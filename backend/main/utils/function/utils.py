@@ -227,19 +227,17 @@ def get_user_permissions(user):
 
     permissions = []
 
-    if emp_list:
-        if user.is_superuser:
-            permissions = list(Permissions.objects.all().filter(name__startswith='lms').values_list('name', flat=True))
+    if user.is_superuser:
+        permissions = list(Permissions.objects.all().filter(name__startswith='lms').values_list('name', flat=True))
 
-        #  super user биш үед л эрх ашиглана
-        else:
-            permissions = list(emp_list.org_position.roles.values_list("permissions__name", flat=True))
-            removed_perms = list(emp_list.org_position.removed_perms.values_list("name", flat=True))
-            permissions = permissions + list(emp_list.org_position.permissions.values_list("name", flat=True))
+    elif emp_list and not user.is_superuser:
+        permissions = list(emp_list.org_position.roles.values_list("permissions__name", flat=True))
+        removed_perms = list(emp_list.org_position.removed_perms.values_list("name", flat=True))
+        permissions = permissions + list(emp_list.org_position.permissions.values_list("name", flat=True))
 
-            removed_perms = set(removed_perms)
-            permissions = set(permissions)
-            permissions = permissions.difference(removed_perms)
+        removed_perms = set(removed_perms)
+        permissions = set(permissions)
+        permissions = permissions.difference(removed_perms)
 
     return list(permissions)
 
@@ -645,7 +643,7 @@ def get_domain_url():
     """ domain url авах """
 
     if settings.DEBUG is False:
-        domain_url = 'http://sis.mnun.edu.mn'
+        domain_url = 'http://157.230.34.184'
     else:
         domain_url = 'http://localhost:8000'
 
@@ -734,6 +732,7 @@ def get_16week_start_date():
     ''' Хичээл эхлэх өдрөөс 16н 7 хоногийг тооцоолох
         return list
     '''
+    week_list = []
 
     SystemSettings = apps.get_model('lms', 'SystemSettings')
     qs_activeyear = SystemSettings.objects.filter(season_type=SystemSettings.ACTIVE).first()
@@ -741,19 +740,18 @@ def get_16week_start_date():
     if qs_activeyear:
         end_date = qs_activeyear.start_date
 
-    week_list = []
 
-    for x in range(16):
-        obj_datas = {}
-        start_date  = end_date
+        for x in range(16):
+            obj_datas = {}
+            start_date  = end_date
 
-        end_date = start_date + timedelta(days=7)
-        enddate = end_date - timedelta(days=1)
-        obj_datas['id'] = x + 1
-        obj_datas['start_date'] = start_date.strftime('%Y-%m-%d')
-        obj_datas['end_date'] = enddate.strftime('%Y-%m-%d')
+            end_date = start_date + timedelta(days=7)
+            enddate = end_date - timedelta(days=1)
+            obj_datas['id'] = x + 1
+            obj_datas['start_date'] = start_date.strftime('%Y-%m-%d')
+            obj_datas['end_date'] = enddate.strftime('%Y-%m-%d')
 
-        week_list.append(obj_datas)
+            week_list.append(obj_datas)
 
     return week_list
 

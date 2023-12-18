@@ -36,8 +36,8 @@ const Departments = () => {
 	// Modal
     const [update_modal, setUpdateModal] = useState(false)
 	// Loader
-	const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true, bg: 2})
-	const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
+	const { Loader, isLoading, fetchData } = useLoader({})
+	const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({})
 
 	// Api
 	const departmentsApi = useApi().hrms.department

@@ -56,12 +56,12 @@ export default [
                 icon: <Circle size={8} />,
                 navLink: "student/specification"
             },
-            {
-                id: 'student12',
-                title: 'Виз',
-                icon: <Circle size={8} />,
-                navLink: "student/viz-status"
-            },
+            // {
+            //     id: 'student12',
+            //     title: 'Виз',
+            //     icon: <Circle size={8} />,
+            //     navLink: "student/viz-status"
+            // },
             // {
             //     id: 'student12',
             //     title: 'Дотуур байранд амьдрах хүсэлт',
