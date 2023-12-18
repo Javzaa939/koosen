@@ -24,23 +24,23 @@ openpyxl-dictreader==0.1.9
 zeep==4.2.1
 
 # ХУР-тай холбоотой package
-appdirs==1.4.4
-attrs==21.4.0
-cached-property==1.5.2
-certifi==2021.10.8
-chardet==4.0.0
-charset-normalizer==2.0.12
-defusedxml==0.7.1
-idna==3.3
-isodate==0.6.1
-lxml==4.8.0
-numpy==1.22.3
-platformdirs==2.5.1
-pycryptodome==3.14.1
-pycryptodomex==3.14.1
-requests-file==1.5.1
-requests-toolbelt==0.9.1
-scipy==1.8.0
-six==1.16.0
-smart-open==5.2.1
-urllib3==1.26.9
+# appdirs==1.4.4
+# attrs==21.4.0
+# cached-property==1.5.2
+# certifi==2021.10.8
+# chardet==4.0.0
+# charset-normalizer==2.0.12
+# defusedxml==0.7.1
+# idna==3.3
+# isodate==0.6.1
+# lxml==4.8.0
+# numpy==1.22.3
+# platformdirs==2.5.1
+# pycryptodome==3.14.1
+# pycryptodomex==3.14.1
+# requests-file==1.5.1
+# requests-toolbelt==0.9.1
+# scipy==1.8.0
+# six==1.16.0
+# smart-open==5.2.1
+# urllib3==1.26.9

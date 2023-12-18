@@ -23,7 +23,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 from main.utils.function.pagination import CustomPagination
 from main.utils.function.utils import str2bool, has_permission, get_lesson_choice_student, remove_key_from_dict, get_fullName, get_student_score_register, calculate_birthday, null_to_none, bytes_image_encode, get_active_year_season,start_time
-from main.khur.XypClient import citizen_regnum, highschool_regnum
+# from main.khur.XypClient import citizen_regnum, highschool_regnum
 
 from lms.models import Student, StudentAdmissionScore, StudentEducation, StudentLeave, StudentLogin, TimeTable
 from lms.models import StudentMovement
@@ -499,10 +499,10 @@ class StudentRegisterAPIView(
         image = None
 
         data = request.data
-        is_khur = data.get('is_khur')
+        # is_khur = data.get('is_khur')
         regnum = data.get('register_num')
         citizen_name = data.get('citizen_name')
-        data = remove_key_from_dict(data, 'is_khur')
+        # data = remove_key_from_dict(data, 'is_khur')
 
 
         if citizen_name.upper() == 'МОНГОЛ':
@@ -512,32 +512,32 @@ class StudentRegisterAPIView(
             data['gender'] = gender
             data['birth_date'] = birth_date
 
-        if is_khur:
-            khur_data = citizen_regnum(regnum)
-            highschool = highschool_regnum(regnum)
+        # if is_khur:
+        #     khur_data = citizen_regnum(regnum)
+        #     highschool = highschool_regnum(regnum)
 
-            if khur_data:
-                last_name = khur_data['lastname']
-                first_name = khur_data['firstname']
-                family_name = khur_data['surname'] # Urgiin ovog
-                nationality = khur_data['nationality'] # Ys vndes
-                image = khur_data['image'] # Irgenii vnemlehiin zurag
-                aimagCode = khur_data['aimagCityCode']
-                sumCode = aimagCode + khur_data['soumDistrictCode']
-                bagCode = sumCode + khur_data['bagKhorooCode']
-                address_detail = khur_data['passportAddress']
+        #     if khur_data:
+        #         last_name = khur_data['lastname']
+        #         first_name = khur_data['firstname']
+        #         family_name = khur_data['surname'] # Urgiin ovog
+        #         nationality = khur_data['nationality'] # Ys vndes
+        #         image = khur_data['image'] # Irgenii vnemlehiin zurag
+        #         aimagCode = khur_data['aimagCityCode']
+        #         sumCode = aimagCode + khur_data['soumDistrictCode']
+        #         bagCode = sumCode + khur_data['bagKhorooCode']
+        #         address_detail = khur_data['passportAddress']
 
-                data['last_name'] = last_name
-                data['first_name'] = first_name
-                data['family_name'] = family_name
-                data['yas_undes'] = nationality
+        #         data['last_name'] = last_name
+        #         data['first_name'] = first_name
+        #         data['family_name'] = family_name
+        #         data['yas_undes'] = nationality
 
-            if highschool:
-                degreeNumber = highschool['degreeNumber'] # Бүрэн дунд сургуулийн дугаар
-                orgName = highschool['orgName'] # Төгссөн сургуулийн нэр
-                year = highschool['year'] # Төгссөн жил
+        #     if highschool:
+        #         degreeNumber = highschool['degreeNumber'] # Бүрэн дунд сургуулийн дугаар
+        #         orgName = highschool['orgName'] # Төгссөн сургуулийн нэр
+        #         year = highschool['year'] # Төгссөн жил
 
-                joined_year = str(int(year) - 12) if year else ''
+        #         joined_year = str(int(year) - 12) if year else ''
 
 
         student_code = data.get("code")
@@ -567,24 +567,24 @@ class StudentRegisterAPIView(
                 student_data = self.create(request).data
                 student_id = student_data.get('id')
 
-                student_obj = self.queryset.get(pk=student_id)
+                # student_obj = self.queryset.get(pk=student_id)
 
-                if image:
-                    img = bytes_image_encode(image)
-                    logo_root = os.path.join(settings.STUDENTS, str(student_id))
-                    path = os.path.join(settings.MEDIA_ROOT, logo_root)
+                # if image:
+                #     img = bytes_image_encode(image)
+                #     logo_root = os.path.join(settings.STUDENTS, str(student_id))
+                #     path = os.path.join(settings.MEDIA_ROOT, logo_root)
 
-                    if not os.path.exists(logo_root):
-                        os.makedirs(path)
+                #     if not os.path.exists(logo_root):
+                #         os.makedirs(path)
 
-                    image_path = os.path.join(path, "picture.jpg" )
-                    img = img.convert('RGB')
-                    img.save(image_path)
+                #     image_path = os.path.join(path, "picture.jpg" )
+                #     img = img.convert('RGB')
+                #     img.save(image_path)
 
-                    save_file_path = split_root_path(image_path)
+                #     save_file_path = split_root_path(image_path)
 
-                    student_obj.image = save_file_path
-                    student_obj.save()
+                #     student_obj.image = save_file_path
+                #     student_obj.save()
 
                 if student_id:
                     StudentLogin.objects.update_or_create(
@@ -596,33 +596,33 @@ class StudentRegisterAPIView(
 
                     )
 
-                    if is_khur and aimagCode:
-                        unit1 = AimagHot.objects.filter(code=aimagCode).last()
-                        sum_duureg = SumDuureg.objects.filter(code=sumCode, unit1=unit1).last()
-                        bag_khoroo = BagHoroo.objects.filter(code=bagCode, unit2=sum_duureg).last()
+                    # if is_khur and aimagCode:
+                    #     unit1 = AimagHot.objects.filter(code=aimagCode).last()
+                    #     sum_duureg = SumDuureg.objects.filter(code=sumCode, unit1=unit1).last()
+                    #     bag_khoroo = BagHoroo.objects.filter(code=bagCode, unit2=sum_duureg).last()
 
-                        StudentAddress.objects.update_or_create(
-                            student=student_obj,
-                            defaults={
-                                'passport_unit1': unit1,
-                                'passport_unit2': sum_duureg,
-                                'passport_unit3': bag_khoroo,
-                                'passport_other': address_detail
-                            }
-                        )
+                    #     StudentAddress.objects.update_or_create(
+                    #         student=student_obj,
+                    #         defaults={
+                    #             'passport_unit1': unit1,
+                    #             'passport_unit2': sum_duureg,
+                    #             'passport_unit3': bag_khoroo,
+                    #             'passport_other': address_detail
+                    #         }
+                    #     )
 
-                    # Боловсролын мэдээлэл
-                    if  is_khur and degreeNumber:
-                        StudentEducation.objects.update_or_create(
-                            student=student_obj,
-                            defaults={
-                                'school_name': orgName,
-                                'edu_level': StudentEducation.EDUCATION_BUREN,
-                                'join_year': joined_year,
-                                'graduate_year': year,
-                                'certificate_num': degreeNumber,
-                            }
-                        )
+                    # # Боловсролын мэдээлэл
+                    # if  is_khur and degreeNumber:
+                    #     StudentEducation.objects.update_or_create(
+                    #         student=student_obj,
+                    #         defaults={
+                    #             'school_name': orgName,
+                    #             'edu_level': StudentEducation.EDUCATION_BUREN,
+                    #             'join_year': joined_year,
+                    #             'graduate_year': year,
+                    #             'certificate_num': degreeNumber,
+                    #         }
+                    #     )
 
             except Exception as e:
                 is_success = False
