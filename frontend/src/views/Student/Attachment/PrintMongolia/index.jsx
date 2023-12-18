@@ -255,7 +255,7 @@ export default function PrintAttachmentMongolia()
 
             <header className='w-100' style={{ backgroundColor: 'white', color: 'black' }} >
                 <div className='d-flex flex-column text-center fw-bolder'>
-                    <p className='text-uppercase' style={{ marginBottom: '10px' }} >Монголын үндэсний их сургууль</p>
+                    <p className='text-uppercase' style={{ marginBottom: '10px' }} >Дотоод Хэргийн Их Сургууль</p>
                     <p className='text-uppercase' style={{ marginBottom: '10px' }} >{printDatas?.student?.department?.school}</p>
                     <p style={{ fontSize: '10px' }} >{printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.graduation_work?.diplom_num} дугаартай дипломын хавсралт-</p>
                 </div>

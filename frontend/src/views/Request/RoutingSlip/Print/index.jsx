@@ -84,7 +84,7 @@ export default function Print()
                         <div>
                             <img className="fallback-logo ms-1" width={30} height={30} src={logo} alt="logo" />
                             <span className='text-primary fw-bold ms-1 fw-bolder'>
-                                МОНГОЛЫН ҮНДЭСНИЙ ИХ СУРГУУЛЬ-ТӨГСӨГЧДИЙН ТОЙРОХ ХУУДАС
+                                Дотоод Хэргийн Их Сургууль-ТӨГСӨГЧДИЙН ТОЙРОХ ХУУДАС
                             </span>
                         </div>
                     </div>

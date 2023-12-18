@@ -54,7 +54,7 @@ class PDF(FPDF, HTMLMixin):
             w = 150,
             h = 5,
             markdown = True,
-            txt = 'Монголын үндэсний их сургууль',
+            txt = 'Дотоод Хэргийн Их Сургууль',
             border = 0,
             align = 'L'
         )

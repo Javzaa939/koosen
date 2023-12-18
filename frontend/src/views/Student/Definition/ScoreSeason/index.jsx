@@ -48,7 +48,7 @@ export default function ScoreSeason() {
                         <img className="fallback-logo" width={100} height={100} src={`http://hr.mnun.edu.mn/media/orgs/logo/MNU-Logo_1.png`} alt="logo"/>
                         <div className="d-flex flex-column text-center fw-bolder">
                             <span className='mt-1'>
-                                МОНГОЛЫН ҮНДЭСНИЙ ИХ СУРГУУЛЬ
+                                Дотоод Хэргийн Их Сургууль
                             </span>
                             <span style={{ marginTop: '6px' }}>MONGOLIAN NATIONAL UNIVERSITY</span>
                         </div>

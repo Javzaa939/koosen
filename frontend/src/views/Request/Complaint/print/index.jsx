@@ -82,7 +82,7 @@ export default function Print()
             <div className='d-flex justify-content-between align-items-center w-100'>
                 <div className="d-flex align-items-center">
                     <img className="fallback-logo ms-1" width={30} height={30} src={logo} alt="logo" />
-                    <span className='text-primary fw-bold ms-1'>Монголын үндэсний их сургууль</span>
+                    <span className='text-primary fw-bold ms-1'>Дотоод Хэргийн Их Сургууль</span>
                 </div>
                 <span className="fw-bold me-1">Өргөдлийн маягт</span>
             </div>

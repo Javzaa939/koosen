@@ -55,7 +55,7 @@ export default function Print()
                         <img className="fallback-logo ms-1" width={50} height={50} src={logo} alt="logo" />
                         <div className="d-flex flex-column text-center ms-2">
                             <span className='text-primary ms-1 fw-bolder'>
-                                МОНГОЛЫН ҮНДЭСНИЙ ИХ СУРГУУЛЬ
+                                Дотоод Хэргийн Их Сургууль
                             </span>
                             <span className="fw-bolder">СУРГАЛТЫН ТӨЛӨВЛӨГӨӨ</span>
                         </div>

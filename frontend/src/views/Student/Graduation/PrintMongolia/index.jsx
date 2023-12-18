@@ -62,7 +62,7 @@ export default function PrintMongolia()
                 <div className='m-auto' style={{ width: '1000px' }}>
                     <span className='fst-italic' >{data?.student?.citizenship?.name} улсын иргэн <span className='fw-bolder'>{data?.student?.last_name} <span className='fw-normal' >овогтой</span> {data?.student?.first_name}</span> нь </span>
                     <br />
-                    <span className='fst-italic' >{data?.student?.group?.join_year?.substring(0, 4)}-{data?.lesson_year?.substring(5, 9)} онд Монголын Үндэсний Их сургуульд </span>
+                    <span className='fst-italic' >{data?.student?.group?.join_year?.substring(0, 4)}-{data?.lesson_year?.substring(5, 9)} онд Дотоод Хэргийн Их Сургуульд </span>
                     <br />
                     <span className='fw-bolder text-uppercase'>{data?.student?.group?.profession?.name}</span> <span className='fst-italic' >/{data?.student?.group?.degree?.degree_code}{data?.student?.group?.profession?.code}/</span>
                 </div>
