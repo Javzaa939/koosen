@@ -1,0 +1,14 @@
+@page {
+    size: A4 landscape;
+    margin: 20px 0px 40px 16px;
+}
+
+@media print {
+    html,
+    body {
+        width: 1090px !important;
+    }
+    #breakInside {
+        break-inside: avoid;
+    }
+}

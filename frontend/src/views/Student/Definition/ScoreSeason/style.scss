@@ -1,0 +1,24 @@
+table, tr, td, th {
+    border: 1px solid rgba(71, 71, 71, 0.792);
+    padding-left: 0.4rem;
+    padding-right: 0.4rem;
+    padding-bottom: 0.1rem;
+    padding-top: 0.1rem;
+}
+
+.first-cell{
+    // width: 30vh;
+}
+
+.shalgaltiin-huudas{
+    font-size: large;
+    font-weight: 900;
+}
+
+.page-break-always{
+    page-break-after: always;
+}
+
+@page {
+    size: A4 portrait;
+}

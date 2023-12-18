@@ -1,0 +1,313 @@
+/* Үндсэн кард элемент */
+/* .card-contain{
+    display: flex;
+    flex-direction: column;
+
+
+    height: 300px;
+    padding: 30px;
+    max-width: 701px;
+    border-radius: 20px;
+    margin: 20px;
+    margin-left: 0px;
+    box-shadow: 0px 0px 0px 0px ;
+    background-clip: border-box;
+    --bs-border-opacity: 1;
+    --bs-card-spacer-y: 1.5rem;
+    --bs-card-spacer-x: 1.5rem;
+    --bs-card-title-spacer-y: 1.5rem;
+    --bs-card-title-color: ;
+    --bs-card-subtitle-color: ;
+    --bs-card-border-width: 0;
+    --bs-card-border-color: var(--bs-border-color-translucent);
+    --bs-card-border-radius: 0.428rem;
+    --bs-card-box-shadow: 0 4px 24px 0 rgba(34, 41, 47, 0.1);
+    --bs-card-inner-border-radius: 0.428rem;
+    --bs-card-cap-padding-y: 1.5rem;
+    --bs-card-cap-padding-x: 1.5rem;
+    --bs-card-cap-bg: transparent;
+    --bs-card-cap-color: ;
+    --bs-card-height: ;
+    --bs-card-color: ;
+    --bs-card-bg: var(--bs-body-bg);
+    --bs-card-img-overlay-padding: 1rem;
+    --bs-card-group-margin: 1rem;
+    position: relative;
+    height: var(--bs-card-height);
+    color: var(--bs-body-color);
+    word-wrap: break-word;
+}
+ */
+
+
+ .card-contain {
+  padding: 30px;
+
+  /* background-color: rgb(14, 23, 44); */
+  border-radius: 20px;
+  margin-bottom: 30px;
+  --bs-card-spacer-y: 1.5rem;
+  --bs-card-spacer-x: 1.5rem;
+  --bs-card-title-spacer-y: 1.5rem;
+  --bs-card-title-color: ;
+  --bs-card-subtitle-color: ;
+  --bs-card-border-width: 0;
+  --bs-card-border-color: var(--bs-border-color-translucent);
+  --bs-card-border-radius: 0.428rem;
+  --bs-card-box-shadow: 0 4px 24px 0 rgba(34, 41, 47, 0.1);
+  --bs-card-inner-border-radius: 0.428rem;
+  --bs-card-cap-padding-y: 1.5rem;
+  --bs-card-cap-padding-x: 1.5rem;
+  --bs-card-cap-bg: transparent;
+  --bs-card-cap-color: ;
+  --bs-card-height: ;
+  --bs-card-color: ;
+  --bs-card-bg: var(--bs-body-bg);
+  --bs-card-img-overlay-padding: 1rem;
+  --bs-card-group-margin: 1rem;
+  width: 100%;
+  height: var(--bs-card-height);
+  color: var(--bs-body-color);
+  word-wrap: break-word;
+}
+
+
+    /* responsive  */
+    /* For smaller screens: */
+    @media only screen and (max-width: 400px) {
+      .card-contain {
+        /* width: 100%; */
+        width: 100%;
+      }
+        .fontsizec {
+            font-weight: 200;
+            font-size: 12px;
+        }
+        .rating {
+          margin: 10px;
+        }
+        .rating > label {
+          width: 0.4em;
+          font-size: 10px;
+        }
+        .custom-me{
+          margin-right: 0px;
+        }
+        .custom-ms{
+          margin-left: 0px;
+        }
+    }
+    @media only screen and (min-width: 401px) and (max-width: 500px) {
+      .card-contain {
+        /* width: 100%; */
+width: 100%;
+      }
+    }
+    @media only screen and (min-width: 501px) and (max-width: 600px) {
+      .card-contain {
+        /* width: 100%; */
+width: 100%;
+
+    }
+        .ratingnumber {
+          margin: 0;
+        }
+        .rating {
+          margin: 20px;
+        }
+        .rating > label {
+          width: 0.4em;
+          font-size: 10px;
+        }
+        .custom-me{
+          margin-right: 2px;
+        }
+        .custom-ms{
+          margin-left: 6px;
+        }
+    }
+    /* For medium-sized screens: */
+    @media only screen and (min-width: 601px) and (max-width: 767px) {
+      .card-contain {
+        /* width: 100%; */
+min-width: 450px;
+
+    }
+        .rating {
+
+          margin: 15px;
+        }
+        .custom-me{
+          margin-right: 15px;
+        }
+        .custom-ms{
+          margin-left: 15px;
+        }
+    }
+
+    /* For larger screens (desktop): */
+    @media only screen and (min-width: 768px) {
+   
+        .fontsizec {
+            font-weight: 200;
+            font-size: 14px;
+        }
+        .rating {
+
+          margin: 20px;
+        }
+        .custom-me{
+          margin-right: 20px;
+        }
+        .custom-ms{
+          margin-left: 20px;
+        }
+    }
+
+
+    /* special */
+    @media only screen and (min-width: 768px)  and (max-width: 999px){
+      .card-contain {
+          /* width: 100%; */
+  min-width: 450px;
+
+      }
+      .fontsizec {
+          font-weight: 200;
+          font-size: 14px;
+      }
+      .rating {
+
+        margin: 20px;
+      }
+      .custom-me{
+        margin-right: 20px;
+      }
+      .custom-ms{
+        margin-left: 20px;
+      }
+  }
+
+  @media only screen and (min-width: 1000px) {
+    .card-contain {
+      min-width: 700px;
+
+    }
+    .fontsizec {
+        font-weight: 200;
+        font-size: 14px;
+    }
+    .rating {
+
+      margin: 20px;
+    }
+    .custom-me{
+      margin-right: 20px;
+    }
+    .custom-ms{
+      margin-left: 20px;
+    }
+}
+
+.fontsizec {
+    font-weight:900;
+    font-size: 14px;
+}
+
+.subtitle {
+  font-style: italic;
+  font-weight: lighter;
+  font-size: 13px;
+}
+
+.qimagecss {
+  width: auto;
+  max-width: 250px;
+  float:left;
+  border-radius: 20px;
+  margin-bottom: 25px;
+  box-shadow: 0px 0px 4px 0px ;
+}
+
+.bradius-20 {
+      border-radius: 20px;
+}
+
+.rating {
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: center;
+
+  }
+
+  .rating > input {
+    display: none;
+  }
+
+  .rating > label {
+    position: relative;
+    width: 0.2em;
+    font-size: 40px;
+    color: #5e5873;;
+    cursor: pointer;
+  }
+
+  .rating > label::before {
+    content: "\2605";
+    position: absolute;
+    opacity: 0;
+  }
+
+  .rating > label:hover:before,
+  .rating > label:hover ~ label:before {
+    opacity: 1 !important;
+  }
+
+  .rating > input:checked ~ .label_star::before {
+    opacity: 1;
+  }
+
+  .rating:hover > input:checked ~ label:before {
+    opacity: 0.4;
+  }
+
+.ratingnumber {
+  margin: 0;
+}
+
+/*
+.rate {
+    float: left;
+    height: 46px;
+    padding: 0 10px;
+  }
+  .rate:not(:checked) > input {
+    position:absolute;
+    top:-9999px;
+  }
+  .rate:not(:checked) > label {
+    float:right;
+    width:1em;
+    overflow:hidden;
+    white-space:nowrap;
+    cursor:pointer;
+    font-size:30px;
+    color:#ccc;
+  }
+  .rate:not(:checked) > label:before {
+    content: '★ ';
+  }
+  .rate > input:checked ~ label {
+    color: #ffc700;
+  }
+  .rate:not(:checked) > label:hover,
+  .rate:not(:checked) > label:hover ~ label {
+    color: #deb217;
+  }
+  .rate > input:checked + label:hover,
+  .rate > input:checked + label:hover ~ label,
+  .rate > input:checked ~ label:hover,
+  .rate > input:checked ~ label:hover ~ label,
+  .rate > label:hover ~ input:checked ~ label {
+    color: #c59b08;
+  } */

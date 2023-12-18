@@ -1,0 +1,70 @@
+@page {
+    size: A4 landscape;
+    margin: 20px 40px 15px 20px;
+}
+
+body {
+    background-color: white !important;
+    color: black;
+}
+
+.page-break {
+    page-break-after: always;
+}
+
+.header {
+    position: fixed;
+    top: 0px;
+}
+
+.footer {
+    position: fixed;
+    top: 0px;
+    right: 0px;
+}
+
+table {
+    font-size: 14px;
+}
+
+table td {
+    padding: 5px 0px;
+}
+
+.cell5 {
+    font-family: serif;
+    transform: rotate(90deg);
+}
+
+.font-serif {
+    font-family: serif;
+    transform: scale(1, -1);
+    rotate: 270deg;
+}
+
+.mini-cell {
+    width: 8%;
+}
+
+.body-cell {
+    width: 50%;
+    text-align: start;
+    line-height: 1;
+    padding: 5px 4px;
+}
+
+.footer-cell1 {
+    width: 13%;
+}
+
+.footer-cell2 {
+    width: 9%;
+}
+
+.footer-cell3 {
+    width: 9%;
+}
+
+.footer-margin {
+    margin-right: 44px;
+}

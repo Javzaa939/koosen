@@ -1,0 +1,21 @@
+tr, th, td {
+    padding: 1rem;
+    border: 1px solid rgba(56, 56, 56, 0.298);
+}
+.dark-layout {
+    tr, th, td {
+        padding: 1rem;
+        border: 1px solid rgba(150, 150, 150, 0.193);
+    }
+}
+@media print{
+
+    .main > * {
+        display: none;
+    }
+
+    .main > .print {
+        display: initial;
+    }
+
+}

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" >
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>Мэйл илгээх</title>
+        <style id="_goober">
+
+            .card-body {
+                width: 400px;
+                height: 300px;
+                background-color: #f8f8f8;
+                padding: 1.5rem;
+                position: absolute;
+                top:0;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                margin: auto;
+                font-family: 'Helvetica';
+                font-weight: 400;
+                background-clip: border-box;
+                border: 0 solid rgba(34,41,47,.125);
+                border-radius: 0.428rem;
+                color:#500050;
+            }
+            img {
+                left: 1.5rem;
+                position: absolute;
+                margin-top: 0;
+            }
+        </style>
+
+    </head>
+    <body>
+        <div id="root">
+            <div class="main">
+                <div class="card-body">
+                    <div><img src="{{logo_url}}" width="40" height="40"/></div>
+                    <div><h2 style="text-align: center; color: #7367f0; font-family: 'Helvetica';">{{org_name}}</h2></div>
+                            <h4 style="text-align: center; color: #500050; line-height: 0.8;">{{title}} 🔒</h4>
+                            <p class="mb-2 card-text">{{body_text1}}</p>
+                            <p style="text-align: center;">
+                                <a style="color: #500050;" href={{verify_url}}>
+                                    <span >Энд дарна уу</span>
+                                </a>
+                            </p>
+                            <p class="mb-2 card-text">{{body_text2}}<div style="text-align: center; color: #f90303;">{{valid_before}}</div></p>
+                        </div>
+                    </div>
+                </div>
+                <div style="position: fixed; z-index: 9999; inset: 16px; pointer-events: none;"></div>
+            </div>
+        </div>
+    </body>
+</html>

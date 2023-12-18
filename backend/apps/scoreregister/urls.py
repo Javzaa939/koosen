@@ -1,0 +1,33 @@
+from django.urls import path
+
+from .views import *
+
+urlpatterns = [
+
+    # Дүнгийн бүртгэл
+    path('register/', ScoreRegisterAPIView.as_view()),
+    path('register/<int:pk>/', ScoreRegisterAPIView.as_view()),
+
+    path('register/list/', ScoreRegisterListAPIView.as_view()),
+    path('register/download/', ScoreTeacherDownloadAPIView.as_view()),
+    path('register/old/', ScoreOldAPIView.as_view()),
+    path('register/old/<int:pk>/', ScoreOldAPIView.as_view()),
+    path('register/import/', ScoreImportAPIView.as_view()),
+
+    # path('register/student/', ScoreRegisterStudentView.as_view()),
+
+    # Дүйцүүлсэн дүн
+    path('correspond/', CorrespondAPIView.as_view()),
+    path('correspond/<int:pk>/', CorrespondAPIView.as_view()),
+
+    # Дахин шалгалтын дүн
+    path('rescore/', ReScoreAPIView.as_view()),
+    path('rescore/student/', ReScoreStudentView.as_view()),
+    path('rescore/<int:pk>/', ReScoreAPIView.as_view()),
+
+    # дүнгийн тодорхойлолт
+    path('print/<int:student>/', ScoreRegisterPrintAPIView.as_view()),
+
+
+]
+

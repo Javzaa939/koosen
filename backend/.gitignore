@@ -1,0 +1,17 @@
+# python-гийн default __pycache__ файлыг оруулахгүй
+*.swp
+__pycache__
+.vscode/
+
+# enviroment оруулахгүй
+venv
+activate
+
+# in the developer environment
+main/settings/dev.py
+# in the production environment
+main/settings/prod.py
+
+main/files
+# зураг хадгалах зам
+main/image/students

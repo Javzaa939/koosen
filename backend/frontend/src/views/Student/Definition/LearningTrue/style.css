@@ -1,0 +1,17 @@
+.fontchange{
+    font-family: 'Times New Roman', Times, serif;
+}
+
+@page {
+    size: A4 portrait;
+    margin: 0;
+}
+
+
+/* @media print{
+    @page {
+        size: A5 landscape;
+        margin: 0;
+    }
+}
+ */

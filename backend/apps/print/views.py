@@ -1,0 +1,640 @@
+
+from lms.models import Student, TimeTable_to_group, TimeTable_to_student
+from lms.models import TimeTable
+from lms.models import GraduationWork
+from lms.models import ScoreRegister
+from lms.models import LessonStandart
+from lms.models import Score
+from lms.models import Group
+
+from rest_framework import mixins
+from rest_framework import generics
+from rest_framework.filters import SearchFilter
+from rest_framework.permissions import IsAuthenticated
+
+from main.utils.function.pagination import CustomPagination
+
+from rest_framework.permissions import IsAuthenticated
+from student.serializers import StudentListSerializer
+from apps.timetable.serializers import TimeTableListSerializer, TimeTableSerializer
+from apps.timetable.serializers import ScoreGpaListSerializer
+from .serializers import ScoreRegisterSerializer
+from .serializers import GraduationWorkListSerializer
+from .serializers import AdmissionListSerializer
+from .serializers import ScoreRegisterlolSerializer
+from .serializers import GroupListFilterSubSchoolSerializer
+
+from main.utils.function.utils import get_lesson_choice_student, get_fullName
+from main.utils.function.utils import str2bool, has_permission
+from rest_framework.decorators import permission_classes
+
+
+
+class StudentListByLessonTeacherAPIView(
+    mixins.ListModelMixin,
+    generics.GenericAPIView,
+):
+
+    queryset = Student.objects.all()
+    serializer_class = StudentListSerializer
+    filter_backends = [SearchFilter]
+    search_fields = ['code' , 'first_name' , 'last_name']
+
+    def get(self, request, pk=None):
+        lesson = self.request.query_params.get('lesson')
+        teacher = self.request.query_params.get('teacher')
+        lesson_year = self.request.query_params.get('lesson_year')
+        lesson_season = self.request.query_params.get('lesson_season')
+        school = self.request.query_params.get('school')
+        group = self.request.query_params.get('group')
+        all_student = get_lesson_choice_student(lesson=lesson, teacher=teacher, lesson_year=lesson_year, lesson_season=lesson_season, school=school,group=group)
+        self.queryset = self.queryset.filter(id__in=all_student)
+        all_list = self.list(request).data
+
+        return request.send_data(all_list)
+
+# Хичээл Хуваарь харуулах
+class ScheduleAPIView(
+    mixins.ListModelMixin,
+    generics.GenericAPIView,
+):
+
+    queryset = TimeTable.objects.all()
+    serializer_class = TimeTableSerializer
+    filter_backends = [SearchFilter]
+    pagination_class = CustomPagination
+    search_fields = ['room__code', 'room__name', 'lesson__name', 'teacher__first_name', 'teacher__last_name']
+    def get_queryset(self):
+        queryset = self.queryset
+        lesson_year = self.request.query_params.get('lesson_year')
+        school = self.request.query_params.get('school')
+        lesson_season = self.request.query_params.get('lesson_season')
+        room = self.request.query_params.get('room')
+        student = self.request.query_params.get('student')
+        group = self.request.query_params.get('group')
+        teacher = self.request.query_params.get('teacher')
+        lesson = self.request.query_params.get('lesson')
+
+        # Сургуулиар хайлт хийх
+        if school:
+            queryset = queryset.filter(school = school)
+
+        # Хичээлийн улиралаар хайлт хийх
+        if lesson_season:
+            queryset = queryset.filter(lesson_season = lesson_season )
+
+        # Хичээлийн жилээр хайлт хийх
+        if lesson_year:
+            queryset = queryset.filter(lesson_year = lesson_year )
+
+        # Багшаар хайлт хийх хэсэг
+        if teacher:
+            queryset = queryset.filter(teacher=teacher)
+
+        # Өрөөгөөр хайлт хийх хэсэг
+        if room:
+            queryset = queryset.filter(room=room)
+
+        # Хичээлээр хайлт хийх хэсэг
+        if lesson:
+            queryset = queryset.filter(lesson=lesson)
+
+        # Оюутнаар хайлт хийх хэсэг
+        if student:
+            student_group = Student.objects.filter(id=student).values_list('group', flat=True).distinct()
+            timetables_to_group = TimeTable_to_group.objects.filter(group__in=student_group)
+            timetable_ids1 = timetables_to_group.values_list('timetable', flat=True)
+
+            timetables = TimeTable_to_student.objects.filter(student=student, add_flag=True)
+            timetable_ids2 = timetables.values_list('timetable', flat=True)
+
+            timetable_ids = timetable_ids1.union(timetable_ids2)
+
+            queryset = queryset.filter(id__in=timetable_ids)
+
+        # Ангиар хайлт хийх хэсэг
+        if group:
+            timetables_to_group = TimeTable_to_group.objects.filter(group=group)
+            timetable_ids = timetables_to_group.values_list('timetable', flat=True).distinct()
+            queryset = queryset.filter(id__in=timetable_ids)
+
+        return queryset
+
+    def get(self, request):
+        self.serializer_class = TimeTableListSerializer
+        all_schedule = self.list(request).data
+
+        return request.send_data(all_schedule)
+
+
+@permission_classes([IsAuthenticated])
+class GpaAPIView(
+    mixins.ListModelMixin,
+    generics.GenericAPIView,
+):
+    ''' Голч дүн '''
+
+    queryset = Student.objects.all()
+    serializer_class = ScoreGpaListSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['code', 'last_name', 'first_name']
+
+    def get_queryset(self):
+        queryset = self.queryset
+        group = self.request.query_params.get('group')
+        degree = self.request.query_params.get('degree')
+        schoolId = self.request.query_params.get('school')
+        sorting = self.request.query_params.get('sorting')
+        department = self.request.query_params.get('department')
+        profession = self.request.query_params.get('profession')
+
+        # Сургуулиар хайлт хийх
+        if schoolId:
+            queryset = queryset.filter(school=schoolId)
+
+        # Хөтөлбөрийн багаар хайх
+        if department:
+            queryset = queryset.filter(department=department)
+
+        # Ангиар хайх
+        if group:
+            queryset = queryset.filter(group=group)
+
+        # Боловсролын зэргээр хайлт хийх
+        if degree:
+            queryset = queryset.filter(group__degree=degree)
+
+        # Мэргэжлээр хайх
+        if profession:
+            queryset = queryset.filter(group__profession=profession)
+
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
+
+        return queryset
+
+    def get(self, request):
+
+        student_ids = []
+        stud_qs = self.queryset.values()
+
+        lesson_year = request.query_params.get('lesson_year')
+        lesson_season = request.query_params.get('lesson_season')
+
+        score_qs = ScoreRegister.objects
+        if lesson_year:
+            score_qs = score_qs.filter(lesson_year=lesson_year)
+
+        if lesson_season:
+            score_qs = score_qs.filter(lesson_season=lesson_season)
+
+        if stud_qs:
+            for qs in stud_qs:
+                student_id = qs.get('id')
+
+                score_list = score_qs.filter(student=student_id)
+
+                if not score_list:
+                    student_ids.append(student_id)
+
+        if student_ids:
+            self.queryset = self.queryset.exclude(id__in=student_ids)
+
+        all_data = self.list(request).data
+
+        return request.send_data(all_data)
+
+
+@permission_classes([IsAuthenticated])
+class GroupListAPIView(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    generics.GenericAPIView,
+):
+    """ Дүнгийн жагсаалт"""
+
+    queryset = ScoreRegister.objects.all().order_by('student__first_name')
+    serializer_class = ScoreRegisterSerializer
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['student__code', 'student__first_name','lesson__name', 'exam_score', 'teach_score']
+
+    def get_queryset(self):
+        queryset = self.queryset
+
+        lesson_season = self.request.query_params.get('lesson_season')
+        lesson_year = self.request.query_params.get('lesson_year')
+
+        department = self.request.query_params.get('department')
+        group = self.request.query_params.get('group')
+        sorting = self.request.query_params.get('sorting')
+
+        is_season = self.request.query_params.get('is_season')
+        school = self.request.query_params.get('school')
+
+        if school:
+            queryset = queryset.filter(school=school)
+
+        # улиралаар хайлт хийнэ
+        if str2bool(is_season):
+            if lesson_season:
+                queryset = queryset.filter(lesson_season=lesson_season)
+
+            if lesson_year:
+                queryset = queryset.filter(lesson_year=lesson_year)
+
+        # тэнхимээр хайх
+        if department:
+            queryset = queryset.filter(student__department=department)
+
+        # ангиар хайх
+        if group:
+            queryset = queryset.filter(student__group=group)
+
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
+
+        return queryset
+
+    @has_permission(must_permissions=['lms-print-score-read'])
+    def get(self, request):
+
+        all_list = self.list(request).data
+        return request.send_data(all_list)
+
+@permission_classes([IsAuthenticated])
+class GroupListNoLimitAPIView(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    generics.GenericAPIView,
+):
+    """Ангийн дүнгийн жагсаалт"""
+
+    queryset = ScoreRegister.objects.all()
+    serializer_class = ScoreRegisterlolSerializer
+
+    # @has_permission(must_permissions=['lms-print-score-read'])
+    def get(self, request):
+
+        group = request.query_params.get('group') # 45
+        all_data = []
+        result_datas = []
+        score_qs = self.queryset.filter(student__group=group, is_delete=False).distinct('student')
+        group_lessons = self.queryset.filter(student__group=group, is_delete=False).distinct('lesson').values_list('lesson', flat=True)
+
+        kredits = {}
+        seasons = {}
+
+        for group_list in score_qs:
+
+            full_name = group_list.student.full_name()
+            code_name = group_list.student.code + '-' + full_name
+
+            lessons = {}
+            total_kr = 0
+            onoo = 0
+            total_onoo = 0
+            for lesson in group_lessons:
+                score = ScoreRegister.objects.filter(student=group_list.student, lesson=lesson).first()
+                lesson_year = score.lesson_year if score and score.lesson_year else ''
+                lesson_season = score.lesson_season.season_name if score and score.lesson_season else ''
+                if not score:
+                    lesson_standart = LessonStandart.objects.filter(id=lesson).first()
+                    lesson_standart_name = lesson_standart.code_name if lesson_standart else ''
+
+                kredit = score.lesson.kredit if score else lesson_standart.kredit
+
+                lesson_name = score.lesson.code_name if score else lesson_standart_name
+                total = score.score_total if score else '-'
+                # нийт кр
+                total_kr = total_kr + kredit
+
+                score_total = score.score_total
+
+                # дундаж олох нь
+                onoo = onoo + kredit * score_total
+
+                lessons[lesson_name] = total
+
+                lesson_year_season = lesson_year + '-' + lesson_season
+                kredits[lesson_name] = kredit
+                seasons[lesson_name] = lesson_year_season
+
+            # голч
+            total_onoo = round(onoo/total_kr, 2)
+            score_qs = Score.objects.filter(score_max__gte=total_onoo, score_min__lte=total_onoo).first()
+            if score_qs:
+                gpa = score_qs.gpa
+
+            lessons['Нийт/кредит'] = total_kr
+            lessons['Голч/дүн'] = gpa
+
+            all_data.append(
+                {
+                    'Овог/нэр': code_name,
+                    **lessons
+                }
+            )
+
+        result_datas.append(
+            {
+                'Овог/нэр': 'Кредит',
+                **kredits
+            }
+        )
+        result_datas.append(
+            {
+                'Овог/нэр': 'Улирал',
+                **seasons
+            }
+        )
+
+        merged_datas = result_datas + all_data
+
+        return request.send_data(merged_datas)
+
+
+
+
+@permission_classes([IsAuthenticated])
+class LessonListAPIView(
+    mixins.ListModelMixin,
+    generics.GenericAPIView,
+):
+    """ Хичээлийн жагсаалт """
+
+    queryset = ScoreRegister.objects.all().order_by('student__first_name')
+    serializer_class = ScoreRegisterSerializer
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['student__code', 'student__first_name','lesson__name', 'exam_score', 'teach_score']
+
+    def get_queryset(self):
+        queryset = self.queryset
+        lesson = self.request.query_params.get('lesson')
+        select_season = self.request.query_params.get('select_season')
+        select_year = self.request.query_params.get('select_year')
+        group = self.request.query_params.get('group')
+        sorting = self.request.query_params.get('sorting')
+
+        # хичээлээр хайлт хийнэ
+        if lesson:
+            queryset = queryset.filter(lesson=lesson)
+
+        # Сонгогдсон хичээлийн жил улирлаар хайх
+        if select_season:
+            queryset = queryset.filter(lesson_season=select_season)
+        if select_year:
+            queryset = queryset.filter(lesson_year=select_year)
+
+
+        # ангиар хайлт хийнэ
+        if group:
+            queryset = queryset.filter(student__group=group)
+
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
+        return queryset
+
+    @has_permission(must_permissions=['lms-print-score-read'])
+    def get(self, request):
+
+        all_list = self.list(request).data
+        return request.send_data(all_list)
+
+
+@permission_classes([IsAuthenticated])
+class StudentListAPIView(
+    mixins.ListModelMixin,
+    mixins.DestroyModelMixin,
+    generics.GenericAPIView,
+):
+    """ Оюутны жагсаалт """
+
+    queryset = ScoreRegister.objects.all().order_by('student__first_name')
+    serializer_class = ScoreRegisterSerializer
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['student__code', 'student__first_name','lesson__name', 'exam_score', 'teach_score', 'assessment__assesment']
+
+    def get_queryset(self):
+        queryset = self.queryset
+        student = self.request.query_params.get('student')
+        select_season = self.request.query_params.get('select_season')
+        select_year = self.request.query_params.get('select_year')
+        sorting = self.request.query_params.get('sorting')
+        school = self.request.query_params.get('school')
+
+        # оюутангаар хайлт хийнэ
+        if student:
+            queryset = queryset.filter(student=student)
+
+        # Сонгогдсон хичээлийн жил улирлаар хайх
+        if select_season:
+            queryset = queryset.filter(lesson_season=select_season)
+
+        if select_year:
+            queryset = queryset.filter(lesson_year=select_year)
+
+        if school:
+            queryset = queryset.filter(school=school)
+
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
+        return queryset
+
+    @has_permission(must_permissions=['lms-print-score-read'])
+    def get(self, request):
+
+        all_list = self.list(request).data
+        return request.send_data(all_list)
+
+    def delete(self, request, pk=None):
+
+        self.destroy(request, pk).data
+        return request.send_info("INF_003")
+
+
+@permission_classes([IsAuthenticated])
+class GraduationWorkAPIView(
+    mixins.ListModelMixin,
+    generics.GenericAPIView,
+):
+    ''' Төгсөлтийн ажид '''
+
+    queryset = GraduationWork.objects.all()
+    serializer_class = GraduationWorkListSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['code', 'last_name', 'first_name']
+
+    def get_queryset(self):
+        queryset = self.queryset
+        learning = self.request.query_params.get('learning')
+        lesson_year = self.request.query_params.get('lesson_year')
+        lesson_season = self.request.query_params.get('lesson_season')
+        group = self.request.query_params.get('group')
+        degree = self.request.query_params.get('degree')
+        schoolId = self.request.query_params.get('school')
+        sorting = self.request.query_params.get('sorting')
+        department = self.request.query_params.get('department')
+        profession = self.request.query_params.get('profession')
+
+        if learning:
+            queryset = queryset.filter(student__group__learning_status=learning)
+
+        # Сургуулиар хайлт хийх
+        if schoolId:
+            queryset = queryset.filter(student__school=schoolId)
+
+        # Хөтөлбөрийн багаар хайх
+        if department:
+            queryset = queryset.filter(student__group__department=department)
+
+        # Ангиар хайх
+        if group:
+            queryset = queryset.filter(student__group=group)
+
+        # Боловсролын зэргээр хайлт хийх
+        if degree:
+            queryset = queryset.filter(student__group__degree=degree)
+
+        # Мэргэжлээр хайх
+        if profession:
+            queryset = queryset.filter(student__group__profession=profession)
+
+        if lesson_year:
+            queryset = queryset.filter(lesson_year=lesson_year)
+
+        if lesson_season:
+            queryset = queryset.filter(lesson_season=lesson_season)
+
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
+
+        return queryset
+
+    def get(self, request):
+
+        all_data = self.list(request).data
+
+        return request.send_data(all_data)
+
+
+@permission_classes([IsAuthenticated])
+class AdmissionAPIView(
+    mixins.ListModelMixin,
+    generics.GenericAPIView,
+):
+    ''' Элсэлтийн тушаал '''
+
+    queryset = Student.objects.all()
+    serializer_class = AdmissionListSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['group__profession__code', 'group__profession__name', 'register_num', 'admission_date', 'admission_number', 'code', 'last_name', 'first_name']
+
+    def get_queryset(self):
+        queryset = self.queryset
+        learning = self.request.query_params.get('learning')
+        lesson_year = self.request.query_params.get('lesson_year')
+        lesson_season = self.request.query_params.get('lesson_season')
+        group = self.request.query_params.get('group')
+        degree = self.request.query_params.get('degree')
+        schoolId = self.request.query_params.get('school')
+        sorting = self.request.query_params.get('sorting')
+        department = self.request.query_params.get('department')
+        profession = self.request.query_params.get('profession')
+
+        if learning:
+            queryset = queryset.filter(group__learning_status=learning)
+
+        # Сургуулиар хайлт хийх
+        if schoolId:
+            queryset = queryset.filter(school=schoolId)
+
+        # Хөтөлбөрийн багаар хайх
+        if department:
+            queryset = queryset.filter(department=department)
+
+        # Ангиар хайх
+        if group:
+            queryset = queryset.filter(group=group)
+
+        # Боловсролын зэргээр хайлт хийх
+        if degree:
+            queryset = queryset.filter(group__degree=degree)
+
+        # Мэргэжлээр хайх
+        if profession:
+            queryset = queryset.filter(group__profession=profession)
+
+        # if lesson_year:
+        #     queryset = queryset.filter(lesson_year=lesson_year)
+
+        # if lesson_season:
+        #     queryset = queryset.filter(lesson_season=lesson_season)
+
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
+
+        return queryset
+
+    def get(self, request):
+
+        all_data = self.list(request).data
+
+        return request.send_data(all_data)
+
+
+class GroupsListFilterWithSubSchoolApiView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin
+):
+    """ Багшийн урт жагсаалт """
+
+    queryset = Group.objects.all()
+    serializer_class = GroupListFilterSubSchoolSerializer
+
+    def get(self, request):
+        school = self.request.query_params.get('school')
+        self.queryset = self.queryset.exclude(school=True) # Аль нэг салбар сургуульд хамаардаггүй багш нарыг "аних филтэр"
+
+        if school:
+            self.queryset = self.queryset.filter(school=school)
+
+            final_data = self.list(request).data
+            return request.send_data(final_data)
+
+        teach_info = self.list(request).data
+
+        return request.send_data(teach_info)

@@ -1,0 +1,39 @@
+table, tr, td, th {
+    border: 1px solid rgba(0, 0, 0, 1);
+    padding-left: 0.4rem;
+    padding-right: 0.4rem;
+    padding-bottom: 0.1rem;
+    padding-top: 0.1rem;
+    color: #000;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+th {
+    border: 1px solid rgba(0, 0, 0, 1);
+    padding-left: 0.4rem;
+    padding-right: 0.4rem;
+    padding-bottom: 0.1rem;
+    padding-top: 0.1rem;
+    color: #000;
+    font-size: 13px;
+    font-weight: 1000;
+}
+
+.first-cell{
+    /* width: 30vh; */
+}
+
+.shalgaltiin-huudas{
+    font-size: large;
+    font-weight: 900;
+    color: #000;
+}
+
+.page-break-always{
+    page-break-after: always;
+}
+
+@page {
+    size: A4 portrait;
+}

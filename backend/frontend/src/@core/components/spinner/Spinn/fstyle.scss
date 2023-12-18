@@ -1,0 +1,102 @@
+.fallback-spinnerf {
+	height: 100%;
+
+	&.app-loaderf {
+		flex-direction: column;
+		.loadingf {
+			margin-top: 1rem;
+		}
+	}
+
+	.loadingf {
+		width: 200px;
+		height: 200px;
+
+		.effect-1f,
+		.effect-2f,
+		.effect-3f {
+			width: 200px;
+			height: 200px;
+			border-radius: 50%;
+			border: 3px solid transparent;
+			border-left: 2px solid rgb(2, 0, 131);
+			-webkit-box-sizing: border-box;
+			box-sizing: border-box;
+		}
+
+		.effect-1f {
+			position: absolute;
+			animation: rotate 1s ease infinite;
+		}
+		.effect-2f {
+			position: absolute;
+			animation: rotateOpacity 1s ease infinite 0.1s;
+		}
+		.effect-3f {
+			-webkit-animation: rotateOpacity 1s ease infinite 0.2s;
+			animation: rotateOpacity 1s ease infinite 0.2s;
+		}
+
+		.loadingf .effectsf {
+			transition: all 0.3s ease;
+		}
+	}
+}
+
+.fallback-logof {
+//   position: absolute;
+}
+
+@keyframes rotate {
+	0% {
+		-webkit-transform: rotate(0deg);
+		transform: rotate(0deg);
+	}
+	100% {
+		-webkit-transform: rotate(1turn);
+		transform: rotate(1turn);
+	}
+}
+@keyframes rotateOpacity {
+	0% {
+		-webkit-transform: rotate(0deg);
+		transform: rotate(0deg);
+		opacity: 0.1;
+	}
+	100% {
+		-webkit-transform: rotate(1turn);
+		transform: rotate(1turn);
+		opacity: 1;
+	}
+}
+
+.background-glassf {
+    z-index: 9999;
+    backdrop-filter: blur(5px);
+    background-color: rgba(255, 255, 255, 0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.background-lightf {
+    z-index: 10000;
+}
+
+// Харанхуй горим дээрхи лоадер
+
+.dark-layout{
+	.fallback-spinnerf {
+		.loadingf {
+
+			.effect-1f,
+			.effect-2f,
+			.effect-3f {
+				border-left: 3px solid rgb(239, 239, 239);
+			}
+
+		}
+	}
+}

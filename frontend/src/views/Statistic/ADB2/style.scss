@@ -1,0 +1,31 @@
+table, td, tr, th{
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    padding: 4px;
+}
+
+
+.dark-layout{
+
+    table, td, tr ,th{
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: rgba(255, 255, 255, 0.535);
+    }
+
+}
+
+
+.th-rotate
+{
+    text-wrap:wrap!important;
+    -ms-writing-mode: tb-rl;
+    -webkit-writing-mode: vertical-rl;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    white-space: nowrap;
+    height:100%;
+    max-height:min-content
+}
+
+.gender{
+}
+

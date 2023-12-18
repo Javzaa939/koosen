@@ -1,0 +1,1266 @@
+import os
+import openpyxl_dictreader
+
+from rest_framework import mixins
+from rest_framework import generics
+
+from django.db.models import Q
+from django.db import transaction
+from django.conf import settings
+
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import permission_classes
+
+from main.utils.function.utils import get_lesson_choice_student, has_permission, remove_key_from_dict, get_fullName
+from main.utils.file import save_file, remove_folder
+from lms.models import ScoreRegister
+from lms.models import Student
+from lms.models import LessonStandart
+from lms.models import Score
+from lms.models import Exam_repeat
+from lms.models import Lesson_to_teacher
+from lms.models import TeacherScore
+from lms.models import Lesson_teacher_scoretype
+from lms.models import LearningPlan
+from lms.models import Season
+
+from .serializers import CorrespondSerailizer
+from .serializers import CorrespondListSerailizer
+from .serializers import ScoreRegisterSerializer
+from .serializers import ReScoreSerializer
+from .serializers import ReScoreListSerializer
+from .serializers import ScoreRegisterListSerializer
+from .serializers import ScoreRegisterPrintSerializer
+
+from apps.student.serializers import StudentListSerializer
+from main.utils.function.pagination import CustomPagination
+from rest_framework.filters import SearchFilter
+from django.db.models import Count
+from django.db.models import Sum
+
+@permission_classes([IsAuthenticated])
+class ScoreRegisterAPIView(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    generics.GenericAPIView
+):
+
+    """ дүн crud """
+
+    queryset = ScoreRegister.objects.all()
+    serializer_class = ScoreRegisterSerializer
+
+    @has_permission(must_permissions=['lms-score-register-create'])
+    def post(self, request):
+        " дүн шинээр үүсгэх "
+
+        data = request.data
+        student = data.get("student")
+        lesson_year = data.get("lesson_year")
+        lesson_season = data.get("lesson_season")
+
+        school = data.get("school")
+        lesson = data.get("lesson")
+
+        teach_score = data.get("teach_score")
+        exam_score = data.get("exam_score")
+        total_score = 0
+
+        if teach_score:
+            total_score = float(teach_score)
+
+        if exam_score:
+            total_score = total_score + float(exam_score)
+
+        if not total_score == 0:
+            assessment = Score.objects.filter(score_max__gte=total_score,score_min__lte=total_score).values('id').first()
+            if assessment:
+                request.data['assessment'] = assessment['id']
+
+        serializer = self.get_serializer(data=data)
+
+        if serializer.is_valid(raise_exception=False):
+            with transaction.atomic():
+                try:
+                    self.create(request)
+                except Exception as e:
+                    print(e)
+                    return request.send_error("ERR_002")
+
+                return request.send_info("INF_001")
+        else:
+            errors = []
+            if student:
+                score_info = self.queryset.filter(student=student,lesson_year=lesson_year,lesson_season=lesson_season,school=school,lesson=lesson)
+                if score_info:
+                    return_error = {
+                        "field": "student",
+                        "msg": "Тухайн оюутны дүн бүртгэгдсэн байна"
+                    }
+                    errors.append(return_error)
+                    return request.send_error("ERR_003", errors)
+
+            for key in serializer.errors:
+                msg = "Хоосон байна"
+
+                return_error = {
+                    "field": key,
+                    "msg": msg
+                }
+                errors.append(return_error)
+
+            if len(errors) > 0:
+                return request.send_error("ERR_003", errors)
+
+    @has_permission(must_permissions=['lms-score-register-update'])
+    def put(self, request, pk=None):
+        ''' дүн засах
+            pk: Оюутны ID
+        '''
+
+        total_score = 0
+        data = request.data
+
+        teach_score = data.get("teach_score")
+        exam_score = data.get("exam_score")
+
+        lesson_year = data.get("lesson_year")
+        lesson_season = data.get("lesson_season")
+        lesson = data.get("lesson")
+
+        if teach_score:
+            total_score = float(teach_score)
+
+        if exam_score:
+            total_score = total_score + float(exam_score)
+
+        if not total_score == 0:
+            assessment = Score.objects.filter(score_max__gte=total_score, score_min__lte=total_score).values('id', 'assesment').first()
+            request.data['assessment'] = assessment['id']
+
+        instance = self.queryset.filter(student=pk, lesson=lesson, lesson_year=lesson_year, lesson_season=lesson_season).last()
+
+        serializer = self.get_serializer(instance, data=data)
+
+        if serializer.is_valid(raise_exception=False):
+            with transaction.atomic():
+                try:
+                   self.perform_update(serializer)
+                except Exception as e:
+                    print(e)
+                    return request.send_error("ERR_002")
+
+                return request.send_info("INF_002", assessment.get('assesment'))
+        else:
+            errors = []
+
+            for key in serializer.errors:
+                msg = "Хоосон байна"
+
+                return_error = {
+                    "field": key,
+                    "msg": serializer.errors[msg]
+                }
+
+                errors.append(return_error)
+
+            if len(errors) > 0:
+                return request.send_error("ERR_003", errors)
+
+            return request.send_error("ERR_002")
+
+    @has_permission(must_permissions=['lms-score-register-delete'])
+    def delete(self, request, pk=None):
+        " Дүйцүүлсэн дүн устгах "
+
+        student = Student.objects.filter(id=pk)
+        lesson = LessonStandart.objects.filter(id=pk)
+
+        if student or lesson:
+            return request.send_error("ERR_002", "Устгах боломжгүй байна.")
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
+
+class ScoreRegisterStudentView(
+    mixins.ListModelMixin,
+    generics.GenericAPIView
+):
+    queryset = Student.objects
+    serializer_class = StudentListSerializer
+
+    filter_backends = [SearchFilter]
+    search_fields = ['code', 'first_name', 'last_name']
+
+    def get(self,request):
+
+        lesson_year = self.request.query_params.get('lesson_year')
+        lesson_season = self.request.query_params.get('lesson_season')
+        school_id = self.request.query_params.get('school')
+        lesson = self.request.query_params.get('lesson')
+        group = self.request.query_params.get('group')
+        teacher = self.request.query_params.get('teacher')
+
+        all_student = get_lesson_choice_student(lesson, teacher, school_id, lesson_year, lesson_season, group)
+
+        score_queryset =  ScoreRegister.objects.all()
+        if school_id:
+            score_queryset = score_queryset.filter(school=school_id)
+
+        score_list = score_queryset.filter(lesson_year=lesson_year, lesson_season=lesson_season, lesson=lesson, teacher=teacher)
+
+        score_list_ids = score_list.values_list('student', flat=True)
+
+        self.queryset = self.queryset.filter(id__in=all_student).exclude(id__in=score_list_ids)
+
+        all_list = self.list(request).data
+
+        return request.send_data(all_list)
+
+
+@permission_classes([IsAuthenticated])
+class CorrespondAPIView(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    generics.GenericAPIView
+):
+
+    """ Дүйцүүлсэн дүн crud """
+
+    queryset = ScoreRegister.objects
+    serializer_class = CorrespondSerailizer
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['student__code','student__last_name','student__first_name', 'lesson__name', 'lesson__code', 'teach_score', 'exam_score', 'assessment__assesment']
+
+    def get_queryset(self):
+        queryset = self.queryset.filter(status=ScoreRegister.CORRESPOND)
+        school = self.request.query_params.get('school')
+        lesson_season = self.request.query_params.get('lesson_season')
+        lesson_year = self.request.query_params.get('lesson_year')
+        sorting = self.request.query_params.get('sorting')
+
+        # Сургуулиар хайлт хийх
+        if school:
+            queryset = queryset.filter(school=school)
+
+        # Хичээлийн жилээр хайлт хийх
+        if lesson_year:
+            queryset = queryset.filter(lesson_year=lesson_year)
+
+        # Хичээлийн улиралаар хайлт хийх
+        if lesson_season:
+            queryset = queryset.filter(lesson_season_id=lesson_season)
+
+        # Sort хийх үед ажиллана
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
+
+        return queryset
+
+    @has_permission(must_permissions=['lms-score-correspond-read'])
+    def get(self, request, pk=None):
+        " Дүйцүүлсэн дүн жагсаалт "
+
+        self.serializer_class = CorrespondListSerailizer
+        if pk:
+            correspond_info = self.retrieve(request, pk).data
+            return request.send_data(correspond_info)
+
+        correspond_list = self.list(request).data
+        return request.send_data(correspond_list)
+
+    @has_permission(must_permissions=['lms-score-correspond-create'])
+    def post(self, request):
+        " Дүйцүүлсэн дүн шинээр үүсгэх "
+
+        data = request.data
+        student = data.get("student")
+        lesson_year = data.get("lesson_year")
+        lesson_season = data.get("lesson_season")
+        school = data.get("school")
+        lesson = data.get("lesson")
+        teach_score = data.get("teach_score")
+        exam_score = data.get("exam_score")
+
+        total_score = 0
+        if teach_score:
+            total_score = float(teach_score)
+        if exam_score:
+            total_score = total_score + float(exam_score)
+
+        if not total_score == 0:
+            assessments = Score.objects.filter(score_max__gte=total_score,score_min__lte=total_score).values('id').first()
+            if assessments:
+                request.data['assessment'] = assessments['id']
+        serializer = self.get_serializer(data=data)
+
+        if serializer.is_valid(raise_exception=False):
+            is_success = False
+            with transaction.atomic():
+                try:
+                    self.create(request)
+                    is_success = True
+                except Exception:
+                    raise
+            if is_success:
+                return request.send_info("INF_001")
+
+            return request.send_error("ERR_002")
+
+        else:
+            error_obj = []
+            if student:
+                score_info = self.queryset.filter(student=student,lesson_year=lesson_year,lesson_season=lesson_season,school=school,lesson=lesson)
+                if score_info:
+                    return_error = {
+                        "field": 'lesson',
+                        "msg": "Энэ оюутан дээр тухайн хичээлийн дүн бүртгэлтэй байна"
+                    }
+                    error_obj.append(return_error)
+                    return request.send_error("ERR_004", error_obj)
+            for key in serializer.errors:
+                msg = "Хоосон байна"
+
+                return_error = {
+                    "field": key,
+                    "msg": msg
+                }
+                error_obj.append(return_error)
+
+            if len(error_obj) > 0:
+                return request.send_error("ERR_003", error_obj)
+
+    @has_permission(must_permissions=['lms-score-correspond-update'])
+    def put(self, request, pk=None):
+        "Дүйцүүлсэн дүн засах"
+
+        data = request.data
+        student = data.get("student")
+        data = request.data
+        assessment = data.get("assessment")
+        lesson_year = data.get("lesson_year")
+        lesson_season = data.get("lesson_season")
+        school = data.get("school")
+        lesson = data.get("lesson")
+        teach_score = data.get("teach_score")
+        exam_score = data.get("exam_score")
+
+        total_score = 0
+        if teach_score:
+            total_score = float(teach_score)
+        if exam_score:
+            total_score = total_score + float(exam_score)
+
+        if not total_score == 0:
+            assessments = Score.objects.filter(score_max__gte=total_score,score_min__lte=total_score).values('id').first()
+            if assessments:
+                request.data['assessment'] = assessments['id']
+
+        instance = self.get_object()
+
+        serializer = self.get_serializer(instance, data=data)
+
+        if serializer.is_valid(raise_exception=False):
+            is_success = False
+            with transaction.atomic():
+                try:
+                    self.update(request).data
+                    is_success = True
+                except Exception:
+                    raise
+            if is_success:
+                return request.send_info("INF_002")
+
+            return request.send_error("ERR_002")
+        else:
+            error_obj = []
+            if student:
+                score_info = self.queryset.filter(student=student,lesson_year=lesson_year,lesson_season=lesson_season,school=school,lesson=lesson).exclude(id=pk)
+                if score_info:
+                    return_error = {
+                        "field": 'lesson',
+                        "msg": "Энэ оюутан дээр тухайн хичээлийн дүн бүртгэлтэй байна"
+                    }
+                    error_obj.append(return_error)
+                    return request.send_error("ERR_004", error_obj)
+            for key in serializer.errors:
+                msg = "Хоосон байна"
+
+                return_error = {
+                    "field": key,
+                    "msg": msg
+                }
+
+                error_obj.append(return_error)
+
+            if len(error_obj) > 0:
+                return request.send_error("ERR_003", error_obj)
+
+            return request.send_error("ERR_002")
+
+    @has_permission(must_permissions=['lms-score-correspond-delete'])
+    def delete(self, request, pk=None):
+        " Дүйцүүлсэн дүн устгах "
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
+
+
+@permission_classes([IsAuthenticated])
+class ReScoreAPIView(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.CreateModelMixin,
+    generics.GenericAPIView
+):
+
+    """ Дахин шалгалтын дүн crud """
+
+    queryset = Exam_repeat.objects
+    serializer_class = ReScoreSerializer
+
+    filter_backends = [SearchFilter]
+    search_fields = ['student__code','student__last_name','student__first_name']
+
+    def get_queryset(self):
+        queryset = self.queryset.filter(status__in=[1,2,3])
+        school = self.request.query_params.get('school')
+        lesson_season = self.request.query_params.get('lesson_season')
+        lesson_year = self.request.query_params.get('lesson_year')
+        status = self.request.query_params.get('status')
+        lesson = self.request.query_params.get('lesson')
+        sorting = self.request.query_params.get('sorting')
+
+       # Сургуулиар хайлт хийх
+        if school:
+            queryset = queryset.filter(school=school)
+
+        # Хичээлийн жилээр хайлт хийх
+        if lesson_year:
+            queryset = queryset.filter(lesson_year=lesson_year)
+
+        # Хичээлийн улиралаар хайлт хийх
+        if lesson_season:
+            queryset = queryset.filter(lesson_season_id=lesson_season)
+
+        # Шалгалтын төлөвөөр хайлт хийх
+        if status:
+            queryset = queryset.filter(status=status)
+
+        # Хичээлээр хайлт хийх
+        if lesson:
+            queryset = queryset.filter(lesson=lesson)
+
+        if status:
+            score_status = int(status) + 4
+            if score_status and lesson:
+                student_ids = ScoreRegister.objects.filter(lesson=lesson, status=score_status,is_delete=False).values_list('student', flat=True)
+                queryset = queryset.filter(student__in=student_ids)
+
+        # Sort хийх үед ажиллана
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
+
+        return queryset
+
+    @has_permission(must_permissions=['lms-score-restudy-read'])
+    def get(self, request, pk=None):
+        " Дахин шалгалтын дүн жагсаалт "
+
+        self.serializer_class = ReScoreListSerializer
+
+        if pk:
+            rescore_info = self.retrieve(request, pk).data
+            return request.send_data(rescore_info)
+
+
+        rescore_list = self.list(request).data
+        return request.send_data(rescore_list)
+
+    @has_permission(must_permissions=['lms-score-restudy-create'])
+    def post(self, request):
+        " Дахин шалгалтын дүн үүсгэх "
+
+        self.queryset = ScoreRegister.objects.all()
+        data = request.data
+        teach_score = data.get('teach_score')
+        exam_score = data.get('exam_score')
+        lesson = data.get('lesson')
+        student = data.get('student')
+        status = data.get('status')
+        lesson_year = data.get('lesson_year')
+        lesson_season = data.get('lesson_season')
+        school = data.get('school')
+        instance = self.queryset.filter().first()
+        serializer = self.get_serializer(instance, data=data)
+
+        if status != 6: #Шууд тооцохоос бусад үед өмнө нь дүнтэй эсэхийг шалгана
+            before_score = ScoreRegister.objects.filter(lesson=lesson, student=student).exclude(lesson_year=lesson_year, lesson_season=lesson_season)
+            if not before_score:
+                return request.send_error("ERR_003", 'Энэ хичээлийг өмнө судлаагүй тул дүн оруулах боломжгүй')
+        now_score = ScoreRegister.objects.filter(lesson=lesson, student=student, lesson_year=lesson_year, lesson_season=lesson_season)
+        if now_score:
+            return request.send_error("ERR_003", 'Энэ улиралд дүн бүртгэгдсэн байна.')
+
+        delete_score = ScoreRegister.objects.filter(lesson=lesson, student=student, is_delete=True)
+        if delete_score:
+            delete_score.delete()
+
+        if serializer.is_valid(raise_exception=False):
+            is_success = False
+            with transaction.atomic():
+                try:
+                    result = ScoreRegister.objects.create(
+                        teach_score = teach_score,
+                        exam_score = exam_score,
+                        teacher = None,
+                        lesson_id = lesson,
+                        student_id = student,
+                        lesson_year = lesson_year,
+                        lesson_season_id = lesson_season,
+                        school_id = school,
+                        status = status,
+                    )
+
+                    result1 = ScoreRegister.objects.filter(lesson=lesson, student=student, is_delete=False).exclude(lesson_year=lesson_year, lesson_season=lesson_season).update(
+                        is_delete = True
+                    )
+
+                    is_success = True
+                except Exception:
+                    raise
+            if is_success:
+                return request.send_info("INF_001")
+
+            return request.send_error("ERR_002")
+        else:
+            error_obj = []
+            for key in serializer.errors:
+                msg = "Хоосон байна"
+
+                return_error = {
+                    "field": key,
+                    "msg": msg
+                }
+
+                error_obj.append(return_error)
+
+            if len(error_obj) > 0:
+                return request.send_error("ERR_003", error_obj)
+
+            return request.send_error("ERR_002")
+
+    @has_permission(must_permissions=['lms-score-restudy-update'])
+    def put(self, request, pk=None):
+        " Дахин шалгалтын дүн засах "
+
+        self.queryset = ScoreRegister.objects.all()
+        data = request.data
+        teach_score = data.get('teach_score')
+        exam_score = data.get('exam_score')
+        lesson = data.get('lesson')
+        student = data.get('student')
+        lesson_year = data.get('lesson_year')
+        lesson_season = data.get('lesson_season')
+        instance = self.queryset.filter(id=pk).first()
+        serializer = self.get_serializer(instance, data=data)
+
+        if serializer.is_valid(raise_exception=False):
+            is_success = False
+            with transaction.atomic():
+                try:
+                    result = ScoreRegister.objects.filter(id=pk).update(
+                        teach_score = teach_score,
+                        exam_score = exam_score,
+                        teacher = None
+                    )
+
+                    result1 = ScoreRegister.objects.filter(lesson=lesson, student=student, is_delete=False).exclude(lesson_year=lesson_year, lesson_season=lesson_season).update(
+                        is_delete = True
+                    )
+
+                    is_success = True
+                except Exception:
+                    raise
+            if is_success:
+                return request.send_info("INF_001")
+
+            return request.send_error("ERR_002")
+        else:
+            error_obj = []
+            for key in serializer.errors:
+                msg = "Хоосон байна"
+
+                return_error = {
+                    "field": key,
+                    "msg": msg
+                }
+
+                error_obj.append(return_error)
+
+            if len(error_obj) > 0:
+                return request.send_error("ERR_003", error_obj)
+
+            return request.send_error("ERR_002")
+
+@permission_classes([IsAuthenticated])
+class ReScoreStudentView(
+    mixins.ListModelMixin,
+    generics.GenericAPIView
+):
+    queryset = Student.objects
+    serializer_class = StudentListSerializer
+
+    filter_backends = [SearchFilter]
+    search_fields = ['code', 'first_name', 'last_name']
+
+    def get(self,request):
+
+        lesson_year = self.request.query_params.get('lesson_year')
+        lesson_season = self.request.query_params.get('lesson_season')
+        school_id = self.request.query_params.get('school')
+        lesson = self.request.query_params.get('lesson')
+        status = self.request.query_params.get('status')
+
+        qs_choice = Exam_repeat.objects.all()
+        qs_score = ScoreRegister.objects.all().filter(status__in=[5,6,7])
+
+        if lesson_year:
+            qs_choice = qs_choice.filter(lesson_year=lesson_year)
+            qs_score = qs_score.filter(lesson_year=lesson_year)
+        if lesson_season:
+            qs_choice = qs_choice.filter(lesson_season=lesson_season)
+            qs_score = qs_score.filter(lesson_season=lesson_season)
+        if school_id:
+            qs_choice = qs_choice.filter(school=school_id)
+            qs_score = qs_score.filter(school=school_id)
+        if lesson:
+            qs_choice = qs_choice.filter(lesson=lesson)
+            qs_score = qs_score.filter(lesson=lesson)
+        if status:
+            qs_choice = qs_choice.filter(status=status)
+            score_status = int(status) + 4
+            if score_status:
+                qs_score = qs_score.filter(status=score_status)
+        choice_list_ids = qs_choice.values_list('student', flat=True)
+
+        score_list_ids = qs_score.values_list('student', flat=True)
+
+        self.queryset = self.queryset.filter(id__in=choice_list_ids).exclude(id__in=score_list_ids)
+
+        all_list = self.list(request).data
+
+        return request.send_data(all_list)
+
+
+@permission_classes([IsAuthenticated])
+class ScoreRegisterListAPIView(
+    mixins.ListModelMixin,
+    generics.GenericAPIView
+):
+    """ дүн crud """
+
+    queryset = ScoreRegister.objects.all().exclude(status=ScoreRegister.CORRESPOND).order_by('-student__first_name')
+
+    serializer_class = ScoreRegisterListSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['student__code', 'student__first_name', 'student__last_name']
+
+    @has_permission(must_permissions=['lms-score-register-read'])
+    def get(self, request, pk=None):
+        " дүн жагсаалт "
+
+        teacher = request.query_params.get('teacher')
+        lesson = request.query_params.get('lesson')
+        group = request.query_params.get('group')
+
+        have_teach_score = False
+
+        lesson_year = request.query_params.get('lesson_year')
+        lesson_season = request.query_params.get('lesson_season')
+
+        if not lesson_year and not lesson_season:
+            self.queryset = self.queryset.filter(lesson_year=lesson_year, lesson_season=lesson_season)
+
+        if teacher:
+            self.queryset = self.queryset.filter(teacher=teacher)
+
+        if lesson:
+            self.queryset = self.queryset.filter(lesson=lesson)
+
+        if group:
+            self.queryset = self.queryset.filter(student__group=group)
+
+        all_list = self.list(request).data
+
+        # Багш хичээл холболт
+        lesson_teacher = Lesson_to_teacher.objects.filter(lesson=lesson, teacher=teacher).first()
+
+        # Багшийн дүнгийн задаргааны төрлүүд
+        score_type_ids = Lesson_teacher_scoretype.objects.filter(lesson_teacher=lesson_teacher).values_list('id', flat=True)
+
+        teach_score_qs = TeacherScore.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season, score_type_id__in=score_type_ids)
+        if teach_score_qs:
+            have_teach_score = True
+
+        return_datas = {
+            'datas': all_list,
+            'have_teach_score': have_teach_score
+        }
+
+        return request.send_data(return_datas)
+
+@permission_classes([IsAuthenticated])
+class ScoreTeacherDownloadAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin
+):
+    """ Багшийн дүн нэгтгэж татах хэсэг """
+
+    queryset = ScoreRegister.objects.all().exclude(status=ScoreRegister.CORRESPOND)
+    serializer_class = ScoreRegisterListSerializer
+
+    def get(self, request):
+
+        all_students_teach_scores = []
+        have_score_students = []
+
+        student_queryset = Student.objects.all()
+
+        teacher = request.query_params.get('teacher')
+        lesson = request.query_params.get('lesson')
+        group = request.query_params.get('group')
+        school_id = self.request.query_params.get('school')
+
+        lesson_year = request.query_params.get('lesson_year')
+        lesson_season = request.query_params.get('lesson_season')
+
+        if not teacher and not lesson:
+            return request.send_data([])
+
+        self.queryset = self.queryset.filter(lesson_year=lesson_year, lesson_season=lesson_season)
+
+        # Багш хичээл холболт
+        lesson_teacher = Lesson_to_teacher.objects.filter(lesson=lesson, teacher=teacher).first()
+
+        # Багшийн дүнгийн задаргааны төрлүүд
+        score_type_ids = Lesson_teacher_scoretype.objects.filter(lesson_teacher=lesson_teacher).values_list('id', flat=True)
+
+        # Багшийн дүнгийн төрөл бүрт оюутанд өгсөн оноо
+        teach_score_qs = TeacherScore.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season, score_type_id__in=score_type_ids)
+
+        # Анги байвал тухайн ангийн оюутны дүнг татна.
+        if group:
+            teach_score_qs = teach_score_qs.filter(student__group=group)
+
+        # Дүнтэй оюутнууд
+        teacher_score_students = teach_score_qs.values_list('student', flat=True).distinct('student')
+
+        # Оюутны дүн нэгтэх
+        for student_id in teacher_score_students:
+            obj = {}
+            scores = teach_score_qs.filter(student=student_id).values_list('score', flat=True)
+            total_score = sum(scores) if scores else 0
+
+            obj['student'] = student_id
+            obj['total_score'] = total_score
+
+            all_students_teach_scores.append(obj)
+
+        # Тухайн хуваарь дээр хичээл үзэж байгаа бүх оюутнууд
+        all_student = get_lesson_choice_student(lesson, teacher, school_id, lesson_year, lesson_season, group)
+
+        student_queryset = student_queryset.filter(id__in=all_student)
+
+        # Хичээлийн хуваарьтай бүх оюутнууд
+        all_timetable_student_ids = student_queryset.values_list('id', flat=True)
+
+        with transaction.atomic():
+
+            # Багшийн дүн оруулсан оюутны дүнг үүсгэнэ
+            for student_teach_score in all_students_teach_scores:
+                student_id = student_teach_score.get('student')
+                student_score_total = student_teach_score.get('total_score')
+
+                have_score_students.append(student_id)
+
+                # Өмнө нь дүн орсон эсэхийг шалгах
+                student_score = ScoreRegister.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season, student=student_id, lesson=lesson)
+
+                # Үсгэн үнэлгээ
+                assessment = Score.objects.filter(score_max__gte=student_score_total, score_min__lte=student_score_total).values('id', 'assesment').first()
+
+                student = Student.objects.filter(id=student_id).first()
+
+                # Өмнө нь дүн орчихсон байвал update хийнэ
+                if student_score:
+                    student_score.update(
+                        teach_score=student_score_total if student_score_total else 0,
+                        assessment_id=assessment['id'] if assessment else None,
+                        status=ScoreRegister.TEACHER_WEB,
+                    )
+                else:
+                    ScoreRegister.objects.create(
+                        lesson_year=lesson_year,
+                        lesson_season_id=lesson_season,
+                        lesson_id=lesson,
+                        student_id=student_id,
+                        teach_score=student_score_total if student_score_total else 0,
+                        teacher_id=teacher,
+                        assessment_id=assessment['id'] if assessment else None,
+                        status=ScoreRegister.TEACHER_WEB,
+                        school=student.school if student else None
+                    )
+
+            # Дүнгүй оюутнууд
+            not_score_students = list(set(all_timetable_student_ids) - set(have_score_students))
+
+            # Багшаас дүн аваагүй ч хуваарьт байгаа оюутнуудыг create хийх
+            if not_score_students:
+                for student_id in not_score_students:
+                    student_score_total = 0
+                    student_not_score = ScoreRegister.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season, student=student_id, lesson=lesson)
+                    student = Student.objects.filter(id=student_id).first()
+
+                    # Үсгэн үнэлгээ
+                    assessment = Score.objects.filter(score_max__gte=student_score_total, score_min__lte=student_score_total).values('id', 'assesment').first()
+
+                    # Өмнө нь дүн орчихсон байвал update хийнэ
+                    if student_not_score:
+                        student_score.update(
+                            teach_score=student_score_total,
+                            assessment_id=assessment['id'] if assessment else None,
+                            status=ScoreRegister.TEACHER_WEB,
+                        )
+                    else:
+                        ScoreRegister.objects.create(
+                            lesson_year=lesson_year,
+                            lesson_season_id=lesson_season,
+                            lesson_id=lesson,
+                            student_id=student_id,
+                            teach_score=student_score_total if student_score_total else 0,
+                            teacher_id=teacher,
+                            assessment_id=assessment['id'] if assessment else None,
+                            status=ScoreRegister.TEACHER_WEB,
+                            school=student.school if student else None
+                        )
+
+        self.queryset = self.queryset.filter(student__id__in=student_queryset)
+
+        all_list = self.list(request).data
+
+        return request.send_data(all_list)
+
+
+class ScoreOldAPIView(
+    generics.GenericAPIView
+):
+    """ Оюутан бүрийн хуучин дүн оруулах """
+
+    #  Хичээлийн жил улирал оруулах
+    def post(self, request):
+
+        data = request.data.dict()
+        assessment = None
+
+        not_found_lesson = []
+        not_found_student = []
+        all_create_datas = []
+
+        file = data.get('file')
+
+        file_name = file.name
+
+        # Файл түр хадгалах
+        path = save_file(file, 1, 'score_sheet')
+
+        full_path = os.path.join(settings.MEDIA_ROOT, str(path))
+
+        try:
+            reader = openpyxl_dictreader.DictReader(full_path)
+            for row in reader:
+                season = None
+                lesson_year = None
+
+                lesson_code = row.get('Хичээлийн код')
+                lesson_name = row.get('Хичээлийн нэр')
+                student_code = row.get('Оюутны код')
+                learningplan_season = row.get('Улирал')
+                score = row.get('Дүн')
+
+                if not lesson_code and not student_code and not score:
+                    continue
+
+                # Дүн оруулах хичээл
+                lesson = LessonStandart.objects.filter(code=lesson_code).first()
+
+                if not lesson:
+                    # Хичээлийн код хоосон зай replace хийх
+                    lesson_code = lesson_code.replace(' ', '')
+
+                student_code = student_code.replace('-', '')
+
+                if lesson_name:
+                    lesson_name = lesson_name.strip()
+
+                # Дүн оруулах хичээл
+                lesson = LessonStandart.objects.filter(code=lesson_code).first()
+
+                # Дүн оруулах оюутан
+                student = Student.objects.filter(code=student_code.upper() if student_code else None).first()
+
+                # Хичээлийн кодоор хичээл олдохгүй үед
+                if not lesson:
+                    obj = {}
+                    obj['student_code'] = student_code
+                    obj['lesson_code'] = lesson_code
+                    obj['lesson_name'] = lesson_name
+                    obj['exam_score'] = score
+
+                    not_found_lesson.append(obj)
+                    continue
+
+                # Оюутны код таарахгүй байхгүй үед
+                if not student:
+                    obj = {}
+                    obj['student_code'] = student_code
+                    obj['lesson_code'] = lesson_code
+                    obj['lesson_name'] = lesson_name
+                    obj['exam_score'] = score
+
+                    not_found_student.append(obj)
+                    continue
+
+                # Оюутны анги
+                student_group = student.group
+
+                # Ангийн элссэн хичээлийн жил
+                student_group_year = student_group.join_year
+
+                # Мэргэжил
+                student_profession = student_group.profession.id
+
+                splitted_list = student_group_year.split('-')
+
+                start_year = int(splitted_list[0]) # Анги эхэлсэн жил
+                end_year = int(splitted_list[1]) # Анги дууссан жил
+
+                # Cургалтын төлөвлөгөөнөөс мэргэжил хичээлээр хайж хичээл үзэх улирлыг авна
+                learningplan = LearningPlan.objects.filter(profession=student_profession, lesson=lesson.id).first()
+
+                # if learningplan:
+
+                if learningplan_season:
+                    # learningplan_season = json_load(learningplan_season)
+                    # if isinstance(learningplan_season, list) and len(learningplan_season) > 0:
+                    #     learningplan_season = learningplan_season[0]
+
+                    # Улирал тэгш сондгой эсэхийг шалгах
+                    if int(learningplan_season) % 2 == 0:
+                        year_count = int(learningplan_season) / 2
+                        cyear_count = int(year_count - 1)
+
+                        qs_season = Season.objects.filter(season_name='Хавар').first()
+                        season = qs_season.id
+                    else:
+                        year_count = (int(learningplan_season) + 1) / 2
+                        cyear_count = int(year_count - 1)
+
+                        qs_season = Season.objects.filter(season_name='Намар').first()
+                        season = qs_season.id
+
+                    score_start_year = str(start_year + cyear_count)
+                    score_end_year = str(end_year + cyear_count)
+
+                    lesson_year = score_start_year + '-' + score_end_year
+
+                if isinstance(score, int) or isinstance(score, float):
+                    assessment = Score.objects.filter(score_max__gte=score, score_min__lte=score).first()
+                elif score:
+                    score  = float(score)
+
+                create_datas = {
+                    'student_id': student.id,
+                    'student_code': student.code,
+                    'lesson_id': lesson.id,
+                    'lesson_name': lesson.name,
+                    'lesson_code': lesson.code,
+                    "exam_score": round(score, 2) if isinstance(score, int) or isinstance(score, float) else None,
+                    'assessment_id': assessment.id if assessment else None,
+                    'status': ScoreRegister.START_SYSTEM_SCORE,
+                    'school_id': student.school.id if student.school else None,
+                    'lesson_year': lesson_year,
+                    'lesson_season_id': season
+                }
+
+                all_create_datas.append(create_datas)
+
+                # Хадгалж дууссаны дараа файлаа устгах
+                remove_folder(path)
+
+        except Exception as e:
+            print(e)
+            # Алдаа гарвал файлаа устгах
+            remove_folder(path)
+
+        all_error_datas = not_found_lesson + not_found_student
+
+        return_datas = {
+            'create_datas': all_create_datas,
+            'not_found_lesson': not_found_lesson,
+            'not_found_student': not_found_student,
+            'all_error_datas': all_error_datas,
+            'file_name': file_name
+        }
+
+        return request.send_data(return_datas)
+
+
+    def put(self, request, pk=None):
+        """ Хуучин дүн тулгах """
+
+        datas = request.data
+
+        score = datas.get('score_total')
+
+        score_obj = ScoreRegister.objects.get(pk=pk)
+
+        with transaction.atomic():
+            score_obj.exam_score = score
+            score_obj.save()
+
+        return request.send_info('INF_002')
+class ScoreImportAPIView(
+    generics.GenericAPIView
+):
+    """ Хуучин дүн import хийх """
+
+    def post(self, request):
+
+        datas = request.data
+
+        with transaction.atomic():
+            try:
+                # Бүх датагаа хадгалах
+                for create_data in datas:
+                    student = create_data.get('student_id')
+                    lesson_id = create_data.get('lesson_id')
+                    score = create_data.get('exam_score')
+
+                    if isinstance(score, int) or isinstance(score, float):
+                        create_data['exam_score'] = float(score)
+                    else:
+                        create_data['exam_score'] = 0
+
+                    create_data = remove_key_from_dict(create_data, ['student_code', 'lesson_code', 'lesson_name'])
+
+                    score_obj = ScoreRegister.objects.filter(student=student, lesson=lesson_id, status=ScoreRegister.START_SYSTEM_SCORE).first()
+
+                    if score_obj:
+                        continue
+                    else:
+                        ScoreRegister.objects.create(**create_data)
+            except Exception as e:
+                print(e)
+                return request.send_error('ERR_002')
+
+        return request.send_info('INF_013')
+
+
+class ScoreRegisterPrintAPIView(
+    generics.GenericAPIView,
+):
+    """ Дүн хэвлэх """
+
+    queryset = ScoreRegister.objects.all().order_by("-lesson_year")
+    serializer_class = ScoreRegisterPrintSerializer
+
+    def get(self, request, student=None):
+        """ Дүнгийн тодорхойлолт (ганц оюутны хувьд) """
+
+        # жил улиралаар хайх
+        lesson_year = self.request.query_params.get('year')
+        lesson_season = self.request.query_params.get('season')
+
+        if lesson_year:
+            self.queryset = self.queryset.filter(lesson_year=lesson_year)
+
+        if lesson_season:
+            self.queryset = self.queryset.filter(lesson_season=lesson_season)
+
+        all_data = []
+        score_info = {}
+        lessons_qs = {}
+        asses_qs = {}
+        total = []
+
+        lesson_counts = []
+        lesson_code_count = []
+
+        # үсгэн дүн тоолох нь
+        asses_qs = (self.queryset.filter(student_id=student, is_delete=False).values('assessment__assesment')
+            .annotate(asses_count=Count('assessment__assesment')).order_by('assessment__assesment'))
+
+        # тухайн жил, улирал болгоны үзсэн хичээлүүдыг тоолох нь
+        lessons_qs = (self.queryset.filter(student_id=student, is_delete=False ).values("lesson_year", "lesson_season__season_name")
+            .annotate(less_count=Count('lesson')).order_by("lesson_season__season_name")).order_by("lesson_year")
+
+        if asses_qs and lessons_qs:
+            lesson_code_count = list(asses_qs)
+            lesson_counts = list(lessons_qs)
+
+        # тухайн оюутны мэдээлэл дүнгийн мэдээлэл
+        score_qs = self.queryset.filter(student_id=student, is_delete=False).order_by("lesson_year", "lesson_season")
+
+        for qs in score_qs:
+            year = ''
+
+            # жил улирал
+            if qs.lesson_year and qs.lesson_season.season_name:
+                year = qs.lesson_year + " " + qs.lesson_season.season_name
+
+            if year not in score_info:
+                score_info[year] = []
+
+            score_info[year].append(qs)
+
+        # Бүх year total
+        total_kr_count = 0
+        total_onoo_count = 0
+        total_gpa_count = 0
+        total_onoo_avg = 0
+        niit_gpa = 0
+
+        degree_name = ''
+        student_code = ''
+        proffession = ''
+        join_year = ''
+        full_names = ''
+
+        for key in score_info.keys():
+            list_info = []
+
+            # total
+            onoo = 0
+            total_kr = 0
+            total_gpa = 0
+
+            # суралцсан жил,улирал болгоны дүнгүүд
+            for eachScore in score_info[key]:
+                assessments = None
+                status_num=None
+
+                total_scores = eachScore.score_total
+                status_num = eachScore.status
+
+                # exam + teach
+                if total_scores:
+                    assessment = Score.objects.filter(score_max__gte=total_scores, score_min__gte=total_scores).first()
+                    if assessment:
+                        assessments = assessment.assesment
+
+                # оюутны мэдээлэл
+                student_code = eachScore.student.code
+                proffession = eachScore.student.group.profession.name
+                join_year = eachScore.student.group.join_year
+                degree_name = eachScore.student.group.degree.degree_name
+                full_names = get_fullName(eachScore.student.last_name + " овогтой " + eachScore.student.first_name, False, True )
+                # хичээлүүд
+                list_info.append({
+                    "lesson_year":eachScore.lesson_year if eachScore.lesson_year else '',
+                    "lesson_season":eachScore.lesson_season.season_name if eachScore.lesson_season else '',
+                    "lesson_code":eachScore.lesson.code if eachScore.lesson.code else '',
+                    "lesson_name":eachScore.lesson.name if eachScore.lesson.name else '',
+                    "lesson_kr":eachScore.lesson.kredit if eachScore.lesson.kredit else 0,
+                    "exam_score":eachScore.exam_score if eachScore.exam_score else '',
+                    "teach_score":eachScore.teach_score if eachScore.teach_score else '',
+                    "total_scores":total_scores if total_scores else '',
+                    "assessment":assessments if assessments else '',
+                    "status_num":status_num if status_num else 0
+
+                })
+
+                total_kr = total_kr + eachScore.lesson.kredit
+                onoo = onoo + total_scores * eachScore.lesson.kredit
+
+            # дундаж олох нь
+            total_onoo = round(onoo / total_kr, 2)
+
+            # нийт kr
+            total_kr_count = total_kr_count+ total_kr
+            total_onoo_count = total_onoo_count + onoo
+
+            # голч олох нь
+            score = Score.objects.filter(
+                score_max__gte=total_onoo, score_min__lte=total_onoo).first()
+
+            if score:
+                total_gpa=score.gpa
+
+            # жил,улирал болгоны kr and lesson жагсаалт
+            all_data.append(
+                {
+                    "year_season": key,
+                    "total":{
+                        "kr":total_kr,
+                        "onoo":total_onoo,
+                        "gpa":total_gpa,
+                    },
+                    "lesson_info":list_info,
+
+                }
+            )
+
+        # ------------ Бүх жилийн total -----------
+        if (total_kr_count and total_onoo_count)>0:
+
+            # дундаж олох нь
+            total_onoo_avg = round(total_onoo_count / total_kr_count, 2)
+
+        # gpa
+        total_gpa_count = Score.objects.filter(score_max__gte=total_onoo_avg, score_min__lte=total_onoo_avg).first()
+        if total_gpa_count:
+            niit_gpa = total_gpa_count.gpa
+
+        total.append({
+            "all_total":
+            {
+                "total_kr": total_kr_count if total_kr_count else "",
+                "total_onoo": total_onoo_avg,
+                "total_gpa":niit_gpa,
+            },
+            "student_info":
+            {
+                "full_name": full_names if full_names else "",
+                "code": student_code if student_code else "",
+                "proffession": proffession if proffession else "",
+                "join_year": join_year if join_year else "",
+                "degree_name":degree_name if degree_name else "",
+            },
+        })
+        data = {
+            "scoreregister":all_data,
+            "asses_count":lesson_code_count,
+            "lesson_count":lesson_counts,
+            "all_total":total,
+        }
+
+        return request.send_data(data)

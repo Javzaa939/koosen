@@ -1,0 +1,19 @@
+Project асаахад анхаарах зүйлс: Зөвхөн backend!
+    1. Хөгжүүлэгчид def.py.def хуулаад өөрсдөө dev.py үүсгээд өөрийн баазтай холбоно!
+    2. python enviroment үүсгэх
+    3. pip install -r requirements.txt
+    3. pip install -r requirements.text
+
+Backend хөгжүүлэгчидийн анхааралд:
+    1. Сан буюу package суулгаж байгаа тохиолдолд requirements.txt дээр бичиж байх
+    2. model дээр өөрчлөлт хийгдсэн эсвэл migrate бичсэн үед заавал python manage.py makemigrations хийх
+    3. response шинэ INFO мэдээлэлийг main.utils.rsp.info руу нэмээд info_code-г нь ашиглах
+    4. response шинэ ERROR мэдээлэлийг main.utils.error.errors руу нэмээд error_code-г нь ашиглах
+    5. Хөрвүүлэх utils функц бичих тохиолдолд main.utils.convert.py дотор бичих
+    6. mixins crud үйлдэл хийх функцуудыг ашиглаагүй бусад үед баазтай холбогдох функцуудыг
+        * with transaction.atomic() функц дотор бичих эсвэл
+        * @transaction.atomic() гэж функцын дээр зарлах
+        ингэж бичсэнээр алдаатай тохиолдолд бааз дээр ямар нэгэн алдаатай үйлдэл хийгдэхгүй байна.
+    7. main.utils.function.utils.py функц дотор олон дахин ашиглагдах боломжтой хэрэгтэй функцуудыг бичих.
+    8. utils функц бичиж байхдаа юу хийдэг функц, дамжуулах утгууд, буцаах утгын талаар тайлбар сайн бичих.
+    9. utils функц нь динамик байх хэрэгтэй. Дамжуулах утга нь default утгыг зарласан байх хэрэгтэй.

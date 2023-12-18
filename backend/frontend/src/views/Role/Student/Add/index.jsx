@@ -1,0 +1,302 @@
+import React, { Fragment, useState, useContext, useEffect } from 'react'
+import {
+    Col,
+    Row,
+    Form,
+    Modal,
+    Label,
+    Input,
+    Button,
+    ModalBody,
+    ModalHeader,
+    FormFeedback,
+    Spinner
+} from 'reactstrap'
+import Select from 'react-select'
+import { X } from 'react-feather'
+import useApi from '@hooks/useApi';
+import classnames from 'classnames'
+import useLoader from '@hooks/useLoader';
+import { useTranslation } from 'react-i18next'
+import AuthContext from "@context/AuthContext"
+import SchoolContext from "@context/SchoolContext"
+import { Controller, useForm } from 'react-hook-form'
+import { validateSchema } from '../Add/validateSchema'
+import ActiveYearContext from "@context/ActiveYearContext"
+import { validate, ReactSelectStyles, convertDefaultValue } from '@utils'
+
+
+import Flatpickr from 'react-flatpickr'
+// flatpickr style
+import '@styles/react/libs/flatpickr/flatpickr.scss'
+// import { Mongolian } from "flatpickr/dist/l10n/mn.js"
+
+import moment from 'moment';
+
+const AddModal = ({ isOpen, handleAddModal, refreshDatas }) => {
+
+     const CloseBtn = (
+        <X className="cursor-pointer" size={15} onClick={handleAddModal} />
+    )
+
+    const { t } = useTranslation()
+	const { user } = useContext(AuthContext)
+    const { school_id } = useContext(SchoolContext)
+    const { cseason_id, cyear_name } = useContext(ActiveYearContext)
+
+    // ** Hook
+    const {control, handleSubmit, setError, clearErrors, formState: { errors }, reset } = useForm(validate(validateSchema));
+
+    const { isLoading, Loader, fetchData } = useLoader({ })
+    const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
+
+    const [select_student, setStudentOption] = useState([])
+    const [student_id , setStudentId] = useState('')
+
+    const [startPicker, setStartPicker] = useState(new Date());
+
+
+    const hourDelay = (date) => {
+        if (!date) {
+            return null;
+        }
+
+        const newDate = new Date(date.getTime() + (24 * 60 * 60 * 1000));
+        return newDate;
+    };
+
+    const [endPicker, setEndPicker] = useState(hourDelay(new Date));
+
+    // Api
+    const permissionStudentApi = useApi().role.student
+
+    //  Оюутны жагсаалт
+    async function getStudentOption() {
+        const { success, data } = await fetchData(permissionStudentApi.getStudent(student_id))
+        if(success) {
+            setStudentOption(data)
+        }
+    }
+
+    async function onSubmit(cdata) {
+        cdata['created_user'] = user.id
+        cdata['updated_user'] = user.id
+        cdata['lesson_season']= cseason_id
+        cdata['lesson_year']= cyear_name
+        cdata['start_date']= moment(startPicker).format('YYYY-MM-DD HH:mm:ss')
+        cdata['finish_date']= moment(endPicker).format('YYYY-MM-DD HH:mm:ss')
+
+        cdata = convertDefaultValue(cdata)
+
+        const { success, error } = await postFetch(permissionStudentApi.post(cdata))
+        if(success) {
+            reset()
+            refreshDatas()
+            handleAddModal()
+        }
+        else {
+            /** Алдааны мессеж */
+            for (let key in error) {
+                setError(error[key].field, { type: 'custom', message: error[key].msg});
+            }
+        }
+    }
+
+    const handleEndDate = (date) => {
+        var end_date = new Date(date);
+
+            if (!startPicker) {
+                if (end_date > startPicker) {
+                    setError('end_date', { type: 'custom', message: 'Эхлэх хугацаанаас өмнө байх боломжгүй !' });
+                } else {
+                    setEndPicker(end_date);
+                    clearErrors('start_date');
+                    clearErrors('end_date');
+                }
+            } else {
+                var start = new Date;
+                if (end_date < start ) {
+                    setError('start_date', { type: 'custom', message: 'Эхлэх хугацаанаас өмнө байх боломжгүй' });
+                    setError('end_date', { type: 'custom', message: 'Дуусах хугацаа нь эхлэх хугацаанаас өмнө байх боломжгүй' });
+
+                } else {
+                    setEndPicker(end_date);
+                    clearErrors('start_date');
+                    clearErrors('end_date');
+                }
+            }
+        }
+
+
+
+    const handleStartPicker = (dates) => {
+        const start_date = new Date(dates);
+        const end_date = new Date(endPicker);
+
+            if (start_date > end_date) {
+                setError('start_date', { type: 'custom', message: 'Дуусах хугацаанаас хойш байх боломжгүй' });
+            } else {
+                setStartPicker(dates)
+                clearErrors('start_date')
+            }
+    };
+
+
+    useEffect(() =>{
+        getStudentOption()
+    }, [student_id])
+    return (
+        <Fragment>
+            {isLoading && Loader}
+            <Modal
+                isOpen={isOpen}
+                toggle={handleAddModal}
+                className="sidebar-md hr-register"
+                modalClassName="modal-slide-in "
+                contentClassName="pt-0"
+            >
+                <ModalHeader
+                    className="mb-1"
+                    toggle={handleAddModal}
+                    close={CloseBtn}
+                    tag="div"
+                >
+                    <h5 className="modal-title">{t('Оюутны хичээл сонголтыг төлбөрөөс хамааралгүйгээр хийх эрх нэмэх')}</h5>
+                </ModalHeader>
+                <ModalBody className='flex-grow-1'>
+                    <Row tag={Form} className='gy-1' onSubmit={handleSubmit(onSubmit)}>
+                        <Col sm={12}>
+                            <Label className='form-label' for='student'>
+                                {t('Оюутан')}
+                            </Label>
+                            <Controller
+                                control={control}
+                                defaultValue=''
+                                name="student"
+                                render={({ field: { onChange } }) => {
+                                    return (
+                                        <Select
+                                            name="student"
+                                            id="student"
+                                            classNamePrefix='select'
+                                            isClearable
+                                            className={classnames('react-select', {'is-invalid': errors.student})}
+                                            isLoading={isLoading}
+                                            placeholder={t('-- Сонгоно уу --')}
+                                            options={select_student || []}
+                                            noOptionsMessage={() => t('Хоосон байна')}
+                                            onChange={(val) => {
+                                                onChange(val?.id || '')
+                                                setStudentId(val?.id || '')
+                                            }}
+                                            styles={ReactSelectStyles}
+                                            getOptionValue={(option) => option.id}
+                                            getOptionLabel={(option) => option.full_name}
+                                        />
+                                    )
+                                }}
+                            />
+                            {errors.student && <FormFeedback className='d-block'>{t(errors.student.message)}</FormFeedback>}
+                        </Col>
+                        <Col xl={12}>
+                            <Label className='form-label' for='description'>
+                                {t('Тайлбар')}
+                            </Label>
+                                <Controller
+                                    defaultValue=''
+                                    control={control}
+                                    name='description'
+                                    render={({ field }) => (
+                                        <Input
+                                            {...field}
+                                            type='textarea'
+                                            name='description'
+                                            id='description'
+                                            bsSize='sm'
+                                            invalid={errors.description && true}
+                                        />
+                                    )}
+                                />
+                            {errors.description && <FormFeedback className='d-block'>{t(errors.description.message)}</FormFeedback>}
+                        </Col>
+                        <Col xl={12}>
+                            <Label className='form-label' for='start_date'>
+                                {t('Эхлэх хугацаа')}
+                            </Label>
+                            <Controller
+                                defaultValue={new Date()}
+                                control={control}
+                                name='start_date'
+                                className="form-control"
+                                render={({}) => {
+                                    return (
+                                        <Flatpickr
+                                            id='start_date'
+                                            className='form-control'
+                                            onChange={dates => {
+                                               handleStartPicker(dates[0]);
+                                                }}
+                                            value={startPicker}
+                                            style={{height: "30px"}}
+                                            options={{
+                                                enableTime: true,
+                                                dateFormat: 'Y-m-d H:i',
+                                                utc: true,
+                                                time_24hr: true,
+                                                // locale: Mongolian
+                                            }}
+                                        />
+                                    )
+                                }}
+                            />
+                                {errors.start_date && <FormFeedback className='d-block'>{t(errors.start_date.message)}</FormFeedback>}
+                        </Col>
+
+                        <Col>
+                            <Label className='form-label' for='end'>
+                                Дуусах хугацаа
+                            </Label>
+                            <Controller
+                                defaultValue=''
+                                control={control}
+                                value={endPicker}
+                                className={classnames({ 'is-invalid': errors.end_date })}
+
+                                name='end_date'
+                                render={() => (
+                                <Flatpickr
+                                    id='end_date'
+                                    name='end_date'
+                                    className={`form-control`}
+                                    onChange={date => handleEndDate(date[0])}
+                                    value={endPicker}
+                                    style={{ height: "30px" }}
+                                    options={{
+                                        enableTime: true,
+                                        dateFormat: 'Y-m-d H:i',
+                                        // minDate: new Date(startPicker),
+                                        time_24hr: true,
+                                        // locale: Mongolian
+                                    }}
+                                />
+                                )}
+                                />
+                                {errors.end_date && <FormFeedback className='d-block'>{t(errors.end_date.message)}</FormFeedback>}
+                        </Col>
+                        <Col md={12} className="mt-2">
+                            <Button className="me-2" color="primary" type="submit" disabled={postLoading}>
+                                {postLoading &&<Spinner size='sm' className='me-1'/>}
+                                {t('Хадгалах')}
+                            </Button>
+                            <Button color="secondary" outline type="reset" onClick={handleAddModal}>
+                                {t('Буцах')}
+                            </Button>
+                        </Col>
+                    </Row>
+                </ModalBody>
+            </Modal>
+        </Fragment>
+    )
+}
+export default AddModal
+
