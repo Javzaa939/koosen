@@ -1264,7 +1264,7 @@ export const printTableBody = `
 
 export const printTableHtml = (columnNames, datas, printTitle='') =>
 {
-	const mywindow = window.open("http://sis.utilitysolution.mn/static/media/dxis_logo.8f988aea.png", "", "height=600,width=800")
+	const mywindow = window.open("http://sis.mnun.edu.mn/static/media/dxis_logo.png", "", "height=600,width=800")
 
 	mywindow.document.write(`<html><head><title>${printTitle}</title>`)
 
