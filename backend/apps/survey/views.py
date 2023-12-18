@@ -610,7 +610,7 @@ class SurveyAPIView(
 
         worker = Employee.objects.filter(user=user).first()
 
-        # МҮИС хэмжээнд авах судалгаа
+        # ДХИС хэмжээнд авах судалгаа
         is_all = datas.get('is_all')
 
         # Хамрах хүрээний сонгогдсон ids

@@ -1,5 +1,0 @@
-.rdt_TableCell > div {
-    white-space: nowrap!important;
-    overflow: hidden!important;
-    text-overflow: ellipsis!important;
-}

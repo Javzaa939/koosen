@@ -42,7 +42,7 @@ const Login = () => {
 
 	const illustration = skin === "dark" ? "login-v2-dark.svg" : "login-v2.svg",
 	source = require(`@src/assets/images/pages/${illustration}`).default
-	const logo = require("@src/assets/images/logo/logo-muis.png").default
+	const logo = require("@src/assets/images/logo/dxis_logo.png").default
 
 	const userApi = useApi().user
 	const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})

@@ -1,6 +1,6 @@
 // ** Logo
 import whitelogo from "@assets/images/logo/logo-white-compressed.png";
-import logo from "@assets/images/logo/logo-muis.png";
+import logo from "@assets/images/logo/dxis_logo.png";
 import './smstyle.scss'
 
 const SmSpinn = () => {

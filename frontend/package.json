@@ -1,6 +1,6 @@
 {
-  "name": "vuexy-react-admin-dashboard",
-  "version": "8.0.0",
+  "name": "dxis",
+  "version": "0.1.0",
   "private": true,
   "dependencies": {
     "@casl/ability": "^5.4.3",

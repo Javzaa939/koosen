@@ -49,7 +49,7 @@ export default function Print()
                 <div className='d-flex justify-content-end align-items-center '>
                     <div className="d-flex flex-column text-center me-4 state-print w-25">
                         <span className='text-dark ms-1 mt-1' style={{ fontWeight: 800}}>
-                            {`МҮИС-ийн захирлын ${now_year} оны ${month} сарын ${day}-н өдрийн ${dates.statement} дугаар тушаалын хавсралт № 1`}
+                            {`ДХИС-ийн захирлын ${now_year} оны ${month} сарын ${day}-н өдрийн ${dates.statement} дугаар тушаалын хавсралт № 1`}
                         </span>
                     </div>
                 </div>

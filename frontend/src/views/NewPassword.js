@@ -50,7 +50,7 @@ const NewPassword = () => {
     const illustration =
         skin === "dark" ? "forgot-password-v2-dark.svg" : "forgot-password-v2.svg",
         source = require(`@src/assets/images/pages/${illustration}`).default
-        const logo = require("@src/assets/images/logo/logo-muis.png").default
+        const logo = require("@src/assets/images/logo/dxis_logo.png").default
 
         async function onSubmit(datas) {
         const cdata = {

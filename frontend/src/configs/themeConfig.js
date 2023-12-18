@@ -2,8 +2,8 @@
 //Template config options
 const themeConfig = {
   app: {
-    appName: "МҮИС",
-    appLogoImage: require("@src/assets/images/logo/logo-muis.png").default
+    appName: "ДХИС",
+    appLogoImage: require("@src/assets/images/logo/dxis_logo.png").default
   },
   layout: {
     isRTL: false,

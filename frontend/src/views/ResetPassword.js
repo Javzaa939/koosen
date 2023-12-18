@@ -31,7 +31,7 @@ const ForgotPassword = () => {
 
   const { control, formState: { errors }} = useForm()
 
-  const logo = require("@src/assets/images/logo/logo-muis.png").default
+  const logo = require("@src/assets/images/logo/dxis_logo.png").default
 
   const illustration =
     skin === "dark" ? "forgot-password-v2-dark.svg" : "forgot-password-v2.svg",

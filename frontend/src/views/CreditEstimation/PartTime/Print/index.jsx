@@ -4,7 +4,7 @@ import { Row } from 'reactstrap'
 import { useLocation } from 'react-router-dom';
 
 // ** Styles
-import logo from "@src/assets/images/logo/logo-muis.png"
+import logo from "@src/assets/images/logo/dxis_logo.png"
 import '@styles/base/pages/app-invoice-print.scss'
 
 export default function Print()

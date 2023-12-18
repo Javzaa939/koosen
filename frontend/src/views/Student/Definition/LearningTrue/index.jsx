@@ -108,13 +108,13 @@ export default function LearningTrue()
                         {
                             datas?.student?.status?.code == 1
                             ?
-                                `${datas?.student?.code} кодтой ${datas?.student?.last_name} овогтой ${datas?.student?.first_name} нь МҮИС-д ${datas?.student?.group?.degree?.degree_name} зэргийн ${datas?.student?.group?.profession?.name} мэргэжлээр ${datas?.student?.group?.level}-р курст суралцдаг нь үнэн болохыг тодорхойлов.`
+                                `${datas?.student?.code} кодтой ${datas?.student?.last_name} овогтой ${datas?.student?.first_name} нь ДХИС-д ${datas?.student?.group?.degree?.degree_name} зэргийн ${datas?.student?.group?.profession?.name} мэргэжлээр ${datas?.student?.group?.level}-р курст суралцдаг нь үнэн болохыг тодорхойлов.`
                             :
                                 datas?.student?.status?.code == 5
                                 ?
-                                    `${datas?.student?.code} кодтой ${datas?.student?.last_name} овогтой ${datas?.student?.first_name} нь МҮИС-д ${datas?.student.group?.degree?.degree_name}-н зэргийн ${datas?.student?.group?.profession?.name} мэргэжлээр ${datas?.student?.group?.join_year?.substring(0, 4)}-${datas?.graduation_work?.substring(datas?.graduation_work?.length - 4)} оны хооронд суралцаж ${datas?.graduation_work?.diplom_num} дипломын дугаартай төгссөн нь үнэн болохыг тодорхойлов.`
+                                    `${datas?.student?.code} кодтой ${datas?.student?.last_name} овогтой ${datas?.student?.first_name} нь ДХИС-д ${datas?.student.group?.degree?.degree_name}-н зэргийн ${datas?.student?.group?.profession?.name} мэргэжлээр ${datas?.student?.group?.join_year?.substring(0, 4)}-${datas?.graduation_work?.substring(datas?.graduation_work?.length - 4)} оны хооронд суралцаж ${datas?.graduation_work?.diplom_num} дипломын дугаартай төгссөн нь үнэн болохыг тодорхойлов.`
                                 :
-                                    `${datas?.student?.code} кодтой ${datas?.student?.last_name} овогтой ${datas?.student?.first_name} нь МҮИС-ээс ${datas?.student?.status?.name?.toLowerCase()} нь үнэн болохыг тодорхойлов.`
+                                    `${datas?.student?.code} кодтой ${datas?.student?.last_name} овогтой ${datas?.student?.first_name} нь ДХИС-ээс ${datas?.student?.status?.name?.toLowerCase()} нь үнэн болохыг тодорхойлов.`
                         }
                         </div>
 

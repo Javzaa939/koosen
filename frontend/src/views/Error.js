@@ -10,7 +10,7 @@ import { useSkin } from "@hooks/useSkin"
 // ** Styles
 import "@styles/base/pages/page-misc.scss"
 
-import logo from "@src/assets/images/logo/logo-muis.png"
+import logo from "@src/assets/images/logo/dxis_logo.png"
 
 const Error = () => {
     // ** Hooks

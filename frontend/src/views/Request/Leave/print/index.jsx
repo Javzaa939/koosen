@@ -9,7 +9,7 @@ import useApi from "@hooks/useApi"
 import useLoader from '@hooks/useLoader';
 
 // ** Styles
-import logo from "@src/assets/images/logo/logo-muis.png"
+import logo from "@src/assets/images/logo/dxis_logo.png"
 import '@styles/base/pages/app-invoice-print.scss'
 
 import { zeroFill } from "@utils"

@@ -1,9 +1,0 @@
-.custom-80{
-	width: 80% !important;
-}
-
-@media (max-width: 992px) {
-	.custom-80{
-		width: 100% !important;
-	}
-}
