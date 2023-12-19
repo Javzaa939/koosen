@@ -35,7 +35,7 @@ const GPA = () => {
 
     const [sortField, setSort] = useState('')
 
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
+    const { Loader, isLoading, fetchData } = useLoader({})
 
     const [currentPage, setCurrentPage] = useState(1)
 

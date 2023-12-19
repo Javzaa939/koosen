@@ -39,8 +39,8 @@ const Student  = ({setMainData}) => {
     const { school_id } = useContext(SchoolContext)
 
     //Loader
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
+    const { Loader, isLoading, fetchData } = useLoader({})
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({})
 
     //Translate
     const { t } = useTranslation()

@@ -33,13 +33,13 @@ const Schedule = () => {
 	const default_page = [ 10, 15, 50, 75, 100, 'Бүгд' ]
 
     // Loader
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
+    const { Loader, isLoading, fetchData } = useLoader({})
 
    	// Хуудаслалтын анхны утга
 	const [currentPage, setCurrentPage] = useState(1)
 
 	// Нэг хуудсанд харуулах нийт датаны тоо
-	const [rowsPerPage, setRowsPerPage] = useState('Бүгд')
+	const [rowsPerPage, setRowsPerPage] = useState(10)
 
     // Нийт датаны тоо
     const [total_count, setTotalCount] = useState(1)

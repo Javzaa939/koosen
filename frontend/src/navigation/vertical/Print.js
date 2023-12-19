@@ -20,12 +20,12 @@ export default [
                 icon: <Circle size={8} />,
                 navLink: "print/schedule/"
             },
-            {
-                id: 'print4',
-                title: 'Дүнгийн жагсаалт',
-                icon: <Circle size={8} />,
-                navLink: "print/list/"
-            },
+            // {
+            //     id: 'print4',
+            //     title: 'Дүнгийн жагсаалт',
+            //     icon: <Circle size={8} />,
+            //     navLink: "print/list/"
+            // },
             {
                 id: 'print5',
                 title: 'Голч дүн',

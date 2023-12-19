@@ -31,6 +31,8 @@ class CustomPagination(pagination.PageNumberPagination):
         else:
             limit = int(limit)
 
+        print(count)
+        print(limit)
         check_page = int(count / limit)
         float_page = count % limit
 

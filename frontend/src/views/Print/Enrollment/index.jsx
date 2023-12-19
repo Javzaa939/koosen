@@ -35,7 +35,7 @@ const Enrollment = () => {
     const [sortField, setSort] = useState('')
 
     const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({})
 
     const [datas, setDatas] = useState([])
 

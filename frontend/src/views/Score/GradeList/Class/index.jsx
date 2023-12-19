@@ -88,8 +88,8 @@ const Class = ({setMainData, setChosenGroup, setFileName}) => {
     const default_page = [10, 15, 50, 75, 100]
 
     // Loader
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
+    const { Loader, isLoading, fetchData } = useLoader({})
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({})
 
     /*Жагсаалт дата авах функц */
     async function getDatas() {

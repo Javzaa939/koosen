@@ -40,7 +40,7 @@ const Graduation = () => {
 
     const { control, setValue, formState: { errors } } = useForm({});
 	const default_page = [10, 15, 50, 75, 100]
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
+    const { Loader, isLoading, fetchData } = useLoader({})
     const [select_value, setSelectValue] = useState(values);
 
     const [departmentOption, setDepartmentOption] = useState([])

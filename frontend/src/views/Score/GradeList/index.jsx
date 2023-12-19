@@ -51,7 +51,7 @@ const GradeList = () => {
     const [showModal, setShowModal] = useState(false)
 
     const [active, setActive] = useState(1)
-    const { Loader, isLoading, fetchData } = useLoader({isSmall: true})
+    const { Loader, isLoading, fetchData } = useLoader({})
 
     const scoreApi = useApi().score.register
 
