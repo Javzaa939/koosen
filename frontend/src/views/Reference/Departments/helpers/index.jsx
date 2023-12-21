@@ -13,21 +13,21 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal) 
 			center: true
 		},
 		{
-			name: `${t('Хөтөлбөрийн багийн нэр')}`,
+			name: `${t('Тэнхимийн нэр')}`,
 			selector: (row) => <span title={row?.name}>{row?.name}</span>,
             sortable: true,
 			width: "250px",
 			center: true
 		},
 		{
-			name: `${t('Салбар сургууль')}`,
+			name: `${t('Бүрэлдэхүүн сургууль')}`,
 			selector: (row) => <span title={row?.school}>{row?.school}</span>,
             sortable: true,
 			width: "250px",
 			center: true
 		},
 		{
-			name: `${t('Багийн ахлагч')}`,
+			name: `${t('Тэнхимийн эрхлэгч')}`,
 			selector: (row) => row?.leaders,
             sortable: true,
 			minWidth: "120px",
@@ -53,7 +53,7 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal) 
 			center: true
 		},
 		{
-            name: `${t('үйлдэл')}`,
+            name: `${t('Үйлдэл')}`,
 
             selector:  (row) => (
                 <div className="text-center" style={{ width: "auto" }}>

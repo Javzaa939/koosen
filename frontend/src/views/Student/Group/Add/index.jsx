@@ -298,7 +298,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                         </Col>
                         <Col md={12}>
                             <Label className="form-label" for="name">
-                                {t('Ангийн нэр')}
+                                {t('Дамжааны нэр')}
                             </Label>
                             <Controller
                                 defaultValue=''
@@ -309,7 +309,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                     <Input
                                         id ="name"
                                         bsSize="sm"
-                                        placeholder={t("Ангийн нэр")}
+                                        placeholder={t("Дамжааны нэр")}
                                         {...field}
                                         type="text"
                                         invalid={errors.name && true}

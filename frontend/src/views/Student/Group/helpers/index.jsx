@@ -33,7 +33,7 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 		},
 		{
 			header: 'name',
-			name: t("Ангийн нэр"),
+			name: t("Дамжааны нэр"),
 			cell: (row) => (row?.name),
 			minWidth: "200px",
 			sortable: true,

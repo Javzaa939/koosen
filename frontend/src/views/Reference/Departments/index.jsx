@@ -99,7 +99,7 @@ const Departments = () => {
 			{isLoading && Loader}
 			<Card>
 				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
-					<CardTitle tag="h4">{t('Хөтөлбөрийн баг')}</CardTitle>
+					<CardTitle tag="h4">{t('Тэнхим')}</CardTitle>
 					<div className='d-flex flex-wrap mt-md-0 mt-1'>
 					</div>
 				</CardHeader>

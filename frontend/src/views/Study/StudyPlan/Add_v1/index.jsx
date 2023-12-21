@@ -147,7 +147,7 @@ const StudyPlanAdd = ({ open, handleModal, mergejil_id }) => {
                         }
                         <div className='added-cards'>
                             <div className={classnames('cardMaster rounded border p-1')} role="button" id="toggler3" onClick={() => setIsProfessionLesson(!is_profession_lesson)}>
-                                { degree === 1 ? 3 : 2}{'. ' + 'Мэргэшүүлэх хичээл'}
+                                { degree === 1 ? 3 : 2}{'. ' + 'Мэргэжлийн хичээл'}
                                 {datas?.professional_lesson && <a className='ms-1 fw-bolder'>({datas?.professional_lesson})</a>}
                             </div>
                         </div>

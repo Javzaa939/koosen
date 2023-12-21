@@ -48,8 +48,8 @@ const Teacher = () => {
     const [total_count, setTotalCount] = useState(1)
 
 	// Loader
-	const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true});
-	const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true});
+	const { Loader, isLoading, fetchData } = useLoader({});
+	const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({});
 
 	// Api
 	const teacherApi = useApi().hrms.teacher

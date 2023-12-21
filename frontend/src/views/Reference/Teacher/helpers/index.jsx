@@ -49,14 +49,14 @@ export function getColumns (currentPage, rowsPerPage, datas) {
 			center: true,
 		},
         {
-			name: `${t("Хөтөлбөрийн баг")}`,
+			name: `${t("Тэнхим")}`,
 			selector: (row) => row?.salbar?.name,
 			minWidth: "30px",
 			center: true,
 			wrap: true,
 		},
 		{
-			name: `${t("Сургууль")}`,
+			name: `${t("Бүрэлдэхүүн сургууль")}`,
 			selector: (row) => row?.sub_org?.name,
 			minWidth: "30px",
 			center: true,

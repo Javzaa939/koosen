@@ -12,13 +12,13 @@ export default function SelfGroup({ datas })
 
             <div className='added-cards border'>
                 <div className='cardMaster rounded p-1 fw-bolder underline text-decoration-underline' role="button" id="groups">
-                    Ангийн мэдээлэл
+                Дамжааны мэдээлэл
                 </div>
                 <UncontrolledCollapse toggler="#groups" className="m-2">
                     <Table bordered responsive className='table'>
                         <thead>
                             <tr>
-                                <th>Ангийн нэр</th>
+                                <th>Дамжааны нэр</th>
                                 <th>Мэргэжлийн код</th>
                                 <th>Мэргэжлийн нэр</th>
                                 <th>Суралцах хэлбэр</th>

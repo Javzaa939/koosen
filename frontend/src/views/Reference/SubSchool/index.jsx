@@ -34,8 +34,8 @@ const SubSchool = () => {
     const [total_count, setTotalCount] = useState(1)
 
 	// Loader
-	const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true});
-	const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
+	const { Loader, isLoading, fetchData } = useLoader({});
+	const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({})
 
 	// Modal
 	const [modal, setModal] = useState(false);
@@ -110,7 +110,7 @@ const SubSchool = () => {
 			{isLoading && Loader}
 			<Card>
 				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
-					<CardTitle tag='h4'>{t('Салбар сургууль')}</CardTitle>
+					<CardTitle tag='h4'>{t('Бүрэлдэхүүн сургууль')}</CardTitle>
                     <div className='d-flex flex-wrap mt-md-0 mt-1'>
                     </div>
                 </CardHeader>

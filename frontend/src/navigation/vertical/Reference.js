@@ -10,13 +10,13 @@ export default [
         children: [
             {
                 id: 'reference1',
-                title: 'Сургууль',
+                title: 'Бүрэлдэхүүн сургууль',
                 icon: <Circle size={8} />,
                 navLink: "reference/school/"
             },
             {
                 id: 'reference2',
-                title: 'Хөтөлбөрийн баг',
+                title: 'Тэнхим',
                 icon: <Circle size={8} />,
                 navLink: "reference/departments/"
             },

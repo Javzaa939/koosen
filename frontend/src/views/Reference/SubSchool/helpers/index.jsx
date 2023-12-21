@@ -27,7 +27,6 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
             sortable: true,
 			width: "250px",
 			wrap: true,
-			center: true
 		},
 		{
 			name: `${t('Захирал')}`,

@@ -370,7 +370,7 @@ const EditModal = ({ open, handleModal, group_id, refreshDatas }) => {
                         </Col>
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="name">
-                                {t("Ангийн нэр")}
+                                {t("Дамжааны нэр")}
                             </Label>
                             <Controller
                                 defaultValue=''
@@ -381,7 +381,7 @@ const EditModal = ({ open, handleModal, group_id, refreshDatas }) => {
                                     <Input
                                         id ="name"
                                         bsSize="sm"
-                                        placeholder={t('Ангийн нэр')}
+                                        placeholder={t('Дамжааны нэр')}
                                         {...field}
                                         type="text"
                                         readOnly={is_disabled}
