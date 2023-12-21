@@ -377,6 +377,7 @@ function useApi(isDisplay=false) {
 				get: () => instance.get(`/core/subschool/?`),
 				getOne: (pk) => instance.get(`/core/subschool/${pk}/`),
 				put: (data, pk) => instance.put(`/core/subschool/${pk}/`, data),
+				post: (data) => instance.get(`/core/subschool/`, data),
 			},
 			/** Хөтөлбөрийн баг */
 			department: {

@@ -1,25 +1,29 @@
 // ** React Imports
-import { Fragment, useState, useEffect} from 'react'
+import { Fragment, useState, useEffect, useContext} from 'react'
 
-import { Row, Col, Card, Input, CardTitle, CardHeader, Spinner } from 'reactstrap'
+import { Row, Col, Card, Input, CardTitle, CardHeader, Spinner, Button} from 'reactstrap'
 
-import { ChevronDown } from 'react-feather'
-
+import { ChevronDown, Plus } from 'react-feather'
 import DataTable from 'react-data-table-component'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 
 import { getPagination } from '@utils';
+import AuthContext from '@context/AuthContext'
+import SchoolContext from '@context/SchoolContext'
 
 import { getColumns } from './helpers';
 import UpdateModal from "./Edit"
+import AddModal from "./Add"
+
 
 import { useTranslation } from "react-i18next";
 
 const SubSchool = () => {
 
-	// const { user } = useContext(AuthContext)
+	const { user } = useContext(AuthContext)
+	const { school_id } = useContext(SchoolContext)
 
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10)
@@ -38,17 +42,17 @@ const SubSchool = () => {
 	const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({})
 
 	// Modal
-	const [modal, setModal] = useState(false);
 	const [edit_id, setEditId] = useState('')
 	const [detailModalData, setDetailModalData ] = useState({})
 	const [update_modal, setUpdateModal] = useState(false)
+	const [add_modal, setAddModal]= useState(false)
 
 	// Api
 	const schoolApi = useApi().hrms.subschool
 
 	/* Модал setState функц */
 	const handleModal = () => {
-		setModal(!modal)
+		setAddModal(!add_modal)
 	}
 
 
@@ -107,11 +111,20 @@ const SubSchool = () => {
 
 	return (
 		<Fragment>
-			{isLoading && Loader}
 			<Card>
+			{isLoading && Loader}
 				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
 					<CardTitle tag='h4'>{t('Бүрэлдэхүүн сургууль')}</CardTitle>
                     <div className='d-flex flex-wrap mt-md-0 mt-1'>
+						<Button
+                            color='primary'
+                            // disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-subschools-create') && school_id) ? false : true}
+                            disabled={Object.keys(user).length > 0  ? false : true}
+
+                            onClick={() => handleModal()}>
+                            <Plus size={15} />
+                            <span className='align-middle ms-50'>{t('Нэмэх')}</span>
+                        </Button>
                     </div>
                 </CardHeader>
                 <Row className="justify-content-between mx-0">
@@ -155,6 +168,7 @@ const SubSchool = () => {
 					</div>
 			</Card>
 			{ update_modal && <UpdateModal editId={edit_id} open={update_modal} handleEdit={handleUpdateModal} refreshDatas={getDatas} datas={detailModalData}/> }
+			{ add_modal && <AddModal open={add_modal} handleModal={handleModal} refreshDatas={getDatas}/>}
         </Fragment>
     )
 }

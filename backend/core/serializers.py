@@ -145,6 +145,14 @@ class SchoolsRegisterSerailizer(serializers.ModelSerializer):
         model = Schools
         fields = "__all__"
 
+# дэд байгууллага шинээр үүсгэх
+class SchoolsRegisterPostSerailizer(serializers.ModelSerializer):
+
+    class Meta:
+        model = SubSchools
+        fields = [ "name", "name_eng","name_uig", "zahiral_name", "zahiral_name_uig","zahiral_name_eng", "tsol_name", "tsol_name_eng", "tsol_name_uig"]
+
+
 # дэд байгууллага
 class SubschoolSerailizer(serializers.ModelSerializer):
 
