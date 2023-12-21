@@ -79,7 +79,7 @@ function ExamReport() {
                                     <div></div>
                                 <div className="d-flex flex-column text-center fw-bolder">
                                     <span className='mt-1 fs-3 fw-bolder' style={{ color: '#000' }}>
-                                        {parentschoolName} {/* Дотоод Хэргийн Их Сургууль */}
+                                        {parentschoolName}
                                     </span>
                                     {/* <span style={{ marginTop: '6px' }}>{datas?.school?.name_eng.toUpperCase()}</span> */}
                                 </div>
@@ -91,7 +91,7 @@ function ExamReport() {
                                     <tbody className="w-100">
                                         <tr className="w-100">
                                             <td className="first-cell">
-                                                Мэргэжил: {vdata.name}
+                                                Дамжаа: {vdata.name}
                                             </td>
                                             <td>
                                                 Жил: {datas?.lesson_year}
