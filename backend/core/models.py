@@ -195,7 +195,7 @@ class Departments(models.Model):
         Тухайн дэд байгууллагын салбар
     """
     class Meta:
-        db_table = 'core_salbars'
+        db_table = 'core_departments'
         managed = False
 
     org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага")
