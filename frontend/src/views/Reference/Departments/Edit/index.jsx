@@ -90,7 +90,7 @@ const UpdateModal = ({ open, editId, refreshDatas, handleEdit}) => {
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
                         <Col  lg={6} xs={12}>
                             <Label className="form-label" for="lead">
-                                {t('Хөтөлбөрийн багийн ахлагч')}
+                                {t('Тэнхимийн ахлагч')}
                             </Label>
                             <Controller
                                 control={control}

@@ -41,7 +41,6 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
     const CloseBtn = (
         <X className="cursor-pointer" size={15} onClick={handleModal} />
     )
-
     const { user } = useContext(AuthContext)
     const { school_id } = useContext(SchoolContext)
 
@@ -53,23 +52,20 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
     // states
     const [is_loading, setLoader] = useState(false)
     const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
+    const [is_school, setSchoolChecked] = useState(false)
+
 
     // Loader
 	const { Loader, isLoading, fetchData } = useLoader({});
 
     // Api
-    const lessonStandartApi = useApi().study.lessonStandart
-    const lessonCategoryApi = useApi().settings.lessonCategory
-    const departmentApi = useApi().hrms.department
     const subSchoolsApi = useApi().hrms.subschool
 
     async function onSubmit(cdata) {
         cdata['created_user'] = user.id
         cdata['updated_user'] = user.id
-        // console.log("school", school_id);
-        // cdata['org'] = school_id
+        cdata['org'] = school_id
         cdata = convertDefaultValue(cdata)
-        console.log("cdata", cdata);
 
         const { success, error } = await postFetch(subSchoolsApi.post(cdata))
         if(success) {
@@ -202,8 +198,9 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                                         />
                                     )}
                                 />
+                                {errors.zahiral_name && <FormFeedback className='d-block'>{t(errors.zahiral_name.message)}</FormFeedback>}
                             </Col>
-                            <Col md={12}>
+                            <Col xs={6} md={12}>
                                 <Label className="form-label" for="zahiral_name_eng">
                                     {t('Захиралын англи нэр')}
                                 </Label>
@@ -223,8 +220,9 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                                         />
                                     )}
                                 />
+                                {errors.zahiral_name_eng && <FormFeedback className='d-block'>{t(errors.zahiral_name_eng.message)}</FormFeedback>}
                             </Col>
-                            <Col md={12}>
+                            <Col xs={6} md={12}>
                             <Label className="form-label" for="zahiral_name_uig">
                                 {t('Захиралын уйгаржин нэр')}
                             </Label>
@@ -247,7 +245,7 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                             />
                             {errors.zahiral_name_uig && <FormFeedback className='d-block'>{t(errors.zahiral_name_uig.message)}</FormFeedback>}
                         </Col>
-                        <Col md={12}>
+                        <Col xs={6} md={12}>
                                 <Label className="form-label" for="tsol_name">
                                     {t('Цол')}
                                 </Label>
@@ -267,8 +265,9 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                                         />
                                     )}
                                 />
+                                {errors.tsol_name && <FormFeedback className='d-block'>{t(errors.tsol_name.message)}</FormFeedback>}
                             </Col>
-                            <Col md={12}>
+                            <Col xs={6} md={12}>
                                 <Label className="form-label" for="tsol_name_eng">
                                     {t('Цол англи нэр')}
                                 </Label>
@@ -288,8 +287,9 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                                         />
                                     )}
                                 />
+                                {errors.tsol_name_eng && <FormFeedback className='d-block'>{t(errors.tsol_name_eng.message)}</FormFeedback>}
                             </Col>
-                            <Col md={12}>
+                            <Col xs={6} md={12}>
                             <Label className="form-label" for="tsol_name_uig">
                                 {t('Цол уйгаржин нэр')}
                             </Label>
@@ -312,9 +312,103 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                             />
                             {errors.tsol_name_uig && <FormFeedback className='d-block'>{t(errors.tsol_name_uig.message)}</FormFeedback>}
                         </Col>
+                        <Col xs={6} md={12}>
+                                <Label className="form-label" for="erdem_tsol_name">
+                                    {t('Эрдмийн цол')}
+                                </Label>
+                                <Controller
+                                    defaultValue=''
+                                    control={control}
+                                    id="erdem_tsol_name"
+                                    name="erdem_tsol_name"
+                                    render={({ field }) => (
+                                        <Input
+                                            id ="erdem_tsol_name"
+                                            bsSize="sm"
+                                            placeholder={t('цол')}
+                                            {...field}
+                                            type="text"
+                                            invalid={errors.erdem_tsol_name && true}
+                                        />
+                                    )}
+                                />
+                                {errors.erdem_tsol_name && <FormFeedback className='d-block'>{t(errors.erdem_tsol_name.message)}</FormFeedback>}
+                            </Col>
+                            <Col xs={6} md={12}>
+                                <Label className="form-label" for="erdem_tsol_name_eng">
+                                    {t('Эрдмийн цол англи нэр')}
+                                </Label>
+                                <Controller
+                                    defaultValue=''
+                                    control={control}
+                                    id="tsol_name_eng"
+                                    name="tsol_name_eng"
+                                    render={({ field }) => (
+                                        <Input
+                                            id ="erdem_tsol_name_eng"
+                                            bsSize="sm"
+                                            placeholder={t('цол англи нэр')}
+                                            {...field}
+                                            type="text"
+                                            invalid={errors.erdem_tsol_name_eng && true}
+                                        />
+                                    )}
+                                />
+                                {errors.erdem_tsol_name_eng && <FormFeedback className='d-block'>{t(errors.erdem_tsol_name_eng.message)}</FormFeedback>}
+                            </Col>
+                            <Col xs={6} md={12}>
+                            <Label className="form-label" for="erdem_tsol_name_uig">
+                                {t('Эрдмийн цол уйгаржин нэр')}
+                            </Label>
+                            <Controller
+                                defaultValue=''
+                                control={control}
+                                id="erdem_tsol_name_uig"
+                                name="erdem_tsol_name_uig"
+                                render={({ field }) => (
+                                    <Input
+                                        id ="erdem_tsol_name_uig"
+                                        bsSize="sm"
+                                        placeholder={t('цол уйгаржин нэр')}
+                                        {...field}
+                                        type="text"
+                                        style={{ fontFamily: 'CMs Urga', fontSize: '15px'}}
+                                        invalid={errors.erdem_tsol_name_uig && true}
+                                    />
+                                )}
+                            />
+                            {errors.erdem_tsol_name_uig && <FormFeedback className='d-block'>{t(errors.erdem_tsol_name_uig.message)}</FormFeedback>}
+                        </Col>
+                        <Col xs={6} md={12}>
+                            <Controller
+                                control={control}
+                                id="is_school"
+                                name="is_school"
+                                defaultValue={is_school}
+                                render={({ field: { value, onChange, checked } }) => (
+                                    <Input
+                                        className='me-50'
+                                        // {...field}
+                                        id="is_school"
+                                        type="checkbox"
+                                        onChange={(e) =>
+                                            {
+                                                onChange(e.target.checked)
+                                                setSchoolChecked(e.target.checked)
+                                            }
+                                        }
+                                        checked={is_school}
+                                        value={is_school}
+                                    />
+                                )}
+                            />
+                            <Label className="form-label pe-1" for="is_school">
+								{t('Сургууль эсэх')}
+                            </Label>
+                        </Col>
                         <Col md={12}>
                             <Button className="me-2" color="primary" type="submit" disabled={postLoading}>
-                                {/* {postLoading &&<Spinner size='sm' className='me-1'/>} */}
+                                {postLoading &&<Spinner size='sm' className='me-1'/>}
                                 {t('Хадгалах')}
                             </Button>
                             <Button color="secondary" type="reset" outline  onClick={handleModal}>

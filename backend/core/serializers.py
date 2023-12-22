@@ -146,12 +146,11 @@ class SchoolsRegisterSerailizer(serializers.ModelSerializer):
         fields = "__all__"
 
 # дэд байгууллага шинээр үүсгэх
-class SchoolsRegisterPostSerailizer(serializers.ModelSerializer):
+class SubSchoolsRegisterPostSerailizer(serializers.ModelSerializer):
 
     class Meta:
         model = SubSchools
-        fields = [ "name", "name_eng","name_uig", "zahiral_name", "zahiral_name_uig","zahiral_name_eng", "tsol_name", "tsol_name_eng", "tsol_name_uig"]
-
+        fields = ["is_school", "org", "name", "name_eng","name_uig", "zahiral_name", "zahiral_name_uig","zahiral_name_eng", "tsol_name", "tsol_name_eng", "tsol_name_uig", "erdem_tsol_name","erdem_tsol_name_eng", "erdem_tsol_name_uig"]
 
 # дэд байгууллага
 class SubschoolSerailizer(serializers.ModelSerializer):
@@ -229,7 +228,12 @@ class DepartmentListSerailizer(serializers.ModelSerializer):
         model = Departments
         fields = ["id", 'name']
 
+class DepartmentPostSerailizer(serializers.ModelSerializer):
+    """ тэнхим шинээр бүртгэх """
 
+    class Meta:
+        model = Departments
+        fields = ["org", 'name', "address", "web", "social", "is_hotolboriin_bag", "leader", "sub_orgs"]
 
 # ----------------- дэд сургууль --------------------
 

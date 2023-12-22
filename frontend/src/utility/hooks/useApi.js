@@ -377,16 +377,19 @@ function useApi(isDisplay=false) {
 				get: () => instance.get(`/core/subschool/?`),
 				getOne: (pk) => instance.get(`/core/subschool/${pk}/`),
 				put: (data, pk) => instance.put(`/core/subschool/${pk}/`, data),
-				post: (data) => instance.get(`/core/subschool/`, data),
+				post: data => instance.post(`/core/subschool/`, data),
 			},
 			/** Хөтөлбөрийн баг */
 			department: {
 				get: () => instance.get(`/core/department/?school=${school_id}`),
 				getSelectSchool: (school) => instance.get(`/core/department/?school=${school}`),
-				// хөтөлбөрийн багийн ахлахын мэдээлэл
+
+				// тэнхим, хөтөлбөрийн багийн ахлахын мэдээлэл
 				getRegister: (search='') => instance.get(`/core/department/register/?school=${school_id}&search=${search}`),
 				getRegisterOne: (pk) => instance.get(`/core/department/register/${pk}/`),
 				putRegister: (data, pk) => instance.put(`/core/department/register/${pk}/`, data),
+				postRegister: data => instance.post(`/core/department/register/`, data),
+
 				leaderList: () => instance.get(`/core/leader/list/?school=${school_id}`),
 
 				getOne: (pk) => instance.get(`/core/department/${pk}/`),

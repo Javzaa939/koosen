@@ -77,7 +77,9 @@ from .serializers import SubSchoolPutRegisterSerailizer
 from .serializers import TeacherLongListSerializer
 from .serializers import LessonTeacherListSerializer
 from .serializers import TeacherListSchoolFilterSerializer
-from .serializers import SchoolsRegisterPostSerailizer
+from .serializers import SubSchoolsRegisterPostSerailizer
+from .serializers import DepartmentPostSerailizer
+
 
 
 @permission_classes([IsAuthenticated])
@@ -199,11 +201,13 @@ class DepartmentAPIView(
     mixins.UpdateModelMixin,
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
-    mixins.RetrieveModelMixin
+    mixins.RetrieveModelMixin,
 ):
     """"Салбар, тухайн дэд байгууллагын салбар """
 
-    queryset = Departments.objects
+    # queryset = Departments.objects.all().filter(is_hotolboriin_bag=True)
+    queryset = Departments.objects.all()
+
     serializer_class = DepartmentRegisterSerailizer
 
     def get_queryset(self):
@@ -225,6 +229,43 @@ class DepartmentAPIView(
 
         group_list = self.list(request).data
         return request.send_data(group_list)
+
+    def post(self, request):
+        " Салбар, Тэнхим шинээр үүсгэх "
+
+        self.serializer_class = DepartmentPostSerailizer
+        datas = request.data
+
+        serializer = self.get_serializer(data=datas)
+
+        if serializer.is_valid(raise_exception=False):
+            is_success = False
+            with transaction.atomic():
+                try:
+                    self.create(request).data
+                    is_success = True
+                except Exception:
+                    raise
+            if is_success:
+                return request.send_info("INF_001")
+
+            return request.send_error("ERR_002")
+        else:
+            error_obj = []
+            for key in serializer.errors:
+                msg = "Хоосон байна"
+
+                return_error = {
+                    "field": key,
+                    "msg": msg
+                }
+
+                error_obj.append(return_error)
+
+            if len(error_obj) > 0:
+                return request.send_error("ERR_003", error_obj)
+
+            return request.send_error("ERR_002")
 
     def put(self, request, pk=None):
         " хөтөлбөрийн багийн мэдээлэл засах "
@@ -329,11 +370,11 @@ class DepartmentTeachersListAPIView(
 
 @permission_classes([IsAuthenticated])
 class SubSchoolAPIView(
-    generics.GenericAPIView,
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
+    generics.GenericAPIView,
 ):
     """" Дэд сургууль """
 
@@ -354,56 +395,25 @@ class SubSchoolAPIView(
     def post(self, request):
         " бүрэлдэхүүн сургуулийн шинээр үүсгэх "
 
-        self.serializer_class = SchoolsRegisterPostSerailizer
+        self.serializer_class = SubSchoolsRegisterPostSerailizer
         datas = request.data
-        print("datas", datas)
 
-        org = datas.get(1)
-        name = datas.get("name")
-        name_eng = datas.get("name_eng")
-        name_uig = datas.get("name_uig")
-        zahiral_name = datas.get("zahiral_name")
-        zahiral_name_eng = datas.get("zahiral_name_eng")
-        zahiral_name_uig = datas.get("zahiral_name_uig")
-        tsol_name = datas.get("tsol_name")
-        tsol_name_eng = datas.get("tsol_name_eng")
-        tsol_name_uig = datas.get("tsol_name_uig")
-
-        # instance = self.get_object()
         serializer = self.get_serializer(data=datas)
 
-        # with transaction.atomic():
-        #     try:
-        #         self.create(request)
-        #     except Exception as e:
-        #         print(e)
-        #         return request.send_error("ERR_002", str(e))
-
-        #     return request.send_info('INF_001')
         if serializer.is_valid(raise_exception=False):
+            is_success = False
             with transaction.atomic():
                 try:
-                    # self.create(request).data
-                    qs = self.queryset.filter(org=org)
-                    if qs:
-                        qs.create(
-                            org=org,
-                            name=name,
-                            name_eng=name_eng,
-                            name_uig=name_uig,
-                            zahiral_name=zahiral_name,
-                            zahiral_name_eng=zahiral_name_eng,
-                            zahiral_name_uig=zahiral_name_uig,
-                            tsol_name=tsol_name,
-                            tsol_name_eng=tsol_name_eng,
-                            tsol_name_uig =tsol_name_uig
-                        )
+                    self.create(request).data
+                    is_success = True
                 except Exception:
                     raise
+            if is_success:
+                return request.send_info("INF_001")
 
+            return request.send_error("ERR_002")
         else:
             error_obj = []
-            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
             for key in serializer.errors:
                 msg = "Хоосон байна"
 
@@ -416,8 +426,8 @@ class SubSchoolAPIView(
 
             if len(error_obj) > 0:
                 return request.send_error("ERR_003", error_obj)
-        return request.send_info("INF_001")
 
+            return request.send_error("ERR_002")
 
     def put(self, request, pk=None):
         " Дэд сургуулийн мэдээлэл засах "
@@ -843,7 +853,7 @@ class DepLeaderAPIView(
         self.queryset = qs_teachers
 
         if school:
-            self.queryset  = self.queryset.filter(sub_org=school)
+            self.queryset = self.queryset.filter(org=school)
 
         datas = self.list(request).data
         return request.send_data(datas)
