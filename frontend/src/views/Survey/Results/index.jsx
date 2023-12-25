@@ -12,7 +12,7 @@ import {
 	Badge
 } from "reactstrap";
 
-import { Search, AlertCircle } from "react-feather";
+import { Search, AlertCircle, AlertTriangle } from "react-feather";
 import { useTranslation } from "react-i18next";
 
 
@@ -21,7 +21,7 @@ import useLoader from "@hooks/useLoader";
 
 
 import ListC from "./ListC";
-import "./style.css"
+import "./style.scss"
 
 function SurveyResults() {
 
@@ -32,7 +32,7 @@ function SurveyResults() {
 	const [searchValue, setSearchValue ] = useState('');
 
 	// Loader
-	const { isLoading, fetchData } = useLoader({});
+	const { Loader, isLoading, fetchData } = useLoader({});
 
 	const surveyAPI = useApi().survey;
 
@@ -65,30 +65,25 @@ function SurveyResults() {
 		}
 	}, [searchValue]);
 
-	function NoDataComp(){
-		if (datas.length > 0) { return(
-			<div className="cardlist ps-3 p">
-				<ListC className='flexone' datas={datas}/>
-			</div>)}
-		else { return(
-			// <div className="d-flex justify-content-center align-items-center customheight">
-			// 	<Badge color="light-secondary" className="p-1 rounded-5 text-wrap"> <AlertCircle className="mx-1"/> Өгөгдөл байхгүй байна</Badge>
-			// </div>
-			<div className="my-2 d-flex justify-content-center align-items-center">
-				<h5>{t('Өгөгдөл байхгүй байна')}</h5>
-			</div>
-		) }
-}
+// 	function NoDataComp(){
+// 		if (datas.length > 0) { return(
+// 			<div className="cardlist ps-3 p">
+// 				<ListC className='flexone' datas={datas}/>
+// 			</div>)}
+// 		else { return(
+// 			// <div className="d-flex justify-content-center align-items-center customheight">
+// 			// 	<Badge color="light-secondary" className="p-1 rounded-5 text-wrap"> <AlertCircle className="mx-1"/> Өгөгдөл байхгүй байна</Badge>
+// 			// </div>
+// 			<div className="my-2 d-flex justify-content-center align-items-center">
+// 				<h5>{t('Өгөгдөл байхгүй байна')}</h5>
+// 			</div>
+// 		) }
+// }
 
 	return (
 		<Fragment>
-			{isLoading && (
-				<div className="suspense-loader">
-					<Spinner size="bg" />
-					<span className="ms-50">{t("Түр хүлээнэ үү...")}</span>
-				</div>
-			)}
-			<Card>
+			{isLoading && Loader}
+			<Card style={{ minHeight: 300 }}>
 				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
 					<CardTitle tag="h4">{t("Судалгааны үр дүн")}</CardTitle>
 				</CardHeader>
@@ -115,8 +110,27 @@ function SurveyResults() {
 							</Button>
 						</Col>
 					</Row>
-				<NoDataComp />
+				{/* <NoDataComp /> */}
+				<div>
+					{
+						isLoading ?
+							'' :
+								datas && datas.length > 0 ?
 
+									<div className="cardlist ps-3 p">
+										<ListC className='flexone' datas={datas}/>
+									</div>
+
+								:
+
+									<div className="my-2 d-flex justify-content-center align-items-center">
+										<Badge color="light-warning" pill className="p-50"><AlertTriangle/> Өгөгдөл байхгүй байна.</Badge>
+										{/* <h5>{t('Өгөгдөл байхгүй байна')}</h5> */}
+									</div>
+
+					}
+
+				</div>
 			</Card>
 		</Fragment>
 	);

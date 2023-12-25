@@ -151,7 +151,7 @@ const Country = () => {
 						<span className='ms-50'>{t('Түр хүлээнэ үү')}...</span>
 					</div>
 				:
-					<div className="react-dataTable react-dataTable-selectable-rows">
+					<div className="react-dataTable react-dataTable-selectable-rows" id="datatableLeftTwoRightOne">
 						<DataTable
                             noHeader
                             pagination

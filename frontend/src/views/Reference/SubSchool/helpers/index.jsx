@@ -52,9 +52,15 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 		},
 		{
 			name: `${t('Хаяг')}`,
-			selector: (row) => row?.address,
+			selector: (row) => (
+				<>
+					<div id={`address${row?.id}`} className='cursor-default'>
+						{row?.address}
+					</div>
+					<UncontrolledTooltip placement='top' target={`address${row?.id}`}>{row?.address}</UncontrolledTooltip>
+				</>
+			),
 			maxWidth: "250px",
-			wrap: true,
 			center: true
 		},
 		{

@@ -233,7 +233,8 @@ const Score = () => {
 				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
 					<CardTitle tag="h4">{t('Анги бүлгийн бүртгэл')}</CardTitle>
                     <div className='d-flex flex-wrap mt-md-0 mt-1'>
-                        <Button color='primary' disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-student-group-create')  && school_id )? false : true} onClick={() => handleModal()}>
+                        <Button color='primary' disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-student-group-create'))? false : true} onClick={() => handleModal()}>
+                        {/* <Button color='primary' disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-student-group-create')  && school_id )? false : true} onClick={() => handleModal()}> */}
                             <Plus size={15} />
                             <span className='align-middle ms-50'>{t('Нэмэх')}</span>
                         </Button>

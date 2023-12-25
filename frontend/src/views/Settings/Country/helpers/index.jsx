@@ -56,7 +56,7 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 	if(Object.keys(user).length > 0 && user.permissions.includes('lms-settings-country-update')? true : false) {
 		var UpdateColumn =  {
 			name: `${t('Үйлдэл')}`,
-			minWidth: "280px",
+			minWidth: "140px",
 			center: true,
 			selector: (row) => (
 				<div className="text-center" style={{ width: "auto" }}>

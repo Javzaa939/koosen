@@ -86,8 +86,8 @@ const Graduation = () => {
 	}
 
     // Loader
-	const { isLoading, fetchData, Loader } = useLoader({ isFullScreen: false })
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
+	const { isLoading, fetchData, Loader } = useLoader({ isFullScreen: true })
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
 
     function getAllData()
     {
@@ -509,7 +509,7 @@ const Graduation = () => {
                         </Button>
                     </Col>
                 </Row>
-                <div className="react-dataTable react-dataTable-selectable-rows">
+                <div className="react-dataTable react-dataTable-selectable-rows" id="datatableLeftTwoRightOne">
                     <DataTable
                         noHeader
                         paginationServer
