@@ -52,9 +52,9 @@ from lms.models import LessonStandart
 from lms.models import StudentViz
 from lms.models import SystemSettings
 from lms.models import PaymentBeginBalance
+from lms.models import Country
 
-
-from core.models import SubSchools, AimagHot, SumDuureg, BagHoroo
+from core.models import SubSchools, SumDuureg, BagHoroo
 
 from .serializers import StudentListSerializer
 from .serializers import StudentRegisterSerializer
@@ -504,6 +504,7 @@ class StudentRegisterAPIView(
         citizen_name = data.get('citizen_name')
         # data = remove_key_from_dict(data, 'is_khur')
 
+        citizenship = Country.objects.filter(name=citizen_name).first()
 
         if citizen_name.upper() == 'МОНГОЛ':
             data['foregin_password'] = regnum
@@ -554,6 +555,11 @@ class StudentRegisterAPIView(
             student_code = generate_student_code(school_id, group)
 
         data['code'] = student_code
+        data['citizenship'] = citizenship.id if citizenship else None
+
+        if 'citizen_name' in data:
+            data = remove_key_from_dict(data, 'citizen_name')
+
         serializer = self.get_serializer(data=data)
 
         if serializer.is_valid(raise_exception=False):
@@ -563,8 +569,8 @@ class StudentRegisterAPIView(
 
             hashed_password = make_password(password)
             try:
-
-                student_data = self.create(request).data
+                self.perform_create(serializer=serializer)
+                student_data = serializer.data
                 student_id = student_data.get('id')
 
                 # student_obj = self.queryset.get(pk=student_id)
@@ -635,7 +641,6 @@ class StudentRegisterAPIView(
             return request.send_info("INF_001")
         else:
             error_obj = []
-            print('errors', serializer.errors)
 
             qs_student = self.queryset.filter(code=student_code).last()
             if qs_student:

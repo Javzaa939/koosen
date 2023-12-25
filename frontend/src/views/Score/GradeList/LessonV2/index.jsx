@@ -226,8 +226,8 @@ const LessonV2 = () => {
     const default_page = [10, 15, 50, 75, 100]
 
     // Loader
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
 
     /*Жагсаалт дата авах функц */
     async function getDatas() {

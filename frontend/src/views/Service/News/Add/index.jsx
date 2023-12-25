@@ -79,7 +79,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
     });
 
     // Loader
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
 
     // ** Hook
     const { control, handleSubmit, formState: { errors }, reset, setError } = useForm(validate(validateSchema));

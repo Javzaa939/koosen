@@ -52,7 +52,7 @@ const RoomType = () => {
 
     // Loader
     const { isLoading, fetchData } = useLoader({})
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
 
 
     // Modal

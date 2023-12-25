@@ -34,7 +34,7 @@ const Diplom = ({ datas, isOpen, profession, degree }) => {
     const [zaaval, initZaavalRow] = useState([]);
 
     // Loader
-	const { isLoading, Loader, fetchData } = useLoader({ isFullScreen: true });
+	const { isLoading, Loader, fetchData } = useLoader({ isFullScreen: false });
 
     // Api
     const planApi = useApi().study.plan

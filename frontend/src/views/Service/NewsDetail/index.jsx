@@ -17,7 +17,7 @@ export default function NewsDetail()
 {
     const { newsid } = useParams()
 
-    const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: true })
+    const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: false })
 
     /** State */
     const [ datas, setDatas ] = useState({})

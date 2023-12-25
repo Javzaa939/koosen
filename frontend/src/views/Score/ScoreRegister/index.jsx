@@ -45,7 +45,7 @@ const ScoreRegister = () => {
     // ** Hook
     const { control, setValue, formState: { errors } } = useForm({});
 
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
 
     const default_page = [10, 15, 50, 75, 100]
 

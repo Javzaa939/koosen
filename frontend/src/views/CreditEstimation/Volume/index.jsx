@@ -136,10 +136,10 @@ const CreditVolume = () => {
     const [sortField, setSort] = useState('')
 
     //option data авах үед
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
 
     //datatable-д утга авах
-	const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
+	const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
 
     // const [edit_modal, setEditModal] = useState(false)
     // const [editData, setEditData] = useState({})

@@ -13,7 +13,7 @@ function ExamReport() {
     const [datas, setDatas] = useState({})
     const { id } = useParams()
     const examApi = useApi().timetable.exam
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
 
     async function getResults() {
         const { success, data } = await fetchData(examApi.getOne(id))
@@ -79,7 +79,7 @@ function ExamReport() {
                                     <div></div>
                                 <div className="d-flex flex-column text-center fw-bolder">
                                     <span className='mt-1 fs-3 fw-bolder' style={{ color: '#000' }}>
-                                        {parentschoolName} {/* Дотоод Хэргийн Их Сургууль */}
+                                        {parentschoolName}
                                     </span>
                                     {/* <span style={{ marginTop: '6px' }}>{datas?.school?.name_eng.toUpperCase()}</span> */}
                                 </div>
@@ -91,7 +91,7 @@ function ExamReport() {
                                     <tbody className="w-100">
                                         <tr className="w-100">
                                             <td className="first-cell">
-                                                Мэргэжил: {vdata.name}
+                                                Дамжаа: {vdata.name}
                                             </td>
                                             <td>
                                                 Жил: {datas?.lesson_year}

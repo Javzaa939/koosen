@@ -71,7 +71,7 @@ function ResultDetail() {
 
     const { id } = useParams()
 
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
 
     const [mainData, setMainData] = useState()
 

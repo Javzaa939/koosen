@@ -56,7 +56,7 @@ const Survey = () => {
 	const [total_count, setTotalCount] = useState(1);
 
 	// Loader
-	const { Loader, isLoading, fetchData } = useLoader({});
+	const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: false });
 
 	// Modal
 	const [showModal, setShowModal] = useState(false);
@@ -179,9 +179,7 @@ const Survey = () => {
 
 	return (
 		<Fragment>
-			{isLoading && (
-				Loader
-			)}
+			{isLoading && Loader}
 			<Card>
 				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
 					<CardTitle tag="h4">{t("Судалгааны жагсаалт")}</CardTitle>

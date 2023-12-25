@@ -21,7 +21,7 @@ import 'chart.js/auto'
 export default function ScienceReport()
 {
     // Loader && Api's
-    const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: true })
+    const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: false })
     const scienceApi = useApi().science
 
     // States

@@ -44,7 +44,7 @@ const List = ({ type }) => {
     // Нийт датаны тоо
     const [total_count, setTotalCount] = useState(1)
 
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
 
     // Api
     const settingsApi = useApi().science.settings

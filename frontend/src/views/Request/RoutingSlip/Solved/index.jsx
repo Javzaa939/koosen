@@ -39,7 +39,7 @@ export default function SolvedModal({ isOpen, handleModal, datas, getDatas, unit
     const { control, handleSubmit, setError, clearErrors, formState: { errors }, reset } = useForm({});
 
     // Loader
-	const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: true });
+	const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: false });
 
     // Api
     const routingApi = useApi().request.routing

@@ -26,7 +26,7 @@ const ProfBasicLesson = ({ datas, isOpen, mergejil_id, degree }) => {
     const [dadlaga, initDadlagaRow] = useState([]);
 
     // Loader
-	const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: true });
+	const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: false });
 
     // Api
     const planApi = useApi().study.plan

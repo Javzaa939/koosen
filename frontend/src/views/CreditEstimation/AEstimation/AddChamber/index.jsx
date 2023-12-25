@@ -136,7 +136,7 @@ export default function AddChamber({ isOpen, handleModal, editId }) {
 
     const [ datas, setDatas ] = useState([])
 
-    const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: true })
+    const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: false })
 
     // API
     const estimateTypeApi = useApi().credit.estimation

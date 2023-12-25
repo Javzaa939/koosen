@@ -9,7 +9,7 @@ import { read, utils, writeFile } from 'xlsx';
 function PrintModal({ pmodal, modalToggler, groupId, file_name }) {
 
         // Loader
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
 
     const [datas, setDatas] = useState([])
     const [cheaders, setHeaders] = useState([])

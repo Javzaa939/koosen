@@ -86,8 +86,8 @@ const Graduation = () => {
 	}
 
     // Loader
-	const { isLoading, fetchData, Loader } = useLoader({ isFullScreen: true })
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
+	const { isLoading, fetchData, Loader } = useLoader({ isFullScreen: false })
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
 
     function getAllData()
     {
