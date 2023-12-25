@@ -24,8 +24,8 @@ const GymRegisterStudents = (props) => {
 
     const { t } = useTranslation()
 
-    const { isLoading, Loader, fetchData } = useLoader({isFullScreen: true})
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
+    const { isLoading, Loader, fetchData } = useLoader({isFullScreen: false})
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
 
     const default_page = [10, 15, 50, 75, 100]
 

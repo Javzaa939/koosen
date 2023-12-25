@@ -29,7 +29,7 @@ export function getColumns (currentPage, rowsPerPage, total_count) {
 
 	// Api
 	const scoreApi = useApi().score.register
-	const { fetchData } = useLoader({ isFullScreen: true })
+	const { fetchData } = useLoader({ isFullScreen: false })
 
 	/** Input-ээс идэвхгүй болох үеийн event */
 	const focusOut = (event) => {

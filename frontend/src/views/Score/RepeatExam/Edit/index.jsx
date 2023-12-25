@@ -54,7 +54,7 @@ const EditModal = ({ editId, open, handleEdit, refreshDatas, datas, lesson_id, s
     const [examScore, setExamScore] = useState('')
 
     // Loader
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
 
     // Api
     const studentApi = useApi().student

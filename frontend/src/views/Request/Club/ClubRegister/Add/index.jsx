@@ -29,7 +29,7 @@ const Addmodal = ({ isOpen, handleModal, refreshDatas }) => {
     // ** Hook
     const { control, handleSubmit, formState: { errors }, reset, setError } = useForm(validate(validateSchema));
 
-    const { isLoading, Loader, fetchData } = useLoader({ isFullScreen: true })
+    const { isLoading, Loader, fetchData } = useLoader({ isFullScreen: false })
 	const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
 
     const [featurefile, setFeaturedImg] = useState([])

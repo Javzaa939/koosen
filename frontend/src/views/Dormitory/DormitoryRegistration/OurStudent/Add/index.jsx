@@ -53,7 +53,7 @@ function AddModal({ toggle, isOpen, refreshDatas, handleModal }) {
         <X className="close" onClick={handleModal} type="button" />
     );
 
-	const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: true });
+	const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: false });
 
     const { cyear_name, cseason_id} = useContext(ActiveYearContext);
     const { control, handleSubmit, setError, reset, setValue, formState: { errors } } = useForm(validate(validateSchema));

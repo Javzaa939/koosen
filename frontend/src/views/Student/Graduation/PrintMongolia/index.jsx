@@ -11,7 +11,7 @@ export default function PrintMongolia()
     const data = JSON.parse(localStorage.getItem('blankDatas'))
 
     // Loader
-	const { fetchData, Loader, isLoading } = useLoader({ isFullScreen: true })
+	const { fetchData, Loader, isLoading } = useLoader({ isFullScreen: false })
 
     // API
     const signatureApi = useApi().signature

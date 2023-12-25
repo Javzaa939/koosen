@@ -21,7 +21,7 @@ export default function Solve({ isOpen, handleModal, datas, getDatas, unit })
     const { control, handleSubmit, formState: { errors }, reset } = useForm({});
 
     // Loader
-	const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: true });
+	const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: false });
 
     // Api
     const studentComplaintLeaveApi = useApi().request.leave

@@ -43,7 +43,7 @@ const RequestRegister = () => {
     const [rowsPerPage, setRowsPerPage] = useState(10)
 
     const { Loader, isLoading, fetchData } = useLoader({})
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
 
     // Api
     const RequestVolunteerApi = useApi().request.volunteer

@@ -63,7 +63,7 @@ const Yvsan  = () => {
 
     // Эрэмбэлэлт
     const [sortField, setSort] = useState('')
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
     const [select_value, setSelectValue] = useState(values)
     const studentmovementApi = useApi().student.movement
 

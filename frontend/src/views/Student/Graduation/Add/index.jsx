@@ -63,7 +63,7 @@ const Createmodal = ({ open, handleModal, refreshDatas, select_value }) => {
     const [selectLessonIds, setSelectLessonIds] = useState([])
 
 	// Loader
-	const { Loader, isLoading: getAllLoading, fetchData: allFetchData } = useLoader({ isFullScreen: true });
+	const { Loader, isLoading: getAllLoading, fetchData: allFetchData } = useLoader({ isFullScreen: false });
 	const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
 
     // Api

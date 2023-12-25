@@ -32,7 +32,7 @@ const EditModal = ({ open, handleEdit, editId, refreshDatas }) => {
     // ** Hook
 
 	// Loader
-	const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true});
+	const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false});
 	const { isLoading: editLoading, fetchData: editFetch } = useLoader({});
 
     // State

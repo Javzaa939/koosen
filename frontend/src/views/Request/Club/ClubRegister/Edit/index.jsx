@@ -35,7 +35,7 @@ const EditModal = ( props ) => {
     // ** Hook
     const { control, handleSubmit, formState: { errors }, setValue, reset, setError } = useForm(validate(validateSchema));
 
-    const { isLoading, Loader, fetchData } = useLoader({ isFullScreen: true })
+    const { isLoading, Loader, fetchData } = useLoader({ isFullScreen: false })
 
     const [is_loading, setIsLoading] = useState(false)
     const [all_files, setAllFiles] = useState([])

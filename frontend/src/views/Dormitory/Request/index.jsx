@@ -25,8 +25,8 @@ import EditModal from './Edit'
 const InventoryRequest = () => {
 
     // Loader
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
     const {  formState: { errors }, setError } = useForm()
 
     //Context

@@ -23,7 +23,7 @@ export default function SignatureModal({ open, handleModal, refreshDatas, defaul
     const { control, handleSubmit, reset, setError, formState: { errors } } = useForm(validate(validateSchema));
 
     // Loader
-	const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: true });
+	const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: false });
 
     // Api
     const signatureApi = useApi().signature

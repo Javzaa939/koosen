@@ -29,8 +29,8 @@ export default function Specification()
 
     const studentApi = useApi().student
     const signatureApi = useApi().signature
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
 
     const [ datas, setDatas ] = useState([])
     // Хуудаслалтын анхны утга
@@ -184,7 +184,7 @@ export default function Specification()
 
     return (
         <Fragment>
-            { isLoading && Loader }
+            {/* { isLoading && Loader } */}
             <Card>
                 <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start'>
                     <CardTitle tag='h4'>{t('Тохиргоо ')} <small>( гарын үсэг зурах хүмүүс )</small> </CardTitle>
@@ -196,62 +196,67 @@ export default function Specification()
                     </div>
                 </CardHeader>
                 {
-                    listArr.length != 0
-                    ?
-                        <ReactSortable
-                            tag='ul'
-                            className='list-group'
-                            list={listArr}
-                            setList={setListArr}
-                            onSort={changeOrder}
-                        >
-                        {
-                            listArr.map((val, idx) => {
-                                return (
-                                    <ListGroupItem className='draggable' key={idx} value={val.id} >
-                                        <div className='d-flex align-items-center justify-content-between'>
-                                            <div className="d-flex align-items-center">
-                                                <div>
-                                                    <Menu size={16} className="me-2" />
-                                                </div>
-                                                <div>
-                                                    <h5 className='mt-0'>{val?.last_name} {val?.first_name}</h5>
-                                                    {val?.position_name}
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <a role="button"
-                                                    onClick={() => handleUpdateModal(val?.id, val)}
-                                                    className="ms-1"
-                                                >
-                                                    <Edit color="gray" width={"18px"} />
-                                                </a>
-                                                <a role="button"
-                                                    onClick={() => showWarning({
-                                                        header: {
-                                                            title: t(`Устгах үйлдэл`),
-                                                        },
-                                                        question: t(`Та энэхүү тохиргоог устгахдаа итгэлтэй байна уу?`),
-                                                        onClick: () => handleDelete(val?.id),
-                                                        btnText: t('Устгах'),
-                                                    })}
-                                                    className="ms-1"
-                                                >
-                                                    <Trash2 color="red" width={"18px"} />
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </ListGroupItem>
-                                )
-                            })
-                        }
-                        </ReactSortable>
+                    isLoading ?
+
+                        Loader
+
                     :
-                        <p className="text-center">Өгөгдөл байхгүй байна.</p>
+                        listArr.length != 0
+                        ?
+                            <ReactSortable
+                                tag='ul'
+                                className='list-group'
+                                list={listArr}
+                                setList={setListArr}
+                                onSort={changeOrder}
+                            >
+                            {
+                                listArr.map((val, idx) => {
+                                    return (
+                                        <ListGroupItem className='draggable' key={idx} value={val.id} >
+                                            <div className='d-flex align-items-center justify-content-between'>
+                                                <div className="d-flex align-items-center">
+                                                    <div>
+                                                        <Menu size={16} className="me-2" />
+                                                    </div>
+                                                    <div>
+                                                        <h5 className='mt-0'>{val?.last_name} {val?.first_name}</h5>
+                                                        {val?.position_name}
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <a role="button"
+                                                        onClick={() => handleUpdateModal(val?.id, val)}
+                                                        className="ms-1"
+                                                    >
+                                                        <Edit color="gray" width={"18px"} />
+                                                    </a>
+                                                    <a role="button"
+                                                        onClick={() => showWarning({
+                                                            header: {
+                                                                title: t(`Устгах үйлдэл`),
+                                                            },
+                                                            question: t(`Та энэхүү тохиргоог устгахдаа итгэлтэй байна уу?`),
+                                                            onClick: () => handleDelete(val?.id),
+                                                            btnText: t('Устгах'),
+                                                        })}
+                                                        className="ms-1"
+                                                    >
+                                                        <Trash2 color="red" width={"18px"} />
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </ListGroupItem>
+                                    )
+                                })
+                            }
+                            </ReactSortable>
+                        :
+                            <p className="text-center">Өгөгдөл байхгүй байна.</p>
                 }
             </Card>
             <Card>
-                {isLoading && Loader}
+                {/* {isLoading && Loader} */}
                 <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
                     <CardTitle tag='h4'>{t('Тодорхойлолт')}</CardTitle>
                 </CardHeader>
@@ -313,9 +318,7 @@ export default function Specification()
                             className='react-dataTable'
                             progressPending={isTableLoading}
                             progressComponent={
-                                <div className='my-2 d-flex align-items-center justify-content-center'>
-                                    <Spinner className='me-1' color="" size='sm'/><h5>Түр хүлээнэ үү...</h5>
-                                </div>
+                                Loader
                             }
                             noDataComponent={(
                                 <div className="my-2">

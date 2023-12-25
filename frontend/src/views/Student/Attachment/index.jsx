@@ -65,8 +65,8 @@ export default function Attachment()
     const [ signatureFormModal, setSignatureFormModal ] = useState(false)
     const [ signatureList, setSignatureList ] = useState([])
     // Loader
-	const { isLoading, fetchData, Loader } = useLoader({ isFullScreen: true })
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
+	const { isLoading, fetchData, Loader } = useLoader({ isFullScreen: false })
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
 
     // Api
     const depApi = useApi().hrms.department

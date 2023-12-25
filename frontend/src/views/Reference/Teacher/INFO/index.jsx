@@ -30,7 +30,7 @@ export default function Info()
     const [ datas, setDatas ] = useState({})
 
     /** Loader */
-    const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: true });
+    const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: false });
 
     async function getTeacherDetail()
     {
