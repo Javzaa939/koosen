@@ -374,7 +374,7 @@ function useApi(isDisplay=false) {
 			},
 			/** Бүрэлдэхүүн сургууль */
 			subschool: {
-				get: () => instance.get(`/core/subschool/?`),
+				get: () => instance.get(`/core/subschool/`),
 				getOne: (pk) => instance.get(`/core/subschool/${pk}/`),
 				put: (data, pk) => instance.put(`/core/subschool/${pk}/`, data),
 				post: data => instance.post(`/core/subschool/`, data),
@@ -402,13 +402,14 @@ function useApi(isDisplay=false) {
 					if (dep_id) depId = dep_id
 					return instance.get(`/core/teacher/?department=${depId}&school=${school_id}`)
 				},
-
 				getPartTeacher: () => { return instance.get(`/core/teacher/part/?school=${school_id}`) },
 				getSelectSchool: (school) => instance.get(`/core/teacher/?school=${school}`),
+				postRegister: (data) => instance.post(`/core/teacher/create/`, data),
 				getList: (limit, page, sort, search, sub_org, salbar) => instance.get(`/core/teacher/list/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&sub_org=${sub_org}&salbar=${salbar}`),
 				getOne: (pk) => instance.get(`/core/teacher/${pk}/`),
 				getLongList: () => instance.get(`/core/teacher/longlist/`),
 				getSchoolFilter: (school_id) => instance.get(`/core/teacher/listschoolfilter/?school=${school_id}`),
+				getTeacherOne: () => instance.get(`core/teachers/info/`),
 				/** Хичээлээс хамаарах багшийн жагсаалт */
 				getTeacher: (lesson_id) => {
 					var lesson = ''

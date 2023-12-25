@@ -50,6 +50,7 @@ class SubSchoolListSerailizer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+
 # ---------- country ---------------
 
 class CountryListSerializer(serializers.ModelSerializer):
@@ -150,7 +151,7 @@ class SubSchoolsRegisterPostSerailizer(serializers.ModelSerializer):
 
     class Meta:
         model = SubSchools
-        fields = ["is_school", "org", "name", "name_eng","name_uig", "zahiral_name", "zahiral_name_uig","zahiral_name_eng", "tsol_name", "tsol_name_eng", "tsol_name_uig", "erdem_tsol_name","erdem_tsol_name_eng", "erdem_tsol_name_uig"]
+        fields = ["is_school", "org", "name", "name_eng","name_uig", "zahiral_name", "zahiral_name_uig","zahiral_name_eng", "tsol_name", "tsol_name_eng", "tsol_name_uig", "erdem_tsol_name","erdem_tsol_name_eng", "erdem_tsol_name_uig", "sub_org"]
 
 # дэд байгууллага
 class SubschoolSerailizer(serializers.ModelSerializer):
@@ -309,6 +310,18 @@ class TeacherLongListSerializer(serializers.ModelSerializer):
 
         return obj.full_name
 
+class EmployeePostSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Employee
+        fields = ["org", "sub_org", "salbar", "user", "org_position"]
+
+class TeacherPostSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Teachers
+        fields = ["first_name","last_name", "org",  "sub_org", "salbar", "user"]
+
     # Багшийн мэдээллийн урт жагсаалт
 class TeacherListSchoolFilterSerializer(serializers.ModelSerializer):
     # salbar = DepartmentsSerializer(many=False)
@@ -411,6 +424,10 @@ class TeacherNameSerializer(serializers.ModelSerializer):
 
         return obj.full_name
 
+class EmployeePostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Employee
+        fields = ["user", "register_code",'org_position',  'org', "sub_org", "salbar", "state"]
 
 class OrgPositionSerializer(serializers.ModelSerializer):
 

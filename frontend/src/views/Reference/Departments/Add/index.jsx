@@ -54,6 +54,8 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
     const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
     const [is_hotolboriin_bag, setIsDepartment] = useState(false)
     const [leader_option, setLeaderOption] = useState([])
+    const [sub_org_option, setSubOrgOption] = useState([])
+
 
     // Loader
 	const { Loader, isLoading, fetchData } = useLoader({});
@@ -62,26 +64,33 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
     const getLeaderApi = useApi().hrms.department
     const departmentApi = useApi().hrms.department
 
-     /* тэнхим багийн ахлагч жагсаалт авах функц */
+    /* салбар сургуулуудын жагсаалт авах функц */
+    async function getSubOrgList() {
+        const school = school_id
+        const { success, data } = await fetchData(departmentApi.getSelectSchool(school))
+        if (success) {
+            setSubOrgOption(data)
+        }
+    }
+
+    /* тэнхимийн эрхлэгч-н жагсаалт авах функц */
     async function getLeaderList() {
         const { success, data } = await fetchData(getLeaderApi.leaderList())
         if (success) {
-            console.log("data", data)
             setLeaderOption(data)
         }
     }
 
     useEffect(() => {
         getLeaderList()
+        getSubOrgList()
     },[open])
 
     async function onSubmit(cdata) {
         cdata['created_user'] = user.id
         cdata['updated_user'] = user.id
         cdata['org'] = school_id
-        cdata["leader"]=leader_option
         cdata = convertDefaultValue(cdata)
-        console.log("cdata", cdata);
 
         const { success, error } = await postFetch(departmentApi.postRegister(cdata))
         if(success) {
@@ -150,8 +159,42 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                             {errors.name && <FormFeedback className='d-block'>{t(errors.name.message)}</FormFeedback>}
                         </Col>
                         <Col md={12}>
+                            <Label className="form-label" for="sub_orgs">
+                                {t('Салбар сургууль')}
+                            </Label>
+                            <Controller
+                                control={control}
+                                defaultValue=''
+                                name="sub_orgs"
+                                render={({ field: { value, onChange} }) => {
+                                    return (
+                                        <Select
+                                            name="sub_orgs"
+                                            id="sub_orgs"
+                                            classNamePrefix='select'
+                                            isClearable
+                                            className={classnames('react-select', { 'is-invalid': errors.sub_orgs })}
+                                            isLoading={isLoading}
+                                            placeholder={t('-- Сонгоно уу --')}
+                                            options={sub_org_option || []}
+                                            value={sub_org_option.find((c) => c.id === value)}
+                                            noOptionsMessage={() => {t('Хоосон байна.')}}
+                                            onChange={(val) => {
+                                                onChange(val?.id || '')
+                                            }}
+                                            styles={ReactSelectStyles}
+                                            getOptionValue={(option) => option.id}
+                                            getOptionLabel={(option) => option.name}
+
+                                        />
+                                    )
+                                }}
+                            />
+                            {errors.sub_orgs && <FormFeedback className='d-block'>{t(errors.sub_orgs.message)}</FormFeedback>}
+                        </Col>
+                        <Col md={12}>
                             <Label className="form-label" for="leader">
-                                {t('Тэнхимийн ахлагч')}
+                                {t('Тэнхимийн эрхлэгч')}
                             </Label>
                             <Controller
                                 control={control}
@@ -249,7 +292,7 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                             />
                             {errors.web && <FormFeedback className='d-block'>{t(errors.web.message)}</FormFeedback>}
                         </Col>
-                        <Col md={12}>
+                        {/* <Col md={12}>
                             <Controller
                                 control={control}
                                 id="is_hotolboriin_bag"
@@ -275,7 +318,7 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                             <Label className="form-label pe-1" for="is_hotolboriin_bag">
 								{t('тэнхим эсэх')}
                             </Label>
-                        </Col>
+                        </Col> */}
                         <Col md={12}>
                             <Button className="me-2" color="primary" type="submit" disabled={postLoading}>
                                 {postLoading &&<Spinner size='sm' className='me-1'/>}
