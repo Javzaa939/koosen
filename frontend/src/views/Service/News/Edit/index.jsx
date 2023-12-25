@@ -30,7 +30,7 @@ import { t } from 'i18next';
 
 const EditModal = ({ open, handleEdit, refreshDatas, edit_id }) => {
 
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
 
     const { user } = useContext(AuthContext)
     const { school_id } = useContext(SchoolContext)

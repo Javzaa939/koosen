@@ -17,7 +17,7 @@ import { t } from "i18next";
 export function getColumns (currentPage, rowsPerPage, total_count) {
 
 	const { user } = useContext(AuthContext)
-	const { fetchData } = useLoader({ isFullScreen: true })
+	const { fetchData } = useLoader({ isFullScreen: false })
 
     const page_count = Math.ceil(total_count / rowsPerPage)
 

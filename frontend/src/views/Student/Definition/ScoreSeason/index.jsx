@@ -6,7 +6,7 @@ import useLoader from '@hooks/useLoader';
 import './style.scss'
 
 export default function ScoreSeason() {
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
 
 
     const location = useLocation()

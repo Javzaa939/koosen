@@ -48,7 +48,7 @@ const RoutingSlip = () => {
     const croutingdApi = useApi().request.routing
 
     const { isLoading, fetchData } = useLoader({})
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
 
     const [datas, setDatas] = useState([]);
     const [solved, setSolved] = useState('')

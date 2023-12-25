@@ -21,7 +21,7 @@ export default function Print()
     const [ datas, setDatas ] = useState({})
 
     // Loader
-	const{ Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
+	const{ Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
 
     const correspondApi = useApi().request.correspond
 

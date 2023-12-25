@@ -52,7 +52,7 @@ function AddModal({ toggle, modal, is_teacher, refreshDatas }) {
         isLoading: teacherLoading,
         fetchData,
         fetchData: teacherFetch
-    } = useLoader({ isFullScreen: true });
+    } = useLoader({ isFullScreen: false });
 
     const { control, handleSubmit, setError, reset, setValue, formState: { errors } } = useForm(validate(is_teacher ? validateTeachers : validateUser));
     const { cyear_name, cseason_id} = useContext(ActiveYearContext);

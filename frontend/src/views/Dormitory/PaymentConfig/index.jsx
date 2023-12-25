@@ -51,7 +51,7 @@ const PaymentConfig = () => {
 
     // Loader
     const { isLoading, fetchData } = useLoader({})
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
 
     // Нийт датаны тоо
     const [total_count, setTotalCount] = useState(1)

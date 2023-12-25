@@ -48,7 +48,7 @@ const Request = () => {
     const correspondApi = useApi().request.correspond
 
     const { isLoading, fetchData } = useLoader({})
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
 
     const [editId, setEditId] = useState('')
     const [solveId, setSolveId] = useState('')

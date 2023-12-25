@@ -75,8 +75,8 @@ const PaymentEstimate = () => {
     const [sortField, setSort] = useState('')
 
     // loader
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
 
     // Api
     const groupApi = useApi().student.group

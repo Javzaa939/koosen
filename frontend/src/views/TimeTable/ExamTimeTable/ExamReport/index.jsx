@@ -13,7 +13,7 @@ function ExamReport() {
     const [datas, setDatas] = useState({})
     const { id } = useParams()
     const examApi = useApi().timetable.exam
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
 
     async function getResults() {
         const { success, data } = await fetchData(examApi.getOne(id))
