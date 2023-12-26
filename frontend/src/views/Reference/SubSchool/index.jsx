@@ -98,6 +98,17 @@ const SubSchool = () => {
         setDetailModalData(data)
     }
 
+	/* Устгах функц */
+	const handleDelete = async(id) => {
+		console.log("id", id);
+        const { success } = await fetchData(departmentsApi.delete(id))
+        if(success)
+        {
+            getDatas()
+        }
+	};
+
+
 	// Хайлт хийх үед ажиллах хэсэг
 	const handleFilter = e => {
         const value = e.target.value.trimStart();
@@ -156,7 +167,7 @@ const SubSchool = () => {
 									<h5>{t('Өгөгдөл байхгүй байна')}</h5>
 								</div>
 							)}
-                            columns={getColumns(currentPage, rowsPerPage, searchValue.length ? filteredData : datas, handleUpdateModal)}
+                            columns={getColumns(currentPage, rowsPerPage, searchValue.length ? filteredData : datas, handleUpdateModal, handleDelete)}
                             sortIcon={<ChevronDown size={10} />}
                             paginationPerPage={rowsPerPage}
                             paginationDefaultPage={currentPage}

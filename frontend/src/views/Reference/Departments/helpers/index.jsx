@@ -1,9 +1,11 @@
 import { t } from 'i18next';
 import { Badge, UncontrolledTooltip} from 'reactstrap'
-import { CheckCircle} from 'react-feather'
+import { CheckCircle, X} from 'react-feather'
+import useModal from "@hooks/useModal"
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal) {
+export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, handleDelete) {
+	const { showWarning } = useModal()
 
     const columns = [
 		{
@@ -68,6 +70,24 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal) 
                             <UncontrolledTooltip placement='top' target={`updateSchool${row?.id}`}>засах</UncontrolledTooltip>
 						</>
                     }
+					{
+						<>
+							<a role="button"
+								onClick={() => showWarning({
+									header: {
+										title: `${t(row?.name)}`,
+									},
+									question: `Та  ${row?.name} устгахдаа итгэлтэй байна уу?`,
+									onClick: () => handleDelete(row?.id),
+									btnText: 'Устгах',
+								})}
+								id={`complaintListDatatableCancel${row?.id}`}
+							>
+								<Badge color="light-danger" pill><X width={"100px"} /></Badge>
+							</a>
+							<UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${row?.id}`} >Устгах</UncontrolledTooltip>
+						</>
+					}
 				</div>
             ),
             minWidth: "230px",

@@ -204,6 +204,7 @@ class DepartmentAPIView(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin,
 ):
     """"Салбар, тухайн дэд байгууллагын салбар """
 
@@ -311,6 +312,13 @@ class DepartmentAPIView(
                 return request.send_error("ERR_003", errors)
 
         return request.send_info("INF_002")
+    
+    def delete(self, request, pk=None):
+        print("pk", pk)
+        " устгах "
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
+
 
 @permission_classes([IsAuthenticated])
 class DepartmentListAPIView(
@@ -372,6 +380,7 @@ class SubSchoolAPIView(
     mixins.CreateModelMixin,
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
     generics.GenericAPIView,
 ):
     """" Бүрэлдэхүүн сургууль """
@@ -490,6 +499,11 @@ class SubSchoolAPIView(
 
         return request.send_info("INF_002")
 
+    def delete(self, request, pk=None):
+        " устгах "
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
 
 @permission_classes([IsAuthenticated])
 class CountryAPIView(

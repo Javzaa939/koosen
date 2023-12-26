@@ -378,6 +378,7 @@ function useApi(isDisplay=false) {
 				getOne: (pk) => instance.get(`/core/subschool/${pk}/`),
 				put: (data, pk) => instance.put(`/core/subschool/${pk}/`, data),
 				post: data => instance.post(`/core/subschool/`, data),
+				delete: pk => instance.delete(`/core/department/register/${pk}/`),
 			},
 			/** Тэнхим */
 			department: {
@@ -389,6 +390,7 @@ function useApi(isDisplay=false) {
 				getRegisterOne: (pk) => instance.get(`/core/department/register/${pk}/`),
 				putRegister: (data, pk) => instance.put(`/core/department/register/${pk}/`, data),
 				postRegister: data => instance.post(`/core/department/register/`, data),
+				delete: pk => instance.delete(`/core/department/register/${pk}/`),
 
 				leaderList: () => instance.get(`/core/leader/list/?school=${school_id}`),
 
