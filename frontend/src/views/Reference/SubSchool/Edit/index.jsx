@@ -270,7 +270,7 @@ const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
                             />
                             {errors.tsol_name_uig && <FormFeedback className='d-block'>{t(errors.tsol_name_uig.message)}</FormFeedback>}
                         </Col>
-                         <Col xs={6} md={12}>
+                         <Col lg={6} xs={12}>
                                 <Label className="form-label" for="erdem_tsol_name">
                                     {t('Эрдмийн цол')}
                                 </Label>
@@ -292,7 +292,7 @@ const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
                                 />
                                 {errors.erdem_tsol_name && <FormFeedback className='d-block'>{t(errors.erdem_tsol_name.message)}</FormFeedback>}
                             </Col>
-                            <Col xs={6} md={12}>
+                            <Col lg={6} xs={12}>
                                 <Label className="form-label" for="erdem_tsol_name_eng">
                                     {t('Эрдмийн цол англи нэр')}
                                 </Label>
@@ -314,7 +314,7 @@ const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
                                 />
                                 {errors.erdem_tsol_name_eng && <FormFeedback className='d-block'>{t(errors.erdem_tsol_name_eng.message)}</FormFeedback>}
                             </Col>
-                            <Col xs={6} md={12}>
+                            <Col lg={6} xs={12}>
                             <Label className="form-label" for="erdem_tsol_name_uig">
                                 {t('Эрдмийн цол уйгаржин нэр')}
                             </Label>
