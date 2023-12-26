@@ -107,10 +107,6 @@ const Departments = () => {
 		firstLoad();
 	}, [])
 
-	useEffect(() => {
-		getDatas();
-	}, [])
-
 	return (
 		<Fragment>
 			{isLoading && Loader}
