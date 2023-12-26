@@ -33,7 +33,11 @@ const Schedule = () => {
 	const default_page = [ 10, 15, 50, 75, 100, 'Бүгд' ]
 
     // Loader
-    const { Loader, isLoading, fetchData } = useLoader({})
+    const { Loader, isLoading, fetchData } = useLoader({ isSmall: true })
+    const {
+        isLoading: tableLoading,
+        fetchData: tableFetch
+    } = useLoader({})
 
    	// Хуудаслалтын анхны утга
 	const [currentPage, setCurrentPage] = useState(1)
@@ -171,7 +175,7 @@ const Schedule = () => {
 
     async function getDatas()
     {
-        const {success, data} = await fetchData(scheduleApi.get(rowsPerPage, currentPage, sortField, searchValue, selectValue.teacher, selectValue.group, selectValue.room, selectValue.student))
+        const {success, data} = await tableFetch(scheduleApi.get(rowsPerPage, currentPage, sortField, searchValue, selectValue.teacher, selectValue.group, selectValue.room, selectValue.student))
         if(success)
         {
 
@@ -238,7 +242,7 @@ const Schedule = () => {
 
     return(
         <Fragment>
-            {isLoading && Loader}
+            {/* {isLoading && Loader} */}
 
             <Card>
                 <CardHeader>
@@ -524,28 +528,34 @@ const Schedule = () => {
                         </Button>
                     </Col>
                 </Row>
+                {tableLoading ?
+                    <div className="position-relative d-flex justify-content-center align-items-center" style={{ minHeight: 100 }}>
+                        {Loader}
+                    </div>
+                :
 
-                <div className="react-dataTable react-dataTable-selectable-rows" id="datatableLeftTwoRightOne" >
-                    <DataTable
-                        noHeader
-                        paginationServer
-                        pagination
-                        className='react-dataTable'
-                        progressPending={isLoading}
-                        progressComponent={<h5>{t('Түр хүлээнэ үү')}</h5>}
-                        noDataComponent={(
-                            <div className="my-2">
-                                <h5>{t('Өгөгдөл байхгүй байна')}</h5>
-                            </div>
-                        )}
-                        paginationTotalRows
-                        data={datas}
-                        columns={getColumns(currentPage, rowsPerPage, total_count)}
-                        paginationPerPage={rowsPerPage}
-                        paginationDefaultPage={currentPage}
-                        paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
-                    />
-                </div>
+                    <div className="react-dataTable react-dataTable-selectable-rows" id="datatableLeftTwoRightOne">
+                        <DataTable
+                            noHeader
+                            paginationServer
+                            pagination
+                            className='react-dataTable'
+                            progressPending={isLoading}
+                            progressComponent={<h5>{t('Түр хүлээнэ үү')}</h5>}
+                            noDataComponent={(
+                                <div className="my-2">
+                                    <h5>{t('Өгөгдөл байхгүй байна')}</h5>
+                                </div>
+                            )}
+                            paginationTotalRows
+                            data={datas}
+                            columns={getColumns(currentPage, rowsPerPage, total_count)}
+                            paginationPerPage={rowsPerPage}
+                            paginationDefaultPage={currentPage}
+                            paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
+                        />
+                    </div>
+                }
 
             </Card>
         </Fragment>

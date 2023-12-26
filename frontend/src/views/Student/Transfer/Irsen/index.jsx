@@ -12,12 +12,13 @@ import {
     Spinner,
     InputGroupText,
     InputGroup,
-    UncontrolledTooltip
+    UncontrolledTooltip,
+    Badge
 } from 'reactstrap'
 
 import { useNavigate } from "react-router-dom";
 
-import { ChevronDown, Search, Printer } from 'react-feather'
+import { ChevronDown, Search, Printer, AlertTriangle } from 'react-feather'
 
 import DataTable from 'react-data-table-component'
 
@@ -333,39 +334,45 @@ const Irsen = () => {
                         </Button>
                     </Col>
                 </Row>
-                <div className='react-dataTable react-dataTable-selectable-rows'>
-                    <DataTable
-                        noHeader
-                        pagination
-                        paginationServer
-                        className='react-dataTable'
-                        progressPending={isLoading}
-                        progressComponent={
-                            <div className='my-2 d-flex align-items-center justify-content-center'>
-                                <Spinner className='me-1' color="" size='sm'/><h5>Түр хүлээнэ үү...</h5>
-                            </div>
-                        }
-                        noDataComponent={(
-                            <div className="my-2">
-                                <h5>{t('Өгөгдөл байхгүй байна')}</h5>
-                            </div>
-                        )}
-                        onSort={handleSort}
-                        sortIcon={<ChevronDown size={10} />}
-                        columns={getColumns(currentPage, rowsPerPage, total_count, handleUpdate , handleOpenModal)}
-                        paginationPerPage={rowsPerPage}
-                        paginationDefaultPage={currentPage}
-                        paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
-                        data={datas}
-                        fixedHeader
-                        fixedHeaderScrollHeight='62vh'
-                        subHeader
-                        subHeaderComponent={searchComponent}
-                        selectableRows
-                        onSelectedRowsChange={(state) => onSelectedRowsChange(state)}
-                        selectableRowDisabled={(state) => state.statement}
-                    />
-                </div>
+                {
+                    datas && datas.length > 0 ?
+
+                        <div className='react-dataTable react-dataTable-selectable-rows'>
+                            <DataTable
+                                noHeader
+                                pagination
+                                paginationServer
+                                className='react-dataTable'
+                                progressPending={isLoading}
+                                progressComponent={
+                                    <div className='my-2 d-flex align-items-center justify-content-center'>
+                                        <Spinner className='me-1' color="" size='sm'/><h5>Түр хүлээнэ үү...</h5>
+                                    </div>
+                                }
+                                noDataComponent={(
+                                    <div className="my-2">
+                                        <h5>{t('Өгөгдөл байхгүй байна')}</h5>
+                                    </div>
+                                )}
+                                onSort={handleSort}
+                                sortIcon={<ChevronDown size={10} />}
+                                columns={getColumns(currentPage, rowsPerPage, total_count, handleUpdate , handleOpenModal)}
+                                paginationPerPage={rowsPerPage}
+                                paginationDefaultPage={currentPage}
+                                paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
+                                data={datas}
+                                fixedHeader
+                                fixedHeaderScrollHeight='62vh'
+                                subHeader
+                                subHeaderComponent={searchComponent}
+                                selectableRows
+                                onSelectedRowsChange={(state) => onSelectedRowsChange(state)}
+                                selectableRowDisabled={(state) => state.statement}
+                            />
+                        </div>
+                    :
+                    <div className="d-flex justify-content-center align-items-center" style={{ minHeight: 100 }}><Badge pill color="light-warning" className="p-50"><AlertTriangle/> Өгөгдөл байхгүй байна</Badge></div>
+                }
             </Card>
             {update_modal && <UpdateModal open={update_modal} handleUpdate={handleUpdate} refreshDatas={getDatas} editDatas={editData} editId={editId}/>}
             {openModal && <Add open={openModal} handleModal={handleOpenModal} refreshDatas={getDatas} datas={editData} isSolved={editData?.corres_type ? true : false} editId={editData?.corres_id}/>}

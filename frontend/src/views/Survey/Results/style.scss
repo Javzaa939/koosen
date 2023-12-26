@@ -33,10 +33,12 @@
     border: var(--bs-card-border-width) solid var(--bs-card-border-color);
     border-radius: var(--bs-card-border-radius);
     transition: 0.3s;
+    box-shadow: 0 4px 16px 0 rgba(34, 41, 47, 0.1);
 }
 
 .customcard:hover{
-    transform: scale(1.05);
+    transform: scale(1.02);
+    box-shadow: 0 4px 24px 0 rgba(34, 41, 47, 0.1);
 }
 /* .cardlist{
     margin: 0 auto;
@@ -161,3 +163,22 @@
     height: 150px;
     margin: 10px;
 }
+
+
+
+.dark-layout{
+    .customcard {
+        box-shadow: 0 4px 14px 0 rgba(115, 115, 115, 0.1);
+    }
+    .customcard:hover{
+        transform: scale(1.02);
+        box-shadow: 0 4px 16px 0 rgba(255, 255, 255, 0.1);
+    }
+    .font_prefix{
+        color: rgb(212, 212, 212);
+    }
+    .font_prefix_lower{
+        color: rgb(156, 156, 156);
+    }
+}
+

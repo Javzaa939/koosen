@@ -514,32 +514,6 @@ def get_teacher_queryset():
     return queryset
 
 
-def get_16week_start_date():
-    ''' Хичээл эхлэх өдрөөс 16н 7 хоногийг тооцоолох
-        return list
-    '''
-
-    SystemSettings = apps.get_model('lms', 'SystemSettings')
-    qs_activeyear = SystemSettings.objects.filter(season_type=1).last()
-
-    end_date = qs_activeyear.start_date
-
-    week_list = []
-
-    for x in range(18):
-        obj_datas = {}
-        start_date  = end_date
-
-        end_date = start_date + timedelta(days=7)
-        enddate = end_date - timedelta(days=1)
-        obj_datas['id'] = x + 1
-        obj_datas['start_date'] = start_date.strftime('%Y-%m-%d')
-        obj_datas['end_date'] = enddate.strftime('%Y-%m-%d')
-
-        week_list.append(obj_datas)
-    return week_list
-
-
 def get_weekday_kurats_date(kurats_start_date, kurats_end_date):
     """ Курац хуваарийн эхлэх өдрөөс 7 хоногийн хэд дэх өдрийг авах
         хичээлийн хэд дэх 7 хоног гэдгийг буцаана
@@ -741,7 +715,7 @@ def get_16week_start_date():
         end_date = qs_activeyear.start_date
 
 
-        for x in range(16):
+        for x in range(18):
             obj_datas = {}
             start_date  = end_date
 

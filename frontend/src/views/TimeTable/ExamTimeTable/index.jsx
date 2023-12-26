@@ -337,7 +337,7 @@ const ExamTimeTable = () => {
                         :
                                 datas.length > 0 ?
 
-                                        <div className="react-dataTable react-dataTable-selectable-rows">
+                                        <div className="react-dataTable react-dataTable-selectable-rows" id="datatableLeftTwoRightOne">
                                             <DataTable
                                                 noHeader
                                                 pagination
