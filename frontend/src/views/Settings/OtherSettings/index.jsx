@@ -21,19 +21,19 @@ function Other() {
             component: <Season />
         },
         {
-            name: 'Боловсролын зэрэг',
+            name: 'Үнэлгээний бүртгэл',
             icon: 'Activity',
             id: 1,
             component: <Score />
         },
         {
-            name: 'Бүртгэлийн хэлбэр',
+            name: 'ЭЕШ-ын хичээл',
             icon: 'Activity',
             id: 2,
             component: <AdmissionLesson />
         },
         {
-            name: 'Өрөөний бүртгэл',
+            name: 'Улс',
             icon: 'Activity',
             id: 3,
             component: <Country />

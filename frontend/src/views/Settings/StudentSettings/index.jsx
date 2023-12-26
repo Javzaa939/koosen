@@ -34,7 +34,7 @@ function Student() {
             component: <StudentRegisterType />
         },
         {
-            name: 'Өрөөний бүртгэл',
+            name: 'Төлбөрийн хөнгөлөлтийн төрөл',
             icon: 'Activity',
             id: 3,
             component: <DiscountType />
