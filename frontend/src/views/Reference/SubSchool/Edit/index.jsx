@@ -17,8 +17,12 @@ import { validateSchema } from './validateSchema'
 import { useForm, Controller } from "react-hook-form";
 import React, { Fragment, useEffect, useState} from 'react'
 import { convertDefaultValue , validate } from "@utils"
+import { X } from "react-feather";
 
 const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
+    const CloseBtn = (
+        <X className="cursor-pointer" size={15} onClick={handleEdit} />
+    )
     // Loader
     const {isLoading, fetchData } = useLoader({})
 
@@ -64,15 +68,32 @@ const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
 	}
 	return (
         <Fragment>
-            <Modal isOpen={open} toggle={handleEdit} className="modal-dialog-centered modal-lg" onClosed={handleEdit}>
-                {isLoading && <div className='suspense-loader'><Spinner size='xl'/></div>}
-                <ModalHeader className='bg-transparent pb-0' toggle={handleEdit} ></ModalHeader>
-                <ModalBody className="px-sm-3 pt-30 pb-3">
-                    <div className='text-center'>
-                        <h4>{t('Сургуулийн мэдээлэл засах')}</h4>
-                    </div>
+            <Modal
+                isOpen={open}
+                toggle={handleEdit}
+                className="sidebar-md"
+                modalClassName='modal-slide-in'
+                contentClassName='pt-0'
+            >
+                {
+                    isLoading &&
+                        <div className='suspense-loader'>
+                            <Spinner size='bg'/>
+                            <span className='ms-50'>Түр хүлээнэ үү...</span>
+                        </div>
+                }
+
+                <ModalHeader
+                    className="mb-1"
+                    toggle={handleEdit}
+                    close={CloseBtn}
+                    tag="div"
+                >
+                    <h5 className="modal-title">{t('Сургуулийн мэдээлэл засах')}</h5>
+                </ModalHeader>
+                <ModalBody className="flex-grow-1">
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
-                        <Col lg={6} xs={12}>
+                        <Col md={12}>
                             <Label className="form-label" for="name">
                                 {t('Сургуулийн нэр')}
                             </Label>
@@ -95,7 +116,7 @@ const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
                             />
                             {errors.name && <FormFeedback className='d-block'>{t(errors.name.message)}</FormFeedback>}
                         </Col>
-                        <Col lg={6} xs={12}>
+                        <Col md={12}>
                             <Label className="form-label" for="name_eng">
                                 {t('Сургуулийн англи нэр')}
                             </Label>
@@ -117,7 +138,7 @@ const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
                             />
                             {errors.name_eng && <FormFeedback className='d-block'>{t(errors.name_eng.message)}</FormFeedback>}
                         </Col>
-                        <Col lg={6} xs={12}>
+                        <Col md={12}>
                             <Label className="form-label" for="name_uig">
                                 {t('Сургуулийн уйгаржин нэр')}
                             </Label>
@@ -140,7 +161,7 @@ const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
                             />
                             {errors.name_uig && <FormFeedback className='d-block'>{t(errors.name_uig.message)}</FormFeedback>}
                         </Col>
-                        <Col lg={6} xs={12}>
+                        <Col md={12}>
                                 <Label className="form-label" for="zahiral_name">
                                     {t('Захиралын нэр')}
                                 </Label>
@@ -161,7 +182,7 @@ const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
                                     )}
                                 />
                             </Col>
-                            <Col lg={6} xs={12}>
+                            <Col md={12}>
                                 <Label className="form-label" for="zahiral_name_eng">
                                     {t('Захиралын англи нэр')}
                                 </Label>
@@ -182,7 +203,7 @@ const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
                                     )}
                                 />
                             </Col>
-                            <Col lg={6} xs={12}>
+                            <Col md={12}>
                             <Label className="form-label" for="zahiral_name_uig">
                                 {t('Захиралын уйгаржин нэр')}
                             </Label>
@@ -205,7 +226,7 @@ const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
                             />
                             {errors.zahiral_name_uig && <FormFeedback className='d-block'>{t(errors.zahiral_name_uig.message)}</FormFeedback>}
                         </Col>
-                        <Col lg={6} xs={12}>
+                        <Col md={12}>
                                 <Label className="form-label" for="tsol_name">
                                     {t('Цол')}
                                 </Label>
@@ -226,7 +247,7 @@ const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
                                     )}
                                 />
                             </Col>
-                            <Col lg={6} xs={12}>
+                            <Col md={12}>
                                 <Label className="form-label" for="tsol_name_eng">
                                     {t('Цол англи нэр')}
                                 </Label>
@@ -247,7 +268,7 @@ const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
                                     )}
                                 />
                             </Col>
-                            <Col lg={6} xs={12}>
+                            <Col md={12}>
                             <Label className="form-label" for="tsol_name_uig">
                                 {t('Цол уйгаржин нэр')}
                             </Label>
@@ -270,7 +291,7 @@ const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
                             />
                             {errors.tsol_name_uig && <FormFeedback className='d-block'>{t(errors.tsol_name_uig.message)}</FormFeedback>}
                         </Col>
-                         <Col lg={6} xs={12}>
+                         <Col md={12}>
                                 <Label className="form-label" for="erdem_tsol_name">
                                     {t('Эрдмийн цол')}
                                 </Label>
@@ -292,7 +313,7 @@ const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
                                 />
                                 {errors.erdem_tsol_name && <FormFeedback className='d-block'>{t(errors.erdem_tsol_name.message)}</FormFeedback>}
                             </Col>
-                            <Col lg={6} xs={12}>
+                            <Col md={12}>
                                 <Label className="form-label" for="erdem_tsol_name_eng">
                                     {t('Эрдмийн цол англи нэр')}
                                 </Label>
@@ -314,7 +335,7 @@ const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
                                 />
                                 {errors.erdem_tsol_name_eng && <FormFeedback className='d-block'>{t(errors.erdem_tsol_name_eng.message)}</FormFeedback>}
                             </Col>
-                            <Col lg={6} xs={12}>
+                            <Col md={12}>
                             <Label className="form-label" for="erdem_tsol_name_uig">
                                 {t('Эрдмийн цол уйгаржин нэр')}
                             </Label>

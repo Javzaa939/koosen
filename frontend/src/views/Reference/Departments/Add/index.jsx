@@ -199,11 +199,9 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                                         placeholder={t('Нийтийн сүлжээ')}
                                         {...field}
                                         type="textarea"
-                                        invalid={errors.social && true}
                                     />
                                 )}
                             />
-                            {errors.social && <FormFeedback className='d-block'>{t(errors.social.message)}</FormFeedback>}
                         </Col>
                         <Col md={12}>
                             <Label className="form-label" for="address">
@@ -221,11 +219,9 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                                         placeholder={t('Хаяг')}
                                         {...field}
                                         type="textarea"
-                                        invalid={errors.address && true}
                                     />
                                 )}
                             />
-                            {errors.address && <FormFeedback className='d-block'>{t(errors.address.message)}</FormFeedback>}
                         </Col>
                         <Col md={12}>
                             <Label className="form-label" for="web">
@@ -243,39 +239,10 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                                         placeholder={t('Веб')}
                                         {...field}
                                         type="textarea"
-                                        invalid={errors.web && true}
                                     />
                                 )}
                             />
-                            {errors.web && <FormFeedback className='d-block'>{t(errors.web.message)}</FormFeedback>}
                         </Col>
-                        {/* <Col md={12}>
-                            <Controller
-                                control={control}
-                                id="is_hotolboriin_bag"
-                                name="is_hotolboriin_bag"
-                                defaultValue={is_hotolboriin_bag}
-                                render={({ field: { value, onChange, checked } }) => (
-                                    <Input
-                                        className='me-50'
-                                        // {...field}
-                                        id="is_hotolboriin_bag"
-                                        type="checkbox"
-                                        onChange={(e) =>
-                                            {
-                                                onChange(e.target.checked)
-                                                setIsDepartment(e.target.checked)
-                                            }
-                                        }
-                                        checked={is_hotolboriin_bag}
-                                        value={is_hotolboriin_bag}
-                                    />
-                                )}
-                            />
-                            <Label className="form-label pe-1" for="is_hotolboriin_bag">
-								{t('тэнхим эсэх')}
-                            </Label>
-                        </Col> */}
                         <Col md={12}>
                             <Button className="me-2" color="primary" type="submit" disabled={postLoading}>
                                 {postLoading &&<Spinner size='sm' className='me-1'/>}

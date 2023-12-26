@@ -207,7 +207,7 @@ class DepartmentAPIView(
 ):
     """"Салбар, тухайн дэд байгууллагын салбар """
 
-    queryset = Departments.objects
+    queryset = Departments.objects.order_by("-created_at")
 
     serializer_class = DepartmentRegisterSerailizer
 
