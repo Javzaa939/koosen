@@ -64,7 +64,7 @@ const Departments = () => {
 		} else {
 			const timeoutId = setTimeout(() => {
 				getDatas();
-			}, 6000);
+			}, 600);
 
 			return () => clearTimeout(timeoutId);
 		}
