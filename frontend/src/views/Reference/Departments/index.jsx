@@ -64,7 +64,7 @@ const Departments = () => {
 		} else {
 			const timeoutId = setTimeout(() => {
 				getDatas();
-			}, 600);
+			}, 6000);
 
 			return () => clearTimeout(timeoutId);
 		}
@@ -95,17 +95,17 @@ const Departments = () => {
 	};
 
 	// Хуудас анх ачааллах үед Fullscreen loader гаргаж ирэх функц, ганц л уншина
-	async function firstLoad() {
-		const { success, data } = await fetchData(departmentsApi.getRegister(searchValue))
-		if(success) {
-			setDatas(data)
-			setTotalCount(data.length)
-		}
-	}
+	// async function firstLoad() {
+	// 	const { success, data } = await fetchData(departmentsApi.getRegister(searchValue))
+	// 	if(success) {
+	// 		setDatas(data)
+	// 		setTotalCount(data.length)
+	// 	}
+	// }
 
-	useEffect(() => {
-		firstLoad();
-	}, [])
+	// useEffect(() => {
+	// 	firstLoad();
+	// }, [])
 
 	return (
 		<Fragment>
