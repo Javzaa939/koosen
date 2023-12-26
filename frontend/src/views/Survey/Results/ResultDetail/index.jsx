@@ -11,7 +11,6 @@ import { useParams } from 'react-router-dom';
 
 import useApi from "@hooks/useApi"
 import useLoader from "@hooks/useLoader"
-import "../style.css";
 
 import { Chart as
     ChartJS,
@@ -31,6 +30,8 @@ import { Chart as
 import { Doughnut, Pie, Bar } from 'react-chartjs-2';
 import { ChevronsLeft } from "react-feather";
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+
+import "../style.scss";
 
 ChartJS.register(
     CategoryScale,
@@ -77,10 +78,13 @@ function ResultDetail() {
 
 	const polleeApi = useApi().survey.pollee;
 
+    const [localLoader, setLocalLoader] = useState(true)
+
     async function getDatas() {
 		const { success, data } = await fetchData(polleeApi.get(id));
 		if (success) {
 			setMainData(data);
+            setLocalLoader(false)
 		}
 	}
 
@@ -91,24 +95,24 @@ function ResultDetail() {
 
     const navigate = useNavigate()
 
-    if (!mainData || !mainData.questions) {
-        return (
-            <Fragment>
-                <Card className="cusheight d-flex justify-content-center align-items-center">
-                    <Spinner
-                        color="dark"
-                        size=""
-                    >
-                            Түр хүлээнэ үү...
-                    </Spinner>
-                </Card>
-            </Fragment>
-        )
-    }
+    // if (!mainData || !mainData.questions) {
+    //     return (
+    //         <Fragment>
+    //             <Card className="cusheight d-flex justify-content-center align-items-center">
+    //                 <Spinner
+    //                     color="dark"
+    //                     size=""
+    //                 >
+    //                         Түр хүлээнэ үү...
+    //                 </Spinner>
+    //             </Card>
+    //         </Fragment>
+    //     )
+    // }
 
-    const chartData = mainData.questions.questions.map((question) => {
-    const counts = question.pollees.map((item) => item.count);
-    const names = question.pollees.map((item) => item.name);
+    const chartData = mainData?.questions?.questions.map((question) => {
+    const counts = question?.pollees.map((item) => item.count);
+    const names = question?.pollees.map((item) => item.name);
 
     return {
       labels: names,
@@ -202,54 +206,61 @@ function ResultDetail() {
 
     return (
         <Fragment>
-            <Card>
-                {isLoading && Loader}
-                <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
-                    <div className="cursor-pointer hover-shadow" onClick={() => handleNavigate()}>
-                        <ChevronsLeft /> Буцах
-                    </div>
-                </CardHeader>
-                <div>
-                    <div className="d-flex align-items-center mt-1 flex-column">
-                        Судалгааны нэр:<b>{mainData.questions.title}</b>
-                        <div className="surveytitle"></div>
-                    </div>
-                <div className="cardlist">
-                    {mainData.questions.questions.map((question, qIdx) => (
-                        <Col md={4} sm={6} xs={12} key={qIdx} className=''>
-                            <div className="p-1 m-2">
-                                <h3>
-                                    {qIdx + 1}. {question.question}{" "}
-                                </h3>
-                                    {question.kind === KIND_ONE_CHOICE && (
-                                    <div className="d-flex ">
-                                        <Doughnut options={options} data={chartData[qIdx]} /> </div>
-                                    )}
-                                    {question.kind === KIND_MULTI_CHOICE && (
-                                        <div className="">
-                                            <Bar options={optionsMulti} data={chartData[qIdx]} />
-                                        </div>
-                                    )}
-                                    {question.kind === KIND_BOOLEAN &&
-                                        <div className="">
-                                            <Pie options={options} data={chartData[qIdx]} />
-                                        </div>
-                                    }
-                                    {question.kind === KIND_RATING &&
-                                            <Bar options={optionsRating}data={chartData[qIdx]} />
-                                    }
-                                    {question.kind === KIND_TEXT && (
-                                        <div key={`text${qIdx}`} className="" >
-                                            {chartData[qIdx].labels.map((q, vidx) => (
-                                                <div className="m-1 p-1 border-bottom rounded-5  shadow-sm ps-2 " key={`textanswer${vidx}`}>{q}</div>
-                                            ))}
-                                        </div>
-                                    )}
+            <Card className="">
+                {isLoading || localLoader ? Loader
+                :
+                    mainData && mainData.questions &&
+
+                    <>
+                        <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
+                            <div className="cursor-pointer font_prefix" onClick={() => handleNavigate()}>
+                                <ChevronsLeft /> Буцах
                             </div>
-                        </Col>
-                    ))}
-                    </div>
-                </div>
+                        </CardHeader>
+                        <div>
+                            <div className="d-flex align-items-center mt-1 flex-column font_prefix">
+                                Судалгааны нэр:<b>{mainData?.questions.title}</b>
+                                <div className="surveytitle"></div>
+                            </div>
+                        <div className="cardlist">
+                            {mainData?.questions?.questions.map((question, qIdx) => (
+                                <Col md={4} sm={6} xs={12} key={qIdx} className=''>
+                                    <div className="p-1 m-2">
+                                        <h3>
+                                            {qIdx + 1}. {question.question}{" "}
+                                        </h3>
+                                            {question.kind === KIND_ONE_CHOICE && (
+                                            <div className="d-flex">
+                                                <Doughnut options={options} data={chartData[qIdx]} /> </div>
+                                            )}
+                                            {question.kind === KIND_MULTI_CHOICE && (
+                                                <div className="">
+                                                    <Bar options={optionsMulti} data={chartData[qIdx]} />
+                                                </div>
+                                            )}
+                                            {question.kind === KIND_BOOLEAN &&
+                                                <div className="">
+                                                    <Pie options={options} data={chartData[qIdx]} />
+                                                </div>
+                                            }
+                                            {question.kind === KIND_RATING &&
+                                                <Bar options={optionsRating}data={chartData[qIdx]} />
+                                            }
+                                            {question.kind === KIND_TEXT && (
+                                                <div key={`text${qIdx}`} className="" >
+                                                    {chartData[qIdx].labels.map((q, vidx) => (
+                                                        <div className="m-1 p-1 border-bottom rounded-5  shadow-sm ps-2 " key={`textanswer${vidx}`}>{q}</div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                    </div>
+                                </Col>
+                            ))}
+                            </div>
+                        </div>
+                    </>
+                }
+
             </Card>
         </Fragment>
   );

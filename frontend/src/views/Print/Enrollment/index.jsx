@@ -34,7 +34,7 @@ const Enrollment = () => {
 
     const [sortField, setSort] = useState('')
 
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
+    const { Loader, isLoading, fetchData } = useLoader({ isSmall: true })
     const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({})
 
     const [datas, setDatas] = useState([])
@@ -193,7 +193,6 @@ const Enrollment = () => {
     return(
         <Fragment>
             <Card>
-            {isLoading && Loader}
                 <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom pt-0'">
 					<CardTitle tag="h4">{t('Элсэлтийн тушаал')}</CardTitle>
 					    <div className='d-flex flex-wrap mt-md-0 mt-1'>
@@ -441,35 +440,38 @@ const Enrollment = () => {
                         </Button>
                     </Col>
                 </Row>
-                <div className='react-dataTable react-dataTable-selectable-rows'>
-                    <DataTable
-                        noHeader
-                        pagination
-                        paginationServer
-                        className='react-dataTable'
-                        progressPending={isTableLoading}
-                        progressComponent={
-                            <div className='my-2 d-flex align-items-center justify-content-center'>
-                                <Spinner className='me-1' color="" size='sm'/><h5>Түр хүлээнэ үү...</h5>
-                            </div>
-                        }
-                        noDataComponent={(
-                            <div className="my-2">
-                                <h5>{t('Өгөгдөл байхгүй байна')}</h5>
-                            </div>
-                        )}
-                        onSort={handleSort}
-                        sortIcon={<ChevronDown size={10} />}
-                        columns={getColumns(currentPage, rowsPerPage, total_count)}
-                        paginationPerPage={rowsPerPage}
-                        paginationDefaultPage={currentPage}
-                        paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
-                        data={datas}
-                        fixedHeader
-                        fixedHeaderScrollHeight='62vh'
-                    />
-                </div>
-            </Card>
+                {
+                    isTableLoading ?
+
+                        <div className="position-relative d-flex justify-content-center align-items-center" style={{ minHeight: 140 }}>
+                            {Loader}
+                        </div>
+                    :
+
+                        <div className='react-dataTable react-dataTable-selectable-rows' id="datatableLeftTwoRightOne">
+                            <DataTable
+                                noHeader
+                                pagination
+                                paginationServer
+                                className='react-dataTable'
+                                noDataComponent={(
+                                    <div className="my-2">
+                                        <h5>{t('Өгөгдөл байхгүй байна')}</h5>
+                                    </div>
+                                )}
+                                onSort={handleSort}
+                                sortIcon={<ChevronDown size={10} />}
+                                columns={getColumns(currentPage, rowsPerPage, total_count)}
+                                paginationPerPage={rowsPerPage}
+                                paginationDefaultPage={currentPage}
+                                paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
+                                data={datas}
+                                fixedHeader
+                                fixedHeaderScrollHeight='62vh'
+                            />
+                        </div>
+                }
+                </Card>
         </Fragment>
     )
 }
