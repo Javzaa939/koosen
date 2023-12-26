@@ -32,7 +32,7 @@ import DetailModal from "./Detail"
 import { getColumns } from './helpers'
 
 
-const RoleRegister = () => {
+const Teachers = () => {
     const { control, handleSubmit, reset, setError, formState: { errors } } = useForm();
 
     const { Loader, isLoading, fetchData } = useLoader({})
@@ -296,4 +296,4 @@ const RoleRegister = () => {
         </Fragment>
     )
 }
-export default RoleRegister
+export default Teachers

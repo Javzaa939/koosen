@@ -23,13 +23,7 @@ import EditModal from './Edit'
 import Select from 'react-select'
 import {  ReactSelectStyles } from "@utils"
 
-const buildOption = [
-	{ value: 'chocolate', label: 'Chocolate' },
-	{ value: 'strawberry', label: 'Strawberry' },
-	{ value: 'vanilla', label: 'Vanilla' }
-]
-
-const Learning = () => {
+const Room = () => {
 
 	const { t } = useTranslation()
 	const { user } = useContext(AuthContext)
@@ -297,4 +291,4 @@ const Learning = () => {
     )
 }
 
-export default Learning;
+export default Room;
