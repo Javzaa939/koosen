@@ -109,7 +109,7 @@ const Departments = () => {
 
 	useEffect(() => {
 		getDatas();
-	}, [school_id])
+	}, [])
 
 	return (
 		<Fragment>

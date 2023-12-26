@@ -79,7 +79,7 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
     async function onSubmit(cdata) {
         cdata['created_user'] = user.id
         cdata['updated_user'] = user.id
-        cdata['org'] = school_id
+        cdata['org'] = 1
         cdata['sub_orgs']= school_id
         cdata = convertDefaultValue(cdata)
 
