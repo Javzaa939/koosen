@@ -154,7 +154,7 @@ const Yvsan  = () => {
                     <div className='d-flex flex-wrap mt-md-0 mt-1'>
                         <Button
                             color='primary'
-                            disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-student-movement-create') && school_id)  ? false : true}
+                            disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-student-movement-create'))  ? false : true}
                             onClick={() => handleModal()}>
                             <Plus size={15} />
                             <span className='align-middle ms-50'>{t('Нэмэх')}</span>
@@ -220,7 +220,7 @@ const Yvsan  = () => {
                         </Button>
                     </Col>
                 </Row>
-                <div className='react-dataTable react-dataTable-selectable-rows'>
+                <div className='react-dataTable react-dataTable-selectable-rows' id='datatableLeftTwoRightOne'>
                     <DataTable
                         noHeader
                         pagination
