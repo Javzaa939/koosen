@@ -8,6 +8,8 @@ import StudentRegisterType from '../StudentRegisterType'
 import DiscountType from '../DiscountType'
 import LessonCategory from '../LessonCategory'
 import LessonGroup from '../LessonGroup'
+import Score from '../Score'
+import AdmissionLesson from '../AdmissionLesson'
 
 function Student() {
 
@@ -50,7 +52,19 @@ function Student() {
             icon: 'Activity',
             id: 5,
             component: <LessonGroup />
-        }
+        },
+        {
+            name: 'Үнэлгээний бүртгэл',
+            icon: 'Activity',
+            id: 6,
+            component: <Score />
+        },
+        {
+            name: 'ЭЕШ-ын хичээл',
+            icon: 'Activity',
+            id: 7,
+            component: <AdmissionLesson />
+        },
     ]
 
 

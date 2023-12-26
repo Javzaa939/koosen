@@ -20,12 +20,12 @@ export default [
                 icon: <Circle size={8} />,
                 navLink: "settings/student/"
             },
-            {
-                id: 'timetable2',
-                title: 'Бусад',
-                icon: <Circle size={8} />,
-                navLink: "settings/other/"
-            },
+            // {
+            //     id: 'timetable2',
+            //     title: 'Бусад',
+            //     icon: <Circle size={8} />,
+            //     navLink: "settings/other/"
+            // },
             // {
             //     id: 'settingsLevel0',
             //     title: 'Ажиллах жил',

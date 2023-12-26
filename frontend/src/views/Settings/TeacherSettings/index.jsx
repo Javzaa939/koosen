@@ -5,6 +5,8 @@ import Score from '../ActiveYear'
 import Signature from '../Signature'
 import Learning from '../../TimeTable/Building'
 import Room from '../../TimeTable/Room'
+import Season from '../Season'
+import Country from '../Country'
 
 function Teacher() {
 
@@ -35,6 +37,18 @@ function Teacher() {
             icon: 'Activity',
             id: 3,
             component: <Room />
+        },
+        {
+            name: 'Улирал',
+            id: 4,
+            icon: 'Activity',
+            component: <Season />
+        },
+        {
+            name: 'Улс',
+            icon: 'Activity',
+            id: 5,
+            component: <Country />
         }
     ]
 
