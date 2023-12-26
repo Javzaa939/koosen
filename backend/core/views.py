@@ -416,6 +416,7 @@ class SubSchoolAPIView(
         else:
             error_obj = []
             for key in serializer.errors:
+                print("err",serializer.errors)
                 msg = "Хоосон байна"
 
                 return_error = {
@@ -450,6 +451,9 @@ class SubSchoolAPIView(
         tsol_name = data.get("tsol_name")
         tsol_name_eng = data.get("tsol_name_eng")
         tsol_name_uig = data.get("tsol_name_uig")
+        erdem_tsol_name = data.get("erdem_tsol_name")
+        erdem_tsol_name_eng = data.get("erdem_tsol_name_eng")
+        erdem_tsol_name_uig = data.get("erdem_tsol_name_uig")
 
         instance = self.get_object()
         serializer = self.get_serializer(data=data)
@@ -467,7 +471,10 @@ class SubSchoolAPIView(
                             zahiral_name_uig=zahiral_name_uig,
                             tsol_name=tsol_name,
                             tsol_name_eng=tsol_name_eng,
-                            tsol_name_uig =tsol_name_uig
+                            tsol_name_uig =tsol_name_uig,
+                            erdem_tsol_name =erdem_tsol_name,
+                            erdem_tsol_name_eng =erdem_tsol_name_eng,
+                            erdem_tsol_name_uig=erdem_tsol_name_uig,
                         )
                 except Exception:
                     raise

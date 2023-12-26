@@ -299,8 +299,8 @@ const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
                                 <Controller
                                     defaultValue=''
                                     control={control}
-                                    id="tsol_name_eng"
-                                    name="tsol_name_eng"
+                                    id="erdem_tsol_name_eng"
+                                    name="erdem_tsol_name_eng"
                                     render={({ field }) => (
                                         <Input
                                             id ="erdem_tsol_name_eng"

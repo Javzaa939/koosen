@@ -45,9 +45,7 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
     const { school_id } = useContext(SchoolContext)
 
     // ** Hook
-    const { control, handleSubmit, reset, setError, formState: { errors } } = useForm();
-    // const { control, handleSubmit, reset, setError, formState: { errors } } = useForm(validate(validateSchema));
-
+    const { control, handleSubmit, reset, setError, formState: { errors } } = useForm(validate(validateSchema));
 
     // states
     const [is_loading, setLoader] = useState(false)
@@ -312,9 +310,9 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                             />
                             {errors.tsol_name_uig && <FormFeedback className='d-block'>{t(errors.tsol_name_uig.message)}</FormFeedback>}
                         </Col>
-                        {/* <Col xs={6} md={12}>
+                        <Col xs={6} md={12}>
                                 <Label className="form-label" for="erdem_tsol_name">
-                                    {t('Эрдмийн цол')}
+                                    {t('Эрдмийн цол нэр')}
                                 </Label>
                                 <Controller
                                     defaultValue=''
@@ -336,13 +334,13 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                             </Col>
                             <Col xs={6} md={12}>
                                 <Label className="form-label" for="erdem_tsol_name_eng">
-                                    {t('Эрдмийн цол англи нэр')}
+                                    {t('Эрдмийн цол англи')}
                                 </Label>
                                 <Controller
                                     defaultValue=''
                                     control={control}
-                                    id="tsol_name_eng"
-                                    name="tsol_name_eng"
+                                    id="erdem_tsol_name_eng"
+                                    name="erdem_tsol_name_eng"
                                     render={({ field }) => (
                                         <Input
                                             id ="erdem_tsol_name_eng"
@@ -358,7 +356,7 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                             </Col>
                             <Col xs={6} md={12}>
                             <Label className="form-label" for="erdem_tsol_name_uig">
-                                {t('Эрдмийн цол уйгаржин нэр')}
+                                {t('Эрдмийн цол уйгаржин')}
                             </Label>
                             <Controller
                                 defaultValue=''
@@ -378,8 +376,8 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                                 )}
                             />
                             {errors.erdem_tsol_name_uig && <FormFeedback className='d-block'>{t(errors.erdem_tsol_name_uig.message)}</FormFeedback>}
-                        </Col> */}
-                        <Col xs={6} md={12}>
+                        </Col>
+                        {/* <Col xs={6} md={12}>
                             <Controller
                                 control={control}
                                 id="is_school"
@@ -405,7 +403,7 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                             <Label className="form-label pe-1" for="is_school">
 								{t('Сургууль эсэх')}
                             </Label>
-                        </Col>
+                        </Col> */}
                         <Col md={12}>
                             <Button className="me-2" color="primary" type="submit" disabled={postLoading}>
                                 {postLoading &&<Spinner size='sm' className='me-1'/>}

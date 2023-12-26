@@ -28,4 +28,14 @@ export const validateSchema = Yup.object().shape({
     tsol_name_uig: Yup.string()
 		.trim()
 		.required('Хоосон байна'),
+
+	erdem_tsol_name: Yup.string()
+		.trim()
+		.required('Хоосон байна'),
+    erdem_tsol_name_eng: Yup.string()
+		.trim()
+		.required('Хоосон байна'),
+    erdem_tsol_name_uig: Yup.string()
+		.trim()
+		.required('Хоосон байна'),
 });

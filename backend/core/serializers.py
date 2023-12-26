@@ -151,8 +151,8 @@ class SubSchoolsRegisterPostSerailizer(serializers.ModelSerializer):
 
     class Meta:
         model = SubSchools
-        fields = ["is_school", "org", "name", "name_eng","name_uig", "zahiral_name", "zahiral_name_uig","zahiral_name_eng", "tsol_name", "tsol_name_eng", "tsol_name_uig"]
-        #  "erdem_tsol_name","erdem_tsol_name_eng", "erdem_tsol_name_uig",
+        fields = ["is_school", "org", "name", "name_eng","name_uig", "zahiral_name", "zahiral_name_uig","zahiral_name_eng", "tsol_name", "tsol_name_eng", "tsol_name_uig", "erdem_tsol_name","erdem_tsol_name_eng", "erdem_tsol_name_uig"]
+
 # дэд байгууллага
 class SubschoolSerailizer(serializers.ModelSerializer):
 
