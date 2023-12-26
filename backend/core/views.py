@@ -42,7 +42,7 @@ from lms.models import UserLicenseCert
 from lms.models import UserRightCert
 
 from lms.models import Student
-
+from lms.models import ProfessionalDegree
 
 from .serializers import SchoolsRegisterSerailizer
 from .serializers import DepartmentRegisterSerailizer
@@ -807,29 +807,33 @@ class TeacherPartListApiView(
 @permission_classes([IsAuthenticated])
 class DashboardAPIView(
     generics.GenericAPIView,
-    mixins.ListModelMixin,
 ):
     """ Хөтөлбөрийн багийн ахлагч жагсаалт """
 
-    # queryset = Teachers.objects.all()
-    serializer_class = DashboardSerializer
 
     def get(self, request):
-
-        qs_teachers = get_teacher_queryset()
-        self.queryset = qs_teachers
 
         collected_data = dict()
 
         collected_data['total_workers'] = Teachers.objects.count()
         collected_data['total_students'] = Student.objects.count()
-        collected_data['total_students_male'] = Student.objects.filter(gender=1).count()
-        collected_data['total_students_female'] = Student.objects.filter(gender=2).count()
+        collected_data['total_students_male'] = Student.objects.filter(gender=Student.GENDER_MALE).count()
+        collected_data['total_students_female'] = Student.objects.filter(gender=Student.GENDER_FEMALE).count()
+
+        degree_list = ProfessionalDegree.objects.all()
+
+        for x in degree_list:
+            collected_data['total_' + x.degree_eng_name.lower()] = Student.objects.filter(group__degree__degree_code=x.degree_code).count()
+
+        salbar_sur_list = SubSchools.objects.all()
 
 
+        for index, v in enumerate(salbar_sur_list):
+            collected_data[index] = Student.objects.filter(school=v).count()
 
-        print(collected_data,'ww')
-        print(collected_data,'ww')
-        print(collected_data,'ww')
-        datas = self.list(request).data
+        print(salbar_sur_list)
+        print(salbar_sur_list)
+        print(salbar_sur_list)
+
+
         return request.send_data(collected_data)

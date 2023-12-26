@@ -8,6 +8,11 @@ import useLoader from '@hooks/useLoader';
 import './style.scss'
 import { sampledata } from './sample'
 
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
+import { Doughnut, Pie } from "react-chartjs-2";
+
+ChartJS.register(ArcElement, Tooltip, Legend);
+
 function Dashboard() {
 
     const datas = sampledata
@@ -27,11 +32,34 @@ function Dashboard() {
         getDatas()
     },[])
 
-    console.log(datas)
-    console.log(info,'info')
-    console.log(info,'info')
-    console.log(info,'info')
-    console.log(info,'info')
+
+
+
+    const eduData = {
+
+        // утга нэмэх бол өнгө бас нэмээрэй
+        labels: [
+            "Бакалавр",
+            "Магистр",
+            "Доктор"
+        ],
+        datasets: [
+            {
+                data: [
+                    info?.total_bachelor,
+                    info?.total_master,
+                    info?.total_doctor
+                ],
+                backgroundColor: ["#d1dfed", "#f2e0cb", "#d8f0cc"],
+                hoverBackgroundColor: ["#7cb7f2", "#f5b36c", "#90e065"],
+                borderColor: ["#469df4", "#f4a046", "#48cf00"],
+                borderWidth: 1,
+            },
+        ],
+    };
+
+
+
     return (
         <Card>
             <CardTitle>
@@ -48,7 +76,7 @@ function Dashboard() {
                                     Нийт оюутнууд
                                 </div>
                                 <div className='numberstyle'>
-                                    {datas?.total_students}
+                                    {info?.total_students}
                                 </div>
                             </div>
                             <div className='p-1' style={{ color: '#fc70ea'}}>
@@ -57,13 +85,30 @@ function Dashboard() {
                         </div>
                     </Col>
                     <Col className='p-1'>
+                        <div className='dashcard' style={{ backgroundColor: '#fe4d4d1a'}}>
+                            <div>
+                                <div>
+                                    Нийт багш нар
+                                </div>
+                                <div className='numberstyle'>
+                                    {info?.total_workers}
+                                </div>
+                            </div>
+                            <div className='p-1' style={{ color: '#ea4949' }}>
+                                <Users/>
+                            </div>
+                        </div>
+                    </Col>
+                </Row>
+                <Row>
+                <Col className='p-1'>
                         <div className='dashcard' style={{ backgroundColor: '#469df412'}}>
                             <div>
                                 <div>
                                     Бакалавр
                                 </div>
                                 <div className='numberstyle'>
-                                    {datas?.bakalavr}
+                                    {info?.total_bachelor}
                                 </div>
                             </div>
                             <div className='p-1' style={{ color: '#469df4' }}>
@@ -78,7 +123,7 @@ function Dashboard() {
                                     Магистр
                                 </div>
                                 <div className='numberstyle'>
-                                    {datas?.magistr}
+                                    {info?.total_master}
                                 </div>
                             </div>
                             <div className='p-1' style={{ color: '#f4a046'}}>
@@ -93,7 +138,7 @@ function Dashboard() {
                                     Доктор
                                 </div>
                                 <div className='numberstyle'>
-                                    {datas?.doktor}
+                                    {info?.total_doctor}
                                 </div>
                             </div>
                             <div className='p-1' style={{ color: '#48cf00'}}>
@@ -101,27 +146,16 @@ function Dashboard() {
                             </div>
                         </div>
                     </Col>
-                    <Col className='p-1'>
-                        <div className='dashcard' style={{ backgroundColor: '#fe4d4d1a'}}>
-                            <div>
-                                <div>
-                                    Нийт багш нар
-                                </div>
-                                <div className='numberstyle'>
-                                    {datas?.total_workers}
-                                </div>
-                            </div>
-                            <div className='p-1' style={{ color: '#ea4949' }}>
-                                <Users/>
-                            </div>
-                        </div>
-                    </Col>
                 </Row>
             </div>
             <div className='p-1'>
                 test
-                <button onClick={() => {getDatas();console.log(sampledata,'sample')}}>GET</button>
+                <button onClick={() => {getDatas();console.log(sampledata,'sample');console.log(info, 'jinhenen')}}>GET</button>
             </div>
+            <div className='p-1' style={{ width: 400 }}>
+                <Pie data={eduData} />
+            </div>
+
         </Card>
     )
 }
