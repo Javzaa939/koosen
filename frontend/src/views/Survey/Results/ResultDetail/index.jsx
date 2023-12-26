@@ -206,7 +206,7 @@ function ResultDetail() {
 
     return (
         <Fragment>
-            <Card className="overflow-scroll">
+            <Card className="">
                 {isLoading || localLoader ? Loader
                 :
                     mainData && mainData.questions &&
