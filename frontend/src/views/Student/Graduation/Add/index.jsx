@@ -316,6 +316,50 @@ const Createmodal = ({ open, handleModal, refreshDatas, select_value }) => {
                             {errors.diplom_topic && <FormFeedback className='d-block'>{t(errors.diplom_topic.message)}</FormFeedback>}
                         </Col>
                         <Col md={12}>
+                            <Label className="form-label" for="diplom_topic_eng">
+                                {t('Төгсөлтийн ажлын сэдэв англи')}
+                            </Label>
+                                <Controller
+                                    defaultValue=''
+                                    control={control}
+                                    id="diplom_topic_eng"
+                                    name="diplom_topic_eng"
+                                    render={({ field }) => (
+                                        <Input
+                                            id ="diplom_topic_eng"
+                                            bsSize="sm"
+                                            placeholder={t('Төгсөлтийн ажлын сэдэв англи оруулах')}
+                                            {...field}
+                                            type="text"
+                                            invalid={errors.diplom_topic_eng && true}
+                                        />
+                                    )}
+                                />
+                            {errors.diplom_topic_eng && <FormFeedback className='d-block'>{t(errors.diplom_topic_eng.message)}</FormFeedback>}
+                        </Col>
+                        <Col md={12}>
+                            <Label className="form-label" for="diplom_topic_uig">
+                                {t('Төгсөлтийн ажлын сэдэв уйгаржин')}
+                            </Label>
+                                <Controller
+                                    defaultValue=''
+                                    control={control}
+                                    id="diplom_topic_uig"
+                                    name="diplom_topic_uig"
+                                    render={({ field }) => (
+                                        <Input
+                                            id ="diplom_topic_uig"
+                                            bsSize="sm"
+                                            placeholder={t('Төгсөлтийн ажлын сэдэв уйгаржин оруулах')}
+                                            {...field}
+                                            type="text"
+                                            invalid={errors.diplom_topic_uig && true}
+                                        />
+                                    )}
+                                />
+                            {errors.diplom_topic_uig && <FormFeedback className='d-block'>{t(errors.diplom_topic_uig.message)}</FormFeedback>}
+                        </Col>
+                        <Col md={12}>
                             <Label className="form-label" for="leader">
                                 {t('Удирдагчийн овог нэр цол')}
                             </Label>
