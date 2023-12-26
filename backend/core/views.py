@@ -41,6 +41,9 @@ from lms.models import UserSymbolCert
 from lms.models import UserLicenseCert
 from lms.models import UserRightCert
 
+from lms.models import Student
+
+
 from .serializers import SchoolsRegisterSerailizer
 from .serializers import DepartmentRegisterSerailizer
 from .serializers import DepartmentListSerailizer
@@ -77,6 +80,8 @@ from .serializers import SubSchoolPutRegisterSerailizer
 from .serializers import TeacherLongListSerializer
 from .serializers import LessonTeacherListSerializer
 from .serializers import TeacherListSchoolFilterSerializer
+from .serializers import DashboardSerializer
+
 
 
 @permission_classes([IsAuthenticated])
@@ -798,3 +803,33 @@ class TeacherPartListApiView(
         all_data = self.list(request).data
 
         return request.send_data(all_data)
+
+@permission_classes([IsAuthenticated])
+class DashboardAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+):
+    """ Хөтөлбөрийн багийн ахлагч жагсаалт """
+
+    # queryset = Teachers.objects.all()
+    serializer_class = DashboardSerializer
+
+    def get(self, request):
+
+        qs_teachers = get_teacher_queryset()
+        self.queryset = qs_teachers
+
+        collected_data = dict()
+
+        collected_data['total_workers'] = Teachers.objects.count()
+        collected_data['total_students'] = Student.objects.count()
+        collected_data['total_students_male'] = Student.objects.filter(gender=1).count()
+        collected_data['total_students_female'] = Student.objects.filter(gender=2).count()
+
+
+
+        print(collected_data,'ww')
+        print(collected_data,'ww')
+        print(collected_data,'ww')
+        datas = self.list(request).data
+        return request.send_data(collected_data)

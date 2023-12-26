@@ -1300,6 +1300,9 @@ function useApi(isDisplay=false) {
 		db3:{
 			get: () => instance.get(`/statistic/db3/`),
 		}
+	},
+	dashboard: {
+		get: () => instance.get(`/core/dashboard/`),
 	}
 	}
 }

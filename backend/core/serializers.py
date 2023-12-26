@@ -779,3 +779,10 @@ class DepartmentUpdateSerailizer(serializers.ModelSerializer):
     class Meta:
         model = Departments
         fields = "__all__"
+
+
+class DashboardSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Teachers
+        fields = "__all__"
