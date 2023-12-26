@@ -353,6 +353,7 @@ const Createmodal = ({ open, handleModal, refreshDatas, select_value }) => {
                                             placeholder={t('Төгсөлтийн ажлын сэдэв уйгаржин оруулах')}
                                             {...field}
                                             type="text"
+                                            style={{ fontFamily: 'CMs Urga', fontSize: '15px'}}
                                             invalid={errors.diplom_topic_uig && true}
                                         />
                                     )}
