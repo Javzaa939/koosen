@@ -379,7 +379,7 @@ function useApi(isDisplay=false) {
 				put: (data, pk) => instance.put(`/core/subschool/${pk}/`, data),
 				post: data => instance.post(`/core/subschool/`, data),
 			},
-			/** Хөтөлбөрийн баг */
+			/** Тэнхим */
 			department: {
 				get: () => instance.get(`/core/department/?school=${school_id}`),
 				getSelectSchool: (school) => instance.get(`/core/department/?school=${school}`),

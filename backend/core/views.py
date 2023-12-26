@@ -207,7 +207,6 @@ class DepartmentAPIView(
 ):
     """"Салбар, тухайн дэд байгууллагын салбар """
 
-    # queryset = Departments.objects.filter(is_hotolboriin_bag=True)
     queryset = Departments.objects
 
     serializer_class = DepartmentRegisterSerailizer
@@ -275,7 +274,7 @@ class DepartmentAPIView(
 
         department = self.queryset.get(id=pk)
         if not department:
-            return request.send_error("ERR_002", "Хөтөлбөрийн баг олдсонгүй")
+            return request.send_error("ERR_002", "Тэнхимийн мэдээлэлэ олдсонгүй")
 
         errors = []
         datas = request.data
@@ -330,7 +329,6 @@ class DepartmentListAPIView(
     def get_queryset(self):
         queryset = self.queryset
         school = self.request.query_params.get('school')
-        print("school1", school)
         if school:
             queryset = queryset.filter(sub_orgs=school)
 
@@ -604,7 +602,7 @@ class TeacherApiView(
 ):
     """ Багшийн жагсаалт """
 
-    queryset = Teachers.objects.all()
+    queryset = Teachers.objects.all().order_by("created_at")
     serializer_class = TeacherNameSerializer
 
     pagination_class = CustomPagination
@@ -665,7 +663,6 @@ class EmployeeApiView(
         " Багшийн мэдээлэл шинээр үүсгэх "
 
         datas = request.data
-        print("datas", datas)
         org = datas["org"]
         sub_org = datas["sub_org"]
         salbar = datas["salbar"]
@@ -679,7 +676,8 @@ class EmployeeApiView(
                 try:
                     teacher_qs = Teachers.objects.filter(org=org, sub_org=sub_org, salbar=salbar)
                     if teacher_qs:
-                        Teachers.objects.create(last_name=last_name, first_name=first_name)
+                        print("tt", teacher_qs)
+                        # Teachers.objects.create(last_name=last_name, first_name=first_name)
                     self.create(request).data
                     is_success = True
                 except Exception:
@@ -917,10 +915,8 @@ class DepLeaderAPIView(
 
         qs_teachers = get_teacher_queryset()
         self.queryset = qs_teachers
-
-        if school:
-            self.queryset = self.queryset.filter(org=school)
-            # self.queryset = self.queryset.filter(sub_org=school)
+        # if school:
+        #     self.queryset = self.queryset.filter(sub_org_id=school)
 
         datas = self.list(request).data
         return request.send_data(datas)
