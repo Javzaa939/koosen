@@ -29,7 +29,7 @@ const buildOption = [
 	{ value: 'vanilla', label: 'Vanilla' }
 ]
 
-const Learning = () => {
+const Room = () => {
 
 	const { t } = useTranslation()
 	const { user } = useContext(AuthContext)
@@ -297,4 +297,4 @@ const Learning = () => {
     )
 }
 
-export default Learning;
+export default Room;
