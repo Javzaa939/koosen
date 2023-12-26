@@ -68,7 +68,7 @@ const Departments = () => {
 
 			return () => clearTimeout(timeoutId);
 		}
-	}, [searchValue]);
+	}, [searchValue, school_id]);
 
 	// Засах функц
     function handleUpdateModal(id, data) {

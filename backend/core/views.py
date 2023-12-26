@@ -211,18 +211,15 @@ class DepartmentAPIView(
 
     serializer_class = DepartmentRegisterSerailizer
 
-    def get_queryset(self):
-        queryset = self.queryset
+    def get(self, request, pk=None):
+        " Салбарын жагсаалт "
+
         school = self.request.query_params.get('school')
         search = self.request.query_params.get('search')
         if school:
-            queryset = queryset.filter(sub_orgs=school)
+            self.queryset = self.queryset.filter(sub_orgs=school)
         if search:
-            queryset = queryset.filter(name__icontains=search)
-        return queryset
-
-    def get(self, request, pk=None):
-        " Салбарын жагсаалт "
+            self.queryset = self.queryset.filter(name__icontains=search)
 
         if pk:
             group = self.retrieve(request, pk).data
