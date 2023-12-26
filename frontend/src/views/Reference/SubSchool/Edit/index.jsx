@@ -270,6 +270,73 @@ const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
                             />
                             {errors.tsol_name_uig && <FormFeedback className='d-block'>{t(errors.tsol_name_uig.message)}</FormFeedback>}
                         </Col>
+                         <Col xs={6} md={12}>
+                                <Label className="form-label" for="erdem_tsol_name">
+                                    {t('Эрдмийн цол')}
+                                </Label>
+                                <Controller
+                                    defaultValue=''
+                                    control={control}
+                                    id="erdem_tsol_name"
+                                    name="erdem_tsol_name"
+                                    render={({ field }) => (
+                                        <Input
+                                            id ="erdem_tsol_name"
+                                            bsSize="sm"
+                                            placeholder={t('цол')}
+                                            {...field}
+                                            type="text"
+                                            invalid={errors.erdem_tsol_name && true}
+                                        />
+                                    )}
+                                />
+                                {errors.erdem_tsol_name && <FormFeedback className='d-block'>{t(errors.erdem_tsol_name.message)}</FormFeedback>}
+                            </Col>
+                            <Col xs={6} md={12}>
+                                <Label className="form-label" for="erdem_tsol_name_eng">
+                                    {t('Эрдмийн цол англи нэр')}
+                                </Label>
+                                <Controller
+                                    defaultValue=''
+                                    control={control}
+                                    id="tsol_name_eng"
+                                    name="tsol_name_eng"
+                                    render={({ field }) => (
+                                        <Input
+                                            id ="erdem_tsol_name_eng"
+                                            bsSize="sm"
+                                            placeholder={t('цол англи нэр')}
+                                            {...field}
+                                            type="text"
+                                            invalid={errors.erdem_tsol_name_eng && true}
+                                        />
+                                    )}
+                                />
+                                {errors.erdem_tsol_name_eng && <FormFeedback className='d-block'>{t(errors.erdem_tsol_name_eng.message)}</FormFeedback>}
+                            </Col>
+                            <Col xs={6} md={12}>
+                            <Label className="form-label" for="erdem_tsol_name_uig">
+                                {t('Эрдмийн цол уйгаржин нэр')}
+                            </Label>
+                            <Controller
+                                defaultValue=''
+                                control={control}
+                                id="erdem_tsol_name_uig"
+                                name="erdem_tsol_name_uig"
+                                render={({ field }) => (
+                                    <Input
+                                        id ="erdem_tsol_name_uig"
+                                        bsSize="sm"
+                                        placeholder={t('цол уйгаржин нэр')}
+                                        {...field}
+                                        type="text"
+                                        style={{ fontFamily: 'CMs Urga', fontSize: '15px'}}
+                                        invalid={errors.erdem_tsol_name_uig && true}
+                                    />
+                                )}
+                            />
+                            {errors.erdem_tsol_name_uig && <FormFeedback className='d-block'>{t(errors.erdem_tsol_name_uig.message)}</FormFeedback>}
+                        </Col>
                         <Col className='text-center mt-2' md={12}>
                             <Button className="me-2" size='sm' color="primary" type="submit">
                                 {t('Хадгалах')}

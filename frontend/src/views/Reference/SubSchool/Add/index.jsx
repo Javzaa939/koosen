@@ -312,7 +312,7 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                             />
                             {errors.tsol_name_uig && <FormFeedback className='d-block'>{t(errors.tsol_name_uig.message)}</FormFeedback>}
                         </Col>
-                        <Col xs={6} md={12}>
+                        {/* <Col xs={6} md={12}>
                                 <Label className="form-label" for="erdem_tsol_name">
                                     {t('Эрдмийн цол')}
                                 </Label>
@@ -378,7 +378,7 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                                 )}
                             />
                             {errors.erdem_tsol_name_uig && <FormFeedback className='d-block'>{t(errors.erdem_tsol_name_uig.message)}</FormFeedback>}
-                        </Col>
+                        </Col> */}
                         <Col xs={6} md={12}>
                             <Controller
                                 control={control}

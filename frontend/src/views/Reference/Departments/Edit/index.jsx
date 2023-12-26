@@ -124,7 +124,7 @@ const UpdateModal = ({ open, editId, refreshDatas, handleEdit}) => {
                         </Col>
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="name">
-                                {t('Хөтөлбөрийн нэр')}
+                                {t('Тэнхимийн нэр')}
                             </Label>
                             <Controller
                                 defaultValue=''
@@ -136,7 +136,7 @@ const UpdateModal = ({ open, editId, refreshDatas, handleEdit}) => {
                                         id ="name"
                                         bsSize="sm"
                                         disabled={true}
-                                        placeholder={t('Хөтөлбөрийн нэр')}
+                                        placeholder={t('Тэнхимийн нэр')}
                                         {...field}
                                         type="text"
                                         invalid={errors.name && true}
