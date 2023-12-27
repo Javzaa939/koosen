@@ -119,7 +119,7 @@ const Teacher = () => {
 	useEffect(() => {
 		getSubSchoolOption()
 		getDepartmentOption()
-	},[selected_values])
+	},[])
 
 	// ** Function to handle filter
 	const handleFilter = e => {

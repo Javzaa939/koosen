@@ -68,7 +68,7 @@ const SubSchool = () => {
 
 	useEffect(() => {
 		getDatas();
-	},[ searchValue])
+	},[])
 	// useEffect(() => {
 	// 	if (searchValue.length == 0) {
 	// 		getDatas();
