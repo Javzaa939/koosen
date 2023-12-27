@@ -1,54 +1,53 @@
-import React, { Fragment, useState, useEffect, useContext } from 'react'
+import React, { Fragment, useState, useEffect, useContext } from "react";
 
-import { X } from 'react-feather'
+import { Controller, useForm } from 'react-hook-form'
+
+import { Row, ModalBody, ModalHeader, Col, FormFeedback, Input, Form, Modal, Label, Button} from 'reactstrap'
 
 import { useQuill } from 'react-quilljs';
+
+import Select from 'react-select'
 
 import 'quill/dist/quill.snow.css'
 
 import '../style.css'
 
-import { Controller, useForm } from 'react-hook-form'
-
-import { convertDefaultValue, validate } from '@utils'
-
-import { Modal, Row, Col, Label, ModalHeader, ModalBody, Form, Input, Button, FormFeedback,} from 'reactstrap'
-
-import Select from 'react-select'
-
-import { useTranslation } from 'react-i18next'
-
-import useApi from '@hooks/useApi';
-
 import useLoader from '@hooks/useLoader';
 
-import { ReactSelectStyles, get_news_people_type, student_course_level } from "@utils"
-
-import classnames from "classnames";
+import useApi from "@hooks/useApi"
 
 import AuthContext from '@context/AuthContext'
 
 import SchoolContext from "@context/SchoolContext"
 
-import { validateSchema } from '../validateSchema'
+import { validate, convertDefaultValue, ReactSelectStyles, get_news_people_type, student_course_level  } from "@utils"
 
-const Addmodal = ({ open, handleModal, refreshDatas }) => {
+import classnames from "classnames";
 
-    const { user } = useContext( AuthContext)
+import { validateSchema } from "../validateSchema";
+
+import { t } from 'i18next';
+
+const EditModal = ({ open, handleEdit, refreshDatas, edit_id }) => {
+
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
+
+    const { user } = useContext(AuthContext)
     const { school_id } = useContext(SchoolContext)
-    const { t } = useTranslation()
 
-    const closeBtn = (
-        <X className='cursor-pointer' size={15} onClick={handleModal} />)
-
-    //  State
-    const [value, setValue] = useState('');
-    const [scopeOptions, setScopeOptions] = useState(get_news_people_type())
-    const [student_levelOptions, setStudent_levelOptions] = useState(student_course_level())
-    const [departmentOptions, setDepartmentOption] = useState([])
+    // State
+    const [is_disabled, setDisabled] = useState(true)
     const [isStudent, setStudent] = useState('')
+    const [value, defaultValue] = useState('');
+    const [is_valid, setValid] = useState(true)
+    const [student_levelOptions, setStudent_levelOptions] = useState(student_course_level())
+    const [scopeOptions, setScopeOptions] = useState(get_news_people_type())
+    const [departmentOptions, setDepartmentOption] = useState([])
 
-    const {quill, quillRef } = useQuill({
+    // ** Hook
+    const { control, handleSubmit, formState: { errors }, reset, setValue, setError } = useForm(validate(validateSchema))
+
+    const { quill, quillRef } = useQuill({
         modules: {
             toolbar: [
                     ['bold', 'italic', 'underline', 'strike'],
@@ -78,17 +77,9 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
         readOnly: false,
     });
 
-    // Loader
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
-
-    // ** Hook
-    const { control, handleSubmit, formState: { errors }, reset, setError } = useForm(validate(validateSchema));
-
-    // Api
+    // API
     const newsApi = useApi().service.news
     const departmentApi = useApi().hrms.department
-
-    console.log(school_id)
 
     // Хөтөлбөрийн багийн жагсаалт
     async function getDepartmentOption() {
@@ -98,85 +89,77 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
         }
     }
 
-    async function onSubmit(cdata)
-    {
-        cdata['body'] = quill.root.innerHTML
-        cdata['created_user'] = user.id
-
-        cdata = convertDefaultValue(cdata)
-
-        const formData = new FormData()
-
-        for (let key in cdata)
-        {
-            formData.append(key, cdata[key])
+    useEffect(() => {
+        if(Object.keys(user).length > 0 && user.permissions.includes('lms-service-news-update')) {
+            setDisabled(false)
         }
+    },[user])
 
-        const { success, error } = await fetchData(newsApi.post(formData))
-        if(success) {
-            reset()
-            refreshDatas()
-            handleModal()
-        }
-        else {
-            /** Алдааны мессеж */
-            for (let key in error) {
-                setError(error[key].field, { type: 'custom', message: error[key].msg});
+    async function getDatas() {
+        if (edit_id) {
+
+            const { success, data } = await fetchData(newsApi.getOne(edit_id))
+            if (success) {
+                // засах үед дата байх юм бол setValue-р дамжуулан утгыг харуулна
+                if (data === null) return
+                for (let key in data) {
+                    if (data[key] !== null)
+                        setValue(key, data[key])
+                    else setValue(key, '')
+
+                    if (key === 'body' && quill) {
+                        quill.pasteHTML(data[key]);
+                    }
+                    if (key === 'scope'){
+                        setStudent(data[key])
+                    }
+                }
             }
         }
     }
 
-    const insertToEditor = (url) => {
-        const range = quill.getSelection();
-        quill.insertEmbed(range.index, 'image', url);
-    };
-
-    async function saveToServer(file)  {
-        const body = new FormData();
-        body.append('file', file);
-
-        const { success, data } = await fetchData(newsApi.saveFile(body))
-        insertToEditor(data);
-    };
-
-    function selectLocalImage () {
-        const input = document.createElement('input');
-        input.setAttribute('type', 'file');
-        input.setAttribute('accept', 'image/*');
-        input.click();
-
-        input.onchange = () => {
-            const file = input.files[0];
-            saveToServer(file);
-        };
-    };
-
     useEffect(() => {
+        getDatas()
         getDepartmentOption()
-        if (quill) {
-            quill.getModule('toolbar').addHandler('image', selectLocalImage);
+    }, [open, quill])
+
+    async function onSubmit(cdata) {
+        cdata['body'] = quill.root.innerHTML
+        cdata = convertDefaultValue(cdata)
+
+        if(edit_id) {
+
+            const formData = new FormData()
+
+            for (let key in cdata) {
+                formData.append(key, cdata[key])
+            }
+            const { success, error } = await fetchData(newsApi.put(cdata, edit_id))
+            if(edit_id) {
+                if(success) {
+                    reset()
+                    refreshDatas()
+                    handleEdit()
+                }
+                else {
+                    /** Алдааны мессеж */
+                    for (let key in error) {
+                        setError(error[key].field, { type: 'custom', message: error[key].msg});
+                    }
+                }
+            }
+        }
     }
-    }, [quill]);
 
     return (
         <Fragment>
-            {Loader && isLoading}
-             <Modal
-                isOpen={open}
-                toggle={handleModal}
-                className="sidebar-xl hr-register"
-                modalClassName="modal-slide-in "
-                contentClassName="pt-0"
-            >
-                <ModalHeader
-                    className="mb-1"
-                    toggle={handleModal}
-                    close={closeBtn}
-                    tag="div"
-                >
-                    <h5 className="modal-title">{t('Мэдээ нэмэх')}</h5>
-                </ModalHeader>
-                <ModalBody className='flex-grow-1'>
+            <Modal isOpen={open} toggle={handleEdit} className="modal-dialog-centered modal-lg" onClosed={handleEdit}>
+            { isLoading && Loader}
+                <ModalHeader className="bg-transparent pb-0" toggle={handleEdit}></ModalHeader>
+                <ModalBody className="px-sm-12 pt-50 pb-3">
+                    <div className="text-center">
+                        <h5>{t('Зар мэдээ засах')}</h5>
+                    </div>
                     <Row tag={Form} className='gy-1' onSubmit={handleSubmit(onSubmit)}>
                         <Col md={12}>
                             <Label className='form-label' for="title">
@@ -196,9 +179,11 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                         placeholder={t('Гарчиг')}
                                         bsSize='sm'
                                         invalid={errors.title && true}
+                                        // readOnly={is_valid}
+                                        // is_disabled={is_valid}
                                     />
                                 )}
-                            />
+                                />
                             {errors.title && <FormFeedback className='d-block'>{t(errors.title.message)}</FormFeedback>}
                         </Col>
                         <Col md={12}>
@@ -217,6 +202,8 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                             name='body'
                                             id='body'
                                             ref={quillRef}
+                                            // is_disabled={is_valid}
+                                            readOnly={is_valid}
                                         />
                                     </div>
                                 )}
@@ -227,34 +214,34 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                             <Label className='form-label' for="scope">
                                 {t('Хамрах хүрээ')}
                             </Label>
-                                <Controller
-                                    defaultValue=''
-                                    control={control}
-                                    name='scope'
-                                    render={({field: { value, onChange }}) => {
-                                        return (
-                                            <Select
-                                                name='scope'
-                                                id='scope'
-                                                classNamePrefix='select'
-                                                isClearable
-                                                className={classnames('react-select', { 'is-invalid': errors.scope })}
-                                                isLoading={isLoading}
-                                                placeholder={t('--Сонгоно уу--')}
-                                                options={scopeOptions || []}
-                                                value={scopeOptions.find((c) => c.id === value)}
-                                                noOptionsMessage={() => t('Хоосон байна')}
-                                                onChange={(val) => {
-                                                    onChange(val?.id || '')
-                                                    setStudent(val?.id || '')
-                                                }}
-                                                styles={ReactSelectStyles}
-                                                getOptionValue={(option) => option.id}
-                                                getOptionLabel={(option) => option.name}
-                                            />
-                                        )
-                                    }}
-                                ></Controller>
+                            <Controller
+                                defaultValue=''
+                                control={control}
+                                name='scope'
+                                render={({field: { value, onChange }}) => {
+                                    return (
+                                        <Select
+                                            name='scope'
+                                            id='scope'
+                                            classNamePrefix='select'
+                                            isClearable
+                                            className={classnames('react-select', { 'is-invalid': errors.scope })}
+                                            isLoading={isLoading}
+                                            placeholder={t('--Сонгоно уу--')}
+                                            options={scopeOptions || []}
+                                            value={scopeOptions.find((c) => c.id === value)}
+                                            noOptionsMessage={() => t('Хоосон байна')}
+                                            onChange={(val) => {
+                                                onChange(val?.id || '')
+                                                setStudent(val?.id || '')
+                                            }}
+                                            styles={ReactSelectStyles}
+                                            getOptionValue={(option) => option.id}
+                                            getOptionLabel={(option) => option.name}
+                                        />
+                                    )
+                                }}
+                            ></Controller>
                             {errors.scope && <FormFeedback className='d-block'>{t(errors.scope.message)}</FormFeedback>}
                         </Col>
                         {
@@ -278,7 +265,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                                     isLoading={isLoading}
                                                     placeholder={t('--Сонгоно уу--')}
                                                     options={student_levelOptions || []}
-                                                    value={value && student_levelOptions.find((c) => c.id === value)}
+                                                    value={student_levelOptions.find((c) => c.id === value)}
                                                     noOptionsMessage={() => t('Хоосон байна')}
                                                     onChange={(val) => {
                                                         onChange(val?.id || '')
@@ -290,7 +277,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                             )
                                         }}
                                     ></Controller>
-                                    {errors.student_level && <FormFeedback className='d-block'>{t(errors.student_level.message)}</FormFeedback>}
+                                {errors.student_level && <FormFeedback className='d-block'>{t(errors.student_level.message)}</FormFeedback>}
                             </Col>
                         }
                         <Col md={12}>
@@ -326,11 +313,11 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                 ></Controller>
                             {errors.department && <FormFeedback className='d-block'>{t(errors.department.message)}</FormFeedback>}
                         </Col>
-                        <Col md={12} className="mt-2">
+                       <Col md={12} className="text-center mt-2">
                             <Button className='me-2' color="primary" type="submit">
                                 {t('Хадгалах')}
                             </Button>
-                            <Button color="secondary" outline type="reset" onClick={handleModal}>
+                            <Button color="secondary" outline type="reset" onClick={handleEdit}>
                                 {t('Буцах')}
                             </Button>
                         </Col>
@@ -342,6 +329,4 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
 }
 
 
-
-export default Addmodal
-
+export default EditModal
