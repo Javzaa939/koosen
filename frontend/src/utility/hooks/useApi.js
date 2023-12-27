@@ -374,18 +374,24 @@ function useApi(isDisplay=false) {
 			},
 			/** Бүрэлдэхүүн сургууль */
 			subschool: {
-				get: () => instance.get(`/core/subschool/?`),
+				get: (search='') => instance.get(`/core/subschool/?search=${search}`),
 				getOne: (pk) => instance.get(`/core/subschool/${pk}/`),
 				put: (data, pk) => instance.put(`/core/subschool/${pk}/`, data),
+				post: data => instance.post(`/core/subschool/`, data),
+				delete: (pk) => instance.delete(`/core/subschool/${pk}/`),
 			},
-			/** Хөтөлбөрийн баг */
+			/** Тэнхим */
 			department: {
 				get: () => instance.get(`/core/department/?school=${school_id}`),
 				getSelectSchool: (school) => instance.get(`/core/department/?school=${school}`),
-				// хөтөлбөрийн багийн ахлахын мэдээлэл
+
+				// тэнхим, хөтөлбөрийн багийн ахлахын мэдээлэл
 				getRegister: (search='') => instance.get(`/core/department/register/?school=${school_id}&search=${search}`),
 				getRegisterOne: (pk) => instance.get(`/core/department/register/${pk}/`),
 				putRegister: (data, pk) => instance.put(`/core/department/register/${pk}/`, data),
+				postRegister: data => instance.post(`/core/department/register/`, data),
+				delete: (pk) => instance.delete(`/core/department/register/${pk}/`),
+
 				leaderList: () => instance.get(`/core/leader/list/?school=${school_id}`),
 
 				getOne: (pk) => instance.get(`/core/department/${pk}/`),
@@ -398,13 +404,14 @@ function useApi(isDisplay=false) {
 					if (dep_id) depId = dep_id
 					return instance.get(`/core/teacher/?department=${depId}&school=${school_id}`)
 				},
-
 				getPartTeacher: () => { return instance.get(`/core/teacher/part/?school=${school_id}`) },
 				getSelectSchool: (school) => instance.get(`/core/teacher/?school=${school}`),
+				postRegister: (data) => instance.post(`/core/teacher/create/`, data),
 				getList: (limit, page, sort, search, sub_org, salbar) => instance.get(`/core/teacher/list/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&sub_org=${sub_org}&salbar=${salbar}`),
 				getOne: (pk) => instance.get(`/core/teacher/${pk}/`),
 				getLongList: () => instance.get(`/core/teacher/longlist/`),
 				getSchoolFilter: (school_id) => instance.get(`/core/teacher/listschoolfilter/?school=${school_id}`),
+				getTeacherOne: () => instance.get(`core/teachers/info/`),
 				/** Хичээлээс хамаарах багшийн жагсаалт */
 				getTeacher: (lesson_id) => {
 					var lesson = ''
