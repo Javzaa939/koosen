@@ -33,6 +33,7 @@ const SubSchool = () => {
 	const [filteredData, setFilteredData] = useState([]);
 	const [datas, setDatas] = useState([]);
 	const { t } = useTranslation();
+	console.log("seasrch", searchValue);
 
     // Нийт датаны тоо
     const [total_count, setTotalCount] = useState(1)
@@ -99,14 +100,15 @@ const SubSchool = () => {
     }
 
 	/* Устгах функц */
-	const handleDelete = async(id) => {
-		console.log("id", id);
-        const { success } = await fetchData(departmentsApi.delete(id))
-        if(success)
-        {
-            getDatas()
-        }
-	};
+	async function handleDelete(id) {
+		if (id){
+			const { success } = await fetchData(schoolApi.delete(id))
+			if(success)
+			{
+				getDatas()
+			}
+		}
+	}
 
 
 	// Хайлт хийх үед ажиллах хэсэг
@@ -129,7 +131,6 @@ const SubSchool = () => {
                     <div className='d-flex flex-wrap mt-md-0 mt-1'>
 						<Button
                             color='primary'
-                            // disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-subschools-create') && school_id) ? false : true}
                             disabled={Object.keys(user).length > 0  ? false : true}
 
                             onClick={() => handleModal()}>

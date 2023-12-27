@@ -83,13 +83,14 @@ const Departments = () => {
     }
 
 	/* Устгах функц */
-	const handleDelete = async(id) => {
-		console.log("id", id);
-        const { success } = await fetchData(departmentsApi.delete(id))
-        if(success)
-        {
-            getDatas()
-        }
+	async function handleDelete (id) {
+		if (id){
+			const { success } = await fetchData(departmentsApi.delete(id))
+			if(success)
+			{
+				getDatas()
+			}
+		}
 	};
 
 	// Хайлт хийх үед ажиллах хэсэг

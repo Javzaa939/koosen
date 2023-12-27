@@ -212,6 +212,10 @@ class DepartmentAPIView(
 
     serializer_class = DepartmentRegisterSerailizer
 
+    filter_backends = [SearchFilter]
+    search_fields = ['name']
+
+
     def get(self, request, pk=None):
         " Салбарын жагсаалт "
 
@@ -312,11 +316,15 @@ class DepartmentAPIView(
                 return request.send_error("ERR_003", errors)
 
         return request.send_info("INF_002")
-    
+
     def delete(self, request, pk=None):
-        print("pk", pk)
         " устгах "
-        self.destroy(request, pk)
+
+        qs = self.queryset.filter(id=pk)
+        if qs:
+            qs.delete()
+
+        # self.destroy(request, pk)
         return request.send_info("INF_003")
 
 
@@ -385,8 +393,11 @@ class SubSchoolAPIView(
 ):
     """" Бүрэлдэхүүн сургууль """
 
-    queryset = SubSchools.objects.all().order_by("-created_at")
+    queryset = SubSchools.objects.order_by("-created_at")
     serializer_class = SubSchoolRegisterSerailizer
+
+    filter_backends = [SearchFilter]
+    search_fields = ['name', 'zahiral_name', 'erdem_tsol_name']
 
     def get(self, request, pk=None):
         " Бүрэлдэхүүн сургуулийн жагсаалт "
@@ -422,7 +433,7 @@ class SubSchoolAPIView(
         else:
             error_obj = []
             for key in serializer.errors:
-                print("err",serializer.errors)
+                print(serializer.errors)
                 msg = "Хоосон байна"
 
                 return_error = {
@@ -501,6 +512,8 @@ class SubSchoolAPIView(
 
     def delete(self, request, pk=None):
         " устгах "
+
+        # SubSchools.objects.filter(pk=pk).delete()
 
         self.destroy(request, pk)
         return request.send_info("INF_003")

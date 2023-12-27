@@ -17,14 +17,12 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 		{
 			name: `${t('Тэнхимийн нэр')}`,
 			selector: (row) => <span title={row?.name}>{row?.name}</span>,
-            sortable: true,
 			width: "250px",
 			center: true
 		},
 		{
 			name: `${t('Бүрэлдэхүүн сургууль')}`,
 			selector: (row) => <span title={row?.school}>{row?.school}</span>,
-            sortable: true,
 			width: "250px",
 			center: true
 		},
@@ -32,7 +30,7 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 			name: `${t('Тэнхимийн эрхлэгч')}`,
 			selector: (row) => row?.leaders,
             sortable: true,
-			minWidth: "120px",
+			minWidth: "250px",
 			wrap: true,
 			center: true
 		},
@@ -70,12 +68,13 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
                             <UncontrolledTooltip placement='top' target={`updateSchool${row?.id}`}>засах</UncontrolledTooltip>
 						</>
                     }
-					{
+					{/* {
 						<>
 							<a role="button"
+								className='ms-1'
 								onClick={() => showWarning({
 									header: {
-										title: `${t(row?.name)}`,
+										title: `${t('Тэнхимийн мэдээлэл устгах')}`,
 									},
 									question: `Та  ${row?.name} устгахдаа итгэлтэй байна уу?`,
 									onClick: () => handleDelete(row?.id),
@@ -87,11 +86,11 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 							</a>
 							<UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${row?.id}`} >Устгах</UncontrolledTooltip>
 						</>
-					}
+					} */}
 				</div>
             ),
-            minWidth: "230px",
-            maxWidth: "230px",
+            minWidth: "200px",
+            maxWidth: "200px",
             center: true,
         },
 	]
