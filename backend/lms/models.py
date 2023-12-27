@@ -2157,6 +2157,7 @@ class StudentNotice(models.Model):
     scope = models.PositiveIntegerField(choices=LearningCalendar.SCOPE, db_index=True, default=LearningCalendar.OTHER, verbose_name="Хэн хамрагдах")
     student_level = models.PositiveIntegerField(null=True, verbose_name="Оюутны курс")
     department = models.ForeignKey(Departments, on_delete=models.SET_NULL, null=True, verbose_name="Хөтөлбөрийн баг")
+    is_news = models.BooleanField(default=False)
     school = models.ForeignKey(SubSchools, on_delete=models.SET_NULL, null=True, verbose_name="Сургууль")
     created_user = models.ForeignKey(User, related_name='news_cr_user', on_delete=models.SET_NULL, null=True, verbose_name="Бүртгэсэн хэрэглэгч")
     updated_user = models.ForeignKey(User, related_name='news_up_user', on_delete=models.SET_NULL, null=True, verbose_name="Зассан хэрэглэгч")
