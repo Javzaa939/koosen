@@ -100,26 +100,23 @@ const Teacher = () => {
 	const handleModal =() =>{
 		setAddModal(!add_modal)
 	}
+
 	useEffect(() => {
-		getDatas();
-	},[ selected_values, rowsPerPage, sortField, searchValue, currentPage])
+		if (searchValue.length == 0) {
+			getDatas();
+		} else {
+			const timeoutId = setTimeout(() => {
+				getDatas();
+			}, 600);
 
-	// useEffect(() => {
-	// 	if (searchValue.length == 0) {
-	// 		getDatas();
-	// 	} else {
-	// 		const timeoutId = setTimeout(() => {
-	// 			getDatas();
-	// 		}, 600);
-
-	// 		return () => clearTimeout(timeoutId);
-	// 	}
-	// },[ selected_values, rowsPerPage, sortField, searchValue, currentPage ])
+			return () => clearTimeout(timeoutId);
+		}
+	},[rowsPerPage, sortField, searchValue, currentPage ])
 
 	useEffect(() => {
 		getSubSchoolOption()
 		getDepartmentOption()
-	},[])
+	},[selected_values])
 
 	// ** Function to handle filter
 	const handleFilter = e => {

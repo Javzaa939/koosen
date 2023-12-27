@@ -66,34 +66,18 @@ const SubSchool = () => {
 		}
 	}
 
+
 	useEffect(() => {
-		getDatas();
-	},[])
-	// useEffect(() => {
-	// 	if (searchValue.length == 0) {
-	// 		getDatas();
-	// 	} else {
-	// 		const timeoutId = setTimeout(() => {
-	// 			getDatas();
-	// 		}, 600);
+		if (searchValue.length == 0) {
+			getDatas();
+		} else {
+			const timeoutId = setTimeout(() => {
+				getDatas();
+			}, 600);
 
-	// 		return () => clearTimeout(timeoutId);
-	// 	}
-	// }, [searchValue]);
-
-	// async function firstLoad() {
-	// 	const { success, data } = await fetchData(schoolApi.get(searchValue))
-	// 	if(success) {
-	// 		setDatas(data)
-	// 		setTotalCount(data.length)
-	// 	}
-	// }
-
-	// // Хуудас анх ачааллах үед Fullscreen loader гаргаж ирэх функц, ганц л уншина
-
-	// useEffect(() => {
-	// 	firstLoad()
-	// }, [])
+			return () => clearTimeout(timeoutId);
+		}
+	}, [searchValue]);
 
 	// Засах функц
     function handleUpdateModal(id, data) {
