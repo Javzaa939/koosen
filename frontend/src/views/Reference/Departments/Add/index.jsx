@@ -45,17 +45,11 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
     const { school_id } = useContext(SchoolContext)
 
     // ** Hook
-    const { control, handleSubmit, reset, setError, formState: { errors } } = useForm();
-    // const { control, handleSubmit, reset, setError, formState: { errors } } = useForm(validate(validateSchema));
-
-
+    const { control, handleSubmit, reset, setError, formState: { errors } } = useForm(validate(validateSchema));
     // states
     const [is_loading, setLoader] = useState(false)
     const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
-    const [is_hotolboriin_bag, setIsDepartment] = useState(false)
     const [leader_option, setLeaderOption] = useState([])
-    const [sub_org_option, setSubOrgOption] = useState([])
-
 
     // Loader
 	const { Loader, isLoading, fetchData } = useLoader({});
@@ -63,15 +57,6 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
     // Api
     const getLeaderApi = useApi().hrms.department
     const departmentApi = useApi().hrms.department
-
-    /* салбар сургуулуудын жагсаалт авах функц */
-    async function getSubOrgList() {
-        const school = school_id
-        const { success, data } = await fetchData(departmentApi.getSelectSchool(school))
-        if (success) {
-            setSubOrgOption(data)
-        }
-    }
 
     /* тэнхимийн эрхлэгч-н жагсаалт авах функц */
     async function getLeaderList() {
@@ -83,13 +68,13 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
 
     useEffect(() => {
         getLeaderList()
-        getSubOrgList()
-    },[open])
+    },[])
 
     async function onSubmit(cdata) {
         cdata['created_user'] = user.id
         cdata['updated_user'] = user.id
-        cdata['org'] = school_id
+        cdata['org'] = 1
+        cdata['sub_orgs']= school_id
         cdata = convertDefaultValue(cdata)
 
         const { success, error } = await postFetch(departmentApi.postRegister(cdata))
@@ -159,40 +144,6 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                             {errors.name && <FormFeedback className='d-block'>{t(errors.name.message)}</FormFeedback>}
                         </Col>
                         <Col md={12}>
-                            <Label className="form-label" for="sub_orgs">
-                                {t('Салбар сургууль')}
-                            </Label>
-                            <Controller
-                                control={control}
-                                defaultValue=''
-                                name="sub_orgs"
-                                render={({ field: { value, onChange} }) => {
-                                    return (
-                                        <Select
-                                            name="sub_orgs"
-                                            id="sub_orgs"
-                                            classNamePrefix='select'
-                                            isClearable
-                                            className={classnames('react-select', { 'is-invalid': errors.sub_orgs })}
-                                            isLoading={isLoading}
-                                            placeholder={t('-- Сонгоно уу --')}
-                                            options={sub_org_option || []}
-                                            value={sub_org_option.find((c) => c.id === value)}
-                                            noOptionsMessage={() => {t('Хоосон байна.')}}
-                                            onChange={(val) => {
-                                                onChange(val?.id || '')
-                                            }}
-                                            styles={ReactSelectStyles}
-                                            getOptionValue={(option) => option.id}
-                                            getOptionLabel={(option) => option.name}
-
-                                        />
-                                    )
-                                }}
-                            />
-                            {errors.sub_orgs && <FormFeedback className='d-block'>{t(errors.sub_orgs.message)}</FormFeedback>}
-                        </Col>
-                        <Col md={12}>
                             <Label className="form-label" for="leader">
                                 {t('Тэнхимийн эрхлэгч')}
                             </Label>
@@ -242,11 +193,9 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                                         placeholder={t('Нийтийн сүлжээ')}
                                         {...field}
                                         type="textarea"
-                                        invalid={errors.social && true}
                                     />
                                 )}
                             />
-                            {errors.social && <FormFeedback className='d-block'>{t(errors.social.message)}</FormFeedback>}
                         </Col>
                         <Col md={12}>
                             <Label className="form-label" for="address">
@@ -264,11 +213,9 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                                         placeholder={t('Хаяг')}
                                         {...field}
                                         type="textarea"
-                                        invalid={errors.address && true}
                                     />
                                 )}
                             />
-                            {errors.address && <FormFeedback className='d-block'>{t(errors.address.message)}</FormFeedback>}
                         </Col>
                         <Col md={12}>
                             <Label className="form-label" for="web">
@@ -286,39 +233,10 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                                         placeholder={t('Веб')}
                                         {...field}
                                         type="textarea"
-                                        invalid={errors.web && true}
                                     />
                                 )}
                             />
-                            {errors.web && <FormFeedback className='d-block'>{t(errors.web.message)}</FormFeedback>}
                         </Col>
-                        {/* <Col md={12}>
-                            <Controller
-                                control={control}
-                                id="is_hotolboriin_bag"
-                                name="is_hotolboriin_bag"
-                                defaultValue={is_hotolboriin_bag}
-                                render={({ field: { value, onChange, checked } }) => (
-                                    <Input
-                                        className='me-50'
-                                        // {...field}
-                                        id="is_hotolboriin_bag"
-                                        type="checkbox"
-                                        onChange={(e) =>
-                                            {
-                                                onChange(e.target.checked)
-                                                setIsDepartment(e.target.checked)
-                                            }
-                                        }
-                                        checked={is_hotolboriin_bag}
-                                        value={is_hotolboriin_bag}
-                                    />
-                                )}
-                            />
-                            <Label className="form-label pe-1" for="is_hotolboriin_bag">
-								{t('тэнхим эсэх')}
-                            </Label>
-                        </Col> */}
                         <Col md={12}>
                             <Button className="me-2" color="primary" type="submit" disabled={postLoading}>
                                 {postLoading &&<Spinner size='sm' className='me-1'/>}

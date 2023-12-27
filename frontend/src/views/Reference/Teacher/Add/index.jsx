@@ -66,25 +66,16 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
 
     // Api
 	const teacherApi = useApi().hrms.teacher
-    // const getLeaderApi = useApi().hrms.department
     const departmentApi = useApi().hrms.department
     const subSchoolApi = useApi().hrms.subschool
     const orgPositionApi = useApi().hrms.position
 
     const [selected_values, setSelectValue] = useState(values);
 
-    /* бүрэлдэхүүн сургуулуудын жагсаалт авах функц */
-    async function getSubOrgList() {
-        const { success, data } = await fetchData(subSchoolApi.get())
-        if (success) {
-            setSubOrgOption(data)
-        }
-    }
     /* Тэнхим жагсаалт авах функц */
 	async function getDepartmentOption() {
-		var school_id = selected_values.subschool_id
-        console.log("salbars",school );
-		const { success, data } = await fetchData(departmentApi.getSelectSchool(school_id))
+		var school = school_id
+		const { success, data } = await fetchData(departmentApi.getSelectSchool(school))
 		if (success) {
 			setDepartmentData(data)
 		}
@@ -100,16 +91,15 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
 
     useEffect(() => {
         getDepartmentOption()
-        getSubOrgList()
         getPositionOption()
-    },[selected_values])
+    },[open, school_id])
 
     async function onSubmit(cdata) {
 
         cdata['user']=user.id
-        cdata['org']=school_id
+        cdata['org']=1
+        cdata['sub_org']=school_id
         cdata = convertDefaultValue(cdata)
-        console.log("datas", cdata)
 
         const { success, error } = await postFetch(teacherApi.postRegister(cdata))
         if(success) {
@@ -155,37 +145,6 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                 <ModalBody className="flex-grow-1">
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
                         <Col md={12}>
-                            <Label className="form-label" for="sub_org">
-                                {t('Бүрэлдэхүүн сургууль')}
-                            </Label>
-                            <Controller
-                                control={control}
-                                defaultValue=''
-                                name="sub_org"
-                                render={({ field: { value, onChange} }) => {
-                                    return (
-                                        <Select
-                                            name="sub_org"
-                                            id="sub_org"
-                                            classNamePrefix='select'
-                                            isClearable
-                                            className='react-select'
-                                            placeholder={t('-- Сонгоно уу --')}
-                                            options={sub_org || []}
-                                            value={sub_org.find((c) => c.id === value)}
-                                            noOptionsMessage={() => t('Хоосон байна.')}
-                                            onChange={(val) => {
-                                                onChange(val?.id || '')
-                                            }}
-                                            styles={ReactSelectStyles}
-                                            getOptionValue={(option) => option.id}
-                                            getOptionLabel={(option) => option.name}
-                                        />
-                                    )
-                                }}
-                            ></Controller>
-                        </Col>
-                        <Col md={12}>
                             <Label className="form-label" for="salbar">
                                 {t('Тэнхим')}
                             </Label>
@@ -200,7 +159,7 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                                             id="salbar"
                                             classNamePrefix='select'
                                             isClearable
-                                            className='react-select'
+                                            className={classnames('react-select opacity-100', { 'is-invalid': errors.salbar})}
                                             placeholder={t('-- Сонгоно уу --')}
                                             options={department || []}
                                             value={value && department.find((c) => c.id === value)}
@@ -208,7 +167,7 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                                             onChange={(val) => {
                                                 onChange(val?.id || '')
                                                 setSelectValue({
-                                                    subschool_id: selected_values.subschool_id,
+                                                    subschool_id: school_id,
                                                 })
                                             }}
                                             styles={ReactSelectStyles}
@@ -218,6 +177,7 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                                     )
                                 }}
                             ></Controller>
+                            {errors.salbar && <FormFeedback className='d-block'>{errors.salbar.message}</FormFeedback>}
                         </Col>
                          <Col md={12}>
                             <Label className="form-label" for="org_position">
@@ -234,7 +194,7 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                                             id="org_position"
                                             classNamePrefix='select'
                                             isClearable
-                                            className='react-select'
+                                            className={classnames('react-select opacity-100', { 'is-invalid': errors.org_position})}
                                             placeholder={t('-- Сонгоно уу --')}
                                             options={position || []}
                                             value={value && position.find((c) => c.id === value)}
@@ -249,6 +209,7 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                                     )
                                 }}
                             ></Controller>
+                            {errors.org_position && <FormFeedback className='d-block'>{errors.org_position.message}</FormFeedback>}
                         </Col>
                         <Col md={12}>
                                 <Label className="form-label" for="state">
@@ -285,17 +246,17 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                                 {errors.state && <FormFeedback className='d-block'>{errors.state.message}</FormFeedback>}
                             </Col>
                             <Col  md={12}>
-                                <Label className="form-label" for="register">
+                                <Label className="form-label" for="register_code">
                                     {t('Ажилтны код')}
                                 </Label>
                                 <Controller
                                     defaultValue=''
                                     control={control}
-                                    id="register"
-                                    name="register"
+                                    id="register_code"
+                                    name="register_code"
                                     render={({ field }) => (
                                         <Input
-                                            id ="register"
+                                            id ="register_code"
                                             bsSize="sm"
                                             placeholder={t('Ажилтны код')}
                                             {...field}
@@ -304,52 +265,8 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                                         />
                                     )}
                                 />
-                                {errors.register && <FormFeedback className='d-block'>{t(errors.register.message)}</FormFeedback>}
+                                {errors.register_code && <FormFeedback className='d-block'>{t(errors.register_code.message)}</FormFeedback>}
                             </Col>
-                            <Col  md={12}>
-                            <Label className="form-label" for="last_name">
-                                {t('Овог нэр')}
-                            </Label>
-                            <Controller
-                                defaultValue=''
-                                control={control}
-                                id="last_name"
-                                name="last_name"
-                                render={({ field }) => (
-                                    <Input
-                                        id ="last_name"
-                                        bsSize="sm"
-                                        placeholder={t(' Овог нэр')}
-                                        {...field}
-                                        type="text"
-                                        invalid={errors.last_name && true}
-                                    />
-                                )}
-                            />
-                            {errors.last_name && <FormFeedback className='d-block'>{t(errors.last_name.message)}</FormFeedback>}
-                        </Col>
-                        <Col  md={12}>
-                            <Label className="form-label" for="first_name">
-                                {t('нэр')}
-                            </Label>
-                            <Controller
-                                defaultValue=''
-                                control={control}
-                                id="first_name"
-                                name="first_name"
-                                render={({ field }) => (
-                                    <Input
-                                        id ="first_name"
-                                        bsSize="sm"
-                                        placeholder={t('нэр')}
-                                        {...field}
-                                        type="text"
-                                        invalid={errors.first_name && true}
-                                    />
-                                )}
-                            />
-                            {errors.first_name && <FormFeedback className='d-block'>{t(errors.first_name.message)}</FormFeedback>}
-                        </Col>
                         <Col md={12}>
                             <Button className="me-2" color="primary" type="submit" disabled={postLoading}>
                                 {postLoading &&<Spinner size='sm' className='me-1'/>}
