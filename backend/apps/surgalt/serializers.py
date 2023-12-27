@@ -89,7 +89,6 @@ class LessonStandartListSerializer(serializers.ModelSerializer):
 
                 if userinfo_data:
                     full_name =  emp_data.first_name + " "+ register_code
-                    # print(full_name)
                 teacher_name = teacher_name + ', ' if teacher_name  else ''
                 teacher_name += full_name
 
