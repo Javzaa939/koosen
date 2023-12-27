@@ -4,7 +4,7 @@ export default [
     {
         id: 'test',
         title: 'Шалгалт',
-        icon: <i className="fas fa-biohazard"></i>,
+        icon: <i className="fa fa-book"></i>,
         navLink: "/test",
         children: [
             {
