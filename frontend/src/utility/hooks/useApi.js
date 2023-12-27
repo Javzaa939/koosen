@@ -1094,6 +1094,7 @@ function useApi(isDisplay=false) {
 
 				//Зар
 				getAd: (limit, page, sort, search) => instance.get(`/service/news/ad/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}`),
+				getOneAd: (pk) => instance.get(`/service/news/ad/${pk}/`),
 			},
 		},
 		/** Цагийн тооцоо */

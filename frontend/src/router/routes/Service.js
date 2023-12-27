@@ -1,8 +1,8 @@
 import { lazy } from "react";
 
 const NewsList = lazy(() => import("@views/Service"))
-const News = lazy(() => import("@views/Service/News"))
-const NewsDetail = lazy(() => import("@views/Service/NewsDetail"))
+const Show = lazy(() => import("@views/Service/Show"))
+const ShowAd = lazy(() => import("@views/Service/ShowAd"))
 
 const ServiceRoutes = [
 
@@ -11,13 +11,13 @@ const ServiceRoutes = [
         element: <NewsList/>
     },
     {
-        path: 'service/news',
-        element: <News/>
+        path: 'service/show/:newsid',
+        element: <Show/>
     },
     {
-        path: 'service/news/:newsid',
-        element: <NewsDetail />
-    }
+        path: 'service/showad/:newsid',
+        element: <ShowAd/>
+    },
 ]
 
 export default ServiceRoutes

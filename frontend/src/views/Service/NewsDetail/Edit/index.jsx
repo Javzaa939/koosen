@@ -57,7 +57,7 @@ const EditModal = ({ open, handleEdit, refreshDatas, edit_id }) => {
                     [{ indent: '-1'}, { indent: '+1' }],
 
                     [{ size: ['small', false, 'large', 'huge'] }],
-                    ['link', 'image',],
+                    ['link'],
 
                     [{ color: [] }, { background: [] }],
 
@@ -70,7 +70,7 @@ const EditModal = ({ open, handleEdit, refreshDatas, edit_id }) => {
             'header','bold', 'italic', 'underline', 'strike',
             'align', 'list', 'indent',
             'size',
-            'link', 'image',
+            'link',
             'color', 'background',
             'clean',
         ],
@@ -98,7 +98,7 @@ const EditModal = ({ open, handleEdit, refreshDatas, edit_id }) => {
     async function getDatas() {
         if (edit_id) {
 
-            const { success, data } = await fetchData(newsApi.getOne(edit_id))
+            const { success, data } = await fetchData(newsApi.getOneAd(edit_id))
             if (success) {
                 // засах үед дата байх юм бол setValue-р дамжуулан утгыг харуулна
                 if (data === null) return
@@ -210,110 +210,7 @@ const EditModal = ({ open, handleEdit, refreshDatas, edit_id }) => {
                             />
                             {errors.body && <FormFeedback className='d-block'>{t(errors.body.message)}</FormFeedback>}
                         </Col>
-                        <Col md={12}>
-                            <Label className='form-label' for="scope">
-                                {t('Хамрах хүрээ')}
-                            </Label>
-                            <Controller
-                                defaultValue=''
-                                control={control}
-                                name='scope'
-                                render={({field: { value, onChange }}) => {
-                                    return (
-                                        <Select
-                                            name='scope'
-                                            id='scope'
-                                            classNamePrefix='select'
-                                            isClearable
-                                            className={classnames('react-select', { 'is-invalid': errors.scope })}
-                                            isLoading={isLoading}
-                                            placeholder={t('--Сонгоно уу--')}
-                                            options={scopeOptions || []}
-                                            value={scopeOptions.find((c) => c.id === value)}
-                                            noOptionsMessage={() => t('Хоосон байна')}
-                                            onChange={(val) => {
-                                                onChange(val?.id || '')
-                                                setStudent(val?.id || '')
-                                            }}
-                                            styles={ReactSelectStyles}
-                                            getOptionValue={(option) => option.id}
-                                            getOptionLabel={(option) => option.name}
-                                        />
-                                    )
-                                }}
-                            ></Controller>
-                            {errors.scope && <FormFeedback className='d-block'>{t(errors.scope.message)}</FormFeedback>}
-                        </Col>
-                        {
-                        isStudent === 1 &&
-                            <Col md={12}>
-                                <Label className='form-label' for="student_level">
-                                    {t('Курс')}
-                                </Label>
-                                    <Controller
-                                        defaultValue=''
-                                        control={control}
-                                        name='student_level'
-                                        render={({field: { value, onChange }}) => {
-                                            return (
-                                                <Select
-                                                    name='student_level'
-                                                    id='student_level'
-                                                    classNamePrefix='select'
-                                                    isClearable
-                                                    className={classnames('react-select', { 'is-invalid': errors.student_level })}
-                                                    isLoading={isLoading}
-                                                    placeholder={t('--Сонгоно уу--')}
-                                                    options={student_levelOptions || []}
-                                                    value={student_levelOptions.find((c) => c.id === value)}
-                                                    noOptionsMessage={() => t('Хоосон байна')}
-                                                    onChange={(val) => {
-                                                        onChange(val?.id || '')
-                                                    }}
-                                                    styles={ReactSelectStyles}
-                                                    getOptionValue={(option) => option.id}
-                                                    getOptionLabel={(option) => option.name}
-                                                />
-                                            )
-                                        }}
-                                    ></Controller>
-                                {errors.student_level && <FormFeedback className='d-block'>{t(errors.student_level.message)}</FormFeedback>}
-                            </Col>
-                        }
-                        <Col md={12}>
-                            <Label className='form-label' for="department">
-                                {t('Хөтөлбөрийн баг')}
-                            </Label>
-                                <Controller
-                                    defaultValue=''
-                                    control={control}
-                                    name='department'
-                                    render={({field: { value, onChange }}) => {
-                                        return (
-                                            <Select
-                                                name='department'
-                                                id='department'
-                                                classNamePrefix='select'
-                                                isClearable
-                                                className={classnames('react-select', { 'is-invalid': errors.department })}
-                                                isLoading={isLoading}
-                                                placeholder={t('--Сонгоно уу--')}
-                                                options={departmentOptions || []}
-                                                value={departmentOptions.find((c) => c.id === value)}
-                                                noOptionsMessage={() => t('Хоосон байна')}
-                                                onChange={(val) => {
-                                                    onChange(val?.id || '')
-                                                }}
-                                                styles={ReactSelectStyles}
-                                                getOptionValue={(option) => option.id}
-                                                getOptionLabel={(option) => option.name}
-                                            />
-                                        )
-                                    }}
-                                ></Controller>
-                            {errors.department && <FormFeedback className='d-block'>{t(errors.department.message)}</FormFeedback>}
-                        </Col>
-                       <Col md={12} className="text-center mt-2">
+                        <Col md={12} className="text-center mt-2">
                             <Button className='me-2' color="primary" type="submit">
                                 {t('Хадгалах')}
                             </Button>

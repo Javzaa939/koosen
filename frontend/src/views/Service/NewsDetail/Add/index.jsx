@@ -88,8 +88,6 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
     const newsApi = useApi().service.news
     const departmentApi = useApi().hrms.department
 
-    console.log(school_id)
-
     // Хөтөлбөрийн багийн жагсаалт
     async function getDepartmentOption() {
         const { success, data } = await fetchData(departmentApi.get(school_id))

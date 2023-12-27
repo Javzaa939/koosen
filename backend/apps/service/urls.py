@@ -13,4 +13,5 @@ urlpatterns = [
 
     # Зөвхөн зар
     path('news/ad/', StudentNoticeNotNewsAPIView.as_view()),
+    path('news/ad/<int:pk>/', StudentNoticeNotNewsAPIView.as_view()),
 ]
