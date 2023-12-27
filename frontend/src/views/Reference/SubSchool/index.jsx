@@ -65,6 +65,7 @@ const SubSchool = () => {
 		}
 	}
 
+
 	useEffect(() => {
 		if (searchValue.length == 0) {
 			getDatas();
@@ -77,26 +78,24 @@ const SubSchool = () => {
 		}
 	}, [searchValue]);
 
-	async function firstLoad() {
-		const { success, data } = await fetchData(schoolApi.get(searchValue))
-		if(success) {
-			setDatas(data)
-			setTotalCount(data.length)
-		}
-	}
-
-	// Хуудас анх ачааллах үед Fullscreen loader гаргаж ирэх функц, ганц л уншина
-
-	useEffect(() => {
-		firstLoad()
-	}, [])
-
 	// Засах функц
     function handleUpdateModal(id, data) {
         setEditId(id)
         setUpdateModal(!update_modal)
         setDetailModalData(data)
     }
+
+	/* Устгах функц */
+	async function handleDelete(id) {
+		if (id){
+			const { success } = await fetchData(schoolApi.delete(id))
+			if(success)
+			{
+				getDatas()
+			}
+		}
+	}
+
 
 	// Хайлт хийх үед ажиллах хэсэг
 	const handleFilter = e => {
@@ -118,8 +117,7 @@ const SubSchool = () => {
                     <div className='d-flex flex-wrap mt-md-0 mt-1'>
 						<Button
                             color='primary'
-                            // disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-subschools-create') && school_id) ? false : true}
-                            disabled={Object.keys(user).length > 0 && school_id ? false : true}
+                            disabled={Object.keys(user).length > 0  ? false : true}
 
                             onClick={() => handleModal()}>
                             <Plus size={15} />
@@ -156,7 +154,7 @@ const SubSchool = () => {
 									<h5>{t('Өгөгдөл байхгүй байна')}</h5>
 								</div>
 							)}
-                            columns={getColumns(currentPage, rowsPerPage, searchValue.length ? filteredData : datas, handleUpdateModal)}
+                            columns={getColumns(currentPage, rowsPerPage, searchValue.length ? filteredData : datas, handleUpdateModal, handleDelete)}
                             sortIcon={<ChevronDown size={10} />}
                             paginationPerPage={rowsPerPage}
                             paginationDefaultPage={currentPage}

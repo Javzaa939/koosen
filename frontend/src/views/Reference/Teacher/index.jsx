@@ -20,7 +20,7 @@ import AuthContext from '@context/AuthContext'
 import SchoolContext from '@context/SchoolContext'
 
 import { getColumns } from './helpers';
-import AddModal from './Add'
+// import AddModal from './Add'
 
 const Teacher = () => {
 
@@ -80,7 +80,7 @@ const Teacher = () => {
 		}
 	}
 
-	/* Хөтөлбөрийн баг дата авах функц */
+	/* Тэнхим дата авах функц */
 	async function getDepartmentOption() {
 		var school_id = selected_values.subschool_id
 		const { success, data } = await fetchData(departmentApi.getSelectSchool(school_id))
@@ -111,12 +111,12 @@ const Teacher = () => {
 
 			return () => clearTimeout(timeoutId);
 		}
-	},[ selected_values, rowsPerPage, sortField, searchValue, currentPage ])
+	},[rowsPerPage, sortField, searchValue, currentPage ])
 
 	useEffect(() => {
 		getSubSchoolOption()
 		getDepartmentOption()
-	},[selected_values])
+	},[searchValue])
 
 	// ** Function to handle filter
 	const handleFilter = e => {
@@ -144,14 +144,14 @@ const Teacher = () => {
 				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
 					<CardTitle tag="h4">{t('Багшийн мэдээлэл')}</CardTitle>
 					<div className='d-flex flex-wrap mt-md-0 mt-1'>
-						<Button
+						{/* <Button
                             color='primary'
                             // disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-subschools-create') && school_id) ? false : true}
-                            disabled={Object.keys(user).length > 0 ? false : true}
+                            disabled={Object.keys(user).length > 0 && school_id ? false : true}
                             onClick={() => handleModal()}>
                             <Plus size={15} />
                             <span className='align-middle ms-50'>{t('Нэмэх')}</span>
-                        </Button>
+                        </Button> */}
                     </div>
                 </CardHeader>
                 <Row className="justify-content-between mx-0 mb-1 mt-1">
@@ -193,7 +193,7 @@ const Teacher = () => {
 					</Col>
 					<Col md={4}>
 						<Label className="form-label" for="salbar">
-							{t('Хөтөлбөрийн баг')}
+							{t('Тэнхим')}
 						</Label>
 						<Controller
 							control={control}
@@ -269,7 +269,7 @@ const Teacher = () => {
 					</div>
 				}
 			</Card>
-			{ add_modal && <AddModal open={add_modal} handleModal={handleModal} refreshDatas={getDatas} /> }
+			{/* { add_modal && <AddModal open={add_modal} handleModal={handleModal} refreshDatas={getDatas} /> } */}
 
         </Fragment>
     )

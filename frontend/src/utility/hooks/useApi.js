@@ -374,12 +374,13 @@ function useApi(isDisplay=false) {
 			},
 			/** Бүрэлдэхүүн сургууль */
 			subschool: {
-				get: () => instance.get(`/core/subschool/`),
+				get: (search='') => instance.get(`/core/subschool/?search=${search}`),
 				getOne: (pk) => instance.get(`/core/subschool/${pk}/`),
 				put: (data, pk) => instance.put(`/core/subschool/${pk}/`, data),
 				post: data => instance.post(`/core/subschool/`, data),
+				delete: (pk) => instance.delete(`/core/subschool/${pk}/`),
 			},
-			/** Хөтөлбөрийн баг */
+			/** Тэнхим */
 			department: {
 				get: () => instance.get(`/core/department/?school=${school_id}`),
 				getSelectSchool: (school) => instance.get(`/core/department/?school=${school}`),
@@ -389,6 +390,7 @@ function useApi(isDisplay=false) {
 				getRegisterOne: (pk) => instance.get(`/core/department/register/${pk}/`),
 				putRegister: (data, pk) => instance.put(`/core/department/register/${pk}/`, data),
 				postRegister: data => instance.post(`/core/department/register/`, data),
+				delete: (pk) => instance.delete(`/core/department/register/${pk}/`),
 
 				leaderList: () => instance.get(`/core/leader/list/?school=${school_id}`),
 

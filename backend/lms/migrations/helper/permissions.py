@@ -737,7 +737,7 @@ permissions = [
 # Хөтөлбөрийн баг
     {
         'name' : "lms-reference-departments-read",
-        'description' : "Лавлах сан хөтөлбөрийн баг мэдээлэл унших"
+        'description' : "Лавлах сан тэнхим мэдээлэл унших"
     },
 # Хөтөлбөрийн баг
     {
