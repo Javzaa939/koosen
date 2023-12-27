@@ -267,50 +267,6 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                                 />
                                 {errors.register_code && <FormFeedback className='d-block'>{t(errors.register_code.message)}</FormFeedback>}
                             </Col>
-                            {/* <Col  md={12}>
-                            <Label className="form-label" for="last_name">
-                                {t('Овог')}
-                            </Label>
-                            <Controller
-                                defaultValue=''
-                                control={control}
-                                id="last_name"
-                                name="last_name"
-                                render={({ field }) => (
-                                    <Input
-                                        id ="last_name"
-                                        bsSize="sm"
-                                        placeholder={t(' Овог')}
-                                        {...field}
-                                        type="text"
-                                        invalid={errors.last_name && true}
-                                    />
-                                )}
-                            />
-                            {errors.last_name && <FormFeedback className='d-block'>{t(errors.last_name.message)}</FormFeedback>}
-                        </Col>
-                        <Col  md={12}>
-                            <Label className="form-label" for="first_name">
-                                {t('Нэр')}
-                            </Label>
-                            <Controller
-                                defaultValue=''
-                                control={control}
-                                id="first_name"
-                                name="first_name"
-                                render={({ field }) => (
-                                    <Input
-                                        id ="first_name"
-                                        bsSize="sm"
-                                        placeholder={t('нэр')}
-                                        {...field}
-                                        type="text"
-                                        invalid={errors.first_name && true}
-                                    />
-                                )}
-                            />
-                            {errors.first_name && <FormFeedback className='d-block'>{t(errors.first_name.message)}</FormFeedback>}
-                        </Col> */}
                         <Col md={12}>
                             <Button className="me-2" color="primary" type="submit" disabled={postLoading}>
                                 {postLoading &&<Spinner size='sm' className='me-1'/>}

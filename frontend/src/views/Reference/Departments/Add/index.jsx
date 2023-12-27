@@ -46,16 +46,10 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
 
     // ** Hook
     const { control, handleSubmit, reset, setError, formState: { errors } } = useForm(validate(validateSchema));
-    var values = {
-		subschool_id: '',
-	}
-
     // states
     const [is_loading, setLoader] = useState(false)
     const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
     const [leader_option, setLeaderOption] = useState([])
-    const [department, setDepartmentData] = useState([]);
-    const [selected, setSelectValue] = useState(values)
 
     // Loader
 	const { Loader, isLoading, fetchData } = useLoader({});

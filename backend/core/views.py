@@ -682,33 +682,17 @@ class EmployeeApiView(
         " Багшийн мэдээлэл шинээр үүсгэх "
 
         datas = request.data
-        org = datas["org"]
-        sub_org = datas["sub_org"]
-        salbar = datas["salbar"]
-        last_name = datas.get("last_name")
-        first_name = datas.get("first_name")
-
         serializer = self.get_serializer(data=datas)
         if serializer.is_valid(raise_exception=False):
-            is_success = False
             with transaction.atomic():
                 try:
-                    teacher_qs = Teachers.objects.filter(org=org, sub_org=sub_org, salbar=salbar)
-                    if teacher_qs:
-                        print("tt", teacher_qs)
-                        # Teachers.objects.create(last_name=last_name, first_name=first_name)
-                    self.create(request).data
-                    is_success = True
+                    self.perform_create(serializer)
                 except Exception:
-                    raise
-            if is_success:
-                return request.send_info("INF_001")
-
-            return request.send_error("ERR_002")
+                    return request.send_error("ERR_002")
+            return request.send_info("INF_001")
         else:
             error_obj = []
             for key in serializer.errors:
-                print("err", serializer.errors)
                 msg = "Хоосон байна"
 
                 return_error = {

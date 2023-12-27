@@ -105,19 +105,6 @@ const Departments = () => {
 		setCurrentPage(page.selected + 1);
 	};
 
-	// Хуудас анх ачааллах үед Fullscreen loader гаргаж ирэх функц, ганц л уншина
-	// async function firstLoad() {
-	// 	const { success, data } = await fetchData(departmentsApi.getRegister(searchValue))
-	// 	if(success) {
-	// 		setDatas(data)
-	// 		setTotalCount(data.length)
-	// 	}
-	// }
-
-	// useEffect(() => {
-	// 	firstLoad();
-	// }, [])
-
 	return (
 		<Fragment>
 			{isLoading && Loader}

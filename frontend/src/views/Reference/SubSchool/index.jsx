@@ -33,7 +33,6 @@ const SubSchool = () => {
 	const [filteredData, setFilteredData] = useState([]);
 	const [datas, setDatas] = useState([]);
 	const { t } = useTranslation();
-	console.log("seasrch", searchValue);
 
     // Нийт датаны тоо
     const [total_count, setTotalCount] = useState(1)
