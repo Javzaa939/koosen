@@ -220,11 +220,9 @@ class DepartmentAPIView(
         " Салбарын жагсаалт "
 
         school = self.request.query_params.get('school')
-        search = self.request.query_params.get('search')
+
         if school:
             self.queryset = self.queryset.filter(sub_orgs=school)
-        if search:
-            self.queryset = self.queryset.filter(name__icontains=search)
 
         if pk:
             group = self.retrieve(request, pk).data
