@@ -17,21 +17,25 @@ from django.db.models import Count
 from django.db.models import Sum
 from django.shortcuts import get_object_or_404
 from django.conf import settings
-from functools import reduce
-from operator import or_
 
-from lms.models import LessonStandart, Student
-from lms.models import Lesson_title_plan
-from lms.models import ProfessionDefinition
-from lms.models import LearningPlan
-from lms.models import Profession_SongonKredit
-from lms.models import TimeTable
-from lms.models import ScoreRegister
-from lms.models import Group
-from lms.models import ProfessionalDegree
-from lms.models import AdmissionBottomScore, SubSchools, Departments
-from lms.models import Lesson_to_teacher
-from lms.models import ExamTimeTable,Exam_repeat
+from lms.models import (
+    Group,
+    Student,
+    TimeTable,
+    SubSchools,
+    Departments,
+    Exam_repeat,
+    LearningPlan,
+    ScoreRegister,
+    ExamTimeTable,
+    LessonStandart,
+    Lesson_title_plan,
+    Lesson_to_teacher,
+    ProfessionalDegree,
+    ProfessionDefinition,
+    AdmissionBottomScore,
+    Profession_SongonKredit,
+)
 
 from .serializers import LessonStandartSerializer
 from .serializers import LessonTitlePlanSerializer
@@ -46,6 +50,7 @@ from .serializers import LearningPlanPrintSerializer
 from .serializers import GroupSerializer
 from .serializers import AdmissionBottomScoreSerializer
 from .serializers import AdmissionBottomScoreListSerializer
+
 
 @permission_classes([IsAuthenticated])
 class LessonStandartAPIView(
@@ -80,12 +85,8 @@ class LessonStandartAPIView(
 
         self.serializer_class = LessonStandartListSerializer
 
-        department = self.request.query_params.get('department')
-        category = self.request.query_params.get('category')
-        school = self.request.query_params.get('schoolId')
-
-        # if school:
-        #     self.queryset = self.queryset.filter(school=int(school))
+        department = request.query_params.get('department')
+        category = request.query_params.get('category')
 
         if department:
             self.queryset = self.queryset.filter(department=department)
@@ -103,47 +104,31 @@ class LessonStandartAPIView(
         return request.send_data(less_standart_list)
 
     @has_permission(must_permissions=['lms-study-lessonstandart-create'])
+    @transaction.atomic
     def post(self, request):
         " хичээлийн стандартын шинээр үүсгэх "
 
         request_data = request.data
         serializer = self.get_serializer(data=request_data)
 
-        if serializer.is_valid(raise_exception=False):
-            is_success = False
-            with transaction.atomic():
-                try:
-                    self.create(request).data
+        # transaction savepoint зарлах нь хэрэв алдаа гарвад roll back хийнэ
+        sid = transaction.savepoint()
 
-                    is_success = True
-                except Exception as e:
-                    print(e)
-                    raise
-            if is_success:
-                return request.send_info("INF_001")
+        try:
+            serializer = self.serializer_class(data=request_data, many=False)
+            if not serializer.is_valid():
+                transaction.savepoint_rollback(sid)
+                return request.send_error_valid(serializer.errors)
 
+            serializer.save()
+
+        except Exception:
             return request.send_error("ERR_002")
-        else:
-            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
-            error_obj = []
-            for key in serializer.errors:
-                msg = "Хоосон байна"
-                if key == 'code':
-                    msg = "Код давхцаж байна"
 
-                return_error = {
-                    "field": key,
-                    "msg": msg
-                }
-
-                error_obj.append(return_error)
-
-            if len(error_obj) > 0:
-                return request.send_error("ERR_003", error_obj)
-
-            return request.send_error("ERR_002")
+        return request.send_info("INF_001")
 
     @has_permission(must_permissions=['lms-study-lessonstandart-update'])
+    @transaction.atomic
     def put(self, request, pk=None):
         " хичээлийн стандартын шинээр үүсгэх "
 
@@ -151,51 +136,29 @@ class LessonStandartAPIView(
         teachers_data = request.data.get("teachers")
         instance = self.get_object()
 
-        serializer = self.get_serializer(instance, data=request_data)
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance, data=request_data, partial=True)
 
-        if serializer.is_valid(raise_exception=False):
-            is_success = False
-            with transaction.atomic():
-                try:
-                    if teachers_data:
-                        old_teacher_ids = Lesson_to_teacher.objects.filter(lesson=pk).values_list('teacher',flat=True)
-                        for old_teacher in old_teacher_ids:
-                            if not (old_teacher in  teachers_data):
-                                qs_teacher = Lesson_to_teacher.objects.filter(teacher_id=old_teacher,lesson_id=pk)
-                                if qs_teacher:
-                                    qs_teacher.delete()
-                        for teacher in teachers_data:
-                            teacher_id = teacher.get('id')
-                            Lesson_to_teacher.objects.update_or_create(
-                                    lesson_id=pk,
-                                    teacher_id=teacher_id
-                                )
+            if not serializer.is_valid(raise_exception=False):
+                return request.send_error_valid(serializer.errors)
 
-                    self.update(request).data
-                    is_success = True
-                except Exception:
-                    raise
-            if is_success:
-                return request.send_info("INF_001")
+            if teachers_data:
+                old_teacher_qs = Lesson_to_teacher.objects.filter(lesson=pk)
+                old_teacher_qs.delete()
+                for teacher in teachers_data:
+                    teacher_id = teacher.get('id')
+                    Lesson_to_teacher.objects.update_or_create(
+                        lesson_id=pk,
+                        teacher_id=teacher_id
+                    )
 
-            return request.send_error("ERR_002")
-        else:
-            error_obj = []
-            for key in serializer.errors:
-                msg = "Хоосон байна"
-                if key == 'code':
-                    msg = "Код давхцаж байна"
+            serializer.save()
 
-                return_error = {
-                    "field": key,
-                    "msg": msg
-                }
+            return request.send_info("INF_002")
 
-                error_obj.append(return_error)
-
-            if len(error_obj) > 0:
-                return request.send_error("ERR_003", error_obj)
-
+        except Exception as e:
+            print(e)
             return request.send_error("ERR_002")
 
     @has_permission(must_permissions=['lms-study-lessonstandart-delete'])
@@ -217,6 +180,7 @@ class LessonStandartAPIView(
 
         self.destroy(request, pk)
         return request.send_info("INF_003")
+
 class LessonTitlePlanAPIView(
     mixins.CreateModelMixin,
     mixins.UpdateModelMixin,
@@ -236,7 +200,6 @@ class LessonTitlePlanAPIView(
     @has_permission(must_permissions=['lms-study-lessonstandart-read'])
     def get(self, request, pk=None, lessonID=None):
         " хичээлийн сэдэвчилсэн төлөвлөгөө жагсаалт "
-
 
         # Хичээлийн хайх
         if lessonID:
@@ -392,10 +355,7 @@ class ProfessionDefinitionAPIView(
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['name', 'code', 'profession_code']
-
-    # def get_queryset(self):
-    #     return override_get_queryset(self)
+    search_fields = ['name', 'code', 'profession_code', 'degree__degree_name']
 
     @has_permission(must_permissions=['lms-study-profession-read'])
     def get(self, request, pk=None):
@@ -424,6 +384,7 @@ class ProfessionDefinitionAPIView(
         return request.send_data(learn_plan_list)
 
     @has_permission(must_permissions=['lms-study-profession-create'])
+    @transaction.atomic
     def post(self, request):
         "  Мэргэжлийн тодорхойлолт шинээр үүсгэх "
 
@@ -444,42 +405,24 @@ class ProfessionDefinitionAPIView(
 
         request_data['profession_code'] = new_profession_code
 
-        serializer = self.get_serializer(data=request_data)
+        # transaction savepoint зарлах нь хэрэв алдаа гарвад roll back хийнэ
+        sid = transaction.savepoint()
 
-        if serializer.is_valid():
-            is_success = False
-            with transaction.atomic():
-                try:
-                    self.create(request).data
+        try:
+            serializer = self.serializer_class(data=request_data, many=False)
+            if not serializer.is_valid():
+                transaction.savepoint_rollback(sid)
+                return request.send_error_valid(serializer.errors)
 
-                    is_success = True
-                except Exception:
-                    raise
-            if is_success:
-                return request.send_info("INF_001")
+            serializer.save()
 
+        except Exception:
             return request.send_error("ERR_002")
-        else:
-            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
-            error_obj = []
-            for key in serializer.errors:
-                msg = "Хоосон байна"
-                if key == 'code':
-                    msg = "Код давхцаж байна"
 
-                return_error = {
-                    "field": key,
-                    "msg": msg
-                }
-
-                error_obj.append(return_error)
-
-            if len(error_obj) > 0:
-                return request.send_error("ERR_003", error_obj)
-
-            return request.send_error("ERR_002")
+        return request.send_info("INF_001")
 
     @has_permission(must_permissions=['lms-study-profession-update'])
+    @transaction.atomic
     def put(self, request, pk=None):
         "  Мэргэжлийн тодорхойлолт  засах "
 
@@ -489,46 +432,39 @@ class ProfessionDefinitionAPIView(
         professional_base = request_data.get('professional_base')
         professional_lesson = request_data.get('professional_lesson')
         admission_lesson = request_data.get('admission_lesson')
-        instance = self.get_object()
 
-        serializer = self.get_serializer(instance, data=request_data)
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance, data=request_data, partial=True)
 
-        if serializer.is_valid(raise_exception=False):
-            self.perform_create(serializer)
+            if not serializer.is_valid(raise_exception=False):
+                return request.send_error_valid(serializer.errors)
+
             if general_base:
                 ss = Profession_SongonKredit.objects.update_or_create(
-                    profession_id = profession,
+                    profession_id=profession,
                     lesson_level=LearningPlan.BASIC,
                     songon_kredit=general_base
                 )
             if professional_base:
                 ss = Profession_SongonKredit.objects.update_or_create(
-                    profession_id = profession,
+                    profession_id=profession,
                     lesson_level=LearningPlan.PROF_BASIC,
                     songon_kredit=professional_base
                 )
             if professional_lesson:
                 ss = Profession_SongonKredit.objects.update_or_create(
-                    profession_id = profession,
+                    profession_id=profession,
                     lesson_level=LearningPlan.PROFESSION,
                     songon_kredit=professional_lesson
                 )
-        else:
-            error_obj = []
-            for key in serializer.errors:
-                msg = "Хоосон байна"
-                if key == 'code':
-                    msg = "Код давхцаж байна"
 
-                return_error = {
-                    "field": key,
-                    "msg": msg
-                }
 
-                error_obj.append(return_error)
+            self.perform_create(serializer)
 
-            if len(error_obj) > 0:
-                return request.send_error("ERR_003", error_obj)
+        except Exception as e:
+            print(e)
+            return request.send_error("ERR_002")
 
         return request.send_info("INF_002")
 
@@ -792,7 +728,7 @@ class LessonStandartStudentListAPIView(
     """ Тухайн оюутны төгсөлтийн хичээлийн жагсаалт """
 
     queryset = LessonStandart.objects
-    serializer_class = LessonStandartListSerializer
+    serializer_class = LessonStandartSerializer
 
     def get_queryset(self):
         queryset = self.queryset
@@ -1293,7 +1229,7 @@ class LessonStandartDiplomaListAPIView(
     """ Тухайн оюутны төгсөлтийн хичээлийн жагсаалт """
 
     queryset = LessonStandart.objects
-    serializer_class = LessonStandartListSerializer
+    serializer_class = LessonStandartSerializer
 
     def get_queryset(self):
         queryset = self.queryset

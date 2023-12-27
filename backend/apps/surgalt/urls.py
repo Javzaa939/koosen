@@ -22,12 +22,12 @@ from .views import LessonStandartProfessionListAPIView
 urlpatterns = [
     # Хичээлийн стандарт
     path('lessonstandart/', LessonStandartAPIView.as_view()),
-    path('lessonstandart/list/', LessonStandartListAPIView.as_view()),
+    path('lessonstandart/<int:pk>/', LessonStandartAPIView.as_view()),
 
+    path('lessonstandart/list/', LessonStandartListAPIView.as_view()),
     path('lessonstandart/list/profession/<int:profession>/', LessonStandartProfessionListAPIView.as_view()),
 
     path('lessonstandart/student/list/', LessonStandartStudentListAPIView.as_view()),
-    path('lessonstandart/<int:pk>/', LessonStandartAPIView.as_view()),
     path('lessonstandart/type/<int:pk>/', LessonStandartBagtsAPIView.as_view()),
 
     path('lessonstandart/timetable-list/', LessonStandartTimetableListAPIView.as_view()),

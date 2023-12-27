@@ -129,27 +129,27 @@ const Education = () => {
         if(is_edit) {
             /** Засах */
             var id = cdata['id']
-            const { success, error } = await fetchData(educationApi.put(cdata, id, studentId))
+            const { success, errors } = await fetchData(educationApi.put(cdata, id, studentId))
             if(success)
             {
                 onModalClosed()
                 getDatas()
             } else {
                 /** Алдааны мессэжийг input дээр харуулна */
-                for (let key in error) {
-                    setError(error[key].field, { type: 'custom', message:  error[key].msg});
+                for (let key in errors) {
+                    setError(key, { type: 'custom', message:  errors[key][0]});
                 }
             }
         } else {
-            const { success, error } = await fetchData(educationApi.post(cdata))
+            const { success, errors } = await fetchData(educationApi.post(cdata))
             if(success)
             {
                 onModalClosed()
                 getDatas()
             } else {
                 /** Алдааны мессэжийг input дээр харуулна */
-                for (let key in error) {
-                    setError(error[key].field, { type: 'custom', message:  error[key].msg});
+                for (let key in errors) {
+                    setError(key, { type: 'custom', message:  errors[key][0]});
                 }
             }
         }

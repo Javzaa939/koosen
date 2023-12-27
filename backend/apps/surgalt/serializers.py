@@ -7,7 +7,6 @@ from lms.models import Lesson_title_plan
 from lms.models import LessonCategory
 from lms.models import ProfessionalDegree
 from lms.models import LearningPlan
-from lms.models import LessonStandart
 from lms.models import ProfessionDefinition
 from lms.models import LessonGroup
 from lms.models import LessonLevel
@@ -22,16 +21,14 @@ from lms.models import TimeTable
 from lms.models import TimeTable_to_group
 from lms.models import AdmissionBottomScore
 from lms.models import AdmissionLesson
-from lms.models import StudentAdmissionScore
 
 
-from core.models import Teachers,Employee
+from core.models import Teachers, Employee
 
 from core.serializers import DepartmentRegisterSerailizer
 
 # Хичээлийн ангилал
 class LessonCategorySerializer(serializers.ModelSerializer):
-
     class Meta:
         model = LessonCategory
         fields = "id", "category_code", "category_name"
@@ -51,22 +48,24 @@ class LessonStandartListSerializer(serializers.ModelSerializer):
     def get_teachers(self, obj):
 
         teacher_list = []
-        teacher_ids = Lesson_to_teacher.objects.filter(lesson_id=obj.id).values_list('teacher_id',flat=True)
+        teacher_ids = Lesson_to_teacher.objects.filter(lesson_id=obj.id).values_list('teacher_id', flat=True)
         if teacher_ids:
             for teacher_id in teacher_ids:
                 full_name = ""
-                emp_data = Teachers.objects.filter(id=teacher_id).first()
-                user_id = emp_data.user
-                userinfo_data = Employee.objects.filter(user=user_id,state=Employee.STATE_WORKING).first()
+                emp_data = Teachers.objects.filter(id=teacher_id, action_status=Teachers.APPROVED).first()
+                if emp_data:
+                    user_id = emp_data.user
+                    userinfo_data = Employee.objects.filter(user=user_id, state=Employee.STATE_WORKING).first()
 
-                register_code = None
-                if userinfo_data:
-                    register_code = userinfo_data.register_code
-                if register_code:
-                    full_name = register_code
-                if userinfo_data:
-                    full_name += emp_data.first_name
-                teacher_list.append({'id': teacher_id, 'name': full_name})
+                    register_code = None
+                    if userinfo_data:
+                        register_code = userinfo_data.register_code
+                    if register_code:
+                        full_name = register_code
+                    if userinfo_data:
+                        full_name += emp_data.first_name
+
+                    teacher_list.append({'id': teacher_id, 'name': full_name})
 
         return teacher_list
 
@@ -77,20 +76,21 @@ class LessonStandartListSerializer(serializers.ModelSerializer):
         if teacher_ids:
             for teacher_id in teacher_ids:
                 full_name = ""
-                emp_data = Teachers.objects.filter(id=teacher_id).first()
-                user_id = emp_data.user
-                userinfo_data = Employee.objects.filter(user=user_id,state=Employee.STATE_WORKING).first()
-                register_code = None
-                if userinfo_data:
-                    register_code = userinfo_data.register_code
+                emp_data = Teachers.objects.filter(id=teacher_id, action_status=Teachers.APPROVED).first()
+                if emp_data:
+                    user_id = emp_data.user
+                    userinfo_data = Employee.objects.filter(user=user_id,state=Employee.STATE_WORKING).first()
+                    register_code = None
 
-                # if register_code:
-                #     full_name = register_code
+                    if userinfo_data:
+                        full_name = emp_data.first_name
+                        register_code = userinfo_data.register_code
 
-                if userinfo_data:
-                    full_name =  emp_data.first_name + " "+ register_code
-                teacher_name = teacher_name + ', ' if teacher_name  else ''
-                teacher_name += full_name
+                        if register_code:
+                            full_name = full_name + " " + register_code
+
+                    teacher_name = teacher_name + ', ' if teacher_name else ''
+                    teacher_name += full_name
 
         return teacher_name
 
@@ -135,6 +135,7 @@ class AdmissionLessonSerializer(serializers.ModelSerializer):
     class Meta:
         model = AdmissionLesson
         fields = "__all__"
+
 
 # Мэргэжлийн тодорхойлолт жагсаалт
 class ProfessionDefinitionListSerializer(serializers.ModelSerializer):

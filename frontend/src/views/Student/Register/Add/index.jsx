@@ -127,20 +127,23 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
 	async function onSubmit(cdata) {
         cdata['school'] = school_id
         cdata['is_khur'] = is_khur
-        cdata['citizen_name'] = citizen_name
-        cdata['citizenship'] = citizen_id
+        // cdata['citizen_name'] = citizen_name
+        // cdata['citizenship'] = citizen_id
         cdata = convertDefaultValue(cdata)
 
-        const { success, error } = await postFetch(studentApi.post(cdata))
+        console.log('cdata', cdata)
+
+        const { success, errors } = await postFetch(studentApi.post(cdata))
         if(success)
         {
             handleModal()
             refreshDatas()
             reset()
         } else {
+            console.log('errors', errors)
             /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in error) {
-                setError(error[key].field, { type: 'custom', message:  error[key].msg});
+            for (let key in errors) {
+                setError(key, { type: 'custom', message:  errors[key][0]});
             }
         }
 	}
@@ -288,11 +291,12 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                             isLoading={isLoading}
                                             placeholder={t(`-- Сонгоно уу --`)}
                                             options={country_option || []}
-                                            value={country_option.find((c) => c.id === (value || citizen_id))}
+                                            value={country_option.find((c) => c.id === value)}
                                             noOptionsMessage={() => t('Хоосон байна')}
                                             onChange={(val) => {
                                                 setCitizenId(val?.id || '')
                                                 setCitizen(val?.name)
+                                                onChange(val?.id || '')
                                             }}
                                             styles={ReactSelectStyles}
                                             getOptionValue={(option) => option.id}

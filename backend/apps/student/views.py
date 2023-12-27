@@ -54,7 +54,7 @@ from lms.models import SystemSettings
 from lms.models import PaymentBeginBalance
 from lms.models import Country
 
-from core.models import SubSchools, SumDuureg, BagHoroo
+from core.models import SubSchools, SumDuureg, BagHoroo, AimagHot
 
 from .serializers import StudentListSerializer
 from .serializers import StudentRegisterSerializer
@@ -118,6 +118,7 @@ class GroupOneAPIView(
         group = self.retrieve(request, pk).data
         return request.send_data(group)
 
+    @transaction.atomic
     def put(self, request, pk=None):
         " Ангийн бүртгэл засах "
 
@@ -135,7 +136,10 @@ class GroupOneAPIView(
 
         serializer = self.get_serializer(instance, data=request_data)
 
-        if serializer.is_valid(raise_exception=False):
+        try:
+            if not serializer.is_valid(raise_exception=False):
+                return request.send_error_valid(serializer.errors)
+
             if is_finish:
                 Student.objects.filter(id__in=finish_students, group=group_id).update(
                     status=StudentRegister.objects.filter(Q(name__contains='Төгссөн') or Q(code=2)).last()
@@ -144,24 +148,11 @@ class GroupOneAPIView(
                 Student.objects.filter(group=group_id).update(
                     status=StudentRegister.objects.filter(Q(name__contains='Суралцаж буй') or Q(code=1)).last()
                 )
+
             self.perform_create(serializer)
 
-        else:
-            error_obj = []
-            for key in serializer.errors:
-                msg = "Хоосон байна"
-                if key == 'name':
-                    msg = "Нэр давхцаж байна"
-
-                return_error = {
-                    "field": key,
-                    "msg": msg
-                }
-
-                error_obj.append(return_error)
-
-            if len(error_obj) > 0:
-                return request.send_error("ERR_003", error_obj)
+        except Exception:
+            return request.send_error("ERR_002")
 
         return request.send_info("INF_002")
 
@@ -265,46 +256,30 @@ class GroupAPIView(
         return request.send_data(group_list)
 
     @has_permission(must_permissions=['lms-student-group-create'])
+    @transaction.atomic
     def post(self, request):
         "Ангийн бүртгэл шинээр үүсгэх"
 
         data = request.data
-        serializer = self.get_serializer(data=request.data)
 
-        if serializer.is_valid(raise_exception=False):
-            is_success = False
-            with transaction.atomic():
-                try:
-                    self.create(request).data
+        # transaction savepoint зарлах нь хэрэв алдаа гарвад roll back хийнэ
+        sid = transaction.savepoint()
 
-                    is_success = True
-                except Exception:
-                    raise
-            if is_success:
-                return request.send_info("INF_001")
+        try:
+            serializer = self.serializer_class(data=data, many=False)
+            if not serializer.is_valid():
+                transaction.savepoint_rollback(sid)
+                return request.send_error_valid(serializer.errors)
 
+            serializer.save()
+
+        except Exception:
             return request.send_error("ERR_002")
-        else:
-            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
-            error_obj = []
-            for key in serializer.errors:
-                msg = "Хоосон байна"
-                if key == 'name':
-                    msg = "Нэр давхцаж байна"
 
-                return_error = {
-                    "field": key,
-                    "msg": msg
-                }
-
-                error_obj.append(return_error)
-
-            if len(error_obj) > 0:
-                return request.send_error("ERR_003", error_obj)
-
-            return request.send_error("ERR_002")
+        return request.send_info("INF_001")
 
     @has_permission(must_permissions=['lms-student-group-update'])
+    @transaction.atomic
     def put(self, request, pk=None):
         " Ангийн бүртгэл засах "
 
@@ -313,25 +288,15 @@ class GroupAPIView(
 
         serializer = self.get_serializer(instance, data=request_data)
 
-        if serializer.is_valid(raise_exception=False):
-            self.perform_create(serializer.data)
+        try:
+            if not serializer.is_valid(raise_exception=False):
+                return request.send_error_valid(serializer.errors)
 
-        else:
-            error_obj = []
-            for key in serializer.errors:
-                msg = "Хоосон байна"
-                if key == 'code':
-                    msg = "Код давхцаж байна"
+            serializer.save()
 
-                return_error = {
-                    "field": key,
-                    "msg": msg
-                }
-
-                error_obj.append(return_error)
-
-            if len(error_obj) > 0:
-                return request.send_error("ERR_003", error_obj)
+        except Exception as e:
+            print(e)
+            return request.send_error("ERR_002")
 
         return request.send_info("INF_002")
 
@@ -479,7 +444,7 @@ class StudentRegisterAPIView(
 
         return queryset
 
-    def get( self, request, pk=None):
+    def get(self, request, pk=None):
         "Оюутны бүртгэл жагсаалт"
 
         self.serializer_class = StudentRegisterListSerializer
@@ -501,17 +466,32 @@ class StudentRegisterAPIView(
         data = request.data
         # is_khur = data.get('is_khur')
         regnum = data.get('register_num')
-        citizen_name = data.get('citizen_name')
+        citizenship = data.get('citizenship')
         # data = remove_key_from_dict(data, 'is_khur')
+        citizen_name = None
+        student_code = data.get("code")
+        school_id = data.get("school")
+        group = data.get("group")
 
-        citizenship = Country.objects.filter(name=citizen_name).first()
+        # transaction savepoint зарлах нь хэрэв алдаа гарвад roll back хийнэ
+        sid = transaction.savepoint()
 
-        if citizen_name.upper() == 'МОНГОЛ':
-            data['foregin_password'] = regnum
-            birth_date, gender = calculate_birthday(regnum)
+        if not school_id:
+            return request.send_error('ERR_002', 'Салбар сургууль сонгоно уу')
 
-            data['gender'] = gender
-            data['birth_date'] = birth_date
+        if citizenship:
+            citizenship_qs = Country.objects.filter(id=citizenship).first()
+
+            if citizenship_qs:
+                citizen_name = citizenship_qs.name
+                citizen_name = citizen_name.upper()
+
+            if citizen_name and citizen_name == 'МОНГОЛ':
+                data['foregin_password'] = regnum
+                birth_date, gender = calculate_birthday(regnum)
+
+                data['gender'] = gender
+                data['birth_date'] = birth_date
 
         # if is_khur:
         #     khur_data = citizen_regnum(regnum)
@@ -540,11 +520,6 @@ class StudentRegisterAPIView(
 
         #         joined_year = str(int(year) - 12) if year else ''
 
-
-        student_code = data.get("code")
-        school_id = data.get("school")
-        group = data.get("group")
-
         if not student_code:
             student_code = generate_student_code(school_id, group)
 
@@ -555,122 +530,84 @@ class StudentRegisterAPIView(
             student_code = generate_student_code(school_id, group)
 
         data['code'] = student_code
-        data['citizenship'] = citizenship.id if citizenship else None
 
-        if 'citizen_name' in data:
-            data = remove_key_from_dict(data, 'citizen_name')
-
-        serializer = self.get_serializer(data=data)
-
-        if serializer.is_valid(raise_exception=False):
+        try:
+            serializer = self.serializer_class(data=data, many=False)
+            if not serializer.is_valid():
+                transaction.savepoint_rollback(sid)
+                return request.send_error_valid(serializer.errors)
 
             # Оюутан бүртгүүлэх үед оюутны нэвтрэх нэр нууц үгийг хадгалах хэсэг
             password = '0123456789'
 
             hashed_password = make_password(password)
-            try:
-                self.perform_create(serializer=serializer)
-                student_data = serializer.data
-                student_id = student_data.get('id')
+            serializer.save()
 
-                # student_obj = self.queryset.get(pk=student_id)
+            student_data = serializer.data
+            student_id = student_data.get('id')
 
-                # if image:
-                #     img = bytes_image_encode(image)
-                #     logo_root = os.path.join(settings.STUDENTS, str(student_id))
-                #     path = os.path.join(settings.MEDIA_ROOT, logo_root)
+            # student_obj = self.queryset.get(pk=student_id)
 
-                #     if not os.path.exists(logo_root):
-                #         os.makedirs(path)
+            # if image:
+            #     img = bytes_image_encode(image)
+            #     logo_root = os.path.join(settings.STUDENTS, str(student_id))
+            #     path = os.path.join(settings.MEDIA_ROOT, logo_root)
 
-                #     image_path = os.path.join(path, "picture.jpg" )
-                #     img = img.convert('RGB')
-                #     img.save(image_path)
+            #     if not os.path.exists(logo_root):
+            #         os.makedirs(path)
 
-                #     save_file_path = split_root_path(image_path)
+            #     image_path = os.path.join(path, "picture.jpg" )
+            #     img = img.convert('RGB')
+            #     img.save(image_path)
 
-                #     student_obj.image = save_file_path
-                #     student_obj.save()
+            #     save_file_path = split_root_path(image_path)
 
-                if student_id:
-                    StudentLogin.objects.update_or_create(
-                        student_id=student_id,
-                        defaults={
-                            'username': student_code,
-                            'password': hashed_password
-                        }
+            #     student_obj.image = save_file_path
+            #     student_obj.save()
 
-                    )
+            if student_id:
+                StudentLogin.objects.update_or_create(
+                    student_id=student_id,
+                    defaults={
+                        'username': student_code,
+                        'password': hashed_password
+                    }
 
-                    # if is_khur and aimagCode:
-                    #     unit1 = AimagHot.objects.filter(code=aimagCode).last()
-                    #     sum_duureg = SumDuureg.objects.filter(code=sumCode, unit1=unit1).last()
-                    #     bag_khoroo = BagHoroo.objects.filter(code=bagCode, unit2=sum_duureg).last()
+                )
 
-                    #     StudentAddress.objects.update_or_create(
-                    #         student=student_obj,
-                    #         defaults={
-                    #             'passport_unit1': unit1,
-                    #             'passport_unit2': sum_duureg,
-                    #             'passport_unit3': bag_khoroo,
-                    #             'passport_other': address_detail
-                    #         }
-                    #     )
+                # if is_khur and aimagCode:
+                #     unit1 = AimagHot.objects.filter(code=aimagCode).last()
+                #     sum_duureg = SumDuureg.objects.filter(code=sumCode, unit1=unit1).last()
+                #     bag_khoroo = BagHoroo.objects.filter(code=bagCode, unit2=sum_duureg).last()
 
-                    # # Боловсролын мэдээлэл
-                    # if  is_khur and degreeNumber:
-                    #     StudentEducation.objects.update_or_create(
-                    #         student=student_obj,
-                    #         defaults={
-                    #             'school_name': orgName,
-                    #             'edu_level': StudentEducation.EDUCATION_BUREN,
-                    #             'join_year': joined_year,
-                    #             'graduate_year': year,
-                    #             'certificate_num': degreeNumber,
-                    #         }
-                    #     )
+                #     StudentAddress.objects.update_or_create(
+                #         student=student_obj,
+                #         defaults={
+                #             'passport_unit1': unit1,
+                #             'passport_unit2': sum_duureg,
+                #             'passport_unit3': bag_khoroo,
+                #             'passport_other': address_detail
+                #         }
+                #     )
 
-            except Exception as e:
-                is_success = False
-                print('exception', e)
-                raise
+                # # Боловсролын мэдээлэл
+                # if  is_khur and degreeNumber:
+                #     StudentEducation.objects.update_or_create(
+                #         student=student_obj,
+                #         defaults={
+                #             'school_name': orgName,
+                #             'edu_level': StudentEducation.EDUCATION_BUREN,
+                #             'join_year': joined_year,
+                #             'graduate_year': year,
+                #             'certificate_num': degreeNumber,
+                #         }
+                #     )
 
-            if not is_success:
-                return request.send_error("ERR_002")
-
-            return request.send_info("INF_001")
-        else:
-            error_obj = []
-
-            qs_student = self.queryset.filter(code=student_code).last()
-            if qs_student:
-                msg = "Оюутны код давхцаж байна"
-
-                return_error = {
-                    "field": 'code',
-                    "msg": msg
-                }
-
-                error_obj.append(return_error)
-                if len(error_obj) > 0:
-                    return request.send_error("ERR_003", error_obj)
-
-            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
-            for key in serializer.errors:
-                msg = "Хоосон байна"
-
-                return_error = {
-                    "field": key,
-                    "msg": msg
-                }
-
-                error_obj.append(return_error)
-
-            if len(error_obj) > 0:
-                return request.send_error("ERR_003", error_obj)
+        except Exception as e:
+            print('exception', e)
+            return request.send_error("ERR_002")
 
         return request.send_info("INF_001")
-
 
     def delete(self, request, pk=None):
         " Оюутны бүртгэл устгах "
@@ -728,16 +665,16 @@ class StudentListAPIView(
     def get(self, request):
         qs = TimeTable_to_group.objects
 
-        lesson = self.request.query_params.get('lesson')
-        teacher = self.request.query_params.get('teacher')
-        class_id = self.request.query_params.get('class_id')
-        school_id = self.request.query_params.get('school')
+        lesson = request.query_params.get('lesson')
+        teacher = request.query_params.get('teacher')
+        class_id = request.query_params.get('class_id')
+        school_id = request.query_params.get('school')
 
-        department = self.request.query_params.get('department')
-        degree = self.request.query_params.get('degree')
-        profession = self.request.query_params.get('profession')
-        join_year = self.request.query_params.get('join_year')
-        group = self.request.query_params.get('group')
+        department = request.query_params.get('department')
+        degree = request.query_params.get('degree')
+        profession = request.query_params.get('profession')
+        join_year = request.query_params.get('join_year')
+        group = request.query_params.get('group')
 
         # Хөтөлбөрийн багаар хайлт хийх
         if school_id:
@@ -1265,6 +1202,7 @@ class StudentDetailAPIView(
 
         return request.send_data(sdatas)
 
+    @transaction.atomic
     def put(self, request, pk=None):
 
         self.serializer_class = StudentRegisterSerializer
@@ -1290,28 +1228,18 @@ class StudentDetailAPIView(
         if change_image and image:
             data['image'] = image
 
-        serializer = self.get_serializer(instance, data=data)
+        try:
+            serializer = self.get_serializer(instance, data=data)
+            if not serializer.is_valid(raise_exception=False):
+                return request.send_error_valid(serializer.errors)
 
-        if serializer.is_valid(raise_exception=False):
-            self.perform_create(serializer)
-        else:
-            errors = []
-            for key in serializer.errors:
-                msg = "Хоосон байна"
-                if key == 'code':
-                    msg = "Оюутны код давхцаж байна"
+            serializer.save()
+            return request.send_info("INF_002", serializer.data)
 
-                return_error = {
-                    "field": key,
-                    "msg": msg
-                }
+        except Exception as e:
+            print(e)
+            return request.send_error("ERR_002")
 
-                errors.append(return_error)
-
-            if len(errors) > 0:
-                return request.send_error("ERR_003", errors)
-
-        return request.send_info("INF_002", serializer.data)
 
 @permission_classes([IsAuthenticated])
 class StudentFamilyAPIView(
@@ -1332,64 +1260,43 @@ class StudentFamilyAPIView(
 
         return request.send_data(datas)
 
+    @transaction.atomic
     def post(self, request):
 
-        data = request.data
-        serializer = self.get_serializer(data=data)
+        request_data = request.data
+        serializer = self.get_serializer(data=request_data)
 
-        if serializer.is_valid(raise_exception=False):
-            is_success = False
-            with transaction.atomic():
-                try:
-                    self.create(request).data
+        # transaction savepoint зарлах нь хэрэв алдаа гарвад roll back хийнэ
+        sid = transaction.savepoint()
 
-                    is_success = True
-                except Exception as e:
-                    raise Exception(e)
+        try:
+            serializer = self.serializer_class(data=request_data, many=False)
+            if not serializer.is_valid():
+                transaction.savepoint_rollback(sid)
+                return request.send_error_valid(serializer.errors)
 
-            if is_success:
-                return request.send_info("INF_001")
+            serializer.save()
 
+        except Exception:
             return request.send_error("ERR_002")
-        else:
-            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
-            error_obj = []
-            for key in serializer.errors:
-                msg = "Хоосон байна"
-                return_error = {
-                    "field": key,
-                    "msg": msg
-                }
-
-                error_obj.append(return_error)
-
-            if len(error_obj) > 0:
-                return request.send_error("ERR_003", error_obj)
 
         return request.send_info("INF_001")
 
+    @transaction.atomic
     def put(self, request, student=None, pk=None):
         data = request.data
-        instance = self.queryset.filter(id=pk).first()
+        instance = self.get_object()
 
-        serializer = self.get_serializer(instance, data=data)
+        try:
+            serializer = self.get_serializer(instance, data=data)
+            if not serializer.is_valid(raise_exception=False):
+                return request.send_error_valid(serializer.errors)
 
-        if serializer.is_valid(raise_exception=True):
             self.perform_update(serializer)
-        else:
-            error_obj = []
-            for key in serializer.errors:
-                msg = "Хоосон байна"
 
-                return_error = {
-                    "field": key,
-                    "msg": msg
-                }
-
-                error_obj.append(return_error)
-
-            if len(error_obj) > 0:
-                return request.send_error("ERR_003", error_obj)
+        except Exception as e:
+            print(e)
+            return request.send_error("ERR_002")
 
         return request.send_info("INF_002")
 
@@ -1420,64 +1327,43 @@ class StudentEducationAPIView(
 
         return request.send_data(datas)
 
+    @transaction.atomic
     def post(self, request):
 
-        data = request.data
-        serializer = self.get_serializer(data=data)
+        request_data = request.data
+        serializer = self.get_serializer(data=request_data)
 
-        if serializer.is_valid(raise_exception=False):
-            is_success = False
-            with transaction.atomic():
-                try:
-                    self.create(request).data
+        # transaction savepoint зарлах нь хэрэв алдаа гарвад roll back хийнэ
+        sid = transaction.savepoint()
 
-                    is_success = True
-                except Exception as e:
-                    raise Exception(e)
+        try:
+            serializer = self.serializer_class(data=request_data, many=False)
+            if not serializer.is_valid():
+                transaction.savepoint_rollback(sid)
+                return request.send_error_valid(serializer.errors)
 
-            if is_success:
-                return request.send_info("INF_001")
+            serializer.save()
 
+        except Exception:
             return request.send_error("ERR_002")
-        else:
-            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
-            error_obj = []
-            for key in serializer.errors:
-                msg = "Хоосон байна"
-                return_error = {
-                    "field": key,
-                    "msg": msg
-                }
-
-                error_obj.append(return_error)
-
-            if len(error_obj) > 0:
-                return request.send_error("ERR_003", error_obj)
 
         return request.send_info("INF_001")
 
+    @transaction.atomic
     def put(self, request, student=None, pk=None):
         data = request.data
-        instance = self.queryset.filter(id=pk).first()
+        instance = self.get_object()
 
-        serializer = self.get_serializer(instance, data=data)
+        try:
+            serializer = self.get_serializer(instance, data=data)
+            if not serializer.is_valid(raise_exception=False):
+                return request.send_error_valid(serializer.errors)
 
-        if serializer.is_valid(raise_exception=True):
             self.perform_update(serializer)
-        else:
-            error_obj = []
-            for key in serializer.errors:
-                msg = "Хоосон байна"
 
-                return_error = {
-                    "field": key,
-                    "msg": msg
-                }
-
-                error_obj.append(return_error)
-
-            if len(error_obj) > 0:
-                return request.send_error("ERR_003", error_obj)
+        except Exception as e:
+            print(e)
+            return request.send_error("ERR_002")
 
         return request.send_info("INF_002")
 
@@ -1498,64 +1384,77 @@ class StudentAddressAPIView(
     """ Оюутны гэр бүлийн байдал """
 
     queryset = StudentAddress.objects
-    serializer_class = StudentAddressSerializer
+    serializer_class = StudentAddressListSerializer
 
     def get(self, request, pk=None, student=None):
-        self.serializer_class = StudentAddressListSerializer
 
         queryset = self.queryset.filter(student_id=student)
         datas = self.get_serializer(queryset, many=True).data
 
         return request.send_data(datas)
 
+    @transaction.atomic
     def post(self, request, pk=None, student=None):
 
         data = request.data
         serializer = self.get_serializer(data=data)
 
-        qs = self.queryset.filter(student_id=student)
+        # qs = self.queryset.filter(student_id=student)
 
-        if serializer.is_valid(raise_exception=False):
-            is_success = False
-            with transaction.atomic():
-                try:
-                    qs.update_or_create(
-                        student_id=student,
-                        defaults={
-                            "passport_unit1_id": data.get('passport_unit1'),
-                            "passport_unit2_id": data.get('passport_unit2'),
-                            "passport_unit3_id": data.get('passport_unit3'),
-                            'passport_toot': data.get('passport_toot'),
-                            'passport_other': data.get('passport_other'),
-                            "lived_unit1_id": data.get('lived_unit1'),
-                            "lived_unit2_id": data.get('lived_unit2'),
-                            "lived_unit3_id": data.get('lived_unit3'),
-                            'lived_toot': data.get('lived_toot'),
-                            'lived_other': data.get('lived_other')
-                        }
-                    )
-                    is_success = True
-                except Exception as e:
-                    raise Exception(e)
+        try:
+            if serializer.is_valid(raise_exception=False):
+                obj = self.queryset.filter(student_id=student).update_or_create(
+                    student_id=student,
+                    defaults={
+                        "passport_unit1_id": AimagHot.objects.get(pk=data.get('passport_unit1')).pk if data.get('passport_unit1') else None,
+                        "passport_unit2_id": SumDuureg.objects.get(pk=data.get('passport_unit2')).pk if data.get('passport_unit2') else None,
+                        "passport_unit3_id": SumDuureg.objects.get(pk=data.get('passport_unit3')).pk if data.get('passport_unit3') else None,
+                        'passport_toot': data.get('passport_toot'),
+                        'passport_other': data.get('passport_other'),
+                        "lived_unit1": data.get('lived_unit1'),
+                        "lived_unit2": data.get('lived_unit2'),
+                        "lived_unit3": data.get('lived_unit3'),
+                        'lived_toot': data.get('lived_toot'),
+                        'lived_other': data.get('lived_other')
+                    }
+                )
 
-            if is_success:
-                return request.send_info("INF_001")
+                # if student:
+                #     check_qs = StudentAddress.objects.filter(student=student)
 
+                #     if check_qs:
+                #         check_qs.update(
+                #             passport_unit1 = AimagHot.objects.get(pk=data.get('passport_unit1')).pk if data.get('passport_unit1') else None,
+                #             passport_unit2 = SumDuureg.objects.get(pk=data.get('passport_unit2')).pk if data.get('passport_unit2') else None,
+                #             passport_unit3 = SumDuureg.objects.get(pk=data.get('passport_unit3')).pk if data.get('passport_unit3') else None,
+                #             passport_toot = data.get('passport_toot'),
+                #             passport_other = data.get('passport_other'),
+                #             lived_unit1 = data.get('lived_unit1'),
+                #             lived_unit2 = data.get('lived_unit2'),
+                #             lived_unit3 = data.get('lived_unit3'),
+                #             lived_toot = data.get('lived_toot'),
+                #             lived_other = data.get('lived_other')
+                #         )
+                #     else:
+                #         obj = StudentAddress.objects.create(
+                #             student=Student.objects.get(pk=student),
+                #             passport_unit1 = AimagHot.objects.get(pk=data.get('passport_unit1')) if data.get('passport_unit1') else None,
+                #             passport_unit2 = SumDuureg.objects.get(pk=data.get('passport_unit2')) if data.get('passport_unit2') else None,
+                #             passport_unit3 = SumDuureg.objects.get(pk=data.get('passport_unit3')) if data.get('passport_unit3') else None,
+                #             passport_toot = data.get('passport_toot'),
+                #             passport_other = data.get('passport_other'),
+                #             lived_unit1 = data.get('lived_unit1'),
+                #             lived_unit2 = data.get('lived_unit2'),
+                #             lived_unit3 = data.get('lived_unit3'),
+                #             lived_toot = data.get('lived_toot'),
+                #             lived_other = data.get('lived_other')
+                #         )
+            else:
+                return request.send_error_valid(serializer.errors)
+
+        except Exception as e:
+            print(e)
             return request.send_error("ERR_002")
-        else:
-            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
-            error_obj = []
-            for key in serializer.errors:
-                msg = "Хоосон байна"
-                return_error = {
-                    "field": key,
-                    "msg": msg
-                }
-
-                error_obj.append(return_error)
-
-            if len(error_obj) > 0:
-                return request.send_error("ERR_003", error_obj)
 
         return request.send_info("INF_001")
 
@@ -1580,15 +1479,21 @@ class StudentAdmissionAPIView(
 
         return request.send_data(datas)
 
+    @transaction.atomic
     def post(self, request):
         """
             ЭЕШ-ын оноо шинээр бүртгэх
             confirmation_num: ЭЕШ-ын батламжийн дугаар
         """
 
-        data = request.data
-        lesson = data.get("admission_lesson")
-        confirmation_num = data.get("confirmation_num")
+        request_data = request.data
+        serializer = self.get_serializer(data=request_data)
+
+        # transaction savepoint зарлах нь хэрэв алдаа гарвад roll back хийнэ
+        sid = transaction.savepoint()
+
+        lesson = request_data.get("admission_lesson")
+        confirmation_num = request_data.get("confirmation_num")
         if confirmation_num:
             qs = self.queryset.filter(confirmation_num=confirmation_num)
             if qs:
@@ -1599,65 +1504,34 @@ class StudentAdmissionAPIView(
             if qs:
                 return request.send_error("ERR_002", "Энэ хичээл бүртгэгдсэн байна")
 
-        serializer = self.get_serializer(data=data)
+        try:
+            serializer = self.serializer_class(data=request_data, many=False)
+            if not serializer.is_valid():
+                transaction.savepoint_rollback(sid)
+                return request.send_error_valid(serializer.errors)
 
-        if serializer.is_valid(raise_exception=False):
-            is_success = False
-            with transaction.atomic():
-                try:
-                    self.create(request).data
+            serializer.save()
 
-                    is_success = True
-                except Exception as e:
-                    raise Exception(e)
-
-            if is_success:
-                return request.send_info("INF_001")
-
+        except Exception:
             return request.send_error("ERR_002")
-        else:
-            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
-            error_obj = []
-            for key in serializer.errors:
-                msg = "Хоосон байна"
-                return_error = {
-                    "field": key,
-                    "msg": msg
-                }
-
-                error_obj.append(return_error)
-
-            if len(error_obj) > 0:
-                return request.send_error("ERR_003", error_obj)
 
         return request.send_info("INF_001")
 
+    @transaction.atomic
     def put(self, request, student=None, pk=None):
-        """
-            ЭЕШ-ын оноо шинээр бүртгэх
-        """
-
         data = request.data
-        instance = self.queryset.filter(id=pk).first()
+        instance = self.get_object()
 
-        serializer = self.get_serializer(instance, data=data)
+        try:
+            serializer = self.get_serializer(instance, data=data)
+            if not serializer.is_valid(raise_exception=False):
+                return request.send_error_valid(serializer.errors)
 
-        if serializer.is_valid(raise_exception=True):
             self.perform_update(serializer)
-        else:
-            error_obj = []
-            for key in serializer.errors:
-                msg = "Хоосон байна"
 
-                return_error = {
-                    "field": key,
-                    "msg": msg
-                }
-
-                error_obj.append(return_error)
-
-            if len(error_obj) > 0:
-                return request.send_error("ERR_003", error_obj)
+        except Exception as e:
+            print(e)
+            return request.send_error("ERR_002")
 
         return request.send_info("INF_002")
 
@@ -1842,6 +1716,7 @@ class StudentLeaveAPIView(
         return request.send_data(leave_list)
 
     @has_permission(must_permissions=['lms-student-leave-create'])
+    @transaction.atomic
     def post(self, request):
         " Оюутны чөлөөний бүртгэл үүсгэх "
 
@@ -1849,94 +1724,56 @@ class StudentLeaveAPIView(
         student = data.get("student")
         register_status = data.get('register_status')
         serializer = self.get_serializer(data=data)
-        if serializer.is_valid(raise_exception=False):
-            is_success = False
-            with transaction.atomic():
-                try:
-                    self.create(request)
 
-                    status_obj = StudentRegister.objects.get(pk=register_status)
+        # transaction savepoint зарлах нь хэрэв алдаа гарвад roll back хийнэ
+        sid = transaction.savepoint()
 
-                    # Оюутны төлөвийг өөрчлөх
-                    Student.objects.filter(pk=student).update(status=status_obj)
-                    is_success = True
-                except Exception:
-                    raise
-            if is_success:
-                return request.send_info("INF_001")
+        score_info = self.queryset.filter(student_id=student)
 
+        if score_info:
+            return request.send_error('ERR_002', 'Оюутан бүртгэгдсэн байна')
+
+        try:
+            serializer = self.serializer_class(data=data, many=False)
+            if not serializer.is_valid():
+                transaction.savepoint_rollback(sid)
+                return request.send_error_valid(serializer.errors)
+
+            status_obj = StudentRegister.objects.get(pk=register_status)
+
+            # Оюутны төлөвийг өөрчлөх
+            Student.objects.filter(pk=student).update(status=status_obj)
+
+            serializer.save()
+
+        except Exception:
             return request.send_error("ERR_002")
-        else:
-            error_obj = []
-            if student:
-                score_info = self.queryset.filter(student_id=student)
-                if score_info:
-                    error_obj = {
-                        "field": student,
-                        "msg": "бүртгэгдсэн оюутан байна"
-                    }
-                    return request.send_error("ERR_011", error_obj)
 
-            for key in serializer.errors:
-                msg = "Хоосон байна"
-
-                return_error = {
-                    "field": key,
-                    "msg": msg
-                }
-                error_obj.append(return_error)
-
-            if len(error_obj) > 0:
-                return request.send_error("ERR_003", error_obj)
+        return request.send_info("INF_001")
 
     @has_permission(must_permissions=['lms-student-leave-update'])
-    def put(self, request, pk=None):
-        "Оюутны чөлөөний бүртгэл засах"
-
+    @transaction.atomic
+    def put(self, request, student=None, pk=None):
         data = request.data
-        student = data.get("student")
+        instance = self.get_object()
 
-        instance = self.queryset.filter(student_id=student, id=pk).first()
+        student_leave = self.queryset.filter(student_id=student).exclude(id=pk)
 
-        serializer = self.get_serializer(instance, data=data)
+        if student_leave:
+            return request.send_error('ERR_002', 'Оюутан бүртгэгдсэн байна')
 
-        if serializer.is_valid(raise_exception=False):
-            is_success = False
-            with transaction.atomic():
-                try:
-                    self.update(request).data
-                    is_success = True
-                except Exception:
-                    raise
-            if is_success:
-                return request.send_info("INF_002")
+        try:
+            serializer = self.get_serializer(instance, data=data)
+            if not serializer.is_valid(raise_exception=False):
+                return request.send_error_valid(serializer.errors)
 
+            self.perform_update(serializer)
+
+        except Exception as e:
+            print(e)
             return request.send_error("ERR_002")
-        else:
-            error_obj = []
-            student_leave = self.queryset.filter(student_id=student).exclude(id=pk)
-            if student_leave:
-                error_obj = {
-                    "field": 'student',
-                    "msg": "Бүртгэлтэй оюутан байна"
-                }
 
-                return request.send_error("ERR_011", error_obj)
-
-            for key in serializer.errors:
-                msg = "Хоосон байна"
-
-                return_error = {
-                    "field": key,
-                    "msg": msg
-                }
-
-                error_obj.append(return_error)
-
-            if len(error_obj) > 0:
-                return request.send_error("ERR_003", error_obj)
-
-            return request.send_error("ERR_002")
+        return request.send_info("INF_002")
 
     @has_permission(must_permissions=['lms-student-leave-delete'])
     def delete(self, request, pk=None):
