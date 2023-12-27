@@ -71,7 +71,7 @@ const News = () => {
     const newsApi = useApi().service.news
 
     async function getDatas() {
-        const { success, data } = await allFetch(newsApi.get(rowsPerPage, currentPage, sortField, searchValue))
+        const { success, data } = await allFetch(newsApi.getAd(rowsPerPage, currentPage, sortField, searchValue))
         if(success) {
             setDatas(data?.results)
             setTotalCount(data?.count)
@@ -81,6 +81,8 @@ const News = () => {
     useEffect(() => {
         getDatas()
     },[sortField, currentPage, rowsPerPage])
+
+    console.log(datas)
 
     useEffect(() => {
 		if (searchValue.length == 0) {

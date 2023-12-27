@@ -2,6 +2,7 @@ from django.urls import path
 
 from .views import StudentNoticeAPIView
 from .views import StudentNoticeFileAPIView
+from .views import StudentNoticeNotNewsAPIView
 
 urlpatterns = [
 
@@ -10,4 +11,6 @@ urlpatterns = [
     path('news/<int:pk>/', StudentNoticeAPIView.as_view()),
     path('news/file/', StudentNoticeFileAPIView.as_view()),
 
+    # Зөвхөн зар
+    path('news/ad/', StudentNoticeNotNewsAPIView.as_view()),
 ]
