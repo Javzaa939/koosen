@@ -102,7 +102,7 @@ const Teacher = () => {
 	}
 	useEffect(() => {
 		getDatas();
-	},[ selected_values, rowsPerPage, sortField, searchValue, currentPage ])
+	},[ selected_values, rowsPerPage, sortField, searchValue, currentPage])
 
 	// useEffect(() => {
 	// 	if (searchValue.length == 0) {
