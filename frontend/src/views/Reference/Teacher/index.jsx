@@ -100,18 +100,21 @@ const Teacher = () => {
 	const handleModal =() =>{
 		setAddModal(!add_modal)
 	}
-
 	useEffect(() => {
-		if (searchValue.length == 0) {
-			getDatas();
-		} else {
-			const timeoutId = setTimeout(() => {
-				getDatas();
-			}, 600);
-
-			return () => clearTimeout(timeoutId);
-		}
+		getDatas();
 	},[ selected_values, rowsPerPage, sortField, searchValue, currentPage ])
+
+	// useEffect(() => {
+	// 	if (searchValue.length == 0) {
+	// 		getDatas();
+	// 	} else {
+	// 		const timeoutId = setTimeout(() => {
+	// 			getDatas();
+	// 		}, 600);
+
+	// 		return () => clearTimeout(timeoutId);
+	// 	}
+	// },[ selected_values, rowsPerPage, sortField, searchValue, currentPage ])
 
 	useEffect(() => {
 		getSubSchoolOption()

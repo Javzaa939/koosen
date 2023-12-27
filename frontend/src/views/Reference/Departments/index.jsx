@@ -58,17 +58,20 @@ const Departments = () => {
 			setTotalCount(data.length)
 		}
 	}
-	useEffect(() => {
-		if (searchValue.length == 0) {
-			getDatas();
-		} else {
-			const timeoutId = setTimeout(() => {
-				getDatas();
-			}, 600);
+	useEffect(()=>{
+		getDatas()
+	}, [searchValue, school_id])
+	// useEffect(() => {
+	// 	if (searchValue.length == 0) {
+	// 		getDatas();
+	// 	} else {
+	// 		const timeoutId = setTimeout(() => {
+	// 			getDatas();
+	// 		}, 600);
 
-			return () => clearTimeout(timeoutId);
-		}
-	}, [searchValue, school_id]);
+	// 		return () => clearTimeout(timeoutId);
+	// 	}
+	// }, [searchValue, school_id]);
 
 	// Засах функц
     function handleUpdateModal(id, data) {

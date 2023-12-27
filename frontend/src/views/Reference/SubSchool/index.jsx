@@ -67,30 +67,33 @@ const SubSchool = () => {
 	}
 
 	useEffect(() => {
-		if (searchValue.length == 0) {
-			getDatas();
-		} else {
-			const timeoutId = setTimeout(() => {
-				getDatas();
-			}, 600);
+		getDatas();
+	},[ searchValue])
+	// useEffect(() => {
+	// 	if (searchValue.length == 0) {
+	// 		getDatas();
+	// 	} else {
+	// 		const timeoutId = setTimeout(() => {
+	// 			getDatas();
+	// 		}, 600);
 
-			return () => clearTimeout(timeoutId);
-		}
-	}, [searchValue]);
+	// 		return () => clearTimeout(timeoutId);
+	// 	}
+	// }, [searchValue]);
 
-	async function firstLoad() {
-		const { success, data } = await fetchData(schoolApi.get(searchValue))
-		if(success) {
-			setDatas(data)
-			setTotalCount(data.length)
-		}
-	}
+	// async function firstLoad() {
+	// 	const { success, data } = await fetchData(schoolApi.get(searchValue))
+	// 	if(success) {
+	// 		setDatas(data)
+	// 		setTotalCount(data.length)
+	// 	}
+	// }
 
-	// Хуудас анх ачааллах үед Fullscreen loader гаргаж ирэх функц, ганц л уншина
+	// // Хуудас анх ачааллах үед Fullscreen loader гаргаж ирэх функц, ганц л уншина
 
-	useEffect(() => {
-		firstLoad()
-	}, [])
+	// useEffect(() => {
+	// 	firstLoad()
+	// }, [])
 
 	// Засах функц
     function handleUpdateModal(id, data) {
