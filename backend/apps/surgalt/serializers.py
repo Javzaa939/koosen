@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from django.db.models import Q
+from django.db.models import Q, F
 
 from lms.models import LessonStandart
 from lms.models import Lesson_title_plan
@@ -39,7 +39,6 @@ class LessonStandartListSerializer(serializers.ModelSerializer):
     category = LessonCategorySerializer(many=False)
     department = DepartmentRegisterSerailizer(many=False)
     teachers = serializers.SerializerMethodField()
-    teacher_name = serializers.SerializerMethodField()
 
     class Meta:
         model = LessonStandart
@@ -47,6 +46,7 @@ class LessonStandartListSerializer(serializers.ModelSerializer):
 
     def get_teachers(self, obj):
 
+        teacher_name = ''
         teacher_list = []
         teacher_ids = Lesson_to_teacher.objects.filter(lesson_id=obj.id).values_list('teacher_id', flat=True)
         if teacher_ids:
@@ -62,38 +62,19 @@ class LessonStandartListSerializer(serializers.ModelSerializer):
                         register_code = userinfo_data.register_code
                     if register_code:
                         full_name = register_code
-                    if userinfo_data:
+                    if emp_data.first_name:
                         full_name += emp_data.first_name
 
                     teacher_list.append({'id': teacher_id, 'name': full_name})
-
-        return teacher_list
-
-    def get_teacher_name(self, obj):
-
-        teacher_name = ""
-        teacher_ids = Lesson_to_teacher.objects.filter(lesson_id=obj.id).values_list('teacher_id',flat=True)
-        if teacher_ids:
-            for teacher_id in teacher_ids:
-                full_name = ""
-                emp_data = Teachers.objects.filter(id=teacher_id, action_status=Teachers.APPROVED).first()
-                if emp_data:
-                    user_id = emp_data.user
-                    userinfo_data = Employee.objects.filter(user=user_id,state=Employee.STATE_WORKING).first()
-                    register_code = None
-
-                    if userinfo_data:
-                        full_name = emp_data.first_name
-                        register_code = userinfo_data.register_code
-
-                        if register_code:
-                            full_name = full_name + " " + register_code
-
                     teacher_name = teacher_name + ', ' if teacher_name else ''
                     teacher_name += full_name
 
-        return teacher_name
+        datas = {
+            'teachers': teacher_list,
+            'teacher_name': teacher_name
+        }
 
+        return datas
 
 # Хичээлийн стандарт
 class LessonStandartSerializer(serializers.ModelSerializer):
@@ -141,42 +122,15 @@ class AdmissionLessonSerializer(serializers.ModelSerializer):
 class ProfessionDefinitionListSerializer(serializers.ModelSerializer):
     degree = ProfessionalDegreeSerializer(many=False)
     department = DepartmentRegisterSerailizer(many=False)
-    general_base = serializers.SerializerMethodField()
-    professional_base = serializers.SerializerMethodField()
-    professional_lesson = serializers.SerializerMethodField()
+    general_base = serializers.FloatField()
+    professional_base = serializers.FloatField()
+    professional_lesson = serializers.FloatField()
     admission_lesson = serializers.SerializerMethodField()
-    gen_direct_type_name = serializers.SerializerMethodField(read_only=True)
+    gen_direct_type_name = serializers.CharField(source="get_gen_direct_type_display", read_only=True)
 
     class Meta:
         model = ProfessionDefinition
         exclude = ["created_at", "updated_at"]
-
-    def get_general_base(self, obj):
-
-        general_base = ''
-        songon_prof = Profession_SongonKredit.objects.filter(profession=obj.id, lesson_level=LearningPlan.BASIC).values('songon_kredit').first()
-        if songon_prof:
-            general_base = songon_prof['songon_kredit']
-
-        return general_base
-
-    def get_professional_base(self, obj):
-
-        general_base = ''
-        songon_prof = Profession_SongonKredit.objects.filter(profession=obj.id, lesson_level=LearningPlan.PROF_BASIC).values('songon_kredit').first()
-        if songon_prof:
-            general_base = songon_prof['songon_kredit']
-
-        return general_base
-
-    def get_professional_lesson(self, obj):
-
-        general_base = ''
-        songon_prof = Profession_SongonKredit.objects.filter(profession=obj.id, lesson_level=LearningPlan.PROFESSION).values('songon_kredit').first()
-        if songon_prof:
-            general_base = songon_prof['songon_kredit']
-
-        return general_base
 
     def get_admission_lesson(self, obj):
 
@@ -186,11 +140,6 @@ class ProfessionDefinitionListSerializer(serializers.ModelSerializer):
             lesson_list =  lesson_ids
 
         return lesson_list
-
-    def get_gen_direct_type_name(self, obj):
-        "Мэргэжлийн ерөнхий чиглэл"
-        type_name = obj.get_gen_direct_type_display()
-        return type_name
 
 
 # Мэргэжлийн тодорхойлолт

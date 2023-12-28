@@ -14,7 +14,7 @@ from main.utils.file import remove_folder
 from django.db import transaction
 from django.db.models import Q
 from django.db.models import Count
-from django.db.models import Sum
+from django.db.models import Sum, Subquery, OuterRef
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 
@@ -375,6 +375,15 @@ class ProfessionDefinitionAPIView(
 
         if department:
             self.queryset = self.queryset.filter(department=department)
+
+        self.queryset = (
+            self.queryset
+            .annotate(
+                general_base=Subquery(Profession_SongonKredit.objects.filter(profession=OuterRef('pk'), lesson_level=LearningPlan.BASIC).values('songon_kredit')[:1]),
+                professional_base=Subquery(Profession_SongonKredit.objects.filter(profession=OuterRef('pk'), lesson_level=LearningPlan.PROF_BASIC).values('songon_kredit')[:1]),
+                professional_lesson=Subquery(Profession_SongonKredit.objects.filter(profession=OuterRef('pk'), lesson_level=LearningPlan.PROFESSION).values('songon_kredit')[:1]),
+            )
+        )
 
         if pk:
             plan = self.retrieve(request, pk).data

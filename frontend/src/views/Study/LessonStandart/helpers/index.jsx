@@ -69,7 +69,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 		{
 			header: '',
 			name: `${t('Заах багш')}`,
-			selector: (row) => row?.teacher_name,
+			selector: (row) => row?.teachers?.teacher_name,
             center: true
         },
 	]

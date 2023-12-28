@@ -125,7 +125,7 @@ const MainInformation = ({ getNavigateData }) => {
                     }
                     if (key === 'teachers') {
                         var teacher_ids = []
-                        data[key].map((teacher, idx) => {
+                        data[key]?.teachers?.map((teacher, idx) => {
                             var selected = teacher_option.find((e) => e.id === teacher?.id)
                             if (selected != undefined) {
                                 teacher_ids.push(selected)
@@ -153,7 +153,7 @@ const MainInformation = ({ getNavigateData }) => {
     useEffect(() => {
         if (Object.keys(datas).length > 0) {
             var teacher_ids = []
-            datas['teachers'].map((teacher, idx) => {
+            datas['teachers']?.teachers?.map((teacher, idx) => {
                 var selected = teacher_option.find((e) => e.id === teacher?.id)
                 if (selected != undefined) {
                     teacher_ids.push(selected)

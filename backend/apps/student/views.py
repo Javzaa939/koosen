@@ -1374,13 +1374,14 @@ class StudentAddressAPIView(
     def post(self, request, pk=None, student=None):
 
         data = request.data
-        serializer = self.get_serializer(data=data)
+        serializer = self.get_serializer(data=data, many=False)
 
         # qs = self.queryset.filter(student_id=student)
 
         try:
+            print('data', data)
             if serializer.is_valid(raise_exception=False):
-                obj = self.queryset.filter(student_id=student).update_or_create(
+                obj, created = self.queryset.filter(student_id=student).update_or_create(
                     student_id=student,
                     defaults={
                         "passport_unit1_id": AimagHot.objects.get(pk=data.get('passport_unit1')).pk if data.get('passport_unit1') else None,

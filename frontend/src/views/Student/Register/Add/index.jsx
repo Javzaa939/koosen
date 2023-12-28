@@ -140,7 +140,6 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
             refreshDatas()
             reset()
         } else {
-            console.log('errors', errors)
             /** Алдааны мессэжийг input дээр харуулна */
             for (let key in errors) {
                 setError(key, { type: 'custom', message:  errors[key][0]});
