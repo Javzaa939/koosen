@@ -303,7 +303,7 @@ const CreditVolume = () => {
     }
 
     function chooseDep(){
-        if (!dep_id) { return(<div>Хөтөлбөрийн баг сонгоно уу.</div>) }
+        if (!dep_id) { return(<div>Тэнхим сонгоно уу.</div>) }
         else { return(<div>Хоосон байна</div>)}
     }
 

@@ -107,7 +107,7 @@ const ScienceProject = () => {
         }
     }
 
-    /* Хөтөлбөрийн баг жагсаалт */
+    /* Тэнхимийн жагсаалт */
     async function getDepartmentOption() {
         const { success, data } = await fetchData(departmentApi.get())
         if(success) {

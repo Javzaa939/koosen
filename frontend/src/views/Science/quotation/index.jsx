@@ -121,7 +121,7 @@ const Invention = () => {
         setRowsPerPage(parseInt(e.target.value))
     }
 
-	 /* Хөтөлбөрийн баг жагсаалт */
+	 /* Тэнхим жагсаалт */
 	async function getDepartmentOption() {
         const { success, data } = await fetchData(departmentApi.get())
         if(success) {

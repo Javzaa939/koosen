@@ -24,7 +24,6 @@ const YearDropDown = () => {
     async function getDatas() {
         const {success, data} = await fetchData(activeYearApi.getActiveYear())
         if(success) {
-            console.log(data)
             setYear(data?.active_lesson_year)
             setSeason(data?.active_season)
             setSeasonId(data?.active_lesson_season)

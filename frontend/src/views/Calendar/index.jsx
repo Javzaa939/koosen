@@ -15,6 +15,7 @@ import AddEventSidebar from './Add'
 
 // ** Custom Hooks
 import { useRTL } from '@hooks/useRTL'
+import  useUpdateEffect  from '@hooks/useUpdateEffect'
 
 // ** Styles
 import '@styles/react/apps/app-calendar.scss'
@@ -81,9 +82,21 @@ const CalendarComponent = () => {
         }
     }
 
-    useEffect(() => {
-        getDatas()
-    },[searchChecked])
+    useEffect(
+        () =>
+        {
+            getDatas()
+        },
+        []
+    )
+
+    useUpdateEffect(
+        () =>
+        {
+            getDatas()
+        },
+        [searchChecked]
+    )
 
     return (
         <Fragment>
