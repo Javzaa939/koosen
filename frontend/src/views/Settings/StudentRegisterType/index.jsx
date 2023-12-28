@@ -81,12 +81,12 @@ const StudentRegisterType = () => {
 		if (value.length) {
 			updatedData = datas.filter((item) => {
 				const startsWith =
-					item.student_code.toString().toLowerCase().startsWith(value.toString().toLowerCase()) ||
-					item.student_name.toString().toLowerCase().startsWith(value.toString().toLowerCase())
+					item.code.toString().toLowerCase().startsWith(value.toString().toLowerCase()) ||
+					item.name.toString().toLowerCase().startsWith(value.toString().toLowerCase())
 
 				const includes =
-					item.student_code.toString().toLowerCase().includes(value.toString().toLowerCase()) ||
-					item.student_name.toString().toLowerCase().includes(value.toString().toLowerCase())
+					item.code.toString().toLowerCase().includes(value.toString().toLowerCase()) ||
+					item.name.toString().toLowerCase().includes(value.toString().toLowerCase())
 
 				if (startsWith) {
 					return startsWith;

@@ -64,66 +64,10 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
         setprevYear(generateLessonYear( 5))
 	}
 
-    //------------------------------------------ засах үйлдэл ---------------------------------
-
-    async function getDatas() {
-        if(editId) {
-            const { success, data } = await fetchData(activeyearApi.getOne(editId))
-            if(success) {
-                // засах үед дата байх юм бол setValue-р дамжуулан утгыг харуулна
-                if(data === null) return
-                for(let key in data) {
-                    if(data[key] !== null)
-                        setValue(key, data[key])
-                    else setValue(key, '')
-                }
-            }
-        }
-    }
-
-    useEffect(() => {
-        getDatas()
-    },[open])
-
-    //улирлын жагсаалт авах
-    async function getSeason () {
-        const { success, data } = await fetchData(seasonApi.get())
-        if (success) {
-            setSeason(data)
-            setprevSeason(data)
-        }
-	}
-
-    //хичээлийн жил жагсаалт авах
-    async function getYear () {
-
-        setYear(generateLessonYear( 5))
-        setprevYear(generateLessonYear( 5))
-	}
-
     useEffect(() => {
         getSeason()
         getYear()
     },[])
-
-    // засах
-    async function onSubmitEdit(cdata) {
-        cdata = convertDefaultValue(cdata)
-        const { success, errors } = await fetchData(activeyearApi.put(cdata, editId))
-        if(success) {
-            reset()
-            handleEdit()
-            refreshDatas()
-        }
-        else {
-            /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in errors) {
-                setError(key, { type: 'custom', message: errors[key][0]});
-            }
-        }
-	}
-
-    // -------------------------------------------------- # -------------------------------------------
 
     // Хадгалах
 	async function onSubmit(cdata) {
@@ -168,11 +112,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                     tag="div"
                 >
                     {
-                        !is_view
-                        ?
                         <h5 className="modal-title">{t('Ажиллах жилийн тохиргоо оруулах')}</h5>
-                        :
-                        <h5 className="modal-title">{t('Ажиллах жилийн тохиргоо засах')}</h5>
                     }
                 </ModalHeader>
                 <ModalBody className="flex-grow-1">

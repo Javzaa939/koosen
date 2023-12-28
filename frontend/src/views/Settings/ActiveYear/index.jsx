@@ -33,7 +33,6 @@ const Score = () => {
 	const [filteredData, setFilteredData] = useState([]);
 	const [datas, setDatas] = useState([]);
     const [edit_id, setEditId] = useState('')
-	const [is_view, setIsView] = useState(false)
 
     // Нийт датаны тоо
     const [total_count, setTotalCount] = useState(datas.length || 1)
@@ -192,7 +191,7 @@ const Score = () => {
                         />
 					</div>
 				}
-				{modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} is_view={is_view}/>}
+				{modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} />}
 				{ update_modal && <UpdateModal editId={edit_id} open={update_modal} handleEdit={handleUpdateModal} refreshDatas={getDatas}/> }
 			</Card>
         </Fragment>

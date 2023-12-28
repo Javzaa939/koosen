@@ -95,7 +95,7 @@ const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
             >
             <h5 className="modal-title">{t('Суралцах хэлбэр засах')}</h5>
             </ModalHeader>
-                <ModalBody className="px-sm-3 pt-30 pb-3">
+                <ModalBody className="flex-grow-1">
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
                         <Col md={12}>
                             <Label className="form-label" for="score_code">
