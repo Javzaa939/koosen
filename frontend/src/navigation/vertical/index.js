@@ -20,6 +20,7 @@ import TeacherEvaluation from './TeacherEvaluation'
 import Role from './Role'
 // import Science from './Science'
 import Statistic from './Statistic'
+import Test from './Test'
 
 export default [
   ...Calendar,
@@ -43,4 +44,5 @@ export default [
   ...Settings,
   ...Role,
   // ...Science
+  ...Test,
 ]
