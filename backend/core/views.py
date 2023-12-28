@@ -969,16 +969,24 @@ class DashboardAPIView(
         collected_data['total_students_male'] = Student.objects.filter(gender=Student.GENDER_MALE).count()
         collected_data['total_students_female'] = Student.objects.filter(gender=Student.GENDER_FEMALE).count()
 
-        degree_list = ProfessionalDegree.objects.all()
+        degrees = ProfessionalDegree.objects.all()
 
-        for x in degree_list:
-            collected_data['total_' + x.degree_eng_name.lower()] = Student.objects.filter(group__degree__degree_code=x.degree_code).count()
+        if degrees:
+            for x in degrees:
+                collected_data['total_' + x.degree_code.lower()] = Student.objects.filter(group__degree__degree_code=x.degree_code).count()
 
         salbar_sur_list = SubSchools.objects.all()
 
+        salbar_data = []
+
+        collected_data['salbar_data'] = salbar_data
 
         for index, v in enumerate(salbar_sur_list):
-            collected_data[index] = Student.objects.filter(school=v).count()
+            salbar_data.append({
+                'name': v.name,
+                'count': Student.objects.filter(school=v).count()
+            })
+
 
         print(salbar_sur_list)
         print(salbar_sur_list)
