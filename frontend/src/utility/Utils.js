@@ -1700,6 +1700,26 @@ export const zeroToNumber = (max) =>
     return too
 }
 
+export const assess_type = () => {
+	const options = [
+		{ id: 1, name: 'Хамгийн өндөр оноо' },
+		{ id: 2, name: 'Дундаж оноо' },
+	]
+
+	return options
+}
+
+
+export const challenge_types = () => {
+	const options = [
+		{ id: 1, name: 'Сорил 1' },
+		{ id: 2, name: 'Сорил 2' },
+		{ id: 3, name: 'Улирлын шалгалт' },
+		{ id: 4, name: 'Өөрийгөө сорих тест' },
+	]
+
+	return options
+}
 
 export const get_emp_state = () =>
 {
