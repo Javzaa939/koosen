@@ -116,7 +116,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                     }
                 </ModalHeader>
                 <ModalBody className="flex-grow-1">
-                        <Row tag={Form} className="gy-1" onSubmit={handleSubmit( !is_view ? onSubmit : onSubmitEdit)}>
+                        <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
                         <Col md={12}>
                             <Label className="form-label" for="active_lesson_year">
                                 {t('Идэвхтэй хичээлийн жил')}
