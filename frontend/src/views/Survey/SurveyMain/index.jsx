@@ -218,7 +218,7 @@ const Survey = () => {
 				</Col>
 				<Row className="justify-content-between mx-0 mt-1" sm={12}>
 					<Col
-						className="d-flex align-items-center justify-content-start"
+						className="d-flex align-items-center justify-content-start m-50"
 						md={6}
 						sm={12}
 					>
@@ -243,7 +243,7 @@ const Survey = () => {
 							</Label>
 						</Col>
 					</Col>
-					<Col className='d-flex align-items-end mobile-datatable-search '>
+					<Col className='d-flex align-items-end mobile-datatable-search m-50'>
                         <Input
                             className='dataTable-filter mb-50'
                             type='text'

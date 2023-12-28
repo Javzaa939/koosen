@@ -162,7 +162,7 @@ const LoanFund= () => {
                     <CardTitle tag='h4'>{t('Боловсролын зээлийн сан')}</CardTitle>
                 </CardHeader>
                 <Row className='mt-1'>
-                    <Col sm={6} md={4} className="ms-1">
+                    <Col sm={6} md={4} className="ms-1 pe-3">
                         <Label className="form-label" for="degree">
                             {t("Боловсролын зэрэг")}
                         </Label>
@@ -211,7 +211,7 @@ const LoanFund= () => {
                             }}
                         ></Controller>
                     </Col>
-                    <Col sm={6} md={4} >
+                    <Col sm={6} md={4} className="ms-1 pe-3">
                         <Label className="form-label" for="group">
                             {t("Анги")}
                         </Label>
