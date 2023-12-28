@@ -1,7 +1,7 @@
 // ** React Imports
 import { Fragment, useState, useEffect, useContext} from 'react'
 
-import { Row, Col, Card, Input, CardTitle, CardHeader, Spinner, Button } from 'reactstrap'
+import { Row, Col, Card, Input, CardTitle, CardHeader, Spinner, Button, Label } from 'reactstrap'
 
 import { ChevronDown, Plus} from 'react-feather'
 
@@ -121,26 +121,25 @@ const Departments = () => {
                         </Button>
 					</div>
 				</CardHeader>
-				<Row className="justify-content-between mx-0">
-					<Col className="datatable-search-text d-flex justify-content-start mt-1" md={6} sm={6}>
-						<Input
-							className="dataTable-filter mb-50"
-							type="text"
-							bsSize="sm"
-							id="search-input"
-							value={searchValue}
-							onChange={handleFilter}
-							placeholder={t('Хайх')}
-						/>
-					</Col>
-				</Row>
+				<Col className="mx-1 mt-1" md={3} sm={6}>
+					<Label>Хайлт</Label>
+					<Input
+						className=" mb-50"
+						type="text"
+						bsSize="sm"
+						id="search-input"
+						value={searchValue}
+						onChange={handleFilter}
+						placeholder={t('Хайх...')}
+					/>
+				</Col>
 				{isLoading ?
 					<div className="my-2 text-center" sm={12}>
 						<Spinner size='sm' />
 						<span className='ms-50'>{t('Түр хүлээнэ үү...')}</span>
 					</div>
 					:
-					<div className="react-dataTable react-dataTable-selectable-rows" id="datatableLeftTwoRightOne">
+					<div className="react-dataTable react-dataTable-selectable-rows mx-1" id="datatableLeftTwoRightOne">
 						<DataTable
 							noHeader
 							pagination

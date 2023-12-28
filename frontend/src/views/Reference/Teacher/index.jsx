@@ -201,7 +201,7 @@ const Teacher = () => {
 						<span className='ms-50'>{t("Түр хүлээнэ үү...")}</span>
 					</div>
 				:
-					<div className="react-dataTable react-dataTable-selectable-rows">
+					<div className="react-dataTable react-dataTable-selectable-rows mx-1">
 						<DataTable
                             noHeader
                             pagination
