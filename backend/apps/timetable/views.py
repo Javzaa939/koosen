@@ -85,18 +85,12 @@ class BuildingAPIView(
         serializer = self.get_serializer(data=request_data)
 
         if serializer.is_valid(raise_exception=False):
-            is_success = False
             with transaction.atomic():
                 try:
-                    self.create(request).data
-
-                    is_success = True
+                    self.perform_create(serializer)
                 except Exception:
-                    raise
-            if is_success:
-                return request.send_info("INF_001")
-
-            return request.send_error("ERR_002")
+                    return request.send_error("ERR_002")
+            return request.send_info("INF_001")
         else:
             # Олон алдааны мессэж буцаах бол үүнийг ашиглана
             error_obj = []
@@ -127,17 +121,13 @@ class BuildingAPIView(
         serializer = self.get_serializer(instance, data=request_data)
 
         if serializer.is_valid(raise_exception=False):
-            is_success = False
             with transaction.atomic():
                 try:
-                    self.update(request).data
-                    is_success = True
+                    self.perform_update(serializer)
                 except Exception:
-                    raise
-            if is_success:
-                return request.send_info("INF_001")
+                    return request.send_error("ERR_002")
+            return request.send_info("INF_001")
 
-            return request.send_error("ERR_002")
         else:
             error_obj = []
             for key in serializer.errors:

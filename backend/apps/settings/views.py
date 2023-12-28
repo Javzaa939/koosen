@@ -1286,6 +1286,7 @@ class SignatureAPIView(
         return request.send_info("INF_003")
 
 
+@permission_classes([IsAuthenticated])
 class SignatureDataTableAPIView(APIView):
 
     @has_permission(must_permissions=['lms-settings-signature-read'])
