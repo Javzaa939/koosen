@@ -72,7 +72,7 @@ const Teacher = () => {
         }
 
 		var department = selected_values.department_id
-		var subschool_id = selected_values.subschool_id
+		var subschool_id = school_id
 		const { success, data } = await allFetch(teacherApi.getList(rowsPerPage, currentPage, sortField, searchValue, subschool_id, department))
 		if(success) {
 			setTotalCount(data?.count)
@@ -82,20 +82,12 @@ const Teacher = () => {
 
 	/* Тэнхим дата авах функц */
 	async function getDepartmentOption() {
-		var school_id = selected_values.subschool_id
 		const { success, data } = await fetchData(departmentApi.getSelectSchool(school_id))
 		if (success) {
 			setDepartmentData(data)
 		}
 	}
 
-	/* Сургуулийн дата авах функц */
-	async function getSubSchoolOption() {
-		const { success, data } = await fetchData(subSchoolApi.get())
-		if (success) {
-			setSubSchoolData(data)
-		}
-	}
 	// addModal
 	const handleModal =() =>{
 		setAddModal(!add_modal)
@@ -111,12 +103,11 @@ const Teacher = () => {
 
 			return () => clearTimeout(timeoutId);
 		}
-	},[rowsPerPage, sortField, searchValue, currentPage ])
+	},[rowsPerPage, sortField, searchValue, currentPage, school_id])
 
 	useEffect(() => {
-		getSubSchoolOption()
 		getDepartmentOption()
-	},[searchValue])
+	},[school_id])
 
 	// ** Function to handle filter
 	const handleFilter = e => {
@@ -155,42 +146,6 @@ const Teacher = () => {
                     </div>
                 </CardHeader>
                 <Row className="justify-content-between mx-0 mb-1 mt-1">
-					<Col md={4}>
-						<Label className="form-label" for="subschool">
-							{t('Сургууль')}
-						</Label>
-						<Controller
-							control={control}
-							defaultValue=''
-							name="school"
-							render={({ field: { value, onChange} }) => {
-								return (
-									<Select
-										name="school"
-										id="school"
-										classNamePrefix='select'
-										isClearable
-										className='react-select'
-										placeholder={t('-- Сонгоно уу --')}
-										options={subschool || []}
-										value={subschool.find((c) => c.id === value)}
-										noOptionsMessage={() => t('Хоосон байна.')}
-										onChange={(val) => {
-											onChange(val?.id || '')
-											setSelectValue({
-												subschool_id: val?.id || '',
-												department_id: ''
-											})
-											setValue('salbar', '')
-										}}
-										styles={ReactSelectStyles}
-										getOptionValue={(option) => option.id}
-										getOptionLabel={(option) => option.name}
-									/>
-								)
-							}}
-						></Controller>
-					</Col>
 					<Col md={4}>
 						<Label className="form-label" for="salbar">
 							{t('Тэнхим')}
@@ -246,7 +201,7 @@ const Teacher = () => {
 						<span className='ms-50'>{t("Түр хүлээнэ үү...")}</span>
 					</div>
 				:
-					<div className="react-dataTable react-dataTable-selectable-rows">
+					<div className="react-dataTable react-dataTable-selectable-rows mx-1">
 						<DataTable
                             noHeader
                             pagination
