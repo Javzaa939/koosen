@@ -139,16 +139,15 @@ const News = () => {
         <Fragment>
             {Loader && isLoading}
             <Card>
-                <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
-                    <CardTitle tag="h4">{t('Зар')}</CardTitle>
-                <div className='d-flex flex-wrap mt-md-0 mt-1'>
+                <CardHeader className="flex-md-row flex-column align-items-start align-self-end my-0">
+                <div className="my-0">
                     <Button color='primary' disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-service-news-create')? false : true} onClick={() => handleModal()}>
                         <Plus size={15}/>
                         <span className='align-middle ms-50'>{t('Нэмэх')}</span>
                     </Button>
                 </div>
                 </CardHeader>
-                <Row className="justify-content-between mx-0 mb-1" sm={12}>
+                <Row className="justify-content-between mx-0 my-0" sm={12}>
                     <Col className='d-flex align-items-center justify-content-start' md={6} sm={12}>
                         <Col md={3} sm={4} xs={5} className='pe-1'>
                             <Input
