@@ -38,13 +38,52 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
     const [ prevseasonOption, setprevSeason] = useState([])
     const [ yearOption, setYear] = useState([])
     const [ prevYearOption, setprevYear] = useState([])
+    const [ is_view, setIsView] = useState(false)
 
 	// Loader
 	const { Loader, isLoading, fetchData } = useLoader({});
 	const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
 
+    // Api
     const seasonApi = useApi().settings.season
     const activeyearApi = useApi().settings.activeyear
+
+    //улирлын жагсаалт авах
+    async function getSeason () {
+        const { success, data } = await fetchData(seasonApi.get())
+        if (success) {
+            setSeason(data)
+            setprevSeason(data)
+        }
+	}
+
+    // хичээлийн жил жагсаалт авах
+    async function getYear () {
+
+        setYear(generateLessonYear( 5))
+        setprevYear(generateLessonYear( 5))
+	}
+
+    //------------------------------------------ засах үйлдэл ---------------------------------
+
+    async function getDatas() {
+        if(editId) {
+            const { success, data } = await fetchData(activeyearApi.getOne(editId))
+            if(success) {
+                // засах үед дата байх юм бол setValue-р дамжуулан утгыг харуулна
+                if(data === null) return
+                for(let key in data) {
+                    if(data[key] !== null)
+                        setValue(key, data[key])
+                    else setValue(key, '')
+                }
+            }
+        }
+    }
+
+    useEffect(() => {
+        getDatas()
+    },[open])
 
     //улирлын жагсаалт авах
     async function getSeason () {
@@ -61,6 +100,30 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
         setYear(generateLessonYear( 5))
         setprevYear(generateLessonYear( 5))
 	}
+
+    useEffect(() => {
+        getSeason()
+        getYear()
+    },[])
+
+    // засах
+    async function onSubmitEdit(cdata) {
+        cdata = convertDefaultValue(cdata)
+        const { success, errors } = await fetchData(activeyearApi.put(cdata, editId))
+        if(success) {
+            reset()
+            handleEdit()
+            refreshDatas()
+        }
+        else {
+            /** Алдааны мессэжийг input дээр харуулна */
+            for (let key in errors) {
+                setError(key, { type: 'custom', message: errors[key][0]});
+            }
+        }
+	}
+
+    // -------------------------------------------------- # -------------------------------------------
 
     // Хадгалах
 	async function onSubmit(cdata) {
@@ -104,10 +167,16 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                     close={CloseBtn}
                     tag="div"
                 >
-                    <h5 className="modal-title">{t('Ажиллах жилийн тохиргоо оруулах')}</h5>
+                    {
+                        !is_view
+                        ?
+                        <h5 className="modal-title">{t('Ажиллах жилийн тохиргоо оруулах')}</h5>
+                        :
+                        <h5 className="modal-title">{t('Ажиллах жилийн тохиргоо засах')}</h5>
+                    }
                 </ModalHeader>
                 <ModalBody className="flex-grow-1">
-                    <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
+                        <Row tag={Form} className="gy-1" onSubmit={handleSubmit( !is_view ? onSubmit : onSubmitEdit)}>
                         <Col md={12}>
                             <Label className="form-label" for="active_lesson_year">
                                 {t('Идэвхтэй хичээлийн жил')}

@@ -14,7 +14,7 @@ import {
 	ModalHeader,
     Spinner
 } from "reactstrap";
-
+import { X } from "react-feather";
 import { t } from 'i18next';
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
@@ -24,6 +24,9 @@ import { validateSchema } from './validateSchema';
 
 const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
 
+    const CloseBtn = (
+        <X className="cursor-pointer" size={15} onClick={handleEdit} />
+    )
 	const { isLoading, fetchData } = useLoader({});
 
     const [ seasonOption, setSeason] = useState([])
@@ -95,14 +98,25 @@ const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
 
 	return (
         <Fragment>
-            <Modal isOpen={open} toggle={handleEdit} className="modal-dialog-centered modal-sm" onClosed={handleEdit}>
+            <Modal
+            isOpen={open}
+            toggle={handleEdit}
+            className="sidebar-lg hr-register"
+            modalClassName="modal-slide-in "
+            contentClassName="pt-0"
+            onClosed={handleEdit}>
+
             {isLoading && <div className='suspense-loader'><Spinner size='xl'/></div>}
-                <ModalHeader className='bg-transparent pb-0' toggle={handleEdit} ></ModalHeader>
-                <ModalBody className="px-sm-3 pt-30 pb-3">
-                    <div className='text-center'>
-                        <h4>{t('Ажиллах жилийн тохиргоо засах')}</h4>
-                    </div>
-                        <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
+                <ModalHeader
+                    className="mb-1"
+                    toggle={handleEdit}
+                    close={CloseBtn}
+                    tag="div"
+                >
+                 <h4>{t('Ажиллах жилийн тохиргоо засах')}</h4>
+                </ModalHeader>
+                <ModalBody className="flex-grow-1">
+                    <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
                         <Col md={12}>
                             <Label className="form-label" for="active_lesson_year">
                                 {t('Идэвхтэй хичээлийн жил')}
@@ -267,7 +281,7 @@ const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
                                     {t('Буцах')}
                                 </Button>
                             </Col>
-                        </Row>
+                    </Row>
                 </ModalBody>
             </Modal>
         </Fragment>

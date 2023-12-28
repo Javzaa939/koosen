@@ -18,15 +18,19 @@ import {
 
 import { t } from 'i18next';
 
+import { X } from "react-feather";
 import useApi from '@hooks/useApi';
 
 import useLoader from '@hooks/useLoader';
 
 import { convertDefaultValue, validate } from "@utils"
-
 import { validateSchema } from '../validateSchema'
 
 const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
+
+    const CloseBtn = (
+        <X className="cursor-pointer" size={15} onClick={handleEdit} />
+    )
 
     const { isLoading, fetchData } = useLoader({})
 
@@ -74,13 +78,27 @@ const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
 
 	return (
         <Fragment>
-            <Modal isOpen={open} toggle={handleEdit} className="modal-dialog-centered modal-sm" onClosed={handleEdit}>
-            {isLoading && <div className='suspense-loader'><Spinner size='xl'/></div>}
-                <ModalHeader className='bg-transparent pb-0' toggle={handleEdit} ></ModalHeader>
-                <ModalBody className="px-sm-3 pt-30 pb-3">
-                    <div className='text-center'>
-                        <h4>{t('Хичээлийн улирал засах')}</h4>
-                    </div>
+            <Modal
+                isOpen={open}
+                toggle={handleEdit}
+                className="sidebar-lg hr-register"
+                modalClassName="modal-slide-in "
+                contentClassName="pt-0"
+                onClosed={handleEdit}>
+
+                {
+                    isLoading && <div className='suspense-loader'><Spinner size='xl'/></div>
+                }
+
+                <ModalHeader
+                    className="mb-1"
+                    toggle={handleEdit}
+                    close={CloseBtn}
+                    tag="div"
+                >
+                    <h5 className="modal-title">{t('Хичээлийн улирал засах')}</h5>
+                </ModalHeader>
+                <ModalBody className="flex-grow-1">
                         <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
                             <Col md={12}>
                                 <Label className="form-label" for="season_code">

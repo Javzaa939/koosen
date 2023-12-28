@@ -18,6 +18,7 @@ import {
 
 import { t } from 'i18next';
 
+import { X } from "react-feather";
 import useApi from '@hooks/useApi';
 
 import useLoader from '@hooks/useLoader';
@@ -27,6 +28,9 @@ import { convertDefaultValue, validate } from "@utils"
 import { validateSchema } from '../Add/validateSchema'
 
 const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
+    const CloseBtn = (
+        <X className="cursor-pointer" size={15} onClick={handleEdit} />
+    )
 
     const { isLoading, fetchData } = useLoader({})
 
@@ -74,14 +78,25 @@ const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
 
 	return (
         <Fragment>
-            <Modal isOpen={open} toggle={handleEdit} className="modal-dialog-centered modal-sm" onClosed={handleEdit}>
+            <Modal
+                isOpen={open}
+                toggle={handleEdit}
+                className="sidebar-lg hr-register"
+                modalClassName="modal-slide-in "
+                contentClassName="pt-0"
+                onClosed={handleEdit}
+            >
             {isLoading && <div className='suspense-loader'><Spinner size='xl'/></div>}
-                <ModalHeader className='bg-transparent pb-0' toggle={handleEdit} ></ModalHeader>
+            <ModalHeader
+                className="mb-1"
+                close={CloseBtn}
+                toggle={handleEdit}
+                tag="div"
+            >
+            <h5 className="modal-title">{t('Суралцах хэлбэр засах')}</h5>
+            </ModalHeader>
                 <ModalBody className="px-sm-3 pt-30 pb-3">
-                    <div className='text-center'>
-                        <h4>{t('Суралцах хэлбэр засах')}</h4>
-                    </div>
-                        <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
+                    <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
                         <Col md={12}>
                             <Label className="form-label" for="score_code">
                                 {t('Код')}
