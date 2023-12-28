@@ -88,7 +88,7 @@ class ProfessionalDegreeAPIView(
         degree_code = data.get("degree_code")
 
         if degree_code:
-            degree = self.queryset.filter(degree_code=degree_code)
+            degree = self.queryset.filter(degree_code=degree_code).exclude(degree_code=degree_code)
             if degree:
                 return request.send_error("ERR_003", "Боловсролын зэргийн код давхцаж байна")
 
