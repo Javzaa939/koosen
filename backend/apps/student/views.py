@@ -792,83 +792,59 @@ class StudentMovementAPIView(
         return request.send_data(stud_list)
 
     @has_permission(must_permissions=['lms-student-movement-create'])
+    @transaction.atomic
     def post(self, request):
         " Оюутны шилжилт хөдөлгөөн шинээр үүсгэх "
 
         data = request.data
-
+        status = None
         student = data.get('student')
         serializer = self.get_serializer(data=data)
+
+        # transaction savepoint зарлах нь хэрэв алдаа гарвад roll back хийнэ
+        sid = transaction.savepoint()
 
         status_rg = StudentRegister.objects.filter(name__contains='Шилжсэн')
 
         if status_rg:
             status = status_rg.first()
 
-        if serializer.is_valid(raise_exception=False):
-            is_success = False
-            with transaction.atomic():
-                try:
-                    self.create(request).data
+        try:
+            serializer = self.serializer_class(data=data, many=False)
+            if not serializer.is_valid():
+                transaction.savepoint_rollback(sid)
+                return request.send_error_valid(serializer.errors)
 
-                    Student.objects.filter(pk=student).update(
-                        status=status
-                    )
+            serializer.save()
 
-                    is_success = True
-                except Exception:
-                    raise
-            if is_success:
-                return request.send_info("INF_001")
+            if status:
+                Student.objects.filter(pk=student).update(
+                    status=status
+                )
 
+        except Exception:
             return request.send_error("ERR_002")
-        else:
-            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
-            error_obj = []
-            for key in serializer.errors:
-                msg = "Хоосон байна"
-
-                if key == 'student':
-                    msg = 'Бүртгэгдсэн оюутан байна'
-
-                return_error = {
-                    "field": key,
-                    "msg": msg
-                }
-
-                error_obj.append(return_error)
-
-            if len(error_obj) > 0:
-                return request.send_error("ERR_003", error_obj)
 
         return request.send_info("INF_001")
 
     @has_permission(must_permissions=['lms-student-movement-update'])
+    @transaction.atomic
     def put(self, request, pk=None):
         " Оюутны шилжилт хөдөлгөөн засах "
 
         data = request.data
         instance = self.get_object()
 
-        serializer = self.get_serializer(instance, data=data)
+        try:
+            serializer = self.get_serializer(instance, data=data)
+            if not serializer.is_valid(raise_exception=False):
+                return request.send_error_valid(serializer.errors)
 
+            self.perform_update(serializer)
 
-        if serializer.is_valid(raise_exception=True):
-            self.perform_create(serializer)
-
-        else:
-            error_obj = []
-            for key in serializer.errors:
-                msg = "Хоосон байна"
-                return_error = {
-                    "field": key,
-                    "msg": msg
-                }
-
-                error_obj.append(return_error)
-
-            if len(error_obj) > 0:
-                return request.send_error("ERR_003", error_obj)
+        except Exception as e:
+            print(e)
+            return request.send_error("ERR_002")
 
         return request.send_info("INF_002")
 
@@ -878,6 +854,7 @@ class StudentMovementAPIView(
 
         self.destroy(request, pk)
         return request.send_info("INF_003")
+
 
 @permission_classes([IsAuthenticated])
 class StudentArrivedAPIView(
@@ -1832,56 +1809,36 @@ class GraduationWorkAPIView(
         return request.send_data(graduation_list)
 
     @has_permission(must_permissions=['lms-student-graduate-create'])
+    @transaction.atomic
     def post(self, request):
         " Төгсөлтийн ажил шинээр үүсгэх "
+
+        # transaction savepoint зарлах нь хэрэв алдаа гарвад roll back хийнэ
+        sid = transaction.savepoint()
 
         data = request.data
         lesson_ids = data['lesson']
         del data['lesson']
-
         student = data.get("student")
-        serializer = self.get_serializer(data=data)
 
-        if serializer.is_valid(raise_exception=False):
-            is_success = False
-            with transaction.atomic():
-                try:
-                    created_qs = self.create(request).data
-                    created_qs = self.queryset.get(id=created_qs.get("id"))
-                    created_qs.lesson.add(*lesson_ids)
-                    is_success = True
-                except Exception:
-                    raise
+        graduate_info = self.queryset.filter(student=student)
+        if graduate_info:
+            return request.send_error('ERR_002', 'Оюутан бүртгэгдсэн байна')
 
-            if is_success:
-                return request.send_info("INF_001")
+        try:
+            serializer = self.serializer_class(data=data, many=False)
+            if not serializer.is_valid():
+                transaction.savepoint_rollback(sid)
+                return request.send_error_valid(serializer.errors)
 
+            created_qs = self.create(request).data
+            created_qs = self.queryset.get(id=created_qs.get("id"))
+            created_qs.lesson.add(*lesson_ids)
+
+        except Exception:
             return request.send_error("ERR_002")
 
-        else:
-            error_obj = []
-            if student:
-                graduate_info = self.queryset.filter(student=student)
-                if graduate_info:
-                    return_error = {
-                        "field": 'student',
-                        "msg": "Бүртгэгдсэн оюутан байна"
-                    }
-
-                    error_obj.append(return_error)
-
-            for key in serializer.errors:
-                msg = "Хоосон байна"
-
-                return_error = {
-                    "field": key,
-                    "msg": msg
-                }
-
-                error_obj.append(return_error)
-
-            if len(error_obj) > 0:
-                return request.send_error("ERR_003", error_obj)
+        return request.send_info("INF_001")
 
     @has_permission(must_permissions=['lms-student-graduate-update'])
     def put(self, request, pk=None):
@@ -1894,51 +1851,27 @@ class GraduationWorkAPIView(
         student = data.get("student")
         instance = self.get_object()
 
-        serializer = self.get_serializer(instance, data=data)
+        student_qs = self.queryset.filter(student_id=student).exclude(id=pk)
 
-        if serializer.is_valid(raise_exception=False):
-            is_success = False
-            with transaction.atomic():
-                try:
-                    updated_qs = self.update(request).data
-                    updated_qs = self.queryset.get(id=updated_qs.get("id"))
-                    # updated_qs.lesson.all().remove()
-                    updated_qs.lesson.clear()
-                    updated_qs.lesson.add(*lesson_ids)
-                    is_success = True
-                except Exception as e:
-                    print(e)
-                    raise
-            if is_success:
-                return request.send_info("INF_002")
+        if student_qs:
+            return request.send_error('ERR_002', 'Оюутан бүртгэгдсэн байна')
 
+        try:
+            serializer = self.get_serializer(instance, data=data)
+            if not serializer.is_valid(raise_exception=False):
+                return request.send_error_valid(serializer.errors)
+
+            updated_qs = self.update(request).data
+            updated_qs = self.queryset.get(id=updated_qs.get("id"))
+            # updated_qs.lesson.all().remove()
+            updated_qs.lesson.clear()
+            updated_qs.lesson.add(*lesson_ids)
+
+        except Exception as e:
+            print(e)
             return request.send_error("ERR_002")
-        else:
-            error_obj = []
-            if student:
-                graduate_info = self.queryset.filter(student=student)
-                if graduate_info:
-                    return_error = {
-                        "field": 'student',
-                        "msg": "Бүртгэгдсэн оюутан байна"
-                    }
 
-                error_obj.append(return_error)
-
-            for key in serializer.errors:
-                msg = "Хоосон байна"
-
-                return_error = {
-                    "field": key,
-                    "msg": msg
-                }
-
-                error_obj.append(return_error)
-
-            if len(error_obj) > 0:
-                return request.send_error("ERR_003", error_obj)
-
-            return request.send_error("ERR_002")
+        return request.send_info("INF_002")
 
     @has_permission(must_permissions=['lms-student-graduate-delete'])
     def delete(self, request, pk=None):

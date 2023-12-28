@@ -47,7 +47,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 			// selector: (row) => row?.name,
             sortable: true,
 			minWidth: "80px",
-			center: true
+			left: true
 		},
 		{
 			header: 'kredit',

@@ -25,6 +25,7 @@ import SignatureModal from './Signature'
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import useModal from '@hooks/useModal'
+import useUpdateEffect from '@hooks/useUpdateEffect'
 
 // drag-and-drop.scss
 import '@styles/react/libs/drag-and-drop/drag-and-drop.scss'
@@ -92,11 +93,11 @@ const Graduation = () => {
     function getAllData()
     {
         Promise.all([
-            allFetch(graduateApi.get(rowsPerPage, currentPage, sortField, searchValue, select_value.department, select_value.degree, select_value.group)),
+            // allFetch(graduateApi.get(rowsPerPage, currentPage, sortField, searchValue, select_value.department, select_value.degree, select_value.group)),
             allFetch(signatureApi.get(2)),
         ]).then((values) => {
-            setDatas(values[0]?.data?.results)
-            setListArr(values[1]?.data)
+            // setDatas(values[0]?.data?.results)
+            setListArr(values[0]?.data)
         })
     }
 
@@ -150,13 +151,18 @@ const Graduation = () => {
     }
 
     useEffect(() => {
-        getDegree()
         getDatas()
-        getDepartment()
-        getGroup()
-    }, [sortField, currentPage, rowsPerPage, select_value])
+    }, [sortField, currentPage, rowsPerPage, select_value, school_id])
 
-	useEffect(() => {
+    useEffect(() => {
+        getDepartment()
+    }, [school_id])
+
+    useEffect(() => {
+        getGroup()
+    }, [select_value.department, select_value.degree, school_id])
+
+	useUpdateEffect(() => {
 		if (searchValue.length == 0) {
 			getDatas();
 		} else {
@@ -167,8 +173,6 @@ const Graduation = () => {
 			return () => clearTimeout(timeoutId);
 		}
 	}, [searchValue]);
-
-
 
     function handleSort(column, sort) {
         if(sort === 'asc') {
@@ -240,6 +244,7 @@ const Graduation = () => {
     useEffect(
         () =>
         {
+            getDegree()
             getAllData();
         },
         []
