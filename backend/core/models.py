@@ -143,6 +143,10 @@ class SubSchools(models.Model):
     tsol_name_eng = models.CharField(max_length=500, null=True, blank=True, verbose_name="Цол нэр англи")
     tsol_name_uig = models.CharField(max_length=500, null=True, blank=True, verbose_name="Цол нэр уйгаржин")
 
+    erdem_tsol_name = models.CharField(max_length=250, verbose_name='Эрдмийн цол нэр', null=True, blank=True)
+    erdem_tsol_name_eng = models.CharField(max_length=500, null=True, blank=True, verbose_name="Эрдмийн цол нэр англи")
+    erdem_tsol_name_uig = models.CharField(max_length=500, null=True, blank=True, verbose_name="Эрдмийн цол нэр уйгаржин")
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -195,7 +199,7 @@ class Departments(models.Model):
         Тухайн дэд байгууллагын салбар
     """
     class Meta:
-        db_table = 'core_departments'
+        db_table = 'core_salbars'
         managed = False
 
     org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага")

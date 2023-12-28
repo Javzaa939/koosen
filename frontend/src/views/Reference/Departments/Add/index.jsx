@@ -1,115 +1,151 @@
-import React, { Fragment, useEffect, useState} from 'react'
+// ** React imports
+import React, { Fragment, useState, useEffect, useContext } from 'react'
+
+import { X } from "react-feather";
+
+import Select from 'react-select'
+
+import useApi from "@hooks/useApi";
+import useLoader from "@hooks/useLoader";
+
+import { ReactSelectStyles } from "@utils"
+
+import classnames from "classnames";
+
+import { useForm, Controller } from "react-hook-form";
+
 import {
     Row,
     Col,
-    Modal,
 	Form,
+	Modal,
 	Input,
 	Label,
 	Button,
-    ModalBody,
-    ModalHeader,
     Spinner,
+	ModalBody,
+	ModalHeader,
+	FormFeedback,
 } from "reactstrap";
 
+import { validate, convertDefaultValue } from "@utils"
+
 import { t } from 'i18next';
-import Select from 'react-select'
-import classnames from 'classnames'
 
-import useApi from '@hooks/useApi';
-import useLoader from '@hooks/useLoader';
+import AuthContext from '@context/AuthContext'
+import SchoolContext from "@context/SchoolContext"
 
-import { validateSchema } from './validateSchema'
+import { validateSchema } from './validateSchema';
 
-import { useForm, Controller } from "react-hook-form";
-import { convertDefaultValue , validate, ReactSelectStyles } from "@utils"
+const AddModal = ({ open, handleModal, refreshDatas}) =>{
+    const CloseBtn = (
+        <X className="cursor-pointer" size={15} onClick={handleModal} />
+    )
+    const { user } = useContext(AuthContext)
+    const { school_id } = useContext(SchoolContext)
 
-const UpdateModal = ({ open, editId, refreshDatas, handleEdit}) => {
-    // Loader
-    const {isLoading, fetchData, Loader} = useLoader({isSmall: true})
-
+    // ** Hook
+    const { control, handleSubmit, reset, setError, formState: { errors } } = useForm(validate(validateSchema));
+    // states
+    const [is_loading, setLoader] = useState(false)
+    const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
     const [leader_option, setLeaderOption] = useState([])
 
-    const { control, handleSubmit, setValue,  setError, formState: { errors } } = useForm(validate(validateSchema));
+    // Loader
+	const { Loader, isLoading, fetchData } = useLoader({});
 
     // Api
-    const getDepartmentApi = useApi().hrms.department
+    const getLeaderApi = useApi().hrms.department
+    const departmentApi = useApi().hrms.department
 
-    async function getDatas() {
-        if(editId) {
-            const { success, data } = await fetchData(getDepartmentApi.getRegisterOne(editId))
-            if(success) {
-                // засах үед дата байх юм бол setValue-р дамжуулан утгыг харуулна
-                if(data === null) return
-                for(let key in data) {
-                    if(data[key] !== null)
-                        setValue(key, data[key])
-                    else setValue(key, '')
-                }
-            }
-        }
-    }
-
-    /* Хөтөлбөрийн багийн ахлагч жагсаалт авах функц */
+    /* тэнхимийн эрхлэгч-н жагсаалт авах функц */
     async function getLeaderList() {
-        const { success, data } = await fetchData(getDepartmentApi.leaderList())
+        const { success, data } = await fetchData(getLeaderApi.leaderList())
         if (success) {
             setLeaderOption(data)
         }
     }
 
     useEffect(() => {
-        getDatas()
         getLeaderList()
-    },[open])
+    },[])
 
     async function onSubmit(cdata) {
-        if(editId) {
-            cdata = convertDefaultValue(cdata)
-            const { success, error } = await fetchData(getDepartmentApi.putRegister(cdata, editId))
-            if(success) {
-                refreshDatas()
-                handleEdit()
-            }
-            else {
-                /** Алдааны мессэжийг input дээр харуулна */
-                for (let key in error) {
-                    setError(error[key].field, { type: 'custom', message:  error[key].msg});
-                }
+        cdata['created_user'] = user.id
+        cdata['updated_user'] = user.id
+        cdata['org'] = 1
+        cdata['sub_orgs']= school_id
+        cdata = convertDefaultValue(cdata)
+
+        const { success, error } = await postFetch(departmentApi.postRegister(cdata))
+        if(success) {
+            setLoader(false)
+            reset()
+            handleModal()
+            refreshDatas()
+        } else {
+            setLoader(false)
+            /** Алдааны мессэжийг input дээр харуулна */
+            for (let key in error) {
+                setError(error[key].field, { type: 'custom', message:  error[key].msg});
             }
         }
+
 	}
 
-	return (
+    return (
         <Fragment>
             <Modal
                 isOpen={open}
-                toggle={handleEdit}
+                toggle={handleModal}
                 className="sidebar-md"
                 modalClassName='modal-slide-in'
                 contentClassName='pt-0'
-                onClosed={handleEdit}
-                >
+            >
                 {
-                    isLoading &&
+                    is_loading &&
                         <div className='suspense-loader'>
                             <Spinner size='bg'/>
                             <span className='ms-50'>Түр хүлээнэ үү...</span>
                         </div>
                 }
+
                 <ModalHeader
                     className="mb-1"
-                    toggle={handleEdit}
-                    // close={CloseBtn}
+                    toggle={handleModal}
+                    close={CloseBtn}
                     tag="div"
-                 >
-                    <h5 className="modal-title">{t('Тэнхимийн мэдээлэл засах')}</h5>
+                >
+                    <h5 className="modal-title">{t('Тэнхимийн мэдээлэл нэмэх')}</h5>
+
                 </ModalHeader>
                 <ModalBody className="flex-grow-1">
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
-                        <Col  md={12}>
+                        <Col md={12}>
+                            <Label className="form-label" for="name">
+                                {t('Тэнхимийн нэр')}
+                            </Label>
+                            <Controller
+                                defaultValue=''
+                                control={control}
+                                id="name"
+                                name="name"
+                                render={({ field }) => (
+                                    <Input
+                                        id ="name"
+                                        bsSize="sm"
+                                        placeholder={t('Тэнхимийн нэр')}
+                                        {...field}
+                                        type="text"
+                                        invalid={errors.name && true}
+                                    />
+                                )}
+                            />
+                            {errors.name && <FormFeedback className='d-block'>{t(errors.name.message)}</FormFeedback>}
+                        </Col>
+                        <Col md={12}>
                             <Label className="form-label" for="leader">
-                                {t('Тэнхимийн ахлагч')}
+                                {t('Тэнхимийн эрхлэгч')}
                             </Label>
                             <Controller
                                 control={control}
@@ -142,29 +178,6 @@ const UpdateModal = ({ open, editId, refreshDatas, handleEdit}) => {
                             {errors.leader && <FormFeedback className='d-block'>{t(errors.leader.message)}</FormFeedback>}
                         </Col>
                         <Col md={12}>
-                            <Label className="form-label" for="name">
-                                {t('Тэнхимийн нэр')}
-                            </Label>
-                            <Controller
-                                defaultValue=''
-                                control={control}
-                                id="name"
-                                name="name"
-                                render={({ field }) => (
-                                    <Input
-                                        id ="name"
-                                        bsSize="sm"
-                                        disabled={true}
-                                        placeholder={t('Тэнхимийн нэр')}
-                                        {...field}
-                                        type="text"
-                                        invalid={errors.name && true}
-                                    />
-                                )}
-                            />
-                            {errors.name && <FormFeedback className='d-block'>{t(errors.name.message)}</FormFeedback>}
-                        </Col>
-                        <Col md={12}>
                             <Label className="form-label" for="social">
                                 {t('Нийтийн сүлжээ')}
                             </Label>
@@ -180,33 +193,9 @@ const UpdateModal = ({ open, editId, refreshDatas, handleEdit}) => {
                                         placeholder={t('Нийтийн сүлжээ')}
                                         {...field}
                                         type="textarea"
-                                        invalid={errors.social && true}
                                     />
                                 )}
                             />
-                            {errors.social && <FormFeedback className='d-block'>{t(errors.social.message)}</FormFeedback>}
-                        </Col>
-                        <Col md={12}>
-                            <Label className="form-label" for="web">
-                                {t('Веб')}
-                            </Label>
-                            <Controller
-                                defaultValue=''
-                                control={control}
-                                id="web"
-                                name="web"
-                                render={({ field }) => (
-                                    <Input
-                                        id ="web"
-                                        bsSize="sm"
-                                        placeholder={t('Веб')}
-                                        {...field}
-                                        type="textarea"
-                                        invalid={errors.web && true}
-                                    />
-                                )}
-                            />
-                            {errors.web && <FormFeedback className='d-block'>{t(errors.web.message)}</FormFeedback>}
                         </Col>
                         <Col md={12}>
                             <Label className="form-label" for="address">
@@ -224,18 +213,36 @@ const UpdateModal = ({ open, editId, refreshDatas, handleEdit}) => {
                                         placeholder={t('Хаяг')}
                                         {...field}
                                         type="textarea"
-                                        invalid={errors.address && true}
                                     />
                                 )}
                             />
-                            {errors.address && <FormFeedback className='d-block'>{t(errors.address.message)}</FormFeedback>}
                         </Col>
-                        <Col className='text-center mt-2' md={12}>
-                            <Button className="me-2" size='sm' color="primary" type="submit">
-                                {isLoading && Loader}
+                        <Col md={12}>
+                            <Label className="form-label" for="web">
+                                {t('Веб')}
+                            </Label>
+                            <Controller
+                                defaultValue=''
+                                control={control}
+                                id="web"
+                                name="web"
+                                render={({ field }) => (
+                                    <Input
+                                        id ="web"
+                                        bsSize="sm"
+                                        placeholder={t('Веб')}
+                                        {...field}
+                                        type="textarea"
+                                    />
+                                )}
+                            />
+                        </Col>
+                        <Col md={12}>
+                            <Button className="me-2" color="primary" type="submit" disabled={postLoading}>
+                                {postLoading &&<Spinner size='sm' className='me-1'/>}
                                 {t('Хадгалах')}
                             </Button>
-                            <Button size='sm' color="secondary" type="reset" onClick={handleEdit}>
+                            <Button color="secondary" type="reset" outline  onClick={handleModal}>
                                 {t('Буцах')}
                             </Button>
                         </Col>
@@ -245,4 +252,4 @@ const UpdateModal = ({ open, editId, refreshDatas, handleEdit}) => {
         </Fragment>
 	);
 };
-export default UpdateModal;
+export default AddModal;
