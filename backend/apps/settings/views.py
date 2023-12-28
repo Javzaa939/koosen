@@ -116,9 +116,9 @@ class ProfessionalDegreeAPIView(
         self.serializer_class = ProfessionalDegreePutSerializer
 
         datas = request.data
-        prof_qs = ProfessionDefinition.objects.filter(degree=pk).exclude(degree=pk)
+        prof_qs = ProfessionDefinition.objects.filter(degree=pk)
         if prof_qs:
-           return request.send_error("ERR_003", "Мэргэжлийн тодорхойлолтод бүртгэлтэй байгаа тул зэргийг засах боломжгүй байна.")
+            return request.send_error("ERR_003", "Зэргийн код давхцаж байна.")
 
         instance = self.queryset.filter(id=pk).first()
 
