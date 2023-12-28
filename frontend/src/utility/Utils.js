@@ -236,8 +236,8 @@ export function getPagination(handlePagination, pageNo, rowsPerPage, total_count
       filtered_page_count = Math.ceil(filteredData.length / rowsPerPage)
     }
     const CustomPagination = () => (
-      <div className="d-flex align-items-center justify-content-end ">
-        <Label className="flex-shrink-0 mx-2">
+      <div className="d-flex align-items-center justify-content-end flex-wrap mt-1">
+        <Label className="mx-2 text-wrap">
             Дэлгэцэнд: {(pageNo-1) * rowsPerPage + 1} - {rowsPerPage != -1 ? ((pageNo) * rowsPerPage > total_count) ? total_count : (pageNo) * rowsPerPage : total_count} Нийт: {total_count} бичлэг
         </Label>
         <ReactPaginate
