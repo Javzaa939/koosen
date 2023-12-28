@@ -33,9 +33,7 @@ export function getColumns (currentPage, rowsPerPage, datas) {
 		{
 			header: 'name',
 			name: `${t("Нэр")}`,
-			selector: (row) => {
-				return <a className='text-decoration-underline' href={`/reference/teachers/${row.id}/info/`} target="_blank" >{row?.first_name}</a>
-			},
+			selector: (row) => row?.first_name,
             sortable: true,
 			minWidth: "100px",
 			center: true,

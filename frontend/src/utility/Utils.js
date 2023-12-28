@@ -1699,3 +1699,15 @@ export const zeroToNumber = (max) =>
     }
     return too
 }
+
+
+export const get_emp_state = () =>
+{
+  const options = [
+    { id: 1, name: 'Ажиллаж байгаа' },
+    { id: 2, name: 'Халагдсан' },
+    { id: 3, name: 'Гарсан' },
+  ]
+
+  return options
+}

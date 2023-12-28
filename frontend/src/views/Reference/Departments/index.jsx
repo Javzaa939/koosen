@@ -1,19 +1,22 @@
 // ** React Imports
-import { Fragment, useState, useEffect} from 'react'
+import { Fragment, useState, useEffect, useContext} from 'react'
 
 import { Row, Col, Card, Input, CardTitle, CardHeader, Spinner, Button } from 'reactstrap'
 
-import { ChevronDown, Search } from 'react-feather'
+import { ChevronDown, Plus} from 'react-feather'
 
 import DataTable from 'react-data-table-component'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
-
+import AuthContext from '@context/AuthContext'
+import SchoolContext from '@context/SchoolContext'
 import { getPagination } from '@utils';
 
 import { getColumns } from './helpers';
 import UpdateModal from "./Edit"
+import AddModal from "./Add"
+
 
 import { useTranslation } from "react-i18next";
 
@@ -33,8 +36,13 @@ const Departments = () => {
 	const [edit_id, setEditId] = useState('')
     const [detailModalData, setDetailModalData ] = useState({})
 
+	const { user } = useContext(AuthContext)
+	const { school_id } = useContext(SchoolContext)
+
 	// Modal
     const [update_modal, setUpdateModal] = useState(false)
+    const [add_modal, setAddModal] = useState(false)
+
 	// Loader
 	const { Loader, isLoading, fetchData } = useLoader({})
 	const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({})
@@ -50,6 +58,7 @@ const Departments = () => {
 			setTotalCount(data.length)
 		}
 	}
+
 	useEffect(() => {
 		if (searchValue.length == 0) {
 			getDatas();
@@ -60,7 +69,7 @@ const Departments = () => {
 
 			return () => clearTimeout(timeoutId);
 		}
-	}, [searchValue]);
+	}, [searchValue, school_id]);
 
 	// Засах функц
     function handleUpdateModal(id, data) {
@@ -68,7 +77,22 @@ const Departments = () => {
         setUpdateModal(!update_modal)
         setDetailModalData(data)
     }
+	// Нэмэх функц
+	const handleModal = () =>
+	{
+        setAddModal(!add_modal)
+    }
 
+	/* Устгах функц */
+	async function handleDelete (id) {
+		if (id){
+			const { success } = await fetchData(departmentsApi.delete(id))
+			if(success)
+			{
+				getDatas()
+			}
+		}
+	};
 
 	// Хайлт хийх үед ажиллах хэсэг
 	const handleFilter = e => {
@@ -81,19 +105,6 @@ const Departments = () => {
 		setCurrentPage(page.selected + 1);
 	};
 
-	// Хуудас анх ачааллах үед Fullscreen loader гаргаж ирэх функц, ганц л уншина
-	async function firstLoad() {
-		const { success, data } = await fetchData(departmentsApi.getRegister(searchValue))
-		if(success) {
-			setDatas(data)
-			setTotalCount(data.length)
-		}
-	}
-
-	useEffect(() => {
-		firstLoad();
-	}, [])
-
 	return (
 		<Fragment>
 			{isLoading && Loader}
@@ -101,6 +112,13 @@ const Departments = () => {
 				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
 					<CardTitle tag="h4">{t('Тэнхим')}</CardTitle>
 					<div className='d-flex flex-wrap mt-md-0 mt-1'>
+						<Button
+                            color='primary'
+                            disabled={Object.keys(user).length > 0 && school_id ?  false : true}
+                            onClick={() => handleModal()}>
+                            <Plus size={15} />
+                            <span className='align-middle ms-50'>{t('Нэмэх')}</span>
+                        </Button>
 					</div>
 				</CardHeader>
 				<Row className="justify-content-between mx-0">
@@ -138,7 +156,7 @@ const Departments = () => {
 									<h5>{t('Өгөгдөл байхгүй байна')}</h5>
 								</div>
 							)}
-							columns={getColumns(currentPage, rowsPerPage, searchValue.length ? filteredData : datas, handleUpdateModal)}
+							columns={getColumns(currentPage, rowsPerPage, searchValue.length ? filteredData : datas, handleUpdateModal, handleDelete)}
 							sortIcon={<ChevronDown size={10} />}
 							paginationPerPage={rowsPerPage}
 							paginationDefaultPage={currentPage}
@@ -151,6 +169,8 @@ const Departments = () => {
 				}
 			</Card>
 			{ update_modal && <UpdateModal editId={edit_id} open={update_modal} handleEdit={handleUpdateModal} refreshDatas={getDatas} datas={detailModalData}/> }
+			{ add_modal && <AddModal open={add_modal} handleModal={handleModal} refreshDatas={getDatas} /> }
+
 		</Fragment>
 	)
 }
