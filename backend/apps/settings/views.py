@@ -116,7 +116,7 @@ class ProfessionalDegreeAPIView(
         self.serializer_class = ProfessionalDegreePutSerializer
 
         datas = request.data
-        prof_qs = ProfessionDefinition.objects.filter(degree=pk)
+        prof_qs = ProfessionDefinition.objects.filter(degree=pk).exclude(degree=pk)
         if prof_qs:
             return request.send_error("ERR_003", "Зэргийн код давхцаж байна.")
 
