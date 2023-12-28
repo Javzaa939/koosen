@@ -88,7 +88,7 @@ class ProfessionalDegreeAPIView(
         degree_code = data.get("degree_code")
 
         if degree_code:
-            degree = self.queryset.filter(degree_code=degree_code).exclude(degree_code=degree_code)
+            degree = self.queryset.filter(degree_code=degree_code)
             if degree:
                 return request.send_error("ERR_003", "Боловсролын зэргийн код давхцаж байна")
 
@@ -116,9 +116,9 @@ class ProfessionalDegreeAPIView(
         self.serializer_class = ProfessionalDegreePutSerializer
 
         datas = request.data
-        # prof_qs = ProfessionDefinition.objects.filter(degree=pk)
-        # if prof_qs:
-        #    return request.send_error("ERR_003", "Мэргэжлийн тодорхойлолтод бүртгэлтэй байгаа тул зэргийг засах боломжгүй байна.")
+        prof_qs = ProfessionDefinition.objects.filter(degree=pk).exclude(degree=pk)
+        if prof_qs:
+           return request.send_error("ERR_003", "Мэргэжлийн тодорхойлолтод бүртгэлтэй байгаа тул зэргийг засах боломжгүй байна.")
 
         instance = self.queryset.filter(id=pk).first()
 
