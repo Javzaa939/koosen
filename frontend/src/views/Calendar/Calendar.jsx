@@ -1,143 +1,148 @@
-// ** React Imports
-import { Fragment, useState, useEffect } from 'react'
+// ** React Import
+import { useRef, useContext } from 'react'
 
-// ** Third Party Components
-import classnames from 'classnames'
-import { Row, Col } from 'reactstrap'
+// ** Full Calendar & it's Plugins
+import FullCalendar from '@fullcalendar/react'
+import dayGridPlugin from '@fullcalendar/daygrid'
+import timeGridPlugin from '@fullcalendar/timegrid'
+import interactionPlugin from '@fullcalendar/interaction'
 
-import useApi from '@hooks/useApi';
-import useLoader from '@hooks/useLoader';
+import AuthContext from "@context/AuthContext"
 
-// ** Calendar App Component Imports
-import Calendar from './Calendar'
-import SidebarLeft from './SidebarLeft'
-import AddEventSidebar from './Add'
+import { useTranslation } from 'react-i18next'
 
-// ** Custom Hooks
-import { useRTL } from '@hooks/useRTL'
-import  useUpdateEffect  from '@hooks/useUpdateEffect'
+import { Menu } from 'react-feather'
+import { Card, CardBody } from 'reactstrap'
 
-// ** Styles
-import '@styles/react/apps/app-calendar.scss'
+import useWindowDimensions from '@lms_components/useWindowDimensions'
 
-import { VOLUNTEER_ACTION_TYPE } from '@utility/consts'
+const Calendar = props => {
+    // ** Refs
+    const calendarRef = useRef(null)
 
-const CalendarComponent = () => {
+    const { t } = useTranslation()
+    const { user } = useContext(AuthContext)
 
-    const blankEvent = {
-        title: '',
-        start: '',
-        end: '',
-    }
+    // Дэлгэцний өргөн, өндөр авах
+    const { width } = useWindowDimensions()
 
-    const { fetchData } = useLoader({})
+    // ** Props
+    const {
+        isRtl,
+        setNew,
+        handleAddEventSidebar,
+        toggleSidebar,
+        eventDatas,
+        setEditId,
+        getDates,
+        blankEvent,
+    } = props
 
-    // ** states
-    const [addSidebarOpen, setAddSidebarOpen] = useState(false)
-    const [leftSidebarOpen, setLeftSidebarOpen] = useState(false)
-    const [datas, setDatas] = useState([])
-    const [edit_id, setEditId] = useState('')
-    const [is_new, setNew] = useState(false)
-    const [searchChecked, setSearchChecked] = useState([])
-    const [dates, setDates] = useState(blankEvent)
-    const [active_week, setActiveWeek] = useState(1)
+    const calendarOptions = {
+        events: eventDatas && eventDatas.length > 0 ? eventDatas : [],
+        plugins: [interactionPlugin, dayGridPlugin, timeGridPlugin],
+        initialView: 'dayGridMonth',
+        headerToolbar:{
+            left: 'sidebarToggle,prev,next',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
 
-    // ** Hooks
-    const [isRtl] = useRTL()
+        eventResizableFromStart: true,
+        dragScroll: true,
+        dayMaxEvents: 5,
+        allDayText: t("Өдрийн турш"),
+        moreLinkText: "Илүү",
+        navLinks: true,
+        buttonText: {
+            today: t('Өнөөдөр'),
+            month: t('Сар'),
+            week: t('7 хоног'),
+            day: t('Өдөр'),
+        },
+        views: {
+            dayGridMonth: { // name of view
+                titleFormat: ({date}) => {
+                    const months = [t('1 сар'), t('2 сар'), t('3 сар'), t('4 сар'), t('5 сар'), t('6 сар'), t('7 сар'), t('8 сар'), t('9 сар'), t('10 сар'), t('11 сар'), t('12 сар')]
 
-    // Api
-    const calendarListApi = useApi().calendar
+                    var now_month = date.month
+                    var now_year = date.year
+                    var full_title = months[now_month] + ' ' + now_year
 
-    // ** AddEventSidebar Toggle Function
-    const handleAddEventSidebar = () => {
-        setAddSidebarOpen(!addSidebarOpen)
-        if (addSidebarOpen) {
-            setEditId('')
-        }
-    }
-
-    // ** LeftSidebar Toggle Function
-    const toggleSidebar = val => setLeftSidebarOpen(val)
-
-    async function getDatas() {
-        const { success, data } = await fetchData(calendarListApi.get(searchChecked))
-        if(success) {
-            setActiveWeek(data?.active_week)
-
-            if (data.datas) {
-
-                var calendarDatas = data.datas
-
-                calendarDatas.forEach(data => {
-                    if (data.action_type == VOLUNTEER_ACTION_TYPE) {
-                        data['title'] = 'ОНА' + ' ' + data?.title
-                        data['color'] = '#e9ff70'
-                    } else {
-                        data['textColor'] = 'white'
-                    }
-                });
-
-                setDatas(calendarDatas)
+                    return full_title
+                },
             }
-        }
+        },
+
+        dayHeaderFormat: {weekday: 'long'},
+
+        slotLabelFormat: {
+            hour: '2-digit',
+            minute: '2-digit',
+            meridiem: false,
+            hour12: false,
+        },
+
+        nowIndicator: true,
+
+        dayHeaderContent: ({date}) => {
+            const fd = date.getDay()
+            const days = [t('Ня'), t('Да'), t('Мя'), t('Лх'), t('Пү'), t('Ба'), t('Бя')]
+            if (width < 1000) {
+                return days[fd]
+            }
+            const weekdays = [t('Ням'), t('Даваа'), t('Мягмар'), t('Лхагва'), t('Пүрэв'), t('Баасан'), t('Бямба')]
+            return weekdays[fd]
+        },
+
+        dayMaxEventRows: 5,
+
+        eventClick: function(info) {
+            const calendar_id = info.event.extendedProps.cal_id
+            setEditId(calendar_id)
+            setNew(false)
+            handleAddEventSidebar()
+        },
+
+        customButtons: {
+            sidebarToggle: {
+                text: <Menu className='d-xl-none d-block' />,
+                click() {
+                    toggleSidebar(true)
+                }
+            }
+        },
+        dateClick(info) {
+
+            if(Object.keys(user).length > 0 && user.permissions.includes('lms-calendar-create')) {
+                const ev = blankEvent
+                ev.start = info.date
+                ev.end = info.date
+                getDates(ev)
+                handleAddEventSidebar()
+            }
+        },
+
+        eventDrop({ event }) {
+            const calendar_id = event.extendedProps.cal_id
+            setEditId(calendar_id)
+            handleAddEventSidebar()
+        },
+
+        ref: calendarRef,
+        direction: isRtl ? 'rtl' : 'ltr',
+        height: '100%',
+
+        displayEventTime: false,
     }
-
-    useEffect(() => {
-        getDatas()
-    },[])
-
-    useUpdateEffect(() => {
-        getDatas()
-    },[searchChecked])
 
     return (
-        <Fragment>
-            <div className='app-calendar overflow-hidden border'>
-                <Row className='g-0'>
-                    <Col
-                        id='app-calendar-sidebar'
-                        className={classnames('col app-calendar-sidebar flex-grow-0 overflow-hidden d-flex flex-column', {
-                            show: leftSidebarOpen
-                        })}
-                    >
-                        <SidebarLeft
-                            toggleSidebar={toggleSidebar}
-                            handleAddEventSidebar={handleAddEventSidebar}
-                            searchValue={setSearchChecked}
-                            setNew={setNew}
-                            active_week={active_week}
-                        />
-                    </Col>
-                    <Col className='position-relative'>
-                        <Calendar
-                            isRtl={isRtl}
-                            toggleSidebar={toggleSidebar}
-                            handleAddEventSidebar={handleAddEventSidebar}
-                            eventDatas={datas}
-                            setEditId={setEditId}
-                            setNew={setNew}
-                            blankEvent={blankEvent}
-                            getDates={setDates}
-                        />
-                    </Col>
-                    <div
-                        className={classnames('body-content-overlay', {
-                            show: leftSidebarOpen === true
-                        })}
-                        onClick={() => toggleSidebar(false)}
-                    ></div>
-                </Row>
-            </div>
-            <AddEventSidebar
-                open={addSidebarOpen}
-                handleAddEventSidebar={handleAddEventSidebar}
-                refreshDatas={getDatas}
-                editId={edit_id}
-                is_new={is_new}
-                dates={dates}
-            />
-        </Fragment>
+        <Card className='shadow-none border-0 mb-0 rounded-0'>
+            <CardBody className='pb-0'>
+                <FullCalendar {...calendarOptions} />{' '}
+            </CardBody>
+        </Card>
     )
 }
 
-export default CalendarComponent
+export default Calendar
