@@ -143,8 +143,8 @@ const Schedule = () => {
     }
 
     //Ангийн жагсаалт
-     async function getGroup()
-     {
+    async function getGroup()
+    {
         const teacher_id = selectValue.teacher
         const { success, data } = await fetchData(groupApi.getList('','','','',school_id))
         if(success)
@@ -204,7 +204,7 @@ const Schedule = () => {
         {
             getDatas()
         },
-        [rowsPerPage, currentPage, sortField, searchValue, selectValue]
+        [rowsPerPage, currentPage, sortField, searchValue, selectValue, school_id]
     )
 
     useEffect(

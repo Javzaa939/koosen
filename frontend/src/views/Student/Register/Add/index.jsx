@@ -91,11 +91,13 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
     function check_year(group_year) {
         var checked = false
         var start_active_year = cyear_name.split('-')[0]
-        var group_active_year = group_year.split('-')[0]
-
-        if (parseInt(group_active_year) < parseInt(start_active_year)) {
-            checked = true
+        if(group_year) {
+            var group_active_year = group_year.split('-')[0]
+            if (parseInt(group_active_year) < parseInt(start_active_year)) {
+                checked = true
+            }
         }
+
 
         setGroupChecked(checked)
     }
@@ -130,8 +132,6 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
         // cdata['citizen_name'] = citizen_name
         // cdata['citizenship'] = citizen_id
         cdata = convertDefaultValue(cdata)
-
-        console.log('cdata', cdata)
 
         const { success, errors } = await postFetch(studentApi.post(cdata))
         if(success)
@@ -174,7 +174,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
             getGroup()
             if (departId == undefined) setValue('group', '')
         },
-        [departId]
+        [departId, school_id]
     )
 
 	return (
@@ -261,7 +261,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                             noOptionsMessage={() => t('Хоосон байна')}
                                             onChange={(val) => {
                                                 onChange(val?.id || '')
-                                                check_year(val?.join_year)
+                                                check_year(val?.join_year || '')
                                             }}
                                             styles={ReactSelectStyles}
                                             getOptionValue={(option) => option.id}

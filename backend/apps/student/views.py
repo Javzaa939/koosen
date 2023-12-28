@@ -1929,7 +1929,7 @@ class EducationalLoanFundAPIView(
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['code', 'register_num', 'first_name', 'last_name']
+    search_fields = ['code', 'register_num', 'first_name', 'last_name', 'status__name', 'register_num']
 
     @has_permission(must_permissions=['lms-student-loanfund-read'])
     def get(self, request, pk=None):
@@ -1993,14 +1993,14 @@ class StudentDefinitionListAPIView(
     """
 
     queryset = Student.objects.all()
-    serializer_class = StudentRegisterSerializer
+    serializer_class = StudentListSerializer
 
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
     search_fields = ['department__name', 'code', 'first_name', 'last_name', 'register_num']
 
-    def get( self, request):
+    def get(self, request):
         "Оюутны бүртгэл жагсаалт"
 
         schoolId = request.query_params.get('school')
@@ -2027,7 +2027,6 @@ class SignatureAPIView(
     queryset = SignaturePeoples.objects.all()
     serializer_class = SignaturePeoplesSerializer
 
-
     def get(self, request):
 
         dedication_type = self.request.query_params.get('type')
@@ -2037,9 +2036,13 @@ class SignatureAPIView(
 
         return request.send_data(data)
 
+    @transaction.atomic
     def post(self, request):
 
         data = request.data
+
+        # transaction savepoint зарлах нь хэрэв алдаа гарвад roll back хийнэ
+        sid = transaction.savepoint()
 
         order = 1
 
@@ -2050,79 +2053,37 @@ class SignatureAPIView(
         data['order'] = order
         data['is_order'] = True
 
-        serializer = self.get_serializer(data=data)
+        try:
+            serializer = self.serializer_class(data=data, many=False)
+            if not serializer.is_valid():
+                transaction.savepoint_rollback(sid)
+                return request.send_error_valid(serializer.errors)
 
-        if serializer.is_valid(raise_exception=False):
-            is_success = False
-            with transaction.atomic():
-                try:
-                    self.create(request).data
+            serializer.save()
 
-                    is_success = True
-                except Exception as e:
-                    raise Exception(e)
-
-            if is_success:
-                return request.send_info("INF_001")
-
+        except Exception:
             return request.send_error("ERR_002")
-        else:
-            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
-            error_obj = []
-            for key in serializer.errors:
-                msg = "Хоосон байна"
-                return_error = {
-                    "field": key,
-                    "msg": msg
-                }
-
-                error_obj.append(return_error)
-
-            if len(error_obj) > 0:
-                return request.send_error("ERR_003", error_obj)
 
         return request.send_info("INF_001")
 
     def put(self, request, pk=None):
 
-        translator = Translator()
-
         data = request.data
-        student = data.get("student")
 
         instance = self.get_object()
 
-        serializer = self.get_serializer(instance, data=data)
+        try:
+            serializer = self.get_serializer(instance, data=data)
+            if not serializer.is_valid(raise_exception=False):
+                return request.send_error_valid(serializer.errors)
 
-        if serializer.is_valid(raise_exception=False):
-            is_success = False
-            with transaction.atomic():
-                try:
-                    self.update(request).data
-                    is_success = True
-                except Exception as e:
-                    print(e)
-                    raise
-            if is_success:
-                return request.send_info("INF_002")
+            self.update(request).data
 
+        except Exception as e:
+            print(e)
             return request.send_error("ERR_002")
-        else:
-            error_obj = []
 
-            for key in serializer.errors:
-
-                return_error = {
-                    "field": key,
-                    "msg": translator.translate(serializer.errors[key][0], dest='mn').text
-                }
-
-                error_obj.append(return_error)
-
-            if len(error_obj) > 0:
-                return request.send_error("ERR_003", error_obj)
-
-            return request.send_error("ERR_002")
+        return request.send_info("INF_002")
 
     def delete(self, request, pk=None):
         " Төгсөлтийн ажил устгах "

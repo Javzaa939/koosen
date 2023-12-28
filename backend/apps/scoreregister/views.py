@@ -281,8 +281,11 @@ class CorrespondAPIView(
         return request.send_data(correspond_list)
 
     @has_permission(must_permissions=['lms-score-correspond-create'])
+    @transaction.atomic
     def post(self, request):
         " Дүйцүүлсэн дүн шинээр үүсгэх "
+
+        sid = transaction.savepoint()
 
         data = request.data
         student = data.get("student")
@@ -303,43 +306,24 @@ class CorrespondAPIView(
             assessments = Score.objects.filter(score_max__gte=total_score,score_min__lte=total_score).values('id').first()
             if assessments:
                 request.data['assessment'] = assessments['id']
-        serializer = self.get_serializer(data=data)
 
-        if serializer.is_valid(raise_exception=False):
-            is_success = False
-            with transaction.atomic():
-                try:
-                    self.create(request)
-                    is_success = True
-                except Exception:
-                    raise
-            if is_success:
-                return request.send_info("INF_001")
+        if student:
+            score_info = self.queryset.filter(student=student, lesson_year=lesson_year, lesson_season=lesson_season, school=school, lesson=lesson)
+            if score_info:
+                return request.send_error("ERR_002", 'Оюутан дээр тухайн хичээлийн дүн бүртгэлтэй байна')
 
+        try:
+            serializer = self.serializer_class(data=data, many=False)
+            if not serializer.is_valid():
+                transaction.savepoint_rollback(sid)
+                return request.send_error_valid(serializer.errors)
+
+            serializer.save()
+
+        except Exception:
             return request.send_error("ERR_002")
 
-        else:
-            error_obj = []
-            if student:
-                score_info = self.queryset.filter(student=student,lesson_year=lesson_year,lesson_season=lesson_season,school=school,lesson=lesson)
-                if score_info:
-                    return_error = {
-                        "field": 'lesson',
-                        "msg": "Энэ оюутан дээр тухайн хичээлийн дүн бүртгэлтэй байна"
-                    }
-                    error_obj.append(return_error)
-                    return request.send_error("ERR_004", error_obj)
-            for key in serializer.errors:
-                msg = "Хоосон байна"
-
-                return_error = {
-                    "field": key,
-                    "msg": msg
-                }
-                error_obj.append(return_error)
-
-            if len(error_obj) > 0:
-                return request.send_error("ERR_003", error_obj)
+        return request.send_info("INF_001")
 
     @has_permission(must_permissions=['lms-score-correspond-update'])
     def put(self, request, pk=None):
@@ -369,45 +353,22 @@ class CorrespondAPIView(
 
         instance = self.get_object()
 
-        serializer = self.get_serializer(instance, data=data)
+        score_info = self.queryset.filter(student=student, lesson_year=lesson_year, lesson_season=lesson_season, school=school, lesson=lesson).exclude(id=pk)
+        if score_info:
+            return request.send_error("ERR_002", 'Оюутан дээр тухайн хичээлийн дүн бүртгэлтэй байна')
 
-        if serializer.is_valid(raise_exception=False):
-            is_success = False
-            with transaction.atomic():
-                try:
-                    self.update(request).data
-                    is_success = True
-                except Exception:
-                    raise
-            if is_success:
-                return request.send_info("INF_002")
+        try:
+            serializer = self.get_serializer(instance, data=data)
+            if not serializer.is_valid(raise_exception=False):
+                return request.send_error_valid(serializer.errors)
 
+            self.update(request).data
+
+        except Exception as e:
+            print(e)
             return request.send_error("ERR_002")
-        else:
-            error_obj = []
-            if student:
-                score_info = self.queryset.filter(student=student,lesson_year=lesson_year,lesson_season=lesson_season,school=school,lesson=lesson).exclude(id=pk)
-                if score_info:
-                    return_error = {
-                        "field": 'lesson',
-                        "msg": "Энэ оюутан дээр тухайн хичээлийн дүн бүртгэлтэй байна"
-                    }
-                    error_obj.append(return_error)
-                    return request.send_error("ERR_004", error_obj)
-            for key in serializer.errors:
-                msg = "Хоосон байна"
 
-                return_error = {
-                    "field": key,
-                    "msg": msg
-                }
-
-                error_obj.append(return_error)
-
-            if len(error_obj) > 0:
-                return request.send_error("ERR_003", error_obj)
-
-            return request.send_error("ERR_002")
+        return request.send_info("INF_002")
 
     @has_permission(must_permissions=['lms-score-correspond-delete'])
     def delete(self, request, pk=None):

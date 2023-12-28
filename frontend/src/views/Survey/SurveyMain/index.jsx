@@ -20,6 +20,7 @@ import Select from 'react-select'
 
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
+import useUpdateEffect from '@hooks/useUpdateEffect'
 
 import AuthContext from "@context/AuthContext"
 
@@ -60,6 +61,9 @@ const Survey = () => {
 
 	// Modal
 	const [showModal, setShowModal] = useState(false);
+
+	const [nestedModal, setNestedModal] = useState(false);
+    const [closeAll, setCloseAll] = useState(false);
 
 	const handleModal = () => {
 		setModal(!modal)
@@ -141,7 +145,8 @@ const Survey = () => {
 	async function handleSearch() {
         if (searchValue.length > 0) getDatas()
     }
-	useEffect(() => {
+
+	useUpdateEffect(() => {
 		if (searchValue.length == 0) {
 			getDatas();
 		} else {
@@ -160,11 +165,6 @@ const Survey = () => {
 		},
 		[isEdit]
 	)
-
-
-
-    const [nestedModal, setNestedModal] = useState(false);
-    const [closeAll, setCloseAll] = useState(false);
 
     const toggleNested = () => {
         setNestedModal(!nestedModal);

@@ -401,17 +401,15 @@ class CreditSettingsAPIView(
     """ Цагийн тооцоо тохиргоо """
 
     queryset = TimeEstimateSettings.objects.all().order_by('created_at')
-    serializer_class = TimeEstimateSettingsSerializer
+    serializer_class = TimeEstimateSettingsListSerializer
 
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['name','ratio','position__name']
+    search_fields = ['name', 'ratio', 'position__name']
 
     @has_permission(must_permissions=['lms-credit-settings-read'])
     def get(self, request, pk=None):
-
-        self.serializer_class = TimeEstimateSettingsListSerializer
 
         ctype = request.query_params.get('type')
         if ctype:
@@ -426,28 +424,43 @@ class CreditSettingsAPIView(
         return request.send_data(all_list)
 
     @has_permission(must_permissions=['lms-credit-settings-create'])
+    @transaction.atomic
     def post(self, request):
 
-        with transaction.atomic():
-            try:
-                self.create(request)
-            except Exception as e:
-                print(e)
-                return request.send_error("ERR_002", str(e))
+        sid = transaction.savepoint()
+        data = request.data
 
-            return request.send_info('INF_001')
+        try:
+            serializer = self.serializer_class(data=data, many=False)
+            if not serializer.is_valid():
+                transaction.savepoint_rollback(sid)
+                return request.send_error_valid(serializer.errors)
+
+            serializer.save()
+
+        except Exception:
+            return request.send_error("ERR_002")
+
+        return request.send_info("INF_001")
 
     @has_permission(must_permissions=['lms-credit-settings-update'])
+    @transaction.atomic
     def put(self, request, pk=None):
 
-        with transaction.atomic():
-            try:
-                self.update(request)
-            except Exception as e:
-                print(e)
-                return request.send_error("ERR_002", str(e))
+        data = request.data
+        instance = self.get_object()
 
-            return request.send_info('INF_001')
+        try:
+            serializer = self.get_serializer(instance, data=data)
+            if not serializer.is_valid(raise_exception=False):
+                return request.send_error_valid(serializer.errors)
+
+            self.update(request).data
+
+        except Exception as e:
+            return request.send_error("ERR_002", e.__str__)
+
+        return request.send_info('INF_002')
 
     @has_permission(must_permissions=['lms-credit-settings-delete'])
     def delete(self, request, pk=None):
@@ -492,7 +505,7 @@ class CreditSettingsPerformancePIView(
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['school__name','amount']
+    search_fields = ['school__name', 'amount']
 
     def get(self, request, pk=None):
 
@@ -505,27 +518,42 @@ class CreditSettingsPerformancePIView(
         all_list = self.list(request).data
         return request.send_data(all_list)
 
+    @transaction.atomic
     def post(self, request):
+        sid = transaction.savepoint()
+        data = request.data
 
-        with transaction.atomic():
-            try:
-                self.create(request)
-            except Exception as e:
-                print(e)
-                return request.send_error("ERR_002", str(e))
+        try:
+            serializer = self.serializer_class(data=data, many=False)
+            if not serializer.is_valid():
+                transaction.savepoint_rollback(sid)
+                return request.send_error_valid(serializer.errors)
 
-        return request.send_info('INF_001')
+            serializer.save()
 
+        except Exception:
+            return request.send_error("ERR_002")
+
+        return request.send_info("INF_001")
+
+    @transaction.atomic
     def put(self, request, pk=None):
 
-        with transaction.atomic():
-            try:
-                self.update(request)
-            except Exception as e:
-                print(e)
-                return request.send_error("ERR_002", str(e))
+        data = request.data
+        instance = self.get_object()
 
-            return request.send_info('INF_001')
+        try:
+            serializer = self.get_serializer(instance, data=data)
+            if not serializer.is_valid(raise_exception=False):
+                return request.send_error_valid(serializer.errors)
+
+            self.update(request).data
+
+        except Exception as e:
+            print(e)
+            return request.send_error("ERR_002")
+
+        return request.send_info("INF_002")
 
     def delete(self, request, pk=None):
         self.destroy(request, pk)

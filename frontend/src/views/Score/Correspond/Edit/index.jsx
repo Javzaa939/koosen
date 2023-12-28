@@ -103,15 +103,15 @@ const EditModal = ({ open, handleEdit, scoreId, refreshDatas }) => {
         cdata['school'] = school_id
         cdata['lesson_year'] = cyear_name
         cdata['lesson_season'] = cseason_id
-        const { success, error } = await fetchData(correspondApi.put(cdata, scoreId))
+        const { success, errors } = await fetchData(correspondApi.put(cdata, scoreId))
         if(success) {
             reset()
             handleEdit()
             refreshDatas()
         } else {
             /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in error) {
-                setError(error[key].field, { type: 'custom', message:  error[key].msg});
+            for (let key in errors) {
+                setError(key, { type: 'custom', message:  errors[key][0]});
             }
         }
 	}

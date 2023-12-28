@@ -271,7 +271,7 @@ const Createmodal = ({ open, handleModal, refreshDatas, select_value }) => {
                                             id="lesson"
                                             classNamePrefix='select'
                                             isClearable
-                                            className={classnames('react-select')}
+                                            className={classnames('react-select', { 'is-invalid': errors.lesson })}
                                             isLoading={getAllLoading}
                                             placeholder={t(`-- Сонгоно уу --`)}
                                             options={lesson_option || []}
