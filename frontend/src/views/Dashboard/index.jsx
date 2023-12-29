@@ -125,33 +125,16 @@ function Dashboard() {
 		return {
 			...dataPoint,
 			fillSettings: {
-				fill:
-					nextIndex < info?.salbar_data.length && info?.salbar_data[nextIndex].count < 60
-					? am5.color(red)
-					: nextIndex < info?.salbar_data.length && info?.salbar_data[nextIndex].count > 91
-					? am5.color(blue)
-					: am5.color(green),
+				fill: am5.color(blue)
 			},
 
 			strokeSettings: {
                 stroke:
-				nextIndex < info?.salbar_data.length && info?.salbar_data[nextIndex].count < 60
-					? "#ff7373"
-						: nextIndex < info?.salbar_data.length && info?.salbar_data[nextIndex].count > 91
-                    ?
-                        am5.color(blue)
-						:
-                        "#00ff00"
+                    am5.color(blue)
 			},
 
 			bulletSettings: {
-				fill: dataPoint.count < 60
-					? "#bf2200"
-					: dataPoint.count > 91
-					?
-                        am5.color(0x6794dc)
-                        :
-                            "#00ff00"
+				fill: am5.color(0x6794dc)
 			},
 		};
 	});
@@ -192,8 +175,9 @@ function Dashboard() {
 
 
             // хамгийн их утгыг олж түүн дээр 100г нэмнэ
-
             const number_array = info?.salbar_data.map(data => data?.count)
+
+            // түүний дараа чартын дээд утгыг гаргана
             const max_number = Math.max(number_array) + 100
 			let yAxis = chart.yAxes.push(
 				am5xy.ValueAxis.new(root, {
