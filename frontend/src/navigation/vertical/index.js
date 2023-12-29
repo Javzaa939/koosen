@@ -21,6 +21,7 @@ import Role from './Role'
 // import Science from './Science'
 import Statistic from './Statistic'
 import Dashboard from './Dashboard'
+import Test from './Test'
 
 export default [
   ...Dashboard,
@@ -45,4 +46,5 @@ export default [
   ...Settings,
   ...Role,
   // ...Science
+  ...Test,
 ]

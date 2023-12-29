@@ -1,6 +1,11 @@
+import os
+
 from rest_framework import serializers
 
-from django.db.models import Q
+from django.conf import settings
+from django.db.models import PositiveIntegerField, Q, CharField, Value, F, Sum, Count
+
+from datetime import datetime, timedelta
 
 from lms.models import LessonStandart
 from lms.models import Lesson_title_plan
@@ -23,11 +28,69 @@ from lms.models import TimeTable_to_group
 from lms.models import AdmissionBottomScore
 from lms.models import AdmissionLesson
 from lms.models import StudentAdmissionScore
+from lms.models import Challenge
+from lms.models import ChallengeQuestions
+from lms.models import QuestionChoices
+from lms.models import AimagHot
+from lms.models import SumDuureg
+from lms.models import Lesson_assignment_student
+from lms.models import Lesson_assignment_student_file
+from lms.models import Lesson_materials
+from lms.models import Lesson_material_file
+from lms.models import Lesson_assignment
 
+from main.utils.file import split_root_path
 
 from core.models import Teachers,Employee
 
 from core.serializers import DepartmentRegisterSerailizer
+
+def get_fullName(firstName='', lastName="", is_dot=True, is_strim_first=False):
+    """ return fullName
+        firstName: Эхэнд бичигдэх нэр
+        lastName: Сүүлд бичигдэх нэр
+        is_dot: Дунд нь цэг байх эсэх
+        is_strim_first: Эхний нэрийн эхний үсгийг авах эсэх
+    """
+
+    full_name = ''
+
+    if is_strim_first:
+        firstName = firstName[0]
+
+    if firstName:
+        full_name += firstName
+
+    if is_dot:
+        full_name += '. '
+    else:
+        full_name += ' '
+
+    if lastName:
+        full_name += lastName
+
+    return full_name
+
+def check_datetime(input_datetime):
+    """ datetime төрөлтэй эсэх """
+    is_datetime = True
+    if not isinstance(input_datetime, datetime):
+        is_datetime = False
+
+    return is_datetime
+
+
+def fix_format_date(input_date, format='%Y-%m-%d %H:%M:%S'):
+    """ Date format хөрвүүлэх """
+
+    date_data = ''
+
+    is_date = check_datetime(input_date)
+
+    if is_date:
+        date_data = input_date.strftime(format)
+
+    return date_data
 
 # Хичээлийн ангилал
 class LessonCategorySerializer(serializers.ModelSerializer):
@@ -440,4 +503,338 @@ class AdmissionBottomScoreListSerializer(serializers.ModelSerializer):
             all_data = list(qs)
 
         return all_data
+    
+class GroupListSerializer(serializers.ModelSerializer):
 
+    class Meta:
+        model = Group
+        fields = "__all__"
+
+class AimaghotListSerializer(serializers.ModelSerializer):
+
+     class Meta:
+        model = AimagHot
+        exclude = "created_at", "updated_at"
+
+class SumDuuregListSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = SumDuureg
+        fields = "id", "name", "unit1"
+
+    
+class TeacherListSerializer(serializers.ModelSerializer):
+    """ Багшийн жагсаалтыг харуулах serializer """
+
+    unit1 = AimaghotListSerializer(many=False, read_only=True)
+    unit2 = SumDuuregListSerializer(many=False, read_only=True)
+    full_name = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Teachers
+        fields = ["id", "last_name", "first_name", "register", 'full_name', 'unit1', 'unit2']
+
+    def get_full_name(self, obj):
+        """ Багшийн бүтэн нэр авах """
+
+        firstName = obj.first_name
+        lastName = obj.last_name[0:1]
+
+        fullName = ''
+        full_name = get_fullName(lastName, firstName, is_dot=True)
+
+        qs_worker = Employee.objects.filter(user=obj.user).last()
+        if qs_worker:
+            register_code = qs_worker.register_code
+            if register_code:
+                fullName = register_code + ' ' + full_name
+            else:
+                fullName = full_name
+
+        return fullName
+
+class SubjectSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Lesson_title_plan
+        fields = 'id', 'title'
+
+class QuestionChoicesSerializer(serializers.ModelSerializer):
+
+    checked = serializers.SerializerMethodField()
+    imageName = serializers.SerializerMethodField()
+    class Meta:
+        model = QuestionChoices
+        fields = '__all__'
+
+    def get_checked(self, obj):
+
+        checked = False
+
+        if obj.score != 0:
+            checked = True
+
+        return checked
+
+    def get_imageName(self, obj):
+        image_name = ''
+        image = obj.image
+        if image:
+            image = image.path if image else ''
+            image_name = os.path.basename(image)
+
+        return image_name
+
+class StudentSerializer(serializers.ModelSerializer):
+
+    full_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Student
+        fields = ["id", "code", "full_name"]
+
+    def get_full_name(self, obj):
+
+        return obj.full_name
+
+class ChallengeQuestionListSerializer(serializers.ModelSerializer):
+
+    kind_name = serializers.SerializerMethodField()
+    choices = QuestionChoicesSerializer(read_only=True, many=True)
+    subject = SubjectSerializer(read_only=True)
+
+    lesson_id = serializers.CharField(default='', source='subject.lesson.id')
+    imageName = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ChallengeQuestions
+        fields = '__all__'
+
+
+    def get_kind_name(self, obj):
+        return obj.get_kind_display()
+
+    def get_imageName(self, obj):
+        image_name = ''
+        image = obj.image
+        if image:
+            image = image.path if image else ''
+            image_name = os.path.basename(image)
+
+        return image_name
+
+class ChallengeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Challenge
+        exclude = ['questions']
+
+
+class ChallengeQuestionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Challenge
+        fields = '__all__'
+
+class ChallengeListSerializer(serializers.ModelSerializer):
+    startAt = serializers.SerializerMethodField()
+    endAt = serializers.SerializerMethodField()
+
+    scopeName = serializers.SerializerMethodField()
+    lesson = LessonStandartSerializer()
+
+    student = StudentSerializer(read_only=True, many=True)
+    group = serializers.SerializerMethodField()
+
+    questions = ChallengeQuestionListSerializer(read_only=True, many=True)
+    created_by = TeacherListSerializer(read_only=True)
+
+    class Meta:
+        model = Challenge
+        fields = '__all__'
+
+    def get_startAt(self, obj):
+        return fix_format_date(obj.start_date)
+
+    def get_endAt(self, obj):
+        return fix_format_date(obj.end_date)
+
+    def get_scopeName(self, obj):
+        return obj.get_kind_display()
+
+
+    def get_group(self, obj):
+        groups = []
+
+        if obj.kind == Challenge.KIND_GROUP:
+
+            group_ids = obj.student.all().values_list('group', flat=True)
+
+            group_qs = Group.objects.filter(id__in=group_ids)
+
+            groups = GroupListSerializer(group_qs, many=True).data
+
+        return list(groups)
+
+class LessonAssignmentStudentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Student
+        fields = '__all__'
+    
+class LessonAssignmentAssigmentListSerializer(serializers.ModelSerializer):
+
+    student = LessonAssignmentStudentSerializer(many=False)
+    homework_files = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Lesson_assignment_student
+        fields = '__all__'
+
+    def get_homework_files(self, obj):
+
+        if settings.DEBUG:
+            base_url = 'http://localhost:8000/files/'
+        else:
+            # TODO: domain
+            # student_url = settings.STUDENT_URL
+            student_url = 'http://student.utilitysolution.mn'
+            base_url = '{student_url}/files/'.format(student_url=student_url)
+
+        files = list()
+
+        qs_list = Lesson_assignment_student_file.objects.filter(student_assignment=obj)
+
+        if qs_list:
+            for qs in qs_list:
+                if qs.file:
+                    try:
+                        path = split_root_path(qs.file.path)
+                        path = os.path.join(base_url, path)
+
+                    except ValueError:
+                        return files
+
+                data = {
+                    'file': path,
+                }
+
+                files.append(data)
+
+        return files
+
+class LessonAssignmentAssigmentSerializer(serializers.ModelSerializer):
+
+    student = LessonAssignmentStudentSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = Lesson_assignment_student
+        fields = '__all__'
+
+class LessonTitleSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Lesson_title_plan
+        fields = '__all__'
+
+class LessonMaterialSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Lesson_materials
+        fields = '__all__'
+
+class LessonMaterialFileSerializer(serializers.ModelSerializer):
+
+    file_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Lesson_material_file
+        fields = '__all__'
+
+    def get_file_name(self, obj):
+
+        file_name = ''
+        file = obj.file.path if obj.file else ''
+        if file:
+            file_name = os.path.basename(file)
+
+        return file_name
+
+class Lesson_assignmentSerializer(serializers.ModelSerializer):
+
+    startDate = serializers.SerializerMethodField()
+    finishDate = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Lesson_assignment
+        fields = "__all__"
+
+    def get_startDate(self, obj):
+        return fix_format_date(obj.start_date)
+
+    def get_finishDate(self, obj):
+        return fix_format_date(obj.finish_date)
+
+class LessonMaterialListSerializer(serializers.ModelSerializer):
+
+    material = serializers.SerializerMethodField()
+    material_type_name = serializers.SerializerMethodField()
+    teacher = TeacherListSerializer()
+    lesson = LessonStandartSerializer()
+    createdAt = serializers.SerializerMethodField()
+    homework = serializers.SerializerMethodField()
+    homework_status = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Lesson_materials
+        fields = '__all__'
+
+    def get_material_type_name(self, obj):
+
+        return obj.get_material_type_display()
+
+    def get_material(self, instance):
+        files = Lesson_material_file.objects.filter(material=instance.id)
+
+        request = self.context.get('request')
+
+        return LessonMaterialFileSerializer(files, many=True, context={'request': request}).data
+
+    def get_createdAt(self, obj):
+        return fix_format_date(obj.created_at)
+
+    def get_homework(self, obj):
+
+        return_data = {}
+        material_type = obj.material_type
+
+        if material_type == Lesson_materials.HOMEWORK:
+            lesson_assignment = Lesson_assignment.objects.filter(lesson_material=obj.id).first()
+            return_data = Lesson_assignmentSerializer(lesson_assignment, many=False).data
+
+        return return_data
+
+    def get_homework_status(self, obj):
+        lesson_assignment_qs = Lesson_assignment.objects.filter(lesson_material=obj.id).first()
+
+        ass_student_qs = {'send_total': 0, 'checked_total': 0}
+
+        if lesson_assignment_qs:
+            ass_student_qs = (
+                Lesson_assignment_student
+                .objects
+                .filter(
+                    assignment=lesson_assignment_qs
+                )
+                .aggregate(
+                    send_total=Count(F('status'), filter=Q(status=Lesson_assignment_student.SEND)),
+                    checked_total=Count(F('status'), filter=Q(status=Lesson_assignment_student.CHECKED)),
+                )
+            )
+
+        return ass_student_qs
+    
+class LessonTeacherSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Lesson_to_teacher
+        fields = '__all__'

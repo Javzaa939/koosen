@@ -23,6 +23,7 @@ import SurveyRoutes from "./Survey"
 import RoleRoutes from "./Role"
 import ScienceRoutes from "./Science"
 import StatisticRoutes from "./Statistic"
+import Test from "./Test"
 
 // ** Layouts
 import BlankLayout from "@layouts/BlankLayout"
@@ -70,7 +71,8 @@ const Routes = [
     ...ServiceRoutes,
     ...SurveyRoutes,
     ...RoleRoutes,
-    ...ScienceRoutes
+    ...ScienceRoutes,
+    ...Test,
 ]
 
 const getRouteMeta = (route) => {
