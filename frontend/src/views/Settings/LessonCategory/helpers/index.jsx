@@ -38,7 +38,7 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 		},
 	]
 
-	if(Object.keys(user).length > 0 && user.permissions.includes('lms-settings-lessoncategory-update' && user.permissions.includes('lms-settings-lessoncategory-delete'))? true : false) {
+	if(Object.keys(user).length > 0 && user.permissions.includes('lms-settings-lessoncategory-update') && user.permissions.includes('lms-settings-lessoncategory-delete')? true : false) {
 		var update_column =  {
 			name: `${t('Үйлдэл')}`,
 			minWidth: "80px",
