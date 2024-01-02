@@ -8,7 +8,7 @@ urlpatterns = [
     path('teacher/create/', EmployeeApiView.as_view()),
     path('teacher/lesson/', TeacherLessonListApiView.as_view()),
     path('teacher/lessonteach/', LessonToTeacherListApiView.as_view()),
-    path('teacher/longlist/', TeacherListApiView.as_view()),
+    path('teacher/longlist/', TeacherLongListApiView.as_view()),
     path('teacher/listschoolfilter/', TeacherListSubschoolApiView.as_view()),
 
     path('teacher/part/', TeacherPartListApiView.as_view()),

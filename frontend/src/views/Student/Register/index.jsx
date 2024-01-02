@@ -175,7 +175,6 @@ const Register = () => {
         }
     }
 
-
     async function getDatas() {
 
         var department = select_value?.department

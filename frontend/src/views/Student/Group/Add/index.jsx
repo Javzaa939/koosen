@@ -109,15 +109,15 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
     // Хадгалах
 	async function onSubmit(cdata) {
         cdata['school'] = school_id
-        const { success, error } = await postFetch(groupApi.post(cdata))
+        const { success, errors } = await postFetch(groupApi.post(cdata))
         if(success) {
             reset()
             refreshDatas()
             handleModal()
         } else {
             /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in error) {
-                setError(error[key].field, { type: 'custom', message:  error[key].msg});
+            for (let key in errors) {
+                setError(key, { type: 'custom', message:  errors[key][0]});
             }
         }
 	}
@@ -126,19 +126,20 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
         getDepartment()
         getYear()
         getDegree()
-        getProfession()
         getStatus()
-        getTeacher()
     },[])
 
     useEffect(
         () =>
         {
             getProfession()
-            getTeacher()
         },
         [degree_id, dep_id]
     )
+
+    useEffect(() => {
+        getTeacher()
+    }, [dep_id, school_id])
 
 	return (
         <Fragment>

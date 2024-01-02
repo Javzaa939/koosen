@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react"
 
 import { Row, Col, Table } from 'reactstrap'
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 // ** Styles
 import logo from "@src/assets/images/logo/dxis_logo.png"
@@ -11,6 +11,7 @@ import '@styles/base/pages/app-invoice-print.scss'
 export default function Print()
 {
     const location = useLocation();
+    const navigate = useNavigate()
     const data = location.state
 
     const groupLength = data.group.length
