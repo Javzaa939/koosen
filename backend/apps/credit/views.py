@@ -29,7 +29,7 @@ from lms.models import TeacherCreditEstimationA
 from lms.models import TeacherCreditNotChamberEstimationA
 from lms.models import Season
 from lms.models import TimeTable
-from lms.models import Departments
+from lms.models import Salbars
 from lms.models import TimeTable_to_group
 from lms.models import TimeTable_to_student
 from lms.models import TeacherCreditEstimationA_group
@@ -636,7 +636,7 @@ class TeacherAEstimationEstimateAPIView(
         department = self.request.query_params.get('department')
         teacher_id = self.request.query_params.get('teacher')
 
-        qs_department = Departments.objects.all().get(id=department)
+        qs_department = Salbars.objects.all().get(id=department)
 
         school = qs_department.sub_orgs
 

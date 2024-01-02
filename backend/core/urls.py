@@ -22,7 +22,6 @@ urlpatterns = [
     path('department/register/', DepartmentAPIView.as_view()),
     path('department/register/<int:pk>/', DepartmentAPIView.as_view()),
 
-    path('department/<int:pk>/', DepartmentListAPIView.as_view()),
     path('department/teacher/<int:pk>/', DepartmentTeachersListAPIView.as_view()),
 
     # бүрэлдэхүүн сургууль

@@ -15,7 +15,7 @@ export default SchoolContext;
 
 export const SchoolContextProvider = ({ children }) => {
 
-    const [ school_id, setSchool ] = useState(1)
+    const [ school_id, setSchool ] = useState('')
     const [ schoolName, setSchoolName ] = useState(t('Дотоод Хэргийн Их Сургууль'));
     const [ parentschoolName, setParentSchoolName ] = useState(t('Дотоод Хэргийн Их Сургууль'));
 

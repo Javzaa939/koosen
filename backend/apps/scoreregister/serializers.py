@@ -7,7 +7,7 @@ from lms.models import Score
 from lms.models import Exam_repeat
 from lms.models import LessonStandart
 from lms.models import Group
-from core.models import SubSchools
+from core.models import SubOrgs
 
 from surgalt.serializers import LessonStandartSerialzier
 from settings.serializers import ScoreSerailizer
@@ -239,7 +239,7 @@ class SubSchoolsSerializer(serializers.ModelSerializer):
     "Сургууль"
 
     class Meta:
-        model = SubSchools
+        model = SubOrgs
         fields = ["name"]
 
 class TeachersSerializer(serializers.ModelSerializer):
