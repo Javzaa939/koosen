@@ -137,7 +137,7 @@ class LessonStandartListSerializer(serializers.ModelSerializer):
 
         teacher_name = ""
         teacher_ids = Lesson_to_teacher.objects.filter(lesson_id=obj.id).values_list('teacher_id',flat=True)
-        if teacher_ids:
+        if len(teacher_ids) > 0:
             for teacher_id in teacher_ids:
                 full_name = ""
                 emp_data = Teachers.objects.filter(id=teacher_id).first()
@@ -147,12 +147,9 @@ class LessonStandartListSerializer(serializers.ModelSerializer):
                 if userinfo_data:
                     register_code = userinfo_data.register_code
 
-                # if register_code:
-                #     full_name = register_code
-
-                if userinfo_data:
+                if emp_data and register_code:
                     full_name =  emp_data.first_name + " "+ register_code
-                teacher_name = teacher_name + ', ' if teacher_name  else ''
+
                 teacher_name += full_name
 
         return teacher_name
