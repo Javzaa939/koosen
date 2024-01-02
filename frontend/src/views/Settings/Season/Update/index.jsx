@@ -61,7 +61,7 @@ const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
     async function onSubmit(cdata) {
         cdata = convertDefaultValue(cdata)
         if(editId) {
-            const { success, error } = await fetchData(seasonApi.put(cdata, editId))
+            const { success, errors } = await fetchData(seasonApi.put(cdata, editId))
             if(success) {
                 reset()
                 refreshDatas()
@@ -69,8 +69,8 @@ const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
             }
             else {
                 /** Алдааны мессеж */
-                for (let key in error) {
-                    setError(error[key].field, { type: 'custom', message: error[key].msg});
+                for (let key in errors) {
+                    setError(errors[key].field, { type: 'custom', message: errors[key].msg});
                 }
             }
         }

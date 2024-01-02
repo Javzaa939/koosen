@@ -34,7 +34,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
 
 	async function onSubmit(cdata) {
         cdata = convertDefaultValue(cdata, ['degree_name_eng'])
-        const { success, error } = await postFetch(professionaldegreeApi.post(cdata))
+        const { success, errors } = await postFetch(professionaldegreeApi.post(cdata))
         if(success) {
             reset()
             handleModal()
@@ -42,9 +42,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
         }
         else {
             /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in error['error']) {
-                setError(key, { type: 'custom', message:  error['msg']});
-            }
+                setError(errors.field, { type: 'custom', message:  errors.msg});
         }
 	}
 

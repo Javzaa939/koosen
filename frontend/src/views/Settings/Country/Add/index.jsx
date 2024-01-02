@@ -31,16 +31,15 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
     const countryApi = useApi().settings.country
 
 	async function onSubmit(cdata) {
-        const { success, error } = await fetchData(countryApi.post(cdata))
+        const { success, errors } = await fetchData(countryApi.post(cdata))
         if(success) {
             reset()
             refreshDatas()
             handleModal()
-        } else {
+        }
+        else {
             /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in error['error']) {
-                setError(key, { type: 'custom', message:  error['msg']});
-            }
+            setError(errors.field, { type: 'custom', message: errors.msg});
         }
 	}
 

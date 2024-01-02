@@ -34,16 +34,14 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
     const AdmissionlessonApi = useApi().settings.admissionlesson
 
 	async function onSubmit(cdata) {
-        const { success, error } = await postFetch(AdmissionlessonApi.post(cdata))
+        const { success, errors } = await postFetch(AdmissionlessonApi.post(cdata))
         if(success) {
             reset()
             refreshDatas()
             handleModal()
         } else {
             /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in error['error']) {
-                setError(key, { type: 'custom', message:  error['msg']});
-            }
+            setError(errors.field, { type: 'custom', message:  errors.msg});
         }
 	}
 

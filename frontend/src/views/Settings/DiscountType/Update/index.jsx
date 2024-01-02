@@ -59,16 +59,14 @@ const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
 
     async function onSubmit(cdata) {
             cdata = convertDefaultValue(cdata)
-            const { success, error } = await fetchData(discountTypeApi.put(cdata, editId))
+            const { success, errors } = await fetchData(discountTypeApi.put(cdata, editId))
             if(success) {
                 refreshDatas()
                 handleEdit()
             }
             else {
                 /** Алдааны мессэжийг input дээр харуулна */
-                for (let key in error) {
-                    setError(error[key].field, { type: 'custom', message:  error[key].msg});
-                }
+                setError(errors.field, { type: 'custom', message:  errors.msg});
             }
 	}
 

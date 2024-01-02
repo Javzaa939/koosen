@@ -58,19 +58,16 @@ const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
     },[open])
 
     async function onSubmit(cdata) {
-            cdata = convertDefaultValue(cdata)
-            const { success, error } = await fetchData(professionalDegreeApi.put(cdata, editId))
-            if(success) {
-                refreshDatas()
-                handleEdit()
-            }
-            else {
-                /** Алдааны мессэжийг input дээр харуулна */
-                for (let key in error) {
-                    setError(error[key].field, { type: 'custom', message:  error[key].msg});
-                }
-            }
-        // }
+        cdata = convertDefaultValue(cdata)
+        const { success, errors } = await fetchData(professionalDegreeApi.put(cdata, editId))
+        if(success) {
+            refreshDatas()
+            handleEdit()
+        }
+        else {
+            /** Алдааны мессэжийг input дээр харуулна */
+            setError(errors.field, { type: 'custom', message:  errors.msg});
+        }
 	}
 
 	return (
