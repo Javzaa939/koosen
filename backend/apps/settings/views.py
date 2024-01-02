@@ -85,28 +85,30 @@ class ProfessionalDegreeAPIView(
         " Мэргэжлийн зэргийн мэдээлэл шинээр үүсгэх "
 
         data = request.data
-        degree_code = data.get("degree_code")
-
-        if degree_code:
-            degree = self.queryset.filter(degree_code=degree_code)
-            if degree:
-                return request.send_error("ERR_003", "Боловсролын зэргийн код давхцаж байна")
 
         serializer = self.get_serializer(data=request.data)
 
         if serializer.is_valid(raise_exception=False):
-            is_success = False
             with transaction.atomic():
                 try:
-                    self.create(request).data
+                    self.perform_create(serializer)
 
-                    is_success = True
                 except Exception:
-                    raise
-            if is_success:
-                return request.send_info("INF_001")
+                    return request.send_error("ERR_002")
 
-            return request.send_error("ERR_002")
+            return request.send_info("INF_001")
+
+        else:
+            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
+            for key in serializer.errors:
+
+                return_error = {
+                    "field": key,
+                    "msg": "Код бүртгэгдсэн байна"
+                }
+
+            return request.send_error_valid(return_error)
+
 
 
     @has_permission(must_permissions=['lms-settings-degree-update'])
@@ -116,9 +118,6 @@ class ProfessionalDegreeAPIView(
         self.serializer_class = ProfessionalDegreePutSerializer
 
         datas = request.data
-        prof_qs = ProfessionDefinition.objects.filter(degree=pk)
-        if prof_qs:
-           return request.send_error("ERR_003", "Мэргэжлийн тодорхойлолтод бүртгэлтэй байгаа тул зэргийг засах боломжгүй байна.")
 
         instance = self.queryset.filter(id=pk).first()
 
@@ -126,23 +125,25 @@ class ProfessionalDegreeAPIView(
 
         if serializer.is_valid(raise_exception=False):
 
-            self.update(request, pk).data
-            return request.send_info("INF_002")
-        else:
-            errors = []
+            with transaction.atomic():
+                try:
+                    self.perform_update(serializer)
 
+                except Exception:
+                    return request.send_error("ERR_002")
+
+            return request.send_info("INF_002")
+
+        else:
+            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
             for key in serializer.errors:
-                msg = serializer.errors[key]
 
                 return_error = {
                     "field": key,
-                    "msg": msg
+                    "msg": "Код бүртгэгдсэн байна"
                 }
 
-                errors.append(return_error)
-
-            if len(errors) > 0:
-                return request.send_error("ERR_003", errors)
+            return request.send_error_valid(return_error)
 
 
 @permission_classes([IsAuthenticated])
@@ -177,27 +178,29 @@ class LearningAPIView(
 
         data = request.data
         learn_code = data.get("learn_code")
-        if learn_code:
-            learning = self.queryset.filter(learn_code=learn_code)
-            if learning:
-                return request.send_error("ERR_003", "Суралцах хэлбэрийн код давхцаж байна")
 
         serializer = self.get_serializer(data=request.data)
 
         if serializer.is_valid(raise_exception=False):
-            is_success = False
             with transaction.atomic():
                 try:
-                    self.create(request).data
+                    self.perform_create(serializer)
 
-                    is_success = True
                 except Exception:
-                    raise
-            if is_success:
-                return request.send_info("INF_001")
+                    return request.send_error("ERR_002")
 
-            return request.send_error("ERR_002")
+            return request.send_info("INF_001")
 
+        else:
+            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
+            for key in serializer.errors:
+
+                return_error = {
+                    "field": key,
+                    "msg": "Код бүртгэгдсэн байна"
+                }
+
+            return request.send_error_valid(return_error)
 
     @has_permission(must_permissions=['lms-settings-learningstatus-update'])
     def put(self, request, pk=None):
@@ -212,9 +215,25 @@ class LearningAPIView(
         serializer = self.get_serializer(instance, data=datas)
 
         if serializer.is_valid(raise_exception=False):
+            with transaction.atomic():
+                try:
+                    self.perform_update(serializer)
 
-            self.perform_update(serializer)
+                except Exception:
+                    return request.send_error("ERR_002")
+
             return request.send_info("INF_002")
+
+        else:
+            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
+            for key in serializer.errors:
+
+                return_error = {
+                    "field": key,
+                    "msg": "Код бүртгэгдсэн байна"
+                }
+
+            return request.send_error_valid(return_error)
 
 
 @permission_classes([IsAuthenticated])
@@ -248,27 +267,28 @@ class StudentRegisterAPIView(
         " Оюутны бүртгэл хэлбэр шинээр үүсгэх "
 
         data = request.data
-        code = data.get("code")
-        if code:
-            stud_register = self.queryset.filter(code=code)
-            if stud_register:
-                return request.send_error("ERR_003", "Оюутны бүртгэлийн хэлбэрийн код давхцаж байна")
-
         serializer = self.get_serializer(data=data)
 
         if serializer.is_valid(raise_exception=False):
-            is_success = False
             with transaction.atomic():
                 try:
-                    self.create(request).data
+                    self.perform_create(serializer)
 
-                    is_success = True
                 except Exception:
-                    raise
-            if is_success:
-                return request.send_info("INF_001")
+                    return request.send_error("ERR_002")
 
-            return request.send_error("ERR_002")
+            return request.send_info("INF_001")
+
+        else:
+            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
+            for key in serializer.errors:
+
+                return_error = {
+                    "field": key,
+                    "msg": "Код бүртгэгдсэн байна"
+                }
+
+            return request.send_error_valid(return_error)
 
     @has_permission(must_permissions=['lms-settings-registerstatus-update'])
     def put(self, request, pk=None):
@@ -284,9 +304,24 @@ class StudentRegisterAPIView(
         serializer = self.get_serializer(instance, data=datas)
 
         if serializer.is_valid(raise_exception=False):
+            with transaction.atomic():
+                try:
+                    self.perform_update(serializer)
 
-            self.perform_update(serializer)
+                except Exception:
+                    return request.send_error("ERR_002")
+
             return request.send_info("INF_002")
+
+        else:
+            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
+            for key in serializer.errors:
+
+                return_error = {
+                    "field": key,
+                    "msg": "Код бүртгэгдсэн байна"
+                }
+            return request.send_error_valid(return_error)
 
 
 @permission_classes([IsAuthenticated])
