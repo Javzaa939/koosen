@@ -35,16 +35,14 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
 	const scoreApi = useApi().settings.score
 
 	async function onSubmit(cdata) {
-        const { success, error } = await postFetch(scoreApi.post(cdata))
+        const { success, errors } = await postFetch(scoreApi.post(cdata))
         if(success) {
             reset()
             handleModal()
             refreshDatas()
         } else {
             /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in error['error']) {
-                setError(key, { type: 'custom', message:  error['msg']});
-            }
+            setError(errors.field, { type: 'custom', message:  errors.msg});
         }
 	}
 
