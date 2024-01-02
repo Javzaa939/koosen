@@ -1,20 +1,24 @@
 
 import React, { Fragment, useState, useEffect } from "react"
 
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { Clock } from "react-feather"
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
+import { ChevronsLeft } from 'react-feather'
+import { useTranslation } from "react-i18next";
+
 
 import {
     Card
 } from 'reactstrap'
 
-// import css from './style.module.css'
 function Show() {
 
     const { newsid } = useParams()
+    const navigation = useNavigate()
+    const { t } = useTranslation()
 
     const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: false })
 
@@ -58,7 +62,9 @@ function Show() {
                     :
                     <>
                         <div className="p-3">
-                            {/* <div className={`${css.newspost}`} > */}
+                            <div role="button" style={{fontSize: "15px"}} onClick={() => navigation('/service')}>
+                                <ChevronsLeft/>{t('Буцах')}
+                            </div>
                             <div>
 
                                 <div className='text-center'>

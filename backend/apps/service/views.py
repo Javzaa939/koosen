@@ -50,19 +50,11 @@ class StudentNoticeAPIView(
         """ Зар мэдээний жагсаалт """
 
         self.serializer_class = StudentNoticeListSerializer
-        self.queryset = self.queryset.order_by('-created_at')
-
-        data = StudentNotice.objects.all()
-
-        if data:
-            self.queryset = self.queryset.filter(is_news=True)
+        self.queryset = self.queryset.filter(is_news=True).order_by('-created_at')
 
         if pk:
-            student_noctice_qs = StudentNotice.objects.filter(id=pk)
-            if not student_noctice_qs:
-                return request.send_data({})
-
-            return_datas = self.retrieve(request, pk).data
+            instance = StudentNotice.objects.filter(id=pk).first()
+            return_datas = self.get_serializer(instance).data
             return request.send_data(return_datas)
 
         return_datas = self.list(request).data
