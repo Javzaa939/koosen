@@ -230,10 +230,11 @@ class LearningAPIView(
 
         # Анги
         group_qs = Group.objects.filter(learning_status=pk)
-        if group_qs:
+        if len(group_qs) > 0:
             return request.send_error("ERR_003", "Устгах боломжгүй")
 
         self.destroy(request, pk)
+
         return request.send_error("INF_003")
 
 
