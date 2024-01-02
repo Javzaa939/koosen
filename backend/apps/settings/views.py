@@ -116,16 +116,14 @@ class ProfessionalDegreeAPIView(
         self.serializer_class = ProfessionalDegreePutSerializer
 
         datas = request.data
-        prof_qs = ProfessionDefinition.objects.filter(degree=pk).exclude(degree=pk)
-        if prof_qs:
+        prof_qs = ProfessionDefinition.objects.exclude(degree=pk).filter(code=datas.get('code'))
+        if len(prof_qs) > 0:
             return request.send_error("ERR_003", "Зэргийн код давхцаж байна.")
 
         instance = self.queryset.filter(id=pk).first()
-
         serializer = self.get_serializer(instance, data=datas)
 
         if serializer.is_valid(raise_exception=False):
-
             self.update(request, pk).data
             return request.send_info("INF_002")
         else:
