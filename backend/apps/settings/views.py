@@ -235,7 +235,7 @@ class LearningAPIView(
 
         self.destroy(request, pk)
 
-        return request.send_error("INF_003")
+        return request.send_info("INF_003")
 
 
 @permission_classes([IsAuthenticated])
