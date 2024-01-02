@@ -12,7 +12,7 @@ from django.db.models import Q
 
 from core.models import Schools
 from core.models import Salbars
-from core.models import SubSchools
+from core.models import SubOrgs
 from core.models import AimagHot
 from core.models import SumDuureg
 from core.models import BagHoroo
@@ -125,14 +125,7 @@ class TeacherLessonListApiView(
     def get(self, request):
 
         lesson = self.request.query_params.get('lesson')
-        school = self.request.query_params.get('school')
         teacher_ids = []
-
-        # qs_teacher = get_teacher_queryset()
-
-        # self.queryset = qs_teacher
-        # if school:
-        #     self.queryset = self.queryset.filter(Q(Q(sub_org=school) | Q(sub_org__org_code=10)))
 
         if lesson:
             teacher_ids = TimeTable.objects.filter(lesson=lesson).values_list('teacher', flat=True)
@@ -158,8 +151,6 @@ class LessonToTeacherListApiView(
 
         lesson = self.request.query_params.get('lesson')
         teacher_ids = []
-
-        qs_teacher = get_teacher_queryset()
 
         if lesson:
             qs = Lesson_to_teacher.objects.filter(lesson=lesson)
@@ -235,7 +226,7 @@ class DepartmentAPIView(
 
         self.serializer_class = DepartmentPostSerailizer
         datas = request.data
-        sub_org = SubSchools.objects.filter(id=datas.get('sub_orgs')).first()
+        sub_org = SubOrgs.objects.filter(id=datas.get('sub_orgs')).first()
         datas['org'] = sub_org.org.id
         serializer = self.get_serializer(data=datas)
 
@@ -258,7 +249,6 @@ class DepartmentAPIView(
                 }
 
                 error_obj.append(return_error)
-            print(error_obj)
             if len(error_obj) > 0:
                 return request.send_error("ERR_003", error_obj)
 
@@ -317,16 +307,9 @@ class DepartmentAPIView(
 
         qs = self.queryset.filter(id=pk).first()
 
-        # notifications = Notification.objects.filter(salbar=pk).first()
-
-        # if notifications:
-        #     for article in list(notifications.salbar_set.all()):
-        #         notifications.article_set.remove(article)
-
         if qs:
             qs.delete()
 
-        # self.destroy(request, pk)
         return request.send_info("INF_003")
 
 
@@ -392,7 +375,7 @@ class SubSchoolAPIView(
 ):
     """" Бүрэлдэхүүн сургууль """
 
-    queryset = SubSchools.objects.order_by("-created_at")
+    queryset = SubOrgs.objects.order_by("-created_at")
     serializer_class = SubSchoolRegisterSerailizer
 
     filter_backends = [SearchFilter]
@@ -510,7 +493,7 @@ class SubSchoolAPIView(
     def delete(self, request, pk=None):
         " устгах "
 
-        # SubSchools.objects.filter(pk=pk).delete()
+        # SubOrgs.objects.filter(pk=pk).delete()
 
         self.destroy(request, pk)
         return request.send_info("INF_003")

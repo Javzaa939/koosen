@@ -17,7 +17,7 @@ from lms.models import (
     Survey,
     Pollee,
     Student,
-    SubSchools,
+    SubOrgs,
     Salbars,
     ProfessionDefinition,
     Group,
@@ -502,7 +502,7 @@ class SurveyRangeAPIView(
         if types == 'teacher':
             # Салбарын жагсаалт
             if selected_value == 'is_org':
-                c_queryset = SubSchools.objects.filter(is_school=True)
+                c_queryset = SubOrgs.objects.filter(is_school=True)
                 all_data = SurveySchoolSerializer(c_queryset, many=True).data
 
                 return request.send_data(all_data)
@@ -526,7 +526,7 @@ class SurveyRangeAPIView(
 
             # Салбарын жагсаалт
             if selected_value == 'is_org':
-                c_queryset = SubSchools.objects.filter(is_school=True)
+                c_queryset = SubOrgs.objects.filter(is_school=True)
                 all_data = SurveySchoolStudentSerializer(c_queryset, many=True).data
 
                 return request.send_data(all_data)

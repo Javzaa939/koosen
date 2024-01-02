@@ -10,7 +10,7 @@ from lms.models import (
     Survey,
     Pollee,
     Salbars,
-    SubSchools,
+    SubOrgs,
     Teachers,
     ProfessionDefinition,
     Group,
@@ -338,7 +338,7 @@ class SurveySchoolSerializer(serializers.ModelSerializer):
     children = serializers.SerializerMethodField()
 
     class Meta:
-        model = SubSchools
+        model = SubOrgs
         fields = 'id', 'name', 'children'
 
     def get_children(self, obj):
@@ -411,7 +411,7 @@ class SurveySchoolStudentSerializer(serializers.ModelSerializer):
     children = serializers.SerializerMethodField()
 
     class Meta:
-        model = SubSchools
+        model = SubOrgs
         fields = 'id', 'name', 'children'
 
     def get_children(self, obj):

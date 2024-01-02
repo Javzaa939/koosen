@@ -24,7 +24,7 @@ from lms.models import (
     Group,
     Student,
     TimeTable,
-    SubSchools,
+    SubOrgs,
     Salbars,
     Exam_repeat,
     LearningPlan,
@@ -958,7 +958,7 @@ class ProfessionPlanListAPIView(
                         if lesson:
                             create_learninPlan_list.append(
                                 LearningPlan(
-                                    school=SubSchools.objects.get(id=school),
+                                    school=SubOrgs.objects.get(id=school),
                                     lesson=LessonStandart.objects.get(id=lesson),
                                     department=Salbars.objects.get(id=department) if department else None,
                                     profession=ProfessionDefinition.objects.get(id=profession_id),

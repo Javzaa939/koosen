@@ -4,7 +4,7 @@ from core.models import User
 from core.models import Employee
 from core.models import Permissions
 from core.models import Teachers
-from core.models import SubSchools
+from core.models import SubOrgs
 
 class UserListSerializer(serializers.ModelSerializer):
     """ Хэрэглэгчийн жагсаалтыг харуулах serializer """
@@ -69,7 +69,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
         if emp_list and emp_list.sub_org:
             school = emp_list.sub_org.id
         if school:
-            school_info = SubSchools.objects.filter(id=school, is_school=False).first()
+            school_info = SubOrgs.objects.filter(id=school, is_school=False).first()
             if school_info:
                 school = ''
 

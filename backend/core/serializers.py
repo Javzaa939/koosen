@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from core.models import Teachers, Employee
 from core.models import Schools
-from core.models import SubSchools
+from core.models import SubOrgs
 from core.models import Salbars
 from core.models import AimagHot
 from core.models import SumDuureg
@@ -46,7 +46,7 @@ class SubSchoolListSerailizer(serializers.ModelSerializer):
     """ Дэд сургуулийн жагсаалт """
 
     class Meta:
-        model = SubSchools
+        model = SubOrgs
         fields = "__all__"
 
 
@@ -94,7 +94,7 @@ class DepartmentsSerializer(serializers.ModelSerializer):
 class SubSchoolsSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = SubSchools
+        model = SubOrgs
         fields = ["id","name"]
 
 
@@ -150,14 +150,14 @@ class SchoolsRegisterSerailizer(serializers.ModelSerializer):
 class SubSchoolsRegisterPostSerailizer(serializers.ModelSerializer):
 
     class Meta:
-        model = SubSchools
+        model = SubOrgs
         fields = ["is_school", "org", "name", "name_eng","name_uig", "zahiral_name", "zahiral_name_uig","zahiral_name_eng", "tsol_name", "tsol_name_eng", "tsol_name_uig", "erdem_tsol_name","erdem_tsol_name_eng", "erdem_tsol_name_uig"]
 
 # дэд байгууллага
 class SubschoolSerailizer(serializers.ModelSerializer):
 
     class Meta:
-        model = SubSchools
+        model = SubOrgs
         fields = "__all__"
 
 
@@ -241,14 +241,14 @@ class DepartmentPostSerailizer(serializers.ModelSerializer):
 class SubSchoolRegisterSerailizer(serializers.ModelSerializer):
 
     class Meta:
-        model = SubSchools
+        model = SubOrgs
         fields = "__all__"
 
 class SubSchoolPutRegisterSerailizer(serializers.ModelSerializer):
     "засах"
 
     class Meta:
-        model = SubSchools
+        model = SubOrgs
         fields = "id", "name_eng","name_uig",  "zahiral_name", "zahiral_name_eng", "zahiral_name_uig", "tsol_name", "tsol_name_eng", "tsol_name_uig", "org"
 
 # Байгууллага сонгох

@@ -26,7 +26,7 @@ from lms.models import Score
 from lms.models import ScoreRegister
 from lms.models import Teachers
 from lms.models import Room
-from lms.models import SubSchools
+from lms.models import SubOrgs
 from lms.models import PaymentEstimate
 from lms.models import PaymentBalance
 from lms.models import StipentStudent
@@ -591,7 +591,7 @@ class LessonStandartSerializer(serializers.ModelSerializer):
 class SchoolSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = SubSchools
+        model = SubOrgs
         fields = ['id', 'name']
 
 

@@ -116,7 +116,7 @@ class Schools(models.Model):
     def __str__(self):
         return self.name
 
-class SubSchools(models.Model):
+class SubOrgs(models.Model):
     """ Байгууллагын охин байгууллага эсвэл дэд байгууллага
     """
     class Meta:
@@ -204,7 +204,7 @@ class Salbars(models.Model):
         managed = False
 
     org = models.ForeignKey(Schools, on_delete=models.CASCADE, verbose_name="Байгууллага")
-    sub_orgs = models.ForeignKey(SubSchools, on_delete=models.CASCADE, verbose_name="Дэд байгууллага")
+    sub_orgs = models.ForeignKey(SubOrgs, on_delete=models.CASCADE, verbose_name="Дэд байгууллага")
     name = models.CharField(max_length=250, null=True, verbose_name="Нэр", help_text="Энэ бол тайлбар")
 
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
@@ -348,7 +348,7 @@ class Teachers(models.Model):
     body_weight = models.FloatField(default=0, verbose_name="Биеийн жин")
 
     org = models.ForeignKey(Schools, blank=True, null=True, on_delete=models.CASCADE, verbose_name="Байгууллага")
-    sub_org = models.ForeignKey(SubSchools, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Харьяалагдах алба нэгж")
+    sub_org = models.ForeignKey(SubOrgs, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Харьяалагдах алба нэгж")
     salbar = models.ForeignKey(Salbars, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Салбар")
 
     birthday = models.DateField(null=True, verbose_name="Төрсөн өдөр")
@@ -398,7 +398,7 @@ class Employee(models.Model):
     )
 
     org = models.ForeignKey(Schools, blank=True, null=True, on_delete=models.CASCADE, verbose_name="Байгууллага")
-    sub_org = models.ForeignKey(SubSchools, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Харьяалагдах алба нэгж")
+    sub_org = models.ForeignKey(SubOrgs, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Харьяалагдах алба нэгж")
     salbar = models.ForeignKey(Salbars, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Салбар")
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Хэрэглэгч")
     org_position = models.ForeignKey(OrgPosition, blank=True, null=True, on_delete=models.SET_NULL, verbose_name="Албан тушаал")
@@ -445,10 +445,6 @@ class NotificationType(models.Model):
 #     pass
 
 class Orgs(Schools):
-    pass
-
-
-class SubOrgs(SubSchools):
     pass
 
 
