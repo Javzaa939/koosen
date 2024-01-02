@@ -25,6 +25,7 @@ import SignatureModal from './Signature'
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import useModal from '@hooks/useModal'
+import useUpdateEffect from '@hooks/useUpdateEffect'
 
 // drag-and-drop.scss
 import '@styles/react/libs/drag-and-drop/drag-and-drop.scss'
@@ -89,17 +90,6 @@ const Graduation = () => {
 	const { isLoading, fetchData, Loader } = useLoader({ isFullScreen: true })
     const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
 
-    function getAllData()
-    {
-        Promise.all([
-            allFetch(graduateApi.get(rowsPerPage, currentPage, sortField, searchValue, select_value.department, select_value.degree, select_value.group)),
-            allFetch(signatureApi.get(2)),
-        ]).then((values) => {
-            setDatas(values[0]?.data?.results)
-            setListArr(values[1]?.data)
-        })
-    }
-
 	/* Устгах функц */
 	const handleDelete = async(id) => {
         const { success } = await fetchData(graduateApi.delete(id))
@@ -150,13 +140,18 @@ const Graduation = () => {
     }
 
     useEffect(() => {
-        getDegree()
         getDatas()
-        getDepartment()
-        getGroup()
-    }, [sortField, currentPage, rowsPerPage, select_value])
+    }, [sortField, currentPage, rowsPerPage, select_value, school_id])
 
-	useEffect(() => {
+    useEffect(() => {
+        getDepartment()
+    }, [school_id])
+
+    useEffect(() => {
+        getGroup()
+    }, [select_value.department, select_value.degree, school_id])
+
+	useUpdateEffect(() => {
 		if (searchValue.length == 0) {
 			getDatas();
 		} else {
@@ -167,8 +162,6 @@ const Graduation = () => {
 			return () => clearTimeout(timeoutId);
 		}
 	}, [searchValue]);
-
-
 
     function handleSort(column, sort) {
         if(sort === 'asc') {
@@ -240,7 +233,8 @@ const Graduation = () => {
     useEffect(
         () =>
         {
-            getAllData();
+            getDegree()
+            getSignatureDatas()
         },
         []
     )
@@ -262,7 +256,7 @@ const Graduation = () => {
 	return (
 		<Fragment>
             <Card>
-            {isLoading && Loader}
+                {isLoading && Loader}
                 <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom align-items-center py-1">
                     <CardTitle tag="h4">{t('Гарын үсэг зурах хүмүүс')}</CardTitle>
                     <div className='d-flex flex-wrap mt-md-0 mt-1'>
@@ -327,7 +321,7 @@ const Graduation = () => {
                         }
                         </ReactSortable>
                     :
-                        <p className="text-center">Өгөгдөл байхгүй байна.</p>
+                        <p className="text-center my-2">Өгөгдөл байхгүй байна.</p>
                 }
             </Card>
 
@@ -516,7 +510,6 @@ const Graduation = () => {
                         pagination
                         className='react-dataTable'
                         progressPending={isTableLoading}
-
                         progressComponent={
                             <div className='my-2 d-flex align-items-center justify-content-center'>
                                 <Spinner className='me-1' color="" size='sm'/><h5>Түр хүлээнэ үү...</h5>

@@ -98,7 +98,7 @@ const Addleavemodal = ({ open, handleModal, refreshDatas }) => {
         cdata = convertDefaultValue(cdata)
         cdata['school'] = school_id
 
-        const { success, error } = await postFetch(leaveApi.post(cdata))
+        const { success, errors } = await postFetch(leaveApi.post(cdata))
 
         if(success)
         {
@@ -107,10 +107,9 @@ const Addleavemodal = ({ open, handleModal, refreshDatas }) => {
             reset()
 
         } else {
-
             /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in error) {
-                setError(error[key].field, { type: 'custom', message:  error[key].msg});
+            for (let key in errors) {
+                setError(key, { type: 'custom', message:  errors[key][0]});
             }
         }
 	}

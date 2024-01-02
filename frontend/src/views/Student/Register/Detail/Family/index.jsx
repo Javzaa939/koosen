@@ -107,28 +107,28 @@ const Family = () => {
         /** Засах */
         if(is_edit) {
             var id = cdata['id']
-            const { success, error } = await fetchData(studentFamilyApi.put(cdata, id, studentId))
+            const { success, errors } = await fetchData(studentFamilyApi.put(cdata, id, studentId))
             if(success)
             {
                 getDatas()
                 onModalClosed()
             } else {
                 /** Алдааны мессэжийг input дээр харуулна */
-                for (let key in error) {
-                    setError(error[key].field, { type: 'custom', message:  error[key].msg});
+                for (let key in errors) {
+                    setError(key, { type: 'custom', message:  errors[key][0]});
                 }
             }
         } else {
             /** Нэмэх */
-            const { success, error } = await fetchData(studentFamilyApi.post(cdata))
+            const { success, errors } = await fetchData(studentFamilyApi.post(cdata))
             if(success)
             {
                 getDatas()
                 onModalClosed()
             } else {
                 /** Алдааны мессэжийг input дээр харуулна */
-                for (let key in error) {
-                    setError(error[key].field, { type: 'custom', message:  error[key].msg});
+                for (let key in errors) {
+                    setError(key, { type: 'custom', message:  errors[key][0]});
                 }
             }
         }

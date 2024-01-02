@@ -18,7 +18,7 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 			name: `${t('Тэнхимийн нэр')}`,
 			selector: (row) => <span title={row?.name}>{row?.name}</span>,
 			width: "250px",
-			center: true
+			left: true
 		},
 		{
 			name: `${t('Бүрэлдэхүүн сургууль')}`,

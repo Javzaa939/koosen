@@ -131,14 +131,16 @@ const GradeList = () => {
 					<CardTitle tag="h4">{t('Дүнгийн жагсаалт')}</CardTitle>
 					    <div className='d-flex flex-wrap mt-md-0 mt-1'>
                             <Button
-                                color='primary'className='me-1'
+                                color='primary'
+                                className='m-50'
                                 href="/files/newtemplate.xlsx"
                             >
                                 <Download size={15} />
                                 <span className='align-middle ms-1'>{t('Загвар татах')}</span>
                             </Button>
                             <Button
-                                color='primary'className='me-1'
+                                color='primary'
+                                className='m-50'
                                 onClick={handleFileModal}
                             >
                                 <FileText size={15} />
@@ -146,6 +148,7 @@ const GradeList = () => {
                             </Button>
                             <Button
                                 color='primary'
+                                className='m-50'
                                 onClick={() => modalToggler()}
                                 disabled={!chosenGroup}
                             >

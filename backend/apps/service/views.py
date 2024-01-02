@@ -50,14 +50,11 @@ class StudentNoticeAPIView(
         """ Зар мэдээний жагсаалт """
 
         self.serializer_class = StudentNoticeListSerializer
-        self.queryset = self.queryset.order_by('-created_at')
+        self.queryset = self.queryset.filter(is_news=True).order_by('-created_at')
 
         if pk:
-            student_noctice_qs = StudentNotice.objects.filter(id=pk)
-            if not student_noctice_qs:
-                return request.send_data({})
-
-            return_datas = self.retrieve(request, pk).data
+            instance = StudentNotice.objects.filter(id=pk).first()
+            return_datas = self.get_serializer(instance).data
             return request.send_data(return_datas)
 
         return_datas = self.list(request).data
@@ -196,3 +193,43 @@ class StudentNoticeFileAPIView(
         return_url = '{domain}{path}'.format(domain=domain, path=file_path)
 
         return request.send_data(return_url)
+    
+class StudentNoticeNotNewsAPIView(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    generics.GenericAPIView
+):
+    ''' Зар мэдээлэл '''
+
+    queryset = StudentNotice.objects.all()
+    serializer_class = StudentNoticeSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['title']
+
+    @has_permission(must_permissions=['lms-service-news-read'])
+    def get(self, request, pk=None):
+        """ Зар мэдээний жагсаалт """
+
+        self.serializer_class = StudentNoticeListSerializer
+        self.queryset = self.queryset.order_by('-created_at')
+
+        if self.queryset:
+            self.queryset = self.queryset.filter(is_news=False)
+
+        if pk:
+            student_noctice_qs = StudentNotice.objects.filter(id=pk)
+            if not student_noctice_qs:
+                return request.send_data({})
+
+            return_datas = self.retrieve(request, pk).data
+            return request.send_data(return_datas)
+
+        return_datas = self.list(request).data
+
+        return request.send_data(return_datas)

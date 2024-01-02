@@ -91,11 +91,13 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
     function check_year(group_year) {
         var checked = false
         var start_active_year = cyear_name.split('-')[0]
-        var group_active_year = group_year.split('-')[0]
-
-        if (parseInt(group_active_year) < parseInt(start_active_year)) {
-            checked = true
+        if(group_year) {
+            var group_active_year = group_year.split('-')[0]
+            if (parseInt(group_active_year) < parseInt(start_active_year)) {
+                checked = true
+            }
         }
+
 
         setGroupChecked(checked)
     }
@@ -127,11 +129,11 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
 	async function onSubmit(cdata) {
         cdata['school'] = school_id
         cdata['is_khur'] = is_khur
-        cdata['citizen_name'] = citizen_name
-        cdata['citizenship'] = citizen_id
+        // cdata['citizen_name'] = citizen_name
+        // cdata['citizenship'] = citizen_id
         cdata = convertDefaultValue(cdata)
 
-        const { success, error } = await postFetch(studentApi.post(cdata))
+        const { success, errors } = await postFetch(studentApi.post(cdata))
         if(success)
         {
             handleModal()
@@ -139,8 +141,8 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
             reset()
         } else {
             /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in error) {
-                setError(error[key].field, { type: 'custom', message:  error[key].msg});
+            for (let key in errors) {
+                setError(key, { type: 'custom', message:  errors[key][0]});
             }
         }
 	}
@@ -171,7 +173,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
             getGroup()
             if (departId == undefined) setValue('group', '')
         },
-        [departId]
+        [departId, school_id]
     )
 
 	return (
@@ -258,7 +260,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                             noOptionsMessage={() => t('Хоосон байна')}
                                             onChange={(val) => {
                                                 onChange(val?.id || '')
-                                                check_year(val?.join_year)
+                                                check_year(val?.join_year || '')
                                             }}
                                             styles={ReactSelectStyles}
                                             getOptionValue={(option) => option.id}
@@ -288,11 +290,12 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                             isLoading={isLoading}
                                             placeholder={t(`-- Сонгоно уу --`)}
                                             options={country_option || []}
-                                            value={country_option.find((c) => c.id === (value || citizen_id))}
+                                            value={country_option.find((c) => c.id === value)}
                                             noOptionsMessage={() => t('Хоосон байна')}
                                             onChange={(val) => {
                                                 setCitizenId(val?.id || '')
                                                 setCitizen(val?.name)
+                                                onChange(val?.id || '')
                                             }}
                                             styles={ReactSelectStyles}
                                             getOptionValue={(option) => option.id}

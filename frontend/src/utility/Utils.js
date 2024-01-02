@@ -236,8 +236,8 @@ export function getPagination(handlePagination, pageNo, rowsPerPage, total_count
       filtered_page_count = Math.ceil(filteredData.length / rowsPerPage)
     }
     const CustomPagination = () => (
-      <div className="d-flex align-items-center justify-content-end ">
-        <Label className="flex-shrink-0 mx-2">
+      <div className="d-flex align-items-center justify-content-end flex-wrap mt-1">
+        <Label className="mx-2 text-wrap">
             Дэлгэцэнд: {(pageNo-1) * rowsPerPage + 1} - {rowsPerPage != -1 ? ((pageNo) * rowsPerPage > total_count) ? total_count : (pageNo) * rowsPerPage : total_count} Нийт: {total_count} бичлэг
         </Label>
         <ReactPaginate
@@ -1700,6 +1700,26 @@ export const zeroToNumber = (max) =>
     return too
 }
 
+export const assess_type = () => {
+	const options = [
+		{ id: 1, name: 'Хамгийн өндөр оноо' },
+		{ id: 2, name: 'Дундаж оноо' },
+	]
+
+	return options
+}
+
+
+export const challenge_types = () => {
+	const options = [
+		{ id: 1, name: 'Сорил 1' },
+		{ id: 2, name: 'Сорил 2' },
+		{ id: 3, name: 'Улирлын шалгалт' },
+		{ id: 4, name: 'Өөрийгөө сорих тест' },
+	]
+
+	return options
+}
 
 export const get_emp_state = () =>
 {

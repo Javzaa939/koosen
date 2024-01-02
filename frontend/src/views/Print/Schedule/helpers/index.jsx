@@ -27,7 +27,7 @@ export function getColumns(currentPage, rowsPerPage, total_count)
 			name: t("Багш"),
 			selector: (row) => row?.teacher?.full_name,
             sortable: true,
-			center: true,
+			left: true,
 			minWidth: '200px',
 			wrap: true,
         },
