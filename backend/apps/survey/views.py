@@ -601,7 +601,6 @@ class SurveyAPIView(
 
         return request.send_data(all_list)
 
-
     def post(self, request):
         datas = request.data.dict()
 

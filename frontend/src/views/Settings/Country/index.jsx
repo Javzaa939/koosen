@@ -68,6 +68,16 @@ const Country = () => {
 		}
 	}
 
+	/* Жагсаалтын дата устгах функц */
+	async function handleDelete(id){
+		if(id){
+			const{ success} = await fetchData(countryApi.delete(id))
+			if (success){
+				getDatas()
+			}
+		}
+	}
+
 	useEffect(() => {
 		getDatas()
 	},[])
@@ -167,7 +177,7 @@ const Country = () => {
                                     <h5>{t('Өгөгдөл байхгүй байна')}</h5>
                                 </div>
                             )}
-                            columns={getColumns(currentPage, rowsPerPage, searchValue.length ? filteredData : datas, handleUpdateModal, user)}
+                            columns={getColumns(currentPage, rowsPerPage, searchValue.length ? filteredData : datas, handleUpdateModal, user, handleDelete)}
                             sortIcon={<ChevronDown size={10} />}
                             paginationPerPage={rowsPerPage}
                             paginationDefaultPage={currentPage}

@@ -13,7 +13,7 @@ import Stipend from './Stipend'
 import Calendar from './Calendar'
 // import Dormitory from './Dormitory'
 // import Order from './Order'
-// import Service from './Service'
+import Service from './Service'
 import Credit from './Credit'
 import Survey from './Survey'
 import TeacherEvaluation from './TeacherEvaluation'
@@ -38,7 +38,7 @@ export default [
   // ...TeacherEvaluation,
   // ...Request,
   // ...Order,
-  // ...Service,
+  ...Service,
   ...Print,
   // ...Report,
   ...Settings,

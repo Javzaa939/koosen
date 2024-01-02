@@ -66,10 +66,20 @@ const ProfessionalDegree = () => {
 			setDatas(data)
 		}
 	}
+	//  Жагсаалт устгах
+	async function handleDelete(id){
+		if(id){
+			const{ success} = await fetchData(professionaldegreeApi.delete(id))
+			if (success){
+				getDatas()
+			}
+		}
+	}
 
 	useEffect(() => {
         getDatas()
     }, [])
+
 
 	// Хайлт хийх үед ажиллах хэсэг
 	const handleFilter = (e) => {
@@ -168,7 +178,7 @@ const ProfessionalDegree = () => {
                                     <h5>{t('Өгөгдөл байхгүй байна')}</h5>
                                 </div>
                             )}
-                            columns={getColumns(currentPage, rowsPerPage, searchValue.length ? filteredData : datas,handleUpdateModal, user)}
+                            columns={getColumns(currentPage, rowsPerPage, searchValue.length ? filteredData : datas,handleUpdateModal, user, handleDelete)}
                             sortIcon={<ChevronDown size={10} />}
                             paginationPerPage={rowsPerPage}
                             paginationDefaultPage={currentPage}

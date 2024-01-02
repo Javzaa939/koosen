@@ -47,7 +47,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 			// selector: (row) => row?.name,
             sortable: true,
 			minWidth: "80px",
-			center: true
+			left: true
 		},
 		{
 			header: 'kredit',
@@ -69,7 +69,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 		{
 			header: '',
 			name: `${t('Заах багш')}`,
-			selector: (row) => row?.teacher_name,
+			selector: (row) => row?.teachers?.teacher_name,
             center: true
         },
 	]

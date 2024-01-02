@@ -19,6 +19,7 @@ import { ChevronDown, Search, Plus } from 'react-feather'
 import DataTable from 'react-data-table-component'
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
+import useUpdateEffect from '@hooks/useUpdateEffect'
 import AuthContext from '@context/AuthContext'
 import SchoolContext from '@context/SchoolContext'
 import { getPagination } from '@utils'
@@ -73,7 +74,7 @@ const Correspond = () => {
 
     useEffect(() => {
         getDatas()
-    },[sortField, currentPage, rowsPerPage])
+    },[sortField, currentPage, rowsPerPage, school_id])
 
     // Хайлт хийх үед ажиллах хэсэг
     const handleFilter = e => {
@@ -105,7 +106,7 @@ const Correspond = () => {
     }
 
     // Хайлтийн хэсэг хоосон болох үед анхны датаг дуудна
-	useEffect(() => {
+	useUpdateEffect(() => {
 		if (searchValue.length == 0) {
 			getDatas();
 		} else {
