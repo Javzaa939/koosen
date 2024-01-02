@@ -64,27 +64,27 @@ export const Addmodal = ( { open, refreshDatas, handleModal, type, editData } ) 
         cdata['type'] = type
 
         if (cdata?.id) {
-            const { success, error } = await postFetch(settingsApi.put(cdata, cdata?.id))
+            const { success, errors } = await postFetch(settingsApi.put(cdata, cdata?.id))
             if(success) {
                 reset()
                 refreshDatas()
                 handleModal()
             } else {
                 /** Алдааны мессэжийг input дээр харуулна */
-                for (let key in error) {
-                    setError(error[key].field, { type: 'custom', message:  error[key].msg});
+                for (let key in errors) {
+                    setError(key, { type: 'custom', message: errors[key][0]});
                 }
             }
         } else {
-            const { success, error } = await postFetch(settingsApi.post(cdata))
+            const { success, errors } = await postFetch(settingsApi.post(cdata))
             if(success) {
                 reset()
                 refreshDatas()
                 handleModal()
             } else {
                 /** Алдааны мессэжийг input дээр харуулна */
-                for (let key in error) {
-                    setError(error[key].field, { type: 'custom', message:  error[key].msg});
+                for (let key in errors) {
+                    setError(key, { type: 'custom', message: errors[key][0]});
                 }
             }
         }
@@ -105,7 +105,7 @@ export const Addmodal = ( { open, refreshDatas, handleModal, type, editData } ) 
                     setValue(key, editData[key])
                 }
             }
-        }
+        }, [editData]
     )
 
     return (

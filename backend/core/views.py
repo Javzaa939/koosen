@@ -573,6 +573,7 @@ class BagHorooAPIView(
             bag_horoo_list = list(qs)
             return request.send_data(bag_horoo_list)
 
+
 @permission_classes([IsAuthenticated])
 class TeacherListAPIView(
     generics.GenericAPIView,
@@ -708,7 +709,7 @@ class EmployeeApiView(
             return request.send_error("ERR_002")
 
 @permission_classes([IsAuthenticated])
-class TeacherListApiView(
+class TeacherLongListApiView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin
@@ -717,7 +718,6 @@ class TeacherListApiView(
 
     queryset = Teachers.objects.all()
     serializer_class = TeacherLongListSerializer
-
 
     def get(self, request):
 

@@ -144,7 +144,7 @@ const ExamTimeTable = () => {
 
 			return () => clearTimeout(timeoutId);
 		}
-	}, [rowsPerPage, currentPage, sortField, searchValue, selectedRoom, selectedTeacher])
+	}, [rowsPerPage, currentPage, sortField, searchValue, selectedRoom, selectedTeacher, school_id])
 
 
     function handleSort(column, sort) {

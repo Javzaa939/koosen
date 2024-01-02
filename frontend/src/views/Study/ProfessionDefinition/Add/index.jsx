@@ -77,15 +77,15 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
 	async function onSubmit(cdata) {
         cdata['school'] = school_id
         cdata = convertDefaultValue(cdata)//, ['confirm_year', 'knowledge_skill', 'requirement', 'dedication' ])
-        const { success, error } = await postFetch(definationApi.post(cdata))
+        const { success, errors } = await postFetch(definationApi.post(cdata))
         if(success) {
             reset()
             handleModal()
             refreshDatas()
         } else {
             /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in error) {
-                setError(error[key].field, { type: 'custom', message:  error[key].msg});
+            for (let key in errors) {
+                setError(key, { type: 'custom', message:  errors[key][0]});
             }
         }
 	}

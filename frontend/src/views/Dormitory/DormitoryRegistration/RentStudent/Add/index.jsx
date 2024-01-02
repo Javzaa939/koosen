@@ -126,7 +126,6 @@ function AddModal({ toggle, modal, is_teacher, refreshDatas }) {
                 toggle()
             } else {
                 /** Алдааны мессэжийг input дээр харуулна */
-                console.log(errors);
                 for (let key in errors) {
                     setError(key, { type: 'custom', message:  errors[key][0]});
                 }
