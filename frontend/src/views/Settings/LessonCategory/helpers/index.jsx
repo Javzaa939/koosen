@@ -1,11 +1,11 @@
 import { t } from "i18next";
-import { Edit } from "react-feather";
+import { X,Edit } from "react-feather";
 import useModal from '@hooks/useModal'
-import { UncontrolledTooltip } from "reactstrap";
+import { Badge, UncontrolledTooltip } from "reactstrap";
 
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, user) {
+export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, user, handleDelete) {
     const { showWarning } = useModal()
 
     const page_count = Math.ceil(datas.length / rowsPerPage)
@@ -38,16 +38,17 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 		},
 	]
 
-	if(Object.keys(user).length > 0 && user.permissions.includes('lms-settings-lessoncategory-update')? true : false) {
+	if(Object.keys(user).length > 0 && user.permissions.includes('lms-settings-lessoncategory-update' && user.permissions.includes('lms-settings-lessoncategory-delete'))? true : false) {
 		var update_column =  {
 			name: `${t('Үйлдэл')}`,
-			minWidth: "380px",
+			minWidth: "80px",
 			center: true,
 			selector: (row) => (
 				<div className="text-center" style={{ width: "auto" }}>
 					<a
 						role="button"
 						id = {`categoryUpdate${row?.id}`}
+						className="me-1"
 						onClick={
 									() => handleUpdateModal(row?.id)
 								}>
@@ -55,6 +56,24 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 					</a>
 
 					<UncontrolledTooltip placement='top' target={`categoryUpdate${row.id}`} >Засах</UncontrolledTooltip>
+					{
+						<>
+							<a role="button"
+								onClick={() => showWarning({
+									header: {
+										title: `${t('Хичээлийн ангилал устгах')}`,
+									},
+									question: `Та "${row?.category_name}" ангилал устгахдаа итгэлтэй байна уу?`,
+									onClick: () => handleDelete(row.id),
+									btnText: 'Устгах',
+								})}
+								id={`learnId${row.id}`}
+							>
+								<Badge color="light-danger" pill><X width={"100px"} /></Badge>
+							</a>
+							<UncontrolledTooltip placement='top' target={`learnId${row.id}`} >Устгах</UncontrolledTooltip>
+						</>
+					}
 				</div>
 			),
 		}

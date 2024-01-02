@@ -67,9 +67,20 @@ const StudentRegisterType = () => {
 		}
 	}
 
+	
 	useEffect(() => {
 		getDatas()
 	},[])
+
+	/* Жагсаалтын дата утсгах функц */
+	async function handleDelete(id) {
+		if (id){
+			const { success } = await fetchData(registerType.delete(id))
+			if(success) {
+				getDatas()
+			}
+		}
+	}
 
 	// Хайлт хийх үед ажиллах хэсэг
 	const handleFilter = (e) => {
@@ -164,7 +175,7 @@ const StudentRegisterType = () => {
                                     <h5>{t('Өгөгдөл байхгүй байна')}</h5>
                                 </div>
                             )}
-                            columns={getColumns(currentPage, rowsPerPage, searchValue.length ? filteredData : datas, handleUpdateModal, user)}
+                            columns={getColumns(currentPage, rowsPerPage, searchValue.length ? filteredData : datas, handleUpdateModal, user, handleDelete)}
                             sortIcon={<ChevronDown size={10} />}
                             paginationPerPage={rowsPerPage}
                             paginationDefaultPage={currentPage}

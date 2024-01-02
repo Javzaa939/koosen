@@ -1,4 +1,4 @@
-import { Edit } from "react-feather";
+import { X, Edit } from "react-feather";
 
 import { Badge, UncontrolledTooltip } from "reactstrap";
 
@@ -7,7 +7,9 @@ import { t } from "i18next";
 import useModal from '@hooks/useModal'
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, user) {
+export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, user, handleDelete) {
+
+	const { showWarning } = useModal()
 
     const page_count = Math.ceil(datas.length / rowsPerPage)
 
@@ -60,15 +62,17 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 		},
 	]
 
-	if(Object.keys(user).length > 0 && user.permissions.includes('lms-settings-score-update')? true : false) {
+	if(Object.keys(user).length > 0 && user.permissions.includes('lms-settings-score-update') && user.permissions.includes('lms-settings-score-delete')? true : false) {
 		var UpdateColumn = {
 			name: `${t('Үйлдэл')}`,
-			maxWidth: "80px",
+			minWidth: "80px",
 			selector: (row) => (
 				<div className="text-center" style={{ width: "auto" }}>
 					{
-					<a role="button"
+					<a
+						role="button"
 						id = {`ScoreUpdate${row?.id}`}
+						className="me-1"
 						onClick={
 							() => handleUpdateModal(row?.id)
 						} >
@@ -76,6 +80,24 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 					</a>
 					}
 					<UncontrolledTooltip placement="top" target={`ScoreUpdate${row.id}`}>Засах</UncontrolledTooltip>
+					{
+						<>
+							<a role="button"
+								onClick={() => showWarning({
+									header: {
+										title: `${t('Үнэлгээний бүртгэл устгах')}`,
+									},
+									question: `Та "${row?.assesment}" үнэлгээг устгахдаа итгэлтэй байна уу?`,
+									onClick: () => handleDelete(row.id),
+									btnText: 'Устгах',
+								})}
+								id={`learnId${row.id}`}
+							>
+								<Badge color="light-danger" pill><X width={"100px"} /></Badge>
+							</a>
+							<UncontrolledTooltip placement='top' target={`learnId${row.id}`} >Устгах</UncontrolledTooltip>
+						</>
+					}
 				</div>
 			),
 		}

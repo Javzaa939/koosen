@@ -73,6 +73,16 @@ const LessonGroup = () => {
 		getDatas()
 	},[])
 
+	/* Жагсаалтын дата устгах функц */
+	async function handleDelete(id){
+		if(id){
+			const{ success} = await fetchData(lessonGroupApi.delete(id))
+			if (success){
+				getDatas()
+			}
+		}
+	}
+
 	// Хайлт хийх үед ажиллах хэсэг
 	const handleFilter = (e) => {
 		var updatedData = [];
@@ -166,7 +176,7 @@ const LessonGroup = () => {
                                     <h5>{t('Өгөгдөл байхгүй байна')}</h5>
                                 </div>
                             )}
-                            columns={getColumns(currentPage, rowsPerPage, searchValue.length ? filteredData : datas, handleUpdateModal, user)}
+                            columns={getColumns(currentPage, rowsPerPage, searchValue.length ? filteredData : datas, handleUpdateModal, user, handleDelete)}
                             sortIcon={<ChevronDown size={10} />}
                             paginationPerPage={rowsPerPage}
                             paginationDefaultPage={currentPage}

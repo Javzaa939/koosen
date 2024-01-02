@@ -189,6 +189,8 @@ function useApi(isDisplay=false) {
 				post: data => instance.post('/settings/professionaldegree/', data),
 				getOne: (pk) => instance.get(`/settings/professionaldegree/${pk}/`),
 				put: (data, pk) => instance.put(`/settings/professionaldegree/${pk}/`, data),
+				delete: (pk) => instance.delete(`/settings/professionaldegree/${pk}/`),
+
 			},
 			/** Суралцах хэлбэр */
 			learning: {
@@ -196,6 +198,7 @@ function useApi(isDisplay=false) {
 				post: data => instance.post('/settings/learning/', data),
 				getOne: (pk) => instance.get(`/settings/learning/${pk}/`),
 				put: (data, pk) => instance.put(`/settings/learning/${pk}/`, data),
+				delete: (pk) => instance.delete(`settings/learning/${pk}/`),
 			},
 			/** Оюутны бүртгэлийн төрөл */
 			studentRegisterType: {
@@ -203,6 +206,7 @@ function useApi(isDisplay=false) {
 				post: data => instance.post('/settings/studentregister/', data),
 				getOne: (pk) => instance.get(`/settings/studentregister/${pk}/`),
 				put: (data, pk) => instance.put(`/settings/studentregister/${pk}/`, data),
+				delete: (pk) => instance.delete(`/settings/studentregister/${pk}/`),
 			},
 			/** Хичээлийн ангилал */
 			lessonCategory: {
@@ -210,6 +214,8 @@ function useApi(isDisplay=false) {
 				post: data => instance.post('/settings/lessoncategory/', data),
 				getOne: (pk) => instance.get(`/settings/lessoncategory/${pk}/`),
 				put: (data, pk) => instance.put(`/settings/lessoncategory/${pk}/`, data),
+				delete: (pk) => instance.delete(`/settings/lessoncategory/${pk}/`),
+
 			},
 			/** Хичээлийн төрөл */
 			lessonType: {
@@ -231,6 +237,8 @@ function useApi(isDisplay=false) {
 				post: data => instance.post('/settings/lessongroup/', data),
 				getOne: (pk) => instance.get(`/settings/lessongroup/${pk}/`),
 				put: (data, pk) => instance.put(`/settings/lessongroup/${pk}/`, data),
+				delete: (pk) => instance.delete(`/settings/lessongroup/${pk}/`),
+
 			},
 			/** улирал */
 			season: {
@@ -238,6 +246,8 @@ function useApi(isDisplay=false) {
 				post: data => instance.post('/settings/season/', data),
 				getOne: (pk) => instance.get(`/settings/season/${pk}/`),
 				put: (data, pk) => instance.put(`/settings/season/${pk}/`, data),
+				delete: (pk) => instance.delete(`/settings/season/${pk}/`),
+
 			},
 			/** Дүн */
 			score: {
@@ -245,6 +255,8 @@ function useApi(isDisplay=false) {
 				post: data => instance.post('/settings/score/', data),
 				getOne: (pk) => instance.get(`/settings/score/${pk}/`),
 				put: ( data, pk) => instance.put(`/settings/score/${pk}/`, data),
+				delete: (pk) => instance.delete(`/settings/score/${pk}/`),
+
 			},
 			activeyear:{
 				get: () => instance.get(`/settings/activeyear/`),
@@ -260,6 +272,8 @@ function useApi(isDisplay=false) {
 				post: data => instance.post('/settings/admissionlesson/', data),
 				getOne: (pk) => instance.get(`/settings/admissionlesson/${pk}/`),
 				put: (data, pk) => instance.put(`/settings/admissionlesson/${pk}/`, data),
+				delete: (pk) => instance.delete(`/settings/admissionlesson/${pk}/`),
+
 			},
 			/* Төлбөрийн хөнгөлөлтийн төрөл */
 			discountType:{
@@ -267,6 +281,8 @@ function useApi(isDisplay=false) {
 				post: data => instance.post('/settings/discounttype/', data),
 				getOne: (pk) => instance.get(`/settings/discounttype/${pk}/`),
 				put: (data, pk) => instance.put(`/settings/discounttype/${pk}/`, data),
+				delete: (pk) => instance.delete(`/settings/discounttype/${pk}/`),
+
 			},
 			/* Улсын нэр */
 			country:{
@@ -274,6 +290,8 @@ function useApi(isDisplay=false) {
 				post: data => instance.post('/settings/country/', data),
 				getOne: (pk) => instance.get(`/settings/country/${pk}/`),
 				put: (data, pk) => instance.put(`/settings/country/${pk}/`, data),
+				delete: (pk) => instance.delete(`/settings/country/${pk}/`),
+
 			},
 			/** Тодорхойлолтын гарын үсэг */
 			signature: {
