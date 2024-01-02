@@ -18,7 +18,7 @@ from lms.models import (
     Pollee,
     Student,
     SubSchools,
-    Departments,
+    Salbars,
     ProfessionDefinition,
     Group,
     Notification,
@@ -509,7 +509,7 @@ class SurveyRangeAPIView(
 
             # Тэнхимийн жагсаалт
             if selected_value == 'is_dep':
-                c_queryset = Departments.objects.all()
+                c_queryset = Salbars.objects.all()
                 all_data = DepartmentSerializer(c_queryset, many=True).data
 
                 return request.send_data(all_data)
@@ -533,7 +533,7 @@ class SurveyRangeAPIView(
 
             # Тэнхимийн жагсаалт
             if selected_value == 'is_dep':
-                c_queryset = Departments.objects.all()
+                c_queryset = Salbars.objects.all()
                 all_data = DepartmentStudentSerializer(c_queryset, many=True).data
 
                 return request.send_data(all_data)

@@ -144,7 +144,7 @@ class LessonStandart(models.Model):
     laborator_kr = models.FloatField(null=True, verbose_name="Лабораторын кредит")
     practic_kr = models.FloatField(null=True, verbose_name="Практикийн кредит")
     biedaalt_kr = models.FloatField(null=True, verbose_name="Бие даалтын кредит")
-    department = models.ForeignKey(Departments, on_delete=models.SET_NULL, null=True, verbose_name="Хөтөлбөрийн баг")
+    department = models.ForeignKey(Salbars, on_delete=models.SET_NULL, null=True, verbose_name="Хөтөлбөрийн баг")
     school = models.ForeignKey(SubSchools, on_delete=models.SET_NULL, null=True, verbose_name="Сургууль")
     created_user = models.ForeignKey(User, related_name='lesson_cr_user', on_delete=models.SET_NULL, null=True, verbose_name="Бүртгэсэн хэрэглэгч")
     updated_user = models.ForeignKey(User, related_name='lesson_up_user', on_delete=models.SET_NULL, null=True, verbose_name="Зассан хэрэглэгч")
@@ -357,7 +357,7 @@ class ProfessionDefinition(models.Model):
     duration = models.FloatField(null=True, verbose_name="Суралцах хугацаа")
     volume_kr = models.FloatField(null=True, verbose_name="Сургалтын агуулга багтаамж/багц цаг")
     introduction = models.TextField(null=True, verbose_name="Мэргэжлийн танилцуулга")
-    department = models.ForeignKey(Departments, on_delete=models.SET_NULL, null=True, verbose_name="Хөтөлбөрийн баг")
+    department = models.ForeignKey(Salbars, on_delete=models.SET_NULL, null=True, verbose_name="Хөтөлбөрийн баг")
     school = models.ForeignKey(SubSchools, on_delete=models.SET_NULL, null=True, verbose_name="Сургууль")
     created_user = models.ForeignKey(User, related_name='prof_cr_user', on_delete=models.SET_NULL, null=True, verbose_name="Бүртгэсэн хэрэглэгч")
     updated_user = models.ForeignKey(User, related_name='prof_up_user', on_delete=models.SET_NULL, null=True, verbose_name="Зассан хэрэглэгч")
@@ -455,7 +455,7 @@ class LearningPlan(models.Model):
     season = models.CharField(null=True, max_length=50, verbose_name="Хичээл үзэх улирал")
     is_check_score = models.BooleanField(default=False, verbose_name='74 -өөс дээш үнэлгээгээр тэнцэх эсэх')
 
-    department = models.ForeignKey(Departments, on_delete=models.SET_NULL, null=True, verbose_name="Хөтөлбөрийн баг")
+    department = models.ForeignKey(Salbars, on_delete=models.SET_NULL, null=True, verbose_name="Хөтөлбөрийн баг")
     school = models.ForeignKey(SubSchools, on_delete=models.SET_NULL, null=True, verbose_name="Сургууль")
     created_user = models.ForeignKey(User, related_name='plan_cr_user', on_delete=models.SET_NULL, null=True, verbose_name="Бүртгэсэн хэрэглэгч")
     updated_user = models.ForeignKey(User, related_name='plan_up_user', on_delete=models.SET_NULL, null=True, verbose_name="Зассан хэрэглэгч")
@@ -520,7 +520,7 @@ class Group(models.Model):
     learning_status = models.ForeignKey(Learning, on_delete=models.PROTECT, verbose_name='Суралцах хэлбэр')
     join_year = models.CharField(max_length=10, null=True, verbose_name='Элссэн хичээлийн жил')
     teacher = models.ForeignKey(Teachers, on_delete=models.SET_NULL, null=True, verbose_name='Ангийн багш')
-    department = models.ForeignKey(Departments, on_delete=models.SET_NULL, null=True, verbose_name="Хөтөлбөрийн баг")
+    department = models.ForeignKey(Salbars, on_delete=models.SET_NULL, null=True, verbose_name="Хөтөлбөрийн баг")
     school = models.ForeignKey(SubSchools, on_delete=models.SET_NULL, null=True, verbose_name="Сургууль")
     is_finish = models.BooleanField(default=False, verbose_name="Төгссөн эсэх")
 
@@ -609,7 +609,7 @@ class Student(models.Model):
     private_score = models.FloatField(default=1000, verbose_name="Хувийн оноо")
 
     image = models.ImageField(upload_to=user_directory_path, max_length=255, null=True)
-    department = models.ForeignKey(Departments, on_delete=models.SET_NULL, null=True, verbose_name="Хөтөлбөрийн баг")
+    department = models.ForeignKey(Salbars, on_delete=models.SET_NULL, null=True, verbose_name="Хөтөлбөрийн баг")
     school = models.ForeignKey(SubSchools, on_delete=models.SET_NULL, null=True, verbose_name="Сургууль")
     created_user = models.ForeignKey(User, related_name='student_cr_user', on_delete=models.SET_NULL, null=True, verbose_name="Бүртгэсэн хэрэглэгч")
     updated_user = models.ForeignKey(User, related_name='student_up_user', on_delete=models.SET_NULL, null=True, verbose_name="Зассан хэрэглэгч")
@@ -2156,7 +2156,7 @@ class StudentNotice(models.Model):
     body = models.TextField(verbose_name="Мэдээний хэсэг")
     scope = models.PositiveIntegerField(choices=LearningCalendar.SCOPE, db_index=True, default=LearningCalendar.OTHER, verbose_name="Хэн хамрагдах")
     student_level = models.PositiveIntegerField(null=True, verbose_name="Оюутны курс")
-    department = models.ForeignKey(Departments, on_delete=models.SET_NULL, null=True, verbose_name="Хөтөлбөрийн баг")
+    department = models.ForeignKey(Salbars, on_delete=models.SET_NULL, null=True, verbose_name="Хөтөлбөрийн баг")
     is_news = models.BooleanField(default=False)
     school = models.ForeignKey(SubSchools, on_delete=models.SET_NULL, null=True, verbose_name="Сургууль")
     created_user = models.ForeignKey(User, related_name='news_cr_user', on_delete=models.SET_NULL, null=True, verbose_name="Бүртгэсэн хэрэглэгч")
@@ -2514,7 +2514,7 @@ class TeacherCreditVolumePlan(models.Model):
     teacher = models.ForeignKey(Teachers, on_delete=models.PROTECT, null=True, verbose_name="Багш")
     type = models.PositiveIntegerField(choices=Lesson_title_plan.LESSON_TYPE, db_index=True, default=Lesson_title_plan.LECT, verbose_name="Хичээллэх төрөл")
     credit = models.PositiveIntegerField(null=True, verbose_name="Хичээлийн төрөлд хамаарах кредит цаг")
-    department = models.ForeignKey(Departments, on_delete=models.SET_NULL, null=True, verbose_name="Хөтөлбөрийн баг")
+    department = models.ForeignKey(Salbars, on_delete=models.SET_NULL, null=True, verbose_name="Хөтөлбөрийн баг")
     school = models.ForeignKey(SubSchools, on_delete=models.SET_NULL, null=True, verbose_name="Сургууль")
 
     is_timetable = models.BooleanField(default=False, verbose_name="Хуваарьт бүртгэгдсэн эсэх")
@@ -2566,7 +2566,7 @@ class TeacherCreditEstimationA(models.Model):
     practice_kr = models.FloatField(null=True, verbose_name="Практикын цаг")
     biedaalt_kr = models.FloatField(null=True, verbose_name="Биедаалтын цаг")
 
-    department = models.ForeignKey(Departments, on_delete=models.SET_NULL, null=True, verbose_name="Хөтөлбөрийн баг")
+    department = models.ForeignKey(Salbars, on_delete=models.SET_NULL, null=True, verbose_name="Хөтөлбөрийн баг")
     school = models.ForeignKey(SubSchools, on_delete=models.SET_NULL, null=True, verbose_name="Сургууль")
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -3433,7 +3433,7 @@ class Survey(models.Model):
     is_hide_employees = models.BooleanField(default=False, verbose_name="Бөглөсөн албан хаагчдыг нуух эсэх")
 
     created_school = models.ForeignKey(SubSchools, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Харьяалагдах алба нэгж", )
-    created_department = models.ForeignKey(Departments, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Салбар")
+    created_department = models.ForeignKey(Salbars, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Салбар")
 
     deleted_by = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name="deleted", null=True, blank=True)
     deleted_at = models.DateTimeField(null=True, blank=True)

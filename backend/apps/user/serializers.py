@@ -82,19 +82,17 @@ class UserInfoSerializer(serializers.ModelSerializer):
 
         permissions = []
 
-        if emp_list:
-            if obj.is_superuser:
-                permissions = list(Permissions.objects.all().filter(name__startswith='lms').values_list('name', flat=True))
+        if obj.is_superuser:
+            permissions = list(Permissions.objects.all().filter(name__startswith='lms').values_list('name', flat=True))
 
-            #  super user биш үед л эрх ашиглана
-            else:
-                permissions = list(emp_list.org_position.roles.values_list("permissions__name", flat=True))
-                removed_perms = list(emp_list.org_position.removed_perms.values_list("name", flat=True))
-                permissions = permissions + list(emp_list.org_position.permissions.values_list("name", flat=True))
+        elif emp_list and not obj.is_superuser:
+            permissions = list(emp_list.org_position.roles.values_list("permissions__name", flat=True))
+            removed_perms = list(emp_list.org_position.removed_perms.values_list("name", flat=True))
+            permissions = permissions + list(emp_list.org_position.permissions.values_list("name", flat=True))
 
-                removed_perms = set(removed_perms)
-                permissions = set(permissions)
-                permissions = permissions.difference(removed_perms)
+            removed_perms = set(removed_perms)
+            permissions = set(permissions)
+            permissions = permissions.difference(removed_perms)
 
         return list(permissions)
 

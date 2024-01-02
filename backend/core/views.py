@@ -11,7 +11,7 @@ from django.db import transaction
 from django.db.models import Q
 
 from core.models import Schools
-from core.models import Departments
+from core.models import Salbars
 from core.models import SubSchools
 from core.models import AimagHot
 from core.models import SumDuureg
@@ -19,7 +19,7 @@ from core.models import BagHoroo
 from core.models import Teachers
 from core.models import Employee
 from core.models import OrgPosition
-from core.models import User
+from core.models import Notification
 
 
 from lms.models import Country
@@ -79,7 +79,6 @@ from .serializers import LessonTeacherListSerializer
 from .serializers import TeacherListSchoolFilterSerializer
 from .serializers import SubSchoolsRegisterPostSerailizer
 from .serializers import DepartmentPostSerailizer
-from .serializers import TeacherPostSerializer
 from .serializers import EmployeePostSerializer
 
 
@@ -208,7 +207,7 @@ class DepartmentAPIView(
 ):
     """"Салбар, тухайн дэд байгууллагын салбар """
 
-    queryset = Departments.objects.all().order_by("-created_at")
+    queryset = Salbars.objects.all().order_by("-created_at")
 
     serializer_class = DepartmentRegisterSerailizer
 
@@ -236,6 +235,8 @@ class DepartmentAPIView(
 
         self.serializer_class = DepartmentPostSerailizer
         datas = request.data
+        sub_org = SubSchools.objects.filter(id=datas.get('sub_orgs')).first()
+        datas['org'] = sub_org.org.id
         serializer = self.get_serializer(data=datas)
 
         if serializer.is_valid(raise_exception=False):
@@ -257,7 +258,7 @@ class DepartmentAPIView(
                 }
 
                 error_obj.append(return_error)
-
+            print(error_obj)
             if len(error_obj) > 0:
                 return request.send_error("ERR_003", error_obj)
 
@@ -314,7 +315,14 @@ class DepartmentAPIView(
     def delete(self, request, pk=None):
         " устгах "
 
-        qs = self.queryset.filter(id=pk)
+        qs = self.queryset.filter(id=pk).first()
+
+        # notifications = Notification.objects.filter(salbar=pk).first()
+
+        # if notifications:
+        #     for article in list(notifications.salbar_set.all()):
+        #         notifications.article_set.remove(article)
+
         if qs:
             qs.delete()
 
@@ -330,19 +338,16 @@ class DepartmentListAPIView(
 ):
     """"Салбар, тухайн дэд байгууллагын салбар """
 
-    queryset = Departments.objects
+    queryset = Salbars.objects.all()
     serializer_class = DepartmentListSerailizer
-
-    def get_queryset(self):
-        queryset = self.queryset
-        school = self.request.query_params.get('school')
-        if school:
-            queryset = queryset.filter(sub_orgs=school)
-
-        return queryset
 
     def get(self, request, pk=None):
         " Салбарын жагсаалт "
+
+        school = self.request.query_params.get('school')
+        if school:
+            self.queryset = self.queryset.filter(sub_orgs=school)
+
         self.serializer_class = DepartmentListSerailizer
 
         if pk:
@@ -410,6 +415,10 @@ class SubSchoolAPIView(
         self.serializer_class = SubSchoolsRegisterPostSerailizer
         datas = request.data
 
+        school = Schools.objects.first()
+
+        datas['org'] = school.id
+
         serializer = self.get_serializer(data=datas)
 
         if serializer.is_valid(raise_exception=False):
@@ -430,7 +439,7 @@ class SubSchoolAPIView(
                 }
 
                 error_obj.append(return_error)
-
+            print(error_obj)
             if len(error_obj) > 0:
                 return request.send_error("ERR_003", error_obj)
 
@@ -633,15 +642,10 @@ class TeacherApiView(
     def get_queryset(self):
         "Багшийн мэдээллийг сургууль, Хөтөлбөрийн багаар харуулах "
 
-        queryset = self.queryset
-        teacher_queryset = queryset.all().values_list('user', flat=True)
-        qs_employee_user = Employee.objects.filter(user_id__in=list(teacher_queryset), org_position__is_teacher=True, state=Employee.STATE_WORKING).values_list('user', flat=True)
-        if qs_employee_user:
-            queryset = queryset.filter(user_id__in = list(qs_employee_user))
+        queryset = get_teacher_queryset()
 
         sub_org = self.request.query_params.get('sub_org')
         salbar = self.request.query_params.get('salbar')
-        search = self.request.query_params.get('search')
 
         # Бүрэлдэхүүн сургууль
         if sub_org:
@@ -650,9 +654,6 @@ class TeacherApiView(
         # салбар, тэнхим
         if salbar:
             queryset = queryset.filter(salbar=salbar)
-
-        # if search:
-        #     queryset = filter_queries(queryset.model, search)
 
         return queryset
 

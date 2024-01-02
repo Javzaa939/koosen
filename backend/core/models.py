@@ -98,6 +98,7 @@ class Schools(models.Model):
     logo = models.ImageField(upload_to="orgs/logo", null=True, blank=True, verbose_name='лого')
 
     email = models.EmailField(max_length=254, unique=True, blank=False, null=True, verbose_name="И-мэйл", error_messages={ "unique": "И-мэйл давхцсан байна" })
+    email_use_tls = models.BooleanField(default=False)
     phone_number = models.IntegerField(null=True, blank=True, verbose_name="Утасны дугаар")
     home_phone = models.IntegerField(null=True, blank=True, verbose_name="Факс")
     todorkhoilolt_signature = models.ImageField(upload_to="orgs/logo", null=True, blank=True, verbose_name='лого')
@@ -194,7 +195,7 @@ class User(AbstractUser):
         return self.info.full_name
 
 
-class Departments(models.Model):
+class Salbars(models.Model):
     """
         Тухайн дэд байгууллагын салбар
     """
@@ -348,7 +349,7 @@ class Teachers(models.Model):
 
     org = models.ForeignKey(Schools, blank=True, null=True, on_delete=models.CASCADE, verbose_name="Байгууллага")
     sub_org = models.ForeignKey(SubSchools, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Харьяалагдах алба нэгж")
-    salbar = models.ForeignKey(Departments, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Салбар")
+    salbar = models.ForeignKey(Salbars, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Салбар")
 
     birthday = models.DateField(null=True, verbose_name="Төрсөн өдөр")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Системд өгөгдөл шинээр оруулсан огноо")
@@ -398,7 +399,7 @@ class Employee(models.Model):
 
     org = models.ForeignKey(Schools, blank=True, null=True, on_delete=models.CASCADE, verbose_name="Байгууллага")
     sub_org = models.ForeignKey(SubSchools, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Харьяалагдах алба нэгж")
-    salbar = models.ForeignKey(Departments, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Салбар")
+    salbar = models.ForeignKey(Salbars, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Салбар")
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Хэрэглэгч")
     org_position = models.ForeignKey(OrgPosition, blank=True, null=True, on_delete=models.SET_NULL, verbose_name="Албан тушаал")
     state = models.PositiveIntegerField(choices=STATE, db_index=True, null=False, default=STATE_WORKING, verbose_name="Ажилтны төлөв(Ажиллаж байгаа, Халагдсан эсэг)")
@@ -450,9 +451,6 @@ class Orgs(Schools):
 class SubOrgs(SubSchools):
     pass
 
-
-class Salbars(Departments):
-    pass
 
 class Notification(models.Model):
     """ Үндсэн notif """

@@ -25,7 +25,7 @@ from lms.models import (
     Student,
     TimeTable,
     SubSchools,
-    Departments,
+    Salbars,
     Exam_repeat,
     LearningPlan,
     ScoreRegister,
@@ -960,7 +960,7 @@ class ProfessionPlanListAPIView(
                                 LearningPlan(
                                     school=SubSchools.objects.get(id=school),
                                     lesson=LessonStandart.objects.get(id=lesson),
-                                    department=Departments.objects.get(id=department) if department else None,
+                                    department=Salbars.objects.get(id=department) if department else None,
                                     profession=ProfessionDefinition.objects.get(id=profession_id),
                                     previous_lesson=LessonStandart.objects.get(id=previous_lesson) if previous_lesson else None,
                                     group_lesson = LessonStandart.objects.get(id=group_lesson) if group_lesson else None,

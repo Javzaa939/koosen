@@ -3,7 +3,7 @@ from rest_framework import serializers
 from core.models import Teachers, Employee
 from core.models import Schools
 from core.models import SubSchools
-from core.models import Departments
+from core.models import Salbars
 from core.models import AimagHot
 from core.models import SumDuureg
 from core.models import BagHoroo
@@ -87,7 +87,7 @@ class BagHorooListSerializer(serializers.ModelSerializer):
 class DepartmentsSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Departments
+        model = Salbars
         fields = ["id", "name"]
 
 
@@ -187,7 +187,7 @@ class DepartmentRegisterSerailizer(serializers.ModelSerializer):
     lead = serializers.SerializerMethodField()
 
     class Meta:
-        model = Departments
+        model = Salbars
         fields = "__all__"
 
     def get_leaders(self, obj):
@@ -217,7 +217,7 @@ class DepartmentRegisterListSerailizer(serializers.ModelSerializer):
     """ Салбар, тэнхим хөтөлбөрийн ахлах жагсаалт """
 
     class Meta:
-        model = Departments
+        model = Salbars
         fields = "__all__"
 
 
@@ -226,14 +226,14 @@ class DepartmentListSerailizer(serializers.ModelSerializer):
     """ Салбар, тэнхим бүртгэх """
 
     class Meta:
-        model = Departments
+        model = Salbars
         fields = ["id", 'name']
 
 class DepartmentPostSerailizer(serializers.ModelSerializer):
     """ тэнхим шинээр бүртгэх """
 
     class Meta:
-        model = Departments
+        model = Salbars
         fields = ["org", 'name', "address", "web", "social", "is_hotolboriin_bag", "leader", "sub_orgs"]
 
 # ----------------- дэд сургууль --------------------
@@ -806,5 +806,5 @@ class DepartmentUpdateSerailizer(serializers.ModelSerializer):
     """ Салбар, тэнхим бүртгэх """
 
     class Meta:
-        model = Departments
+        model = Salbars
         fields = "__all__"

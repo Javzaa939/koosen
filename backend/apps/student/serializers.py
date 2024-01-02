@@ -14,7 +14,7 @@ from lms.models import Group
 from lms.models import StudentMovement
 from lms.models import StudentFamily
 from lms.models import StudentAddress
-from lms.models import Departments
+from lms.models import Salbars
 from lms.models import Country
 from lms.models import StudentEducation
 from lms.models import GraduationWork
@@ -111,7 +111,7 @@ class StatusSerializer(serializers.ModelSerializer):
 class DepartmentsSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Departments
+        model = Salbars
         exclude = "created_at", "updated_at"
 
 
