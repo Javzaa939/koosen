@@ -156,7 +156,6 @@ const Editmodal = ({ open, handleEdit, editData, refreshDatas, season }) => {
 
                 if(key === 'lesson') {
                     setValue(key, editData[key]?.id)
-                    console.log(editData[key]?.id)
                 }
             }
         }

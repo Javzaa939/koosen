@@ -59,7 +59,6 @@ class ScoreRegisterlolSerializer(serializers.ModelSerializer):
         return total
 
 
-
 class LessonListSerializer(serializers.ModelSerializer):
     '''  Хичээлийн жагсаалт '''
 
@@ -77,7 +76,7 @@ class StudentistSerializer(serializers.ModelSerializer):
 
 
 class GraduationWorkListSerializer(serializers.ModelSerializer):
-    lesson = LessonListSerializer(many=False, read_only=True)
+    lesson = LessonListSerializer(many=True, default='', read_only=True)
     student = StudentistSerializer(many=False, read_only=True)
     mergejil_code = serializers.CharField(source="student.group.profession.code", default='')
     mergejil_name = serializers.CharField(source="student.group.profession.name", default='')

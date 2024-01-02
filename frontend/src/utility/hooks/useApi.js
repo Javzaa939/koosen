@@ -1182,6 +1182,10 @@ function useApi(isDisplay=false) {
 				delete: (pk) => instance.delete(`/service/news/${pk}/`),
 				// File save
 				saveFile: data => instance.post(`/service/news/file/`, data),
+
+				//Зар
+				getAd: (limit, page, sort, search) => instance.get(`/service/news/ad/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}`),
+				getOneAd: (pk) => instance.get(`/service/news/ad/${pk}/`),
 			},
 		},
 		/** Цагийн тооцоо */

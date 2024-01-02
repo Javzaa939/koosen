@@ -96,7 +96,7 @@ const LessonStandart = () => {
 
 			return () => clearTimeout(timeoutId);
 		}
-    }, [sortField, currentPage, rowsPerPage, searchValue,dep_id, category_id, params_search])
+    }, [sortField, currentPage, rowsPerPage, searchValue, dep_id, category_id, params_search])
 
     async function getDatas() {
 
@@ -180,18 +180,6 @@ const LessonStandart = () => {
     async function handleSearch() {
         if (searchValue.length > 0) getDatas()
     }
-
-    // Хайлтийн хэсэг хоосон болох үед анхны датаг дуудна
-    useEffect(
-        () =>
-        {
-            if (!searchValue) {
-                getDatas()
-            }
-        },
-        [searchValue]
-    )
-
 
     useEffect(
         () =>

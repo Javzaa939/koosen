@@ -2,7 +2,7 @@ import { Fragment, useState, useEffect, useContext } from 'react'
 
 import { Controller, useForm } from 'react-hook-form'
 
-import { Row, Col, Card, Input, Label, CardTitle, CardHeader, Spinner, Button } from 'reactstrap'
+import { Row, Col, Card, Input, Label, CardTitle, CardHeader, Button } from 'reactstrap'
 
 import { ChevronDown , Printer, Search} from 'react-feather'
 
@@ -15,6 +15,7 @@ import DataTable from 'react-data-table-component'
 import useApi from '@hooks/useApi';
 
 import useLoader from '@hooks/useLoader';
+import useUpdateEffect from '@hooks/useUpdateEffect'
 
 import SchoolContext from '@context/SchoolContext'
 
@@ -78,7 +79,11 @@ const GPA = () => {
         getProfessionOption()
         getGroupOption()
         getDatas()
-    },[select_value, currentPage, rowsPerPage])
+    },[select_value, currentPage, rowsPerPage, school_id])
+
+    useUpdateEffect(() => {
+        if(!searchValue) getDatas()
+    }, [searchValue])
 
     async function handleSearch() {
         getDatas()

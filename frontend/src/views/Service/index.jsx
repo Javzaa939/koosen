@@ -6,13 +6,11 @@ import {
     Nav,
     NavItem,
     NavLink,
-    CardHeader,
     CardBody
 } from 'reactstrap'
 
-import Teachers from "./Teachers";
-import Student from "./Student";
-import Busad from "./Busads";
+import News from "./News";
+import NewsDetail from "./NewsDetail";
 
 function RoleRoutes() {
 
@@ -23,19 +21,14 @@ function RoleRoutes() {
 
         {
             active_id: 1,
-            name: 'Багшийн дүнгийн эрх',
-            component: < Teachers/>
+            name: 'Зар',
+            component: < NewsDetail/>
         },
         {
             active_id: 2,
-            name: 'Бусад эрх',
-            component: < Busad/>
+            name: 'Мэдээ',
+            component: < News/>
         },
-        {
-            active_id: 3,
-            name: 'Төлбөргүй сонголтын эрх',
-            component: < Student/>
-        }
     ]
 
     useEffect(() => {

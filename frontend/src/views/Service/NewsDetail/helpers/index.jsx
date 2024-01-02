@@ -43,15 +43,6 @@ export function getColumns (currentPage, rowsPerPage, total_count, user, handleE
 			minWidth: "280px",
 			center: true,
 		},
-        {
-			header: 'created_user',
-			name: `${t('Оруулсан хэрэглэгч')}`,
-			selector: (row) => row?.created_user_name,
-            sortable: true,
-			minWidth: '220px',
-			wrap: true,
-			center: true,
-        },
 	]
 
     if(Object.keys(user).length > 0) {

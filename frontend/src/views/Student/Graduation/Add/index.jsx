@@ -149,7 +149,7 @@ const Createmodal = ({ open, handleModal, refreshDatas, select_value }) => {
         cdata['lesson'] = allSelectLessonIds
         cdata = convertDefaultValue(cdata)
 
-        const { success, error } = await postFetch(graduateApi.post(cdata))
+        const { success, errors } = await postFetch(graduateApi.post(cdata))
         if(success)
         {
             reset()
@@ -159,9 +159,8 @@ const Createmodal = ({ open, handleModal, refreshDatas, select_value }) => {
         else
         {
             /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in error)
-            {
-                setError(error[key].field, { type: 'custom', message:  error[key].msg});
+            for (let key in errors) {
+                setError(key, { type: 'custom', message:  errors[key][0]});
             }
         }
 	}
@@ -272,7 +271,7 @@ const Createmodal = ({ open, handleModal, refreshDatas, select_value }) => {
                                             id="lesson"
                                             classNamePrefix='select'
                                             isClearable
-                                            className={classnames('react-select')}
+                                            className={classnames('react-select', { 'is-invalid': errors.lesson })}
                                             isLoading={getAllLoading}
                                             placeholder={t(`-- Сонгоно уу --`)}
                                             options={lesson_option || []}
