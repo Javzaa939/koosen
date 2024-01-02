@@ -4,7 +4,7 @@ import { t } from "i18next";
 
 import useModal from '@hooks/useModal'
 
-import { UncontrolledTooltip } from 'reactstrap'
+import { Badge, UncontrolledTooltip } from 'reactstrap'
 
 // Хүснэгтийн баганууд
 export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, user) {
@@ -53,7 +53,7 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 									() => handleUpdateModal(row?.id)
 								}>
 
-						<Edit color='#b4b7bd' width={"15px"} />
+						<Badge color="light-secondary" pill><Edit  width={"15px"} /></Badge>
 					</a>
 					}
 					<UncontrolledTooltip placement='top' target={`DiscountUpdates${row.id}`} >Засах</UncontrolledTooltip>

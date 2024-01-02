@@ -1,6 +1,6 @@
 import { Edit } from "react-feather";
 
-import { UncontrolledTooltip } from "reactstrap";
+import { Badge, UncontrolledTooltip } from "reactstrap";
 
 import { t } from "i18next";
 
@@ -72,7 +72,7 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 						onClick={
 							() => handleUpdateModal(row?.id)
 						} >
-						<Edit color = '#b4b7bd' width={"15px"} />
+						<Badge color="light-secondary" pill><Edit  width={"15px"} /></Badge>
 					</a>
 					}
 					<UncontrolledTooltip placement="top" target={`ScoreUpdate${row.id}`}>Засах</UncontrolledTooltip>
