@@ -54,7 +54,7 @@ from lms.models import SystemSettings
 from lms.models import PaymentBeginBalance
 from lms.models import Country
 
-from core.models import SubSchools, SumDuureg, BagHoroo, AimagHot
+from core.models import SubOrgs, SumDuureg, BagHoroo, AimagHot
 
 from .serializers import StudentListSerializer
 from .serializers import StudentRegisterSerializer
@@ -311,7 +311,7 @@ class GroupAPIView(
 def generate_student_code(school_id, group):
     """ Оюутны код generate хийх """
 
-    school_code = SubSchools.objects.get(pk=school_id).org_code
+    school_code = SubOrgs.objects.get(pk=school_id).org_code
     group_qs = Group.objects.get(pk=group)
     profession_code = group_qs.profession.profession_code
     degree_code = group_qs.profession.degree.degree_code

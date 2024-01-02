@@ -9,7 +9,7 @@ from core.models import EducationalInstitutionCategory
 from core.models import PropertyType
 from lms.models import (
     Student,
-    SubSchools,
+    SubOrgs,
     GraduationWork
 )
 from lms.models import ProfessionalDegree
@@ -410,7 +410,7 @@ class StatisticDB3APIView(
                     filter_data.append(datax["id"])
 
                 property_data = Schools.objects.filter(property_type__in=filter_data).values_list("id", flat=True)
-                sub_school = SubSchools.objects.filter(org__in=property_data)
+                sub_school = SubOrgs.objects.filter(org__in=property_data)
                 student_qs = Student.objects.filter(school__in=sub_school)
                 for idx in range_pro:       # Өмчийн хэлбэр дотор боловсролын зэргээр гүйлгэх
                     key_obj = list()
