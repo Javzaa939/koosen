@@ -160,6 +160,18 @@ const VerticalLayout = (props) => {
                     menus.children = children
                 }
 
+                /** Эрх */
+                if(!user.is_superuser) {
+                    var children = menus.children.filter(child => child.id !== 'settingsLevel15')
+                    menus.children = children
+                }
+
+                /** Role */
+                if(!user.permissions.includes('role-read')) {
+                    var children = menus.children.filter(child => child.id !== 'settingsLevel16')
+                    menus.children = children
+                }
+
                 /** ----------------------------- Хичээлийн хуваарь ---------------------------- */
 
                 /** Хичээлийн байрны бүртгэл */

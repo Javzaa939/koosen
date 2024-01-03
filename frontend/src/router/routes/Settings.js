@@ -12,6 +12,8 @@ const ActiveYear = lazy(() => import("@views/Settings/ActiveYear"))
 const AdmissionLesson = lazy(() => import("@views/Settings/AdmissionLesson"))
 const Country = lazy(() => import("@views/Settings/Country"))
 const Signature = lazy(() => import("@views/Settings/Signature"))
+const Permission = lazy(() => import("@views/Settings/Permission"))
+const Role = lazy(() => import("@views/Settings/Role"))
 
 const SettingsRoutes = [
     {
@@ -61,6 +63,14 @@ const SettingsRoutes = [
     {
         path: 'settings/signature/',
         element: <Signature />
+    },
+    {
+        path: 'settings/permission/',
+        element: <Permission />
+    },
+    {
+        path: 'settings/role/',
+        element: <Role />
     },
 ]
 

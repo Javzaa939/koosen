@@ -17,6 +17,9 @@ from lms.models import DiscountType
 from lms.models import Country
 from lms.models import DefinitionSignature
 
+from core.models import Permissions
+from core.models import Roles
+
 from main.utils.function.utils import get_week_num_from_date
 
 # Мэргэжлийн зэргийн serializer
@@ -202,4 +205,18 @@ class DefinitionSignatureSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DefinitionSignature
+        fields = "__all__"
+
+
+class PermissionsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Permissions
+        fields = "__all__"
+
+
+class RolesSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Roles
         fields = "__all__"

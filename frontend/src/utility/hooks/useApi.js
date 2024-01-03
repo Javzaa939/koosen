@@ -286,6 +286,21 @@ function useApi(isDisplay=false) {
 				put: (data, pk) => instance.put(`/settings/signature/${pk}/`, data),
 				delete: (id) => instance.delete(`/settings/signature/${id}/`),
 			},
+			/** Эрх */
+			permission: {
+				get: (limit, page, sort, search) => instance.get(`/settings/permission/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}`),
+				post: (data) => instance.post(`/settings/permission/`, data),
+				put: (pk, data) => instance.put(`/settings/permission/${pk}/`, data),
+				delete: (pk) => instance.delete(`/settings/permission/${pk}/`),
+				list: () => instance.get(`/settings/permission/list/`),
+			},
+			/** Role */
+			role: {
+				get: () => instance.get(`/settings/role/`),
+				post: (data) => instance.post(`/settings/role/`, data),
+				put: (pk, data) => instance.put(`/settings/role/${pk}/`, data),
+				delete: (pk) => instance.delete(`/settings/role/${pk}/`),
+			}
 		},
 		/** Сургалт */
 		study: {
