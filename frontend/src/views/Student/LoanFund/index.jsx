@@ -16,6 +16,7 @@ import { useForm, Controller } from "react-hook-form";
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
+import useUpdateEffect from '@hooks/useUpdateEffect'
 import SchoolContext from '@context/SchoolContext'
 import ActiveYearContext from "@context/ActiveYearContext"
 
@@ -62,10 +63,8 @@ const LoanFund= () => {
     const { isLoading, fetchData} = useLoader({});
 
     // Api
-    const studentApi = useApi().student
     const groupApi = useApi().student.group
     const degreeApi = useApi().settings.professionaldegree
-    const estimateApi = useApi().payment.estimate
     const eduloanfundApi = useApi().student.eduloanfund
 
     /* Боловсролын зээлийн сан жагсаалт авах функц */
@@ -87,8 +86,7 @@ const LoanFund= () => {
 
     useEffect(() => {
         getDatas()
-    }, [rowsPerPage, currentPage, sortField, searchValue ,select_value, school_id])
-
+    }, [rowsPerPage, currentPage, sortField, select_value, school_id])
 
     // Боловсролын зэргийн жагсаалт
     async function getDegreeOption() {
@@ -107,7 +105,7 @@ const LoanFund= () => {
     }
 
     // Хайлтийн хэсэг хоосон болох үед анхны датаг дуудна
-    useEffect(
+    useUpdateEffect(
         () =>
         {
             if (!searchValue) {
@@ -119,11 +117,10 @@ const LoanFund= () => {
 
     useEffect(() => {
         getGroup()
-    },[select_value.degree])
+    },[select_value.degree, school_id])
 
     useEffect(() => {
         getDegreeOption()
-        getGroup()
     },[school_id])
 
     function handleSort(column, sort) {
@@ -162,7 +159,7 @@ const LoanFund= () => {
                     <CardTitle tag='h4'>{t('Боловсролын зээлийн сан')}</CardTitle>
                 </CardHeader>
                 <Row className='mt-1'>
-                    <Col sm={6} md={4} className="ms-1">
+                    <Col sm={6} md={4} className="ms-1 pe-3">
                         <Label className="form-label" for="degree">
                             {t("Боловсролын зэрэг")}
                         </Label>
@@ -211,7 +208,7 @@ const LoanFund= () => {
                             }}
                         ></Controller>
                     </Col>
-                    <Col sm={6} md={4} >
+                    <Col sm={6} md={4} className="ms-1 pe-3">
                         <Label className="form-label" for="group">
                             {t("Анги")}
                         </Label>

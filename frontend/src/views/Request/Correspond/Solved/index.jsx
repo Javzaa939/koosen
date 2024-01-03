@@ -188,8 +188,6 @@ export default function SolvedModal({ open, handleModal, solveId, professionId, 
 
     const [lessonOption, setLessonOption] = useState([])
 
-    console.log(sdatas)
-
     const CloseBtn = (
         <X className="cursor-pointer" size={15} onClick={() => {handleModal()}} />
     )
@@ -285,8 +283,6 @@ export default function SolvedModal({ open, handleModal, solveId, professionId, 
         },
         [solveId]
     )
-
-    console.log(lessonOption)
 
     return (
         <Modal

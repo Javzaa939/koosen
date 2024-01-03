@@ -43,7 +43,7 @@ const VerticalLayout = (props) => {
                     var children = menus.children.filter(child => child.id !== 'reference1')
                     menus.children = children
                 }
-                /** Хөтөлбөрийн баг */
+                /** Тэнхим*/
                 if(!user.permissions.includes('lms-reference-departments-read')) {
                     var children = menus.children.filter(child => child.id !== 'reference2')
                     menus.children = children

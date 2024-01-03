@@ -12,12 +12,12 @@ class Migration(migrations.Migration):
 
         print("\n STARTING")
 
-        SubSchools = apps.get_model('core', 'SubSchools')
+        SubOrgs = apps.get_model('core', 'SubOrgs')
         ProfessionDefinition = apps.get_model('lms', 'ProfessionDefinition')
 
         with transaction.atomic():
 
-            school_qs = SubSchools.objects.filter(is_school=True)
+            school_qs = SubOrgs.objects.filter(is_school=True)
 
             school_kod = 0
             prop_kod = 0
@@ -49,8 +49,8 @@ class Migration(migrations.Migration):
                         update_profession_datas.append(prop)
 
             if len(update_school_datas) > 0:
-                print('SubSchools org_code амжилттай')
-                SubSchools.objects.bulk_update(update_school_datas, ['org_code'])
+                print('SubOrgs org_code амжилттай')
+                SubOrgs.objects.bulk_update(update_school_datas, ['org_code'])
 
             if len(update_profession_datas) > 0:
                 print('ProfessionDefinition profession_code амжилттай')

@@ -25,28 +25,26 @@ export function getColumns (currentPage, rowsPerPage, datas) {
 		{
 			header: 'last_name',
 			name: `${t("Овог")}`,
-			selector: (row) => row?.last_name,
+			selector: (row) => <span title={row?.last_name}>{row?.last_name}</span>,
             sortable: true,
 			minWidth: "100px",
-			center: true,
+			left: true,
 		},
 		{
 			header: 'name',
 			name: `${t("Нэр")}`,
-			selector: (row) => {
-				return <a className='text-decoration-underline' href={`/reference/teachers/${row.id}/info/`} target="_blank" >{row?.first_name}</a>
-			},
+			selector: (row) => <span title={row?.first_name}>{row?.first_name}</span>,
             sortable: true,
 			minWidth: "100px",
-			center: true,
+			left: true,
 		},
         {
 			header: 'last_name',
 			name: `${t("Албан тушаал")}`,
-			selector: (row) => row?.org_position,
+			selector: (row) => <span title={row?.org_position}>{row?.org_position}</span>,
             sortable: true,
 			minWidth: "30px",
-			center: true,
+			left: true,
 		},
         {
 			name: `${t("Тэнхим")}`,

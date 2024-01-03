@@ -118,14 +118,14 @@ const MainInformation = ({ }) => {
 
 	async function onSubmit(cdata) {
         cdata = convertDefaultValue(cdata)
-        const { success, error } = await fetchData(definationApi.put(cdata, definition_Id))
+        const { success, errors } = await fetchData(definationApi.put(cdata, definition_Id))
         if(success) {
             reset()
             getDatas()
         } else {
             /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in error) {
-                setError(error[key].field, { type: 'custom', message:  error[key].msg});
+            for (let key in errors) {
+                setError(key, { type: 'custom', message:  errors[key][0]});
             }
         }
 	}

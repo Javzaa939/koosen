@@ -79,7 +79,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
     });
 
     // Loader
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
 
     // ** Hook
     const { control, handleSubmit, formState: { errors }, reset, setError } = useForm(validate(validateSchema));
@@ -100,7 +100,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
     {
         cdata['body'] = quill.root.innerHTML
         cdata['created_user'] = user.id
-
+        cdata['is_news'] = true
         cdata = convertDefaultValue(cdata)
 
         const formData = new FormData()
@@ -172,7 +172,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                     close={closeBtn}
                     tag="div"
                 >
-                    <h5 className="modal-title">{t('Зар мэдээ нэмэх')}</h5>
+                    <h5 className="modal-title">{t('Мэдээ нэмэх')}</h5>
                 </ModalHeader>
                 <ModalBody className='flex-grow-1'>
                     <Row tag={Form} className='gy-1' onSubmit={handleSubmit(onSubmit)}>

@@ -1,4 +1,4 @@
-import { X } from "react-feather";
+import { X, Edit } from "react-feather";
 
 import { Badge, UncontrolledTooltip } from "reactstrap";
 
@@ -7,7 +7,7 @@ import useModal from '@hooks/useModal'
 import { t } from "i18next";
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, datas, handleDelete, user) {
+export function getColumns (currentPage, rowsPerPage, datas, handleDelete, user, handleModal) {
 
     const { showWarning } = useModal()
 
@@ -43,9 +43,17 @@ export function getColumns (currentPage, rowsPerPage, datas, handleDelete, user)
 	if(Object.keys(user).length > 0 && user.permissions.includes('lms-timetable-building-delete')) {
 		var delete_column =  {
 			name: `${t('Үйлдэл')}`,
-			maxWidth: "80px",
+			maxWidth: "150px",
+			minWidth: '150px',
 			selector: (row) => (
 				<div className="text-center" style={{ width: "auto" }}>
+						<a role="button" onClick={() => { handleModal(row.id)} }
+                                id={`complaintListDatatableEdit${row?.id}`}
+                                className='me-1'
+                            >
+                            <Badge color="light-secondary" pill><Edit  width={"15px"} /></Badge>
+                        </a>
+                        <UncontrolledTooltip placement='top' target={`complaintListDatatableEdit${row.id}`} >Засах</UncontrolledTooltip>
 						<a role="button"
 							onClick={() => showWarning({
 								header: {

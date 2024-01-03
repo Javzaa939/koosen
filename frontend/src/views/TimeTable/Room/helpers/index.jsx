@@ -60,7 +60,7 @@ export function getColumns (currentPage, rowsPerPage, datas, handleDelete, editM
 		},
 		{
 			name: `${t('Өрөөний төрөл')}`,
-            cell: (row) => row?.type,
+            cell: (row) => row?.type_name,
 			minWidth: "80px",
 			sortable: true,
 			center: true

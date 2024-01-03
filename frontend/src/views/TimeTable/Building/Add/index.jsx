@@ -15,8 +15,9 @@ import { Row, Col, Form, Modal, Input, Label, Button, ModalBody, ModalHeader, Fo
 import { validate } from "@utils"
 
 import { validateSchema } from '../validateSchema';
+import EditModal from '../../../Dormitory/Rooms/Edit';
 
-const Addmodal = ({ open, handleModal, refreshDatas }) => {
+const Addmodal = ({ open, handleModal, refreshDatas, editId }) => {
 
     const { t } = useTranslation()
 
@@ -34,15 +35,30 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
     const buildingApi = useApi().timetable.building
 
 	async function onSubmit(cdata) {
-        const { success, error } = await fetchData(buildingApi.post(cdata))
-        if(success) {
-            reset()
-            refreshDatas()
-            handleModal()
-        } else {
-            /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in error['error']) {
-                setError(key, { type: 'custom', message:  error['msg']});
+        if(editId){
+            const { success, error } = await fetchData(buildingApi.put(cdata, editId))
+            if(success) {
+                reset()
+                refreshDatas()
+                handleModal()
+            } else {
+                /** Алдааны мессэжийг input дээр харуулна */
+                for (let key in error['error']) {
+                    setError(key, { type: 'custom', message:  error['msg']});
+                }
+            }
+        }
+        else{
+            const { success, error } = await fetchData(buildingApi.post(cdata))
+            if(success) {
+                reset()
+                refreshDatas()
+                handleModal()
+            } else {
+                /** Алдааны мессэжийг input дээр харуулна */
+                for (let key in error['error']) {
+                    setError(key, { type: 'custom', message:  error['msg']});
+                }
             }
         }
 	}
@@ -62,7 +78,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                     close={CloseBtn}
                     tag="div"
                 >
-                    <h5 className="modal-title">{t('Хичээлийн байр бүртгэх')}</h5>
+                    {editId? <h5 className="modal-title">{t('Хичээлийн байр засах')}</h5> :<h5 className="modal-title">{t('Хичээлийн байр бүртгэх')}</h5>}
                 </ModalHeader>
                 <ModalBody className="flex-grow-1">
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>

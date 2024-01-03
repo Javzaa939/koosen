@@ -16,6 +16,8 @@ import useApi from '@hooks/useApi';
 
 import useLoader from '@hooks/useLoader';
 
+import SchoolContext from '@context/SchoolContext'
+
 import { getColumns } from './helpers';
 
 import { getPagination, ReactSelectStyles } from '@utils';
@@ -31,6 +33,7 @@ const Graduation = () => {
 	}
 
     const { t } = useTranslation()
+    const { school_id } = useContext(SchoolContext)
 
     const [rowsPerPage, setRowsPerPage] = useState(10)
     const [searchValue, setSearchValue] = useState("");
@@ -40,7 +43,11 @@ const Graduation = () => {
 
     const { control, setValue, formState: { errors } } = useForm({});
 	const default_page = [10, 15, 50, 75, 100]
-    const { Loader, isLoading, fetchData } = useLoader({})
+    const { Loader, isLoading, fetchData } = useLoader({ isSmall: true })
+    const {
+        isLoading: tableLoading,
+        fetchData: tableFetch
+    } = useLoader({})
     const [select_value, setSelectValue] = useState(values);
 
     const [departmentOption, setDepartmentOption] = useState([])
@@ -63,7 +70,7 @@ const Graduation = () => {
 	}
 
     async function getDatas() {
-        const { success, data } = await fetchData(graduationApi.get(rowsPerPage, currentPage, sort, searchValue, select_value.degree, select_value.department, select_value.group, select_value.profession, select_value.learning))
+        const { success, data } = await tableFetch(graduationApi.get(rowsPerPage, currentPage, sort, searchValue, select_value.degree, select_value.department, select_value.group, select_value.profession, select_value.learning))
         if(success){
             setDatas(data?.results)
         }
@@ -71,7 +78,7 @@ const Graduation = () => {
 
     useEffect(() => {
         getDatas()
-    }, [rowsPerPage, currentPage, sort, searchValue, select_value])
+    }, [rowsPerPage, currentPage, sort, searchValue, select_value, school_id])
 
     async function handleSearch() {
         // if (searchValue.length > 0) getDatas()
@@ -145,7 +152,7 @@ const Graduation = () => {
     return(
         <Fragment>
             <Card>
-            {isLoading && Loader}
+            {/* {isLoading && Loader} */}
                 <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom pt-0'">
 					<CardTitle tag="h4">{t('Төгсөлтийн тушаал')}</CardTitle>
 					    <div className='d-flex flex-wrap mt-md-0 mt-1'>
@@ -393,31 +400,40 @@ const Graduation = () => {
                         </Button>
                     </Col>
                 </Row>
-                <div className='react-dataTable react-dataTable-selectable-rows'>
-                    <DataTable
-                        noHeader
-                        pagination
-                        paginationServer
-                        className='react-dataTable'
-                        progressPending={isLoading}
-                        progressComponent={<h5>{t('Түр хүлээнэ үү...')}</h5>}
-                        noDataComponent={(
-                            <div className="my-2">
-                                <h5>{t('Өгөгдөл байхгүй байна')}</h5>
-                            </div>
-                        )}
-                        onSort={handleSort}
-                        sortIcon={<ChevronDown size={10} />}
-                        columns={getColumns(currentPage, rowsPerPage, total_count)}
-                        paginationPerPage={rowsPerPage}
-                        paginationDefaultPage={currentPage}
-                        paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
-                        data={datas}
-                        fixedHeader
-                        fixedHeaderScrollHeight='62vh'
-                    />
-                </div>
-            </Card>
+                {
+                    tableLoading ?
+
+                        <div className="position-relative d-flex justify-content-center align-items-center" style={{ minHeight: 140 }}>
+                            {Loader}
+                        </div>
+
+                    :
+
+                        <div className='react-dataTable react-dataTable-selectable-rows'>
+                            <DataTable
+                                noHeader
+                                pagination
+                                paginationServer
+                                className='react-dataTable'
+                                noDataComponent={(
+                                    <div className="my-2 d-flex justify-content-center align-items-center" style={{ minHeight: 100 }}>
+                                        <h5>{t('Өгөгдөл байхгүй байна')}</h5>
+                                    </div>
+                                )}
+                                onSort={handleSort}
+                                sortIcon={<ChevronDown size={10} />}
+                                columns={getColumns(currentPage, rowsPerPage, total_count)}
+                                paginationPerPage={rowsPerPage}
+                                paginationDefaultPage={currentPage}
+                                paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
+                                data={datas}
+                                fixedHeader
+                                fixedHeaderScrollHeight='62vh'
+                            />
+                        </div>
+
+                }
+                </Card>
         </Fragment>
     )
 }

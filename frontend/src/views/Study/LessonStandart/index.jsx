@@ -73,8 +73,8 @@ const LessonStandart = () => {
     // Эрэмбэлэлт
     const [sortField, setSort] = useState('')
 
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
 
     const [dep_option, setDepOption] = useState([])
     const [lessonCategory_option, setLessonCategory_option] = useState ([])
@@ -96,7 +96,7 @@ const LessonStandart = () => {
 
 			return () => clearTimeout(timeoutId);
 		}
-    }, [sortField, currentPage, rowsPerPage, searchValue,dep_id, category_id, params_search])
+    }, [sortField, currentPage, rowsPerPage, searchValue, dep_id, category_id, params_search])
 
     async function getDatas() {
 
@@ -180,18 +180,6 @@ const LessonStandart = () => {
     async function handleSearch() {
         if (searchValue.length > 0) getDatas()
     }
-
-    // Хайлтийн хэсэг хоосон болох үед анхны датаг дуудна
-    useEffect(
-        () =>
-        {
-            if (!searchValue) {
-                getDatas()
-            }
-        },
-        [searchValue]
-    )
-
 
     useEffect(
         () =>

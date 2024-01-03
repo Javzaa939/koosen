@@ -383,7 +383,7 @@ class TimeEstimateSettingsSerializer(serializers.ModelSerializer):
 
 class TimeEstimateSettingsListSerializer(serializers.ModelSerializer):
 
-    position = OrgPositionSerializer()
+    position = OrgPositionSerializer(read_only=True)
 
     class Meta:
         model = TimeEstimateSettings
@@ -398,7 +398,6 @@ class SchoolLessonLevelVolumeListSerializer(serializers.ModelSerializer):
     class Meta:
         model = SchoolLessonLevelVolume
         fields = "__all__"
-
 
     def get_lesson_level_name(self, obj):
         return obj.get_lesson_level_display()

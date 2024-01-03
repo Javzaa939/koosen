@@ -7,21 +7,26 @@ import CModal from "@lms_components/Modal";
 
 import { AuthProvider } from "@context/AuthContext";
 import { RequestProvider } from "@context/RequestContext";
+import {SchoolContextProvider} from "@context/SchoolContext"
 
 // ** Router Import
 import Router from "./router/Router"
 
 import './style/style.css'
+import './style/datatable.css'
+import './style/darktable.css'
 
 const App = () => {
     return (
         <Suspense fallback={null}>
             <AuthProvider >
-                <RequestProvider>
-                    <ToastContainer />
-                    <CModal/>
-                    <Router />
-                </RequestProvider>
+                <SchoolContextProvider>
+                    <RequestProvider>
+                        <ToastContainer />
+                        <CModal/>
+                        <Router />
+                    </RequestProvider>
+                </SchoolContextProvider>
             </AuthProvider>
         </Suspense>
     )

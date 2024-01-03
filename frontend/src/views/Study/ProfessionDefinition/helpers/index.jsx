@@ -45,7 +45,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
             sortable: true,
 			minWidth: "350px",
 			maxWidth: "250px",
-			center: true,
+			left: true,
 			wrap: true
 		},
 		{

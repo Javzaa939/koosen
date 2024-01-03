@@ -27,6 +27,7 @@ import classnames from 'classnames'
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import { useSkin } from "@hooks/useSkin"
+import useUpdateEffect from '@hooks/useUpdateEffect'
 
 import AuthContext from '@context/AuthContext'
 import SchoolContext from '@context/SchoolContext'
@@ -118,9 +119,8 @@ const Estimation = () => {
     // Нийт датаны тоо
     const [total_count, setTotalCount] = useState(1)
 
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
-
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
 
     const [dep_option, setDepOption] = useState([])
     const [seasonOption, setSeason] = useState([])
@@ -211,7 +211,7 @@ const Estimation = () => {
 
     useEffect(() => {
         getDatas()
-    }, [ currentPage, rowsPerPage, dep_id, teacherId])
+    }, [currentPage, rowsPerPage, dep_id, teacherId])
 
     // ** Function to handle filter
     const handleFilter = e => {
@@ -235,15 +235,9 @@ const Estimation = () => {
     }
 
     // Хайлтийн хэсэг хоосон болох үед анхны датаг дуудна
-	useEffect(() => {
+	useUpdateEffect(() => {
 		if (searchValue.length == 0) {
 			getDatas();
-		} else {
-			const timeoutId = setTimeout(() => {
-				getDatas();
-			}, 600);
-
-			return () => clearTimeout(timeoutId);
 		}
 	}, [searchValue]);
 

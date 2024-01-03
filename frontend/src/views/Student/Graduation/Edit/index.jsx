@@ -79,8 +79,8 @@ const EditModal = ({ open, handleModal, graduate_id, refreshDatas }) => {
         }
     }
 
-     // Сургуулийн жагсаалт
-     async function getStudentOption() {
+    // Сургуулийн жагсаалт
+    async function getStudentOption() {
         const { success, data } = await fetchData(studentApi.getList())
         if(success) {
             setStudentOption(data)
@@ -161,15 +161,15 @@ const EditModal = ({ open, handleModal, graduate_id, refreshDatas }) => {
 
         cdata['lesson'] = allSelectLessonIds
 
-        const { success, error } = await fetchData(graduateApi.put(cdata, graduate_id))
+        const { success, errors } = await fetchData(graduateApi.put(cdata, graduate_id))
         if(success) {
             reset()
             handleModal()
             refreshDatas()
         } else {
             /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in error) {
-                setError(error[key].field, { type: 'custom', message:  error[key].msg});
+            for (let key in errors) {
+                setError(key, { type: 'custom', message:  errors[key][0]});
             }
         }
 	}
@@ -253,7 +253,7 @@ const EditModal = ({ open, handleModal, graduate_id, refreshDatas }) => {
                                             id="lesson"
                                             classNamePrefix='select'
                                             isClearable
-                                            className={classnames('react-select')}
+                                            className={classnames('react-select', { 'is-invalid': errors.lesson })}
                                             isLoading={isLoading}
                                             placeholder={t(`-- Сонгоно уу --`)}
                                             options={lesson_option || []}
@@ -274,7 +274,7 @@ const EditModal = ({ open, handleModal, graduate_id, refreshDatas }) => {
                                     )
                                 }}
                             ></Controller>
-                            {/* {errors.lesson && <FormFeedback className='d-block'>{t(errors.lesson.message)}</FormFeedback>} */}
+                            {errors.lesson && <FormFeedback className='d-block'>{t(errors.lesson.message)}</FormFeedback>}
                         </Col>
                         <Col lg={6} md={12}>
                             <Label className="form-label" for="diplom_topic">

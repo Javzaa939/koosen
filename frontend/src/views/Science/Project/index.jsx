@@ -71,8 +71,8 @@ const ScienceProject = () => {
 
     const { control} = useForm();
 
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
 
     const { t } = useTranslation()
 
@@ -107,7 +107,7 @@ const ScienceProject = () => {
         }
     }
 
-    /* Хөтөлбөрийн баг жагсаалт */
+    /* Тэнхимийн жагсаалт */
     async function getDepartmentOption() {
         const { success, data } = await fetchData(departmentApi.get())
         if(success) {

@@ -32,11 +32,11 @@ import DetailModal from "./Detail"
 import { getColumns } from "./helpers"
 
 
-const RoleRegister = () => {
+const Busad = () => {
     const { control, handleSubmit, reset, setError, formState: { errors } } = useForm();
 
     const { Loader, isLoading, fetchData } = useLoader({})
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
 
     const { t } = useTranslation()
 
@@ -276,4 +276,4 @@ const RoleRegister = () => {
         </Fragment>
     )
 }
-export default RoleRegister
+export default Busad

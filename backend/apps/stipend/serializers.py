@@ -107,7 +107,6 @@ class StipendStudentListSerializer(serializers.ModelSerializer):
 
                 data = {
                     'id': qs.id,
-                
                     'file': path
                 }
 

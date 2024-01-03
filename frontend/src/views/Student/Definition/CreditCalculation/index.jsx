@@ -26,7 +26,7 @@ export default function CreditCalculation()
     const [ listArr, setListArr ] = useState([])
 
     // Loader
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
 
     // Api
     const signatureApi = useApi().signature

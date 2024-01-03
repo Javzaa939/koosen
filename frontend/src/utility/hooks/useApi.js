@@ -380,6 +380,90 @@ function useApi(isDisplay=false) {
 			confirmyear: {
 				get: () => instance.get(`/learning/confirmyear/`),
 			},
+			lesson: {
+
+				studentlist:{
+					get: (lesson, assignment='') =>
+						instance.get(
+							`/learning/lesson/studentlist/?lesson=${lesson}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&assignment=${assignment}`
+						),
+				},
+
+				studentHomeWork: {
+					/** Тухайн даалгаврын хариултууд */
+					getStudentHomework: (student, assignment) =>
+						instance.get(
+							`/learning/lesson/homework/?student=${student}&assignment=${assignment}`
+						),
+					put: (pk, data) =>
+						instance.put(
+							`/learning/lesson/homework/${pk}/`, data
+						),
+
+					multiplePut: (data) =>
+						instance.put(
+							`/learning/lesson/assignment/score/`, data
+						),
+				},
+
+				get: (stype = "one") =>
+					instance.get(
+						`/learning/lesson/list/?year=${cyear_name}&season=${cseason_id}&stype=${stype}`
+					),
+				getOne: (lessonId) =>
+					instance.get(`/learning/lesson/getone/${lessonId}/`),
+
+				/* Тухайн тэнхимийн бүх хичээлийг авах */
+				getAll: (teacherId) =>
+					instance.get(`/learning/lesson/getall/?teacher=${teacherId}`),
+
+				getKreditZadargaa: (lessonId) =>
+					instance.get(`/learning/lesson/kredit/${lessonId}/`),
+
+				getMaterials: (lessonId, type='', weekId='') =>
+					instance.get(`/learning/lesson/material/${lessonId}/?lesson_type=${type}&week=${weekId}`),
+
+				postSedev: (lessonId, data, type) =>
+					instance.post(`/learning/lesson/sedev/${lessonId}/?type=${type}`, data),
+
+				postMaterialFile: (lessonId, data) =>
+					instance.post(`/learning/lesson/material/${lessonId}/`, data),
+
+				editMaterial: (id, data) =>
+					instance.put(`/learning/lesson/material/${id}/`, data),
+
+				postGeneralMaterial: (lessonId, data) =>
+					instance.post(`/learning/lesson/material/general/${lessonId}/`, data),
+
+				postAssignmentMaterial: (lessonId, data) =>
+					instance.post(`/learning/lesson/material/assignment/${lessonId}/`, data),
+
+				getAssignmentMaterial: (lessonId) =>
+					instance.get(`/learning/lesson/material/assignment/${lessonId}/`),
+
+				postEditorImage: (lessonId, data) =>
+					instance.post(`/learning/lesson/editor/image/${lessonId}/`, data),
+
+				deleteMaterial: (id) =>
+					instance.delete(`/learning/lesson/material/${id}/`),
+
+				postLessonImage: (id, data) =>
+					instance.post(`/learning/lesson/image/${id}/`, data),
+
+				getSedevAll: (lessonId) =>
+					instance.get(`/learning/lesson/sedev/${lessonId}/`),
+
+				sendMaterial: (lessonId, data) => instance.post(`/learning/lesson/material/send-material/${lessonId}/`, data),
+
+				getLekts: (lessonId) => instance.get(`/learning/lesson/material/send-material/${lessonId}/`),
+
+				// ХБА хичээлийн лекц батлуулах хүсэлт
+				getApproveMaterial: (page, limit, sort, search, type, teacherId, lessonId) =>
+					instance.get(`learning/lesson/approve/?page=${page}&limit=${limit}&type=${type}&sorting=${sort}&search=${search}&teacher=${teacherId}&lesson=${lessonId}`),
+
+				postAnswer: (data) =>
+					instance.post(`learning/lesson/approve/`, data),
+			},
 		},
 		/** hrms-ээс */
 		hrms: {
@@ -389,18 +473,24 @@ function useApi(isDisplay=false) {
 			},
 			/** Бүрэлдэхүүн сургууль */
 			subschool: {
-				get: () => instance.get(`/core/subschool/?`),
+				get: (search='') => instance.get(`/core/subschool/?search=${search}`),
 				getOne: (pk) => instance.get(`/core/subschool/${pk}/`),
 				put: (data, pk) => instance.put(`/core/subschool/${pk}/`, data),
+				post: data => instance.post(`/core/subschool/`, data),
+				delete: (pk) => instance.delete(`/core/subschool/${pk}/`),
 			},
-			/** Хөтөлбөрийн баг */
+			/** Тэнхим */
 			department: {
 				get: () => instance.get(`/core/department/?school=${school_id}`),
 				getSelectSchool: (school) => instance.get(`/core/department/?school=${school}`),
-				// хөтөлбөрийн багийн ахлахын мэдээлэл
+
+				// тэнхим, хөтөлбөрийн багийн ахлахын мэдээлэл
 				getRegister: (search='') => instance.get(`/core/department/register/?school=${school_id}&search=${search}`),
 				getRegisterOne: (pk) => instance.get(`/core/department/register/${pk}/`),
 				putRegister: (data, pk) => instance.put(`/core/department/register/${pk}/`, data),
+				postRegister: data => instance.post(`/core/department/register/`, data),
+				delete: (pk) => instance.delete(`/core/department/register/${pk}/`),
+
 				leaderList: () => instance.get(`/core/leader/list/?school=${school_id}`),
 
 				getOne: (pk) => instance.get(`/core/department/${pk}/`),
@@ -413,13 +503,14 @@ function useApi(isDisplay=false) {
 					if (dep_id) depId = dep_id
 					return instance.get(`/core/teacher/?department=${depId}&school=${school_id}`)
 				},
-
 				getPartTeacher: () => { return instance.get(`/core/teacher/part/?school=${school_id}`) },
 				getSelectSchool: (school) => instance.get(`/core/teacher/?school=${school}`),
+				postRegister: (data) => instance.post(`/core/teacher/create/`, data),
 				getList: (limit, page, sort, search, sub_org, salbar) => instance.get(`/core/teacher/list/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&sub_org=${sub_org}&salbar=${salbar}`),
 				getOne: (pk) => instance.get(`/core/teacher/${pk}/`),
 				getLongList: () => instance.get(`/core/teacher/longlist/`),
 				getSchoolFilter: (school_id) => instance.get(`/core/teacher/listschoolfilter/?school=${school_id}`),
+				getTeacherOne: () => instance.get(`core/teachers/info/`),
 				/** Хичээлээс хамаарах багшийн жагсаалт */
 				getTeacher: (lesson_id) => {
 					var lesson = ''
@@ -1106,6 +1197,10 @@ function useApi(isDisplay=false) {
 				delete: (pk) => instance.delete(`/service/news/${pk}/`),
 				// File save
 				saveFile: data => instance.post(`/service/news/file/`, data),
+
+				//Зар
+				getAd: (limit, page, sort, search) => instance.get(`/service/news/ad/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}`),
+				getOneAd: (pk) => instance.get(`/service/news/ad/${pk}/`),
 			},
 		},
 		/** Цагийн тооцоо */
@@ -1217,6 +1312,67 @@ function useApi(isDisplay=false) {
 			delete: (pk) => instance.delete(`permissions/crontab/${pk}/`),
 			limit: (pk) => instance.get(`permissions/crontab/limit/${pk}/`),
 			active: (pk) => instance.get(`permissions/crontab/active/${pk}/`),
+		}
+	},
+
+	challenge: {
+		get: (page, limit, lesson, type) =>
+			instance.get(`learning/challenge/?page=${page}&limit=${limit}&lesson=${lesson}&type=${type}`),
+
+		getAll: (challenge) => {
+			var c_challenge = ''
+			if (challenge) c_challenge = challenge
+			return instance.get(`learning/challenge/all/?challenge=${c_challenge}`)
+		},
+
+		getSelect: (type, lesson) =>
+			instance.get(`learning/challenge/select/?type=${type}&year=${cyear_name}&season=${cseason_id}&lesson=${lesson}`),
+
+		post: (data) =>
+			instance.post(`learning/challenge/?year=${cyear_name}&season=${cseason_id}`, data),
+
+		put: (data, id) =>
+			instance.put(`learning/challenge/${id}/?year=${cyear_name}&season=${cseason_id}`, data),
+
+		delete: (id) =>
+			instance.delete(`learning/challenge/${id}/`),
+
+		send: (id) =>
+			instance.get(`learning/challenge/send/${id}/`),
+
+		// ХБА шалгалт батлуулах хүсэлт
+		getApprove: (page, limit, sort, search, type, teacherId, lessonId) =>
+			instance.get(`learning/challenge/approve/?page=${page}&limit=${limit}&type=${type}&sorting=${sort}&search=${search}&teacher=${teacherId}&lesson=${lessonId}`),
+
+		postAnswer: (data) =>
+			instance.post(`learning/challenge/approve/`, data),
+		question: {
+			get: (page, limit, lessonId, subjectId, search) =>
+				instance.get(`learning/questions/?page=${page}&limit=${limit}&lesson=${lessonId}&subject=${subjectId}&search=${search}`),
+
+			getList: (checked_ids, count, type) => {
+				var check_ids = ''
+				for(var i of checked_ids) {
+					check_ids += `&checked=${i}`
+				}
+				return instance.get(`learning/questions/list/?count=${count}&type=${type}${check_ids}`)
+			},
+
+			post: (data) =>
+				instance.post(`learning/questions/?year=${cyear_name}&season=${cseason_id}`, data),
+
+			put: (data, pk) =>
+				instance.put(`learning/questions/${pk}/?year=${cyear_name}&season=${cseason_id}`, data),
+
+			delete: (delete_ids) =>
+			{
+				var remove_ids = ''
+				for(var i of delete_ids) {
+					remove_ids += `&delete=${i}`
+				}
+				return instance.delete(`learning/questions/?year=${cyear_name}&season=${cseason_id}${remove_ids}`)
+			}
+
 		}
 	},
 

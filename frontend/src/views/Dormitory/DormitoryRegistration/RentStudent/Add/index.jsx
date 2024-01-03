@@ -52,7 +52,7 @@ function AddModal({ toggle, modal, is_teacher, refreshDatas }) {
         isLoading: teacherLoading,
         fetchData,
         fetchData: teacherFetch
-    } = useLoader({ isFullScreen: true });
+    } = useLoader({ isFullScreen: false });
 
     const { control, handleSubmit, setError, reset, setValue, formState: { errors } } = useForm(validate(is_teacher ? validateTeachers : validateUser));
     const { cyear_name, cseason_id} = useContext(ActiveYearContext);
@@ -126,7 +126,6 @@ function AddModal({ toggle, modal, is_teacher, refreshDatas }) {
                 toggle()
             } else {
                 /** Алдааны мессэжийг input дээр харуулна */
-                console.log(errors);
                 for (let key in errors) {
                     setError(key, { type: 'custom', message:  errors[key][0]});
                 }

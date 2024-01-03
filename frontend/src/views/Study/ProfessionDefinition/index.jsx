@@ -75,8 +75,8 @@ const ProfessionDefinition = () => {
     // Эрэмбэлэлт
     const [sortField, setSort] = useState('')
 
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
 
     const [edit_modal, setEditModal] = useState(false)
     const [def_id, setDefinationId] = useState('')
@@ -111,7 +111,7 @@ const ProfessionDefinition = () => {
         var degree = select_value.degree
         var department = select_value.department
 
-        const { success, data } = await allFetch(definationApi.get(rowsPerPage, currentPage, sortField, searchValue, degree, department,school_id))
+        const { success, data } = await allFetch(definationApi.get(rowsPerPage, currentPage, sortField, searchValue, degree, department, school_id))
         if(success) {
             setDatas(data?.results)
             setTotalCount(data?.count)
@@ -136,7 +136,6 @@ const ProfessionDefinition = () => {
 
     useEffect(() => {
         getDegree()
-        getDepartment()
     },[])
 
     useEffect(() => {
@@ -189,17 +188,6 @@ const ProfessionDefinition = () => {
     async function handleSearch() {
         if (searchValue.length > 0) getDatas()
     }
-
-    // Хайлтийн хэсэг хоосон болох үед анхны датаг дуудна
-    useEffect(
-        () =>
-        {
-            if (!searchValue) {
-                getDatas()
-            }
-        },
-        [searchValue]
-    )
 
     // Сургалтын төлөвлөгөө харуулах
     const planhandleModal = (id) => {

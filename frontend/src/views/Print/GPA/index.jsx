@@ -2,7 +2,7 @@ import { Fragment, useState, useEffect, useContext } from 'react'
 
 import { Controller, useForm } from 'react-hook-form'
 
-import { Row, Col, Card, Input, Label, CardTitle, CardHeader, Spinner, Button } from 'reactstrap'
+import { Row, Col, Card, Input, Label, CardTitle, CardHeader, Button } from 'reactstrap'
 
 import { ChevronDown , Printer, Search} from 'react-feather'
 
@@ -15,6 +15,7 @@ import DataTable from 'react-data-table-component'
 import useApi from '@hooks/useApi';
 
 import useLoader from '@hooks/useLoader';
+import useUpdateEffect from '@hooks/useUpdateEffect'
 
 import SchoolContext from '@context/SchoolContext'
 
@@ -35,7 +36,8 @@ const GPA = () => {
 
     const [sortField, setSort] = useState('')
 
-    const { Loader, isLoading, fetchData } = useLoader({})
+    const { Loader, isLoading, fetchData } = useLoader({ isSmall: true })
+    const { isLoading: tableLoading, fetchData: tableFetch } = useLoader({})
 
     const [currentPage, setCurrentPage] = useState(1)
 
@@ -66,7 +68,7 @@ const GPA = () => {
         const group = select_value.group
         const lesson_year = select_value.lesson_year
         const lesson_season = select_value.lesson_season
-        const { success, data } = await fetchData(gpaApi.get(rowsPerPage, currentPage, sortField, searchValue, degree, department, group, profession, lesson_year, lesson_season))
+        const { success, data } = await tableFetch(gpaApi.get(rowsPerPage, currentPage, sortField, searchValue, degree, department, group, profession, lesson_year, lesson_season))
         if(success) {
             setDatas(data?.results)
             setTotalCount(data?.count)
@@ -77,7 +79,11 @@ const GPA = () => {
         getProfessionOption()
         getGroupOption()
         getDatas()
-    },[select_value, currentPage, rowsPerPage])
+    },[select_value, currentPage, rowsPerPage, school_id])
+
+    useUpdateEffect(() => {
+        if(!searchValue) getDatas()
+    }, [searchValue])
 
     async function handleSearch() {
         getDatas()
@@ -444,31 +450,38 @@ const GPA = () => {
                         </Button>
                     </Col>
                 </Row>
-                <div className='react-dataTable react-dataTable-selectable-rows'>
-                    <DataTable
-                        noHeader
-                        pagination
-                        paginationServer
-                        className='react-dataTable'
-                        progressPending={isLoading}
-                        progressComponent={<h5>{t('Түр хүлээнэ үү...')}</h5>}
-                        noDataComponent={(
-                            <div className="my-2">
-                                <h5>{t('Өгөгдөл байхгүй байна')}</h5>
-                            </div>
-                        )}
-                        onSort={handleSort}
-                        sortIcon={<ChevronDown size={10} />}
-                        columns={getColumns(currentPage, rowsPerPage, total_count)}
-                        paginationPerPage={rowsPerPage}
-                        paginationDefaultPage={currentPage}
-                        paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
-                        data={datas}
-                        fixedHeader
-                        fixedHeaderScrollHeight='62vh'
-                    />
-                </div>
-            </Card>
+                {
+                    tableLoading ?
+                        <div className="position-relative d-flex justify-content-center align-items-center" style={{ minHeight: 100 }}>
+                            {Loader}
+                        </div>
+                    :
+                        <div className='react-dataTable react-dataTable-selectable-rows'>
+                            <DataTable
+                                noHeader
+                                pagination
+                                paginationServer
+                                className='react-dataTable'
+                                progressPending={isLoading}
+                                progressComponent={<h5>{t('Түр хүлээнэ үү...')}</h5>}
+                                noDataComponent={(
+                                    <div className="my-2">
+                                        <h5>{t('Өгөгдөл байхгүй байна')}</h5>
+                                    </div>
+                                )}
+                                onSort={handleSort}
+                                sortIcon={<ChevronDown size={10} />}
+                                columns={getColumns(currentPage, rowsPerPage, total_count)}
+                                paginationPerPage={rowsPerPage}
+                                paginationDefaultPage={currentPage}
+                                paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
+                                data={datas}
+                                fixedHeader
+                                fixedHeaderScrollHeight='62vh'
+                            />
+                        </div>
+                }
+                </Card>
         </Fragment>
     )
 }

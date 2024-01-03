@@ -22,6 +22,8 @@ import useLoader from '@hooks/useLoader';
 import AuthContext from '@context/AuthContext'
 import SchoolContext from '@context/SchoolContext'
 
+import useUpdateEffect from '@hooks/useUpdateEffect'
+
 import { getPagination } from '@utils'
 import { getColumns } from './helpers'
 
@@ -48,7 +50,6 @@ const Yvsan  = () => {
     const [modal, setModal] = useState(false)
     const [student_id, setStudentId] = useState('')
 
-
     // Хуудаслалтын анхны утга
     const [currentPage, setCurrentPage] = useState(1)
 
@@ -63,14 +64,13 @@ const Yvsan  = () => {
 
     // Эрэмбэлэлт
     const [sortField, setSort] = useState('')
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
     const [select_value, setSelectValue] = useState(values)
     const studentmovementApi = useApi().student.movement
 
-
     useEffect(() => {
         getDatas()
-    }, [sortField, currentPage, rowsPerPage, is_check])
+    }, [sortField, currentPage, rowsPerPage, is_check, school_id])
 
     async function getDatas() {
 
@@ -133,7 +133,7 @@ const Yvsan  = () => {
 
     }
     // Хайлтийн хэсэг хоосон болох үед анхны датаг дуудна
-	useEffect(() => {
+	useUpdateEffect(() => {
 		if (searchValue.length == 0) {
 			getDatas();
 		} else {
@@ -154,7 +154,7 @@ const Yvsan  = () => {
                     <div className='d-flex flex-wrap mt-md-0 mt-1'>
                         <Button
                             color='primary'
-                            disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-student-movement-create') && school_id)  ? false : true}
+                            disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-student-movement-create'))  ? false : true}
                             onClick={() => handleModal()}>
                             <Plus size={15} />
                             <span className='align-middle ms-50'>{t('Нэмэх')}</span>
@@ -220,7 +220,7 @@ const Yvsan  = () => {
                         </Button>
                     </Col>
                 </Row>
-                <div className='react-dataTable react-dataTable-selectable-rows'>
+                <div className='react-dataTable react-dataTable-selectable-rows' id='datatableLeftTwoRightOne'>
                     <DataTable
                         noHeader
                         pagination

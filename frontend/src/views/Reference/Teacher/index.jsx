@@ -3,9 +3,9 @@ import { Fragment, useState, useEffect, useContext } from 'react'
 
 import { Controller, useForm } from 'react-hook-form'
 
-import { Row, Col, Card, Input, Label, CardTitle, CardHeader, Spinner } from 'reactstrap'
+import { Row, Col, Card, Input, Label, CardTitle, CardHeader, Spinner, Button } from 'reactstrap'
 
-import { ChevronDown } from 'react-feather'
+import { ChevronDown, Plus } from 'react-feather'
 import { useTranslation } from 'react-i18next'
 
 import Select from 'react-select'
@@ -16,8 +16,11 @@ import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 
 import { getPagination, ReactSelectStyles } from '@utils';
+import AuthContext from '@context/AuthContext'
+import SchoolContext from '@context/SchoolContext'
 
 import { getColumns } from './helpers';
+// import AddModal from './Add'
 
 const Teacher = () => {
 
@@ -39,10 +42,14 @@ const Teacher = () => {
 
 	const [searchValue, setSearchValue] = useState("");
 
+	const { user } = useContext(AuthContext)
+	const { school_id } = useContext(SchoolContext)
+
 	const [datas, setDatas] = useState([]);
 	const [department, setDepartmentData] = useState([]);
 	const [subschool, setSubSchoolData] = useState([]);
 	const [selected_values, setSelectValue] = useState(values);
+	const [add_modal, setAddModal]=useState(false)
 
     // Нийт датаны тоо
     const [total_count, setTotalCount] = useState(1)
@@ -65,7 +72,7 @@ const Teacher = () => {
         }
 
 		var department = selected_values.department_id
-		var subschool_id = selected_values.subschool_id
+		var subschool_id = school_id
 		const { success, data } = await allFetch(teacherApi.getList(rowsPerPage, currentPage, sortField, searchValue, subschool_id, department))
 		if(success) {
 			setTotalCount(data?.count)
@@ -73,22 +80,19 @@ const Teacher = () => {
 		}
 	}
 
-	/* Хөтөлбөрийн баг дата авах функц */
+	/* Тэнхим дата авах функц */
 	async function getDepartmentOption() {
-		var school_id = selected_values.subschool_id
 		const { success, data } = await fetchData(departmentApi.getSelectSchool(school_id))
 		if (success) {
 			setDepartmentData(data)
 		}
 	}
 
-	/* Сургууль дата авах функц */
-	async function getSubSchoolOption() {
-		const { success, data } = await fetchData(subSchoolApi.get())
-		if (success) {
-			setSubSchoolData(data)
-		}
+	// addModal
+	const handleModal =() =>{
+		setAddModal(!add_modal)
 	}
+
 	useEffect(() => {
 		if (searchValue.length == 0) {
 			getDatas();
@@ -99,12 +103,11 @@ const Teacher = () => {
 
 			return () => clearTimeout(timeoutId);
 		}
-	},[ selected_values, rowsPerPage, sortField, searchValue, currentPage ])
+	},[rowsPerPage, sortField, searchValue, currentPage, school_id])
 
 	useEffect(() => {
-		getSubSchoolOption()
 		getDepartmentOption()
-	},[selected_values])
+	},[school_id])
 
 	// ** Function to handle filter
 	const handleFilter = e => {
@@ -131,47 +134,21 @@ const Teacher = () => {
 				{isLoading && Loader}
 				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
 					<CardTitle tag="h4">{t('Багшийн мэдээлэл')}</CardTitle>
+					<div className='d-flex flex-wrap mt-md-0 mt-1'>
+						{/* <Button
+                            color='primary'
+                            // disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-subschools-create') && school_id) ? false : true}
+                            disabled={Object.keys(user).length > 0 && school_id ? false : true}
+                            onClick={() => handleModal()}>
+                            <Plus size={15} />
+                            <span className='align-middle ms-50'>{t('Нэмэх')}</span>
+                        </Button> */}
+                    </div>
                 </CardHeader>
                 <Row className="justify-content-between mx-0 mb-1 mt-1">
 					<Col md={4}>
-						<Label className="form-label" for="subschool">
-							{t('Сургууль')}
-						</Label>
-						<Controller
-							control={control}
-							defaultValue=''
-							name="school"
-							render={({ field: { value, onChange} }) => {
-								return (
-									<Select
-										name="school"
-										id="school"
-										classNamePrefix='select'
-										isClearable
-										className='react-select'
-										placeholder={t('-- Сонгоно уу --')}
-										options={subschool || []}
-										value={subschool.find((c) => c.id === value)}
-										noOptionsMessage={() => t('Хоосон байна.')}
-										onChange={(val) => {
-											onChange(val?.id || '')
-											setSelectValue({
-												subschool_id: val?.id || '',
-												department_id: ''
-											})
-											setValue('salbar', '')
-										}}
-										styles={ReactSelectStyles}
-										getOptionValue={(option) => option.id}
-										getOptionLabel={(option) => option.name}
-									/>
-								)
-							}}
-						></Controller>
-					</Col>
-					<Col md={4}>
 						<Label className="form-label" for="salbar">
-							{t('Хөтөлбөрийн баг')}
+							{t('Тэнхим')}
 						</Label>
 						<Controller
 							control={control}
@@ -224,7 +201,7 @@ const Teacher = () => {
 						<span className='ms-50'>{t("Түр хүлээнэ үү...")}</span>
 					</div>
 				:
-					<div className="react-dataTable react-dataTable-selectable-rows">
+					<div className="react-dataTable react-dataTable-selectable-rows mx-1">
 						<DataTable
                             noHeader
                             pagination
@@ -247,6 +224,8 @@ const Teacher = () => {
 					</div>
 				}
 			</Card>
+			{/* { add_modal && <AddModal open={add_modal} handleModal={handleModal} refreshDatas={getDatas} /> } */}
+
         </Fragment>
     )
 }

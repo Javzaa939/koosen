@@ -15,6 +15,7 @@ import DataTable from 'react-data-table-component'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
+import useUpdateEffect from '@hooks/useUpdateEffect'
 
 import AuthContext from '@context/AuthContext'
 
@@ -47,8 +48,8 @@ const PerformanceList = ({ type }) => {
     // Эрэмбэлэлт
     const [sortField, setSort] = useState('')
 
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
 
     const [editData, setEditData] = useState({})
 
@@ -112,15 +113,9 @@ const PerformanceList = ({ type }) => {
     }
 
     // Хайлтийн хэсэг хоосон болох үед анхны датаг дуудна
-	useEffect(() => {
+	useUpdateEffect(() => {
 		if (searchValue.length == 0) {
 			getDatas();
-		} else {
-			const timeoutId = setTimeout(() => {
-				getDatas();
-			}, 600);
-
-			return () => clearTimeout(timeoutId);
 		}
 	}, [searchValue]);
 

@@ -1,19 +1,16 @@
-// ** Icons Import
-import { Circle,CreditCard } from 'react-feather'
-
 export default [
     {
         id: 'service',
-        title: 'Үйлчилгээ',
-        icon: <CreditCard size={20} />,
+        title: 'Зар мэдээ',
+        icon: <i className='far fa-newspaper'></i>,
         navLink: "/service",
-        children: [
-            {
-                id: 'service',
-                title: 'Зар мэдээ',
-                icon: <Circle size={8} />,
-                navLink: "service/news"
-            }
-        ]
+        // children: [
+        //     {
+        //         id: 'service',
+        //         title: 'Зар мэдээ',
+        //         icon: <Circle size={8} />,
+        //         navLink: "service/news"
+        //     }
+        // ]
     }
 ]
