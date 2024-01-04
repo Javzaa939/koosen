@@ -971,10 +971,4 @@ class DashboardAPIView(
                 'count': Student.objects.filter(school=v).count()
             })
 
-
-        print(salbar_sur_list)
-        print(salbar_sur_list)
-        print(salbar_sur_list)
-
-
         return request.send_data(collected_data)
