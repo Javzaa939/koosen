@@ -1,5 +1,5 @@
 // ** React imports
-import React, { Fragment } from 'react'
+import React, { Fragment, useEffect } from 'react'
 
 import { X } from "react-feather";
 
@@ -12,11 +12,11 @@ import { useForm, Controller } from "react-hook-form";
 
 import { Row, Col, Form, Modal, Input, Label, Button, ModalBody, ModalHeader, FormFeedback, Spinner } from "reactstrap";
 
-import { validate } from "@utils"
+import {convertDefaultValue, validate } from "@utils"
 
 import { validateSchema } from './validateSchema';
 
-const Addmodal = ({ open, handleModal, refreshDatas }) => {
+const Addmodal = ({ open, handleModal, refreshDatas ,editId}) => {
 
     const CloseBtn = (
         <X className="cursor-pointer" size={15} onClick={handleModal} />
@@ -25,7 +25,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
     const { t } = useTranslation()
 
     // ** Hook
-    const { control, handleSubmit, reset, setError, formState: { errors } } = useForm(validate(validateSchema));
+    const { control, handleSubmit, reset, setError, formState: { errors }, setValue } = useForm(validate(validateSchema));
 
 	// Loader
 	const { Loader, isLoading, fetchData } = useLoader({});
@@ -35,18 +35,53 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
 	const seasonApi = useApi().settings.season
 
 	async function onSubmit(cdata) {
-        const { success, error } = await postFetch(seasonApi.post(cdata))
-        if(success) {
-            reset()
-            handleModal()
-            refreshDatas()
-        } else {
-            /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in error['error']) {
-                setError(key, { type: 'custom', message:  error['msg']});
+         cdata = convertDefaultValue(cdata)
+        if(editId) {
+            const { success, errors } = await fetchData(seasonApi.put(cdata, editId))
+            if(success) {
+                reset()
+                refreshDatas()
+                handleModal()
+            }
+            else {
+                /** Алдааны мессеж */
+                for (let key in errors) {
+                    setError(errors[key].field, { type: 'custom', message: errors[key].msg});
+                }
+            }
+        }
+        else{
+            const { success, error } = await postFetch(seasonApi.post(cdata))
+            if(success) {
+                reset()
+                handleModal()
+                refreshDatas()
+            } else {
+                /** Алдааны мессэжийг input дээр харуулна */
+                for (let key in error['error']) {
+                    setError(key, { type: 'custom', message:  error['msg']});
+                }
             }
         }
 	}
+    async function getDatas() {
+        if(editId) {
+            const { success, data } = await fetchData(seasonApi.getOne(editId))
+            if(success) {
+                // засах үед дата байх юм бол setValue-р дамжуулан утгыг харуулна
+                if(data === null) return
+                for(let key in data) {
+                    if(data[key] !== null)
+                        setValue(key, data[key])
+                    else setValue(key, '')
+                }
+            }
+        }
+    }
+
+    useEffect(() => {
+        getDatas()
+    },[editId])
 
 	return (
         <Fragment>

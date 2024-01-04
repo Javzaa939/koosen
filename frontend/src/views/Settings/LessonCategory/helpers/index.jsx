@@ -52,7 +52,7 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 						onClick={
 									() => handleUpdateModal(row?.id)
 								}>
-						<Edit color="#b4b7bd" width={"15px"} />
+						<Badge color="light-secondary" pill><Edit  width={"15px"} /></Badge>
 					</a>
 
 					<UncontrolledTooltip placement='top' target={`categoryUpdate${row.id}`} >Засах</UncontrolledTooltip>

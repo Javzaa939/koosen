@@ -1,5 +1,5 @@
 // ** React Import
-import React, { Fragment } from 'react'
+import React, { useState, Fragment, useEffect } from 'react'
 
 import { X } from "react-feather";
 
@@ -12,55 +12,89 @@ import { useForm, Controller } from "react-hook-form";
 
 import { Row, Col, Form, Modal, Input, Label, Button, ModalBody, ModalHeader, FormFeedback, Spinner } from "reactstrap";
 
-import { validate } from "@utils"
+import {convertDefaultValue, validate } from "@utils"
 
 import { validateSchema } from './validateSchema';
 
-const Addmodal = ({ open, handleModal, refreshDatas }) => {
+const Addmodal = ({ open, handleModal, refreshDatas, editId, handleEdit}) => {
     const CloseBtn = (
         < X className="cursor-pointer" size={15} onClick={handleModal}/>
     )
-
     // ** Hook
-    const { control, handleSubmit, formState: { errors }, reset, setError } = useForm(validate(validateSchema));
+    const { control, handleSubmit, formState: { errors }, reset, setError, setValue} = useForm(validate(validateSchema));
 
     const { t } = useTranslation()
 
 	// Loader
-	const { Loader, isLoading, fetchData } = useLoader({});
 	const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
+    const { Loader, isLoading, fetchData } = useLoader({});
 
     // Api
     const AdmissionlessonApi = useApi().settings.admissionlesson
 
 	async function onSubmit(cdata) {
-        const { success, errors } = await postFetch(AdmissionlessonApi.post(cdata))
-        if(success) {
-            reset()
-            refreshDatas()
-            handleModal()
-        } else {
-            /** Алдааны мессэжийг input дээр харуулна */
-            setError(errors.field, { type: 'custom', message:  errors.msg});
+        cdata = convertDefaultValue(cdata)
+        if(editId) {
+            const { success, errors } = await fetchData(AdmissionlessonApi.put(cdata, editId))
+            if(success) {
+                reset()
+                refreshDatas()
+                handleModal()
+            }
+            else {
+                /** Алдааны мессеж */
+                setError(errors.field, { type: 'custom', message: errors.msg});
+            }
+        }
+        else{
+            const { success, errors } = await postFetch(AdmissionlessonApi.post(cdata))
+            if(success) {
+                reset()
+                refreshDatas()
+                handleModal()
+            } else {
+                /** Алдааны мессэжийг input дээр харуулна */
+                setError(errors.field, { type: 'custom', message:  errors.msg});
+            }
         }
 	}
 
+    async function getDatas() {
+        if(editId) {
+            const { success, data } = await fetchData(AdmissionlessonApi.getOne(editId))
+            if(success) {
+                // засах үед дата байх юм бол setValue-р дамжуулан утгыг харуулна
+                if(data === null) return
+                for(let key in data) {
+                    if(data[key] !== null)
+                        setValue(key, data[key])
+                    else setValue(key, '')
+                }
+            }
+        }
+    }
+
+    useEffect(() => {
+        getDatas()
+    },[ editId])
+
 	return (
         <Fragment>
-            <Modal
-                isOpen={open}
-                toggle={handleModal}
-                className="sidebar-lg hr-register"
-                modalClassName="modal-slide-in "
-                contentClassName="pt-0"
-            >
+                <Modal
+                    toggle={ handleModal }
+                    isOpen={ open }
+                    className="sidebar-lg hr-register"
+                    modalClassName="modal-slide-in "
+                    contentClassName="pt-0"
+                >
+
                 <ModalHeader
                     className="mb-1"
-                    toggle={handleModal}
+                    toggle={ handleModal}
                     close={CloseBtn}
                     tag="div"
                 >
-                    <h5 className="modal-title">{t('ЭЕШ-ын хичээл нэмэх')}</h5>
+                    <h5 className="modal-title">{ editId ?  t('ЭЕШ-ын хичээл засах'): t('ЭЕШ-ын хичээл нэмэх')}</h5>
                 </ModalHeader>
                 <ModalBody className="flex-grow-1">
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>

@@ -1,5 +1,5 @@
 // ** React imports
-import React, { Fragment, useState, useContext } from 'react'
+import React, { Fragment, useState, useContext, useEffect } from 'react'
 
 import { X } from "react-feather";
 
@@ -16,12 +16,11 @@ import { Row, Col, Form, Modal, Input, Label, Button, ModalBody, ModalHeader, Fo
 import { validate, generateLessonYear, convertDefaultValue } from "@utils"
 
 import { validateSchema } from './validateSchema';
-import { useEffect } from 'react';
 
 import AuthContext from '@context/AuthContext'
 import SchoolContext from '@context/SchoolContext'
 
-const Addmodal = ({ open, handleModal, refreshDatas }) => {
+const Addmodal = ({ open, handleModal, refreshDatas, editId }) => {
 
     const CloseBtn = (
         <X className="cursor-pointer" size={15} onClick={handleModal} />
@@ -32,13 +31,12 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
     const { user } = useContext(AuthContext)
 
     // ** Hook
-    const { control, handleSubmit, reset, setError, formState: { errors } } = useForm(validate(validateSchema));
+    const { control, handleSubmit, reset, setError, formState: { errors }, setValue } = useForm(validate(validateSchema));
 
     const [ seasonOption, setSeason] = useState([])
     const [ prevseasonOption, setprevSeason] = useState([])
     const [ yearOption, setYear] = useState([])
     const [ prevYearOption, setprevYear] = useState([])
-    const [ is_view, setIsView] = useState(false)
 
 	// Loader
 	const { Loader, isLoading, fetchData } = useLoader({});
@@ -71,21 +69,35 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
 
     // Хадгалах
 	async function onSubmit(cdata) {
-        cdata['created_user'] = user.id
-        cdata['updated_user'] = user.id
-
         cdata = convertDefaultValue(cdata)
-
-        const { success, errors } = await postFetch(activeyearApi.post(cdata))
-        if(success) {
-            reset()
-            refreshDatas()
-            handleModal()
-        } else {
-            if(errors && Object.keys(errors).length > 0) {
+        if(editId){
+            const { success, errors } = await fetchData(activeyearApi.put(cdata, editId))
+            if(success) {
+                reset()
+                handleModal()
+                refreshDatas()
+            }
+            else {
                 /** Алдааны мессэжийг input дээр харуулна */
                 for (let key in errors) {
                     setError(key, { type: 'custom', message: errors[key][0]});
+                }
+            }
+        }
+        else{
+            cdata['created_user'] = user.id
+            cdata['updated_user'] = user.id
+            const { success, errors } = await postFetch(activeyearApi.post(cdata))
+            if(success) {
+                reset()
+                refreshDatas()
+                handleModal()
+            } else {
+                if(errors && Object.keys(errors).length > 0) {
+                    /** Алдааны мессэжийг input дээр харуулна */
+                    for (let key in errors) {
+                        setError(key, { type: 'custom', message: errors[key][0]});
+                    }
                 }
             }
         }
@@ -95,6 +107,25 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
         getSeason()
         getYear()
     },[])
+
+    async function getDatas() {
+        if(editId) {
+            const { success, data } = await fetchData(activeyearApi.getOne(editId))
+            if(success) {
+                // засах үед дата байх юм бол setValue-р дамжуулан утгыг харуулна
+                if(data === null) return
+                for(let key in data) {
+                    if(data[key] !== null)
+                        setValue(key, data[key])
+                    else setValue(key, '')
+                }
+            }
+        }
+    }
+
+    useEffect(() => {
+        getDatas()
+    },[editId])
 
 	return (
         <Fragment>

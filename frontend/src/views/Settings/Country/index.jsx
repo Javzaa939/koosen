@@ -18,7 +18,6 @@ import { getPagination } from '@utils'
 import { getColumns } from './helpers'
 
 import Addmodal from './Add'
-import UpdateModal from './Update'
 
 const Country = () => {
 
@@ -43,7 +42,6 @@ const Country = () => {
 
 	// Modal
 	const [modal, setModal] = useState(false);
-	const [update_modal, setUpdateModal] = useState(false)
 
 	// Api
 	const countryApi = useApi().settings.country
@@ -51,12 +49,15 @@ const Country = () => {
 	/* Модал setState функц */
 	const handleModal = () => {
 		setModal(!modal)
+		if(modal){
+			setEditId()
+		}
 	}
 
 	// Засах функц
     function handleUpdateModal(id) {
         setEditId(id)
-        setUpdateModal(!update_modal)
+		handleModal()
     }
 
 	/* Жагсаалтын дата авах функц */
@@ -188,8 +189,7 @@ const Country = () => {
                         />
 					</div>
 				}
-				{modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} />}
-				{ update_modal && <UpdateModal editId={edit_id} open={update_modal} handleEdit={handleUpdateModal} refreshDatas={getDatas} /> }
+				{modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} editId={edit_id}/>}
 			</Card>
         </Fragment>
     )

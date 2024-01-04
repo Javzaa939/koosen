@@ -19,7 +19,6 @@ import { getColumns } from './helpers'
 
 import Addmodal from './Add'
 
-import UpdateModal from './Update'
 
 const Learning = () => {
 
@@ -47,17 +46,21 @@ const Learning = () => {
 
 	// Modal
 	const [modal, setModal] = useState(false);
-	const [update_modal, setUpdateModal] = useState(false)
 
 	/* Модал setState функц */
 	const handleModal = () => {
 		setModal(!modal)
+		if(modal){
+			setEditId()
+		}
 	}
 
 	// Засах функц
     function handleUpdateModal(id) {
-        setEditId(id)
-        setUpdateModal(!update_modal)
+		if(id){
+			setEditId(id)
+		}
+		handleModal()
     }
 
 	/* Жагсаалтын дата авах функц */
@@ -180,8 +183,7 @@ const Learning = () => {
                         />
 					</div>
 				}
-				{modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas}/>}
-				{ update_modal && <UpdateModal editId={edit_id} open={update_modal} handleEdit={handleUpdateModal} refreshDatas={getDatas} /> }
+				{ modal &&  <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} editId={edit_id} handleEdit={handleUpdateModal}/>}
 			</Card>
         </Fragment>
     )
