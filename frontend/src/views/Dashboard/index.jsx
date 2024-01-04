@@ -62,34 +62,6 @@ function Dashboard() {
     },[])
 
 
-
-
-    const eduData = {
-
-        // утга нэмэх бол өнгө бас нэмээрэй
-        labels: [
-            "Бакалавр",
-            "Магистр",
-            "Доктор"
-        ],
-        datasets: [
-            {
-                data: [
-                    info?.total_d,
-                    info?.total_e,
-                    info?.total_f
-                ],
-                backgroundColor: ["#d1dfed", "#f2e0cb", "#d8f0cc"],
-                hoverBackgroundColor: ["#7cb7f2", "#f5b36c", "#90e065"],
-                borderColor: ["#469df4", "#f4a046", "#48cf00"],
-                borderWidth: 1,
-            },
-        ],
-    };
-
-    console.log(info,'REALLLL')
-
-
     const data_line = {
         labels: info?.salbar_data.map((name) => (name?.name)),
         datasets: [
@@ -322,9 +294,6 @@ function Dashboard() {
 		},
 		[info]
 	)
-
-console.log(updatedData,'upppppp')
-
 
     return (
         <Card>

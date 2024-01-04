@@ -20,7 +20,7 @@ from core.models import Teachers
 from core.models import Employee
 from core.models import OrgPosition
 from core.models import Notification
-
+from core.models import SubOrgs
 
 from lms.models import Country
 from lms.models import TimeTable
@@ -959,7 +959,7 @@ class DashboardAPIView(
             for x in degrees:
                 collected_data['total_' + x.degree_code.lower()] = Student.objects.filter(group__degree__degree_code=x.degree_code).count()
 
-        salbar_sur_list = SubSchools.objects.all()
+        salbar_sur_list = SubOrgs.objects.all()
 
         salbar_data = []
 
