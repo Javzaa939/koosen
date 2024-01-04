@@ -438,7 +438,8 @@ class ProfessionDefinitionAPIView(
 
         if profession_qs:
             check_code = profession_qs.profession_code
-            profession_code = int(check_code) + 1
+            if check_code:
+                profession_code = int(check_code) + 1
 
         new_profession_code = f'{int(profession_code):0{len(with_start)}d}'
 
