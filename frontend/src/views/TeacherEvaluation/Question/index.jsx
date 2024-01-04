@@ -21,8 +21,8 @@ import AddQuestion from "./Add"
 const Question = () => {
 
     // Loader
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
 
     //Context
     const { user } = useContext(AuthContext)

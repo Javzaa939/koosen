@@ -105,7 +105,7 @@ const Address = () => {
 
         cdata = convertDefaultValue(cdata)
 
-        const { success, error } = await fetchData(addressApi.post(cdata, studentId))
+        const { success, errors } = await fetchData(addressApi.post(cdata, studentId))
         if(success)
         {
             setEdit(!is_edit)
@@ -113,8 +113,8 @@ const Address = () => {
             reset()
         } else {
             /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in error) {
-                setError(error[key].field, { type: 'custom', message:  error[key].msg});
+            for (let key in errors) {
+                setError(key, { type: 'custom', message:  errors[key][0]});
             }
         }
 	}

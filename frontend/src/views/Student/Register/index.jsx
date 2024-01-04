@@ -100,8 +100,8 @@ const Register = () => {
     // Эрэмбэлэлт
     const [sortField, setSort] = useState('')
 
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
 
     const studentApi = useApi().student
     const groupApi = useApi().student.group
@@ -174,7 +174,6 @@ const Register = () => {
             setGroup(data)
         }
     }
-
 
     async function getDatas() {
 
@@ -292,8 +291,9 @@ const Register = () => {
                 <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
                     <CardTitle tag='h4'>{t('Оюутны бүртгэл')}</CardTitle>
                     <div className='d-flex flex-wrap mt-md-0 mt-1'>
-                    <UncontrolledButtonDropdown disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-read')  && school_id? false : true}>
-                        <DropdownToggle color='secondary' caret outline>
+                    <UncontrolledButtonDropdown disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-read')?false : true}>
+                    {/* <UncontrolledButtonDropdown disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-read')  && school_id? false : true}> */}
+                        <DropdownToggle color='secondary' className='m-50' caret outline>
                             <Download size={15} />
                             <span className='align-middle ms-50'>Export</span>
                         </DropdownToggle>
@@ -311,8 +311,8 @@ const Register = () => {
                     <Button
                         color='primary'
                         onClick={() => handleModal()}
-                        className="ms-1"
-                        disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-create')  && school_id? false : true}
+                        className="m-50"
+                        disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-create') ? false : true}
                     >
                         <Plus size={15} />
                         <span className='align-middle ms-50'>{t('Нэмэх')}</span>

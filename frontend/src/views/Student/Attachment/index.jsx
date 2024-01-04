@@ -17,6 +17,7 @@ import SchoolContext from '@context/SchoolContext'
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import useModal from '@hooks/useModal';
+import useUpdateEffect from '@hooks/useUpdateEffect'
 
 import SignatureModal from '@views/Student/Attachment/Signature/index.jsx'
 import { getColumns } from '@views/Student/Attachment/helpers/index.jsx'
@@ -65,8 +66,8 @@ export default function Attachment()
     const [ signatureFormModal, setSignatureFormModal ] = useState(false)
     const [ signatureList, setSignatureList ] = useState([])
     // Loader
-	const { isLoading, fetchData, Loader } = useLoader({ isFullScreen: true })
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
+	const { isLoading, fetchData, Loader } = useLoader({ isFullScreen: false })
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
 
     // Api
     const depApi = useApi().hrms.department
@@ -74,16 +75,6 @@ export default function Attachment()
     const graduateApi = useApi().student.graduate
     const groupApi = useApi().student.group
     const signatureApi = useApi().signature
-
-    /** Бүх датаг нэгэн зэрэг авах */
-    function getAllData()
-    {
-        Promise.all([
-            fetchData(signatureApi.get(3)),
-        ]).then((values) => {
-            setSignatureList(values[0]?.data)
-        })
-    }
 
     async function getDatas()
     {
@@ -209,15 +200,21 @@ export default function Attachment()
     useEffect(
         () =>
         {
-            getDegree()
             getDatas()
-            getDepartment()
-            getGroup()
         },
-        [sortField, currentPage, rowsPerPage, select_value]
+        [sortField, currentPage, rowsPerPage, select_value, school_id]
     )
 
-    useEffect(
+    useEffect(() => {
+        getDegree()
+        getDepartment()
+    }, [school_id])
+
+    useEffect(() => {
+        getGroup()
+    }, [select_value.department, select_value.degree, school_id])
+
+    useUpdateEffect(
         () =>
         {
             if (!searchValue) getDatas()
@@ -228,7 +225,7 @@ export default function Attachment()
     useEffect(
         () =>
         {
-            getAllData()
+            getSignatureDatas()
         },
         []
     )
@@ -254,61 +251,62 @@ export default function Attachment()
                     </div>
                 </CardHeader>
                 {
-                signatureList.length > 0
-                ?
-                    <ReactSortable
-                        tag='ul'
-                        className='list-group'
-                        list={signatureList}
-                        setList={setSignatureList}
-                        onSort={changeOrder}
-                    >
-                    {
-                        signatureList.map((val, idx) => {
-                            return (
-                                <ListGroupItem className='draggable' key={idx} value={val.id} >
-                                    <div className='d-flex align-items-center justify-content-between'>
-                                        <div className="d-flex align-items-center">
-                                            <div>
-                                                <Menu size={16} className="me-2" />
+                    signatureList.length > 0
+                    ?
+                        <ReactSortable
+                            tag='ul'
+                            className='list-group'
+                            list={signatureList}
+                            setList={setSignatureList}
+                            onSort={changeOrder}
+                        >
+                        {
+                            signatureList.map((val, idx) => {
+                                return (
+                                    <ListGroupItem className='draggable' key={idx} value={val.id} >
+                                        <div className='d-flex align-items-center justify-content-between'>
+                                            <div className="d-flex align-items-center">
+                                                <div>
+                                                    <Menu size={16} className="me-2" />
+                                                </div>
+                                                <div>
+                                                    <h5 className='form-label my-0'>{val?.last_name} {val?.first_name}</h5>
+                                                    <span className='form-label'>{val?.position_name}</span>
+                                                </div>
                                             </div>
                                             <div>
-                                                <h5 className='form-label my-0'>{val?.last_name} {val?.first_name}</h5>
-                                                <span className='form-label'>{val?.position_name}</span>
+                                                <a role="button"
+                                                    onClick={() => signatureUpdateModal(val?.id, val)}
+                                                    className="ms-1"
+                                                >
+                                                    <Edit color="gray" width={"18px"} />
+                                                </a>
+                                                <a role="button"
+                                                    onClick={() => showWarning({
+                                                        header: {
+                                                            title: t(`Устгах үйлдэл`),
+                                                        },
+                                                        question: t(`Та энэхүү тохиргоог устгахдаа итгэлтэй байна уу?`),
+                                                        onClick: () => deleteSignature(val?.id),
+                                                        btnText: t('Устгах'),
+                                                    })}
+                                                    className="ms-1"
+                                                >
+                                                    <Trash2 color="red" width={"18px"} />
+                                                </a>
                                             </div>
                                         </div>
-                                        <div>
-                                            <a role="button"
-                                                onClick={() => signatureUpdateModal(val?.id, val)}
-                                                className="ms-1"
-                                            >
-                                                <Edit color="gray" width={"18px"} />
-                                            </a>
-                                            <a role="button"
-                                                onClick={() => showWarning({
-                                                    header: {
-                                                        title: t(`Устгах үйлдэл`),
-                                                    },
-                                                    question: t(`Та энэхүү тохиргоог устгахдаа итгэлтэй байна уу?`),
-                                                    onClick: () => deleteSignature(val?.id),
-                                                    btnText: t('Устгах'),
-                                                })}
-                                                className="ms-1"
-                                            >
-                                                <Trash2 color="red" width={"18px"} />
-                                            </a>
-                                        </div>
-                                    </div>
-                                </ListGroupItem>
-                            )
-                        })
-                    }
-                    </ReactSortable>
-                :
-                <div className='my-2 d-flex align-items-center justify-content-center'>
-                    <Spinner className='me-1' color="" size='sm'/><h5>Түр хүлээнэ үү...</h5>
-                </div>
-            }
+                                    </ListGroupItem>
+                                )
+                            })
+                        }
+                        </ReactSortable>
+                    :
+                        <p className="text-center my-2">Өгөгдөл байхгүй байна.</p>
+                        // <div className='my-2 d-flex align-items-center justify-content-center'>
+                        //     <Spinner className='me-1' color="" size='sm'/><h5>Түр хүлээнэ үү...</h5>
+                        // </div>
+                }
             </Card>
 
             <Card>

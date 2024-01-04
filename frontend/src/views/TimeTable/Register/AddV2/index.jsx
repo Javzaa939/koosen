@@ -359,7 +359,6 @@ const AddTimetableComponent = ({ }) => {
         () =>
         {
             if (isCalendar && rangeDate.start) {
-                console.log('render')
                 getKuratsData()
             }
         },

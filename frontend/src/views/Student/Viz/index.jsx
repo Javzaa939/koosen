@@ -27,7 +27,7 @@ import { useForm, Controller } from "react-hook-form";
 import AuthContext from '@context/AuthContext'
 import SchoolContext from '@context/SchoolContext'
 
-import { getPagination, ReactSelectStyles, generateLessonYear, get_status} from '@utils'
+import { getPagination, ReactSelectStyles, get_status} from '@utils'
 
 import { getColumns, customStyles } from './helpers'
 
@@ -45,7 +45,7 @@ const Viz = () => {
     const { t } = useTranslation()
 
     // ** Hook
-    const { control, handleSubmit, reset, setError, setValue, formState: { errors } } = useForm();
+    const { control } = useForm();
 
     var values = {
         department: '',
@@ -78,8 +78,8 @@ const Viz = () => {
     const [is_change, setIsChange] = useState(false);
     const [check, setCheck] = useState(false)
     // Laoder
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
 
     // API
     const studentApi = useApi().student.viz
@@ -136,7 +136,7 @@ const Viz = () => {
         if(Object.keys(user).length > 0 && user.permissions.includes('lms-foreign-student-viz-read')? true: false){
             getDatas()
         }
-    }, [rowsPerPage, currentPage, school_id, select_value.department, select_value.profession,select_value.group, select_value.status])
+    }, [rowsPerPage, currentPage, school_id, select_value.department, select_value.profession,select_value.group, select_value.status, school_id])
 
     useEffect(
         () =>

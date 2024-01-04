@@ -30,7 +30,7 @@ const RentStudent = ({ is_teacher }) => {
     }
 
     const { t } = useTranslation()
-    const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: true })
+    const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: false })
 
     const default_page = [10, 15, 50, 75, 100]
     const { user } = useContext(AuthContext)

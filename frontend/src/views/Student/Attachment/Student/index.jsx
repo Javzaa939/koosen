@@ -43,7 +43,7 @@ export default function AttachmentStudent()
     const studentId = location.state
 
     // Loader
-	const { isLoading, fetchData, Loader } = useLoader({ isFullScreen: true })
+	const { isLoading, fetchData, Loader } = useLoader({ isFullScreen: false })
 
     // Api
     const studentApi = useApi().student

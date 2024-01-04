@@ -96,8 +96,8 @@ const Invention = () => {
 	const [total_count, setTotalCount] = useState(1);
 
 	// Loader
-	const { isLoading, fetchData } = useLoader({isFullScreen: true});
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
+	const { isLoading, fetchData } = useLoader({isFullScreen: false});
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
 
 	// Api
 	const departmentApi = useApi().hrms.department
@@ -121,7 +121,7 @@ const Invention = () => {
         setRowsPerPage(parseInt(e.target.value))
     }
 
-	 /* Хөтөлбөрийн баг жагсаалт */
+	 /* Тэнхим жагсаалт */
 	async function getDepartmentOption() {
         const { success, data } = await fetchData(departmentApi.get())
         if(success) {

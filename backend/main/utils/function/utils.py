@@ -504,40 +504,15 @@ def get_teacher_queryset():
     Teacher = apps.get_model('core', 'Teachers')
     Employee = apps.get_model('core', 'Employee')
 
-    queryset = Teacher.objects.all().order_by('id')
+    queryset = Teacher.objects.all().filter(action_status=Teacher.APPROVED).order_by('id')
 
     teacher_queryset = queryset.values_list('user', flat=True)
-    qs_employee_user = Employee.objects.filter(user_id__in=list(teacher_queryset)).values_list('user', flat=True)
+    qs_employee_user = Employee.objects.filter(user_id__in=list(teacher_queryset), state=Employee.STATE_WORKING, org_position__is_teacher=True).values_list('user', flat=True)
     if len(qs_employee_user) > 0:
-        queryset = queryset.filter(user_id__in = list(qs_employee_user))
+        queryset = queryset.filter(user_id__in = list(qs_employee_user), sub_org__isnull=False)
 
     return queryset
 
-
-def get_16week_start_date():
-    ''' Хичээл эхлэх өдрөөс 16н 7 хоногийг тооцоолох
-        return list
-    '''
-
-    SystemSettings = apps.get_model('lms', 'SystemSettings')
-    qs_activeyear = SystemSettings.objects.filter(season_type=1).last()
-
-    end_date = qs_activeyear.start_date
-
-    week_list = []
-
-    for x in range(18):
-        obj_datas = {}
-        start_date  = end_date
-
-        end_date = start_date + timedelta(days=7)
-        enddate = end_date - timedelta(days=1)
-        obj_datas['id'] = x + 1
-        obj_datas['start_date'] = start_date.strftime('%Y-%m-%d')
-        obj_datas['end_date'] = enddate.strftime('%Y-%m-%d')
-
-        week_list.append(obj_datas)
-    return week_list
 
 
 def get_weekday_kurats_date(kurats_start_date, kurats_end_date):
@@ -741,7 +716,7 @@ def get_16week_start_date():
         end_date = qs_activeyear.start_date
 
 
-        for x in range(16):
+        for x in range(18):
             obj_datas = {}
             start_date  = end_date
 

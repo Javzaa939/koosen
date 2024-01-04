@@ -53,7 +53,7 @@ const Editmodal = ({ open, handleEdit, editData, refreshDatas, season }) => {
     const [is_loading, setLoader] = useState(false)
 
 	// Loader
-	const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true});
+	const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false});
 
     // Api
     const lessonStandartApi = useApi().study.lessonStandart
@@ -156,7 +156,6 @@ const Editmodal = ({ open, handleEdit, editData, refreshDatas, season }) => {
 
                 if(key === 'lesson') {
                     setValue(key, editData[key]?.id)
-                    console.log(editData[key]?.id)
                 }
             }
         }

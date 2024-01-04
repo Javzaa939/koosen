@@ -25,7 +25,7 @@ import AddModal from './Add';
 const RentStudent = ({ is_teacher }) => {
 
     const { t } = useTranslation()
-    const {Loader, isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
+    const {Loader, isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
 
     const default_page = [10, 15, 50, 75, 100]
 

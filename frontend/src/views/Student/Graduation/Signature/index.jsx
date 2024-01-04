@@ -1,10 +1,10 @@
-import React, { Fragment, useContext, useEffect, useState } from 'react'
+import React, { Fragment } from 'react'
 
 import { useForm, Controller } from "react-hook-form";
 
 import { t } from 'i18next';
 import { X } from "react-feather";
-import { Row, Col, Form, Modal, Input, Label, Button, ModalBody, ModalHeader, FormFeedback, InputGroup, InputGroupText } from "reactstrap";
+import { Row, Col, Form, Modal, Input, Label, Button, ModalBody, ModalHeader, FormFeedback } from "reactstrap";
 
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
@@ -23,7 +23,7 @@ export default function SignatureModal({ open, handleModal, refreshDatas, defaul
     const { control, handleSubmit, reset, setError, formState: { errors } } = useForm(validate(validateSchema));
 
     // Loader
-	const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: true });
+	const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: false });
 
     // Api
     const signatureApi = useApi().signature
@@ -33,17 +33,17 @@ export default function SignatureModal({ open, handleModal, refreshDatas, defaul
     {
         cdata['dedication_type'] = 2
 
-        const { success, data, error } = await fetchData(Object.keys(defaultDatas).length != 0 ? signatureApi.put(cdata, defaultDatas?.id) : signatureApi.post(cdata))
+        const { success, errors } = await fetchData(Object.keys(defaultDatas).length != 0 ? signatureApi.put(cdata, defaultDatas?.id) : signatureApi.post(cdata))
         if (success) {
             reset()
             handleModal()
             refreshDatas()
         }
-        else if (error)
+        else if (errors && Object.keys(errors)?.length > 0)
         {
             /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in error) {
-                setError(error[key].field, { type: 'custom', message:  error[key].msg});
+            for (let key in errors) {
+                setError(key, { type: 'custom', message:  errors[key][0]});
             }
         }
     }

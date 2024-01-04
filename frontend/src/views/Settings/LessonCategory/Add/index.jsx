@@ -32,16 +32,14 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
 	const lessonCategoryApi = useApi().settings.lessonCategory
 
 	async function onSubmit(cdata) {
-        const { success, error } = await postFetch(lessonCategoryApi.post(cdata))
+        const { success, errors } = await postFetch(lessonCategoryApi.post(cdata))
         if(success) {
             reset()
             handleModal()
             refreshDatas()
         } else {
             /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in error['error']) {
-                setError(key, { type: 'custom', message:  error['msg']});
-            }
+            setError(errors.field, { type: 'custom', message:  errors.msg});
         }
 	}
 

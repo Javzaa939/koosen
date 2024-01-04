@@ -32,16 +32,14 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
     const discountTypeApi = useApi().settings.discountType
 
 	async function onSubmit(cdata) {
-        const { success, error } = await postFetch(discountTypeApi.post(cdata))
+        const { success, errors } = await postFetch(discountTypeApi.post(cdata))
         if(success) {
             reset()
             refreshDatas()
             handleModal()
         } else {
             /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in error) {
-                setError(error[key].field, { type: 'custom', message: error[key].msg});
-            }
+            setError(errors.field, { type: 'custom', message: errors.msg});
         }
 	}
 

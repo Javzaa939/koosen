@@ -1,84 +1,231 @@
+import React, { Fragment, useState, useContext, useEffect } from "react";
 
-import React, { Fragment, useState, useEffect } from "react"
+import { Col, Row, Card, CardHeader, CardTitle, Button, Input, Label, Spinner } from 'reactstrap'
 
-import { useParams } from 'react-router-dom'
-import { Clock } from "react-feather"
+import { useTranslation } from 'react-i18next'
 
-import useApi from '@hooks/useApi';
-import useLoader from '@hooks/useLoader';
+import { ChevronDown, Plus, Search } from 'react-feather'
 
-import {
-    Card
-} from 'reactstrap'
+import DataTable from "react-data-table-component";
 
-import css from './style.module.css'
+import { getPagination, ReactSelectStyles } from '@utils'
 
-export default function NewsDetail()
-{
-    const { newsid } = useParams()
+import AuthContext from '@context/AuthContext'
 
-    const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: true })
+import useLoader from '@hooks/useLoader'
 
-    /** State */
-    const [ datas, setDatas ] = useState({})
+import useApi from "@hooks/useApi"
 
-    /** Api */
-    const serviceNewsApi = useApi().service.news
+import { getColumns } from "./helpers";
 
-    useEffect(
-        () =>
-        {
-            getDatas()
-        },
-        [newsid]
-    )
+import Addmodal from "./Add";
 
-    async function getDatas()
-    {
-        if(newsid)
-        {
-            const { success, data } = await fetchData(serviceNewsApi.getOne(newsid))
-            if(success)
-            {
-                setDatas(data)
-            }
+import EditModal from "./Edit";
+import { get } from "react-hook-form";
+
+const News = () => {
+
+    const { user } = useContext(AuthContext)
+
+    const { t } = useTranslation()
+
+    const default_page = [10, 15, 50, 75, 100]
+    const [datas, setDatas] = useState([])
+    const [edit_id, setEditId] = useState('')
+
+    // Modal
+	const [modal, setModal] = useState(false);
+    const [edit_modal, setEditModal] = useState(false)
+
+    // Хуудаслалтын анхны утга
+    const [currentPage, setCurrentPage] = useState(1)
+
+    // Нэг хуудсанд харуулах нийт датаны тоо
+    const [rowsPerPage, setRowsPerPage] = useState(10)
+
+    // Хайлт хийхэд ажиллах хувьсагч
+    const [searchValue, setSearchValue] = useState('')
+
+    // Нийт датаны тоо
+    const [total_count, setTotalCount] = useState(1)
+
+    // Эрэмбэлэлт
+    const [sortField, setSortField] = useState('')
+
+    // Loader
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
+
+     // Хуудас солих үед ажиллах хэсэг
+	const handlePagination = (page) => {
+		setCurrentPage(page.selected + 1);
+	};
+
+    // Хайлт хийх үед ажиллах хэсэг
+    const handleFilter = e => {
+        const value = e.target.value.trimStart();
+		setSearchValue(value)
+	}
+
+    // API
+    const newsApi = useApi().service.news
+
+    async function getDatas() {
+        const { success, data } = await allFetch(newsApi.getAd(rowsPerPage, currentPage, sortField, searchValue))
+        if(success) {
+            setDatas(data?.results)
+            setTotalCount(data?.count)
         }
+    }
+
+    useEffect(() => {
+        getDatas()
+    },[sortField, currentPage, rowsPerPage])
+
+    console.log(datas)
+
+    useEffect(() => {
+		if (searchValue.length == 0) {
+			getDatas();
+		} else {
+			const timeoutId = setTimeout(() => {
+				getDatas();
+			}, 600);
+
+			return () => clearTimeout(timeoutId);
+		}
+	}, [searchValue]);
+
+    function handleSearch() {
+        getDatas()
+    }
+
+    function handleSort(column, sort) {
+        if(sort === 'asc') {
+            setSortField(column.header)
+        } else {
+            setSortField('-' + column.header)
+        }
+    }
+
+    function handlePerPage(e) {
+        setRowsPerPage(parseInt(e.target.value))
+    }
+
+    // Нэмэх функц
+    const handleModal = () => {
+        setModal(!modal)
+    }
+
+    // Засах функц
+    const handleEditModal = (id) => {
+        setEditId(id)
+        setEditModal(!edit_modal)
+    }
+
+    /* Устгах функц */
+	const handleDelete = async(id) => {
+		const { success } = await fetchData(newsApi.delete(id))
+		if(success) {
+			getDatas()
+		}
+	};
+
+    function refreshDatas(){
+        getDatas()
     }
 
     return (
         <Fragment>
+            {Loader && isLoading}
             <Card>
-                {isLoading && Loader}
-
-                {
-                    Object.keys(datas).length == 0
-                    ?
-                    <div className="p-3">
-                        <p>Уучлаарай мэдээлэл олдсонгүй.</p>
-                    </div>
-                    :
-                    <>
-                        <div className="p-3">
-                            <div className={`${css.newspost}`} >
-
-                                <div className='text-center'>
-                                    <h3>{datas?.title}</h3>
-                                </div>
-
-                                <div className="pb-2 pt-1">
-                                    <Clock size={10} />
-                                    <small className='ms-1' >Нийтэлсэн хугацаа: {datas?.created_at}</small>
-                                </div>
-
-                                <div className={`width-auto`} id="news" dangerouslySetInnerHTML={{ __html: datas?.body }} >
-                                </div>
-
+                <CardHeader className="flex-md-row flex-column align-items-start align-self-end my-0">
+                <div className="my-0">
+                    <Button color='primary' disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-service-news-create')? false : true} onClick={() => handleModal()}>
+                        <Plus size={15}/>
+                        <span className='align-middle ms-50'>{t('Нэмэх')}</span>
+                    </Button>
+                </div>
+                </CardHeader>
+                <Row className="justify-content-between mx-0 my-0" sm={12}>
+                    <Col className='d-flex align-items-center justify-content-start' md={6} sm={12}>
+                        <Col md={3} sm={4} xs={5} className='pe-1'>
+                            <Input
+                                type='select'
+                                bsSize='sm'
+                                style={{ height: "30px" }}
+                                value={rowsPerPage}
+                                onChange={e => handlePerPage(e)}
+                            >
+                                {
+                                    default_page.map((page, idx) => (
+                                    <option
+                                        key={idx}
+                                        value={page}
+                                    >
+                                        {page}
+                                    </option>
+                                ))}
+                            </Input>
+                        </Col>
+                        <Col md={10} sm={3}>
+                            <Label for='sort-select'>{t('Хуудсанд харуулах тоо')}</Label>
+                        </Col>
+                    </Col>
+					<Col className='d-flex align-items-center mobile-datatable-search mt-1' md={4} sm={12}>
+                        <Input
+                            className='dataTable-filter mb-50'
+                            type='text'
+                            bsSize='sm'
+                            id='search-input'
+                            placeholder={t('Хайх')}
+                            value={searchValue}
+                            onChange={handleFilter}
+                            onKeyPress={e => e.key === 'Enter' && handleSearch()}
+                        />
+                        <Button
+                            size='sm'
+                            className='ms-50 mb-50'
+                            color='primary'
+                            onClick={handleSearch}
+                        >
+                            <Search size={15} />
+                            <span className='align-middle ms-50'></span>
+                        </Button>
+                    </Col>
+                </Row>
+                <div className='react-dataTable react-dataTable-selectable-rows'>
+                    <DataTable
+                        noHeader
+                        pagination
+                        className='react-dataTable'
+                        progressPending={isTableLoading}
+                        progressComponent={
+                            <div className='my-2 d-flex align-items-center justify-content-center'>
+                                <Spinner className='me-1' color="" size='sm'/><h5>Түр хүлээнэ үү...</h5>
                             </div>
-                        </div>
-                    </>
-                }
-
+                        }
+                        noDataComponent={(
+                            <div className="my-2">
+                                <h5>{t('Өгөгдөл байхгүй байна')}</h5>
+                            </div>
+                        )}
+                        columns={getColumns(currentPage, rowsPerPage, total_count, user, handleEditModal, handleDelete)}
+                        sortIcon={<ChevronDown size={10} />}
+                        paginationPerPage={rowsPerPage}
+                        paginationDefaultPage={currentPage}
+                        data={datas}
+                        onSort={handleSort}
+                        paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
+                        fixedHeader
+                        fixedHeaderScrollHeight='62vh'
+                    />
+                </div>
+                {modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={refreshDatas}/>}
+                {edit_modal && <EditModal open={edit_modal} handleEdit={handleEditModal} refreshDatas={refreshDatas} edit_id={edit_id} />}
             </Card>
         </Fragment>
     )
 }
+
+export default News

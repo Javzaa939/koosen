@@ -17,8 +17,8 @@ from lms.models import (
     Survey,
     Pollee,
     Student,
-    SubSchools,
-    Departments,
+    SubOrgs,
+    Salbars,
     ProfessionDefinition,
     Group,
     Notification,
@@ -502,14 +502,14 @@ class SurveyRangeAPIView(
         if types == 'teacher':
             # Салбарын жагсаалт
             if selected_value == 'is_org':
-                c_queryset = SubSchools.objects.filter(is_school=True)
+                c_queryset = SubOrgs.objects.filter(is_school=True)
                 all_data = SurveySchoolSerializer(c_queryset, many=True).data
 
                 return request.send_data(all_data)
 
             # Тэнхимийн жагсаалт
             if selected_value == 'is_dep':
-                c_queryset = Departments.objects.all()
+                c_queryset = Salbars.objects.all()
                 all_data = DepartmentSerializer(c_queryset, many=True).data
 
                 return request.send_data(all_data)
@@ -526,14 +526,14 @@ class SurveyRangeAPIView(
 
             # Салбарын жагсаалт
             if selected_value == 'is_org':
-                c_queryset = SubSchools.objects.filter(is_school=True)
+                c_queryset = SubOrgs.objects.filter(is_school=True)
                 all_data = SurveySchoolStudentSerializer(c_queryset, many=True).data
 
                 return request.send_data(all_data)
 
             # Тэнхимийн жагсаалт
             if selected_value == 'is_dep':
-                c_queryset = Departments.objects.all()
+                c_queryset = Salbars.objects.all()
                 all_data = DepartmentStudentSerializer(c_queryset, many=True).data
 
                 return request.send_data(all_data)
@@ -600,7 +600,6 @@ class SurveyAPIView(
         all_list = self.list(request).data
 
         return request.send_data(all_list)
-
 
     def post(self, request):
         datas = request.data.dict()

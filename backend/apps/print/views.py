@@ -486,7 +486,7 @@ class GraduationWorkAPIView(
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['code', 'last_name', 'first_name']
+    search_fields = ['student__code', 'student__last_name', 'student__first_name']
 
     def get_queryset(self):
         queryset = self.queryset

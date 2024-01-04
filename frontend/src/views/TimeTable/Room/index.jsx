@@ -23,13 +23,7 @@ import EditModal from './Edit'
 import Select from 'react-select'
 import {  ReactSelectStyles } from "@utils"
 
-const buildOption = [
-	{ value: 'chocolate', label: 'Chocolate' },
-	{ value: 'strawberry', label: 'Strawberry' },
-	{ value: 'vanilla', label: 'Vanilla' }
-]
-
-const Learning = () => {
+const Room = () => {
 
 	const { t } = useTranslation()
 	const { user } = useContext(AuthContext)
@@ -264,7 +258,7 @@ const Learning = () => {
 						</div>
 					</Col>
 				</Row>
-					<div className="react-dataTable react-dataTable-selectable-rows">
+					<div className="react-dataTable react-dataTable-selectable-rows" id="datatableLeftTwoRightOne">
 						<DataTable
                             noHeader
                             pagination
@@ -297,4 +291,4 @@ const Learning = () => {
     )
 }
 
-export default Learning;
+export default Room;

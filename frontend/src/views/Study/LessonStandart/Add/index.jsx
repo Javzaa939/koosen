@@ -83,17 +83,17 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
         cdata['updated_user'] = user.id
         cdata['school'] = school_id
         cdata = convertDefaultValue(cdata)
-        const { success, error } = await postFetch(lessonStandartApi.post(cdata))
+        const { success, errors } = await postFetch(lessonStandartApi.post(cdata))
         if(success) {
-            setLoader(false)
             reset()
+            setLoader(false)
             handleModal()
             refreshDatas()
         } else {
             setLoader(false)
             /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in error) {
-                setError(error[key].field, { type: 'custom', message:  error[key].msg});
+            for (let key in errors) {
+                setError(key, { type: 'custom', message:  errors[key][0]});
             }
         }
 
