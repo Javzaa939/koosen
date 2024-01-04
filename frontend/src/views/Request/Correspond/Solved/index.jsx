@@ -275,7 +275,7 @@ export default function SolvedModal({ open, handleModal, solveId, professionId, 
                 getRequestAnswer()
             }
 
-            var menus = roleMenus.find((c) => c.name === 'Хөтөлбөрийн багийн ахлагч')
+            var menus = roleMenus.find((c) => c.name === 'Тэнхимийн ахлагч')
 
             if (Object.keys(menus).length > 0 && menus?.is_solve && unitId === menus?.id) {
                 setAllow(true)

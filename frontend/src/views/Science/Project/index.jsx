@@ -194,7 +194,7 @@ const ScienceProject = () => {
 				<Row className="mx-0 mt-1">
                     <Col md={3}>
                         <Label className="form-label" for="department">
-                            {t('Хөтөлбөрийн баг')}
+                            {t('Тэнхим')}
                         </Label>
                         <Controller
                             control={control}

@@ -98,40 +98,30 @@ export function getColumns (currentPage, rowsPerPage, total_count) {
 		{
 			header: 'student__first_name',
 			name: t("Оюутны нэр"),
-			selector: (row) => row?.student?.first_name,
+			selector: (row) => row?.student?.last_name + ' ' + row?.student?.first_name,
             left: true,
 			sortable: true,
-			minWidth: "150px",
+			minWidth: "200px",
 			wrap: true
-		},
-
-		{
-			header: 'lesson__code',
-			name: t("Хичээлийн код"),
-			selector: (row) => row?.lesson?.code,
-            center: true,
-			sortable: true,
-			minWidth: "150px",
 		},
 		{
 			header: 'lesson__name',
 			name: t("Хичээлийн нэр"),
-			selector: (row) => row?.lesson?.name,
+			selector: (row) => row?.lesson?.code + ' ' + row?.lesson?.name,
 			minWidth: "200px",
 			sortable: true,
 			left: true,
+			wrap: true
 		},
 		{
 			header: 'volume_kr',
-			name: t("Багц цаг"),
+			name: t("Кр"),
 			selector: (row) => row?.volume_kr,
-			minWidth: "80px",
 			center: true,
-			wrap: true,
 		},
 		{
 			header: 'teacher__first_name',
-			name: t("Багшийн код"),
+			name: t("Багш"),
 			selector: (row) => {
 				if(row?.teacher) {
 					if(row?.teacher?.code && row?.teacher?.first_name) {
@@ -177,7 +167,7 @@ export function getColumns (currentPage, rowsPerPage, total_count) {
 							type="number"
 							bsSize='sm'
 							placeholder={`Нийт оноо`}
-							disabled={Object.keys(user).length > 0 && (user?.permissions.includes('lms-score-update')) ? false : true}
+							disabled={(Object.keys(user).length > 0 && (user?.permissions.includes('lms-score-update')) || user?.is_superuser) ? false : true}
 							onFocus={(e) => focusData.current = (e.target.value)}
 							onKeyPress={(e) => {
 								setIndName(`score_total-${index}-input`)

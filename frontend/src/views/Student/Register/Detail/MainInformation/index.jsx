@@ -310,7 +310,7 @@ const MainInformation = () => {
                         <Row className='gy-50'>
                             <Col lg={4} sm={6} xs={12}>
                                 <Label className="form-label" for="department">
-                                    {t("Хөтөлбөрийн баг")}
+                                    {t("Тэнхим")}
                                 </Label>
                                 <Controller
                                     control={control}

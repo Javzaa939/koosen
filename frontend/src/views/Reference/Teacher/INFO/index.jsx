@@ -78,7 +78,7 @@ export default function Info()
                                         </Col>
                                     <Col tag="dd" sm="8" className="mb-1">{datas?.mainInfo?.sub_org?.name || 'хоосон'}</Col>
                                     <Col tag="dt" sm="4" className="fw-bolder mb-1" >
-                                        Хөтөлбөрийн баг:
+                                        Тэнхим:
                                     </Col>
                                     <Col tag="dd" sm="8" className="mb-1">{datas?.mainInfo?.salbar?.name || 'хоосон'}</Col>
                                     <Col tag="dt" sm="4" className="fw-bolder mb-1" >

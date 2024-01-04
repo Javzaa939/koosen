@@ -88,7 +88,7 @@ const Viz = () => {
     const groupApi = useApi().student.group
 
 
-    // Хөтөлбөрийн багаар жагсаалт авна.
+    // Тэнхимаар жагсаалт авна.
     async function getDepartmentOption() {
         const { success, data } = await fetchData(departmentApi.get(school_id))
 
@@ -231,7 +231,7 @@ const Viz = () => {
                 <Row className="justify-content-between mx-0 mt-1 mb-1" sm={12}>
                     <Col sm={6} lg={3} >
                         <Label className="form-label" for="department">
-                            {t('Хөтөлбөрийн баг')}
+                            {t('Тэнхим')}
                         </Label>
                         <Controller
                             control={control}
