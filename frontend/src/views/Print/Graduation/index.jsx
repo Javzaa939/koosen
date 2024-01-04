@@ -167,7 +167,7 @@ const Graduation = () => {
                 <Row className="justify-content-between mx-0 mb-1 mt-1">
                     <Col md={4}>
                         <Label className="form-label" for="department">
-                            {t('Хөтөлбөрийн баг')}
+                            {t('Тэнхим')}
                         </Label>
                         <Controller
                             control={control}

@@ -123,7 +123,7 @@ export default function Confrontation()
                 <Row className="justify-content-between mx-0 mt-1 mb-1">
                     <Col md={6}>
                         <Label className="form-label" for="department">
-                            {t('Хөтөлбөрийн баг')}
+                            {t('Тэнхим')}
                         </Label>
                         <Controller
                             defaultValue=''

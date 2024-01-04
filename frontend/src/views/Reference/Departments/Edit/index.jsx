@@ -50,7 +50,7 @@ const UpdateModal = ({ open, editId, refreshDatas, handleEdit}) => {
         }
     }
 
-    /* Хөтөлбөрийн багийн ахлагч жагсаалт авах функц */
+    /* Тэнхимийн ахлагч жагсаалт авах функц */
     async function getLeaderList() {
         const { success, data } = await fetchData(getDepartmentApi.leaderList())
         if (success) {

@@ -88,7 +88,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
     const newsApi = useApi().service.news
     const departmentApi = useApi().hrms.department
 
-    // Хөтөлбөрийн багийн жагсаалт
+    // Тэнхимийн жагсаалт
     async function getDepartmentOption() {
         const { success, data } = await fetchData(departmentApi.get(school_id))
         if(success) {
@@ -293,7 +293,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                         }
                         <Col md={12}>
                             <Label className='form-label' for="department">
-                                {t('Хөтөлбөрийн баг')}
+                                {t('Тэнхим')}
                             </Label>
                                 <Controller
                                     defaultValue=''

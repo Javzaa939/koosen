@@ -60,7 +60,7 @@ const Class = ({setMainData, setChosenGroup, setFileName}) => {
         department: ''
     }
     // Нэг хуудсанд харуулах нийт датаны тоо
-    const [rowsPerPage, setRowsPerPage] = useState(10)
+    const [rowsPerPage, setRowsPerPage] = useState(15)
 
     const [searchValue, setSearchValue] = useState("");
 
@@ -227,7 +227,7 @@ const Class = ({setMainData, setChosenGroup, setFileName}) => {
                 <Row className="justify-content-between mx-0 align-items-start mb-1" tag={Form}  onSubmit={handleSubmit(handlePrintModal)}>
                     <Col md={4}>
                         <Label className="form-label" for="department">
-                            {t('Хөтөлбөрийн баг')}
+                            {t('Тэнхим')}
                         </Label>
                         <Controller
                             control={control}

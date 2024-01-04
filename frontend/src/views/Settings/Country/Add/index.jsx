@@ -1,5 +1,5 @@
 // ** React imports
-import React, { Fragment } from 'react'
+import React, { Fragment, useEffect } from 'react'
 
 import { X } from "react-feather";
 
@@ -10,19 +10,19 @@ import { useForm, Controller } from "react-hook-form";
 
 import { Row, Col, Form, Modal, Input, Label, Button, ModalBody, ModalHeader, FormFeedback } from "reactstrap";
 
-import { validate } from "@utils"
+import { convertDefaultValue, validate } from "@utils"
 
 import { validateSchema } from './validateSchema';
 import { t } from 'i18next';
 
-const Addmodal = ({ open, handleModal, refreshDatas }) => {
+const Addmodal = ({ open, handleModal, refreshDatas, editId }) => {
 
     const CloseBtn = (
         <X className="cursor-pointer" size={15} onClick={handleModal} />
     )
 
     // ** Hook
-    const { control, handleSubmit, formState: { errors }, reset, setError } = useForm(validate(validateSchema));
+    const { control, handleSubmit, formState: { errors }, reset, setError, setValue } = useForm(validate(validateSchema));
 
 	// Loader
 	const { Loader, isLoading, fetchData } = useLoader({});
@@ -31,17 +31,50 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
     const countryApi = useApi().settings.country
 
 	async function onSubmit(cdata) {
-        const { success, errors } = await fetchData(countryApi.post(cdata))
-        if(success) {
-            reset()
-            refreshDatas()
-            handleModal()
+        cdata = convertDefaultValue(cdata)
+        if(editId) {
+            const { success, errors } = await fetchData(countryApi.put(cdata, editId))
+            if(success) {
+                reset()
+                refreshDatas()
+                handleModal()
+            }
+            else {
+                /** Алдааны мессеж */
+                setError(errors.field, { type: 'custom', message: errors.msg});
+            }
         }
-        else {
-            /** Алдааны мессэжийг input дээр харуулна */
-            setError(errors.field, { type: 'custom', message: errors.msg});
+        else{
+            const { success, errors } = await fetchData(countryApi.post(cdata))
+            if(success) {
+                reset()
+                refreshDatas()
+                handleModal()
+            }
+            else {
+                /** Алдааны мессэжийг input дээр харуулна */
+                setError(errors.field, { type: 'custom', message: errors.msg});
+            }
         }
 	}
+    async function getDatas() {
+        if(editId) {
+            const { success, data } = await fetchData(countryApi.getOne(editId))
+            if(success) {
+                // засах үед дата байх юм бол setValue-р дамжуулан утгыг харуулна
+                if(data === null) return
+                for(let key in data) {
+                    if(data[key] !== null)
+                        setValue(key, data[key])
+                    else setValue(key, '')
+                }
+            }
+        }
+    }
+
+    useEffect(() => {
+        getDatas()
+    },[editId])
 
 	return (
         <Fragment>
@@ -58,7 +91,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                     close={CloseBtn}
                     tag="div"
                 >
-                    <h5 className="modal-title">{t('Улс нэмэх')}</h5>
+                    <h5 className="modal-title">{editId ? t('Улс засах') : t('Улс нэмэх')}</h5>
                 </ModalHeader>
                 <ModalBody className="flex-grow-1">
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
@@ -152,13 +185,19 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                             />
                             {errors.name_uig && <FormFeedback className='d-block'>{t(errors.name_uig.message)}</FormFeedback>}
                         </Col>
-                        <Col md={12} className="mt-2">
+                        <Col md={12} className=" text-center mt-2">
                             <Button className="me-2" color="primary" type="submit">
                                 {t('Хадгалах')}
                             </Button>
-                            <Button color="secondary" type="reset" outline  onClick={handleModal}>
-                                {t('Буцах')}
-                            </Button>
+                            {
+                                editId
+                                ?
+                                    null
+                                :
+                                <Button color="secondary" type="reset" outline  onClick={handleModal}>
+                                    {t('Буцах')}
+                                </Button>
+                            }
                         </Col>
                     </Row>
                 </ModalBody>

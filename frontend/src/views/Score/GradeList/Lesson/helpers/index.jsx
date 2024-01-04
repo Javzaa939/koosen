@@ -126,7 +126,7 @@ export function getColumns (currentPage, rowsPerPage, total_count) {
 							type="number"
 							bsSize='sm'
 							placeholder={`Нийт оноо`}
-							disabled={Object.keys(user).length > 0 && (user?.permissions.includes('lms-score-update')) ? false : true}
+							disabled={(Object.keys(user).length > 0 && (user?.permissions.includes('lms-score-update')) || user?.is_superuser)  ? false : true}
 							onFocus={(e) => focusData.current = (e.target.value)}
 							onKeyPress={(e) => {
 								setIndName(`score_total-${index}-input`)

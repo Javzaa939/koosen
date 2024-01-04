@@ -121,7 +121,7 @@ const LessonStandart = () => {
 		}
 	};
 
-    /**Хөтөлбөрийн багын жагсаалт */
+    /**Тэнхимын жагсаалт */
     async function getDepartment() {
         const { success, data } = await fetchData(departmentApi.get())
         if(success) {
@@ -208,7 +208,7 @@ const LessonStandart = () => {
                 <Row className='mx-0 mt-50'>
                     <Col sm={4} lg={4} md={4} className='mb-1'>
                         <Label className="form-label" for="department">
-                            {t('Хөтөлбөрийн баг')}
+                            {t('Тэнхим')}
                         </Label>
                         <Controller
                             control={control}

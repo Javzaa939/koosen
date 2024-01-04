@@ -18,7 +18,6 @@ import { getPagination } from '@utils'
 import { getColumns } from './helpers'
 
 import Addmodal from './Add'
-import UpdateModal from './Update'
 
 const ProfessionalDegree = () => {
 
@@ -32,7 +31,6 @@ const ProfessionalDegree = () => {
 
 	const [filteredData, setFilteredData] = useState([]);
 	const [datas, setDatas] = useState([]);
-    const [update_modal, setUpdateModal] = useState(false)
     const [edit_id, setEditId] = useState('')
 
     // Нийт датаны тоо
@@ -51,12 +49,15 @@ const ProfessionalDegree = () => {
 	/* Модал setState функц */
 	const handleModal = () => {
 		setModal(!modal)
+		if(modal){
+			setEditId()
+		}
 	}
 
 	// Засах функц
     function handleUpdateModal(id) {
         setEditId(id)
-        setUpdateModal(!update_modal)
+		handleModal()
     }
 
 	/* Жагсаалтын дата авах функц */
@@ -66,10 +67,20 @@ const ProfessionalDegree = () => {
 			setDatas(data)
 		}
 	}
+	//  Жагсаалт устгах
+	async function handleDelete(id){
+		if(id){
+			const{ success} = await fetchData(professionaldegreeApi.delete(id))
+			if (success){
+				getDatas()
+			}
+		}
+	}
 
 	useEffect(() => {
         getDatas()
     }, [])
+
 
 	// Хайлт хийх үед ажиллах хэсэг
 	const handleFilter = (e) => {
@@ -168,7 +179,7 @@ const ProfessionalDegree = () => {
                                     <h5>{t('Өгөгдөл байхгүй байна')}</h5>
                                 </div>
                             )}
-                            columns={getColumns(currentPage, rowsPerPage, searchValue.length ? filteredData : datas,handleUpdateModal, user)}
+                            columns={getColumns(currentPage, rowsPerPage, searchValue.length ? filteredData : datas,handleUpdateModal, user, handleDelete)}
                             sortIcon={<ChevronDown size={10} />}
                             paginationPerPage={rowsPerPage}
                             paginationDefaultPage={currentPage}
@@ -179,8 +190,7 @@ const ProfessionalDegree = () => {
                         />
 					</div>
 				}
-				{modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} />}
-				{ update_modal && <UpdateModal editId={edit_id} open={update_modal} handleEdit={handleUpdateModal} refreshDatas={getDatas} /> }
+				{modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} editId={edit_id}/>}
 
 			</Card>
         </Fragment>

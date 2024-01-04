@@ -128,7 +128,7 @@ const StudyPlan = () => {
         }
     }
 
-    // Хөтөлбөрийн багын жагсаалт
+    // Тэнхимын жагсаалт
     async function getDepartmentOption() {
         const { success, data } = await fetchData(departmentApi.get())
         if(success) {
@@ -284,7 +284,7 @@ const StudyPlan = () => {
                 <Row className="mx-50 gy-1 my-1" sm={12}>
                     <Col sm={6} lg={3}>
                         <Label className="form-label" for="department">
-                            {t('Хөтөлбөрийн баг')}
+                            {t('Тэнхим')}
                         </Label>
                         <Controller
                             control={control}

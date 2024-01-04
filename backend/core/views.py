@@ -172,19 +172,15 @@ class SchoolAPIView(
 ):
     """" Сургууль, Хамгийн том Байгууллага"""
 
-    queryset = Schools.objects
+    queryset = Schools.objects.all()
     serializer_class = SchoolsRegisterSerailizer
 
     def get(self, request, pk=None):
         " Сургуулийн жагсаалт "
-        self.serializer_class = SchoolsRegisterSerailizer
+        instance = Schools.objects.first()
+        school_data = self.get_serializer(instance).data
 
-        if pk:
-            group = self.retrieve(request, pk).data
-            return request.send_data(group)
-
-        group_list = self.list(request).data
-        return request.send_data(group_list)
+        return request.send_data(school_data)
 
 
 @permission_classes([IsAuthenticated])
@@ -255,7 +251,7 @@ class DepartmentAPIView(
             return request.send_error("ERR_002")
 
     def put(self, request, pk=None):
-        " хөтөлбөрийн багийн мэдээлэл засах "
+        " Тэнхимийн мэдээлэл засах "
 
         self.serializer_class = DepartmentRegisterListSerailizer
 
@@ -891,7 +887,7 @@ class DepLeaderAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
 ):
-    """ Хөтөлбөрийн багийн ахлагч жагсаалт """
+    """ Тэнхимийн эрхлэгч жагсаалт """
 
     queryset = Teachers.objects.all()
     serializer_class = TeachersSerializer

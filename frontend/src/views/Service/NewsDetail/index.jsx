@@ -82,7 +82,6 @@ const News = () => {
         getDatas()
     },[sortField, currentPage, rowsPerPage])
 
-    console.log(datas)
 
     useEffect(() => {
 		if (searchValue.length == 0) {
