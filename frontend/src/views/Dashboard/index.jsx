@@ -383,10 +383,6 @@ function Dashboard() {
                     </Col>
                 </Row>
             </div>
-            <div className='p-1'>
-                test
-                <button onClick={() => {getDatas();}}>GET</button>
-            </div>
             {/* <Pie data={eduData} /> */}
                 {/* <div className='p-1'>
                 <Line options={options} data={data_line} />;
