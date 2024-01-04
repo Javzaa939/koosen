@@ -253,6 +253,15 @@ const Graduation = () => {
         setUpdateData(data)
     }
 
+    // Төгсөгчдийг  анги ангиар нь үүсгэх
+    const handleGraduate = async() => {
+        const { success } = await fetchData(signatureApi.postGraduate(select_value.group))
+        if (success)
+        {
+            // getSignatureDatas()
+        }
+    }
+
 	return (
 		<Fragment>
             <Card>
@@ -340,7 +349,7 @@ const Graduation = () => {
                     </div>
                 </CardHeader>
                 <Row className="justify-content-between mx-0 mt-1 mb-1" sm={12}>
-                    <Col md={4}>
+                    <Col md={3}>
                         <Label className="form-label" for="department">
                             {t('Тэнхим')}
                         </Label>
@@ -378,7 +387,7 @@ const Graduation = () => {
                             }}
                         />
                     </Col>
-                    <Col md={4}>
+                    <Col md={3}>
                         <Label className="form-label" for="degree">
                             {t('Боловсролын зэрэг')}
                         </Label>
@@ -416,7 +425,7 @@ const Graduation = () => {
                             }}
                         />
                     </Col>
-                    <Col md={4}>
+                    <Col md={3}>
                         <Label className="form-label" for="group">
                             {t('Анги')}
                         </Label>
@@ -453,6 +462,9 @@ const Graduation = () => {
                                 )
                             }}
                         />
+                    </Col>
+                    <Col md={3} className='mt-2'>
+                        <Button size='sm' color='primary' disabled={select_value.group ? false : true} onClick={handleGraduate}>Төгсөгчид үүсгэх</Button>
                     </Col>
                 </Row>
                 <Row className='mt-1 d-flex justify-content-between mx-0'>

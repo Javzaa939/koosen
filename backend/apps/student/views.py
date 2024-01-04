@@ -2539,6 +2539,7 @@ class StudentVizStatusAPIView(
             return request.send_info("INF_002")
 
 
+@permission_classes([IsAuthenticated])
 class StudentDownloadAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin
@@ -2600,6 +2601,7 @@ class StudentDownloadAPIView(
         return request.send_data(student_list)
 
 
+@permission_classes([IsAuthenticated])
 class GroupLessonAPIView(
     generics.GenericAPIView,
 ):
@@ -2645,6 +2647,7 @@ class GroupLessonAPIView(
         return request.send_data(all_list)
 
 
+@permission_classes([IsAuthenticated])
 class StudentScoreLessonAPIView(
     generics.GenericAPIView
 ):
@@ -2658,6 +2661,7 @@ class StudentScoreLessonAPIView(
         return request.send_data(list(lesson_scores))
 
 
+@permission_classes([IsAuthenticated])
 class StudentArrivedApproveAPIView(
     generics.GenericAPIView
 ):
@@ -2725,3 +2729,37 @@ class StudentArrivedApproveAPIView(
                 return request.send_error('ERR_002', e.__str__())
 
         return request.send_info('INF_001', 'Амжилттай шилжилт хөдөлгөөн хийлээ.')
+
+
+@permission_classes([IsAuthenticated])
+class SignatureGroupAPIView(
+    generics.GenericAPIView
+):
+    """ Төгсөгчдийг ангиар нь үүсгэх """
+
+    queryset = GraduationWork.objects.all()
+
+    @has_permission(must_permissions=['lms-student-graduate-create'])
+    def get(self, request, group=None):
+
+        group_obj = Group.objects.get(pk=group)
+        lesson_year, lesson_season = get_active_year_season()
+
+        # Тухайн ангийн мэргэжил
+        profession = group_obj.profession
+
+        # Тухайн ангийн боловсролын зэрэг
+        degree_code = group_obj.degree.degree_code
+
+        student_status = StudentRegister.objects.filter(Q(Q(name__contains='Суралцаж буй') | Q(code=1))).first()
+
+        # Төгсөх оюутны жагсаалт
+        students = Student.objects.filter(group=group_obj, status=student_status)
+
+        # Мэргэжлийн зэргээс хамаарч дипломын хичээл
+        lessons = LearningPlan.objects.filter(profession=profession, lesson_level=LearningPlan.DIPLOM).values_list('lesson', flat=True)
+
+        if degree_code == 'E':
+            lessons = LearningPlan.objects.filter(profession=profession, lesson_level=LearningPlan.MAG_DIPLOM).values_list('lesson', flat=True)
+        elif degree_code == 'F':
+            lessons = LearningPlan.objects.filter(profession=profession, lesson_level=LearningPlan.DOC_DIPLOM).values_list('lesson', flat=True)

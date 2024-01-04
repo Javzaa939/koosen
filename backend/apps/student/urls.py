@@ -74,6 +74,7 @@ urlpatterns = [
     # Гарын үсэг
     path('signature/', SignatureAPIView.as_view()),
     path('signature/<int:pk>/', SignatureAPIView.as_view()),
+    path('signature/group/<int:group>/', SignatureGroupAPIView.as_view()),
     path('signature/changeorder/', SignatureChangeOrderApiView.as_view()),
 
     # Оюутны дүнгийн мэдээлэл авах

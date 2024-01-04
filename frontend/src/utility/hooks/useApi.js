@@ -180,7 +180,8 @@ function useApi(isDisplay=false) {
 			post: (data) => instance.post(`/student/signature/`, data),
 			put: (data, pk) => instance.put(`/student/signature/${pk}/`, data),
 			delete: (pk) => instance.delete(`/student/signature/${pk}/`),
-			changeorder: (data, typeNumber) => instance.post(`/student/signature/changeorder/?type=${typeNumber}`, data)
+			changeorder: (data, typeNumber) => instance.post(`/student/signature/changeorder/?type=${typeNumber}`, data),
+			postGraduate: (group) => instance.get(`/student/signature/group/${group}/`)
 		},
 		settings: {
 			/** Бололвсролын зэрэг */
