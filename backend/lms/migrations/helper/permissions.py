@@ -734,7 +734,7 @@ permissions = [
         'name' : "lms-reference-school-read",
         'description' : "Лавлах сан сургуулийн мэдээлэл унших"
     },
-# Хөтөлбөрийн баг
+# Тэнхим
     {
         'name' : "lms-reference-departments-read",
         'description' : "Лавлах сан тэнхим мэдээлэл унших"

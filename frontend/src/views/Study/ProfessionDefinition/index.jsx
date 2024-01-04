@@ -111,7 +111,7 @@ const ProfessionDefinition = () => {
         var degree = select_value.degree
         var department = select_value.department
 
-        const { success, data } = await allFetch(definationApi.get(rowsPerPage, currentPage, sortField, searchValue, degree, department,school_id))
+        const { success, data } = await allFetch(definationApi.get(rowsPerPage, currentPage, sortField, searchValue, degree, department, school_id))
         if(success) {
             setDatas(data?.results)
             setTotalCount(data?.count)
@@ -126,7 +126,7 @@ const ProfessionDefinition = () => {
         }
     }
 
-    /**Хөтөлбөрийн багын жагсаалт */
+    /**Тэнхимын жагсаалт */
     async function getDepartment() {
         const { success, data } = await fetchData(departmentApi.get(school_id))
         if(success) {
@@ -136,7 +136,6 @@ const ProfessionDefinition = () => {
 
     useEffect(() => {
         getDegree()
-        getDepartment()
     },[])
 
     useEffect(() => {
@@ -190,17 +189,6 @@ const ProfessionDefinition = () => {
         if (searchValue.length > 0) getDatas()
     }
 
-    // Хайлтийн хэсэг хоосон болох үед анхны датаг дуудна
-    useEffect(
-        () =>
-        {
-            if (!searchValue) {
-                getDatas()
-            }
-        },
-        [searchValue]
-    )
-
     // Сургалтын төлөвлөгөө харуулах
     const planhandleModal = (id) => {
         setMergejilId(id)
@@ -227,7 +215,7 @@ const ProfessionDefinition = () => {
                 <Row className='my-1 p-2'>
                     <Col md={4} sm={12} className=''>
                         <Label className="form-label" for="department">
-                            {t('Хөтөлбөрийн баг')}
+                            {t('Тэнхим')}
                         </Label>
                         <Controller
                             control={control}

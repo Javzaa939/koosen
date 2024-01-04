@@ -21,7 +21,7 @@ import useLoader from '@hooks/useLoader';
 import { useTranslation } from 'react-i18next';
 
 
-export const RoomAdd = ( {refreshDatas, handleModal} ) => {
+export const RoomAdd = ( { handleModal} ) => {
     const { t } = useTranslation()
 
         // ** Hook
@@ -56,7 +56,7 @@ export const RoomAdd = ( {refreshDatas, handleModal} ) => {
         const { success, error } = await fetchData(roomApi.post(cdata))
         if(success) {
             reset()
-            refreshDatas()
+            // refreshDatas()
             handleModal()
         } else {
             /** Алдааны мессэжийг input дээр харуулна */

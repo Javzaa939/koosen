@@ -94,9 +94,8 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
         cdata['lesson_year'] = cyear_name
         cdata['lesson_season'] = cseason_id
         cdata['status'] = '4'
-        cdata = convertDefaultValue(cdata)
 
-        const { success, error } = await postFetch(correspondApi.post(cdata))
+        const { success, errors } = await postFetch(correspondApi.post(cdata))
         if(success) {
             reset()
             handleModal()
@@ -104,8 +103,8 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
             setLoader(false)
         } else {
             /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in error) {
-                setError(error[key].field, { type: 'custom', message:  error[key].msg});
+            for (let key in errors) {
+                setError(key, { type: 'custom', message:  errors[key][0]});
             }
         }
 	}

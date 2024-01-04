@@ -8,7 +8,7 @@ urlpatterns = [
     path('teacher/create/', EmployeeApiView.as_view()),
     path('teacher/lesson/', TeacherLessonListApiView.as_view()),
     path('teacher/lessonteach/', LessonToTeacherListApiView.as_view()),
-    path('teacher/longlist/', TeacherListApiView.as_view()),
+    path('teacher/longlist/', TeacherLongListApiView.as_view()),
     path('teacher/listschoolfilter/', TeacherListSubschoolApiView.as_view()),
 
     path('teacher/part/', TeacherPartListApiView.as_view()),
@@ -17,12 +17,11 @@ urlpatterns = [
     path('school/', SchoolAPIView.as_view()),
     path('school/<int:pk>/', SchoolAPIView.as_view()),
 
-    # Хөтөлбөрийн баг
+    # Тэнхим
     path('department/', DepartmentListAPIView.as_view()),
     path('department/register/', DepartmentAPIView.as_view()),
     path('department/register/<int:pk>/', DepartmentAPIView.as_view()),
 
-    path('department/<int:pk>/', DepartmentListAPIView.as_view()),
     path('department/teacher/<int:pk>/', DepartmentTeachersListAPIView.as_view()),
 
     # бүрэлдэхүүн сургууль

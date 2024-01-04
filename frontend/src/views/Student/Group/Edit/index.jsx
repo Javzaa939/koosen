@@ -46,7 +46,7 @@ const EditModal = ({ open, handleModal, group_id, refreshDatas }) => {
 
     const { school_id } = useContext(SchoolContext)
 
-    // Хөтөлбөрийн багын id
+    // Тэнхимын id
     const [ dep_id, setDepId] = useState('')
 
     const [ profOption, setProfession] = useState([])
@@ -129,9 +129,7 @@ const EditModal = ({ open, handleModal, group_id, refreshDatas }) => {
         getDepartment()
         getYear()
         getDegree()
-        getProfession()
         getStatus()
-        getTeacher()
         getDatas()
     },[])
 
@@ -139,10 +137,13 @@ const EditModal = ({ open, handleModal, group_id, refreshDatas }) => {
         () =>
         {
             getProfession()
-            getTeacher()
         },
         [degree_id, dep_id]
     )
+
+    useEffect(() => {
+        getTeacher()
+    }, [dep_id, school_id])
 
     async function getDatas() {
         if(group_id) {
@@ -157,6 +158,13 @@ const EditModal = ({ open, handleModal, group_id, refreshDatas }) => {
 
                     if(key === 'profession' || key === 'degree' || key === 'learning_status' || key === 'teacher' || key === 'department') {
                         setValue(key, data[key]?.id)
+                        if(key === 'degree') {
+                            setDegreeId(data[key]?.id)
+                        }
+
+                        if(key === 'department') {
+                            setDepId(data[key]?.id)
+                        }
                     }
 
                     if (key === 'is_finish') {
@@ -169,25 +177,17 @@ const EditModal = ({ open, handleModal, group_id, refreshDatas }) => {
     }
 
 	async function onSubmit(cdata) {
-        var selected_students = students.filter((item) => {
-            item?.is_selected ?  (item?.is_selected == true  && item.id)  : item?.id
-            if (item?.is_selected && item?.is_selected) {
-                return item.id
-            } else {
-                item.id
-            }
-        })
         cdata['is_finish'] = is_finish
         cdata['finish_students'] = add_students
-        const { success, error } = await fetchData(groupApi.put(cdata, group_id))
+        const { success, errors } = await fetchData(groupApi.put(cdata, group_id))
         if(success) {
             reset()
             handleModal()
             refreshDatas()
         } else {
             /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in error) {
-                setError(error[key].field, { type: 'custom', message:  error[key].msg});
+            for (let key in errors) {
+                setError(key, { type: 'custom', message:  errors[key][0]});
             }
         }
 	}
@@ -233,7 +233,7 @@ const EditModal = ({ open, handleModal, group_id, refreshDatas }) => {
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="department">
-                               {t('Хөтөлбөрийн баг')}
+                               {t('Тэнхим')}
                             </Label>
                             <Controller
                                 control={control}

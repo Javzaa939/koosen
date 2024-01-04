@@ -15,6 +15,7 @@ import DataTable from 'react-data-table-component'
 import useApi from '@hooks/useApi';
 
 import useLoader from '@hooks/useLoader';
+import useUpdateEffect from '@hooks/useUpdateEffect'
 
 import SchoolContext from '@context/SchoolContext'
 
@@ -88,7 +89,7 @@ const Enrollment = () => {
         }
     }
 
-    // Хөтөлбөрийн баг
+    // Тэнхим
     async function getDepartmentOption() {
         const { success, data } = await fetchData(departmentApi.get())
         if(success) {
@@ -162,11 +163,11 @@ const Enrollment = () => {
     }
 
     useEffect(() => {
-            getDegreeOption()
-            getGroupOption()
-            getDepartmentOption()
-            getLearningOption()
-            getProfessionOption()
+        getDegreeOption()
+        getGroupOption()
+        getDepartmentOption()
+        getLearningOption()
+        getProfessionOption()
     },[])
 
     useEffect(() => {
@@ -176,9 +177,9 @@ const Enrollment = () => {
 
     useEffect(() => {
         getDatas()
-    },[select_value, rowsPerPage, currentPage, sortField])
+    },[select_value, rowsPerPage, currentPage, sortField, school_id])
 
-    useEffect(() => {
+    useUpdateEffect(() => {
 		if (searchValue.length == 0) {
 			getDatas();
 		} else {
@@ -207,7 +208,7 @@ const Enrollment = () => {
                 <Row className="justify-content-between mx-0 mt-1">
                     <Col md={4}>
                         <Label className="form-label" for="department">
-                            {t('Хөтөлбөрийн баг')}
+                            {t('Тэнхим')}
                         </Label>
                         <Controller
                             control={control}

@@ -63,7 +63,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
     const lessonCategoryApi = useApi().settings.lessonCategory
     const departmentApi = useApi().hrms.department
 
-    // Хөтөлбөрийн багын жагсаалт
+    // Тэнхимын жагсаалт
     async function getDepartmentOption() {
         const { success, data } = await fetchData(departmentApi.get(school_id))
         if(success) {
@@ -83,17 +83,17 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
         cdata['updated_user'] = user.id
         cdata['school'] = school_id
         cdata = convertDefaultValue(cdata)
-        const { success, error } = await postFetch(lessonStandartApi.post(cdata))
+        const { success, errors } = await postFetch(lessonStandartApi.post(cdata))
         if(success) {
-            setLoader(false)
             reset()
+            setLoader(false)
             handleModal()
             refreshDatas()
         } else {
             setLoader(false)
             /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in error) {
-                setError(error[key].field, { type: 'custom', message:  error[key].msg});
+            for (let key in errors) {
+                setError(key, { type: 'custom', message:  errors[key][0]});
             }
         }
 
@@ -133,7 +133,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="department">
-                                {t('Хөтөлбөрийн баг')}
+                                {t('Тэнхим')}
                             </Label>
                             <Controller
                                 control={control}

@@ -137,16 +137,15 @@ const News = () => {
         <Fragment>
             {Loader && isLoading}
             <Card>
-                <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
-                    <CardTitle tag="h4">{t('Зар мэдээ')}</CardTitle>
-                <div className='d-flex flex-wrap mt-md-0 mt-1'>
+                <CardHeader className="flex-md-row flex-column align-items-start align-self-end my-0">
+                <div className="my-0">
                     <Button color='primary' disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-service-news-create')? false : true} onClick={() => handleModal()}>
                         <Plus size={15}/>
                         <span className='align-middle ms-50'>{t('Нэмэх')}</span>
                     </Button>
                 </div>
                 </CardHeader>
-                <Row className="justify-content-between mx-0 mb-1" sm={12}>
+                <Row className="justify-content-between mx-0 my-0" sm={12}>
                     <Col className='d-flex align-items-center justify-content-start' md={6} sm={12}>
                         <Col md={3} sm={4} xs={5} className='pe-1'>
                             <Input
@@ -193,14 +192,14 @@ const News = () => {
                         </Button>
                     </Col>
                 </Row>
-                <div className='react-dataTable react-dataTable-selectable-rows'>
+                <div className='react-dataTable react-dataTable-selectable-rows mt-0'>
                     <DataTable
                         noHeader
                         pagination
                         className='react-dataTable'
                         progressPending={isTableLoading}
                         progressComponent={
-                            <div className='my-2 d-flex align-items-center justify-content-center'>
+                            <div className='my-1 d-flex align-items-center justify-content-center'>
                                 <Spinner className='me-1' color="" size='sm'/><h5>Түр хүлээнэ үү...</h5>
                             </div>
                         }

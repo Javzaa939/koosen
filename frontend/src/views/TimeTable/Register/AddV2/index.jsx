@@ -359,7 +359,6 @@ const AddTimetableComponent = ({ }) => {
         () =>
         {
             if (isCalendar && rangeDate.start) {
-                console.log('render')
                 getKuratsData()
             }
         },
@@ -520,7 +519,7 @@ const AddTimetableComponent = ({ }) => {
                             </Col>
                             <Col md={4} sm={12} xs={12}  className='mt-1'>
                                 <Label className="form label ms-1" for="department">
-                                    {t('Хөтөлбөрийн баг')}
+                                    {t('Тэнхим')}
                                 </Label>
                                 <Select
                                     name="department"

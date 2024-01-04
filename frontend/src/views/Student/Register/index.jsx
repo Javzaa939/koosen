@@ -134,7 +134,7 @@ const Register = () => {
         []
     )
 
-    // Хөтөлбөрийн багын жагсаалт
+    // Тэнхимын жагсаалт
     async function getDepartmentOption() {
         const { success, data } = await fetchData(departmentApi.get())
         if(success) {
@@ -174,7 +174,6 @@ const Register = () => {
             setGroup(data)
         }
     }
-
 
     async function getDatas() {
 
@@ -294,7 +293,7 @@ const Register = () => {
                     <div className='d-flex flex-wrap mt-md-0 mt-1'>
                     <UncontrolledButtonDropdown disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-read')?false : true}>
                     {/* <UncontrolledButtonDropdown disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-read')  && school_id? false : true}> */}
-                        <DropdownToggle color='secondary' caret outline>
+                        <DropdownToggle color='secondary' className='m-50' caret outline>
                             <Download size={15} />
                             <span className='align-middle ms-50'>Export</span>
                         </DropdownToggle>
@@ -312,7 +311,7 @@ const Register = () => {
                     <Button
                         color='primary'
                         onClick={() => handleModal()}
-                        className="ms-1"
+                        className="m-50"
                         disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-create') ? false : true}
                     >
                         <Plus size={15} />
@@ -323,7 +322,7 @@ const Register = () => {
                 <Row className="justify-content-start mx-0 mt-1 mb-1" sm={12}>
                     <Col sm={6} lg={3} >
                         <Label className="form-label" for="department">
-                            {t('Хөтөлбөрийн баг')}
+                            {t('Тэнхим')}
                         </Label>
                         <Controller
                             control={control}

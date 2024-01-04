@@ -24,9 +24,9 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 		{
 			name: `${t('Нэр')}`,
 			selector: (row) => <span title={row?.name}>{row?.name}</span>,
-			maxwidth: "250px",
+			minWidth: "250px",
 			wrap: true,
-			center: true
+			left: true
 
 		},
 		{
@@ -83,7 +83,7 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
                             <UncontrolledTooltip placement='top' target={`updateSchool${row?.id}`}>засах</UncontrolledTooltip>
 						</>
                     }
-				{/* {
+				{
 					<>
 						<a role="button"
 							className='ms-1'
@@ -101,7 +101,7 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 						</a>
 						<UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${row?.id}`} >Устгах</UncontrolledTooltip>
 					</>
-				} */}
+				}
 				</div>
             ),
             Width: "50px",

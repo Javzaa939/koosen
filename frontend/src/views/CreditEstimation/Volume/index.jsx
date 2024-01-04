@@ -24,6 +24,7 @@ import classnames from 'classnames'
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import { useSkin } from "@hooks/useSkin"
+import useUpdateEffect from '@hooks/useUpdateEffect'
 
 import AuthContext from '@context/AuthContext'
 import SchoolContext from '@context/SchoolContext'
@@ -168,16 +169,8 @@ const CreditVolume = () => {
 	}
 
     useEffect(() => {
-        if (searchValue.length == 0) {
-			getDatas();
-		} else {
-			const timeoutId = setTimeout(() => {
-				getDatas();
-			}, 600);
-
-			return () => clearTimeout(timeoutId);
-		}
-    }, [sortField, currentPage, rowsPerPage, dep_id, year, searchValue, teacherId])
+        getDatas();
+    }, [sortField, currentPage, rowsPerPage, dep_id, year, teacherId, school_id])
 
     async function getDatas() {
 
@@ -204,7 +197,7 @@ const CreditVolume = () => {
         }
 	};
 
-    /**Хөтөлбөрийн багын жагсаалт */
+    /**Тэнхимын жагсаалт */
     async function getDepartment() {
         const { success, data } = await fetchData(departmentApi.get())
         if(success) {
@@ -247,8 +240,6 @@ const CreditVolume = () => {
         setModal(!modal)
     }
 
-   
-
     // ** Function to handle filter
     const handleFilter = e => {
         const value = e.target.value.trimStart();
@@ -279,7 +270,7 @@ const CreditVolume = () => {
     }
 
     // Хайлтийн хэсэг хоосон болох үед анхны датаг дуудна
-    useEffect(
+    useUpdateEffect(
         () =>
         {
             if (!searchValue) {
@@ -363,7 +354,7 @@ const CreditVolume = () => {
                     </Col>
                     <Col md={3} className='mb-1'>
                         <Label className="form-label" for="department">
-                            {t('Хөтөлбөрийн баг')}
+                            {t('Тэнхим')}
                         </Label>
                         <Select
                             name="department"

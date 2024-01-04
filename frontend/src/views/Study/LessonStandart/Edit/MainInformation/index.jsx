@@ -57,6 +57,7 @@ const MainInformation = ({ getNavigateData }) => {
 
 	// Loader
 	const { isLoading, fetchData } = useLoader({});
+	const { isLoading: teacherLoading, fetchData: teacherFetchData } = useLoader({});
 
     // Api
     const lessonStandartApi = useApi().study.lessonStandart
@@ -73,7 +74,7 @@ const MainInformation = ({ getNavigateData }) => {
         }
     }
 
-    // Хөтөлбөрийн багын жагсаалт
+    // Тэнхимын жагсаалт
     async function getDepartmentOption() {
         const { success, data } = await fetchData(departmentApi.getSelectSchool(select_school))
         if(success) {
@@ -91,7 +92,7 @@ const MainInformation = ({ getNavigateData }) => {
 
     // Хичээл заах багшийн жагсаалт авах
     async function getTeacher() {
-        const { success, data } = await fetchData(teacherApi.getSelectSchool(select_school)) //сонгосон сургуулиас хамаарч багшийн мэдээлэл гаргадаг болгосон
+        const { success, data } = await teacherFetchData(teacherApi.getSelectSchool(select_school)) //сонгосон сургуулиас хамаарч багшийн мэдээлэл гаргадаг болгосон
         if(success) {
             setTeacherOption(data)
         }
@@ -124,7 +125,7 @@ const MainInformation = ({ getNavigateData }) => {
                     }
                     if (key === 'teachers') {
                         var teacher_ids = []
-                        data[key].map((teacher, idx) => {
+                        data[key]?.teachers?.map((teacher, idx) => {
                             var selected = teacher_option.find((e) => e.id === teacher?.id)
                             if (selected != undefined) {
                                 teacher_ids.push(selected)
@@ -140,11 +141,8 @@ const MainInformation = ({ getNavigateData }) => {
     useEffect(() => {
         getLessonCategory()
         getSchoolOption()
-        getDepartmentOption()
-        getTeacher()
         getDatas()
     },[])
-
 
     useEffect(() => {
         getDepartmentOption()
@@ -155,7 +153,7 @@ const MainInformation = ({ getNavigateData }) => {
     useEffect(() => {
         if (Object.keys(datas).length > 0) {
             var teacher_ids = []
-            datas['teachers'].map((teacher, idx) => {
+            datas['teachers']?.teachers?.map((teacher, idx) => {
                 var selected = teacher_option.find((e) => e.id === teacher?.id)
                 if (selected != undefined) {
                     teacher_ids.push(selected)
@@ -170,14 +168,14 @@ const MainInformation = ({ getNavigateData }) => {
         cdata['updated_user'] = user.id
         cdata['teachers'] = selectedTeachers
         cdata = convertDefaultValue(cdata)
-        const { success, error } = await fetchData(lessonStandartApi.put(cdata, standart_Id))
+        const { success, errors } = await fetchData(lessonStandartApi.put(cdata, standart_Id))
         if(success) {
             getDatas();
             getNavigateData();
         } else {
             /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in error) {
-                setError(error[key].field, { type: 'custom', message:  error[key].msg});
+            for (let key in errors) {
+                setError(key, { type: 'custom', message:  errors[key][0]});
             }
         }
 	}
@@ -231,7 +229,7 @@ const MainInformation = ({ getNavigateData }) => {
                         }
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="department">
-                                {t('Хөтөлбөрийн баг')}
+                                {t('Тэнхим')}
                             </Label>
                             <Controller
                                 control={control}
@@ -541,7 +539,7 @@ const MainInformation = ({ getNavigateData }) => {
                                             classNamePrefix='select'
                                             isClearable
                                             className={classnames('react-select', { 'is-invalid': errors.teacher })}
-                                            isLoading={isLoading}
+                                            isLoading={teacherLoading}
                                             placeholder={t('-- Сонгоно уу --')}
                                             options={teacher_option || []}
                                             value={selectedTeachers}

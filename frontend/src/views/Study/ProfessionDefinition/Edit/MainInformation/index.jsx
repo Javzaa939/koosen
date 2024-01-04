@@ -67,7 +67,7 @@ const MainInformation = ({ }) => {
     const definationApi = useApi().study.professionDefinition
     const departmentApi = useApi().hrms.department
 
-    // Хөтөлбөрийн багын жагсаалт
+    // Тэнхимын жагсаалт
     async function getDepartmentOption() {
         const { success, data } = await fetchData(departmentApi.get(school_id))
         if(success) {
@@ -118,14 +118,14 @@ const MainInformation = ({ }) => {
 
 	async function onSubmit(cdata) {
         cdata = convertDefaultValue(cdata)
-        const { success, error } = await fetchData(definationApi.put(cdata, definition_Id))
+        const { success, errors } = await fetchData(definationApi.put(cdata, definition_Id))
         if(success) {
             reset()
             getDatas()
         } else {
             /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in error) {
-                setError(error[key].field, { type: 'custom', message:  error[key].msg});
+            for (let key in errors) {
+                setError(key, { type: 'custom', message:  errors[key][0]});
             }
         }
 	}
@@ -142,7 +142,7 @@ const MainInformation = ({ }) => {
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
                         <Col  lg={6} xs={12}>
                             <Label className="form-label" for="department">
-                                {t('Хөтөлбөрийн баг')}
+                                {t('Тэнхим')}
                             </Label>
                             <Controller
                                 control={control}

@@ -1,10 +1,10 @@
 
-import React, { Fragment, useState, useEffect } from "react"
+import React, { Fragment, useState, useEffect, useContext } from "react"
 
 import { Card, CardHeader, CardTitle, Row, Col, Input, Label, Button, ListGroupItem, Spinner } from "reactstrap"
 import { ChevronDown, Plus, Search, Menu, Trash2, Edit } from 'react-feather'
 import { useTranslation } from 'react-i18next'
-import DataTable, { ExpanderComponentProps } from 'react-data-table-component'
+import DataTable from 'react-data-table-component'
 
 import { ReactSortable } from 'react-sortablejs'
 
@@ -13,6 +13,9 @@ import { getPagination } from '@utils'
 import useApi from '@hooks/useApi'
 import useLoader from '@hooks/useLoader'
 import useModal from '@hooks/useModal'
+
+import SchoolContext from '@context/SchoolContext'
+import useUpdateEffect from '@hooks/useUpdateEffect'
 
 // drag-and-drop.scss
 import '@styles/react/libs/drag-and-drop/drag-and-drop.scss'
@@ -26,6 +29,8 @@ export default function Specification()
 
     const { showWarning } = useModal()
     const { t } = useTranslation()
+
+    const { school_id } = useContext(SchoolContext)
 
     const studentApi = useApi().student
     const signatureApi = useApi().signature
@@ -52,27 +57,21 @@ export default function Specification()
     useEffect(
         () =>
         {
+            getDatas();
+        },
+        [rowsPerPage, currentPage, sortField, school_id]
+    )
+
+    useUpdateEffect(
+        () =>
+        {
+            // Хайлт хийсэн утгаа хоослох үед бүх датаг дуудна
             if (searchValue.length == 0) {
                 getDatas();
-            } else {
-                const timeoutId = setTimeout(() => {
-                    getDatas();
-                }, 600);
-                return () => clearTimeout(timeoutId);
             }
         },
-        [rowsPerPage, currentPage, sortField, searchValue]
+        [searchValue]
     )
-    function getAllData()
-    {
-        Promise.all([
-            fetchData(studentApi.getDefinition(rowsPerPage, currentPage, sortField, searchValue)),
-            fetchData(signatureApi.get(1)),
-        ]).then((values) => {
-            setDatas(values[0]?.data?.results)
-            setListArr(values[1]?.data)
-        })
-    }
 
     // Function to handle per page
     function handlePerPage(e)
@@ -163,7 +162,7 @@ export default function Specification()
     useEffect(
         () =>
         {
-            getAllData()
+            getSignatureDatas()
         },
         []
     )

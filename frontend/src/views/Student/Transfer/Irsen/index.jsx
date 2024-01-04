@@ -24,7 +24,9 @@ import DataTable from 'react-data-table-component'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
+import useUpdateEffect from '@hooks/useUpdateEffect'
 // import AuthContext from '@context/AuthContext'
+import SchoolContext from '@context/SchoolContext'
 
 import { getPagination, formatDate } from '@utils'
 import { getColumns } from './helpers'
@@ -40,6 +42,8 @@ import PrintModal from "./PrintModal";
 const Irsen = () => {
 
     // const { user } = useContext(AuthContext)
+    const { school_id } = useContext(SchoolContext)
+
     const default_page = [10, 15, 50, 75, 100]
     const { t } = useTranslation()
     const navigate = useNavigate();
@@ -76,7 +80,6 @@ const Irsen = () => {
     // Эрэмбэлэлт
     const [sortField, setSort] = useState('')
 
-
     const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: false })
 
     const studentmovementApi = useApi().student.arrived
@@ -84,7 +87,7 @@ const Irsen = () => {
 
     useEffect(() => {
         getDatas()
-    }, [sortField, currentPage, rowsPerPage, endPicker, startPicker])
+    }, [sortField, currentPage, rowsPerPage, endPicker, startPicker, school_id])
 
     async function getDatas() {
         const page_count = Math.ceil(total_count / rowsPerPage)
@@ -150,9 +153,8 @@ const Irsen = () => {
         if (searchValue.length > 0 || stateValue.length >  0) getDatas()
     }
 
-
     // Хайлтийн хэсэг хоосон болох үед анхны датаг дуудна
-	useEffect(() => {
+	useUpdateEffect(() => {
 		if (searchValue.length == 0) {
 			getDatas();
 		} else {

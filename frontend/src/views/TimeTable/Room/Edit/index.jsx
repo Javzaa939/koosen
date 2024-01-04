@@ -56,7 +56,7 @@ const EditModal = ({ open, handleModal, room_id, refreshDatas }) => {
     const buildingApi = useApi().timetable.building
     const schoolApi = useApi().hrms.subschool
 
-    // Хөтөлбөрийн багын жагсаалт
+    // Тэнхимын жагсаалт
     async function getBuilding() {
         const { success, data } = await fetchData(buildingApi.get())
         if(success) {

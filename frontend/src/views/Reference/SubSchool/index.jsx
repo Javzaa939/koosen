@@ -1,7 +1,7 @@
 // ** React Imports
 import { Fragment, useState, useEffect, useContext} from 'react'
 
-import { Row, Col, Card, Input, CardTitle, CardHeader, Spinner, Button, Label } from 'reactstrap'
+import { Col, Card, Input, CardTitle, CardHeader, Spinner, Button, Label } from 'reactstrap'
 
 import { ChevronDown, Plus } from 'react-feather'
 import DataTable from 'react-data-table-component'
@@ -16,7 +16,6 @@ import SchoolContext from '@context/SchoolContext'
 import { getColumns } from './helpers';
 import UpdateModal from "./Edit"
 import AddModal from "./Add"
-
 
 import { useTranslation } from "react-i18next";
 
@@ -55,7 +54,6 @@ const SubSchool = () => {
 		setAddModal(!add_modal)
 	}
 
-
 	/* Жагсаалтын дата авах функц */
 	async function getDatas() {
 		const { success, data } = await allFetch(schoolApi.get(searchValue))
@@ -64,7 +62,6 @@ const SubSchool = () => {
 			setTotalCount(data.length)
 		}
 	}
-
 
 	useEffect(() => {
 		if (searchValue.length == 0) {

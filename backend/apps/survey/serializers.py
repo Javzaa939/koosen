@@ -9,8 +9,8 @@ from lms.models import (
     QuestionChoices,
     Survey,
     Pollee,
-    Departments,
-    SubSchools,
+    Salbars,
+    SubOrgs,
     Teachers,
     ProfessionDefinition,
     Group,
@@ -117,7 +117,7 @@ class SurveyPolleeGetDepartmentSerializer(serializers.ModelSerializer):
     " Багшыг филтэрдэх үед түүнийг дагаад Тэнхимийг дуудах serializer. Өөр газар ашиглахад боломжтой."
 
     class Meta:
-        model = Departments
+        model = Salbars
         fields = "id", "name"
 
 class SurveyPolleeTeacherSerializers(serializers.ModelSerializer):
@@ -127,7 +127,7 @@ class SurveyPolleeTeacherSerializers(serializers.ModelSerializer):
     def get_salbar(self, obj):
         if obj.salbar:
             salbar_id = obj.salbar.id
-            teachers_data = Departments.objects.get(id=salbar_id)
+            teachers_data = Salbars.objects.get(id=salbar_id)
             serializer = SurveyPolleeGetDepartmentSerializer(teachers_data)
             return serializer.data
         else:
@@ -321,7 +321,7 @@ class DepartmentSerializer(serializers.ModelSerializer):
     children = serializers.SerializerMethodField()
 
     class Meta:
-        model = Departments
+        model = Salbars
         fields = 'id', 'name', 'children'
 
 
@@ -338,11 +338,11 @@ class SurveySchoolSerializer(serializers.ModelSerializer):
     children = serializers.SerializerMethodField()
 
     class Meta:
-        model = SubSchools
+        model = SubOrgs
         fields = 'id', 'name', 'children'
 
     def get_children(self, obj):
-        qs_department = Departments.objects.filter(sub_orgs=obj)
+        qs_department = Salbars.objects.filter(sub_orgs=obj)
 
         all_list = DepartmentSerializer(qs_department, many=True).data
 
@@ -395,7 +395,7 @@ class DepartmentStudentSerializer(serializers.ModelSerializer):
     children = serializers.SerializerMethodField()
 
     class Meta:
-        model = Departments
+        model = Salbars
         fields = 'id', 'name', 'children'
 
     def get_children(self, obj):
@@ -411,11 +411,11 @@ class SurveySchoolStudentSerializer(serializers.ModelSerializer):
     children = serializers.SerializerMethodField()
 
     class Meta:
-        model = SubSchools
+        model = SubOrgs
         fields = 'id', 'name', 'children'
 
     def get_children(self, obj):
-        qs_department = Departments.objects.filter(sub_orgs=obj)
+        qs_department = Salbars.objects.filter(sub_orgs=obj)
 
         all_list = DepartmentStudentSerializer(qs_department, many=True).data
 

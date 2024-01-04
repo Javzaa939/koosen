@@ -16,6 +16,8 @@ import useApi from '@hooks/useApi';
 
 import useLoader from '@hooks/useLoader';
 
+import SchoolContext from '@context/SchoolContext'
+
 import { getColumns } from './helpers';
 
 import { getPagination, ReactSelectStyles } from '@utils';
@@ -31,6 +33,7 @@ const Graduation = () => {
 	}
 
     const { t } = useTranslation()
+    const { school_id } = useContext(SchoolContext)
 
     const [rowsPerPage, setRowsPerPage] = useState(10)
     const [searchValue, setSearchValue] = useState("");
@@ -75,7 +78,7 @@ const Graduation = () => {
 
     useEffect(() => {
         getDatas()
-    }, [rowsPerPage, currentPage, sort, searchValue, select_value])
+    }, [rowsPerPage, currentPage, sort, searchValue, select_value, school_id])
 
     async function handleSearch() {
         // if (searchValue.length > 0) getDatas()
@@ -164,7 +167,7 @@ const Graduation = () => {
                 <Row className="justify-content-between mx-0 mb-1 mt-1">
                     <Col md={4}>
                         <Label className="form-label" for="department">
-                            {t('Хөтөлбөрийн баг')}
+                            {t('Тэнхим')}
                         </Label>
                         <Controller
                             control={control}

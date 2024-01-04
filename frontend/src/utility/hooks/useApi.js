@@ -469,7 +469,7 @@ function useApi(isDisplay=false) {
 				get: () => instance.get(`/core/department/?school=${school_id}`),
 				getSelectSchool: (school) => instance.get(`/core/department/?school=${school}`),
 
-				// тэнхим, хөтөлбөрийн багийн ахлахын мэдээлэл
+				// тэнхимийн эрхлэгчийн мэдээлэл
 				getRegister: (search='') => instance.get(`/core/department/register/?school=${school_id}&search=${search}`),
 				getRegisterOne: (pk) => instance.get(`/core/department/register/${pk}/`),
 				putRegister: (data, pk) => instance.put(`/core/department/register/${pk}/`, data),
@@ -1182,6 +1182,10 @@ function useApi(isDisplay=false) {
 				delete: (pk) => instance.delete(`/service/news/${pk}/`),
 				// File save
 				saveFile: data => instance.post(`/service/news/file/`, data),
+
+				//Зар
+				getAd: (limit, page, sort, search) => instance.get(`/service/news/ad/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}`),
+				getOneAd: (pk) => instance.get(`/service/news/ad/${pk}/`),
 			},
 		},
 		/** Цагийн тооцоо */
