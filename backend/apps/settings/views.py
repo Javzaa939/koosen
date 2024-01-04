@@ -1474,7 +1474,7 @@ class PermissionAPIView(
 class PermissionListAPIView(
     generics.GenericAPIView
 ):
-    queryset = Permissions.objects.order_by("-created_at")
+    queryset = Permissions.objects.filter(name__startswith='lms-').order_by("-created_at")
     serializer_class = PermissionsSerializer
 
     @login_required()
