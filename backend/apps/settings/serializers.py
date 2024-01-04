@@ -220,3 +220,17 @@ class RolesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Roles
         fields = "__all__"
+
+
+class RolesListSerializer(serializers.ModelSerializer):
+
+    permissions = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Roles
+        fields = "__all__"
+
+    def get_permissions(self, obj):
+
+        permissions = obj.permissions.filter(name__startswith='lms-').values_list('id', flat=True)
+        return list(permissions)

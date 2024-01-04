@@ -49,6 +49,7 @@ from .serializers import CountrySerializer
 from .serializers import DefinitionSignatureSerializer
 from .serializers import PermissionsSerializer
 from .serializers import RolesSerializer
+from .serializers import RolesListSerializer
 
 from django.db import transaction
 from django.db.models import Max, Q
@@ -1569,6 +1570,7 @@ class RolesAPIView(
         """ Role жагсаалт
         """
 
+        self.serializer_class = RolesListSerializer
         list = self.list(request, pk).data
         return request.send_data(list)
 

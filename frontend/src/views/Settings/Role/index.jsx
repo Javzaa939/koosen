@@ -181,7 +181,11 @@ export default function Role()
 
             for (let perm of isUpdate.permissions)
             {
-                document.getElementById(`perm-${perm}`).checked = true
+                let permInput = document.getElementById(`perm-${perm}`)
+                if (permInput)
+                {
+                    document.getElementById(`perm-${perm}`).checked = true
+                }
             }
         }
     }
@@ -346,7 +350,8 @@ export default function Role()
                             <h4 className='mt-2 pt-50'>Эрхүүд</h4>
                             <Table className='table-flush-spacing' style={{ display: 'block', maxHeight: '400px', overflow: 'auto' }} responsive>
                                 <tbody>
-                                    <tr>
+                                    {/* TODO: Бүх эрхийг идэвхжүүлдэг байлгах */}
+                                    {/* <tr>
                                         <td className='text-nowrap fw-bolder'>
                                             <span className='me-50'>Админ эрх</span>
                                             <Info size={14} id='info-tooltip' />
@@ -362,7 +367,7 @@ export default function Role()
                                                 </Label>
                                             </div>
                                         </td>
-                                    </tr>
+                                    </tr> */}
                                     {
                                         permissions?.non_crud_perms?.map((val, idx) =>
                                         {
