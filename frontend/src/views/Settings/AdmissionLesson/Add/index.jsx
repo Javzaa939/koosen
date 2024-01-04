@@ -143,14 +143,20 @@ const Addmodal = ({ open, handleModal, refreshDatas, editId, handleEdit}) => {
                             />
                             {errors.lesson_name && <FormFeedback className='d-block'>{t(errors.lesson_name.message)}</FormFeedback>}
                         </Col>
-                        <Col md={12} className="mt-2">
+                        <Col md={12} className=" text-center mt-2">
                             <Button className="me-2" color="primary" type="submit" disabled={postLoading}>
                             {postLoading &&<Spinner size='sm' className='me-1'/>}
                                 {t('Хадгалах')}
                             </Button>
-                            <Button color="secondary" type="reset" outline  onClick={handleModal}>
-                                {t('Буцах')}
-                            </Button>
+                            {
+                                editId
+                                ?
+                                    null
+                                :
+                                <Button color="secondary" type="reset" outline  onClick={handleModal}>
+                                    {t('Буцах')}
+                                </Button>
+                            }
                         </Col>
                     </Row>
                 </ModalBody>

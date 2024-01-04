@@ -91,7 +91,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, editId }) => {
                     close={CloseBtn}
                     tag="div"
                 >
-                    <h5 className="modal-title">{t('Улс нэмэх')}</h5>
+                    <h5 className="modal-title">{editId ? t('Улс засах') : t('Улс нэмэх')}</h5>
                 </ModalHeader>
                 <ModalBody className="flex-grow-1">
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
@@ -185,13 +185,19 @@ const Addmodal = ({ open, handleModal, refreshDatas, editId }) => {
                             />
                             {errors.name_uig && <FormFeedback className='d-block'>{t(errors.name_uig.message)}</FormFeedback>}
                         </Col>
-                        <Col md={12} className="mt-2">
+                        <Col md={12} className=" text-center mt-2">
                             <Button className="me-2" color="primary" type="submit">
                                 {t('Хадгалах')}
                             </Button>
-                            <Button color="secondary" type="reset" outline  onClick={handleModal}>
-                                {t('Буцах')}
-                            </Button>
+                            {
+                                editId
+                                ?
+                                    null
+                                :
+                                <Button color="secondary" type="reset" outline  onClick={handleModal}>
+                                    {t('Буцах')}
+                                </Button>
+                            }
                         </Col>
                     </Row>
                 </ModalBody>

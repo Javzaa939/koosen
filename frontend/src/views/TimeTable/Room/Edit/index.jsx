@@ -362,9 +362,9 @@ const EditModal = ({ open, handleModal, room_id, refreshDatas }) => {
                             <Button className="me-2" disabled={is_valid} size='sm' color="primary" type="submit">
                                 {t('Хадгалах')}
                             </Button>
-                            <Button color="secondary" size='sm' type="reset" outline  onClick={handleModal}>
+                            {/* <Button color="secondary" size='sm' type="reset" outline  onClick={handleModal}>
                                 {t('Буцах')}
-                            </Button>
+                            </Button> */}
                         </Col>
                     </Row>
                 </ModalBody>

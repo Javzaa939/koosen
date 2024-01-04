@@ -92,7 +92,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, editId }) => {
                     close={CloseBtn}
                     tag="div"
                 >
-                    <h5 className="modal-title">{t('Оюутны бүртгэлийн хэлбэр нэмэх')}</h5>
+                    <h5 className="modal-title">{ editId ? t('Оюутны бүртгэлийн хэлбэр засах') :t('Оюутны бүртгэлийн хэлбэр нэмэх')}</h5>
                 </ModalHeader>
                 <ModalBody className="flex-grow-1">
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
@@ -141,14 +141,19 @@ const Addmodal = ({ open, handleModal, refreshDatas, editId }) => {
                             />
                             {errors.name && <FormFeedback className='d-block'>{t(errors.name.message)}</FormFeedback>}
                         </Col>
-                        <Col md={12} className="mt-2">
+                        <Col md={12} className=" text-center mt-2">
                             <Button className="me-2" color="primary" type="submit" disabled={postLoading}>
                                 {postLoading &&<Spinner size='sm' className='me-1'/>}
                                 {t('Хадгалах')}
                             </Button>
-                            <Button color="secondary" type="reset" outline  onClick={handleModal}>
-                                {t('Буцах')}
-                            </Button>
+                            {
+                                editId ?
+                                    null
+                                :
+                                <Button color="secondary" type="reset" outline  onClick={handleModal}>
+                                    {t('Буцах')}
+                                </Button>
+                            }
                         </Col>
                     </Row>
                 </ModalBody>
