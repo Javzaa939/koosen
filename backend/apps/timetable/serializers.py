@@ -48,7 +48,12 @@ class RoomInfoSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def get_type_name(self, obj):
-        return Room.ROOM_TYPE[obj.type][1]
+        room_type = None
+
+        if obj:
+            room_type = obj.get_type_display()
+
+        return room_type
 
 
 class RoomListSerializer(serializers.ModelSerializer):
