@@ -197,7 +197,7 @@ const CreditVolume = () => {
         }
 	};
 
-    /**Хөтөлбөрийн багын жагсаалт */
+    /**Тэнхимын жагсаалт */
     async function getDepartment() {
         const { success, data } = await fetchData(departmentApi.get())
         if(success) {
@@ -354,7 +354,7 @@ const CreditVolume = () => {
                     </Col>
                     <Col md={3} className='mb-1'>
                         <Label className="form-label" for="department">
-                            {t('Хөтөлбөрийн баг')}
+                            {t('Тэнхим')}
                         </Label>
                         <Select
                             name="department"

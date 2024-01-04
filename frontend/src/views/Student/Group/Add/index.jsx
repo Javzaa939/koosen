@@ -32,7 +32,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
     // Боловсролын зэргийн id
     const [ degree_id, setDegreeId] = useState('')
 
-    // Хөтөлбөрийн багын id
+    // Тэнхимын id
     const [ dep_id, setDepId] = useState('')
 
     // ** Hook
@@ -163,7 +163,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
                         <Col md={12}>
                             <Label className="form-label" for="department">
-                               {t('Хөтөлбөрийн баг')}
+                               {t('Тэнхим')}
                             </Label>
                             <Controller
                                 control={control}

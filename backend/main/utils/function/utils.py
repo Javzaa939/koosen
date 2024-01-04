@@ -926,3 +926,121 @@ def dict_fetchall(cursor):
     columns = [col[0] for col in cursor.description if col]
     for row in cursor.fetchall():
         yield dict(zip(columns, row))
+
+
+def import_score(reader):
+    headers = []
+
+    not_lesson = []
+    not_student = []
+    for idx, row in enumerate(reader):
+        # Эхний мөрийг Header хэсэг гэж үзээд
+        if idx == 0:
+            for key in row:
+                if key != None:
+                    headers.append(key)
+
+        print('idx', idx)
+
+        student = None
+        for head in headers:
+            if head == 'Оюутны код':
+                student_code = row[head]
+                student = Student.objects.filter(code=student_code).first()
+                print(student_code)
+
+                if not student:
+                    not_student.append(student_code)
+
+            else:
+                if not student:
+                    continue
+
+                score_head = head
+                if '–' in head:
+                    head = head.replace('–', '-')
+
+                splitted_name = head.split('-')
+                lesson_name = splitted_name[0]
+                lesson_code = splitted_name[-1]
+
+                lesson_code = lesson_code.strip()
+                lesson_name = lesson_name.strip()
+
+
+                lesson = LessonStandart.objects.filter(code=lesson_code).first()
+
+                if not lesson:
+                    lesson = LessonStandart.objects.filter(name__contains=lesson_name).first()
+
+                if not lesson and (head not in not_lesson):
+                    not_lesson.append(head)
+                    break
+
+                # Дүн
+                score = row[score_head] or 0
+
+                # START_SYSTEM_SCORE
+
+                assessment = Score.objects.filter(score_max__gte=score, score_min__lte=score).first()
+
+                # Оюутны анги
+                student_group = student.group
+
+                # Ангийн элссэн хичээлийн жил
+                student_group_year = student_group.join_year
+
+                # Мэргэжил
+                student_profession = student_group.profession.id
+
+                splitted_list = student_group_year.split('-')
+
+                start_year = int(splitted_list[0]) # Анги эхэлсэн жил
+                end_year = int(splitted_list[1]) # Анги дууссан жил
+
+                # Cургалтын төлөвлөгөөнөөс мэргэжил хичээлээр хайж хичээл үзэх улирлыг авна
+                learningplan = LearningPlan.objects.filter(profession=student_profession, lesson=lesson.id).first()
+                if learningplan:
+                    learningplan_season = learningplan.season
+
+                    if learningplan_season:
+                        learningplan_season = json_load(learningplan_season)
+                        if isinstance(learningplan_season, list) and len(learningplan_season) > 0:
+                            learningplan_season = learningplan_season[0]
+
+                        # Улирал тэгш сондгой эсэхийг шалгах
+                        if int(learningplan_season) % 2 == 0:
+                            year_count = int(learningplan_season) / 2
+                            cyear_count = int(year_count - 1)
+
+                            qs_season = Season.objects.filter(season_name='Хавар').first()
+                            season = qs_season.id
+                        else:
+                            year_count = (int(learningplan_season) + 1) / 2
+                            cyear_count = int(year_count - 1)
+
+                            qs_season = Season.objects.filter(season_name='Намар').first()
+                            season = qs_season.id
+
+                        score_start_year = str(start_year + cyear_count)
+                        score_end_year = str(end_year + cyear_count)
+
+                        lesson_year = score_start_year + '-' + score_end_year
+
+                    obj, created = ScoreRegister.objects.update_or_create(
+                        student=student,
+                        lesson=lesson,
+                        lesson_year=lesson_year,
+                        defaults={
+                            'exam_score': score,
+                            'assessment': assessment,
+                            'lesson_season': qs_season,
+                            'lesson_year':lesson_year,
+                            'status': ScoreRegister.START_SYSTEM_SCORE,
+                            'school': student.school
+                        }
+                    )
+
+                    print(student,  lesson, obj, 'Амжилттай үүслээ')
+
+    return 'Бүгд хадгалагдлаа'
