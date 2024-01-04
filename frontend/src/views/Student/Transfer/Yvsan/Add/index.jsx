@@ -431,7 +431,7 @@ const Createmodal = ({ open, handleModal, refreshDatas, edit_id }) => {
                                                         isClearable={!selectedPro}
                                                         className={classnames('react-select', { 'is-invalid': errors.destination_department})}
                                                         isLoading={isLoading}
-                                                        placeholder={t(`Та хөтөлбөрийн багаа сонгоно уу`)}
+                                                        placeholder={t(`Та тэнхим сонгоно уу`)}
                                                         options={selectedValue?.children}
                                                         value={selectedValue?.children.find((val) => val.id === value)}
                                                         noOptionsMessage={() => t('Хоосон байна')}

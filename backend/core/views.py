@@ -255,7 +255,7 @@ class DepartmentAPIView(
             return request.send_error("ERR_002")
 
     def put(self, request, pk=None):
-        " хөтөлбөрийн багийн мэдээлэл засах "
+        " Тэнхимийн мэдээлэл засах "
 
         self.serializer_class = DepartmentRegisterListSerailizer
 
@@ -891,7 +891,7 @@ class DepLeaderAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
 ):
-    """ Хөтөлбөрийн багийн ахлагч жагсаалт """
+    """ Тэнхимийн эрхлэгч жагсаалт """
 
     queryset = Teachers.objects.all()
     serializer_class = TeachersSerializer

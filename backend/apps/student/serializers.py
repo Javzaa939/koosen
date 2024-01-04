@@ -107,7 +107,7 @@ class StatusSerializer(serializers.ModelSerializer):
         fields = "name"
 
 
-# Хөтөлбөрийн баг
+# Тэнхимээр
 class DepartmentsSerializer(serializers.ModelSerializer):
 
     class Meta:

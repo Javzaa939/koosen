@@ -17,7 +17,7 @@ urlpatterns = [
     path('school/', SchoolAPIView.as_view()),
     path('school/<int:pk>/', SchoolAPIView.as_view()),
 
-    # Хөтөлбөрийн баг
+    # Тэнхим
     path('department/', DepartmentListAPIView.as_view()),
     path('department/register/', DepartmentAPIView.as_view()),
     path('department/register/<int:pk>/', DepartmentAPIView.as_view()),

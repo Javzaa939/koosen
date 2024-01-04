@@ -155,7 +155,7 @@ class GpaAPIView(
         if schoolId:
             queryset = queryset.filter(school=schoolId)
 
-        # Хөтөлбөрийн багаар хайх
+        # Тэнхимээр хайх
         if department:
             queryset = queryset.filter(department=department)
 
@@ -507,7 +507,7 @@ class GraduationWorkAPIView(
         if schoolId:
             queryset = queryset.filter(student__school=schoolId)
 
-        # Хөтөлбөрийн багаар хайх
+        # Тэнхимээр хайх
         if department:
             queryset = queryset.filter(student__group__department=department)
 
@@ -578,7 +578,7 @@ class AdmissionAPIView(
         if schoolId:
             queryset = queryset.filter(school=schoolId)
 
-        # Хөтөлбөрийн багаар хайх
+        # Тэнхимээр хайх
         if department:
             queryset = queryset.filter(department=department)
 

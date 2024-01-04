@@ -173,7 +173,7 @@ def override_get_queryset(self):
     if lesson:
         queryset = queryset.filter(lesson=lesson)
 
-    # Хөтөлбөрийн багаар хайлт хийх
+    # Тэнхимээр хайлт хийх
     if department:
         queryset = queryset.filter(department=department)
 

@@ -469,7 +469,7 @@ function useApi(isDisplay=false) {
 				get: () => instance.get(`/core/department/?school=${school_id}`),
 				getSelectSchool: (school) => instance.get(`/core/department/?school=${school}`),
 
-				// тэнхим, хөтөлбөрийн багийн ахлахын мэдээлэл
+				// тэнхимийн эрхлэгчийн мэдээлэл
 				getRegister: (search='') => instance.get(`/core/department/register/?school=${school_id}&search=${search}`),
 				getRegisterOne: (pk) => instance.get(`/core/department/register/${pk}/`),
 				putRegister: (data, pk) => instance.put(`/core/department/register/${pk}/`, data),
