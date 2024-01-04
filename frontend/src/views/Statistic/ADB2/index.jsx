@@ -948,7 +948,7 @@ function ADB2(){
                                     } */}
 
                         {/* Нийт оюутны тоо */}
-                                    <td>
+                                    {/* <td>
                                         {data.profesion.filter((data) => data.degree_id === degreeAll)[0].all_student}
                                     </td>
                                     <td>
@@ -956,10 +956,10 @@ function ADB2(){
                                     </td>
                                     <td>
                                         {data.profesion.filter((data) => data.degree_id === degreeAll)[0].student_women}
-                                    </td>
+                                    </td> */}
 
                             {/* Дипломын боловсролд хамрагдах оюутны тоо */}
-                                    <td>
+                                    {/* <td>
                                         {data.profesion.filter((data) => data.degree_code === degreeDiplom)[0].all_student}
                                     </td>
                                     <td>
@@ -967,11 +967,11 @@ function ADB2(){
                                     </td>
                                     <td>
                                         {data.profesion.filter((data) => data.degree_code === degreeDiplom)[0].student_women}
-                                    </td>
+                                    </td> */}
 
 
                             {/* Бакалаврын боловсролд хамрагдах оюутны тоо */}
-                                    <td>
+                                    {/* <td>
                                         {data.profesion.filter((data) => data.degree_code === degreeBakalavr)[0].all_student}
                                     </td>
                                     <td>
@@ -979,11 +979,11 @@ function ADB2(){
                                     </td>
                                     <td>
                                         {data.profesion.filter((data) => data.degree_code === degreeBakalavr)[0].student_women}
-                                    </td>
+                                    </td> */}
 
 
                             {/* Магистрын боловсролд хамрагдах оюутны тоо */}
-                                    <td>
+                                    {/* <td>
                                         {data.profesion.filter((data) => data.degree_code === degreeMagistr)[0].all_student}
                                     </td>
                                     <td>
@@ -991,11 +991,11 @@ function ADB2(){
                                     </td>
                                     <td>
                                         {data.profesion.filter((data) => data.degree_code === degreeMagistr)[0].student_women}
-                                    </td>
+                                    </td> */}
 
 
                             {/* Докторын боловсролд хамрагдах оюутны тоо */}
-                                    <td>
+                                    {/* <td>
                                         {data.profesion.filter((data) => data.degree_code === degreeDoctor)[0].all_student}
                                     </td>
                                     <td>
@@ -1003,10 +1003,10 @@ function ADB2(){
                                     </td>
                                     <td>
                                         {data.profesion.filter((data) => data.degree_code === degreeDoctor)[0].student_women}
-                                    </td>
+                                    </td> */}
 
                             {/* Нийт хөгжлийн бэрхшээлтэй оюутны тоо */}
-                                            <td>
+                                            {/* <td>
                                                 {data.disability.filter((data) => data.disability_type_id === disAll)[0].all_student}
                                             </td>
                                             <td>
@@ -1014,7 +1014,7 @@ function ADB2(){
                                             </td>
                                             <td>
                                                 {data.disability.filter((data) => data.disability_type_id === disAll)[0].student_women}
-                                            </td>
+                                            </td> */}
 
                         {/* Үзүүлэлт */}
                     <td style={{ minWidth: 200 }}>
@@ -1026,44 +1026,44 @@ function ADB2(){
 
                                         {/* Харааны бэрхшээлтэй оюутны тоо */}
 
-                                                <td>{data.disability.filter((data) => data.disability_type_id === disHaraa)[0].all_student}</td>
+                                                {/* <td>{data.disability.filter((data) => data.disability_type_id === disHaraa)[0].all_student}</td>
                                                 <td>{data.disability.filter((data) => data.disability_type_id === disHaraa)[0].student_men}</td>
-                                                <td>{data.disability.filter((data) => data.disability_type_id === disHaraa)[0].student_women}</td>
+                                                <td>{data.disability.filter((data) => data.disability_type_id === disHaraa)[0].student_women}</td> */}
 
                                         {/* Сонсголын бэрхшээлтэй оюутны тоо */}
 
-                                                <td>{data.disability.filter((data) => data.disability_type_id === disSonsgol)[0].all_student}</td>
+                                                {/* <td>{data.disability.filter((data) => data.disability_type_id === disSonsgol)[0].all_student}</td>
                                                 <td>{data.disability.filter((data) => data.disability_type_id === disSonsgol)[0].student_men}</td>
-                                                <td>{data.disability.filter((data) => data.disability_type_id === disSonsgol)[0].student_women}</td>
+                                                <td>{data.disability.filter((data) => data.disability_type_id === disSonsgol)[0].student_women}</td> */}
 
                                         {/* Ярианы бэрхшээлтэй оюутны тоо */}
 
-                                                <td>{data.disability.filter((data) => data.disability_type_id === disYria)[0].all_student}</td>
+                                                {/* <td>{data.disability.filter((data) => data.disability_type_id === disYria)[0].all_student}</td>
                                                 <td>{data.disability.filter((data) => data.disability_type_id === disYria)[0].student_men}</td>
-                                                <td>{data.disability.filter((data) => data.disability_type_id === disYria)[0].student_women}</td>
+                                                <td>{data.disability.filter((data) => data.disability_type_id === disYria)[0].student_women}</td> */}
 
                                         {/* Хөдөлгөөний бэрхшээлтэй оюутны тоо */}
-                                                <td>{data.disability.filter((data) => data.disability_type_id === disHudulguun)[0].all_student}</td>
+                                                {/* <td>{data.disability.filter((data) => data.disability_type_id === disHudulguun)[0].all_student}</td>
                                                 <td>{data.disability.filter((data) => data.disability_type_id === disHudulguun)[0].student_men}</td>
-                                                <td>{data.disability.filter((data) => data.disability_type_id === disHudulguun)[0].student_women}</td>
+                                                <td>{data.disability.filter((data) => data.disability_type_id === disHudulguun)[0].student_women}</td> */}
 
 
                                         {/* Сэтгэцийн бэрхшээлтэй оюутны тоо */}
 
-                                                <td>{data.disability.filter((data) => data.disability_type_id === disSetgets)[0].all_student}</td>
+                                                {/* <td>{data.disability.filter((data) => data.disability_type_id === disSetgets)[0].all_student}</td>
                                                 <td>{data.disability.filter((data) => data.disability_type_id === disSetgets)[0].student_men}</td>
-                                                <td>{data.disability.filter((data) => data.disability_type_id === disSetgets)[0].student_women}</td>
+                                                <td>{data.disability.filter((data) => data.disability_type_id === disSetgets)[0].student_women}</td> */}
 
                                         {/* Хавсарсан бэрхшээлтэй оюутны тоо */}
-                                                <td>{data.disability.filter((data) => data.disability_type_id === disHavsarsan)[0].all_student}</td>
+                                                {/* <td>{data.disability.filter((data) => data.disability_type_id === disHavsarsan)[0].all_student}</td>
                                                 <td>{data.disability.filter((data) => data.disability_type_id === disHavsarsan)[0].student_men}</td>
-                                                <td>{data.disability.filter((data) => data.disability_type_id === disHavsarsan)[0].student_women}</td>
+                                                <td>{data.disability.filter((data) => data.disability_type_id === disHavsarsan)[0].student_women}</td> */}
 
 
                                         {/* Бусад төрлийн хөгжлийн бэрхшээлтэй оюутны тоо */}
-                                                <td>{data.disability.filter((data) => data.disability_type_id === disBusad)[0].all_student}</td>
+                                                {/* <td>{data.disability.filter((data) => data.disability_type_id === disBusad)[0].all_student}</td>
                                                 <td>{data.disability.filter((data) => data.disability_type_id === disBusad)[0].student_men}</td>
-                                                <td>{data.disability.filter((data) => data.disability_type_id === disBusad)[0].student_women}</td>
+                                                <td>{data.disability.filter((data) => data.disability_type_id === disBusad)[0].student_women}</td> */}
 
 
                                     {/* {data.disability.map((disab, didx) => {
