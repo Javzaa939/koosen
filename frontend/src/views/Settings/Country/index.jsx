@@ -18,7 +18,6 @@ import { getPagination } from '@utils'
 import { getColumns } from './helpers'
 
 import Addmodal from './Add'
-import UpdateModal from './Update'
 
 const Country = () => {
 
@@ -43,7 +42,6 @@ const Country = () => {
 
 	// Modal
 	const [modal, setModal] = useState(false);
-	const [update_modal, setUpdateModal] = useState(false)
 
 	// Api
 	const countryApi = useApi().settings.country
@@ -51,12 +49,15 @@ const Country = () => {
 	/* Модал setState функц */
 	const handleModal = () => {
 		setModal(!modal)
+		if(modal){
+			setEditId()
+		}
 	}
 
 	// Засах функц
     function handleUpdateModal(id) {
         setEditId(id)
-        setUpdateModal(!update_modal)
+		handleModal()
     }
 
 	/* Жагсаалтын дата авах функц */
@@ -65,6 +66,16 @@ const Country = () => {
 		if(success) {
 			setDatas(data)
 			setTotalCount(data.length)
+		}
+	}
+
+	/* Жагсаалтын дата устгах функц */
+	async function handleDelete(id){
+		if(id){
+			const{ success} = await fetchData(countryApi.delete(id))
+			if (success){
+				getDatas()
+			}
 		}
 	}
 
@@ -167,7 +178,7 @@ const Country = () => {
                                     <h5>{t('Өгөгдөл байхгүй байна')}</h5>
                                 </div>
                             )}
-                            columns={getColumns(currentPage, rowsPerPage, searchValue.length ? filteredData : datas, handleUpdateModal, user)}
+                            columns={getColumns(currentPage, rowsPerPage, searchValue.length ? filteredData : datas, handleUpdateModal, user, handleDelete)}
                             sortIcon={<ChevronDown size={10} />}
                             paginationPerPage={rowsPerPage}
                             paginationDefaultPage={currentPage}
@@ -178,8 +189,7 @@ const Country = () => {
                         />
 					</div>
 				}
-				{modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} />}
-				{ update_modal && <UpdateModal editId={edit_id} open={update_modal} handleEdit={handleUpdateModal} refreshDatas={getDatas} /> }
+				{modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} editId={edit_id}/>}
 			</Card>
         </Fragment>
     )

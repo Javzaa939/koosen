@@ -172,19 +172,15 @@ class SchoolAPIView(
 ):
     """" Сургууль, Хамгийн том Байгууллага"""
 
-    queryset = Schools.objects
+    queryset = Schools.objects.all()
     serializer_class = SchoolsRegisterSerailizer
 
     def get(self, request, pk=None):
         " Сургуулийн жагсаалт "
-        self.serializer_class = SchoolsRegisterSerailizer
+        instance = Schools.objects.first()
+        school_data = self.get_serializer(instance).data
 
-        if pk:
-            group = self.retrieve(request, pk).data
-            return request.send_data(group)
-
-        group_list = self.list(request).data
-        return request.send_data(group_list)
+        return request.send_data(school_data)
 
 
 @permission_classes([IsAuthenticated])

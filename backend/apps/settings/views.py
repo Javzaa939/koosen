@@ -24,8 +24,9 @@ from lms.models import ProfessionalDegree
 from lms.models import ProfessionDefinition
 from lms.models import StudentAdmissionScore
 from lms.models import Country
-from lms.models import PaymentSeasonClosing
+from lms.models import TimeTable
 from lms.models import DefinitionSignature
+from lms.models import AdmissionBottomScore
 
 from .serializers import ScoreSerailizer
 from .serializers import SeasonSerailizer
@@ -118,9 +119,11 @@ class ProfessionalDegreeAPIView(
         self.serializer_class = ProfessionalDegreePutSerializer
 
         datas = request.data
+        prof_qs = ProfessionDefinition.objects.exclude(degree=pk).filter(code=datas.get('code'))
+        if len(prof_qs) > 0:
+            return request.send_error("ERR_003", "Зэргийн код давхцаж байна.")
 
         instance = self.queryset.filter(id=pk).first()
-
         serializer = self.get_serializer(instance, data=datas)
 
         if serializer.is_valid(raise_exception=False):
@@ -144,6 +147,15 @@ class ProfessionalDegreeAPIView(
                 }
 
             return request.send_error_valid(return_error)
+
+    @has_permission(must_permissions=['lms-settings-degree-delete'])
+    def delete(self, request, pk=None):
+        prof_qs = ProfessionDefinition.objects.filter(degree=pk)
+        if prof_qs:
+            return request.send_error("ERR_003", "Мэргэжлийн тодорхойлолтод холбогдсон байгаа тул устгах боломжгүй")
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
 
 
 @permission_classes([IsAuthenticated])
@@ -235,6 +247,19 @@ class LearningAPIView(
 
             return request.send_error_valid(return_error)
 
+    @has_permission(must_permissions=['lms-settings-learningstatus-delete'])
+    def delete(self, request, pk=None):
+        "Суралцах хэлбэр устгах"
+
+        # Анги
+        group_qs = Group.objects.filter(learning_status=pk)
+        if len(group_qs) > 0:
+            return request.send_error("ERR_003", "Ангитай холбогдсон байгаа тул устгах боломжгүй")
+
+        self.destroy(request, pk)
+
+        return request.send_info("INF_003")
+
 
 @permission_classes([IsAuthenticated])
 class StudentRegisterAPIView(
@@ -323,6 +348,15 @@ class StudentRegisterAPIView(
                 }
             return request.send_error_valid(return_error)
 
+    @has_permission(must_permissions=['lms-settings-registerstatus-delete'])
+    def delete(self, request, pk=None):
+        " Оюутны бүртгэл устгах "
+
+        stud_qs = Student.objects.filter(status=pk)
+        if len(stud_qs) >0:
+            return request.send_error("ERR_004", "Оюутны бүртгэлтэй холбогдсон тул устгах боломжгүй")
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
 
 @permission_classes([IsAuthenticated])
 class LessonCategoryAPIView(
@@ -380,7 +414,7 @@ class LessonCategoryAPIView(
 
     @has_permission(must_permissions=['lms-settings-lessoncategory-update'])
     def put(self, request, pk=None):
-        "Хичээлийн ангилал  засах"
+        "Хичээлийн ангилал засах"
 
         datas = request.data
         instance = self.queryset.filter(id=pk).first()
@@ -403,7 +437,14 @@ class LessonCategoryAPIView(
                     "msg": "Код бүртгэгдсэн байна"
                 }
 
-            return request.send_error_valid(return_error)
+                return request.send_error_valid(return_error)
+
+    @has_permission(must_permissions=['lms-settings-lessoncategory-delete'])
+    def delete(self, request, pk=None):
+        " Хичээлийн ангилал устгах "
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
 
 
 @permission_classes([IsAuthenticated])
@@ -499,6 +540,13 @@ class LessonTypeAPIView(
             if len(errors) > 0:
                 return request.send_error("ERR_003", errors)
 
+    @has_permission(must_permissions=['lms-settings-lessontype-delete'])
+    def delete(self, request, pk=None):
+        " Хичээлийн төрөл устгах "
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
+
 @permission_classes([IsAuthenticated])
 class LessonLevelAPIView(
     mixins.CreateModelMixin,
@@ -560,7 +608,7 @@ class LessonLevelAPIView(
 
     @has_permission(must_permissions=['lms-settings-lessonlevel-update'])
     def put(self, request, pk=None):
-        " Хичээлийн бүлэг засах"
+        " Хичээлийн түвшин засах"
 
         datas = request.data
         serializer = self.get_serializer(data=datas)
@@ -589,6 +637,13 @@ class LessonLevelAPIView(
 
             if len(errors) > 0:
                 return request.send_error("ERR_003", errors)
+
+    # @has_permission(must_permissions=['lms-settings-lessonlevel-delete'])
+    def delete(self, request, pk=None):
+        " Хичээлийн түвшин устгах "
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
 
 @permission_classes([IsAuthenticated])
 class LessonGroupAPIView(
@@ -669,6 +724,12 @@ class LessonGroupAPIView(
 
             return request.send_error_valid(return_error)
 
+    @has_permission(must_permissions=['lms-settings-lessongroup-delete'])
+    def delete(self, request, pk=None):
+        " Хичээлийн бүлэг устгах "
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
 
 @permission_classes([IsAuthenticated])
 class SeasonAPIView(
@@ -753,6 +814,17 @@ class SeasonAPIView(
 
             return request.send_error("ERR_002")
 
+    @has_permission(must_permissions=['lms-settings-season-delete'])
+    def delete(self, request, pk=None):
+        " Улирал устгах "
+
+        timetable_qs = TimeTable.objects.filter(lesson_season=pk)
+        if len(timetable_qs) > 0:
+            return request.send_error("Хичээлийн хуваарьтай холбогдсон байгаа тул устгах боломжгүй")
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
+
 @permission_classes([IsAuthenticated])
 class ScoreAPIView(
     mixins.CreateModelMixin,
@@ -835,6 +907,13 @@ class ScoreAPIView(
                 }
 
             return request.send_error_valid(return_error)
+
+    @has_permission(must_permissions=['lms-settings-score-delete'])
+    def delete(self, request, pk=None):
+        " Үнэлгээний бүртгэл устгах "
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
 
 
 @permission_classes([IsAuthenticated])
@@ -1018,6 +1097,16 @@ class AdmissionLessonAPIView(
 
             return request.send_error_valid(return_error)
 
+    def delete(self, request, pk=None):
+        "ЭЕШ-ын хичээл устгах "
+
+        score = AdmissionBottomScore.objects.filter(admission_lesson=pk)
+        if len(score) > 0:
+            return request.send_error("ERR_002", "Элсэлтийн шалгалтын хичээлд холбогдсон байгаа тул устгах боломжгүй")
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
+
 
 class SystemSettingsActiveYearAPIView(
     mixins.CreateModelMixin,
@@ -1112,7 +1201,6 @@ class DiscountTypeAPIView(
                     return request.send_error("ERR_002")
 
             return request.send_info("INF_002")
-
         else:
             # Олон алдааны мессэж буцаах бол үүнийг ашиглана
             for key in serializer.errors:
@@ -1124,7 +1212,12 @@ class DiscountTypeAPIView(
 
             return request.send_error_valid(return_error)
 
+    @has_permission(must_permissions=['lms-settings-discounttype-delete'])
+    def delete(self, request, pk=None):
+        "Төлбөрийн хөнгөлөлтийн төрөл устгах "
 
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
 
 @permission_classes([IsAuthenticated])
 class CountryAPIView(
@@ -1207,6 +1300,12 @@ class CountryAPIView(
 
             return request.send_error_valid(return_error)
 
+    @has_permission(must_permissions=['lms-settings-country-delete'])
+    def delete(self, request, pk=None):
+        "Улс устгах "
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
 
 @permission_classes([IsAuthenticated])
 class SignatureAPIView(
