@@ -45,7 +45,7 @@ urlpatterns = [
     path('baghoroo/<int:unit2>/', BagHorooAPIView.as_view()),
 
     # Багшийн мэдээллийн жагсаалт
-    path('teachers/info/', TeacherListAPIView().as_view()),
+    path('teachers/info/', TeacherListApiView.as_view()),
     path('reference/teachers/info/<int:pk>/', TeacherInfoAPIView.as_view()),
 
     # Албан тушаалын жагсаалт

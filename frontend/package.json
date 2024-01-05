@@ -110,8 +110,8 @@
     "yup": "^0.32.11"
   },
   "scripts": {
-    "start": "HOST=0.0.0.0 craco start",
-    "build": "craco build",
+    "start": "HOST=0.0.0.0 craco --openssl-legacy-provider start",
+    "build": "craco --openssl-legacy-provider build",
     "build-dev": "dotenv -e .env.development react-app-rewired build",
     "build-prod": "dotenv -e .env.production react-app-rewired build",
     "test": "craco test",

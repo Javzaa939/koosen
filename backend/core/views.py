@@ -92,6 +92,9 @@ class TeacherListApiView(
     queryset = Teachers.objects
     serializer_class = TeacherListSerializer
 
+    filter_backends = [SearchFilter]
+    search_fields = ['first_name', 'last_name']
+
     def get_queryset(self):
         queryset = get_teacher_queryset()
 
@@ -371,7 +374,7 @@ class SubSchoolAPIView(
 ):
     """" Бүрэлдэхүүн сургууль """
 
-    queryset = SubOrgs.objects.order_by("-created_at")
+    queryset = SubOrgs.objects.order_by("name")
     serializer_class = SubSchoolRegisterSerailizer
 
     filter_backends = [SearchFilter]
@@ -563,6 +566,7 @@ class BagHorooAPIView(
 
 
 @permission_classes([IsAuthenticated])
+<<<<<<< HEAD
 class TeacherListAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -594,6 +598,8 @@ class TeacherListAPIView(
         return request.send_data(teach_info)
 
 @permission_classes([IsAuthenticated])
+=======
+>>>>>>> b7a9c8882f9f4b0fdc61d8bf9a896516be87d9fd
 class TeacherApiView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
