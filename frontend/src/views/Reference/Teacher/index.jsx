@@ -25,7 +25,7 @@ import { getColumns } from './helpers';
 const Teacher = () => {
 
 	var values = {
-		subschool_id: '',
+		position_id: '',
 		department_id: ''
 	}
 
@@ -47,7 +47,7 @@ const Teacher = () => {
 
 	const [datas, setDatas] = useState([]);
 	const [department, setDepartmentData] = useState([]);
-	const [subschool, setSubSchoolData] = useState([]);
+	const [position_option, setOrgPositions] = useState([]);
 	const [selected_values, setSelectValue] = useState(values);
 	const [add_modal, setAddModal]=useState(false)
 
@@ -61,7 +61,7 @@ const Teacher = () => {
 	// Api
 	const teacherApi = useApi().hrms.teacher
 	const departmentApi = useApi().hrms.department
-	const subSchoolApi = useApi().hrms.subschool
+	const positionApi = useApi().hrms.position
 
 	/* Жагсаалтын дата сургууль, тэнхим авах функц */
 	async function getDatas() {
@@ -70,10 +70,7 @@ const Teacher = () => {
         if (page_count < currentPage && page_count != 0) {
             setCurrentPage(page_count)
         }
-
-		var department = selected_values.department_id
-		var subschool_id = school_id
-		const { success, data } = await allFetch(teacherApi.getList(rowsPerPage, currentPage, sortField, searchValue, subschool_id, department))
+		const { success, data } = await allFetch(teacherApi.getList(rowsPerPage, currentPage, sortField, searchValue, school_id, selected_values.department_id, selected_values.position_id))
 		if(success) {
 			setTotalCount(data?.count)
             setDatas(data?.results)
@@ -85,6 +82,14 @@ const Teacher = () => {
 		const { success, data } = await fetchData(departmentApi.getSelectSchool(school_id))
 		if (success) {
 			setDepartmentData(data)
+		}
+	}
+
+	/* Албан тушаал дата авах функц */
+	async function getPositionData() {
+		const { success, data } = await fetchData(positionApi.get())
+		if (success) {
+			setOrgPositions(data)
 		}
 	}
 
@@ -103,11 +108,21 @@ const Teacher = () => {
 
 			return () => clearTimeout(timeoutId);
 		}
-	},[rowsPerPage, sortField, searchValue, currentPage, school_id, selected_values.department_id])
+	},[sortField, searchValue, currentPage, school_id])
+
+	useEffect(() => {
+		if (selected_values.department_id || selected_values.position_id) {
+			getDatas();
+		}
+	},[selected_values])
 
 	useEffect(() => {
 		getDepartmentOption()
 	},[school_id])
+
+	useEffect(() => {
+		getPositionData()
+	},[])
 
 	// ** Function to handle filter
 	const handleFilter = e => {
@@ -146,7 +161,7 @@ const Teacher = () => {
                     </div>
                 </CardHeader>
                 <Row className="justify-content-between mx-0 mb-1 mt-1">
-					<Col md={4}>
+					<Col md={3}>
 						<Label className="form-label" for="salbar">
 							{t('Тэнхим')}
 						</Label>
@@ -181,7 +196,33 @@ const Teacher = () => {
 							}}
 						></Controller>
 					</Col>
-					<Col md={4}>
+					<Col md={3}>
+						<Label className="form-label" for="position">
+							{t('Албан тушаал')}
+						</Label>
+							<Select
+								name="position"
+								id="position"
+								classNamePrefix='select'
+								isClearable
+								className='react-select'
+								placeholder={t('-- Сонгоно уу --')}
+								options={position_option || []}
+								value={position_option.find((c) => c.id === selected_values.position_id)}
+								noOptionsMessage={() => t('Хоосон байна.')}
+								onChange={(val) => {
+									setSelectValue({
+										department_id: selected_values.department_id,
+										position_id: val?.id || ''
+									})
+								}}
+								styles={ReactSelectStyles}
+								getOptionValue={(option) => option.id}
+								getOptionLabel={(option) => option.name}
+							/>
+					</Col>
+					<Col md={3}></Col>
+					<Col md={3}>
 						<Label className="form-label" for="salbar">
 							{t('Хайлт')}
 						</Label>
@@ -225,7 +266,6 @@ const Teacher = () => {
 				}
 			</Card>
 			{/* { add_modal && <AddModal open={add_modal} handleModal={handleModal} refreshDatas={getDatas} /> } */}
-
         </Fragment>
     )
 }

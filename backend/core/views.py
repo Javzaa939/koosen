@@ -566,6 +566,37 @@ class BagHorooAPIView(
 
 
 @permission_classes([IsAuthenticated])
+class TeacherListAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+):
+    queryset = Teachers.objects
+    serializer_class = TeacherNameSerializer
+
+    """ Багшийн мэдээллийн жагсаалт """
+
+    def get(self, request):
+        " нийт багшийн жагсаалт"
+
+        queryset = get_teacher_queryset()
+
+        sub_org = self.request.query_params.get('sub_org')
+        salbar = self.request.query_params.get('salbar')
+
+        # сургууль
+        if sub_org:
+            queryset = queryset.filter(sub_org=sub_org)
+
+        # салбар, тэнхим
+        if salbar:
+            queryset = queryset.filter(salbar=salbar)
+
+        self.queryset = queryset
+
+        teach_info = self.list(request).data
+        return request.send_data(teach_info)
+
+@permission_classes([IsAuthenticated])
 class TeacherApiView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -589,6 +620,7 @@ class TeacherApiView(
 
         sub_org = self.request.query_params.get('sub_org')
         salbar = self.request.query_params.get('salbar')
+        position = self.request.query_params.get('position')
         sorting = self.request.query_params.get('sorting')
 
 
@@ -600,6 +632,11 @@ class TeacherApiView(
         if salbar:
             queryset = queryset.filter(salbar=salbar)
 
+        # Албан тушаалаар хайх
+        if position:
+            user_ids = Employee.objects.filter(org_position=position, state=Employee.STATE_WORKING).values_list('user', flat=True)
+
+            queryset = queryset.filter(user_id__in=user_ids)
         # Sort хийх үед ажиллана
         if sorting:
             if not isinstance(sorting, str):

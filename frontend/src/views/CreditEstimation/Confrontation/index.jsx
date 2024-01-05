@@ -12,6 +12,7 @@ import classnames from "classnames";
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
+import  useUpdateEffect  from '@hooks/useUpdateEffect'
 
 import { ReactSelectStyles, validate } from '@utils'
 
@@ -77,7 +78,7 @@ export default function Confrontation()
         []
     )
 
-    useEffect(
+    useUpdateEffect(
         () =>
         {
             getProfession()
