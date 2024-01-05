@@ -1211,7 +1211,7 @@ function useApi(isDisplay=false) {
 
 			// Цагийн ачаалал
 			volume: {
-				get: (limit, page, sort, search, dep_id, year, teacherId) => instance.get(`/credit/volume/?page=${page}&limit=${limit}&sorting=${sort}&school=${school_id}&department=${dep_id}&lesson_year=${year}&teacher=${teacherId}&search=${search}`),
+				get: (limit, page, sort, search, dep_id, year, teacherId, season) => instance.get(`/credit/volume/?page=${page}&limit=${limit}&sorting=${sort}&school=${school_id}&department=${dep_id}&lesson_year=${year}&teacher=${teacherId}&search=${search}&lesson_season=${season}`),
 				post: data => instance.post(`/credit/volume/?lesson_year=${cyear_name}`, data),
 				estimate: (dep_id, year, season, teacher)=> instance.post(`/credit/volume/estimate/?dep_id=${dep_id}&schoolId=${school_id}&lesson_year=${year}&season=${season}&teacher=${teacher}`),
 				getOne: (pk) => instance.get(`/credit/volume/${pk}/`),
