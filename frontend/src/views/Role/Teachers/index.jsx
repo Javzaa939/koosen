@@ -206,7 +206,7 @@ const Teachers = () => {
                                         }}
                                         styles={ReactSelectStyles}
                                         getOptionValue={(option) => option.id}
-                                        getOptionLabel={(option) => option.code}
+                                        getOptionLabel={(option) => option.full_name}
                                     />
                                 )
                             }}
