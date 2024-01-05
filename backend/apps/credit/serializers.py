@@ -90,20 +90,8 @@ class TeacherCreditVolumePrintSerializer(serializers.ModelSerializer):
         return group_name
 
     def get_exec_kr(self, obj):
-        credit = 0
-
-        lesson = LessonStandart.objects.filter(id=obj.lesson_id).first()
-
-        if obj.type == 2 and lesson.lecture_kr:
-            credit= lesson.lecture_kr
-        if obj.type == 3 and lesson.seminar_kr:
-            credit= lesson.seminar_kr
-        if obj.type == 1 and lesson.laborator_kr:
-            credit= lesson.laborator_kr
-        if obj.type == 5 and lesson.practic_kr:
-            credit= lesson.practic_kr
-        if obj.type == 6 and lesson.biedaalt_kr:
-            credit= lesson.biedaalt_kr
+        credits = TeacherCreditVolumePlan.objects.filter(lesson=obj.lesson, teacher=obj.teacher, lesson_year=obj.lesson_year, lesson_season=obj.lesson_season).values_list('credit', flat=True)
+        credit = sum(credits)
 
         credit_group = TeacherCreditVolumePlan_group.objects.filter(creditvolume_id=obj.id).values('exec_credit_flag')
         exec_kr_list = []
@@ -117,29 +105,15 @@ class TeacherCreditVolumePrintSerializer(serializers.ModelSerializer):
         return exec_kr
 
     def get_credit(self, obj):
-        credit = 0
+        credits = TeacherCreditVolumePlan.objects.filter(lesson=obj.lesson, teacher=obj.teacher, lesson_year=obj.lesson_year, lesson_season=obj.lesson_season).values_list('credit', flat=True)
 
-        lesson = LessonStandart.objects.filter(id=obj.lesson_id).first()
-
-        if obj.type == 2 and lesson.lecture_kr:
-            credit = lesson.lecture_kr
-        if obj.type == 3 and lesson.seminar_kr:
-            credit = lesson.seminar_kr
-        if obj.type == 1 and lesson.laborator_kr:
-            credit = lesson.laborator_kr
-        if obj.type == 5 and lesson.practic_kr:
-            credit = lesson.practic_kr
-        # if obj.type == 6 and lesson.biedaalt_kr:
-        #     credit = lesson.biedaalt_kr
-
-        return credit
+        return sum(credits)
 
     def get_lesson_level(self, obj):
 
         tcvp_group_qs = TeacherCreditVolumePlan_group.objects.filter(creditvolume_id=obj.id).last()
 
         return tcvp_group_qs.lesson_level if tcvp_group_qs else ''
-
 
 
 class TeacherCreditVolumeOneSerializer(serializers.ModelSerializer):

@@ -406,8 +406,12 @@ class TimeTableAPIView(
                 return request.send_error("ERR_003", errors)
 
         request_data['created_user'] = user.id
-        serializer = self.get_serializer(data=request_data)
+        if not request_data.get('school'):
+            lesson_data = LessonStandart.objects.get(id=lesson)
+            if lesson_data and lesson_data.school:
+                request_data['school'] = lesson_data.school.id if lesson_data else None
 
+        serializer = self.get_serializer(data=request_data)
         if serializer.is_valid(raise_exception=False):
 
             group_ids = [item.get('id') for item in group_data]
@@ -768,6 +772,7 @@ class TimeTableAPIView(
                     print(e)
                     return request.send_error("ERR_002", "Хичээлийн хуваарь давхцаж байна.")
         else:
+            print(serializer.errors)
             # Олон алдааны мессэж буцаах бол үүнийг ашиглана
             for key in serializer.errors:
                 msg = "Хоосон байна"

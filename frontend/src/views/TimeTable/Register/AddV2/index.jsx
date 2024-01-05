@@ -444,7 +444,7 @@ const AddTimetableComponent = ({ }) => {
                 <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
                     <CardTitle tag='h4'>{t('Хичээлийн хуваарь')}</CardTitle>
                     <div className='d-flex justify-content-end'>
-                        <Button className='ms-1' color='primary' onClick={() => { handleModal(), setEditValues(edit_values)}} disabled={school_id ? false : true}>Хуваарь нэмэх</Button>
+                        <Button className='ms-1' color='primary' onClick={() => { handleModal(), setEditValues(edit_values)}}>Хуваарь нэмэх</Button>
                     </div>
                 </CardHeader>
                 <div className='app-calendar overflow-hidden border'>

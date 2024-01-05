@@ -787,7 +787,7 @@ class TeacherAEstimationEstimateAPIView(
         department = self.request.query_params.get('department')
         teacher_id = self.request.query_params.get('teacher')
 
-        qs_department = Salbars.objects.all().get(id=department)
+        qs_department = Salbars.objects.get(id=department)
 
         school = qs_department.sub_orgs
 
