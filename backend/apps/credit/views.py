@@ -550,7 +550,7 @@ class CreditSettingsAPIView(
     """ Цагийн тооцоо тохиргоо """
 
     queryset = TimeEstimateSettings.objects.all().order_by('created_at')
-    serializer_class = TimeEstimateSettingsListSerializer
+    serializer_class = TimeEstimateSettingsSerializer
 
     pagination_class = CustomPagination
 
@@ -559,6 +559,8 @@ class CreditSettingsAPIView(
 
     @has_permission(must_permissions=['lms-credit-settings-read'])
     def get(self, request, pk=None):
+
+        self.serializer_class = TimeEstimateSettingsListSerializer
 
         ctype = request.query_params.get('type')
         if ctype:
