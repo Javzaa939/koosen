@@ -621,6 +621,8 @@ class TeacherApiView(
         sub_org = self.request.query_params.get('sub_org')
         salbar = self.request.query_params.get('salbar')
         position = self.request.query_params.get('position')
+        sorting = self.request.query_params.get('sorting')
+
 
         # Бүрэлдэхүүн сургууль
         if sub_org:
@@ -635,6 +637,12 @@ class TeacherApiView(
             user_ids = Employee.objects.filter(org_position=position, state=Employee.STATE_WORKING).values_list('user', flat=True)
 
             queryset = queryset.filter(user_id__in=user_ids)
+        # Sort хийх үед ажиллана
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
 
         return queryset
 

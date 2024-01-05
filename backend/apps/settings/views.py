@@ -998,9 +998,8 @@ class SystemSettingsAPIView(
             prev_lesson_season = instance.prev_lesson_season
             check_qs = self.queryset.filter(active_lesson_year=prev_lesson_year, active_lesson_season=prev_lesson_season, season_type=SystemSettings.CLOSED)
 
-            if len(self.queryset) > 1:
-                if not check_qs:
-                    return request.send_error('ERR_02', 'Та өмнөх улирлаа хаана уу?')
+            if not check_qs:
+                return request.send_error('ERR_02', 'Та өмнөх улирлаа хаана уу?')
 
             self.queryset.filter(season_type=SystemSettings.ACTIVE).update(season_type=SystemSettings.INACTIVE)
 
