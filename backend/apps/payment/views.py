@@ -70,7 +70,7 @@ class BeginBalanceAPIView(
         if schoolId:
             self.queryset = self.queryset.filter(school=schoolId)
 
-        # Хөтөлбөрийн багаар хайлт хийх
+        # Тэнхимээр хайлт хийх
         if department:
             self.queryset = self.queryset.filter(student__department=department)
 
@@ -281,7 +281,7 @@ class PaymentBalanceAPIView(
         if schoolId:
             self.queryset = self.queryset.filter(school=schoolId)
 
-        # Хөтөлбөрийн багаар хайлт хийх
+        # Тэнхимээр хайлт хийх
         if department:
             self.queryset = self.queryset.filter(student__department=department)
 
@@ -638,7 +638,7 @@ class PaymentEstimateAPIView(
         if lesson_season:
             self.queryset = self.queryset.filter(lesson_season=lesson_season)
 
-        # Хөтөлбөрийн багаар хайлт хийх
+        # Тэнхимээр хайлт хийх
         if department:
             self.queryset = self.queryset.filter(student__department=department)
 

@@ -1,5 +1,5 @@
 // ** React imports
-import React, { Fragment, useState, useContext } from 'react'
+import React, { Fragment, useState, useContext, useEffect } from 'react'
 
 import { X } from "react-feather";
 
@@ -16,12 +16,11 @@ import { Row, Col, Form, Modal, Input, Label, Button, ModalBody, ModalHeader, Fo
 import { validate, generateLessonYear, convertDefaultValue } from "@utils"
 
 import { validateSchema } from './validateSchema';
-import { useEffect } from 'react';
 
 import AuthContext from '@context/AuthContext'
 import SchoolContext from '@context/SchoolContext'
 
-const Addmodal = ({ open, handleModal, refreshDatas }) => {
+const Addmodal = ({ open, handleModal, refreshDatas, editId }) => {
 
     const CloseBtn = (
         <X className="cursor-pointer" size={15} onClick={handleModal} />
@@ -32,7 +31,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
     const { user } = useContext(AuthContext)
 
     // ** Hook
-    const { control, handleSubmit, reset, setError, formState: { errors } } = useForm(validate(validateSchema));
+    const { control, handleSubmit, reset, setError, formState: { errors }, setValue } = useForm(validate(validateSchema));
 
     const [ seasonOption, setSeason] = useState([])
     const [ prevseasonOption, setprevSeason] = useState([])
@@ -43,6 +42,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
 	const { Loader, isLoading, fetchData } = useLoader({});
 	const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
 
+    // Api
     const seasonApi = useApi().settings.season
     const activeyearApi = useApi().settings.activeyear
 
@@ -55,30 +55,49 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
         }
 	}
 
-    //хичээлийн жил жагсаалт авах
+    // хичээлийн жил жагсаалт авах
     async function getYear () {
 
         setYear(generateLessonYear( 5))
         setprevYear(generateLessonYear( 5))
 	}
 
+    useEffect(() => {
+        getSeason()
+        getYear()
+    },[])
+
     // Хадгалах
 	async function onSubmit(cdata) {
-        cdata['created_user'] = user.id
-        cdata['updated_user'] = user.id
-
         cdata = convertDefaultValue(cdata)
-
-        const { success, errors } = await postFetch(activeyearApi.post(cdata))
-        if(success) {
-            reset()
-            refreshDatas()
-            handleModal()
-        } else {
-            if(errors && Object.keys(errors).length > 0) {
+        if(editId){
+            const { success, errors } = await fetchData(activeyearApi.put(cdata, editId))
+            if(success) {
+                reset()
+                handleModal()
+                refreshDatas()
+            }
+            else {
                 /** Алдааны мессэжийг input дээр харуулна */
                 for (let key in errors) {
                     setError(key, { type: 'custom', message: errors[key][0]});
+                }
+            }
+        }
+        else{
+            cdata['created_user'] = user.id
+            cdata['updated_user'] = user.id
+            const { success, errors } = await postFetch(activeyearApi.post(cdata))
+            if(success) {
+                reset()
+                refreshDatas()
+                handleModal()
+            } else {
+                if(errors && Object.keys(errors).length > 0) {
+                    /** Алдааны мессэжийг input дээр харуулна */
+                    for (let key in errors) {
+                        setError(key, { type: 'custom', message: errors[key][0]});
+                    }
                 }
             }
         }
@@ -88,6 +107,25 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
         getSeason()
         getYear()
     },[])
+
+    async function getDatas() {
+        if(editId) {
+            const { success, data } = await fetchData(activeyearApi.getOne(editId))
+            if(success) {
+                // засах үед дата байх юм бол setValue-р дамжуулан утгыг харуулна
+                if(data === null) return
+                for(let key in data) {
+                    if(data[key] !== null)
+                        setValue(key, data[key])
+                    else setValue(key, '')
+                }
+            }
+        }
+    }
+
+    useEffect(() => {
+        getDatas()
+    },[editId])
 
 	return (
         <Fragment>
@@ -104,10 +142,11 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                     close={CloseBtn}
                     tag="div"
                 >
-                    <h5 className="modal-title">{t('Ажиллах жилийн тохиргоо оруулах')}</h5>
+                    <h5 className="modal-title">{ editId ?  t('Ажиллах жилийн тохиргоо засах'): t('Ажиллах жилийн тохиргоо оруулах')}</h5>
+
                 </ModalHeader>
                 <ModalBody className="flex-grow-1">
-                    <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
+                        <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
                         <Col md={12}>
                             <Label className="form-label" for="active_lesson_year">
                                 {t('Идэвхтэй хичээлийн жил')}
@@ -283,14 +322,19 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                 )}
                             />
                         </Col> */}
-                        <Col md={12} className="mt-2">
+                        <Col md={12} className="text-center mt-2">
                             <Button className="me-2" color="primary" type="submit" disabled={postLoading}>
                                 {postLoading &&<Spinner size='sm' className='me-1'/>}
                                 {t('Хадгалах')}
                             </Button>
-                            <Button color="secondary" type="reset" outline  onClick={handleModal}>
-                                {t('Буцах')}
-                            </Button>
+                            {
+                                editId ?
+                                    null
+                                :
+                                <Button color="secondary" type="reset" outline  onClick={handleModal}>
+                                    {t('Буцах')}
+                                </Button>
+                            }
                         </Col>
                     </Row>
                 </ModalBody>

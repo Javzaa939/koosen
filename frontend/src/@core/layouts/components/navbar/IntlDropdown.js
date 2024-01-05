@@ -35,7 +35,7 @@ const IntlDropdown = () => {
     async function getParentSchool() {
         const {success, data} = await fetchData(parentschoolApi.get())
         if(success) {
-            setParentSchoolName(data[0]?.name)
+            setParentSchoolName(data?.name)
         }
     }
 

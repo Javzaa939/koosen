@@ -19,7 +19,6 @@ import { getColumns } from './helpers'
 
 import Addmodal from './Add'
 
-import UpdateModal from './Update'
 
 const Learning = () => {
 
@@ -47,17 +46,21 @@ const Learning = () => {
 
 	// Modal
 	const [modal, setModal] = useState(false);
-	const [update_modal, setUpdateModal] = useState(false)
 
 	/* Модал setState функц */
 	const handleModal = () => {
 		setModal(!modal)
+		if(modal){
+			setEditId()
+		}
 	}
 
 	// Засах функц
     function handleUpdateModal(id) {
-        setEditId(id)
-        setUpdateModal(!update_modal)
+		if(id){
+			setEditId(id)
+		}
+		handleModal()
     }
 
 	/* Жагсаалтын дата авах функц */
@@ -72,6 +75,13 @@ const Learning = () => {
 	useEffect(() => {
 		getDatas()
 	},[])
+
+	const handleDelete = async(id) =>{
+		const{ success } = await fetchData(learningApi.delete(id))
+		if (success){
+			getDatas()
+		}
+	}
 
 	// Хайлт хийх үед ажиллах хэсэг
 	const handleFilter = (e) => {
@@ -162,7 +172,7 @@ const Learning = () => {
                                     <h5>{t('Өгөгдөл байхгүй байна')}</h5>
                                 </div>
                             )}
-                            columns={getColumns(currentPage, rowsPerPage, searchValue.length ? filteredData : datas, handleUpdateModal, user)}
+                            columns={getColumns(currentPage, rowsPerPage, searchValue.length ? filteredData : datas, handleUpdateModal, user, handleDelete)}
                             sortIcon={<ChevronDown size={10} />}
                             paginationPerPage={rowsPerPage}
                             paginationDefaultPage={currentPage}
@@ -173,8 +183,7 @@ const Learning = () => {
                         />
 					</div>
 				}
-				{modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas}/>}
-				{ update_modal && <UpdateModal editId={edit_id} open={update_modal} handleEdit={handleUpdateModal} refreshDatas={getDatas} /> }
+				{ modal &&  <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} editId={edit_id} handleEdit={handleUpdateModal}/>}
 			</Card>
         </Fragment>
     )

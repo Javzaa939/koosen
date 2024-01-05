@@ -35,7 +35,9 @@ function Statistic() {
         {
             active_id: 2,
             name: 'А-ДБ-2',
-            component: <ADB2 />
+            // component: <ADB2 />
+            component: <Blank />
+
         },
         {
             active_id: 3,

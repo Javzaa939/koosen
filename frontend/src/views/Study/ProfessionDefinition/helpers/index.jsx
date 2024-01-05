@@ -46,7 +46,8 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 			minWidth: "350px",
 			maxWidth: "250px",
 			left: true,
-			wrap: true
+			wrap: true,
+			center: true,
 		},
 		{
 			header: 'degree',

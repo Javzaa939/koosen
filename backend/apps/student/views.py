@@ -209,6 +209,8 @@ class GroupAPIView(
         degree = self.request.query_params.get('degree')
         profession = self.request.query_params.get('profession')
         join = self.request.query_params.get('join')
+        sorting = self.request.query_params.get('sorting')
+
         # search_value = self.request.query_params.get('search')
 
         # Сургуулиар хайлт хийх
@@ -231,6 +233,12 @@ class GroupAPIView(
         if join:
             queryset = queryset.filter(join_year=join)
 
+        # Sort хийх үед ажиллана
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
         # хайлт хийх
         # if search_value:
         #     queryset = filter_queries(queryset.model, search_value)

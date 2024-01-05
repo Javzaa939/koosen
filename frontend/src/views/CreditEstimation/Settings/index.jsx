@@ -14,7 +14,7 @@ export default function Settings() {
     const nav_menus = [
         {
             active_id: 1,
-            name: 'Танхимийн бус кредит',
+            name: 'Танхимын бус кредит',
             component: <List type={NOT_CHAMBER}/>
         },
         {

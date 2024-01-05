@@ -64,7 +64,6 @@ function Teacher() {
         setComponent(check.component)
     },[activeTab])
 
-
     return (
         <Card>
             <Nav tabs>

@@ -33,3 +33,12 @@
   src: local("CMSHR"),
     url("../assets/fonts/CMSHR.ttf") format("truetype");
 }
+
+/* Эцэг tag-аас өндөрөөс их text байвал ... болгоно */
+.heightThreeDots {
+  overflow: hidden;
+  width: 100%;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}

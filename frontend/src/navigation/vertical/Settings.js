@@ -20,6 +20,18 @@ export default [
                 icon: <Circle size={8} />,
                 navLink: "settings/student/"
             },
+            {
+                id: 'settingsLevel15',
+                title: 'Эрх',
+                icon: <Circle size={8} />,
+                navLink: "settings/permission/"
+            },
+            {
+                id: 'settingsLevel16',
+                title: 'Role',
+                icon: <Circle size={8} />,
+                navLink: "settings/role/"
+            },
         ]
     }
 ]
