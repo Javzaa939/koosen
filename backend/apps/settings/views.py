@@ -4,6 +4,7 @@ import json
 from rest_framework import mixins
 from rest_framework import generics
 from rest_framework.views import APIView
+from rest_framework.filters import SearchFilter
 
 from lms.models import Score
 from lms.models import Group
@@ -26,6 +27,8 @@ from lms.models import StudentAdmissionScore
 from lms.models import Country
 from lms.models import TimeTable
 from lms.models import DefinitionSignature
+from lms.models import Permissions
+from lms.models import Roles
 from lms.models import AdmissionBottomScore
 
 from .serializers import ScoreSerailizer
@@ -45,14 +48,21 @@ from .serializers import AdmissionLessonListSerializer
 from .serializers import ProfessionalDegreePutSerializer
 from .serializers import CountrySerializer
 from .serializers import DefinitionSignatureSerializer
+from .serializers import PermissionsSerializer
+from .serializers import RolesSerializer
+from .serializers import RolesListSerializer
 
 from django.db import transaction
-from django.db.models import Max
+from django.db.models import Max, Q
 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 
+from main.utils.function.pagination import CustomPagination
 from main.utils.function.utils import has_permission, list_to_dict
+from main.decorators import login_required
+from main.utils.function.serializer import post_put_action
+
 
 @permission_classes([IsAuthenticated])
 class ProfessionalDegreeAPIView(
@@ -1487,3 +1497,203 @@ class SignatureOrderAPIView(APIView):
         from_qs.update(order=to_order)
 
         return request.send_info("INF_013")
+
+
+@permission_classes([IsAuthenticated])
+class PermissionAPIView(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    generics.GenericAPIView
+):
+    """ Эрх
+    """
+
+    queryset = Permissions.objects.order_by("-created_at")
+    serializer_class = PermissionsSerializer
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = [
+        'name',
+        'description',
+        'created_at',
+    ]
+
+    def get_queryset(self):
+        queryset = self.queryset
+
+        sorting = self.request.query_params.get('sorting')
+
+        # Sort хийх үед ажиллана
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
+
+        return queryset
+
+    @login_required()
+    def get(self, request, pk=None):
+        """ Эрх жагсаалт
+        """
+
+        list = self.list(request, pk).data
+        return request.send_data(list)
+
+    @login_required()
+    @transaction.atomic
+    def post(self, request):
+        """ Эрх үүсгэх
+        """
+
+        return post_put_action(self, request, 'post', request.data)
+
+    @login_required()
+    @transaction.atomic
+    def put(self, request, pk=None):
+        """ Эрх засах
+        """
+
+        return post_put_action(self, request, 'put', request.data, pk)
+
+    @login_required()
+    @transaction.atomic
+    def delete(self, request, pk=None):
+        """ Эрх устгах
+        """
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
+
+
+@permission_classes([IsAuthenticated])
+class PermissionListAPIView(
+    generics.GenericAPIView
+):
+    queryset = Permissions.objects.filter(name__startswith='lms-').order_by("-created_at")
+    serializer_class = PermissionsSerializer
+
+    @login_required()
+    def get(self, request, pk=None):
+        """ Эрх жагсаалт
+        """
+
+        crud_perms = list()
+
+        # read create update delete орсон утгууд
+        crud_perms_qs = self.queryset.filter(Q(name__endswith='-read') | Q(name__endswith='-create') | Q(name__endswith='-update') | Q(name__endswith='-delete'))
+        crud_perms_datas = self.serializer_class(crud_perms_qs, many=True).data
+
+        # read create update delete ороогүй утгууд
+        non_crud_perms_qs = self.queryset.exclude(Q(name__endswith='-read') | Q(name__endswith='-create') | Q(name__endswith='-update') | Q(name__endswith='-delete'))
+        non_crud_perms = self.serializer_class(non_crud_perms_qs, many=True).data
+
+
+        for crud_perms_data in crud_perms_qs.values_list('name', flat=True):
+
+            name = crud_perms_data
+
+            if '-read' in crud_perms_data:
+                name = crud_perms_data.replace('-read', '')
+
+            if '-create' in crud_perms_data:
+                name = crud_perms_data.replace('-create', '')
+
+            if '-update' in crud_perms_data:
+                name = crud_perms_data.replace('-update', '')
+
+            if '-delete' in crud_perms_data:
+                name = crud_perms_data.replace('-delete', '')
+
+            if not any(name == d.get('name') for d in crud_perms):
+
+                filtered = list(filter(lambda crud_perms_data: (f'{name}-read' == dict(crud_perms_data).get('name') or f'{name}-create' == dict(crud_perms_data).get('name') or f'{name}-update' == dict(crud_perms_data).get('name') or f'{name}-delete' == dict(crud_perms_data).get('name')), crud_perms_datas))
+
+                description = ''
+
+                if len(filtered) != 1:
+                    chars = {}
+                    for char1 in filtered:
+                        for char in dict(char1).get('description').split(" "):
+                            if char not in chars:
+                                chars[char] = 1
+                            else:
+                                chars[char] += 1
+
+                    duplicates = []
+
+                    for char, count in chars.items():
+                        if count > 1:
+                            duplicates.append(char)
+
+                    description = (" ".join(duplicates)).replace(' эрх', '')
+
+                else:
+                    description = filtered[0].get('description')
+
+
+                crud_perms.append({
+                    'name': name,
+                    'description': description,
+                    'filtered': filtered
+                })
+
+
+        return request.send_data({
+            'non_crud_perms': non_crud_perms,
+            'crud_perms': crud_perms
+        })
+
+
+@permission_classes([IsAuthenticated])
+class RolesAPIView(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    generics.GenericAPIView
+):
+    """ Role
+    """
+
+    queryset = Roles.objects.order_by("-created_at")
+    serializer_class = RolesSerializer
+
+    @login_required()
+    def get(self, request, pk=None):
+        """ Role жагсаалт
+        """
+
+        self.serializer_class = RolesListSerializer
+        list = self.list(request, pk).data
+        return request.send_data(list)
+
+    @login_required()
+    @transaction.atomic
+    def post(self, request):
+        """ Role үүсгэх
+        """
+
+        return post_put_action(self, request, 'post', request.data)
+
+    @login_required()
+    @transaction.atomic
+    def put(self, request, pk=None):
+        """ Role засах
+        """
+
+        return post_put_action(self, request, 'put', request.data, pk)
+
+    @login_required()
+    @transaction.atomic
+    def delete(self, request, pk=None):
+        """ Role устгах
+        """
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")

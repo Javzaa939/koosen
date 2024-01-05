@@ -92,6 +92,9 @@ class TeacherListApiView(
     queryset = Teachers.objects
     serializer_class = TeacherListSerializer
 
+    filter_backends = [SearchFilter]
+    search_fields = ['first_name', 'last_name']
+
     def get_queryset(self):
         queryset = get_teacher_queryset()
 
@@ -561,45 +564,6 @@ class BagHorooAPIView(
             bag_horoo_list = list(qs)
             return request.send_data(bag_horoo_list)
 
-
-@permission_classes([IsAuthenticated])
-class TeacherListAPIView(
-    generics.GenericAPIView,
-    mixins.ListModelMixin,
-):
-    queryset = Teachers.objects
-    serializer_class = TeacherNameSerializer
-
-    """ Багшийн мэдээллийн жагсаалт """
-
-    def get_queryset(self):
-        "Багшийн мэдээллийг сургууль, Хөтөлбөрийн багаар харуулах "
-
-        queryset = self.queryset
-        teacher_queryset = queryset.all().values_list('user', flat=True)
-        qs_employee_user = Employee.objects.filter(user_id__in=list(teacher_queryset), org_position__is_teacher=True, state=Employee.STATE_WORKING).values_list('user', flat=True)
-        if qs_employee_user:
-            queryset = queryset.filter(user_id__in = list(qs_employee_user))
-
-        sub_org = self.request.query_params.get('sub_org')
-
-        # сургууль
-        if sub_org:
-            queryset = queryset.filter(sub_org=sub_org)
-
-        salbar = self.request.query_params.get('salbar')
-
-        # салбар, тэнхим
-        if salbar:
-            queryset = queryset.filter(salbar=salbar)
-
-        return queryset
-
-    def get(self, request):
-        " нийт багшийн жагсаалт"
-
-        teach_info = self.list(request).data
-        return request.send_data(teach_info)
 
 @permission_classes([IsAuthenticated])
 class TeacherApiView(
