@@ -572,31 +572,23 @@ class TeacherListAPIView(
 
     """ Багшийн мэдээллийн жагсаалт """
 
-    def get_queryset(self):
-        "Багшийн мэдээллийг сургууль, Хөтөлбөрийн багаар харуулах "
+    def get(self, request):
+        " нийт багшийн жагсаалт"
 
-        queryset = self.queryset
-        teacher_queryset = queryset.all().values_list('user', flat=True)
-        qs_employee_user = Employee.objects.filter(user_id__in=list(teacher_queryset), org_position__is_teacher=True, state=Employee.STATE_WORKING).values_list('user', flat=True)
-        if qs_employee_user:
-            queryset = queryset.filter(user_id__in = list(qs_employee_user))
+        queryset = get_teacher_queryset()
 
         sub_org = self.request.query_params.get('sub_org')
+        salbar = self.request.query_params.get('salbar')
 
         # сургууль
         if sub_org:
             queryset = queryset.filter(sub_org=sub_org)
 
-        salbar = self.request.query_params.get('salbar')
-
         # салбар, тэнхим
         if salbar:
             queryset = queryset.filter(salbar=salbar)
 
-        return queryset
-
-    def get(self, request):
-        " нийт багшийн жагсаалт"
+        self.queryset = queryset
 
         teach_info = self.list(request).data
         return request.send_data(teach_info)
@@ -625,6 +617,7 @@ class TeacherApiView(
 
         sub_org = self.request.query_params.get('sub_org')
         salbar = self.request.query_params.get('salbar')
+        position = self.request.query_params.get('position')
 
         # Бүрэлдэхүүн сургууль
         if sub_org:
@@ -633,6 +626,12 @@ class TeacherApiView(
         # салбар, тэнхим
         if salbar:
             queryset = queryset.filter(salbar=salbar)
+
+        # Албан тушаалаар хайх
+        if position:
+            user_ids = Employee.objects.filter(org_position=position, state=Employee.STATE_WORKING).values_list('user', flat=True)
+
+            queryset = queryset.filter(user_id__in=user_ids)
 
         return queryset
 
