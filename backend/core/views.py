@@ -374,7 +374,7 @@ class SubSchoolAPIView(
 ):
     """" Бүрэлдэхүүн сургууль """
 
-    queryset = SubOrgs.objects.order_by("-created_at")
+    queryset = SubOrgs.objects.order_by("name")
     serializer_class = SubSchoolRegisterSerailizer
 
     filter_backends = [SearchFilter]
