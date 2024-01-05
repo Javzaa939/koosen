@@ -2,8 +2,7 @@ from rest_framework import mixins
 from rest_framework import generics
 
 from django.db import transaction
-
-from datetime import datetime, timedelta
+from django.db.models import Q
 
 from rest_framework.filters import SearchFilter
 
@@ -14,7 +13,7 @@ from main.utils.function.utils import has_permission
 
 from main.utils.function.pagination import CustomPagination
 
-from main.utils.function.utils import override_get_queryset, get_active_year_season, remove_key_from_dict
+from main.utils.function.utils import get_active_year_season, remove_key_from_dict
 
 from lms.models import TeacherCreditVolumePlan
 from lms.models import TeacherCreditVolumePlan_group
@@ -33,7 +32,7 @@ from lms.models import Salbars
 from lms.models import TimeTable_to_group
 from lms.models import TimeTable_to_student
 from lms.models import TeacherCreditEstimationA_group
-from lms.models import Employee
+from lms.models import Employee, StudentRegister, Lesson_to_teacher
 
 from .serializers import TeacherCreditVolumePlanListSerializer
 from .serializers import TeacherCreditVolumePlanSerializer
@@ -61,17 +60,27 @@ class TeacherCreditVolumePlanAPIView(
     ''' Багшийн цагийн ачаалал '''
 
     queryset = TeacherCreditVolumePlan.objects.all().order_by('teacher')
-    serializer_class = TeacherCreditVolumePlanSerializer
     pagination_class = CustomPagination
+    serializer_class = TeacherCreditVolumePlanSerializer
 
     filter_backends = [SearchFilter]
     search_fields = ['teacher__first_name', 'lesson__name', 'lesson__code']
 
     def get(self, request, pk=None):
+        self.serializer_class = TeacherCreditVolumePlanListSerializer
 
         school = self.request.query_params.get('school')
         department = self.request.query_params.get('department')
         teacher_id = self.request.query_params.get('teacher')
+
+        lesson_year = self.request.query_params.get('lesson_year')
+        lesson_season = self.request.query_params.get('lesson_season')
+
+        if lesson_year:
+            self.queryset = self.queryset.filter(lesson_year=lesson_year)
+
+        if lesson_season:
+            self.queryset = self.queryset.filter(lesson_season=lesson_season)
 
         if school:
             self.queryset = self.queryset.filter(school=school)
@@ -82,7 +91,6 @@ class TeacherCreditVolumePlanAPIView(
         if teacher_id:
             self.queryset = self.queryset.filter(teacher=teacher_id)
 
-        self.serializer_class = TeacherCreditVolumePlanListSerializer
         self.queryset = self.queryset.distinct('teacher', 'lesson')
 
         if pk:
@@ -99,46 +107,59 @@ class TeacherCreditVolumePlanAPIView(
         group_data = request_data.get('group')
         lesson = request_data.get('lesson')
 
-        serializer = self.get_serializer(data=request_data)
+
+        if 'group' in request_data:
+            del request_data['group']
+
+        credit_volume = self.queryset.filter(lesson=lesson, lesson_year=request_data.get('lesson_year'), lesson_season=request_data.get('lesson_season'), teacher=request_data.get('teacher'), type=request_data.get('type')).first()
+
+        if credit_volume:
+            serializer = self.get_serializer(credit_volume, data=request_data)
+        else:
+            serializer = self.get_serializer(data=request_data)
+
         if serializer.is_valid(raise_exception=False):
-            is_success = False
             with transaction.atomic():
                 try:
-                    result_data=self.create(request).data
-                    is_success = True
+                    self.perform_create(serializer)
+                    result_data=serializer.data
+
                     # Цагийн ачааллын хүснэгтийн id
                     table_id=result_data.get('id')
+
                     # Цагийн ачааллын ангиуд шивэх хэсэг
                     if group_data:
+                        status = StudentRegister.objects.filter(Q(Q(name__contains='Суралцаж буй') | Q(code=1))).first()
                         for row in group_data:
                             group_id = row.get("id")
                             profession = Group.objects.filter(id=group_id).values_list('profession_id',flat=True).first()
-                            stcount = Student.objects.filter(group_id=group_id,status__code=1).count()
-                            lesson_level = LearningPlan.objects.filter(profession_id=profession, lesson_id=lesson).values('lesson_level').first()
+                            stcount = Student.objects.filter(group_id=group_id, status=status).count()
+                            learningplan = LearningPlan.objects.filter(profession_id=profession, lesson_id=lesson).first()
+                            lesson_level = learningplan.lesson_level
                             if not lesson_level:
                                 return request.send_error("ERR_003", row.get("name") + " ангийн сургалтын төлөвлөгөөнд энэ хичээл байхгүй байна")
-                            amount = SchoolLessonLevelVolume.objects.filter(school_id=school,lesson_level=lesson_level['lesson_level']).values('amount').first()
+
+                            amount = SchoolLessonLevelVolume.objects.filter(school_id=school,lesson_level=lesson_level).first()
 
                             if not amount:
                                 amt = 40
                             else:
-                                amt = amount['amount']
+                                amt = amount.amount
 
-                            obj = TeacherCreditVolumePlan_group.objects.create(
-                                creditvolume_id = table_id,
-                                group_id = group_id,
-                                st_count = stcount,
-                                lesson_level = lesson_level['lesson_level'],
-                                exec_credit_flag = amt
+                            obj = TeacherCreditVolumePlan_group.objects.update_or_create(
+                                creditvolume_id=table_id,
+                                group_id=group_id,
+                                defaults={
+                                    'st_count': stcount,
+                                    'lesson_level': lesson_level,
+                                    'exec_credit_flag': amt
+                                }
                             )
+                except Exception as e:
+                    print(e)
+                    return request.send_error("ERR_002")
 
-                except Exception:
-                    raise
-            if is_success:
                 return request.send_info("INF_001")
-
-            return request.send_error("ERR_002")
-
         else:
             error_obj = []
             for key in serializer.errors:
@@ -160,17 +181,13 @@ class TeacherCreditVolumePlanAPIView(
         school = request_data.get('school')
         group_data = request_data.get('groups')
         lesson = request_data.get('lesson')
-        department = request_data.get('department')
-        request_data['department'] = department['id']
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request_data)
 
         if serializer.is_valid(raise_exception=False):
-            is_success = False
             with transaction.atomic():
                 try:
                     self.update(request, pk)
-                    # is_success = True
                     # Цагийн ачааллын ангиуд шивэх хэсэг
                     group_ids=[]
                     if group_data:
@@ -179,36 +196,36 @@ class TeacherCreditVolumePlanAPIView(
                             group_ids.append(group_id)
                             profession = Group.objects.filter(id=group_id).values_list('profession_id',flat=True).first()
                             stcount = Student.objects.filter(group_id=group_id,status__code=1).count()
-                            lesson_level = LearningPlan.objects.filter(profession_id=profession, lesson_id=lesson).values('lesson_level').first()
-                            if not lesson_level:
+                            learnplan = LearningPlan.objects.filter(profession_id=profession, lesson_id=lesson).first()
+                            if not learnplan:
                                 return request.send_error("ERR_003", row.get("name") + " ангийн сургалтын төлөвлөгөөнд энэ хичээл байхгүй байна")
-                            amount = SchoolLessonLevelVolume.objects.filter(school_id=school,lesson_level=lesson_level['lesson_level']).values('amount').first()
+
+                            lesson_level = learnplan.lesson_level
+                            amount = SchoolLessonLevelVolume.objects.filter(school_id=school,lesson_level=lesson_level).values('amount').first()
 
                             if not amount:
                                 amt = 40
                             else:
                                 amt = amount['amount']
 
-
-                            obj = TeacherCreditVolumePlan_group.objects.filter(group_id=group_id).update_or_create(
-                                creditvolume_id = pk,
-                                group_id = group_id,
-                                st_count = stcount,
-                                lesson_level = lesson_level['lesson_level'],
-                                exec_credit_flag = amt
+                            obj = TeacherCreditVolumePlan_group.objects.update_or_create(
+                                group_id=group_id,
+                                creditvolume_id=pk,
+                                defaults={
+                                    'st_count': stcount,
+                                    'lesson_level': lesson_level,
+                                    'exec_credit_flag': amt
+                                }
                             )
-
+                    # Байсан анги устсан бол
                     qs = TeacherCreditVolumePlan_group.objects.filter(creditvolume_id=pk).exclude(group_id__in=group_ids)
                     qs.delete()
-                    is_success = True
                 except Exception as err:
                     # raise
                     return request.send_error("ERR_002", str(err))
 
-            if is_success:
                 return request.send_info("INF_002")
 
-            return request.send_error("ERR_002")
         else:
             error_obj = []
             for key in serializer.errors:
@@ -249,74 +266,206 @@ class TeacherCreditVolumePlanEstimateAPIView(
         season = self.request.query_params.get('season')
         lesson_list = []
 
+        even_i = []
+        odd_i = []
+
+        for i in range(1,13):
+            if i % 2 == 0:
+                even_i.append(i)
+            else:
+                odd_i.append(i)
+
         # Хөтөлбөрийн багт байгаа бүх мэргэжлийн хичээлийн төлөвлөгөөнд шивэгдсэн бүх хичээлээр цагийн ачаалал үүсгэх
         if schoolId and dep_id and season:
             own_list_ids = LessonStandart.objects.filter(department=dep_id).values_list('id', flat=True)
-            lesson_ids = LearningPlan.objects.filter(lesson_id__in=own_list_ids, season__contains=str(season)).values_list('lesson', flat=True)
+            season = Season.objects.get(pk=season)
+
+            season_name = season.season_name
+
+            # Идэвхтэй улиралд байгаа хичээлүүдийг авах
+            if season_name == 'Намар':
+                lookups = [Q(season__contains=str(value)) for value in odd_i]
+
+                filter_query = Q()
+                for lookup in lookups:
+                    filter_query |= lookup
+
+            else:
+                lookups = [Q(season__contains=str(value)) for value in even_i]
+
+                filter_query = Q()
+                for lookup in lookups:
+                    filter_query |= lookup
+
+            lesson_ids = LearningPlan.objects.filter(lesson_id__in=own_list_ids).filter(filter_query).values_list('lesson', flat=True)
             lesson_list = LessonStandart.objects.filter(id__in=lesson_ids)
 
         for lesson in lesson_list:
             with transaction.atomic():
-                try:
+                # try:
+                    lesson_to_teacher = Lesson_to_teacher.objects.filter(lesson=lesson).first()
+                    teacher = lesson_to_teacher.teacher if lesson_to_teacher else None
+                    profession_ids = LearningPlan.objects.filter(lesson=lesson).filter(filter_query).values_list('profession', flat=True)
+                    groups = list(Group.objects.filter(profession__in=profession_ids, is_finish=False).values('id','profession'))
+
                     if lesson.lecture_kr:
                         qs =self.queryset.filter(lesson=lesson,lesson_year=lesson_year,type=TimeTable.LECT)
                         if not qs:
-                            self.queryset.create(
+                            obj = self.queryset.create(
                                 lesson = lesson,
                                 lesson_year=lesson_year,
+                                lesson_season=season,
                                 type = 2,
+                                teacher=teacher,
                                 credit = lesson.lecture_kr,
                                 department_id=dep_id,
                                 school_id = schoolId
                             )
+
+                            if len(groups):
+                                for row in groups:
+                                    stcount = Student.objects.filter(group_id=row.get('id'),status__code=1).count()
+                                    learnplan = LearningPlan.objects.filter(profession_id=row.get('profession'), lesson_id=lesson).first()
+
+                                    lesson_level = learnplan.lesson_level
+                                    amount = SchoolLessonLevelVolume.objects.filter(school_id=schoolId,lesson_level=lesson_level).first()
+
+                                    if not amount:
+                                        amt = 40
+                                    else:
+                                        amt = amount.amount
+                                    TeacherCreditVolumePlan_group.objects.update_or_create(
+                                        group_id=row.get('id'),
+                                        creditvolume_id=obj.id,
+                                        defaults={
+                                            'st_count': stcount,
+                                            'lesson_level': lesson_level,
+                                            'exec_credit_flag': amt
+                                        }
+                                    )
                     if lesson.seminar_kr:
                         qs =self.queryset.filter(lesson=lesson,lesson_year=lesson_year,type=TimeTable.SEM)
                         if not qs:
-                            self.queryset.create(
-                                lesson = lesson,
+                            obj = self.queryset.create(
+                                lesson=lesson,
                                 lesson_year=lesson_year,
+                                lesson_season=season,
                                 type = 3,
+                                teacher=teacher,
                                 credit = lesson.seminar_kr,
                                 department_id=dep_id,
                                 school_id = schoolId
                             )
+
+                            if len(groups):
+                                for row in groups:
+                                    stcount = Student.objects.filter(group_id=row.get('id'),status__code=1).count()
+                                    learnplan = LearningPlan.objects.filter(profession_id=row.get('profession'), lesson_id=lesson).first()
+
+                                    lesson_level = learnplan.lesson_level
+                                    amount = SchoolLessonLevelVolume.objects.filter(school_id=schoolId,lesson_level=lesson_level).first()
+
+                                    if not amount:
+                                        amt = 40
+                                    else:
+                                        amt = amount.amount
+
+                                    TeacherCreditVolumePlan_group.objects.update_or_create(
+                                        group_id=row.get('id'),
+                                        creditvolume_id=obj.id,
+                                        defaults={
+                                            'st_count': stcount,
+                                            'lesson_level': lesson_level,
+                                            'exec_credit_flag': amt
+                                        }
+                                    )
                     if lesson.laborator_kr:
                         qs =self.queryset.filter(lesson=lesson,lesson_year=lesson_year,type=TimeTable.LAB)
                         if not qs:
-                            self.queryset.create(
+                            obj = self.queryset.create(
                                 lesson = lesson,
                                 lesson_year=lesson_year,
+                                lesson_season=season,
                                 type = 1,
+                                teacher=teacher,
                                 credit = lesson.laborator_kr,
                                 department_id=dep_id,
                                 school_id = schoolId
                             )
+                            if len(groups):
+                                for row in groups:
+                                    stcount = Student.objects.filter(group_id=row.get('id'),status__code=1).count()
+                                    learnplan = LearningPlan.objects.filter(profession_id=row.get('profession'), lesson_id=lesson).first()
+
+                                    lesson_level = learnplan.lesson_level
+                                    amount = SchoolLessonLevelVolume.objects.filter(school_id=schoolId,lesson_level=lesson_level).first()
+
+                                    if not amount:
+                                        amt = 40
+                                    else:
+                                        amt = amount.amount
+
+                                    TeacherCreditVolumePlan_group.objects.update_or_create(
+                                        group_id=row.get('id'),
+                                        creditvolume_id=obj.id,
+                                        defaults={
+                                            'st_count': stcount,
+                                            'lesson_level': lesson_level,
+                                            'exec_credit_flag': amt
+                                        }
+                                    )
                     if lesson.practic_kr:
                         qs =self.queryset.filter(lesson=lesson,lesson_year=lesson_year,type=TimeTable.PRACTIC)
                         if not qs:
-                            self.queryset.create(
+                            obj = self.queryset.create(
                                 lesson = lesson,
                                 lesson_year=lesson_year,
+                                lesson_season=season,
                                 type = 5,
+                                teacher=teacher,
                                 credit = lesson.practic_kr,
                                 department_id=dep_id,
                                 school_id = schoolId
                             )
-                    if lesson.biedaalt_kr:
-                        qs =self.queryset.filter(lesson=lesson,lesson_year=lesson_year,type=TimeTable.BIY_DAALT)
-                        if not qs:
-                            self.queryset.create(
-                                lesson = lesson,
-                                lesson_year=lesson_year,
-                                type = 6,
-                                credit = lesson.biedaalt_kr,
-                                department_id=dep_id,
-                                school_id = schoolId
-                            )
 
-                except Exception as err:
-                    # raise
-                    return request.send_error("ERR_002", str(err))
+                            if len(groups):
+                                for row in groups:
+                                    stcount = Student.objects.filter(group_id=row.get('id'),status__code=1).count()
+                                    learnplan = LearningPlan.objects.filter(profession_id=row.get('profession'), lesson_id=lesson).first()
+
+                                    lesson_level = learnplan.lesson_level
+                                    amount = SchoolLessonLevelVolume.objects.filter(school_id=schoolId,lesson_level=lesson_level).first()
+
+                                    if not amount:
+                                        amt = 40
+                                    else:
+                                        amt = amount.amount
+
+                                    TeacherCreditVolumePlan_group.objects.update_or_create(
+                                        group_id=row.get('id'),
+                                        creditvolume_id=obj.id,
+                                        defaults={
+                                            'st_count': stcount,
+                                            'lesson_level': lesson_level,
+                                            'exec_credit_flag': amt
+                                        }
+                                    )
+                    # elif lesson.biedaalt_kr:
+                    #     qs =self.queryset.filter(lesson=lesson,lesson_year=lesson_year,type=TimeTable.BIY_DAALT)
+                    #     if not qs:
+                    #         self.queryset.create(
+                    #             lesson = lesson,
+                    #             lesson_year=lesson_year,
+                    #             lesson_season=season,
+                    #             type = 6,
+                    #             credit = lesson.biedaalt_kr,
+                    #             department_id=dep_id,
+                    #             school_id = schoolId
+                    #         )
+
+                # except Exception as err:
+                #     # raise
+                #     return request.send_error("ERR_002", str(err))
 
         return request.send_info("INF_001")
 

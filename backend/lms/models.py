@@ -2512,7 +2512,7 @@ class TeacherCreditVolumePlan(models.Model):
     lesson_year = models.CharField(max_length=20, null=True, verbose_name='Хичээлийн жил')
     lesson_season = models.ForeignKey(Season, on_delete=models.SET_NULL, null=True, verbose_name='Улирал')
     teacher = models.ForeignKey(Teachers, on_delete=models.PROTECT, null=True, verbose_name="Багш")
-    type = models.PositiveIntegerField(choices=Lesson_title_plan.LESSON_TYPE, db_index=True, default=Lesson_title_plan.LECT, verbose_name="Хичээллэх төрөл")
+    type = models.PositiveIntegerField(choices=TimeTable.LESSON_TYPE, db_index=True, default=TimeTable.LECT, verbose_name="Хичээллэх төрөл")
     credit = models.PositiveIntegerField(null=True, verbose_name="Хичээлийн төрөлд хамаарах кредит цаг")
     department = models.ForeignKey(Salbars, on_delete=models.SET_NULL, null=True, verbose_name="Хөтөлбөрийн баг")
     school = models.ForeignKey(SubOrgs, on_delete=models.SET_NULL, null=True, verbose_name="Сургууль")

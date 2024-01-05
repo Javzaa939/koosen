@@ -1,6 +1,6 @@
 import {useContext } from 'react'
 import css from '@mstyle/style.module.css'
-import { Badge,UncontrolledTooltip } from 'reactstrap';
+import { Badge,Button,UncontrolledTooltip } from 'reactstrap';
 
 import { t } from 'i18next';
 
@@ -11,11 +11,11 @@ import useModal from '@hooks/useModal'
 import SchoolContext from '@context/SchoolContext'
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, total_count, editModal, handleDelete, user) {
+export function getColumns (currentPage, rowsPerPage, total_count, handleModal) {
 
-	const { school_id } = useContext(SchoolContext)
+	// const { school_id } = useContext(SchoolContext)
 
-	const { showWarning } = useModal()
+	// const { showWarning } = useModal()
 
 	const page_count = Math.ceil(total_count / rowsPerPage)
 
@@ -46,8 +46,9 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 			name: `${t('Хичээл')}`,
 			selector: (row) =>row?.lesson?.code +" "+ row?.lesson?.name,
             sortable: true,
-			minWidth: "100px",
-			left: true
+			minWidth: "200px",
+			center: true,
+			wrap: true
 		},
 		{
 			header: 'type',
@@ -59,7 +60,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
         },
 		{
 			header: 'lesson__kredit',
-			name: `${t('Багц цаг')}`,
+			name: `${t('Кр')}`,
 			selector: (row) => row?.lesson?.kredit,
             sortable: true,
 			maxWidth: "50px",
@@ -69,7 +70,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 			header: 'exec_kr',
 			name: `${t('Гүйцэтгэлийн кр')}`,
 			selector: (row) => row?.exec_kr,
-            maxWidth: "80px",
+            minWidth: "80px",
 			center: true
         },
 		{
@@ -77,6 +78,13 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 			name: `${t('Цаг')}`,
 			selector: (row) => row?.credit,
             sortable: true,
+			center: true
+        },
+		{
+			name: `${t('Үйлдэл')}`,
+			selector: (row) => (
+				<Button color='primary' size='sm' onClick={() => handleModal(row)}>Нэмэх</Button>
+			),
 			center: true
         },
 	]
