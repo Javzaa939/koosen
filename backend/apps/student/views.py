@@ -209,6 +209,8 @@ class GroupAPIView(
         degree = self.request.query_params.get('degree')
         profession = self.request.query_params.get('profession')
         join = self.request.query_params.get('join')
+        sorting = self.request.query_params.get('sorting')
+
         # search_value = self.request.query_params.get('search')
 
         # Сургуулиар хайлт хийх
@@ -231,6 +233,12 @@ class GroupAPIView(
         if join:
             queryset = queryset.filter(join_year=join)
 
+        # Sort хийх үед ажиллана
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
         # хайлт хийх
         # if search_value:
         #     queryset = filter_queries(queryset.model, search_value)
@@ -2374,8 +2382,7 @@ class StudentCalculateGpaDiplomaAPIView(
             created_cal_qs.lesson.add(*grouped_datas[grouped_data])
 
         for unique_id in unique_ids:
-            score_register_qs = ScoreRegister.objects.filter(student_id=student_id, lesson_id=unique_id).last()
-
+            score_register_qs = ScoreRegister.objects.filter(student_id=student_id, lesson_id=unique_id).first()
             created_cal_qs = CalculatedGpaOfDiploma.objects.create(student_id=student_id, kredit=score_register_qs.lesson.kredit, score=((score_register_qs.teach_score or 0) + (score_register_qs.exam_score or 0)), gpa=score_register_qs.assessment.gpa, assesment=score_register_qs.assessment.assesment)
             created_cal_qs.lesson.add(score_register_qs.lesson)
 
@@ -2409,7 +2416,10 @@ class StudentGpaDiplomaValuesAPIView(
             all_score = all_score + (data['score'] * data['kredit'])
 
         newlist = sorted(calculated_data, key=lambda i: (i['lesson']['lesson_level'], i['lesson']['lesson_type'], i['lesson']['season']))
-
+        print(qs)
+        print(student_prof_qs)
+        print(max_kredit)
+        print(all_score)
         final_gpa = all_score / max_kredit
         score_qs = Score.objects.filter(score_max__gte=final_gpa, score_min__lte=final_gpa).first()
 

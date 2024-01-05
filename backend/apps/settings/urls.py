@@ -17,6 +17,9 @@ from .views import SignatureAPIView
 from .views import SignatureDataTableAPIView
 from .views import SignatureTableAPIView
 from .views import SignatureOrderAPIView
+from .views import PermissionAPIView
+from .views import RolesAPIView
+from .views import PermissionListAPIView
 
 
 urlpatterns = [
@@ -79,4 +82,13 @@ urlpatterns = [
     path('signature/table/', SignatureTableAPIView.as_view()),
     path('signature/changeorder/', SignatureOrderAPIView.as_view()),
     path('signature/<int:pk>/', SignatureAPIView.as_view()),
+
+    # Эрх
+    path('permission/', PermissionAPIView.as_view()),
+    path('permission/<int:pk>/', PermissionAPIView.as_view()),
+    path('permission/list/', PermissionListAPIView.as_view()),
+
+    # Role
+    path('role/', RolesAPIView.as_view()),
+    path('role/<int:pk>/', RolesAPIView.as_view()),
 ]

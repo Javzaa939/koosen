@@ -123,10 +123,7 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 							style={{ pointerEvents: row?.season_type !== 2 && `none` }}
 						>
 
-							<Edit
-								color='#b4b7bd'
-								width={"15px"}
-							/>
+							<Badge color="light-secondary" pill><Edit  width={"15px"} /></Badge>
 						</a>
 					}
 					<UncontrolledTooltip placement='top' target={`activeYearUpdate${row.id}`} >Засах</UncontrolledTooltip>

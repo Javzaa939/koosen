@@ -28,43 +28,44 @@ export function getColumns (currentPage, rowsPerPage, total_count) {
 		{
 			header: 'student__first_name',
 			name: `${t('Овог нэр')}`,
-			selector: (row) =>row?.student?.first_name,
+			selector: (row) =>row?.student?.last_name + ' ' + row?.student?.first_name,
             sortable: true,
-			minWidth: "130px",
-			center: true,
+			minWidth: "200px",
 			wrap: true
         },
 		{
 			header: 'lesson__name',
 			name: t('Хичээлийн нэр'),
 			selector: (row) =>  row?.lesson?.name,
-			minWidth: "200px",
+			minWidth: "250px",
 			sortable: true,
 			left: true,
+			wrap: true
 		},
 		{
 			header: 'volume_kr',
-			name: `${t('Багц цаг')}`,
+			name: `${t('Кр')}`,
 			selector: (row) => row?.volume_kr,
             sortable: false,
-			minWidth: "100px",
 			center: true
         },
-        {
-			header: 'teacher__code',
-			name: `${t('Багшийн код')}`,
-			selector: (row) => row?.teacher?.code,
-            sortable: true,
-			minWidth: "150px",
-			center: true
-        },
+        // {
+		// 	header: 'teacher__code',
+		// 	name: `${t('Багшийн код')}`,
+		// 	selector: (row) => row?.teacher?.code,
+        //     sortable: true,
+		// 	minWidth: "150px",
+		// 	center: true
+        // },
 		{
 			header: 'teacher__first_name',
 			name: `${t('Багшийн нэр')}`,
-			selector: (row) => row?.teacher?.first_name,
+			selector: (row) => row?.teacher?.full_name,
             sortable: true,
 			minWidth: "150px",
-			center: true
+			center: true,
+			wrap: true
+
         },
 		{
 			header: 'teach_score',

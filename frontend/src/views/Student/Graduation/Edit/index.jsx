@@ -48,7 +48,7 @@ const EditModal = ({ open, handleModal, graduate_id, refreshDatas }) => {
     const { school_id } = useContext(SchoolContext)
     const { cyear_name, cseason_id } =useContext(ActiveYearContext)
 
-    // Хөтөлбөрийн багын id
+    // Тэнхимын id
     const [studentOption, setStudentOption] = useState([])
     const [lesson_option, setLessonOption] = useState ([])
     const [student_id, setStudent] = useState('')

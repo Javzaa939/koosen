@@ -60,7 +60,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
         },
 		{
 			header: 'department__name',
-			name: `${t('Хөтөлбөрийн баг')}`,
+			name: `${t('Тэнхим')}`,
 			selector: (row) => row?.department?.name,
             sortable: true,
 			minWidth: "80px",

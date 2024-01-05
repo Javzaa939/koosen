@@ -126,7 +126,7 @@ const ProfessionDefinition = () => {
         }
     }
 
-    /**Хөтөлбөрийн багын жагсаалт */
+    /**Тэнхимын жагсаалт */
     async function getDepartment() {
         const { success, data } = await fetchData(departmentApi.get(school_id))
         if(success) {
@@ -215,7 +215,7 @@ const ProfessionDefinition = () => {
                 <Row className='my-1 p-2'>
                     <Col md={4} sm={12} className=''>
                         <Label className="form-label" for="department">
-                            {t('Хөтөлбөрийн баг')}
+                            {t('Тэнхим')}
                         </Label>
                         <Controller
                             control={control}

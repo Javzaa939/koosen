@@ -205,7 +205,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="department">
-                                {t('Хөтөлбөрийн баг')}
+                                {t('Тэнхим')}
                             </Label>
                             <Controller
                                 control={control}

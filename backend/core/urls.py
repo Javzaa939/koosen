@@ -17,7 +17,7 @@ urlpatterns = [
     path('school/', SchoolAPIView.as_view()),
     path('school/<int:pk>/', SchoolAPIView.as_view()),
 
-    # Хөтөлбөрийн баг
+    # Тэнхим
     path('department/', DepartmentListAPIView.as_view()),
     path('department/register/', DepartmentAPIView.as_view()),
     path('department/register/<int:pk>/', DepartmentAPIView.as_view()),
@@ -45,7 +45,7 @@ urlpatterns = [
     path('baghoroo/<int:unit2>/', BagHorooAPIView.as_view()),
 
     # Багшийн мэдээллийн жагсаалт
-    path('teachers/info/', TeacherListAPIView().as_view()),
+    path('teachers/info/', TeacherListApiView.as_view()),
     path('reference/teachers/info/<int:pk>/', TeacherInfoAPIView.as_view()),
 
     # Албан тушаалын жагсаалт

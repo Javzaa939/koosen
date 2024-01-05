@@ -94,7 +94,7 @@ class UserInventionAPIView(
         published_year = self.request.query_params.get('published_year')
         category = self.request.query_params.get('category')
 
-        # Хөтөлбөрийн багаар хайлт хийх
+        # Тэнхимээр хайлт хийх
         if salbar:
             qs_teachers = qs_teachers.filter(salbar=salbar)
 
@@ -212,7 +212,7 @@ class UserNoteAPIView(
         category = self.request.query_params.get('category')
         salbar = self.request.query_params.get('salbar')
 
-        # Хөтөлбөрийн багаар хайлт хийх
+        # Тэнхимээр хайлт хийх
         if salbar:
             qs = Teachers.objects.filter(salbar=salbar).values_list('id', flat=True)
             self.queryset = self.queryset.filter(user__in=qs)
@@ -261,7 +261,7 @@ class UserPatentAPIView(
         salbar = self.request.query_params.get('salbar')
         science_field = self.request.query_params.get('science_field')
 
-        # Хөтөлбөрийн багаар хайлт хийх
+        # Тэнхимээр хайлт хийх
         if salbar:
             self.qs_teachers = self.qs_teachers.filter(salbar=salbar)
 
@@ -351,7 +351,7 @@ class UserProjectAPIView(
         salbar = self.request.query_params.get('salbar')
         teacher = self.request.query_params.get('teacher')
 
-        # Хөтөлбөрийн багаар хайлт хийх
+        # Тэнхимээр хайлт хийх
         if salbar:
             teacher_user_ids = self.qs_teachers.filter(salbar=salbar).values_list('user', flat=True)
             self.queryset = self.queryset.filter(user_id__in=teacher_user_ids)
@@ -427,7 +427,7 @@ class UserQuotationAPIView(
 
         self.queryset = self.queryset.filter(id__in=userquotation_ids)
 
-        # Хөтөлбөрийн багаар хайлт хийх
+        # Тэнхимээр хайлт хийх
         if salbar:
             user_ids = Teachers.objects.filter(salbar=salbar).values_list('user', flat=True)
             self.queryset = self.queryset.filter(user__in=user_ids)
@@ -468,7 +468,7 @@ class UserSymbolCertAPIView(
         salbar = self.request.query_params.get('salbar')
         register_number = self.request.query_params.get('register_number')
 
-        # Хөтөлбөрийн багаар хайлт хийх
+        # Тэнхимээр хайлт хийх
         if salbar:
             self.qs_teachers = self.qs_teachers.filter(salbar=salbar)
 
@@ -512,7 +512,7 @@ class UserModelCertPatentAPIView(
         name = self.request.query_params.get('name')
         science_field = self.request.query_params.get('science_field')
 
-        # Хөтөлбөрийн багаар хайлт хийх
+        # Тэнхимээр хайлт хийх
         if salbar:
             self.qs_teachers = self.qs_teachers.filter(salbar=salbar)
 
@@ -557,7 +557,7 @@ class UserlicenseCertAPIView(
         salbar = self.request.query_params.get('salbar')
         license_class = self.request.query_params.get('license_class')
 
-        # Хөтөлбөрийн багаар хайлт хийх
+        # Тэнхимээр хайлт хийх
         if salbar:
             self.qs_teachers = self.qs_teachers.filter(salbar=salbar)
 
@@ -601,7 +601,7 @@ class UserRightCertAPIView(
         abstract = self.request.query_params.get('abstract')
         register_number = self.request.query_params.get('register_number')
 
-        # Хөтөлбөрийн багаар хайлт хийх
+        # Тэнхимээр хайлт хийх
         if salbar:
             self.qs_teachers = self.qs_teachers.filter(salbar=salbar)
 

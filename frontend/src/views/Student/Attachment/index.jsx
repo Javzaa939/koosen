@@ -316,7 +316,7 @@ export default function Attachment()
                 <Row className="justify-content-between mx-0 mt-1 mb-1" sm={12}>
                     <Col md={4}>
                         <Label className="form-label" for="department">
-                            {t('Хөтөлбөрийн баг')}
+                            {t('Тэнхим')}
                         </Label>
                         <Select
                             name="department"

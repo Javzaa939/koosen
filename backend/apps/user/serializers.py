@@ -1,5 +1,7 @@
 from rest_framework import serializers
 
+from django.db.models import Q
+
 from core.models import User
 from core.models import Employee
 from core.models import Permissions
@@ -83,7 +85,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
         permissions = []
 
         if obj.is_superuser:
-            permissions = list(Permissions.objects.all().filter(name__startswith='lms').values_list('name', flat=True))
+            permissions = list(Permissions.objects.all().filter(Q(name__startswith='lms') | (Q(name='role-read'))).values_list('name', flat=True))
 
         elif emp_list and not obj.is_superuser:
             permissions = list(emp_list.org_position.roles.values_list("permissions__name", flat=True))
