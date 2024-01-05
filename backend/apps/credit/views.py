@@ -890,7 +890,7 @@ class TeacherAEstimationChamberAPIView(
     mixins.ListModelMixin,
     mixins.CreateModelMixin
 ):
-    """ А цагийн танхимийн бус кредитийн төрөл """
+    """ А цагийн тэнхимийн бус кредитийн төрөл """
 
     queryset = TimeEstimateSettings.objects.filter(type=TimeEstimateSettings.NOT_CHAMBER).order_by('created_at')
     serializer_class = TimeEstimateSettingsSerializer

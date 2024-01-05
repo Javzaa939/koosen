@@ -210,10 +210,10 @@ export default function LessonPrint()
                                 Заах кредит
                             </th>
                             <th colSpan={2} className="px-1" style={{ width: '20%' }} >
-                                Танхимийн нийт
+                                Тэнхимийн нийт
                             </th>
                             <th rowSpan={2} className="px-1" style={{ width: '20%' }} >
-                                Танхимийн бус нийт Кр
+                                Тэнхимийн бус нийт Кр
                             </th>
                             <th rowSpan={2} className="px-1" style={{ width: '20%' }} >
                                 Нийт Кр
