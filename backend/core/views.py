@@ -131,7 +131,7 @@ class TeacherLessonListApiView(
         teacher_ids = []
 
         if lesson:
-            teacher_ids = TimeTable.objects.filter(lesson=lesson).values_list('teacher', flat=True)
+            teacher_ids = Lesson_to_teacher.objects.filter(lesson=lesson).values_list('teacher', flat=True)
 
             self.queryset = self.queryset.filter(id__in=teacher_ids)
 
