@@ -103,7 +103,7 @@ const Teacher = () => {
 
 			return () => clearTimeout(timeoutId);
 		}
-	},[rowsPerPage, sortField, searchValue, currentPage, school_id])
+	},[rowsPerPage, sortField, searchValue, currentPage, school_id, selected_values.department_id])
 
 	useEffect(() => {
 		getDepartmentOption()
