@@ -566,7 +566,6 @@ class BagHorooAPIView(
 
 
 @permission_classes([IsAuthenticated])
-<<<<<<< HEAD
 class TeacherListAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -598,8 +597,6 @@ class TeacherListAPIView(
         return request.send_data(teach_info)
 
 @permission_classes([IsAuthenticated])
-=======
->>>>>>> b7a9c8882f9f4b0fdc61d8bf9a896516be87d9fd
 class TeacherApiView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
