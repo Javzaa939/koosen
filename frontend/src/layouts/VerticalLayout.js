@@ -481,6 +481,7 @@ const VerticalLayout = (props) => {
                     var children = menus.children.filter(child => child.id !== 'question')
                     menus.children = children
                 }
+
                 /** Шалгалт */
                 if(!user.permissions.includes('lms-exam-read')) {
                     var children = menus.children.filter(child => child.id !== 'create')
