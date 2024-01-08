@@ -2668,7 +2668,7 @@ class TimeTableResource1(
                     qs_tgroup = qs_tgroup.filter(group__department=selectedValue).order_by('group__name')
 
                 if option_filter:
-                    qs_tgroup = qs_tgroup.filter(group=option_filter).order_by('group__name')
+                    qs_tgroup = qs_tgroup.filter(group=option_filter)
 
                 groups = qs_tgroup.order_by('group__name').values('group__name', 'group')
 
