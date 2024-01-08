@@ -11,7 +11,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.AlterModelTable(
-            name='departments',
+            name='salbars',
             table='core_salbars',
         ),
         migrations.AlterModelTable(

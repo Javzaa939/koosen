@@ -115,7 +115,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='survey',
             name='created_department',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='core.departments', verbose_name='Салбар'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='core.salbars', verbose_name='Салбар'),
         ),
         migrations.AddField(
             model_name='survey',

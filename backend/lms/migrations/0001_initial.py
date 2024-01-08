@@ -139,7 +139,7 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('created_user', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='student_cr_user', to=settings.AUTH_USER_MODEL, verbose_name='Бүртгэсэн хэрэглэгч')),
-                ('department', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.departments', verbose_name='Хөтөлбөрийн баг')),
+                ('department', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.salbars', verbose_name='Хөтөлбөрийн баг')),
                 ('group', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='lms.group', verbose_name='Анги')),
                 ('school', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.subschools', verbose_name='Сургууль')),
             ],
@@ -270,7 +270,7 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('created_user', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='plan_cr_user', to=settings.AUTH_USER_MODEL, verbose_name='Бүртгэсэн хэрэглэгч')),
-                ('department', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.departments', verbose_name='Хөтөлбөрийн баг')),
+                ('department', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.salbars', verbose_name='Хөтөлбөрийн баг')),
                 ('lesson', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='less', to='lms.lessonstandart', verbose_name='Хичээл')),
                 ('lesson_group', models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to='lms.lessongroup', verbose_name='Хичээлийн бүлэг')),
                 ('lesson_level', models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to='lms.lessonlevel', verbose_name='Хичээлийн түвшин')),
@@ -290,7 +290,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='group',
             name='department',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.departments', verbose_name='Хөтөлбөрийн баг'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.salbars', verbose_name='Хөтөлбөрийн баг'),
         ),
         migrations.AddField(
             model_name='group',
