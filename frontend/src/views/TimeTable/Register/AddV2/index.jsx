@@ -39,14 +39,12 @@ import { get_time_date, ReactSelectStyles, get_par_from_strTime, convert_kurats_
 // import Addmodal from '../Add'
 import AddModalV2 from '../AddTimeTableV2';
 import EditModal from '../Edit'
-import FileModal from './FileModal';
+// import FileModal from './FileModal';
 
 // ** Styles
 import '@styles/react/apps/app-calendar.scss'
 
 const AddTimetableComponent = ({ }) => {
-
-    const { skin } = useSkin()
 
     const blankEvent = {
         start: '',
@@ -91,14 +89,16 @@ const AddTimetableComponent = ({ }) => {
     const [rangeDate, setRangeDate] = useState(range_date)
 
     const [addmodal, setModal] = useState(false)
-    const [importModal, setFileModal] = useState(false)
+    // const [importModal, setFileModal] = useState(false)
     const [edit_modal, setEditModal] = useState(false)
 
     const [editValues, setEditValues] = useState(edit_values)
     const [radioName, setRadio] = useState('lesson')
     const [selectedValue, setSelectValue] = useState('')
+    const [optionFilter, setOptionFilter] = useState('')
 
     const [depOption, setDepartmentOption] = useState([])
+    const [selectedOption, setSelectedOption] = useState([])
     const [resourceOption, setResourceOption] = useState([])
 
     const [selectedMntName, setSelectedMntName] = useState('Хичээл')
@@ -116,6 +116,10 @@ const AddTimetableComponent = ({ }) => {
     // Api
     const calendarListApi = useApi().timetable.register
     const depApi = useApi().hrms.department
+    const lessonApi = useApi().study.lessonStandart
+    const groupApi = useApi().student.group
+    const teacherApi = useApi().hrms.teacher
+    const roomApi = useApi().timetable.room
 
     const handleModal = () => {
         setModal(!addmodal)
@@ -125,10 +129,11 @@ const AddTimetableComponent = ({ }) => {
         setEditModal(!edit_modal)
     }
 
-    const fileModal = () => {
-        setFileModal(!importModal)
-    }
+    // const fileModal = () => {
+    //     setFileModal(!importModal)
+    // }
 
+    // Календариас өдөр сонгоод дарахад сонгогдсон өдрийн хувиргах
     const convertSelectDate = () => {
         var start_date = dates.start
         var resource_id = dates.resource
@@ -178,6 +183,7 @@ const AddTimetableComponent = ({ }) => {
         setEditValues(editValues)
     }
 
+    // Collapse хайлт onchange
     const handleChange = (value) =>
     {
         setRadio(value)
@@ -211,7 +217,36 @@ const AddTimetableComponent = ({ }) => {
         }
     }
 
-    // Event zooh heseg
+
+    async function getSelectOption() {
+        // Хичээл
+        if (selectedMntName === 'Хичээл') {
+            const { success, data } = await fetchData(lessonApi.getList(school_id, selectedValue))
+            if (success) {
+                setSelectedOption(data)
+            }
+        } else if (selectedMntName === 'Анги') {
+            const { success, data } = await fetchData(groupApi.getList(selectedValue))
+            if (success) {
+                setSelectedOption(data)
+            }
+        }
+        if (selectedMntName === 'Багш') {
+            const { success, data } = await fetchData(teacherApi.get(selectedValue))
+            if (success) {
+                setSelectedOption(data)
+            }
+        }
+
+        if (selectedMntName === 'Өрөө') {
+            const { success, data } = await fetchData(roomApi.getList())
+            if (success) {
+                setSelectedOption(data)
+            }
+        }
+    }
+
+    // Нэг хичээлийн хуваарь onchange хийх хэсэг
     const setEventChange = async () => {
         if (eventValue.start) {
             var start_date = eventValue.start
@@ -259,14 +294,20 @@ const AddTimetableComponent = ({ }) => {
         }
     }
 
+    async function getDepartment() {
+        const {success, data} = await fetchData(depApi.getRegister())
+        if (success) {
+            setDepartmentOption(data)
+        }
+    }
+
     function getAll() {
         setLoader(true)
         Promise.all([
             // Хичээлийн хуваарийн дата
-            fetchData(calendarListApi.getCalendar(isCalendar, selectedValue, radioName)),
+            fetchData(calendarListApi.getCalendar(isCalendar, selectedValue, radioName, optionFilter)),
             // Resource дата
-            fetchData(calendarListApi.selectionDatas(radioName, selectedValue)),
-            fetchData(depApi.getRegister())
+            fetchData(calendarListApi.selectionDatas(radioName, selectedValue, optionFilter)),
         ]).then((values) => {
             if(values[0]?.data) {
                 var data = values[0]?.data
@@ -313,14 +354,13 @@ const AddTimetableComponent = ({ }) => {
                 setDatas(data)
             }
             setResourceOption(values[1]?.data)
-            setDepartmentOption(values[2]?.data)
             setLoader(false)
         })
     }
 
     async function getKuratsData() {
         setLoader(true)
-        const { success, data } = await fetchData(calendarListApi.getCalendarKurats(isCalendar, selectedValue, radioName, rangeDate.start, rangeDate.end))
+        const { success, data } = await fetchData(calendarListApi.getCalendarKurats(isCalendar, selectedValue, radioName, rangeDate.start, rangeDate.end, optionFilter))
 
         if (success) {
             for(var i in data) {
@@ -349,24 +389,31 @@ const AddTimetableComponent = ({ }) => {
     }
 
     useEffect(() => {
+        getDepartment()
+    },[])
+
+    useEffect(() => {
+        getSelectOption()
+    },[selectedMntName, selectedValue])
+
+    useEffect(() => {
         if (isCalendar == false) {
             getAll()
         }
-    },[radioName, selectedValue, isCalendar])
+    },[radioName, selectedValue, isCalendar, optionFilter])
 
 
-    useEffect(
+    useUpdateEffect(
         () =>
         {
             if (isCalendar && rangeDate.start) {
                 getKuratsData()
             }
         },
-        [selectedValue, isCalendar, rangeDate]
+        [selectedValue, isCalendar, rangeDate, optionFilter]
     )
 
-
-    useEffect(() => {
+    useUpdateEffect(() => {
         convertSelectDate()
     }, [dates])
 
@@ -444,14 +491,13 @@ const AddTimetableComponent = ({ }) => {
                 <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
                     <CardTitle tag='h4'>{t('Хичээлийн хуваарь')}</CardTitle>
                     <div className='d-flex justify-content-end'>
-                        <Button className='ms-1' color='primary' onClick={() => { handleModal(), setEditValues(edit_values)}}>Хуваарь нэмэх</Button>
+                        <Button className='ms-1' color='primary' onClick={() => { handleModal(), setEditValues(edit_values)}} disabled={school_id ? false : true}>Хуваарь нэмэх</Button>
                     </div>
                 </CardHeader>
                 <div className='app-calendar overflow-hidden border'>
                     <Row className='g-0'>
                         <Row md={12} className='mx-0' >
-                            <Col md={4} sm={12} xs={12} className="mt-2 ps-0 mx-0 d-flex">
-
+                            <Col md={3} sm={6} xs={12} className="mt-2 ps-0 mx-0 d-flex">
                                 <span data-bs-toggle="tooltip" data-bs-placement="top" title={selectedMntName} >
                                     <Button className='pe-1' outline size="sm" onMouseOver={() => setIsOpen(true)} onMouseOut={() => setIsOpen(false)} >
                                         <i className={`far ${selectedIconName} fs-4`} ></i>
@@ -517,9 +563,9 @@ const AddTimetableComponent = ({ }) => {
                                     </div>
                                 </Collapse>
                             </Col>
-                            <Col md={4} sm={12} xs={12}  className='mt-1'>
+                            <Col md={3} sm={6} xs={12}  className='mt-1'>
                                 <Label className="form label ms-1" for="department">
-                                    {t('Тэнхим')}
+                                    {t('Хөтөлбөрийн баг')}
                                 </Label>
                                 <Select
                                     name="department"
@@ -540,7 +586,30 @@ const AddTimetableComponent = ({ }) => {
                                     getOptionLabel={(option) => option.name}
                                 />
                             </Col>
-                            <Col md={4}  sm={12} xs={12} className='d-flex justify-content-end mt-3'>
+                            <Col md={3} sm={6} xs={12}  className='mt-1'>
+                                <Label className="form label ms-1" for="selected">
+                                    {`${selectedMntName} хайх`}
+                                </Label>
+                                <Select
+                                    name="selected"
+                                    id="selected"
+                                    classNamePrefix='select'
+                                    isClearable
+                                    className={classnames('react-select')}
+                                    isLoading={isLoading}
+                                    placeholder={t('-- Сонгоно уу --')}
+                                    options={selectedOption || []}
+                                    onChange={(val) => {
+                                        setOptionFilter(val?.id || '')
+                                    }}
+                                    value={selectedOption.find((c) => c.id === optionFilter)}
+                                    noOptionsMessage={() => t('Хоосон байна.')}
+                                    styles={ReactSelectStyles}
+                                    getOptionValue={(option) => option.id}
+                                    getOptionLabel={(option) => selectedMntName === 'Багш' ? option.last_name + " " + option.first_name : selectedMntName === 'Өрөө' ? option.full_name : option.name}
+                                />
+                            </Col>
+                            <Col md={3}  sm={6} xs={12} className='d-flex justify-content-end mt-3 ms-auto'>
                                 <div className=" form-check form-switch ">
                                     <Label className='form-label pe-1' for='is_calendar'>
                                         {isCalendar ? "Календарь" : "Курац Календарь"}

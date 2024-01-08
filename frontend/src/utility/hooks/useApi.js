@@ -374,6 +374,7 @@ function useApi(isDisplay=false) {
 				getOne: (pk) => instance.get(`/learning/profession/${pk}/`),
 				deleteIntro: (pk) => instance.delete(`/learning/profession/${pk}/`),
 				putScore: (data, pk,) => instance.put(`/learning/profession/score/${pk}/`, data),
+				deleteScore: (pk) => instance.delete(`/learning/profession/score/${pk}/`),
 				getAddScoreOne: (pk) => instance.get(`/learning/profession/score/${pk}/`),
 
 				// Танилцуулга дээр зураг хадгалах
@@ -774,15 +775,15 @@ function useApi(isDisplay=false) {
 			register:{
 				get: (limit, page, sort, search, day, group,
 				lesson, teacher, time, checked, type, isOptional) => instance.get(`/timetable/register/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&day=${day}&group=${group}&lesson=${lesson}&teacher=${teacher}&time=${time}&school=${school_id}&checked=${checked}&type=${type}&isOptional=${isOptional}&lesson_year=${cyear_name}&lesson_season=${cseason_id}`),
-				getCalendar: (isCalendar, selectedValue, stype) => instance.get(`/timetable/register-new/?school=${school_id}&year=${cyear_name}&season=${cseason_id}&isCalendar=${isCalendar}&selectedValue=${selectedValue}&type=${stype}`),
-				getCalendarKurats: (isCalendar, selectedValue, stype, start, end) => instance.get(`/timetable/register1/kurats/?school=${school_id}&year=${cyear_name}&season=${cseason_id}&isCalendar=${isCalendar}&selectedValue=${selectedValue}&type=${stype}&start=${start}&end=${end}`),
-				getSearchSelect: (selectType) => instance.get(`/timetable/resource/select/?school=${school_id}&year=${cyear_name}&season=${cseason_id}&stype=${selectType}`),
+				getCalendar: (isCalendar, selectedValue, stype, optionFilter) => instance.get(`/timetable/register-new/?school=${school_id}&year=${cyear_name}&season=${cseason_id}&isCalendar=${isCalendar}&selectedValue=${selectedValue}&type=${stype}&option=${optionFilter}`),
+				getCalendarKurats: (isCalendar, selectedValue, stype, start, end, optionFilter) => instance.get(`/timetable/register1/kurats/?school=${school_id}&year=${cyear_name}&season=${cseason_id}&isCalendar=${isCalendar}&selectedValue=${selectedValue}&type=${stype}&start=${start}&end=${end}&option=${optionFilter}`),
+				// getSearchSelect: (selectType) => instance.get(`/timetable/resource/select/?school=${school_id}&year=${cyear_name}&season=${cseason_id}&stype=${selectType}`),
 				post: (data, type) => instance.post(`/timetable/register/?type=${type}`, data),
 				getOne: (pk) => instance.get(`/timetable/register/${pk}/`),
 				getPotok: (lesson, potok) => instance.get(`/timetable/list/?lesson=${lesson}&potok=${potok}&school=${school_id}&year=${cyear_name}&season=${cseason_id}`),
 				put: (data, pk) => instance.put(`/timetable/register/${pk}/`, data),
 				delete: (pk) => instance.delete(`/timetable/register/${pk}/`),
-				selectionDatas: (selectType, selectedValue) => instance.get(`/timetable/resource1/?school=${school_id}&year=${cyear_name}&season=${cseason_id}&stype=${selectType}&selectedValue=${selectedValue}`),
+				selectionDatas: (selectType, selectedValue, optionFilter) => instance.get(`/timetable/resource1/?school=${school_id}&year=${cyear_name}&season=${cseason_id}&stype=${selectType}&selectedValue=${selectedValue}&option=${optionFilter}`),
 				setEvent: (data, id) => instance.put(`/timetable/event/${id}/`, data),
 				moveEvent: (data, id) => instance.put(`/timetable/register/new/${id}/`, data),
 				saveFile: (data) => instance.post(`/timetable/file/`, data)
@@ -1489,6 +1490,27 @@ function useApi(isDisplay=false) {
 		},
 		db3:{
 			get: () => instance.get(`/statistic/db3/`),
+		},
+		db4:{
+			get: () => instance.get(`/statistic/db4/`),
+		},
+		db5:{
+			get: () => instance.get(`/statistic/db5/`),
+		},
+		db6:{
+			get: () => instance.get(`/statistic/db6/`),
+		},
+		db7:{
+			get: () => instance.get(`/statistic/db7/`),
+		},
+		db8:{
+			get: () => instance.get(`/statistic/db8/`),
+		},
+		db9:{
+			get: () => instance.get(`/statistic/db9/`),
+		},
+		db10:{
+			get: () => instance.get(`/statistic/db10/`),
 		}
 	}
 	}

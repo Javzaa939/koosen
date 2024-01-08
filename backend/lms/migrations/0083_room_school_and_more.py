@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='room',
             name='school',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='core.subschools', verbose_name='Сургууль'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='core.suborgs', verbose_name='Сургууль'),
         ),
         migrations.AlterField(
             model_name='studentcorrespondscore',
