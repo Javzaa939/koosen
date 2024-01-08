@@ -81,12 +81,11 @@ function ExamReport() {
                                     <div></div>
                                 <div className="d-flex flex-column text-center fw-bolder">
                                     <span className='mt-1 fs-3 fw-bolder' style={{ color: '#000' }}>
-                                        {parentschoolName} {/* Монголын Үндэсний Их Сургууль */}
+                                        {parentschoolName} {/* Дотоод Хэргийн Их Сургууль */}
                                     </span>
                                     {/* <span style={{ marginTop: '6px' }}>{datas?.school?.name_eng.toUpperCase()}</span> */}
                                 </div>
-                                <img className="fallback-logo" width={50} height={50} src='http://hr.mnun.edu.mn/media/orgs/logo/MNU-Logo_1.png' alt="logo" onLoad={vidx === 0 ? imageLoaded : null}  />
-                                {/* <img className="fallback-logo" width={100} height={100} src={`${process.env.REACT_APP_MUIS_HR_MEDIA_URL}${datas?.school?.logo_url}`} alt="logo" onLoad={vidx === 0 ? imageLoaded : null} /> */}
+                                <img className="fallback-logo" width={50} height={50} src={logo} alt="logo" onLoad={vidx === 0 ? imageLoaded : null}  />
                             </div>
                             <div className="my-2">
                                 <table className="w-100 examreport" style={{ fontSize: '13px' }}>
