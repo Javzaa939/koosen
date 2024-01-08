@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='lessonstandart',
             name='department',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.departments', verbose_name='Хөтөлбөрийн баг'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.salbars', verbose_name='Хөтөлбөрийн баг'),
         ),
         migrations.AddField(
             model_name='lessonstandart',
@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='professiondefinition',
             name='department',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.departments', verbose_name='Хөтөлбөрийн баг'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.salbars', verbose_name='Хөтөлбөрийн баг'),
         ),
         migrations.AddField(
             model_name='professiondefinition',
