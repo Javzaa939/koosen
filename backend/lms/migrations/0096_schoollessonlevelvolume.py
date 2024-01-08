@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
                 ('amount', models.PositiveIntegerField(default=40, verbose_name='Гүйцэтгэлийн кр тооцох коэфф')),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
-                ('school', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.subschools', verbose_name='Сургууль')),
+                ('school', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.suborgs', verbose_name='Сургууль')),
             ],
         ),
     ]

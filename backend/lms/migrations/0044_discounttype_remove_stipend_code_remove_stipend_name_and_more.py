@@ -46,7 +46,7 @@ class Migration(migrations.Migration):
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('created_user', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='pd_cr_user', to=settings.AUTH_USER_MODEL, verbose_name='Бүртгэсэн хэрэглэгч')),
                 ('lesson_season', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='lms.season', verbose_name='Улирал')),
-                ('school', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.subschools', verbose_name='Сургууль')),
+                ('school', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.suborgs', verbose_name='Сургууль')),
                 ('stipent_type', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='lms.discounttype', verbose_name='Хөнгөлөлтийн төрөл')),
                 ('student', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='lms.student', verbose_name='Оюутан')),
                 ('updated_user', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='pd_up_user', to=settings.AUTH_USER_MODEL, verbose_name='Зассан хэрэглэгч')),
