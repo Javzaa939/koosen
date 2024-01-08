@@ -1,3 +1,5 @@
+
+
 import React, { useEffect, useState, useContext } from "react";
 import { useParams, useLocation } from 'react-router-dom';
 import './style.css'
@@ -10,10 +12,10 @@ import SchoolContext from '@context/SchoolContext'
 function ExamReport() {
 
     const { parentschoolName } = useContext(SchoolContext)
-    const [datas, setDatas] = useState({})
+    const [ datas, setDatas ] = useState({})
     const { id } = useParams()
     const examApi = useApi().timetable.exam
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
 
     async function getResults() {
         const { success, data } = await fetchData(examApi.getOne(id))
@@ -63,7 +65,7 @@ function ExamReport() {
 
 
     function fdata(group){
-        const filter = datas.student_list.filter(data => data.group === group)
+        const filter = datas.student_list.filter(data => { if (data.group === group && data.status === 1) return data})
         return filter
     }
 
@@ -73,25 +75,25 @@ function ExamReport() {
         {Object.keys(datas).length > 0 ?
             datas?.student_group_list.map((vdata, vidx ) => {
                 return(
-                    <div key={`groups${vidx}`} className={`d-flex align-items-center flex-column justify-content-start align-items-center m-2 mt-0 ${vidx + 1 === datas.student_group_list.length ? '' : 'page-break-always border-0'}`}>
+                    <div key={`groups${vidx}`} className={`d-flex align-items-center flex-column justify-content-start align-items-center mt-0 ${vidx + 1 === datas.student_group_list.length ? '' : 'page-break-always border-0'}`}>
                         <div className="w-100">
                             <div className='d-flex justify-content-between align-items-center w-100 mt-1' style={{ fontSize: '14px' }} >
                                     <div></div>
                                 <div className="d-flex flex-column text-center fw-bolder">
                                     <span className='mt-1 fs-3 fw-bolder' style={{ color: '#000' }}>
-                                        {parentschoolName}
+                                        {parentschoolName} {/* Монголын Үндэсний Их Сургууль */}
                                     </span>
                                     {/* <span style={{ marginTop: '6px' }}>{datas?.school?.name_eng.toUpperCase()}</span> */}
                                 </div>
                                 <img className="fallback-logo" width={50} height={50} src='http://hr.mnun.edu.mn/media/orgs/logo/MNU-Logo_1.png' alt="logo" onLoad={vidx === 0 ? imageLoaded : null}  />
-                                {/* <img className="fallback-logo" width={100} height={100} src={`${process.env.REACT_APP_MUIS_HR_MEDIA_URL}${datas?.school?.logo_url}`} alt="logo" onLoad={imageLoaded} /> */}
+                                {/* <img className="fallback-logo" width={100} height={100} src={`${process.env.REACT_APP_MUIS_HR_MEDIA_URL}${datas?.school?.logo_url}`} alt="logo" onLoad={vidx === 0 ? imageLoaded : null} /> */}
                             </div>
                             <div className="my-2">
-                                <table className="w-100" style={{ fontSize: '13px' }}>
+                                <table className="w-100 examreport" style={{ fontSize: '13px' }}>
                                     <tbody className="w-100">
                                         <tr className="w-100">
                                             <td className="first-cell">
-                                                Дамжаа: {vdata.name}
+                                                Анги: {vdata.name}
                                             </td>
                                             <td>
                                                 Жил: {datas?.lesson_year}
@@ -120,7 +122,7 @@ function ExamReport() {
                             Шалгалтын хуудас
                         </div>
                         <div className="w-100">
-                            <table className="w-100" style={{ fontSize: 12 }}>
+                            <table className="w-100 examreport" style={{ fontSize: 12 }}>
                                 <thead>
                                     <tr>
                                         <th>
@@ -138,7 +140,7 @@ function ExamReport() {
                                         <th>
                                             70 оноо
                                         </th>
-                                        <th>
+                                        <th style={{ maxWidth: '100px' }}>
                                             Шалгалтын оноо
                                         </th>
                                         <th>
@@ -155,16 +157,22 @@ function ExamReport() {
                                 <tbody>
                                     {fdata(vdata.id).map((data, idx) => {
                                         // setHeadLesson(data?.)
+                                        const firstName = data?.first_name.toLowerCase();
+                                        const formattedFirstName = firstName.charAt(0).toUpperCase() + firstName.slice(1);
+
+                                        const lastName = data?.last_name.toLowerCase();
+                                        const formattedLastName = lastName.charAt(0).toUpperCase() + lastName.slice(1);
+
                                         return(
                                             <tr key={`student${idx}`}>
                                                 <td style={{ width: 0 }}>
                                                     {idx + 1}
                                                 </td>
-                                                <td>
-                                                    {data?.last_name}
+                                                <td className="wraptext" style={{fontSize: '11px'}}>
+                                                    {formattedLastName}
                                                 </td>
-                                                <td>
-                                                    {data?.first_name}
+                                                <td className="wraptext" style={{fontSize: '11px'}}>
+                                                    {formattedFirstName}
                                                 </td>
                                                 <td>
                                                     {data?.code}
@@ -173,16 +181,15 @@ function ExamReport() {
                                                     {data?.teach_score}
                                                 </td>
                                                 <td>
-                                                    {convertPercentageToNumber(data?.exam)}
+                                                    {/* {convertPercentageToNumber(data?.exam)} */}
                                                 </td>
                                                 <td>
-                                                    {data?.exam === 0 || data?.teach_score === 0 ? '' : convertPercentageToNumber(data?.exam) + data?.teach_score}
+                                                    {/* {data?.exam === 0 || data?.teach_score === 0 ? '' : convertPercentageToNumber(data?.exam) + data?.teach_score} */}
                                                 </td>
                                                 <td>
-                                                    {data?.exam === 0 || data?.teach_score === 0 ? '' : data?.assesment}
-
+                                                    {/* {data?.exam === 0 || data?.teach_score === 0 ? '' : data?.assesment} */}
                                                 </td>
-                                                <td>
+                                                <td className="wraptext-teacher" style={{fontSize: '11px'}}>
                                                     {data?.teacher_name}
                                                 </td>
                                             </tr>

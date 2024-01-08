@@ -1,4 +1,6 @@
-table, tr, td, th {
+.examreport table,
+.examreport tr,
+.examreport td {
     border: 1px solid rgba(0, 0, 0, 1);
     padding-left: 0.4rem;
     padding-right: 0.4rem;
@@ -9,7 +11,7 @@ table, tr, td, th {
     font-weight: 500;
 }
 
-th {
+.examreport th {
     border: 1px solid rgba(0, 0, 0, 1);
     padding-left: 0.4rem;
     padding-right: 0.4rem;
@@ -19,6 +21,7 @@ th {
     font-size: 13px;
     font-weight: 1000;
 }
+
 
 .first-cell{
     /* width: 30vh; */
@@ -37,3 +40,17 @@ th {
 @page {
     size: A4 portrait;
 }
+
+.wraptext{
+    overflow-wrap: break-word!important;
+    max-width: 110px!important;
+    font-weight: 600;
+}
+
+.wraptext-teacher{
+    overflow-wrap: break-word!important;
+    max-width: 110px!important;
+    font-weight: 600;
+}
+
+
