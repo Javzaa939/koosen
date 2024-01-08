@@ -35,7 +35,6 @@ function ADB1(){
         getDatas()
     },[])
 
-
         function convert() {
 
             const header = Array.from({length: 10},(_, hidx) => {
