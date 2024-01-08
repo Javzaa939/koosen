@@ -56,7 +56,7 @@ const Register = () => {
         'last_name': 'Овог',
         'first_name': 'Нэр',
         'register_num': 'Регистрийн дугаар',
-        'profession_name': 'Мэргэжил',
+        'profession_name': 'Хөтөлбөр',
         'group_name': 'Анги',
         'group_level': 'Курс',
     }
@@ -159,7 +159,7 @@ const Register = () => {
 
     }
 
-    // Мэргэжлийн жагсаалтын getList функц боловсролын зэргээс хамаарч жагсаалтаа авна. Шаардлагагүй үед хоосон string явуулна.
+    // Хөтөлбөрийн жагсаалтын getList функц боловсролын зэргээс хамаарч жагсаалтаа авна. Шаардлагагүй үед хоосон string явуулна.
     async function getProfession() {
         const { success, data } = await fetchData(professionApi.getList(select_value?.degree, select_value.department,''))
         if(success) {
@@ -416,7 +416,7 @@ const Register = () => {
                     </Col>
                     <Col sm={6} lg={3}>
                         <Label className="form-label" for="profession">
-                            {t('Мэргэжил')}
+                            {t('Хөтөлбөр')}
                         </Label>
                         <Select
                             name="profession"

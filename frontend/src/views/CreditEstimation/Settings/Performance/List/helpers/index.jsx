@@ -38,7 +38,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 			center: true
         },
 		{
-			name: `${t('Мэргэжлийн түвшин нэр')}`,
+			name: `${t('Хөтөлбөрийн түвшин нэр')}`,
 			selector: (row) => row?.lesson_level_name,
 			center: true
         },

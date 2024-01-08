@@ -137,7 +137,7 @@ const MainInformation = ({ }) => {
                 <CardHeader className='bg-transparent pb-0'></CardHeader>
                 <CardBody className="px-sm-3 pt-50 pb-3">
                     <div className='text-center'>
-                        <h4>{t('Мэргэжлийн тодорхойлолт засах')}</h4>
+                        <h4>{t('Хөтөлбөр засах')}</h4>
                     </div>
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
                         <Col  lg={6} xs={12}>
@@ -176,7 +176,7 @@ const MainInformation = ({ }) => {
                         </Col>
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="code">
-                                {t('Мэргэжлийн индекс')}
+                                {t('Хөтөлбөрийн индекс')}
                             </Label>
                             <Controller
                                 defaultValue=''
@@ -187,7 +187,7 @@ const MainInformation = ({ }) => {
                                     <Input
                                         id ="code"
                                         bsSize="sm"
-                                        placeholder={t('Мэргэжлийн код')}
+                                        placeholder={t('Хөтөлбөрийн код')}
                                         {...field}
                                         type="text"
                                         readOnly={is_valid}
@@ -200,7 +200,7 @@ const MainInformation = ({ }) => {
                         </Col>
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="name">
-                                {t('Мэргэжлийн нэр')}
+                                {t('Хөтөлбөрийн нэр')}
                             </Label>
                             <Controller
                                 defaultValue=''
@@ -211,7 +211,7 @@ const MainInformation = ({ }) => {
                                     <Input
                                         id ="name"
                                         bsSize="sm"
-                                        placeholder={t('Мэргэжлийн нэр')}
+                                        placeholder={t('Хөтөлбөрийн нэр')}
                                         {...field}
                                         type="text"
                                         readOnly={is_valid}
@@ -224,7 +224,7 @@ const MainInformation = ({ }) => {
                         </Col>
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="name_eng">
-                                {t('Мэргэжлийн нэр англи')}
+                                {t('Хөтөлбөрийн нэр англи')}
                             </Label>
                             <Controller
                                 defaultValue=''
@@ -235,7 +235,7 @@ const MainInformation = ({ }) => {
                                     <Input
                                         id ="name_eng"
                                         bsSize="sm"
-                                        placeholder={t('Мэргэжлийн нэр англи')}
+                                        placeholder={t('Хөтөлбөрийн нэр англи')}
                                         {...field}
                                         type="text"
                                         readOnly={is_valid}
@@ -248,7 +248,7 @@ const MainInformation = ({ }) => {
                         </Col>
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="name_uig">
-                                {t('Мэргэжлийн нэр уйгаржин')}
+                                {t('Хөтөлбөрийн нэр уйгаржин')}
                             </Label>
                             <Controller
                                 defaultValue=''
@@ -259,7 +259,7 @@ const MainInformation = ({ }) => {
                                     <Input
                                         id ="name_uig"
                                         bsSize="sm"
-                                        placeholder={t('Мэргэжлийн нэр уйгаржин')}
+                                        placeholder={t('Хөтөлбөрийн нэр уйгаржин')}
                                         {...field}
                                         type="text"
                                         style={{ fontFamily: 'CMs Urga', fontSize: '15px'}}
@@ -307,7 +307,7 @@ const MainInformation = ({ }) => {
                         </Col>
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="gen_direct_type">
-                                {t('Мэргэжлийн ерөнхий чиглэл')}
+                                {t('Хөтөлбөрийн ерөнхий чиглэл')}
                             </Label>
                             <Controller
                                 defaultValue=''
@@ -341,7 +341,7 @@ const MainInformation = ({ }) => {
                         </Col>
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="dep_name">
-                                {t('Мэргэжлийн төрөлжсөн чиглэл')}
+                                {t('Хөтөлбөрийн төрөлжсөн чиглэл')}
                             </Label>
                             <Controller
                                 defaultValue=''
@@ -352,7 +352,7 @@ const MainInformation = ({ }) => {
                                     <Input
                                         id ="dep_name"
                                         bsSize="sm"
-                                        placeholder={t('Мэргэжлийн төрөлжсөн чиглэл')}
+                                        placeholder={t('Хөтөлбөрийн төрөлжсөн чиглэл')}
                                         {...field}
                                         type="text"
                                         readOnly={is_valid}
@@ -365,7 +365,7 @@ const MainInformation = ({ }) => {
                         </Col>
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="dep_name_eng">
-                                {t('Мэргэжлийн төрөлжсөн чиглэл англи')}
+                                {t('Хөтөлбөрийн төрөлжсөн чиглэл англи')}
                             </Label>
                             <Controller
                                 defaultValue=''
@@ -376,7 +376,7 @@ const MainInformation = ({ }) => {
                                     <Input
                                         id ="dep_name_eng"
                                         bsSize="sm"
-                                        placeholder={t('Мэргэжлийн төрөлжсөн чиглэл англи')}
+                                        placeholder={t('Хөтөлбөрийн төрөлжсөн чиглэл англи')}
                                         {...field}
                                         type="text"
                                         readOnly={is_valid}
@@ -389,7 +389,7 @@ const MainInformation = ({ }) => {
                         </Col>
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="dep_name_uig">
-                                {t('Мэргэжлийн төрөлжсөн чиглэл уйгаржин')}
+                                {t('Хөтөлбөрийн төрөлжсөн чиглэл уйгаржин')}
                             </Label>
                             <Controller
                                 defaultValue=''
@@ -400,7 +400,7 @@ const MainInformation = ({ }) => {
                                     <Input
                                         id ="dep_name_uig"
                                         bsSize="sm"
-                                        placeholder={t('Мэргэжлийн төрөлжсөн чиглэл уйгаржин')}
+                                        placeholder={t('Хөтөлбөрийн төрөлжсөн чиглэл уйгаржин')}
                                         {...field}
                                         type="text"
                                         style={{ fontFamily: 'CMs Urga', fontSize: '15px'}}
@@ -414,7 +414,7 @@ const MainInformation = ({ }) => {
                         </Col>
                         <Col lg={6} xs={12}>
                             <Label className="form-label  me-1" for="dedication">
-                                {t('Мэргэжлийн тодорхойлолт')}
+                                {t('Хөтөлбөр')}
                             </Label>
                             <Controller
                                 control={control}
@@ -429,7 +429,7 @@ const MainInformation = ({ }) => {
                                         bsSize="sm"
                                         readOnly={is_valid}
                                         disabled={is_valid}
-                                        placeholder={t('Мэргэжлийн тодорхойлолт')}
+                                        placeholder={t('Хөтөлбөр')}
                                         invalid={errors.dedication && true}
                                     />
                                 )}
@@ -438,7 +438,7 @@ const MainInformation = ({ }) => {
                         </Col>
                         <Col lg={6} xs={12}>
                             <Label className="form-label  me-1" for="requirement">
-                                {t('Мэргэжлийн зорилго')}
+                                {t('Хөтөлбөрийн зорилго')}
                             </Label>
                             <Controller
                                 control={control}
@@ -453,7 +453,7 @@ const MainInformation = ({ }) => {
                                         bsSize="sm"
                                         readOnly={is_valid}
                                         disabled={is_valid}
-                                        placeholder={t('Мэргэжлийн зорилго')}
+                                        placeholder={t('Хөтөлбөрийн зорилго')}
                                         invalid={errors.requirement && true}
                                     />
                                 )}
@@ -595,7 +595,7 @@ const MainInformation = ({ }) => {
                                     </Col>
                                     <Col md={4}>
                                         <Label className="form-label" for="professional_base">
-                                            {t('Мэргэжлийн суурь хичээл')}
+                                            {t('Хөтөлбөрийн суурь хичээл')}
                                         </Label>
                                         <Controller
                                             control={control}
@@ -611,7 +611,7 @@ const MainInformation = ({ }) => {
                                                         bsSize='sm'
                                                         readOnly={is_valid}
                                                         disabled={is_valid}
-                                                        placeholder={t('Мэргэжлийн суурь хичээл')}
+                                                        placeholder={t('Хөтөлбөрийн суурь хичээл')}
                                                     />
                                                 )
                                             }}
@@ -619,7 +619,7 @@ const MainInformation = ({ }) => {
                                     </Col>
                                     <Col md={4}>
                                         <Label className="form-label" for="professional_lesson">
-                                            {t('Мэргэжлийн хичээл')}
+                                            {t('Хөтөлбөрийн хичээл')}
                                         </Label>
                                         <Controller
                                             control={control}
@@ -635,7 +635,7 @@ const MainInformation = ({ }) => {
                                                         bsSize='sm'
                                                         readOnly={is_valid}
                                                         disabled={is_valid}
-                                                        placeholder={t('Мэргэжлийн хичээл')}
+                                                        placeholder={t('Хөтөлбөрийн хичээл')}
                                                     />
                                                 )
                                             }}

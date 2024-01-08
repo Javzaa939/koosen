@@ -38,7 +38,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, UpdateModal, 
 		},
 		{
 			header: 'school_pro',
-			name: `${t('Суралцах мэргэжил')}`,
+			name: `${t('Суралцах Хөтөлбөр')}`,
 			selector: (row) => <span title={`${row?.pro_name}`}>{row?.pro_name}</span>,
             sortable: true,
 			minWidth: "80px",

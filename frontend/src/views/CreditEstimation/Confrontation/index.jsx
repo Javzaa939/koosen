@@ -57,7 +57,7 @@ export default function Confrontation()
         }
 	}
 
-    //Мэргэжлийн жагсаалт авах
+    //Хөтөлбөрийн жагсаалт авах
     async function getProfession()
     {
 
@@ -163,7 +163,7 @@ export default function Confrontation()
                     </Col>
                     <Col md={6}>
                         <Label className="form-label" for="profession">
-                            {t('Мэргэжил')}
+                            {t('Хөтөлбөр')}
                         </Label>
                         <Controller
                             control={control}

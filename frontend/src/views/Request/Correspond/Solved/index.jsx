@@ -61,7 +61,7 @@ function detailRows( datas ) {
                                 <td>{datas?.degree_name}</td>
                             </tr>
                             <tr className='border-bottom'>
-                                <td className='pe-1'>Мэргэжил:</td>
+                                <td className='pe-1'>Хөтөлбөр:</td>
                                 <td>{datas?.profession_name}</td>
                             </tr>
                             {
