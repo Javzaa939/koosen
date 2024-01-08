@@ -141,7 +141,7 @@ class Migration(migrations.Migration):
                 ('created_user', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='student_cr_user', to=settings.AUTH_USER_MODEL, verbose_name='Бүртгэсэн хэрэглэгч')),
                 ('department', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.salbars', verbose_name='Хөтөлбөрийн баг')),
                 ('group', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='lms.group', verbose_name='Анги')),
-                ('school', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.subschools', verbose_name='Сургууль')),
+                ('school', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.suborgs', verbose_name='Сургууль')),
             ],
         ),
         migrations.CreateModel(
@@ -277,7 +277,7 @@ class Migration(migrations.Migration):
                 ('lesson_type', models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to='lms.lessontype', verbose_name='Хичээлийн төрөл')),
                 ('previous_lesson', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='prev_less', to='lms.lessonstandart', verbose_name='Өмнөх холбоо хичээл')),
                 ('profession', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='lms.professiondefinition', verbose_name='Мэргэжил')),
-                ('school', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.subschools', verbose_name='Сургууль')),
+                ('school', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.suborgs', verbose_name='Сургууль')),
                 ('season', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='lms.season', verbose_name='Хичээл үзэх улирал')),
                 ('updated_user', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='plan_up_user', to=settings.AUTH_USER_MODEL, verbose_name='Зассан хэрэглэгч')),
             ],
@@ -305,7 +305,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='group',
             name='school',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.subschools', verbose_name='Сургууль'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.suborgs', verbose_name='Сургууль'),
         ),
         migrations.CreateModel(
             name='GraduationWork',

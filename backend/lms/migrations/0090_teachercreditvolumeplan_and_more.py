@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
                 ('department', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.salbars', verbose_name='Хөтөлбөрийн баг')),
                 ('lesson', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='lms.lessonstandart', verbose_name='Хичээл')),
                 ('lesson_season', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='lms.season', verbose_name='Улирал')),
-                ('school', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.subschools', verbose_name='Сургууль')),
+                ('school', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.suborgs', verbose_name='Сургууль')),
                 ('teacher', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='core.teachers', verbose_name='Багш')),
             ],
         ),

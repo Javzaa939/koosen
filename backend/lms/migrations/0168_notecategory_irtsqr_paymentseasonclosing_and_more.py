@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('created_user', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL, verbose_name='Хаалт хийсэн хэрэглэгч')),
                 ('lesson_season', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='lms.season', verbose_name='Улирал')),
-                ('school', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.subschools', verbose_name='Бүрэлдэхүүн сургууль')),
+                ('school', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.suborgs', verbose_name='Бүрэлдэхүүн сургууль')),
             ],
         ),
     ]

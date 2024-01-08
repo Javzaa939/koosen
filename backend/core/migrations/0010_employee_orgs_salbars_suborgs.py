@@ -58,9 +58,9 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='SubOrgs',
             fields=[
-                ('subschools_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='core.subschools')),
+                ('subschools_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='core.suborgs')),
             ],
-            bases=('core.subschools',),
+            bases=('core.suborgs',),
             options={
                 'db_table': 'core_subschools',
                 'managed': False,
