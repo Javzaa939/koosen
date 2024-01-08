@@ -717,7 +717,7 @@ def get_16week_start_date():
         end_date = qs_activeyear.start_date
 
 
-        for x in range(18):
+        for x in range(25):
             obj_datas = {}
             start_date  = end_date
 
