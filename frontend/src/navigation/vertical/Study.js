@@ -16,7 +16,7 @@ export default [
             },
             {
                 id: 'study2',
-                title: 'Мэргэжлийн тодорхойлолт',
+                title: 'Хөтөлбөр',
                 icon: <Circle size={8} />,
                 navLink: "study/profession-definition/"
             },

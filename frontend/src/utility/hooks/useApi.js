@@ -180,7 +180,7 @@ function useApi(isDisplay=false) {
 			post: (data) => instance.post(`/student/signature/`, data),
 			put: (data, pk) => instance.put(`/student/signature/${pk}/`, data),
 			delete: (pk) => instance.delete(`/student/signature/${pk}/`),
-			changeorder: (data, typeNumber) => instance.post(`/student/signature/changeorder/?type=${typeNumber}`, data)
+			changeorder: (data, typeNumber) => instance.post(`/student/signature/changeorder/?type=${typeNumber}`, data),
 		},
 		settings: {
 			/** Бололвсролын зэрэг */
@@ -597,6 +597,7 @@ function useApi(isDisplay=false) {
 			},
 			getSimpleList: () => instance.get(`/student/info/simplelist/`),
 			getGraduate: (depId, degree, group) => instance.get(`/student/info/graduate/?department=${depId}&degree=${degree}&group=${group}&school=${school_id}`),
+			postGraduate: (data) => instance.post(`/student/graduation/group/`, data),
 			getStudent: (department, degree, profession, group, join_year) => instance.get(`/student/info/list/?department=${department}&degree=${degree}&profession=${profession}&group=${group}&join_year=${join_year}&school=${school_id}`),
 			getGroup: (groups, type) => {
 				var group_ids = ''

@@ -37,7 +37,7 @@ export function getColumns (currentPage, rowsPerPage, datas) {
 		},
 		{
 			header: 'student__profession',
-			name: t("Мэргэжил"),
+			name: t("Хөтөлбөр"),
 			selector: (row) =>
 				<span title={row?.student?.group?.profession?.prof_name}>{row?.student?.group?.profession?.prof_name}</span>,
             sortable: true,

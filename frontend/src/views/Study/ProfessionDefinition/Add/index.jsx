@@ -117,7 +117,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                     close={CloseBtn}
                     tag="div"
                 >
-                    <h5 className="modal-title">{t('Мэргэжлийн тодорхойлолт нэмэх')}</h5>
+                    <h5 className="modal-title">{t('Хөтөлбөр нэмэх')}</h5>
                 </ModalHeader>
                 <ModalBody className="flex-grow-1">
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
@@ -156,7 +156,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                         </Col>
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="code">
-                                {t('Мэргэжлийн код')}
+                                {t('Хөтөлбөрийн код')}
                             </Label>
                             <Controller
                                 defaultValue=''
@@ -167,7 +167,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                     <Input
                                         id ="code"
                                         bsSize="sm"
-                                        placeholder={t('Мэргэжлийн код')}
+                                        placeholder={t('Хөтөлбөрийн код')}
                                         {...field}
                                         type="text"
                                         invalid={errors.code && true}
@@ -178,7 +178,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                         </Col>
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="name">
-                                {t('Мэргэжлийн нэр')}
+                                {t('Хөтөлбөрийн нэр')}
                             </Label>
                             <Controller
                                 defaultValue=''
@@ -189,7 +189,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                     <Input
                                         id ="name"
                                         bsSize="sm"
-                                        placeholder={t('Мэргэжлийн нэр')}
+                                        placeholder={t('Хөтөлбөрийн нэр')}
                                         {...field}
                                         type="text"
                                         invalid={errors.name && true}
@@ -200,7 +200,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                         </Col>
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="name_eng">
-                                {t('Мэргэжлийн нэр англи')}
+                                {t('Хөтөлбөрийн нэр англи')}
                             </Label>
                             <Controller
                                 defaultValue=''
@@ -211,7 +211,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                     <Input
                                         id ="name_eng"
                                         bsSize="sm"
-                                        placeholder={t('Мэргэжлийн нэр англи')}
+                                        placeholder={t('Хөтөлбөрийн нэр англи')}
                                         {...field}
                                         type="text"
                                         invalid={errors.name_eng && true}
@@ -222,7 +222,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                         </Col>
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="name_uig">
-                                {t('Мэргэжлийн нэр уйгаржин')}
+                                {t('Хөтөлбөрийн нэр уйгаржин')}
                             </Label>
                             <Controller
                                 defaultValue=''
@@ -233,7 +233,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                     <Input
                                         id ="name_uig"
                                         bsSize="sm"
-                                        placeholder={t('Мэргэжлийн нэр уйгаржин')}
+                                        placeholder={t('Хөтөлбөрийн нэр уйгаржин')}
                                         {...field}
                                         type="text"
                                         style={{ fontFamily: 'CMs Urga', fontSize: '15px'}}
@@ -278,7 +278,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                         </Col>
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="gen_direct_type">
-                                {t('Мэргэжлийн ерөнхий чиглэл')}
+                                {t('Хөтөлбөрийн ерөнхий чиглэл')}
                             </Label>
                             <Controller
                                 defaultValue=''
@@ -311,7 +311,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                         </Col>
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="dep_name">
-                                {t('Мэргэжлийн төрөлжсөн чиглэл')}
+                                {t('Хөтөлбөрийн төрөлжсөн чиглэл')}
                             </Label>
                             <Controller
                                 defaultValue=''
@@ -322,7 +322,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                     <Input
                                         id ="dep_name"
                                         bsSize="sm"
-                                        placeholder={t('Мэргэжлийн төрөлжсөн чиглэл')}
+                                        placeholder={t('Хөтөлбөрийн төрөлжсөн чиглэл')}
                                         {...field}
                                         type="text"
                                         invalid={errors.dep_name && true}
@@ -333,7 +333,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                         </Col>
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="dep_name_eng">
-                                {t('Мэргэжлийн төрөлжсөн чиглэл англи')}
+                                {t('Хөтөлбөрийн төрөлжсөн чиглэл англи')}
                             </Label>
                             <Controller
                                 defaultValue=''
@@ -344,7 +344,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                     <Input
                                         id ="dep_name_eng"
                                         bsSize="sm"
-                                        placeholder={t('Мэргэжлийн төрөлжсөн чиглэл англи')}
+                                        placeholder={t('Хөтөлбөрийн төрөлжсөн чиглэл англи')}
                                         {...field}
                                         type="text"
                                         invalid={errors.dep_name_eng && true}
@@ -355,7 +355,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                         </Col>
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="dep_name_uig">
-                                {t('Мэргэжлийн төрөлжсөн чиглэл уйгаржин')}
+                                {t('Хөтөлбөрийн төрөлжсөн чиглэл уйгаржин')}
                             </Label>
                             <Controller
                                 defaultValue=''
@@ -366,7 +366,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                     <Input
                                         id ="dep_name_uig"
                                         bsSize="sm"
-                                        placeholder={t('Мэргэжлийн төрөлжсөн чиглэл уйгаржин')}
+                                        placeholder={t('Хөтөлбөрийн төрөлжсөн чиглэл уйгаржин')}
                                         {...field}
                                         type="text"
                                         style={{ fontFamily: 'CMs Urga', fontSize: '15px'}}
@@ -378,7 +378,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                         </Col>
                         <Col lg={6} xs={12}>
                             <Label className="form-label  me-1" for="dedication">
-                                {t('Мэргэжлийн тодорхойлолт')}
+                                {t('Хөтөлбөр')}
                             </Label>
                             <Controller
                                 control={control}
@@ -391,7 +391,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                         id="dedication"
                                         type="textarea"
                                         bsSize="sm"
-                                        placeholder={t('Мэргэжлийн тодорхойлолт')}
+                                        placeholder={t('Хөтөлбөр')}
                                         invalid={errors.dedication && true}
                                     />
                                 )}
@@ -400,7 +400,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                         </Col>
                         <Col lg={6} xs={12}>
                             <Label className="form-label  me-1" for="requirement">
-                                {t('Мэргэжлийн зорилго')}
+                                {t('Хөтөлбөрийн зорилго')}
                             </Label>
                             <Controller
                                 control={control}
@@ -413,7 +413,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                         id="requirement"
                                         type="textarea"
                                         bsSize="sm"
-                                        placeholder={t('Мэргэжлийн зорилго')}
+                                        placeholder={t('Хөтөлбөрийн зорилго')}
                                         invalid={errors.requirement && true}
                                     />
                                 )}
