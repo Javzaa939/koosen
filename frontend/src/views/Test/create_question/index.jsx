@@ -191,7 +191,7 @@ const CreateQuestion = () => {
 					<CardTitle tag="h4">{t("Асуултын жагсаалт")}</CardTitle>
 					<div className="d-flex flex-wrap mt-md-0 mt-1">
 						<Button
-						disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-exam-question-create') && school_id ) ? false : true}
+							disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-exam-question-create') && school_id ) ? false : true}
 							color="primary"
 							onClick={() => { handleModal(), setEditRowData({})}}
 						>

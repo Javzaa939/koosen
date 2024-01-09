@@ -163,7 +163,7 @@ const CreateTest = () => {
 					<div className="d-flex flex-wrap mt-md-0 mt-1">
 						<Button
 							color="primary"
-                            disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-exam-read') && school_id) ? false : true}
+                            disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-exam-create') && school_id) ? false : true}
 							onClick={() => handleModal()}
 						>
 							<Plus size={15} />

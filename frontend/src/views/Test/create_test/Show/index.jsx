@@ -35,7 +35,7 @@ export default function Show({ open, handleModal, datas }) {
                 </ModalHeader>
                 <ModalBody className="flex-grow-1">
                     {
-                        Object.keys(datas).length > 0 && (user.permissions.includes('lms-exam-read') && school_id) ? false : true
+                        Object.keys(datas).length > 0
                         &&
                             <Verification
                                 selectedQuestionDatas={datas?.questions}
