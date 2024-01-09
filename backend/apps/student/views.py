@@ -18,11 +18,11 @@ from main.utils.function.pagination import CustomPagination
 from main.decorators import login_required
 
 from rest_framework.filters import SearchFilter
-from main.utils.file import remove_folder, split_root_path
+from main.utils.file import remove_folder
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 from main.utils.function.pagination import CustomPagination
-from main.utils.function.utils import str2bool, has_permission, get_lesson_choice_student, remove_key_from_dict, get_fullName, get_student_score_register, calculate_birthday, null_to_none, bytes_image_encode, get_active_year_season,start_time
+from main.utils.function.utils import str2bool, has_permission, get_lesson_choice_student, remove_key_from_dict, get_fullName, get_student_score_register, calculate_birthday, null_to_none, end_time, get_active_year_season,start_time
 # from main.khur.XypClient import citizen_regnum, highschool_regnum
 
 from lms.models import Student, StudentAdmissionScore, StudentEducation, StudentLeave, StudentLogin, TimeTable
@@ -1897,7 +1897,7 @@ class StudentGraduateListAPIView(
     """ Төгсөлтийн оюутан бүртгэлийг жагсаалт """
 
     queryset = Student.objects.all()
-    serializer_class = StudentListSerializer
+    serializer_class = StudentSimpleListSerializer
 
     def get_queryset(self):
         queryset = self.queryset
@@ -1921,6 +1921,11 @@ class StudentGraduateListAPIView(
         return queryset
 
     def get(self, request):
+
+        # Зөвхөн суралцаж буй төлөвтэй оюутнууд
+        status = StudentRegister.objects.filter(Q(Q(name__icontains='Суралцаж буй') | Q(code=1))).first()
+        self.queryset = self.queryset.filter(status=status)
+
         student_list = self.list(request).data
         return request.send_data(student_list)
 
@@ -2547,6 +2552,7 @@ class StudentVizStatusAPIView(
             return request.send_info("INF_002")
 
 
+@permission_classes([IsAuthenticated])
 class StudentDownloadAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin
@@ -2608,6 +2614,7 @@ class StudentDownloadAPIView(
         return request.send_data(student_list)
 
 
+@permission_classes([IsAuthenticated])
 class GroupLessonAPIView(
     generics.GenericAPIView,
 ):
@@ -2653,6 +2660,7 @@ class GroupLessonAPIView(
         return request.send_data(all_list)
 
 
+@permission_classes([IsAuthenticated])
 class StudentScoreLessonAPIView(
     generics.GenericAPIView
 ):
@@ -2666,6 +2674,7 @@ class StudentScoreLessonAPIView(
         return request.send_data(list(lesson_scores))
 
 
+@permission_classes([IsAuthenticated])
 class StudentArrivedApproveAPIView(
     generics.GenericAPIView
 ):
@@ -2733,3 +2742,66 @@ class StudentArrivedApproveAPIView(
                 return request.send_error('ERR_002', e.__str__())
 
         return request.send_info('INF_001', 'Амжилттай шилжилт хөдөлгөөн хийлээ.')
+
+
+@permission_classes([IsAuthenticated])
+class SignatureGroupAPIView(
+    generics.GenericAPIView
+):
+    """ Төгсөгчдийг ангиар нь үүсгэх """
+
+    queryset = GraduationWork.objects.all()
+
+    @has_permission(must_permissions=['lms-student-graduate-create'])
+    def post(self, request):
+
+        user = request.user
+        lesson_year, lesson_season = get_active_year_season()
+        datas = request.data
+        group = datas.get('group')
+        students = datas.get('students')
+        group_obj = Group.objects.get(pk=group)
+
+        if 'students' in datas:
+            del datas['students']
+
+        if 'group' in datas:
+            del datas['group']
+
+        datas['lesson_year'] = lesson_year
+        datas['lesson_season_id'] = lesson_season
+        datas['lesson_type'] = GraduationWork.ATTACHMENT_SHALGALT
+        datas['created_user'] = user
+
+        # Тухайн ангийн мэргэжил
+        profession = group_obj.profession
+
+        # Тухайн ангийн боловсролын зэрэг
+        degree_code = group_obj.degree.degree_code
+
+        # Мэргэжлийн зэргээс хамаарч дипломын хичээл
+        lessons = LearningPlan.objects.filter(profession=profession, lesson_level=LearningPlan.DIPLOM).values_list('lesson', flat=True)
+
+        if degree_code == 'E':
+            lessons = LearningPlan.objects.filter(profession=profession, lesson_level=LearningPlan.MAG_DIPLOM).values_list('lesson', flat=True)
+        elif degree_code == 'F':
+            lessons = LearningPlan.objects.filter(profession=profession, lesson_level=LearningPlan.DOC_DIPLOM).values_list('lesson', flat=True)
+
+        with transaction.atomic():
+            try:
+                for student in students:
+                    datas['student_id'] = student.get('id')
+                    graduate_obj, created = GraduationWork.objects.update_or_create(
+                        student_id = student.get('id'),
+                        lesson_year = lesson_year,
+                        lesson_season_id = lesson_season,
+                        defaults={
+                            **datas
+                        }
+                    )
+
+                    graduate_obj.lesson.add(*list(lessons))
+            except Exception as e:
+                return request.send_error('ERR_002')
+
+        return request.send_info('INF_001')

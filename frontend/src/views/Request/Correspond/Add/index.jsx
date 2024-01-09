@@ -508,7 +508,7 @@ const Add = ({ open, handleModal, refreshDatas, datas, editId, isSolved }) => {
                             />
                         </Col>
                         <Col md={4} sm={12} className='mt-1'>
-                            <Label for="profession">{t('Мэргэжил')}</Label>
+                            <Label for="profession">{t('Хөтөлбөр')}</Label>
                             <Controller
                                 control={control}
                                 defaultValue=''

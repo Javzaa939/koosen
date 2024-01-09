@@ -145,7 +145,7 @@ const MainInformation = ({ }) => {
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="profession">
-                                {t('Мэргэжил')}
+                                {t('Хөтөлбөр')}
                             </Label>
                             <Controller
                                 defaultValue=''
@@ -158,7 +158,7 @@ const MainInformation = ({ }) => {
                                             id ="profession"
                                             name = "profession"
                                             bsSize="sm"
-                                            placeholder={t('Мэргэжлийн нэр')}
+                                            placeholder={t('Хөтөлбөрийн нэр')}
                                             type="text"
                                             readOnly={true}
                                             disabled={true}

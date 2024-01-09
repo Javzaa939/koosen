@@ -325,7 +325,7 @@ const Education = () => {
                             </Col>
                             <Col lg={12}>
                                 <Label className="form-label" for="profession">
-                                    {t('Эзэмшсэн мэргэжил')}
+                                    {t('Эзэмшсэн Хөтөлбөр')}
                                 </Label>
                                 <Controller
                                     defaultValue=''
@@ -337,7 +337,7 @@ const Education = () => {
                                             id ="profession"
                                             bsSize="sm"
                                             {...field}
-                                            placeholder={t('Эзэмшсэн мэргэжил')}
+                                            placeholder={t('Эзэмшсэн Хөтөлбөр')}
                                             type="text"
                                             readOnly={disabled}
                                             disabled={disabled}

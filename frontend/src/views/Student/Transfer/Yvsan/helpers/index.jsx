@@ -67,7 +67,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
         },
 		{
 			header: 'destination_pro',
-			name: `${t('Мэргэжил')}`,
+			name: `${t('Хөтөлбөр')}`,
 			selector: (row) => <span title={`${row?.pro_name}`}>{row?.pro_name}</span>,
             sortable: true,
 			minWidth: "250px",
