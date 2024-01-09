@@ -63,7 +63,7 @@ export default function Print()
                     </div>
                     <Row className='px-2 mt-1'>
                         <Col className="fw-bolder" style={{ fontSize: '8px' }} >
-                            <span className="m-0 d-inline-block w-100">Мэргэжлийн ерөнхий чиглэл: Боловсрол</span>
+                            <span className="m-0 d-inline-block w-100">Хөтөлбөрийн ерөнхий чиглэл: Боловсрол</span>
                             <span className="m-0 d-inline-block w-100">Төрөлжсөн чиглэл: {data?.dep_name}</span>
                             <span className="m-0 d-inline-block w-100">Нарийвчилсан чиглэл: {data?.name}</span>
                             <span className="m-0 d-inline-block w-100">Хөтөлбөрийн нэр: {data?.name}</span>

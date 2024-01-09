@@ -450,7 +450,7 @@ const Createmodal = ({ open, handleModal, refreshDatas, edit_id }) => {
                                     </Col>
                                     <Col md={12} className='mt-1'>
                                         <Label className="form-label mb-0" for="destination_pro">
-                                            {t('Мэргэжил')}
+                                            {t('Хөтөлбөр')}
                                         </Label>
                                         <Controller
                                             control={control}

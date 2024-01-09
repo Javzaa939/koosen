@@ -118,7 +118,7 @@ export default function AmountDetails()
                                 Нэр: <span className="fw-normal">{datas?.student?.first_name}</span>
                             </div>
                             <div className="w-50 d-inline-block">
-                                Мэргэжил: <span className="fw-normal">{datas?.student?.group.profession.name}</span>
+                                Хөтөлбөр: <span className="fw-normal">{datas?.student?.group.profession.name}</span>
                             </div>
                         </div>
                         <div className="w-100 fw-bolder mt-1" style={{ marginBottom: '-50px' }} >

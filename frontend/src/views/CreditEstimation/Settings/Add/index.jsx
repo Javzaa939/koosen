@@ -51,7 +51,7 @@ export const Addmodal = ( { open, refreshDatas, handleModal, type, editData } ) 
     const settingsApi = useApi().credit.settings
     const positionApi = useApi().hrms.position
 
-    // Мэргэжлийн жагсаалт
+    // Хөтөлбөрийн жагсаалт
     async function getPosition() {
         const { success, data } = await fetchData(positionApi.get())
         if (success) {

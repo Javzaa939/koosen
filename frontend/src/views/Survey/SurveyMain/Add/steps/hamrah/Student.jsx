@@ -203,7 +203,7 @@ function Student({ onChosenScopeChange }) {
 										onChange={(e) => setSelectedValue(e.target.name)}
 									/>
 									<Label className='form-check-label' for={'is_pro'}>
-										{'Мэргэжил'}
+										{'Хөтөлбөр'}
 									</Label>
 								</div>
 								<div className="mb-1">

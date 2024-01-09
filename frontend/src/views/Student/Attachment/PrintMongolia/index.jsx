@@ -276,7 +276,7 @@ export default function PrintAttachmentMongolia()
                         Нэр: <span className='fw-normal' >{printDatas?.student?.first_name}</span>
                     </div>
                     <div className='d-inline-block' style={{ width: '33.3%' }} >
-                        Мэргэжил: <span className='fw-normal' >{printDatas?.student?.group?.profession?.name}</span>
+                        Хөтөлбөр: <span className='fw-normal' >{printDatas?.student?.group?.profession?.name}</span>
                     </div>
                 </div>
                 <div className='fw-bolder' style={{ fontSize: '11px' }} >
@@ -284,7 +284,7 @@ export default function PrintAttachmentMongolia()
                         Регистр: <span className='fw-normal' >{printDatas?.student?.register_num}</span>
                     </div>
                     <div className='d-inline-block' style={{ width: '33.3%' }} >
-                        Мэргэжлийн индекс: <span className='fw-normal' >{printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.group?.profession?.code}</span>
+                        Хөтөлбөрийн индекс: <span className='fw-normal' >{printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.group?.profession?.code}</span>
                     </div>
                     <div className='d-inline-block' style={{ width: '33.3%' }} >
                         Бүртгэлийн дугаар: <span className='fw-normal' >{printDatas?.student?.graduation_work?.registration_num}</span>

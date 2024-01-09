@@ -85,7 +85,7 @@ const StudyPlanAdd = ({ open, handleModal, mergejil_id }) => {
                                 <Col tag="dt" sm="4" className="fw-bolder mb-1" >
                                     Ерөнхий чиглэл:
                                 </Col>
-                                <Col tag="dd" sm="8" className="mb-1">Боловсрол</Col>
+                                <Col tag="dd" sm="8" className="mb-1">{datas?.gen_direct_type_name}</Col>
                                 <Col tag="dt" sm="4" className="fw-bolder mb-1" >
                                     Төрөлжсөн чиглэл:
                                 </Col>
@@ -137,7 +137,7 @@ const StudyPlanAdd = ({ open, handleModal, mergejil_id }) => {
                         }
                         <div className='added-cards'>
                             <div className={classnames('cardMaster rounded border p-1')} role="button" id="toggler2" onClick={() => setIsProfBasicLesson(!is_profbasic_lesson)}>
-                                { degree === 1 ? 2 : 1}{'. ' + 'Мэргэжлийн суурь хичээл'}
+                                { degree === 1 ? 2 : 1}{'. ' + 'Хөтөлбөрийн суурь хичээл'}
                                 {datas?.professional_base && <a className='ms-1 fw-bolder'>({datas?.professional_base})</a>}
                             </div>
                         </div>
@@ -147,7 +147,7 @@ const StudyPlanAdd = ({ open, handleModal, mergejil_id }) => {
                         }
                         <div className='added-cards'>
                             <div className={classnames('cardMaster rounded border p-1')} role="button" id="toggler3" onClick={() => setIsProfessionLesson(!is_profession_lesson)}>
-                                { degree === 1 ? 3 : 2}{'. ' + 'Мэргэжлийн хичээл'}
+                                { degree === 1 ? 3 : 2}{'. ' + 'Хөтөлбөрийн хичээл'}
                                 {datas?.professional_lesson && <a className='ms-1 fw-bolder'>({datas?.professional_lesson})</a>}
                             </div>
                         </div>
