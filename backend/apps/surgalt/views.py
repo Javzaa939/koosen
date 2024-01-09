@@ -428,22 +428,20 @@ class ProfessionDefinitionAPIView(
         "  Мэргэжлийн тодорхойлолт шинээр үүсгэх "
 
         request_data = request.data
+        # with_start = '001'
+        # profession_code = 1
 
-        with_start = '001'
-        profession_code = 1
+        # profession_qs = (
+        #     ProfessionDefinition.objects.order_by('profession_code')
+        # ).first()
 
-        profession_qs = (
-            ProfessionDefinition.objects.order_by('-profession_code')
-        ).first()
+        # if profession_qs:
+        #     check_code = profession_qs.profession_code
+        #     if check_code:
+        #         profession_code = int(check_code) + 1
 
-        if profession_qs:
-            check_code = profession_qs.profession_code
-            if check_code:
-                profession_code = int(check_code) + 1
-
-        new_profession_code = f'{int(profession_code):0{len(with_start)}d}'
-
-        request_data['profession_code'] = new_profession_code
+        # new_profession_code = f'{int(profession_code):0{len(with_start)}d}'
+        # request_data['profession_code'] = new_profession_code
 
         # transaction savepoint зарлах нь хэрэв алдаа гарвад roll back хийнэ
         sid = transaction.savepoint()
