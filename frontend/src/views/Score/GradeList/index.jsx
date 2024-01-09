@@ -133,7 +133,7 @@ const GradeList = () => {
                             <Button
                                 color='primary'
                                 className='m-50'
-                                href="/files/newtemplate.xlsx"
+                                href="/zagvar/newtemplate.xlsx"
                             >
                                 <Download size={15} />
                                 <span className='align-middle ms-1'>{t('Загвар татах')}</span>
