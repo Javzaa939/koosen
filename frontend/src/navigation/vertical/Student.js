@@ -32,12 +32,7 @@ export default [
                 icon: <Circle size={8} />,
                 navLink: "student/shift"
             },
-            {
-                id: 'student5',
-                title: 'Төгсөлт',
-                icon: <Circle size={8} />,
-                navLink: "student/graduation"
-            },
+           
             {
                 id: 'student10',
                 title: 'Хавсралт',
@@ -58,6 +53,12 @@ export default [
             },
             // {
             //     id: 'student12',
+            //     title: 'Төгсөлт',
+            //     icon: <Circle size={8} />,
+            //     navLink: "student/graduation"
+            // }
+            // {
+            //     id: 'student12',
             //     title: 'Виз',
             //     icon: <Circle size={8} />,
             //     navLink: "student/viz-status"
@@ -69,5 +70,16 @@ export default [
             //     navLink: "student/dormitory"
             // },
         ]
-    }
+
+    },
+    {
+        // id: 'graduation',
+        // title: 'Төгсөлт',
+        // icon: 
+        // navLink: "/graduation",
+        id: 'student12',
+            title: 'Төгсөлт',
+            icon: <i className="far fa-graduation-cap"></i>,
+            navLink: "student/graduation",
+    },
 ]
