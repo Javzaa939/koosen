@@ -35,7 +35,7 @@ export default function PrintMongolia()
 
             window.onafterprint = function()
             {
-                window.close()
+                // window.close()
             }
         },
         []
@@ -46,19 +46,19 @@ export default function PrintMongolia()
         {
             if (data && listArr.length != 0)
             {
-                setTimeout(() => window.print(), 1000)
+                // setTimeout(() => window.print(), 1000)
             }
         },
         [data, listArr]
     )
 
     return (
-        <div className='vh-100 position-relative bg-white' style={{ fontFamily: 'Arial', color: 'black' }} >
+        <div className='vh-100 position-relative d-flex flex-column justify-content-end align-items-center bg-white' style={{ fontFamily: 'Arial', color: 'black' }} >
 
             {isLoading && Loader}
 
             {/* Үндсэн хэсэг */}
-            <div className='position-absolute text-center' style={{ top: '310px', width: '100%', lineHeight: '30px', fontSize: '19px' }} >
+            <div className='text-center' style={{ top: '', width: '100%', lineHeight: '30px', fontSize: '19px' }} >
                 <div className='m-auto' style={{ width: '1000px' }}>
                     <span className='fst-italic' >{data?.student?.citizenship?.name} улсын иргэн <span className='fw-bolder'>{data?.student?.last_name} <span className='fw-normal' >овогтой</span> {data?.student?.first_name}</span> нь </span>
                     <br />
@@ -72,7 +72,7 @@ export default function PrintMongolia()
             </div>
 
             {/* Гарын үсгийн хэсэг */}
-            <div className='position-absolute' style={{ bottom: '100px', fontSize: '15px' }} >
+            <div className='mb-3' style={{ bottom: '0', fontSize: '15px' }} >
                 <div style={{ paddingLeft: '170px', paddingRight: '70px' }} >
                     <div className='d-flex w-100 text-center justify-content-center fst-italic'>
 
@@ -82,7 +82,7 @@ export default function PrintMongolia()
                             listArr.map((val, idx) =>
                             {
                                 return (
-                                    <div className='w-25 d-flex flex-column pt-4 pb-2' style={{ paddingRight: '7px', paddingLeft: '7px' }} key={idx} >
+                                    <div className='w-25 d-flex flex-column pt-2 pb-2' style={{ paddingRight: '7px', paddingLeft: '7px' }} key={idx} >
                                         <span>_______________________</span>
                                         <span>{val?.position_name}</span>
                                         <span>{val?.last_name} {val?.first_name}</span>
