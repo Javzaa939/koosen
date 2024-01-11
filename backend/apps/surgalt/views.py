@@ -13,12 +13,14 @@ from main.utils.file import remove_folder
 from main.decorators import login_required
 
 from django.db import transaction
-from django.db.models import F, Sum, Count, Q, Subquery, OuterRef, Case, When, Value, FloatField
+from django.db.models import Sum, Count, Q, Subquery, OuterRef,  Value, CharField
+from django.db.models.functions import Concat
 
-from django.db.models import Count
-from django.db.models import Sum, Subquery, OuterRef
 from django.shortcuts import get_object_or_404
 from django.conf import settings
+
+from functools import reduce
+from operator import or_
 
 from lms.models import (
     Group,
@@ -49,6 +51,7 @@ from lms.models import (
     Lesson_material_file,
     Lesson_assignment_student,
     Lesson_assignment_student_file,
+    AdmissionLesson,
 )
 
 from lms.models import get_image_path
@@ -211,6 +214,7 @@ class LessonStandartAPIView(
         self.destroy(request, pk)
         return request.send_info("INF_003")
 
+@permission_classes([IsAuthenticated])
 class LessonTitlePlanAPIView(
     mixins.CreateModelMixin,
     mixins.UpdateModelMixin,
@@ -428,22 +432,20 @@ class ProfessionDefinitionAPIView(
         "  Мэргэжлийн тодорхойлолт шинээр үүсгэх "
 
         request_data = request.data
+        # with_start = '001'
+        # profession_code = 1
 
-        with_start = '001'
-        profession_code = 1
+        # profession_qs = (
+        #     ProfessionDefinition.objects.order_by('profession_code')
+        # ).first()
 
-        profession_qs = (
-            ProfessionDefinition.objects.order_by('-profession_code')
-        ).first()
+        # if profession_qs:
+        #     check_code = profession_qs.profession_code
+        #     if check_code:
+        #         profession_code = int(check_code) + 1
 
-        if profession_qs:
-            check_code = profession_qs.profession_code
-            if check_code:
-                profession_code = int(check_code) + 1
-
-        new_profession_code = f'{int(profession_code):0{len(with_start)}d}'
-
-        request_data['profession_code'] = new_profession_code
+        # new_profession_code = f'{int(profession_code):0{len(with_start)}d}'
+        # request_data['profession_code'] = new_profession_code
 
         # transaction savepoint зарлах нь хэрэв алдаа гарвад roll back хийнэ
         sid = transaction.savepoint()
@@ -527,6 +529,9 @@ class ProfessionDefinitionAPIView(
 
         return request.send_info("INF_003")
 
+
+
+@permission_classes([IsAuthenticated])
 class ProfessionIntroductionFileAPIView(
     generics.GenericAPIView,
 ):
@@ -564,6 +569,8 @@ class ProfessionIntroductionFileAPIView(
 
         return request.send_info('INF_002')
 
+
+@permission_classes([IsAuthenticated])
 class StudentNoticeFileAPIView(
     generics.GenericAPIView,
     mixins.DestroyModelMixin,
@@ -746,7 +753,7 @@ class LearningPlanListAPIView(
         return request.send_data(learn_plan_list)
 
 
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 class ConfirmYearListAPIView(
     mixins.ListModelMixin,
     generics.GenericAPIView
@@ -761,6 +768,7 @@ class ConfirmYearListAPIView(
         return request.send_data(conf_year)
 
 
+@permission_classes([IsAuthenticated])
 class LessonStandartStudentListAPIView(
     mixins.ListModelMixin,
     generics.GenericAPIView
@@ -791,6 +799,8 @@ class LessonStandartStudentListAPIView(
         return request.send_data(lesson_list)
 
 
+
+@permission_classes([IsAuthenticated])
 class ProfessionPlanListAPIView(
     mixins.CreateModelMixin,
     mixins.UpdateModelMixin,
@@ -990,6 +1000,7 @@ class ProfessionPlanListAPIView(
         return request.send_info("INF_003")
 
 
+@permission_classes([IsAuthenticated])
 class LessonStandartBagtsAPIView(
     generics.GenericAPIView
 ):
@@ -1042,6 +1053,7 @@ class LessonStandartBagtsAPIView(
         return request.send_data(list(return_values))
 
 
+@permission_classes([IsAuthenticated])
 class LearningPlanProfessionDefinitionAPIView(
     generics.GenericAPIView
 ):
@@ -1088,6 +1100,7 @@ class LearningPlanProfessionDefinitionAPIView(
         return request.send_data(all_list)
 
 
+@permission_classes([IsAuthenticated])
 class ProfessionPrintPlanAPIView(
     generics.GenericAPIView
 ):
@@ -1144,6 +1157,7 @@ class ProfessionPrintPlanAPIView(
 
         return request.send_data(all_data)
 
+@permission_classes([IsAuthenticated])
 class AdmissionBottomScoreAPIView(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
@@ -1172,38 +1186,43 @@ class AdmissionBottomScoreAPIView(
 
     # @has_permission(must_permissions=['lms-role-teacher-score-update'])
     def put(self, request, pk=None):
-        """ ЕЭШ оноо засах
+        """ ЭЕШ оноо засах
             мэргэжлийн id = pk
         """
-
         datas = request.data
-        admission_lesson = datas.get("admission_lesson")
 
         profession = datas.get("profession")
         bottom_score = datas.get("bottom_score")
+        lesson = datas.get('lesson')
 
         profession = ProfessionDefinition.objects.filter(pk=pk).first()
+        admission_lesson = AdmissionBottomScore.objects.filter(profession=profession, admission_lesson=lesson).first()
 
-        if not profession:
-            return request.send_error("ERR_002", "Мэргэжил олдсонгүй")
-
-        if profession:
-            old_admission_ids = AdmissionBottomScore.objects.filter(profession=pk).values_list('admission_lesson_id',flat=True)
-            for old_lesson in old_admission_ids:
-                if not (old_lesson in  admission_lesson):
-                    qs_admission_lesson = AdmissionBottomScore.objects.filter(admission_lesson=old_lesson,profession_id=pk)
-                    if qs_admission_lesson:
-                        qs_admission_lesson.delete()
-
-            if admission_lesson:
-                for lesson in admission_lesson:
-                    sa = AdmissionBottomScore.objects.filter(profession=pk).update_or_create(
-                        profession=profession,
-                        admission_lesson_id=lesson.get("id"),
-                        bottom_score=bottom_score
-                    )
+        if admission_lesson:
+            obj = AdmissionBottomScore.objects.filter(admission_lesson__id=lesson).update(
+                profession=profession,
+                bottom_score=bottom_score
+            )
+        else:
+            lesson_instance = AdmissionLesson.objects.filter(id=lesson).first()
+            obj = AdmissionBottomScore.objects.filter(profession=pk).create(
+                profession=profession,
+                admission_lesson=lesson_instance,
+                bottom_score=bottom_score
+            )
 
         return request.send_info("INF_002")
+
+    def delete(self, request, pk=None):
+
+        try:
+            obj = AdmissionBottomScore.objects.filter(admission_lesson__id=pk).delete()
+        except:
+            return request.send_error("ERR_002", "Амжилтгүй")
+
+        return request.send_info("INF_003")
+
+@permission_classes([IsAuthenticated])
 class LessonStandartTimetableListAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin
@@ -1262,6 +1281,7 @@ class LessonStandartTimetableListAPIView(
         return request.send_data(list(all_list))
 
 
+@permission_classes([IsAuthenticated])
 class LessonStandartDiplomaListAPIView(
     mixins.ListModelMixin,
     generics.GenericAPIView
@@ -1291,6 +1311,7 @@ class LessonStandartDiplomaListAPIView(
         return request.send_data(lesson_list)
 
 
+@permission_classes([IsAuthenticated])
 class LessonStandartProfessionListAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin
@@ -1544,6 +1565,7 @@ class ChallengeAPIView(
 
         return request.send_info("INF_003")
 
+@permission_classes([IsAuthenticated])
 class ChallengeAllAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -1569,6 +1591,7 @@ class ChallengeAllAPIView(
 
         return request.send_data(datas)
 
+@permission_classes([IsAuthenticated])
 class ChallengeSelectAPIView(
     generics.GenericAPIView
 ):
@@ -2013,6 +2036,8 @@ class QuestionsAPIView(
 
         return request.send_info("INF_003")
 
+
+@permission_classes([IsAuthenticated])
 class QuestionsListAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin
@@ -2059,6 +2084,8 @@ class QuestionsListAPIView(
 
         return request.send_data(datas)
 
+
+@permission_classes([IsAuthenticated])
 class ChallengeSendAPIView(
     generics.GenericAPIView
 ):
@@ -2075,6 +2102,8 @@ class ChallengeSendAPIView(
         return request.send_info('INF_019')
 
 
+
+@permission_classes([IsAuthenticated])
 class ChallengeApprovePIView(
     generics.GenericAPIView,
     mixins.ListModelMixin
@@ -2147,6 +2176,8 @@ class ChallengeApprovePIView(
 
         return request.send_info('INF_018')
 
+
+@permission_classes([IsAuthenticated])
 class StudentHomeworkListAPIView(
     mixins.ListModelMixin,
     mixins.DestroyModelMixin,
@@ -2206,6 +2237,8 @@ class StudentHomeworkListAPIView(
         return request.send_info("INF_002")
 
 
+
+@permission_classes([IsAuthenticated])
 class StudentHomeworkMultiEditAPIView(
     mixins.UpdateModelMixin,
     generics.GenericAPIView,
@@ -2246,6 +2279,8 @@ class StudentHomeworkMultiEditAPIView(
 
         return request.send_info("INF_002")
 
+
+@permission_classes([IsAuthenticated])
 class HomeworkStudentsListAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -2300,6 +2335,8 @@ class HomeworkStudentsListAPIView(
             'assignment': assignment_list
         })
 
+
+@permission_classes([IsAuthenticated])
 class LessonsTeacher(
     generics.GenericAPIView,
 ):
@@ -2364,6 +2401,8 @@ class LessonsTeacher(
 
         return request.send_data(list(sort_list))
 
+
+@permission_classes([IsAuthenticated])
 class LessonOneApiView(
     generics.GenericAPIView,
     mixins.RetrieveModelMixin
@@ -2381,6 +2420,8 @@ class LessonOneApiView(
         return request.send_data(datas)
 
 
+
+@permission_classes([IsAuthenticated])
 class LessonKreditApiView(
     generics.GenericAPIView
 ):
@@ -2450,6 +2491,8 @@ class LessonKreditApiView(
         return request.send_data(list(return_values))
 
 
+
+@permission_classes([IsAuthenticated])
 class LessonSedevApiView(
     generics.GenericAPIView,
     mixins.CreateModelMixin,
@@ -2518,6 +2561,8 @@ class LessonSedevApiView(
         Lesson_title_plan.objects.filter(lesson=pk, lesson_type=int(lesson_type)).exclude(week__in=created_weeks).delete()
         return request.send_info('INF_013')
 
+
+@permission_classes([IsAuthenticated])
 class LessonAllApiView(
     generics.GenericAPIView,
     mixins.ListModelMixin
@@ -2545,7 +2590,9 @@ class LessonAllApiView(
         all_list = self.list(request).data
 
         return request.send_data(all_list)
-    
+
+
+@permission_classes([IsAuthenticated])
 class LessonMaterialApiView(
     generics.GenericAPIView,
     mixins.CreateModelMixin,
@@ -2693,6 +2740,8 @@ class LessonMaterialApiView(
 
             return request.send_info('INF_003')
 
+
+@permission_classes([IsAuthenticated])
 class LessonMaterialGeneralApiView(
     generics.GenericAPIView,
     mixins.CreateModelMixin
@@ -2736,6 +2785,8 @@ class LessonMaterialGeneralApiView(
         return request.send_info("INF_001")
 
 
+
+@permission_classes([IsAuthenticated])
 class LessonEditorImage(
     generics.GenericAPIView
 ):
@@ -2756,6 +2807,9 @@ class LessonEditorImage(
 
         return request.send_data(return_url)
 
+
+
+@permission_classes([IsAuthenticated])
 class LessonMaterialAssignmentApiView(
     generics.GenericAPIView
 ):
@@ -2832,6 +2886,7 @@ class LessonMaterialAssignmentApiView(
 
         return request.send_info('INF_001')
 
+@permission_classes([IsAuthenticated])
 class LessonImage(
     generics.GenericAPIView
 ):
@@ -2874,6 +2929,9 @@ class LessonImage(
 
         return request.send_info("INF_002")
 
+
+
+@permission_classes([IsAuthenticated])
 class LessonMaterialSendApiView(
     generics.GenericAPIView,
     mixins.ListModelMixin
@@ -2923,7 +2981,9 @@ class LessonMaterialSendApiView(
                 return request.send_error("ERR_002")
 
         return request.send_info("INF_019")
-    
+
+
+@permission_classes([IsAuthenticated])
 class LessonMaterialApproveApiView(
     generics.GenericAPIView,
     mixins.ListModelMixin
@@ -2994,3 +3054,27 @@ class LessonMaterialApproveApiView(
             )
 
         return request.send_info('INF_018')
+
+
+@permission_classes([IsAuthenticated])
+class LessonStandartGroupAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin
+):
+    """ Тухайн ангийн хичээлүүд """
+
+    queryset = LessonStandart.objects.all()
+    serializer_class = LessonStandartSerializer
+    def get(self, request, group=None):
+
+        group_obj = get_object_or_404(Group, pk=group)
+
+        lessons = LearningPlan.objects.filter(profession=group_obj.profession).annotate(full_name=Concat("lesson__code", Value("-"), "lesson__name", output_field=CharField())).values('lesson__id', 'full_name').order_by('lesson_level', 'lesson__name')
+        students = Student.objects.filter(group=group).annotate(full_name=Concat("last_name", Value(". "), "first_name", output_field=CharField())).values('id', 'code', 'full_name')
+
+        return_datas = {
+            'lessons': list(lessons),
+            'students': list(students)
+        }
+
+        return request.send_data(return_datas)
