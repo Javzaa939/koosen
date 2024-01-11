@@ -4,14 +4,16 @@ import openpyxl_dictreader
 from rest_framework import mixins
 from rest_framework import generics
 
-from django.db.models import Q
 from django.db import transaction
 from django.conf import settings
+from django.db.models import  Count, Q,  Value, CharField
+from django.db.models.functions import Concat
 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
+from rest_framework.filters import SearchFilter
 
-from main.utils.function.utils import get_lesson_choice_student, has_permission, remove_key_from_dict, get_fullName
+from main.utils.function.utils import get_lesson_choice_student, has_permission, remove_key_from_dict, get_fullName, json_load
 from main.utils.file import save_file, remove_folder
 from lms.models import ScoreRegister
 from lms.models import Student
@@ -22,7 +24,7 @@ from lms.models import Lesson_to_teacher
 from lms.models import TeacherScore
 from lms.models import Lesson_teacher_scoretype
 from lms.models import LearningPlan
-from lms.models import Season
+from lms.models import Season, Group
 
 from .serializers import CorrespondSerailizer
 from .serializers import CorrespondListSerailizer
@@ -34,9 +36,6 @@ from .serializers import ScoreRegisterPrintSerializer
 
 from apps.student.serializers import StudentListSerializer
 from main.utils.function.pagination import CustomPagination
-from rest_framework.filters import SearchFilter
-from django.db.models import Count
-from django.db.models import Sum
 
 @permission_classes([IsAuthenticated])
 class ScoreRegisterAPIView(
@@ -855,84 +854,67 @@ class ScoreOldAPIView(
 
         full_path = os.path.join(settings.MEDIA_ROOT, str(path))
 
-        try:
-            reader = openpyxl_dictreader.DictReader(full_path)
-            for row in reader:
-                season = None
-                lesson_year = None
+        # try:
+        reader = openpyxl_dictreader.DictReader(full_path)
+        for row in reader:
+            season = None
+            lesson_year = None
 
-                lesson_code = row.get('Хичээлийн код')
-                lesson_name = row.get('Хичээлийн нэр')
-                student_code = row.get('Оюутны код')
-                learningplan_season = row.get('Улирал')
-                score = row.get('Дүн')
+            student_code = row.get('Оюутны код')
+            student_full_name = row.get('Оюутны нэр')
 
-                if not lesson_code and not student_code and not score:
-                    continue
+            if not student_code or not student_full_name:
+                continue
 
-                # Дүн оруулах хичээл
-                lesson = LessonStandart.objects.filter(code=lesson_code).first()
+            splitted_name = student_full_name.split('.')
+            first_name = splitted_name[0]
+            last_name = splitted_name[-1]
 
-                if not lesson:
-                    # Хичээлийн код хоосон зай replace хийх
-                    lesson_code = lesson_code.replace(' ', '')
+            student = Student.objects.filter(Q(Q(code=student_code) | Q(first_name=first_name, last_name=last_name))).first()
 
-                student_code = student_code.replace('-', '')
+            # Оюутны код таарахгүй байхгүй үед
+            if not student:
+                obj = {}
+                obj['student_code'] = student_code
+                obj['student_name'] = student_full_name
 
-                if lesson_name:
-                    lesson_name = lesson_name.strip()
+                not_found_student.append(obj)
+                continue
 
-                # Дүн оруулах хичээл
-                lesson = LessonStandart.objects.filter(code=lesson_code).first()
+            group_obj = Group.objects.get(id=student.group.id)
 
-                # Дүн оруулах оюутан
-                student = Student.objects.filter(code=student_code.upper() if student_code else None).first()
+            # Ангийн элссэн хичээлийн жил
+            student_group_year = group_obj.join_year
 
-                # Хичээлийн кодоор хичээл олдохгүй үед
-                if not lesson:
+            # Мэргэжил
+            student_profession = group_obj.profession
+            lessons = LearningPlan.objects.filter(profession=student_profession).annotate(full_name=Concat("lesson__code", Value("-"), "lesson__name", output_field=CharField())).values('lesson__id', 'full_name').order_by('lesson_level', 'lesson__name')
+
+            for lesson in list(lessons):
+                score = row.get('{}'.format(lesson.get('full_name')))
+                if not score:
                     obj = {}
                     obj['student_code'] = student_code
-                    obj['lesson_code'] = lesson_code
-                    obj['lesson_name'] = lesson_name
+                    obj['lesson_code'] = lesson.get('full_name')
+                    obj['lesson_name'] = lesson.get('full_name')
                     obj['exam_score'] = score
 
                     not_found_lesson.append(obj)
                     continue
-
-                # Оюутны код таарахгүй байхгүй үед
-                if not student:
-                    obj = {}
-                    obj['student_code'] = student_code
-                    obj['lesson_code'] = lesson_code
-                    obj['lesson_name'] = lesson_name
-                    obj['exam_score'] = score
-
-                    not_found_student.append(obj)
-                    continue
-
-                # Оюутны анги
-                student_group = student.group
-
-                # Ангийн элссэн хичээлийн жил
-                student_group_year = student_group.join_year
-
-                # Мэргэжил
-                student_profession = student_group.profession.id
 
                 splitted_list = student_group_year.split('-')
 
                 start_year = int(splitted_list[0]) # Анги эхэлсэн жил
                 end_year = int(splitted_list[1]) # Анги дууссан жил
 
+                lesson = LessonStandart.objects.get(id=lesson.get('lesson__id'))
+
                 # Cургалтын төлөвлөгөөнөөс мэргэжил хичээлээр хайж хичээл үзэх улирлыг авна
                 learningplan = LearningPlan.objects.filter(profession=student_profession, lesson=lesson.id).first()
+                learningplan_season = json_load(learningplan.season)
 
-                # if learningplan:
-
-                if learningplan_season:
-                    # learningplan_season = json_load(learningplan_season)
-                    # if isinstance(learningplan_season, list) and len(learningplan_season) > 0:
-                    #     learningplan_season = learningplan_season[0]
+                if isinstance(learningplan_season, list) and len(learningplan_season) > 0:
+                    learningplan_season = learningplan_season[0]
 
                     # Улирал тэгш сондгой эсэхийг шалгах
                     if int(learningplan_season) % 2 == 0:
@@ -953,10 +935,11 @@ class ScoreOldAPIView(
 
                     lesson_year = score_start_year + '-' + score_end_year
 
-                if isinstance(score, int) or isinstance(score, float):
+                if score and not isinstance(score, str):
                     assessment = Score.objects.filter(score_max__gte=score, score_min__lte=score).first()
                 elif score:
                     score  = float(score)
+                    assessment = Score.objects.filter(score_max__gte=score, score_min__lte=score).first()
 
                 create_datas = {
                     'student_id': student.id,
@@ -974,13 +957,13 @@ class ScoreOldAPIView(
 
                 all_create_datas.append(create_datas)
 
-                # Хадгалж дууссаны дараа файлаа устгах
-                remove_folder(path)
-
-        except Exception as e:
-            print(e)
-            # Алдаа гарвал файлаа устгах
+            # Хадгалж дууссаны дараа файлаа устгах
             remove_folder(path)
+
+        # except Exception as e:
+            # print(e)
+            # Алдаа гарвал файлаа устгах
+            # remove_folder(path)
 
         all_error_datas = not_found_lesson + not_found_student
 

@@ -106,7 +106,6 @@ export default function PermissionModal({ open, handleModal, refreshDatas, editV
                                         type="text"
                                         placeholder={t('Нэр')}
                                         invalid={errors.name && true}
-                                        onKeyDown={(e) =>["e", "E", "+", "-", "."].includes(e.key) && e.preventDefault()}
                                     />
                                 )}
                             />
