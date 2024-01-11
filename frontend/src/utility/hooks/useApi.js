@@ -340,6 +340,7 @@ function useApi(isDisplay=false) {
 				getOne: (pk) => instance.get(`/learning/profession/${pk}/`),
 				deleteIntro: (pk) => instance.delete(`/learning/profession/${pk}/`),
 				putScore: (data, pk,) => instance.put(`/learning/profession/score/${pk}/`, data),
+				deleteScore: (pk) => instance.delete(`/learning/profession/score/${pk}/`),
 				getAddScoreOne: (pk) => instance.get(`/learning/profession/score/${pk}/`),
 
 				// Танилцуулга дээр зураг хадгалах
