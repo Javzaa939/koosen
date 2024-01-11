@@ -19,6 +19,9 @@ from django.db.models.functions import Concat
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 
+from functools import reduce
+from operator import or_
+
 from lms.models import (
     Group,
     Student,
@@ -48,6 +51,7 @@ from lms.models import (
     Lesson_material_file,
     Lesson_assignment_student,
     Lesson_assignment_student_file,
+    AdmissionLesson,
 )
 
 from lms.models import get_image_path
@@ -1182,39 +1186,41 @@ class AdmissionBottomScoreAPIView(
 
     # @has_permission(must_permissions=['lms-role-teacher-score-update'])
     def put(self, request, pk=None):
-        """ ЕЭШ оноо засах
+        """ ЭЕШ оноо засах
             мэргэжлийн id = pk
         """
-
         datas = request.data
-        admission_lesson = datas.get("admission_lesson")
 
         profession = datas.get("profession")
         bottom_score = datas.get("bottom_score")
+        lesson = datas.get('lesson')
 
         profession = ProfessionDefinition.objects.filter(pk=pk).first()
+        admission_lesson = AdmissionBottomScore.objects.filter(profession=profession, admission_lesson=lesson).first()
 
-        if not profession:
-            return request.send_error("ERR_002", "Мэргэжил олдсонгүй")
-
-        if profession:
-            old_admission_ids = AdmissionBottomScore.objects.filter(profession=pk).values_list('admission_lesson_id',flat=True)
-            for old_lesson in old_admission_ids:
-                if not (old_lesson in  admission_lesson):
-                    qs_admission_lesson = AdmissionBottomScore.objects.filter(admission_lesson=old_lesson,profession_id=pk)
-                    if qs_admission_lesson:
-                        qs_admission_lesson.delete()
-
-            if admission_lesson:
-                for lesson in admission_lesson:
-                    sa = AdmissionBottomScore.objects.filter(profession=pk).update_or_create(
-                        profession=profession,
-                        admission_lesson_id=lesson.get("id"),
-                        bottom_score=bottom_score
-                    )
+        if admission_lesson:
+            obj = AdmissionBottomScore.objects.filter(admission_lesson__id=lesson).update(
+                profession=profession,
+                bottom_score=bottom_score
+            )
+        else:
+            lesson_instance = AdmissionLesson.objects.filter(id=lesson).first()
+            obj = AdmissionBottomScore.objects.filter(profession=pk).create(
+                profession=profession,
+                admission_lesson=lesson_instance,
+                bottom_score=bottom_score
+            )
 
         return request.send_info("INF_002")
 
+    def delete(self, request, pk=None):
+
+        try:
+            obj = AdmissionBottomScore.objects.filter(admission_lesson__id=pk).delete()
+        except:
+            return request.send_error("ERR_002", "Амжилтгүй")
+
+        return request.send_info("INF_003")
 
 @permission_classes([IsAuthenticated])
 class LessonStandartTimetableListAPIView(
