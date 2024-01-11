@@ -80,9 +80,9 @@ function TableRows({ rows, tableRowRemove, onValUpdate, profession }) {
         const { lesson, previous_lesson, group_lesson, season, is_check_score, errors } = rowsData;
 
         return (
-            <tr key={index}>
-                <td className='text-center'>{index + 1}</td>
-                <td className="col-lg-3 col-md-6">
+            <tr key={index} className='bg-transparent'>
+                <td className='text-center bg-transparent'>{index + 1}</td>
+                <td className="col-lg-3 col-md-6 bg-transparent">
                     <Controller
                         control={control}
                         defaultValue=''
@@ -114,7 +114,7 @@ function TableRows({ rows, tableRowRemove, onValUpdate, profession }) {
                     ></Controller>
                     {!lesson && <FormFeedback className='d-block'>{t("Хоосон байна")}</FormFeedback>}
                 </td>
-                <td className="col-lg-2 col-md-6">
+                <td className="col-lg-2 col-md-6 bg-transparent">
                     <Controller
                         control={control}
                         defaultValue=''
@@ -145,7 +145,7 @@ function TableRows({ rows, tableRowRemove, onValUpdate, profession }) {
                         }}
                     ></Controller>
                 </td>
-                <td className="col-lg-3 col-sm-6 select-container">
+                <td className="col-lg-3 col-sm-6 select-container bg-transparent">
                     <Controller
                         control={control}
                         defaultValue=''
@@ -176,7 +176,7 @@ function TableRows({ rows, tableRowRemove, onValUpdate, profession }) {
                         }}
                     ></Controller>
                 </td>
-                <td className={"col-lg-2 col-md-6"}>
+                <td className={"col-lg-2 col-md-6 bg-transparent"}>
                     <Controller
                         control={control}
                         defaultValue=''
@@ -207,7 +207,7 @@ function TableRows({ rows, tableRowRemove, onValUpdate, profession }) {
                         }}
                     ></Controller>
                 </td>
-                <td className={`text-center col-lg-3 col-md-6`}>
+                <td className={`text-center col-lg-3 col-md-6 bg-transparent`}>
                     <Controller
                         defaultValue={false}
                         control={control}
@@ -230,7 +230,7 @@ function TableRows({ rows, tableRowRemove, onValUpdate, profession }) {
                 </td>
                 {
                     user && Object.keys(user).length > 0 && user.permissions.includes('lms-study-learningplan-delete') &&
-                    <td className='text-center w-10'>
+                    <td className='text-center w-10 bg-transparent'>
                         <Button size='sm' color="danger" type="reset"
                             onClick={() => showWarning({
                                 header: {

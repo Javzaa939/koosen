@@ -153,7 +153,7 @@ const Diplom = ({ datas, isOpen, profession, degree }) => {
                             <thead>
                                 {tableHeader}
                             </thead>
-                            <tbody>
+                            <tbody className='bg-transparent'>
                                 <TableRows
                                     rows={zaaval}
                                     tableRowRemove={removeZaavalField}
