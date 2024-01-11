@@ -1333,7 +1333,6 @@ class LessonStandartProfessionListAPIView(
 
         return request.send_data(all_list)
 
-
 @permission_classes([IsAuthenticated])
 class ChallengeAPIView(
     generics.GenericAPIView,
@@ -1349,7 +1348,7 @@ class ChallengeAPIView(
 
     pagination_class = CustomPagination
 
-    @login_required()
+    @has_permission(must_permissions=['lms-exam-read'])
     def get(self, request):
 
         self.serializer_class = ChallengeListSerializer
@@ -1373,7 +1372,7 @@ class ChallengeAPIView(
 
         return request.send_data(datas)
 
-    @login_required()
+    @has_permission(must_permissions=['lms-exam-create'])
     def post(self, request):
 
         lesson_year = request.query_params.get('year')
@@ -1464,7 +1463,7 @@ class ChallengeAPIView(
 
         return request.send_info('INF_001')
 
-    @login_required()
+    @has_permission(must_permissions=['lms-exam-update'])
     def put(self, request, pk):
 
         general_datas = request.data
@@ -1543,6 +1542,7 @@ class ChallengeAPIView(
 
         return request.send_info('INF_002')
 
+    @has_permission(must_permissions=['lms-exam-delete'])
     def delete(self, request, pk=None):
 
         challenge_obj = self.queryset.get(id=pk)
@@ -1649,7 +1649,6 @@ class ChallengeSelectAPIView(
         return request.send_data(list(all_list))
 
 
-
 @permission_classes([IsAuthenticated])
 class QuestionsAPIView(
     generics.GenericAPIView,
@@ -1669,7 +1668,8 @@ class QuestionsAPIView(
     filter_backends = [SearchFilter]
     search_fields = ['question', 'subject__title']
 
-    @login_required()
+
+    @has_permission(must_permissions=['lms-exam-question-read'])
     def get(self, request, pk=None):
 
         lesson = request.query_params.get('lesson')
@@ -1694,7 +1694,8 @@ class QuestionsAPIView(
 
         return request.send_data(all_list)
 
-    @login_required()
+
+    @has_permission(must_permissions=['lms-exam-question-update'])
     def put(self, request, pk):
 
         datas = request.data.dict()
@@ -1855,7 +1856,7 @@ class QuestionsAPIView(
             return request.send_info('INF_002')
 
 
-    @login_required()
+    @has_permission(must_permissions=['lms-exam-question-create'])
     def post(self, request):
 
         datas = request.data.dict()
@@ -1995,7 +1996,7 @@ class QuestionsAPIView(
 
             return request.send_info('INF_001')
 
-    @login_required()
+    @has_permission(must_permissions=['lms-exam-question-delete'])
     def delete(self, request):
 
         delete_ids = request.query_params.getlist('delete')

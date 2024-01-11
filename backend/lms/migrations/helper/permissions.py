@@ -1134,36 +1134,36 @@ permissions = [
 
     # Шалгалтын асуулт бэлдэх
     {
-        'name' : 'dxis-exam-question-read',
+        'name' : 'lms-exam-question-read',
         'description' : 'Шалгалтын асуулт унших эрх'
     },
     {
-        'name' : 'dxis-exam-question-create',
+        'name' : 'lms-exam-question-create',
         'description' : 'Шалгалтын асуулт шинээр үүсгэх эрх'
     },
     {
-        'name' : 'dxis-exam-question-update',
+        'name' : 'lms-exam-question-update',
         'description' : 'Шалгалтын асуулт засах эрх'
     },
     {
-        'name' : 'dxis-exam-question-delete',
+        'name' : 'lms-exam-question-delete',
         'description' : 'Шалгалтын асуулт устгах эрх'
     },
     # Шалгалт үүсгэх
     {
-        'name' : 'dxis-exam-read',
+        'name' : 'lms-exam-read',
         'description' : 'Шалгалт унших эрх'
     },
     {
-        'name' : 'dxis-exam-create',
+        'name' : 'lms-exam-create',
         'description' : 'Шалгалт шинээр үүсгэх'
     },
     {
-        'name' : 'dxis-exam-update',
+        'name' : 'lms-exam-update',
         'description' : 'Шалгалт засах'
     },
     {
-        'name' : 'dxis-exam-delete',
+        'name' : 'lms-exam-delete',
         'description' : 'Шалгалт устгах эрх'
     },
 ]
