@@ -892,6 +892,24 @@ class OrgPositionListAPIView(
         datas = self.list(request).data
         return request.send_data(datas)
 
+
+@permission_classes([IsAuthenticated])
+class OrgPositionAllListAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+):
+    """ Албан тушаалын жагсаалт """
+
+    queryset = OrgPosition.objects
+    serializer_class = OrgPositionSerializer
+
+    def get(self, request):
+
+        self.queryset = self.queryset.all()
+        datas = self.list(request).data
+        return request.send_data(datas)
+
+
 @permission_classes([IsAuthenticated])
 class DepLeaderAPIView(
     generics.GenericAPIView,

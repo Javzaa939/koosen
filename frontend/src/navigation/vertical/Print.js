@@ -1,5 +1,4 @@
 import { Circle } from 'react-feather'
-import { t } from 'i18next';
 
 export default [
     {
@@ -7,7 +6,7 @@ export default [
         title: 'Хэвлэх',
         icon: <i className="far fa-print"></i>,
         navLink: "/print",
-        children: [
+        navChildren: [
             {
                 id: 'print1',
                 title: 'Хичээл сонголтын нэрс',

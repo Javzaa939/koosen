@@ -7,7 +7,7 @@ export default [
         title: 'Дүнгийн бүртгэл',
         icon: <i className="far fa-award"></i>,
         navLink: "/score",
-        children: [
+        navChildren: [
             {
                 id: 'score1',
                 title: 'Дүнгийн бүртгэл',

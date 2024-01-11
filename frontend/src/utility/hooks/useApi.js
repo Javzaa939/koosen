@@ -570,6 +570,7 @@ function useApi(isDisplay=false) {
 			/** Албан тушаал */
 			position: {
 				get: () => instance.get(`/core/position/`),
+				getAll: () => instance.get(`/core/position/all/`),
 			},
 
 		},

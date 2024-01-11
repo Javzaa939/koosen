@@ -7,7 +7,7 @@ export default [
         title: 'Тохиргоо',
         icon: <Settings size={20} />,
         navLink: "/settings",
-        children: [
+        navChildren: [
             {
                 id: 'settingsLevel14',
                 title: 'Ажилчдын тохиргоо',

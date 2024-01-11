@@ -4,7 +4,7 @@ export default [
         title: 'Зар мэдээ',
         icon: <i className='far fa-newspaper'></i>,
         navLink: "/service",
-        // children: [
+        // navChildren: [
         //     {
         //         id: 'service',
         //         title: 'Зар мэдээ',
