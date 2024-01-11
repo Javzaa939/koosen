@@ -35,7 +35,7 @@ export default function PrintMongolia()
 
             window.onafterprint = function()
             {
-                // window.close()
+                window.close()
             }
         },
         []
@@ -46,7 +46,7 @@ export default function PrintMongolia()
         {
             if (data && listArr.length != 0)
             {
-                // setTimeout(() => window.print(), 1000)
+                setTimeout(() => window.print(), 1000)
             }
         },
         [data, listArr]
