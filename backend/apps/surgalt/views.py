@@ -13,10 +13,9 @@ from main.utils.file import remove_folder
 from main.decorators import login_required
 
 from django.db import transaction
-from django.db.models import F, Sum, Count, Q, Subquery, OuterRef, Case, When, Value, FloatField
+from django.db.models import Sum, Count, Q, Subquery, OuterRef,  Value, CharField
+from django.db.models.functions import Concat
 
-from django.db.models import Count
-from django.db.models import Sum, Subquery, OuterRef
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 
@@ -215,6 +214,7 @@ class LessonStandartAPIView(
         self.destroy(request, pk)
         return request.send_info("INF_003")
 
+@permission_classes([IsAuthenticated])
 class LessonTitlePlanAPIView(
     mixins.CreateModelMixin,
     mixins.UpdateModelMixin,
@@ -529,6 +529,9 @@ class ProfessionDefinitionAPIView(
 
         return request.send_info("INF_003")
 
+
+
+@permission_classes([IsAuthenticated])
 class ProfessionIntroductionFileAPIView(
     generics.GenericAPIView,
 ):
@@ -566,6 +569,8 @@ class ProfessionIntroductionFileAPIView(
 
         return request.send_info('INF_002')
 
+
+@permission_classes([IsAuthenticated])
 class StudentNoticeFileAPIView(
     generics.GenericAPIView,
     mixins.DestroyModelMixin,
@@ -748,7 +753,7 @@ class LearningPlanListAPIView(
         return request.send_data(learn_plan_list)
 
 
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 class ConfirmYearListAPIView(
     mixins.ListModelMixin,
     generics.GenericAPIView
@@ -763,6 +768,7 @@ class ConfirmYearListAPIView(
         return request.send_data(conf_year)
 
 
+@permission_classes([IsAuthenticated])
 class LessonStandartStudentListAPIView(
     mixins.ListModelMixin,
     generics.GenericAPIView
@@ -793,6 +799,8 @@ class LessonStandartStudentListAPIView(
         return request.send_data(lesson_list)
 
 
+
+@permission_classes([IsAuthenticated])
 class ProfessionPlanListAPIView(
     mixins.CreateModelMixin,
     mixins.UpdateModelMixin,
@@ -992,6 +1000,7 @@ class ProfessionPlanListAPIView(
         return request.send_info("INF_003")
 
 
+@permission_classes([IsAuthenticated])
 class LessonStandartBagtsAPIView(
     generics.GenericAPIView
 ):
@@ -1044,6 +1053,7 @@ class LessonStandartBagtsAPIView(
         return request.send_data(list(return_values))
 
 
+@permission_classes([IsAuthenticated])
 class LearningPlanProfessionDefinitionAPIView(
     generics.GenericAPIView
 ):
@@ -1090,6 +1100,7 @@ class LearningPlanProfessionDefinitionAPIView(
         return request.send_data(all_list)
 
 
+@permission_classes([IsAuthenticated])
 class ProfessionPrintPlanAPIView(
     generics.GenericAPIView
 ):
@@ -1146,6 +1157,7 @@ class ProfessionPrintPlanAPIView(
 
         return request.send_data(all_data)
 
+@permission_classes([IsAuthenticated])
 class AdmissionBottomScoreAPIView(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
@@ -1209,6 +1221,8 @@ class AdmissionBottomScoreAPIView(
             return request.send_error("ERR_002", "Амжилтгүй")
 
         return request.send_info("INF_003")
+
+@permission_classes([IsAuthenticated])
 class LessonStandartTimetableListAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin
@@ -1267,6 +1281,7 @@ class LessonStandartTimetableListAPIView(
         return request.send_data(list(all_list))
 
 
+@permission_classes([IsAuthenticated])
 class LessonStandartDiplomaListAPIView(
     mixins.ListModelMixin,
     generics.GenericAPIView
@@ -1296,6 +1311,7 @@ class LessonStandartDiplomaListAPIView(
         return request.send_data(lesson_list)
 
 
+@permission_classes([IsAuthenticated])
 class LessonStandartProfessionListAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin
@@ -1318,6 +1334,7 @@ class LessonStandartProfessionListAPIView(
         return request.send_data(all_list)
 
 
+@permission_classes([IsAuthenticated])
 class ChallengeAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -1548,6 +1565,7 @@ class ChallengeAPIView(
 
         return request.send_info("INF_003")
 
+@permission_classes([IsAuthenticated])
 class ChallengeAllAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -1573,6 +1591,7 @@ class ChallengeAllAPIView(
 
         return request.send_data(datas)
 
+@permission_classes([IsAuthenticated])
 class ChallengeSelectAPIView(
     generics.GenericAPIView
 ):
@@ -1630,6 +1649,8 @@ class ChallengeSelectAPIView(
         return request.send_data(list(all_list))
 
 
+
+@permission_classes([IsAuthenticated])
 class QuestionsAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -2013,7 +2034,9 @@ class QuestionsAPIView(
                 return request.send_error("ERR_002")
 
         return request.send_info("INF_003")
-    
+
+
+@permission_classes([IsAuthenticated])
 class QuestionsListAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin
@@ -2060,6 +2083,8 @@ class QuestionsListAPIView(
 
         return request.send_data(datas)
 
+
+@permission_classes([IsAuthenticated])
 class ChallengeSendAPIView(
     generics.GenericAPIView
 ):
@@ -2076,6 +2101,8 @@ class ChallengeSendAPIView(
         return request.send_info('INF_019')
 
 
+
+@permission_classes([IsAuthenticated])
 class ChallengeApprovePIView(
     generics.GenericAPIView,
     mixins.ListModelMixin
@@ -2147,7 +2174,9 @@ class ChallengeApprovePIView(
             )
 
         return request.send_info('INF_018')
-    
+
+
+@permission_classes([IsAuthenticated])
 class StudentHomeworkListAPIView(
     mixins.ListModelMixin,
     mixins.DestroyModelMixin,
@@ -2207,6 +2236,8 @@ class StudentHomeworkListAPIView(
         return request.send_info("INF_002")
 
 
+
+@permission_classes([IsAuthenticated])
 class StudentHomeworkMultiEditAPIView(
     mixins.UpdateModelMixin,
     generics.GenericAPIView,
@@ -2247,6 +2278,8 @@ class StudentHomeworkMultiEditAPIView(
 
         return request.send_info("INF_002")
 
+
+@permission_classes([IsAuthenticated])
 class HomeworkStudentsListAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -2301,6 +2334,8 @@ class HomeworkStudentsListAPIView(
             'assignment': assignment_list
         })
 
+
+@permission_classes([IsAuthenticated])
 class LessonsTeacher(
     generics.GenericAPIView,
 ):
@@ -2365,6 +2400,8 @@ class LessonsTeacher(
 
         return request.send_data(list(sort_list))
 
+
+@permission_classes([IsAuthenticated])
 class LessonOneApiView(
     generics.GenericAPIView,
     mixins.RetrieveModelMixin
@@ -2382,6 +2419,8 @@ class LessonOneApiView(
         return request.send_data(datas)
 
 
+
+@permission_classes([IsAuthenticated])
 class LessonKreditApiView(
     generics.GenericAPIView
 ):
@@ -2451,6 +2490,8 @@ class LessonKreditApiView(
         return request.send_data(list(return_values))
 
 
+
+@permission_classes([IsAuthenticated])
 class LessonSedevApiView(
     generics.GenericAPIView,
     mixins.CreateModelMixin,
@@ -2519,6 +2560,8 @@ class LessonSedevApiView(
         Lesson_title_plan.objects.filter(lesson=pk, lesson_type=int(lesson_type)).exclude(week__in=created_weeks).delete()
         return request.send_info('INF_013')
 
+
+@permission_classes([IsAuthenticated])
 class LessonAllApiView(
     generics.GenericAPIView,
     mixins.ListModelMixin
@@ -2546,7 +2589,9 @@ class LessonAllApiView(
         all_list = self.list(request).data
 
         return request.send_data(all_list)
-    
+
+
+@permission_classes([IsAuthenticated])
 class LessonMaterialApiView(
     generics.GenericAPIView,
     mixins.CreateModelMixin,
@@ -2694,6 +2739,8 @@ class LessonMaterialApiView(
 
             return request.send_info('INF_003')
 
+
+@permission_classes([IsAuthenticated])
 class LessonMaterialGeneralApiView(
     generics.GenericAPIView,
     mixins.CreateModelMixin
@@ -2737,6 +2784,8 @@ class LessonMaterialGeneralApiView(
         return request.send_info("INF_001")
 
 
+
+@permission_classes([IsAuthenticated])
 class LessonEditorImage(
     generics.GenericAPIView
 ):
@@ -2757,6 +2806,9 @@ class LessonEditorImage(
 
         return request.send_data(return_url)
 
+
+
+@permission_classes([IsAuthenticated])
 class LessonMaterialAssignmentApiView(
     generics.GenericAPIView
 ):
@@ -2833,6 +2885,7 @@ class LessonMaterialAssignmentApiView(
 
         return request.send_info('INF_001')
 
+@permission_classes([IsAuthenticated])
 class LessonImage(
     generics.GenericAPIView
 ):
@@ -2875,6 +2928,9 @@ class LessonImage(
 
         return request.send_info("INF_002")
 
+
+
+@permission_classes([IsAuthenticated])
 class LessonMaterialSendApiView(
     generics.GenericAPIView,
     mixins.ListModelMixin
@@ -2924,7 +2980,9 @@ class LessonMaterialSendApiView(
                 return request.send_error("ERR_002")
 
         return request.send_info("INF_019")
-    
+
+
+@permission_classes([IsAuthenticated])
 class LessonMaterialApproveApiView(
     generics.GenericAPIView,
     mixins.ListModelMixin
@@ -2995,3 +3053,27 @@ class LessonMaterialApproveApiView(
             )
 
         return request.send_info('INF_018')
+
+
+@permission_classes([IsAuthenticated])
+class LessonStandartGroupAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin
+):
+    """ Тухайн ангийн хичээлүүд """
+
+    queryset = LessonStandart.objects.all()
+    serializer_class = LessonStandartSerializer
+    def get(self, request, group=None):
+
+        group_obj = get_object_or_404(Group, pk=group)
+
+        lessons = LearningPlan.objects.filter(profession=group_obj.profession).annotate(full_name=Concat("lesson__code", Value("-"), "lesson__name", output_field=CharField())).values('lesson__id', 'full_name').order_by('lesson_level', 'lesson__name')
+        students = Student.objects.filter(group=group).annotate(full_name=Concat("last_name", Value(". "), "first_name", output_field=CharField())).values('id', 'code', 'full_name')
+
+        return_datas = {
+            'lessons': list(lessons),
+            'students': list(students)
+        }
+
+        return request.send_data(return_datas)

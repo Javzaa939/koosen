@@ -8,7 +8,6 @@ import { t } from 'i18next';
 
 import SchoolContext from "@context/SchoolContext"
 
-
 // Хүснэгтийн баганууд
 export function getColumns (currentPage, rowsPerPage, total_count, editModal, handleDelete, user) {
 
@@ -54,7 +53,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
         },
 		{
 			header: 'register_num',
-			name: t("Регистрийн дугаар"),
+			name: t("Регистр дугаар"),
 			selector: (row) => row?.register_num,
             sortable: true,
 			center: true
@@ -64,18 +63,14 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 			name: t("Хөтөлбөр"),
 			selector: (row) => <span title={row?.profession_name}>{row?.profession_name}</span>,
             sortable: true,
-			center: true
+			left: true,
+			wrap: true
         },
 		{
 			name: t("Анги"),
 			selector: (row) => row?.group_name,
 			center: true,
 			width: '250px'
-        },
-		{
-			name: t("Курс"),
-			selector: (row) => row?.group_level,
-			center: true
         },
 		{
 			header: 'status',
