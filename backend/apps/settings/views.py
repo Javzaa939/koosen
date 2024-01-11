@@ -4,6 +4,7 @@ import json
 from rest_framework import mixins
 from rest_framework import generics
 from rest_framework.views import APIView
+from rest_framework.filters import SearchFilter
 
 from lms.models import Score
 from lms.models import Group
@@ -24,8 +25,11 @@ from lms.models import ProfessionalDegree
 from lms.models import ProfessionDefinition
 from lms.models import StudentAdmissionScore
 from lms.models import Country
-from lms.models import PaymentSeasonClosing
+from lms.models import TimeTable
 from lms.models import DefinitionSignature
+from lms.models import Permissions
+from lms.models import Roles
+from lms.models import AdmissionBottomScore
 
 from .serializers import ScoreSerailizer
 from .serializers import SeasonSerailizer
@@ -44,14 +48,21 @@ from .serializers import AdmissionLessonListSerializer
 from .serializers import ProfessionalDegreePutSerializer
 from .serializers import CountrySerializer
 from .serializers import DefinitionSignatureSerializer
+from .serializers import PermissionsSerializer
+from .serializers import RolesSerializer
+from .serializers import RolesListSerializer
 
 from django.db import transaction
-from django.db.models import Max
+from django.db.models import Max, Q
 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 
+from main.utils.function.pagination import CustomPagination
 from main.utils.function.utils import has_permission, list_to_dict
+from main.decorators import login_required
+from main.utils.function.serializer import post_put_action
+
 
 @permission_classes([IsAuthenticated])
 class ProfessionalDegreeAPIView(
@@ -85,28 +96,30 @@ class ProfessionalDegreeAPIView(
         " Мэргэжлийн зэргийн мэдээлэл шинээр үүсгэх "
 
         data = request.data
-        degree_code = data.get("degree_code")
-
-        if degree_code:
-            degree = self.queryset.filter(degree_code=degree_code)
-            if degree:
-                return request.send_error("ERR_003", "Боловсролын зэргийн код давхцаж байна")
 
         serializer = self.get_serializer(data=request.data)
 
         if serializer.is_valid(raise_exception=False):
-            is_success = False
             with transaction.atomic():
                 try:
-                    self.create(request).data
+                    self.perform_create(serializer)
 
-                    is_success = True
                 except Exception:
-                    raise
-            if is_success:
-                return request.send_info("INF_001")
+                    return request.send_error("ERR_002")
 
-            return request.send_error("ERR_002")
+            return request.send_info("INF_001")
+
+        else:
+            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
+            for key in serializer.errors:
+
+                return_error = {
+                    "field": key,
+                    "msg": "Код бүртгэгдсэн байна"
+                }
+
+            return request.send_error_valid(return_error)
+
 
 
     @has_permission(must_permissions=['lms-settings-degree-update'])
@@ -116,33 +129,43 @@ class ProfessionalDegreeAPIView(
         self.serializer_class = ProfessionalDegreePutSerializer
 
         datas = request.data
-        prof_qs = ProfessionDefinition.objects.filter(degree=pk)
-        if prof_qs:
-           return request.send_error("ERR_003", "Мэргэжлийн тодорхойлолтод бүртгэлтэй байгаа тул зэргийг засах боломжгүй байна.")
+        prof_qs = ProfessionDefinition.objects.exclude(degree=pk).filter(code=datas.get('code'))
+        if len(prof_qs) > 0:
+            return request.send_error("ERR_003", "Зэргийн код давхцаж байна.")
 
         instance = self.queryset.filter(id=pk).first()
-
         serializer = self.get_serializer(instance, data=datas)
 
         if serializer.is_valid(raise_exception=False):
 
-            self.update(request, pk).data
-            return request.send_info("INF_002")
-        else:
-            errors = []
+            with transaction.atomic():
+                try:
+                    self.perform_update(serializer)
 
+                except Exception:
+                    return request.send_error("ERR_002")
+
+            return request.send_info("INF_002")
+
+        else:
+            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
             for key in serializer.errors:
-                msg = serializer.errors[key]
 
                 return_error = {
                     "field": key,
-                    "msg": msg
+                    "msg": "Код бүртгэгдсэн байна"
                 }
 
-                errors.append(return_error)
+            return request.send_error_valid(return_error)
 
-            if len(errors) > 0:
-                return request.send_error("ERR_003", errors)
+    @has_permission(must_permissions=['lms-settings-degree-delete'])
+    def delete(self, request, pk=None):
+        prof_qs = ProfessionDefinition.objects.filter(degree=pk)
+        if prof_qs:
+            return request.send_error("ERR_003", "Мэргэжлийн тодорхойлолтод холбогдсон байгаа тул устгах боломжгүй")
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
 
 
 @permission_classes([IsAuthenticated])
@@ -177,27 +200,29 @@ class LearningAPIView(
 
         data = request.data
         learn_code = data.get("learn_code")
-        if learn_code:
-            learning = self.queryset.filter(learn_code=learn_code)
-            if learning:
-                return request.send_error("ERR_003", "Суралцах хэлбэрийн код давхцаж байна")
 
         serializer = self.get_serializer(data=request.data)
 
         if serializer.is_valid(raise_exception=False):
-            is_success = False
             with transaction.atomic():
                 try:
-                    self.create(request).data
+                    self.perform_create(serializer)
 
-                    is_success = True
                 except Exception:
-                    raise
-            if is_success:
-                return request.send_info("INF_001")
+                    return request.send_error("ERR_002")
 
-            return request.send_error("ERR_002")
+            return request.send_info("INF_001")
 
+        else:
+            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
+            for key in serializer.errors:
+
+                return_error = {
+                    "field": key,
+                    "msg": "Код бүртгэгдсэн байна"
+                }
+
+            return request.send_error_valid(return_error)
 
     @has_permission(must_permissions=['lms-settings-learningstatus-update'])
     def put(self, request, pk=None):
@@ -212,9 +237,38 @@ class LearningAPIView(
         serializer = self.get_serializer(instance, data=datas)
 
         if serializer.is_valid(raise_exception=False):
+            with transaction.atomic():
+                try:
+                    self.perform_update(serializer)
 
-            self.perform_update(serializer)
+                except Exception:
+                    return request.send_error("ERR_002")
+
             return request.send_info("INF_002")
+
+        else:
+            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
+            for key in serializer.errors:
+
+                return_error = {
+                    "field": key,
+                    "msg": "Код бүртгэгдсэн байна"
+                }
+
+            return request.send_error_valid(return_error)
+
+    @has_permission(must_permissions=['lms-settings-learningstatus-delete'])
+    def delete(self, request, pk=None):
+        "Суралцах хэлбэр устгах"
+
+        # Анги
+        group_qs = Group.objects.filter(learning_status=pk)
+        if len(group_qs) > 0:
+            return request.send_error("ERR_003", "Ангитай холбогдсон байгаа тул устгах боломжгүй")
+
+        self.destroy(request, pk)
+
+        return request.send_info("INF_003")
 
 
 @permission_classes([IsAuthenticated])
@@ -248,27 +302,28 @@ class StudentRegisterAPIView(
         " Оюутны бүртгэл хэлбэр шинээр үүсгэх "
 
         data = request.data
-        code = data.get("code")
-        if code:
-            stud_register = self.queryset.filter(code=code)
-            if stud_register:
-                return request.send_error("ERR_003", "Оюутны бүртгэлийн хэлбэрийн код давхцаж байна")
-
         serializer = self.get_serializer(data=data)
 
         if serializer.is_valid(raise_exception=False):
-            is_success = False
             with transaction.atomic():
                 try:
-                    self.create(request).data
+                    self.perform_create(serializer)
 
-                    is_success = True
                 except Exception:
-                    raise
-            if is_success:
-                return request.send_info("INF_001")
+                    return request.send_error("ERR_002")
 
-            return request.send_error("ERR_002")
+            return request.send_info("INF_001")
+
+        else:
+            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
+            for key in serializer.errors:
+
+                return_error = {
+                    "field": key,
+                    "msg": "Код бүртгэгдсэн байна"
+                }
+
+            return request.send_error_valid(return_error)
 
     @has_permission(must_permissions=['lms-settings-registerstatus-update'])
     def put(self, request, pk=None):
@@ -284,10 +339,34 @@ class StudentRegisterAPIView(
         serializer = self.get_serializer(instance, data=datas)
 
         if serializer.is_valid(raise_exception=False):
+            with transaction.atomic():
+                try:
+                    self.perform_update(serializer)
 
-            self.perform_update(serializer)
+                except Exception:
+                    return request.send_error("ERR_002")
+
             return request.send_info("INF_002")
 
+        else:
+            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
+            for key in serializer.errors:
+
+                return_error = {
+                    "field": key,
+                    "msg": "Код бүртгэгдсэн байна"
+                }
+            return request.send_error_valid(return_error)
+
+    @has_permission(must_permissions=['lms-settings-registerstatus-delete'])
+    def delete(self, request, pk=None):
+        " Оюутны бүртгэл устгах "
+
+        stud_qs = Student.objects.filter(status=pk)
+        if len(stud_qs) >0:
+            return request.send_error("ERR_004", "Оюутны бүртгэлтэй холбогдсон тул устгах боломжгүй")
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
 
 @permission_classes([IsAuthenticated])
 class LessonCategoryAPIView(
@@ -319,64 +398,63 @@ class LessonCategoryAPIView(
     def post(self, request):
         " Хичээлийн ангиллыг шинээр үүсгэх "
 
-        data = request.data
-        category_code = data.get("category_code")
         serializer = self.get_serializer(data=request.data)
 
         if serializer.is_valid(raise_exception=False):
-            is_success = False
             with transaction.atomic():
                 try:
-                    self.create(request).data
+                    self.perform_create(serializer)
 
-                    is_success = True
                 except Exception:
-                    raise
-            if is_success:
-                return request.send_info("INF_001")
+                    return request.send_error("ERR_002")
 
-            return request.send_error("ERR_002")
+            return request.send_info("INF_001")
 
         else:
-            if category_code:
-                category_info = self.queryset.filter(category_code=category_code)
-                if category_info:
-                    error_obj = {
-                        "error": serializer.errors,
-                        "msg": "Код давхцаж байна"
-                    }
-                    return request.send_error("ERR_004", error_obj)
+            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
+            for key in serializer.errors:
 
-            return request.send_error("ERR_002")
+                return_error = {
+                    "field": key,
+                    "msg": "Код бүртгэгдсэн байна"
+                }
+
+            return request.send_error_valid(return_error)
 
 
     @has_permission(must_permissions=['lms-settings-lessoncategory-update'])
     def put(self, request, pk=None):
-        "Хичээлийн ангилал  засах"
+        "Хичээлийн ангилал засах"
 
-        errors = []
         datas = request.data
         instance = self.queryset.filter(id=pk).first()
         serializer = self.get_serializer(instance, data=datas)
         if serializer.is_valid(raise_exception=False):
+            with transaction.atomic():
+                try:
+                    self.perform_update(serializer)
 
-            self.perform_update(serializer)
+                except Exception:
+                    return request.send_error("ERR_002")
 
             return request.send_info("INF_002")
         else:
+            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
             for key in serializer.errors:
-                msg = serializer.errors[key]
 
                 return_error = {
                     "field": key,
-                    "msg": msg
+                    "msg": "Код бүртгэгдсэн байна"
                 }
 
-                errors.append(return_error)
+                return request.send_error_valid(return_error)
 
-            if len(errors) > 0:
-                return request.send_error("ERR_003", errors)
+    @has_permission(must_permissions=['lms-settings-lessoncategory-delete'])
+    def delete(self, request, pk=None):
+        " Хичээлийн ангилал устгах "
 
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
 
 
 @permission_classes([IsAuthenticated])
@@ -472,6 +550,13 @@ class LessonTypeAPIView(
             if len(errors) > 0:
                 return request.send_error("ERR_003", errors)
 
+    @has_permission(must_permissions=['lms-settings-lessontype-delete'])
+    def delete(self, request, pk=None):
+        " Хичээлийн төрөл устгах "
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
+
 @permission_classes([IsAuthenticated])
 class LessonLevelAPIView(
     mixins.CreateModelMixin,
@@ -533,7 +618,7 @@ class LessonLevelAPIView(
 
     @has_permission(must_permissions=['lms-settings-lessonlevel-update'])
     def put(self, request, pk=None):
-        " Хичээлийн бүлэг засах"
+        " Хичээлийн түвшин засах"
 
         datas = request.data
         serializer = self.get_serializer(data=datas)
@@ -562,6 +647,13 @@ class LessonLevelAPIView(
 
             if len(errors) > 0:
                 return request.send_error("ERR_003", errors)
+
+    # @has_permission(must_permissions=['lms-settings-lessonlevel-delete'])
+    def delete(self, request, pk=None):
+        " Хичээлийн түвшин устгах "
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
 
 @permission_classes([IsAuthenticated])
 class LessonGroupAPIView(
@@ -592,36 +684,28 @@ class LessonGroupAPIView(
     def post(self, request):
         " Хичээлийн бүлэг шинээр үүсгэх "
 
-        data = request.data
-        group_code = data.get("group_code")
-
         serializer = self.get_serializer(data=request.data)
 
         if serializer.is_valid(raise_exception=False):
-            is_success = False
             with transaction.atomic():
                 try:
-                    self.create(request).data
+                    self.perform_create(serializer)
 
-                    is_success = True
                 except Exception:
-                    raise
-            if is_success:
-                return request.send_info("INF_001")
+                    return request.send_error("ERR_002")
 
-            return request.send_error("ERR_002")
+            return request.send_info("INF_001")
 
         else:
-            if group_code:
-                less_group_info = self.queryset.filter(group_code=group_code)
-                if less_group_info:
-                    error_obj = {
-                        "error": serializer.errors,
-                        "msg": "Код давхцаж байна"
-                    }
-                    return request.send_error("ERR_004", error_obj)
+            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
+            for key in serializer.errors:
 
-            return request.send_error("ERR_002")
+                return_error = {
+                    "field": key,
+                    "msg": "Код бүртгэгдсэн байна"
+                }
+
+            return request.send_error_valid(return_error)
 
     @has_permission(must_permissions=['lms-settings-lessongroup-update'])
     def put(self, request, pk=None):
@@ -632,24 +716,30 @@ class LessonGroupAPIView(
         serializer = self.get_serializer(instance, data=datas)
 
         if serializer.is_valid(raise_exception=False):
+            with transaction.atomic():
+                try:
+                    self.perform_update(serializer)
 
-            self.perform_update(serializer)
+                except Exception:
+                    return request.send_error("ERR_002")
+
             return request.send_info("INF_002")
         else:
-            errors = []
             for key in serializer.errors:
-                msg = serializer.errors[key]
 
                 return_error = {
                     "field": key,
-                    "msg": msg
+                    "msg": "Код бүртгэгдсэн байна"
                 }
 
-                errors.append(return_error)
+            return request.send_error_valid(return_error)
 
-            if len(errors) > 0:
-                return request.send_error("ERR_003", errors)
+    @has_permission(must_permissions=['lms-settings-lessongroup-delete'])
+    def delete(self, request, pk=None):
+        " Хичээлийн бүлэг устгах "
 
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
 
 @permission_classes([IsAuthenticated])
 class SeasonAPIView(
@@ -686,23 +776,19 @@ class SeasonAPIView(
         serializer = self.get_serializer(data=request.data)
 
         if serializer.is_valid(raise_exception=False):
-            is_success = False
             with transaction.atomic():
                 try:
-                    self.create(request).data
+                    self.perform_create(serializer)
 
-                    is_success = True
                 except Exception:
-                    raise
-            if is_success:
-                return request.send_info("INF_001")
+                    return request.send_error("ERR_002")
 
-            return request.send_error("ERR_002")
+            return request.send_info("INF_001")
 
         else:
             if season_code:
                 less_season_info = self.queryset.filter(season_code=season_code)
-                if less_season_info:
+                if len(less_season_info) > 0:
                     error_obj = {
                         "error": serializer.errors,
                         "msg": "Код давхцаж байна"
@@ -716,13 +802,38 @@ class SeasonAPIView(
         " Улирал засах"
 
         datas = request.data
+        season_code = datas.get("season_code")
         instance = self.queryset.filter(id=pk).first()
         serializer = self.get_serializer(instance, data=datas)
 
         if serializer.is_valid(raise_exception=False):
-
             self.perform_update(serializer)
             return request.send_info("INF_002")
+
+        else:
+            for key in serializer.errors:
+
+                return_error = {
+                    "field": key,
+                    "msg": "Код давхцаж байна."
+                }
+            if season_code:
+                less_season_info = self.queryset.filter(season_code=season_code)
+                if len(less_season_info) > 0:
+                    return request.send_error_valid([return_error])
+
+            return request.send_error("ERR_002")
+
+    @has_permission(must_permissions=['lms-settings-season-delete'])
+    def delete(self, request, pk=None):
+        " Улирал устгах "
+
+        timetable_qs = TimeTable.objects.filter(lesson_season=pk)
+        if len(timetable_qs) > 0:
+            return request.send_error("Хичээлийн хуваарьтай холбогдсон байгаа тул устгах боломжгүй")
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
 
 @permission_classes([IsAuthenticated])
 class ScoreAPIView(
@@ -754,29 +865,28 @@ class ScoreAPIView(
     def post(self, request):
         " Үнэлгээ шинээр үүсгэх "
 
-        data = request.data
-        score_code = data.get("score_code")
-        if score_code:
-            score = self.queryset.filter(score_code=score_code)
-            if score:
-                return request.send_error("ERR_003", " Үнэлгээний код давхцаж байна")
-
         serializer = self.get_serializer(data=request.data)
 
         if serializer.is_valid(raise_exception=False):
-            is_success = False
             with transaction.atomic():
                 try:
-                    self.create(request).data
+                    self.perform_create(serializer)
 
-                    is_success = True
                 except Exception:
-                    raise
-            if is_success:
-                return request.send_info("INF_001")
+                    return request.send_error("ERR_002")
 
-            return request.send_error("ERR_002")
+            return request.send_info("INF_001")
 
+        else:
+            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
+            for key in serializer.errors:
+
+                return_error = {
+                    "field": key,
+                    "msg": "Код бүртгэгдсэн байна"
+                }
+
+            return request.send_error_valid(return_error)
 
     @has_permission(must_permissions=['lms-settings-score-update'])
     def put(self, request, pk=None):
@@ -784,19 +894,36 @@ class ScoreAPIView(
 
         datas = request.data
 
-        score_code = datas.get("score_code")
-        if score_code:
-            score = self.queryset.filter(score_code=score_code).exclude(id=pk)
-            if score:
-                return request.send_error("ERR_003", " Үнэлгээний код давхцаж байна")
-
         instance = self.queryset.filter(id=pk).first()
         serializer = self.get_serializer(instance, data=datas)
 
         if serializer.is_valid(raise_exception=False):
+            with transaction.atomic():
+                try:
+                    self.perform_create(serializer)
 
-            self.perform_update(serializer)
+                except Exception:
+                    return request.send_error("ERR_002")
+
             return request.send_info("INF_002")
+
+        else:
+            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
+            for key in serializer.errors:
+
+                return_error = {
+                    "field": key,
+                    "msg": "Код бүртгэгдсэн байна"
+                }
+
+            return request.send_error_valid(return_error)
+
+    @has_permission(must_permissions=['lms-settings-score-delete'])
+    def delete(self, request, pk=None):
+        " Үнэлгээний бүртгэл устгах "
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
 
 
 @permission_classes([IsAuthenticated])
@@ -835,7 +962,7 @@ class SystemSettingsAPIView(
             season = data.get("active_lesson_season")
 
             check_qs = self.queryset.filter(active_lesson_year=active_lesson_year, active_lesson_season=season)
-            if check_qs:
+            if len(check_qs) > 0:
                 return request.send_error("ERR_003", "Хичээлийн жил улирлын тохиргоо бүртгэгдсэн байна.")
 
             serializer = self.serializer_class(data=data)
@@ -861,7 +988,7 @@ class SystemSettingsAPIView(
 
         if active_lesson_year:
             check_qs = self.queryset.filter(active_lesson_year=active_lesson_year, active_lesson_season=season).exclude(id=pk)
-            if check_qs:
+            if len(check_qs) > 0:
                 return request.send_error("ERR_003", "Тухай сургууль дээр энэ хичээлийн жил улирлын тохиргоо орсон байна.")
 
         if season_type == SystemSettings.ACTIVE:
@@ -871,9 +998,8 @@ class SystemSettingsAPIView(
             prev_lesson_season = instance.prev_lesson_season
             check_qs = self.queryset.filter(active_lesson_year=prev_lesson_year, active_lesson_season=prev_lesson_season, season_type=SystemSettings.CLOSED)
 
-            if self.queryset.count() > 1:
-                if not check_qs:
-                    return request.send_error('ERR_02', 'Та өмнөх улирлаа хаана уу?')
+            if not check_qs:
+                return request.send_error('ERR_02', 'Та өмнөх улирлаа хаана уу?')
 
             self.queryset.filter(season_type=SystemSettings.ACTIVE).update(season_type=SystemSettings.INACTIVE)
 
@@ -930,50 +1056,65 @@ class AdmissionLessonAPIView(
     def post(self, request):
         " ЭЕШ-ын хичээл шинээр үүсгэх "
 
-        data = request.data
-        lesson_code = data.get("lesson_code")
-
-        serializer = self.get_serializer(data=data)
+        serializer = self.get_serializer(data=request.data)
 
         if serializer.is_valid(raise_exception=False):
-            is_success = False
             with transaction.atomic():
                 try:
-                    self.create(request).data
+                    self.perform_create(serializer)
 
-                    is_success = True
                 except Exception:
-                    raise
-            if is_success:
-                return request.send_info("INF_001")
+                    return request.send_error("ERR_002")
 
-            return request.send_error("ERR_002")
+            return request.send_info("INF_001")
+
         else:
-            if lesson_code:
-                admis_less_info = self.queryset.filter(lesson_code=lesson_code)
-                if admis_less_info:
-                    error_obj = {
-                        "error": serializer.errors,
-                        "msg": "ЭЕШ-ын хичээлийн код давхцаж байна"
-                    }
-                    return request.send_error("ERR_004", error_obj)
-        return request.send_info("INF_001")
+            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
+            for key in serializer.errors:
+
+                return_error = {
+                    "field": key,
+                    "msg": "Код бүртгэгдсэн байна"
+                }
+
+            return request.send_error_valid(return_error)
 
     def put(self, request, pk=None):
         "ЭЕШ-ын хичээл засах"
 
-        admiss_qs = StudentAdmissionScore.objects.filter(admission_lesson=pk)
-        if admiss_qs:
-            return request.send_error("ERR_003", "Энэ хичээл дээр ЭЕШ-ын оноо бүртгэлтэй байгаа тул засах боломжгүй")
-
-        datas = request.data
-
         instance = self.queryset.filter(id=pk).first()
-        serializer = self.get_serializer(instance, data=datas)
-        if serializer.is_valid(raise_exception=False):
+        serializer = self.get_serializer(instance, data=request.data)
 
-            self.perform_update(serializer)
+        if serializer.is_valid(raise_exception=False):
+            with transaction.atomic():
+                try:
+                    self.perform_create(serializer)
+
+                except Exception:
+                    return request.send_error("ERR_002")
+
             return request.send_info("INF_002")
+
+        else:
+            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
+            for key in serializer.errors:
+
+                return_error = {
+                    "field": key,
+                    "msg": "Код бүртгэгдсэн байна"
+                }
+
+            return request.send_error_valid(return_error)
+
+    def delete(self, request, pk=None):
+        "ЭЕШ-ын хичээл устгах "
+
+        score = AdmissionBottomScore.objects.filter(admission_lesson=pk)
+        if len(score) > 0:
+            return request.send_error("ERR_002", "Элсэлтийн шалгалтын хичээлд холбогдсон байгаа тул устгах боломжгүй")
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
 
 
 class SystemSettingsActiveYearAPIView(
@@ -1029,61 +1170,63 @@ class DiscountTypeAPIView(
     def post(self, request):
         " Төлбөрийн хөнгөлөлтийн төрөл шинээр үүсгэх "
 
-        data = request.data
-        serializer = self.get_serializer(data=data)
+        serializer = self.get_serializer(data=request.data)
 
         if serializer.is_valid(raise_exception=False):
-            is_success = False
             with transaction.atomic():
                 try:
-                    self.create(request).data
+                    self.perform_create(serializer)
 
-                    is_success = True
                 except Exception:
-                    raise
-            if is_success:
-                return request.send_info("INF_001")
+                    return request.send_error("ERR_002")
 
-            return request.send_error("ERR_002")
+            return request.send_info("INF_001")
+
         else:
             # Олон алдааны мессэж буцаах бол үүнийг ашиглана
-            error_obj = []
             for key in serializer.errors:
-                msg = "Хоосон байна"
-                if key == 'code':
-                    msg = "Код давхцаж байна"
 
                 return_error = {
                     "field": key,
-                    "msg": msg
+                    "msg": "Код бүртгэгдсэн байна"
                 }
 
-                error_obj.append(return_error)
-
-            if len(error_obj) > 0:
-                return request.send_error("ERR_003", error_obj)
-
-        return request.send_info("INF_001")
+            return request.send_error_valid(return_error)
 
 
     @has_permission(must_permissions=['lms-settings-discounttype-update'])
     def put(self, request, pk=None):
         "Төлбөрийн хөнгөлөлтийн төрөл засах"
 
-        stipent = Stipend.objects.filter(stipend_type=pk)
-        if stipent:
-            return request.send_error("ERR_003","Тухайн хөнгөлөлтийн төрөлд тэтгэлэг бүртгэлтэй байгаа тул засах боломжгүй")
-
-        datas = request.data
         instance = self.queryset.filter(id=pk).first()
-        serializer = self.get_serializer(instance, data=datas)
+        serializer = self.get_serializer(instance, data=request.data)
 
         if serializer.is_valid(raise_exception=False):
+            with transaction.atomic():
+                try:
+                    self.perform_update(serializer)
 
-            self.perform_update(serializer)
+                except Exception:
+                    return request.send_error("ERR_002")
+
             return request.send_info("INF_002")
+        else:
+            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
+            for key in serializer.errors:
 
+                return_error = {
+                    "field": key,
+                    "msg": "Код бүртгэгдсэн байна"
+                }
 
+            return request.send_error_valid(return_error)
+
+    @has_permission(must_permissions=['lms-settings-discounttype-delete'])
+    def delete(self, request, pk=None):
+        "Төлбөрийн хөнгөлөлтийн төрөл устгах "
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
 
 @permission_classes([IsAuthenticated])
 class CountryAPIView(
@@ -1117,42 +1260,27 @@ class CountryAPIView(
         " Улсын нэр шинээр үүсгэх "
 
         data = request.data
-        code = data.get("code")
-        if code:
-            qs = self.queryset.filter(code=code)
-            if qs:
-                return request.send_error("ERR_002", "Код бүртгэгдсэн байна")
 
         serializer = self.get_serializer(data=data)
         if serializer.is_valid(raise_exception=False):
-            is_success = False
             with transaction.atomic():
                 try:
-                    self.create(request).data
-
-                    is_success = True
+                    self.perform_create(serializer)
                 except Exception:
-                    raise
-            if is_success:
-                return request.send_info("INF_001")
+                    return request.send_error("ERR_002")
 
-            return request.send_error("ERR_002")
+            return request.send_info("INF_001")
+
         else:
             # Олон алдааны мессэж буцаах бол үүнийг ашиглана
-            error_obj = []
             for key in serializer.errors:
 
                 return_error = {
                     "field": key,
-                    "msg": serializer.errors
+                    "msg": "Код бүртгэгдсэн байна"
                 }
 
-                error_obj.append(return_error)
-
-            if len(error_obj) > 0:
-                return request.send_error("ERR_003", error_obj)
-
-        return request.send_info("INF_001")
+            return request.send_error_valid(return_error)
 
 
     @has_permission(must_permissions=['lms-settings-country-update'])
@@ -1161,35 +1289,32 @@ class CountryAPIView(
 
 
         datas = request.data
-        # code = datas.get("code")
-        # qs = self.queryset.filter(code=code)
-        # if qs:
-        #     return request.send_error("ERR_003","Тухайн улсын код давхцаж байна")
-
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=datas)
 
         if serializer.is_valid(raise_exception=False):
-
-            self.perform_update(serializer)
+            with transaction.atomic():
+                try:
+                    self.perform_create(serializer)
+                except Exception:
+                    return request.send_error("ERR_002")
             return request.send_info("INF_002")
         else:
             # Олон алдааны мессэж буцаах бол үүнийг ашиглана
-            error_obj = []
             for key in serializer.errors:
-
                 return_error = {
                     "field": key,
-                    "msg": serializer.errors
+                    "msg": "Код бүртгэгдсэн байна"
                 }
 
-                error_obj.append(return_error)
+            return request.send_error_valid(return_error)
 
-            if len(error_obj) > 0:
-                return request.send_error("ERR_003", error_obj)
+    @has_permission(must_permissions=['lms-settings-country-delete'])
+    def delete(self, request, pk=None):
+        "Улс устгах "
 
-        return request.send_info("INF_001")
-
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
 
 @permission_classes([IsAuthenticated])
 class SignatureAPIView(
@@ -1286,6 +1411,7 @@ class SignatureAPIView(
         return request.send_info("INF_003")
 
 
+@permission_classes([IsAuthenticated])
 class SignatureDataTableAPIView(APIView):
 
     @has_permission(must_permissions=['lms-settings-signature-read'])
@@ -1370,3 +1496,203 @@ class SignatureOrderAPIView(APIView):
         from_qs.update(order=to_order)
 
         return request.send_info("INF_013")
+
+
+@permission_classes([IsAuthenticated])
+class PermissionAPIView(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    generics.GenericAPIView
+):
+    """ Эрх
+    """
+
+    queryset = Permissions.objects.order_by("-created_at")
+    serializer_class = PermissionsSerializer
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = [
+        'name',
+        'description',
+        'created_at',
+    ]
+
+    def get_queryset(self):
+        queryset = self.queryset
+
+        sorting = self.request.query_params.get('sorting')
+
+        # Sort хийх үед ажиллана
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
+
+        return queryset
+
+    @login_required()
+    def get(self, request, pk=None):
+        """ Эрх жагсаалт
+        """
+
+        list = self.list(request, pk).data
+        return request.send_data(list)
+
+    @login_required()
+    @transaction.atomic
+    def post(self, request):
+        """ Эрх үүсгэх
+        """
+
+        return post_put_action(self, request, 'post', request.data)
+
+    @login_required()
+    @transaction.atomic
+    def put(self, request, pk=None):
+        """ Эрх засах
+        """
+
+        return post_put_action(self, request, 'put', request.data, pk)
+
+    @login_required()
+    @transaction.atomic
+    def delete(self, request, pk=None):
+        """ Эрх устгах
+        """
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
+
+
+@permission_classes([IsAuthenticated])
+class PermissionListAPIView(
+    generics.GenericAPIView
+):
+    queryset = Permissions.objects.filter(name__startswith='lms-').order_by("-created_at")
+    serializer_class = PermissionsSerializer
+
+    @login_required()
+    def get(self, request, pk=None):
+        """ Эрх жагсаалт
+        """
+
+        crud_perms = list()
+
+        # read create update delete орсон утгууд
+        crud_perms_qs = self.queryset.filter(Q(name__endswith='-read') | Q(name__endswith='-create') | Q(name__endswith='-update') | Q(name__endswith='-delete'))
+        crud_perms_datas = self.serializer_class(crud_perms_qs, many=True).data
+
+        # read create update delete ороогүй утгууд
+        non_crud_perms_qs = self.queryset.exclude(Q(name__endswith='-read') | Q(name__endswith='-create') | Q(name__endswith='-update') | Q(name__endswith='-delete'))
+        non_crud_perms = self.serializer_class(non_crud_perms_qs, many=True).data
+
+
+        for crud_perms_data in crud_perms_qs.values_list('name', flat=True):
+
+            name = crud_perms_data
+
+            if '-read' in crud_perms_data:
+                name = crud_perms_data.replace('-read', '')
+
+            if '-create' in crud_perms_data:
+                name = crud_perms_data.replace('-create', '')
+
+            if '-update' in crud_perms_data:
+                name = crud_perms_data.replace('-update', '')
+
+            if '-delete' in crud_perms_data:
+                name = crud_perms_data.replace('-delete', '')
+
+            if not any(name == d.get('name') for d in crud_perms):
+
+                filtered = list(filter(lambda crud_perms_data: (f'{name}-read' == dict(crud_perms_data).get('name') or f'{name}-create' == dict(crud_perms_data).get('name') or f'{name}-update' == dict(crud_perms_data).get('name') or f'{name}-delete' == dict(crud_perms_data).get('name')), crud_perms_datas))
+
+                description = ''
+
+                if len(filtered) != 1:
+                    chars = {}
+                    for char1 in filtered:
+                        for char in dict(char1).get('description').split(" "):
+                            if char not in chars:
+                                chars[char] = 1
+                            else:
+                                chars[char] += 1
+
+                    duplicates = []
+
+                    for char, count in chars.items():
+                        if count > 1:
+                            duplicates.append(char)
+
+                    description = (" ".join(duplicates)).replace(' эрх', '')
+
+                else:
+                    description = filtered[0].get('description')
+
+
+                crud_perms.append({
+                    'name': name,
+                    'description': description,
+                    'filtered': filtered
+                })
+
+
+        return request.send_data({
+            'non_crud_perms': non_crud_perms,
+            'crud_perms': crud_perms
+        })
+
+
+@permission_classes([IsAuthenticated])
+class RolesAPIView(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    generics.GenericAPIView
+):
+    """ Role
+    """
+
+    queryset = Roles.objects.order_by("-created_at")
+    serializer_class = RolesSerializer
+
+    @login_required()
+    def get(self, request, pk=None):
+        """ Role жагсаалт
+        """
+
+        self.serializer_class = RolesListSerializer
+        list = self.list(request, pk).data
+        return request.send_data(list)
+
+    @login_required()
+    @transaction.atomic
+    def post(self, request):
+        """ Role үүсгэх
+        """
+
+        return post_put_action(self, request, 'post', request.data)
+
+    @login_required()
+    @transaction.atomic
+    def put(self, request, pk=None):
+        """ Role засах
+        """
+
+        return post_put_action(self, request, 'put', request.data, pk)
+
+    @login_required()
+    @transaction.atomic
+    def delete(self, request, pk=None):
+        """ Role устгах
+        """
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")

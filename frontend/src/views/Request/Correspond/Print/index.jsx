@@ -175,7 +175,7 @@ export default function Print()
                     })
                 }
 
-                <small className="mt-2"><span className="fw-bolder">Дүйцүүлэлт хийсэн: </span>..................................... БМА-ны мэргэжилтэн /&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/</small>
+                <small className="mt-2"><span className="fw-bolder">Дүйцүүлэлт хийсэн: </span>..................................... БМА-ны Хөтөлбөртэн /&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;/</small>
 
             </Row>
         </div>

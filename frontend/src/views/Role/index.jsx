@@ -33,7 +33,7 @@ function RoleRoutes() {
         },
         {
             active_id: 3,
-            name: 'Оюутны сонголтыг төлбөрөөс хамааралгүйгээр хийх эрх',
+            name: 'Төлбөргүй сонголтын эрх',
             component: < Student/>
         }
     ]

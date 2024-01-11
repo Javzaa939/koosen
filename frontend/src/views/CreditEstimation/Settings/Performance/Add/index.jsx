@@ -54,7 +54,7 @@ export const AddPerformancemodal = ( { open, refreshDatas, handleModal, editData
     const performanceApi = useApi().credit.performance
     const schoolApi = useApi().hrms.subschool
 
-    // Мэргэжлийн жагсаалт
+    // Хөтөлбөрийн жагсаалт
     async function getSchools() {
         const { success, data } = await fetchData(schoolApi.get())
         if (success) {
@@ -66,27 +66,27 @@ export const AddPerformancemodal = ( { open, refreshDatas, handleModal, editData
         cdata = convertDefaultValue(cdata)
 
         if (cdata?.id) {
-            const { success, error } = await postFetch(performanceApi.put(cdata, cdata?.id))
+            const { success, errors } = await postFetch(performanceApi.put(cdata, cdata?.id))
             if(success) {
                 reset()
                 refreshDatas()
                 handleModal()
             } else {
                 /** Алдааны мессэжийг input дээр харуулна */
-                for (let key in error) {
-                    setError(error[key].field, { type: 'custom', message:  error[key].msg});
+                for (let key in errors) {
+                    setError(key, { type: 'custom', message: errors[key][0]});
                 }
             }
         } else {
-            const { success, error } = await postFetch(performanceApi.post(cdata))
+            const { success, errors } = await postFetch(performanceApi.post(cdata))
             if(success) {
                 reset()
                 refreshDatas()
                 handleModal()
             } else {
                 /** Алдааны мессэжийг input дээр харуулна */
-                for (let key in error) {
-                    setError(error[key].field, { type: 'custom', message:  error[key].msg});
+                for (let key in errors) {
+                    setError(key, { type: 'custom', message: errors[key][0]});
                 }
             }
         }

@@ -20,6 +20,7 @@ import { useTranslation } from "react-i18next";
 import { X } from "react-feather";
 
 import { useForm, Controller } from "react-hook-form";
+import useUpdateEffect from '@hooks/useUpdateEffect'
 
 import {
     Row,
@@ -100,19 +101,22 @@ const Createmodal = ({ open, handleModal, refreshDatas, select_value }) => {
         var degree = select_value.degree || ''
         var group = select_value.group || ''
 
-        const [studentRsp, teahcerRsp]= await allFetchData(
+        const [studentRsp]= await allFetchData(
             Promise.all([
                 studentApi.getGraduate(depId, degree, group),
-                teacherApi.get()
             ])
         )
         if (studentRsp?.success)
         {
             setStudentOption(studentRsp?.data)
         }
-        if (teahcerRsp?.success)
+    }
+
+    async function getTeachers() {
+        const { success, data } = await allFetchData(teacherApi.get(select_value.department))
+        if (success)
         {
-            setTeacherOption(teahcerRsp?.data)
+            setTeacherOption(data)
         }
     }
 
@@ -122,6 +126,14 @@ const Createmodal = ({ open, handleModal, refreshDatas, select_value }) => {
             getAll()
         },
         []
+    )
+
+    useUpdateEffect(
+        () =>
+        {
+            getTeachers()
+        },
+        [radio]
     )
 
     // Radio
@@ -149,7 +161,7 @@ const Createmodal = ({ open, handleModal, refreshDatas, select_value }) => {
         cdata['lesson'] = allSelectLessonIds
         cdata = convertDefaultValue(cdata)
 
-        const { success, error } = await postFetch(graduateApi.post(cdata))
+        const { success, errors } = await postFetch(graduateApi.post(cdata))
         if(success)
         {
             reset()
@@ -159,9 +171,8 @@ const Createmodal = ({ open, handleModal, refreshDatas, select_value }) => {
         else
         {
             /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in error)
-            {
-                setError(error[key].field, { type: 'custom', message:  error[key].msg});
+            for (let key in errors) {
+                setError(key, { type: 'custom', message:  errors[key][0]});
             }
         }
 	}
@@ -272,7 +283,7 @@ const Createmodal = ({ open, handleModal, refreshDatas, select_value }) => {
                                             id="lesson"
                                             classNamePrefix='select'
                                             isClearable
-                                            className={classnames('react-select')}
+                                            className={classnames('react-select', { 'is-invalid': errors.lesson })}
                                             isLoading={getAllLoading}
                                             placeholder={t(`-- Сонгоно уу --`)}
                                             options={lesson_option || []}
@@ -314,6 +325,51 @@ const Createmodal = ({ open, handleModal, refreshDatas, select_value }) => {
                                     )}
                                 />
                             {errors.diplom_topic && <FormFeedback className='d-block'>{t(errors.diplom_topic.message)}</FormFeedback>}
+                        </Col>
+                        <Col md={12}>
+                            <Label className="form-label" for="diplom_topic_eng">
+                                {t('Төгсөлтийн ажлын сэдэв англи')}
+                            </Label>
+                                <Controller
+                                    defaultValue=''
+                                    control={control}
+                                    id="diplom_topic_eng"
+                                    name="diplom_topic_eng"
+                                    render={({ field }) => (
+                                        <Input
+                                            id ="diplom_topic_eng"
+                                            bsSize="sm"
+                                            placeholder={t('Төгсөлтийн ажлын сэдэв англи оруулах')}
+                                            {...field}
+                                            type="text"
+                                            invalid={errors.diplom_topic_eng && true}
+                                        />
+                                    )}
+                                />
+                            {errors.diplom_topic_eng && <FormFeedback className='d-block'>{t(errors.diplom_topic_eng.message)}</FormFeedback>}
+                        </Col>
+                        <Col md={12}>
+                            <Label className="form-label" for="diplom_topic_uig">
+                                {t('Төгсөлтийн ажлын сэдэв уйгаржин')}
+                            </Label>
+                                <Controller
+                                    defaultValue=''
+                                    control={control}
+                                    id="diplom_topic_uig"
+                                    name="diplom_topic_uig"
+                                    render={({ field }) => (
+                                        <Input
+                                            id ="diplom_topic_uig"
+                                            bsSize="sm"
+                                            placeholder={t('Төгсөлтийн ажлын сэдэв уйгаржин оруулах')}
+                                            {...field}
+                                            type="text"
+                                            style={{ fontFamily: 'CMs Urga', fontSize: '15px'}}
+                                            invalid={errors.diplom_topic_uig && true}
+                                        />
+                                    )}
+                                />
+                            {errors.diplom_topic_uig && <FormFeedback className='d-block'>{t(errors.diplom_topic_uig.message)}</FormFeedback>}
                         </Col>
                         <Col md={12}>
                             <Label className="form-label" for="leader">

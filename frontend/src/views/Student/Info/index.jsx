@@ -65,7 +65,7 @@ export default function Info()
                             <Col md={6}>
                                 <Row tag="dl" className="mb-0">
                                     <Col tag="dt" sm="4" className="fw-bolder mb-1" >
-                                        Хөтөлбөрийн баг:
+                                        Тэнхим:
                                     </Col>
                                     <Col tag="dd" sm="8" className="mb-1">{datas?.mainInfo?.department?.name || 'хоосон'}</Col>
                                     <Col tag="dt" sm="4" className="fw-bolder mb-1" >

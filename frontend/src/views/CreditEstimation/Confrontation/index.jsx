@@ -1,7 +1,7 @@
 
 import React, { Fragment, useEffect, useState } from "react"
 
-import { Row, Col, Card, Label, Button, CardTitle, CardHeader, FormFeedback, Form, Table } from 'reactstrap'
+import { Row, Col, Card, Label, Button, CardTitle, CardHeader, FormFeedback, Form } from 'reactstrap'
 import { useTranslation } from 'react-i18next'
 import { useForm, Controller } from "react-hook-form";
 import Select from 'react-select'
@@ -12,6 +12,7 @@ import classnames from "classnames";
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
+import  useUpdateEffect  from '@hooks/useUpdateEffect'
 
 import { ReactSelectStyles, validate } from '@utils'
 
@@ -30,7 +31,7 @@ export default function Confrontation()
     const navigate = useNavigate();
 
     // Hook
-    const { control, setValue, handleSubmit, formState: { errors }, reset, setError } = useForm(validate(validateSchema));
+    const { control, setValue, handleSubmit, formState: { errors } } = useForm(validate(validateSchema));
 
     // UseState
     const [ datas, setDatas ] = useState({})
@@ -56,7 +57,7 @@ export default function Confrontation()
         }
 	}
 
-    //Мэргэжлийн жагсаалт авах
+    //Хөтөлбөрийн жагсаалт авах
     async function getProfession()
     {
 
@@ -77,7 +78,7 @@ export default function Confrontation()
         []
     )
 
-    useEffect(
+    useUpdateEffect(
         () =>
         {
             getProfession()
@@ -123,7 +124,7 @@ export default function Confrontation()
                 <Row className="justify-content-between mx-0 mt-1 mb-1">
                     <Col md={6}>
                         <Label className="form-label" for="department">
-                            {t('Хөтөлбөрийн баг')}
+                            {t('Тэнхим')}
                         </Label>
                         <Controller
                             defaultValue=''
@@ -162,7 +163,7 @@ export default function Confrontation()
                     </Col>
                     <Col md={6}>
                         <Label className="form-label" for="profession">
-                            {t('Мэргэжил')}
+                            {t('Хөтөлбөр')}
                         </Label>
                         <Controller
                             control={control}

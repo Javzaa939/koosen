@@ -19,12 +19,12 @@ const Detail = () => {
     const nav_menus = [
         {
             active_id: 1,
-            name: t('Мэргэжлийн тодорхойлолт'),
+            name: t('Хөтөлбөр'),
             component: <MainInformation />
         },
         {
             active_id: 2,
-            name: t('Мэргэжлийн танилцуулга'),
+            name: t('Хөтөлбөрийн танилцуулга'),
             component: <Introduction />
         },
         {

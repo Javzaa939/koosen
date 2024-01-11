@@ -115,17 +115,17 @@ const Editmodal = ({ open, handleEdit, editData, refreshDatas, season }) => {
         cdata = convertDefaultValue(cdata)
         const { success, error } = await fetchData(creditVolumeApi.put(cdata, editData?.id))
         if(success) {
-            setLoader(false)
             reset()
             handleEdit()
             refreshDatas()
         } else {
-            setLoader(false)
             /** Алдааны мессэжийг input дээр харуулна */
             for (let key in error) {
                 setError(error[key].field, { type: 'custom', message:  error[key].msg});
             }
         }
+        setLoader(false)
+
 
 	}
 
@@ -156,7 +156,6 @@ const Editmodal = ({ open, handleEdit, editData, refreshDatas, season }) => {
 
                 if(key === 'lesson') {
                     setValue(key, editData[key]?.id)
-                    console.log(editData[key]?.id)
                 }
             }
         }

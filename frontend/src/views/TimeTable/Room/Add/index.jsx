@@ -270,7 +270,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                             />
                             {errors.description && <FormFeedback className='d-block'>{t(errors.description.message)}</FormFeedback>}
                         </Col>
-                        <Col md={12} className="mt-2">
+                        <Col md={12} className=" text-center mt-2">
                         <Button className="me-2" color="primary" type="submit" disabled={postLoading}>
                             {postLoading &&<Spinner size='sm' className='me-1'/>}
                                 {t('Хадгалах')}

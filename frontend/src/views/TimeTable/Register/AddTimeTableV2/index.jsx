@@ -66,7 +66,7 @@ const AddModalV2 = ({ open, handleModal, refreshDatas, editValues }) => {
     useEffect(() => {
         var check = nav_menus.find(menus => menus.active_id == active)
         setComponent(check.component)
-    },[active])
+    },[active, roomModal])
 
 	return (
         <Fragment>
@@ -123,7 +123,7 @@ const AddModalV2 = ({ open, handleModal, refreshDatas, editValues }) => {
                 <Modal isOpen={roomModal} toggle={handleRoomModal} className="modal-dialog-centered modal-md">
                     <ModalHeader toggle={handleRoomModal}>{t('Өрөө бүртгэх')}</ModalHeader>
                     <ModalBody>
-                        <RoomAdd refreshDatas={getRoom} handleModal={handleRoomModal}/>
+                        <RoomAdd handleModal={handleRoomModal}/>
                     </ModalBody>
                 </Modal>
             }

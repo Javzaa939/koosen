@@ -198,7 +198,7 @@ const MainInformation = () => {
         }
 
         if (!errorImage) {
-            const { success, error } = await fetchData(studentApi.put(formData, studentId,'main'))
+            const { success, errors } = await fetchData(studentApi.put(formData, studentId,'main'))
             if(success)
             {
                 getDatas()
@@ -206,8 +206,8 @@ const MainInformation = () => {
 
             } else {
                 /** Алдааны мессэжийг input дээр харуулна */
-                for (let key in error) {
-                    setError(error[key].field, { type: 'custom', message:  error[key].msg});
+                for (let key in errors) {
+                    setError(key, { type: 'custom', message:  errors[key][0]});
                 }
             }
         }
@@ -310,7 +310,7 @@ const MainInformation = () => {
                         <Row className='gy-50'>
                             <Col lg={4} sm={6} xs={12}>
                                 <Label className="form-label" for="department">
-                                    {t("Хөтөлбөрийн баг")}
+                                    {t("Тэнхим")}
                                 </Label>
                                 <Controller
                                     control={control}

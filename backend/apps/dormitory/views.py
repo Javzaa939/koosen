@@ -354,7 +354,7 @@ class DormitoryRoomAPIView(
         if serializer.is_valid(raise_exception=False):
             with transaction.atomic():
                 try:
-                    self.create(request).data
+                    self.perform_create(serializer)
                 except Exception:
                     return request.send_error("ERR_002")
 
@@ -370,7 +370,10 @@ class DormitoryRoomAPIView(
 
                 errors.append(return_error)
 
-            return request.send_error("ERR_003", errors)
+            if len(errors) > 0:
+                return request.send_error("ERR_003", errors)
+
+            return request.send_error("ERR_002")
 
     def put(self, request, pk=None):
         request_data = request.data
@@ -401,17 +404,13 @@ class DormitoryRoomAPIView(
         serializer = self.get_serializer(instance, data=request_data)
 
         if serializer.is_valid(raise_exception=False):
-            is_success = False
             with transaction.atomic():
                 try:
-                    self.update(request).data
-                    is_success = True
+                    self.perform_update(serializer)
                 except Exception:
-                    raise
-            if is_success:
-                return request.send_info("INF_001")
+                    return request.send_error("ERR_002")
+            return request.send_info("INF_001")
 
-            return request.send_error("ERR_002")
         else:
             error_obj = []
             for key in serializer.errors:
@@ -427,7 +426,7 @@ class DormitoryRoomAPIView(
             if len(error_obj) > 0:
                 return request.send_error("ERR_003", error_obj)
 
-        return request.send_info("INF_002")
+            return request.send_info("ERR_002")
 
     def delete(self, request, pk=None):
 

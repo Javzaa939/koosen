@@ -10,29 +10,53 @@ from main.utils.function.utils import override_get_queryset
 from main.utils.function.utils import has_permission, get_domain_url
 from main.utils.file import save_file
 from main.utils.file import remove_folder
+from main.decorators import login_required
 
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import F, Sum, Count, Q, Subquery, OuterRef, Case, When, Value, FloatField
+
 from django.db.models import Count
-from django.db.models import Sum
+from django.db.models import Sum, Subquery, OuterRef
 from django.shortcuts import get_object_or_404
 from django.conf import settings
+
 from functools import reduce
 from operator import or_
 
-from lms.models import LessonStandart, Student
-from lms.models import Lesson_title_plan
-from lms.models import ProfessionDefinition
-from lms.models import LearningPlan
-from lms.models import Profession_SongonKredit
-from lms.models import TimeTable
-from lms.models import ScoreRegister
-from lms.models import Group
-from lms.models import ProfessionalDegree
-from lms.models import AdmissionBottomScore, SubSchools, Departments
-from lms.models import Lesson_to_teacher
-from lms.models import ExamTimeTable,Exam_repeat
-from lms.models import AdmissionLesson
+from lms.models import (
+    Group,
+    Student,
+    TimeTable,
+    SubOrgs,
+    Salbars,
+    Exam_repeat,
+    LearningPlan,
+    ScoreRegister,
+    ExamTimeTable,
+    LessonStandart,
+    Lesson_title_plan,
+    Lesson_to_teacher,
+    ProfessionalDegree,
+    ProfessionDefinition,
+    AdmissionBottomScore,
+    Profession_SongonKredit,
+    Teachers,
+    Challenge,
+    QuestionChoices,
+    Lesson_materials,
+    Lesson_assignment,
+    ChallengeStudents,
+    TimeTable_to_group,
+    ChallengeQuestions,
+    TimeTable_to_student,
+    Lesson_material_file,
+    Lesson_assignment_student,
+    Lesson_assignment_student_file,
+    AdmissionLesson,
+)
+
+from lms.models import get_image_path
+from lms.models import get_choice_image_path
 
 from .serializers import LessonStandartSerializer
 from .serializers import LessonTitlePlanSerializer
@@ -47,6 +71,20 @@ from .serializers import LearningPlanPrintSerializer
 from .serializers import GroupSerializer
 from .serializers import AdmissionBottomScoreSerializer
 from .serializers import AdmissionBottomScoreListSerializer
+from .serializers import ChallengeSerializer
+from .serializers import ChallengeListSerializer
+from .serializers import ChallengeQuestionListSerializer
+from .serializers import GroupListSerializer
+from .serializers import LessonAssignmentAssigmentListSerializer
+from .serializers import LessonAssignmentAssigmentSerializer
+from .serializers import LessonTitleSerializer
+from .serializers import LessonMaterialSerializer
+from .serializers import LessonMaterialListSerializer
+from .serializers import LessonTeacherSerializer
+
+from main.utils.function.utils import remove_key_from_dict, fix_format_date, get_domain_url
+from main.utils.function.utils import null_to_none, get_lesson_choice_student, get_active_year_season, json_load
+
 
 @permission_classes([IsAuthenticated])
 class LessonStandartAPIView(
@@ -81,12 +119,8 @@ class LessonStandartAPIView(
 
         self.serializer_class = LessonStandartListSerializer
 
-        department = self.request.query_params.get('department')
-        category = self.request.query_params.get('category')
-        school = self.request.query_params.get('schoolId')
-
-        # if school:
-        #     self.queryset = self.queryset.filter(school=int(school))
+        department = request.query_params.get('department')
+        category = request.query_params.get('category')
 
         if department:
             self.queryset = self.queryset.filter(department=department)
@@ -104,47 +138,31 @@ class LessonStandartAPIView(
         return request.send_data(less_standart_list)
 
     @has_permission(must_permissions=['lms-study-lessonstandart-create'])
+    @transaction.atomic
     def post(self, request):
         " хичээлийн стандартын шинээр үүсгэх "
 
         request_data = request.data
         serializer = self.get_serializer(data=request_data)
 
-        if serializer.is_valid(raise_exception=False):
-            is_success = False
-            with transaction.atomic():
-                try:
-                    self.create(request).data
+        # transaction savepoint зарлах нь хэрэв алдаа гарвад roll back хийнэ
+        sid = transaction.savepoint()
 
-                    is_success = True
-                except Exception as e:
-                    print(e)
-                    raise
-            if is_success:
-                return request.send_info("INF_001")
+        try:
+            serializer = self.serializer_class(data=request_data, many=False)
+            if not serializer.is_valid():
+                transaction.savepoint_rollback(sid)
+                return request.send_error_valid(serializer.errors)
 
+            serializer.save()
+
+        except Exception:
             return request.send_error("ERR_002")
-        else:
-            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
-            error_obj = []
-            for key in serializer.errors:
-                msg = "Хоосон байна"
-                if key == 'code':
-                    msg = "Код давхцаж байна"
 
-                return_error = {
-                    "field": key,
-                    "msg": msg
-                }
-
-                error_obj.append(return_error)
-
-            if len(error_obj) > 0:
-                return request.send_error("ERR_003", error_obj)
-
-            return request.send_error("ERR_002")
+        return request.send_info("INF_001")
 
     @has_permission(must_permissions=['lms-study-lessonstandart-update'])
+    @transaction.atomic
     def put(self, request, pk=None):
         " хичээлийн стандартын шинээр үүсгэх "
 
@@ -152,51 +170,29 @@ class LessonStandartAPIView(
         teachers_data = request.data.get("teachers")
         instance = self.get_object()
 
-        serializer = self.get_serializer(instance, data=request_data)
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance, data=request_data, partial=True)
 
-        if serializer.is_valid(raise_exception=False):
-            is_success = False
-            with transaction.atomic():
-                try:
-                    if teachers_data:
-                        old_teacher_ids = Lesson_to_teacher.objects.filter(lesson=pk).values_list('teacher',flat=True)
-                        for old_teacher in old_teacher_ids:
-                            if not (old_teacher in  teachers_data):
-                                qs_teacher = Lesson_to_teacher.objects.filter(teacher_id=old_teacher,lesson_id=pk)
-                                if qs_teacher:
-                                    qs_teacher.delete()
-                        for teacher in teachers_data:
-                            teacher_id = teacher.get('id')
-                            Lesson_to_teacher.objects.update_or_create(
-                                    lesson_id=pk,
-                                    teacher_id=teacher_id
-                                )
+            if not serializer.is_valid(raise_exception=False):
+                return request.send_error_valid(serializer.errors)
 
-                    self.update(request).data
-                    is_success = True
-                except Exception:
-                    raise
-            if is_success:
-                return request.send_info("INF_001")
+            if teachers_data:
+                old_teacher_qs = Lesson_to_teacher.objects.filter(lesson=pk)
+                old_teacher_qs.delete()
+                for teacher in teachers_data:
+                    teacher_id = teacher.get('id')
+                    Lesson_to_teacher.objects.update_or_create(
+                        lesson_id=pk,
+                        teacher_id=teacher_id
+                    )
 
-            return request.send_error("ERR_002")
-        else:
-            error_obj = []
-            for key in serializer.errors:
-                msg = "Хоосон байна"
-                if key == 'code':
-                    msg = "Код давхцаж байна"
+            serializer.save()
 
-                return_error = {
-                    "field": key,
-                    "msg": msg
-                }
+            return request.send_info("INF_002")
 
-                error_obj.append(return_error)
-
-            if len(error_obj) > 0:
-                return request.send_error("ERR_003", error_obj)
-
+        except Exception as e:
+            print(e)
             return request.send_error("ERR_002")
 
     @has_permission(must_permissions=['lms-study-lessonstandart-delete'])
@@ -218,6 +214,7 @@ class LessonStandartAPIView(
 
         self.destroy(request, pk)
         return request.send_info("INF_003")
+
 class LessonTitlePlanAPIView(
     mixins.CreateModelMixin,
     mixins.UpdateModelMixin,
@@ -237,7 +234,6 @@ class LessonTitlePlanAPIView(
     @has_permission(must_permissions=['lms-study-lessonstandart-read'])
     def get(self, request, pk=None, lessonID=None):
         " хичээлийн сэдэвчилсэн төлөвлөгөө жагсаалт "
-
 
         # Хичээлийн хайх
         if lessonID:
@@ -393,10 +389,7 @@ class ProfessionDefinitionAPIView(
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['name', 'code', 'profession_code']
-
-    # def get_queryset(self):
-    #     return override_get_queryset(self)
+    search_fields = ['name', 'code', 'profession_code', 'degree__degree_name']
 
     @has_permission(must_permissions=['lms-study-profession-read'])
     def get(self, request, pk=None):
@@ -417,6 +410,15 @@ class ProfessionDefinitionAPIView(
         if department:
             self.queryset = self.queryset.filter(department=department)
 
+        self.queryset = (
+            self.queryset
+            .annotate(
+                general_base=Subquery(Profession_SongonKredit.objects.filter(profession=OuterRef('pk'), lesson_level=LearningPlan.BASIC).values('songon_kredit')[:1]),
+                professional_base=Subquery(Profession_SongonKredit.objects.filter(profession=OuterRef('pk'), lesson_level=LearningPlan.PROF_BASIC).values('songon_kredit')[:1]),
+                professional_lesson=Subquery(Profession_SongonKredit.objects.filter(profession=OuterRef('pk'), lesson_level=LearningPlan.PROFESSION).values('songon_kredit')[:1]),
+            )
+        )
+
         if pk:
             plan = self.retrieve(request, pk).data
             return request.send_data(plan)
@@ -425,62 +427,44 @@ class ProfessionDefinitionAPIView(
         return request.send_data(learn_plan_list)
 
     @has_permission(must_permissions=['lms-study-profession-create'])
+    @transaction.atomic
     def post(self, request):
         "  Мэргэжлийн тодорхойлолт шинээр үүсгэх "
 
         request_data = request.data
+        # with_start = '001'
+        # profession_code = 1
 
-        with_start = '001'
-        profession_code = 1
+        # profession_qs = (
+        #     ProfessionDefinition.objects.order_by('profession_code')
+        # ).first()
 
-        profession_qs = (
-            ProfessionDefinition.objects.order_by('-profession_code')
-        ).first()
+        # if profession_qs:
+        #     check_code = profession_qs.profession_code
+        #     if check_code:
+        #         profession_code = int(check_code) + 1
 
-        if profession_qs:
-            check_code = profession_qs.profession_code
-            profession_code = int(check_code) + 1
+        # new_profession_code = f'{int(profession_code):0{len(with_start)}d}'
+        # request_data['profession_code'] = new_profession_code
 
-        new_profession_code = f'{int(profession_code):0{len(with_start)}d}'
+        # transaction savepoint зарлах нь хэрэв алдаа гарвад roll back хийнэ
+        sid = transaction.savepoint()
 
-        request_data['profession_code'] = new_profession_code
+        try:
+            serializer = self.serializer_class(data=request_data, many=False)
+            if not serializer.is_valid():
+                transaction.savepoint_rollback(sid)
+                return request.send_error_valid(serializer.errors)
 
-        serializer = self.get_serializer(data=request_data)
+            serializer.save()
 
-        if serializer.is_valid():
-            is_success = False
-            with transaction.atomic():
-                try:
-                    self.create(request).data
-
-                    is_success = True
-                except Exception:
-                    raise
-            if is_success:
-                return request.send_info("INF_001")
-
+        except Exception:
             return request.send_error("ERR_002")
-        else:
-            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
-            error_obj = []
-            for key in serializer.errors:
-                msg = "Хоосон байна"
-                if key == 'code':
-                    msg = "Код давхцаж байна"
 
-                return_error = {
-                    "field": key,
-                    "msg": msg
-                }
-
-                error_obj.append(return_error)
-
-            if len(error_obj) > 0:
-                return request.send_error("ERR_003", error_obj)
-
-            return request.send_error("ERR_002")
+        return request.send_info("INF_001")
 
     @has_permission(must_permissions=['lms-study-profession-update'])
+    @transaction.atomic
     def put(self, request, pk=None):
         "  Мэргэжлийн тодорхойлолт  засах "
 
@@ -490,46 +474,39 @@ class ProfessionDefinitionAPIView(
         professional_base = request_data.get('professional_base')
         professional_lesson = request_data.get('professional_lesson')
         admission_lesson = request_data.get('admission_lesson')
-        instance = self.get_object()
 
-        serializer = self.get_serializer(instance, data=request_data)
+        try:
+            instance = self.get_object()
+            serializer = self.get_serializer(instance, data=request_data, partial=True)
 
-        if serializer.is_valid(raise_exception=False):
-            self.perform_create(serializer)
+            if not serializer.is_valid(raise_exception=False):
+                return request.send_error_valid(serializer.errors)
+
             if general_base:
                 ss = Profession_SongonKredit.objects.update_or_create(
-                    profession_id = profession,
+                    profession_id=profession,
                     lesson_level=LearningPlan.BASIC,
                     songon_kredit=general_base
                 )
             if professional_base:
                 ss = Profession_SongonKredit.objects.update_or_create(
-                    profession_id = profession,
+                    profession_id=profession,
                     lesson_level=LearningPlan.PROF_BASIC,
                     songon_kredit=professional_base
                 )
             if professional_lesson:
                 ss = Profession_SongonKredit.objects.update_or_create(
-                    profession_id = profession,
+                    profession_id=profession,
                     lesson_level=LearningPlan.PROFESSION,
                     songon_kredit=professional_lesson
                 )
-        else:
-            error_obj = []
-            for key in serializer.errors:
-                msg = "Хоосон байна"
-                if key == 'code':
-                    msg = "Код давхцаж байна"
 
-                return_error = {
-                    "field": key,
-                    "msg": msg
-                }
 
-                error_obj.append(return_error)
+            self.perform_create(serializer)
 
-            if len(error_obj) > 0:
-                return request.send_error("ERR_003", error_obj)
+        except Exception as e:
+            print(e)
+            return request.send_error("ERR_002")
 
         return request.send_info("INF_002")
 
@@ -793,7 +770,7 @@ class LessonStandartStudentListAPIView(
     """ Тухайн оюутны төгсөлтийн хичээлийн жагсаалт """
 
     queryset = LessonStandart.objects
-    serializer_class = LessonStandartListSerializer
+    serializer_class = LessonStandartSerializer
 
     def get_queryset(self):
         queryset = self.queryset
@@ -984,9 +961,9 @@ class ProfessionPlanListAPIView(
                         if lesson:
                             create_learninPlan_list.append(
                                 LearningPlan(
-                                    school=SubSchools.objects.get(id=school),
+                                    school=SubOrgs.objects.get(id=school),
                                     lesson=LessonStandart.objects.get(id=lesson),
-                                    department=Departments.objects.get(id=department) if department else None,
+                                    department=Salbars.objects.get(id=department) if department else None,
                                     profession=ProfessionDefinition.objects.get(id=profession_id),
                                     previous_lesson=LessonStandart.objects.get(id=previous_lesson) if previous_lesson else None,
                                     group_lesson = LessonStandart.objects.get(id=group_lesson) if group_lesson else None,
@@ -1297,7 +1274,7 @@ class LessonStandartDiplomaListAPIView(
     """ Тухайн оюутны төгсөлтийн хичээлийн жагсаалт """
 
     queryset = LessonStandart.objects
-    serializer_class = LessonStandartListSerializer
+    serializer_class = LessonStandartSerializer
 
     def get_queryset(self):
         queryset = self.queryset
@@ -1339,3 +1316,1682 @@ class LessonStandartProfessionListAPIView(
             all_list = self.list(request).data
 
         return request.send_data(all_list)
+
+
+class ChallengeAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin
+):
+    """ Өөрийгөө сорих тест """
+
+    queryset = Challenge.objects.all().order_by("-created_at")
+    serializer_class = ChallengeSerializer
+
+    pagination_class = CustomPagination
+
+    @login_required()
+    def get(self, request):
+
+        self.serializer_class = ChallengeListSerializer
+        lesson = request.query_params.get('lesson')
+        time_type = request.query_params.get('type')
+
+        user = request.user
+        teacher = Teachers.objects.filter(user_id=user).first()
+
+        self.queryset = self.queryset.filter(created_by=teacher)
+
+        if lesson:
+            self.queryset = self.queryset.filter(lesson=lesson)
+
+        if time_type:
+            state_filters = Challenge.get_state_filter(time_type)
+
+            self.queryset = self.queryset.filter(**state_filters)
+
+        datas = self.list(request).data
+
+        return request.send_data(datas)
+
+    @login_required()
+    def post(self, request):
+
+        lesson_year = request.query_params.get('year')
+        lesson_season = request.query_params.get('season')
+
+        general_datas = request.data
+
+        question_ids = general_datas.get('question_ids')
+
+        qs_student = Student.objects.all()
+
+        user = request.user
+        teacher = Teachers.objects.filter(user_id=user).first()
+
+        # Анги эсвэл оюутны select хийгдсэн ids
+        selected_ids = general_datas.get('selected')
+
+        # Хамрах хүрээ
+        scope = general_datas.get('scope')
+        lesson_id = general_datas.get('lesson')
+
+        lesson = LessonStandart.objects.get(id=lesson_id)
+
+        general_datas = remove_key_from_dict(general_datas, [ 'scope', 'scopeName', 'selected', 'select', 'lesson'])
+
+        # Өмнөх шалгалтын мэдээллээс сонгож хадгалсан үед дараах serializer-аар  дамжиж ирсэн утгуудыг хасна
+        if general_datas.get('id'):
+            general_datas = remove_key_from_dict(general_datas, ['group', 'student', 'startAt', 'endAt', 'id'])
+
+        if 'question_ids' in general_datas:
+            del general_datas['question_ids']
+
+        if 'questions' in general_datas:
+            del general_datas['questions']
+
+        if 'scopeName' in general_datas:
+            del general_datas['scopeName']
+
+        general_datas['lesson'] = lesson
+        general_datas['deleted_by'] = teacher
+        general_datas['created_by'] = teacher
+
+        # Тухайн хичээлийн хуваарь
+        timetable_qs = TimeTable.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season, lesson=lesson_id, teacher=teacher)
+        timetable_ids = timetable_qs.values_list('id', flat=True)
+
+        # Хичээлийн хуваариас хасалт хийлгэсэн оюутнууд
+        exclude_student_ids = TimeTable_to_student.objects.filter(timetable_id__in=timetable_ids, add_flag=False).values_list('student', flat=True)
+
+        kind = Challenge.KIND_LESSON
+
+        # Хамрах хүрээ
+        if scope == 'all':
+            all_lesson_students = get_lesson_choice_student(lesson_id, teacher.id, '', lesson_year, lesson_season)
+            student_ids = qs_student.filter(id__in=all_lesson_students).values_list('id', flat=True)
+
+        elif scope == 'group':
+            kind = Challenge.KIND_GROUP
+
+            all_student_ids = qs_student.filter(group_id__in=selected_ids).values_list('id', flat=True)
+
+            student_ids = set(all_student_ids) - set(list(exclude_student_ids))
+
+        elif scope == 'student':
+            kind = Challenge.KIND_STUDENT
+            student_ids = selected_ids
+
+        general_datas['kind'] = kind
+
+        general_datas = null_to_none(general_datas)
+
+        with transaction.atomic():
+
+            try:
+                question_qs = ChallengeQuestions.objects.filter(id__in=question_ids)
+
+                challenge = self.queryset.create(**general_datas)
+
+                # ManytoMany field нэмэх хэсэг
+                if challenge:
+                    challenge.questions.set(list(question_qs))
+                    challenge.student.set(list(student_ids))
+
+            except Exception as e:
+                print(e)
+
+                return request.send_error('ERR_002')
+
+        return request.send_info('INF_001')
+
+    @login_required()
+    def put(self, request, pk):
+
+        general_datas = request.data
+
+        lesson_year = request.query_params.get('year')
+        lesson_season = request.query_params.get('season')
+
+        question_ids = general_datas.get('question_ids')
+
+        qs_student = Student.objects.all()
+
+        user = request.user
+        teacher = Teachers.objects.filter(user_id=user).first()
+
+        # Анги эсвэл оюутны select хийгдсэн ids
+        selected_ids = general_datas.get('selected')
+
+        # Хамрах хүрээ
+        scope = general_datas.get('scope')
+        lesson_id = general_datas.get('lesson')
+
+        general_datas = remove_key_from_dict(general_datas, ['group', 'student', 'scopeName', 'startAt', 'endAt', 'question_ids', 'questions', 'selected', 'created_by'])
+
+        # Тухайн хичээлийн хуваарь
+        timetable_qs = TimeTable.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season, lesson=lesson_id, teacher=teacher)
+        timetable_ids = timetable_qs.values_list('id', flat=True)
+
+        # Хичээлийн хуваариас хасалт хийлгэсэн оюутнууд
+        exclude_student_ids = TimeTable_to_student.objects.filter(timetable_id__in=timetable_ids, add_flag=False).values_list('student', flat=True)
+
+        kind = Challenge.KIND_LESSON
+
+        # Хамрах хүрээ
+        if scope == 'all':
+            all_lesson_students = get_lesson_choice_student(lesson_id, teacher.id, '',  lesson_year, lesson_season)
+            student_ids = qs_student.filter(id__in=all_lesson_students).values_list('id', flat=True)
+
+        elif scope == 'group':
+            kind = Challenge.KIND_GROUP
+
+            all_student_ids = qs_student.filter(group_id__in=selected_ids).values_list('id', flat=True)
+
+            student_ids = set(all_student_ids) - set(list(exclude_student_ids))
+
+        elif scope == 'student':
+            kind = Challenge.KIND_STUDENT
+            student_ids = selected_ids
+
+        general_datas['kind'] = kind
+        general_datas['created_by'] = teacher.id
+
+        with transaction.atomic():
+
+            try:
+                self.update(request, pk).data
+
+                challenge = self.queryset.get(id=pk)
+
+                # ManytoMany field нэмэх хэсэг
+                if challenge:
+
+                    question_qs = ChallengeQuestions.objects.filter(id__in=question_ids)
+
+                    # ManytoMany field ээ устгаад нэмнэ.
+                    challenge.questions.clear()
+                    challenge.student.clear()
+
+                    # ManytoMany field ээ шинээр нэмнэ.
+                    challenge.questions.set(list(question_qs))
+                    challenge.student.set(list(student_ids))
+
+            except Exception as e:
+                print(e)
+
+                return request.send_error('ERR_002')
+
+        return request.send_info('INF_002')
+
+    def delete(self, request, pk=None):
+
+        challenge_obj = self.queryset.get(id=pk)
+
+        try:
+            if challenge_obj:
+               challenge_obj.questions.clear()
+               challenge_obj.student.clear()
+               challenge_obj.save()
+
+            # Шалгалтад хариулсан сурагчид
+            challenge_students = ChallengeStudents.objects.filter(challenge=challenge_obj)
+            print(challenge_students)
+
+            self.destroy(request, pk)
+
+        except Exception as e:
+            print(e)
+            return request.send_error("ERR_002")
+
+        return request.send_info("INF_003")
+
+class ChallengeAllAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin
+):
+    """ Өөрийгөө сорих шалгалт бүх жагсаалт """
+
+    queryset = Challenge.objects.all()
+    serializer_class = ChallengeListSerializer
+
+    @login_required()
+    def get(self, request):
+
+        challenge = request.query_params.get('challenge')
+
+        if challenge:
+            instance = self.queryset.filter(id=int(challenge)).first()
+            serializer_data = self.get_serializer(instance).data
+
+            return request.send_data(serializer_data)
+
+        datas = self.list(request).data
+
+        return request.send_data(datas)
+
+class ChallengeSelectAPIView(
+    generics.GenericAPIView
+):
+    @login_required()
+    def get(self, request):
+
+        lesson = ''
+        all_list = []
+
+        year = request.query_params.get('year')
+        season = request.query_params.get('season')
+        lesson = request.query_params.get('lesson')
+
+        ctype = request.query_params.get('type')
+
+        user = request.user
+        teacher = get_object_or_404(Teachers, user_id=user, action_status=Teachers.APPROVED)
+
+        quesyset = TimeTable.objects.all()
+
+        if year and season:
+            quesyset = quesyset.filter(lesson_year=year, lesson_season=season)
+
+        if lesson:
+            quesyset = quesyset.filter(lesson=lesson)
+
+        quesyset = quesyset.filter(teacher=teacher)
+
+        timetable_ids = quesyset.values_list('id', flat=True)
+
+        if ctype == 'group':
+
+            group_ids = TimeTable_to_group.objects.filter(timetable_id__in=timetable_ids).values_list('group', flat=True)
+
+            qroup_qs = Group.objects.filter(id__in=group_ids)
+
+            all_list = GroupListSerializer(qroup_qs, many=True).data
+
+        else:
+
+            all_student = get_lesson_choice_student(lesson, teacher, '', year, season)
+
+            student_list = Student.objects.filter(id__in=all_student).values_list('id', flat=True)
+
+            for student_id in student_list:
+                obj = {}
+                obj['id'] = student_id
+
+                student = Student.objects.filter(id=student_id).first()
+
+                obj['full_name'] = student.full_name + " " + student.code
+
+                all_list.append(obj)
+
+        return request.send_data(list(all_list))
+
+
+class QuestionsAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin
+):
+    """
+        Асуултын хэсэг
+    """
+
+    queryset = ChallengeQuestions.objects.all().order_by('-created_at')
+    serializer_class = ChallengeQuestionListSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['question', 'subject__title']
+
+    @login_required()
+    def get(self, request, pk=None):
+
+        lesson = request.query_params.get('lesson')
+        subject = request.query_params.get('subject')
+
+        user = request.user
+        teacher = get_object_or_404(Teachers, user_id=user, action_status=Teachers.APPROVED)
+
+        self.queryset = self.queryset.filter(created_by=teacher)
+
+        if lesson:
+            self.queryset = self.queryset.filter(subject__lesson=lesson)
+
+        if subject:
+            self.queryset = self.queryset.filter(subject=subject)
+
+        if pk:
+            row_data = self.retrieve(request, pk).data
+            return request.send_data(row_data)
+
+        all_list = self.list(request).data
+
+        return request.send_data(all_list)
+
+    @login_required()
+    def put(self, request, pk):
+
+        datas = request.data.dict()
+        subject_id = datas.get('subject')
+
+        subject = Lesson_title_plan.objects.filter(id=subject_id).first()
+
+        quesion_imgs = request.FILES.getlist('questionImg')
+        choice_imgs = request.FILES.getlist('choiceImg')
+
+        questions = request.POST.getlist('question')
+
+        user = request.user
+        teacher = Teachers.objects.filter(user_id=user).first()
+
+        with transaction.atomic():
+            sid = transaction.savepoint()
+            try:
+                # Асуултыг хадгалах хэсэг
+                for question in questions:
+                    question = json_load(question)
+
+                    qkind = question.get("kind")
+                    image_name = question.get('imageName')
+
+                    score = question.get('score') # Асуултын оноо
+
+                    question['created_by'] = teacher
+                    question['subject'] = subject
+
+                    question_img = None
+
+                    # Асуултын сонголтууд
+                    choices = question.get('choices')
+
+                    # Асуултын зураг хадгалах хэсэг
+                    for img in quesion_imgs:
+                        if image_name == img.name:
+                            question_img = img
+                            break
+
+                    question = remove_key_from_dict(question, [ 'image', 'choices'])
+
+                    if 'imageName' in question:
+                        del question['imageName']
+
+                    if 'imageUrl' in question:
+                        del question['imageUrl']
+
+                    if 'kind_name' in question:
+                        del question['kind_name']
+
+                    if not question.get('max_choice_count'):
+                        question['max_choice_count'] = 0
+
+                    if not question.get('rating_max_count'):
+                        question['rating_max_count'] = 0
+                    else:
+                        question['rating_max_count'] = 5
+
+                    question = null_to_none(question)
+
+                    question_obj, created = ChallengeQuestions.objects.update_or_create(
+                        id=pk,
+                        defaults={
+                            **question
+                        }
+                    )
+
+                    # Асуултанд зураг байвал хадгалах хэсэг
+                    if question_img:
+                        question_img_path = get_image_path(question_obj)
+
+                        file_path = save_file(question_img, question_img_path)[0]
+
+                        question_obj.image = file_path
+                        question_obj.save()
+                    else:
+                        old_image = question_obj.image
+
+                        # Хуучин зураг засах үедээ устгасан бол файл устгана.
+                        if old_image and not image_name:
+                            remove_folder(str(old_image))
+
+                            question_obj.image = None
+                            question_obj.save()
+
+                    choice_ids = list()
+
+                    # Асуултын сонголтуудыг үүсгэх нь
+                    if int(qkind) in [ChallengeQuestions.KIND_MULTI_CHOICE, ChallengeQuestions.KIND_ONE_CHOICE]:
+
+                        # Олон сонголттой үед асуултын оноог хувааж тавина
+                        if int(qkind) == ChallengeQuestions.KIND_MULTI_CHOICE:
+                            max_choice_count = int(question.get('max_choice_count'))
+
+                            score = float(score) / max_choice_count
+
+                        for choice in choices:
+                            choice['created_by'] = teacher
+                            checked = choice.get('checked')
+
+                            choice['score'] = score if checked else 0
+
+                            img_name = choice.get('imageName')
+
+                            choice_img = None
+
+                            # Хариултын зураг хадгалах хэсэг
+                            for cimg in choice_imgs:
+                                if img_name == cimg.name:
+                                    choice_img = cimg
+                                    break
+
+                            choice = remove_key_from_dict(choice, ['image', 'checked'])
+
+                            if 'imageName' in choice:
+                                del choice['imageName']
+
+                            if 'imageUrl' in choice:
+                                del choice['imageUrl']
+
+                            choice_obj, created = QuestionChoices.objects.update_or_create(
+                                id=choice.get('id'),
+                                defaults={
+                                    **choice
+                                }
+                            )
+
+                            # Асуултанд зураг байвал хадгалах хэсэг
+                            if choice_img:
+                                choice_img_path = get_choice_image_path(choice_obj)
+
+                                file_path = save_file(choice_img, choice_img_path)[0]
+
+                                choice_obj.image = file_path
+                                choice_obj.save()
+                            else:
+                                choice_old_image = choice_obj.image
+
+                                # Хуучин зураг засах үедээ устгасан бол файл устгана.
+                                if choice_old_image and not img_name:
+                                    remove_folder(str(choice_old_image))
+
+                                    choice_obj.image = None
+                                    choice_obj.save()
+
+                            choice_ids.append(choice_obj.id)
+
+                    question_obj.choices.set(choice_ids)
+
+            except Exception as e:
+                print(e)
+                transaction.savepoint_rollback(sid)
+
+                return request.send_error('ERR_002')
+
+            return request.send_info('INF_002')
+
+
+    @login_required()
+    def post(self, request):
+
+        datas = request.data.dict()
+        subject_id = datas.get('subject')
+
+        subject = Lesson_title_plan.objects.filter(id=subject_id).first()
+
+        quesion_imgs = request.FILES.getlist('questionImg')
+        choice_imgs = request.FILES.getlist('choiceImg')
+
+        questions = request.POST.getlist('question')
+
+        user = request.user
+        teacher = Teachers.objects.filter(user_id=user).first()
+
+        with transaction.atomic():
+            sid = transaction.savepoint()
+            try:
+                # Асуултыг хадгалах хэсэг
+                for question in questions:
+                    question = json_load(question)
+
+                    qkind = question.get("kind")
+                    image_name = question.get('imageName')
+                    yes_or_no = question.get('yes_or_no')
+
+                    score = question.get('score') # Асуултын оноо
+
+                    question['created_by'] = teacher
+                    question['subject'] = subject
+
+                    if not yes_or_no:
+                        question['yes_or_no'] = None
+
+                    question_img = None
+
+                    # Асуултын сонголтууд
+                    choices = question.get('choices')
+
+                    # Асуултын зураг хадгалах хэсэг
+                    for img in quesion_imgs:
+                        if image_name == img.name:
+                            question_img = img
+                            break
+
+                    question = remove_key_from_dict(question, [ 'image', 'choices'])
+
+                    if 'imageName' in question:
+                        del question['imageName']
+
+                    if 'imageUrl' in question:
+                        del question['imageUrl']
+
+
+                    if not question.get('max_choice_count'):
+                        question['max_choice_count'] = 0
+
+                    if not question.get('rating_max_count'):
+                        question['rating_max_count'] = 0
+                    else:
+                        question['rating_max_count'] = 5
+
+                    question = null_to_none(question)
+
+                    question_obj = ChallengeQuestions.objects.create(
+                        **question
+                    )
+
+                    # Асуултанд зураг байвал хадгалах хэсэг
+                    if question_img:
+                        question_img_path = get_image_path(question_obj)
+
+                        file_path = save_file(question_img, question_img_path)[0]
+
+                        question_obj.image = file_path
+                        question_obj.save()
+
+                    choice_ids = list()
+
+                    # Асуултын сонголтуудыг үүсгэх нь
+                    if int(qkind) in [ChallengeQuestions.KIND_MULTI_CHOICE, ChallengeQuestions.KIND_ONE_CHOICE]:
+
+                        # Олон сонголттой үед асуултын оноог хувааж тавина
+                        if int(qkind) == ChallengeQuestions.KIND_MULTI_CHOICE:
+                            max_choice_count = int(question.get('max_choice_count'))
+
+                            score = float(score) / max_choice_count
+
+                        for choice in choices:
+
+                            choice['created_by'] = teacher
+
+                            checked = choice.get('checked')
+
+                            choice['score'] = score if checked else 0
+
+                            img_name = choice.get('imageName')
+
+                            choice_img = None
+
+                            # Хариултын зураг хадгалах хэсэг
+                            for cimg in choice_imgs:
+                                if img_name == cimg.name:
+                                    choice_img = cimg
+                                    break
+
+                            choice = remove_key_from_dict(choice, ['image', 'checked'])
+
+                            if 'imageName' in choice:
+                                del choice['imageName']
+
+                            if 'imageUrl' in choice:
+                                del choice['imageUrl']
+
+                            choice_obj = QuestionChoices.objects.create(
+                                **choice
+                            )
+
+                            # Асуултанд зураг байвал хадгалах хэсэг
+                            if choice_img:
+                                choice_img_path = get_choice_image_path(choice_obj)
+
+                                file_path = save_file(choice_img, choice_img_path)[0]
+
+                                choice_obj.image = file_path
+                                choice_obj.save()
+
+                            choice_ids.append(choice_obj.id)
+
+                    question_obj.choices.set(choice_ids)
+
+            except Exception as e:
+                print(e)
+                transaction.savepoint_rollback(sid)
+
+                return request.send_error('ERR_002')
+
+            return request.send_info('INF_001')
+
+    @login_required()
+    def delete(self, request):
+
+        delete_ids = request.query_params.getlist('delete')
+
+        questions = self.queryset.filter(id__in=delete_ids)
+
+        with transaction.atomic():
+            try:
+                for question in questions:
+
+                    # Хэрвээ асуултанд зураг байвал устгана
+                    question_img = question.image
+
+                    if question_img:
+                        remove_folder(str(question_img))
+
+                        if question:
+                            choices = question.choices.all()
+
+                            for choice in choices:
+                                img = choice.image
+
+                                # Хэрвээ хариултын хэсэгт зураг байвал устгана
+                                if img:
+                                    remove_folder(str(img))
+
+                                choice.delete()
+
+                            # Хариултын хэсгийг устгах хэсэг
+                            question.choices.clear()
+
+                    question.delete()
+
+            except Exception as e:
+                print(e)
+                return request.send_error("ERR_002")
+
+        return request.send_info("INF_003")
+    
+class QuestionsListAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin
+):
+    """ Шалгалт үүсгэхдээ асуулт сонгох хэсэг """
+
+    queryset = ChallengeQuestions.objects.all()
+    serializer_class = ChallengeQuestionListSerializer
+
+    def get(self, request):
+
+        datas = []
+
+        queryset = self.queryset
+
+        checked_ids = self.request.query_params.getlist('checked')
+        count = self.request.query_params.get('count')
+        qtype = self.request.query_params.get('type')
+
+        for check_id in checked_ids:
+            obj = {}
+            subject = Lesson_title_plan.objects.get(id=check_id)
+
+            obj['id'] = int(check_id)
+            obj['name'] = subject.title
+
+            querysets = queryset.filter(subject_id=check_id)
+
+            if count and qtype:
+                scount = int(count)
+
+                if qtype == 'Эхний':
+                    querysets = querysets.order_by('created_at')
+                else:
+                    querysets = querysets.order_by('-created_at')
+
+                querysets = querysets[0:scount]
+
+            serializer = self.get_serializer(querysets, many=True).data
+
+            obj['data'] = list(serializer)
+
+            datas.append(obj)
+
+        return request.send_data(datas)
+
+class ChallengeSendAPIView(
+    generics.GenericAPIView
+):
+    """ Шалгалтын материал батлуулах хүсэлт илгээх """
+
+    def get(self, request, pk=None):
+
+        challlenge = Challenge.objects.get(id=pk)
+
+        with transaction.atomic():
+            challlenge.send_type = Challenge.SEND
+            challlenge.save()
+
+        return request.send_info('INF_019')
+
+
+class ChallengeApprovePIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin
+):
+    """ ХБА батлах шалгалтын хүсэлтүүд """
+
+    queryset = Challenge.objects.all()
+    serializer_class = ChallengeListSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['title', 'start_date', 'end_date', 'lesson__name', 'lesson__code']
+
+    @login_required()
+    def get(self, request):
+
+        user_id = request.user
+
+        ctype = request.query_params.get('type')
+        search_teacher = request.query_params.get('teacher')
+        lesson = request.query_params.get('lesson')
+
+        # Шалгалтын төрлөөр хайх
+        if ctype:
+            self.queryset = self.queryset.filter(send_type=int(ctype))
+
+        teacher = Teachers.objects.get(user=user_id)
+
+        department_id = teacher.salbar.id
+
+        self.queryset = self.queryset.exclude(challenge_type=Challenge.SELF_TEST)
+
+        self.queryset = self.queryset.filter(created_by__salbar__id=department_id)
+
+        teacher_ids = self.queryset.values_list('created_by', flat=True)
+
+        self.queryset = self.queryset.filter(created_by__in=teacher_ids)
+
+        if search_teacher:
+            self.queryset = self.queryset.filter(created_by=search_teacher)
+
+        if lesson:
+            self.queryset = self.queryset.filter(lesson=lesson)
+
+        all_list = self.list(request).data
+
+        return request.send_data(all_list)
+
+    def post(self, request):
+        data = request.data
+
+        challenge_id = data.get('id')
+        is_confirm = data.get('is_confirm')
+        comment = data.get('comment')
+
+        send_type = Challenge.APPROVE
+
+        if not is_confirm:
+            send_type = Challenge.REJECT
+
+        qs = self.queryset.filter(id=challenge_id)
+
+        with transaction.atomic():
+
+            qs.update(
+                send_type=send_type,
+                comment=comment
+            )
+
+        return request.send_info('INF_018')
+    
+class StudentHomeworkListAPIView(
+    mixins.ListModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.UpdateModelMixin,
+    generics.GenericAPIView,
+    mixins.RetrieveModelMixin
+):
+
+    queryset = Lesson_assignment_student.objects.all().order_by('created_at')
+    serializer_class = LessonAssignmentAssigmentListSerializer
+
+    @login_required()
+    def get(self, request):
+        student = request.query_params.get('student')
+        assignment = request.query_params.get('assignment')
+
+        user = request.user
+        teacher = Teachers.objects.get(user=user)
+
+        lesson_year, lesson_season = get_active_year_season()
+
+        self.queryset = self.queryset.filter(assignment=assignment)
+
+        if student:
+            self.queryset = self.queryset.filter(student=student)
+
+        assignment_list = self.list(request).data
+
+        return request.send_data(assignment_list)
+
+    @login_required()
+    def put(self, request, pk=None):
+        data = request.data
+        instance = self.queryset.filter(id=pk).first()
+
+        self.serializer_class = LessonAssignmentAssigmentSerializer
+
+        if 'score' in data:
+            data['score'] = float(data['score'])
+
+        data['status'] = Lesson_assignment_student.CHECKED
+
+        try:
+            """ Нэгээр дүгнэхэд """
+            serializer = self.get_serializer(instance, data=data)
+
+            if serializer.is_valid(raise_exception=False):
+                self.perform_update(serializer)
+            else:
+                print(serializer.errors)
+
+                return request.send_error("ERR_003", 'Дүн оруулахад алдаа гарлаа')
+        except Exception as e:
+            print(e)
+            return request.send_error("ERR_003", 'Дүн оруулахад алдаа гарлаа')
+
+        return request.send_info("INF_002")
+
+
+class StudentHomeworkMultiEditAPIView(
+    mixins.UpdateModelMixin,
+    generics.GenericAPIView,
+):
+
+    queryset = Lesson_assignment_student.objects.all()
+    serializer_class = LessonAssignmentAssigmentSerializer
+
+    @login_required()
+    def put(self, request):
+        """ Даалгаварт олноор үнэлгээ өгөхөд """
+
+        data = request.data
+
+        score = float(data['score'])
+        students = data.get('students')
+        assignment = data.get('assignment')
+
+        all_update_datas = list()
+
+        try:
+            if students and len(students) > 0:
+                """ Олноор дүгнэхэд """
+                student_assignment_qs = Lesson_assignment_student.objects.filter(student__in=students, assignment=assignment)
+
+                if student_assignment_qs:
+                    for student_assignment in student_assignment_qs:
+                        student_assignment.score = score
+                        student_assignment.status = Lesson_assignment_student.CHECKED
+                        all_update_datas.append(student_assignment)
+
+                if len(all_update_datas) > 0:
+                    Lesson_assignment_student.objects.bulk_update(all_update_datas, ['score', 'status'])
+
+        except Exception as e:
+            print(e)
+            return request.send_error("ERR_003", 'Дүн оруулахад алдаа гарлаа')
+
+        return request.send_info("INF_002")
+
+class HomeworkStudentsListAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+):
+
+    queryset = Lesson_assignment_student.objects.all().order_by('created_at')
+    serializer_class = LessonAssignmentAssigmentListSerializer
+
+    @login_required()
+    def get(self, request):
+        lesson = request.query_params.get('lesson')
+        assignment = request.query_params.get('assignment')
+
+        user = request.user
+        teacher = Teachers.objects.get(user=user, action_status=Teachers.APPROVED)
+        filters = dict()
+
+        lesson_year, lesson_season = get_active_year_season()
+
+        self.queryset = self.queryset.filter(
+            assignment__lesson_material__lesson=lesson,
+            assignment__lesson_material__teacher=teacher.id
+        )
+
+        lesson_data = get_lesson_choice_student(lesson, teacher.id, '', lesson_year, lesson_season)
+
+        if assignment:
+            filters['assignment'] = assignment
+
+        students = (
+            Student
+            .objects
+            .filter(
+                id__in=lesson_data
+            )
+            .annotate(
+                unelgee=Subquery(
+                    Lesson_assignment_student.objects.filter(student=OuterRef('id'), assignment__lesson_material__lesson=lesson, **filters).values('score')[:1]
+                ),
+                homework_status=Subquery(
+                    Lesson_assignment_student.objects.filter(student=OuterRef('id'), assignment__lesson_material__lesson=lesson, **filters).values('status')[:1]
+                ),
+            )
+            .values()
+        )
+
+        assignment_list = self.list(request).data
+
+        return request.send_data({
+            'students': list(students),
+            'assignment': assignment_list
+        })
+
+class LessonsTeacher(
+    generics.GenericAPIView,
+):
+    ''' Тухайн багшийн зааж байгаа хичээл  '''
+
+    @login_required()
+    def get(self, request, pk=None):
+        stype = request.query_params.get('stype')
+
+        user = request.user
+
+        teacher = get_object_or_404(Teachers, user_id=user, action_status=Teachers.APPROVED)
+
+        year, season = get_active_year_season()
+
+        lesson_ids = TimeTable.objects.filter(lesson_year=year, lesson_season=season, teacher=teacher).values_list('lesson', flat=True).distinct('lesson')
+
+        if stype == 'one':
+            sort_list = LessonStandart.objects.filter(id__in=lesson_ids).values('id', 'name').order_by('name')
+        else:
+            all_list = LessonStandart.objects.filter(id__in=lesson_ids).values('id', 'name', 'code', 'category__category_name', 'definition', 'updated_at', 'kredit')
+
+            for lesson in all_list:
+                is_active = False
+                is_active_num = 0
+                file = None
+
+                lesson_id = lesson.get('id')
+                updated = lesson.get('updated_at')
+
+                lesson_teacher = Lesson_to_teacher.objects.filter(lesson=lesson_id, teacher=teacher).first()
+
+                if lesson_teacher:
+                    file = lesson_teacher.file
+
+                    media_path = settings.MEDIA_URL + str(file)
+                    domain = get_domain_url()
+
+                    file_path = domain + media_path
+
+                fixed_date = fix_format_date(updated)
+
+                timetable_qs_count = TimeTable.objects.filter(lesson_year=year, lesson_season=season, lesson=lesson_id).count()
+
+                if timetable_qs_count >= 1:
+                    is_active = True
+                    is_active_num = 1
+
+                lesson_materials_qs = Lesson_materials.objects.filter(lesson=lesson_id, teacher=teacher, material_type=Lesson_materials.PPTX)
+                material_count = lesson_materials_qs.count()
+
+                lesson_title_plan_qs = Lesson_title_plan.objects.filter(lesson=lesson_id, lesson_type=Lesson_title_plan.LECT)
+                lesson_title_count = lesson_title_plan_qs.count()
+
+                lesson['active'] = is_active
+                lesson['is_active_num'] = is_active_num
+                lesson['updated_at'] = fixed_date
+                lesson['file'] = file_path if file else ''
+                lesson['count'] = material_count + lesson_title_count
+
+            sort_list = sorted(list(all_list), key=lambda item: (-item['is_active_num']) )
+
+        return request.send_data(list(sort_list))
+
+class LessonOneApiView(
+    generics.GenericAPIView,
+    mixins.RetrieveModelMixin
+):
+    """ Хичээлийн стандарт мэдээлэл """
+
+    queryset = LessonStandart.objects.all()
+    serializer_class = LessonStandartSerializer
+
+    @login_required()
+    def get(self, request, pk=None):
+
+        datas = self.retrieve(request, pk).data
+
+        return request.send_data(datas)
+
+
+class LessonKreditApiView(
+    generics.GenericAPIView
+):
+
+    def get(self, request, pk=None):
+        """ Нэг хичээлийн багц цагийн мэдээлэл авах """
+
+        return_values = []
+        qs_title_plan = Lesson_title_plan.objects.all()
+        if pk:
+            values = LessonStandart.objects.filter(id=pk).values('lecture_kr', 'seminar_kr', 'laborator_kr', 'practic_kr', 'biedaalt_kr')
+
+            for value in values:
+                obj = {}
+
+                lk = value.get('lecture_kr')
+                sem = value.get('seminar_kr')
+                lab = value.get('laborator_kr')
+                pr = value.get('practic_kr')
+                bd = value.get('biedaalt_kr')
+
+                if lk:
+                    sedev_data = qs_title_plan.filter(lesson=pk, lesson_type=Lesson_title_plan.LECT).values()
+                    obj['id'] = Lesson_title_plan.LECT
+                    obj['name'] = 'Лекц'
+                    obj['data'] = list(sedev_data)
+
+                    return_values.append(obj)
+                    obj = {}
+
+                if sem:
+                    sedev_data = qs_title_plan.filter(lesson=pk, lesson_type=Lesson_title_plan.SEM).values()
+                    obj['id'] = Lesson_title_plan.SEM
+                    obj['name'] = 'Семинар'
+                    obj['data'] = list(sedev_data)
+
+                    return_values.append(obj)
+                    obj = {}
+
+                if lab:
+                    sedev_data = qs_title_plan.filter(lesson=pk, lesson_type=Lesson_title_plan.LAB).values()
+                    obj['id'] = Lesson_title_plan.LAB
+                    obj['name'] = 'Лаборатор'
+                    obj['data'] = list(sedev_data)
+
+                    return_values.append(obj)
+                    obj = {}
+
+                if pr:
+                    sedev_data = qs_title_plan.filter(lesson=pk, lesson_type=Lesson_title_plan.PRACTIC).values()
+                    obj['id'] = Lesson_title_plan.PRACTIC
+                    obj['name'] = 'Практик'
+                    obj['data'] = list(sedev_data)
+
+                    return_values.append(obj)
+                    obj = {}
+
+                if bd:
+                    sedev_data = qs_title_plan.filter(lesson=pk, lesson_type=Lesson_title_plan.BIY_DAALT).values()
+                    obj['id'] = Lesson_title_plan.BIY_DAALT
+                    obj['name'] = 'Бие даалт'
+                    obj['data'] = list(sedev_data)
+
+                    return_values.append(obj)
+                    obj = {}
+
+        return request.send_data(list(return_values))
+
+
+class LessonSedevApiView(
+    generics.GenericAPIView,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.ListModelMixin
+):
+    """ Хичээлийн сэдэвчилсэн төлөвлөгөө хадгалах """
+
+    queryset = Lesson_title_plan.objects.all()
+    serializer_class = LessonTitleSerializer
+
+    def get(self, request, pk=None):
+
+        if pk:
+            self.queryset = self.queryset.filter(lesson=pk)
+
+        all_list = self.list(request).data
+
+        return request.send_data(all_list)
+
+    def post(self, request, pk=None):
+
+        errors = []
+        datas = request.data
+        lesson_type = request.query_params.get('type')
+
+        is_created = False
+        created_weeks = []
+        for data in datas:
+            lesson_type = data.get('lesson_type')
+            data['lesson'] = pk
+
+            week_obj = Lesson_title_plan.objects.filter(lesson=pk, week=data.get('week'), lesson_type=lesson_type).first()
+
+            if week_obj:
+                is_created = True
+
+            if is_created:
+                serializer = self.get_serializer(week_obj, data=data)
+            else:
+                serializer = self.get_serializer(data=data)
+
+            if serializer.is_valid(raise_exception=False):
+
+                with transaction.atomic():
+                    try:
+                       serializer.save()
+                       created_weeks.append(data.get('week'))
+                    except Exception as e:
+                        print(e)
+
+                        return request.send_error('ERR_002')
+            else:
+                for key in serializer.errors:
+
+                    return_error = {
+                        "field": key,
+                        "msg": serializer.errors[key]
+                    }
+
+                    errors.append(return_error)
+
+                return request.send_error("ERR_003", errors)
+
+        # Хадгалсан датанаас устгах
+        Lesson_title_plan.objects.filter(lesson=pk, lesson_type=int(lesson_type)).exclude(week__in=created_weeks).delete()
+        return request.send_info('INF_013')
+
+class LessonAllApiView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin
+):
+    """ Тухайн тэнхимийн хичээлийг авах """
+
+    queryset = LessonStandart.objects.all().order_by('name')
+    serializer_class = LessonStandartSerializer
+
+    @login_required()
+    def get(self, request):
+        user_id = request.user
+        teacher = Teachers.objects.get(user=user_id)
+
+        department_id = teacher.salbar.id
+
+        self.queryset = self.queryset.filter(department=department_id)
+
+        search_teacher = request.query_params.get('teacher')
+
+        if search_teacher:
+            lesson_teacher_ids = Lesson_to_teacher.objects.filter(teacher=search_teacher).values_list('lesson', flat=True)
+            self.queryset = self.queryset.filter(id__in=lesson_teacher_ids)
+
+        all_list = self.list(request).data
+
+        return request.send_data(all_list)
+    
+class LessonMaterialApiView(
+    generics.GenericAPIView,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.ListModelMixin,
+    mixins.DestroyModelMixin
+):
+    """ Хичээлийн материал хадгалах хэсэг """
+
+    queryset = Lesson_materials.objects.all()
+    serializer_class = LessonMaterialSerializer
+
+    @login_required()
+    def get(self, request, pk):
+
+        self.serializer_class = LessonMaterialListSerializer
+        lesson_type = request.query_params.get('lesson_type')
+        week = request.query_params.get('week')
+
+        user = request.user
+        teacher = get_object_or_404(Teachers, user_id=user, action_status=Teachers.APPROVED)
+
+        lesson = LessonStandart.objects.filter(id=pk).first()
+
+        if pk:
+            self.queryset = self.queryset.filter(lesson=pk, teacher=teacher)
+
+        if lesson_type:
+            self.queryset = self.queryset.filter(lesson_type=lesson_type)
+
+        if week:
+            self.queryset = self.queryset.filter(week=int(week))
+
+        all_list = self.list(request).data
+
+        datas = {
+            'datas': all_list,
+            'name': lesson.code_name if lesson else ''
+        }
+
+        return request.send_data(datas)
+
+    @login_required()
+    def post(self, request, pk=None):
+        """ pk: Хичээлийн ID
+            Файлтай хэсгүүдийг хадгалах хэсэг
+        """
+
+        datas = request.data.dict()
+
+        files = request.FILES.getlist('files')
+
+        user = request.user
+        teacher = get_object_or_404(Teachers, user_id=user, action_status=Teachers.APPROVED)
+
+        # Файл мэдээлэл устгах
+        if datas.get('files'):
+            datas = remove_key_from_dict(datas, 'files')
+
+        material_type = datas.get('material_type')
+
+        datas['teacher'] = teacher.id
+        datas['material_type'] = int(material_type)
+
+        datas = null_to_none(datas)
+
+        with transaction.atomic():
+            sid = transaction.savepoint()
+            try:
+
+                serializer =  self.get_serializer(data=datas)
+
+                if serializer.is_valid(raise_exception=True):
+                    serializer.save()
+
+                    datas = serializer.data
+
+                    # Материал ID
+                    lesson_material_id = datas.get('id')
+
+                    for file in files:
+                        obj_datas = {}
+                        obj_datas['material_id'] = lesson_material_id
+                        obj_datas['file'] = file
+
+                        # Оруулсан файл бүрийг хадгалах
+                        Lesson_material_file.objects.create(**obj_datas)
+
+            except Exception as e:
+
+                transaction.savepoint_rollback(sid)
+                print(e)
+                return request.send_error('ERR_002')
+
+        return request.send_info('INF_001')
+
+
+    @login_required()
+    def put(self, request, pk=None):
+        # Энд засах үйлдэл хийгдэнэ ирж байгааг датаг харж байгаад хийе
+        return request.send_info('INF_002')
+
+    @login_required()
+    def delete(self, request, pk=None):
+        """ Хичээлийн материал устгах """
+
+        with transaction.atomic():
+            try:
+                files = Lesson_material_file.objects.filter(material=pk).values_list('file', flat=True)
+
+                # Файлуудыг устгах
+                for file in files:
+
+                    full_path = os.path.join(settings.MEDIA_ROOT, str(file))
+
+                    if os.path.exists(full_path):
+                        os.remove(full_path)
+
+                # Хичээлийн материал устгах
+                Lesson_material_file.objects.filter(material=pk).delete()
+
+                # Даалгаврыг устгах
+                lesson_assignment = Lesson_assignment.objects.filter(lesson_material=pk).values_list('id', flat=True)
+
+                # Тухайн хичээл дээр холбоотой бүх даалгаврын хариуг устгана
+                lesson_assignmend_students = Lesson_assignment_student.objects.filter(assignment__in=lesson_assignment).values_list('id', flat=True)
+
+                # Тухайн хичээл дээр багш руу илгээсэн файлууд
+                student_files = Lesson_assignment_student_file.objects.filter(student_assignment__in=lesson_assignmend_students).values_list('file', flat=True)
+                for file in student_files:
+
+                    full_path = os.path.join(settings.MEDIA_ROOT, str(file))
+
+                    if os.path.exists(full_path):
+                        os.remove(full_path)
+
+                # Хичээлийн материал устгах
+                Lesson_assignment_student.objects.filter(id__in=lesson_assignmend_students).delete()
+
+                self.destroy(request, pk)
+
+            except Exception as e:
+                print(e)
+                return request.send_error('ERR_002')
+
+            return request.send_info('INF_003')
+
+class LessonMaterialGeneralApiView(
+    generics.GenericAPIView,
+    mixins.CreateModelMixin
+):
+    """ Хичээлийн ерөнхий мэдээлэл """
+
+    queryset = Lesson_materials.objects.all()
+    serializer_class = LessonMaterialSerializer
+
+    @login_required()
+    def post(self, request, pk=None):
+
+        data = request.data.dict()
+
+        user = request.user
+        teacher = get_object_or_404(Teachers, user_id=user, action_status=Teachers.APPROVED)
+
+        data['teacher'] = teacher.id
+
+        data = null_to_none(data)
+
+        serializer = self.get_serializer(data=data)
+
+        if serializer.is_valid(raise_exception=True):
+            with transaction.atomic():
+                self.perform_create(serializer)
+        else:
+            errors = []
+            for key in serializer.errors:
+
+                return_error = {
+                    "field": key,
+                    "msg": serializer.errors[key]
+                }
+
+                errors.append(return_error)
+
+            if len(errors) > 0:
+                return request.send_error("ERR_003", errors)
+
+        return request.send_info("INF_001")
+
+
+class LessonEditorImage(
+    generics.GenericAPIView
+):
+    """ Editor зураг хадгалах """
+
+    def post(self, request, pk):
+
+        data = request.data
+        file = data.get('file')
+
+        path = save_file(file, 'news_images', pk)[0]
+
+        domain = get_domain_url()
+
+        file_path = os.path.join(settings.MEDIA_URL, path)
+
+        return_url = '{domain}{path}'.format(domain=domain, path=file_path)
+
+        return request.send_data(return_url)
+
+class LessonMaterialAssignmentApiView(
+    generics.GenericAPIView
+):
+    """ Даалгавар үүсгэх хэсэг"""
+
+    queryset = Lesson_materials.objects.all()
+    serializer_class = LessonMaterialSerializer
+
+    @login_required()
+    def post(self, request, pk):
+        """
+            pk: Хичээлийн ID
+        """
+
+        datas = request.data.dict()
+
+        # Assignment datas
+        score = datas.get('score')
+        start_date = datas.get('start_date')
+        finish_date = datas.get('finish_date')
+
+        files = request.FILES.getlist('files')
+
+        user = request.user
+        teacher = get_object_or_404(Teachers, user_id=user, action_status=Teachers.APPROVED)
+
+        # Файл мэдээлэл устгах
+        if len(files) > 0:
+            datas = remove_key_from_dict(datas, 'files')
+
+        material_type = datas.get('material_type')
+
+        datas['teacher'] = teacher.id
+        datas['material_type'] = int(material_type)
+
+        datas = null_to_none(datas)
+
+        with transaction.atomic():
+            sid = transaction.savepoint()
+            try:
+
+                serializer =  self.get_serializer(data=datas)
+
+                if serializer.is_valid(raise_exception=True):
+                    serializer.save()
+
+                    datas = serializer.data
+
+                    # Материал ID
+                    lesson_material_id = datas.get('id')
+
+                    for file in files:
+                        obj_datas = {}
+                        obj_datas['material_id'] = lesson_material_id
+                        obj_datas['file'] = file
+
+                        # Оруулсан файл бүрийг хадгалах
+                        Lesson_material_file.objects.create(**obj_datas)
+
+                    # Хичээлийн даалгавар үүсгэх хэсэг
+                    Lesson_assignment.objects.create(
+                        lesson_material_id =  lesson_material_id,
+                        score =  int(score),
+                        start_date = start_date,
+                        finish_date = finish_date
+                    )
+
+            except Exception as e:
+
+                transaction.savepoint_rollback(sid)
+
+                print(e)
+                return request.send_error('ERR_002')
+
+        return request.send_info('INF_001')
+
+class LessonImage(
+    generics.GenericAPIView
+):
+    """ Тухайн багш хичээлдээ зураг оруулах """
+
+    queryset = Lesson_to_teacher.objects.all()
+    serializer_class = LessonTeacherSerializer
+
+    @login_required()
+    def post(self, request, pk=None):
+
+        data = request.data.dict()
+
+        user = request.user
+        teacher = get_object_or_404(Teachers, user_id=user, action_status=Teachers.APPROVED)
+
+        instance = self.queryset.filter(lesson=pk, teacher=teacher).first()
+
+        data['teacher'] = teacher.id
+        data['lesson'] = pk
+
+        serializer = self.get_serializer(instance=instance, data=data)
+
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+
+        else:
+            error_obj = []
+            for key in serializer.errors:
+
+                return_error = {
+                    "field": key,
+                    "msg": serializer.errors[key]
+                }
+
+                error_obj.append(return_error)
+
+            if len(error_obj) > 0:
+                return request.send_error("ERR_003", error_obj)
+
+        return request.send_info("INF_002")
+
+class LessonMaterialSendApiView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin
+):
+    ''' Хичээлийн материал ХБА руу илгээх '''
+
+    queryset = Lesson_materials.objects.all().order_by('created_at', 'week')
+    serializer_class = LessonMaterialListSerializer
+
+    @login_required()
+    def get(self, request, lesson=None):
+        """ Хичээлийн бүр лекцийн материал авах """
+
+        self.queryset = self.queryset.filter(lesson=lesson, material_type=Lesson_materials.PPTX)
+
+        all_list = self.list(request).data
+
+        return request.send_data(all_list)
+
+    @login_required()
+    def post(self, request, lesson=None):
+
+        # Checked хийсэн ids
+        checked_ids = request.data
+
+        queryset = Lesson_materials.objects.filter(lesson=lesson)
+
+        send_ids = queryset.filter(send_type=Lesson_materials.SEND).values_list('id', flat=True)
+
+        remove_sends =  list(set(send_ids) - set(checked_ids))
+
+        qs = queryset.filter(id__in=checked_ids)
+        remove_qs = queryset.filter(id__in=remove_sends)
+
+        with transaction.atomic():
+            try:
+                qs.update(
+                    send_type = Lesson_materials.SEND
+                )
+
+                remove_qs.update(
+                    send_type = None
+                )
+
+            except Exception as e:
+                print(e)
+                return request.send_error("ERR_002")
+
+        return request.send_info("INF_019")
+    
+class LessonMaterialApproveApiView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin
+):
+    """ ХБА батлах хичээлийн материал """
+
+    queryset = Lesson_materials.objects.filter(material_type=Lesson_materials.PPTX).order_by('created_at', 'teacher', 'week')
+    serializer_class = LessonMaterialListSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['title', 'teacher__first_name', 'end_date', 'teacher__last_name', 'lesson__name', 'lesson__code', 'week']
+
+    @login_required()
+    def get(self, request):
+
+        user_id = request.user
+
+        ctype = request.query_params.get('type')
+        search_teacher = request.query_params.get('teacher')
+        lesson = request.query_params.get('lesson')
+
+        # Шалгалтын төрлөөр хайх
+        if ctype:
+            self.queryset = self.queryset.filter(send_type=int(ctype))
+
+        teacher = Teachers.objects.get(user=user_id)
+
+        department_id = teacher.salbar.id
+
+        self.queryset = self.queryset.filter(teacher__salbar__id=department_id)
+
+        teacher_ids = self.queryset.values_list('teacher', flat=True)
+
+        self.queryset = self.queryset.filter(teacher__in=teacher_ids)
+
+        if search_teacher:
+            self.queryset = self.queryset.filter(teacher=search_teacher)
+
+        if lesson:
+            self.queryset = self.queryset.filter(lesson=lesson)
+
+
+        all_list = self.list(request).data
+
+        return request.send_data(all_list)
+
+    def post(self, request):
+        data = request.data
+
+        challenge_id = data.get('id')
+        is_confirm = data.get('is_confirm')
+        comment = data.get('comment')
+
+        send_type = Lesson_materials.APPROVE
+
+        if not is_confirm:
+            send_type = Lesson_materials.REJECT
+
+        qs = self.queryset.filter(id=challenge_id)
+
+        with transaction.atomic():
+
+            qs.update(
+                send_type=send_type,
+                comment=comment
+            )
+
+        return request.send_info('INF_018')

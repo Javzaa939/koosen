@@ -51,7 +51,7 @@ export const Addmodal = ( { open, refreshDatas, handleModal, type, editData } ) 
     const settingsApi = useApi().credit.settings
     const positionApi = useApi().hrms.position
 
-    // Мэргэжлийн жагсаалт
+    // Хөтөлбөрийн жагсаалт
     async function getPosition() {
         const { success, data } = await fetchData(positionApi.get())
         if (success) {
@@ -64,27 +64,27 @@ export const Addmodal = ( { open, refreshDatas, handleModal, type, editData } ) 
         cdata['type'] = type
 
         if (cdata?.id) {
-            const { success, error } = await postFetch(settingsApi.put(cdata, cdata?.id))
+            const { success, errors } = await postFetch(settingsApi.put(cdata, cdata?.id))
             if(success) {
                 reset()
                 refreshDatas()
                 handleModal()
             } else {
                 /** Алдааны мессэжийг input дээр харуулна */
-                for (let key in error) {
-                    setError(error[key].field, { type: 'custom', message:  error[key].msg});
+                for (let key in errors) {
+                    setError(key, { type: 'custom', message: errors[key][0]});
                 }
             }
         } else {
-            const { success, error } = await postFetch(settingsApi.post(cdata))
+            const { success, errors } = await postFetch(settingsApi.post(cdata))
             if(success) {
                 reset()
                 refreshDatas()
                 handleModal()
             } else {
                 /** Алдааны мессэжийг input дээр харуулна */
-                for (let key in error) {
-                    setError(error[key].field, { type: 'custom', message:  error[key].msg});
+                for (let key in errors) {
+                    setError(key, { type: 'custom', message: errors[key][0]});
                 }
             }
         }
@@ -105,13 +105,14 @@ export const Addmodal = ( { open, refreshDatas, handleModal, type, editData } ) 
                     setValue(key, editData[key])
                 }
             }
-        }
+        }, [editData]
     )
 
     return (
         <Modal isOpen={open} toggle={handleModal} className="modal-dialog-centered modal-sm">
             {isLoading && <div className='suspense-loader'><Spinner size='xl'/></div>}
-            <ModalHeader toggle={handleModal}>{t('Тохиргоо бүртгэх')}</ModalHeader>
+            <ModalHeader toggle={handleModal}> { editData?.id ?  t('Тохиргоо засах'): t('Тохиргоо бүртгэх')}
+            </ModalHeader>
             <ModalBody>
                 <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
                     {
@@ -197,7 +198,7 @@ export const Addmodal = ( { open, refreshDatas, handleModal, type, editData } ) 
                         />
                         {errors.ratio && <FormFeedback className='d-block'>{t(errors.ratio.message)}</FormFeedback>}
                     </Col>
-                    <Col md={12} className="mt-2 ">
+                    <Col md={12} className="text-center mt-2 ">
                         <Button className="me-2" color="primary" type="submit" disabled={postLoading}>
                         {postLoading &&<Spinner size='sm' className='me-1'/>}
                             {t('Хадгалах')}

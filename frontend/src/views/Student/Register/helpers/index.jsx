@@ -61,7 +61,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
         },
         {
 			header: 'profession',
-			name: t("Мэргэжил"),
+			name: t("Хөтөлбөр"),
 			selector: (row) => <span title={row?.profession_name}>{row?.profession_name}</span>,
             sortable: true,
 			center: true

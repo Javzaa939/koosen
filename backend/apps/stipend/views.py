@@ -201,39 +201,22 @@ class StipendRequestAPIView(
         """ Тэтгэлэгийн хүсэлтээд хариулах """
 
         request_data = request.data
-        instance = self.queryset.filter(id=pk).first()
+        instance = self.get_object()
 
-        serializer = self.get_serializer(instance, data=request_data)
+        try:
+            serializer = self.get_serializer(instance, data=request_data)
+            if not serializer.is_valid(raise_exception=False):
+                return request.send_error_valid(serializer.errors)
 
-        if serializer.is_valid(raise_exception=False):
-            is_success = False
-            with transaction.atomic():
-                try:
-                    self.perform_update(serializer)
-                    is_success = True
-                except Exception:
-                    raise
-            if is_success:
-                return request.send_info("INF_001")
+            self.update(request).data
 
+        except Exception as e:
+            print(e)
             return request.send_error("ERR_002")
-        else:
-            error_obj = []
-            for key in serializer.errors:
-                msg = "Хоосон байна"
 
-                return_error = {
-                    "field": key,
-                    "msg": msg
-                }
+        return request.send_info("INF_002")
 
-                error_obj.append(return_error)
 
-            if len(error_obj) > 0:
-                return request.send_error("ERR_003", error_obj)
-
-            return request.send_error("ERR_002")
-        
 class StipendFileAPIView(
     generics.GenericAPIView,
 ):

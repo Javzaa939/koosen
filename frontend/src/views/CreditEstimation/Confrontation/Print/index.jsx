@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react"
 
 import { Row, Col, Table } from 'reactstrap'
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 // ** Styles
 import logo from "@src/assets/images/logo/dxis_logo.png"
@@ -11,6 +11,7 @@ import '@styles/base/pages/app-invoice-print.scss'
 export default function Print()
 {
     const location = useLocation();
+    const navigate = useNavigate()
     const data = location.state
 
     const groupLength = data.group.length
@@ -62,7 +63,7 @@ export default function Print()
                     </div>
                     <Row className='px-2 mt-1'>
                         <Col className="fw-bolder" style={{ fontSize: '8px' }} >
-                            <span className="m-0 d-inline-block w-100">Мэргэжлийн ерөнхий чиглэл: Боловсрол</span>
+                            <span className="m-0 d-inline-block w-100">Хөтөлбөрийн ерөнхий чиглэл: Боловсрол</span>
                             <span className="m-0 d-inline-block w-100">Төрөлжсөн чиглэл: {data?.dep_name}</span>
                             <span className="m-0 d-inline-block w-100">Нарийвчилсан чиглэл: {data?.name}</span>
                             <span className="m-0 d-inline-block w-100">Хөтөлбөрийн нэр: {data?.name}</span>
@@ -274,7 +275,7 @@ export default function Print()
                         </div>
 
                         <Col className="fw-bolder mt-1 mb-1" style={{ fontSize: '8px' }} >
-                        <span className="m-0 d-inline-block w-100">Боловсруулсан: Хөтөлбөрийн багийн ахлагч ............................................................. </span>
+                        <span className="m-0 d-inline-block w-100">Боловсруулсан: Тэнхимийн ахлагч ............................................................. </span>
                         <span className="m-0 d-inline-block w-100">Баталсан: Салбар сургуулийн захирал ............................................................. </span>
                         <span className="m-0 d-inline-block w-100">Хөтөлбөрийн хорооны нарийн бичгийн дарга .............................................................</span>
                         </Col>

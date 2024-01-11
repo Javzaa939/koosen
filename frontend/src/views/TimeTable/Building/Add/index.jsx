@@ -1,5 +1,5 @@
 // ** React imports
-import React, { Fragment } from 'react'
+import React, { Fragment, useEffect } from 'react'
 
 import { X } from "react-feather";
 
@@ -15,8 +15,9 @@ import { Row, Col, Form, Modal, Input, Label, Button, ModalBody, ModalHeader, Fo
 import { validate } from "@utils"
 
 import { validateSchema } from '../validateSchema';
+import EditModal from '../../../Dormitory/Rooms/Edit';
 
-const Addmodal = ({ open, handleModal, refreshDatas }) => {
+const Addmodal = ({ open, handleModal, refreshDatas, editId }) => {
 
     const { t } = useTranslation()
 
@@ -25,7 +26,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
     )
 
     // ** Hook
-    const { control, handleSubmit, formState: { errors }, reset, setError } = useForm(validate(validateSchema));
+    const { control, handleSubmit, formState: { errors }, reset, setError, setValue } = useForm(validate(validateSchema));
 
 	// Loader
 	const { Loader, isLoading, fetchData } = useLoader({});
@@ -34,18 +35,51 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
     const buildingApi = useApi().timetable.building
 
 	async function onSubmit(cdata) {
-        const { success, error } = await fetchData(buildingApi.post(cdata))
-        if(success) {
-            reset()
-            refreshDatas()
-            handleModal()
-        } else {
-            /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in error['error']) {
-                setError(key, { type: 'custom', message:  error['msg']});
+        if(editId){
+            const { success, error } = await fetchData(buildingApi.put(cdata, editId))
+            if(success) {
+                reset()
+                refreshDatas()
+                handleModal()
+            } else {
+                /** Алдааны мессэжийг input дээр харуулна */
+                for (let key in error['error']) {
+                    setError(key, { type: 'custom', message:  error['msg']});
+                }
+            }
+        }
+        else{
+            const { success, error } = await fetchData(buildingApi.post(cdata))
+            if(success) {
+                reset()
+                refreshDatas()
+                handleModal()
+            } else {
+                /** Алдааны мессэжийг input дээр харуулна */
+                for (let key in error['error']) {
+                    setError(key, { type: 'custom', message:  error['msg']});
+                }
             }
         }
 	}
+    async function getDatas() {
+        if(editId) {
+            const { success, data } = await fetchData(buildingApi.getOne(editId))
+            if(success) {
+                // засах үед дата байх юм бол setValue-р дамжуулан утгыг харуулна
+                if(data === null) return
+                for(let key in data) {
+                    if(data[key] !== null)
+                        setValue(key, data[key])
+                    else setValue(key, '')
+                }
+            }
+        }
+    }
+
+    useEffect(() => {
+        getDatas()
+    },[editId])
 
 	return (
         <Fragment>
@@ -62,7 +96,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                     close={CloseBtn}
                     tag="div"
                 >
-                    <h5 className="modal-title">{t('Хичээлийн байр бүртгэх')}</h5>
+                     <h5 className="modal-title">{ editId? t('Хичээлийн байр засах') :t('Хичээлийн байр бүртгэх')}</h5>
                 </ModalHeader>
                 <ModalBody className="flex-grow-1">
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
@@ -111,7 +145,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                             />
                             {errors.name && <FormFeedback className='d-block'>{t(errors.name.message)}</FormFeedback>}
                         </Col>
-                        <Col md={12} className="mt-2">
+                        <Col md={12} className=" text-center mt-2">
                             {isLoading ?
                                 <Button className="me-2" color="primary" type="submit" disabled>
                                     <Spinner size='sm'/>
@@ -121,9 +155,14 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                     {t('Хадгалах')}
                                 </Button>
                             }
-                            <Button color="secondary" type="reset" outline  onClick={handleModal}>
-                                {t('Буцах')}
-                            </Button>
+                            {
+                                editId ?
+                                    null
+                                :
+                                <Button color="secondary" type="reset" outline  onClick={handleModal}>
+                                    {t('Буцах')}
+                                </Button>
+                            }
                         </Col>
                     </Row>
                 </ModalBody>

@@ -24,6 +24,7 @@ import classnames from 'classnames'
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import { useSkin } from "@hooks/useSkin"
+import useUpdateEffect from '@hooks/useUpdateEffect'
 
 import AuthContext from '@context/AuthContext'
 import SchoolContext from '@context/SchoolContext'
@@ -119,6 +120,7 @@ const CreditVolume = () => {
     const default_page = [10, 15, 50, 75, 100]
     const [modal, setModal] = useState(false)
     const [datas, setDatas] = useState([])
+    const [rowData, setRowData] = useState({})
 
     // Хуудаслалтын анхны утга
     const [currentPage, setCurrentPage] = useState(1)
@@ -147,7 +149,7 @@ const CreditVolume = () => {
     const [yearOption] = useState(generateLessonYear(5))
     const [seasonOption, setSeasonOption] = useState([])
     const [dep_id, setDepId] = useState('')
-    const [season_id, setSeasonId] = useState([])
+    const [season_id, setSeasonId] = useState('')
     const [year, setYear] = useState(cyear_name)
     const [dep_name, setDepName] = useState('')
 
@@ -168,16 +170,8 @@ const CreditVolume = () => {
 	}
 
     useEffect(() => {
-        if (searchValue.length == 0) {
-			getDatas();
-		} else {
-			const timeoutId = setTimeout(() => {
-				getDatas();
-			}, 600);
-
-			return () => clearTimeout(timeoutId);
-		}
-    }, [sortField, currentPage, rowsPerPage, dep_id, year, searchValue, teacherId])
+        getDatas();
+    }, [sortField, currentPage, rowsPerPage, dep_id, year, teacherId, school_id, season_id])
 
     async function getDatas() {
 
@@ -187,7 +181,7 @@ const CreditVolume = () => {
             setCurrentPage(page_count)
         }
 
-        const { success, data } = await allFetch(creditVolumeApi.get(rowsPerPage, currentPage, sortField, searchValue, dep_id, year, teacherId))
+        const { success, data } = await allFetch(creditVolumeApi.get(rowsPerPage, currentPage, sortField, searchValue, dep_id, year, teacherId, season_id))
         if (success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
@@ -204,7 +198,7 @@ const CreditVolume = () => {
         }
 	};
 
-    /**Хөтөлбөрийн багын жагсаалт */
+    /**Тэнхимын жагсаалт */
     async function getDepartment() {
         const { success, data } = await fetchData(departmentApi.get())
         if(success) {
@@ -245,9 +239,13 @@ const CreditVolume = () => {
     // ** Function to handle Modal toggle
     const handleModal = () => {
         setModal(!modal)
+        setRowData({})
     }
 
-   
+    const handleRowModal = (row) => {
+        setModal(!modal)
+        setRowData(row)
+    }
 
     // ** Function to handle filter
     const handleFilter = e => {
@@ -279,7 +277,7 @@ const CreditVolume = () => {
     }
 
     // Хайлтийн хэсэг хоосон болох үед анхны датаг дуудна
-    useEffect(
+    useUpdateEffect(
         () =>
         {
             if (!searchValue) {
@@ -303,7 +301,7 @@ const CreditVolume = () => {
     }
 
     function chooseDep(){
-        if (!dep_id) { return(<div>Хөтөлбөрийн баг сонгоно уу.</div>) }
+        if (!dep_id) { return(<div>Тэнхим сонгоно уу.</div>) }
         else { return(<div>Хоосон байна</div>)}
     }
 
@@ -312,7 +310,7 @@ const CreditVolume = () => {
             <Card>
                 {isLoading && Loader}
                 <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
-                <CardTitle tag='h4'>{t('Цагийн ачаалал')}</CardTitle>
+                    <CardTitle tag='h4'>{t('Цагийн ачаалал')}</CardTitle>
                 </CardHeader>
                 <Row className='mx-0 mt-50'>
                     <Col md={3} className='mb-1'>
@@ -363,7 +361,7 @@ const CreditVolume = () => {
                     </Col>
                     <Col md={3} className='mb-1'>
                         <Label className="form-label" for="department">
-                            {t('Хөтөлбөрийн баг')}
+                            {t('Тэнхим')}
                         </Label>
                         <Select
                             name="department"
@@ -408,13 +406,13 @@ const CreditVolume = () => {
                             getOptionLabel={(option) => `${option?.last_name[0]}.${option?.first_name}`}
                         />
                     </Col>
-                    <div className='d-flex align-items-center justify-content-start flex-wrap mt-1 mb-2'>
+                    <div className='d-flex align-items-center justify-content-start flex-wrap mb-1'>
                         <Button
                             color='primary'
                             size='sm'
                             disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-credit-volume-create') && school_id && dep_id && year && season_id) ? false : true}
                             onClick={() => handleEstimate()}
-                            className='mb-1 ms-1 mb-sm-0'
+                            className='mb-1 mb-sm-0'
                         >
                             <Circle size={15} />
                             <span className='align-middle ms-50'>{t('Тооцох')}</span>
@@ -506,7 +504,7 @@ const CreditVolume = () => {
                         )}
                         onSort={handleSort}
                         sortIcon={<ChevronDown size={10} />}
-                        columns={getColumns(currentPage, rowsPerPage, total_count)}
+                        columns={getColumns(currentPage, rowsPerPage, total_count, handleRowModal)}
                         paginationPerPage={rowsPerPage}
                         paginationDefaultPage={currentPage}
                         paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
@@ -518,7 +516,7 @@ const CreditVolume = () => {
                     />
                 </div>
             </Card>
-            {modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas}  year ={year} dep_id={dep_id} season={season_id}/>}
+            {modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas}  year={year} dep_id={dep_id} season={season_id} lesson_id={rowData?.lesson?.id} teacher_id={rowData?.teacher?.id}/>}
         </Fragment>
     )
 }

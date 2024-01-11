@@ -21,10 +21,11 @@ import { getColumns } from './helpers'
 import Addmodal from './Add'
 import EditModal from './Edit'
 import SignatureModal from './Signature'
-
+import CreateModal from './Graduate'
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import useModal from '@hooks/useModal'
+import useUpdateEffect from '@hooks/useUpdateEffect'
 
 // drag-and-drop.scss
 import '@styles/react/libs/drag-and-drop/drag-and-drop.scss'
@@ -59,6 +60,8 @@ const Graduation = () => {
     const [groupOption, setGroupOption] = useState([])
     const [select_value, setSelectValue] = useState(values)
     const [datas, setDatas] = useState([])
+    const [createModal, setCreateModal] = useState(false);
+
 
     const [ listArr, setListArr ] = useState([])
     const [ formModal, setFormModal ] = useState(false)
@@ -86,19 +89,8 @@ const Graduation = () => {
 	}
 
     // Loader
-	const { isLoading, fetchData, Loader } = useLoader({ isFullScreen: true })
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
-
-    function getAllData()
-    {
-        Promise.all([
-            allFetch(graduateApi.get(rowsPerPage, currentPage, sortField, searchValue, select_value.department, select_value.degree, select_value.group)),
-            allFetch(signatureApi.get(2)),
-        ]).then((values) => {
-            setDatas(values[0]?.data?.results)
-            setListArr(values[1]?.data)
-        })
-    }
+	const { isLoading, fetchData, Loader } = useLoader({ isFullScreen: false })
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
 
 	/* Устгах функц */
 	const handleDelete = async(id) => {
@@ -150,13 +142,18 @@ const Graduation = () => {
     }
 
     useEffect(() => {
-        getDegree()
         getDatas()
-        getDepartment()
-        getGroup()
     }, [sortField, currentPage, rowsPerPage, select_value])
 
-	useEffect(() => {
+    useEffect(() => {
+        getDepartment()
+    }, [school_id])
+
+    useEffect(() => {
+        getGroup()
+    }, [select_value.department, select_value.degree, school_id])
+
+	useUpdateEffect(() => {
 		if (searchValue.length == 0) {
 			getDatas();
 		} else {
@@ -167,8 +164,6 @@ const Graduation = () => {
 			return () => clearTimeout(timeoutId);
 		}
 	}, [searchValue]);
-
-
 
     function handleSort(column, sort) {
         if(sort === 'asc') {
@@ -240,7 +235,8 @@ const Graduation = () => {
     useEffect(
         () =>
         {
-            getAllData();
+            getDegree()
+            getSignatureDatas()
         },
         []
     )
@@ -259,10 +255,14 @@ const Graduation = () => {
         setUpdateData(data)
     }
 
+    function handleCreateModal() {
+        setCreateModal(!createModal)
+    }
+
 	return (
 		<Fragment>
             <Card>
-            {isLoading && Loader}
+                {isLoading && Loader}
                 <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom align-items-center py-1">
                     <CardTitle tag="h4">{t('Гарын үсэг зурах хүмүүс')}</CardTitle>
                     <div className='d-flex flex-wrap mt-md-0 mt-1'>
@@ -327,7 +327,7 @@ const Graduation = () => {
                         }
                         </ReactSortable>
                     :
-                        <p className="text-center">Өгөгдөл байхгүй байна.</p>
+                        <p className="text-center my-2">Өгөгдөл байхгүй байна.</p>
                 }
             </Card>
 
@@ -346,9 +346,9 @@ const Graduation = () => {
                     </div>
                 </CardHeader>
                 <Row className="justify-content-between mx-0 mt-1 mb-1" sm={12}>
-                    <Col md={4}>
+                    <Col md={3}>
                         <Label className="form-label" for="department">
-                            {t('Хөтөлбөрийн баг')}
+                            {t('Тэнхим')}
                         </Label>
                         <Controller
                             control={control}
@@ -384,7 +384,7 @@ const Graduation = () => {
                             }}
                         />
                     </Col>
-                    <Col md={4}>
+                    <Col md={3}>
                         <Label className="form-label" for="degree">
                             {t('Боловсролын зэрэг')}
                         </Label>
@@ -422,7 +422,7 @@ const Graduation = () => {
                             }}
                         />
                     </Col>
-                    <Col md={4}>
+                    <Col md={3}>
                         <Label className="form-label" for="group">
                             {t('Анги')}
                         </Label>
@@ -459,6 +459,9 @@ const Graduation = () => {
                                 )
                             }}
                         />
+                    </Col>
+                    <Col md={3} className='mt-2'>
+                        <Button size='sm' color='primary' disabled={select_value.group ? false : true} onClick={handleCreateModal}>Төгсөгчид үүсгэх</Button>
                     </Col>
                 </Row>
                 <Row className='mt-1 d-flex justify-content-between mx-0'>
@@ -516,7 +519,6 @@ const Graduation = () => {
                         pagination
                         className='react-dataTable'
                         progressPending={isTableLoading}
-
                         progressComponent={
                             <div className='my-2 d-flex align-items-center justify-content-center'>
                                 <Spinner className='me-1' color="" size='sm'/><h5>Түр хүлээнэ үү...</h5>
@@ -541,6 +543,7 @@ const Graduation = () => {
         	</Card>
             {modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} select_value={select_value}/>}
             {edit_modal && <EditModal open={edit_modal} handleModal={editModal} graduate_id={graduate_id} refreshDatas={getDatas}/>}
+            {createModal && <CreateModal open={createModal} handleModal={handleCreateModal} group={select_value?.group} refreshDatas={getDatas}/>}
 
             { formModal && <SignatureModal open={formModal} handleModal={handleModalSig} refreshDatas={getSignatureDatas} defaultDatas={updateData} /> }
 

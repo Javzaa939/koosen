@@ -270,7 +270,7 @@ function AddModal({ toggle, modal, handleModal, refreshDatas }) {
                                             <div className="m-1">
                                                 <div className='mt-1'>
                                                     <Label className="mb-50">
-                                                        Мэргэжил
+                                                        Хөтөлбөр
                                                     </Label>
                                                     <Controller
                                                         name="profession"

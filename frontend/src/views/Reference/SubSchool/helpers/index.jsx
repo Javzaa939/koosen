@@ -1,10 +1,10 @@
 import useModal from '@hooks/useModal';
 import { t } from 'i18next';
 import { Badge, UncontrolledTooltip} from 'reactstrap'
-import { CheckCircle } from 'react-feather'
+import { CheckCircle, X } from 'react-feather'
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, user) {
+export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, handleDelete) {
     const { showWarning } = useModal()
 
     const page_count = Math.ceil(datas.length / rowsPerPage)
@@ -24,22 +24,27 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 		{
 			name: `${t('Нэр')}`,
 			selector: (row) => <span title={row?.name}>{row?.name}</span>,
-            sortable: true,
-			width: "250px",
+			minWidth: "250px",
 			wrap: true,
+			left: true
+
 		},
 		{
 			name: `${t('Захирал')}`,
 			selector: (row) => <span title={row?.zahiral_name}>{row?.zahiral_name}</span>,
-            sortable: true,
-			width: "250px",
-			wrap: true,
+			maxwidth: "150px",
+			center: true
+		},
+		{
+			name: `${t('Эрдмийн цол')}`,
+			selector: (row) => <span title={row?.erdem_tsol_name}>{row?.erdem_tsol_name}</span>,
+			maxwidth: "250px",
 			center: true
 		},
         {
 			name: `${t('Нийтийн сүлжээ')}`,
 			selector: (row) => row?.social,
-			width: "250px",
+			maxwidth: "250px",
 			wrap: false,
 			center: true
 		},
@@ -78,6 +83,25 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
                             <UncontrolledTooltip placement='top' target={`updateSchool${row?.id}`}>засах</UncontrolledTooltip>
 						</>
                     }
+				{
+					<>
+						<a role="button"
+							className='ms-1'
+							onClick={() => showWarning({
+								header: {
+									title: `${t('Бүрэлдэхүүн сургууль устгах')}`,
+								},
+								question: `Та  ${row?.name} устгахдаа итгэлтэй байна уу?`,
+								onClick: () => handleDelete(row?.id),
+								btnText: 'Устгах',
+							})}
+							id={`complaintListDatatableCancel${row.id}`}
+						>
+							<Badge color="light-danger" pill><X width={"100px"} /></Badge>
+						</a>
+						<UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${row?.id}`} >Устгах</UncontrolledTooltip>
+					</>
+				}
 				</div>
             ),
             Width: "50px",

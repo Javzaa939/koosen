@@ -71,8 +71,6 @@ const Createmodal = ({ open, handleModal, refreshDatas, edit_id }) => {
     const schoolApi = useApi().survey.surveyrange;
     const studentmovementApi = useApi().student.movement
 
-    console.log(studentOption)
-
     // Сургуулийн жагсаалт
     async function getSchoolOption() {
         setLoader(true)
@@ -111,27 +109,27 @@ const Createmodal = ({ open, handleModal, refreshDatas, edit_id }) => {
             }
             cdata['student'] = studentInfo?.student.id
             cdata = convertDefaultValue(cdata)
-            const { success, error } = await fetchData(studentmovementApi.put(cdata, studentInfo.id))
+            const { success, errors } = await fetchData(studentmovementApi.put(cdata, studentInfo.id))
             if(success){
                 reset()
                 handleModal()
                 refreshDatas()
             } else {
                 /** Алдааны мессэжийг input дээр харуулна */
-                for (let key in error) {
-                    setError(error[key].field, { type: 'custom', message:  error[key].msg});
+                for (let key in errors) {
+                    setError(key, { type: 'custom', message: errors[key][0]});
                 }
             }
         } else {
-            const { success, error } = await fetchData(studentmovementApi.post(cdata))
+            const { success, errors } = await fetchData(studentmovementApi.post(cdata))
             if(success) {
                 reset()
                 handleModal()
                 refreshDatas()
             } else {
                 /** Алдааны мессэжийг input дээр харуулна */
-                for (let key in error) {
-                    setError(error[key].field, { type: 'custom', message:  error[key].msg});
+                for (let key in errors) {
+                    setError(key, { type: 'custom', message:  errors[key][0]});
                 }
             }
         }
@@ -433,7 +431,7 @@ const Createmodal = ({ open, handleModal, refreshDatas, edit_id }) => {
                                                         isClearable={!selectedPro}
                                                         className={classnames('react-select', { 'is-invalid': errors.destination_department})}
                                                         isLoading={isLoading}
-                                                        placeholder={t(`Та хөтөлбөрийн багаа сонгоно уу`)}
+                                                        placeholder={t(`Та тэнхим сонгоно уу`)}
                                                         options={selectedValue?.children}
                                                         value={selectedValue?.children.find((val) => val.id === value)}
                                                         noOptionsMessage={() => t('Хоосон байна')}
@@ -452,7 +450,7 @@ const Createmodal = ({ open, handleModal, refreshDatas, edit_id }) => {
                                     </Col>
                                     <Col md={12} className='mt-1'>
                                         <Label className="form-label mb-0" for="destination_pro">
-                                            {t('Мэргэжил')}
+                                            {t('Хөтөлбөр')}
                                         </Label>
                                         <Controller
                                             control={control}

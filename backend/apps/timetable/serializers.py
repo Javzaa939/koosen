@@ -41,9 +41,19 @@ class RoomInfoSerializer(serializers.ModelSerializer):
 
     building = BuildingSerializer(many=False)
     school = SubSchoolListSerailizer(many=False)
+    type_name = serializers.SerializerMethodField()
+
     class Meta:
         model = Room
         fields = "__all__"
+
+    def get_type_name(self, obj):
+        room_type = None
+
+        if obj:
+            room_type = obj.get_type_display()
+
+        return room_type
 
 
 class RoomListSerializer(serializers.ModelSerializer):

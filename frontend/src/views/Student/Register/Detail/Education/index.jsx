@@ -129,27 +129,27 @@ const Education = () => {
         if(is_edit) {
             /** Засах */
             var id = cdata['id']
-            const { success, error } = await fetchData(educationApi.put(cdata, id, studentId))
+            const { success, errors } = await fetchData(educationApi.put(cdata, id, studentId))
             if(success)
             {
                 onModalClosed()
                 getDatas()
             } else {
                 /** Алдааны мессэжийг input дээр харуулна */
-                for (let key in error) {
-                    setError(error[key].field, { type: 'custom', message:  error[key].msg});
+                for (let key in errors) {
+                    setError(key, { type: 'custom', message:  errors[key][0]});
                 }
             }
         } else {
-            const { success, error } = await fetchData(educationApi.post(cdata))
+            const { success, errors } = await fetchData(educationApi.post(cdata))
             if(success)
             {
                 onModalClosed()
                 getDatas()
             } else {
                 /** Алдааны мессэжийг input дээр харуулна */
-                for (let key in error) {
-                    setError(error[key].field, { type: 'custom', message:  error[key].msg});
+                for (let key in errors) {
+                    setError(key, { type: 'custom', message:  errors[key][0]});
                 }
             }
         }
@@ -325,7 +325,7 @@ const Education = () => {
                             </Col>
                             <Col lg={12}>
                                 <Label className="form-label" for="profession">
-                                    {t('Эзэмшсэн мэргэжил')}
+                                    {t('Эзэмшсэн Хөтөлбөр')}
                                 </Label>
                                 <Controller
                                     defaultValue=''
@@ -337,7 +337,7 @@ const Education = () => {
                                             id ="profession"
                                             bsSize="sm"
                                             {...field}
-                                            placeholder={t('Эзэмшсэн мэргэжил')}
+                                            placeholder={t('Эзэмшсэн Хөтөлбөр')}
                                             type="text"
                                             readOnly={disabled}
                                             disabled={disabled}

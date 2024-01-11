@@ -22,6 +22,8 @@ import useLoader from '@hooks/useLoader';
 import AuthContext from '@context/AuthContext'
 import SchoolContext from '@context/SchoolContext'
 
+import useUpdateEffect from '@hooks/useUpdateEffect'
+
 import { getPagination } from '@utils'
 import { getColumns } from './helpers'
 
@@ -48,7 +50,6 @@ const Yvsan  = () => {
     const [modal, setModal] = useState(false)
     const [student_id, setStudentId] = useState('')
 
-
     // Хуудаслалтын анхны утга
     const [currentPage, setCurrentPage] = useState(1)
 
@@ -67,10 +68,9 @@ const Yvsan  = () => {
     const [select_value, setSelectValue] = useState(values)
     const studentmovementApi = useApi().student.movement
 
-
     useEffect(() => {
         getDatas()
-    }, [sortField, currentPage, rowsPerPage, is_check])
+    }, [sortField, currentPage, rowsPerPage, is_check, school_id])
 
     async function getDatas() {
 
@@ -133,7 +133,7 @@ const Yvsan  = () => {
 
     }
     // Хайлтийн хэсэг хоосон болох үед анхны датаг дуудна
-	useEffect(() => {
+	useUpdateEffect(() => {
 		if (searchValue.length == 0) {
 			getDatas();
 		} else {

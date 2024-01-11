@@ -12,6 +12,8 @@ import { RequestProvider } from "@context/RequestContext";
 import Router from "./router/Router"
 
 import './style/style.css'
+import './style/datatable.css'
+import './style/darktable.css'
 
 const App = () => {
     return (

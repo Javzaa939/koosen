@@ -1,6 +1,6 @@
 {
   "Сургууль": "School",
-  "Хөтөлбөрийн баг": "Department",
+  "Тэнхим": "Department",
   "Багш": "Teacher",
   "Хичээлийн стандарт": "Lesson standards",
   "Мэргэжлийн тодорхойлолт": "Professional definition",
@@ -111,7 +111,7 @@
   "Суралцаж буй": "studying",
   "Ангийн бүртгэл устгах": "Group remove",
   "Ангийн бүртгэл засах": "Group edit",
-  "-- Хөтөлбөрийн баг сонгоно уу --": "-- select department --",
+  "-- Тэнхим сонгоно уу --": "-- select department --",
   "Курс": "Course",
   "Ангийн багш": "Group teacher",
   "Элссэн хичээлийн жил": "Joined academic year",

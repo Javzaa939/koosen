@@ -43,7 +43,7 @@ const VerticalLayout = (props) => {
                     var children = menus.children.filter(child => child.id !== 'reference1')
                     menus.children = children
                 }
-                /** Хөтөлбөрийн баг */
+                /** Тэнхим*/
                 if(!user.permissions.includes('lms-reference-departments-read')) {
                     var children = menus.children.filter(child => child.id !== 'reference2')
                     menus.children = children
@@ -157,6 +157,18 @@ const VerticalLayout = (props) => {
                 /** Тодорхойлолтын гарын үсэг */
                 if(!user.permissions.includes('lms-settings-signature-read')) {
                     var children = menus.children.filter(child => child.id !== 'settingsLevel14')
+                    menus.children = children
+                }
+
+                /** Эрх */
+                if(!user.is_superuser) {
+                    var children = menus.children.filter(child => child.id !== 'settingsLevel15')
+                    menus.children = children
+                }
+
+                /** Role */
+                if(!user.permissions.includes('role-read')) {
+                    var children = menus.children.filter(child => child.id !== 'settingsLevel16')
                     menus.children = children
                 }
 

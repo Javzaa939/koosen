@@ -8,7 +8,8 @@ import {
 	Label,
 	Button,
     ModalBody,
-    ModalHeader
+    ModalHeader,
+    Spinner,
 } from "reactstrap";
 
 import { t } from 'i18next';
@@ -49,7 +50,7 @@ const UpdateModal = ({ open, editId, refreshDatas, handleEdit}) => {
         }
     }
 
-    /* Хөтөлбөрийн багийн ахлагч жагсаалт авах функц */
+    /* Тэнхимийн ахлагч жагсаалт авах функц */
     async function getLeaderList() {
         const { success, data } = await fetchData(getDepartmentApi.leaderList())
         if (success) {
@@ -78,32 +79,49 @@ const UpdateModal = ({ open, editId, refreshDatas, handleEdit}) => {
             }
         }
 	}
-
 	return (
         <Fragment>
-            <Modal isOpen={open} toggle={handleEdit} className="modal-dialog-centered modal-lg" onClosed={handleEdit}>
-                <ModalHeader className='bg-transparent pb-0' toggle={handleEdit} ></ModalHeader>
-                <ModalBody className="px-sm-3 pt-30 pb-3">
-                    <div className='text-center'>
-                        <h4>{t('Хөтөлбөрийн мэдээлэл засах')}</h4>
-                    </div>
+            <Modal
+                isOpen={open}
+                toggle={handleEdit}
+                className="sidebar-md"
+                modalClassName='modal-slide-in'
+                contentClassName='pt-0'
+                onClosed={handleEdit}
+                >
+                {
+                    isLoading &&
+                        <div className='suspense-loader'>
+                            <Spinner size='bg'/>
+                            <span className='ms-50'>Түр хүлээнэ үү...</span>
+                        </div>
+                }
+                <ModalHeader
+                    className="mb-1"
+                    toggle={handleEdit}
+                    // close={CloseBtn}
+                    tag="div"
+                 >
+                    <h5 className="modal-title">{t('Тэнхимийн мэдээлэл засах')}</h5>
+                </ModalHeader>
+                <ModalBody className="flex-grow-1">
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
-                        <Col  lg={6} xs={12}>
-                            <Label className="form-label" for="lead">
-                                {t('Хөтөлбөрийн багийн ахлагч')}
+                        <Col  md={12}>
+                            <Label className="form-label" for="leader">
+                                {t('Тэнхимийн ахлагч')}
                             </Label>
                             <Controller
                                 control={control}
                                 defaultValue=''
-                                name="lead"
+                                name="leader"
                                 render={({ field: { value, onChange} }) => {
                                     return (
                                         <Select
-                                            name="lead"
-                                            id="lead"
+                                            name="leader"
+                                            id="leader"
                                             classNamePrefix='select'
                                             isClearable
-                                            className={classnames('react-select', { 'is-invalid': errors.lead })}
+                                            className={classnames('react-select', { 'is-invalid': errors.leader })}
                                             isLoading={isLoading}
                                             placeholder={t('-- Сонгоно уу --')}
                                             options={leader_option || []}
@@ -120,11 +138,11 @@ const UpdateModal = ({ open, editId, refreshDatas, handleEdit}) => {
                                     )
                                 }}
                             />
-                            {errors.lead && <FormFeedback className='d-block'>{t(errors.lead.message)}</FormFeedback>}
+                            {errors.leader && <FormFeedback className='d-block'>{t(errors.leader.message)}</FormFeedback>}
                         </Col>
-                        <Col lg={6} xs={12}>
+                        <Col md={12}>
                             <Label className="form-label" for="name">
-                                {t('Хөтөлбөрийн нэр')}
+                                {t('Тэнхимийн нэр')}
                             </Label>
                             <Controller
                                 defaultValue=''
@@ -136,7 +154,7 @@ const UpdateModal = ({ open, editId, refreshDatas, handleEdit}) => {
                                         id ="name"
                                         bsSize="sm"
                                         disabled={true}
-                                        placeholder={t('Хөтөлбөрийн нэр')}
+                                        placeholder={t('Тэнхимийн нэр')}
                                         {...field}
                                         type="text"
                                         invalid={errors.name && true}
@@ -145,7 +163,7 @@ const UpdateModal = ({ open, editId, refreshDatas, handleEdit}) => {
                             />
                             {errors.name && <FormFeedback className='d-block'>{t(errors.name.message)}</FormFeedback>}
                         </Col>
-                        <Col lg={6} xs={12}>
+                        <Col md={12}>
                             <Label className="form-label" for="social">
                                 {t('Нийтийн сүлжээ')}
                             </Label>
@@ -167,7 +185,7 @@ const UpdateModal = ({ open, editId, refreshDatas, handleEdit}) => {
                             />
                             {errors.social && <FormFeedback className='d-block'>{t(errors.social.message)}</FormFeedback>}
                         </Col>
-                        <Col lg={6} xs={12}>
+                        <Col md={12}>
                             <Label className="form-label" for="web">
                                 {t('Веб')}
                             </Label>
@@ -189,7 +207,7 @@ const UpdateModal = ({ open, editId, refreshDatas, handleEdit}) => {
                             />
                             {errors.web && <FormFeedback className='d-block'>{t(errors.web.message)}</FormFeedback>}
                         </Col>
-                        <Col lg={6} xs={12}>
+                        <Col md={12}>
                             <Label className="form-label" for="address">
                                 {t('Хаяг')}
                             </Label>
@@ -213,7 +231,6 @@ const UpdateModal = ({ open, editId, refreshDatas, handleEdit}) => {
                         </Col>
                         <Col className='text-center mt-2' md={12}>
                             <Button className="me-2" size='sm' color="primary" type="submit">
-                                {isLoading && Loader}
                                 {t('Хадгалах')}
                             </Button>
                             <Button size='sm' color="secondary" type="reset" onClick={handleEdit}>

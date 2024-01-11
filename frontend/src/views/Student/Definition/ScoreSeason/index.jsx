@@ -75,7 +75,7 @@ export default function ScoreSeason() {
                             <div style={{ width: 100 }}>
                                 <div>Оюутны код</div>
                                 <div>Овог нэр</div>
-                                <div>Мэргэжил</div>
+                                <div>Хөтөлбөр</div>
                                 <div>Элссэн он</div>
                                 <div>Зэрэг</div>
                             </div>

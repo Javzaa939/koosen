@@ -85,7 +85,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, user, handleE
 						<a
 							id={`complaintListDatatableDetail${row.id}`}
 							className='ms-1'
-							href={`/service/showad/${row.id}`}
+							href={`/service/show/${row.id}`}
 							target={'_blank'}
 						>
 							<Badge color="light-info" pill><Book  width={"15px"} /></Badge>

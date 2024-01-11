@@ -128,7 +128,7 @@ const StudyPlan = () => {
         }
     }
 
-    // Хөтөлбөрийн багын жагсаалт
+    // Тэнхимын жагсаалт
     async function getDepartmentOption() {
         const { success, data } = await fetchData(departmentApi.get())
         if(success) {
@@ -152,7 +152,7 @@ const StudyPlan = () => {
     //     }
     // }
 
-    // Мэргэжлийн жагсаалтын getList функц боловсролын зэргээс хамаарч жагсаалтаа авна. Шаардлагагүй үед хоосон string явуулна.
+    // Хөтөлбөрийн жагсаалтын getList функц боловсролын зэргээс хамаарч жагсаалтаа авна. Шаардлагагүй үед хоосон string явуулна.
     async function getProfession() {
         const { success, data } = await fetchData(professionApi.getList(select_value.degree, select_value.department, select_value.confirm_year))
         if(success) {
@@ -284,7 +284,7 @@ const StudyPlan = () => {
                 <Row className="mx-50 gy-1 my-1" sm={12}>
                     <Col sm={6} lg={3}>
                         <Label className="form-label" for="department">
-                            {t('Хөтөлбөрийн баг')}
+                            {t('Тэнхим')}
                         </Label>
                         <Controller
                             control={control}
@@ -429,7 +429,7 @@ const StudyPlan = () => {
                     </Col> */}
                     <Col sm={6} lg={3}>
                         <Label className="form-label" for="profession">
-                            {t('Мэргэжил')}
+                            {t('Хөтөлбөр')}
                         </Label>
                         <Controller
                             control={control}

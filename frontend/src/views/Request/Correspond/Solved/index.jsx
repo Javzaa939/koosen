@@ -61,7 +61,7 @@ function detailRows( datas ) {
                                 <td>{datas?.degree_name}</td>
                             </tr>
                             <tr className='border-bottom'>
-                                <td className='pe-1'>Мэргэжил:</td>
+                                <td className='pe-1'>Хөтөлбөр:</td>
                                 <td>{datas?.profession_name}</td>
                             </tr>
                             {
@@ -188,8 +188,6 @@ export default function SolvedModal({ open, handleModal, solveId, professionId, 
 
     const [lessonOption, setLessonOption] = useState([])
 
-    console.log(sdatas)
-
     const CloseBtn = (
         <X className="cursor-pointer" size={15} onClick={() => {handleModal()}} />
     )
@@ -277,7 +275,7 @@ export default function SolvedModal({ open, handleModal, solveId, professionId, 
                 getRequestAnswer()
             }
 
-            var menus = roleMenus.find((c) => c.name === 'Хөтөлбөрийн багийн ахлагч')
+            var menus = roleMenus.find((c) => c.name === 'Тэнхимийн ахлагч')
 
             if (Object.keys(menus).length > 0 && menus?.is_solve && unitId === menus?.id) {
                 setAllow(true)
@@ -285,8 +283,6 @@ export default function SolvedModal({ open, handleModal, solveId, professionId, 
         },
         [solveId]
     )
-
-    console.log(lessonOption)
 
     return (
         <Modal

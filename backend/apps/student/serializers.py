@@ -14,7 +14,7 @@ from lms.models import Group
 from lms.models import StudentMovement
 from lms.models import StudentFamily
 from lms.models import StudentAddress
-from lms.models import Departments
+from lms.models import Salbars
 from lms.models import Country
 from lms.models import StudentEducation
 from lms.models import GraduationWork
@@ -26,7 +26,7 @@ from lms.models import Score
 from lms.models import ScoreRegister
 from lms.models import Teachers
 from lms.models import Room
-from lms.models import SubSchools
+from lms.models import SubOrgs
 from lms.models import PaymentEstimate
 from lms.models import PaymentBalance
 from lms.models import StipentStudent
@@ -107,11 +107,11 @@ class StatusSerializer(serializers.ModelSerializer):
         fields = "name"
 
 
-# Хөтөлбөрийн баг
+# Тэнхимээр
 class DepartmentsSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Departments
+        model = Salbars
         exclude = "created_at", "updated_at"
 
 
@@ -591,7 +591,7 @@ class LessonStandartSerializer(serializers.ModelSerializer):
 class SchoolSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = SubSchools
+        model = SubOrgs
         fields = ['id', 'name']
 
 

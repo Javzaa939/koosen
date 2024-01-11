@@ -734,10 +734,10 @@ permissions = [
         'name' : "lms-reference-school-read",
         'description' : "Лавлах сан сургуулийн мэдээлэл унших"
     },
-# Хөтөлбөрийн баг
+# Тэнхим
     {
         'name' : "lms-reference-departments-read",
-        'description' : "Лавлах сан хөтөлбөрийн баг мэдээлэл унших"
+        'description' : "Лавлах сан тэнхим мэдээлэл унших"
     },
 # Хөтөлбөрийн баг
     {
@@ -1129,5 +1129,41 @@ permissions = [
     {
         'name' : 'lms-settings-signature-delete',
         'description' : 'Тодорхойлолтын гарын үсэг устгах эрх'
+    },
+    # ----------------------Шалгалт цэс ------------------------
+
+    # Шалгалтын асуулт бэлдэх
+    {
+        'name' : 'dxis-exam-question-read',
+        'description' : 'Шалгалтын асуулт унших эрх'
+    },
+    {
+        'name' : 'dxis-exam-question-create',
+        'description' : 'Шалгалтын асуулт шинээр үүсгэх эрх'
+    },
+    {
+        'name' : 'dxis-exam-question-update',
+        'description' : 'Шалгалтын асуулт засах эрх'
+    },
+    {
+        'name' : 'dxis-exam-question-delete',
+        'description' : 'Шалгалтын асуулт устгах эрх'
+    },
+    # Шалгалт үүсгэх
+    {
+        'name' : 'dxis-exam-read',
+        'description' : 'Шалгалт унших эрх'
+    },
+    {
+        'name' : 'dxis-exam-create',
+        'description' : 'Шалгалт шинээр үүсгэх'
+    },
+    {
+        'name' : 'dxis-exam-update',
+        'description' : 'Шалгалт засах'
+    },
+    {
+        'name' : 'dxis-exam-delete',
+        'description' : 'Шалгалт устгах эрх'
     },
 ]
