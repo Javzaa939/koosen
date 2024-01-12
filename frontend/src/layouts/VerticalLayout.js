@@ -44,7 +44,8 @@ const VerticalLayout = (props) =>
      */
     function checkPerm(saveData, menus=[], checkPerm, idName='')
     {
-        if (typeof checkPerm == 'boolean')
+        // is_superuser гэж шалгаж байгаа бол
+        if (typeof checkPerm == 'boolean' && checkPerm)
         {
             var navChildren = menus.navChildren.filter(child => child.id === idName)
             if (navChildren.length > 0)
@@ -52,6 +53,7 @@ const VerticalLayout = (props) =>
                 saveData = [...saveData, ...navChildren]
             }
         }
+        // тухайн нэвтэрсэн хэрэглэгчийн эрхүүдээс
         else if(user.permissions.includes(checkPerm))
         {
             var navChildren = menus.navChildren.filter(child => child.id === idName)
@@ -313,10 +315,6 @@ const VerticalLayout = (props) =>
                     childrenDatas = checkPerm(childrenDatas, menus, 'lms-print-admission-read', 'print7')
 
 
-                    /** ----------------------------- Үйлчилгээ ---------------------------- */
-                    /** Зар мэдээ */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-service-news-read', 'service')
-
                     /**------------------------------------"Цагийн тооцоо"----------------------------*/
                     /** Цагийн ачаалал */
                     childrenDatas = checkPerm(childrenDatas, menus, 'lms-credit-volume-read', 'credit1')
@@ -381,9 +379,25 @@ const VerticalLayout = (props) =>
 
             cNavigation.map((menus, idx) =>
             {
-                if(menus && menus.children && menus.children.length < 1)
+                /** navChildren-тай menu-д нэгч хүүхэд эрх нь таарахгүй бол тэрийг устгана */
+                if (menus.navChildren && (menus && menus.children && menus.children.length < 1))
                 {
-                    delete cNavigation[idx]
+                    delete cNavigation[idx];
+                }
+                /** Дан ганцаар байдаг бол permission шалгана */
+                else
+                {
+                    /** Хуанли */
+                    if (menus.id === 'calendar' && !user.permissions.includes('lms-calendar-read')) delete cNavigation[idx];
+
+                    /** Зар мэдээ */
+                    if (menus.id === 'service' && !user.permissions.includes('lms-service-news-read')) delete cNavigation[idx];
+
+                    /** Статистик */
+                    if (menus.id === 'statistic' && !user.permissions.includes('lms-statistic-read')) delete cNavigation[idx];
+
+                    /** Хандах эрх */
+                    if (menus.id === 'role' && !user.permissions.includes('role-read')) delete cNavigation[idx];
                 }
             })
 
