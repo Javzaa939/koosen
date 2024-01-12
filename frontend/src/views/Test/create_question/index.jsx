@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect } from "react";
+import React, { Fragment, useState, useEffect, useContext } from "react";
 
 import { Plus, Search} from "react-feather";
 
@@ -21,7 +21,8 @@ import { ReactSelectStyles } from "@utils"
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
 import useModal from "@hooks/useModal"
-
+import AuthContext from '@context/AuthContext'
+import SchoolContext from '@context/SchoolContext'
 import { useTranslation } from "react-i18next";
 
 import { getPagination } from "@utils";
@@ -37,7 +38,8 @@ const CreateQuestion = () => {
 	const default_page = [10, 15, 50, 75, 100];
 
 	const { showWarning } = useModal()
-
+	const { user } = useContext(AuthContext)
+	const { school_id } = useContext(SchoolContext)
 	const [datas, setDatas] = useState([]);
 
 	const [currentPage, setCurrentPage] = useState(1);
@@ -189,6 +191,7 @@ const CreateQuestion = () => {
 					<CardTitle tag="h4">{t("Асуултын жагсаалт")}</CardTitle>
 					<div className="d-flex flex-wrap mt-md-0 mt-1">
 						<Button
+							disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-exam-question-create') && school_id ) ? false : true}
 							color="primary"
 							onClick={() => { handleModal(), setEditRowData({})}}
 						>

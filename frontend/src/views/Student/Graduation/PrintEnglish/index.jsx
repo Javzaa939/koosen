@@ -47,7 +47,7 @@ export default function PrintMongolia()
         {
             if (data && listArr.length != 0)
             {
-                setTimeout(() => window.print(), 1000)
+                // setTimeout(() => window.print(), 1000)
             }
         },
         [data, listArr]
@@ -117,7 +117,7 @@ export default function PrintMongolia()
     }
 
     return (
-        <div className='vh-100 position-relative bg-white' style={{ fontFamily: 'serif', color: 'black' }} >
+        <div className='vh-100 position-relative bg-white' style={{ fontFamily: 'Arial', color: 'black' }} >
 
             {isLoading && Loader}
 
@@ -143,7 +143,7 @@ export default function PrintMongolia()
             {/* Гарын үсгийн хэсэг */}
             <div className='position-absolute' style={{ bottom: '100px', fontSize: '15px' }} >
                 <div style={{ paddingLeft: '170px', paddingRight: '70px' }} >
-                    <div className='d-flex w-100 text-center fst-italic'>
+                    <div className='d-flex w-100 text-center justify-content-center fst-italic'>
 
                         {
                             listArr.length != 0
