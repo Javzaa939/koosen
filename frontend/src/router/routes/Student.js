@@ -18,6 +18,9 @@ const PrintMongolia = lazy(() => import("@views/Student/Graduation/PrintMongolia
 const PrintEnglish = lazy(() => import("@views/Student/Graduation/PrintEnglish"))
 const PrintNational = lazy(() => import("@views/Student/Graduation/PrintNational"))
 
+//nemsen zuil ni
+const Graduates = lazy(() => import("@views/Student/Graduates"))
+
 const PrintAttachmentMongolia = lazy(() => import("@views/Student/Attachment/PrintMongolia"))
 const PrintAttachmentEnglish = lazy(() => import("@views/Student/Attachment/PrintEnglish"))
 const PrintAttachmentNational = lazy(() => import("@views/Student/Attachment/PrintNational"))
@@ -28,6 +31,11 @@ const StatementPrint = lazy(() => import("@views/Student/Transfer/Irsen/Print"))
 const ScoreSeasonPrint = lazy(() => import("@views/Student/Definition/ScoreSeason"))
 
 const StudentRoutes = [
+    //shineer nemsen zam ni:
+    {
+        path: 'student/graduates/',
+        element: <Graduates />
+    },
     {
         path: 'student/group/',
         element: <Group />
@@ -143,7 +151,7 @@ const StudentRoutes = [
         }
     },
     {
-        path: 'student/attachment/print-national/',
+        path: 'student/attachment/pstudent/viz-status/rint-national/',
         element: <PrintAttachmentNational />,
         meta: {
             layout: 'blank'
