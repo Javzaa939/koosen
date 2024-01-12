@@ -73,7 +73,7 @@ export default function PrintMongolia()
 
             {/* Гарын үсгийн хэсэг */}
             <div className='mb-3' style={{ bottom: '0', fontSize: '15px' }} >
-                <div style={{ paddingLeft: '170px', paddingRight: '70px' }} >
+                <div style={{ paddingLeft: '70px', paddingRight: '70px' }} >
                     <div className='d-flex w-100 text-center justify-content-center fst-italic'>
 
                         {
