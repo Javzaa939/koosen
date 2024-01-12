@@ -75,16 +75,6 @@ function EditPage() {
     const roomApi = useApi().timetable.room
     const examApi = useApi().timetable.exam
 
-    // async function getResults() {
-    //     const { success, data } = await fetchData(examApi.getOne(id));
-    //     if (success) {
-    //         setDatas(data);
-    //         updateStudentLists(data.student_list);
-    //         setTotalCount(data.student_list.filter(student => student.status === ACTIVE_STUDENT).length);
-    //         setLocalloader(false)
-    //     }
-    // }
-
     async function getResults() {
         const { success, data } = await fetchData(examApi.getOne(id))
         if(success) {
@@ -158,7 +148,6 @@ function EditPage() {
 
     }
 
-
 	async function onSubmit(cdata) {
         cdata['lesson_year'] = cyear_name
         cdata['lesson_season'] = cseason_id
@@ -187,7 +176,7 @@ function EditPage() {
                 }
             }
         }
-    }
+	}
 
     return (
         <div>
@@ -392,7 +381,7 @@ function EditPage() {
                                     ></Controller>
                                     {errors.room && <FormFeedback className='d-block'>{t(errors.room.message)}</FormFeedback>}
                                     <div className='d-flex justify-content-end m-1'>
-                                        <Button color='primary' disabled={postLoading} type="submit">{postLoading ? <Spinner size='sm' style={{ marginLeft: 26, marginRight: 27 }}/> : 'Хадгалах' }</Button>
+                                        <Button color='primary' disabled={isLoading || postLoading} type="submit">{postLoading ? <Spinner size='sm' style={{ marginLeft: 26, marginRight: 27 }}/> : 'Хадгалах' }</Button>
                                     </div>
                                 </Col>
                             </Row>
@@ -400,12 +389,12 @@ function EditPage() {
                     </div>
                 </Col>
                 <Col md={6} sm={12} className='mt-1'>
-                    <div className='rounded-3 light-glow' style={{ minHeight: 529, maxHeight: 530 }}>
+                    <div className='rounded-3 light-glow overflow-auto' style={{ minHeight: 529, maxHeight: 530 }}>
                         <div className='p-1 hasah-oyutnuud'>
                             Хасах оюутнууд
                         </div>
                         <div>
-                            <div className='p-2 overflow-auto'>
+                            <div className='p-2'>
                                 {
                                     inactive_students.map((dis, didx) => {
                                         const firstName = dis?.first_name.toLowerCase();
@@ -452,8 +441,6 @@ function EditPage() {
                                     <div className='p-5 position-relative'>{Loader}</div>
                                     :
                                         datas.student_list && datas.student_list.length > 0 ?
-                                        // active_students && datas.active_students.length > 0 ?
-
                                             <div>
                                                 <DataTable
                                                     noHeader
