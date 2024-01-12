@@ -67,18 +67,19 @@ export default [
         ]
 
     },
+    // ariunagiin oorchilson
     {
         id: 'student12',
             title: 'Төгсөлт',
             icon: <i className="far fa-graduation-cap"></i>,
-            navLink: "student",
+            navLink: "/student",
             children:
             [
                 {
-                    id: 'student10',
-                    title: 'Хавсралт',
+                    id:'student17',
+                    title:'Төгсөгчид',
                     icon: <Circle size={8} />,
-                    navLink: "student/attachment"
+                    navLink:"student/graduates"
                 },
                 {
                     id: 'student16',
@@ -86,6 +87,13 @@ export default [
                     icon: <Circle size={8} />,
                     navLink: "student/graduation"
                 },
+                {
+                    id: 'student10',
+                    title: 'Хавсралт',
+                    icon: <Circle size={8} />,
+                    navLink: "student/attachment"
+                },
+                
             ]
     },
 ]
