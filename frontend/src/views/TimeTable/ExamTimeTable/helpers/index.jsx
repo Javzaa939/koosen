@@ -1,4 +1,4 @@
-import { Printer } from 'react-feather'
+import { Edit, Printer } from 'react-feather'
 import { t } from "i18next";
 
 import { Badge } from "reactstrap";
@@ -21,6 +21,7 @@ export function getColumns (currentPage, rowsPerPage, datas, handleEditModal, na
         currentPage = 1
     }
 
+
 	const columns = [
 		{
 			name: "№",
@@ -32,11 +33,11 @@ export function getColumns (currentPage, rowsPerPage, datas, handleEditModal, na
 			header: 'lesson__name',
 			name: `${t('Хичээл')}`,
 			cell: (row) => (
-                <p className={`${css.hrefHover} mb-0` }>
-                    <a role="button" onClick={() => { handleEditModal(row.id)} }>
+				<div className='w-100 text-wrap'>
+                    <div className={`text-wrap`}>
 						{row?.lesson_code + ' ' + row?.lesson_name}
-                    </a>
-                </p>
+                    </div>
+				</div>
             ),
 			minWidth: "300px",
 			sortable: true,
@@ -50,7 +51,7 @@ export function getColumns (currentPage, rowsPerPage, datas, handleEditModal, na
 			minWidth: "180px",
 			sortable: true,
 			center: true,
-			wrap: true,
+			wrap: false,
 		},
 		{
 			header: 'exam_date',
@@ -58,6 +59,7 @@ export function getColumns (currentPage, rowsPerPage, datas, handleEditModal, na
             cell: (row) => row?.exam_date,
 			minWidth: "80px",
 			sortable: true,
+			wrap: false,
 			center: true
 		},
 		{
@@ -66,6 +68,7 @@ export function getColumns (currentPage, rowsPerPage, datas, handleEditModal, na
             cell: (row) => row?.begin_time,
 			minWidth: "80px",
 			sortable: true,
+			wrap: false,
 			center: true
 		},
 		{
@@ -74,6 +77,7 @@ export function getColumns (currentPage, rowsPerPage, datas, handleEditModal, na
             cell: (row) => row?.end_time,
 			minWidth: "80px",
 			sortable: true,
+			wrap: false,
 			center: true
 		},
 		{
@@ -106,11 +110,14 @@ export function getColumns (currentPage, rowsPerPage, datas, handleEditModal, na
 	]
 
 	var print_column = {
-		name: `${t('Хэвлэх')}`,
+		name: `${t('Үйлдэл')}`,
 		maxWidth: "80px",
 		selector: (row) => (
 			// Onclick хийх функц орно
-			<Printer  width={"15px"} role='button'  onClick={() => {navHandler(row,row.id)}} />
+			<div>
+				<Edit width={"15px"} className='me-1' role='button' onClick={() => {navigate(`edit/${row.id}`)}}/>
+				<Printer width={"15px"} role='button'  onClick={() => {navHandler(row,row.id)}} />
+			</div>
 		),
 	}
 	columns.push(print_column)
