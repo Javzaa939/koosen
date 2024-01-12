@@ -2,8 +2,6 @@
 import Settings from './Settings'
 import Score from './Score'
 import Study from './Study'
-//nemsen ni
-//import Graduation from './Graduation'
 // import Report from './Report'
 import Student from './Student'
 import Request from './Request'
