@@ -19,8 +19,8 @@ export default function SelfGroup({ datas })
                         <thead>
                             <tr>
                                 <th>Дамжааны нэр</th>
-                                <th>Мэргэжлийн код</th>
-                                <th>Мэргэжлийн нэр</th>
+                                <th>Хөтөлбөрийн код</th>
+                                <th>Хөтөлбөрийн нэр</th>
                                 <th>Суралцах хэлбэр</th>
                                 <th>Курс</th>
                                 <th>Боловсролын зэрэг</th>

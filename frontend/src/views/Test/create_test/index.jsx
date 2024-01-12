@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect } from "react";
+import React, { Fragment, useState, useEffect, useContext } from "react";
 
 import { Plus} from "react-feather";
 
@@ -22,6 +22,8 @@ import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
 
 import { useTranslation } from "react-i18next";
+import AuthContext from '@context/AuthContext'
+import SchoolContext from '@context/SchoolContext'
 
 import { getPagination, get_questiontimetype } from "@utils";
 
@@ -37,6 +39,8 @@ const CreateTest = () => {
 	const default_page = [10, 15, 50, 75, 100];
 
 	const [datas, setDatas] = useState([]);
+	const { user } = useContext(AuthContext)
+	const { school_id } = useContext(SchoolContext)
 
 	const [currentPage, setCurrentPage] = useState(1);
 	const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -159,6 +163,7 @@ const CreateTest = () => {
 					<div className="d-flex flex-wrap mt-md-0 mt-1">
 						<Button
 							color="primary"
+                            disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-exam-create') && school_id) ? false : true}
 							onClick={() => handleModal()}
 						>
 							<Plus size={15} />

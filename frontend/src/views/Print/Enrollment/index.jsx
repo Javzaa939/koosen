@@ -105,7 +105,7 @@ const Enrollment = () => {
         }
     }
 
-    // Мэргэжил
+    // Хөтөлбөр
     async function getProfessionOption() {
         const degreeId = select_value.degree
         const { success, data } = await fetchData(professionApi.getList(degreeId))
@@ -282,7 +282,7 @@ const Enrollment = () => {
                     </Col>
                     <Col md={4}>
                         <Label className="form-label" for="profession">
-                            {t('Мэргэжил')}
+                            {t('Хөтөлбөр')}
                         </Label>
                         <Controller
                             control={control}

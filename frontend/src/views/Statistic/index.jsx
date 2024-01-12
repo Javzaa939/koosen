@@ -11,8 +11,8 @@ import {
 
 
 import ADB1 from "./ADB1";
-// import ADB2 from "./ADB2";
-// import ADB3 from "./ADB3";
+import ADB2 from "./ADB2";
+import ADB3 from "./ADB3";
 // import ADB4 from "./ADB4";
 // import ADB5 from "./ADB5";
 // import ADB6 from "./ADB6";
@@ -51,14 +51,14 @@ function Statistic() {
         {
             active_id: 2,
             name: 'А-ДБ-2',
-            component: <Blank />
-            // component: <ADB2 />
+            // component: <Blank />
+            component: <ADB2 />
         },
         {
             active_id: 3,
             name: 'А-ДБ-3',
-            component: <Blank />
-            // component: <ADB3 />
+            // component: <Blank />
+            component: <ADB3 />
         },
         {
             active_id: 4,
@@ -70,7 +70,7 @@ function Statistic() {
             active_id: 5,
             name: 'А-ДБ-5',
             // component: <ADB5 />
-            component: <Blank />
+            component: <Blank zasvar />
         },
         {
             active_id: 6,
@@ -88,7 +88,7 @@ function Statistic() {
             active_id: 8,
             name: 'А-ДБ-8',
             // component: <ADB8 />
-            component: <Blank />
+            component: <Blank/>
         },
         {
             active_id: 9,

@@ -58,7 +58,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
 
     const teacherApi = useApi().hrms.teacher
 
-    //Мэргэжлийн жагсаалт авах
+    //Хөтөлбөрийн жагсаалт авах
     async function getProfession () {
         const { success, data } = await fetchData(professionApi.getList(degree_id, dep_id))
         if (success) {
@@ -237,7 +237,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                         </Col>
                         <Col md={12}>
                             <Label className="form-label" for="profession">
-                               {t('Мэргэжил')}
+                               {t('Хөтөлбөр')}
                             </Label>
                             <Controller
                                 control={control}

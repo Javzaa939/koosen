@@ -163,7 +163,7 @@ export default function CreditCalculation()
                                 Регистр: <span className="fw-normal">{datas?.student?.register_num}</span>
                             </div>
                             <div className="w-50 d-inline-block">
-                                Мэргэжил: <span className="fw-normal">{datas?.student?.group?.profession?.name}</span>
+                                Хөтөлбөр: <span className="fw-normal">{datas?.student?.group?.profession?.name}</span>
                             </div>
                         </div>
 

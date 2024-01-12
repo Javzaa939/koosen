@@ -105,7 +105,7 @@ export function getColumns (currentPage, rowsPerPage, datas, handleRequestSolve,
 		},
         {
 			header: 'profession',
-			name: `${t('Мэргэжил')}`,
+			name: `${t('Хөтөлбөр')}`,
             cell: (row) => row?.profession_name,
 			minWidth: "80px",
 			sortable: true,
