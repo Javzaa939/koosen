@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.db.models import Q
 
 from lms.models import Room
 from lms.models import Building
@@ -17,7 +18,7 @@ from core.serializers import SubSchoolListSerailizer
 
 from main.utils.function.utils import get_fullName, start_time, end_time
 
-from ..surgalt.serializers import LessonStandartListSerializer
+from surgalt.serializers import LessonStandartListSerializer
 from core.serializers import TeacherListSerializer
 
 
@@ -491,7 +492,6 @@ class ExamTimeTableListSerializer(serializers.ModelSerializer):
     student_list = serializers.SerializerMethodField()
     student_group_list = serializers.SerializerMethodField()
 
-
     class Meta:
         model = ExamTimeTable
         fields = "__all__"
@@ -508,17 +508,18 @@ class ExamTimeTableListSerializer(serializers.ModelSerializer):
         school = request.query_params.get('school')
 
         student_list = []
-        status = StudentRegister.objects.filter(name__contains='Суралцаж буй').first()
+        status = StudentRegister.objects.filter(Q(Q(name__contains='Суралцаж буй') | Q(code=1))).first()
 
         student_queryset = Exam_to_group.objects.filter(exam_id=obj.id, student__status=status)
         if school:
             student_queryset = student_queryset.filter(group__school=school)
 
-        students = student_queryset.values('student', 'student__code', 'student__last_name', 'student__first_name', 'student__group').order_by('student__first_name')
+        students = student_queryset.values('student', 'student__id', 'student__code', 'student__last_name', 'student__first_name', 'student__group').order_by('student__first_name')
 
         if len(students) > 0:
             for student in list(students):
                 student_datas = {}
+                exam_student = Exam_to_group.objects.filter(exam_id=obj.id, student=student.get('student__id')).first()
 
                 student_group = student.get('student__group')
                 student_id = student.get('student')
@@ -526,6 +527,9 @@ class ExamTimeTableListSerializer(serializers.ModelSerializer):
                 student_datas['last_name'] = student.get('student__last_name')
                 student_datas['first_name'] = student.get('student__first_name')
                 student_datas['group'] = student_group
+                student_datas['id'] = student.get('student__id')
+                student_datas['status'] = exam_student.status
+
                 exam_score = 0
                 teach_score = 0
                 score = ScoreRegister.objects.filter(student=student_id, lesson_year=obj.lesson_year, lesson_season=obj.lesson_season, lesson=obj.lesson).first()
@@ -551,6 +555,7 @@ class ExamTimeTableListSerializer(serializers.ModelSerializer):
                 student_list.append(student_datas)
 
         return student_list
+
 
     def get_student_group_list(self, obj):
 
