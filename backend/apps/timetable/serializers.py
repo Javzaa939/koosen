@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.db.models import Q
 
 from lms.models import Room
 from lms.models import Building
@@ -17,7 +18,7 @@ from core.serializers import SubSchoolListSerailizer
 
 from main.utils.function.utils import get_fullName, start_time, end_time
 
-from ..surgalt.serializers import LessonStandartListSerializer
+from surgalt.serializers import LessonStandartListSerializer
 from core.serializers import TeacherListSerializer
 
 
@@ -491,7 +492,6 @@ class ExamTimeTableListSerializer(serializers.ModelSerializer):
     student_list = serializers.SerializerMethodField()
     student_group_list = serializers.SerializerMethodField()
 
-
     class Meta:
         model = ExamTimeTable
         fields = "__all__"
@@ -508,7 +508,7 @@ class ExamTimeTableListSerializer(serializers.ModelSerializer):
         school = request.query_params.get('school')
 
         student_list = []
-        status = StudentRegister.objects.filter(name__contains='Суралцаж буй').first()
+        status = StudentRegister.objects.filter(Q(Q(name__contains='Суралцаж буй') | Q(code=1))).first()
 
         student_queryset = Exam_to_group.objects.filter(exam_id=obj.id, student__status=status)
         if school:
