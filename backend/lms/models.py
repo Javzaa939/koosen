@@ -419,7 +419,7 @@ class LearningPlan(models.Model):
     DOC_DIPLOM = 23
 
     LESSON_LEVEL = (
-        (BASIC, 'Ерөнхий суурь хичээл'),
+        (BASIC, 'Дээд боловсролын суурь хичээл'),
         (PROF_BASIC, 'Мэргэжлийн суурь хичээл'),
         (PROFESSION, 'Мэргэжлийн хичээл'),
         (DIPLOM, 'Диплом'),
