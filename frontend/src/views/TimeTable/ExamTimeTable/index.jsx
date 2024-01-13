@@ -144,7 +144,7 @@ const ExamTimeTable = () => {
 
 			return () => clearTimeout(timeoutId);
 		}
-	}, [rowsPerPage, currentPage, sortField, searchValue, selectedRoom, selectedTeacher, school_id])
+	}, [rowsPerPage, currentPage, sortField, searchValue, selectedRoom, selectedTeacher])
 
 
     function handleSort(column, sort) {
@@ -198,7 +198,7 @@ const ExamTimeTable = () => {
 					<CardTitle tag="h4">{t('Шалгалтын хуваарь')}</CardTitle>
                     <div className='d-flex flex-wrap mt-md-0 mt-1 '>
                         <Button
-                            className='me-1 m-50'
+                            className='me-1'
                             color='primary' disabled={user && Object.keys(user).length && user.permissions.includes('lms-timetable-exam-create') ? false : true}
                             onClick={() =>
                                 showWarning({
@@ -213,7 +213,7 @@ const ExamTimeTable = () => {
                         >
                             <span className='align-middle ms-50'>{t('Шалгалт үүсгэх')}</span>
                         </Button>
-                        <Button color='primary' className="m-50" disabled={user && Object.keys(user).length && user.permissions.includes('lms-timetable-exam-create')&& school_id ? false : true} onClick={() => handleModal()}>
+                        <Button color='primary' disabled={user && Object.keys(user).length && user.permissions.includes('lms-timetable-exam-create')&& school_id ? false : true} onClick={() => handleModal()}>
                             <Plus size={15} />
                             <span className='align-middle ms-50'>{t('Нэмэх')}</span>
                         </Button>

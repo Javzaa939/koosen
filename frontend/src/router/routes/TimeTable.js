@@ -6,6 +6,7 @@ const AddV2 = lazy(() => import("@views/TimeTable/Register/AddV2"))
 const ExamTimeTable = lazy(() => import("@views/TimeTable/ExamTimeTable"))
 const ExamReport = lazy (() => import("@views/TimeTable/ExamTimeTable/ExamReport"))
 const ExamRepeat = lazy (() => import("@views/TimeTable/ExamRepeat"))
+const EditPage = lazy (() => import("@views/TimeTable/ExamTimeTable/EditPage"))
 
 const TimetableRoutes = [
     {
@@ -26,6 +27,10 @@ const TimetableRoutes = [
     {
         path: 'timetable/exam-register/',
         element: <ExamTimeTable />
+    },
+    {
+        path: 'timetable/exam-register/edit/:id',
+        element: <EditPage />
     },
     {
         path: 'timetable/exam-re/',
