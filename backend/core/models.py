@@ -173,7 +173,7 @@ class User(AbstractUser):
     phone_number = models.IntegerField(null=True, blank=True, verbose_name="Утасны дугаар", unique=True, error_messages={'unique': 'Бүртгэлтэй дугаар байна.'})
     email = models.EmailField(max_length=254, unique=True, blank=False, null=True, verbose_name="И-мэйл", error_messages={ "unique": "И-мэйл давхцсан байна" })
     password = models.CharField(max_length=256, null=True)
-    username = models.CharField(max_length=30, unique=True, null=True)
+    username = models.CharField(max_length=255, unique=True, null=True)
     home_phone = models.IntegerField(null=True, blank=True, verbose_name="Гэрийн утасны дугаар")
     mail_verified = models.BooleanField(null=True, blank=True, default=False, verbose_name="Гэрийн утасны дугаар")
     login_type = models.PositiveIntegerField(choices=LOGIN_TYPE, db_index=True, null=False, default=LOGIN_TYPE_SIMPLE, verbose_name="Хэрэглэгчийн төлөв")
@@ -345,6 +345,7 @@ class Teachers(models.Model):
     emdd_number = models.CharField(default='', null=True, max_length=256, verbose_name="ЭМДД-ийн дугаар", blank=True)
     ndd_number = models.CharField(default='', null=True, max_length=256, verbose_name="НДД-ийн дугаар", blank=True)
     body_height = models.FloatField(default=0, verbose_name="Биеийн өндөр")
+    is_foreigner = models.BooleanField(default=False)
     body_weight = models.FloatField(default=0, verbose_name="Биеийн жин")
 
     org = models.ForeignKey(Schools, blank=True, null=True, on_delete=models.CASCADE, verbose_name="Байгууллага")
