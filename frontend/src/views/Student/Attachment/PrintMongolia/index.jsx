@@ -17,7 +17,7 @@ export default function PrintAttachmentMongolia()
 
     // State
     const [ listArr, setListArr ] = useState([])
-    const [ datas, setDatas ] = useState([])
+    const [ datas, setDatas ] = useState({})
     const [ isPageBreak, setIsPageBreak ] = useState(false)
 
     const [ printDatas, setPrintDatas ] = useState(JSON.parse(localStorage.getItem('blankDatas')))
@@ -68,7 +68,6 @@ export default function PrintAttachmentMongolia()
                     let half = printDatas.tableRowCount.length / 2
                     for (let [idx, val] of printDatas.tableRowCount.entries())
                     {
-                        // console.log(val,'valll')
                         if (idx == half)
                         {
                             if (val > 0)
@@ -102,7 +101,6 @@ export default function PrintAttachmentMongolia()
 									newCell1.innerHTML = count
 									newCell2.innerHTML = flattenedArray[count - 1]?.lesson?.lesson?.name || ''
 									newCell3.innerHTML = flattenedArray[count - 1]?.kredit || ''
-									newCell4.innerHTML = flattenedArray[count - 1]?.score ? flattenedArray[count - 1]?.score : ''
 
 									// NaN буцаагаад байхаар нь шалгах функц бичсэн.
 									// ер нь бол шаардлагагүй гэхдээ яахав
@@ -110,6 +108,8 @@ export default function PrintAttachmentMongolia()
 									// newCell4.innerHTML = !isNaN(flattenedArray[count - 1]?.score)
 									// 	? flattenedArray[count - 1]?.score
 									// 		: 'Default';
+
+									newCell4.innerHTML = flattenedArray[count - 1]?.score ? flattenedArray[count - 1]?.score : ''
 
 									newCell5.innerHTML = flattenedArray[count - 1]?.assesment || ''
 

@@ -78,7 +78,7 @@ export default function AttachmentStudent()
 
     function changeTableRowValues(value)
     {
-        let defaultSum = datas?.calculated_length
+        let defaultSum = datas?.calculated_length + 3
 
         let sum = 0
 
@@ -207,7 +207,7 @@ export default function AttachmentStudent()
     {
         let tableRowData = []
 
-        if (tableCount * 13 < allLength)
+        if (tableCount * 12 < allLength)
         {
             let residual = allLength % tableCount
             let notResidualValue = allLength - residual
@@ -221,7 +221,6 @@ export default function AttachmentStudent()
                     data++
                     residual--
                 }
-
                 tableRowData.push(data)
 
                 document.getElementById(`table${i}`).value = data
@@ -261,12 +260,12 @@ export default function AttachmentStudent()
             switch (printValue)
             {
                 case 'mongolian':
-                    var tableMax = 13
+                    var tableMax = 12
                     calculatePrintTableValue(allLength, tableMax, 6)
                     break;
 
                 case 'english':
-                    var tableMax = 13
+                    var tableMax = 12
                     calculatePrintTableValue(allLength, tableMax, 6)
                     break;
 
