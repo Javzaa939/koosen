@@ -39,7 +39,7 @@ import { validateSchema } from '../validateSchema';
 
 const EditModal = ({ open, handleModal, graduate_id, refreshDatas }) => {
 
-    const { control, handleSubmit, setValue, reset, setError, formState: { errors } } = useForm(validate(validateSchema));
+    const { control, handleSubmit, setValue, reset, setError, formState: { errors } } = useForm();
 
     const { user } = useContext(AuthContext)
 
@@ -145,13 +145,14 @@ const EditModal = ({ open, handleModal, graduate_id, refreshDatas }) => {
 
 	async function onSubmit(cdata)
     {
+
         cdata = convertDefaultValue(cdata)
         cdata['school'] = school_id
         cdata['lesson_year'] = cyear_name
         cdata['lesson_season'] = cseason_id
         cdata['lesson_type'] = radio === 'diploma' ? 1 : 2
 
-        let selectLesson_ids = radio === 'diploma' ? selectLessonIds ? [selectLessonIds] : [] : selectLessonIds
+        let selectLesson_ids = (radio === 'diploma' && selectLessonIds) ? [selectLessonIds] : selectLessonIds
         let allSelectLessonIds = []
 
         for (let selectLessonId of selectLesson_ids)
@@ -162,6 +163,7 @@ const EditModal = ({ open, handleModal, graduate_id, refreshDatas }) => {
         cdata['lesson'] = allSelectLessonIds
 
         const { success, errors } = await fetchData(graduateApi.put(cdata, graduate_id))
+
         if(success) {
             reset()
             handleModal()

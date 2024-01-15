@@ -26,8 +26,15 @@ const AttachmentStudent = lazy(() => import("@views/Student/Attachment/Student")
 const Viz = lazy(() => import("@views/Student/Viz"))
 const StatementPrint = lazy(() => import("@views/Student/Transfer/Irsen/Print"))
 const ScoreSeasonPrint = lazy(() => import("@views/Student/Definition/ScoreSeason"))
+//nemsen zuil ni
+const Graduates = lazy(() => import("@views/Student/Graduates"))
 
 const StudentRoutes = [
+     //shineer nemsen zam ni:
+    {
+        path: 'student/graduates/',
+        element: <Graduates />
+    },
     {
         path: 'student/group/',
         element: <Group />

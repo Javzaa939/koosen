@@ -1,51 +1,12 @@
 from django.urls import path
 
-from .views import LessonStandartAPIView
-from .views import LessonStandartListAPIView
-from .views import ProfessionDefinitionAPIView
-from .views import ProfessionDefinitionListAPIView
-from .views import ProfessionIntroductionFileAPIView
-from .views import LearningPlanAPIView
-from .views import LearningPlanListAPIView
-from .views import ConfirmYearListAPIView
-from .views import LessonStandartStudentListAPIView
-from .views import LessonStandartDiplomaListAPIView
-from .views import ProfessionPlanListAPIView
-from .views import LessonStandartBagtsAPIView
-from .views import LessonTitlePlanAPIView
-from .views import LearningPlanProfessionDefinitionAPIView
-from .views import ProfessionPrintPlanAPIView
-from .views import AdmissionBottomScoreAPIView
-from .views import LessonStandartTimetableListAPIView
-from .views import LessonStandartProfessionListAPIView
-from .views import ChallengeAPIView
-from .views import ChallengeApprovePIView
-from .views import ChallengeSelectAPIView
-from .views import ChallengeSendAPIView
-from .views import ChallengeAllAPIView
-from .views import QuestionsAPIView
-from .views import QuestionsListAPIView
-from .views import LessonsTeacher
-from .views import HomeworkStudentsListAPIView
-from .views import StudentHomeworkListAPIView
-from .views import StudentHomeworkMultiEditAPIView
-from .views import LessonOneApiView
-from .views import LessonAllApiView
-from .views import LessonKreditApiView
-from .views import LessonSedevApiView
-from .views import LessonMaterialApiView
-from .views import LessonMaterialGeneralApiView
-from .views import LessonMaterialAssignmentApiView
-from .views import LessonMaterialSendApiView
-from .views import LessonMaterialApproveApiView
-from .views import LessonEditorImage
-from .views import LessonImage
-
+from .views import *
 
 urlpatterns = [
     # Хичээлийн стандарт
     path('lessonstandart/', LessonStandartAPIView.as_view()),
     path('lessonstandart/<int:pk>/', LessonStandartAPIView.as_view()),
+    path('lessonstandart/group/<int:group>/', LessonStandartGroupAPIView.as_view()),
 
     path('lessonstandart/list/', LessonStandartListAPIView.as_view()),
     path('lessonstandart/list/profession/<int:profession>/', LessonStandartProfessionListAPIView.as_view()),

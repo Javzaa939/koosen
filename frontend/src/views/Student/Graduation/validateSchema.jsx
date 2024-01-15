@@ -7,15 +7,15 @@ export const validateSchema = Yup.object().shape({
     // lesson: Yup.string()
     //     .trim()
     //     .required('Хоосон байна.'),
-    diplom_topic: Yup.string()
-        .trim()
-        .required('Хоосон байна.'),
+    // diplom_topic: Yup.string()
+    //     .trim()
+    //     .required('Хоосон байна.'),
     registration_num: Yup.string()
         .trim()
         .required('Хоосон байна.'),
-    lesson: Yup.string()
-        .trim()
-        .required('Хоосон байна.'),
+    // lesson: Yup.string()
+    //     .trim()
+    //     .required('Хоосон байна.'),
     diplom_topic_eng: Yup.string()
         .trim()
         .required('Хоосон байна.'),

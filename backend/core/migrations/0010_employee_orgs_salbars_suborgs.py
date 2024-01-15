@@ -49,7 +49,6 @@ class Migration(migrations.Migration):
             fields=[
                 ('departments_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='core.salbars')),
             ],
-            bases=('core.salbars',),
             options={
                 'db_table': 'core_salbars',
                 'managed': False,
@@ -60,7 +59,6 @@ class Migration(migrations.Migration):
             fields=[
                 ('subschools_ptr', models.OneToOneField(auto_created=True, on_delete=django.db.models.deletion.CASCADE, parent_link=True, primary_key=True, serialize=False, to='core.suborgs')),
             ],
-            bases=('core.suborgs',),
             options={
                 'db_table': 'core_subschools',
                 'managed': False,
