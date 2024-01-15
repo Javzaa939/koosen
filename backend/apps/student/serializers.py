@@ -413,7 +413,7 @@ class StudentListSerializer(serializers.ModelSerializer):
         ovog = obj.last_name
 
         # хоолойн г ээр төгссөн өол
-        if ovog.endswith("г"):
+        if ovog.endswith("г") or ovog.endswith("ж") or ovog.endswith("ч") or ovog.endswith("ш"):
             ovog = ovog + 'ийн'
         elif ovog.endswith("н") and ('э' in ovog or 'ө' in ovog or 'ү' in ovog):
             ovog = ovog + 'гийн'
