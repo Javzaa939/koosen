@@ -411,9 +411,10 @@ class StudentListSerializer(serializers.ModelSerializer):
 
     def get_lastname(self, obj):
         ovog = obj.last_name
+        reverse_ovog = ovog[::-1]
 
         # хоолойн г ээр төгссөн өол
-        if ovog.endswith("г"):
+        if ovog.endswith("г") or ovog.endswith("ж") or ovog.endswith("ч") or ovog.endswith("ш"):
             ovog = ovog + 'ийн'
         elif ovog.endswith("н") and ('э' in ovog or 'ө' in ovog or 'ү' in ovog):
             ovog = ovog + 'гийн'
@@ -435,9 +436,9 @@ class StudentListSerializer(serializers.ModelSerializer):
             ovog = ovog + 'ийн'
         elif ovog.endswith("н") and ('э' in ovog or 'ө' in ovog or 'ү' in ovog or 'и' in ovog):
             ovog = ovog + 'гийн'
-        elif 'а' in ovog or 'о' in ovog or 'у' in ovog:
+        elif 'а' in reverse_ovog or 'о' in reverse_ovog or 'у' in reverse_ovog:
             ovog = ovog + 'ын'
-        elif 'э' in ovog or 'ө' in ovog or 'ү' in ovog or 'и' in ovog:
+        elif 'э' in reverse_ovog or 'ө' in reverse_ovog or 'ү' in reverse_ovog or 'и' in ovog:
             ovog = ovog + 'ийн'
 
         return ovog
