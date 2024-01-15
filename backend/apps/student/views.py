@@ -2809,7 +2809,7 @@ class SignatureGroupAPIView(
                             **datas
                         }
                     )
-
+                    graduate_obj.lesson.clear()
                     graduate_obj.lesson.add(*list(lessons))
             except Exception as e:
                 return request.send_error('ERR_002')
