@@ -53,9 +53,30 @@ export default function PrintMongolia()
     )
 
     return (
-        <div className='vh-100 position-relative d-flex flex-column justify-content-end align-items-center bg-white' style={{ fontFamily: 'Arial', color: 'black' }} >
+
+        // энэ мөрний стайлын учир сайн олдохгүй л байна.
+        // Харагдах байдал нь print preview дээр зүгээр
+        // хэрнээ хэвлэхээр арагшаа гүйгээд байна.
+
+        // Ерөнхийдөө ажиллагаа одоогоор хэвийн. Өөр төхөөрөмжүүд дээр тестлэж, засвар хийж цэгцлэх шаардлагатай
+
+        <div
+            className={`
+                vh-100 position-relative
+                d-flex flex-column justify-content-center align-items-center
+
+                pe-5
+
+                bg-white
+            `}
+            style={{ fontFamily: 'Arial', color: 'black' }} >
 
             {isLoading && Loader}
+
+
+            <div className='bg-info' style={{ height: 200 }}>
+                {/* Хоосон хэсэг */}
+            </div>
 
             {/* Үндсэн хэсэг */}
             <div className='text-center' style={{ top: '', width: '100%', lineHeight: '30px', fontSize: '19px' }} >
@@ -72,8 +93,8 @@ export default function PrintMongolia()
             </div>
 
             {/* Гарын үсгийн хэсэг */}
-            <div className='mb-3' style={{ bottom: '0', fontSize: '15px' }} >
-                <div style={{ paddingLeft: '70px', paddingRight: '70px' }} >
+            <div className='mb-2' style={{ bottom: '0', fontSize: '15px' }} >
+                <div className='mb-2 mt-5' style={{ paddingLeft: '70px', paddingRight: '70px' }} >
                     <div className='d-flex w-100 text-center justify-content-center fst-italic'>
 
                         {

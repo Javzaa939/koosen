@@ -2411,20 +2411,30 @@ class StudentGpaDiplomaValuesAPIView(
         student_prof_qs = Student.objects.get(id=student_id).group.profession
 
         all_data = dict()
-        calculated_data = list()
 
-        for data in qs:
+        learning_plan_levels = LearningPlan.objects.filter(profession=student_prof_qs).values_list('lesson_level', flat=True).distinct('lesson_level')
 
-            data = CalculatedGpaOfDiplomaPrintSerializer(data, context={ "student_prof_qs": student_prof_qs }, many=False).data
-            calculated_data.append(data)
-            max_kredit = max_kredit + data['kredit']
-            all_score = all_score + (data['score'] * data['kredit'])
+        all_learn_levels = dict(LearningPlan.LESSON_LEVEL)
 
-        newlist = sorted(calculated_data, key=lambda i: (i['lesson']['lesson_level'], i['lesson']['lesson_type'], i['lesson']['season']))
-        print(qs)
-        print(student_prof_qs)
-        print(max_kredit)
-        print(all_score)
+        all_datas = []
+        for level in list(learning_plan_levels):
+            obj_datas = {}
+            obj_datas['name'] = all_learn_levels[level]
+            lesson_datas = []
+            if level == (LearningPlan.DIPLOM or LearningPlan.MAG_DIPLOM or LearningPlan.DOC_DIPLOM):
+                continue
+
+            for data_qs in qs:
+                data = CalculatedGpaOfDiplomaPrintSerializer(data_qs, context={ "student_prof_qs": student_prof_qs }, many=False).data
+                if data['lesson']['lesson_level'] == level:
+                    lesson_datas.append(data)
+
+                    max_kredit = max_kredit + data['kredit']
+                    all_score = all_score + (data['score'] * data['kredit'])
+
+            obj_datas['lessons'] = lesson_datas
+            all_datas.append(obj_datas)
+
         final_gpa = all_score / max_kredit
         score_qs = Score.objects.filter(score_max__gte=final_gpa, score_min__lte=final_gpa).first()
 
@@ -2432,7 +2442,7 @@ class StudentGpaDiplomaValuesAPIView(
             score_assesment = score_qs.gpa
 
         all_data['score'] = { 'assesment': score_assesment, 'max_kredit': max_kredit }
-        all_data['lessons'] = newlist
+        all_data['lessons'] = all_datas
 
         # GraduationWork
         graduationwork_qs = GraduationWork.objects.filter(student_id=student_id).last()

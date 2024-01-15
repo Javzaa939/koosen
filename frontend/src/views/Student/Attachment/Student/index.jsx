@@ -60,6 +60,9 @@ export default function AttachmentStudent()
         })
     }
 
+    console.log('datas', datas)
+    console.log('calculatedDatas', calculatedDatas)
+
 
     useEffect(
         () =>
@@ -97,6 +100,9 @@ export default function AttachmentStudent()
                 break
             }
         }
+
+        console.log('defaultSum', defaultSum)
+        console.log('sum', sum)
 
         if (defaultSum == sum)
         {
@@ -207,7 +213,7 @@ export default function AttachmentStudent()
     {
         let tableRowData = []
 
-        if (tableCount * 13 < allLength)
+        if (tableCount * 12 < allLength)
         {
             let residual = allLength % tableCount
             let notResidualValue = allLength - residual
@@ -221,7 +227,6 @@ export default function AttachmentStudent()
                     data++
                     residual--
                 }
-
                 tableRowData.push(data)
 
                 document.getElementById(`table${i}`).value = data
@@ -261,12 +266,12 @@ export default function AttachmentStudent()
             switch (printValue)
             {
                 case 'mongolian':
-                    var tableMax = 13
+                    var tableMax = 12
                     calculatePrintTableValue(allLength, tableMax, 6)
                     break;
 
                 case 'english':
-                    var tableMax = 13
+                    var tableMax = 12
                     calculatePrintTableValue(allLength, tableMax, 6)
                     break;
 
