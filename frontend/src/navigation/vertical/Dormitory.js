@@ -6,7 +6,7 @@ export default [
         title: 'Дотуур байр',
         icon: <i className="far fa-building"></i>,
         navLink: "/dormitory",
-        children: [
+        navChildren: [
             {
                 id: 'dormitory1',
                 title: 'Өрөөний төрөл',

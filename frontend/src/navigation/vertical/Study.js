@@ -7,7 +7,7 @@ export default [
         title: 'Сургалт',
         icon: <i className="fas fa-users-class"></i>,
         navLink: "/study",
-        children: [
+        navChildren: [
             {
                 id: 'study1',
                 title: 'Хичээлийн стандарт',
