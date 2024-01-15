@@ -151,10 +151,9 @@ export default function PrintAttachmentMongolia()
                     <table className='w-100 text-center d-none' id='table1' >
                         <thead>
                             <tr>
-                                <td rowSpan={2} className='border-dark' style={{ width: '6.25%' }}  >№</td>
-                                <td rowSpan={2} className='border-dark' style={{ width: '63,75%' }}  >Судалсан хичээлийн нэр</td>
-                                <td rowSpan={2} className='border-dark' style={{ width: '12%' }}  >Кредит цаг</td>
-                                <td colSpan={2} className='border-dark' style={{ width: '18%' }}  >Сурлагын</td>
+                                <td rowSpan={2} className='border-dark' style={{ width: '6.25%' }}>№</td>
+                                <td rowSpan={2} className='border-dark' style={{ width: '63,75%' }}>Хичээлийн нэрс</td>
+                                <td rowSpan={2} className='border-dark' style={{ width: '12%' }}  >Кр</td>
                             </tr>
                             <tr>
                                 <td className='border-dark' style={{ width: '10%' }} >Оноо</td>
@@ -193,10 +192,9 @@ export default function PrintAttachmentMongolia()
                     <table className='w-100 text-center d-none' id='table3' >
                         <thead>
                             <tr>
-                                <td rowSpan={2} className='border-dark' style={{ width: '6.25%' }}  >№</td>
-                                <td rowSpan={2} className='border-dark' style={{ width: '63,75%' }}  >Судалсан хичээлийн нэр</td>
-                                <td rowSpan={2} className='border-dark' style={{ width: '12.5%' }}  >Кредит цаг</td>
-                                <td colSpan={2} className='border-dark' style={{ width: '18%' }}  >Сурлагын</td>
+                                <td rowSpan={2} className='border-dark' style={{ width: '6.25%' }}>№</td>
+                                <td rowSpan={2} className='border-dark' style={{ width: '63,75%' }}>Хичээлийн нэрс</td>
+                                <td rowSpan={2} className='border-dark' style={{ width: '12%' }}  >Кр</td>
                             </tr>
                             <tr>
                                 <td className='border-dark' style={{ width: '10%' }} >Оноо</td>
@@ -234,10 +232,9 @@ export default function PrintAttachmentMongolia()
                         <table className='w-100 text-center d-none' id='table4' >
                             <thead>
                                 <tr>
-                                    <td rowSpan={2} className='border-dark' style={{ width: '6.25%' }}  >№</td>
-                                    <td rowSpan={2} className='border-dark' style={{ width: '63.75%' }}  >Судалсан хичээлийн нэр</td>
-                                    <td rowSpan={2} className='border-dark' style={{ width: '12%' }}  >Кредит цаг</td>
-                                    <td colSpan={2} className='border-dark' style={{ width: '18%' }}  >Сурлагын</td>
+                                    <td rowSpan={2} className='border-dark' style={{ width: '6.25%' }}>№</td>
+                                    <td rowSpan={2} className='border-dark' style={{ width: '63,75%' }}>Хичээлийн нэрс</td>
+                                    <td rowSpan={2} className='border-dark' style={{ width: '12%' }}  >Кр</td>
                                 </tr>
                                 <tr>
                                     <td className='border-dark' style={{ width: '10%' }} >Оноо</td>
@@ -255,10 +252,9 @@ export default function PrintAttachmentMongolia()
                         <table className='w-100 text-center d-none' id='table5' >
                             <thead>
                                 <tr>
-                                    <td rowSpan={2} className='border-dark' style={{ width: '6.25%' }}  >№</td>
-                                    <td rowSpan={2} className='border-dark' style={{ width: '63.75%' }}  >Судалсан хичээлийн нэр</td>
-                                    <td rowSpan={2} className='border-dark' style={{ width: '12%' }}  >Кредит цаг</td>
-                                    <td colSpan={2} className='border-dark' style={{ width: '18%' }}  >Сурлагын</td>
+                                    <td rowSpan={2} className='border-dark' style={{ width: '6.25%' }}>№</td>
+                                    <td rowSpan={2} className='border-dark' style={{ width: '63,75%' }}>Хичээлийн нэрс</td>
+                                    <td rowSpan={2} className='border-dark' style={{ width: '12%' }}  >Кр</td>
                                 </tr>
                                 <tr>
                                     <td className='border-dark' style={{ width: '10%' }} >Оноо</td>
@@ -276,10 +272,9 @@ export default function PrintAttachmentMongolia()
                         <table className='w-100 text-center d-none' id='table6' >
                             <thead>
                                 <tr>
-                                    <td rowSpan={2} className='border-dark' style={{ width: '6.25%' }}  >№</td>
-                                    <td rowSpan={2} className='border-dark' style={{ width: '63.75%' }}  >Судалсан хичээлийн нэр</td>
-                                    <td rowSpan={2} className='border-dark' style={{ width: '12%' }}  >Кредит цаг</td>
-                                    <td colSpan={2} className='border-dark' style={{ width: '18%' }}  >Сурлагын</td>
+                                    <td rowSpan={2} className='border-dark' style={{ width: '6.25%' }}>№</td>
+                                    <td rowSpan={2} className='border-dark' style={{ width: '63,75%' }}>Хичээлийн нэрс</td>
+                                    <td rowSpan={2} className='border-dark' style={{ width: '12%' }}  >Кр</td>
                                 </tr>
                                 <tr>
                                     <td className='border-dark' style={{ width: '10%' }} >Оноо</td>

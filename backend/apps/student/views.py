@@ -2421,17 +2421,16 @@ class StudentGpaDiplomaValuesAPIView(
             obj_datas = {}
             obj_datas['name'] = all_learn_levels[level]
             lesson_datas = []
-            if all_learn_levels[level] == 'Диплом':
+            if level == (LearningPlan.DIPLOM or LearningPlan.MAG_DIPLOM or LearningPlan.DOC_DIPLOM):
                 continue
 
             for data_qs in qs:
-
                 data = CalculatedGpaOfDiplomaPrintSerializer(data_qs, context={ "student_prof_qs": student_prof_qs }, many=False).data
                 if data['lesson']['lesson_level'] == level:
                     lesson_datas.append(data)
 
-                max_kredit = max_kredit + data['kredit']
-                all_score = all_score + (data['score'] * data['kredit'])
+                    max_kredit = max_kredit + data['kredit']
+                    all_score = all_score + (data['score'] * data['kredit'])
 
             obj_datas['lessons'] = lesson_datas
             all_datas.append(obj_datas)
