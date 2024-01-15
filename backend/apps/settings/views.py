@@ -30,6 +30,7 @@ from lms.models import DefinitionSignature
 from lms.models import Permissions
 from lms.models import Roles
 from lms.models import AdmissionBottomScore
+from lms.models import OrgPosition
 
 from .serializers import ScoreSerailizer
 from .serializers import SeasonSerailizer
@@ -1678,7 +1679,17 @@ class RolesAPIView(
         """ Role үүсгэх
         """
 
-        return post_put_action(self, request, 'post', request.data)
+        orgpositions = request.data['orgpositions']
+        del request.data['orgpositions']
+
+        created_qs = post_put_action(self, request, 'post', request.data, None, True)
+
+        # Албан тушаалууд дээр сонгогдсон role-ийг оноож өгөх
+        for orgposition in orgpositions:
+            OrgPosition.objects.get(pk=orgposition).roles.add(created_qs.id)
+
+
+        return request.send_info("INF_001")
 
     @login_required()
     @transaction.atomic
@@ -1686,7 +1697,23 @@ class RolesAPIView(
         """ Role засах
         """
 
-        return post_put_action(self, request, 'put', request.data, pk)
+        orgpositions = request.data['orgpositions']
+        del request.data['orgpositions']
+
+        updated_qs = post_put_action(self, request, 'put', request.data, pk, True)
+
+        # Тухайн role дээрх бүх албан тушаалууд олно
+        orgpositions_qs = OrgPosition.objects.filter(roles__id=updated_qs.id)
+
+        # Тухайн role-д хамааралтай албан тушаалуудаас (role-ийг) устгана
+        for orgposition_qs in orgpositions_qs:
+            orgposition_qs.roles.remove(updated_qs)
+
+        # Тухайн role-ийг сонгогдсон албан тушаалуудад онооно
+        for orgposition in orgpositions:
+            OrgPosition.objects.get(pk=orgposition).roles.add(updated_qs.id)
+
+        return request.send_info("INF_002")
 
     @login_required()
     @transaction.atomic

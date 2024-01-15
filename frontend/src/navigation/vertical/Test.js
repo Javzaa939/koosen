@@ -6,7 +6,7 @@ export default [
         title: 'Шалгалт',
         icon: <i className="fa fa-book"></i>,
         navLink: "/test",
-        children: [
+        navChildren: [
             {
                 id: 'question',
                 title: 'Асуулт бэлдэх',

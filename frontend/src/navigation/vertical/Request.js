@@ -8,7 +8,7 @@ export default [
         title: 'Өргөдөл',
         icon: <GitPullRequest size={20} />,
         navLink: "/request",
-        children: [
+        navChildren: [
             // {
             //     id: 'request1',
             //     title: 'Хүсэлтийн төрөл',
@@ -52,7 +52,7 @@ export default [
         title: 'Хүсэлт',
         icon: <Send size={20} />,
         navLink: "/request",
-        children: [
+        navChildren: [
             {
                 id: 'request1',
                 title: 'Олон нийтийн ажилд оролцох',

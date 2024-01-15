@@ -9,7 +9,7 @@ export default [
         title: 'Цагийн хуваарь',
         icon: <FaCalendarAlt size={20} />,
         navLink: "/timetable",
-        children: [
+        navChildren: [
             {
                 id: 'timetable3',
                 title: 'Хичээлийн хуваарь',
