@@ -393,10 +393,12 @@ class StudentListSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField(read_only=True)
     group = GroupListSerializerWithProfessional(many=False, read_only=True)
     citizenship = CountryListSerializer(many=False, read_only=True)
+    school_name = serializers.CharField(source='school.name', default='')
+    lastname = serializers.SerializerMethodField()
 
     class Meta:
         model = Student
-        fields = ["id", 'code', 'first_name', 'last_name', 'register_num', 'full_name', 'group', 'citizenship', 'last_name_eng', 'first_name_eng', 'last_name_uig', 'first_name_uig' ]
+        fields = ["id", 'code', 'first_name', 'last_name', 'register_num', 'full_name', 'group', 'citizenship', 'last_name_eng', 'first_name_eng', 'last_name_uig', 'first_name_uig', 'school_name', 'lastname' ]
 
     def get_full_name(self, obj):
         first_name = obj.first_name
@@ -407,6 +409,38 @@ class StudentListSerializer(serializers.ModelSerializer):
 
         return full_name
 
+    def get_lastname(self, obj):
+        ovog = obj.last_name
+
+        # хоолойн г ээр төгссөн өол
+        if ovog.endswith("г"):
+            ovog = ovog + 'ийн'
+        elif ovog.endswith("н") and ('э' in ovog or 'ө' in ovog or 'ү' in ovog):
+            ovog = ovog + 'гийн'
+        elif ovog.endswith("н") and ('а' in ovog or 'о' in ovog or 'у' in ovog):
+            ovog = ovog + 'ы'
+        elif ovog.endswith("ь"):
+            ovog = ovog + 'ийн'
+        elif ovog.endswith("я") or  ovog.endswith("яа"):
+            ovog = ovog + 'гийн'
+        elif ovog.endswith("аа") or ovog.endswith("ээ") or ovog.endswith("ий") or ovog.endswith("оо") or ovog.endswith("уу") or ovog.endswith("өө") or ovog.endswith("үү"):
+            ovog = ovog + 'гийн'
+        elif ovog.endswith("а")  or ovog.endswith("о") or ovog.endswith("у"):
+            last_element = ovog[-1]
+            ovog = ovog[:-1] + ''
+            ovog = ovog + 'ын'
+        elif ovog.endswith("э") or ovog.endswith("и") or ovog.endswith("ө") or ovog.endswith("ү"):
+            last_element = ovog[-1]
+            ovog = ovog.replace('{}'.format(last_element), '')
+            ovog = ovog + 'ийн'
+        elif ovog.endswith("н") and ('э' in ovog or 'ө' in ovog or 'ү' in ovog or 'и' in ovog):
+            ovog = ovog + 'гийн'
+        elif 'а' in ovog or 'о' in ovog or 'у' in ovog:
+            ovog = ovog + 'ын'
+        elif 'э' in ovog or 'ө' in ovog or 'ү' in ovog or 'и' in ovog:
+            ovog = ovog + 'ийн'
+
+        return ovog
 
 class StudentSimpleListSerializer(serializers.ModelSerializer):
 
