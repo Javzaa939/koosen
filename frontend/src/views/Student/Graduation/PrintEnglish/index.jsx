@@ -25,7 +25,6 @@ export default function PrintMongolia()
             fetchData(signatureApi.get(2)),
         ]).then((values) => {
             setListArr(values[0]?.data)
-            printAuto()
         })
     }
 
@@ -47,7 +46,7 @@ export default function PrintMongolia()
         {
             if (data && listArr.length != 0)
             {
-                // setTimeout(() => window.print(), 1000)
+                setTimeout(() => window.print(), 1000)
             }
         },
         [data, listArr]
