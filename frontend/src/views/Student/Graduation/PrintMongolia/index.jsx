@@ -53,12 +53,33 @@ export default function PrintMongolia()
     )
 
     return (
-        <div className='vh-100 position-relative bg-white' style={{ fontFamily: 'serif', color: 'black' }} >
+
+        // энэ мөрний стайлын учир сайн олдохгүй л байна.
+        // Харагдах байдал нь print preview дээр зүгээр
+        // хэрнээ хэвлэхээр арагшаа гүйгээд байна.
+
+        // Ерөнхийдөө ажиллагаа одоогоор хэвийн. Өөр төхөөрөмжүүд дээр тестлэж, засвар хийж цэгцлэх шаардлагатай
+
+        <div
+            className={`
+                vh-100 position-relative
+                d-flex flex-column justify-content-center align-items-center
+
+                pe-5
+
+                bg-white
+            `}
+            style={{ fontFamily: 'Arial', color: 'black' }} >
 
             {isLoading && Loader}
 
+
+            <div className='bg-info' style={{ height: 200 }}>
+                {/* Хоосон хэсэг */}
+            </div>
+
             {/* Үндсэн хэсэг */}
-            <div className='position-absolute text-center' style={{ top: '310px', width: '100%', lineHeight: '30px', fontSize: '19px' }} >
+            <div className='text-center' style={{ top: '', width: '100%', lineHeight: '30px', fontSize: '19px' }} >
                 <div className='m-auto' style={{ width: '1000px' }}>
                     <span className='fst-italic' >{data?.student?.citizenship?.name} улсын иргэн <span className='fw-bolder'>{data?.student?.last_name} <span className='fw-normal' >овогтой</span> {data?.student?.first_name}</span> нь </span>
                     <br />
@@ -72,9 +93,9 @@ export default function PrintMongolia()
             </div>
 
             {/* Гарын үсгийн хэсэг */}
-            <div className='position-absolute' style={{ bottom: '100px', fontSize: '15px' }} >
-                <div style={{ paddingLeft: '170px', paddingRight: '70px' }} >
-                    <div className='d-flex w-100 text-center fst-italic'>
+            <div className='mb-2' style={{ bottom: '0', fontSize: '15px' }} >
+                <div className='mb-2 mt-5' style={{ paddingLeft: '70px', paddingRight: '70px' }} >
+                    <div className='d-flex w-100 text-center justify-content-center fst-italic'>
 
                         {
                             listArr.length != 0
@@ -82,7 +103,7 @@ export default function PrintMongolia()
                             listArr.map((val, idx) =>
                             {
                                 return (
-                                    <div className='w-25 d-flex flex-column pt-4 pb-2' style={{ paddingRight: '7px', paddingLeft: '7px' }} key={idx} >
+                                    <div className='w-25 d-flex flex-column pt-2 pb-2' style={{ paddingRight: '7px', paddingLeft: '7px' }} key={idx} >
                                         <span>_______________________</span>
                                         <span>{val?.position_name}</span>
                                         <span>{val?.last_name} {val?.first_name}</span>

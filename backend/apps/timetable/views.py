@@ -2951,9 +2951,9 @@ class ExamTimeTableCreateAPIView(
             try:
                 for timetable in timetables:
                     lesson = timetable.get('lesson')
-                    create_lesson = timetable.get('school')
+                    create_lesson_school = timetable.get('school')
 
-                    all_students = get_lesson_choice_student(lesson=lesson, lesson_season=season, lesson_year=year)
+                    all_students = get_lesson_choice_student(lesson=lesson, teacher='', school=school, lesson_year=year, lesson_season=season )
 
                     # Шалгалт үүсгэх
                     exam, created = ExamTimeTable.objects.update_or_create(
@@ -2961,7 +2961,7 @@ class ExamTimeTableCreateAPIView(
                         lesson_year=year.strip(),
                         lesson_season=lesson_season,
                         defaults={
-                            'school_id': create_lesson,
+                            'school_id': create_lesson_school,
                             'created_user': request.user,
                         }
                     )

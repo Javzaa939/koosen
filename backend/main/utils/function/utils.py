@@ -332,8 +332,7 @@ def get_lesson_choice_student(lesson='', teacher='', school='',lesson_year='', l
     TimeTable_to_student = apps.get_model('lms', 'TimeTable_to_student')
     Student = apps.get_model('lms', 'Student')
     StudentRegister = apps.get_model('lms', 'StudentRegister')
-    status = StudentRegister.objects.filter(name__contains='Суралцаж буй').first()
-
+    status = StudentRegister.objects.filter(Q(Q(name__contains='Суралцаж буй') | Q(code=1))).first()
     all_student = []
 
     timetable = TimeTable.objects.all()

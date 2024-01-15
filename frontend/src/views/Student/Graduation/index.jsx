@@ -89,12 +89,21 @@ const Graduation = () => {
 	}
 
     // Loader
-	const { isLoading, fetchData, Loader } = useLoader({ isFullScreen: false })
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
+	const {
+        isLoading,
+        fetchData,
+        Loader
+    } = useLoader({  })
+
+    const {
+        Loader: tableLoader,
+        isLoading: isTableLoading,
+        fetchData: allFetch
+    } = useLoader({isFullScreen: false})
 
 	/* Устгах функц */
 	const handleDelete = async(id) => {
-        const { success } = await fetchData(graduateApi.delete(id))
+        const { success } = await allFetch(graduateApi.delete(id))
         if(success)
         {
             getDatas()
@@ -104,7 +113,7 @@ const Graduation = () => {
     /* Устгах функц */
 	const handleDeleteSig = async(sigId) =>
     {
-		const { success } = await fetchData(signatureApi.delete(sigId))
+		const { success } = await allFetch(signatureApi.delete(sigId))
 		if(success) {
 			let removeVal = listArr.findIndex(({ id }) => id === sigId)
             listArr.splice(removeVal, 1)
@@ -181,7 +190,7 @@ const Graduation = () => {
             setCurrentPage(page_count)
         }
 
-        const { success, data } = await allFetch(graduateApi.get(rowsPerPage, currentPage, sortField, searchValue, select_value.department, select_value.degree, select_value.group))
+        const { success, data } = await fetchData(graduateApi.get(rowsPerPage, currentPage, sortField, searchValue, select_value.department, select_value.degree, select_value.group))
         if(success)
         {
             setTotalCount(data?.count)
@@ -211,7 +220,7 @@ const Graduation = () => {
 
     async function getSignatureDatas()
     {
-        const { success, data } = await fetchData(signatureApi.get(2))
+        const { success, data } = await allFetch(signatureApi.get(2))
         if (success)
         {
             setListArr(data)
@@ -225,7 +234,7 @@ const Graduation = () => {
 
         let data = { from_id, to_id }
 
-        const { success } = await fetchData(signatureApi.changeorder(data, 2))
+        const { success } = await allFetch(signatureApi.changeorder(data, 2))
         if (success)
         {
             getSignatureDatas()
@@ -262,7 +271,7 @@ const Graduation = () => {
 	return (
 		<Fragment>
             <Card>
-                {isLoading && Loader}
+                {/* {isLoading && Loader} */}
                 <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom align-items-center py-1">
                     <CardTitle tag="h4">{t('Гарын үсэг зурах хүмүүс')}</CardTitle>
                     <div className='d-flex flex-wrap mt-md-0 mt-1'>
@@ -520,8 +529,8 @@ const Graduation = () => {
                         className='react-dataTable'
                         progressPending={isTableLoading}
                         progressComponent={
-                            <div className='my-2 d-flex align-items-center justify-content-center'>
-                                <Spinner className='me-1' color="" size='sm'/><h5>Түр хүлээнэ үү...</h5>
+                            <div className='my-2 d-flex align-items-center justify-content-center position-relative'>
+                                {Loader}
                             </div>
                         }
                         noDataComponent={(
