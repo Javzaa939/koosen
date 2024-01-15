@@ -60,6 +60,9 @@ export default function AttachmentStudent()
         })
     }
 
+    console.log('datas', datas)
+    console.log('calculatedDatas', calculatedDatas)
+
 
     useEffect(
         () =>
@@ -78,7 +81,7 @@ export default function AttachmentStudent()
 
     function changeTableRowValues(value)
     {
-        let defaultSum = datas?.calculated_length + 3
+        let defaultSum = datas?.calculated_length
 
         let sum = 0
 
@@ -97,6 +100,9 @@ export default function AttachmentStudent()
                 break
             }
         }
+
+        console.log('defaultSum', defaultSum)
+        console.log('sum', sum)
 
         if (defaultSum == sum)
         {
