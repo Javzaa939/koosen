@@ -62,19 +62,19 @@ export default function PrintMongolia()
             <div className='position-relative w-100 h-100'>
 
                 <div className='d-flex position-absolute start-0' >
-                    <div className='text-center' style={{ writingMode: 'vertical-rl', transform: 'scale(-1, 1)', fontSize: '30px' }} >
+                    <div className='text-center' style={{ writingMode: 'vertical-rl', transform: 'scale(-1, 1)', fontSize: '30px', marginRight: '30px' }} >
                         doge* <span style={{ fontFamily: 'serif' }}>{data?.student?.group?.degree?.degree_code}</span>{data?.diplom_num}
                     </div>
 
-                    <div style={{ writingMode: 'vertical-rl', transform: 'scale(-1, 1)', fontSize: '30px', textAlign: 'justify', textAlignLast: 'center' }} >
-                        {data?.student?.citizenship?.name_uig} folo_ oa fJrhEa {data?.student?.last_name_uig} {data?.student?.first_name_uig} nh {data?.student?.group?.join_year?.substring(0, 4)} - {data?.lesson_year?.substring(5, 9)} Foa dO Moekgo& oa foiedosoa O YekEt SorgegolI dO {data?.student?.group?.profession?.name_uig} <span style={{ fontFamily: 'serif' }}>/{data?.student?.group?.degree?.degree_code}</span > {data?.student?.group?.profession?.code} <span style={{ fontFamily: 'serif' }}>/</span> MerkEji& iie* Sorolcea DeKsohsea Dola
+                    <div style={{ writingMode: 'vertical-rl', transform: 'scale(-1, 1)', fontSize: '30px', textAlign: 'justify' }} >
+                        {data?.student?.citizenship?.name_uig} folo_ oa fJrhEa {data?.student?.last_name_uig} {data?.student?.first_name_uig} nh {data?.student?.group?.join_year?.substring(0, 4)} - {data?.lesson_year?.substring(5, 9)} Foa dO Moekgo& oa foiedosoa O YekEt SorgegolI dO {data?.student?.group?.profession?.name_uig} <span style={{ fontFamily: 'serif' }}>({data?.student?.group?.degree?.degree_code}</span > {data?.student?.group?.profession?.code} <span style={{ fontFamily: 'serif' }}>)</span> MerkEji& iie* Sorolcea DeKsohsea Dola
                         DeKsolda iia Silgelda iia |mis_ oa {data?.decision_date?.substring(0, 4)} Foa O {data?.decision_date?.substring(5, 7)} doge* Se*T iia {data?.decision_date?.substring(8, 10)} - O Fdo* oa SiioeBrI iI Foiedosolea , Jehuro& oa {data?.graduation_date?.substring(0, 4)} Foa O {data?.graduation_date?.substring(5, 7)} doge* Se*T iia {data?.graduation_date?.substring(8, 10)} - O Fdo* oa {data?.graduation_number} DogedO Dosiye& iie* {data?.student?.group?.profession?.dep_name_uig}
                         <br />
                         <span className='fw-bolder'>{data?.student?.group?.degree?.degree_name_uig}</span> oa JerhEt FolgobEt.
                     </div>
                 </div>
 
-                <div className='d-flex position-absolute' style={{ right: '70px' }} >
+                <div className='d-flex position-absolute' style={{ right: '200px' }} >
 
                     {/* Гарын үсгийн хэсэг */}
                             {
@@ -90,7 +90,7 @@ export default function PrintMongolia()
                                 })
                             }
 
-                    <div className='d-flex justify-content-between' style={{ writingMode: 'vertical-rl', transform: 'scale(-1, 1)', fontSize: '24px', marginLeft: '58px' }} >
+                    <div className='d-flex justify-content-between' style={{ writingMode: 'vertical-rl', transform: 'scale(-1, 1)', fontSize: '24px', marginLeft: '20px' }} >
                         <span>Moekgo& folo_ , folegefbEgedo* Hoda</span>
                         <span>BirioekE& oa doge* {data?.registration_num}</span>
                     </div>

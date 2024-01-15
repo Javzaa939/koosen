@@ -529,8 +529,8 @@ const Graduation = () => {
                         className='react-dataTable'
                         progressPending={isTableLoading}
                         progressComponent={
-                            <div className='my-2 d-flex align-items-center justify-content-center position-relative'>
-                                {Loader}
+                            <div className='my-2 d-flex align-items-center justify-content-center'>
+                                <Spinner className='me-1' color="" size='sm'/><h5>Түр хүлээнэ үү...</h5>
                             </div>
                         }
                         noDataComponent={(
