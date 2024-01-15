@@ -19,6 +19,7 @@ from lms.models import DefinitionSignature
 
 from core.models import Permissions
 from core.models import Roles
+from core.models import OrgPosition
 
 from main.utils.function.utils import get_week_num_from_date
 
@@ -225,6 +226,7 @@ class RolesSerializer(serializers.ModelSerializer):
 class RolesListSerializer(serializers.ModelSerializer):
 
     permissions = serializers.SerializerMethodField()
+    positions = serializers.SerializerMethodField()
 
     class Meta:
         model = Roles
@@ -234,3 +236,9 @@ class RolesListSerializer(serializers.ModelSerializer):
 
         permissions = obj.permissions.filter(name__startswith='lms-').values_list('id', flat=True)
         return list(permissions)
+
+    def get_positions(self, obj):
+
+        org_pos_ids = OrgPosition.objects.filter(roles__in=[obj.id]).values_list('id', flat=True).distinct()
+
+        return list(org_pos_ids)

@@ -1,5 +1,5 @@
 // ** Icons Import
-import { Circle,Clock, Watch } from 'react-feather'
+import { Circle, Watch } from 'react-feather'
 
 export default [
     {
@@ -7,7 +7,7 @@ export default [
         title: 'Цагийн тооцоо',
         icon: <Watch size={20} />,
         navLink: "/credit",
-        children: [
+        navChildren: [
             {
                 id: 'credit3',
                 title: 'Хичээл тулгалт',

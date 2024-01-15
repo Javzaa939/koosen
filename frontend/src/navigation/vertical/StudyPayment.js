@@ -9,7 +9,7 @@ export default [
         title: 'Сургалтын төлбөр',
         icon: <MdPayment size={20} />,
         navLink: "/studypayment",
-        children: [
+        navChildren: [
             {
                 id: 'studypayment1',
                 title: 'Төлбөрийн тохиргоо',

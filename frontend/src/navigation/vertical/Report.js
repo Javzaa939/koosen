@@ -7,7 +7,7 @@ export default [
         title: 'Тайлан',
         icon: <i className="far fa-file-chart-line"></i>,
         navLink: "/report",
-        children: [
+        navChildren: [
             {
                 id: 'report1',
                 title: 'Дүнгийн тодорхойлолт',

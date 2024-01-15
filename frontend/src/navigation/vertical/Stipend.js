@@ -7,7 +7,7 @@ export default [
         title: 'Тэтгэлэг',
         icon: <i className="far fa-award"></i>,
         navLink: "/stipend",
-        children: [
+        navChildren: [
             {
                 id: 'stipend1',
                 title: 'Тэтгэлэгийн бүртгэл',

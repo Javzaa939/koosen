@@ -6,7 +6,7 @@ export default [
         title: 'Судалгаа',
         icon: <i className="fal fa-ballot-check"></i>,
         navLink: "/survey",
-        children: [
+        navChildren: [
             {
                 id: 'takesurvey',
                 title: 'Судалгааны жагсаалт',
