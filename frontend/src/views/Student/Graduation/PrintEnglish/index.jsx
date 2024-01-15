@@ -124,26 +124,27 @@ export default function PrintMongolia()
             {/* Үндсэн хэсэг */}
             <div className='position-absolute text-center' style={{ top: '300px', width: '100%', fontSize: '19px', lineHeight: '30px' }} >
                 <div className='m-auto' style={{ width: '1000px' }}>
-                    <span className='text-center fst-italic'>This is to certify that <span className='fw-bolder text-uppercase'>{data?.student?.last_name_eng} {data?.student?.first_name_eng}</span> a citizen of {data?.student?.citizenship?.name_eng},
+                    <span className='text-center'>This is to certify that
                     <br />
-                    has been duly awarded by the President order {data?.graduation_number} dated on {monthToText(data?.graduation_date?.substring(5, 7))} {data?.graduation_date?.substring(8, 10)}, {data?.graduation_date?.substring(0, 4)} upon
+                    <span className='fw-bolder text-uppercase'>{data?.student?.last_name_eng} {data?.student?.first_name_eng}</span>
                     <br />
-                    the decision of the Graduation Commission on {monthToText(data?.decision_date?.substring(5, 7))} {data?.decision_date?.substring(8, 10)}, {data?.decision_date?.substring(0, 4)} the degree of</span>
+                    citizen of {data?.student?.citizenship?.name_eng},
                     <br />
-                    <span className='fw-bolder text-uppercase'>{data?.student?.group?.degree?.degree_eng_name} of {data?.student?.group?.profession?.dep_name_eng}</span>
+                    has completed requirements of the programme {data?.student?.group?.profession?.name_eng} ({data?.student?.group?.degree?.degree_code}{data?.student?.group?.profession?.code})
                     <br />
-                    <span className='text-center fst-italic'>for having successfully complated the prescribed course of study in
+                    was awarded the degree of <span className='text-uppercase'>{data?.student?.group?.degree?.degree_eng_name} OF {data?.student?.group?.profession?.dep_name_eng}</span>
                     <br />
-                    <span className='text-uppercase'><span className='fst-normal fw-bolder'>{data?.student?.group?.profession?.name_eng}</span> / {data?.student?.group?.degree?.degree_code}{data?.student?.group?.profession?.code} /</span>
+                    by the President's order {data?.graduation_number} dated {data?.graduation_date?.substring(8, 10)} {monthToText(data?.graduation_date?.substring(5, 7))} {data?.graduation_date?.substring(0, 4)}, based on the decision of the
                     <br />
-                     at the Mongolian National University for the period of {data?.student?.group?.join_year?.substring(0, 4)}-{data?.lesson_year?.substring(5, 9)}.</span>
+                    Graduation Examination Committee
+                    </span>
                 </div>
             </div>
 
             {/* Гарын үсгийн хэсэг */}
             <div className='position-absolute' style={{ bottom: '100px', fontSize: '15px' }} >
-                <div style={{ paddingLeft: '170px', paddingRight: '70px' }} >
-                    <div className='d-flex w-100 text-center justify-content-center fst-italic'>
+                <div style={{ paddingLeft: '70px', paddingRight: '70px', lineHeight: '18px' }} >
+                    <div className='d-flex w-100 text-center justify-content-center'>
 
                         {
                             listArr.length != 0
@@ -164,9 +165,9 @@ export default function PrintMongolia()
                 </div>
 
                 {/* Footer */}
-                <div className='d-flex justify-content-between fst-italic'>
-                    <span style={{ paddingLeft: '130px' }} >Ulaanbaatar, Mongolia</span>
-                    <span style={{ paddingRight: '150px' }} >Registration No: {data?.registration_num}</span>
+                <div className='d-flex justify-content-between'>
+                    <span style={{ paddingLeft: '130px' }} >ULAANBAATAR CITY</span>
+                    <span style={{ paddingRight: '150px' }} >REGISTER No: {data?.registration_num}</span>
                 </div>
             </div>
 
