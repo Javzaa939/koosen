@@ -33,10 +33,10 @@ export default function PrintMongolia()
         {
             getAllData()
 
-            window.onafterprint = function()
-            {
-                window.close()
-            }
+            // window.onafterprint = function()
+            // {
+            //     window.close()
+            // }
         },
         []
     )
@@ -121,21 +121,21 @@ export default function PrintMongolia()
             {isLoading && Loader}
 
             {/* Үндсэн хэсэг */}
-            <div className='position-absolute text-center' style={{ top: '300px', width: '100%', fontSize: '19px', lineHeight: '30px' }} >
+            <div className='position-absolute text-center' style={{ top: '250px', width: '100%', fontSize: '19px', lineHeight: '30px' }} >
                 <div className='m-auto' style={{ width: '1000px' }}>
                     <span className='text-center'>This is to certify that
-                    <br />
-                    <span className='fw-bolder text-uppercase'>{data?.student?.last_name_eng} {data?.student?.first_name_eng}</span>
-                    <br />
-                    citizen of {data?.student?.citizenship?.name_eng},
-                    <br />
-                    has completed requirements of the programme {data?.student?.group?.profession?.name_eng} ({data?.student?.group?.degree?.degree_code}{data?.student?.group?.profession?.code})
-                    <br />
-                    was awarded the degree of <span className='text-uppercase'>{data?.student?.group?.degree?.degree_eng_name} OF {data?.student?.group?.profession?.dep_name_eng}</span>
-                    <br />
-                    by the President's order {data?.graduation_number} dated {data?.graduation_date?.substring(8, 10)} {monthToText(data?.graduation_date?.substring(5, 7))} {data?.graduation_date?.substring(0, 4)}, based on the decision of the
-                    <br />
-                    Graduation Examination Committee
+                        <br />
+                        <span className='fw-bolder text-uppercase'>{data?.student?.last_name_eng} {data?.student?.first_name_eng}</span>
+                        <br />
+                        citizen of {data?.student?.citizenship?.name_eng},
+                        <br />
+                        has completed requirements of the programme {data?.student?.group?.profession?.name_eng} ({data?.student?.group?.degree?.degree_code}{data?.student?.group?.profession?.code})
+                        <br />
+                        was awarded the degree of <span className='text-uppercase'>{data?.student?.group?.degree?.degree_eng_name} OF {data?.student?.group?.profession?.dep_name_eng}</span>
+                        <br />
+                        by the President's order {data?.graduation_number} dated {data?.graduation_date?.substring(8, 10)} {monthToText(data?.graduation_date?.substring(5, 7))} {data?.graduation_date?.substring(0, 4)}, based on the decision of the
+                        <br />
+                        Graduation Examination Committee
                     </span>
                 </div>
             </div>
