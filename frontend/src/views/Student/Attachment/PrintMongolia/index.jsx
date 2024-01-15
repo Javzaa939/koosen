@@ -127,7 +127,7 @@ export default function PrintAttachmentMongolia()
 									newCell1.innerHTML = flattenedArray[count - 1]?.name
 									newCell1.colSpan = 5
 
-									newCell1.className = 'border-dark body-cell'
+									newCell1.className = 'border-dark body-cell text-center'
 
 									}
 
@@ -171,10 +171,9 @@ export default function PrintAttachmentMongolia()
                     <table className='w-100 text-center d-none' id='table2' >
                         <thead>
                             <tr>
-                                <td rowSpan={2} className='border-dark' style={{ width: '6.25%' }}  >№</td>
-                                <td rowSpan={2} className='border-dark' style={{ width: '63,75%' }}  >Судалсан хичээлийн нэр</td>
-                                <td rowSpan={2} className='border-dark' style={{ width: '12.5%' }}  >Кредит цаг</td>
-                                <td colSpan={2} className='border-dark' style={{ width: '18%' }}  >Сурлагын</td>
+                                <td rowSpan={2} className='border-dark' style={{ width: '6.25%' }}>№</td>
+                                <td rowSpan={2} className='border-dark' style={{ width: '63,75%' }}>Хичээлийн нэрс</td>
+                                <td rowSpan={2} className='border-dark' style={{ width: '12%' }}  >Кр</td>
                             </tr>
                             <tr>
                                 <td className='border-dark' style={{ width: '10%' }} >Оноо</td>
