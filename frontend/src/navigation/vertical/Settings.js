@@ -9,13 +9,13 @@ export default [
         navLink: "/settings",
         navChildren: [
             {
-                id: 'settingsLevel14',
+                id: 'settings_employee',
                 title: 'Ажилчдын тохиргоо',
                 icon: <Circle size={8} />,
                 navLink: "settings/teacher/"
             },
             {
-                id: 'timetable1',
+                id: 'settings_student',
                 title: 'Оюутнуудын тохиргоо',
                 icon: <Circle size={8} />,
                 navLink: "settings/student/"

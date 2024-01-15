@@ -129,40 +129,10 @@ const VerticalLayout = (props) =>
 
 
                     /** Ажиллах жил */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-settings-аctiveyear-read', 'settingsLevel0')
+                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-employee-settings-read', 'settings_employee')
 
                     /** Боловсролын зэрэг */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-settings-degree-read', 'settingsLevel1')
-
-                    /** Суралцах хэлбэр */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-settings-learningstatus-read', 'settingsLevel2')
-
-                    /** Оюутны бүртгэлийн хэлбэр */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-settings-registerstatus-read', 'settingsLevel3')
-
-                    /** Хичээлийн ангилал */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-settings-lessoncategory-read', 'settingsLevel4')
-
-                    /** Хичээлийн бүлэг */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-settings-lessongroup-read', 'settingsLevel9')
-
-                    /** Улирал */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-settings-season-read', 'settingsLevel10')
-
-                    /** Үнэлгээний бүртгэл */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-settings-score-read', 'settingsLevel11')
-
-                    /** ЭЕШ-ын хичээлийн бүртгэл */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-settings-admissionlesson-read', 'settingsLevel12')
-
-                    /** Төлбөрийн хөнгөлөлтийн төрөл */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-settings-discounttype-read', 'settingsLevel13')
-
-                    /** Улс */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-settings-country-read', 'settingsCountry13')
-
-                    /** Тодорхойлолтын гарын үсэг */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-settings-signature-read', 'settingsLevel14')
+                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-settings-read', 'settings_student')
 
                     /** Эрх */
                     childrenDatas = checkPerm(childrenDatas, menus, user.is_superuser, 'settingsLevel15')
@@ -171,12 +141,6 @@ const VerticalLayout = (props) =>
                     childrenDatas = checkPerm(childrenDatas, menus, 'role-read', 'settingsLevel16')
 
                     /** ----------------------------- Хичээлийн хуваарь ---------------------------- */
-
-                    /** Хичээлийн байрны бүртгэл */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-timetable-building-read', 'timetable1')
-
-                    /** Өрөөний бүртгэл */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-timetable-room-read', 'timetable2')
 
                     /** Цагийн хуваарь */
                     childrenDatas = checkPerm(childrenDatas, menus, 'lms-timetable-register-read', 'timetable3')
