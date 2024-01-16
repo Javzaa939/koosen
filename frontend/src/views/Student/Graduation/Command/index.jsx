@@ -9,7 +9,7 @@ import { t } from 'i18next'
 import { AlertTriangle } from "react-feather";
 import DataTable from 'react-data-table-component';
 import { useForm, Controller } from "react-hook-form";
-import { convertDefaultValue } from '@utils'
+import { convertDefaultValue, getPagination, validate } from '@utils'
 
 import {
     Row,
@@ -25,6 +25,23 @@ import {
     Spinner,
     UncontrolledTooltip
 } from "reactstrap";
+
+import * as Yup from 'yup'
+
+const validateSchema = Yup.object().shape(
+{
+    graduation_date: Yup.string()
+        .trim()
+        .required('Хоосон байна'),
+
+    graduation_number: Yup.string()
+        .trim()
+        .required('Хоосон байна'),
+
+    decision_date: Yup.string()
+        .trim()
+        .required('Хоосон байна'),
+});
 
 function getColumns() {
     const columns = [
@@ -57,26 +74,32 @@ function getColumns() {
     return columns
 }
 
-const CreateModal = ({ open, handleModal, refreshDatas, group }) => {
+const GraduationCommand = ({ open, handleModal, refreshDatas }) => {
 
-    const { control, handleSubmit, setValue, reset, setError, formState: { errors } } = useForm();
-
+    const { control, handleSubmit, setValue, reset, setError, formState: { errors } } = useForm(validate(validateSchema));
     const [is_change, setIsChange] = useState(false);
     const [studentOption, setStudentOption] = useState([])
     const [studentLen, setStudentLen] = useState(studentOption.length)
 
+
     // Loader
 	const { Loader, isLoading, fetchData } = useLoader({});
+
+	const { Loader: StudentLoader, isLoading: studentLoading, fetchData: studentFetchData } = useLoader({});
 
     // Api
     const studentApi = useApi().student
 
+
+    // оюутны жагсаалт
     async function getStudentOption() {
-        const { success, data } = await fetchData(studentApi.getGraduate('', '', group))
+        const { success, data } = await studentFetchData(studentApi.getStudentCommandList())
+
         if(success) {
             setStudentOption(data)
         }
     }
+
 
     useEffect(()=>{
         getStudentOption()
@@ -89,10 +112,9 @@ const CreateModal = ({ open, handleModal, refreshDatas, group }) => {
         var selected_students = is_change ? studentOption.filter((c) => c.is_selected) : studentOption
 
         cdata['students'] = selected_students
-        cdata['group'] = group
         cdata = convertDefaultValue(cdata)
+        const { success } = await fetchData(studentApi.postCommand(cdata))
 
-        const { success } = await fetchData(studentApi.postGraduate(cdata))
         if (success)
         {
             refreshDatas()
@@ -123,12 +145,12 @@ const CreateModal = ({ open, handleModal, refreshDatas, group }) => {
 
 	return (
         <Fragment>
-            <Modal isOpen={open} toggle={handleModal} className="modal-dialog-centered modal-xl">
-                {isLoading && <div className='suspense-loader'><Spinner size='xl'/></div>}
+            <Modal isOpen={open} toggle={handleModal} className="modal-dialog-centered modal-xl" >
                 <ModalHeader className='bg-transparent pb-0' toggle={handleModal}></ModalHeader>
                 <ModalBody className="px-sm-3 pt-50 pb-3">
+                {studentLoading && StudentLoader}
                     <div className='text-center'>
-                        <h4>{t('Төгсөлтийн ажил үүсгэх')}</h4>
+                        <h4>{t('Төгсөлтийн тушаал оруулах')}</h4>
                     </div>
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(handleGraduate)}>
                         <Col sm={6} md={4}>
@@ -217,6 +239,7 @@ const CreateModal = ({ open, handleModal, refreshDatas, group }) => {
                                         selectableRows
                                         onSelectedRowsChange={(state) => onSelectedRowsChange(state)}
                                         selectableRowSelected={row => is_change ? row?.is_selected && row?.is_selected : true}
+                                        progressPending={studentLoading}
                                     />
                                 </div>
                             :
@@ -238,4 +261,4 @@ const CreateModal = ({ open, handleModal, refreshDatas, group }) => {
         </Fragment>
 	);
 };
-export default CreateModal;
+export default GraduationCommand;

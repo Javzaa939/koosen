@@ -27,6 +27,8 @@ import useLoader from '@hooks/useLoader';
 import useModal from '@hooks/useModal'
 import useUpdateEffect from '@hooks/useUpdateEffect'
 
+import GraduationCommand from './Command'
+
 // drag-and-drop.scss
 import '@styles/react/libs/drag-and-drop/drag-and-drop.scss'
 
@@ -61,6 +63,7 @@ const Graduation = () => {
     const [select_value, setSelectValue] = useState(values)
     const [datas, setDatas] = useState([])
     const [createModal, setCreateModal] = useState(false);
+    const [commandModal, setCommandModal] = useState(false);
 
 
     const [ listArr, setListArr ] = useState([])
@@ -268,6 +271,10 @@ const Graduation = () => {
         setCreateModal(!createModal)
     }
 
+    function handleCommandCreateModal() {
+        setCommandModal(!commandModal)
+    }
+
 	return (
 		<Fragment>
             <Card>
@@ -355,7 +362,7 @@ const Graduation = () => {
                     </div>
                 </CardHeader>
                 <Row className="justify-content-between mx-0 mt-1 mb-1" sm={12}>
-                    <Col md={3}>
+                    <Col md={3}  sm={6}>
                         <Label className="form-label" for="department">
                             {t('Тэнхим')}
                         </Label>
@@ -393,7 +400,7 @@ const Graduation = () => {
                             }}
                         />
                     </Col>
-                    <Col md={3}>
+                    <Col md={3}  sm={6}>
                         <Label className="form-label" for="degree">
                             {t('Боловсролын зэрэг')}
                         </Label>
@@ -431,7 +438,7 @@ const Graduation = () => {
                             }}
                         />
                     </Col>
-                    <Col md={3}>
+                    <Col md={3} sm={6}>
                         <Label className="form-label" for="group">
                             {t('Анги')}
                         </Label>
@@ -469,8 +476,9 @@ const Graduation = () => {
                             }}
                         />
                     </Col>
-                    <Col md={3} className='mt-2'>
-                        <Button size='sm' color='primary' disabled={select_value.group ? false : true} onClick={handleCreateModal}>Төгсөгчид үүсгэх</Button>
+                    <Col sm={6} md={6} lg={3} className='mt-2 d-flex'>
+                        <Button size='sm' className='me-1' color='primary' disabled={select_value.group ? false : true} onClick={handleCreateModal}>Төгсөлтийн шалгалт үүсгэх</Button>
+                        <Button size='sm' className='me-1' color='primary' disabled={datas.length > 0 ? false : true} onClick={handleCommandCreateModal}>Төгсөлтийн тушаал оруулах</Button>
                     </Col>
                 </Row>
                 <Row className='mt-1 d-flex justify-content-between mx-0'>
@@ -550,11 +558,12 @@ const Graduation = () => {
                     />
                 </div>
         	</Card>
-            {modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} select_value={select_value}/>}
-            {edit_modal && <EditModal open={edit_modal} handleModal={editModal} graduate_id={graduate_id} refreshDatas={getDatas}/>}
-            {createModal && <CreateModal open={createModal} handleModal={handleCreateModal} group={select_value?.group} refreshDatas={getDatas}/>}
+            <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} select_value={select_value}/>
+            <EditModal open={edit_modal} handleModal={editModal} graduate_id={graduate_id} refreshDatas={getDatas}/>
+            <CreateModal open={createModal} handleModal={handleCreateModal} group={select_value?.group} refreshDatas={getDatas}/>
 
-            { formModal && <SignatureModal open={formModal} handleModal={handleModalSig} refreshDatas={getSignatureDatas} defaultDatas={updateData} /> }
+            <SignatureModal open={formModal} handleModal={handleModalSig} refreshDatas={getSignatureDatas} defaultDatas={updateData}/>
+            <GraduationCommand open={commandModal} handleModal={handleCommandCreateModal} refreshDatas={getDatas}/>
 
             {/* Шинэ хуудас руу үсэргэх товч */}
             <Link className='d-none' to='/' id='clickBtn' target='_blank' ></Link>

@@ -25,6 +25,8 @@ from main.utils.function.pagination import CustomPagination
 from main.utils.function.utils import str2bool, has_permission, get_lesson_choice_student, remove_key_from_dict, get_fullName, get_student_score_register, calculate_birthday, null_to_none, end_time, get_active_year_season,start_time
 # from main.khur.XypClient import citizen_regnum, highschool_regnum
 
+from core.models import SubOrgs, SumDuureg, AimagHot
+
 from lms.models import Student, StudentAdmissionScore, StudentEducation, StudentLeave, StudentLogin, TimeTable
 from lms.models import StudentMovement
 from lms.models import Group
@@ -54,8 +56,6 @@ from lms.models import SystemSettings
 from lms.models import PaymentBeginBalance
 from lms.models import Country
 
-from core.models import SubOrgs, SumDuureg, BagHoroo, AimagHot
-
 from .serializers import StudentListSerializer
 from .serializers import StudentRegisterSerializer
 from .serializers import StudentRegisterListSerializer
@@ -69,7 +69,7 @@ from .serializers import StudentEducationSerializer
 from .serializers import StudentEducationListSerializer
 from .serializers import SignaturePeoplesSerializer
 from .serializers import StudentAddressListSerializer
-from .serializers import StudentAddressSerializer
+from .serializers import GraduationWorkStudentListSerializer
 from .serializers import StudentAdmissionScoreSerializer
 from .serializers import StudentAdmissionScoreListSerializer
 from .serializers import GroupListSerializer
@@ -2815,3 +2815,68 @@ class SignatureGroupAPIView(
                 return request.send_error('ERR_002')
 
         return request.send_info('INF_001')
+
+@permission_classes([IsAuthenticated])
+class CommandAPIView(
+    generics.GenericAPIView,
+    mixins.CreateModelMixin,
+):
+    queryset = GraduationWork.objects.all()
+
+    def post(self, request):
+        "Тушаал шинээр үүсгэх нь "
+
+        user = request.user
+        lesson_year, lesson_season = get_active_year_season()
+
+        datas = request.data
+        students = datas.get('students')
+        decision_date = datas.get('decision_date')
+        graduation_date = datas.get('graduation_date')
+        graduation_number = datas.get('graduation_number')
+
+        datas['lesson_year'] = lesson_year
+        datas['lesson_season_id'] = lesson_season
+        datas['lesson_type'] = GraduationWork.ATTACHMENT_SHALGALT
+        datas['created_user'] = user
+
+        with transaction.atomic():
+            try:
+                for student in students:
+                    GraduationWork.objects.update_or_create(
+                        student_id = student.get('id'),
+                        lesson_year = lesson_year,
+                        lesson_season_id = lesson_season,
+                        defaults={
+                            "decision_date":decision_date,
+                            "graduation_number":graduation_number,
+                            "graduation_date":graduation_date
+                        }
+                    )
+
+            except Exception as e:
+                return request.send_error('ERR_002')
+
+        return request.send_info('INF_001')
+
+
+@permission_classes([IsAuthenticated])
+class StudentCommandListAPIView(
+    mixins.ListModelMixin,
+    generics.GenericAPIView
+):
+    """ Төгсөлтын ажлын оюутны жагсаалт """
+
+    queryset = GraduationWork.objects.all()
+    serializer_class = GraduationWorkStudentListSerializer
+
+    def get(self, request):
+        " Идэвхитэй жил, улиралд төгсөх оюутны жагсаалт "
+
+        year, season = get_active_year_season()
+
+        stud_qs = self.queryset.filter(lesson_year=year, lesson_season=season).values_list('student', flat=True)
+        student_data = Student.objects.filter(id__in=stud_qs).values("id", "code", "last_name", "first_name")
+
+        data = list(student_data)
+        return request.send_data(data)
