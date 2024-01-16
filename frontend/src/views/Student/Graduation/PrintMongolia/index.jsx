@@ -56,26 +56,26 @@ export default function PrintMongolia()
     {
         switch (too)
         {
-            case 0:
-                return 'дүгаар'
-            case 1:
-                return 'дүгаар'
-            case 2:
+            case '0' || 0:
+                return 'дүгээр'
+            case '1' || 1:
+                return 'дүгээр'
+            case '2' || 2:
                 return 'дугаар'
-            case 3:
+            case '3' || 3:
                 return 'дугаар'
-            case 4:
-                return 'дүгаар'
-            case 5:
+            case '4' || 4:
+                return 'дүгээр'
+            case '5' || 5:
                 return 'дугаар'
-            case 6:
+            case '6' || 6:
                 return 'дугаар'
-            case 7:
+            case '7' || 7:
                 return 'дугаар'
-            case 8:
+            case '8' || 8:
                 return 'дугаар'
-            case 9:
-                return 'дүгаар'
+            case '9' || 9:
+                return 'дүгээр'
             default:
                 break;
         }
