@@ -21,6 +21,9 @@ export default function PrintAttachmentEnglish()
     const [ printDatas, setPrintDatas ] = useState(JSON.parse(localStorage.getItem('blankDatas')))
     const [ datas, setDatas ] = useState([])
 
+    console.log(printDatas)
+    console.log(datas)
+
     async function getAllData(studentId)
     {
         await Promise.all([
@@ -45,7 +48,8 @@ export default function PrintAttachmentEnglish()
     const flattenedArray = lessonData.flatMap(item => [
         {
             type: "parent",
-            name: item?.name
+            name: item?.name,
+            eng_name: item?.eng_name,
         },
 		...item.lessons.map((lesson) => {
             return {
@@ -117,7 +121,7 @@ export default function PrintAttachmentEnglish()
                                 {
                                     let newCell1 = newRow.insertCell();
 
-									newCell1.innerHTML = flattenedArray[count - 1]?.name_eng
+									newCell1.innerHTML = flattenedArray[count - 1]?.eng_name
 									newCell1.colSpan = 5
 
 									newCell1.className = 'border-dark body-cell text-center'
@@ -280,7 +284,7 @@ export default function PrintAttachmentEnglish()
                         <span className='fw-normal w-50' style={{ width: '200px'}}>Graduated year:</span> <span>{printDatas?.student?.graduation_work?.lesson_year?.substring(5, 9)}</span>
                     </div>
                     <div className='d-flex px-2' style={{ width: '33.3%' }} >
-                        <span className='fw-normal w-50'>Date:</span> <span>{printDatas?.registration_num}</span>
+                        <span className='fw-normal w-50'>Date:</span> <span>{printDatas?.registration_num?.replaceAll('.', '-')}</span>
                     </div>
                 </div>
                 <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >

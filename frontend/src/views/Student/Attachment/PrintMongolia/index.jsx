@@ -293,7 +293,7 @@ export default function PrintAttachmentMongolia()
                         <span className='fw-normal w-50' style={{ width: '200px'}}>Төгссөн он:</span> <span>{printDatas?.student?.graduation_work?.lesson_year?.substring(5, 9)}</span>
                     </div>
                     <div className='d-flex px-2' style={{ width: '33.3%' }} >
-                        <span className='fw-normal w-50'>Олгосон огноо:</span> <span>{printDatas?.registration_num}</span>
+                        <span className='fw-normal w-50'>Олгосон огноо:</span> <span>{printDatas?.registration_num?.replaceAll('.', '-')}</span>
                     </div>
                 </div>
                 <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
@@ -312,7 +312,7 @@ export default function PrintAttachmentMongolia()
                         <span className='fw-normal w-50'>Регистрийн дугаар:</span> <span>{printDatas?.student?.register_num}</span>
                     </div>
                     <div className='d-flex px-1' style={{ width: '33.3%' }} >
-                        <span className='fw-normal w-50'>Мэргэжил:</span> <span>{printDatas?.student?.group?.profession?.name}</span>
+                        <span className='fw-normal w-50'>Мэргэжил:</span> <span className='text-uppercase'>{printDatas?.student?.group?.profession?.name}</span>
                     </div>
                 </div>
             </header>
@@ -325,7 +325,7 @@ export default function PrintAttachmentMongolia()
                 </div>
 
                 <div className='px-2 mb-5' style={{ paddingTop: '2px', paddingBottom: '15px' }} >
-                    { datas?.graduation_work?.lesson_type == 1 ? 'Төгсөлтйн ажил:' : 'Төгсөлтйн шалгалт:' }
+                    { datas?.graduation_work?.lesson_type == 1 ? 'Төгсөлтийн ажил:' : 'Төгсөлтийн шалгалт:' }
                     {
                         datas?.graduation_work?.lesson?.map((val, idx) =>
                         {
@@ -359,7 +359,7 @@ export default function PrintAttachmentMongolia()
                     isPageBreak === false
                     ?
                     (
-                        <div className={`text-end mt-2`} style={{ fontSize: '9px', marginRight: '12px' }} >
+                        <div className={`text-end mt-2`} style={{ fontSize: '11px', marginRight: '12px' }} >
                             Энэхүү хавсралт нь {new Date().getFullYear()} оны {printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.group?.profession?.code} дугаартай дипломын хамт хүчинтэй.
                         </div>
                     )

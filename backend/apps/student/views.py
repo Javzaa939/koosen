@@ -2420,9 +2420,16 @@ class StudentGpaDiplomaValuesAPIView(
         for level in list(learning_plan_levels):
             obj_datas = {}
             obj_datas['name'] = all_learn_levels[level]
+
             lesson_datas = []
             if level == (LearningPlan.DIPLOM or LearningPlan.MAG_DIPLOM or LearningPlan.DOC_DIPLOM):
                 continue
+
+            obj_datas['eng_name'] = 'Education subject'
+            if level == 2:
+                obj_datas['eng_name'] = 'Core'
+            if level == 3:
+                obj_datas['eng_name'] = 'Major course'
 
             for data_qs in qs:
                 data = CalculatedGpaOfDiplomaPrintSerializer(data_qs, context={ "student_prof_qs": student_prof_qs }, many=False).data
