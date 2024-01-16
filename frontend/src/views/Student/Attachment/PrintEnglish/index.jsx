@@ -37,8 +37,23 @@ export default function PrintAttachmentEnglish()
         {
             getAllData(printDatas.student.id)
         },
-        []
+        [printDatas]
     )
+
+    const lessonData = datas?.lessons || []
+
+    const flattenedArray = lessonData.flatMap(item => [
+        {
+            type: "parent",
+            name: item?.name
+        },
+		...item.lessons.map((lesson) => {
+            return {
+                ...lesson,
+                type: "children"
+            };
+        })
+    ]);
 
     useEffect(
         () =>
@@ -48,6 +63,7 @@ export default function PrintAttachmentEnglish()
                 if (datas?.lessons?.length != 0)
                 {
                     let count = 0
+                    let perCount = 0
                     let half = printDatas.tableRowCount.length / 2
 
                     for (let [idx, val] of printDatas.tableRowCount.entries())
@@ -70,25 +86,42 @@ export default function PrintAttachmentEnglish()
                             for (let bodyIdx = 0; bodyIdx < val; bodyIdx++)
                             {
                                 let newRow = tbodyRef.insertRow();
-                                let newCell1 = newRow.insertCell();
-                                let newCell2 = newRow.insertCell();
-                                let newCell3 = newRow.insertCell();
-                                let newCell4 = newRow.insertCell();
-                                let newCell5 = newRow.insertCell();
 
                                 count++
 
-                                newCell1.innerHTML = count
-                                newCell2.innerHTML = datas?.lessons[count - 1]?.lesson?.lesson?.name_eng || ''
-                                newCell3.innerHTML = datas?.lessons[count - 1]?.kredit
-                                newCell4.innerHTML = datas?.lessons[count - 1]?.score ? Math.round(datas?.lessons[count - 1]?.score) : ''
-                                newCell5.innerHTML = datas?.lessons[count - 1]?.assesment
+                                if(flattenedArray[count - 1]?.type === "children")
+                                {
+                                    let newCell1 = newRow.insertCell();
+                                    let newCell2 = newRow.insertCell();
+                                    let newCell3 = newRow.insertCell();
+                                    let newCell4 = newRow.insertCell();
+                                    let newCell5 = newRow.insertCell();
 
-                                newCell1.className = 'border-dark mini-cell'
-                                newCell2.className = 'border-dark body-cell'
-                                newCell3.className = 'border-dark footer-cell1'
-                                newCell4.className = 'border-dark footer-cell2'
-                                newCell5.className = 'border-dark footer-cell3'
+                                    perCount++
+
+									newCell1.innerHTML = perCount
+									newCell2.innerHTML = flattenedArray[count - 1]?.lesson?.lesson?.name_eng || ''
+									newCell3.innerHTML = flattenedArray[count - 1]?.kredit || ''
+
+                                    newCell4.innerHTML = flattenedArray[count - 1]?.score ? flattenedArray[count - 1]?.score : ''
+
+									newCell5.innerHTML = flattenedArray[count - 1]?.assesment || ''
+
+									newCell1.className = 'border-dark mini-cell'
+									newCell2.className = 'border-dark body-cell'
+									newCell3.className = 'border-dark footer1-cell'
+									newCell4.className = 'border-dark footer2-cell'
+									newCell5.className = 'border-dark footer3-cell'
+                                }
+                                else
+                                {
+                                    let newCell1 = newRow.insertCell();
+
+									newCell1.innerHTML = flattenedArray[count - 1]?.name_eng
+									newCell1.colSpan = 5
+
+									newCell1.className = 'border-dark body-cell text-center'
+                                }
                             }
                         }
                     }

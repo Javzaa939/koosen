@@ -81,7 +81,7 @@ export default function AttachmentStudent()
 
     function changeTableRowValues(value)
     {
-        let defaultSum = datas?.calculated_length
+        let defaultSum = datas?.calculated_length + 3
 
         let sum = 0
 
@@ -100,9 +100,6 @@ export default function AttachmentStudent()
                 break
             }
         }
-
-        console.log('defaultSum', defaultSum)
-        console.log('sum', sum)
 
         if (defaultSum == sum)
         {
@@ -262,7 +259,7 @@ export default function AttachmentStudent()
     useEffect(
         () =>
         {
-            let allLength = datas?.calculated_length
+            let allLength = datas?.calculated_length + 3
             switch (printValue)
             {
                 case 'mongolian':
@@ -396,6 +393,13 @@ export default function AttachmentStudent()
                                 <code className='text-dark' ><span className='fw-bolder'>{calculatedDatas.length}</span> хичээл сонгогдож хавсралтанд <span className='fw-bolder'>{datas?.calculated_length}</span> хичээл харагдана</code><AlertCircle id='alertCaluclated' className='' size={15} />
                                 <UncontrolledTooltip placement='top' target={`alertCaluclated`} >Багц хичээл байвал хичээлүүд багцлагдаж бодогдоно.</UncontrolledTooltip>
                             </p>
+                            {
+                                datas?.calculated_length
+                                ?
+                                    <p><code className='text-dark'><span className='fw-bolder'>{datas?.calculated_length}</span> хичээл дээр нэмэх нь 3 гарчиг нийт <span className='fw-bolder'>({datas?.calculated_length + 3}) мөр</span></code></p>
+                                :
+                                    null
+                            }
                             <Row>
                                 <Col md={3}>
                                     <Label className="form-label" for="table1">

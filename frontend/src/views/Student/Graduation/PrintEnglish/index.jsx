@@ -152,7 +152,7 @@ export default function PrintMongolia()
                             {
                                 return (
                                     <div className='d-flex flex-column pt-4 pb-2' style={{ paddingRight: '20px', paddingLeft: '20px' }} key={idx} >
-                                        <span className='border-top-black' style={{ paddingTop: '3px' }}>{val?.last_name_eng} {val?.first_name_eng}</span>
+                                        <span className='border-top-black' style={{ paddingTop: '3px' }}>{val?.last_name_eng}{val?.first_name_eng}</span>
                                         <span>{val?.position_name_eng}</span>
                                     </div>
                                 )

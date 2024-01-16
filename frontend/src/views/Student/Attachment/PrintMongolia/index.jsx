@@ -9,7 +9,7 @@ import './style.css'
 export default function PrintAttachmentMongolia()
 {
     // Loader
-	const { fetchData, Loader, isLoading } = useLoader({})
+	const { fetchData, Loader, isLoading } = useLoader({ isFullScreen: false })
 
     // API
     const signatureApi = useApi().signature
@@ -65,6 +65,7 @@ export default function PrintAttachmentMongolia()
                 if (datas?.lessons?.length != 0)
                 {
                     let count = 0
+                    let perCount = 0
                     let half = printDatas.tableRowCount.length / 2
                     for (let [idx, val] of printDatas.tableRowCount.entries())
                     {
@@ -90,15 +91,17 @@ export default function PrintAttachmentMongolia()
 
                                 count++
 
-								if(flattenedArray[count - 1]?.type === "children") {
-
-									let newCell1 = newRow.insertCell();
+								if(flattenedArray[count - 1]?.type === "children")
+                                {
+                                    let newCell1 = newRow.insertCell();
 									let newCell2 = newRow.insertCell();
 									let newCell3 = newRow.insertCell();
 									let newCell4 = newRow.insertCell();
 									let newCell5 = newRow.insertCell();
 
-									newCell1.innerHTML = count
+                                    perCount++
+
+									newCell1.innerHTML = perCount
 									newCell2.innerHTML = flattenedArray[count - 1]?.lesson?.lesson?.name || ''
 									newCell3.innerHTML = flattenedArray[count - 1]?.kredit || ''
 
@@ -118,18 +121,16 @@ export default function PrintAttachmentMongolia()
 									newCell3.className = 'border-dark footer1-cell'
 									newCell4.className = 'border-dark footer2-cell'
 									newCell5.className = 'border-dark footer3-cell'
-
 								}
-									else {
-
+                                else
+                                {
 									let newCell1 = newRow.insertCell();
 
 									newCell1.innerHTML = flattenedArray[count - 1]?.name
 									newCell1.colSpan = 5
 
 									newCell1.className = 'border-dark body-cell text-center'
-
-									}
+                                }
 
                             }
                         }
@@ -144,12 +145,12 @@ export default function PrintAttachmentMongolia()
         <>
             {isLoading && Loader}
 
-            <div className={`position-relative d-flex justify-content-between ${isPageBreak && 'page-break'}`} style={{ fontSize: '9px', marginTop: '155px', backgroundColor: 'white', color: 'black' }} >
+            <div className={`position-relative d-flex justify-content-between ${isPageBreak && 'page-break'}`} style={{ fontSize: '9px', marginTop: '135px', backgroundColor: 'white', color: 'black' }} >
 
                 <div className='d-flex flex-wrap align-content-start p-1' style={{ width: '33.1%' }} >
 
                     <table className='w-100 text-center d-none' id='table1' >
-                        <thead>
+                        <thead className='fw-bolder'>
                             <tr>
                                 <td rowSpan={2} className='border-dark' style={{ width: '6.25%' }}>№</td>
                                 <td rowSpan={2} className='border-dark' style={{ width: '63,75%' }}>Хичээлийн нэрс</td>
@@ -225,7 +226,7 @@ export default function PrintAttachmentMongolia()
 
             </div>
 
-            <div className={`${!isPageBreak && 'd-none'}`} style={{ marginTop: '155px', breakInside: 'avoid', backgroundColor: 'white', color: 'black' }} >
+            <div className={`${!isPageBreak && 'd-none'}`} style={{ marginTop: '135px', breakInside: 'avoid', backgroundColor: 'white', color: 'black' }} >
                 <div className={`position-relative d-flex justify-content-between`} style={{ fontSize: '9px' }} >
                     <div className='d-flex flex-wrap align-content-start' style={{ width: '33.1%' }} >
                         <table className='w-100 text-center d-none' id='table4' >
@@ -291,9 +292,9 @@ export default function PrintAttachmentMongolia()
 
             <header className='w-100 px-1' style={{ backgroundColor: 'white', color: 'black' }} >
                 <div className='d-flex flex-column text-center fw-bolder'>
-                    <p className='text-uppercase' style={{ marginBottom: '10px' }} >Дотоод Хэргийн Их Сургууль</p>
-                    <p className='text-uppercase' style={{ marginBottom: '10px' }} >{printDatas?.student?.department?.school}</p>
-                    <p style={{ fontSize: '10px' }} >{printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.graduation_work?.diplom_num} дугаартай дипломын хавсралт-</p>
+                    <p className='text-uppercase' style={{ marginBottom: '0px' }} >Дотоод Хэргийн Их Сургууль</p>
+                    <p className='text-uppercase' style={{ marginBottom: '0px' }} >{printDatas?.student?.department?.school}</p>
+                    <p style={{ fontSize: '12px', fontWeight: '500' }} >{printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.graduation_work?.diplom_num} дугаартай дипломын хавсралт</p>
                 </div>
 
                 <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
@@ -312,18 +313,18 @@ export default function PrintAttachmentMongolia()
                         <span className='fw-normal w-50'>Нэр:</span> <span>{printDatas?.student?.first_name}</span>
                     </div>
                     <div className='d-flex px-1' style={{ width: '33.3%' }} >
-                        <span className='fw-normal w-50'>Хөтөлбөр:</span> <span>{printDatas?.student?.group?.profession?.name}</span>
+                        <span className='fw-normal w-50'>Мэргэжлийн индекс: </span><span>{printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.group?.profession?.code}</span>
+                    </div>
+                    <div className='d-flex px-2' style={{ width: '33.3%' }} >
+                        <span className='fw-normal w-50'>Бүртгэлийн дугаар:</span> <span>{printDatas?.student?.graduation_work?.registration_num}</span>
                     </div>
                 </div>
                 <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
                     <div className='d-flex' style={{ width: '33.3%' }} >
-                        <span className='fw-normal w-50'>Регистр:</span> <span>{printDatas?.student?.register_num}</span>
+                        <span className='fw-normal w-50'>Регистрийн дугаар:</span> <span>{printDatas?.student?.register_num}</span>
                     </div>
                     <div className='d-flex px-1' style={{ width: '33.3%' }} >
-                        <span className='fw-normal w-50'>Хөтөлбөрийн индекс: </span><span>{printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.group?.profession?.code}</span>
-                    </div>
-                    <div className='d-flex px-2' style={{ width: '33.3%' }} >
-                        <span className='fw-normal w-50'>Бүртгэлийн дугаар:</span> <span>{printDatas?.student?.graduation_work?.registration_num}</span>
+                        <span className='fw-normal w-50'>Мэргэжил:</span> <span>{printDatas?.student?.group?.profession?.name}</span>
                     </div>
                 </div>
             </header>
