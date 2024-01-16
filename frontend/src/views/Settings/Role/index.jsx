@@ -311,6 +311,26 @@ export default function Role()
     }, [searchVal])
 
 
+    /** checked болгодог */
+    useEffect(
+        () =>
+        {
+            if (isUpdate && isUpdate.permissions)
+            {
+                for (let perm of isUpdate.permissions)
+                {
+                    let permInput = document.getElementById(`perm-${perm}`)
+                    if (permInput)
+                    {
+                        document.getElementById(`perm-${perm}`).checked = true
+                    }
+                }
+            }
+        },
+        [permissions]
+    )
+
+
     /**
      * Албан тушаал хайх
      * @param {string} name Хайх үг
@@ -437,7 +457,7 @@ export default function Role()
 
             <Modal
                 isOpen={show}
-                onClosed={() => reset({ name: '' })}
+                onClosed={() => {reset({ name: '' }); setSearchVal('')}}
                 toggle={() => setShow(!show)}
                 onOpened={() => openedModal()}
                 className='modal-dialog-centered'

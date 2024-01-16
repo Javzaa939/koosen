@@ -125,7 +125,7 @@ export default function PrintMongolia()
                 <div className='m-auto' style={{ width: '1000px' }}>
                     <span className='text-center'>This is to certify that
                         <br />
-                        <span className='fw-bolder text-uppercase'>{data?.student?.last_name_eng} {data?.student?.first_name_eng}</span>
+                        <span className='fw-bolder text-uppercase'>{data?.student?.first_name_eng} {data?.student?.last_name_eng}</span>
                         <br />
                         citizen of {data?.student?.citizenship?.name_eng},
                         <br />
@@ -142,7 +142,7 @@ export default function PrintMongolia()
 
             {/* Гарын үсгийн хэсэг */}
             <div className='position-absolute' style={{ bottom: '100px', fontSize: '15px' }} >
-                <div style={{ paddingLeft: '70px', paddingRight: '70px', lineHeight: '18px' }} >
+                <div style={{ paddingLeft: '100px', paddingRight: '100px', lineHeight: '18px' }} >
                     <div className='d-flex w-100 text-center justify-content-center'>
 
                         {
@@ -151,9 +151,8 @@ export default function PrintMongolia()
                             listArr.map((val, idx) =>
                             {
                                 return (
-                                    <div className='w-25 d-flex flex-column pt-4 pb-2' style={{ paddingRight: '7px', paddingLeft: '7px' }} key={idx} >
-                                        <span>_______________________</span>
-                                        <span>{val?.last_name_eng} {val?.first_name_eng}</span>
+                                    <div className='d-flex flex-column pt-4 pb-2' style={{ paddingRight: '20px', paddingLeft: '20px' }} key={idx} >
+                                        <span className='border-top-black' style={{ paddingTop: '3px' }}>{val?.last_name_eng} {val?.first_name_eng}</span>
                                         <span>{val?.position_name_eng}</span>
                                     </div>
                                 )
