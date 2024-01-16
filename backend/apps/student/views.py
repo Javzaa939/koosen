@@ -2873,8 +2873,7 @@ class StudentCommandListAPIView(
     def get(self, request):
         " Идэвхитэй жил, улиралд төгсөх оюутны жагсаалт "
 
-        year = self.request.query_params.get('year')
-        season = self.request.query_params.get('season')
+        year, season = get_active_year_season()
 
         stud_qs = self.queryset.filter(lesson_year=year, lesson_season=season).values_list('student', flat=True)
         student_data = Student.objects.filter(id__in=stud_qs).values("id", "code", "last_name", "first_name")
