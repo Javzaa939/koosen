@@ -87,4 +87,8 @@ urlpatterns = [
 
     path('score-lesson/<int:student>/', StudentScoreLessonAPIView.as_view()),
 
+    # тушаал гаргах
+    path('command/', CommandAPIView.as_view()),
+    path('graduate/list/', StudentCommandListAPIView.as_view()),
+
 ]

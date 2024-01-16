@@ -615,6 +615,8 @@ function useApi(isDisplay=false) {
 				}
 				return instance.get(`/student/info/group/?${group_ids}&type=${type}`)
 			},
+
+			getStudentCommandList: () =>instance.get(`/student/graduate/list/?year=${cyear_name}&season=${cseason_id}`),
 			post: data => instance.post('/student/info/', data),
 			getOne: (pk, type) => instance.get(`/student/info/detail/${pk}/?type=${type}`),
 			put: (data, pk, type) => instance.put(`/student/info/detail/${pk}/?type=${type}`, data),

@@ -1109,3 +1109,11 @@ class StudentVizSerializer(serializers.ModelSerializer):
     class Meta:
         model = StudentViz
         fields = "__all__"
+
+
+class GraduationWorkStudentListSerializer(serializers.ModelSerializer):
+    student = StudentListSerializer()
+
+    class Meta:
+        model = GraduationWork
+        fields = "__all__"
