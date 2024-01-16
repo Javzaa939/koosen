@@ -15,25 +15,8 @@ const VerticalLayout = (props) =>
 {
     const { user } = useContext(AuthContext)
 
-
-    const [ cNavigation, setCNavigation ] = useState([])
+    const [ cNavigation, setCNavigation ] = useState(navigation)
     const [ isEnd, setIsEnd ] = useState(false)
-
-    /** cNavigation эхлээд тусад нь хадгална */
-    useEffect(
-        () =>
-        {
-            setIsEnd(false)
-            navigation.map((val) =>
-            {
-                setCNavigation(prev =>
-                {
-                    return [...prev, val]
-                })
-            })
-        },
-        []
-    )
 
     /**
      * Хэрэглэгчийн эрх дотор байна уу гэдгийг шалгах
@@ -66,314 +49,301 @@ const VerticalLayout = (props) =>
         return saveData
     }
 
-
     useEffect(
         () =>
         {
-            navigation.map((menus) =>
-            {
-                if (menus && menus.navChildren && menus.navChildren.length > 0 && user && Object.keys(user).length > 0)
+            if(Object.keys(user).length > 0) {
+
+                navigation.map((menus) =>
                 {
+                    if (menus && menus.navChildren && menus.navChildren.length > 0 && user && Object.keys(user).length > 0)
+                    {
 
-                    let childrenDatas = []
+                        let childrenDatas = []
 
-                    /** ----------------------------- Сургалт ---------------------------- */
+                        /** ----------------------------- Сургалт ---------------------------- */
 
-                    /** Хичээлийн стандарт */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'permission-read', 'permission-list')
+                        /** Хичээлийн стандарт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'permission-read', 'permission-list')
 
-                    /** Мэргэжлийн тодорхойлолт */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-study-lessonstandart-read', 'study1')
+                        /** Мэргэжлийн тодорхойлолт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-study-lessonstandart-read', 'study1')
 
-                    /** Мэргэжлийн тодорхойлолт */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-study-profession-read', 'study2')
+                        /** Мэргэжлийн тодорхойлолт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-study-profession-read', 'study2')
 
-                    /** Сургалтын төлөвлөгөө */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-study-learningplan-read', 'study3')
+                        /** Сургалтын төлөвлөгөө */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-study-learningplan-read', 'study3')
 
-                    /** ----------------------------Лавлах сан ------------------------------- */
+                        /** ----------------------------Лавлах сан ------------------------------- */
 
-                    /** Сургууль */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-reference-school-read', 'reference1')
+                        /** Сургууль */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-reference-school-read', 'reference1')
 
-                    /** Тэнхим*/
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-reference-departments-read', 'reference2')
+                        /** Тэнхим*/
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-reference-departments-read', 'reference2')
 
-                    /** Багш */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-reference-teacher-read', 'reference3')
+                        /** Багш */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-reference-teacher-read', 'reference3')
 
-                    /** ----------------------------Оюутан ------------------------------- */
+                        /** ----------------------------Оюутан ------------------------------- */
 
-                    /** Анги бүлгийн бүртгэл */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-group-read', 'student1')
+                        /** Анги бүлгийн бүртгэл */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-group-read', 'student1')
 
-                    /** Оюутны бүртгэл */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-register-read', 'student2')
+                        /** Оюутны бүртгэл */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-register-read', 'student2')
 
-                    /** Чөлөөний бүртгэл */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-leave-read', 'student3')
+                        /** Чөлөөний бүртгэл */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-leave-read', 'student3')
 
-                    /** Шилжилтийн бүртгэл */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-movement-read', 'student4')
+                        /** Шилжилтийн бүртгэл */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-movement-read', 'student4')
 
-                    /** Төгсөлт */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-graduate-read', 'student5')
+                        /** Төгсөлт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-graduate-read', 'student5')
 
-                    /** Боловсролын зээлийн сан */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-loanfund-read', 'student7')
+                        /** Боловсролын зээлийн сан */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-loanfund-read', 'student7')
 
-                    /** Оюутаны хавсралт, төгсөлтийн ажил */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-graduate-read', 'student10')
+                        /** Оюутаны хавсралт, төгсөлтийн ажил */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-graduate-read', 'student10')
 
-                    /** Оюутан тодорхойлолт */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-definition-read', 'student11')
+                        /** Оюутан тодорхойлолт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-definition-read', 'student11')
 
-                    /** ----------------------------- Тохиргоо ---------------------------- */
+                        /** ----------------------------- Тохиргоо ---------------------------- */
 
+                        /** Ажиллах жил */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-employee-settings-read', 'settings_employee')
 
-                    /** Ажиллах жил */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-employee-settings-read', 'settings_employee')
+                        /** Боловсролын зэрэг */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-settings-read', 'settings_student')
 
-                    /** Боловсролын зэрэг */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-settings-read', 'settings_student')
+                        /** Эрх */
+                        childrenDatas = checkPerm(childrenDatas, menus, user.is_superuser, 'settingsLevel15')
 
-                    /** Эрх */
-                    childrenDatas = checkPerm(childrenDatas, menus, user.is_superuser, 'settingsLevel15')
+                        /** Role */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'role-read', 'settingsLevel16')
 
-                    /** Role */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'role-read', 'settingsLevel16')
+                        /** ----------------------------- Хичээлийн хуваарь ---------------------------- */
 
-                    /** ----------------------------- Хичээлийн хуваарь ---------------------------- */
+                        /** Цагийн хуваарь */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-timetable-register-read', 'timetable3')
 
-                    /** Цагийн хуваарь */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-timetable-register-read', 'timetable3')
+                        /** Шалгалтын хуваарь */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-timetable-exam-read', 'timetable4')
 
-                    /** Шалгалтын хуваарь */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-timetable-exam-read', 'timetable4')
+                        /** Дахин шалгалт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-timetable-examrepeat-read', 'timetable5')
 
-                    /** Дахин шалгалт */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-timetable-examrepeat-read', 'timetable5')
+                        /** ----------------------------- Дүнгийн бүртгэл ---------------------------- */
 
+                        /** Дүнгийн бүртгэл */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-score-read', 'score1')
 
-                    /** ----------------------------- Дүнгийн бүртгэл ---------------------------- */
+                        /** Дүйцүүлсэн дүн */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-score-correspond-read', 'score2')
 
-                    /** Дүнгийн бүртгэл */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-score-read', 'score1')
+                        /** Дахин шалгалт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-score-restudy-read', 'score3')
 
-                    /** Дүйцүүлсэн дүн */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-score-correspond-read', 'score2')
+                        /** Өмнөх улирлын дүн */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-score-restudy-read', 'score4')
 
-                    /** Дахин шалгалт */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-score-restudy-read', 'score3')
+                        /** ----------------------------- Сургалтын төлбөр ---------------------------- */
 
-                    /** Өмнөх улирлын дүн */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-score-restudy-read', 'score4')
+                        /** Төлбөрийн тохиргоо */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-payment-settings-read', 'studypayment1')
 
+                        /** Төлбөрийн гүйлгээ */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-payment-balance-read', 'studypayment2')
 
-                    /** ----------------------------- Сургалтын төлбөр ---------------------------- */
+                        /** Төлбөрийн эхний үлдэгдэл */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-payment-beginbalance-read', 'studypayment3')
 
-                    /** Төлбөрийн тохиргоо */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-payment-settings-read', 'studypayment1')
+                        /** Төлбөрийн тооцоо */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-payment-estimate-read', 'studypayment4')
 
-                    /** Төлбөрийн гүйлгээ */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-payment-balance-read', 'studypayment2')
+                        /** Төлбөрийн хөнгөлөлт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-payment-discount-read', 'studypayment5')
 
-                    /** Төлбөрийн эхний үлдэгдэл */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-payment-beginbalance-read', 'studypayment3')
+                        /** ------------------------ Захиалга -------------------------------- */
 
-                    /** Төлбөрийн тооцоо */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-payment-estimate-read', 'studypayment4')
+                        /** Номын сан */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-order-library-read', 'order1')
 
-                    /** Төлбөрийн хөнгөлөлт */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-payment-discount-read', 'studypayment5')
+                        /** Спорт заал */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-order-sporthall-read', 'order2')
 
+                        /** Фитнесс */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-order-fitness-read', 'order3')
 
-                    /** ------------------------ Захиалга -------------------------------- */
+                        /** Эмнэлэг */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-order-hospital-read', 'order4')
 
-                    /** Номын сан */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-order-library-read', 'order1')
+                        /** ----------------------------- Тэтгэлэг ---------------------------- */
 
-                    /** Спорт заал */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-order-sporthall-read', 'order2')
+                        /** Тэтгэлэг бүртгэл */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-stipend-read', 'stipend1')
 
-                    /** Фитнесс */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-order-fitness-read', 'order3')
+                        /** Тэтгэлэгийн хүсэлт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-stipend-request-read', 'stipend2')
 
-                    /** Эмнэлэг */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-order-hospital-read', 'order4')
+                        /** ----------------------------- Дотуур байр ---------------------------- */
 
+                        /** Өрөөний төрөл */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-dormitory-roomtype-read', 'dormitory1')
 
-                    /** ----------------------------- Тэтгэлэг ---------------------------- */
+                        /** Өрөөний бүртгэл*/
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-dormitory-rooms-read', 'dormitory2')
 
-                    /** Тэтгэлэг бүртгэл */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-stipend-read', 'stipend1')
+                        /** Төлбөрийн тохиргоо */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-dormitory-paymentconfig-read', 'dormitory3')
 
-                    /** Тэтгэлэгийн хүсэлт */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-stipend-request-read', 'stipend2')
+                        /** Дотуур байрны бүртгэл */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-dormitory-request-read', 'dormitory4')
 
+                        /** Дотуур байрны тооцоо */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-dormitory-estimate-read', 'dormitory5')
 
-                    /** ----------------------------- Дотуур байр ---------------------------- */
+                        /** ----------------------------- Өргөдөл ---------------------------- */
 
-                    /** Өрөөний төрөл */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-dormitory-roomtype-read', 'dormitory1')
+                        /** Шийдвэрлэх нэгж */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-decide-unit-read', 'complaint1')
 
-                    /** Өрөөний бүртгэл*/
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-dormitory-rooms-read', 'dormitory2')
+                        /** Өргөдөл */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-request-application-read', 'complaint2')
 
-                    /** Төлбөрийн тохиргоо */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-dormitory-paymentconfig-read', 'dormitory3')
+                        /** Дүнгийн дүйцүүлэлтийн хүсэлт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-request-correspond-read', 'complaint3')
 
+                        /** Чөлөөний хүсэлт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-request-vacation-read', 'complaint4')
 
-                    /** Дотуур байрны бүртгэл */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-dormitory-request-read', 'dormitory4')
+                        /** Тойрох хуудас */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-request-routingslip-read', 'complaint5')
 
-                    /** Дотуур байрны тооцоо */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-dormitory-estimate-read', 'dormitory5')
+                        /** ----------------------------- Хүсэлт ---------------------------- */
 
+                        /** Олон нийтийн ажлын хүсэлт*/
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-wish-volunteer-read', 'request1')
 
-                    /** ----------------------------- Өргөдөл ---------------------------- */
+                        /** Олон нийтийн ажлын хүсэлт*/
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-wish-club-read', 'request2')
 
-                    /** Шийдвэрлэх нэгж */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-decide-unit-read', 'complaint1')
+                        /** Олон нийтийн ажлын хүсэлт*/
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-wish-tutor-read', 'request3')
 
-                    /** Өргөдөл */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-request-application-read', 'complaint2')
+                        /** ----------------------------- Хэвлэх ---------------------------- */
 
-                    /** Дүнгийн дүйцүүлэлтийн хүсэлт */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-request-correspond-read', 'complaint3')
+                        /** Хичээл сонголтын нэрс */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-print-choice-read', 'print1')
 
-                    /** Чөлөөний хүсэлт */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-request-vacation-read', 'complaint4')
+                        /** Хичээлийн хуваарь */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-print-schedule-read', 'print2')
 
-                    /** Тойрох хуудас */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-request-routingslip-read', 'complaint5')
+                        /** Дүнгийн жагсаалт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-print-score-read', 'print4')
 
+                        /** Голч дүн */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-print-gpa-read', 'print5')
 
-                    /** ----------------------------- Хүсэлт ---------------------------- */
+                        /** Төгсөлтийн тушаал */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-print-graduate-read', 'print6')
 
-                    /** Олон нийтийн ажлын хүсэлт*/
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-wish-volunteer-read', 'request1')
+                        /** Элсэлтийн тушаал */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-print-admission-read', 'print7')
 
-                    /** Олон нийтийн ажлын хүсэлт*/
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-wish-club-read', 'request2')
+                        /**------------------------------------"Цагийн тооцоо"----------------------------*/
+                        /** Цагийн ачаалал */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-credit-volume-read', 'credit1')
 
-                    /** Олон нийтийн ажлын хүсэлт*/
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-wish-tutor-read', 'request3')
+                        /** Цагийн тооцоо */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-credit-estimation-read', 'credit2')
 
+                        /** Хичээл тулгалт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-credit-confrontation-read', 'credit3')
 
-                    /** ----------------------------- Хэвлэх ---------------------------- */
+                        /** Цагийн багшийн тооцоо */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-credit-parttime-read', 'credit5')
 
-                    /** Хичээл сонголтын нэрс */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-print-choice-read', 'print1')
+                        /** Цагийн тооцоо тохиргоо */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-credit-settings-read', 'credit4')
 
-                    /** Хичээлийн хуваарь */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-print-schedule-read', 'print2')
+                        /** ----------------------------- Хандах эрх ---------------------------- */
+                        /** Багшийн дүнгийн эрх */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-role-teacher-score-read', 'role1')
 
-                    /** Дүнгийн жагсаалт */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-print-score-read', 'print4')
+                        /** Оюутны хичээл сонголтыг төлбөрөөс хамааралгүйгээр хийх эрх*/
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-role-choice-payment-read', 'role2')
 
-                    /** Голч дүн */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-print-gpa-read', 'print5')
+                        /** Бусад эрх */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-role-other-read', 'role3')
 
-                    /** Төгсөлтийн тушаал */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-print-graduate-read', 'print6')
+                        /** Тохиргоо хийх  эрх */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-role-settings-read', 'role4')
 
-                    /** Элсэлтийн тушаал */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-print-admission-read', 'print7')
+                        /** ----------------------------- Судалгаа ---------------------------- */
+                        /** Судалгаа бүртгэх */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-survey-read', 'surveymain')
 
+                        /** ----------------------------- Багшийг үнэлэх ---------------------------- */
+                        /** Судалгааны асуулт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-survey-question-read', 'evaluation1')
 
-                    /**------------------------------------"Цагийн тооцоо"----------------------------*/
-                    /** Цагийн ачаалал */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-credit-volume-read', 'credit1')
+                        /** Эрдэм шинжилгээ асуулт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-science-read', 'science1')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-science-read', 'science2')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-science-read', 'science3')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-science-read', 'science4')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-science-read', 'science5')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-science-read', 'science6')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-science-read', 'science7')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-science-read', 'science8')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-science-read', 'science9')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-science-read', 'science10')
 
-                    /** Цагийн тооцоо */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-credit-estimation-read', 'credit2')
+                        /** ----------------------------- Шалгалт цэс ---------------------------- */
+                        /** Шалгалтын асуулт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-exam-question-read', 'question')
 
+                        /** Шалгалт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-exam-read', 'create')
 
-                    /** Хичээл тулгалт */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-credit-confrontation-read', 'credit3')
+                        menus.children = childrenDatas
+                    }
+                })
 
-                    /** Цагийн багшийн тооцоо */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-credit-parttime-read', 'credit5')
-
-                    /** Цагийн тооцоо тохиргоо */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-credit-settings-read', 'credit4')
-
-                    /** ----------------------------- Хандах эрх ---------------------------- */
-                    /** Багшийн дүнгийн эрх */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-role-teacher-score-read', 'role1')
-
-                    /** Оюутны хичээл сонголтыг төлбөрөөс хамааралгүйгээр хийх эрх*/
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-role-choice-payment-read', 'role2')
-
-
-                    /** Бусад эрх */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-role-other-read', 'role3')
-
-                    /** Тохиргоо хийх  эрх */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-role-settings-read', 'role4')
-
-                    /** ----------------------------- Судалгаа ---------------------------- */
-                    /** Судалгаа бүртгэх */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-survey-read', 'surveymain')
-
-                    /** ----------------------------- Багшийг үнэлэх ---------------------------- */
-                    /** Судалгааны асуулт */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-survey-question-read', 'evaluation1')
-
-                    /** Эрдэм шинжилгээ асуулт */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-science-read', 'science1')
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-science-read', 'science2')
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-science-read', 'science3')
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-science-read', 'science4')
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-science-read', 'science5')
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-science-read', 'science6')
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-science-read', 'science7')
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-science-read', 'science8')
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-science-read', 'science9')
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-science-read', 'science10')
-
-                    /** ----------------------------- Шалгалт цэс ---------------------------- */
-                    /** Шалгалтын асуулт */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-exam-question-read', 'question')
-
-                    /** Шалгалт */
-                    childrenDatas = checkPerm(childrenDatas, menus, 'lms-exam-read', 'create')
-
-                    menus.children = childrenDatas
-                }
-            })
-
-            cNavigation.map((menus, idx) =>
-            {
-                /** navChildren-тай menu-д нэгч хүүхэд эрх нь таарахгүй бол тэрийг устгана */
-                if (menus.navChildren && (menus && menus.children && menus.children.length < 1))
+                cNavigation.map((menus, idx) =>
                 {
-                    delete cNavigation[idx];
-                }
-                /** Дан ганцаар байдаг бол permission шалгана */
-                else
-                {
-                    /** Хуанли */
-                    if (menus.id === 'calendar' && !user.permissions?.includes('lms-calendar-read')) delete cNavigation[idx];
+                    /** navChildren-тай menu-д нэгч хүүхэд эрх нь таарахгүй бол тэрийг устгана */
+                    if (menus.navChildren && (menus && menus.children && menus.children.length < 1))
+                    {
+                        delete cNavigation[idx];
+                    }
+                    /** Дан ганцаар байдаг бол permission шалгана */
+                    else
+                    {
+                        /** Хуанли */
+                        if (menus.id === 'calendar' && !user.permissions?.includes('lms-calendar-read')) delete cNavigation[idx];
+    
+                        /** Зар мэдээ */
+                        if (menus.id === 'service' && !user.permissions?.includes('lms-service-news-read')) delete cNavigation[idx];
+    
+                        /** Статистик */
+                        if (menus.id === 'statistic' && !user.permissions?.includes('lms-statistic-read')) delete cNavigation[idx];
+    
+                        /** Хандах эрх */
+                        if (menus.id === 'role' && !user.permissions?.includes('role-read')) delete cNavigation[idx];
+                    }
+                })
 
-                    /** Зар мэдээ */
-                    if (menus.id === 'service' && !user.permissions?.includes('lms-service-news-read')) delete cNavigation[idx];
-
-                    /** Статистик */
-                    if (menus.id === 'statistic' && !user.permissions?.includes('lms-statistic-read')) delete cNavigation[idx];
-
-                    /** Хандах эрх */
-                    if (menus.id === 'role' && !user.permissions?.includes('role-read')) delete cNavigation[idx];
-                }
-            })
-
-            setIsEnd(true)
-
+                setIsEnd(true)
+            }
         },
-        [cNavigation]
+        [user]
     )
-
 
     return (
         <>

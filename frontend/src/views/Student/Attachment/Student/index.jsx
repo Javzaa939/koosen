@@ -11,13 +11,13 @@ import { Mongolian } from "flatpickr/dist/l10n/mn.js"
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
+import  useUpdateEffect  from '@hooks/useUpdateEffect'
 
 import { getColumns } from '@views/Student/Attachment/Student/helpers/index.jsx'
 
 // ** Styles Imports
 import '@styles/react/libs/flatpickr/flatpickr.scss'
 import './style.css'
-import { useParams } from 'react-router-dom';
 
 export default function AttachmentStudent()
 {
@@ -28,6 +28,7 @@ export default function AttachmentStudent()
     const [ editDatatable, setEditDatatable ] = useState(false)
     const [ printValue, setPrintValue ] = useState("")
     const [ picker, setPicker ] = useState(new Date())
+    const [ is_loading, setLoading ] = useState(true)
 
     const [ checkedTableRowCount, setCheckedTableRowCount ] = useState([])
     const [ errorMessage, setErrorMessage ] = useState('')
@@ -55,14 +56,13 @@ export default function AttachmentStudent()
             fetchData(studentApi.scoreRegister(studentId)),
             fetchData(studentApi.calculateGpaDimploma(studentId)),
         ]).then((values) => {
+            if (values[0]?.success) {
+                setLoading(false)
+            }
             setDatas(values[0]?.data),
-            setCalculatedDatas(values[1].data)
+            setCalculatedDatas(values[1]?.data)
         })
     }
-
-    console.log('datas', datas)
-    console.log('calculatedDatas', calculatedDatas)
-
 
     useEffect(
         () =>
@@ -76,7 +76,7 @@ export default function AttachmentStudent()
                 getAllData()
             }
         },
-        [studentId]
+        []
     )
 
     function changeTableRowValues(value)
@@ -114,6 +114,7 @@ export default function AttachmentStudent()
 
     async function toThink()
     {
+        console.log('vdsv')
         await Promise.all([
             fetchData(studentApi.calculateGpaDimplomaAdd(studentId, checkedValues.current)),
         ]).then((values) => {
@@ -189,7 +190,7 @@ export default function AttachmentStudent()
         }
     }
 
-    useEffect(
+    useUpdateEffect(
         () =>
         {
             checkedValues.current = []
@@ -256,7 +257,7 @@ export default function AttachmentStudent()
         setCheckedTableRowCount(tableRowData)
     }
 
-    useEffect(
+    useUpdateEffect(
         () =>
         {
             let allLength = datas?.calculated_length + 3
@@ -333,7 +334,7 @@ export default function AttachmentStudent()
 
     return (
         <Fragment>
-            { isLoading && Loader }
+            { is_loading && Loader }
             <Card>
                 <div className="cursor-pointer hover-shadow m-1" onClick={() => handleNavigate()}>
                     <ChevronsLeft /> Буцах
@@ -549,6 +550,7 @@ export default function AttachmentStudent()
                         <DataTable
                             noHeader
                             className='react-dataTable'
+                            progressPending={is_loading}
                             noDataComponent={(
                                 <div className="my-2">
                                     <h5>{t('Өгөгдөл байхгүй байна')}</h5>
