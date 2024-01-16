@@ -165,7 +165,7 @@ export default function PrintMongolia()
                 {/* Footer */}
                 <div className='d-flex justify-content-between'>
                     <span style={{ paddingLeft: '130px' }} >ULAANBAATAR CITY</span>
-                    <span style={{ paddingRight: '150px' }} >REGISTER No: {data?.registration_num}</span>
+                    <span style={{ paddingRight: '150px' }} >REGISTER No {data?.registration_num}</span>
                 </div>
             </div>
 
