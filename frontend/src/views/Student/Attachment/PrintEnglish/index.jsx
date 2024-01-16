@@ -135,20 +135,17 @@ export default function PrintAttachmentEnglish()
         <>
             {Loading && Loader}
 
-            <div className={`position-relative d-flex justify-content-between ${isPageBreak && 'page-break'}`} style={{ fontSize: '8px', marginTop: '160px' }} >
+            <div className={`position-relative d-flex justify-content-between ${isPageBreak && 'page-break'}`} style={{ fontSize: '8px', marginTop: '135px' }} >
 
                 <div className='d-flex flex-wrap align-content-start' style={{ width: '33.1%' }} >
                     <table className='w-100 text-center d-none' id='table1' >
-                        <thead>
-                            <tr>
-                                <td rowSpan={2} className='border-dark' style={{ width: '6.25%' }}  >№</td>
-                                <td rowSpan={2} className='border-dark' style={{ width: '63.75%' }}  >Subject</td>
-                                <td rowSpan={2} className='border-dark' style={{ width: '12%' }}  >Credit hours</td>
-                                <td colSpan={2} className='border-dark' style={{ width: '18%' }}  >Study</td>
-                            </tr>
-                            <tr>
+                        <thead className='fw-bolder'>
+                             <tr style={{ height: '25px' }}>
+                                <td className='border-dark' style={{ width: '6.25%' }}  >№</td>
+                                <td className='border-dark' style={{ width: '63.75%' }}  >Name of subject</td>
+                                <td className='border-dark' style={{ width: '12%' }}  >Cr</td>
                                 <td className='border-dark' style={{ width: '10%' }} >Point</td>
-                                <td className='border-dark' style={{ width: '8%' }} >Mark</td>
+                                <td className='border-dark' style={{ width: '8%' }} >Grade</td>
                             </tr>
                         </thead>
                         <tbody>
@@ -159,16 +156,13 @@ export default function PrintAttachmentEnglish()
 
                 <div className='d-flex flex-wrap align-content-start' style={{ width: '33.1%' }} >
                     <table className='w-100 text-center d-none' id='table2' >
-                        <thead>
-                            <tr>
-                                <td rowSpan={2} className='border-dark' style={{ width: '6.25%' }}  >№</td>
-                                <td rowSpan={2} className='border-dark' style={{ width: '63.75%' }}  >Subject</td>
-                                <td rowSpan={2} className='border-dark' style={{ width: '12%' }}  >Credit hours</td>
-                                <td colSpan={2} className='border-dark' style={{ width: '18%' }}  >Study</td>
-                            </tr>
-                            <tr>
+                        <thead className='fw-bolder'>
+                             <tr style={{ height: '25px' }}>
+                                <td className='border-dark' style={{ width: '6.25%' }}  >№</td>
+                                <td className='border-dark' style={{ width: '63.75%' }}  >Name of subject</td>
+                                <td className='border-dark' style={{ width: '12%' }}  >Cr</td>
                                 <td className='border-dark' style={{ width: '10%' }} >Point</td>
-                                <td className='border-dark' style={{ width: '8%' }} >Mark</td>
+                                <td className='border-dark' style={{ width: '8%' }} >Grade</td>
                             </tr>
                         </thead>
                         <tbody>
@@ -180,16 +174,13 @@ export default function PrintAttachmentEnglish()
                 <div className='d-flex flex-wrap align-content-start' style={{ width: '33.1%' }} >
 
                     <table className='w-100 text-center d-none' id='table3' >
-                        <thead>
-                            <tr>
-                                <td rowSpan={2} className='border-dark' style={{ width: '6.25%' }}  >№</td>
-                                <td rowSpan={2} className='border-dark' style={{ width: '63.75%' }}  >Subject</td>
-                                <td rowSpan={2} className='border-dark' style={{ width: '12%' }}  >Credit hours</td>
-                                <td colSpan={2} className='border-dark' style={{ width: '18%' }}  >Study</td>
-                            </tr>
-                            <tr>
+                        <thead className='fw-bolder'>
+                             <tr style={{ height: '25px' }}>
+                                <td className='border-dark' style={{ width: '6.25%' }}  >№</td>
+                                <td className='border-dark' style={{ width: '63.75%' }}  >Name of subject</td>
+                                <td className='border-dark' style={{ width: '12%' }}  >Cr</td>
                                 <td className='border-dark' style={{ width: '10%' }} >Point</td>
-                                <td className='border-dark' style={{ width: '8%' }} >Mark</td>
+                                <td className='border-dark' style={{ width: '8%' }} >Grade</td>
                             </tr>
                         </thead>
                         <tbody>
@@ -217,20 +208,17 @@ export default function PrintAttachmentEnglish()
 
             </div>
 
-            <div className={`${!isPageBreak && 'd-none'}`} style={{ marginTop: '160px', breakInside: 'avoid' }} >
+            <div className={`${!isPageBreak && 'd-none'}`} style={{ marginTop: '135px', breakInside: 'avoid' }} >
                 <div className={`position-relative d-flex justify-content-between`} >
                     <div className='d-flex flex-wrap align-content-start' style={{ width: '33.1%' }} >
                         <table className='w-100 text-center d-none' id='table4' >
-                            <thead>
-                                <tr>
-                                    <td rowSpan={2} className='border-dark' style={{ width: '6.25%' }}  >№</td>
-                                    <td rowSpan={2} className='border-dark' style={{ width: '63.75%' }}  >Subject</td>
-                                    <td rowSpan={2} className='border-dark' style={{ width: '12%' }}  >Credit hours</td>
-                                    <td colSpan={2} className='border-dark' style={{ width: '18%' }}  >Study</td>
-                                </tr>
-                                <tr>
+                            <thead className='fw-bolder'>
+                                 <tr style={{ height: '25px' }}>
+                                    <td className='border-dark' style={{ width: '6.25%' }}  >№</td>
+                                    <td className='border-dark' style={{ width: '63.75%' }}  >Name of subject</td>
+                                    <td className='border-dark' style={{ width: '12%' }}  >Cr</td>
                                     <td className='border-dark' style={{ width: '10%' }} >Point</td>
-                                    <td className='border-dark' style={{ width: '8%' }} >Mark</td>
+                                    <td className='border-dark' style={{ width: '8%' }} >Grade</td>
                                 </tr>
                             </thead>
                             <tbody>
@@ -242,16 +230,13 @@ export default function PrintAttachmentEnglish()
                     <div className='d-flex flex-wrap align-content-start' style={{ width: '33.1%' }} >
 
                         <table className='w-100 text-center d-none' id='table5' >
-                            <thead>
-                                <tr>
-                                    <td rowSpan={2} className='border-dark' style={{ width: '6.25%' }}  >№</td>
-                                    <td rowSpan={2} className='border-dark' style={{ width: '63.75%' }}  >Subject</td>
-                                    <td rowSpan={2} className='border-dark' style={{ width: '12%' }}  >Credit hours</td>
-                                    <td colSpan={2} className='border-dark' style={{ width: '18%' }}  >Study</td>
-                                </tr>
-                                <tr>
+                            <thead className='fw-bolder'>
+                                 <tr style={{ height: '25px' }}>
+                                    <td className='border-dark' style={{ width: '6.25%' }}  >№</td>
+                                    <td className='border-dark' style={{ width: '63.75%' }}  >Name of subject</td>
+                                    <td className='border-dark' style={{ width: '12%' }}  >Cr</td>
                                     <td className='border-dark' style={{ width: '10%' }} >Point</td>
-                                    <td className='border-dark' style={{ width: '8%' }} >Mark</td>
+                                    <td className='border-dark' style={{ width: '8%' }} >Grade</td>
                                 </tr>
                             </thead>
                             <tbody>
@@ -263,16 +248,13 @@ export default function PrintAttachmentEnglish()
                     <div className='d-flex flex-wrap align-content-start' style={{ width: '33.1%' }} >
 
                         <table className='w-100 text-center d-none' id='table6' >
-                            <thead>
-                                <tr>
-                                    <td rowSpan={2} className='border-dark' style={{ width: '6.25%' }}  >№</td>
-                                    <td rowSpan={2} className='border-dark' style={{ width: '63.75%' }}  >Subject</td>
-                                    <td rowSpan={2} className='border-dark' style={{ width: '12%' }}  >Credit hours</td>
-                                    <td colSpan={2} className='border-dark' style={{ width: '18%' }}  >Study</td>
-                                </tr>
-                                <tr>
+                            <thead className='fw-bolder'>
+                                 <tr style={{ height: '25px' }}>
+                                    <td className='border-dark' style={{ width: '6.25%' }}  >№</td>
+                                    <td className='border-dark' style={{ width: '63.75%' }}  >Name of subject</td>
+                                    <td className='border-dark' style={{ width: '12%' }}  >Cr</td>
                                     <td className='border-dark' style={{ width: '10%' }} >Point</td>
-                                    <td className='border-dark' style={{ width: '8%' }} >Mark</td>
+                                    <td className='border-dark' style={{ width: '8%' }} >Grade</td>
                                 </tr>
                             </thead>
                             <tbody>
@@ -285,39 +267,39 @@ export default function PrintAttachmentEnglish()
 
             <header className='w-100' >
                 <div className='d-flex flex-column text-center fw-bolder'>
-                    <p className='text-uppercase' style={{ marginBottom: '10px' }} >Mongolian national university</p>
-                    <p className='text-uppercase' style={{ marginBottom: '10px' }} >{printDatas?.student?.department?.school}</p>
-                    <p style={{ fontSize: '10px' }} >Annex to the Diploma No. {printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.graduation_work?.diplom_num}</p>
+                    <p className='text-uppercase' style={{ marginBottom: '0px' }} >UNIVERSITY OF INTERNAL AFFAIRS, MONGOLIA</p>
+                    <p className='text-uppercase' style={{ marginBottom: '0px' }} >{printDatas?.student?.department?.school_eng}</p>
+                    <p style={{ fontSize: '12px', fontWeight: '500' }} >{printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.graduation_work?.diplom_num} <span className='text-lowercase'>{printDatas?.student?.group?.degree?.degree_eng_name}</span> degree diploma</p>
                 </div>
 
-                <div className='fw-bolder' style={{ fontSize: '11px' }} >
-                    <div className='d-inline-block' style={{ width: '33.3%' }} >
-                        Surname: <span className='fw-normal' >{printDatas?.student?.last_name_eng}</span>
+                <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
+                    <div className='d-flex' style={{ width: '33.3%' }} >
+                        <span className='fw-normal w-50'>Last name:</span> <span>{printDatas?.student?.last_name_eng}</span>
                     </div>
-                    <div className='d-inline-block' style={{ width: '33.3%' }} >
-                        Year of Graduation: <span className='fw-normal' >{printDatas?.student?.graduation_work?.lesson_year?.substring(5, 9)}</span>
+                    <div className='d-flex px-1' style={{ width: '33.3%' }} >
+                        <span className='fw-normal w-50' style={{ width: '200px'}}>Graduated year:</span> <span>{printDatas?.student?.graduation_work?.lesson_year?.substring(5, 9)}</span>
                     </div>
-                    <div className='d-inline-block' style={{ width: '33.3%' }} >
-                        Date of Issue: <span className='fw-normal' >{printDatas?.registration_num}</span>
-                    </div>
-                </div>
-                <div className='fw-bolder' style={{ fontSize: '11px' }} >
-                    <div className='d-inline-block' style={{ width: '33.3%' }} >
-                        Given name: <span className='fw-normal' >{printDatas?.student?.first_name_eng}</span>
-                    </div>
-                    <div className='d-inline-block' style={{ width: '33.3%' }} >
-                        Profession: <span className='fw-normal' >{printDatas?.student?.group?.profession?.name_eng}</span>
+                    <div className='d-flex px-2' style={{ width: '33.3%' }} >
+                        <span className='fw-normal w-50'>Date:</span> <span>{printDatas?.registration_num}</span>
                     </div>
                 </div>
-                <div className='fw-bolder' style={{ fontSize: '11px' }} >
-                    <div className='d-inline-block' style={{ width: '33.3%' }} >
-                        ID Registration No:: <span className='fw-normal' >{printDatas?.student?.register_num}</span>
+                <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
+                    <div className='d-flex' style={{ width: '33.3%' }} >
+                        <span className='fw-normal w-50'>First name:</span> <span>{printDatas?.student?.first_name_eng}</span>
                     </div>
-                    <div className='d-inline-block' style={{ width: '33.3%' }} >
-                        Professional Index: <span className='fw-normal' >{printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.group?.profession?.code}</span>
+                    <div className='d-flex px-1' style={{ width: '33.3%' }} >
+                        <span className='fw-normal w-50'>Professional Index: </span><span>{printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.group?.profession?.code}</span>
                     </div>
-                    <div className='d-inline-block' style={{ width: '33.3%' }} >
-                        Diploma Registration No: <span className='fw-normal' >{printDatas?.student?.graduation_work?.registration_num}</span>
+                    <div className='d-flex px-2' style={{ width: '33.3%' }} >
+                        <span className='fw-normal w-50'>Registration No:</span> <span>{printDatas?.student?.graduation_work?.registration_num}</span>
+                    </div>
+                </div>
+                <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
+                    <div className='d-flex' style={{ width: '33.3%' }} >
+                        <span className='fw-normal w-50'>Registration number:</span> <span>{printDatas?.student?.register_num}</span>
+                    </div>
+                    <div className='d-flex px-1' style={{ width: '33.3%' }} >
+                        <span className='fw-normal w-50'>Profession:</span> <span>{printDatas?.student?.group?.profession?.name_eng}</span>
                     </div>
                 </div>
             </header>
@@ -329,7 +311,7 @@ export default function PrintAttachmentEnglish()
                     <span className='ms-5'>GPA: {datas?.score?.assesment}</span>
                 </div>
 
-                <div className='px-2 pb-2' style={{ paddingTop: '5px' }} >
+                <div className='px-2 mb-5' style={{ paddingTop: '2px', paddingBottom: '15px' }} >
                     { datas?.graduation_work?.lesson_type == 1 ? 'Diploma thesis:' : 'Graduation Exams:' }
                     {
                         datas?.graduation_work?.lesson?.map((val, idx) =>
@@ -341,17 +323,18 @@ export default function PrintAttachmentEnglish()
                     }
                 </div>
 
-                <div>
+                <div className='d-flex justify-content-center' style={{ paddingInline: '100px' }} >
                     {
                         listArr.length != 0
                         &&
                         listArr.map((val, idx) =>
                         {
                             return (
-                                <div className='d-inline-block px-2' style={{ width: `${100/listArr.length}%` }} key={idx} >
-                                    <div className='d-inline-block text-start' >
-                                        {val?.position_name_eng}
-                                        <p>________________ {`${val?.last_name_eng} ${val?.first_name_eng}`}</p>
+                                <div className='px-1' style={{ width: `${100/listArr.length}%` }} key={idx} >
+                                    <div className='d-inline-block text-center' >
+                                        <div className='pt-50 px-2' style={{ textTransform: 'uppercase', borderTop: '1px solid black' }}>
+                                            {val?.position_name_eng} {`${val?.last_name_eng} ${val?.first_name_eng}`}
+                                        </div>
                                     </div>
                                 </div>
                             )
@@ -364,7 +347,7 @@ export default function PrintAttachmentEnglish()
                     ?
                     (
                         <div className={`text-end`} style={{ fontSize: '9px', marginRight: '12px' }} >
-                            This annex is valid with Diploma No. {printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.group?.profession?.code} in {new Date().getFullYear()}
+                            {printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.group?.profession?.code} Invalid without diploma.
                         </div>
                     )
                     :
