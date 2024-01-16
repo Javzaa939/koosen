@@ -125,7 +125,7 @@ export default function PrintMongolia()
                 <div className='m-auto' style={{ width: '1000px' }}>
                     <span className='text-center'>This is to certify that
                         <br />
-                        <span className='fw-bolder text-uppercase'>{data?.student?.first_name_eng} {data?.student?.last_name_eng}</span>
+                        <span className='fw-bolder text-uppercase'>{data?.student?.first_name_eng}</span> <span className='fw-bolder'>{data?.student?.last_name_eng}</span>
                         <br />
                         citizen of {data?.student?.citizenship?.name_eng},
                         <br />
