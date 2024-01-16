@@ -183,6 +183,8 @@ class DepartmentRegisterSerailizer(serializers.ModelSerializer):
     """ Салбар, тэнхим ахлах бүртгэх """
 
     school = serializers.CharField(source="sub_orgs.name", default="")
+    school_eng = serializers.CharField(source="sub_orgs.name_eng", default="")
+    school_uig = serializers.CharField(source="sub_orgs.name_uig", default="")
     leaders = serializers.SerializerMethodField()
     lead = serializers.SerializerMethodField()
 

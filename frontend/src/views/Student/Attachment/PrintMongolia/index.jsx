@@ -151,12 +151,10 @@ export default function PrintAttachmentMongolia()
 
                     <table className='w-100 text-center d-none' id='table1' >
                         <thead className='fw-bolder'>
-                            <tr>
-                                <td rowSpan={2} className='border-dark' style={{ width: '6.25%' }}>№</td>
-                                <td rowSpan={2} className='border-dark' style={{ width: '63,75%' }}>Хичээлийн нэрс</td>
-                                <td rowSpan={2} className='border-dark' style={{ width: '12%' }}  >Кр</td>
-                            </tr>
-                            <tr>
+                            <tr style={{ height: '25px' }}>
+                                <td className='border-dark' style={{ width: '6.25%' }}>№</td>
+                                <td className='border-dark' style={{ width: '63,75%' }}>Хичээлийн нэрс</td>
+                                <td className='border-dark' style={{ width: '12%' }}  >Кр</td>
                                 <td className='border-dark' style={{ width: '10%' }} >Оноо</td>
                                 <td className='border-dark' style={{ width: '8%' }} >Дүн</td>
                             </tr>
@@ -170,13 +168,11 @@ export default function PrintAttachmentMongolia()
                 <div className='d-flex flex-wrap align-content-start p-1' style={{ width: '33.1%' }} >
 
                     <table className='w-100 text-center d-none' id='table2' >
-                        <thead>
-                            <tr>
-                                <td rowSpan={2} className='border-dark' style={{ width: '6.25%' }}>№</td>
-                                <td rowSpan={2} className='border-dark' style={{ width: '63,75%' }}>Хичээлийн нэрс</td>
-                                <td rowSpan={2} className='border-dark' style={{ width: '12%' }}  >Кр</td>
-                            </tr>
-                            <tr>
+                        <thead className='fw-bolder'>
+                            <tr style={{ height: '25px' }}>
+                                <td className='border-dark' style={{ width: '6.25%' }}>№</td>
+                                <td className='border-dark' style={{ width: '63,75%' }}>Хичээлийн нэрс</td>
+                                <td className='border-dark' style={{ width: '12%' }}  >Кр</td>
                                 <td className='border-dark' style={{ width: '10%' }} >Оноо</td>
                                 <td className='border-dark' style={{ width: '8%' }} >Дүн</td>
                             </tr>
@@ -190,13 +186,11 @@ export default function PrintAttachmentMongolia()
                 <div className='d-flex flex-wrap align-content-start p-1' style={{ width: '33.1%' }} >
 
                     <table className='w-100 text-center d-none' id='table3' >
-                        <thead>
-                            <tr>
-                                <td rowSpan={2} className='border-dark' style={{ width: '6.25%' }}>№</td>
-                                <td rowSpan={2} className='border-dark' style={{ width: '63,75%' }}>Хичээлийн нэрс</td>
-                                <td rowSpan={2} className='border-dark' style={{ width: '12%' }}  >Кр</td>
-                            </tr>
-                            <tr>
+                        <thead className='fw-bolder'>
+                            <tr style={{ height: '25px' }}>
+                                <td className='border-dark' style={{ width: '6.25%' }}>№</td>
+                                <td className='border-dark' style={{ width: '63,75%' }}>Хичээлийн нэрс</td>
+                                <td className='border-dark' style={{ width: '12%' }}  >Кр</td>
                                 <td className='border-dark' style={{ width: '10%' }} >Оноо</td>
                                 <td className='border-dark' style={{ width: '8%' }} >Дүн</td>
                             </tr>
@@ -230,13 +224,11 @@ export default function PrintAttachmentMongolia()
                 <div className={`position-relative d-flex justify-content-between`} style={{ fontSize: '9px' }} >
                     <div className='d-flex flex-wrap align-content-start' style={{ width: '33.1%' }} >
                         <table className='w-100 text-center d-none' id='table4' >
-                            <thead>
-                                <tr>
-                                    <td rowSpan={2} className='border-dark' style={{ width: '6.25%' }}>№</td>
-                                    <td rowSpan={2} className='border-dark' style={{ width: '63,75%' }}>Хичээлийн нэрс</td>
-                                    <td rowSpan={2} className='border-dark' style={{ width: '12%' }}  >Кр</td>
-                                </tr>
-                                <tr>
+                            <thead className='fw-bolder'>
+                                <tr style={{ height: '25px' }}>
+                                    <td className='border-dark' style={{ width: '6.25%' }}>№</td>
+                                    <td className='border-dark' style={{ width: '63,75%' }}>Хичээлийн нэрс</td>
+                                    <td className='border-dark' style={{ width: '12%' }}  >Кр</td>
                                     <td className='border-dark' style={{ width: '10%' }} >Оноо</td>
                                     <td className='border-dark' style={{ width: '8%' }} >Дүн</td>
                                 </tr>
@@ -250,13 +242,11 @@ export default function PrintAttachmentMongolia()
                     <div className='d-flex flex-wrap align-content-start' style={{ width: '33.1%' }} >
 
                         <table className='w-100 text-center d-none' id='table5' >
-                            <thead>
-                                <tr>
-                                    <td rowSpan={2} className='border-dark' style={{ width: '6.25%' }}>№</td>
-                                    <td rowSpan={2} className='border-dark' style={{ width: '63,75%' }}>Хичээлийн нэрс</td>
-                                    <td rowSpan={2} className='border-dark' style={{ width: '12%' }}  >Кр</td>
-                                </tr>
-                                <tr>
+                            <thead className='fw-bolder'>
+                                <tr style={{ height: '25px' }}>
+                                    <td className='border-dark' style={{ width: '6.25%' }}>№</td>
+                                    <td className='border-dark' style={{ width: '63,75%' }}>Хичээлийн нэрс</td>
+                                    <td className='border-dark' style={{ width: '12%' }}  >Кр</td>
                                     <td className='border-dark' style={{ width: '10%' }} >Оноо</td>
                                     <td className='border-dark' style={{ width: '8%' }} >Дүн</td>
                                 </tr>
@@ -270,13 +260,11 @@ export default function PrintAttachmentMongolia()
                     <div className='d-flex flex-wrap align-content-start' style={{ width: '33.1%' }} >
 
                         <table className='w-100 text-center d-none' id='table6' >
-                            <thead>
-                                <tr>
-                                    <td rowSpan={2} className='border-dark' style={{ width: '6.25%' }}>№</td>
-                                    <td rowSpan={2} className='border-dark' style={{ width: '63,75%' }}>Хичээлийн нэрс</td>
-                                    <td rowSpan={2} className='border-dark' style={{ width: '12%' }}  >Кр</td>
-                                </tr>
-                                <tr>
+                            <thead className='fw-bolder'>
+                                <tr style={{ height: '25px' }}>
+                                    <td className='border-dark' style={{ width: '6.25%' }}>№</td>
+                                    <td className='border-dark' style={{ width: '63,75%' }}>Хичээлийн нэрс</td>
+                                    <td className='border-dark' style={{ width: '12%' }}  >Кр</td>
                                     <td className='border-dark' style={{ width: '10%' }} >Оноо</td>
                                     <td className='border-dark' style={{ width: '8%' }} >Дүн</td>
                                 </tr>
@@ -294,7 +282,7 @@ export default function PrintAttachmentMongolia()
                 <div className='d-flex flex-column text-center fw-bolder'>
                     <p className='text-uppercase' style={{ marginBottom: '0px' }} >Дотоод Хэргийн Их Сургууль</p>
                     <p className='text-uppercase' style={{ marginBottom: '0px' }} >{printDatas?.student?.department?.school}</p>
-                    <p style={{ fontSize: '12px', fontWeight: '500' }} >{printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.graduation_work?.diplom_num} дугаартай дипломын хавсралт</p>
+                    <p style={{ fontSize: '12px', fontWeight: '500' }} >{printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.graduation_work?.diplom_num} дугаартай <span className='text-lowercase'>{printDatas?.student?.group?.degree?.degree_name && `${printDatas?.student?.group?.degree?.degree_name}ын`}</span> дипломын хавсралт</p>
                 </div>
 
                 <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
@@ -348,18 +336,16 @@ export default function PrintAttachmentMongolia()
                     }
                 </div>
 
-                <div className='d-flex justify-content-center'>
+                <div className='d-flex justify-content-center' style={{ paddingInline: '100px' }} >
                     {
                         listArr.length != 0
                         &&
                         listArr.map((val, idx) =>
                         {
                             return (
-                                <div className='px-1' style={{ width: `35%` }} key={idx} >
-                                {/* <div className='bg-info px-1' style={{ width: `${100/listArr.length}%` }} key={idx} > */}
+                                <div className='px-1' style={{ width: `${100/listArr.length}%` }} key={idx} >
                                     <div className='d-inline-block text-center' >
-                                        {/* <p>_____________________________________________________________</p> */}
-                                        <div className='border-top pt-50 px-2' style={{ textTransform: 'uppercase'}}>
+                                        <div className='pt-50 px-2' style={{ textTransform: 'uppercase', borderTop: '1px solid black' }}>
                                             {val?.position_name} {`${val?.last_name} ${val?.first_name}`}
                                         </div>
                                     </div>
