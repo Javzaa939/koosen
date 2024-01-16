@@ -629,6 +629,7 @@ function useApi(isDisplay=false) {
 			calculateGpaDimplomaGet: (studentId) => instance.get(`/student/gpa-diploma-values/?id=${studentId}`),
 
 			getLessonStudent: (student) => instance.get(`/student/score-lesson/${student}/`),
+			postCommand: (data) => instance.post(`/student/command/`, data),
 
 			/* Анги бүлгийн бүртгэл */
 			group:{
