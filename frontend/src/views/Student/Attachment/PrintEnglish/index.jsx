@@ -141,7 +141,7 @@ export default function PrintAttachmentEnglish()
 
             <div className={`position-relative d-flex justify-content-between ${isPageBreak && 'page-break'}`} style={{ fontSize: '8px', marginTop: '135px' }} >
 
-                <div className='d-flex flex-wrap align-content-start' style={{ width: '33.1%' }} >
+                <div className='d-flex flex-wrap align-content-start p-1' style={{ width: '33.1%' }} >
                     <table className='w-100 text-center d-none' id='table1' >
                         <thead className='fw-bolder'>
                              <tr style={{ height: '25px' }}>
@@ -158,7 +158,7 @@ export default function PrintAttachmentEnglish()
                     </table>
                 </div>
 
-                <div className='d-flex flex-wrap align-content-start' style={{ width: '33.1%' }} >
+                <div className='d-flex flex-wrap align-content-start p-1' style={{ width: '33.1%' }} >
                     <table className='w-100 text-center d-none' id='table2' >
                         <thead className='fw-bolder'>
                              <tr style={{ height: '25px' }}>
@@ -175,7 +175,7 @@ export default function PrintAttachmentEnglish()
                     </table>
                 </div>
 
-                <div className='d-flex flex-wrap align-content-start' style={{ width: '33.1%' }} >
+                <div className='d-flex flex-wrap align-content-start p-1' style={{ width: '33.1%' }} >
 
                     <table className='w-100 text-center d-none' id='table3' >
                         <thead className='fw-bolder'>
@@ -198,10 +198,10 @@ export default function PrintAttachmentEnglish()
                     ?
                     (
                         <>
-                            <div className='position-absolute' style={{ right: '12px', fontSize: '9px', top: '533px' }} >
+                            <div className='position-absolute' style={{ right: '12px', fontSize: '11px', top: '533px' }} >
                                 This annex-1 is valid with Diploma No. {printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.group?.profession?.code} in {new Date().getFullYear()}
                             </div>
-                            <div className='position-absolute' style={{ right: '12px', fontSize: '9px', top: '1242px' }} >
+                            <div className='position-absolute' style={{ right: '12px', fontSize: '11px', top: '1242px' }} >
                                 This annex-2 is valid with Diploma No. {printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.group?.profession?.code} in {new Date().getFullYear()}
                             </div>
                         </>
@@ -214,7 +214,7 @@ export default function PrintAttachmentEnglish()
 
             <div className={`${!isPageBreak && 'd-none'}`} style={{ marginTop: '135px', breakInside: 'avoid' }} >
                 <div className={`position-relative d-flex justify-content-between`} >
-                    <div className='d-flex flex-wrap align-content-start' style={{ width: '33.1%' }} >
+                    <div className='d-flex flex-wrap align-content-start p-1' style={{ width: '33.1%' }} >
                         <table className='w-100 text-center d-none' id='table4' >
                             <thead className='fw-bolder'>
                                  <tr style={{ height: '25px' }}>
@@ -231,7 +231,7 @@ export default function PrintAttachmentEnglish()
                         </table>
                     </div>
 
-                    <div className='d-flex flex-wrap align-content-start' style={{ width: '33.1%' }} >
+                    <div className='d-flex flex-wrap align-content-start p-1' style={{ width: '33.1%' }} >
 
                         <table className='w-100 text-center d-none' id='table5' >
                             <thead className='fw-bolder'>
@@ -249,7 +249,7 @@ export default function PrintAttachmentEnglish()
                         </table>
                     </div>
 
-                    <div className='d-flex flex-wrap align-content-start' style={{ width: '33.1%' }} >
+                    <div className='d-flex flex-wrap align-content-start p-1' style={{ width: '33.1%' }} >
 
                         <table className='w-100 text-center d-none' id='table6' >
                             <thead className='fw-bolder'>
@@ -269,7 +269,7 @@ export default function PrintAttachmentEnglish()
                 </div>
             </div>
 
-            <header className='w-100' >
+            <header className='w-100 px-1' style={{ backgroundColor: 'white', color: 'black' }} >
                 <div className='d-flex flex-column text-center fw-bolder'>
                     <p className='text-uppercase' style={{ marginBottom: '0px' }} >UNIVERSITY OF INTERNAL AFFAIRS, MONGOLIA</p>
                     <p className='text-uppercase' style={{ marginBottom: '0px' }} >{printDatas?.student?.department?.school_eng}</p>
@@ -310,8 +310,8 @@ export default function PrintAttachmentEnglish()
 
             <footer className='w-100' style={{ fontSize: '10px' }} >
 
-                <div className='text-center'>
-                    <span>Total Credits: {datas?.score?.max_kredit}</span>
+                <div className='text-end'>
+                    <span className='ms-5'>Total Credits: {datas?.score?.max_kredit}</span>
                     <span className='ms-5'>GPA: {datas?.score?.assesment}</span>
                 </div>
 
@@ -350,7 +350,7 @@ export default function PrintAttachmentEnglish()
                     isPageBreak === false
                     ?
                     (
-                        <div className={`text-end`} style={{ fontSize: '9px', marginRight: '12px' }} >
+                        <div className={`text-end mt-2`} style={{ fontSize: '11px', marginRight: '12px' }} >
                             {printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.group?.profession?.code} Invalid without diploma.
                         </div>
                     )

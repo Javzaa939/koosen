@@ -206,10 +206,10 @@ export default function PrintAttachmentMongolia()
                     ?
                     (
                         <>
-                            <div className='position-absolute' style={{ right: '12px', fontSize: '9px', top: '533px' }} >
+                            <div className='position-absolute' style={{ right: '12px', fontSize: '11px', top: '533px' }} >
                                 Энэхүү хавсралт-1 {new Date().getFullYear()} оны {printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.group?.profession?.code} дугаартай дипломын хамт хүчинтэй.
                             </div>
-                            <div className='position-absolute' style={{ right: '12px', fontSize: '9px', top: '1242px' }} >
+                            <div className='position-absolute' style={{ right: '12px', fontSize: '11px', top: '1242px' }} >
                                 Энэхүү хавсралт-2 {new Date().getFullYear()} оны {printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.group?.profession?.code} дугаартай дипломын хамт хүчинтэй.
                             </div>
                         </>
@@ -222,7 +222,7 @@ export default function PrintAttachmentMongolia()
 
             <div className={`${!isPageBreak && 'd-none'}`} style={{ marginTop: '135px', breakInside: 'avoid', backgroundColor: 'white', color: 'black' }} >
                 <div className={`position-relative d-flex justify-content-between`} style={{ fontSize: '9px' }} >
-                    <div className='d-flex flex-wrap align-content-start' style={{ width: '33.1%' }} >
+                    <div className='d-flex flex-wrap align-content-start p-1' style={{ width: '33.1%' }} >
                         <table className='w-100 text-center d-none' id='table4' >
                             <thead className='fw-bolder'>
                                 <tr style={{ height: '25px' }}>
@@ -239,7 +239,7 @@ export default function PrintAttachmentMongolia()
                         </table>
                     </div>
 
-                    <div className='d-flex flex-wrap align-content-start' style={{ width: '33.1%' }} >
+                    <div className='d-flex flex-wrap align-content-start p-1' style={{ width: '33.1%' }} >
 
                         <table className='w-100 text-center d-none' id='table5' >
                             <thead className='fw-bolder'>
@@ -257,7 +257,7 @@ export default function PrintAttachmentMongolia()
                         </table>
                     </div>
 
-                    <div className='d-flex flex-wrap align-content-start' style={{ width: '33.1%' }} >
+                    <div className='d-flex flex-wrap align-content-start p-1' style={{ width: '33.1%' }} >
 
                         <table className='w-100 text-center d-none' id='table6' >
                             <thead className='fw-bolder'>
