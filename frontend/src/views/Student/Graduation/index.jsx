@@ -278,7 +278,7 @@ const Graduation = () => {
 	return (
 		<Fragment>
             <Card>
-                {/* {isLoading && Loader} */}
+                {isLoading && Loader}
                 <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom align-items-center py-1">
                     <CardTitle tag="h4">{t('Гарын үсэг зурах хүмүүс')}</CardTitle>
                     <div className='d-flex flex-wrap mt-md-0 mt-1'>
