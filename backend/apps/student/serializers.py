@@ -420,7 +420,9 @@ class StudentListSerializer(serializers.ModelSerializer):
         # хоолойн г ээр төгссөн өол
         if ovog.endswith("г") or ovog.endswith("ж") or ovog.endswith("ч") or ovog.endswith("ш"):
             ovog = ovog + 'ийн'
-        elif ovog.endswith("н") and ('э' in ovog or 'ө' in ovog or 'ү' in ovog):
+        elif ovog.endswith("н"):
+            ovog = ovog + 'гийн'
+        elif ovog.endswith("й"):
             ovog = ovog + 'гийн'
         elif ovog.endswith("н") and ('а' in ovog or 'о' in ovog or 'у' in ovog):
             ovog = ovog + 'ы'
@@ -436,8 +438,8 @@ class StudentListSerializer(serializers.ModelSerializer):
             ovog = ovog + 'ын'
         elif ovog.endswith("э") or ovog.endswith("и") or ovog.endswith("ө") or ovog.endswith("ү"):
             last_element = ovog[-1]
-            ovog = ovog.replace('{}'.format(last_element), '')
-            ovog = ovog + 'ийн'
+            split_ovog = ovog[:-1]
+            ovog = split_ovog + 'ийн'
         elif ovog.endswith("н") and ('э' in ovog or 'ө' in ovog or 'ү' in ovog or 'и' in ovog):
             ovog = ovog + 'гийн'
         elif 'а' in reverse_ovog or 'о' in reverse_ovog or 'у' in reverse_ovog:

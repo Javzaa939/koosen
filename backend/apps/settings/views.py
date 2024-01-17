@@ -848,7 +848,7 @@ class ScoreAPIView(
 
     """ Үнэлгээний бүртгэл """
 
-    queryset = Score.objects.all().order_by("-created_at")
+    queryset = Score.objects.all().order_by("-score_max")
     serializer_class = ScoreSerailizer
 
     @has_permission(must_permissions=['lms-settings-score-read'])
@@ -881,7 +881,6 @@ class ScoreAPIView(
         else:
             # Олон алдааны мессэж буцаах бол үүнийг ашиглана
             for key in serializer.errors:
-
                 return_error = {
                     "field": key,
                     "msg": "Код бүртгэгдсэн байна"
