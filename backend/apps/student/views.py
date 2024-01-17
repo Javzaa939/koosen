@@ -2461,7 +2461,9 @@ class StudentGpaDiplomaValuesAPIView(
             obj_datas['lessons'] = lesson_datas
             all_datas.append(obj_datas)
 
-        final_gpa = round(all_score / max_kredit, 2)
+        final_gpa = all_score / max_kredit
+        final_gpa = format(final_gpa, ".2f")
+
         all_data['score'] = { 'assesment': final_gpa, 'max_kredit': max_kredit }
         all_data['lessons'] = all_datas
 
