@@ -1777,7 +1777,7 @@ class GraduationWorkAPIView(
     mixins.ListModelMixin,
     generics.GenericAPIView
 ):
-    queryset = GraduationWork.objects.all()
+    queryset = GraduationWork.objects.all().order_by('student__first_name')
     serializer_class = GraduationWorkSerializer
 
     pagination_class = CustomPagination
@@ -2388,6 +2388,9 @@ class StudentCalculateGpaDiplomaAPIView(
 
         for unique_id in unique_ids:
             score_register_qs = ScoreRegister.objects.filter(student_id=student_id, lesson_id=unique_id).first()
+            print(kredit=score_register_qs.lesson.kredit)
+            print(score_register_qs.teach_score)
+            print(score_register_qs.exam_score)
             created_cal_qs = CalculatedGpaOfDiploma.objects.create(student_id=student_id, kredit=score_register_qs.lesson.kredit, score=((score_register_qs.teach_score or 0) + (score_register_qs.exam_score or 0)), gpa=score_register_qs.assessment.gpa, assesment=score_register_qs.assessment.assesment)
             created_cal_qs.lesson.add(score_register_qs.lesson)
 
@@ -2455,18 +2458,14 @@ class StudentGpaDiplomaValuesAPIView(
                         lesson_datas.append(lesson)
 
                         max_kredit = max_kredit + lesson.get('kredit')
-                        all_score = all_score + (data_qs.score * lesson.get('kredit'))
+                        score_qs = Score.objects.filter(score_max__gte=data_qs.score, score_min__lte=data_qs.score).first()
+                        all_score = all_score + (score_qs.gpa * lesson.get('kredit'))
 
             obj_datas['lessons'] = lesson_datas
             all_datas.append(obj_datas)
 
         final_gpa = round(all_score / max_kredit, 2)
-        score_qs = Score.objects.filter(score_max__gte=final_gpa, score_min__lte=final_gpa).first()
-
-        if score_qs:
-            score_assesment = score_qs.gpa
-
-        all_data['score'] = { 'assesment': score_assesment, 'max_kredit': max_kredit }
+        all_data['score'] = { 'assesment': final_gpa, 'max_kredit': max_kredit }
         all_data['lessons'] = all_datas
 
         # GraduationWork
