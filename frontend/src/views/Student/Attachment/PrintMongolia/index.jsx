@@ -60,76 +60,79 @@ export default function PrintAttachmentMongolia()
     useEffect(
         () =>
         {
-            if (datas?.lessons?.length != 0)
-            {
-                let count = 0
-                let perCount = 0
-                let half = printDatas.tableRowCount.length / 2
-                for (let [idx, val] of printDatas.tableRowCount.entries())
+            if (datas?.lessons)
                 {
-                    if (idx == half)
+                if (datas?.lessons?.length != 0)
+                {
+                    let count = 0
+                    let perCount = 0
+                    let half = printDatas.tableRowCount.length / 2
+                    for (let [idx, val] of printDatas.tableRowCount.entries())
                     {
+                        if (idx == half)
+                        {
+                            if (val > 0)
+                            {
+                                setIsPageBreak(true)
+                            }
+                        }
+
                         if (val > 0)
                         {
-                            setIsPageBreak(true)
-                        }
-                    }
+                            let tableDoc = document.getElementById(`table${idx + 1}`)
+                            tableDoc.classList.toggle('d-none')
 
-                    if (val > 0)
-                    {
-                        let tableDoc = document.getElementById(`table${idx + 1}`)
-                        tableDoc.classList.toggle('d-none')
+                            var tbodyRef = tableDoc.getElementsByTagName('tbody')[0];
 
-                        var tbodyRef = tableDoc.getElementsByTagName('tbody')[0];
-
-                        for (let bodyIdx = 0; bodyIdx < val; bodyIdx++)
-                        {
-
-                            let newRow = tbodyRef.insertRow();
-
-                            count++
-
-                            if(flattenedArray[count - 1]?.type === "children")
+                            for (let bodyIdx = 0; bodyIdx < val; bodyIdx++)
                             {
-                                let newCell1 = newRow.insertCell();
-                                let newCell2 = newRow.insertCell();
-                                let newCell3 = newRow.insertCell();
-                                let newCell4 = newRow.insertCell();
-                                let newCell5 = newRow.insertCell();
 
-                                perCount++
+                                let newRow = tbodyRef.insertRow();
 
-                                newCell1.innerHTML = perCount
-                                newCell2.innerHTML = flattenedArray[count - 1]?.lesson?.lesson?.name || ''
-                                newCell3.innerHTML = flattenedArray[count - 1]?.kredit || ''
+                                count++
 
-                                // NaN буцаагаад байхаар нь шалгах функц бичсэн.
-                                // ер нь бол шаардлагагүй гэхдээ яахав
+                                if(flattenedArray[count - 1]?.type === "children")
+                                {
+                                    let newCell1 = newRow.insertCell();
+                                    let newCell2 = newRow.insertCell();
+                                    let newCell3 = newRow.insertCell();
+                                    let newCell4 = newRow.insertCell();
+                                    let newCell5 = newRow.insertCell();
 
-                                // newCell4.innerHTML = !isNaN(flattenedArray[count - 1]?.score)
-                                // 	? flattenedArray[count - 1]?.score
-                                // 		: 'Default';
+                                    perCount++
 
-                                newCell4.innerHTML = flattenedArray[count - 1]?.score ? flattenedArray[count - 1]?.score : ''
+                                    newCell1.innerHTML = perCount
+                                    newCell2.innerHTML = flattenedArray[count - 1]?.lesson?.lesson?.name || ''
+                                    newCell3.innerHTML = flattenedArray[count - 1]?.kredit || ''
 
-                                newCell5.innerHTML = flattenedArray[count - 1]?.assesment || ''
+                                    // NaN буцаагаад байхаар нь шалгах функц бичсэн.
+                                    // ер нь бол шаардлагагүй гэхдээ яахав
 
-                                newCell1.className = 'border-dark mini-cell'
-                                newCell2.className = 'border-dark body-cell'
-                                newCell3.className = 'border-dark footer1-cell'
-                                newCell4.className = 'border-dark footer2-cell'
-                                newCell5.className = 'border-dark footer3-cell'
+                                    // newCell4.innerHTML = !isNaN(flattenedArray[count - 1]?.score)
+                                    // 	? flattenedArray[count - 1]?.score
+                                    // 		: 'Default';
+
+                                    newCell4.innerHTML = flattenedArray[count - 1]?.score ? flattenedArray[count - 1]?.score : ''
+
+                                    newCell5.innerHTML = flattenedArray[count - 1]?.assesment || ''
+
+                                    newCell1.className = 'border-dark mini-cell'
+                                    newCell2.className = 'border-dark body-cell'
+                                    newCell3.className = 'border-dark footer1-cell'
+                                    newCell4.className = 'border-dark footer2-cell'
+                                    newCell5.className = 'border-dark footer3-cell'
+                                }
+                                else
+                                {
+                                    let newCell1 = newRow.insertCell();
+
+                                    newCell1.innerHTML = flattenedArray[count - 1]?.name
+                                    newCell1.colSpan = 5
+
+                                    newCell1.className = 'border-dark body-cell text-center'
+                                }
+
                             }
-                            else
-                            {
-                                let newCell1 = newRow.insertCell();
-
-                                newCell1.innerHTML = flattenedArray[count - 1]?.name
-                                newCell1.colSpan = 5
-
-                                newCell1.className = 'border-dark body-cell text-center'
-                            }
-
                         }
                     }
                 }
