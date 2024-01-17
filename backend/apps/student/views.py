@@ -8,6 +8,7 @@ from rest_framework import mixins
 from rest_framework import generics
 
 from django.conf import settings
+from django.db import connection
 from django.db import transaction
 from django.db.models import Max, Sum, F, FloatField, Q, Value
 from django.db.models.functions import Replace, Upper
@@ -22,7 +23,7 @@ from main.utils.file import remove_folder
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 from main.utils.function.pagination import CustomPagination
-from main.utils.function.utils import str2bool, has_permission, get_lesson_choice_student, remove_key_from_dict, get_fullName, get_student_score_register, calculate_birthday, null_to_none, end_time, get_active_year_season,start_time
+from main.utils.function.utils import str2bool, has_permission, get_lesson_choice_student, remove_key_from_dict, get_fullName, get_student_score_register, calculate_birthday, null_to_none, end_time, get_active_year_season,start_time, dict_fetchall
 # from main.khur.XypClient import citizen_regnum, highschool_regnum
 
 from core.models import SubOrgs, SumDuureg, AimagHot
@@ -88,7 +89,6 @@ from .serializers import BigSchoolsSerializer
 from .serializers import StudentDefinitionSerializer
 from .serializers import ScoreRegisterDefinitionSerializer
 from .serializers import SeasonSerializer
-from .serializers import CalculatedGpaOfDiplomaPrintSerializer
 from .serializers import StudentAttachmentSerializer
 from .serializers import GraduationWorkPrintSerailizer
 from .serializers import StudentVizListSerializer
@@ -1777,7 +1777,7 @@ class GraduationWorkAPIView(
     mixins.ListModelMixin,
     generics.GenericAPIView
 ):
-    queryset = GraduationWork.objects.all()
+    queryset = GraduationWork.objects.all().order_by('student__first_name')
     serializer_class = GraduationWorkSerializer
 
     pagination_class = CustomPagination
@@ -2418,12 +2418,13 @@ class StudentGpaDiplomaValuesAPIView(
 
         all_datas = []
         for level in list(learning_plan_levels):
+            if level == (LearningPlan.DIPLOM or LearningPlan.MAG_DIPLOM or LearningPlan.DOC_DIPLOM):
+                continue
+
             obj_datas = {}
             obj_datas['name'] = all_learn_levels[level]
 
             lesson_datas = []
-            if level == (LearningPlan.DIPLOM or LearningPlan.MAG_DIPLOM or LearningPlan.DOC_DIPLOM):
-                continue
 
             obj_datas['eng_name'] = 'Education subject'
             if level == 2:
@@ -2432,23 +2433,38 @@ class StudentGpaDiplomaValuesAPIView(
                 obj_datas['eng_name'] = 'Major course'
 
             for data_qs in qs:
-                data = CalculatedGpaOfDiplomaPrintSerializer(data_qs, context={ "student_prof_qs": student_prof_qs }, many=False).data
-                if data['lesson']['lesson_level'] == level:
-                    lesson_datas.append(data)
+                lesson_first_data = data_qs.lesson.all()
+                lesson_obj = lesson_first_data.first()
 
-                    max_kredit = max_kredit + data['kredit']
-                    all_score = all_score + (data['score'] * data['kredit'])
+                query = '''
+                    select lp.lesson_level, ls.name, ls.code, ls.id, ls.name_eng, ls.name_uig, ls.kredit from lms_learningplan lp
+                    inner join lms_lessonstandart ls
+                    on lp.lesson_id=ls.id
+                    where lp.profession_id = {profession_id} and lp.lesson_id = {lesson_id}
+                '''.format(profession_id=student_prof_qs.id, lesson_id=lesson_obj.id)
+
+                cursor = connection.cursor()
+                cursor.execute(query)
+                rows = list(dict_fetchall(cursor))
+
+                if len(rows) > 0:
+                    if rows[0]['lesson_level'] == level:
+                        lesson = rows[0]
+                        lesson['score'] = data_qs.score
+                        lesson['assesment'] = data_qs.assesment
+                        lesson_datas.append(lesson)
+
+                        max_kredit = max_kredit + lesson.get('kredit')
+                        score_qs = Score.objects.filter(score_max__gte=data_qs.score, score_min__lte=data_qs.score).first()
+                        all_score = all_score + (score_qs.gpa * lesson.get('kredit'))
 
             obj_datas['lessons'] = lesson_datas
             all_datas.append(obj_datas)
 
         final_gpa = all_score / max_kredit
-        score_qs = Score.objects.filter(score_max__gte=final_gpa, score_min__lte=final_gpa).first()
+        final_gpa = format(final_gpa, ".2f")
 
-        if score_qs:
-            score_assesment = score_qs.gpa
-
-        all_data['score'] = { 'assesment': score_assesment, 'max_kredit': max_kredit }
+        all_data['score'] = { 'assesment': final_gpa, 'max_kredit': max_kredit }
         all_data['lessons'] = all_datas
 
         # GraduationWork
