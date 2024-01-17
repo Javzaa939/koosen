@@ -2388,9 +2388,6 @@ class StudentCalculateGpaDiplomaAPIView(
 
         for unique_id in unique_ids:
             score_register_qs = ScoreRegister.objects.filter(student_id=student_id, lesson_id=unique_id).first()
-            print(kredit=score_register_qs.lesson.kredit)
-            print(score_register_qs.teach_score)
-            print(score_register_qs.exam_score)
             created_cal_qs = CalculatedGpaOfDiploma.objects.create(student_id=student_id, kredit=score_register_qs.lesson.kredit, score=((score_register_qs.teach_score or 0) + (score_register_qs.exam_score or 0)), gpa=score_register_qs.assessment.gpa, assesment=score_register_qs.assessment.assesment)
             created_cal_qs.lesson.add(score_register_qs.lesson)
 
