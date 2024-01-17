@@ -894,30 +894,25 @@ class ScoreAPIView(
         "Үнэлгээний бүртгэл засах"
 
         datas = request.data
+        code = datas.get('score_code')
 
-        instance = self.queryset.filter(id=pk).first()
-        serializer = self.get_serializer(instance, data=datas)
-
-        if serializer.is_valid(raise_exception=False):
-            with transaction.atomic():
-                try:
-                    self.perform_create(serializer)
-
-                except Exception:
-                    return request.send_error("ERR_002")
-
-            return request.send_info("INF_002")
-
-        else:
-            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
-            for key in serializer.errors:
-
-                return_error = {
-                    "field": key,
-                    "msg": "Код бүртгэгдсэн байна"
-                }
-
+        checked_qs = Score.objects.exclude(id=pk).filter(score_code=code)
+        if len(checked_qs) > 0:
+            return_error = {
+                "field": 'score_code',
+                "msg": "Код бүртгэгдсэн байна"
+            }
             return request.send_error_valid(return_error)
+
+        with transaction.atomic():
+            try:
+                self.queryset.filter(id=pk).update(**datas)
+            except Exception as e:
+                print(e)
+                return request.send_error("ERR_002")
+
+        return request.send_info("INF_002")
+
 
     @has_permission(must_permissions=['lms-settings-score-delete'])
     def delete(self, request, pk=None):

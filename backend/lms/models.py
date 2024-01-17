@@ -106,7 +106,7 @@ class Score(models.Model):
     score_max = models.FloatField(verbose_name="Дүнгийн доод оноо")
     score_min = models.FloatField(verbose_name="Дүнгийн дээд оноо")
     gpa = models.FloatField(verbose_name="Голч дүн")
-    assesment = models.CharField(max_length=1, verbose_name="Үсгэн үнэлгээ")
+    assesment = models.CharField(max_length=10, verbose_name="Үсгэн үнэлгээ")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
