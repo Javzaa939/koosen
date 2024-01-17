@@ -101,7 +101,7 @@ export default function PrintAttachmentEnglish()
                                     perCount++
 
 									newCell1.innerHTML = perCount
-									newCell2.innerHTML = flattenedArray[count - 1]?.lesson?.lesson?.name_eng || ''
+									newCell2.innerHTML = flattenedArray[count - 1]?.name_eng || ''
 									newCell3.innerHTML = flattenedArray[count - 1]?.kredit || ''
 
                                     newCell4.innerHTML = flattenedArray[count - 1]?.score ? flattenedArray[count - 1]?.score : ''
