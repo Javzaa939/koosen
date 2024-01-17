@@ -394,11 +394,13 @@ class StudentListSerializer(serializers.ModelSerializer):
     group = GroupListSerializerWithProfessional(many=False, read_only=True)
     citizenship = CountryListSerializer(many=False, read_only=True)
     school_name = serializers.CharField(source='school.name', default='')
+    school_name_eng = serializers.CharField(source='school.name_eng', default='')
+    school_name_uig = serializers.CharField(source='school.name_uig', default='')
     lastname = serializers.SerializerMethodField()
 
     class Meta:
         model = Student
-        fields = ["id", 'code', 'first_name', 'last_name', 'register_num', 'full_name', 'group', 'citizenship', 'last_name_eng', 'first_name_eng', 'last_name_uig', 'first_name_uig', 'school_name', 'lastname' ]
+        fields = ["id", 'code', 'first_name', 'last_name', 'register_num', 'full_name', 'group', 'citizenship', 'last_name_eng', 'first_name_eng', 'last_name_uig', 'first_name_uig', 'school_name', 'lastname', 'school_name_eng', 'school_name_uig' ]
 
     def get_full_name(self, obj):
         first_name = obj.first_name

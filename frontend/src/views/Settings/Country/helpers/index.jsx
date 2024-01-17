@@ -51,7 +51,7 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
             sortable: false,
 			minWidth: "280px",
 			center: true,
-			style: {fontFamily: 'CMs Urga', fontSize:'15px'}
+			style: {fontFamily: 'cmdashitseden', fontSize:'15px'}
 		},
 	]
 	if(Object.keys(user).length > 0 && user.permissions.includes('lms-settings-country-update') && user.permissions.includes('lms-settings-country-delete')? true : false) {

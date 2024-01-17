@@ -178,7 +178,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, editId }) => {
                                         bsSize="sm"
                                         placeholder={t('уйгаржин нэр')}
                                         type="text"
-                                        style={{fontFamily: 'CMs Urga', fontSize:'15px'}}
+                                        style={{fontFamily: 'cmdashitseden', fontSize:'15px'}}
                                         invalid={errors.name_uig && true}
                                     />
                                 )}
