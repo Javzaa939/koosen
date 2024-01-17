@@ -1,4 +1,5 @@
 import os
+import re
 from datetime import date
 
 from rest_framework import serializers
@@ -68,6 +69,9 @@ from main.utils.function.utils import fix_format_date
 from main.utils.function.utils import json_load
 from main.utils.function.utils import get_active_year_season
 
+from googletrans import Translator
+
+translator = Translator()
 
 # ------------------- Оюутан бүртгэл -----------------
 
@@ -986,6 +990,7 @@ class StudentAttachmentSerializer(serializers.ModelSerializer):
 
     score_code = serializers.SerializerMethodField()
     graduation_work = serializers.SerializerMethodField()
+    register_num_eng = serializers.SerializerMethodField()
 
     class Meta:
         model = Student
@@ -1032,6 +1037,24 @@ class StudentAttachmentSerializer(serializers.ModelSerializer):
                 if score_qs:
                     score_assesment = score_qs.gpa
         return { 'score_code': score_assesment, 'max_kredit': max_kredit }
+
+
+    def get_register_num_eng(self, obj):
+        regex = r'[А-Яа-я]{2}[0-9]{8}'
+        return_reg_num = obj.register_num
+
+        regex_matches = re.search(regex, str(return_reg_num))
+        if regex_matches:
+            register_num = regex_matches[0]
+
+            st_2 = register_num[:2]
+            number = register_num[2:10]
+
+            eng = translator.translate(st_2, dest='en').text
+
+            return_reg_num = eng + number
+
+        return return_reg_num
 
 
 class CalculatedGpaOfDiplomaPrintSerializer(serializers.ModelSerializer):

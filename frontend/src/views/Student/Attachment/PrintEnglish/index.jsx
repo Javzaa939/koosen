@@ -196,10 +196,10 @@ export default function PrintAttachmentEnglish()
                     (
                         <>
                             <div className='position-absolute' style={{ right: '12px', fontSize: '11px', top: '533px' }} >
-                                This annex-1 is valid with Diploma No. {printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.group?.profession?.code} in {new Date().getFullYear()}
+                                This annex-1 is valid with Diploma No. {printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.graduation_work?.diplom_num} in {new Date().getFullYear()}
                             </div>
                             <div className='position-absolute' style={{ right: '12px', fontSize: '11px', top: '1242px' }} >
-                                This annex-2 is valid with Diploma No. {printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.group?.profession?.code} in {new Date().getFullYear()}
+                                This annex-2 is valid with Diploma No. {printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.graduation_work?.diplom_num} in {new Date().getFullYear()}
                             </div>
                         </>
                     )
@@ -297,7 +297,7 @@ export default function PrintAttachmentEnglish()
                 </div>
                 <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
                     <div className='d-flex' style={{ width: '33.3%' }} >
-                        <span className='fw-normal w-50'>Registration number:</span> <span>{printDatas?.student?.register_num}</span>
+                        <span className='fw-normal w-50'>Registration number:</span> <span>{printDatas?.student?.register_num_eng}</span>
                     </div>
                     <div className='d-flex px-1' style={{ width: '33.3%' }} >
                         <span className='fw-normal w-50'>Profession:</span> <span>{printDatas?.student?.group?.profession?.name_eng}</span>
@@ -334,7 +334,7 @@ export default function PrintAttachmentEnglish()
                                 <div className='px-1' style={{ width: `${100/listArr.length}%` }} key={idx} >
                                     <div className='d-inline-block text-center' >
                                         <div className='pt-50 px-2' style={{ textTransform: 'uppercase', borderTop: '1px solid black' }}>
-                                            {val?.position_name_eng} {`${val?.last_name_eng} ${val?.first_name_eng}`}
+                                        {`${val?.last_name_eng} ${val?.first_name_eng}`}, {val?.position_name_eng}
                                         </div>
                                     </div>
                                 </div>
@@ -348,7 +348,7 @@ export default function PrintAttachmentEnglish()
                     ?
                     (
                         <div className={`text-end mt-2`} style={{ fontSize: '11px', marginRight: '12px' }} >
-                            {printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.group?.profession?.code} Invalid without diploma.
+                            {printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.graduation_work?.diplom_num} Invalid without diploma.
                         </div>
                     )
                     :

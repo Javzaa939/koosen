@@ -207,10 +207,10 @@ export default function PrintAttachmentMongolia()
                     (
                         <>
                             <div className='position-absolute' style={{ right: '12px', fontSize: '11px', top: '533px' }} >
-                                Энэхүү хавсралт-1 {new Date().getFullYear()} оны {printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.group?.profession?.code} дугаартай дипломын хамт хүчинтэй.
+                                Энэхүү хавсралт-1 {new Date().getFullYear()} оны {printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.graduation_work?.diplom_num} дугаартай дипломын хамт хүчинтэй.
                             </div>
                             <div className='position-absolute' style={{ right: '12px', fontSize: '11px', top: '1242px' }} >
-                                Энэхүү хавсралт-2 {new Date().getFullYear()} оны {printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.group?.profession?.code} дугаартай дипломын хамт хүчинтэй.
+                                Энэхүү хавсралт-2 {new Date().getFullYear()} оны {printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.graduation_work?.diplom_num} дугаартай дипломын хамт хүчинтэй.
                             </div>
                         </>
                     )
@@ -360,7 +360,7 @@ export default function PrintAttachmentMongolia()
                     ?
                     (
                         <div className={`text-end mt-2`} style={{ fontSize: '11px', marginRight: '12px' }} >
-                            Энэхүү хавсралт нь {new Date().getFullYear()} оны {printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.group?.profession?.code} дугаартай дипломын хамт хүчинтэй.
+                            Энэхүү хавсралт нь {new Date().getFullYear()} оны {printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.graduation_work?.diplom_num} дугаартай дипломын хамт хүчинтэй.
                         </div>
                     )
                     :

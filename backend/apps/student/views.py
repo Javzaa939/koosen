@@ -2460,7 +2460,7 @@ class StudentGpaDiplomaValuesAPIView(
             obj_datas['lessons'] = lesson_datas
             all_datas.append(obj_datas)
 
-        final_gpa = all_score / max_kredit
+        final_gpa = round(all_score / max_kredit, 2)
         score_qs = Score.objects.filter(score_max__gte=final_gpa, score_min__lte=final_gpa).first()
 
         if score_qs:
