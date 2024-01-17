@@ -114,7 +114,6 @@ export default function AttachmentStudent()
 
     async function toThink()
     {
-        console.log('vdsv')
         await Promise.all([
             fetchData(studentApi.calculateGpaDimplomaAdd(studentId, checkedValues.current)),
         ]).then((values) => {
@@ -334,7 +333,7 @@ export default function AttachmentStudent()
 
     return (
         <Fragment>
-            { is_loading && Loader }
+            { (is_loading || isLoading) && Loader }
             <Card>
                 <div className="cursor-pointer hover-shadow m-1" onClick={() => handleNavigate()}>
                     <ChevronsLeft /> Буцах

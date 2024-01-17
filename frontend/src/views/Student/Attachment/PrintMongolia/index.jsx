@@ -102,7 +102,7 @@ export default function PrintAttachmentMongolia()
                                     perCount++
 
                                     newCell1.innerHTML = perCount
-                                    newCell2.innerHTML = flattenedArray[count - 1]?.lesson?.lesson?.name || ''
+                                    newCell2.innerHTML = flattenedArray[count - 1]?.name || ''
                                     newCell3.innerHTML = flattenedArray[count - 1]?.kredit || ''
 
                                     // NaN буцаагаад байхаар нь шалгах функц бичсэн.

@@ -21,9 +21,6 @@ export default function PrintAttachmentEnglish()
     const [ printDatas, setPrintDatas ] = useState(JSON.parse(localStorage.getItem('blankDatas')))
     const [ datas, setDatas ] = useState([])
 
-    console.log(printDatas)
-    console.log(datas)
-
     async function getAllData(studentId)
     {
         await Promise.all([

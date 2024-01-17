@@ -909,15 +909,17 @@ class StudentDefinitionSerializer(serializers.ModelSerializer):
 
 
 class ScoreRegisterDefinitionSerializer(serializers.ModelSerializer):
-
-    lesson = LessonStandartSerializer(many=False, read_only=True)
+    lesson_name = serializers.CharField(source='lesson.name', default='')
+    lesson_code = serializers.CharField(source='lesson.code', default='')
+    lesson_kredit = serializers.CharField(source='lesson.kredit', default='')
+    lesson_id = serializers.IntegerField(source='lesson.id')
 
     assessment = serializers.SerializerMethodField()
-    lesson_season = SeasonSerializer(many=False)
+    lesson_season_name = serializers.CharField(source='lesson_season.season_name', default='')
 
     class Meta:
         model = ScoreRegister
-        fields = "__all__"
+        fields = "id", 'lesson_name', 'lesson_year', 'lesson_code', 'lesson_kredit', 'assessment', 'lesson_season_name', 'exam_score', 'teach_score', 'lesson_id'
 
     def get_assessment(self, obj):
 

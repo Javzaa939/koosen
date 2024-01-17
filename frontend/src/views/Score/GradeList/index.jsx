@@ -101,7 +101,6 @@ const GradeList = () => {
     async function getGroupLesson() {
         const { success, data } = await fetchData(lessonApi.getLessonsGroup(chosenGroup))
         if(success) {
-            console.log(data)
             setLessonOption(data?.lessons)
             setStudentOption(data?.students)
         }
@@ -150,7 +149,6 @@ const GradeList = () => {
 
     function convert() {
         var lessons = lessonOption.map((c) => c.full_name)
-        console.log(lessons)
 
         const staticCells = [
             "№",
