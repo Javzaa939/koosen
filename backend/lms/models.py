@@ -23,6 +23,7 @@ class ProfessionalDegree(models.Model):
     degree_code = models.CharField(unique=True, max_length=255)
     degree_name = models.CharField(max_length=255, verbose_name="Зэргийн нэр")
     degree_eng_name = models.CharField(max_length=255, null=True, verbose_name="Зэргийн англи нэр")
+    degree_uig_name = models.CharField(max_length=255, null=True, verbose_name="Зэргийн уйгаржин нэр")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
