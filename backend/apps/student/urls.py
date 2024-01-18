@@ -91,4 +91,7 @@ urlpatterns = [
     path('command/', CommandAPIView.as_view()),
     path('graduate/list/', StudentCommandListAPIView.as_view()),
 
+    # тушаалын бүртгэл болон дипломын дугаар
+    path('regisanddiplom/<int:pk>/', RegistrationAndDiplomAPIView.as_view()),
+
 ]
