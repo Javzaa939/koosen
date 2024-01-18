@@ -255,11 +255,11 @@ const Graduates = () => {
 		if (searchValue.length == 0) {
 			getDatas();
 		} else {
-			const timeoutId = setTimeout(() => {
-				getDatas();
-			}, 600);
+			// const timeoutId = setTimeout(() => {
+			// 	getDatas();
+			// }, 600);
 
-			return () => clearTimeout(timeoutId);
+			// return () => clearTimeout(timeoutId);
 		}
 	}, [searchValue]);
 
@@ -291,7 +291,39 @@ const Graduates = () => {
 
     return (    
         <Fragment>
+      
         <Card>
+        <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
+                    <CardTitle tag='h4'>{t('Оюутны бүртгэл')}</CardTitle>
+                    <div className='d-flex flex-wrap mt-md-0 mt-1'>
+                    <UncontrolledButtonDropdown disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-read')?false : true}>
+                    {/* <UncontrolledButtonDropdown disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-read')  && school_id? false : true}> */}
+                        <DropdownToggle color='secondary' className='m-50' caret outline>
+                            <Download size={15} />
+                            <span className='align-middle ms-50'>Export</span>
+                        </DropdownToggle>
+                        <DropdownMenu>
+                            <DropdownItem className='w-100' onClick={() => excelDownload('csv')}>
+                                <FileText size={15} />
+                                <span className='align-middle ms-50'>CSV</span>
+                            </DropdownItem>
+                            <DropdownItem className='w-100' onClick={() => excelDownload('excel')}>
+                                <Grid size={15} />
+                                <span className='align-middle ms-50' >Excel</span>
+                            </DropdownItem>
+                        </DropdownMenu>
+                    </UncontrolledButtonDropdown>
+                    <Button
+                        color='primary'
+                        onClick={() => handleModal()}
+                        className="m-50"
+                        disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-create') ? false : true}
+                    >
+                        <Plus size={15} />
+                        <span className='align-middle ms-50'>{t('Нэмэх')}</span>
+                    </Button>
+                    </div>
+                </CardHeader>
         {isLoading && Loader}
 
            
@@ -467,54 +499,53 @@ const Graduates = () => {
                 
                
             </Row>
-            <Row className='justify-content-between mx-0'>
-                <Col className='d-flex align-items-center justify-content-start mt-1' md={6} sm={12}>
-                    <Col md={2} sm={3} className='pe-1'>
+            <Row className="justify-content-between mx-0">
+                    <Col className='d-flex align-items-center justify-content-start' md={4}>
+                        <Col md={3} sm={2} className='pe-1'>
+                            <Input
+                                type='select'
+                                bsSize='sm'
+                                style={{ height: "30px" }}
+                                value={rowsPerPage}
+                                onChange={e => handlePerPage(e)}
+                            >
+                                {
+                                    default_page.map((page, idx) => (
+                                    <option
+                                        key={idx}
+                                        value={page}
+                                    >
+                                        {page}
+                                    </option>
+                                ))}
+                            </Input>
+                        </Col>
+                        <Col md={9} sm={3}>
+                            <Label for='sort-select'>{t('Хуудсанд харуулах тоо')}</Label>
+                        </Col>
+                    </Col>
+                    <Col className='d-flex align-items-center mobile-datatable-search mt-1' md={4} sm={12}>
                         <Input
-                            className='dataTable-select me-1 mb-50'
-                            type='select'
+                            className='dataTable-filter mb-50'
+                            type='text'
                             bsSize='sm'
-                            style={{ height: "30px" }}
-                            value={rowsPerPage}
-                            onChange={e => handlePerPage(e)}
+                            id='search-input'
+                            placeholder={t("Хайх үг....")}
+                            value={searchValue}
+                            onChange={handleFilter}
+                            onKeyPress={e => e.key === 'Enter' && handleSearch()}
+                        />
+                        <Button
+                            size='sm'
+                            className='ms-50 mb-50'
+                            color='primary'
+                            onClick={handleSearch}
                         >
-                            {
-                                default_page.map((page, idx) => (
-                                <option
-                                    key={idx}
-                                    value={page}
-                                >
-                                    {page}
-                                </option>
-                            ))}
-                        </Input>
+                            <Search size={15} />
+                            <span className='align-middle ms-50'></span>
+                        </Button>
                     </Col>
-                    <Col md={10} sm={3}>
-                        <Label for='sort-select'>{t('Хуудсанд харуулах тоо')}</Label>
-                    </Col>
-                </Col>
-                <Col className='d-flex align-items-center mobile-datatable-search mt-1' md={6} sm={12}>
-                    <Input
-                        className='dataTable-filter mb-50'
-                        type='text'
-                        bsSize='sm'
-                        id='search-input'
-                        placeholder={t("Хайх")}
-                        value={searchValue}
-                        onChange={handleFilter}
-                        onKeyPress={e => e.key === 'Enter' && handleSearch()}
-                    />
-                    <Button
-                        size='sm'
-                        className='ms-50 mb-50'
-                        color='primary'
-                        onClick={handleSearch}
-                    >
-                        <Search size={15} />
-                        <span className='align-middle ms-50'></span>
-                    </Button>
-                </Col>
-            </Row>
+                </Row>
             <div className='react-dataTable react-dataTable-selectable-rows' id='datatableLeftTwoRightOne' >
                 <DataTable
                     noHeader
