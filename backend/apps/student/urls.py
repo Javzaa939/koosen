@@ -14,6 +14,8 @@ urlpatterns = [
     path('info/all/<int:pk>/', StudentInfoAPIView.as_view()),
     path('info/simplelist/', StudentsListSimpleAPIView.as_view()),
 
+    # Төгссөн оюутны жагсаалт
+    path('info/graduate1/', StudentGraduate1APIView.as_view()),
 
     # Оюутны дэлгэрэнгүй мэдээлэл
     path('info/lesson/<int:lessonId>/', StudentLessonListAPIView.as_view()),
