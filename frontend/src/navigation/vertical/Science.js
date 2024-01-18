@@ -7,7 +7,7 @@ export default [
         title: 'Эрдэм шинжилгээ',
         icon: <i className="far fa-book"></i>,
         navLink: "/science",
-        children: [
+        navChildren: [
             {
                 id: 'science1',
                 title: 'Б цагийн тохиргоо',

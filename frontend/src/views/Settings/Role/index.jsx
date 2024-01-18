@@ -1,9 +1,7 @@
 
-// ** React Imports
 import { Fragment, useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 
-// ** Reactstrap Imports
 import {
   Row,
   Col,
@@ -17,29 +15,38 @@ import {
   ModalBody,
   ModalHeader,
   FormFeedback,
-  UncontrolledTooltip,
   Spinner,
+  TabContent,
+  TabPane,
+  Nav,
+  NavItem,
+  NavLink,
+  ListGroup,
+  ListGroupItem
 } from 'reactstrap'
 
-// ** Third Party Components
-import { Copy, Info } from 'react-feather'
 import { useForm, Controller } from 'react-hook-form'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import useModal from "@hooks/useModal";
+import useUpdateEffect from '@hooks/useUpdateEffect'
 
-// ** FAQ Illustrations
 import illustration from '@src/assets/images/illustration/faq-illustrations.svg'
 
 
 export default function Role()
 {
-    const [ show, setShow ] = useState(false);
-    const [ roles, setRoles ] = useState([])
-    const [ permissions, setPermissions ] = useState([])
-    const [ checked, setChecked ] = useState([])
-    const [ isUpdate, setisUpdate ] = useState(null)
+    const [ show, setShow ] = useState(false);                      // Modal харагдах утга
+    const [ roles, setRoles ] = useState([])                        // Бүх Role-ийн утга
+    const [ positions, setPositions ] = useState([])                // Бүх Албан тушаал-ийн утга
+    const [ permissions, setPermissions ] = useState(null)          // Бүх Эрх-ийн утга
+    const [ cpermissions, setCpermissions ] = useState(null)        // Бүх Эрх-ийн утга (Хайлт хийх үед ашигладаг, утгаа авчаад өөрчлөгддөггүй)
+    const [ checked, setChecked ] = useState([])                    // Сонгогдсон эрхүүдийн жагсаалт (id)
+    const [ isUpdate, setIsUpdate ] = useState(null)                // Засах дарах үеийн role-ийн утга
+    const [ searchVal, setSearchVal ] = useState('')                // Эрх хайх утга
+    const [ active, setActive ] = useState('1')                     // Идэвхтэй tab
+    const [ checkedPos, setCheckedPos ] = useState([])              // Сонгогдсон албан тушаалын жагсаалт (id)
 
     const {
         reset,
@@ -53,6 +60,7 @@ export default function Role()
     // Api
     const roleApi = useApi().settings.role
     const permissionApi = useApi().settings.permission
+    const hrmsApi = useApi().hrms
 
     const { showWarning } = useModal()
 
@@ -60,6 +68,7 @@ export default function Role()
 	const { isLoading, fetchData } = useLoader({});
 	const { isLoading: createLoading, fetchData: createFetchData } = useLoader({});
 
+    /** Утга дуудах */
     async function refreshDatas()
     {
         const { success, data } = await fetchData(roleApi.get())
@@ -69,7 +78,19 @@ export default function Role()
         }
     }
 
+    const toggle = tab => {
+        if (active !== tab)
+        {
+            setActive(tab)
+        }
+    }
 
+    const onReset = () => {
+        setShow(false)
+        reset({ name: '' })
+    }
+
+    /** Анхны бүх хүсэлтүүд */
     useEffect(
         function()
         {
@@ -79,10 +100,13 @@ export default function Role()
                     [
                         fetchData(roleApi.get()),
                         fetchData(permissionApi.list()),
+                        fetchData(hrmsApi.position.getAll())
                     ]
                 ).then((values) => {
                     setRoles(values[0]?.data)
                     setPermissions(values[1]?.data)
+                    setCpermissions(values[1]?.data)
+                    setPositions(values[2]?.data)
                 })
             })()
         },
@@ -90,11 +114,28 @@ export default function Role()
     )
 
 
+    /** Хадгалах дарах үе
+     * @param {object} data Хадгалах role-хамааралтай утгууд
+     */
     async function onSubmit(data)
     {
+        // Эрх сонгоогүй бол warning өгнө
+        if (checked.length < 1)
+        {
+            return showWarning({
+                header: {
+                    title: 'Эрх сонгоно уу',
+                },
+                question: ' ',
+                btnShow: false
+            })
+        }
+
+        // Нэр талбарыг бөглөсон тохиолдолд үргэлжлүүлнэ
         if (data.name.length)
         {
             data['permissions'] = checked
+            data['orgpositions'] = checkedPos
 
             const { success, errors } = await createFetchData(isUpdate ? roleApi.put(isUpdate.id, data) : roleApi.post(data))
             if(success)
@@ -120,11 +161,11 @@ export default function Role()
         }
     }
 
-    const onReset = () => {
-        setShow(false)
-        reset({ name: '' })
-    }
 
+    /**
+     * read, create, update, delete орчуулах
+     * @param {string} text монгол руу болгох
+    */
     function textInc(text='')
     {
         let crudName = text
@@ -148,12 +189,18 @@ export default function Role()
         return crudName
     }
 
+    /**
+     * Албан тушаал сонгох үе
+     * @param {object} event Эрхийн input
+    */
     function checkPerm(event)
     {
         setChecked((prevState) =>
         {
             const newState = [...prevState]
             let value = parseInt(event.target.id.replace('perm-', ''))
+
+            // Байвал хасаж үгүй бол нэмнэ
             if (event.target.checked)
             {
                 newState.push(value)
@@ -166,18 +213,48 @@ export default function Role()
         })
     }
 
-    function updateRole()
+    /**
+     * Албан тушаал сонгох үе
+     * @param {string} id Албан тушаалын id
+    */
+    function checkPos(id)
     {
+        setCheckedPos((prevState) =>
+        {
+            const newState = [...prevState]
+
+            // Байвал хасаж үгүй бол нэмнэ
+            if (newState.includes(id))
+            {
+                newState.splice(newState.indexOf(id), 1)
+            }
+            else
+            {
+                newState.push(id)
+            }
+
+            return newState
+        })
+    }
+
+
+    /** Modal нээгдэх үе (role үүсгэх болон засах дарах үед) */
+    function openedModal()
+    {
+        // үүсгэх дарах үед
         if (!isUpdate)
         {
             setChecked([])
+            setCheckedPos([])
             return
         }
+        // засах дарах үед албан тушаал болон эрхүүдийг сонгогдсон болгоно
         else
         {
             setValue('name', isUpdate.name)
             setValue('description', isUpdate.description)
             setChecked(isUpdate.permissions)
+            setCheckedPos(isUpdate.positions)
 
             for (let perm of isUpdate.permissions)
             {
@@ -190,13 +267,86 @@ export default function Role()
         }
     }
 
-    /** Устгах дарах үе */
+
+    /**
+     * Устгах дарах үе
+     * @param {string} id role-id
+    */
     async function handleDelete(id)
     {
         const { success } = await fetchData(roleApi.delete(id))
         if(success)
         {
             refreshDatas()
+        }
+    }
+
+
+    /**
+     * Эрх хайх
+    */
+    useUpdateEffect(() =>
+    {
+        // name болон description field-үүдээс хайж олдсон эрхүүдийг буцаана
+        if(searchVal)
+        {
+            setPermissions(() =>
+            {
+                let data = {}
+
+                let crud_perms = cpermissions?.crud_perms?.filter((val) => val.name.includes(searchVal) || val.description.includes(searchVal))
+                let non_crud_perms = cpermissions?.non_crud_perms?.filter((val) =>  val.name.includes(searchVal) || val.description.includes(searchVal))
+
+                data.crud_perms = crud_perms
+                data.non_crud_perms = non_crud_perms
+
+                return data
+            })
+        }
+        // хайх үг байгаагүй бол бүх эрхийг буцаана
+        else
+        {
+            setPermissions(cpermissions)
+        }
+    }, [searchVal])
+
+
+    /** checked болгодог */
+    useEffect(
+        () =>
+        {
+            if (isUpdate && isUpdate.permissions)
+            {
+                for (let perm of isUpdate.permissions)
+                {
+                    let permInput = document.getElementById(`perm-${perm}`)
+                    if (permInput)
+                    {
+                        document.getElementById(`perm-${perm}`).checked = true
+                    }
+                }
+            }
+        },
+        [permissions]
+    )
+
+
+    /**
+     * Албан тушаал хайх
+     * @param {string} name Хайх үг
+    */
+    function searchPosition(name)
+    {
+        if (name)
+        {
+            // Бүх албан тушаалаас хайж эхний олдсоныг буцаана
+            let result = positions.find((val) => val.name.toLowerCase().includes(name.toLowerCase()))
+
+            // Албан тушаал олдвол scroll дож аваачина
+            if (result)
+            {
+                document.getElementById(`orgposition-${result.id}`).scrollIntoView({ behavior: "smooth" })
+            }
         }
     }
 
@@ -241,7 +391,7 @@ export default function Role()
                                                                 className='role-edit-modal'
                                                                 onClick={e => {
                                                                     e.preventDefault()
-                                                                    setisUpdate(val)
+                                                                    setIsUpdate(val)
                                                                     setShow(true)
                                                                 }}
                                                             >
@@ -290,7 +440,7 @@ export default function Role()
                                                 className='text-nowrap mb-1'
                                                 onClick={() => {
                                                     setShow(true)
-                                                    setisUpdate(null)
+                                                    setIsUpdate(null)
                                                 }}
                                             >
                                                 Роль үүсгэх
@@ -307,15 +457,15 @@ export default function Role()
 
             <Modal
                 isOpen={show}
-                onClosed={() => reset({ name: '' })}
+                onClosed={() => {reset({ name: '' }); setSearchVal('')}}
                 toggle={() => setShow(!show)}
-                onOpened={() => updateRole()}
+                onOpened={() => openedModal()}
                 className='modal-dialog-centered'
                 size="xl"
             >
                 <ModalHeader className='bg-transparent' toggle={() => setShow(!show)}></ModalHeader>
-                <ModalBody className='px-5 pb-5'>
-                    <div className='text-center mb-4'>
+                <ModalBody className='px-5 pb-5 pt-0'>
+                    <div className='text-center'>
                         <h1>Роль</h1>
                         <p>Ролийн эрхийг тохируулах</p>
                     </div>
@@ -346,86 +496,111 @@ export default function Role()
                             />
                             {errors.description && <FormFeedback>Тайлбарыг оруулна уу</FormFeedback>}
                         </Col>
-                        <Col xs={12}>
-                            <h4 className='mt-2 pt-50'>Эрхүүд</h4>
-                            <Table className='table-flush-spacing' style={{ display: 'block', maxHeight: '400px', overflow: 'auto' }} responsive>
-                                <tbody>
-                                    {/* TODO: Бүх эрхийг идэвхжүүлдэг байлгах */}
-                                    {/* <tr>
-                                        <td className='text-nowrap fw-bolder'>
-                                            <span className='me-50'>Админ эрх</span>
-                                            <Info size={14} id='info-tooltip' />
-                                            <UncontrolledTooltip placement='top' target='info-tooltip'>
-                                                Системийн бүх эрхийг өгнө
-                                            </UncontrolledTooltip>
-                                        </td>
-                                        <td>
-                                            <div className='form-check'>
-                                                <Input type='checkbox' id='select-all' />
-                                                <Label className='form-check-label' for='select-all'>
-                                                    Бүгдийг идэвхжүүлэх
-                                                </Label>
-                                            </div>
-                                        </td>
-                                    </tr> */}
-                                    {
-                                        permissions?.non_crud_perms?.map((val, idx) =>
-                                        {
-                                            return (
-                                                <tr key={`non_crud_perms${idx}`}>
-                                                    <td className='text-nowrap fw-bolder'>{val.description}
-                                                        <br />
-                                                        <small>
-                                                            {val.name}
-                                                        </small>
-                                                    </td>
-                                                    <td>
-                                                        <div className='d-flex'>
-                                                            <div className='form-check me-3 me-lg-5'>
-                                                                <Input type='checkbox' id={`perm-${val.id}`} onClick={e => checkPerm(e)} />
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            )
-                                        })
-                                    }
-                                    {
-                                        permissions?.crud_perms?.map((val, idx) =>
-                                        {
-                                            return (
-                                                <tr key={`crud_perms${idx}`}>
-                                                    <td className='text-nowrap fw-bolder'>{val.description}
-                                                        <br />
-                                                        <small>
-                                                            {val.name}
-                                                        </small>
-                                                    </td>
-                                                    <td>
-                                                        <div className='d-flex'>
-                                                        {
-                                                            val?.filtered?.map((filVal, filIdx) =>
-                                                            {
-                                                                return (
-                                                                    <div key={filIdx} className='form-check me-3 me-lg-5'>
-                                                                        <Input type='checkbox' id={`perm-${filVal.id}`} onClick={e => checkPerm(e)} />
-                                                                        <Label className='form-check-label' for={`perm-${filVal.id}`}>
-                                                                            {
-                                                                                textInc(filVal.name)
-                                                                            }
-                                                                        </Label>
+                        <Col xs={12} style={{ scrollBehavior: 'smooth' }} >
+                            <Nav tabs>
+                                <NavItem>
+                                    <NavLink
+                                        active={active === '1'}
+                                        onClick={() => {
+                                            toggle('1')
+                                        }}
+                                    >
+                                        Эрхүүд
+                                    </NavLink>
+                                </NavItem>
+                                <NavItem>
+                                    <NavLink
+                                        active={active === '2'}
+                                        onClick={() => {
+                                            toggle('2')
+                                        }}
+                                    >
+                                        Албан тушаал
+                                    </NavLink>
+                                </NavItem>
+                            </Nav>
+                            <TabContent className='py-50' activeTab={active}>
+                                <TabPane tabId='1'>
+                                    <Input type="text" id='search' placeholder='Эрх хайх...' value={searchVal} onChange={(e) => setSearchVal(e.target.value)} />
+                                    <Table className='table-flush-spacing' style={{ display: 'block', maxHeight: '450px', overflow: 'auto' }} responsive>
+                                        <tbody>
+                                            {
+                                                permissions?.non_crud_perms?.map((val, idx) =>
+                                                {
+                                                    return (
+                                                        <tr key={`non_crud_perms${idx}`}>
+                                                            <td className='text-nowrap fw-bolder'>{val.description}
+                                                                <br />
+                                                                <small>
+                                                                    {val.name}
+                                                                </small>
+                                                            </td>
+                                                            <td>
+                                                                <div className='d-flex'>
+                                                                    <div className='form-check me-3 me-lg-5'>
+                                                                        <Input type='checkbox' id={`perm-${val.id}`} onClick={e => checkPerm(e)} />
                                                                     </div>
-                                                                )
-                                                            })
-                                                        }
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    )
+                                                })
+                                            }
+                                            {
+                                                permissions?.crud_perms?.map((val, idx) =>
+                                                {
+                                                    return (
+                                                        <tr key={`crud_perms${idx}`}>
+                                                            <td className='text-nowrap fw-bolder'>{val.description}
+                                                                <br />
+                                                                <small>
+                                                                    {val.name}
+                                                                </small>
+                                                            </td>
+                                                            <td>
+                                                                <div className='d-flex'>
+                                                                {
+                                                                    val?.filtered?.map((filVal, filIdx) =>
+                                                                    {
+                                                                        return (
+                                                                            <div key={filIdx} className='form-check me-3 me-lg-5'>
+                                                                                <Input type='checkbox' id={`perm-${filVal.id}`} onClick={e => checkPerm(e)} />
+                                                                                <Label className='form-check-label' for={`perm-${filVal.id}`}>
+                                                                                    {
+                                                                                        textInc(filVal.name)
+                                                                                    }
+                                                                                </Label>
+                                                                            </div>
+                                                                        )
+                                                                    })
+                                                                }
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                    )
+                                                })
+                                            }
+                                        </tbody>
+                                    </Table>
+                                </TabPane>
+                                <TabPane tabId='2'>
+                                    <Input type="text" id='search' placeholder='Албан тушаал хайх...' onChange={(e) => searchPosition(e.target.value)} />
+                                    <ListGroup className='cursor-pointer' style={{ display: 'block', maxHeight: '450px', overflow: 'auto' }}>
+                                        {
+                                            positions.map((val, idx) =>
+                                            {
+                                                return (
+                                                    <ListGroupItem key={idx} active={checkedPos.includes(val.id)} onClick={() => checkPos(val.id)} id={`orgposition-${val.id}`} >
+                                                        <div>
+                                                            <h6 className={`${checkedPos.includes(val.id) && 'text-white'} m-0`}>{val.name}</h6>
                                                         </div>
-                                                    </td>
-                                                </tr>
-                                            )
-                                        })
-                                    }
-                                </tbody>
-                            </Table>
+                                                    </ListGroupItem>
+                                                )
+                                            })
+                                        }
+                                    </ListGroup>
+                                </TabPane>
+                            </TabContent>
                         </Col>
                         <Col className='text-center mt-2' xs={12}>
                             <Button type='submit' color='primary' className='me-1' disabled={createLoading} >
@@ -445,7 +620,6 @@ export default function Role()
                     </Row>
                 </ModalBody>
             </Modal>
-
         </Fragment>
     )
 }

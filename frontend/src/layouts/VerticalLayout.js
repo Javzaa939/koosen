@@ -1,5 +1,5 @@
 // ** React Imports
-import React, { useContext, useEffect } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { Outlet } from "react-router-dom"
 
 // ** Core Layout Import
@@ -11,499 +11,352 @@ import navigation from "@src/navigation/vertical"
 
 import AuthContext from '@context/AuthContext'
 
-const VerticalLayout = (props) => {
+const VerticalLayout = (props) =>
+{
     const { user } = useContext(AuthContext)
 
+    const [ cNavigation, setCNavigation ] = useState(navigation)
+    const [ isEnd, setIsEnd ] = useState(false)
 
-    useEffect(() => {
-        navigation.map((menus) => {
-            if(menus.children && menus.children.length > 0 && user && Object.keys(user).length > 0) {
-                /** ----------------------------- Сургалт ---------------------------- */
-
-                /** Хичээлийн стандарт */
-                if(!user.permissions.includes('lms-study-lessonstandart-read')) {
-                    var children = menus.children.filter(child => child.id !== 'study1')
-                    menus.children = children
-                }
-                /** Мэргэжлийн тодорхойлолт */
-                if(!user.permissions.includes('lms-study-profession-read')) {
-                    var children = menus.children.filter(child => child.id !== 'study2')
-                    menus.children = children
-                }
-                /** Сургалтын төлөвлөгөө */
-                if(!user.permissions.includes('lms-study-learningplan-read')) {
-                    var children = menus.children.filter(child => child.id !== 'study3')
-                    menus.children = children
-                }
-
-                /** ----------------------------Лавлах сан ------------------------------- */
-
-                /** Сургууль */
-                if(!user.permissions.includes('lms-reference-school-read')) {
-                    var children = menus.children.filter(child => child.id !== 'reference1')
-                    menus.children = children
-                }
-                /** Тэнхим*/
-                if(!user.permissions.includes('lms-reference-departments-read')) {
-                    var children = menus.children.filter(child => child.id !== 'reference2')
-                    menus.children = children
-                }
-                /** Багш */
-                if(!user.permissions.includes('lms-reference-teacher-read')) {
-                    var children = menus.children.filter(child => child.id !== 'reference3')
-                    menus.children = children
-                }
-
-                /** ----------------------------Оюутан ------------------------------- */
-
-                /** Анги бүлгийн бүртгэл */
-                if(!user.permissions.includes('lms-student-group-read')) {
-                    var children = menus.children.filter(child => child.id !== 'student1')
-                    menus.children = children
-                }
-                /** Оюутны бүртгэл */
-                if(!user.permissions.includes('lms-student-register-read')) {
-                    var children = menus.children.filter(child => child.id !== 'student2')
-                    menus.children = children
-                }
-                /** Чөлөөний бүртгэл */
-                if(!user.permissions.includes('lms-student-leave-read')) {
-                    var children = menus.children.filter(child => child.id !== 'student3')
-                    menus.children = children
-                }
-                /** Шилжилтийн бүртгэл */
-                if(!user.permissions.includes('lms-student-movement-read')) {
-                    var children = menus.children.filter(child => child.id !== 'student4')
-                    menus.children = children
-                }
-                /** Төгсөлт */
-                if(!user.permissions.includes('lms-student-graduate-read')) {
-                    var children = menus.children.filter(child => child.id !== 'student5')
-                    menus.children = children
-                }
-                /** Боловсролын зээлийн сан */
-                if(!user.permissions.includes('lms-student-loanfund-read')) {
-                    var children = menus.children.filter(child => child.id !== 'student7')
-                    menus.children = children
-                }
-                /** Оюутаны хавсралт, төгсөлтийн ажил */
-                if(!user.permissions.includes('lms-student-graduate-read')) {
-                    var children = menus.children.filter(child => child.id !== 'student10')
-                    menus.children = children
-                }
-                /** Оюутан тодорхойлолт */
-                if(!user.permissions.includes('lms-student-definition-read')) {
-                    var children = menus.children.filter(child => child.id !== 'student11')
-                    menus.children = children
-                }
-
-                /** ----------------------------- Тохиргоо ---------------------------- */
-
-                /** Ажиллах жил */
-                if(!user.permissions.includes('lms-settings-аctiveyear-read')) {
-                    var children = menus.children.filter(child => child.id !== 'settingsLevel0')
-                    menus.children = children
-                }
-                /** Боловсролын зэрэг */
-                if(!user.permissions.includes('lms-settings-degree-read')) {
-                    var children = menus.children.filter(child => child.id !== 'settingsLevel1')
-                    menus.children = children
-                }
-                /** Суралцах хэлбэр */
-                if(!user.permissions.includes('lms-settings-learningstatus-read')) {
-                    var children = menus.children.filter(child => child.id !== 'settingsLevel2')
-                    menus.children = children
-                }
-                /** Оюутны бүртгэлийн хэлбэр */
-                if(!user.permissions.includes('lms-settings-registerstatus-read')) {
-                    var children = menus.children.filter(child => child.id !== 'settingsLevel3')
-                    menus.children = children
-                }
-                /** Хичээлийн ангилал */
-                if(!user.permissions.includes('lms-settings-lessoncategory-read')) {
-                    var children = menus.children.filter(child => child.id !== 'settingsLevel4')
-                    menus.children = children
-                }
-                /** Хичээлийн бүлэг */
-                if(!user.permissions.includes('lms-settings-lessongroup-read')) {
-                    var children = menus.children.filter(child => child.id !== 'settingsLevel9')
-                    menus.children = children
-                }
-                /** Улирал */
-                if(!user.permissions.includes('lms-settings-season-read')) {
-                    var children = menus.children.filter(child => child.id !== 'settingsLevel10')
-                    menus.children = children
-                }
-                /** Үнэлгээний бүртгэл */
-                if(!user.permissions.includes('lms-settings-score-read')) {
-                    var children = menus.children.filter(child => child.id !== 'settingsLevel11')
-                    menus.children = children
-                }
-                /** ЭЕШ-ын хичээлийн бүртгэл */
-                if(!user.permissions.includes('lms-settings-admissionlesson-read')) {
-                    var children = menus.children.filter(child => child.id !== 'settingsLevel12')
-                    menus.children = children
-                }
-                /** Төлбөрийн хөнгөлөлтийн төрөл */
-                if(!user.permissions.includes('lms-settings-discounttype-read')) {
-                    var children = menus.children.filter(child => child.id !== 'settingsLevel13')
-                    menus.children = children
-                }
-                /** Улс */
-                if(!user.permissions.includes('lms-settings-country-read')) {
-                    var children = menus.children.filter(child => child.id !== 'settingsCountry13')
-                    menus.children = children
-                }
-                /** Тодорхойлолтын гарын үсэг */
-                if(!user.permissions.includes('lms-settings-signature-read')) {
-                    var children = menus.children.filter(child => child.id !== 'settingsLevel14')
-                    menus.children = children
-                }
-
-                /** Эрх */
-                if(!user.is_superuser) {
-                    var children = menus.children.filter(child => child.id !== 'settingsLevel15')
-                    menus.children = children
-                }
-
-                /** Role */
-                if(!user.permissions.includes('role-read')) {
-                    var children = menus.children.filter(child => child.id !== 'settingsLevel16')
-                    menus.children = children
-                }
-
-                /** ----------------------------- Хичээлийн хуваарь ---------------------------- */
-
-                /** Хичээлийн байрны бүртгэл */
-                if(!user.permissions.includes('lms-timetable-building-read')) {
-                    var children = menus.children.filter(child => child.id !== 'timetable1')
-                    menus.children = children
-                }
-                /** Өрөөний бүртгэл */
-                if(!user.permissions.includes('lms-timetable-room-read')) {
-                    var children = menus.children.filter(child => child.id !== 'timetable2')
-                    menus.children = children
-                }
-                /** Цагийн хуваарь */
-                if(!user.permissions.includes('lms-timetable-register-read')) {
-                    var children = menus.children.filter(child => child.id !== 'timetable3')
-                    menus.children = children
-                }
-                /** Шалгалтын хуваарь */
-                if(!user.permissions.includes('lms-timetable-exam-read')) {
-                    var children = menus.children.filter(child => child.id !== 'timetable4')
-                    menus.children = children
-                }
-                /** Дахин шалгалт */
-                if(!user.permissions.includes('lms-timetable-examrepeat-read')) {
-                    var children = menus.children.filter(child => child.id !== 'timetable5')
-                    menus.children = children
-                }
-
-                /** ----------------------------- Дүнгийн бүртгэл ---------------------------- */
-
-                /** Дүнгийн бүртгэл */
-                if(!user.permissions.includes('lms-score-read')) {
-                    var children = menus.children.filter(child => child.id !== 'score1')
-                    menus.children = children
-                }
-                /** Дүйцүүлсэн дүн */
-                if(!user.permissions.includes('lms-score-correspond-read')) {
-                    var children = menus.children.filter(child => child.id !== 'score2')
-                    menus.children = children
-                }
-                /** Дахин шалгалт */
-                if(!user.permissions.includes('lms-score-restudy-read')) {
-                    var children = menus.children.filter(child => child.id !== 'score3')
-                    menus.children = children
-                }
-                /** Өмнөх улирлын дүн */
-                if(!user.permissions.includes('lms-score-restudy-read')) {
-                    var children = menus.children.filter(child => child.id !== 'score4')
-                    menus.children = children
-                }
-
-                /** ----------------------------- Сургалтын төлбөр ---------------------------- */
-
-                /** Төлбөрийн тохиргоо */
-                if(!user.permissions.includes('lms-payment-settings-read')) {
-                    var children = menus.children.filter(child => child.id !== 'studypayment1')
-                    menus.children = children
-                }
-                /** Төлбөрийн гүйлгээ */
-                if(!user.permissions.includes('lms-payment-balance-read')) {
-                    var children = menus.children.filter(child => child.id !== 'studypayment2')
-                    menus.children = children
-                }
-                /** Төлбөрийн эхний үлдэгдэл */
-                if(!user.permissions.includes('lms-payment-beginbalance-read')) {
-                    var children = menus.children.filter(child => child.id !== 'studypayment3')
-                    menus.children = children
-                }
-                /** Төлбөрийн тооцоо */
-                if(!user.permissions.includes('lms-payment-estimate-read')) {
-                    var children = menus.children.filter(child => child.id !== 'studypayment4')
-                    menus.children = children
-                }
-                /** Төлбөрийн хөнгөлөлт */
-                if(!user.permissions.includes('lms-payment-discount-read')) {
-                    var children = menus.children.filter(child => child.id !== 'studypayment5')
-                    menus.children = children
-                }
-
-                /** ------------------------ Захиалга -------------------------------- */
-
-                /** Номын сан */
-                if(!user.permissions.includes('lms-order-library-read')) {
-                    var children = menus.children.filter(child => child.id !== 'order1')
-                    menus.children = children
-                }
-                /** Спорт заал */
-                if(!user.permissions.includes('lms-order-sporthall-read')) {
-                    var children = menus.children.filter(child => child.id !== 'order2')
-                    menus.children = children
-                }
-                /** Фитнесс */
-                if(!user.permissions.includes('lms-order-fitness-read')) {
-                    var children = menus.children.filter(child => child.id !== 'order3')
-                    menus.children = children
-                }
-                /** Эмнэлэг */
-                if(!user.permissions.includes('lms-order-hospital-read')) {
-                    var children = menus.children.filter(child => child.id !== 'order4')
-                    menus.children = children
-                }
-
-                /** ----------------------------- Тэтгэлэг ---------------------------- */
-
-                /** Тэтгэлэг бүртгэл */
-                if(!user.permissions.includes('lms-stipend-read')) {
-                    var children = menus.children.filter(child => child.id !== 'stipend1')
-                    menus.children = children
-                }
-                /** Тэтгэлэгийн хүсэлт */
-                if(!user.permissions.includes('lms-stipend-request-read')) {
-                    var children = menus.children.filter(child => child.id !== 'stipend2')
-                    menus.children = children
-                }
-
-                /** ----------------------------- Дотуур байр ---------------------------- */
-
-                /** Өрөөний төрөл */
-                if(!user.permissions.includes('lms-dormitory-roomtype-read')) {
-                    var children = menus.children.filter(child => child.id !== 'dormitory1')
-                    menus.children = children
-                }
-                /** Өрөөний бүртгэл*/
-                if(!user.permissions.includes('lms-dormitory-rooms-read')) {
-                    var children = menus.children.filter(child => child.id !== 'dormitory2')
-                    menus.children = children
-                }
-                /** Төлбөрийн тохиргоо */
-                if(!user.permissions.includes('lms-dormitory-paymentconfig-read')) {
-                    var children = menus.children.filter(child => child.id !== 'dormitory3')
-                    menus.children = children
-                }
-
-                /** Дотуур байрны бүртгэл */
-                if(!user.permissions.includes('lms-dormitory-request-read')) {
-                    var children = menus.children.filter(child => child.id !== 'dormitory4')
-                    menus.children = children
-                }
-
-                /** Дотуур байрны тооцоо */
-                if(!user.permissions.includes('lms-dormitory-estimate-read')) {
-                    var children = menus.children.filter(child => child.id !== 'dormitory5')
-                    menus.children = children
-                }
-
-                /** ----------------------------- Өргөдөл ---------------------------- */
-
-                /** Шийдвэрлэх нэгж */
-                if(!user.permissions.includes('lms-decide-unit-read')) {
-                    var children = menus.children.filter(child => child.id !== 'complaint1')
-                    menus.children = children
-                }
-                /** Өргөдөл */
-                if(!user.permissions.includes('lms-request-application-read')) {
-                    var children = menus.children.filter(child => child.id !== 'complaint2')
-                    menus.children = children
-                }
-                /** Дүнгийн дүйцүүлэлтийн хүсэлт */
-                if(!user.permissions.includes('lms-request-correspond-read')) {
-                    var children = menus.children.filter(child => child.id !== 'complaint3')
-                    menus.children = children
-                }
-                /** Чөлөөний хүсэлт */
-                if(!user.permissions.includes('lms-request-vacation-read')) {
-                    var children = menus.children.filter(child => child.id !== 'complaint4')
-                    menus.children = children
-                }
-                /** Тойрох хуудас */
-                if(!user.permissions.includes('lms-request-routingslip-read')) {
-                    var children = menus.children.filter(child => child.id !== 'complaint5')
-                    menus.children = children
-                }
-
-                /** ----------------------------- Хүсэлт ---------------------------- */
-
-                /** Олон нийтийн ажлын хүсэлт*/
-                if(!user.permissions.includes('lms-wish-volunteer-read')) {
-                    var children = menus.children.filter(child => child.id !== 'request1')
-                    menus.children = children
-                }
-                /** Олон нийтийн ажлын хүсэлт*/
-                if(!user.permissions.includes('lms-wish-club-read')) {
-                    var children = menus.children.filter(child => child.id !== 'request2')
-                    menus.children = children
-                }
-                /** Олон нийтийн ажлын хүсэлт*/
-                if(!user.permissions.includes('lms-wish-tutor-read')) {
-                    var children = menus.children.filter(child => child.id !== 'request3')
-                    menus.children = children
-                }
-
-                /** ----------------------------- Хэвлэх ---------------------------- */
-
-                /** Хичээл сонголтын нэрс */
-                if(!user.permissions.includes('lms-print-choice-read')) {
-                    var children = menus.children.filter(child => child.id !== 'print1')
-                    menus.children = children
-                }
-                /** Хичээлийн хуваарь */
-                if(!user.permissions.includes('lms-print-schedule-read')) {
-                    var children = menus.children.filter(child => child.id !== 'print2')
-                    menus.children = children
-                }
-                /** Дүнгийн жагсаалт */
-                if(!user.permissions.includes('lms-print-score-read')) {
-                    var children = menus.children.filter(child => child.id !== 'print4')
-                    menus.children = children
-                }
-                /** Голч дүн */
-                if(!user.permissions.includes('lms-print-gpa-read')) {
-                    var children = menus.children.filter(child => child.id !== 'print5')
-                    menus.children = children
-                }
-                /** Төгсөлтийн тушаал */
-                if(!user.permissions.includes('lms-print-graduate-read')) {
-                    var children = menus.children.filter(child => child.id !== 'print6')
-                    menus.children = children
-                }
-                /** Элсэлтийн тушаал */
-                if(!user.permissions.includes('lms-print-admission-read')) {
-                    var children = menus.children.filter(child => child.id !== 'print7')
-                    menus.children = children
-                }
-
-                /** ----------------------------- Үйлчилгээ ---------------------------- */
-                /** Зар мэдээ */
-                if(!user.permissions.includes('lms-service-news-read')) {
-                    var children = menus.children.filter(child => child.id !== 'service')
-                    menus.children = children
-                }
-
-                /**------------------------------------"Цагийн тооцоо"----------------------------*/
-                /** Цагийн ачаалал */
-                if(!user.permissions.includes('lms-credit-volume-read')) {
-                    var children = menus.children.filter(child => child.id !== 'credit1')
-                    menus.children = children
-                }
-                /** Цагийн тооцоо */
-                if(!user.permissions.includes('lms-credit-estimation-read')) {
-                    var children = menus.children.filter(child => child.id !== 'credit2')
-                    menus.children = children
-                }
-
-                /** Хичээл тулгалт */
-                if(!user.permissions.includes('lms-credit-confrontation-read')) {
-                    var children = menus.children.filter(child => child.id !== 'credit3')
-                    menus.children = children
-                }
-                /** Цагийн багшийн тооцоо */
-                if(!user.permissions.includes('lms-credit-parttime-read')) {
-                    var children = menus.children.filter(child => child.id !== 'credit5')
-                    menus.children = children
-                }
-                /** Цагийн тооцоо тохиргоо */
-                if(!user.permissions.includes('lms-credit-settings-read')) {
-                    var children = menus.children.filter(child => child.id !== 'credit4')
-                    menus.children = children
-                }
-                /** ----------------------------- Хандах эрх ---------------------------- */
-                /** Багшийн дүнгийн эрх */
-                if(!user.permissions.includes('lms-role-teacher-score-read')) {
-                    var children = menus.children.filter(child => child.id !== 'role1')
-                    menus.children = children
-                }
-                /** Оюутны хичээл сонголтыг төлбөрөөс хамааралгүйгээр хийх эрх*/
-                if(!user.permissions.includes('lms-role-choice-payment-read')) {
-                    var children = menus.children.filter(child => child.id !== 'role2')
-                    menus.children = children
-                }
-
-                /** Бусад эрх */
-                if(!user.permissions.includes('lms-role-other-read')) {
-                    var children = menus.children.filter(child => child.id !== 'role3')
-                    menus.children = children
-                }
-
-                /** Тохиргоо хийх  эрх */
-                if(!user.permissions.includes('lms-role-settings-read')) {
-                    var children = menus.children.filter(child => child.id !== 'role4')
-                    menus.children = children
-                }
-
-                /** ----------------------------- Судалгаа ---------------------------- */
-                /** Судалгаа бүртгэх */
-                if(!user.permissions.includes('lms-survey-read')) {
-                    var children = menus.children.filter(child => child.id !== 'surveymain')
-                    menus.children = children
-                }
-
-                /** ----------------------------- Багшийг үнэлэх ---------------------------- */
-                /** Судалгааны асуулт */
-                if(!user.permissions.includes('lms-survey-question-read')) {
-                    var children = menus.children.filter(child => child.id !== 'evaluation1')
-                    menus.children = children
-                }
-
-                /** Эрдэм шинжилгээ асуулт */
-                if(!user.permissions.includes('lms-science-read')) {
-                    var science_ids = ['science1', 'science2', 'science3', 'science4', 'science5', 'science6', 'science7', 'science8', 'science9','science10']
-                    var children = menus.children.filter(child => !science_ids.includes(child.id))
-                    menus.children = children
-                }
-
-                /** ----------------------------- Шалгалт цэс ---------------------------- */
-                /** Шалгалтын асуулт */
-                if(!user.permissions.includes('lms-exam-question-read')) {
-                    var children = menus.children.filter(child => child.id !== 'question')
-                    menus.children = children
-                }
-
-                /** Шалгалт */
-                if(!user.permissions.includes('lms-exam-read')) {
-                    var children = menus.children.filter(child => child.id !== 'create')
-                    menus.children = children
-                }
+    /**
+     * Хэрэглэгчийн эрх дотор байна уу гэдгийг шалгах
+     * @param {Array} saveData Хадгалах утга
+     * @param {Array} menus Layouts утга
+     * @param {String | Boolean} checkPerm User perm-ийн шүүж шалганаа
+     * @param {String} idName children-ий шалгах утга
+     */
+    function checkPerm(saveData, menus=[], checkPerm, idName='')
+    {
+        // is_superuser гэж шалгаж байгаа бол
+        if (typeof checkPerm == 'boolean' && checkPerm)
+        {
+            var navChildren = menus.navChildren.filter(child => child.id === idName)
+            if (navChildren.length > 0)
+            {
+                saveData = [...saveData, ...navChildren]
             }
-        })
-    },[])
-
-    useEffect(() => {
-        /**  Хэрвээ дэд цэс байхгүй бол үндсэн цэсийг ч устгана */
-        navigation.map((menus, idx) => {
-            if(menus.children && menus.children.length < 1) {
-                delete navigation[idx]
+        }
+        // тухайн нэвтэрсэн хэрэглэгчийн эрхүүдээс
+        else if(user.permissions.includes(checkPerm))
+        {
+            var navChildren = menus.navChildren.filter(child => child.id === idName)
+            if (navChildren.length > 0)
+            {
+                saveData = [...saveData, ...navChildren]
             }
-        })
-    },[navigation])
+        }
+
+        return saveData
+    }
+
+    useEffect(
+        () =>
+        {
+            if(Object.keys(user).length > 0) {
+
+                navigation.map((menus) =>
+                {
+                    if (menus && menus.navChildren && menus.navChildren.length > 0 && user && Object.keys(user).length > 0)
+                    {
+
+                        let childrenDatas = []
+
+                        /** ----------------------------- Сургалт ---------------------------- */
+
+                        /** Хичээлийн стандарт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'permission-read', 'permission-list')
+
+                        /** Мэргэжлийн тодорхойлолт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-study-lessonstandart-read', 'study1')
+
+                        /** Мэргэжлийн тодорхойлолт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-study-profession-read', 'study2')
+
+                        /** Сургалтын төлөвлөгөө */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-study-learningplan-read', 'study3')
+
+                        /** ----------------------------Лавлах сан ------------------------------- */
+
+                        /** Сургууль */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-reference-school-read', 'reference1')
+
+                        /** Тэнхим*/
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-reference-departments-read', 'reference2')
+
+                        /** Багш */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-reference-teacher-read', 'reference3')
+
+                        /** ----------------------------Оюутан ------------------------------- */
+
+                        /** Анги бүлгийн бүртгэл */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-group-read', 'student1')
+
+                        /** Оюутны бүртгэл */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-register-read', 'student2')
+
+                        /** Чөлөөний бүртгэл */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-leave-read', 'student3')
+
+                        /** Шилжилтийн бүртгэл */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-movement-read', 'student4')
+
+                        /** Төгсөлт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-graduate-read', 'student5')
+
+                        /** Боловсролын зээлийн сан */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-loanfund-read', 'student7')
+
+                        /** Оюутаны хавсралт, төгсөлтийн ажил */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-graduate-read', 'student10')
+
+                        /** Оюутан тодорхойлолт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-definition-read', 'student11')
+
+                        /** ----------------------------- Тохиргоо ---------------------------- */
+
+                        /** Ажиллах жил */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-employee-settings-read', 'settings_employee')
+
+                        /** Боловсролын зэрэг */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-settings-read', 'settings_student')
+
+                        /** Эрх */
+                        childrenDatas = checkPerm(childrenDatas, menus, user.is_superuser, 'settingsLevel15')
+
+                        /** Role */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'role-read', 'settingsLevel16')
+
+                        /** ----------------------------- Хичээлийн хуваарь ---------------------------- */
+
+                        /** Цагийн хуваарь */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-timetable-register-read', 'timetable3')
+
+                        /** Шалгалтын хуваарь */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-timetable-exam-read', 'timetable4')
+
+                        /** Дахин шалгалт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-timetable-examrepeat-read', 'timetable5')
+
+                        /** ----------------------------- Дүнгийн бүртгэл ---------------------------- */
+
+                        /** Дүнгийн бүртгэл */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-score-read', 'score1')
+
+                        /** Дүйцүүлсэн дүн */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-score-correspond-read', 'score2')
+
+                        /** Дахин шалгалт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-score-restudy-read', 'score3')
+
+                        /** Өмнөх улирлын дүн */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-score-restudy-read', 'score4')
+
+                        /** ----------------------------- Сургалтын төлбөр ---------------------------- */
+
+                        /** Төлбөрийн тохиргоо */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-payment-settings-read', 'studypayment1')
+
+                        /** Төлбөрийн гүйлгээ */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-payment-balance-read', 'studypayment2')
+
+                        /** Төлбөрийн эхний үлдэгдэл */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-payment-beginbalance-read', 'studypayment3')
+
+                        /** Төлбөрийн тооцоо */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-payment-estimate-read', 'studypayment4')
+
+                        /** Төлбөрийн хөнгөлөлт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-payment-discount-read', 'studypayment5')
+
+                        /** ------------------------ Захиалга -------------------------------- */
+
+                        /** Номын сан */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-order-library-read', 'order1')
+
+                        /** Спорт заал */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-order-sporthall-read', 'order2')
+
+                        /** Фитнесс */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-order-fitness-read', 'order3')
+
+                        /** Эмнэлэг */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-order-hospital-read', 'order4')
+
+                        /** ----------------------------- Тэтгэлэг ---------------------------- */
+
+                        /** Тэтгэлэг бүртгэл */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-stipend-read', 'stipend1')
+
+                        /** Тэтгэлэгийн хүсэлт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-stipend-request-read', 'stipend2')
+
+                        /** ----------------------------- Дотуур байр ---------------------------- */
+
+                        /** Өрөөний төрөл */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-dormitory-roomtype-read', 'dormitory1')
+
+                        /** Өрөөний бүртгэл*/
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-dormitory-rooms-read', 'dormitory2')
+
+                        /** Төлбөрийн тохиргоо */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-dormitory-paymentconfig-read', 'dormitory3')
+
+                        /** Дотуур байрны бүртгэл */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-dormitory-request-read', 'dormitory4')
+
+                        /** Дотуур байрны тооцоо */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-dormitory-estimate-read', 'dormitory5')
+
+                        /** ----------------------------- Өргөдөл ---------------------------- */
+
+                        /** Шийдвэрлэх нэгж */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-decide-unit-read', 'complaint1')
+
+                        /** Өргөдөл */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-request-application-read', 'complaint2')
+
+                        /** Дүнгийн дүйцүүлэлтийн хүсэлт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-request-correspond-read', 'complaint3')
+
+                        /** Чөлөөний хүсэлт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-request-vacation-read', 'complaint4')
+
+                        /** Тойрох хуудас */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-request-routingslip-read', 'complaint5')
+
+                        /** ----------------------------- Хүсэлт ---------------------------- */
+
+                        /** Олон нийтийн ажлын хүсэлт*/
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-wish-volunteer-read', 'request1')
+
+                        /** Олон нийтийн ажлын хүсэлт*/
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-wish-club-read', 'request2')
+
+                        /** Олон нийтийн ажлын хүсэлт*/
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-wish-tutor-read', 'request3')
+
+                        /** ----------------------------- Хэвлэх ---------------------------- */
+
+                        /** Хичээл сонголтын нэрс */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-print-choice-read', 'print1')
+
+                        /** Хичээлийн хуваарь */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-print-schedule-read', 'print2')
+
+                        /** Дүнгийн жагсаалт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-print-score-read', 'print4')
+
+                        /** Голч дүн */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-print-gpa-read', 'print5')
+
+                        /** Төгсөлтийн тушаал */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-print-graduate-read', 'print6')
+
+                        /** Элсэлтийн тушаал */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-print-admission-read', 'print7')
+
+                        /**------------------------------------"Цагийн тооцоо"----------------------------*/
+                        /** Цагийн ачаалал */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-credit-volume-read', 'credit1')
+
+                        /** Цагийн тооцоо */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-credit-estimation-read', 'credit2')
+
+                        /** Хичээл тулгалт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-credit-confrontation-read', 'credit3')
+
+                        /** Цагийн багшийн тооцоо */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-credit-parttime-read', 'credit5')
+
+                        /** Цагийн тооцоо тохиргоо */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-credit-settings-read', 'credit4')
+
+                        /** ----------------------------- Хандах эрх ---------------------------- */
+                        /** Багшийн дүнгийн эрх */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-role-teacher-score-read', 'role1')
+
+                        /** Оюутны хичээл сонголтыг төлбөрөөс хамааралгүйгээр хийх эрх*/
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-role-choice-payment-read', 'role2')
+
+                        /** Бусад эрх */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-role-other-read', 'role3')
+
+                        /** Тохиргоо хийх  эрх */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-role-settings-read', 'role4')
+
+                        /** ----------------------------- Судалгаа ---------------------------- */
+                        /** Судалгаа бүртгэх */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-survey-read', 'surveymain')
+
+                        /** ----------------------------- Багшийг үнэлэх ---------------------------- */
+                        /** Судалгааны асуулт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-survey-question-read', 'evaluation1')
+
+                        /** Эрдэм шинжилгээ асуулт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-science-read', 'science1')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-science-read', 'science2')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-science-read', 'science3')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-science-read', 'science4')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-science-read', 'science5')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-science-read', 'science6')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-science-read', 'science7')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-science-read', 'science8')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-science-read', 'science9')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-science-read', 'science10')
+
+                        /** ----------------------------- Шалгалт цэс ---------------------------- */
+                        /** Шалгалтын асуулт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-exam-question-read', 'question')
+
+                        /** Шалгалт */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-exam-read', 'create')
+
+                        menus.children = childrenDatas
+                    }
+                })
+
+                cNavigation.map((menus, idx) =>
+                {
+                    /** navChildren-тай menu-д нэгч хүүхэд эрх нь таарахгүй бол тэрийг устгана */
+                    if (menus.navChildren && (menus && menus.children && menus.children.length < 1))
+                    {
+                        delete cNavigation[idx];
+                    }
+                    /** Дан ганцаар байдаг бол permission шалгана */
+                    else
+                    {
+                        /** Хуанли */
+                        if (menus.id === 'calendar' && !user.permissions?.includes('lms-calendar-read')) delete cNavigation[idx];
+    
+                        /** Зар мэдээ */
+                        if (menus.id === 'service' && !user.permissions?.includes('lms-service-news-read')) delete cNavigation[idx];
+    
+                        /** Статистик */
+                        if (menus.id === 'statistic' && !user.permissions?.includes('lms-statistic-read')) delete cNavigation[idx];
+    
+                        /** Хандах эрх */
+                        if (menus.id === 'role' && !user.permissions?.includes('role-read')) delete cNavigation[idx];
+                    }
+                })
+
+                setIsEnd(true)
+            }
+        },
+        [user]
+    )
 
     return (
-        <Layout menuData={navigation} {...props}>
-            <Outlet />
-        </Layout>
+        <>
+            {
+                isEnd
+                ?
+                    <Layout menuData={cNavigation} {...props}>
+                        <Outlet />
+                    </Layout>
+                :
+                    null
+            }
+        </>
     )
 }
 

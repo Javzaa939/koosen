@@ -25,7 +25,6 @@ export default function PrintMongolia()
             fetchData(signatureApi.get(2)),
         ]).then((values) => {
             setListArr(values[0]?.data)
-            printAuto()
         })
     }
 
@@ -34,10 +33,10 @@ export default function PrintMongolia()
         {
             getAllData()
 
-            window.onafterprint = function()
-            {
-                window.close()
-            }
+            // window.onafterprint = function()
+            // {
+            //     window.close()
+            // }
         },
         []
     )
@@ -47,7 +46,7 @@ export default function PrintMongolia()
         {
             if (data && listArr.length != 0)
             {
-                // setTimeout(() => window.print(), 1000)
+                setTimeout(() => window.print(), 1000)
             }
         },
         [data, listArr]
@@ -122,28 +121,29 @@ export default function PrintMongolia()
             {isLoading && Loader}
 
             {/* Үндсэн хэсэг */}
-            <div className='position-absolute text-center' style={{ top: '300px', width: '100%', fontSize: '19px', lineHeight: '30px' }} >
+            <div className='position-absolute text-center' style={{ top: '250px', width: '100%', fontSize: '19px', lineHeight: '30px' }} >
                 <div className='m-auto' style={{ width: '1000px' }}>
-                    <span className='text-center fst-italic'>This is to certify that <span className='fw-bolder text-uppercase'>{data?.student?.last_name_eng} {data?.student?.first_name_eng}</span> a citizen of {data?.student?.citizenship?.name_eng},
-                    <br />
-                    has been duly awarded by the President order {data?.graduation_number} dated on {monthToText(data?.graduation_date?.substring(5, 7))} {data?.graduation_date?.substring(8, 10)}, {data?.graduation_date?.substring(0, 4)} upon
-                    <br />
-                    the decision of the Graduation Commission on {monthToText(data?.decision_date?.substring(5, 7))} {data?.decision_date?.substring(8, 10)}, {data?.decision_date?.substring(0, 4)} the degree of</span>
-                    <br />
-                    <span className='fw-bolder text-uppercase'>{data?.student?.group?.degree?.degree_eng_name} of {data?.student?.group?.profession?.dep_name_eng}</span>
-                    <br />
-                    <span className='text-center fst-italic'>for having successfully complated the prescribed course of study in
-                    <br />
-                    <span className='text-uppercase'><span className='fst-normal fw-bolder'>{data?.student?.group?.profession?.name_eng}</span> / {data?.student?.group?.degree?.degree_code}{data?.student?.group?.profession?.code} /</span>
-                    <br />
-                     at the Mongolian National University for the period of {data?.student?.group?.join_year?.substring(0, 4)}-{data?.lesson_year?.substring(5, 9)}.</span>
+                    <span className='text-center'>This is to certify that
+                        <br />
+                        <span className='fw-bolder text-uppercase'>{data?.student?.first_name_eng}</span> <span className='fw-bolder'>{data?.student?.last_name_eng}</span>
+                        <br />
+                        citizen of {data?.student?.citizenship?.name_eng},
+                        <br />
+                        has completed requirements of the programme {data?.student?.group?.profession?.name_eng} ({data?.student?.group?.degree?.degree_code}{data?.student?.group?.profession?.code})
+                        <br />
+                        was awarded the degree of <span className='text-uppercase'>{data?.student?.group?.degree?.degree_eng_name} OF {data?.student?.group?.profession?.dep_name_eng}</span>
+                        <br />
+                        by the President's order {data?.graduation_number} dated {data?.graduation_date?.substring(8, 10)} {monthToText(data?.graduation_date?.substring(5, 7))} {data?.graduation_date?.substring(0, 4)}, based on the decision of the
+                        <br />
+                        Graduation Examination Committee
+                    </span>
                 </div>
             </div>
 
             {/* Гарын үсгийн хэсэг */}
             <div className='position-absolute' style={{ bottom: '100px', fontSize: '15px' }} >
-                <div style={{ paddingLeft: '170px', paddingRight: '70px' }} >
-                    <div className='d-flex w-100 text-center justify-content-center fst-italic'>
+                <div style={{ paddingLeft: '100px', paddingRight: '100px', lineHeight: '18px' }} >
+                    <div className='d-flex w-100 text-center justify-content-center'>
 
                         {
                             listArr.length != 0
@@ -151,9 +151,8 @@ export default function PrintMongolia()
                             listArr.map((val, idx) =>
                             {
                                 return (
-                                    <div className='w-25 d-flex flex-column pt-4 pb-2' style={{ paddingRight: '7px', paddingLeft: '7px' }} key={idx} >
-                                        <span>_______________________</span>
-                                        <span>{val?.last_name_eng} {val?.first_name_eng}</span>
+                                    <div className='d-flex flex-column pt-4 pb-2' style={{ paddingRight: '20px', paddingLeft: '20px' }} key={idx} >
+                                        <span className='border-top-black' style={{ paddingTop: '3px' }}>{val?.last_name_eng}{val?.first_name_eng}</span>
                                         <span>{val?.position_name_eng}</span>
                                     </div>
                                 )
@@ -164,9 +163,9 @@ export default function PrintMongolia()
                 </div>
 
                 {/* Footer */}
-                <div className='d-flex justify-content-between fst-italic'>
-                    <span style={{ paddingLeft: '130px' }} >Ulaanbaatar, Mongolia</span>
-                    <span style={{ paddingRight: '150px' }} >Registration No: {data?.registration_num}</span>
+                <div className='d-flex justify-content-between'>
+                    <span style={{ paddingLeft: '130px' }} >ULAANBAATAR CITY</span>
+                    <span style={{ paddingRight: '150px' }} >REGISTER No {data?.registration_num}</span>
                 </div>
             </div>
 

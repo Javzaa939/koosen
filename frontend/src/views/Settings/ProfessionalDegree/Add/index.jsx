@@ -166,6 +166,31 @@ const Addmodal = ({ open, handleModal, refreshDatas, editId }) => {
                             />
                             {errors.degree_eng_name && <FormFeedback className='d-block'>{t(errors.degree_eng_name.message)}</FormFeedback>}
                         </Col>
+                        <Col md={12}>
+                            <Label className="form-label" for="degree_uig_name">
+                                {t('Зэргийн нэр уйгаржин')}
+                            </Label>
+                            <Controller
+                                defaultValue=''
+                                control={control}
+                                id="degree_uig_name"
+                                name="degree_uig_name"
+                                render={({ field }) => {
+                                    return(
+                                        <Input
+                                            id="degree_uig_name"
+                                            bsSize="sm"
+                                            placeholder={t('Зэргийн нэр уйгаржин')}
+                                            {...field}
+                                            style={{fontFamily: 'CMs Urga', fontSize:'15px'}}
+                                            type="text"
+                                            invalid={errors.degree_uig_name && true}
+                                        />
+                                    )
+                                }}
+                            />
+                            {errors.degree_uig_name && <FormFeedback className='d-block'>{t(errors.degree_uig_name.message)}</FormFeedback>}
+                        </Col>
                         <Col md={12} className=" text-center mt-2">
                             <Button className="me-2" color="primary" type="submit" disabled={postLoading}>
                                 {postLoading &&<Spinner size='sm' className='me-1'/>}

@@ -33,10 +33,10 @@ export default function PrintMongolia()
         {
             getAllData()
 
-            window.onafterprint = function()
-            {
-                window.close()
-            }
+            // window.onafterprint = function()
+            // {
+            //     window.close()
+            // }
         },
         []
     )
@@ -52,50 +52,50 @@ export default function PrintMongolia()
         [data, listArr]
     )
 
-    return (
-        // <div className='vh-100 p-0' style={{ fontFamily: 'CMs Urga dp' }}  >
-        //<div className='vh-100 p-0' style={{ fontFamily: 'CMSUBDP' }}  >
-        <div className='vh-100 p-0' style={{ fontFamily: 'CMSHRDP' }}  >
+    function tooBichih(too)
+    {
+        return ( <span style={{ fontFamily: 'CMSUB', fontSize: '25px' }}>{too}</span> )
+    }
 
+    function tushaal(text)
+    {
+        let slash = text.split('/')
+
+        return <><span>ᠠ/</span><span style={{ fontFamily: 'CMSUB', fontSize: '25px' }}>{slash[1]}</span></>
+    }
+
+    return (
+        <div className='vh-100 position-relative' style={{ fontFamily: 'mongolianScript', fontSize: '16px', padding: '125px 160px 100px 260px' }}>
             {isLoading && Loader}
 
-            <div className='position-relative w-100 h-100'>
-
-                <div className='d-flex position-absolute start-0' >
-                    <div className='text-center' style={{ writingMode: 'vertical-rl', transform: 'scale(-1, 1)', fontSize: '30px' }} >
-                        doge* <span style={{ fontFamily: 'serif' }}>{data?.student?.group?.degree?.degree_code}</span>{data?.diplom_num}
+            <div className='d-flex justify-content-between h-100' >
+                <div className='d-flex'>
+                    <div className='text-center' style={{ writingMode: 'vertical-lr' }} >
+                        ᠳ᠋ᠤᠭᠠᠷ <span style={{ fontFamily: 'cmdashitseden', fontSize: '24px' }}>{data?.student?.group?.degree?.degree_code}</span>{tooBichih(data?.diplom_num)}
                     </div>
-
-                    <div style={{ writingMode: 'vertical-rl', transform: 'scale(-1, 1)', fontSize: '30px', textAlign: 'justify', textAlignLast: 'center' }} >
-                        {data?.student?.citizenship?.name_uig} folo_ oa fJrhEa {data?.student?.last_name_uig} {data?.student?.first_name_uig} nh {data?.student?.group?.join_year?.substring(0, 4)} - {data?.lesson_year?.substring(5, 9)} Foa dO Moekgo& oa foiedosoa O YekEt SorgegolI dO {data?.student?.group?.profession?.name_uig} <span style={{ fontFamily: 'serif' }}>/{data?.student?.group?.degree?.degree_code}</span > {data?.student?.group?.profession?.code} <span style={{ fontFamily: 'serif' }}>/</span> MerkEji& iie* Sorolcea DeKsohsea Dola
-                        DeKsolda iia Silgelda iia |mis_ oa {data?.decision_date?.substring(0, 4)} Foa O {data?.decision_date?.substring(5, 7)} doge* Se*T iia {data?.decision_date?.substring(8, 10)} - O Fdo* oa SiioeBrI iI Foiedosolea , Jehuro& oa {data?.graduation_date?.substring(0, 4)} Foa O {data?.graduation_date?.substring(5, 7)} doge* Se*T iia {data?.graduation_date?.substring(8, 10)} - O Fdo* oa {data?.graduation_number} DogedO Dosiye& iie* {data?.student?.group?.profession?.dep_name_uig}
-                        <br />
-                        <span className='fw-bolder'>{data?.student?.group?.degree?.degree_name_uig}</span> oa JerhEt FolgobEt.
+                    <div style={{ writingMode: 'vertical-lr', marginLeft: '36px', lineHeight: '46px' }} >
+                        ᠮᠣᠩᠭᠣᠯ ᠤᠯᠤᠰ ᠤ᠋ᠨ ᠢᠷᢉᠡᠨ {data?.student?.last_name_uig} ᠶᠢᠨ / ᠤᠨ {data?.student?.first_name_uig} ᠨᠢ <span style={{ fontFamily: 'CMSUB', fontSize: '25px' }}>{data?.student?.group?.join_year?.substring(0, 4)} - {data?.lesson_year?.substring(5, 9)}</span> ᠣᠨ ᠳ᠋ᠤ {data?.student?.school_name_uig} ᠳ᠋ᠤ {data?.student?.group?.profession?.name_uig} ᠮᠡᠷᢉᠡᠵᠢᠯ <span style={{ fontFamily: 'cmdashitseden', fontSize: '24px' }}>({data?.student?.group?.degree?.degree_code}</span>{tooBichih(data?.diplom_num)})
+                        ᠢ᠋ᠶᠡᠷ ᠰᠤᠷᠤᠯᠴᠠᠵᠤ ᠲᠡᢉᠦᠰᠦᢉᠰᠡᠨ ᠲᠤᠯᠠ ᠶᠡᢈᠡ ᠰᠤᠷᠭᠠᠭᠤᠯᠢ ᠶ᠋ᠢᠨ ᠵᠠᢈᠢᠷᠤᠯ ᠤ᠋ᠨ {tooBichih(data?.decision_date?.substring(0, 4))} ᠣᠨ ᠤ᠋ {tooBichih(data?.decision_date?.substring(5, 7))} ᠳ᠋ᠤᠭᠠᠷ ᠰᠠᠷ᠎ᠠ ᠶ᠋ᠢᠨ {tooBichih(data?.decision_date?.substring(8, 10))}{tooBichih('-')} ᠪ
+                        ᠡᠳᠦᠷ ᠦ᠋ᠨ {tushaal(data?.graduation_number)} ᠳ᠋ᠤᠭᠠᠷ ᠲᠤᠰᠢᠶᠠᠯ ᠢ᠋ᠶᠠᠷ {data?.student?.group?.profession?.dep_name_uig} ᠶᠢᠨ {data?.student?.group?.degree?.degree_uig_name} ᠤ᠋ᠨ ᠵᠡᠷᢉᠡ ᠣᠯᠭᠤᠪᠠ.
                     </div>
                 </div>
-
-                <div className='d-flex position-absolute' style={{ right: '70px' }} >
-
-                    {/* Гарын үсгийн хэсэг */}
-                            {
-                                listArr.length != 0
-                                &&
-                                listArr.map((val, idx) =>
-                                {
-                                    return (
-                                        <div style={{ writingMode: 'vertical-rl', transform: 'scale(-1, 1)', fontSize: '20px', marginTop: '40px' }} key={idx} >
-                                            <span>{val?.position_name_uig}</span> <span>{val?.last_name_uig} {val?.first_name_uig} ,,,,,,,,,,,,,</span>
-                                        </div>
-                                    )
-                                })
-                            }
-
-                    <div className='d-flex justify-content-between' style={{ writingMode: 'vertical-rl', transform: 'scale(-1, 1)', fontSize: '24px', marginLeft: '58px' }} >
-                        <span>Moekgo& folo_ , folegefbEgedo* Hoda</span>
-                        <span>BirioekE& oa doge* {data?.registration_num}</span>
+                <div className='d-flex' style={{ fontSize: '14px', lineHeight: '42px' }}>
+                {
+                    listArr.map((val, idx) =>
+                    {
+                        return (
+                            <div className='d-flex justify-content-between' style={{ writingMode: 'vertical-lr' }} key={idx} >
+                                <span style={{ height: '60%' }}>{val?.position_name_uig}</span>
+                                <span style={{ marginLeft: 'auto' }}>{val?.last_name_uig} {val?.first_name_uig}</span>
+                            </div>
+                        )
+                    })
+                }
+                    <div className='d-flex justify-content-between' style={{ writingMode: 'vertical-rl', paddingTop: '30px', paddingBottom: '30px' }} >
+                        <span>ᠤᠯᠠᠭᠠᠨᠪᠠᠭᠠᠲᠤᠷ ᠬᠣᠲᠠ</span>
+                        <span>ᠪᠦᠷᠢᠳᢈᠡᠯ ᠦ᠋ᠨ ᠳ᠋ᠤᠭᠠᠷ <span style={{ fontFamily: 'CMSUB', fontSize: '20px' }}>{data?.registration_num}</span></span>
                     </div>
                 </div>
-
             </div>
         </div>
     )

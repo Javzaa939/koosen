@@ -571,6 +571,7 @@ function useApi(isDisplay=false) {
 			/** Албан тушаал */
 			position: {
 				get: () => instance.get(`/core/position/`),
+				getAll: () => instance.get(`/core/position/all/`),
 			},
 
 		},
@@ -616,6 +617,8 @@ function useApi(isDisplay=false) {
 				}
 				return instance.get(`/student/info/group/?${group_ids}&type=${type}`)
 			},
+
+			getStudentCommandList: () =>instance.get(`/student/graduate/list/?year=${cyear_name}&season=${cseason_id}`),
 			post: data => instance.post('/student/info/', data),
 			getOne: (pk, type) => instance.get(`/student/info/detail/${pk}/?type=${type}`),
 			put: (data, pk, type) => instance.put(`/student/info/detail/${pk}/?type=${type}`, data),
@@ -628,6 +631,7 @@ function useApi(isDisplay=false) {
 			calculateGpaDimplomaGet: (studentId) => instance.get(`/student/gpa-diploma-values/?id=${studentId}`),
 
 			getLessonStudent: (student) => instance.get(`/student/score-lesson/${student}/`),
+			postCommand: (data) => instance.post(`/student/command/`, data),
 
 			/* Анги бүлгийн бүртгэл */
 			group:{

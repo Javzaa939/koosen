@@ -7,6 +7,7 @@ from rest_framework import mixins
 from rest_framework import generics
 
 from django.conf import settings
+from django.db import connection
 from django.db import transaction
 from django.db.models import Max, Sum, F, FloatField, Q, Value
 from django.db.models.functions import Replace, Upper
@@ -21,8 +22,10 @@ from main.utils.file import remove_folder
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 from main.utils.function.pagination import CustomPagination
-from main.utils.function.utils import str2bool, has_permission, get_lesson_choice_student, remove_key_from_dict, get_fullName, get_student_score_register, calculate_birthday, null_to_none, end_time, get_active_year_season,start_time
+from main.utils.function.utils import str2bool, has_permission, get_lesson_choice_student, remove_key_from_dict, get_fullName, get_student_score_register, calculate_birthday, null_to_none, end_time, get_active_year_season,start_time, dict_fetchall
 # from main.khur.XypClient import citizen_regnum, highschool_regnum
+
+from core.models import SubOrgs, SumDuureg, AimagHot
 
 from lms.models import Student, StudentAdmissionScore, StudentEducation, StudentLeave, StudentLogin, TimeTable
 from lms.models import StudentMovement
@@ -53,8 +56,6 @@ from lms.models import SystemSettings
 from lms.models import PaymentBeginBalance
 from lms.models import Country
 
-from core.models import SubOrgs, SumDuureg, BagHoroo, AimagHot
-
 from .serializers import StudentListSerializer
 from .serializers import StudentRegisterSerializer
 from .serializers import StudentRegisterListSerializer
@@ -68,6 +69,7 @@ from .serializers import StudentEducationSerializer
 from .serializers import StudentEducationListSerializer
 from .serializers import SignaturePeoplesSerializer
 from .serializers import StudentAddressListSerializer
+from .serializers import GraduationWorkStudentListSerializer
 from .serializers import StudentAdmissionScoreSerializer
 from .serializers import StudentAdmissionScoreListSerializer
 from .serializers import GroupListSerializer
@@ -86,7 +88,6 @@ from .serializers import BigSchoolsSerializer
 from .serializers import StudentDefinitionSerializer
 from .serializers import ScoreRegisterDefinitionSerializer
 from .serializers import SeasonSerializer
-from .serializers import CalculatedGpaOfDiplomaPrintSerializer
 from .serializers import StudentAttachmentSerializer
 from .serializers import GraduationWorkPrintSerailizer
 from .serializers import StudentVizListSerializer
@@ -1815,7 +1816,7 @@ class GraduationWorkAPIView(
     mixins.ListModelMixin,
     generics.GenericAPIView
 ):
-    queryset = GraduationWork.objects.all()
+    queryset = GraduationWork.objects.all().order_by('student__first_name')
     serializer_class = GraduationWorkSerializer
 
     pagination_class = CustomPagination
@@ -2449,28 +2450,61 @@ class StudentGpaDiplomaValuesAPIView(
         student_prof_qs = Student.objects.get(id=student_id).group.profession
 
         all_data = dict()
-        calculated_data = list()
 
-        for data in qs:
+        learning_plan_levels = LearningPlan.objects.filter(profession=student_prof_qs).values_list('lesson_level', flat=True).distinct('lesson_level')
 
-            data = CalculatedGpaOfDiplomaPrintSerializer(data, context={ "student_prof_qs": student_prof_qs }, many=False).data
-            calculated_data.append(data)
-            max_kredit = max_kredit + data['kredit']
-            all_score = all_score + (data['score'] * data['kredit'])
+        all_learn_levels = dict(LearningPlan.LESSON_LEVEL)
 
-        newlist = sorted(calculated_data, key=lambda i: (i['lesson']['lesson_level'], i['lesson']['lesson_type'], i['lesson']['season']))
-        print(qs)
-        print(student_prof_qs)
-        print(max_kredit)
-        print(all_score)
+        all_datas = []
+        for level in list(learning_plan_levels):
+            if level == (LearningPlan.DIPLOM or LearningPlan.MAG_DIPLOM or LearningPlan.DOC_DIPLOM):
+                continue
+
+            obj_datas = {}
+            obj_datas['name'] = all_learn_levels[level]
+
+            lesson_datas = []
+
+            obj_datas['eng_name'] = 'Education subject'
+            if level == 2:
+                obj_datas['eng_name'] = 'Core'
+            if level == 3:
+                obj_datas['eng_name'] = 'Major course'
+
+            for data_qs in qs:
+                lesson_first_data = data_qs.lesson.all()
+                lesson_obj = lesson_first_data.first()
+
+                query = '''
+                    select lp.lesson_level, ls.name, ls.code, ls.id, ls.name_eng, ls.name_uig, ls.kredit from lms_learningplan lp
+                    inner join lms_lessonstandart ls
+                    on lp.lesson_id=ls.id
+                    where lp.profession_id = {profession_id} and lp.lesson_id = {lesson_id}
+                '''.format(profession_id=student_prof_qs.id, lesson_id=lesson_obj.id)
+
+                cursor = connection.cursor()
+                cursor.execute(query)
+                rows = list(dict_fetchall(cursor))
+
+                if len(rows) > 0:
+                    if rows[0]['lesson_level'] == level:
+                        lesson = rows[0]
+                        lesson['score'] = data_qs.score
+                        lesson['assesment'] = data_qs.assesment
+                        lesson_datas.append(lesson)
+
+                        max_kredit = max_kredit + lesson.get('kredit')
+                        score_qs = Score.objects.filter(score_max__gte=data_qs.score, score_min__lte=data_qs.score).first()
+                        all_score = all_score + (score_qs.gpa * lesson.get('kredit'))
+
+            obj_datas['lessons'] = lesson_datas
+            all_datas.append(obj_datas)
+
         final_gpa = all_score / max_kredit
-        score_qs = Score.objects.filter(score_max__gte=final_gpa, score_min__lte=final_gpa).first()
+        final_gpa = format(final_gpa, ".2f")
 
-        if score_qs:
-            score_assesment = score_qs.gpa
-
-        all_data['score'] = { 'assesment': score_assesment, 'max_kredit': max_kredit }
-        all_data['lessons'] = newlist
+        all_data['score'] = { 'assesment': final_gpa, 'max_kredit': max_kredit }
+        all_data['lessons'] = all_datas
 
         # GraduationWork
         graduationwork_qs = GraduationWork.objects.filter(student_id=student_id).last()
@@ -2837,9 +2871,74 @@ class SignatureGroupAPIView(
                             **datas
                         }
                     )
-
+                    graduate_obj.lesson.clear()
                     graduate_obj.lesson.add(*list(lessons))
             except Exception as e:
                 return request.send_error('ERR_002')
 
         return request.send_info('INF_001')
+
+@permission_classes([IsAuthenticated])
+class CommandAPIView(
+    generics.GenericAPIView,
+    mixins.CreateModelMixin,
+):
+    queryset = GraduationWork.objects.all()
+
+    def post(self, request):
+        "Тушаал шинээр үүсгэх нь "
+
+        user = request.user
+        lesson_year, lesson_season = get_active_year_season()
+
+        datas = request.data
+        students = datas.get('students')
+        decision_date = datas.get('decision_date')
+        graduation_date = datas.get('graduation_date')
+        graduation_number = datas.get('graduation_number')
+
+        datas['lesson_year'] = lesson_year
+        datas['lesson_season_id'] = lesson_season
+        datas['lesson_type'] = GraduationWork.ATTACHMENT_SHALGALT
+        datas['created_user'] = user
+
+        with transaction.atomic():
+            try:
+                for student in students:
+                    GraduationWork.objects.update_or_create(
+                        student_id = student.get('id'),
+                        lesson_year = lesson_year,
+                        lesson_season_id = lesson_season,
+                        defaults={
+                            "decision_date":decision_date,
+                            "graduation_number":graduation_number,
+                            "graduation_date":graduation_date
+                        }
+                    )
+
+            except Exception as e:
+                return request.send_error('ERR_002')
+
+        return request.send_info('INF_001')
+
+
+@permission_classes([IsAuthenticated])
+class StudentCommandListAPIView(
+    mixins.ListModelMixin,
+    generics.GenericAPIView
+):
+    """ Төгсөлтын ажлын оюутны жагсаалт """
+
+    queryset = GraduationWork.objects.all()
+    serializer_class = GraduationWorkStudentListSerializer
+
+    def get(self, request):
+        " Идэвхитэй жил, улиралд төгсөх оюутны жагсаалт "
+
+        year, season = get_active_year_season()
+
+        stud_qs = self.queryset.filter(lesson_year=year, lesson_season=season).values_list('student', flat=True)
+        student_data = Student.objects.filter(id__in=stud_qs).values("id", "code", "last_name", "first_name")
+
+        data = list(student_data)
+        return request.send_data(data)

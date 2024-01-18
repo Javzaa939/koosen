@@ -41,7 +41,6 @@ import { validateSchema } from '../validateSchema';
 
 const Addmodal = ({ open, handleModal, refreshDatas, year, dep_id, season, lesson_id, teacher_id}) => {
 
-    console.log(teacher_id)
     const CloseBtn = (
         <X className="cursor-pointer" size={15} onClick={handleModal} />
     )

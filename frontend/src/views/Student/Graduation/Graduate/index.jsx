@@ -123,7 +123,7 @@ const CreateModal = ({ open, handleModal, refreshDatas, group }) => {
 
 	return (
         <Fragment>
-            <Modal isOpen={open} toggle={handleModal} className="modal-dialog-centered modal-xl" onClosed={handleModal}>
+            <Modal isOpen={open} toggle={handleModal} className="modal-dialog-centered modal-xl">
                 {isLoading && <div className='suspense-loader'><Spinner size='xl'/></div>}
                 <ModalHeader className='bg-transparent pb-0' toggle={handleModal}></ModalHeader>
                 <ModalBody className="px-sm-3 pt-50 pb-3">

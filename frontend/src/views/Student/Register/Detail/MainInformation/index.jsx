@@ -498,7 +498,7 @@ const MainInformation = () => {
                                             readOnly={is_edit}
                                             disabled={is_edit}
                                             className="opacity-100"
-                                            style={{ fontFamily: 'CMs Urga', fontSize: '15px'}}
+                                            style={{ fontFamily: 'cmdashitseden', fontSize: '15px'}}
                                             invalid={errors.last_name_uig && true}
                                         />
                                     )}
@@ -571,7 +571,7 @@ const MainInformation = () => {
                                             placeholder={t('Өөрийн нэр уйгаржин')}
                                             {...field}
                                             type="text"
-                                            style={{ fontFamily: 'CMs Urga', fontSize: '15px'}}
+                                            style={{ fontFamily: 'cmdashitseden', fontSize: '15px'}}
                                             readOnly={is_edit}
                                             disabled={is_edit}
                                             className="opacity-100"

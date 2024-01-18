@@ -262,7 +262,7 @@ const MainInformation = ({ }) => {
                                         placeholder={t('Хөтөлбөрийн нэр уйгаржин')}
                                         {...field}
                                         type="text"
-                                        style={{ fontFamily: 'CMs Urga', fontSize: '15px'}}
+                                        style={{ fontFamily: 'cmdashitseden', fontSize: '15px'}}
                                         readOnly={is_valid}
                                         disabled={is_valid}
                                         invalid={errors.name_uig && true}
@@ -403,7 +403,7 @@ const MainInformation = ({ }) => {
                                         placeholder={t('Хөтөлбөрийн төрөлжсөн чиглэл уйгаржин')}
                                         {...field}
                                         type="text"
-                                        style={{ fontFamily: 'CMs Urga', fontSize: '15px'}}
+                                        style={{ fontFamily: 'cmdashitseden', fontSize: '15px'}}
                                         readOnly={is_valid}
                                         disabled={is_valid}
                                         invalid={errors.dep_name_uig && true}

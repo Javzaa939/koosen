@@ -3,14 +3,20 @@ from googletrans import Translator
 
 translator = Translator()
 
-def post_put_action(self, request, crud, data, pk=None):
+# TODO: yuki get_res=True үед serializer validation-г даваагүй үеийн result-г
+
+
+def post_put_action(self, request, crud, data, pk=None, get_res=False):
 
     if crud == 'post':
 
         serializer = self.get_serializer(data=data)
 
         if serializer.is_valid(raise_exception=False):
-            serializer.save()
+            saved_qs = serializer.save()
+            if get_res:
+                return saved_qs
+
             return request.send_info("INF_001")
         else:
             error_fields = []
@@ -29,7 +35,9 @@ def post_put_action(self, request, crud, data, pk=None):
         serializer = self.get_serializer(qs, data=data, partial=True)
 
         if serializer.is_valid(raise_exception=False):
-            self.perform_update(serializer)
+            saved_qs = serializer.save()
+            if get_res:
+                return saved_qs
             return request.send_info("INF_002")
         else:
             error_fields = []
