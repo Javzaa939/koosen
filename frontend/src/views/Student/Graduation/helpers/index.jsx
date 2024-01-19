@@ -152,23 +152,6 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 			minWidth: '200px',
 			wrap: true,
         },
-		// {
-		// 	header: 'lesson',
-		// 	name: t("Дипломын хичээл"),
-		// 	selector: (row) => `${row?.lesson?.code} ${row?.lesson?.name}`,
-        //     sortable: false,
-		// 	minWidth: "200px",
-		// 	center: true,
-		// 	wrap: true,
-		// },
-		// {
-		// 	header: 'diplom_topic',
-		// 	name: t("Дипломын сэдэв"),
-		// 	selector: (row) => row?.diplom_topic,
-        //     center: true,
-		// 	sortable: false,
-		// 	minWidth: "200px",
-		// },
 		{
 			header: 'leader',
 			name: t("Удирдагч багш"),
