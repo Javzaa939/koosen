@@ -928,6 +928,36 @@ def dict_fetchall(cursor):
         yield dict(zip(columns, row))
 
 
+def student__full_name(last_name, first_name):
+
+    ovog = f"{last_name[0].upper()}." if last_name else ""
+    name = first_name.capitalize()
+
+    if ovog and name:
+        return f"{ovog}{name}"
+
+    if name:
+        return name
+
+    return ""
+
+
+def lesson_standart__code_name(code, name):
+    return code + "-" + name
+
+
+def score_register__score_total(teach_score, exam_score):
+        full = 0
+
+        if teach_score:
+            full = full + teach_score
+
+        if exam_score:
+            full = full + exam_score
+
+        return full
+
+
 def import_score(reader):
     headers = []
 
