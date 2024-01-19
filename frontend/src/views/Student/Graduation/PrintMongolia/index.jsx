@@ -126,6 +126,7 @@ export default function PrintMongolia()
                     {data?.student?.group?.join_year?.substring(0, 4)}-{data?.lesson_year?.substring(5, 9)} онд {data?.student?.school_name}д
                     "{data?.student?.group?.profession?.name}" мэргэжил ({data?.student?.group?.degree?.degree_code}{data?.student?.group?.profession?.code})-ээр суралцаж төгссөн тул Их сургуулийн захирлын&nbsp;
                     {data?.decision_date?.substring(0, 4)} оны {data?.decision_date?.substring(5, 7)} {dugeerUg(data?.decision_date?.substring(5, 7) && data?.decision_date?.substring(5, 7).charAt(data?.decision_date?.substring(5, 7).length - 1))} сарын {data?.decision_date?.substring(8, 10)}{niiUg(data?.decision_date?.substring(8, 10) && data?.decision_date?.substring(8, 10).charAt(data?.decision_date?.substring(8, 10).length - 1))} өдрийн {data?.graduation_number} {dugeerUg(data?.graduation_number && data?.graduation_number.charAt(data?.graduation_number.length - 1))} тушаалаар
+                    <br/>
                     <span style={{ whiteSpace: 'nowrap' }}><span className='text-uppercase'> {data?.student?.group?.profession?.dep_name} {data?.student?.group?.degree?.degree_name}</span>-ын зэрэг олгов.</span>
                 </div>
             </div>

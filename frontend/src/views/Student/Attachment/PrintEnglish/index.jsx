@@ -136,7 +136,7 @@ export default function PrintAttachmentEnglish()
         <>
             {Loading && Loader}
 
-            <div className={`position-relative d-flex justify-content-between ${isPageBreak && 'page-break'}`} style={{ fontSize: '8px', marginTop: '135px' }} >
+            <div className={`position-relative d-flex justify-content-between ${isPageBreak && 'page-break'}`} style={{ fontSize: '9px', marginTop: '135px' }} >
 
                 <div className='d-flex flex-wrap align-content-start p-1' style={{ width: '33.1%' }} >
                     <table className='w-100 text-center d-none' id='table1' >
@@ -305,14 +305,14 @@ export default function PrintAttachmentEnglish()
                 </div>
             </header>
 
-            <footer className='w-100' style={{ fontSize: '10px' }} >
+            <footer className='w-100' style={{ fontSize: '10px', backgroundColor: 'white', color: 'black' }} >
 
-                <div className='text-end'>
+                <div className='text-end me-1'>
                     <span className='ms-5'>Total Credits: {datas?.score?.max_kredit}</span>
                     <span className='ms-5'>GPA: {datas?.score?.assesment}</span>
                 </div>
 
-                <div className='px-2 mb-5' style={{ paddingTop: '2px', paddingBottom: '15px' }} >
+                <div className='px-1 mb-5' style={{ paddingTop: '2px', paddingBottom: '15px' }} >
                     { datas?.graduation_work?.lesson_type == 1 ? 'Diploma thesis:' : 'Graduation Exams:' }
                     {
                         datas?.graduation_work?.lesson?.map((val, idx) =>
@@ -334,7 +334,7 @@ export default function PrintAttachmentEnglish()
                                 <div className='px-1' style={{ width: `${100/listArr.length}%` }} key={idx} >
                                     <div className='d-inline-block text-center' >
                                         <div className='pt-50 px-2' style={{ textTransform: 'uppercase', borderTop: '1px solid black' }}>
-                                        {`${val?.last_name_eng} ${val?.first_name_eng}`}, {val?.position_name_eng}
+                                        {`${val?.last_name_eng}${val?.first_name_eng}`}, {val?.position_name_eng}
                                         </div>
                                     </div>
                                 </div>

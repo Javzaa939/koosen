@@ -145,7 +145,7 @@ export default function PrintAttachmentMongolia()
                 <div style={{ height: '49.5%', marginLeft: '178px' }} >
                     <table id='table1' className='text-center w-100 d-none' style={{ writingMode: 'vertical-lr', marginBottom: '1px', height: '100%' }} >
                         <thead>
-                            <tr style={{ fontSize: '6px' }} >
+                            <tr style={{ fontSize: '9px' }} >
                                 <td rowSpan={2} className='border-dark' style={{ rotate: '90deg', height: '8%', fontFamily: 'sans-serif', fontSize: '12px'  }} >№</td>
                                 <td className='border-dark' style={{ height: '69%' }} >ᢈᠢᠴᠢᠶᠡᠯ ᠦ᠋ᠨ ᠨᠡᠷ᠎</td>
                                 <td className='border-dark' style={{ height: '5%' }} >ᠻᠷ</td>
@@ -226,10 +226,8 @@ export default function PrintAttachmentMongolia()
             <header className='d-flex' style={{ fontFamily: 'mongolianScript', fontSize: '14px' }} >
 
                 <div className='d-flex flex-column text-center' style={{ writingMode: 'vertical-lr', fontSize: '14px', marginRight: '3px', marginBottom: '75px' }} >
-                    <span>ᠳᠣᠲᠤᠭᠠᠳᠤ ᢈᠡᠷᠡᢉ ᠦ᠋ᠨ ᠶᠡᢈᠡ ᠰᠤᠷᠭᠠᠭᠤᠯᠢ</span>
-                    {/* <span>{printDatas?.student?.department?.school_uig}</span> */}
-                    <span style={{ marginLeft: '13px' }}>ᠡᠷᢈᠡ ᠵᠦᠢ ᠨᠡᠶᠢᢉᠡᠮ ᠦ᠋ᠨ ᠰᠤᠷᠭᠠᠭᠤᠯᠢ</span>
-                    <span style={{ fontSize: '6px', marginLeft: '10px' }}>
+                    <span style={{ marginLeft: '13px' }}>{printDatas?.student?.department?.school_uig}</span>
+                    <span style={{ fontSize: '9px', marginLeft: '10px' }}>
                         <span className='font-serif' style={{ writingMode: 'vertical-lr', rotate: '180deg' }} >
                             <span style={{ fontFamily: 'cmdashitseden', fontSize: '14px' }}>{printDatas?.student?.group?.degree?.degree_code}</span>
                         </span>
@@ -237,7 +235,7 @@ export default function PrintAttachmentMongolia()
                     </span>
                 </div>
 
-                <div className='d-flex flex-column lh-sm' style={{ fontSize: '6px', marginLeft: '10px' }} >
+                <div className='d-flex flex-column lh-sm' style={{ fontSize: '9px', marginLeft: '10px' }} >
                     <div style={{ height: '33.3%', writingMode: 'vertical-lr', display: 'flex' }}>
                         <span className='h-50'>ᠡᠴᠢᢉᠡ / ᠡᢈᠡ ᠶ᠋ᠢᠨ ᠨᠡᠷ᠎ᠡ:</span>
                         {printDatas?.student?.last_name_uig}
@@ -252,7 +250,7 @@ export default function PrintAttachmentMongolia()
                     </div>
                 </div>
 
-                <div className='d-flex flex-column lh-sm' style={{ fontSize: '6px', marginLeft: '10px' }} >
+                <div className='d-flex flex-column lh-sm' style={{ fontSize: '9px', marginLeft: '10px' }} >
                     <div style={{ height: '33.3%', writingMode: 'vertical-lr', display: 'flex' }} >
                         <span className='h-50'>ᠨᠡᠷ᠎ᠡ:</span>
                         {printDatas?.student?.first_name_uig}
@@ -267,7 +265,7 @@ export default function PrintAttachmentMongolia()
                     </div>
                 </div>
 
-                <div className='d-flex flex-column lh-sm' style={{ fontSize: '6px', marginLeft: '10px' }} >
+                <div className='d-flex flex-column lh-sm' style={{ fontSize: '9px', marginLeft: '10px' }} >
                     <div style={{ height: '33.3%', writingMode: 'vertical-lr', display: 'flex' }}>
                         <span className='h-50'>
                             {/* TODO: регистр эхний 2 үсэг монгол бичгээр болгох */}
@@ -283,7 +281,7 @@ export default function PrintAttachmentMongolia()
 
             </header>
 
-            <footer className={`${isPageBreak && 'footer-margin'}`} style={{ fontFamily: 'mongolianScript', fontSize: '6px' }} >
+            <footer className={`${isPageBreak && 'footer-margin'}`} style={{ fontFamily: 'mongolianScript', fontSize: '9px' }} >
                 <div className='d-flex'>
 
                     <div className='d-flex' style={{ writingMode: 'vertical-lr', marginRight: '30px' }} >
@@ -328,7 +326,7 @@ export default function PrintAttachmentMongolia()
                         })
                     }
 
-                    <div style={{ writingMode: 'vertical-lr', marginLeft: '9px', fontSize: '6px' }} >
+                    <div style={{ writingMode: 'vertical-lr', marginLeft: '9px', fontSize: '9px' }} >
                         <span>ᠡᠨᠡᢈᠦ ᠬᠠᠪᠰᠤᠷᠤᠯᠲᠠ {tooBichih(new Date().getFullYear())} ᠣᠨ ᠤ᠋ <span style={{ fontFamily: 'cmdashitseden', fontSize: '12px' }}>{printDatas?.student?.group?.degree?.degree_code}</span>{tooBichih(printDatas?.student?.group?.profession?.code)} ᠳ᠋ᠤᠭᠠᠷ ᠲᠠᠢ ᠳ᠋ᠢᠫᠯᠣᠮ ᠤ᠋ᠨ ᠬᠠᠮᠲᠤ ᢈᠦᠴᠦᠨ ᠲᠡᠢ</span>
                     </div>
                 </div>
