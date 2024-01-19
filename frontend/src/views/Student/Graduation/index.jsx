@@ -559,11 +559,35 @@ const Graduation = () => {
                 </div>
         	</Card>
             <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} select_value={select_value}/>
-            <EditModal open={edit_modal} handleModal={editModal} graduate_id={graduate_id} refreshDatas={getDatas}/>
-            <CreateModal open={createModal} handleModal={handleCreateModal} group={select_value?.group} refreshDatas={getDatas}/>
+            {
+                edit_modal
+                ?
+                    <EditModal open={edit_modal} handleModal={editModal} graduate_id={graduate_id} refreshDatas={getDatas}/>
+                :
+                null
+            }
+            {
+                createModal
+                ?
+                <CreateModal open={createModal} handleModal={handleCreateModal} group={select_value?.group} refreshDatas={getDatas}/>
+                :
+                null
 
-            <SignatureModal open={formModal} handleModal={handleModalSig} refreshDatas={getSignatureDatas} defaultDatas={updateData}/>
-            <GraduationCommand open={commandModal} handleModal={handleCommandCreateModal} refreshDatas={getDatas}/>
+            }
+            {
+                formModal
+                ?
+                    <SignatureModal open={formModal} handleModal={handleModalSig} refreshDatas={getSignatureDatas} defaultDatas={updateData}/>
+                :
+                    null
+            }
+            {
+                commandModal
+                ?
+                <GraduationCommand open={commandModal} handleModal={handleCommandCreateModal} refreshDatas={getDatas}/>
+                :
+                null
+            }
 
             {/* Шинэ хуудас руу үсэргэх товч */}
             <Link className='d-none' to='/' id='clickBtn' target='_blank' ></Link>
