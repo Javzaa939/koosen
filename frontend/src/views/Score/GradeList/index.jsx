@@ -234,7 +234,6 @@ const GradeList = () => {
                                 color='primary'
                                 className='m-50'
                                 onClick={() => {convert()}}
-                                // href="/files/newtemplate.xlsx"
                                 disabled={chosenGroup ? false : true}
                             >
                                 <Download size={15} />

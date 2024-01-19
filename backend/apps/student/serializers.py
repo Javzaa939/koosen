@@ -984,7 +984,7 @@ class GraduationWorkPrintSerailizer(serializers.ModelSerializer):
 
             les_data = LessonStandartSerializer(lesson, many=False).data
 
-            score_reg_qs = ScoreRegister.objects.filter(student=obj.student, lesson=lesson).last()
+            score_reg_qs = ScoreRegister.objects.filter(student=obj.student, lesson=lesson).first()
             if score_reg_qs:
                 score_reg_data = ScoreRegisterDefinitionSerializer(score_reg_qs, many=False).data
                 les_data['score_register'] = score_reg_data
