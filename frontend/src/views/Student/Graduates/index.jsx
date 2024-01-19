@@ -126,27 +126,11 @@ const Graduates = () => {
         [select_value, school_id]
     )
 
-    useEffect(
-        () =>
-        {
-            getStatus()
-        },
-        []
-    )
-
     // Тэнхимын жагсаалт
     async function getDepartmentOption() {
         const { success, data } = await fetchData(departmentApi.get())
         if(success) {
             setDepartmentOption(data)
-        }
-    }
-
-    // Суралцаж буй хэлбэрийн жагсаалт
-    async function getStatus() {
-        const { success, data } = await fetchData(settingsApi.get())
-        if(success) {
-            setStatusOption(data)
         }
     }
 
@@ -156,7 +140,6 @@ const Graduates = () => {
         if(success) {
             setDegree(data)
         }
-
     }
 
     // Хөтөлбөрийн жагсаалтын getList функц боловсролын зэргээс хамаарч жагсаалтаа авна. Шаардлагагүй үед хоосон string явуулна.
@@ -183,12 +166,6 @@ const Graduates = () => {
         var group = select_value?.group
         var join_year = select_value?.join_year
 
-        const page_count = Math.ceil(total_count / rowsPerPage)
-
-        if (page_count < currentPage && page_count != 0) {
-            setCurrentPage(page_count)
-        }
-
         const {success: success1, data: data1} = await allFetch(studentApi.getGraduate1(rowsPerPage, currentPage, sortField, searchValue, department, degree, profession, group))
         if(success1)
         {
@@ -197,7 +174,6 @@ const Graduates = () => {
         }
     }
 
-   
     /* Устгах функц */
 	const handleDelete = async(id) => {
         const { success, data } = await fetchData(studentApi.delete(id))
@@ -207,13 +183,8 @@ const Graduates = () => {
         }
 	};
 
-    // ** Function to handle Modal toggle
-    const handleModal = () => {
-        setModal(!modal)
-    }
-
     const editModal = (student_id) => {
-        navigate(`/student/register/${student_id}/detail/`)
+    navigate(`/student/register/${student_id}/detail/`)
     }
 
     // ** Function to handle filter
@@ -252,8 +223,8 @@ const Graduates = () => {
 		}
 	}, [searchValue]);
 
-     /** excel file аар татуулах датаг backend-ээс авах */
-     async function excelDownload(type) {
+    /** excel file аар татуулах датаг backend-ээс авах */
+    async function excelDownload(type) {
         var keys = Object.keys(excelColumns)
 
         const { success, data } = await fetchData(studentApi.download(searchValue, select_value.department, select_value.degree, select_value.profession, select_value.group, select_value.join_year, select_value?.status, level))
@@ -278,206 +249,203 @@ const Graduates = () => {
         }
     }
 
-    return (    
-        <Fragment>  
-        <Card>
-        {isLoading && Loader}
-            <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
-                        <CardTitle tag='h4' style={{ marginTop: '20px' }}>{t('Төгссөн оюутны мэдээлэл')}</CardTitle>
-                        <div className='d-flex flex-wrap mt-md-0 mt-1'>
-                        <UncontrolledButtonDropdown disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-read')?false : true}>
-                        {/* <UncontrolledButtonDropdown disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-read')  && school_id? false : true}> */}
-                            <DropdownToggle color='secondary' className='m-50' caret outline>
-                                <Download size={15} />
-                                <span className='align-middle ms-50'>Export</span>
-                            </DropdownToggle>
-                            <DropdownMenu>
-                                <DropdownItem className='w-100' onClick={() => excelDownload('csv')}>
-                                    <FileText size={15} />
-                                    <span className='align-middle ms-50'>CSV</span>
-                                </DropdownItem>
-                                <DropdownItem className='w-100' onClick={() => excelDownload('excel')}>
-                                    <Grid size={15} />
-                                    <span className='align-middle ms-50' >Excel</span>
-                                </DropdownItem>
-                            </DropdownMenu>
-                        </UncontrolledButtonDropdown>
-                    
-                        </div>
-            </CardHeader>
-            <Row className="justify-content-start mx-0 mt-1 mb-1" sm={12}>
-                <Col sm={6} lg={3} >
-                    <Label className="form-label" for="department">
-                        {t('Тэнхим')}
-                    </Label>
-                    <Controller
-                        control={control}
-                        defaultValue=''
-                        name="department"
-                        render={({ field: { value, onChange} }) => {
-                            return (
-                                <Select
-                                    name="department"
-                                    id="department"
-                                    classNamePrefix='select'
-                                    isClearable
-                                    className={classnames('react-select', { 'is-invalid': errors.department })}
-                                    isLoading={isLoading}
-                                    placeholder={`-- Сонгоно уу --`}
-                                    options={department_option || []}
-                                    value={department_option.find((c) => c.id === value)}
-                                    noOptionsMessage={() => 'Хоосон байна'}
-                                    onChange={(val) => {
-                                        onChange(val?.id || '')
-                                        if (val?.id) {
-                                            setSelectValue(current => {
-                                                return {
-                                                    ...current,
-                                                    department: val?.id
-                                                }
-                                            })
-                                        } else {
-                                            setSelectValue(current => {
-                                                return {
-                                                    ...current,
-                                                    department: ''
-                                                }
-                                            })
+    return (
+        <Fragment>
+            <Card>
+            {isLoading && Loader}
+
+                <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
+                    <CardTitle tag='h4' style={{ marginTop: '20px' }}>{t('Төгссөн оюутны мэдээлэл')}</CardTitle>
+                    <div className='d-flex flex-wrap mt-md-0 mt-1'>
+                    <UncontrolledButtonDropdown disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-read')?false : true}>
+                        <DropdownToggle color='secondary' className='m-50' caret outline>
+                            <Download size={15} />
+                            <span className='align-middle ms-50'>Export</span>
+                        </DropdownToggle>
+                        <DropdownMenu>
+                            <DropdownItem className='w-100' onClick={() => excelDownload('csv')}>
+                                <FileText size={15} />
+                                <span className='align-middle ms-50'>CSV</span>
+                            </DropdownItem>
+                            <DropdownItem className='w-100' onClick={() => excelDownload('excel')}>
+                                <Grid size={15} />
+                                <span className='align-middle ms-50' >Excel</span>
+                            </DropdownItem>
+                        </DropdownMenu>
+                    </UncontrolledButtonDropdown>
+                    </div>
+                </CardHeader>
+                <Row className="justify-content-start mx-0 mt-1 mb-1" sm={12}>
+                    <Col sm={6} lg={3} >
+                        <Label className="form-label" for="department">
+                            {t('Тэнхим')}
+                        </Label>
+                        <Controller
+                            control={control}
+                            defaultValue=''
+                            name="department"
+                            render={({ field: { value, onChange} }) => {
+                                return (
+                                    <Select
+                                        name="department"
+                                        id="department"
+                                        classNamePrefix='select'
+                                        isClearable
+                                        className={classnames('react-select', { 'is-invalid': errors.department })}
+                                        isLoading={isLoading}
+                                        placeholder={`-- Сонгоно уу --`}
+                                        options={department_option || []}
+                                        value={department_option.find((c) => c.id === value)}
+                                        noOptionsMessage={() => 'Хоосон байна'}
+                                        onChange={(val) => {
+                                            onChange(val?.id || '')
+                                            if (val?.id) {
+                                                setSelectValue(current => {
+                                                    return {
+                                                        ...current,
+                                                        department: val?.id
+                                                    }
+                                                })
+                                            } else {
+                                                setSelectValue(current => {
+                                                    return {
+                                                        ...current,
+                                                        department: ''
+                                                    }
+                                                })
+                                            }
+                                        }}
+                                        styles={ReactSelectStyles}
+                                        getOptionValue={(option) => option.id}
+                                        getOptionLabel={(option) => option.name}
+                                    />
+                                )
+                            }}
+                        ></Controller>
+                    </Col>
+                    <Col sm={6} lg={3}>
+                        <Label className="form-label" for="degree">
+                            {t("Боловсролын зэрэг")}
+                        </Label>
+                        <Controller
+                            control={control}
+                            defaultValue=''
+                            name="degree"
+                            render={({ field: { value, onChange} }) => {
+                                return (
+                                    <Select
+                                        name="degree"
+                                        id="degree"
+                                        classNamePrefix='select'
+                                        isClearable
+                                        className={classnames('react-select', { 'is-invalid': errors.degree })}
+                                        isLoading={isLoading}
+                                        placeholder={`-- Сонгоно уу --`}
+                                        options={degree_option || []}
+                                        value={degree_option.find((c) => c.id === value)}
+                                        noOptionsMessage={() => 'Хоосон байна'}
+                                        onChange={(val) => {
+                                            onChange(val?.id || '')
+                                            if (val?.id) {
+                                                setSelectValue(current => {
+                                                    return {
+                                                        ...current,
+                                                        degree: val?.id
+                                                    }
+                                                })
+                                            } else {
+                                                setSelectValue(current => {
+                                                    return {
+                                                        ...current,
+                                                        degree: ''
+                                                    }
+                                                })
+                                            }
+                                        }}
+                                        styles={ReactSelectStyles}
+                                        getOptionValue={(option) => option.id}
+                                        getOptionLabel={(option) => option.degree_name_code}
+                                    />
+                                )
+                            }}
+                        ></Controller>
+                    </Col>
+                    <Col sm={6} lg={3}>
+                        <Label className="form-label" for="profession">
+                            {t('Хөтөлбөр')}
+                        </Label>
+                        <Select
+                            name="profession"
+                            id="profession"
+                            classNamePrefix='select'
+                            isClearable
+                            className={classnames('react-select', { 'is-invalid': errors.profession })}
+                            isLoading={isLoading}
+                            placeholder={`-- Сонгоно уу --`}
+                            options={profession_option || []}
+                            value={profession_option.find((c) => c.id === select_value.profession)}
+                            noOptionsMessage={() => 'Хоосон байна'}
+                            onChange={(val) => {
+                                if (val?.id) {
+                                    setSelectValue(current => {
+                                        return {
+                                            ...current,
+                                            profession: val?.id
                                         }
-                                    }}
-                                    styles={ReactSelectStyles}
-                                    getOptionValue={(option) => option.id}
-                                    getOptionLabel={(option) => option.name}
-                                />
-                            )
-                        }}
-                    ></Controller>
-                </Col>
-                <Col sm={6} lg={3}>
-                    <Label className="form-label" for="degree">
-                        {t("Боловсролын зэрэг")}
-                    </Label>
-                    <Controller
-                        control={control}
-                        defaultValue=''
-                        name="degree"
-                        render={({ field: { value, onChange} }) => {
-                            return (
-                                <Select
-                                    name="degree"
-                                    id="degree"
-                                    classNamePrefix='select'
-                                    isClearable
-                                    className={classnames('react-select', { 'is-invalid': errors.degree })}
-                                    isLoading={isLoading}
-                                    placeholder={`-- Сонгоно уу --`}
-                                    options={degree_option || []}
-                                    value={degree_option.find((c) => c.id === value)}
-                                    noOptionsMessage={() => 'Хоосон байна'}
-                                    onChange={(val) => {
-                                        onChange(val?.id || '')
-                                        if (val?.id) {
-                                            setSelectValue(current => {
-                                                return {
-                                                    ...current,
-                                                    degree: val?.id
-                                                }
-                                            })
-                                        } else {
-                                            setSelectValue(current => {
-                                                return {
-                                                    ...current,
-                                                    degree: ''
-                                                }
-                                            })
+                                    })
+                                } else {
+                                    setSelectValue(current => {
+                                        return {
+                                            ...current,
+                                            profession: ''
                                         }
-                                    }}
-                                    styles={ReactSelectStyles}
-                                    getOptionValue={(option) => option.id}
-                                    getOptionLabel={(option) => option.degree_name_code}
-                                />
-                            )
-                        }}
-                    ></Controller>
-                </Col>
-                <Col sm={6} lg={3}>
-                    <Label className="form-label" for="profession">
-                        {t('Хөтөлбөр')}
-                    </Label>
-                    <Select
-                        name="profession"
-                        id="profession"
-                        classNamePrefix='select'
-                        isClearable
-                        className={classnames('react-select', { 'is-invalid': errors.profession })}
-                        isLoading={isLoading}
-                        placeholder={`-- Сонгоно уу --`}
-                        options={profession_option || []}
-                        value={profession_option.find((c) => c.id === select_value.profession)}
-                        noOptionsMessage={() => 'Хоосон байна'}
-                        onChange={(val) => {
-                            if (val?.id) {
-                                setSelectValue(current => {
-                                    return {
-                                        ...current,
-                                        profession: val?.id
-                                    }
-                                })
-                            } else {
-                                setSelectValue(current => {
-                                    return {
-                                        ...current,
-                                        profession: ''
-                                    }
-                                })
-                            }
-                        }}
-                        styles={ReactSelectStyles}
-                        getOptionValue={(option) => option.id}
-                        getOptionLabel={(option) => option.full_name}
-                    />
-                </Col>
-                <Col sm={6} lg={3} >
-                    <Label className="form-label" for="group">
-                        {t("Анги")}
-                    </Label>
-                    <Select
-                        name="group"
-                        id="group"
-                        classNamePrefix='select'
-                        isClearable
-                        className={classnames('react-select', { 'is-invalid': errors.group })}
-                        isLoading={isLoading}
-                        placeholder={`-- Сонгоно уу --`}
-                        options={groupOption || []}
-                        value={groupOption.find((c) => c.id === select_value.group)}
-                        noOptionsMessage={() => 'Хоосон байна'}
-                        onChange={(val) => {
-                            if (val?.id) {
-                                setSelectValue(current => {
-                                    return {
-                                        ...current,
-                                        group: val?.id
-                                    }
-                                })
-                            } else {
-                                setSelectValue(current => {
-                                    return {
-                                        ...current,
-                                        group: ''
-                                    }
-                                })
-                            }
-                        }}
-                        styles={ReactSelectStyles}
-                        getOptionValue={(option) => option.id}
-                        getOptionLabel={(option) => option.name}
-                    />
-                </Col>
-                
-               
-            </Row>
-            <Row className="justify-content-between mx-0">
+                                    })
+                                }
+                            }}
+                            styles={ReactSelectStyles}
+                            getOptionValue={(option) => option.id}
+                            getOptionLabel={(option) => option.full_name}
+                        />
+                    </Col>
+                    <Col sm={6} lg={3} >
+                        <Label className="form-label" for="group">
+                            {t("Анги")}
+                        </Label>
+                        <Select
+                            name="group"
+                            id="group"
+                            classNamePrefix='select'
+                            isClearable
+                            className={classnames('react-select', { 'is-invalid': errors.group })}
+                            isLoading={isLoading}
+                            placeholder={`-- Сонгоно уу --`}
+                            options={groupOption || []}
+                            value={groupOption.find((c) => c.id === select_value.group)}
+                            noOptionsMessage={() => 'Хоосон байна'}
+                            onChange={(val) => {
+                                if (val?.id) {
+                                    setSelectValue(current => {
+                                        return {
+                                            ...current,
+                                            group: val?.id
+                                        }
+                                    })
+                                } else {
+                                    setSelectValue(current => {
+                                        return {
+                                            ...current,
+                                            group: ''
+                                        }
+                                    })
+                                }
+                            }}
+                            styles={ReactSelectStyles}
+                            getOptionValue={(option) => option.id}
+                            getOptionLabel={(option) => option.name}
+                        />
+                    </Col>
+                </Row>
+                <Row className="justify-content-between mx-0">
                     <Col className='d-flex align-items-center justify-content-start' md={4}>
                         <Col md={3} sm={2} className='pe-1'>
                             <Input
@@ -524,37 +492,36 @@ const Graduates = () => {
                         </Button>
                     </Col>
                 </Row>
-            <div className='react-dataTable react-dataTable-selectable-rows' id='datatableLeftTwoRightOne' >
-                <DataTable
-                    noHeader
-                    pagination
-                    paginationServer
-                    className='react-dataTable'
-                    progressPending={isTableLoading}
-                    progressComponent={
-                        <div className='my-2 d-flex align-items-center justify-content-center'>
-                            <Spinner className='me-1' color="" size='sm'/><h5>Түр хүлээнэ үү...</h5>
-                        </div>
-                    }
-                    noDataComponent={(
-                        <div className="my-2">
-                            <h5>{t('Өгөгдөл байхгүй байна')}</h5>
-                        </div>
-                    )}
-                    onSort={handleSort}
-                    sortIcon={<ChevronDown size={10} />}
-                    columns={getColumns(currentPage, rowsPerPage, total_count, editModal, handleDelete, user)}
-                    paginationPerPage={rowsPerPage}
-                    paginationDefaultPage={currentPage}
-                    paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
-                    data={datas}
-                    fixedHeader
-                    fixedHeaderScrollHeight='62vh'
-                />
-            </div>
-        </Card>
-        {modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} />}
-    </Fragment>
+                <div className='react-dataTable react-dataTable-selectable-rows' id='datatableLeftTwoRightOne' >
+                    <DataTable
+                        noHeader
+                        pagination
+                        paginationServer
+                        className='react-dataTable'
+                        progressPending={isTableLoading}
+                        progressComponent={
+                            <div className='my-2 d-flex align-items-center justify-content-center'>
+                                <Spinner className='me-1' color="" size='sm'/><h5>Түр хүлээнэ үү...</h5>
+                            </div>
+                        }
+                        noDataComponent={(
+                            <div className="my-2">
+                                <h5>{t('Өгөгдөл байхгүй байна')}</h5>
+                            </div>
+                        )}
+                        onSort={handleSort}
+                        sortIcon={<ChevronDown size={10} />}
+                        columns={getColumns(currentPage, rowsPerPage, total_count, editModal, handleDelete, user)}
+                        paginationPerPage={rowsPerPage}
+                        paginationDefaultPage={currentPage}
+                        paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
+                        data={datas}
+                        fixedHeader
+                        fixedHeaderScrollHeight='62vh'
+                    />
+                </div>
+            </Card>
+        </Fragment>
     )
 }
 
