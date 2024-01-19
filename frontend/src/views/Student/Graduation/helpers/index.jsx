@@ -1,14 +1,15 @@
-import { useContext } from 'react';
+import { useContext, useRef } from 'react';
 
-import { X, Edit, Printer } from "react-feather";
-import { Badge, UncontrolledTooltip } from 'reactstrap';
-import { useNavigate } from 'react-router-dom'
+import { X, Edit, Printer, AlertOctagon } from "react-feather";
+import { Badge, UncontrolledTooltip, Input } from 'reactstrap';
 
 import useModal from '@hooks/useModal'
 
 import { t } from 'i18next'
 
 import SchoolContext from "@context/SchoolContext"
+import useLoader from "@hooks/useLoader";
+import useApi from '@hooks/useApi';
 
 // Хүснэгтийн баганууд
 export function getColumns (currentPage, rowsPerPage, total_count, editModal, handleDelete, user)
@@ -16,9 +17,84 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 	const { school_id } = useContext(SchoolContext)
 
 	const { showWarning } = useModal()
-	const navigate = useNavigate()
+	const { fetchData } = useLoader({ isFullScreen: false })
+	const focusData = useRef(undefined)
 
     const page_count = Math.ceil(total_count / rowsPerPage)
+
+	// Api
+	const graduateApi = useApi().student
+
+	/** Input-ээс идэвхгүй болох үеийн event */
+	const focusOut = (event) => {
+		if (focusData.current || focusData.current == '')
+		{
+			event.target.value = focusData.current
+		}
+	}
+
+	const handleSetRegistrationResult = async(event, id, index, key) => {
+
+		var value = event.target.value
+
+        if (["e", "E", "+", "-"].includes(event.key))
+        {
+            event.preventDefault()
+        }
+        if (event.key === 'Enter')
+        {
+			let cdata = {
+				[key]: value
+			}
+
+			if (id){
+				const { success } = await fetchData(graduateApi.putRegNumAndDiplom(cdata, id))
+				if(success)
+
+				{
+					focusData.current = undefined
+
+					var nextElementId = `${key}-${index + 1}-input`
+					var element = document.getElementById(`${nextElementId}`)
+
+					if (element) element.focus()
+
+				}
+			}
+
+        }
+    };
+
+	const handleSetDiplomResult = async(event, id, index, key) => {
+
+		var value = event.target.value
+
+        if (["e", "E", "+", "-"].includes(event.key))
+        {
+            event.preventDefault()
+        }
+        if (event.key === 'Enter')
+        {
+			let cdata = {
+				[key]: value
+			}
+
+			if (id){
+				const { success} = await fetchData(graduateApi.putRegNumAndDiplom(cdata, id))
+				if(success)
+				{
+					focusData.current = undefined
+
+					var nextElementId = `${key}-${index + 1}-input`
+					var element = document.getElementById(`${nextElementId}`)
+
+					if (element) element.focus()
+
+
+				}
+			}
+        }
+    };
 
     // /** Сонгосон хуудасны тоо датаны тооноос их болсон үед хуудаслалт 1-ээс эхлэнэ */
     if (currentPage > page_count) {
@@ -76,23 +152,6 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 			minWidth: '200px',
 			wrap: true,
         },
-		// {
-		// 	header: 'lesson',
-		// 	name: t("Дипломын хичээл"),
-		// 	selector: (row) => `${row?.lesson?.code} ${row?.lesson?.name}`,
-        //     sortable: false,
-		// 	minWidth: "200px",
-		// 	center: true,
-		// 	wrap: true,
-		// },
-		// {
-		// 	header: 'diplom_topic',
-		// 	name: t("Дипломын сэдэв"),
-		// 	selector: (row) => row?.diplom_topic,
-        //     center: true,
-		// 	sortable: false,
-		// 	minWidth: "200px",
-		// },
 		{
 			header: 'leader',
 			name: t("Удирдагч багш"),
@@ -104,16 +163,63 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 		{
 			header: 'diplom_num',
 			name: t("Дипломын дугаар"),
-			selector: (row) => row?.diplom_num,
-			minWidth: "80px",
+			selector: (row, diplom_num) =>
+			{
+				return (
+					<>
+						<div className='d-flex'>
+							<Input
+								id={`diplom_num-${diplom_num}-input`}
+								type="text"
+								bsSize='sm'
+								placeholder={(`дипломын дугаар`)}
+								defaultValue={row?.diplom_num}
+								disabled={(Object.keys(user).length > 0 && user?.is_superuser) ? false : true}
+								onBlur={focusOut}
+								onFocus={(e) => focusData.current = (e.target.value)}
+								onKeyPress={(e) => {
+									handleSetDiplomResult(e, `${row?.id}`, diplom_num, 'diplom_num')
+								}}
+							/>
+							<AlertOctagon id={`diplomNum${row?.diplom_num}`} width={"20px"} className='ms-1' />
+							<UncontrolledTooltip placement='top' target={`diplomNum${row?.diplom_num}`} >Enter дарсан тохиолдолд дипломын дугаар хадгалагдах болно.</UncontrolledTooltip>
+						</div>
+
+					</>
+				)
+			},
+			minWidth: "250px",
 			sortable: true,
             center: true,
 		},
 		{
 			header: 'registration_num',
 			name: t("Бүртгэлийн дугаар"),
-			selector: (row) => row?.registration_num,
-			minWidth: "80px",
+			selector: (row, registertion_num) =>
+			{
+				return (
+					<>
+						<div className='d-flex'>
+							<Input
+								id={`registration_num-${registertion_num}-input`}
+								type="text"
+								bsSize='sm'
+								placeholder={(`бүртгэлийн дугаар`)}
+								defaultValue={row?.registration_num}
+								onBlur={focusOut}
+								onFocus={(e) => focusData.current = (e.target.value)}
+								disabled={(Object.keys(user).length > 0 && user?.is_superuser) ? false : true}
+								onKeyPress={(e) => {
+									handleSetRegistrationResult(e, `${row?.id}`, registertion_num, 'registration_num')
+								}}
+							/>
+							<AlertOctagon id={`registrationNum${row?.registration_num}`} width={"20px"} className='ms-1' />
+							<UncontrolledTooltip placement='top' target={`registrationNum${row?.registration_num}`} >Enter дарсан тохиолдолд бүртгэлийн дугаар хадгалагдах болно.</UncontrolledTooltip>
+						</div>
+					</>
+				)
+			},
+			minWidth: "250px",
 			sortable: true,
             center: true,
 		},

@@ -2903,3 +2903,42 @@ class StudentCommandListAPIView(
 
         data = list(student_data)
         return request.send_data(data)
+
+
+@permission_classes([IsAuthenticated])
+class RegistrationAndDiplomAPIView(
+    generics.GenericAPIView,
+    mixins.UpdateModelMixin
+):
+    """ Төгсөлтийн ажлын дипломын дугаар болон бүртгэлийн дугаар засах """
+
+    queryset = GraduationWork.objects.all()
+
+    @transaction.atomic
+    def put(self, request, pk=None):
+        """ diplom_num : дипломын дугаар
+            registration_num : бүртгэлийн дугаар
+        """
+
+        request_data = request.data
+        diplom_num = request_data.get('diplom_num')
+        registration_num = request_data.get('registration_num')
+
+        with transaction.atomic():
+            try:
+                qs = self.queryset.filter(id=pk)
+                if diplom_num:
+                    qs.update(
+                        diplom_num=diplom_num,
+                    )
+
+                if registration_num:
+                    qs.update(
+                        registration_num=registration_num,
+                    )
+
+            except Exception as e:
+                print(e)
+                return request.send_error("ERR_002")
+
+        return request.send_info('INF_002')
