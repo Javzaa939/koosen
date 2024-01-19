@@ -227,7 +227,7 @@ export default function PrintAttachmentMongolia()
 
                 <div className='d-flex flex-column text-center' style={{ writingMode: 'vertical-lr', fontSize: '14px', marginRight: '3px', marginBottom: '75px' }} >
                     <span style={{ marginLeft: '13px' }}>{printDatas?.student?.department?.school_uig}</span>
-                    <span style={{ fontSize: '9px', marginLeft: '10px' }}>
+                    <span style={{ fontSize: '11px', marginLeft: '10px' }}>
                         <span className='font-serif' style={{ writingMode: 'vertical-lr', rotate: '180deg' }} >
                             <span style={{ fontFamily: 'cmdashitseden', fontSize: '14px' }}>{printDatas?.student?.group?.degree?.degree_code}</span>
                         </span>
@@ -301,7 +301,7 @@ export default function PrintAttachmentMongolia()
                         {datas?.graduation_work?.lesson_type == 1 ? 'ᠲᠡᢉᠦᠰᠦᠯᠲᠡ ᠶ᠋ᠢᠨ ᠰᠢᠯᠭᠠᠯᠲᠠ:' : 'ᠲᠡᢉᠦᠰᠦᠯᠲᠡ ᠶ᠋ᠢᠨ ᠰᠢᠯᠭᠠᠯᠲᠠ:'}
                     </div>
 
-                    <div style={{ writingMode: 'vertical-lr', display: 'flex', marginRight: '50px' }} >
+                    <div style={{ writingMode: 'vertical-lr', display: 'flex', marginRight: '70px' }} >
                     {
                         datas?.graduation_work?.lesson?.map((val, idx) =>
                         {
@@ -319,7 +319,7 @@ export default function PrintAttachmentMongolia()
                         listArr.map((val, idx) =>
                         {
                             return (
-                                <div style={{ writingMode: 'vertical-lr', height: '60%', fontSize: '12px', marginRight: '10px', lineHeight: '26px' }} key={idx} >
+                                <div style={{ writingMode: 'vertical-lr', height: '60%', fontSize: '12px', marginRight: '30px', lineHeight: '26px' }} key={idx} >
                                     <span>{val?.position_name_uig}</span> <span>{val?.last_name_uig} {val?.first_name_uig}</span>
                                 </div>
                             )
@@ -327,7 +327,7 @@ export default function PrintAttachmentMongolia()
                     }
 
                     <div style={{ writingMode: 'vertical-lr', marginLeft: '9px', fontSize: '9px' }} >
-                        <span>ᠡᠨᠡᢈᠦ ᠬᠠᠪᠰᠤᠷᠤᠯᠲᠠ {tooBichih(new Date().getFullYear())} ᠣᠨ ᠤ᠋ <span style={{ fontFamily: 'cmdashitseden', fontSize: '12px' }}>{printDatas?.student?.group?.degree?.degree_code}</span>{tooBichih(printDatas?.student?.group?.profession?.code)} ᠳ᠋ᠤᠭᠠᠷ ᠲᠠᠢ ᠳ᠋ᠢᠫᠯᠣᠮ ᠤ᠋ᠨ ᠬᠠᠮᠲᠤ ᢈᠦᠴᠦᠨ ᠲᠡᠢ</span>
+                        <span>ᠡᠨᠡᢈᠦ ᠬᠠᠪᠰᠤᠷᠤᠯᠲᠠ {tooBichih(new Date().getFullYear())} ᠣᠨ ᠤ᠋ <span style={{ fontFamily: 'cmdashitseden', fontSize: '12px' }}>{printDatas?.student?.group?.degree?.degree_code}</span>{tooBichih(printDatas?.student?.graduation_work?.diplom_num)} ᠳ᠋ᠤᠭᠠᠷ ᠲᠠᠢ ᠳ᠋ᠢᠫᠯᠣᠮ ᠤ᠋ᠨ ᠬᠠᠮᠲᠤ ᢈᠦᠴᠦᠨ ᠲᠡᠢ</span>
                     </div>
                 </div>
             </footer>
