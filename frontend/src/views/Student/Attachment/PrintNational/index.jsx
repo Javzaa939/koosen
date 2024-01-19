@@ -40,6 +40,21 @@ export default function PrintAttachmentMongolia()
         []
     )
 
+    const lessonData = datas?.lessons || []
+
+    const flattenedArray = lessonData.flatMap(item => [
+        {
+            type: "parent",
+            uig_name: item?.uig_name
+        },
+		...item.lessons.map((lesson) => {
+            return {
+                ...lesson,
+                type: "children"
+            };
+        })
+    ]);
+
     useEffect(
         () =>
         {
@@ -48,6 +63,7 @@ export default function PrintAttachmentMongolia()
                 if (datas?.lessons?.length != 0)
                 {
                     let count = 0
+                    let perCount = 0
                     let half = printDatas.tableRowCount.length / 2
 
                     for (let [idx, val] of printDatas.tableRowCount.entries())
@@ -70,25 +86,41 @@ export default function PrintAttachmentMongolia()
                             for (let bodyIdx = 0; bodyIdx < val; bodyIdx++)
                             {
                                 let newRow = tbodyRef.insertRow();
-                                let newCell1 = newRow.insertCell();
-                                let newCell2 = newRow.insertCell();
-                                let newCell3 = newRow.insertCell();
-                                let newCell4 = newRow.insertCell();
-                                let newCell5 = newRow.insertCell();
 
                                 count++
 
-                                newCell1.innerHTML = count
-                                newCell2.innerHTML = datas?.lessons[count - 1]?.lesson?.lesson?.name_uig || ''
-                                newCell3.innerHTML = datas?.lessons[count - 1]?.kredit
-                                newCell4.innerHTML = datas?.lessons[count - 1]?.score ? Math.round(datas?.lessons[count - 1]?.score) : ''
-                                newCell5.innerHTML = datas?.lessons[count - 1]?.assesment
+                                if(flattenedArray[count - 1]?.type === "children")
+                                {
+                                    let newCell1 = newRow.insertCell();
+                                    let newCell2 = newRow.insertCell();
+                                    let newCell3 = newRow.insertCell();
+                                    let newCell4 = newRow.insertCell();
+                                    let newCell5 = newRow.insertCell();
 
-                                newCell1.className = 'border-dark mini-cell'
-                                newCell2.className = 'border-dark body-cell'
-                                newCell3.className = 'border-dark footer1-cell'
-                                newCell4.className = 'border-dark footer2-cell'
-                                newCell5.className = 'border-dark footer3-cell font-serif'
+                                    perCount++
+
+                                    newCell1.innerHTML = `<span style="font-family: CMSUB; font-size: 12px;">${perCount}</span>`
+                                    newCell2.innerHTML = flattenedArray[count - 1]?.name_uig || ''
+                                    newCell3.innerHTML = flattenedArray[count - 1]?.kredit ? `<span style="font-family: CMSUB; font-size: 12px;">${flattenedArray[count - 1]?.kredit}</span>` : ''
+                                    newCell4.innerHTML = flattenedArray[count - 1]?.score ? `<span style="font-family: CMSUB; font-size: 12px;">${flattenedArray[count - 1]?.score}</span>` : ''
+                                    newCell5.innerHTML = flattenedArray[count - 1]?.assesment || ''
+
+                                    newCell1.className = 'border-dark mini-cell'
+                                    newCell2.className = 'border-dark body-cell'
+                                    newCell3.className = 'border-dark footer1-cell'
+                                    newCell4.className = 'border-dark footer2-cell'
+                                    newCell5.className = 'border-dark footer3-cell'
+                                }
+                                else
+                                {
+                                    let newCell1 = newRow.insertCell();
+
+                                    newCell1.innerHTML = flattenedArray[count - 1]?.uig_name
+                                    newCell1.colSpan = 5
+
+                                    newCell1.className = 'border-dark body-cell text-center'
+                                }
+
                             }
                         }
                     }
@@ -98,69 +130,49 @@ export default function PrintAttachmentMongolia()
         [datas]
     )
 
+    function tooBichih(too)
+    {
+        return ( <span style={{ fontFamily: 'CMSUB', fontSize: '12px' }}>{too}</span> )
+    }
+
     return (
 
         <>
             {Loading && Loader}
 
-            <div className={`vh-100 p-0 d-flex flex-column justify-content-center align-items-start position-relative ${isPageBreak && 'page-break'}`} style={{ fontFamily: 'CMs Urga dp'}} >
+            <div className={`vh-100 p-0 d-flex flex-column justify-content-between align-items-start position-relative ${isPageBreak && 'page-break'}`} style={{ fontFamily: 'CMs Urga dp'}} >
 
-                <div style={{ height: '373px', marginLeft: '178px' }} >
-
-                    <table id='table1' className='text-center w-100 d-none' style={{ writingMode: 'vertical-rl', transform: 'scale(-1, 1)', marginBottom: '1px', }} >
+                <div style={{ height: '49.5%', marginLeft: '178px' }} >
+                    <table id='table1' className='text-center w-100 d-none' style={{ writingMode: 'vertical-lr', marginBottom: '1px', height: '100%' }} >
                         <thead>
-
-                            <tr style={{ fontSize: '16px' }} >
-                                <td rowSpan={2} className='border-dark' style={{ transform: 'scale(-1, 1)', rotate: '270deg', height: '8%', paddingRight: '5px' }} >№</td>
-                                <td rowSpan={2} className='border-dark' style={{ height: '61%' }} >Sodoloeesea kuciye& oa Ne*T</td>
-                                <td rowSpan={2} className='border-dark' style={{ height: '13%' }} >\rwdiDA Ce(</td>
-                                <td colSpan={2} className='border-dark' style={{ height: '18%' }} >Sorol)T Jia</td>
+                            <tr style={{ fontSize: '8px' }} >
+                                <td rowSpan={2} className='border-dark' style={{ rotate: '90deg', height: '8%', fontFamily: 'sans-serif', fontSize: '12px'  }} >№</td>
+                                <td className='border-dark' style={{ height: '69%' }} >ᢈᠢᠴᠢᠶᠡᠯ ᠦ᠋ᠨ ᠨᠡᠷ᠎</td>
+                                <td className='border-dark' style={{ height: '5%' }} >ᠻᠷ</td>
+                                <td className='border-dark' style={{ height: '9%' }}>ᠣᠨᠤᠭ᠎ᠠ</td>
+                                <td className='border-dark' style={{ height: '9%' }} >ᠳ᠋ᠦᠩ</td>
                             </tr>
-                            <tr>
-                                <td className='border-dark' style={{ height: '9%' }}>fono)T</td>
-                                <td className='border-dark' style={{ height: '9%' }}>doieit</td>
-                            </tr>
-
                         </thead>
                         <tbody>
-
                         </tbody>
                     </table>
-
                 </div>
 
-                <div style={{ height: '376px', marginLeft: '178px', marginTop: '5px'}} >
-
-                    <table id='table2' className='text-center w-100 d-none' style={{ writingMode: 'vertical-rl', transform: 'scale(-1, 1)', marginBottom: '1px' }}  >
+                <div style={{ height: '49.5%', marginLeft: '178px' }} >
+                    <table id='table2' className='text-center w-100 d-none' style={{ writingMode: 'vertical-lr', marginBottom: '1px', height: '100%' }}  >
                         <thead>
-
-                            <tr style={{ fontSize: '16px' }} >
-                                <td rowSpan={2} className='border-dark' style={{ transform: 'scale(-1, 1)', rotate: '270deg', height: '8%', paddingRight: '5px' }} >№</td>
-                                <td rowSpan={2} className='border-dark' style={{ height: '61%', minWidth: "20px", maxWidth: "20px" }} >Sodoloeesea kuciye& oa Ne*T</td>
-                                <td rowSpan={2} className='border-dark' style={{ height: '13%' }} >\rwdiDA Ce(</td>
-                                <td colSpan={2} className='border-dark' style={{ height: '18%' }} >Sorol)T Jia</td>
+                            <tr style={{ fontSize: '8px' }} >
+                                <td rowSpan={2} className='border-dark' style={{ rotate: '90deg', height: '8%', fontFamily: 'sans-serif', fontSize: '12px'  }} >№</td>
+                                <td className='border-dark' style={{ height: '69%' }} >ᢈᠢᠴᠢᠶᠡᠯ ᠦ᠋ᠨ ᠨᠡᠷ᠎</td>
+                                <td className='border-dark' style={{ height: '5%' }} >ᠻᠷ</td>
+                                <td className='border-dark' style={{ height: '9%' }}>ᠣᠨᠤᠭ᠎ᠠ</td>
+                                <td className='border-dark' style={{ height: '9%' }} >ᠳ᠋ᠦᠩ</td>
                             </tr>
-                            <tr>
-                                <td className='border-dark' style={{ height: '9%' }}>fono)T</td>
-                                <td className='border-dark' style={{ height: '9%' }}>doieit</td>
-                            </tr>
-
                         </thead>
                         <tbody>
-
                         </tbody>
                     </table>
-
                 </div>
-
-                {
-                    isPageBreak
-                    &&
-                        <div className='text-center vh-100 position-absolute end-0' style={{ writingMode: 'vertical-rl', transform: 'scale(-1, 1)', fontSize: '20px' }} >
-                            <span>fna K Hebsorolda - 1 {new Date().getFullYear()} foa O D <span className='font-serif' style={{ writingMode: 'vertical-lr', rotate: '180deg' }} >{printDatas?.student?.group?.degree?.degree_code}</span>{printDatas?.student?.group?.profession?.code} dogerdeI dip;o^ oa HemdO KicoedeI.</span>
-                        </div>
-                }
-
             </div>
 
 
@@ -169,18 +181,15 @@ export default function PrintAttachmentMongolia()
 
                     <div style={{ height: '373px', marginLeft: '178px' }} >
 
-                        <table id='table3' className='text-center w-100 d-none' style={{ writingMode: 'vertical-rl', transform: 'scale(-1, 1)', marginBottom: '1px' }}  >
+                        <table id='table3' className='text-center w-100 d-none' style={{ writingMode: 'vertical-lr', marginBottom: '1px' }}  >
                             <thead>
 
-                                <tr style={{ fontSize: '16px' }} >
-                                    <td rowSpan={2} className='border-dark' style={{ transform: 'scale(-1, 1)', rotate: '270deg', height: '8%', paddingRight: '5px' }} >№</td>
-                                    <td rowSpan={2} className='border-dark' style={{ height: '61%' }} >Sodoloeesea kuciye& oa Ne*T</td>
-                                    <td rowSpan={2} className='border-dark' style={{ height: '13%' }} >\rwdiDA Ce(</td>
-                                    <td colSpan={2} className='border-dark' style={{ height: '18%' }} >Sorol)T Jia</td>
-                                </tr>
-                                <tr>
-                                    <td className='border-dark' style={{ height: '9%' }}>fono)T</td>
-                                    <td className='border-dark' style={{ height: '9%' }}>doieit</td>
+                                <tr style={{ fontSize: '8px' }} >
+                                    <td rowSpan={2} className='border-dark' style={{ rotate: '90deg', height: '8%', fontFamily: 'sans-serif', fontSize: '12px'  }} >№</td>
+                                    <td className='border-dark' style={{ height: '69%' }} >ᢈᠢᠴᠢᠶᠡᠯ ᠦ᠋ᠨ ᠨᠡᠷ᠎</td>
+                                    <td className='border-dark' style={{ height: '5%' }} >ᠻᠷ</td>
+                                    <td className='border-dark' style={{ height: '9%' }}>ᠣᠨᠤᠭ᠎ᠠ</td>
+                                    <td className='border-dark' style={{ height: '9%' }} >ᠳ᠋ᠦᠩ</td>
                                 </tr>
 
                             </thead>
@@ -191,21 +200,18 @@ export default function PrintAttachmentMongolia()
 
                     </div>
 
-                    <div style={{ height: '376px', marginLeft: '210px' }} >
+                    <div style={{ height: '376px', marginLeft: '178px' }} >
 
-                        <table id='table4' className='text-center w-100 d-none' style={{ writingMode: 'vertical-rl', transform: 'scale(-1, 1)', marginBottom: '1px' }}  >
+                        <table id='table4' className='text-center w-100 d-none' style={{ writingMode: 'vertical-lr', marginBottom: '1px' }}  >
 
                             <thead>
 
-                                <tr style={{ fontSize: '16px' }} >
-                                    <td rowSpan={2} className='border-dark' style={{ transform: 'scale(-1, 1)', rotate: '270deg', height: '8%', paddingRight: '5px' }} >№</td>
-                                    <td rowSpan={2} className='border-dark' style={{ height: '61%' }} >Sodoloeesea kuciye& oa Ne*T</td>
-                                    <td rowSpan={2} className='border-dark' style={{ height: '13%' }} >\rwdiDA Ce(</td>
-                                    <td colSpan={2} className='border-dark' style={{ height: '18%' }} >Sorol)T Jia</td>
-                                </tr>
-                                <tr>
-                                    <td className='border-dark' style={{ height: '9%' }}>fono)T</td>
-                                    <td className='border-dark' style={{ height: '9%' }}>doieit</td>
+                                <tr style={{ fontSize: '8px' }} >
+                                    <td rowSpan={2} className='border-dark' style={{ rotate: '90deg', height: '8%', fontFamily: 'sans-serif', fontSize: '12px'  }} >№</td>
+                                    <td className='border-dark' style={{ height: '69%' }} >ᢈᠢᠴᠢᠶᠡᠯ ᠦ᠋ᠨ ᠨᠡᠷ᠎</td>
+                                    <td className='border-dark' style={{ height: '5%' }} >ᠻᠷ</td>
+                                    <td className='border-dark' style={{ height: '9%' }}>ᠣᠨᠤᠭ᠎ᠠ</td>
+                                    <td className='border-dark' style={{ height: '9%' }} >ᠳ᠋ᠦᠩ</td>
                                 </tr>
 
                             </thead>
@@ -214,118 +220,119 @@ export default function PrintAttachmentMongolia()
                             </tbody>
                         </table>
                     </div>
-                    {
-                        isPageBreak
-                        &&
-                            <div className='text-center vh-100 position-absolute end-0' style={{ writingMode: 'vertical-rl', transform: 'scale(-1, 1)', fontSize: '20px' }} >
-                                <span>fna K Hebsorolda - 2 {new Date().getFullYear()} foa O D <span className='font-serif' style={{ writingMode: 'vertical-lr', rotate: '180deg' }} >{printDatas?.student?.group?.degree?.degree_code}</span>{printDatas?.student?.group?.profession?.code} dogerdeI dip;o^ oa HemdO KicoedeI.</span>
-                            </div>
-                    }
                 </div>
             </div>
 
-            <div className='header d-flex' style={{ fontFamily: 'CMs Urga dp', fontSize: '20px' }} >
+            <header className='d-flex' style={{ fontFamily: 'mongolianScript', fontSize: '14px' }} >
 
-                <div className='d-flex flex-column text-center' style={{ writingMode: 'vertical-rl', transform: 'scale(-1, 1)', fontSize: '25px', marginRight: '3px', marginBottom: '75px' }} >
-                    <span>Moekgo& oa foiedosoa O YekEt SorgegolI</span>
-                    <span>BlbEsore& oa SorgegolI</span>
-                    <span><span className='font-serif' style={{ writingMode: 'vertical-lr', rotate: '180deg' }} >{printDatas?.student?.group?.degree?.degree_code}</span>{printDatas?.student?.graduation_work?.diplom_num} dogerdeI dip;o^ oa Hebsorolda</span>
+                <div className='d-flex flex-column text-center' style={{ writingMode: 'vertical-lr', fontSize: '14px', marginRight: '3px', marginBottom: '75px' }} >
+                    <span>ᠳᠣᠲᠤᠭᠠᠳᠤ ᢈᠡᠷᠡᢉ ᠦ᠋ᠨ ᠶᠡᢈᠡ ᠰᠤᠷᠭᠠᠭᠤᠯᠢ</span>
+                    {/* <span>{printDatas?.student?.department?.school_uig}</span> */}
+                    <span style={{ marginLeft: '13px' }}>ᠡᠷᢈᠡ ᠵᠦᠢ ᠨᠡᠶᠢᢉᠡᠮ ᠦ᠋ᠨ ᠰᠤᠷᠭᠠᠭᠤᠯᠢ</span>
+                    <span style={{ fontSize: '8px', marginLeft: '10px' }}>
+                        <span className='font-serif' style={{ writingMode: 'vertical-lr', rotate: '180deg' }} >
+                            <span style={{ fontFamily: 'cmdashitseden', fontSize: '14px' }}>{printDatas?.student?.group?.degree?.degree_code}</span>
+                        </span>
+                        {tooBichih(printDatas?.student?.graduation_work?.diplom_num)} ᠳᠤᠭᠠᠷᠲᠠᠢ {printDatas?.student?.group?.degree?.degree_uig_name} ᠤ᠋ᠨ ᠳ᠋ᠢᠫᠯᠣᠮ ᠤ᠋ᠨ ᠬᠠᠪᠰᠤᠷᠤᠯᠲᠠ
+                    </span>
                 </div>
 
-                <div className='d-flex flex-column lh-sm'>
-                    <div style={{ height: '33.3%', writingMode: 'vertical-rl', transform: 'scale(-1, 1)' }}>
-                        <span style={{ fontSize: '18px' }} >
-                            fcikEt <span style={{ fontFamily: 'serif' }}>/</span>fkEt<span style={{ fontFamily: 'serif' }}>/</span> Jia Ne*T= {printDatas?.student?.last_name_uig}
-                        </span>
+                <div className='d-flex flex-column lh-sm' style={{ fontSize: '8px', marginLeft: '10px' }} >
+                    <div style={{ height: '33.3%', writingMode: 'vertical-lr', display: 'flex' }}>
+                        <span className='h-50'>ᠡᠴᠢᢉᠡ / ᠡᢈᠡ ᠶ᠋ᠢᠨ ᠨᠡᠷ᠎ᠡ:</span>
+                        {printDatas?.student?.last_name_uig}
                     </div>
-                    <div style={{ height: '33.3%', writingMode: 'vertical-rl', transform: 'scale(-1, 1)' }}>
-                        <span style={{ fontSize: '18px' }} >
-                            Ne*T= {printDatas?.student?.first_name_uig}
-                        </span>
+                    <div style={{ height: '33.3%', writingMode: 'vertical-lr', display: 'flex' }}>
+                        <span className='h-50'>ᠲᠡᢉᠦᠰᠦᢉᠰᠡᠨ ᠣᠨ:</span>
+                        {tooBichih(printDatas?.student?.graduation_work?.lesson_year?.substring(5, 9))}
                     </div>
-                    <div style={{ height: '33.3%', writingMode: 'vertical-rl', transform: 'scale(-1, 1)' }}>
-                        <span style={{ fontSize: '18px' }} >
-                            RwkusDw*= <span className='font-serif' style={{ writingMode: 'vertical-lr', rotate: '180deg', fontSize: '14px' }} >{printDatas?.student?.register_num}</span>
-                        </span>
-                    </div>
-                </div>
-
-                <div className='d-flex flex-column lh-sm'>
-                    <div style={{ height: '33.3%', writingMode: 'vertical-rl', transform: 'scale(-1, 1)' }} >
-                        <span style={{ fontSize: '18px' }} >
-                            DeKsohsea foa= {printDatas?.student?.graduation_work?.lesson_year?.substring(5, 9)}
-                        </span>
-                    </div>
-                    <div style={{ height: '66.0%', writingMode: 'vertical-rl', transform: 'scale(-1, 1)' }}>
-                        <span style={{ fontSize: '18px' }} >
-                            MerkEji&= {printDatas?.student?.group?.profession?.name_uig}
-                        </span>
+                    <div style={{ height: '33.3%', writingMode: 'vertical-lr', display: 'flex' }}>
+                        <span className='h-50'>ᠣᠯᠭᠠᠭᠰᠠᠨ ᠣᠨ:</span>
+                        {tooBichih(printDatas?.registration_num?.replaceAll('.', '-'))}
                     </div>
                 </div>
 
-                <div className='d-flex flex-column lh-sm'>
-                    <div style={{ height: '33.3%', writingMode: 'vertical-rl', transform: 'scale(-1, 1)' }}>
-                        <span style={{ fontSize: '18px' }} >
-                            MerkEji& oa findw\_= <span className='font-serif' style={{ writingMode: 'vertical-lr', rotate: '180deg' }} >{printDatas?.student?.group?.degree?.degree_code}</span>{printDatas?.student?.group?.profession?.code}
-                        </span>
+                <div className='d-flex flex-column lh-sm' style={{ fontSize: '8px', marginLeft: '10px' }} >
+                    <div style={{ height: '33.3%', writingMode: 'vertical-lr', display: 'flex' }} >
+                        <span className='h-50'>ᠨᠡᠷ᠎ᠡ:</span>
+                        {printDatas?.student?.first_name_uig}
                     </div>
-                    <div style={{ height: '33.3%', writingMode: 'vertical-rl', transform: 'scale(-1, 1)' }}>
-                        <span style={{ fontSize: '18px' }} >
-                            folgoeesea foa= {printDatas?.registration_num}
-                        </span>
+                    <div style={{ height: '33.3%', writingMode: 'vertical-lr', display: 'flex' }}>
+                        <span className='h-50'>ᠮᠡᠷᢉᠡᠵᠢᠯ ᠦ᠋ᠨ ᠢᠨᠳᠧᠻᠰ:</span>
+                        <span style={{ fontFamily: 'cmdashitseden', fontSize: '14px' }}>{printDatas?.student?.group?.degree?.degree_code}</span>{tooBichih(printDatas?.student?.group?.profession?.code)}
                     </div>
-                    <div style={{ height: '33.3%', writingMode: 'vertical-rl', transform: 'scale(-1, 1)' }}>
-                        <span style={{ fontSize: '18px' }} >
-                        BirioekE& oa doge*= {printDatas?.student?.graduation_work?.registration_num}
-                        </span>
+                    <div style={{ height: '33.3%', writingMode: 'vertical-lr', display: 'flex' }}>
+                        <span className='h-50'>ᠪᠦᠷᠢᠳᢈᠡᠯ ᠦ᠋ᠨ ᠳ᠋ᠤᠭᠠᠷ:</span>
+                        {tooBichih(printDatas?.student?.graduation_work?.registration_num)}
                     </div>
                 </div>
 
-            </div>
+                <div className='d-flex flex-column lh-sm' style={{ fontSize: '8px', marginLeft: '10px' }} >
+                    <div style={{ height: '33.3%', writingMode: 'vertical-lr', display: 'flex' }}>
+                        <span className='h-50'>
+                            {/* TODO: регистр эхний 2 үсэг монгол бичгээр болгох */}
+                            ᠷᠧᢉᠢᠰᠲ᠋ᠧᠷ ᠦ᠋ᠨ ᠳ᠋ᠤᠭᠠᠷ:
+                        </span>
+                        {printDatas?.student?.register_num}
+                    </div>
+                    <div style={{ height: '66.6%', writingMode: 'vertical-lr', display: 'flex' }}>
+                        <span className='h-50'>ᠮᠡᠷᢉᠡᠵᠢᠯ:</span>
+                        {printDatas?.student?.group?.profession?.name_uig}
+                    </div>
+                </div>
 
-            <div className={`footer ${isPageBreak && 'footer-margin'}`} style={{ fontFamily: 'CMs Urga dp', fontSize: '20px' }} >
+            </header>
+
+            <footer className={`${isPageBreak && 'footer-margin'}`} style={{ fontFamily: 'mongolianScript', fontSize: '8px' }} >
                 <div className='d-flex'>
 
-                    <div className='d-flex justify-content-evenly lh-sm' style={{ writingMode: 'vertical-rl', transform: 'scale(-1, 1)' }} >
-                        <span>Neiida \rwdiDA= {datas?.score?.max_kredit}</span>
-                        <span>GoolcI doieit= {datas?.score?.assesment}</span>
+                    <div className='d-flex' style={{ writingMode: 'vertical-lr', marginRight: '30px' }} >
+                        <span style={{ height: '40%' }}>ᠨᠡᠶᠢᠲᠡ ᠻᠷᠧᠳᠢᠲ: {tooBichih(datas?.score?.max_kredit)}</span>
+                        <span>ᠭᠣᠣᠯᠴᠢ ᠳ᠋ᠦᠩ:&nbsp;
+                            {
+                                datas?.score?.assesment
+                                ?
+                                    <span style={{ fontFamily: 'CMSUB', fontSize: '12px' }}>{datas?.score?.assesment.split('.')[0]}<span style={{ fontFamily: 'serif', fontWeight: 'bolder' }}>.</span>{datas?.score?.assesment.split('.')[1]}</span>
+                                :
+                                    null
+                            }
+                        </span>
                     </div>
 
-                    <div className='lh-sm' style={{ writingMode: 'vertical-rl', transform: 'scale(-1, 1)', marginRight: '8px' }} >
-                        {datas?.graduation_work?.lesson_type == 1 ? 'DeKsolda iia feji&' : 'DeKsolda iia Silgelda:'}=
-                            {
-                                datas?.graduation_work?.lesson?.map((val, idx) =>
-                                {
-                                    return (
-                                        <span key={idx} style={{marginTop: '9px'}}>&nbsp;{idx + 1}, {val?.name_uig} {(val?.score_register?.teach_score || 0) + (val?.score_register?.exam_score || 0)}</span>
-                                    )
-                                })
-                            }
+                    <div style={{ writingMode: 'vertical-lr', marginRight: '8px' }} >
+                        {datas?.graduation_work?.lesson_type == 1 ? 'ᠲᠡᢉᠦᠰᠦᠯᠲᠡ ᠶ᠋ᠢᠨ ᠰᠢᠯᠭᠠᠯᠲᠠ:' : 'ᠲᠡᢉᠦᠰᠦᠯᠲᠡ ᠶ᠋ᠢᠨ ᠰᠢᠯᠭᠠᠯᠲᠠ:'}
+                    </div>
+
+                    <div style={{ writingMode: 'vertical-lr', display: 'flex', marginRight: '50px' }} >
+                    {
+                        datas?.graduation_work?.lesson?.map((val, idx) =>
+                        {
+                            return (
+                                <div key={idx} style={{ height: `${100/datas?.graduation_work?.lesson.length}%`, display: 'flex' }}>
+                                    <span style={{ height: '80%' }}>{val?.name_uig}</span>
+                                    {tooBichih((val?.score_register?.teach_score || 0) + (val?.score_register?.exam_score || 0))} <span style={{ fontFamily: 'serif' }}>.{val?.score_register?.assessment}</span>
+                                </div>
+                            )
+                        })
+                    }
                     </div>
 
                     {
-                        listArr?.length != 0
-                        &&
                         listArr.map((val, idx) =>
                         {
                             return (
-                                <div className='lh-sm' style={{ writingMode: 'vertical-rl', transform: 'scale(-1, 1)' }} key={idx} >
-                                    <span>{val?.position_name_uig}</span> <span>{val?.last_name_uig} {val?.first_name_uig}=</span>
+                                <div style={{ writingMode: 'vertical-lr', height: '60%', fontSize: '12px', marginRight: '10px', lineHeight: '26px' }} key={idx} >
+                                    <span>{val?.position_name_uig}</span> <span>{val?.last_name_uig} {val?.first_name_uig}</span>
                                 </div>
                             )
                         })
                     }
 
-                    {
-                        isPageBreak === false
-                        &&
-                            <div className='text-center vh-100' style={{ writingMode: 'vertical-rl', transform: 'scale(-1, 1)', marginLeft: '9px' }} >
-                                <span>fna K Hebsorolda {new Date().getFullYear()} foa O <span className='font-serif' style={{ writingMode: 'vertical-lr', rotate: '180deg' }} >{printDatas?.student?.group?.degree?.degree_code}</span>{printDatas?.student?.group?.profession?.code} dogerdeI dip;o^ oa HemdO KicoedeI.</span>
-                            </div>
-
-                    }
+                    <div style={{ writingMode: 'vertical-lr', marginLeft: '9px', fontSize: '8px' }} >
+                        <span>ᠡᠨᠡᢈᠦ ᠬᠠᠪᠰᠤᠷᠤᠯᠲᠠ {tooBichih(new Date().getFullYear())} ᠣᠨ ᠤ᠋ <span style={{ fontFamily: 'cmdashitseden', fontSize: '14px' }}>{printDatas?.student?.group?.degree?.degree_code}</span>{tooBichih(printDatas?.student?.group?.profession?.code)} ᠳ᠋ᠤᠭᠠᠷ ᠲᠠᠢ ᠳ᠋ᠢᠫᠯᠣᠮ ᠤ᠋ᠨ ᠬᠠᠮᠲᠤ ᢈᠦᠴᠦᠨ ᠲᠡᠢ</span>
+                    </div>
                 </div>
-            </div>
+            </footer>
         </>
     )
 }

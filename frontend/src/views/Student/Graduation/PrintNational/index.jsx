@@ -47,6 +47,21 @@ export default function PrintMongolia()
             if (data && listArr.length != 0)
             {
                 setTimeout(() => window.print(), 1000)
+
+                let highest = 0
+
+                for (let data of document.getElementsByClassName('signature_national'))
+                {
+                    if (highest < data.getBoundingClientRect().height)
+                    {
+                        highest = data.getBoundingClientRect().height
+                    }
+                }
+
+                for (let data of document.getElementsByClassName('signature_national'))
+                {
+                    data.style.height = `${highest}px`
+                }
             }
         },
         [data, listArr]
@@ -86,7 +101,7 @@ export default function PrintMongolia()
                         return (
                             <div className='d-flex justify-content-between' style={{ writingMode: 'vertical-lr' }} key={idx} >
                                 <span style={{ height: '60%' }}>{val?.position_name_uig}</span>
-                                <span style={{ marginLeft: 'auto' }}>{val?.last_name_uig} {val?.first_name_uig}</span>
+                                <span className='signature_national' style={{ marginLeft: 'auto' }}>{val?.last_name_uig} {val?.first_name_uig}</span>
                             </div>
                         )
                     })

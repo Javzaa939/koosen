@@ -2427,10 +2427,13 @@ class StudentGpaDiplomaValuesAPIView(
             lesson_datas = []
 
             obj_datas['eng_name'] = 'Education subject'
+            obj_datas['uig_name'] = 'ᠳᠡᢉᠡᠳᠦ ᠪᠣᠯᠪᠠᠰᠤᠷᠠᠯ ᠤ᠋ᠨ ᠰᠠᠭᠤᠷᠢ ᢈᠢᠴᠢᠶᠡᠯ'
             if level == 2:
                 obj_datas['eng_name'] = 'Core'
+                obj_datas['uig_name'] = 'ᠮᠡᠷᢉᠡᠵᠢᠯ ᠦ᠋ᠨ ᠰᠠᠭᠤᠷᠢ ᢈᠢᠴᠢᠶᠡᠯ'
             if level == 3:
                 obj_datas['eng_name'] = 'Major course'
+                obj_datas['uig_name'] = 'ᠮᠡᠷᢉᠡᠵᠢᠯ ᠦ᠋ᠨ ᢈᠢᠴᠢᠶᠡᠯ'
 
             for data_qs in qs:
                 lesson_first_data = data_qs.lesson.all()
