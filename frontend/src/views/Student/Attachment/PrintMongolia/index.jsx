@@ -319,7 +319,7 @@ export default function PrintAttachmentMongolia()
 
             <footer className='w-100' style={{ fontSize: '10px', backgroundColor: 'white', color: 'black' }} >
 
-                <div className='text-end'>
+                <div className='text-end  me-1'>
                     <span className='ms-5'>Нийт кредит: {datas?.score?.max_kredit}</span>
                     <span className='ms-5'>Голч дүн: {datas?.score?.assesment}</span>
                 </div>
@@ -346,7 +346,7 @@ export default function PrintAttachmentMongolia()
                                 <div className='px-1' style={{ width: `${100/listArr.length}%` }} key={idx} >
                                     <div className='d-inline-block text-center' >
                                         <div className='pt-50 px-2' style={{ textTransform: 'uppercase', borderTop: '1px solid black' }}>
-                                            {val?.position_name} {`${val?.last_name} ${val?.first_name}`}
+                                            {val?.position_name} <span style={{ textWrap: 'nowrap' }}>{`${val?.last_name} ${val?.first_name}`}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -359,7 +359,7 @@ export default function PrintAttachmentMongolia()
                     isPageBreak === false
                     ?
                     (
-                        <div className={`text-end mt-2`} style={{ fontSize: '11px', marginRight: '12px' }} >
+                        <div className={`text-end mt-2 me-1`} style={{ fontSize: '11px' }} >
                             Энэхүү хавсралт нь {new Date().getFullYear()} оны {printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.graduation_work?.diplom_num} дугаартай дипломын хамт хүчинтэй.
                         </div>
                     )
