@@ -600,6 +600,8 @@ function useApi(isDisplay=false) {
 			getSimpleList: () => instance.get(`/student/info/simplelist/`),
 			getGraduate: (depId, degree, group) => instance.get(`/student/info/graduate/?department=${depId}&degree=${degree}&group=${group}&school=${school_id}`),
 			postGraduate: (data) => instance.post(`/student/graduation/group/`, data),
+			putRegNumAndDiplom: (data, pk) => instance.put(`/student/regisanddiplom/${pk}/`, data),
+
 			getStudent: (department, degree, profession, group, join_year) => instance.get(`/student/info/list/?department=${department}&degree=${degree}&profession=${profession}&group=${group}&join_year=${join_year}&school=${school_id}`),
 			getGroup: (groups, type) => {
 				var group_ids = ''
