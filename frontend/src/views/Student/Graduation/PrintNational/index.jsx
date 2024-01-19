@@ -109,12 +109,12 @@ export default function PrintMongolia()
     }
 
     return (
-        <div className='vh-100 position-relative' style={{ fontFamily: 'mongolianScript', fontSize: '16px', padding: '125px 160px 100px 260px' }}>
+        <div className='vh-100 position-relative' style={{ fontFamily: 'mongolianScript', fontSize: '16px', padding: '117px 160px 95px 260px' }}>
             {isLoading && Loader}
 
             <div className='d-flex justify-content-between h-100' >
                 <div className='d-flex'>
-                    <div className='text-center' style={{ writingMode: 'vertical-lr' }} >
+                    <div className='text-center' style={{ writingMode: 'vertical-lr', marginLeft: '2px' }} >
                         ᠳ᠋ᠤᠭᠠᠷ <span style={{ fontFamily: 'cmdashitseden', fontSize: '24px' }}>{data?.student?.group?.degree?.degree_code}</span>{tooBichih(data?.diplom_num)}
                     </div>
                     <div style={{ writingMode: 'vertical-lr', marginLeft: '36px', lineHeight: '46px' }} >
