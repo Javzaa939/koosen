@@ -324,7 +324,7 @@ export default function PrintAttachmentMongolia()
                     <span className='ms-5'>Голч дүн: {datas?.score?.assesment}</span>
                 </div>
 
-                <div className='px-2 mb-5' style={{ paddingTop: '2px', paddingBottom: '15px' }} >
+                <div className='px-1 mb-5' style={{ paddingTop: '2px', paddingBottom: '15px' }} >
                     { datas?.graduation_work?.lesson_type == 1 ? 'Төгсөлтийн ажил:' : 'Төгсөлтийн шалгалт:' }
                     {
                         datas?.graduation_work?.lesson?.map((val, idx) =>
@@ -346,7 +346,7 @@ export default function PrintAttachmentMongolia()
                                 <div className='px-1' style={{ width: `${100/listArr.length}%` }} key={idx} >
                                     <div className='d-inline-block text-center' >
                                         <div className='pt-50 px-2' style={{ textTransform: 'uppercase', borderTop: '1px solid black' }}>
-                                            {val?.position_name} <span style={{ textWrap: 'nowrap' }}>{`${val?.last_name} ${val?.first_name}`}</span>
+                                            {val?.position_name} <span style={{ textWrap: 'nowrap' }}>{`${val?.last_name}${val?.first_name}`}</span>
                                         </div>
                                     </div>
                                 </div>
