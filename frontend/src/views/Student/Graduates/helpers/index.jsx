@@ -42,14 +42,14 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 			name: t("Овог"),
 			selector: (row) => `${row?.last_name}`,
             sortable: true,
-			center: true
+			center: true,
         },
 		{
 			header: 'first_name',
 			name: t("Нэр"),
 			selector: (row) => `${row?.first_name}`,
             sortable: true,
-			center: true
+			center: true,
         },
 		{
 			header: 'register_num',
@@ -61,19 +61,14 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
         {
 			header: 'profession',
 			name: t("Хөтөлбөр"),
-			selector: (row) => <span title={row?.profession_name}>{row?.profession_name}</span>,
+			selector: (row) => <span title={row?.group?.profession?.name}>{row?.group?.profession?.name}</span>,
             sortable: true,
 			left: true,
-			wrap: true
+			wrap: true,
         },
-		// {
-		// 	name: t("Анги"),
-		// 	selector: (row) => row?.group_name,
-		// 	center: true,
-		// 	width: '250px'
-        // },
+		
 		{
-			name: t("Элссэн он"),
+			name: t("Төгссөн он"),
 			selector: (row) => row?.join_year,
 			sortable: true,
 			width: '250px',

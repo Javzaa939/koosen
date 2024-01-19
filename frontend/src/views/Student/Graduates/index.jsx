@@ -100,8 +100,6 @@ const Graduates = () => {
     // Эрэмбэлэлт
     const [sortField, setSort] = useState('')
 
-    //const[department, setDepartment] = useState('')
-
     const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
     const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
 
@@ -191,14 +189,11 @@ const Graduates = () => {
             setCurrentPage(page_count)
         }
 
-        //АРИУНААГИЙН НЭМСЭН ФУНКЦ
         const {success: success1, data: data1} = await allFetch(studentApi.getGraduate1(rowsPerPage, currentPage, sortField, searchValue, department, degree, profession, group))
         if(success1)
         {
             setTotalCount(data1?.count)
             setDatas(data1?.results)
-            // var cpage_count = Math.ceil(data?.count / rowsPerPage)
-            // setPageCount(cpage_count)
         }
     }
 
@@ -254,12 +249,6 @@ const Graduates = () => {
 	useEffect(() => {
 		if (searchValue.length == 0) {
 			getDatas();
-		} else {
-			// const timeoutId = setTimeout(() => {
-			// 	getDatas();
-			// }, 600);
-
-			// return () => clearTimeout(timeoutId);
 		}
 	}, [searchValue]);
 
@@ -290,43 +279,32 @@ const Graduates = () => {
     }
 
     return (    
-        <Fragment>
-      
+        <Fragment>  
         <Card>
-        <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
-                    <CardTitle tag='h4'>{t('Оюутны бүртгэл')}</CardTitle>
-                    <div className='d-flex flex-wrap mt-md-0 mt-1'>
-                    <UncontrolledButtonDropdown disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-read')?false : true}>
-                    {/* <UncontrolledButtonDropdown disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-read')  && school_id? false : true}> */}
-                        <DropdownToggle color='secondary' className='m-50' caret outline>
-                            <Download size={15} />
-                            <span className='align-middle ms-50'>Export</span>
-                        </DropdownToggle>
-                        <DropdownMenu>
-                            <DropdownItem className='w-100' onClick={() => excelDownload('csv')}>
-                                <FileText size={15} />
-                                <span className='align-middle ms-50'>CSV</span>
-                            </DropdownItem>
-                            <DropdownItem className='w-100' onClick={() => excelDownload('excel')}>
-                                <Grid size={15} />
-                                <span className='align-middle ms-50' >Excel</span>
-                            </DropdownItem>
-                        </DropdownMenu>
-                    </UncontrolledButtonDropdown>
-                    <Button
-                        color='primary'
-                        onClick={() => handleModal()}
-                        className="m-50"
-                        disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-create') ? false : true}
-                    >
-                        <Plus size={15} />
-                        <span className='align-middle ms-50'>{t('Нэмэх')}</span>
-                    </Button>
-                    </div>
-                </CardHeader>
         {isLoading && Loader}
-
-           
+            <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
+                        <CardTitle tag='h4' style={{ marginTop: '20px' }}>{t('Төгссөн оюутны мэдээлэл')}</CardTitle>
+                        <div className='d-flex flex-wrap mt-md-0 mt-1'>
+                        <UncontrolledButtonDropdown disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-read')?false : true}>
+                        {/* <UncontrolledButtonDropdown disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-read')  && school_id? false : true}> */}
+                            <DropdownToggle color='secondary' className='m-50' caret outline>
+                                <Download size={15} />
+                                <span className='align-middle ms-50'>Export</span>
+                            </DropdownToggle>
+                            <DropdownMenu>
+                                <DropdownItem className='w-100' onClick={() => excelDownload('csv')}>
+                                    <FileText size={15} />
+                                    <span className='align-middle ms-50'>CSV</span>
+                                </DropdownItem>
+                                <DropdownItem className='w-100' onClick={() => excelDownload('excel')}>
+                                    <Grid size={15} />
+                                    <span className='align-middle ms-50' >Excel</span>
+                                </DropdownItem>
+                            </DropdownMenu>
+                        </UncontrolledButtonDropdown>
+                    
+                        </div>
+            </CardHeader>
             <Row className="justify-content-start mx-0 mt-1 mb-1" sm={12}>
                 <Col sm={6} lg={3} >
                     <Label className="form-label" for="department">
