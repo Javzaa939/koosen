@@ -1,7 +1,6 @@
 @page {
     size: A4 landscape;
-    margin: 70px 80px 70px 70px;
-    /* margin: 0px; */
+    margin: 40px 50px 40px 40px;
 }
 
 body {
@@ -52,7 +51,7 @@ table td {
     text-align: start;
     line-height: 1;
     padding: 5px 4px;
-    font-size: 8px;
+    font-size: 6px;
 }
 
 .footer-cell1 {

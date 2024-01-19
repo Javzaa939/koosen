@@ -131,7 +131,7 @@ export default function PrintMongolia()
                         return (
                             <div className='d-flex justify-content-between' style={{ writingMode: 'vertical-lr' }} key={idx} >
                                 <span style={{ height: '60%' }}>{val?.position_name_uig}</span>
-                                <span className='signature_national' style={{ marginLeft: 'auto' }}>{val?.last_name_uig} {val?.first_name_uig}</span>
+                                <span className='signature_national' style={{ marginLeft: 'auto', textWrap: 'nowrap' }}>{val?.last_name_uig} {val?.first_name_uig}</span>
                             </div>
                         )
                     })

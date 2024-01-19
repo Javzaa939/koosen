@@ -145,7 +145,7 @@ export default function PrintAttachmentMongolia()
                 <div style={{ height: '49.5%', marginLeft: '178px' }} >
                     <table id='table1' className='text-center w-100 d-none' style={{ writingMode: 'vertical-lr', marginBottom: '1px', height: '100%' }} >
                         <thead>
-                            <tr style={{ fontSize: '8px' }} >
+                            <tr style={{ fontSize: '6px' }} >
                                 <td rowSpan={2} className='border-dark' style={{ rotate: '90deg', height: '8%', fontFamily: 'sans-serif', fontSize: '12px'  }} >№</td>
                                 <td className='border-dark' style={{ height: '69%' }} >ᢈᠢᠴᠢᠶᠡᠯ ᠦ᠋ᠨ ᠨᠡᠷ᠎</td>
                                 <td className='border-dark' style={{ height: '5%' }} >ᠻᠷ</td>
@@ -161,7 +161,7 @@ export default function PrintAttachmentMongolia()
                 <div style={{ height: '49.5%', marginLeft: '178px' }} >
                     <table id='table2' className='text-center w-100 d-none' style={{ writingMode: 'vertical-lr', marginBottom: '1px', height: '100%' }}  >
                         <thead>
-                            <tr style={{ fontSize: '8px' }} >
+                            <tr style={{ fontSize: '6px' }} >
                                 <td rowSpan={2} className='border-dark' style={{ rotate: '90deg', height: '8%', fontFamily: 'sans-serif', fontSize: '12px'  }} >№</td>
                                 <td className='border-dark' style={{ height: '69%' }} >ᢈᠢᠴᠢᠶᠡᠯ ᠦ᠋ᠨ ᠨᠡᠷ᠎</td>
                                 <td className='border-dark' style={{ height: '5%' }} >ᠻᠷ</td>
@@ -184,7 +184,7 @@ export default function PrintAttachmentMongolia()
                         <table id='table3' className='text-center w-100 d-none' style={{ writingMode: 'vertical-lr', marginBottom: '1px' }}  >
                             <thead>
 
-                                <tr style={{ fontSize: '8px' }} >
+                                <tr style={{ fontSize: '6px' }} >
                                     <td rowSpan={2} className='border-dark' style={{ rotate: '90deg', height: '8%', fontFamily: 'sans-serif', fontSize: '12px'  }} >№</td>
                                     <td className='border-dark' style={{ height: '69%' }} >ᢈᠢᠴᠢᠶᠡᠯ ᠦ᠋ᠨ ᠨᠡᠷ᠎</td>
                                     <td className='border-dark' style={{ height: '5%' }} >ᠻᠷ</td>
@@ -206,7 +206,7 @@ export default function PrintAttachmentMongolia()
 
                             <thead>
 
-                                <tr style={{ fontSize: '8px' }} >
+                                <tr style={{ fontSize: '6px' }} >
                                     <td rowSpan={2} className='border-dark' style={{ rotate: '90deg', height: '8%', fontFamily: 'sans-serif', fontSize: '12px'  }} >№</td>
                                     <td className='border-dark' style={{ height: '69%' }} >ᢈᠢᠴᠢᠶᠡᠯ ᠦ᠋ᠨ ᠨᠡᠷ᠎</td>
                                     <td className='border-dark' style={{ height: '5%' }} >ᠻᠷ</td>
@@ -229,7 +229,7 @@ export default function PrintAttachmentMongolia()
                     <span>ᠳᠣᠲᠤᠭᠠᠳᠤ ᢈᠡᠷᠡᢉ ᠦ᠋ᠨ ᠶᠡᢈᠡ ᠰᠤᠷᠭᠠᠭᠤᠯᠢ</span>
                     {/* <span>{printDatas?.student?.department?.school_uig}</span> */}
                     <span style={{ marginLeft: '13px' }}>ᠡᠷᢈᠡ ᠵᠦᠢ ᠨᠡᠶᠢᢉᠡᠮ ᠦ᠋ᠨ ᠰᠤᠷᠭᠠᠭᠤᠯᠢ</span>
-                    <span style={{ fontSize: '8px', marginLeft: '10px' }}>
+                    <span style={{ fontSize: '6px', marginLeft: '10px' }}>
                         <span className='font-serif' style={{ writingMode: 'vertical-lr', rotate: '180deg' }} >
                             <span style={{ fontFamily: 'cmdashitseden', fontSize: '14px' }}>{printDatas?.student?.group?.degree?.degree_code}</span>
                         </span>
@@ -237,7 +237,7 @@ export default function PrintAttachmentMongolia()
                     </span>
                 </div>
 
-                <div className='d-flex flex-column lh-sm' style={{ fontSize: '8px', marginLeft: '10px' }} >
+                <div className='d-flex flex-column lh-sm' style={{ fontSize: '6px', marginLeft: '10px' }} >
                     <div style={{ height: '33.3%', writingMode: 'vertical-lr', display: 'flex' }}>
                         <span className='h-50'>ᠡᠴᠢᢉᠡ / ᠡᢈᠡ ᠶ᠋ᠢᠨ ᠨᠡᠷ᠎ᠡ:</span>
                         {printDatas?.student?.last_name_uig}
@@ -252,7 +252,7 @@ export default function PrintAttachmentMongolia()
                     </div>
                 </div>
 
-                <div className='d-flex flex-column lh-sm' style={{ fontSize: '8px', marginLeft: '10px' }} >
+                <div className='d-flex flex-column lh-sm' style={{ fontSize: '6px', marginLeft: '10px' }} >
                     <div style={{ height: '33.3%', writingMode: 'vertical-lr', display: 'flex' }} >
                         <span className='h-50'>ᠨᠡᠷ᠎ᠡ:</span>
                         {printDatas?.student?.first_name_uig}
@@ -267,7 +267,7 @@ export default function PrintAttachmentMongolia()
                     </div>
                 </div>
 
-                <div className='d-flex flex-column lh-sm' style={{ fontSize: '8px', marginLeft: '10px' }} >
+                <div className='d-flex flex-column lh-sm' style={{ fontSize: '6px', marginLeft: '10px' }} >
                     <div style={{ height: '33.3%', writingMode: 'vertical-lr', display: 'flex' }}>
                         <span className='h-50'>
                             {/* TODO: регистр эхний 2 үсэг монгол бичгээр болгох */}
@@ -283,12 +283,12 @@ export default function PrintAttachmentMongolia()
 
             </header>
 
-            <footer className={`${isPageBreak && 'footer-margin'}`} style={{ fontFamily: 'mongolianScript', fontSize: '8px' }} >
+            <footer className={`${isPageBreak && 'footer-margin'}`} style={{ fontFamily: 'mongolianScript', fontSize: '6px' }} >
                 <div className='d-flex'>
 
                     <div className='d-flex' style={{ writingMode: 'vertical-lr', marginRight: '30px' }} >
-                        <span style={{ height: '40%' }}>ᠨᠡᠶᠢᠲᠡ ᠻᠷᠧᠳᠢᠲ: {tooBichih(datas?.score?.max_kredit)}</span>
-                        <span>ᠭᠣᠣᠯᠴᠢ ᠳ᠋ᠦᠩ:&nbsp;
+                        <span style={{ height: '40%' }}>ᠨᠡᠶᠢᠲᠡ ᠪᠠᠭᠴᠡ ᠴᠠᠭ: {tooBichih(datas?.score?.max_kredit)}</span>
+                        <span>ᠭᠣᠣᠯᠴᠢ ᠳᠦᠩ:&nbsp;
                             {
                                 datas?.score?.assesment
                                 ?
@@ -299,7 +299,7 @@ export default function PrintAttachmentMongolia()
                         </span>
                     </div>
 
-                    <div style={{ writingMode: 'vertical-lr', marginRight: '8px' }} >
+                    <div style={{ writingMode: 'vertical-lr', marginRight: '6px' }} >
                         {datas?.graduation_work?.lesson_type == 1 ? 'ᠲᠡᢉᠦᠰᠦᠯᠲᠡ ᠶ᠋ᠢᠨ ᠰᠢᠯᠭᠠᠯᠲᠠ:' : 'ᠲᠡᢉᠦᠰᠦᠯᠲᠡ ᠶ᠋ᠢᠨ ᠰᠢᠯᠭᠠᠯᠲᠠ:'}
                     </div>
 
@@ -328,8 +328,8 @@ export default function PrintAttachmentMongolia()
                         })
                     }
 
-                    <div style={{ writingMode: 'vertical-lr', marginLeft: '9px', fontSize: '8px' }} >
-                        <span>ᠡᠨᠡᢈᠦ ᠬᠠᠪᠰᠤᠷᠤᠯᠲᠠ {tooBichih(new Date().getFullYear())} ᠣᠨ ᠤ᠋ <span style={{ fontFamily: 'cmdashitseden', fontSize: '14px' }}>{printDatas?.student?.group?.degree?.degree_code}</span>{tooBichih(printDatas?.student?.group?.profession?.code)} ᠳ᠋ᠤᠭᠠᠷ ᠲᠠᠢ ᠳ᠋ᠢᠫᠯᠣᠮ ᠤ᠋ᠨ ᠬᠠᠮᠲᠤ ᢈᠦᠴᠦᠨ ᠲᠡᠢ</span>
+                    <div style={{ writingMode: 'vertical-lr', marginLeft: '9px', fontSize: '6px' }} >
+                        <span>ᠡᠨᠡᢈᠦ ᠬᠠᠪᠰᠤᠷᠤᠯᠲᠠ {tooBichih(new Date().getFullYear())} ᠣᠨ ᠤ᠋ <span style={{ fontFamily: 'cmdashitseden', fontSize: '12px' }}>{printDatas?.student?.group?.degree?.degree_code}</span>{tooBichih(printDatas?.student?.group?.profession?.code)} ᠳ᠋ᠤᠭᠠᠷ ᠲᠠᠢ ᠳ᠋ᠢᠫᠯᠣᠮ ᠤ᠋ᠨ ᠬᠠᠮᠲᠤ ᢈᠦᠴᠦᠨ ᠲᠡᠢ</span>
                     </div>
                 </div>
             </footer>
