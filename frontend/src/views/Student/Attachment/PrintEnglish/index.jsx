@@ -315,12 +315,16 @@ export default function PrintAttachmentEnglish()
                 <div className='px-1 mb-5' style={{ paddingTop: '2px', paddingBottom: '15px' }} >
                     { datas?.graduation_work?.lesson_type == 1 ? 'Diploma thesis:' : 'Graduation Exams:' }
                     {
-                        datas?.graduation_work?.lesson?.map((val, idx) =>
-                        {
-                            return (
-                                <span className='ms-5' key={idx} >{idx + 1}. {val?.name_eng} / {(val?.score_register?.teach_score || 0) + (val?.score_register?.exam_score || 0)} {val?.score_register?.assessment} /</span>
-                            )
-                        })
+                        datas?.graduation_work?.lesson_type == 1
+                        ?
+                            <span className='ms-5'>{datas?.graduation_work?.diplom_topic_eng}</span>
+                        :
+                            datas?.graduation_work?.lesson?.map((val, idx) =>
+                            {
+                                return (
+                                    <span className='ms-5' key={idx} >{idx + 1}. {val?.name} / {(val?.score_register?.teach_score || 0) + (val?.score_register?.exam_score || 0)} {val?.score_register?.assessment} /</span>
+                                )
+                            })
                     }
                 </div>
 

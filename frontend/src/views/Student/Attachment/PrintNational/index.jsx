@@ -135,6 +135,81 @@ export default function PrintAttachmentMongolia()
         return ( <span style={{ fontFamily: 'CMSUB', fontSize: '12px' }}>{too}</span> )
     }
 
+    function uigVseg(vseg)
+    {
+        switch (vseg)
+        {
+            case 'А':
+                return 'ᠠ'
+            case 'Б':
+                return 'ᠪ'
+            case 'В':
+                return 'ᠸ'
+            case 'Г':
+                return 'ᠭ'
+            case 'Д':
+                return 'ᠲ'
+            case 'Е':
+                return 'ᠶᠢ'
+            case 'Ё':
+                return 'ᠶ'
+            case 'Ж':
+                return 'ᠵᠢ'
+            case 'З':
+                return 'ᠵ'
+            case 'И':
+                return 'ᠢ'
+            case 'Й':
+                return 'ᠢ'
+            case 'К':
+                return 'ᠻ'
+            case 'Л':
+                return 'ᠯ'
+            case 'М':
+                return 'ᠮ'
+            case 'Н':
+                return 'ᠨ᠋'
+            case 'О':
+                return 'ᠣ'
+            case 'Ө':
+                return 'ᠥ'
+            case 'П':
+                return 'ᠫ'
+            case 'Р':
+                return 'ᠷ'
+            case 'С':
+                return 'ᠰ'
+            case 'Т':
+                return 'ᠲ'
+            case 'У':
+                return 'ᠤ'
+            case 'Ү':
+                return 'ᠦ‍'
+            case 'Ф':
+                return 'ᠹ'
+            case 'Х':
+                return 'ᠬ'
+            case 'Ц':
+                return 'ᠴ'
+            case 'Ч':
+                return 'ᠴ'
+            case 'Ш':
+                return 'ᠰ'
+            case 'Ы':
+                return 'ᠢ'
+            case 'Ь':
+                return 'ᠢ'
+            case 'Э':
+                return 'ᠡ'
+            case 'Ю':
+                return 'ᠶᠦ᠋'
+            case 'Я':
+                return 'ᠶ'
+            default:
+                break;
+        }
+    }
+
     return (
 
         <>
@@ -271,7 +346,7 @@ export default function PrintAttachmentMongolia()
                             {/* TODO: регистр эхний 2 үсэг монгол бичгээр болгох */}
                             ᠷᠧᢉᠢᠰᠲ᠋ᠧᠷ ᠦ᠋ᠨ ᠳ᠋ᠤᠭᠠᠷ:
                         </span>
-                        {printDatas?.student?.register_num}
+                        {uigVseg(printDatas?.student?.register_num[0])} {uigVseg(printDatas?.student?.register_num[1])}  &nbsp;{tooBichih(printDatas?.student?.register_num.slice(-8))}
                     </div>
                     <div style={{ height: '66.6%', writingMode: 'vertical-lr', display: 'flex' }}>
                         <span className='h-50'>ᠮᠡᠷᢉᠡᠵᠢᠯ:</span>
@@ -298,11 +373,15 @@ export default function PrintAttachmentMongolia()
                     </div>
 
                     <div style={{ writingMode: 'vertical-lr', marginRight: '6px' }} >
-                        {datas?.graduation_work?.lesson_type == 1 ? 'ᠲᠡᢉᠦᠰᠦᠯᠲᠡ ᠶ᠋ᠢᠨ ᠰᠢᠯᠭᠠᠯᠲᠠ:' : 'ᠲᠡᢉᠦᠰᠦᠯᠲᠡ ᠶ᠋ᠢᠨ ᠰᠢᠯᠭᠠᠯᠲᠠ:'}
+                        {datas?.graduation_work?.lesson_type == 1 ? 'ᠲᠡᢉᠦᠰᠦᠯᠲᠡ ᠶ᠋ᠢᠨ ᠠᠵᠢᠯ:' : 'ᠲᠡᢉᠦᠰᠦᠯᠲᠡ ᠶ᠋ᠢᠨ ᠰᠢᠯᠭᠠᠯᠲᠠ:'}
                     </div>
 
                     <div style={{ writingMode: 'vertical-lr', display: 'flex', marginRight: '70px' }} >
                     {
+                    datas?.graduation_work?.lesson_type == 1
+                    ?
+                        <span style={{ height: '80%' }}>{datas?.graduation_work?.diplom_topic_uig}</span>
+                    :
                         datas?.graduation_work?.lesson?.map((val, idx) =>
                         {
                             return (
