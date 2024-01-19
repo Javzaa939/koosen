@@ -1854,6 +1854,7 @@ class GraduationWorkAPIView(
         "Төгсөлтийн ажил засах"
 
         data = request.data
+        stype = data.get('lesson_type')
         lesson_ids = data['lesson']
         del data['lesson']
 
@@ -1870,11 +1871,17 @@ class GraduationWorkAPIView(
             if not serializer.is_valid(raise_exception=False):
                 return request.send_error_valid(serializer.errors)
 
-            updated_qs = self.update(request).data
+            self.perform_update(serializer)
+            updated_qs = serializer.data
             updated_qs = self.queryset.get(id=updated_qs.get("id"))
-            # updated_qs.lesson.all().remove()
-            updated_qs.lesson.clear()
-            updated_qs.lesson.add(*lesson_ids)
+
+            old_lesson_ids = updated_qs.lesson.all()
+            if stype == 1 and old_lesson_ids:
+                updated_qs.lesson.remove()
+            else:
+                if len(lesson_ids) > 0:
+                    updated_qs.lesson.clear()
+                    updated_qs.lesson.add(*lesson_ids)
 
         except Exception as e:
             print(e)
