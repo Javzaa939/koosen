@@ -136,7 +136,7 @@ export default function PrintAttachmentEnglish()
         <>
             {Loading && Loader}
 
-            <div className={`position-relative d-flex justify-content-between ${isPageBreak && 'page-break'}`} style={{ fontSize: '8px', marginTop: '135px' }} >
+            <div className={`position-relative d-flex justify-content-between ${isPageBreak && 'page-break'}`} style={{ fontSize: '9px', marginTop: '135px' }} >
 
                 <div className='d-flex flex-wrap align-content-start p-1' style={{ width: '33.1%' }} >
                     <table className='w-100 text-center d-none' id='table1' >

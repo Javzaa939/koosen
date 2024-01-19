@@ -226,9 +226,7 @@ export default function PrintAttachmentMongolia()
             <header className='d-flex' style={{ fontFamily: 'mongolianScript', fontSize: '14px' }} >
 
                 <div className='d-flex flex-column text-center' style={{ writingMode: 'vertical-lr', fontSize: '14px', marginRight: '3px', marginBottom: '75px' }} >
-                    <span>ᠳᠣᠲᠤᠭᠠᠳᠤ ᢈᠡᠷᠡᢉ ᠦ᠋ᠨ ᠶᠡᢈᠡ ᠰᠤᠷᠭᠠᠭᠤᠯᠢ</span>
-                    {/* <span>{printDatas?.student?.department?.school_uig}</span> */}
-                    <span style={{ marginLeft: '13px' }}>ᠡᠷᢈᠡ ᠵᠦᠢ ᠨᠡᠶᠢᢉᠡᠮ ᠦ᠋ᠨ ᠰᠤᠷᠭᠠᠭᠤᠯᠢ</span>
+                    <span style={{ marginLeft: '13px' }}>{printDatas?.student?.department?.school_uig}</span>
                     <span style={{ fontSize: '6px', marginLeft: '10px' }}>
                         <span className='font-serif' style={{ writingMode: 'vertical-lr', rotate: '180deg' }} >
                             <span style={{ fontFamily: 'cmdashitseden', fontSize: '14px' }}>{printDatas?.student?.group?.degree?.degree_code}</span>
