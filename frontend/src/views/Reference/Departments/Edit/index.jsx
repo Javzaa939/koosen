@@ -79,7 +79,6 @@ const UpdateModal = ({ open, editId, refreshDatas, handleEdit}) => {
             }
         }
 	}
-
 	return (
         <Fragment>
             <Modal
@@ -232,7 +231,6 @@ const UpdateModal = ({ open, editId, refreshDatas, handleEdit}) => {
                         </Col>
                         <Col className='text-center mt-2' md={12}>
                             <Button className="me-2" size='sm' color="primary" type="submit">
-                                {isLoading && Loader}
                                 {t('Хадгалах')}
                             </Button>
                             <Button size='sm' color="secondary" type="reset" onClick={handleEdit}>

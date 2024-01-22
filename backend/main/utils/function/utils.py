@@ -332,8 +332,7 @@ def get_lesson_choice_student(lesson='', teacher='', school='',lesson_year='', l
     TimeTable_to_student = apps.get_model('lms', 'TimeTable_to_student')
     Student = apps.get_model('lms', 'Student')
     StudentRegister = apps.get_model('lms', 'StudentRegister')
-    status = StudentRegister.objects.filter(name__contains='Суралцаж буй').first()
-
+    status = StudentRegister.objects.filter(Q(Q(name__contains='Суралцаж буй') | Q(code=1))).first()
     all_student = []
 
     timetable = TimeTable.objects.all()
@@ -509,7 +508,8 @@ def get_teacher_queryset():
     teacher_queryset = queryset.values_list('user', flat=True)
     qs_employee_user = Employee.objects.filter(user_id__in=list(teacher_queryset), state=Employee.STATE_WORKING, org_position__is_teacher=True).values_list('user', flat=True)
     if len(qs_employee_user) > 0:
-        queryset = queryset.filter(user_id__in = list(qs_employee_user), sub_org__isnull=False)
+        queryset = queryset.filter(user_id__in = list(qs_employee_user))
+        #sub_org__isnull=False  Дараа нь багшийн бүртгэл бүтэн болох үед ажиллана
 
     return queryset
 
@@ -716,7 +716,7 @@ def get_16week_start_date():
         end_date = qs_activeyear.start_date
 
 
-        for x in range(18):
+        for x in range(25):
             obj_datas = {}
             start_date  = end_date
 
@@ -926,6 +926,36 @@ def dict_fetchall(cursor):
     columns = [col[0] for col in cursor.description if col]
     for row in cursor.fetchall():
         yield dict(zip(columns, row))
+
+
+def student__full_name(last_name, first_name):
+
+    ovog = f"{last_name[0].upper()}." if last_name else ""
+    name = first_name.capitalize()
+
+    if ovog and name:
+        return f"{ovog}{name}"
+
+    if name:
+        return name
+
+    return ""
+
+
+def lesson_standart__code_name(code, name):
+    return code + "-" + name
+
+
+def score_register__score_total(teach_score, exam_score):
+        full = 0
+
+        if teach_score:
+            full = full + teach_score
+
+        if exam_score:
+            full = full + exam_score
+
+        return full
 
 
 def import_score(reader):

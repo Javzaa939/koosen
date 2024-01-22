@@ -106,7 +106,7 @@ const Simple = ({ handleRoomModal, editValues, handleModal, roomModal, is_loadin
 
     // Багшийн жагсаалт
     async function getTeacher() {
-        const { success, data } = await fetchData(teacherApi.getTeacher())
+        const { success, data } = await fetchData(teacherApi.getTeacher(select_value?.lesson))
         if(success) {
             setTeacher(data)
         }
@@ -285,9 +285,11 @@ const Simple = ({ handleRoomModal, editValues, handleModal, roomModal, is_loadin
     useEffect(
         () =>
         {
-            getTeacher()
+            if (select_value?.lesson) {
+                getTeacher()
+            }
         },
-        [select_value?.teacher]
+        [select_value?.lesson]
     )
 
 
@@ -321,7 +323,7 @@ const Simple = ({ handleRoomModal, editValues, handleModal, roomModal, is_loadin
             cdata['group'] = !checked ? selectedGroups : []
             cdata['addgroup'] = !checked ? selectedAddGroups : []
 
-            cdata['school'] = school_id
+            cdata['school'] = school_id ? school_id : ''
             cdata['lesson_year'] = cyear_name
             cdata['lesson_season'] = cseason_id
 

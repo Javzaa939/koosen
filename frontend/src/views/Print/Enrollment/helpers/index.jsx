@@ -21,7 +21,7 @@ export function getColumns (currentPage, rowsPerPage, total_count) {
 		},
 		{
 			header: 'mergejil_code',
-			name: t("Мэргэжлийн код"),
+			name: t("Хөтөлбөрийн код"),
 			selector: (row) => row?.mergejil_code,
             sortable: false,
 			minWidth: "180px",
@@ -29,7 +29,7 @@ export function getColumns (currentPage, rowsPerPage, total_count) {
         },
 		{
 			header: 'mergejil_name',
-			name: t("Мэргэжлийн нэр"),
+			name: t("Хөтөлбөрийн нэр"),
 			selector: (row) => row?.mergejil_name,
             sortable: false,
 			minWidth: "180px",

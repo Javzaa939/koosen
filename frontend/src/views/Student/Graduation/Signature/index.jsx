@@ -219,7 +219,7 @@ export default function SignatureModal({ open, handleModal, refreshDatas, defaul
                                         bsSize="sm"
                                         type="text"
                                         placeholder={t('овог оруулна уу')}
-                                        style={{ fontFamily: 'CMSHRDP' }}
+                                        style={{ fontFamily: 'cmdashitseden' }}
                                         invalid={errors.last_name_uig && true}
                                     />
                                 )}
@@ -242,7 +242,7 @@ export default function SignatureModal({ open, handleModal, refreshDatas, defaul
                                         bsSize="sm"
                                         type="text"
                                         placeholder={t('нэр оруулна уу')}
-                                        style={{ fontFamily: 'CMSHRDP' }}
+                                        style={{ fontFamily: 'cmdashitseden' }}
                                         invalid={errors.first_name_uig && true}
                                     />
                                 )}
@@ -265,7 +265,7 @@ export default function SignatureModal({ open, handleModal, refreshDatas, defaul
                                         bsSize="sm"
                                         type="text"
                                         placeholder={t('албан тушаал оруулна уу')}
-                                        style={{ fontFamily: 'CMSHRDP' }}
+                                        style={{ fontFamily: 'cmdashitseden' }}
                                         invalid={errors.position_name_uig && true}
                                     />
                                 )}

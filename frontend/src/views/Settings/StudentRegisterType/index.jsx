@@ -19,7 +19,6 @@ import { getColumns } from './helpers'
 
 import Addmodal from './Add'
 
-import UpdateModal from './Update'
 
 const StudentRegisterType = () => {
 
@@ -42,7 +41,6 @@ const StudentRegisterType = () => {
 
 	// Modal
 	const [modal, setModal] = useState(false);
-	const [update_modal, setUpdateModal] = useState(false)
 
 	// Api
     const registerType = useApi().settings.studentRegisterType
@@ -50,12 +48,15 @@ const StudentRegisterType = () => {
 	/* Модал setState функц */
 	const handleModal = () => {
 		setModal(!modal)
+		if(modal){
+			setEditId()
+		}
 	}
 
 	// Засах функц
     function handleUpdateModal(id) {
         setEditId(id)
-        setUpdateModal(!update_modal)
+		handleModal()
     }
 
 	/* Жагсаалтын дата авах функц */
@@ -67,9 +68,20 @@ const StudentRegisterType = () => {
 		}
 	}
 
+
 	useEffect(() => {
 		getDatas()
 	},[])
+
+	/* Жагсаалтын дата утсгах функц */
+	async function handleDelete(id) {
+		if (id){
+			const { success } = await fetchData(registerType.delete(id))
+			if(success) {
+				getDatas()
+			}
+		}
+	}
 
 	// Хайлт хийх үед ажиллах хэсэг
 	const handleFilter = (e) => {
@@ -81,12 +93,12 @@ const StudentRegisterType = () => {
 		if (value.length) {
 			updatedData = datas.filter((item) => {
 				const startsWith =
-					item.student_code.toString().toLowerCase().startsWith(value.toString().toLowerCase()) ||
-					item.student_name.toString().toLowerCase().startsWith(value.toString().toLowerCase())
+					item.code.toString().toLowerCase().startsWith(value.toString().toLowerCase()) ||
+					item.name.toString().toLowerCase().startsWith(value.toString().toLowerCase())
 
 				const includes =
-					item.student_code.toString().toLowerCase().includes(value.toString().toLowerCase()) ||
-					item.student_name.toString().toLowerCase().includes(value.toString().toLowerCase())
+					item.code.toString().toLowerCase().includes(value.toString().toLowerCase()) ||
+					item.name.toString().toLowerCase().includes(value.toString().toLowerCase())
 
 				if (startsWith) {
 					return startsWith;
@@ -164,7 +176,7 @@ const StudentRegisterType = () => {
                                     <h5>{t('Өгөгдөл байхгүй байна')}</h5>
                                 </div>
                             )}
-                            columns={getColumns(currentPage, rowsPerPage, searchValue.length ? filteredData : datas, handleUpdateModal, user)}
+                            columns={getColumns(currentPage, rowsPerPage, searchValue.length ? filteredData : datas, handleUpdateModal, user, handleDelete)}
                             sortIcon={<ChevronDown size={10} />}
                             paginationPerPage={rowsPerPage}
                             paginationDefaultPage={currentPage}
@@ -175,8 +187,7 @@ const StudentRegisterType = () => {
                         />
 					</div>
 				}
-				{modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} />}
-				{ update_modal && <UpdateModal editId={edit_id} open={update_modal} handleEdit={handleUpdateModal} refreshDatas={getDatas} /> }
+				{modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} editId={edit_id}/>}
 			</Card>
         </Fragment>
     )

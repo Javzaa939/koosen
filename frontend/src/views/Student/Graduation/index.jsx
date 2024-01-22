@@ -21,11 +21,13 @@ import { getColumns } from './helpers'
 import Addmodal from './Add'
 import EditModal from './Edit'
 import SignatureModal from './Signature'
-
+import CreateModal from './Graduate'
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import useModal from '@hooks/useModal'
 import useUpdateEffect from '@hooks/useUpdateEffect'
+
+import GraduationCommand from './Command'
 
 // drag-and-drop.scss
 import '@styles/react/libs/drag-and-drop/drag-and-drop.scss'
@@ -60,6 +62,9 @@ const Graduation = () => {
     const [groupOption, setGroupOption] = useState([])
     const [select_value, setSelectValue] = useState(values)
     const [datas, setDatas] = useState([])
+    const [createModal, setCreateModal] = useState(false);
+    const [commandModal, setCommandModal] = useState(false);
+
 
     const [ listArr, setListArr ] = useState([])
     const [ formModal, setFormModal ] = useState(false)
@@ -87,12 +92,21 @@ const Graduation = () => {
 	}
 
     // Loader
-	const { isLoading, fetchData, Loader } = useLoader({ isFullScreen: true })
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
+	const {
+        isLoading,
+        fetchData,
+        Loader
+    } = useLoader({  })
+
+    const {
+        Loader: tableLoader,
+        isLoading: isTableLoading,
+        fetchData: allFetch
+    } = useLoader({isFullScreen: false})
 
 	/* Устгах функц */
 	const handleDelete = async(id) => {
-        const { success } = await fetchData(graduateApi.delete(id))
+        const { success } = await allFetch(graduateApi.delete(id))
         if(success)
         {
             getDatas()
@@ -102,7 +116,7 @@ const Graduation = () => {
     /* Устгах функц */
 	const handleDeleteSig = async(sigId) =>
     {
-		const { success } = await fetchData(signatureApi.delete(sigId))
+		const { success } = await allFetch(signatureApi.delete(sigId))
 		if(success) {
 			let removeVal = listArr.findIndex(({ id }) => id === sigId)
             listArr.splice(removeVal, 1)
@@ -141,7 +155,7 @@ const Graduation = () => {
 
     useEffect(() => {
         getDatas()
-    }, [sortField, currentPage, rowsPerPage, select_value, school_id])
+    }, [sortField, currentPage, rowsPerPage, select_value])
 
     useEffect(() => {
         getDepartment()
@@ -179,7 +193,7 @@ const Graduation = () => {
             setCurrentPage(page_count)
         }
 
-        const { success, data } = await allFetch(graduateApi.get(rowsPerPage, currentPage, sortField, searchValue, select_value.department, select_value.degree, select_value.group))
+        const { success, data } = await fetchData(graduateApi.get(rowsPerPage, currentPage, sortField, searchValue, select_value.department, select_value.degree, select_value.group))
         if(success)
         {
             setTotalCount(data?.count)
@@ -209,7 +223,7 @@ const Graduation = () => {
 
     async function getSignatureDatas()
     {
-        const { success, data } = await fetchData(signatureApi.get(2))
+        const { success, data } = await allFetch(signatureApi.get(2))
         if (success)
         {
             setListArr(data)
@@ -223,7 +237,7 @@ const Graduation = () => {
 
         let data = { from_id, to_id }
 
-        const { success } = await fetchData(signatureApi.changeorder(data, 2))
+        const { success } = await allFetch(signatureApi.changeorder(data, 2))
         if (success)
         {
             getSignatureDatas()
@@ -251,6 +265,14 @@ const Graduation = () => {
     {
         setFormModal(!formModal)
         setUpdateData(data)
+    }
+
+    function handleCreateModal() {
+        setCreateModal(!createModal)
+    }
+
+    function handleCommandCreateModal() {
+        setCommandModal(!commandModal)
     }
 
 	return (
@@ -340,7 +362,7 @@ const Graduation = () => {
                     </div>
                 </CardHeader>
                 <Row className="justify-content-between mx-0 mt-1 mb-1" sm={12}>
-                    <Col md={4}>
+                    <Col md={3}  sm={6}>
                         <Label className="form-label" for="department">
                             {t('Тэнхим')}
                         </Label>
@@ -378,7 +400,7 @@ const Graduation = () => {
                             }}
                         />
                     </Col>
-                    <Col md={4}>
+                    <Col md={3}  sm={6}>
                         <Label className="form-label" for="degree">
                             {t('Боловсролын зэрэг')}
                         </Label>
@@ -416,7 +438,7 @@ const Graduation = () => {
                             }}
                         />
                     </Col>
-                    <Col md={4}>
+                    <Col md={3} sm={6}>
                         <Label className="form-label" for="group">
                             {t('Анги')}
                         </Label>
@@ -453,6 +475,10 @@ const Graduation = () => {
                                 )
                             }}
                         />
+                    </Col>
+                    <Col sm={6} md={6} lg={3} className='mt-2 d-flex'>
+                        <Button size='sm' className='me-1' color='primary' disabled={select_value.group ? false : true} onClick={handleCreateModal}>Төгсөлтийн шалгалт үүсгэх</Button>
+                        <Button size='sm' className='me-1' color='primary' disabled={datas.length > 0 ? false : true} onClick={handleCommandCreateModal}>Төгсөлтийн тушаал оруулах</Button>
                     </Col>
                 </Row>
                 <Row className='mt-1 d-flex justify-content-between mx-0'>
@@ -532,10 +558,42 @@ const Graduation = () => {
                     />
                 </div>
         	</Card>
-            {modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} select_value={select_value}/>}
-            {edit_modal && <EditModal open={edit_modal} handleModal={editModal} graduate_id={graduate_id} refreshDatas={getDatas}/>}
+            {
+                modal
+                ?
+                    <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} select_value={select_value} graduate_id={graduate_id}/>
+                :
+                null
+            }
+            {
+                edit_modal
+                ?
+                    <EditModal open={edit_modal} handleModal={editModal} graduate_id={graduate_id} refreshDatas={getDatas}/>
+                :
+                null
+            }
+            {
+                createModal
+                ?
+                <CreateModal open={createModal} handleModal={handleCreateModal} group={select_value?.group} refreshDatas={getDatas}/>
+                :
+                null
 
-            { formModal && <SignatureModal open={formModal} handleModal={handleModalSig} refreshDatas={getSignatureDatas} defaultDatas={updateData} /> }
+            }
+            {
+                formModal
+                ?
+                    <SignatureModal open={formModal} handleModal={handleModalSig} refreshDatas={getSignatureDatas} defaultDatas={updateData}/>
+                :
+                    null
+            }
+            {
+                commandModal
+                ?
+                <GraduationCommand open={commandModal} handleModal={handleCommandCreateModal} refreshDatas={getDatas}/>
+                :
+                null
+            }
 
             {/* Шинэ хуудас руу үсэргэх товч */}
             <Link className='d-none' to='/' id='clickBtn' target='_blank' ></Link>

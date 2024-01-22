@@ -1,6 +1,5 @@
 import os
 
-from googletrans import Translator
 
 from datetime import date
 
@@ -8,6 +7,7 @@ from rest_framework import mixins
 from rest_framework import generics
 
 from django.conf import settings
+from django.db import connection
 from django.db import transaction
 from django.db.models import Max, Sum, F, FloatField, Q, Value
 from django.db.models.functions import Replace, Upper
@@ -18,12 +18,14 @@ from main.utils.function.pagination import CustomPagination
 from main.decorators import login_required
 
 from rest_framework.filters import SearchFilter
-from main.utils.file import remove_folder, split_root_path
+from main.utils.file import remove_folder
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 from main.utils.function.pagination import CustomPagination
-from main.utils.function.utils import str2bool, has_permission, get_lesson_choice_student, remove_key_from_dict, get_fullName, get_student_score_register, calculate_birthday, null_to_none, bytes_image_encode, get_active_year_season,start_time
+from main.utils.function.utils import str2bool, has_permission, get_lesson_choice_student, remove_key_from_dict, get_fullName, get_student_score_register, calculate_birthday, null_to_none, end_time, get_active_year_season,start_time, dict_fetchall
 # from main.khur.XypClient import citizen_regnum, highschool_regnum
+
+from core.models import SubOrgs, SumDuureg, AimagHot
 
 from lms.models import Student, StudentAdmissionScore, StudentEducation, StudentLeave, StudentLogin, TimeTable
 from lms.models import StudentMovement
@@ -54,8 +56,6 @@ from lms.models import SystemSettings
 from lms.models import PaymentBeginBalance
 from lms.models import Country
 
-from core.models import SubOrgs, SumDuureg, BagHoroo, AimagHot
-
 from .serializers import StudentListSerializer
 from .serializers import StudentRegisterSerializer
 from .serializers import StudentRegisterListSerializer
@@ -69,7 +69,7 @@ from .serializers import StudentEducationSerializer
 from .serializers import StudentEducationListSerializer
 from .serializers import SignaturePeoplesSerializer
 from .serializers import StudentAddressListSerializer
-from .serializers import StudentAddressSerializer
+from .serializers import GraduationWorkStudentListSerializer
 from .serializers import StudentAdmissionScoreSerializer
 from .serializers import StudentAdmissionScoreListSerializer
 from .serializers import GroupListSerializer
@@ -88,16 +88,55 @@ from .serializers import BigSchoolsSerializer
 from .serializers import StudentDefinitionSerializer
 from .serializers import ScoreRegisterDefinitionSerializer
 from .serializers import SeasonSerializer
-from .serializers import CalculatedGpaOfDiplomaPrintSerializer
 from .serializers import StudentAttachmentSerializer
 from .serializers import GraduationWorkPrintSerailizer
 from .serializers import StudentVizListSerializer
 from .serializers import StudentVizSerializer
 from .serializers import StudentSimpleListSerializer
 
-translator = Translator()
-
 STUDY_YEAR = 12
+
+
+# Төгссөн оюутны мэдээлэл авах
+@permission_classes([IsAuthenticated])
+class StudentGraduate1APIView(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    generics.GenericAPIView
+):  
+    queryset = Student.objects.all().order_by('first_name')
+    serializer_class = StudentListSerializer
+
+    pagination_class = CustomPagination
+    filter_backends = [SearchFilter]
+    search_fields = ['first_name', 'last_name', 'code', 'register_num', 'group__name', 'group__profession__name']
+
+    def get_queryset(self):
+        queryset = self.queryset
+        department = self.request.query_params.get('department')
+        degree = self.request.query_params.get('degree')
+        profession = self.request.query_params.get('profession')
+        group = self.request.query_params.get('group')
+        if department:
+            queryset = queryset.filter(department=department)
+        if degree:
+            queryset = queryset.filter(group__degree_id=degree)
+        if profession:
+            queryset = queryset.filter(group__profession_id=profession)
+        if group:
+            queryset = queryset.filter(group_id=group)
+        return queryset 
+
+    def get(self, request):
+        
+        status = StudentRegister.objects.filter(Q(Q(code=2) | Q(name__icontains='Төгссөн'))).first()
+        self.queryset = self.queryset.filter(status=status)
+
+        all_list = self.list(request).data
+    
+        return request.send_data(all_list)
+
+
 
 @permission_classes([IsAuthenticated])
 class GroupOneAPIView(
@@ -209,6 +248,8 @@ class GroupAPIView(
         degree = self.request.query_params.get('degree')
         profession = self.request.query_params.get('profession')
         join = self.request.query_params.get('join')
+        sorting = self.request.query_params.get('sorting')
+
         # search_value = self.request.query_params.get('search')
 
         # Сургуулиар хайлт хийх
@@ -231,6 +272,12 @@ class GroupAPIView(
         if join:
             queryset = queryset.filter(join_year=join)
 
+        # Sort хийх үед ажиллана
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
         # хайлт хийх
         # if search_value:
         #     queryset = filter_queries(queryset.model, search_value)
@@ -435,7 +482,7 @@ class StudentRegisterAPIView(
         # Ангиар хайлт хийх
         if group:
             queryset = queryset.filter(group_id=group)
-
+        # Төлвөөр хайлт хийх
         if status:
             queryset = queryset.filter(status=status)
 
@@ -1769,7 +1816,7 @@ class GraduationWorkAPIView(
     mixins.ListModelMixin,
     generics.GenericAPIView
 ):
-    queryset = GraduationWork.objects.all()
+    queryset = GraduationWork.objects.all().order_by('student__first_name')
     serializer_class = GraduationWorkSerializer
 
     pagination_class = CustomPagination
@@ -1846,6 +1893,7 @@ class GraduationWorkAPIView(
         "Төгсөлтийн ажил засах"
 
         data = request.data
+        stype = data.get('lesson_type')
         lesson_ids = data['lesson']
         del data['lesson']
 
@@ -1862,11 +1910,17 @@ class GraduationWorkAPIView(
             if not serializer.is_valid(raise_exception=False):
                 return request.send_error_valid(serializer.errors)
 
-            updated_qs = self.update(request).data
+            self.perform_update(serializer)
+            updated_qs = serializer.data
             updated_qs = self.queryset.get(id=updated_qs.get("id"))
-            # updated_qs.lesson.all().remove()
-            updated_qs.lesson.clear()
-            updated_qs.lesson.add(*lesson_ids)
+
+            old_lesson_ids = updated_qs.lesson.all()
+            if stype == 1 and old_lesson_ids:
+                updated_qs.lesson.remove()
+            else:
+                if len(lesson_ids) > 0:
+                    updated_qs.lesson.clear()
+                    updated_qs.lesson.add(*lesson_ids)
 
         except Exception as e:
             print(e)
@@ -1889,7 +1943,7 @@ class StudentGraduateListAPIView(
     """ Төгсөлтийн оюутан бүртгэлийг жагсаалт """
 
     queryset = Student.objects.all()
-    serializer_class = StudentListSerializer
+    serializer_class = StudentSimpleListSerializer
 
     def get_queryset(self):
         queryset = self.queryset
@@ -1913,6 +1967,11 @@ class StudentGraduateListAPIView(
         return queryset
 
     def get(self, request):
+
+        # Зөвхөн суралцаж буй төлөвтэй оюутнууд
+        status = StudentRegister.objects.filter(Q(Q(name__icontains='Суралцаж буй') | Q(code=1))).first()
+        self.queryset = self.queryset.filter(status=status)
+
         student_list = self.list(request).data
         return request.send_data(student_list)
 
@@ -2398,28 +2457,64 @@ class StudentGpaDiplomaValuesAPIView(
         student_prof_qs = Student.objects.get(id=student_id).group.profession
 
         all_data = dict()
-        calculated_data = list()
 
-        for data in qs:
+        learning_plan_levels = LearningPlan.objects.filter(profession=student_prof_qs).values_list('lesson_level', flat=True).distinct('lesson_level')
 
-            data = CalculatedGpaOfDiplomaPrintSerializer(data, context={ "student_prof_qs": student_prof_qs }, many=False).data
-            calculated_data.append(data)
-            max_kredit = max_kredit + data['kredit']
-            all_score = all_score + (data['score'] * data['kredit'])
+        all_learn_levels = dict(LearningPlan.LESSON_LEVEL)
 
-        newlist = sorted(calculated_data, key=lambda i: (i['lesson']['lesson_level'], i['lesson']['lesson_type'], i['lesson']['season']))
-        print(qs)
-        print(student_prof_qs)
-        print(max_kredit)
-        print(all_score)
+        all_datas = []
+        for level in list(learning_plan_levels):
+            if level == (LearningPlan.DIPLOM or LearningPlan.MAG_DIPLOM or LearningPlan.DOC_DIPLOM):
+                continue
+
+            obj_datas = {}
+            obj_datas['name'] = all_learn_levels[level]
+
+            lesson_datas = []
+
+            obj_datas['eng_name'] = 'Education subject'
+            obj_datas['uig_name'] = 'ᠳᠡᢉᠡᠳᠦ ᠪᠣᠯᠪᠠᠰᠤᠷᠠᠯ ᠤ᠋ᠨ ᠰᠠᠭᠤᠷᠢ ᢈᠢᠴᠢᠶᠡᠯ'
+            if level == 2:
+                obj_datas['eng_name'] = 'Core'
+                obj_datas['uig_name'] = 'ᠮᠡᠷᢉᠡᠵᠢᠯ ᠦ᠋ᠨ ᠰᠠᠭᠤᠷᠢ ᢈᠢᠴᠢᠶᠡᠯ'
+            if level == 3:
+                obj_datas['eng_name'] = 'Major course'
+                obj_datas['uig_name'] = 'ᠮᠡᠷᢉᠡᠵᠢᠯ ᠦ᠋ᠨ ᢈᠢᠴᠢᠶᠡᠯ'
+
+            for data_qs in qs:
+                lesson_first_data = data_qs.lesson.all()
+                lesson_obj = lesson_first_data.first()
+
+                query = '''
+                    select lp.lesson_level, ls.name, ls.code, ls.id, ls.name_eng, ls.name_uig, ls.kredit from lms_learningplan lp
+                    inner join lms_lessonstandart ls
+                    on lp.lesson_id=ls.id
+                    where lp.profession_id = {profession_id} and lp.lesson_id = {lesson_id}
+                '''.format(profession_id=student_prof_qs.id, lesson_id=lesson_obj.id)
+
+                cursor = connection.cursor()
+                cursor.execute(query)
+                rows = list(dict_fetchall(cursor))
+
+                if len(rows) > 0:
+                    if rows[0]['lesson_level'] == level:
+                        lesson = rows[0]
+                        lesson['score'] = data_qs.score
+                        lesson['assesment'] = data_qs.assesment
+                        lesson_datas.append(lesson)
+
+                        max_kredit = max_kredit + lesson.get('kredit')
+                        score_qs = Score.objects.filter(score_max__gte=data_qs.score, score_min__lte=data_qs.score).first()
+                        all_score = all_score + (score_qs.gpa * lesson.get('kredit'))
+
+            obj_datas['lessons'] = lesson_datas
+            all_datas.append(obj_datas)
+
         final_gpa = all_score / max_kredit
-        score_qs = Score.objects.filter(score_max__gte=final_gpa, score_min__lte=final_gpa).first()
+        final_gpa = format(final_gpa, ".2f")
 
-        if score_qs:
-            score_assesment = score_qs.gpa
-
-        all_data['score'] = { 'assesment': score_assesment, 'max_kredit': max_kredit }
-        all_data['lessons'] = newlist
+        all_data['score'] = { 'assesment': final_gpa, 'max_kredit': max_kredit }
+        all_data['lessons'] = all_datas
 
         # GraduationWork
         graduationwork_qs = GraduationWork.objects.filter(student_id=student_id).last()
@@ -2539,6 +2634,7 @@ class StudentVizStatusAPIView(
             return request.send_info("INF_002")
 
 
+@permission_classes([IsAuthenticated])
 class StudentDownloadAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin
@@ -2600,6 +2696,7 @@ class StudentDownloadAPIView(
         return request.send_data(student_list)
 
 
+@permission_classes([IsAuthenticated])
 class GroupLessonAPIView(
     generics.GenericAPIView,
 ):
@@ -2645,6 +2742,7 @@ class GroupLessonAPIView(
         return request.send_data(all_list)
 
 
+@permission_classes([IsAuthenticated])
 class StudentScoreLessonAPIView(
     generics.GenericAPIView
 ):
@@ -2658,6 +2756,7 @@ class StudentScoreLessonAPIView(
         return request.send_data(list(lesson_scores))
 
 
+@permission_classes([IsAuthenticated])
 class StudentArrivedApproveAPIView(
     generics.GenericAPIView
 ):
@@ -2725,3 +2824,170 @@ class StudentArrivedApproveAPIView(
                 return request.send_error('ERR_002', e.__str__())
 
         return request.send_info('INF_001', 'Амжилттай шилжилт хөдөлгөөн хийлээ.')
+
+
+@permission_classes([IsAuthenticated])
+class SignatureGroupAPIView(
+    generics.GenericAPIView
+):
+    """ Төгсөгчдийг ангиар нь үүсгэх """
+
+    queryset = GraduationWork.objects.all()
+
+    @has_permission(must_permissions=['lms-student-graduate-create'])
+    def post(self, request):
+
+        user = request.user
+        lesson_year, lesson_season = get_active_year_season()
+        datas = request.data
+        group = datas.get('group')
+        students = datas.get('students')
+        group_obj = Group.objects.get(pk=group)
+
+        if 'students' in datas:
+            del datas['students']
+
+        if 'group' in datas:
+            del datas['group']
+
+        datas['lesson_year'] = lesson_year
+        datas['lesson_season_id'] = lesson_season
+        datas['lesson_type'] = GraduationWork.ATTACHMENT_SHALGALT
+        datas['created_user'] = user
+
+        # Тухайн ангийн мэргэжил
+        profession = group_obj.profession
+
+        # Тухайн ангийн боловсролын зэрэг
+        degree_code = group_obj.degree.degree_code
+
+        # Мэргэжлийн зэргээс хамаарч дипломын хичээл
+        lessons = LearningPlan.objects.filter(profession=profession, lesson_level=LearningPlan.DIPLOM).values_list('lesson', flat=True)
+
+        if degree_code == 'E':
+            lessons = LearningPlan.objects.filter(profession=profession, lesson_level=LearningPlan.MAG_DIPLOM).values_list('lesson', flat=True)
+        elif degree_code == 'F':
+            lessons = LearningPlan.objects.filter(profession=profession, lesson_level=LearningPlan.DOC_DIPLOM).values_list('lesson', flat=True)
+
+        with transaction.atomic():
+            try:
+                for student in students:
+                    datas['student_id'] = student.get('id')
+                    graduate_obj, created = GraduationWork.objects.update_or_create(
+                        student_id = student.get('id'),
+                        lesson_year = lesson_year,
+                        lesson_season_id = lesson_season,
+                        defaults={
+                            **datas
+                        }
+                    )
+                    graduate_obj.lesson.clear()
+                    graduate_obj.lesson.add(*list(lessons))
+            except Exception as e:
+                return request.send_error('ERR_002')
+
+        return request.send_info('INF_001')
+
+@permission_classes([IsAuthenticated])
+class CommandAPIView(
+    generics.GenericAPIView,
+    mixins.CreateModelMixin,
+):
+    queryset = GraduationWork.objects.all()
+
+    def post(self, request):
+        "Тушаал шинээр үүсгэх нь "
+
+        user = request.user
+        lesson_year, lesson_season = get_active_year_season()
+
+        datas = request.data
+        students = datas.get('students')
+        decision_date = datas.get('decision_date')
+        graduation_date = datas.get('graduation_date')
+        graduation_number = datas.get('graduation_number')
+
+        datas['lesson_year'] = lesson_year
+        datas['lesson_season_id'] = lesson_season
+        datas['lesson_type'] = GraduationWork.ATTACHMENT_SHALGALT
+        datas['created_user'] = user
+
+        with transaction.atomic():
+            try:
+                for student in students:
+                    GraduationWork.objects.update_or_create(
+                        student_id = student.get('id'),
+                        lesson_year = lesson_year,
+                        lesson_season_id = lesson_season,
+                        defaults={
+                            "decision_date":decision_date,
+                            "graduation_number":graduation_number,
+                            "graduation_date":graduation_date
+                        }
+                    )
+
+            except Exception as e:
+                return request.send_error('ERR_002')
+
+        return request.send_info('INF_001')
+
+
+@permission_classes([IsAuthenticated])
+class StudentCommandListAPIView(
+    mixins.ListModelMixin,
+    generics.GenericAPIView
+):
+    """ Төгсөлтын ажлын оюутны жагсаалт """
+
+    queryset = GraduationWork.objects.all()
+    serializer_class = GraduationWorkStudentListSerializer
+
+    def get(self, request):
+        " Идэвхитэй жил, улиралд төгсөх оюутны жагсаалт "
+
+        year, season = get_active_year_season()
+
+        stud_qs = self.queryset.filter(lesson_year=year, lesson_season=season).values_list('student', flat=True)
+        student_data = Student.objects.filter(id__in=stud_qs).values("id", "code", "last_name", "first_name")
+
+        data = list(student_data)
+        return request.send_data(data)
+
+
+@permission_classes([IsAuthenticated])
+class RegistrationAndDiplomAPIView(
+    generics.GenericAPIView,
+    mixins.UpdateModelMixin
+):
+    """ Төгсөлтийн ажлын дипломын дугаар болон бүртгэлийн дугаар засах """
+
+    queryset = GraduationWork.objects.all()
+
+    @transaction.atomic
+    def put(self, request, pk=None):
+        """ diplom_num : дипломын дугаар
+            registration_num : бүртгэлийн дугаар
+        """
+
+        request_data = request.data
+        diplom_num = request_data.get('diplom_num')
+        registration_num = request_data.get('registration_num')
+
+        with transaction.atomic():
+            try:
+                qs = self.queryset.filter(id=pk)
+                if diplom_num:
+                    qs.update(
+                        diplom_num=diplom_num,
+                    )
+
+                if registration_num:
+                    qs.update(
+                        registration_num=registration_num,
+                    )
+
+            except Exception as e:
+                print(e)
+                return request.send_error("ERR_002")
+
+        return request.send_info('INF_002')

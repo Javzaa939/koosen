@@ -4,7 +4,6 @@ from lms.models import TimeTable
 from lms.models import GraduationWork
 from lms.models import ScoreRegister
 from lms.models import LessonStandart
-from lms.models import Score
 from lms.models import Group
 
 from rest_framework import mixins
@@ -21,13 +20,11 @@ from apps.timetable.serializers import ScoreGpaListSerializer
 from .serializers import ScoreRegisterSerializer
 from .serializers import GraduationWorkListSerializer
 from .serializers import AdmissionListSerializer
-from .serializers import ScoreRegisterlolSerializer
 from .serializers import GroupListFilterSubSchoolSerializer
 
-from main.utils.function.utils import get_lesson_choice_student, get_fullName
+from main.utils.function.utils import get_lesson_choice_student, student__full_name, score_register__score_total, lesson_standart__code_name
 from main.utils.function.utils import str2bool, has_permission
 from rest_framework.decorators import permission_classes
-
 
 
 class StudentListByLessonTeacherAPIView(
@@ -280,90 +277,215 @@ class GroupListNoLimitAPIView(
 ):
     """Ангийн дүнгийн жагсаалт"""
 
-    queryset = ScoreRegister.objects.all()
-    serializer_class = ScoreRegisterlolSerializer
+    queryset = ScoreRegister.objects.all().select_related("student", "student__group", "lesson", "lesson_season", "assessment").values("student__last_name", "student__first_name", "student__code", "student__id", "lesson__kredit", "lesson_year", "lesson_season", "lesson_season__season_name", "teach_score", "exam_score", "lesson__code", "lesson__name", "assessment__assesment")
 
-    # @has_permission(must_permissions=['lms-print-score-read'])
+    @has_permission(must_permissions=['lms-print-score-read'])
     def get(self, request):
 
         group = request.query_params.get('group') # 45
+        qs = self.queryset
+        lesson_qs = LessonStandart.objects.all().values("id", "code", "name", "kredit")
+        score_qs = qs.filter(student__group=group, is_delete=False).distinct('student')
+        group_lessons = qs.filter(student__group=group, is_delete=False).distinct('lesson').values_list('lesson', flat=True)
         all_data = []
         result_datas = []
-        score_qs = self.queryset.filter(student__group=group, is_delete=False).distinct('student')
-        group_lessons = self.queryset.filter(student__group=group, is_delete=False).distinct('lesson').values_list('lesson', flat=True)
-
+        grade_lesson_list = []
         kredits = {}
         seasons = {}
+        id = 0
 
+        # Хичээлүүдийн үнэлгээний нийлбэрийг хадгалах dict-н хүснэгт бэлдэх нь
+        while id < len(group_lessons):
+            grade_dict = {
+                "A": 0,
+                "B": 0,
+                "C": 0,
+                "D": 0,
+                "F": 0
+            }
+            grade_lesson_list.append(grade_dict)
+            id += 1
+
+        # Сурагчаар гүйлгэх нь
         for group_list in score_qs:
+            # Сурагчдын бүтэн нэрийг авах хэсэг
+            full_name = student__full_name(group_list["student__last_name"], group_list["student__first_name"])
+            code_name = group_list["student__code"] + '-' + full_name
 
-            full_name = group_list.student.full_name()
-            code_name = group_list.student.code + '-' + full_name
-
+            # Хэрэгтэй хувьсагчдыг зарлах хэсэг
             lessons = {}
             total_kr = 0
-            onoo = 0
-            total_onoo = 0
+            # onoo = 0
+            id = 0
+            lesson_standart = None
+            grade_dict = {
+                "A": 0,
+                "B": 0,
+                "C": 0,
+                "D": 0,
+                "F": 0
+            }
+
+            # Хичээлээр гүйлгэх нь
             for lesson in group_lessons:
-                score = ScoreRegister.objects.filter(student=group_list.student, lesson=lesson).first()
-                lesson_year = score.lesson_year if score and score.lesson_year else ''
-                lesson_season = score.lesson_season.season_name if score and score.lesson_season else ''
+                # Сурагчын id болон хичээлээр хайх хэсэг
+                score = qs.filter(student=group_list["student__id"], lesson=lesson).first()
+
+                # score байхгүй үед
                 if not score:
-                    lesson_standart = LessonStandart.objects.filter(id=lesson).first()
-                    lesson_standart_name = lesson_standart.code_name if lesson_standart else ''
 
-                kredit = score.lesson.kredit if score else lesson_standart.kredit
+                    # Хичээлийн жилийг авах хэсэг
+                    lesson_year = ""
 
-                lesson_name = score.lesson.code_name if score else lesson_standart_name
-                total = score.score_total if score else '-'
+                    # Хичээлийн улиралыг авах хэсэг
+                    lesson_season = ""
+                    lesson_standart = lesson_qs.filter(id=lesson).first()
+                    lesson_standart_name = lesson_standart__code_name(lesson_standart["code"], lesson_standart["name"]) if lesson_standart else None
+
+                    if not lesson_standart:
+                        continue
+
+                    # Хичээлийн кредит авах хэсэг
+                    kredit = lesson_standart["kredit"]
+
+                    # Хичээлийн нэр авах хэсэг
+                    lesson_name = lesson_standart_name
+
+                    # Хичээлийн дүн авах хэсэг
+                    total = '-'
+
+                else:
+                    # Хичээлийн жилийг авах хэсэг
+                    if score["lesson_year"]:
+                        lesson_year = score["lesson_year"]
+                    else:
+                        lesson_year = ""
+
+                    # Хичээлийн улиралыг авах хэсэг
+                    if score["lesson_season"]:
+                        lesson_season = score["lesson_season__season_name"]
+                    else:
+                        lesson_season = ""
+
+                    # Хичээлийн кредит авах хэсэг
+                    kredit = score["lesson__kredit"]
+
+                    # Хичээлийн нэр авах хэсэг
+                    lesson_name = lesson_standart__code_name(score["lesson__code"], score["lesson__name"])
+
+                    # Хичээлийн дүн авах хэсэг
+                    total = score_register__score_total(score["teach_score"], score["exam_score"])
+
+                    # Сурагчын хичээлүүдийн үнэлгээний нийлбэр дүнг бодох хэсэг
+                    if score["assessment__assesment"]:
+                        if score["assessment__assesment"] == "A":
+                            grade_dict["A"] += 1
+                            grade_lesson_list[id]["A"] += 1
+
+                        elif score["assessment__assesment"] == "B":
+                            grade_dict["B"] += 1
+                            grade_lesson_list[id]["B"] += 1
+
+                        elif score["assessment__assesment"] == "C":
+                            grade_dict["C"] += 1
+                            grade_lesson_list[id]["C"] += 1
+
+                        elif score["assessment__assesment"] == "D":
+                            grade_dict["D"] += 1
+                            grade_lesson_list[id]["D"] += 1
+
+                        elif score["assessment__assesment"] == "F":
+                            grade_dict["F"] += 1
+                            grade_lesson_list[id]["F"] += 1
+
+                # score_total = full if score else 0
                 # нийт кр
                 total_kr = total_kr + kredit
 
-                score_total = score.score_total
-
                 # дундаж олох нь
-                onoo = onoo + kredit * score_total
+                # onoo = onoo + kredit * score_total
 
+                # Хичээлийн нэрний дагуу дүнг оруулах хэсэг
                 lessons[lesson_name] = total
 
+                # Хичээлийн жил болон улирлыг нэгтгэх хэсэг
                 lesson_year_season = lesson_year + '-' + lesson_season
                 kredits[lesson_name] = kredit
                 seasons[lesson_name] = lesson_year_season
 
+                id += 1
+
             # голч
-            total_onoo = round(onoo/total_kr, 2)
-            score_qs = Score.objects.filter(score_max__gte=total_onoo, score_min__lte=total_onoo).first()
-            if score_qs:
-                gpa = score_qs.gpa
+            # total_onoo = round(onoo/total_kr, 2)
+            # score_qs = Score.objects.filter(score_max__gte=total_onoo, score_min__lte=total_onoo).first()
+            # if score_qs:
+            #     gpa = score_qs.gpa
 
-            lessons['Нийт/кредит'] = total_kr
-            lessons['Голч/дүн'] = gpa
-
+            # Сурагчын бодогдсон мэдээллийг үндсэн хүснэгт рүү нэгтгэх хэсэг
             all_data.append(
                 {
                     'Овог/нэр': code_name,
-                    **lessons
+                    **lessons,
+                    'A': grade_dict['A'],
+                    'B': grade_dict['B'],
+                    'C': grade_dict['C'],
+                    'D': grade_dict['D'],
+                    'F': grade_dict['F']
+                }
+            )
+
+        id = 0
+
+        # Хичээл болгоны үнэлгээний нийлбэрийг мөр дата хэлбэрээр үндсэн хүснэгт рүү оруулах хэсэг
+        for key in grade_dict:
+            id = 0
+
+            for lesson in group_lessons:
+                # Хичээлийн нэрийг хайж авах хэсэг
+                lesson_standart = lesson_qs.filter(id=lesson).first()
+                lesson_standart_name = lesson_standart__code_name(lesson_standart["code"], lesson_standart["name"]) if lesson_standart else ""
+                lessons[lesson_standart_name] = grade_lesson_list[id][key]
+
+                id += 1
+
+            all_data.append(
+                {
+                    'Овог/нэр': key,
+                    **lessons,
+                    'A': '',
+                    'B': '',
+                    'C': '',
+                    'D': '',
+                    'F': ''
                 }
             )
 
         result_datas.append(
             {
                 'Овог/нэр': 'Кредит',
-                **kredits
+                **kredits,
+                'A': '',
+                'B': '',
+                'C': '',
+                'D': '',
+                'F': ''
             }
         )
         result_datas.append(
             {
                 'Овог/нэр': 'Улирал',
-                **seasons
+                **seasons,
+                'A': '',
+                'B': '',
+                'C': '',
+                'D': '',
+                'F': ''
             }
         )
 
         merged_datas = result_datas + all_data
 
         return request.send_data(merged_datas)
-
-
 
 
 @permission_classes([IsAuthenticated])

@@ -20,8 +20,10 @@ import useLoader from '@hooks/useLoader';
 import useApi from '@hooks/useApi';
 
 import { useNavigate } from "react-router-dom"
-
+import  useUpdateEffect  from '@hooks/useUpdateEffect'
 import { useTranslation } from "react-i18next";
+
+import { utils, writeFile } from 'xlsx-js-style';
 
 import Class from './Class'
 import Lesson from './Lesson'
@@ -40,7 +42,9 @@ const GradeList = () => {
     const [open_file, setFileModal] = useState(false)
     const [file, setFile] = useState(false)
     const [ mainData, setMainData ] = useState([])
-    const [ chosenGroup, setChosenGroup ] = useState()
+    const [ chosenGroup, setChosenGroup ] = useState('')
+    const [ lessonOption, setLessonOption ] = useState([])
+    const [ studentOption, setStudentOption ] = useState([])
 
     const [detailDatas, setDetailDatas] = useState({})
     const [pmodal, setPmodal] = useState()
@@ -54,24 +58,25 @@ const GradeList = () => {
     const { Loader, isLoading, fetchData } = useLoader({})
 
     const scoreApi = useApi().score.register
+    const lessonApi = useApi().study.lessonStandart
 
     const nav_menus = [
-            {
-                active_id: 1,
-                name: t('Анги'),
-                component: <Class setMainData={setMainData} setChosenGroup={setChosenGroup} setFileName={setGroupName}/>
-            },
-            {
-                active_id: 2,
-                name: t('Хичээл'),
-                component: <Lesson setMainData={setMainData} setChosenGroup={setChosenGroup}/>
-            },
-            {
-                active_id: 3,
-                name: t('Оюутан'),
-                component: <Student setMainData={setMainData} setChosenGroup={setChosenGroup}/>
-            },
-        ]
+        {
+            active_id: 1,
+            name: t('Анги'),
+            component: <Class setMainData={setMainData} setChosenGroup={setChosenGroup} setFileName={setGroupName}/>
+        },
+        {
+            active_id: 2,
+            name: t('Хичээл'),
+            component: <Lesson setMainData={setMainData} setChosenGroup={setChosenGroup}/>
+        },
+        {
+            active_id: 3,
+            name: t('Оюутан'),
+            component: <Student setMainData={setMainData} setChosenGroup={setChosenGroup}/>
+        },
+    ]
 
     useEffect(() => {
         var check = nav_menus.find(menus => menus.active_id == active)
@@ -91,6 +96,14 @@ const GradeList = () => {
     // Оруулах датаны жагсаалт харуулах модал
     const handleShowDetailModal = () => {
         setShowModal(!showModal)
+    }
+
+    async function getGroupLesson() {
+        const { success, data } = await fetchData(lessonApi.getLessonsGroup(chosenGroup))
+        if(success) {
+            setLessonOption(data?.lessons)
+            setStudentOption(data?.students)
+        }
     }
 
     async function onSubmit() {
@@ -123,6 +136,93 @@ const GradeList = () => {
 
     const modalToggler = () => {setPmodal(!pmodal)}
 
+
+    useUpdateEffect(
+        () =>
+        {
+            if(chosenGroup) {
+                getGroupLesson()
+            }
+        },
+        [chosenGroup]
+    )
+
+    function convert() {
+        var lessons = lessonOption.map((c) => c.full_name)
+
+        const staticCells = [
+            "№",
+            "Оюутны код",
+            "Оюутны нэр",
+            ...lessons
+        ]
+
+        const columns = studentOption.map((col, idx) => {
+
+            const dynamicKey = {
+                "№": idx + 1,
+                "Оюутны код": col.code,
+                "Оюутны нэр": col.full_name,
+            };
+
+            lessons.forEach((lesson) =>
+                dynamicKey[lesson] = ''
+            )
+
+            return dynamicKey;
+        });
+
+
+        const worksheet = utils.json_to_sheet(columns);
+        const workbook = utils.book_new();
+        utils.book_append_sheet(workbook, worksheet, "Sheet1");
+
+        utils.sheet_add_aoa(worksheet, [staticCells], { origin: "A1" });
+
+        const normalCells = {
+            border: {
+                top: { style: "thin", color: { rgb: "000000" } },
+                bottom: { style: "thin", color: { rgb: "000000" } },
+                left: { style: "thin", color: { rgb: "000000" } },
+                right: { style: "thin", color: { rgb: "000000" } }
+            },
+            font:{
+                sz:10
+            },
+            alignment: {
+                horizontal: 'center',
+                vertical: 'center',
+                wrapText: true
+            },
+        };
+
+        const startRow = 0;
+        const endRow = studentOption.length;
+        const startCol = 0;
+        const endCol = lessons.length + 3;
+
+        for (let row = startRow; row <= endRow; row++) {
+            for (let col = startCol; col <= endCol; col++) {
+              const cellAddress = utils.encode_cell({ r: row, c: col });
+
+                if (!worksheet[cellAddress]) {
+                    worksheet[cellAddress] = {};
+                }
+
+              worksheet[cellAddress].s = normalCells
+            }
+        }
+
+        worksheet["!cols"] = [{ wch: studentOption.length > 100 ? 3 : 2 }, { wch: 15 }, { wch: 20 }, { wch: 20 }, {wch: 11}  ];
+
+        worksheet["!rows"] = [
+            { hpx: 100 },
+        ];
+
+
+        return writeFile(workbook,'zagwar.xlsx')
+    }
+
     return (
         <Fragment>
             {pmodal ? <PrintModal pmodal={pmodal} modalToggler={modalToggler} navigatePrint={navigatePrint} groupId={chosenGroup} file_name={group_name}/> : ''}
@@ -133,7 +233,8 @@ const GradeList = () => {
                             <Button
                                 color='primary'
                                 className='m-50'
-                                href="/files/newtemplate.xlsx"
+                                onClick={() => {convert()}}
+                                disabled={chosenGroup ? false : true}
                             >
                                 <Download size={15} />
                                 <span className='align-middle ms-1'>{t('Загвар татах')}</span>

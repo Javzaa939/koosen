@@ -70,7 +70,7 @@ export default function Print()
             {
                 return (
                     <div className="ms-3 mt-2">
-                        <p className="fw-bolder" style={{fontSize: '8px', marginLeft: '10px', margin: '0px' }} >Хянасан: Хөтөлбөр хариуцсан мэргэжилтэн ............................................ </p>
+                        <p className="fw-bolder" style={{fontSize: '8px', marginLeft: '10px', margin: '0px' }} >Хянасан: Хөтөлбөр хариуцсан Хөтөлбөртэн ............................................ </p>
                         <p className="fw-bolder" style={{fontSize: '8px', marginLeft: '10px', margin: '0px' }} >Хянасан: Бүрэлдэхүүн сургуулийн захирал ............................................ </p>
                         <p className="fw-bolder" style={{fontSize: '8px', marginLeft: '10px', margin: '0px' }} >Боловсруулсан: Тэнхимийн ахлагч ............................................ </p>
                     </div>

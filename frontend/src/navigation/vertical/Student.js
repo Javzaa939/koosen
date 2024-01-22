@@ -7,7 +7,7 @@ export default [
         title: 'Оюутан',
         icon: <i className="fas fa-user-graduate"></i>,
         navLink: "/student",
-        children: [
+        navChildren: [
             {
                 id: 'student1',
                 title: 'Анги бүлгийн бүртгэл',
@@ -32,18 +32,18 @@ export default [
                 icon: <Circle size={8} />,
                 navLink: "student/shift"
             },
-            {
-                id: 'student5',
-                title: 'Төгсөлт',
-                icon: <Circle size={8} />,
-                navLink: "student/graduation"
-            },
-            {
-                id: 'student10',
-                title: 'Хавсралт',
-                icon: <Circle size={8} />,
-                navLink: "student/attachment"
-            },
+            // {
+            //     id: 'student5',
+            //     title: 'Төгсөлт',
+            //     icon: <Circle size={8} />,
+            //     navLink: "student/graduation"
+            // },
+            // {
+            //     id: 'student10',
+            //     title: 'Хавсралт',
+            //     icon: <Circle size={8} />,
+            //     navLink: "student/attachment"
+            // },
             {
                 id: 'student7',
                 title: 'Боловсролын зээлийн сан',
@@ -69,5 +69,33 @@ export default [
             //     navLink: "student/dormitory"
             // },
         ]
-    }
+    },
+    {
+        id: 'student12',
+            title: 'Төгсөлт',
+            icon: <i className="far fa-graduation-cap"></i>,
+            navLink: "/student",
+            children:
+            [
+                {
+                    id:'student17',
+                    title:'Төгсөгчид',
+                    icon: <Circle size={8} />,
+                    navLink:"student/graduates"
+                },
+                {
+                    id: 'student16',
+                    title: 'Төгсөлтийн ажил',
+                    icon: <Circle size={8} />,
+                    navLink: "student/graduation"
+                },
+                {
+                    id: 'student10',
+                    title: 'Хавсралт',
+                    icon: <Circle size={8} />,
+                    navLink: "student/attachment"
+                },
+                
+            ]
+    },
 ]

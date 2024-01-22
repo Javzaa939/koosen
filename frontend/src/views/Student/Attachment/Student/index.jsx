@@ -11,13 +11,13 @@ import { Mongolian } from "flatpickr/dist/l10n/mn.js"
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
+import  useUpdateEffect  from '@hooks/useUpdateEffect'
 
 import { getColumns } from '@views/Student/Attachment/Student/helpers/index.jsx'
 
 // ** Styles Imports
 import '@styles/react/libs/flatpickr/flatpickr.scss'
 import './style.css'
-import { useParams } from 'react-router-dom';
 
 export default function AttachmentStudent()
 {
@@ -28,6 +28,7 @@ export default function AttachmentStudent()
     const [ editDatatable, setEditDatatable ] = useState(false)
     const [ printValue, setPrintValue ] = useState("")
     const [ picker, setPicker ] = useState(new Date())
+    const [ is_loading, setLoading ] = useState(true)
 
     const [ checkedTableRowCount, setCheckedTableRowCount ] = useState([])
     const [ errorMessage, setErrorMessage ] = useState('')
@@ -55,11 +56,13 @@ export default function AttachmentStudent()
             fetchData(studentApi.scoreRegister(studentId)),
             fetchData(studentApi.calculateGpaDimploma(studentId)),
         ]).then((values) => {
+            if (values[0]?.success) {
+                setLoading(false)
+            }
             setDatas(values[0]?.data),
-            setCalculatedDatas(values[1].data)
+            setCalculatedDatas(values[1]?.data)
         })
     }
-
 
     useEffect(
         () =>
@@ -73,12 +76,12 @@ export default function AttachmentStudent()
                 getAllData()
             }
         },
-        [studentId]
+        []
     )
 
     function changeTableRowValues(value)
     {
-        let defaultSum = datas?.calculated_length
+        let defaultSum = datas?.calculated_length + 3
 
         let sum = 0
 
@@ -186,7 +189,7 @@ export default function AttachmentStudent()
         }
     }
 
-    useEffect(
+    useUpdateEffect(
         () =>
         {
             checkedValues.current = []
@@ -207,7 +210,7 @@ export default function AttachmentStudent()
     {
         let tableRowData = []
 
-        if (tableCount * 13 < allLength)
+        if (tableCount * 12 < allLength)
         {
             let residual = allLength % tableCount
             let notResidualValue = allLength - residual
@@ -221,7 +224,6 @@ export default function AttachmentStudent()
                     data++
                     residual--
                 }
-
                 tableRowData.push(data)
 
                 document.getElementById(`table${i}`).value = data
@@ -254,19 +256,19 @@ export default function AttachmentStudent()
         setCheckedTableRowCount(tableRowData)
     }
 
-    useEffect(
+    useUpdateEffect(
         () =>
         {
-            let allLength = datas?.calculated_length
+            let allLength = datas?.calculated_length + 3
             switch (printValue)
             {
                 case 'mongolian':
-                    var tableMax = 13
+                    var tableMax = 12
                     calculatePrintTableValue(allLength, tableMax, 6)
                     break;
 
                 case 'english':
-                    var tableMax = 13
+                    var tableMax = 12
                     calculatePrintTableValue(allLength, tableMax, 6)
                     break;
 
@@ -331,7 +333,7 @@ export default function AttachmentStudent()
 
     return (
         <Fragment>
-            { isLoading && Loader }
+            { (is_loading || isLoading) && Loader }
             <Card>
                 <div className="cursor-pointer hover-shadow m-1" onClick={() => handleNavigate()}>
                     <ChevronsLeft /> Буцах
@@ -391,6 +393,13 @@ export default function AttachmentStudent()
                                 <code className='text-dark' ><span className='fw-bolder'>{calculatedDatas.length}</span> хичээл сонгогдож хавсралтанд <span className='fw-bolder'>{datas?.calculated_length}</span> хичээл харагдана</code><AlertCircle id='alertCaluclated' className='' size={15} />
                                 <UncontrolledTooltip placement='top' target={`alertCaluclated`} >Багц хичээл байвал хичээлүүд багцлагдаж бодогдоно.</UncontrolledTooltip>
                             </p>
+                            {
+                                datas?.calculated_length
+                                ?
+                                    <p><code className='text-dark'><span className='fw-bolder'>{datas?.calculated_length}</span> хичээл дээр нэмэх нь 3 гарчиг нийт <span className='fw-bolder'>({datas?.calculated_length + 3}) мөр</span></code></p>
+                                :
+                                    null
+                            }
                             <Row>
                                 <Col md={3}>
                                     <Label className="form-label" for="table1">
@@ -540,6 +549,7 @@ export default function AttachmentStudent()
                         <DataTable
                             noHeader
                             className='react-dataTable'
+                            progressPending={is_loading}
                             noDataComponent={(
                                 <div className="my-2">
                                     <h5>{t('Өгөгдөл байхгүй байна')}</h5>

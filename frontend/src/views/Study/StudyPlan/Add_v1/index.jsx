@@ -85,7 +85,7 @@ const StudyPlanAdd = ({ open, handleModal, mergejil_id }) => {
                                 <Col tag="dt" sm="4" className="fw-bolder mb-1" >
                                     Ерөнхий чиглэл:
                                 </Col>
-                                <Col tag="dd" sm="8" className="mb-1">Боловсрол</Col>
+                                <Col tag="dd" sm="8" className="mb-1">{datas?.gen_direct_type_name}</Col>
                                 <Col tag="dt" sm="4" className="fw-bolder mb-1" >
                                     Төрөлжсөн чиглэл:
                                 </Col>
@@ -125,7 +125,7 @@ const StudyPlanAdd = ({ open, handleModal, mergejil_id }) => {
                             <>
                                 <div className='added-cards'>
                                     <div className={classnames('cardMaster rounded border p-1')} role="button" id="toggler" onClick={() => setBasicLesson(!is_basic_lesson)}>
-                                        1. Ерөнхий суурь хичээл
+                                        1. Дээд боловсролын суурь хичээл
                                         {datas?.general_base && <a className='ms-1 fw-bolder'>({datas?.general_base})</a>}
                                     </div>
                                 </div>

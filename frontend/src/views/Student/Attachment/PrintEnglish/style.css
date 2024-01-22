@@ -1,6 +1,6 @@
 @page {
     size: A4 landscape;
-    margin: 25px 30px 60px 30px;
+    margin: 30px 30px 20px 30px;
 }
 
 body {
@@ -10,7 +10,7 @@ body {
 }
 
 table {
-    font-size: 8px;
+    font-size: 9px;
 }
 
 .page-break {

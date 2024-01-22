@@ -14,6 +14,8 @@ urlpatterns = [
     path('info/all/<int:pk>/', StudentInfoAPIView.as_view()),
     path('info/simplelist/', StudentsListSimpleAPIView.as_view()),
 
+    # Төгссөн оюутны жагсаалт
+    path('info/graduate1/', StudentGraduate1APIView.as_view()),
 
     # Оюутны дэлгэрэнгүй мэдээлэл
     path('info/lesson/<int:lessonId>/', StudentLessonListAPIView.as_view()),
@@ -66,6 +68,7 @@ urlpatterns = [
 
     # Төгсөлтийн ажил
     path('graduation/', GraduationWorkAPIView.as_view()),
+    path('graduation/group/', SignatureGroupAPIView.as_view()),
     path('graduation/<int:pk>/', GraduationWorkAPIView.as_view()),
 
     # Боловсролын зээлийн сан
@@ -85,5 +88,12 @@ urlpatterns = [
     path('viz-status/', StudentVizStatusAPIView.as_view()),
 
     path('score-lesson/<int:student>/', StudentScoreLessonAPIView.as_view()),
+
+    # тушаал гаргах
+    path('command/', CommandAPIView.as_view()),
+    path('graduate/list/', StudentCommandListAPIView.as_view()),
+
+    # тушаалын бүртгэл болон дипломын дугаар
+    path('regisanddiplom/<int:pk>/', RegistrationAndDiplomAPIView.as_view()),
 
 ]

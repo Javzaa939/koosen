@@ -1,5 +1,5 @@
 // ** React imports
-import React, { Fragment } from 'react'
+import React, { Fragment , useEffect} from 'react'
 
 import { X } from "react-feather";
 
@@ -10,19 +10,19 @@ import { useForm, Controller } from "react-hook-form";
 
 import { Row, Col, Form, Modal, Input, Label, Button, ModalBody, ModalHeader, FormFeedback, Spinner } from "reactstrap";
 
-import { validate } from "@utils"
+import { convertDefaultValue, validate } from "@utils"
 
 import { validateSchema } from './validateSchema';
 import { t } from 'i18next';
 
-const Addmodal = ({ open, handleModal, refreshDatas }) => {
+const Addmodal = ({ open, handleModal, refreshDatas, editId,  handleEdit }) => {
 
     const CloseBtn = (
         <X className="cursor-pointer" size={15} onClick={handleModal} />
     )
 
     // ** Hook
-    const { control, handleSubmit, formState: { errors }, reset, setError } = useForm(validate(validateSchema));
+    const { control, handleSubmit, formState: { errors }, reset, setError, setValue} = useForm(validate(validateSchema));
 
 	// Loader
 	const { Loader, isLoading, fetchData } = useLoader({});
@@ -32,21 +32,58 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
     const learningApi = useApi().settings.learning
 
 	async function onSubmit(cdata) {
-        const { success, errors } = await postFetch(learningApi.post(cdata))
-        if(success) {
-            reset()
-            refreshDatas()
-            handleModal()
-        } else {
-            /** Алдааны мессэжийг input дээр харуулна */
-            setError(errors.field, { type: 'custom', message:  errors.msg});
+        cdata = convertDefaultValue(cdata)
+        if(editId) {
+            const { success, errors } = await fetchData(learningApi.put(cdata, editId))
+            if(success) {
+                reset()
+                refreshDatas()
+                handleEdit()
+            }
+            else {
+                /** Алдааны мессеж */
+                setError(errors.field, { type: 'custom', message: errors.msg});
+            }
+        }
+        else{
+
+            const { success, errors } = await postFetch(learningApi.post(cdata))
+            if(success) {
+                reset()
+                refreshDatas()
+                handleModal()
+            } else {
+                /** Алдааны мессэжийг input дээр харуулна */
+                setError(errors.field, { type: 'custom', message:  errors.msg});
+            }
         }
 	}
+
+    // засах үйлдэл
+    async function getDatas() {
+        if(editId) {
+            const { success, data } = await fetchData(learningApi.getOne(editId))
+            if(success) {
+                // засах үед дата байх юм бол setValue-р дамжуулан утгыг харуулна
+                if(data === null) return
+                for(let key in data) {
+                    if(data[key] !== null)
+                        setValue(key, data[key])
+                    else setValue(key, '')
+                }
+            }
+        }
+    }
+
+    useEffect(() => {
+        getDatas()
+    },[editId])
+
 
 	return (
         <Fragment>
             <Modal
-                isOpen={open}
+                isOpen={ open}
                 toggle={handleModal}
                 className="sidebar-lg hr-register"
                 modalClassName="modal-slide-in "
@@ -58,10 +95,10 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                     close={CloseBtn}
                     tag="div"
                 >
-                    <h5 className="modal-title">{t('Суралцах хэлбэр нэмэх')}</h5>
+                    <h5 className="modal-title">{ editId ?  t('Суралцах хэлбэр засах'): t('Суралцах хэлбэр нэмэх')}</h5>
                 </ModalHeader>
                 <ModalBody className="flex-grow-1">
-                    <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
+                    <Row tag={Form} className="gy-1" onSubmit={ handleSubmit(onSubmit) }>
                         <Col md={12}>
                             <Label className="form-label" for="learn_code">
                                 {t('Код')}
@@ -107,14 +144,19 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                             />
                             {errors.learn_name && <FormFeedback className='d-block'>{t(errors.learn_name.message)}</FormFeedback>}
                         </Col>
-                        <Col md={12} className="mt-2">
+                        <Col md={12} className=" text-center mt-2">
                             <Button className="me-2" color="primary" type="submit" disabled={postLoading}>
                             {postLoading &&<Spinner size='sm' className='me-1'/>}
                                 {t('Хадгалах')}
                             </Button>
-                            <Button color="secondary" type="reset" outline  onClick={handleModal}>
-                                {t('Буцах')}
-                            </Button>
+                            {
+                                editId ?
+                                    null
+                                :
+                                <Button color="secondary" type="reset" outline  onClick={handleModal}>
+                                    {t('Буцах')}
+                                </Button>
+                            }
                         </Col>
                     </Row>
                 </ModalBody>

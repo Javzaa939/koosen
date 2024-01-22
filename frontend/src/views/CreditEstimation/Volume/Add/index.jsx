@@ -31,6 +31,7 @@ import {
 import { validate, convertDefaultValue } from "@utils"
 
 import { t } from 'i18next';
+import useUpdateEffect from '@hooks/useUpdateEffect'
 
 import AuthContext from '@context/AuthContext'
 import SchoolContext from "@context/SchoolContext"
@@ -38,7 +39,7 @@ import SchoolContext from "@context/SchoolContext"
 import { validateSchema } from '../validateSchema';
 
 
-const Addmodal = ({ open, handleModal, refreshDatas, year, dep_id, season}) => {
+const Addmodal = ({ open, handleModal, refreshDatas, year, dep_id, season, lesson_id, teacher_id}) => {
 
     const CloseBtn = (
         <X className="cursor-pointer" size={15} onClick={handleModal} />
@@ -53,18 +54,17 @@ const Addmodal = ({ open, handleModal, refreshDatas, year, dep_id, season}) => {
     const { user } = useContext(AuthContext)
     const { school_id } = useContext(SchoolContext)
 
-    const [department_option, setDepartment] = useState([])
     const [lesson_option, setLesson] = useState([])
     const [lesson_type_option, setType] = useState([])
     const [teacher_option, setTeacher] = useState([])
     const [group_option, setGroup] = useState([])
     const [selectedGroups, setSelectedGroups] = useState([])
-    const [ seasonOption, setSeason] = useState([])
+    const [seasonOption, setSeason] = useState([])
 
     const [select_value, setSelectValue] = useState(values);
 
     // ** Hook
-    const { control, handleSubmit, reset, setError, formState: { errors } } = useForm(validate(validateSchema));
+    const { control, handleSubmit, setValue, reset, setError, formState: { errors } } = useForm(validate(validateSchema));
 
     // states
     const [is_loading, setLoader] = useState(false)
@@ -79,6 +79,26 @@ const Addmodal = ({ open, handleModal, refreshDatas, year, dep_id, season}) => {
     const creditVolumeApi = useApi().credit.volume
     const seasonApi = useApi().settings.season
 
+    useEffect(() => {
+        setValue('lesson', lesson_id)
+        setValue('lesson_season', season)
+        setSelectValue(current => {
+            return {
+                ...current,
+                lesson: lesson_id || '',
+            }
+        })
+    },[lesson_id])
+
+    useUpdateEffect(() => {
+        setValue('teacher', teacher_id)
+        setSelectValue(current => {
+            return {
+                ...current,
+                teacher: teacher_id || '',
+            }
+        })
+    },[teacher_option, teacher_id])
 
     //улирлын жагсаалт авах
     async function getSeason () {
@@ -105,7 +125,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, year, dep_id, season}) => {
     }
     // Хичээлийн жагсаалт
     async function getLesson() {
-        const { success, data } = await fetchData(lessonStandartApi.getList(dep_id))
+        const { success, data } = await fetchData(lessonStandartApi.getList(school_id, dep_id ? dep_id : ''))
         if(success) {
             setLesson(data)
         }
@@ -130,7 +150,9 @@ const Addmodal = ({ open, handleModal, refreshDatas, year, dep_id, season}) => {
         cdata['school'] = school_id
         cdata['department'] = dep_id
         cdata['lesson_year'] = year
+
         cdata['group'] = selectedGroups
+
         cdata = convertDefaultValue(cdata)
         const { success, error } = await fetchData(creditVolumeApi.post(cdata))
         if(success) {
@@ -145,15 +167,17 @@ const Addmodal = ({ open, handleModal, refreshDatas, year, dep_id, season}) => {
                 setError(error[key].field, { type: 'custom', message:  error[key].msg});
             }
         }
-
 	}
 
     useEffect(() => {
         getSeason()
-        getLesson()
     },[])
 
-    useEffect(
+    useEffect(() => {
+        getLesson()
+    },[dep_id])
+
+    useUpdateEffect(
         () =>
         {
             if (select_value?.lesson) {
@@ -162,7 +186,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, year, dep_id, season}) => {
                 getGroup()
             }
         },
-        [select_value]
+        [select_value?.lesson]
     )
 
 	return (
@@ -197,7 +221,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, year, dep_id, season}) => {
                             </Label>
                             <Controller
                                 control={control}
-                                defaultValue=''
+                                defaultValue={lesson_id || ''}
                                 name="lesson"
                                 render={({ field: { value, onChange} }) => {
                                     return (
@@ -235,28 +259,32 @@ const Addmodal = ({ open, handleModal, refreshDatas, year, dep_id, season}) => {
                                 {t('Улирал')}
                             </Label>
                             <Controller
-                                defaultValue={season}
                                 control={control}
-                                id='lesson_season'
-                                name='lesson_season'
-                                render={({ field }) => (
-                                    <Input
-                                        {...field}
-                                        type='select'
-                                        name='lesson_season'
-                                        bsSize='sm'
-                                        id='lesson_season'
-                                        invalid={errors.lesson_season && true}
-                                    >
-                                        <option value="">{t('-- Сонгоно уу --')}</option>
-                                        {
-                                            seasonOption.map((season, idx) => (
-                                                <option key={idx} value={season.id}>{season.season_name}</option>
-                                            ))
-                                        }
-                                    </Input>
-                                )}
-                            />
+                                defaultValue={season}
+                                name="lesson_season"
+                                render={({ field: { value, onChange} }) => {
+                                    return (
+                                        <Select
+                                            name="lesson_season"
+                                            id="lesson_season"
+                                            classNamePrefix='select'
+                                            isClearable
+                                            className={classnames('react-select', { 'is-invalid': errors.lesson_season })}
+                                            isLoading={isLoading}
+                                            placeholder={t(`-- Сонгоно уу --`)}
+                                            options={seasonOption || []}
+                                            value={seasonOption.find((c) => c.id === value)}
+                                            noOptionsMessage={() => 'Хоосон байна'}
+                                            onChange={(val) => {
+                                                onChange(val?.id || '')
+                                            }}
+                                            styles={ReactSelectStyles}
+                                            getOptionValue={(option) => option.id}
+                                            getOptionLabel={(option) => option.season_name}
+                                        />
+                                    )
+                                }}
+                            ></Controller>
                             {errors.lesson_season && <FormFeedback className='d-block'>{t(errors.lesson_season.message)}</FormFeedback>}
                         </Col>
                         <Col lg={12}>
@@ -285,7 +313,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, year, dep_id, season}) => {
                                                 setSelectValue(current => {
                                                     return {
                                                         ...current,
-                                                        type: val?.id || '',
+                                                        type: val?.id,
                                                     }
                                                 })
                                             }}
@@ -298,34 +326,13 @@ const Addmodal = ({ open, handleModal, refreshDatas, year, dep_id, season}) => {
                             ></Controller>
                             {errors.type && <FormFeedback className='d-block'>{t(errors.type.message)}</FormFeedback>}
                         </Col>
-                        {/* <Col lg={6} xs={6}>
-                            <Label className="form-label" for="credit">
-                                {t('Хичээлийн төрөлд хамаарах кредит цаг')}
-                            </Label>
-                            <Controller
-                                defaultValue=''
-                                control={control}
-                                id="credit"
-                                name="credit"
-                                render={({ field }) => (
-                                    <Input
-                                        id ="credit"
-                                        bsSize="sm"
-                                        {...field}
-                                        type="text"
-                                        invalid={errors.credit && true}
-                                    />
-                                )}
-                            />
-                            {errors.credit && <FormFeedback className='d-block'>{t(errors.credit.message)}</FormFeedback>}
-                        </Col> */}
                         <Col lg={12}>
                             <Label className="form-label" for="teacher">
                                 {t('Багш')}
                             </Label>
                             <Controller
                                 control={control}
-                                defaultValue=''
+                                defaultValue={teacher_id}
                                 name="teacher"
                                 render={({ field: { value, onChange} }) => {
                                     return (
@@ -341,11 +348,11 @@ const Addmodal = ({ open, handleModal, refreshDatas, year, dep_id, season}) => {
                                             value={teacher_option.find((c) => c.id === value)}
                                             noOptionsMessage={() => 'Хоосон байна'}
                                             onChange={(val) => {
-                                                onChange(val?.id || '')
+                                                onChange(val?.id)
                                                 setSelectValue(current => {
                                                     return {
                                                         ...current,
-                                                        teacher: val?.id || '',
+                                                        teacher: val?.id,
                                                     }
                                                 })
                                             }}

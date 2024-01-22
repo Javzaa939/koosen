@@ -44,10 +44,10 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 			name: `${t('Хичээлийн нэр')}`,
 			selector: (row) => <span title={row?.name}>{row?.name}</span>,
 
-			// selector: (row) => row?.name,
             sortable: true,
-			minWidth: "80px",
-			left: true
+			minWidth: "100px",
+			left: true,
+			wrap: true
 		},
 		{
 			header: 'kredit',

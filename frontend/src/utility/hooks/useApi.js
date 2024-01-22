@@ -180,7 +180,7 @@ function useApi(isDisplay=false) {
 			post: (data) => instance.post(`/student/signature/`, data),
 			put: (data, pk) => instance.put(`/student/signature/${pk}/`, data),
 			delete: (pk) => instance.delete(`/student/signature/${pk}/`),
-			changeorder: (data, typeNumber) => instance.post(`/student/signature/changeorder/?type=${typeNumber}`, data)
+			changeorder: (data, typeNumber) => instance.post(`/student/signature/changeorder/?type=${typeNumber}`, data),
 		},
 		settings: {
 			/** Бололвсролын зэрэг */
@@ -189,6 +189,8 @@ function useApi(isDisplay=false) {
 				post: data => instance.post('/settings/professionaldegree/', data),
 				getOne: (pk) => instance.get(`/settings/professionaldegree/${pk}/`),
 				put: (data, pk) => instance.put(`/settings/professionaldegree/${pk}/`, data),
+				delete: (pk) => instance.delete(`/settings/professionaldegree/${pk}/`),
+
 			},
 			/** Суралцах хэлбэр */
 			learning: {
@@ -196,6 +198,7 @@ function useApi(isDisplay=false) {
 				post: data => instance.post('/settings/learning/', data),
 				getOne: (pk) => instance.get(`/settings/learning/${pk}/`),
 				put: (data, pk) => instance.put(`/settings/learning/${pk}/`, data),
+				delete: (pk) => instance.delete(`settings/learning/${pk}/`),
 			},
 			/** Оюутны бүртгэлийн төрөл */
 			studentRegisterType: {
@@ -203,6 +206,7 @@ function useApi(isDisplay=false) {
 				post: data => instance.post('/settings/studentregister/', data),
 				getOne: (pk) => instance.get(`/settings/studentregister/${pk}/`),
 				put: (data, pk) => instance.put(`/settings/studentregister/${pk}/`, data),
+				delete: (pk) => instance.delete(`/settings/studentregister/${pk}/`),
 			},
 			/** Хичээлийн ангилал */
 			lessonCategory: {
@@ -210,6 +214,8 @@ function useApi(isDisplay=false) {
 				post: data => instance.post('/settings/lessoncategory/', data),
 				getOne: (pk) => instance.get(`/settings/lessoncategory/${pk}/`),
 				put: (data, pk) => instance.put(`/settings/lessoncategory/${pk}/`, data),
+				delete: (pk) => instance.delete(`/settings/lessoncategory/${pk}/`),
+
 			},
 			/** Хичээлийн төрөл */
 			lessonType: {
@@ -231,6 +237,8 @@ function useApi(isDisplay=false) {
 				post: data => instance.post('/settings/lessongroup/', data),
 				getOne: (pk) => instance.get(`/settings/lessongroup/${pk}/`),
 				put: (data, pk) => instance.put(`/settings/lessongroup/${pk}/`, data),
+				delete: (pk) => instance.delete(`/settings/lessongroup/${pk}/`),
+
 			},
 			/** улирал */
 			season: {
@@ -238,6 +246,8 @@ function useApi(isDisplay=false) {
 				post: data => instance.post('/settings/season/', data),
 				getOne: (pk) => instance.get(`/settings/season/${pk}/`),
 				put: (data, pk) => instance.put(`/settings/season/${pk}/`, data),
+				delete: (pk) => instance.delete(`/settings/season/${pk}/`),
+
 			},
 			/** Дүн */
 			score: {
@@ -245,6 +255,8 @@ function useApi(isDisplay=false) {
 				post: data => instance.post('/settings/score/', data),
 				getOne: (pk) => instance.get(`/settings/score/${pk}/`),
 				put: ( data, pk) => instance.put(`/settings/score/${pk}/`, data),
+				delete: (pk) => instance.delete(`/settings/score/${pk}/`),
+
 			},
 			activeyear:{
 				get: () => instance.get(`/settings/activeyear/`),
@@ -260,6 +272,8 @@ function useApi(isDisplay=false) {
 				post: data => instance.post('/settings/admissionlesson/', data),
 				getOne: (pk) => instance.get(`/settings/admissionlesson/${pk}/`),
 				put: (data, pk) => instance.put(`/settings/admissionlesson/${pk}/`, data),
+				delete: (pk) => instance.delete(`/settings/admissionlesson/${pk}/`),
+
 			},
 			/* Төлбөрийн хөнгөлөлтийн төрөл */
 			discountType:{
@@ -267,6 +281,8 @@ function useApi(isDisplay=false) {
 				post: data => instance.post('/settings/discounttype/', data),
 				getOne: (pk) => instance.get(`/settings/discounttype/${pk}/`),
 				put: (data, pk) => instance.put(`/settings/discounttype/${pk}/`, data),
+				delete: (pk) => instance.delete(`/settings/discounttype/${pk}/`),
+
 			},
 			/* Улсын нэр */
 			country:{
@@ -274,6 +290,8 @@ function useApi(isDisplay=false) {
 				post: data => instance.post('/settings/country/', data),
 				getOne: (pk) => instance.get(`/settings/country/${pk}/`),
 				put: (data, pk) => instance.put(`/settings/country/${pk}/`, data),
+				delete: (pk) => instance.delete(`/settings/country/${pk}/`),
+
 			},
 			/** Тодорхойлолтын гарын үсэг */
 			signature: {
@@ -286,6 +304,21 @@ function useApi(isDisplay=false) {
 				put: (data, pk) => instance.put(`/settings/signature/${pk}/`, data),
 				delete: (id) => instance.delete(`/settings/signature/${id}/`),
 			},
+			/** Эрх */
+			permission: {
+				get: (limit, page, sort, search) => instance.get(`/settings/permission/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}`),
+				post: (data) => instance.post(`/settings/permission/`, data),
+				put: (pk, data) => instance.put(`/settings/permission/${pk}/`, data),
+				delete: (pk) => instance.delete(`/settings/permission/${pk}/`),
+				list: () => instance.get(`/settings/permission/list/`),
+			},
+			/** Role */
+			role: {
+				get: () => instance.get(`/settings/role/`),
+				post: (data) => instance.post(`/settings/role/`, data),
+				put: (pk, data) => instance.put(`/settings/role/${pk}/`, data),
+				delete: (pk) => instance.delete(`/settings/role/${pk}/`),
+			}
 		},
 		/** Сургалт */
 		study: {
@@ -316,6 +349,7 @@ function useApi(isDisplay=false) {
 				},
 				getStudentDiplomaLessons: (selectedStudent) => instance.get(`/learning/lessonstandart/diploma/list/?student=${selectedStudent}`),
 				getType: (pk) => instance.get(`/learning/lessonstandart/type/${pk}/`),
+				getLessonsGroup: (group) => instance.get(`/learning/lessonstandart/group/${group}/`),
 
 				titleplan: {
 					get: (lessonID) => instance.get(`/learning/lessonstandart/titleplan/${lessonID}/`),
@@ -340,6 +374,7 @@ function useApi(isDisplay=false) {
 				getOne: (pk) => instance.get(`/learning/profession/${pk}/`),
 				deleteIntro: (pk) => instance.delete(`/learning/profession/${pk}/`),
 				putScore: (data, pk,) => instance.put(`/learning/profession/score/${pk}/`, data),
+				deleteScore: (pk) => instance.delete(`/learning/profession/score/${pk}/`),
 				getAddScoreOne: (pk) => instance.get(`/learning/profession/score/${pk}/`),
 
 				// Танилцуулга дээр зураг хадгалах
@@ -491,7 +526,7 @@ function useApi(isDisplay=false) {
 				getPartTeacher: () => { return instance.get(`/core/teacher/part/?school=${school_id}`) },
 				getSelectSchool: (school) => instance.get(`/core/teacher/?school=${school}`),
 				postRegister: (data) => instance.post(`/core/teacher/create/`, data),
-				getList: (limit, page, sort, search, sub_org, salbar) => instance.get(`/core/teacher/list/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&sub_org=${sub_org}&salbar=${salbar}`),
+				getList: (limit, page, sort, search, sub_org, salbar, position="") => instance.get(`/core/teacher/list/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&sub_org=${sub_org}&salbar=${salbar}&position=${position}`),
 				getOne: (pk) => instance.get(`/core/teacher/${pk}/`),
 				getLongList: () => instance.get(`/core/teacher/longlist/`),
 				getSchoolFilter: (school_id) => instance.get(`/core/teacher/listschoolfilter/?school=${school_id}`),
@@ -536,6 +571,7 @@ function useApi(isDisplay=false) {
 			/** Албан тушаал */
 			position: {
 				get: () => instance.get(`/core/position/`),
+				getAll: () => instance.get(`/core/position/all/`),
 			},
 
 		},
@@ -544,6 +580,8 @@ function useApi(isDisplay=false) {
 			/* Оюутны бүртгэл */
 			get: (limit, page, sort, search, department, degree, profession, group, join_year, status, level
 				) => instance.get(`/student/info/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&department=${department}&degree=${degree}&profession=${profession}&group=${group}&join_year=${join_year}&schoolId=${school_id}&status=${status}&level=${level}`),
+			// Төгссөн оюутны бүртгэл
+			getGraduate1: (limit, page, sort, search, department, degree, profession, group) => instance.get(`/student/info/graduate1/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&department=${department}&degree=${degree}&profession=${profession}&group=${group}`),
 			getDefinition: (limit, page, sort, search) => instance.get(`/student/definition/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&school=${school_id}`),
 			download: ( search, department, degree, profession, group, join_year, status, level) => instance.get(`/student/info/download/?search=${search}&department=${department}&degree=${degree}&profession=${profession}&group=${group}&join_year=${join_year}&schoolId=${school_id}&status=${status}&level=${level}`),
 			getDefinitionStudent: (type, id) => instance.get(`/student/definition/value/?type=${type}&id=${id}`),
@@ -563,6 +601,9 @@ function useApi(isDisplay=false) {
 			},
 			getSimpleList: () => instance.get(`/student/info/simplelist/`),
 			getGraduate: (depId, degree, group) => instance.get(`/student/info/graduate/?department=${depId}&degree=${degree}&group=${group}&school=${school_id}`),
+			postGraduate: (data) => instance.post(`/student/graduation/group/`, data),
+			putRegNumAndDiplom: (data, pk) => instance.put(`/student/regisanddiplom/${pk}/`, data),
+
 			getStudent: (department, degree, profession, group, join_year) => instance.get(`/student/info/list/?department=${department}&degree=${degree}&profession=${profession}&group=${group}&join_year=${join_year}&school=${school_id}`),
 			getGroup: (groups, type) => {
 				var group_ids = ''
@@ -578,6 +619,8 @@ function useApi(isDisplay=false) {
 				}
 				return instance.get(`/student/info/group/?${group_ids}&type=${type}`)
 			},
+
+			getStudentCommandList: () =>instance.get(`/student/graduate/list/?year=${cyear_name}&season=${cseason_id}`),
 			post: data => instance.post('/student/info/', data),
 			getOne: (pk, type) => instance.get(`/student/info/detail/${pk}/?type=${type}`),
 			put: (data, pk, type) => instance.put(`/student/info/detail/${pk}/?type=${type}`, data),
@@ -590,6 +633,7 @@ function useApi(isDisplay=false) {
 			calculateGpaDimplomaGet: (studentId) => instance.get(`/student/gpa-diploma-values/?id=${studentId}`),
 
 			getLessonStudent: (student) => instance.get(`/student/score-lesson/${student}/`),
+			postCommand: (data) => instance.post(`/student/command/`, data),
 
 			/* Анги бүлгийн бүртгэл */
 			group:{
@@ -740,15 +784,15 @@ function useApi(isDisplay=false) {
 			register:{
 				get: (limit, page, sort, search, day, group,
 				lesson, teacher, time, checked, type, isOptional) => instance.get(`/timetable/register/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&day=${day}&group=${group}&lesson=${lesson}&teacher=${teacher}&time=${time}&school=${school_id}&checked=${checked}&type=${type}&isOptional=${isOptional}&lesson_year=${cyear_name}&lesson_season=${cseason_id}`),
-				getCalendar: (isCalendar, selectedValue, stype) => instance.get(`/timetable/register-new/?school=${school_id}&year=${cyear_name}&season=${cseason_id}&isCalendar=${isCalendar}&selectedValue=${selectedValue}&type=${stype}`),
-				getCalendarKurats: (isCalendar, selectedValue, stype, start, end) => instance.get(`/timetable/register1/kurats/?school=${school_id}&year=${cyear_name}&season=${cseason_id}&isCalendar=${isCalendar}&selectedValue=${selectedValue}&type=${stype}&start=${start}&end=${end}`),
-				getSearchSelect: (selectType) => instance.get(`/timetable/resource/select/?school=${school_id}&year=${cyear_name}&season=${cseason_id}&stype=${selectType}`),
+				getCalendar: (isCalendar, selectedValue, stype, optionFilter) => instance.get(`/timetable/register-new/?school=${school_id}&year=${cyear_name}&season=${cseason_id}&isCalendar=${isCalendar}&selectedValue=${selectedValue}&type=${stype}&option=${optionFilter}`),
+				getCalendarKurats: (isCalendar, selectedValue, stype, start, end, optionFilter) => instance.get(`/timetable/register1/kurats/?school=${school_id}&year=${cyear_name}&season=${cseason_id}&isCalendar=${isCalendar}&selectedValue=${selectedValue}&type=${stype}&start=${start}&end=${end}&option=${optionFilter}`),
+				// getSearchSelect: (selectType) => instance.get(`/timetable/resource/select/?school=${school_id}&year=${cyear_name}&season=${cseason_id}&stype=${selectType}`),
 				post: (data, type) => instance.post(`/timetable/register/?type=${type}`, data),
 				getOne: (pk) => instance.get(`/timetable/register/${pk}/`),
 				getPotok: (lesson, potok) => instance.get(`/timetable/list/?lesson=${lesson}&potok=${potok}&school=${school_id}&year=${cyear_name}&season=${cseason_id}`),
 				put: (data, pk) => instance.put(`/timetable/register/${pk}/`, data),
 				delete: (pk) => instance.delete(`/timetable/register/${pk}/`),
-				selectionDatas: (selectType, selectedValue) => instance.get(`/timetable/resource1/?school=${school_id}&year=${cyear_name}&season=${cseason_id}&stype=${selectType}&selectedValue=${selectedValue}`),
+				selectionDatas: (selectType, selectedValue, optionFilter) => instance.get(`/timetable/resource1/?school=${school_id}&year=${cyear_name}&season=${cseason_id}&stype=${selectType}&selectedValue=${selectedValue}&option=${optionFilter}`),
 				setEvent: (data, id) => instance.put(`/timetable/event/${id}/`, data),
 				moveEvent: (data, id) => instance.put(`/timetable/register/new/${id}/`, data),
 				saveFile: (data) => instance.post(`/timetable/file/`, data)
@@ -1193,7 +1237,7 @@ function useApi(isDisplay=false) {
 
 			// Цагийн ачаалал
 			volume: {
-				get: (limit, page, sort, search, dep_id, year, teacherId) => instance.get(`/credit/volume/?page=${page}&limit=${limit}&sorting=${sort}&school=${school_id}&department=${dep_id}&lesson_year=${year}&teacher=${teacherId}&search=${search}`),
+				get: (limit, page, sort, search, dep_id, year, teacherId, season) => instance.get(`/credit/volume/?page=${page}&limit=${limit}&sorting=${sort}&school=${school_id}&department=${dep_id}&lesson_year=${year}&teacher=${teacherId}&search=${search}&lesson_season=${season}`),
 				post: data => instance.post(`/credit/volume/?lesson_year=${cyear_name}`, data),
 				estimate: (dep_id, year, season, teacher)=> instance.post(`/credit/volume/estimate/?dep_id=${dep_id}&schoolId=${school_id}&lesson_year=${year}&season=${season}&teacher=${teacher}`),
 				getOne: (pk) => instance.get(`/credit/volume/${pk}/`),
@@ -1455,6 +1499,27 @@ function useApi(isDisplay=false) {
 		},
 		db3:{
 			get: () => instance.get(`/statistic/db3/`),
+		},
+		db4:{
+			get: () => instance.get(`/statistic/db4/`),
+		},
+		db5:{
+			get: () => instance.get(`/statistic/db5/`),
+		},
+		db6:{
+			get: () => instance.get(`/statistic/db6/`),
+		},
+		db7:{
+			get: () => instance.get(`/statistic/db7/`),
+		},
+		db8:{
+			get: () => instance.get(`/statistic/db8/`),
+		},
+		db9:{
+			get: () => instance.get(`/statistic/db9/`),
+		},
+		db10:{
+			get: () => instance.get(`/statistic/db10/`),
 		}
 	},
 	dashboard: {

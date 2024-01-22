@@ -33,8 +33,6 @@ from main.utils.function.utils import get_active_year_season, get_week_num_from_
 
 class TeacherCreditVolumePlanSerializer(serializers.ModelSerializer):
 
-    type_name = serializers.SerializerMethodField(read_only=True)
-
     class Meta:
         model = TeacherCreditVolumePlan
         fields = "__all__"
@@ -92,20 +90,8 @@ class TeacherCreditVolumePrintSerializer(serializers.ModelSerializer):
         return group_name
 
     def get_exec_kr(self, obj):
-        credit = 0
-
-        lesson = LessonStandart.objects.filter(id=obj.lesson_id).first()
-
-        if obj.type == 2 and lesson.lecture_kr:
-            credit= lesson.lecture_kr
-        if obj.type == 3 and lesson.seminar_kr:
-            credit= lesson.seminar_kr
-        if obj.type == 1 and lesson.laborator_kr:
-            credit= lesson.laborator_kr
-        if obj.type == 5 and lesson.practic_kr:
-            credit= lesson.practic_kr
-        if obj.type == 6 and lesson.biedaalt_kr:
-            credit= lesson.biedaalt_kr
+        credits = TeacherCreditVolumePlan.objects.filter(lesson=obj.lesson, teacher=obj.teacher, lesson_year=obj.lesson_year, lesson_season=obj.lesson_season).values_list('credit', flat=True)
+        credit = sum(credits)
 
         credit_group = TeacherCreditVolumePlan_group.objects.filter(creditvolume_id=obj.id).values('exec_credit_flag')
         exec_kr_list = []
@@ -119,29 +105,15 @@ class TeacherCreditVolumePrintSerializer(serializers.ModelSerializer):
         return exec_kr
 
     def get_credit(self, obj):
-        credit = 0
+        credits = TeacherCreditVolumePlan.objects.filter(lesson=obj.lesson, teacher=obj.teacher, lesson_year=obj.lesson_year, lesson_season=obj.lesson_season).values_list('credit', flat=True)
 
-        lesson = LessonStandart.objects.filter(id=obj.lesson_id).first()
-
-        if obj.type == 2 and lesson.lecture_kr:
-            credit = lesson.lecture_kr
-        if obj.type == 3 and lesson.seminar_kr:
-            credit = lesson.seminar_kr
-        if obj.type == 1 and lesson.laborator_kr:
-            credit = lesson.laborator_kr
-        if obj.type == 5 and lesson.practic_kr:
-            credit = lesson.practic_kr
-        if obj.type == 6 and lesson.biedaalt_kr:
-            credit = lesson.biedaalt_kr
-
-        return credit
+        return sum(credits)
 
     def get_lesson_level(self, obj):
 
         tcvp_group_qs = TeacherCreditVolumePlan_group.objects.filter(creditvolume_id=obj.id).last()
 
         return tcvp_group_qs.lesson_level if tcvp_group_qs else ''
-
 
 
 class TeacherCreditVolumeOneSerializer(serializers.ModelSerializer):
@@ -196,7 +168,7 @@ class TeacherCreditVolumeOneSerializer(serializers.ModelSerializer):
 
     def get_exec_kr(self, obj):
         credit = 0
-
+        exec_kr = 0
         lesson = LessonStandart.objects.filter(id=obj.lesson_id).first()
 
         if obj.type == 2 and lesson.lecture_kr:
@@ -217,7 +189,7 @@ class TeacherCreditVolumeOneSerializer(serializers.ModelSerializer):
                 exec_kr_list.append( credit/group['exec_credit_flag'])
 
         if exec_kr_list:
-            exec_kr = round(sum(exec_kr_list)/len(exec_kr_list),2)
+            exec_kr = round(sum(exec_kr_list) / len(exec_kr_list),2)
 
         return exec_kr
 
@@ -261,9 +233,14 @@ class TeacherCreditVolumePlanListSerializer(serializers.ModelSerializer):
 
         lesson = LessonStandart.objects.filter(id=obj.lesson_id).first()
 
-        year, season = get_active_year_season()
+        request = self.context.get('request')
+        year = request.query_params.get('lesson_year')
+        season = request.query_params.get('lesson_season')
+        qs_plans = TeacherCreditVolumePlan.objects.filter(lesson=obj.lesson, lesson_year=year.strip(), teacher=obj.teacher)
 
-        qs_plans = TeacherCreditVolumePlan.objects.filter(lesson=obj.lesson, lesson_year=year.strip(), lesson_season=season, teacher=obj.teacher)
+        if season:
+            qs_plans = TeacherCreditVolumePlan.objects.filter(lesson_season=season)
+
         for qs in qs_plans:
             if qs.type == 2 and lesson.lecture_kr:
                 credit = credit + lesson.lecture_kr
@@ -282,10 +259,13 @@ class TeacherCreditVolumePlanListSerializer(serializers.ModelSerializer):
         credit = 0
 
         lesson = LessonStandart.objects.filter(id=obj.lesson_id).first()
+        request = self.context.get('request')
+        year = request.query_params.get('lesson_year')
+        season = request.query_params.get('lesson_season')
 
-        year, season = get_active_year_season()
-
-        qs_plans = TeacherCreditVolumePlan.objects.filter(lesson=obj.lesson, lesson_year=year.strip(), lesson_season=season, teacher=obj.teacher)
+        qs_plans = TeacherCreditVolumePlan.objects.filter(lesson=obj.lesson, lesson_year=year.strip(), teacher=obj.teacher)
+        if season:
+            qs_plans = qs_plans.filter(lesson_season=season)
 
         total_kr = 0
         for qs in qs_plans:
@@ -309,59 +289,30 @@ class TeacherCreditVolumePlanListSerializer(serializers.ModelSerializer):
                     exec_kr_list.append( credit/group['exec_credit_flag'])
 
             if exec_kr_list:
-                exec_kr = round(sum(exec_kr_list)/len(exec_kr_list),2)
+                exec_kr = sum(exec_kr_list)/len(exec_kr_list)
 
             total_kr = total_kr + exec_kr
-        return total_kr
+
+        return round(total_kr, 2)
 
     def get_lesson_level(self, obj):
 
-        tcvp_group_qs = TeacherCreditVolumePlan_group.objects.filter(creditvolume_id=obj.id).last()
+        tcvp_group_qs = TeacherCreditVolumePlan_group.objects.filter(creditvolume_id=obj.id).first()
 
         return tcvp_group_qs.get_lesson_level_display() if tcvp_group_qs else ''
 
     def get_estimations(self, obj):
-        year, season = get_active_year_season()
+        request = self.context.get('request')
+        lesson_year = request.query_params.get('lesson_year')
+        season = request.query_params.get('lesson_season')
 
-        qs_plans = TeacherCreditVolumePlan.objects.filter(lesson=obj.lesson, lesson_year=year.strip(), lesson_season=season, teacher=obj.teacher)
+        qs_plans = TeacherCreditVolumePlan.objects.filter(lesson=obj.lesson, lesson_year=lesson_year, teacher=obj.teacher)
+        if season:
+            qs_plans = qs_plans.filter(lesson_season=season)
 
         all_list = TeacherCreditVolumeOneSerializer(qs_plans, many=True).data
 
         return all_list
-
-    # def get_type_name(self, obj):
-    #     """ Хичээллэх төрлийн нэр авах """
-
-    #     type_name = obj.get_type_display()
-    #     return type_name
-
-    # def get_groups(self, obj):
-
-    #     group_list = []
-    #     group_ids = TeacherCreditVolumePlan_group.objects.filter(creditvolume_id=obj.id).values_list('group_id',flat=True)
-    #     if group_ids:
-    #         for group_id in group_ids:
-    #             group_data = Group.objects.filter(id=group_id).first()
-    #             if group_data:
-    #                 group_list.append({'id': group_id, 'name': group_data.name})
-
-    #     return group_list
-
-    # def get_group_name(self, obj):
-
-    #     group_name = ""
-    #     group_ids = TeacherCreditVolumePlan_group.objects.filter(creditvolume_id=obj.id).values_list('group_id',flat=True)
-    #     if group_ids:
-    #         for group_id in group_ids:
-    #             group_data = Group.objects.filter(id=group_id).first()
-    #             if group_data:
-    #                 if group_name:
-    #                     group_name = group_name  + ', '  + group_data.name
-    #                 else:
-    #                     group_name = group_data.name
-
-    #     return group_name
-
 
 class TeachersSerializer(serializers.ModelSerializer):
 

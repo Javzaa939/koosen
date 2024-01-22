@@ -256,7 +256,7 @@ const GPA = () => {
                     </Col>
                     <Col md={4}>
                         <Label className="form-label" for="profession">
-                            {t('Мэргэжил')}
+                            {t('Хөтөлбөр')}
                         </Label>
                         <Controller
                             control={control}

@@ -20,6 +20,7 @@ import { useTranslation } from "react-i18next";
 import { X } from "react-feather";
 
 import { useForm, Controller } from "react-hook-form";
+import useUpdateEffect from '@hooks/useUpdateEffect'
 
 import {
     Row,
@@ -100,19 +101,22 @@ const Createmodal = ({ open, handleModal, refreshDatas, select_value }) => {
         var degree = select_value.degree || ''
         var group = select_value.group || ''
 
-        const [studentRsp, teahcerRsp]= await allFetchData(
+        const [studentRsp]= await allFetchData(
             Promise.all([
                 studentApi.getGraduate(depId, degree, group),
-                teacherApi.get()
             ])
         )
         if (studentRsp?.success)
         {
             setStudentOption(studentRsp?.data)
         }
-        if (teahcerRsp?.success)
+    }
+
+    async function getTeachers() {
+        const { success, data } = await allFetchData(teacherApi.get(select_value.department))
+        if (success)
         {
-            setTeacherOption(teahcerRsp?.data)
+            setTeacherOption(data)
         }
     }
 
@@ -122,6 +126,14 @@ const Createmodal = ({ open, handleModal, refreshDatas, select_value }) => {
             getAll()
         },
         []
+    )
+
+    useUpdateEffect(
+        () =>
+        {
+            getTeachers()
+        },
+        [radio]
     )
 
     // Radio
@@ -352,7 +364,7 @@ const Createmodal = ({ open, handleModal, refreshDatas, select_value }) => {
                                             placeholder={t('Төгсөлтийн ажлын сэдэв уйгаржин оруулах')}
                                             {...field}
                                             type="text"
-                                            style={{ fontFamily: 'CMs Urga', fontSize: '15px'}}
+                                            style={{ fontFamily: 'cmdashitseden', fontSize: '15px'}}
                                             invalid={errors.diplom_topic_uig && true}
                                         />
                                     )}

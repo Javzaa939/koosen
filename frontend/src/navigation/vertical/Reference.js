@@ -7,7 +7,7 @@ export default [
         title: 'Лавлах сан',
         icon: <i className="far fa-address-book"></i>,
         navLink: "/reference",
-        children: [
+        navChildren: [
             {
                 id: 'reference1',
                 title: 'Бүрэлдэхүүн сургууль',

@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='studentmovement',
             name='destination_school',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='new_school', to='core.subschools', verbose_name='Очих сургуулийн нэр'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='new_school', to='core.suborgs', verbose_name='Очих сургуулийн нэр'),
         ),
         migrations.AlterField(
             model_name='studentmovement',
@@ -32,7 +32,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='studentmovement',
             name='school',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='old_school', to='core.subschools', verbose_name='Сургууль'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='old_school', to='core.suborgs', verbose_name='Сургууль'),
         ),
         migrations.AlterField(
             model_name='studentmovement',
@@ -54,7 +54,7 @@ class Migration(migrations.Migration):
                 ('created_user', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='score_cr_user', to=settings.AUTH_USER_MODEL, verbose_name='Бүртгэсэн хэрэглэгч')),
                 ('lesson', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='lms.lessonstandart', verbose_name='Хичээл')),
                 ('lesson_season', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='lms.season', verbose_name='Улирал')),
-                ('school', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.subschools', verbose_name='Сургууль')),
+                ('school', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.suborgs', verbose_name='Сургууль')),
                 ('student', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='lms.student', verbose_name='Оюутан')),
                 ('teacher', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='core.teachers', verbose_name='Багш')),
                 ('updated_user', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='score_up_user', to=settings.AUTH_USER_MODEL, verbose_name='Зассан хэрэглэгч')),

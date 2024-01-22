@@ -308,7 +308,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                         </Col>
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="register_num">
-                                {citizen_name.includes('Монгол') ? t('Регистрийн дугаар') : t('Гадаад пасспорт дугаар')}
+                                {citizen_name?.includes('Монгол') ? t('Регистрийн дугаар') : t('Гадаад пасспорт дугаар')}
                             </Label>
                             <Controller
                                 defaultValue=''
@@ -319,7 +319,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                     <Input
                                         id ="register_num"
                                         bsSize="sm"
-                                        placeholder={citizen_name.includes('Монгол') ? t('Регистрийн дугаар') : t('Гадаад пасспорт дугаар')}
+                                        placeholder={citizen_name?.includes('Монгол') ? t('Регистрийн дугаар') : t('Гадаад пасспорт дугаар')}
                                         {...field}
                                         type="text"
                                         invalid={errors.register_num && true}
@@ -328,7 +328,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                             />
                             {errors.register_num && <FormFeedback className='d-block'>{errors.register_num.message}</FormFeedback>}
                         </Col>
-                        {
+                        {/* {
                             citizen_name.includes('Монгол')
                             &&
                                 <Col lg={6} xs={12} className="pt-2">
@@ -345,31 +345,31 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                     </div>
                                     {is_khur && <FormFeedback className='d-block'>{'ХУР мэдээллийн сангаас иргэний мэдээлэл авах үед үндсэн мэдээлэл бөглөх шаардлагагүй.'}</FormFeedback>}
                                 </Col>
-                        }
-                        {
+                        } */}
+                        {/* {
                             groupChecked
-                            &&
-                                <Col lg={6} xs={12}>
-                                    <Label className="form-label" for="code">
-                                        {t('Оюутны хуучин код')}
-                                    </Label>
-                                    <Controller
-                                        defaultValue=''
-                                        control={control}
-                                        id="code"
-                                        name="code"
-                                        render={({ field }) => (
-                                            <Input
-                                                id ="code"
-                                                bsSize="sm"
-                                                placeholder={t("Оюутны хуучин код")}
-                                                {...field}
-                                                type="text"
-                                            />
-                                        )}
+                            && */}
+                        <Col lg={6} xs={12}>
+                            <Label className="form-label" for="code">
+                                {t('Оюутны код')}
+                            </Label>
+                            <Controller
+                                defaultValue=''
+                                control={control}
+                                id="code"
+                                name="code"
+                                render={({ field }) => (
+                                    <Input
+                                        id ="code"
+                                        bsSize="sm"
+                                        placeholder={t("Оюутны код")}
+                                        {...field}
+                                        type="text"
                                     />
-                                </Col>
-                        }
+                                )}
+                            />
+                        </Col>
+                        {/* } */}
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="family_name">
                                 {t('Ургийн овог')}

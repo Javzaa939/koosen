@@ -120,7 +120,7 @@ export default function Print()
                                 <td><small>{datas?.group?.join_year}</small></td>
                             </tr>
                             <tr>
-                                <td className='pe-1'><small>Мэргэжил:</small></td>
+                                <td className='pe-1'><small>Хөтөлбөр:</small></td>
                                 <td><small>{datas?.group?.profession}</small></td>
                             </tr>
                             <tr>
@@ -221,7 +221,7 @@ export default function Print()
                     </small>
                 </div>
 
-                <p className="text-center fst-italic fw-bolder"><small>1. Бүртгэл мэдээллийн албаны мэргэжилтний бөглүүлэх хэсэг</small></p>
+                <p className="text-center fst-italic fw-bolder"><small>1. Бүртгэл мэдээллийн албаны Хөтөлбөртний бөглүүлэх хэсэг</small></p>
 
                 {
                     Object.keys(datas) != 0

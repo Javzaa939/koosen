@@ -1,5 +1,5 @@
 // ** Icons Import
-import { Circle,Clock } from 'react-feather'
+import { Circle, Clock } from 'react-feather'
 
 export default [
     {
@@ -7,7 +7,7 @@ export default [
         title: 'Захиалга',
         icon: <Clock size={20} />,
         navLink: "/order",
-        children: [
+        navChildren: [
             {
                 id: 'order1',
                 title: 'Номын сан',

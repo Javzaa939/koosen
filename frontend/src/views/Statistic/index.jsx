@@ -6,17 +6,33 @@ import {
     NavItem,
     NavLink,
     CardHeader,
-    CardTitle,
-    Button,
     CardBody
 } from 'reactstrap'
 
-import ADB2 from "./ADB2";
 
 import ADB1 from "./ADB1";
+import ADB2 from "./ADB2";
+import ADB3 from "./ADB3";
+// import ADB4 from "./ADB4";
+// import ADB5 from "./ADB5";
+// import ADB6 from "./ADB6";
+// import ADB7 from "./ADB7";
+// import ADB8 from "./ADB8";
+// import ADB9 from "./ADB9";
+// import ADB10 from "./ADB10";
+// import ADB11 from "./ADB11";
+// import ADB12 from "./ADB12";
+// import ADB13 from "./ADB13";
+// import ADB14 from "./ADB14";
+// import ADB15 from "./ADB15";
+// import ADB16 from "./ADB16";
+// import ADB17 from "./ADB17";
+// import ADB18 from "./ADB18";
+
+
 import './style.scss'
 import Blank from "./Blank";
-import ADB3 from "./ADB3";
+
 
 function Statistic() {
 
@@ -35,37 +51,44 @@ function Statistic() {
         {
             active_id: 2,
             name: 'А-ДБ-2',
+            // component: <Blank />
             component: <ADB2 />
         },
         {
             active_id: 3,
             name: 'А-ДБ-3',
+            // component: <Blank />
             component: <ADB3 />
         },
         {
             active_id: 4,
             name: 'А-ДБ-4',
             component: <Blank />
+            // component: <ADB4 />
         },
         {
             active_id: 5,
             name: 'А-ДБ-5',
-            component: <Blank />
+            // component: <ADB5 />
+            component: <Blank zasvar />
         },
         {
             active_id: 6,
             name: 'А-ДБ-6',
+            // component: <ADB6 />
             component: <Blank />
         },
         {
             active_id: 7,
             name: 'А-ДБ-7',
+            // component: <ADB7 />
             component: <Blank />
         },
         {
             active_id: 8,
             name: 'А-ДБ-8',
-            component: <Blank />
+            // component: <ADB8 />
+            component: <Blank/>
         },
         {
             active_id: 9,

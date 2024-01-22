@@ -12,6 +12,7 @@ import classnames from "classnames";
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
+import  useUpdateEffect  from '@hooks/useUpdateEffect'
 
 import { ReactSelectStyles, validate } from '@utils'
 
@@ -56,7 +57,7 @@ export default function Confrontation()
         }
 	}
 
-    //Мэргэжлийн жагсаалт авах
+    //Хөтөлбөрийн жагсаалт авах
     async function getProfession()
     {
 
@@ -77,7 +78,7 @@ export default function Confrontation()
         []
     )
 
-    useEffect(
+    useUpdateEffect(
         () =>
         {
             getProfession()
@@ -162,7 +163,7 @@ export default function Confrontation()
                     </Col>
                     <Col md={6}>
                         <Label className="form-label" for="profession">
-                            {t('Мэргэжил')}
+                            {t('Хөтөлбөр')}
                         </Label>
                         <Controller
                             control={control}

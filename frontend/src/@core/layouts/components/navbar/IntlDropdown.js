@@ -13,6 +13,8 @@ import useLoader from '@hooks/useLoader';
 import SchoolContext from '@context/SchoolContext'
 import AuthContext from "@context/AuthContext"
 
+import  useUpdateEffect  from '@hooks/useUpdateEffect'
+
 const IntlDropdown = () => {
 
     const [ schools, setSchools ] = useState([]);
@@ -35,7 +37,7 @@ const IntlDropdown = () => {
     async function getParentSchool() {
         const {success, data} = await fetchData(parentschoolApi.get())
         if(success) {
-            setParentSchoolName(data[0]?.name)
+            setParentSchoolName(data?.name)
         }
     }
 
@@ -54,7 +56,6 @@ const IntlDropdown = () => {
         setSchool(id)
     }
 
-
     useEffect(
         () =>
         {
@@ -67,7 +68,7 @@ const IntlDropdown = () => {
         []
     )
 
-    useEffect(() => {
+    useUpdateEffect(() => {
         /** Хэрэглэгчийн харьяалагдах сургуулийн мэдээллийг авна */
         var school_detail = []
         if(school_id) {

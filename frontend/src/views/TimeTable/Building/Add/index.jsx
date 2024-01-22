@@ -1,5 +1,5 @@
 // ** React imports
-import React, { Fragment } from 'react'
+import React, { Fragment, useEffect } from 'react'
 
 import { X } from "react-feather";
 
@@ -26,7 +26,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, editId }) => {
     )
 
     // ** Hook
-    const { control, handleSubmit, formState: { errors }, reset, setError } = useForm(validate(validateSchema));
+    const { control, handleSubmit, formState: { errors }, reset, setError, setValue } = useForm(validate(validateSchema));
 
 	// Loader
 	const { Loader, isLoading, fetchData } = useLoader({});
@@ -62,6 +62,24 @@ const Addmodal = ({ open, handleModal, refreshDatas, editId }) => {
             }
         }
 	}
+    async function getDatas() {
+        if(editId) {
+            const { success, data } = await fetchData(buildingApi.getOne(editId))
+            if(success) {
+                // засах үед дата байх юм бол setValue-р дамжуулан утгыг харуулна
+                if(data === null) return
+                for(let key in data) {
+                    if(data[key] !== null)
+                        setValue(key, data[key])
+                    else setValue(key, '')
+                }
+            }
+        }
+    }
+
+    useEffect(() => {
+        getDatas()
+    },[editId])
 
 	return (
         <Fragment>
@@ -78,7 +96,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, editId }) => {
                     close={CloseBtn}
                     tag="div"
                 >
-                    {editId? <h5 className="modal-title">{t('Хичээлийн байр засах')}</h5> :<h5 className="modal-title">{t('Хичээлийн байр бүртгэх')}</h5>}
+                     <h5 className="modal-title">{ editId? t('Хичээлийн байр засах') :t('Хичээлийн байр бүртгэх')}</h5>
                 </ModalHeader>
                 <ModalBody className="flex-grow-1">
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
@@ -127,7 +145,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, editId }) => {
                             />
                             {errors.name && <FormFeedback className='d-block'>{t(errors.name.message)}</FormFeedback>}
                         </Col>
-                        <Col md={12} className="mt-2">
+                        <Col md={12} className=" text-center mt-2">
                             {isLoading ?
                                 <Button className="me-2" color="primary" type="submit" disabled>
                                     <Spinner size='sm'/>
@@ -137,9 +155,14 @@ const Addmodal = ({ open, handleModal, refreshDatas, editId }) => {
                                     {t('Хадгалах')}
                                 </Button>
                             }
-                            <Button color="secondary" type="reset" outline  onClick={handleModal}>
-                                {t('Буцах')}
-                            </Button>
+                            {
+                                editId ?
+                                    null
+                                :
+                                <Button color="secondary" type="reset" outline  onClick={handleModal}>
+                                    {t('Буцах')}
+                                </Button>
+                            }
                         </Col>
                     </Row>
                 </ModalBody>
