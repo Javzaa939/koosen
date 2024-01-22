@@ -140,14 +140,14 @@ export default function PrintAttachmentMongolia()
         <>
             {Loading && Loader}
 
-            <div className={`vh-100 p-0 d-flex flex-column justify-content-between align-items-start position-relative ${isPageBreak && 'page-break'}`} style={{ fontFamily: 'CMs Urga dp'}} >
+            <div className={`vh-100 p-0 d-flex flex-column justify-content-between align-items-start position-relative ${isPageBreak && 'page-break'}`} style={{ fontFamily: 'mongolianScript'}} >
 
                 <div style={{ height: '49.5%', marginLeft: '178px' }} >
                     <table id='table1' className='text-center w-100 d-none' style={{ writingMode: 'vertical-lr', marginBottom: '1px', height: '100%' }} >
                         <thead>
                             <tr style={{ fontSize: '9px' }} >
                                 <td rowSpan={2} className='border-dark' style={{ rotate: '90deg', height: '8%', fontFamily: 'sans-serif', fontSize: '12px'  }} >№</td>
-                                <td className='border-dark' style={{ height: '69%' }} >ᢈᠢᠴᠢᠶᠡᠯ ᠦ᠋ᠨ ᠨᠡᠷ᠎</td>
+                                <td className='border-dark' style={{ height: '69%' }} >ᢈᠢᠴᠢᠶᠡᠯ ᠦ᠋ᠨ ᠨᠡᠷ᠎ᠡ</td>
                                 <td className='border-dark' style={{ height: '5%' }} >ᠻᠷ</td>
                                 <td className='border-dark' style={{ height: '9%' }}>ᠣᠨᠤᠭ᠎ᠠ</td>
                                 <td className='border-dark' style={{ height: '9%' }} >ᠳ᠋ᠦᠩ</td>
@@ -163,7 +163,7 @@ export default function PrintAttachmentMongolia()
                         <thead>
                             <tr style={{ fontSize: '6px' }} >
                                 <td rowSpan={2} className='border-dark' style={{ rotate: '90deg', height: '8%', fontFamily: 'sans-serif', fontSize: '12px'  }} >№</td>
-                                <td className='border-dark' style={{ height: '69%' }} >ᢈᠢᠴᠢᠶᠡᠯ ᠦ᠋ᠨ ᠨᠡᠷ᠎</td>
+                                <td className='border-dark' style={{ height: '69%' }} >ᢈᠢᠴᠢᠶᠡᠯ ᠦ᠋ᠨ ᠨᠡᠷ᠎ᠡ</td>
                                 <td className='border-dark' style={{ height: '5%' }} >ᠻᠷ</td>
                                 <td className='border-dark' style={{ height: '9%' }}>ᠣᠨᠤᠭ᠎ᠠ</td>
                                 <td className='border-dark' style={{ height: '9%' }} >ᠳ᠋ᠦᠩ</td>
@@ -177,7 +177,7 @@ export default function PrintAttachmentMongolia()
 
 
             <div className={`${!isPageBreak && 'd-none'}`} >
-                <div className='vh-100 p-0 d-flex flex-column justify-content-between align-items-start position-relative' style={{ fontFamily: 'CMs Urga dp' }} >
+                <div className='vh-100 p-0 d-flex flex-column justify-content-between align-items-start position-relative' style={{ fontFamily: 'mongolianScript' }} >
 
                     <div style={{ height: '373px', marginLeft: '178px' }} >
 
@@ -186,7 +186,7 @@ export default function PrintAttachmentMongolia()
 
                                 <tr style={{ fontSize: '6px' }} >
                                     <td rowSpan={2} className='border-dark' style={{ rotate: '90deg', height: '8%', fontFamily: 'sans-serif', fontSize: '12px'  }} >№</td>
-                                    <td className='border-dark' style={{ height: '69%' }} >ᢈᠢᠴᠢᠶᠡᠯ ᠦ᠋ᠨ ᠨᠡᠷ᠎</td>
+                                    <td className='border-dark' style={{ height: '69%' }} >ᢈᠢᠴᠢᠶᠡᠯ ᠦ᠋ᠨ ᠨᠡᠷ᠎ᠡ</td>
                                     <td className='border-dark' style={{ height: '5%' }} >ᠻᠷ</td>
                                     <td className='border-dark' style={{ height: '9%' }}>ᠣᠨᠤᠭ᠎ᠠ</td>
                                     <td className='border-dark' style={{ height: '9%' }} >ᠳ᠋ᠦᠩ</td>
@@ -208,7 +208,7 @@ export default function PrintAttachmentMongolia()
 
                                 <tr style={{ fontSize: '6px' }} >
                                     <td rowSpan={2} className='border-dark' style={{ rotate: '90deg', height: '8%', fontFamily: 'sans-serif', fontSize: '12px'  }} >№</td>
-                                    <td className='border-dark' style={{ height: '69%' }} >ᢈᠢᠴᠢᠶᠡᠯ ᠦ᠋ᠨ ᠨᠡᠷ᠎</td>
+                                    <td className='border-dark' style={{ height: '69%' }} >ᢈᠢᠴᠢᠶᠡᠯ ᠦ᠋ᠨ ᠨᠡᠷ᠎ᠡ</td>
                                     <td className='border-dark' style={{ height: '5%' }} >ᠻᠷ</td>
                                     <td className='border-dark' style={{ height: '9%' }}>ᠣᠨᠤᠭ᠎ᠠ</td>
                                     <td className='border-dark' style={{ height: '9%' }} >ᠳ᠋ᠦᠩ</td>
