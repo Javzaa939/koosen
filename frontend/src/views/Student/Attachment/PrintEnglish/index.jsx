@@ -132,6 +132,81 @@ export default function PrintAttachmentEnglish()
         [datas]
     )
 
+    function engVseg(vseg)
+    {
+        switch (vseg)
+        {
+            case 'А':
+                return 'A'
+            case 'Б':
+                return 'B'
+            case 'В':
+                return 'V'
+            case 'Г':
+                return 'G'
+            case 'Д':
+                return 'D'
+            case 'Е':
+                return 'Ye'
+            case 'Ё':
+                return 'Yo'
+            case 'Ж':
+                return 'J'
+            case 'З':
+                return 'Z'
+            case 'И':
+                return 'I'
+            case 'Й':
+                return 'i'
+            case 'К':
+                return 'K'
+            case 'Л':
+                return 'L'
+            case 'М':
+                return 'M'
+            case 'Н':
+                return 'N'
+            case 'О':
+                return 'O'
+            case 'Ө':
+                return 'O'
+            case 'П':
+                return 'P'
+            case 'Р':
+                return 'R'
+            case 'С':
+                return 'S'
+            case 'Т':
+                return 'T'
+            case 'У':
+                return 'U'
+            case 'Ү':
+                return 'U'
+            case 'Ф':
+                return 'F'
+            case 'Х':
+                return 'Kh'
+            case 'Ц':
+                return 'Ts'
+            case 'Ч':
+                return 'Ch'
+            case 'Ш':
+                return 'Sh'
+            case 'Ы':
+                return 'I'
+            case 'Ь':
+                return 'I'
+            case 'Э':
+                return 'E'
+            case 'Ю':
+                return 'Yu'
+            case 'Я':
+                return 'Ya'
+            default:
+                break;
+        }
+    }
+
     return (
         <>
             {Loading && Loader}
@@ -292,12 +367,12 @@ export default function PrintAttachmentEnglish()
                         <span className='fw-normal w-50'>Professional Index: </span><span>{printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.group?.profession?.code}</span>
                     </div>
                     <div className='d-flex px-2' style={{ width: '33.3%' }} >
-                        <span className='fw-normal w-50'>Registration No:</span> <span>{printDatas?.student?.graduation_work?.registration_num}</span>
+                    <span className='fw-normal w-50'>Registration No:</span> <span>{printDatas?.student?.graduation_work?.registration_num}</span>
                     </div>
                 </div>
                 <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
                     <div className='d-flex' style={{ width: '33.3%' }} >
-                        <span className='fw-normal w-50'>Registration number:</span> <span>{printDatas?.student?.register_num_eng}</span>
+                        <span className='fw-normal w-50'>Registration number:</span> <span>{engVseg(printDatas?.student?.register_num[0])}{engVseg(printDatas?.student?.register_num[1])}{printDatas?.student?.register_num.slice(-8)}</span>
                     </div>
                     <div className='d-flex px-1' style={{ width: '33.3%' }} >
                         <span className='fw-normal w-50'>Profession:</span> <span>{printDatas?.student?.group?.profession?.name_eng}</span>
