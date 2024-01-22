@@ -1,8 +1,4 @@
-import { useContext } from 'react';
-
 import { t } from 'i18next';
-
-import SchoolContext from "@context/SchoolContext"
 
 // Хүснэгтийн баганууд
 export function getColumns (currentPage, rowsPerPage, total_count) {
