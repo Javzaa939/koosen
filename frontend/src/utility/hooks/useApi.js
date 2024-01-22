@@ -580,6 +580,8 @@ function useApi(isDisplay=false) {
 			/* Оюутны бүртгэл */
 			get: (limit, page, sort, search, department, degree, profession, group, join_year, status, level
 				) => instance.get(`/student/info/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&department=${department}&degree=${degree}&profession=${profession}&group=${group}&join_year=${join_year}&schoolId=${school_id}&status=${status}&level=${level}`),
+			// Төгссөн оюутны бүртгэл
+			getGraduate1: (limit, page, sort, search, department, degree, profession, group) => instance.get(`/student/info/graduate1/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&department=${department}&degree=${degree}&profession=${profession}&group=${group}`),
 			getDefinition: (limit, page, sort, search) => instance.get(`/student/definition/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&school=${school_id}`),
 			download: ( search, department, degree, profession, group, join_year, status, level) => instance.get(`/student/info/download/?search=${search}&department=${department}&degree=${degree}&profession=${profession}&group=${group}&join_year=${join_year}&schoolId=${school_id}&status=${status}&level=${level}`),
 			getDefinitionStudent: (type, id) => instance.get(`/student/definition/value/?type=${type}&id=${id}`),

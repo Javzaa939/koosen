@@ -132,7 +132,82 @@ export default function PrintAttachmentMongolia()
 
     function tooBichih(too)
     {
-        return ( <span style={{ fontFamily: 'CMSUB', fontSize: '12px' }}>{too}</span> )
+        return ( <span style={{ fontFamily: 'CMSUB', fontSize: '14px' }}>{too}</span> )
+    }
+
+    function uigVseg(vseg)
+    {
+        switch (vseg)
+        {
+            case 'А':
+                return 'ᠠ'
+            case 'Б':
+                return 'ᠪ'
+            case 'В':
+                return 'ᠸ'
+            case 'Г':
+                return 'ᠭ'
+            case 'Д':
+                return 'ᠲ'
+            case 'Е':
+                return 'ᠶᠢ'
+            case 'Ё':
+                return 'ᠶ'
+            case 'Ж':
+                return 'ᠵᠢ'
+            case 'З':
+                return 'ᠵ'
+            case 'И':
+                return 'ᠢ'
+            case 'Й':
+                return 'ᠢ'
+            case 'К':
+                return 'ᠻ'
+            case 'Л':
+                return 'ᠯ'
+            case 'М':
+                return 'ᠮ'
+            case 'Н':
+                return 'ᠨ᠋'
+            case 'О':
+                return 'ᠣ'
+            case 'Ө':
+                return 'ᠥ'
+            case 'П':
+                return 'ᠫ'
+            case 'Р':
+                return 'ᠷ'
+            case 'С':
+                return 'ᠰ'
+            case 'Т':
+                return 'ᠲ'
+            case 'У':
+                return 'ᠤ'
+            case 'Ү':
+                return 'ᠦ‍'
+            case 'Ф':
+                return 'ᠹ'
+            case 'Х':
+                return 'ᠬ'
+            case 'Ц':
+                return 'ᠴ'
+            case 'Ч':
+                return 'ᠴ'
+            case 'Ш':
+                return 'ᠰ'
+            case 'Ы':
+                return 'ᠢ'
+            case 'Ь':
+                return 'ᠢ'
+            case 'Э':
+                return 'ᠡ'
+            case 'Ю':
+                return 'ᠶᠦ᠋'
+            case 'Я':
+                return 'ᠶ'
+            default:
+                break;
+        }
     }
 
     return (
@@ -159,9 +234,9 @@ export default function PrintAttachmentMongolia()
                 </div>
 
                 <div style={{ height: '49.5%', marginLeft: '178px' }} >
-                    <table id='table2' className='text-center w-100 d-none' style={{ writingMode: 'vertical-lr', marginBottom: '1px', height: '100%' }}  >
+                    <table id='table2' className='text-center w-100 d-none' style={{ writingMode: 'vertical-lr', marginBottom: '1px', height: '100%' }} >
                         <thead>
-                            <tr style={{ fontSize: '6px' }} >
+                            <tr style={{ fontSize: '9px' }} >
                                 <td rowSpan={2} className='border-dark' style={{ rotate: '90deg', height: '8%', fontFamily: 'sans-serif', fontSize: '12px'  }} >№</td>
                                 <td className='border-dark' style={{ height: '69%' }} >ᢈᠢᠴᠢᠶᠡᠯ ᠦ᠋ᠨ ᠨᠡᠷ᠎ᠡ</td>
                                 <td className='border-dark' style={{ height: '5%' }} >ᠻᠷ</td>
@@ -223,19 +298,19 @@ export default function PrintAttachmentMongolia()
                 </div>
             </div>
 
-            <header className='d-flex' style={{ fontFamily: 'mongolianScript', fontSize: '14px' }} >
+            <header className='d-flex' style={{ fontFamily: 'mongolianScript', fontSize: '16px' }} >
 
-                <div className='d-flex flex-column text-center' style={{ writingMode: 'vertical-lr', fontSize: '14px', marginRight: '3px', marginBottom: '75px' }} >
+                <div className='d-flex flex-column text-center' style={{ writingMode: 'vertical-lr', fontSize: '16px', marginRight: '3px', marginBottom: '75px' }} >
                     <span style={{ marginLeft: '13px' }}>{printDatas?.student?.department?.school_uig}</span>
                     <span style={{ fontSize: '11px', marginLeft: '10px' }}>
                         <span className='font-serif' style={{ writingMode: 'vertical-lr', rotate: '180deg' }} >
-                            <span style={{ fontFamily: 'cmdashitseden', fontSize: '14px' }}>{printDatas?.student?.group?.degree?.degree_code}</span>
+                            <span style={{ fontFamily: 'cmdashitseden', fontSize: '16px' }}>{printDatas?.student?.group?.degree?.degree_code}</span>
                         </span>
                         {tooBichih(printDatas?.student?.graduation_work?.diplom_num)} ᠳᠤᠭᠠᠷᠲᠠᠢ {printDatas?.student?.group?.degree?.degree_uig_name} ᠤ᠋ᠨ ᠳ᠋ᠢᠫᠯᠣᠮ ᠤ᠋ᠨ ᠬᠠᠪᠰᠤᠷᠤᠯᠲᠠ
                     </span>
                 </div>
 
-                <div className='d-flex flex-column lh-sm' style={{ fontSize: '9px', marginLeft: '10px' }} >
+                <div className='d-flex flex-column lh-sm' style={{ fontSize: '11px', marginLeft: '10px' }} >
                     <div style={{ height: '33.3%', writingMode: 'vertical-lr', display: 'flex' }}>
                         <span className='h-50'>ᠡᠴᠢᢉᠡ / ᠡᢈᠡ ᠶ᠋ᠢᠨ ᠨᠡᠷ᠎ᠡ:</span>
                         {printDatas?.student?.last_name_uig}
@@ -250,7 +325,7 @@ export default function PrintAttachmentMongolia()
                     </div>
                 </div>
 
-                <div className='d-flex flex-column lh-sm' style={{ fontSize: '9px', marginLeft: '10px' }} >
+                <div className='d-flex flex-column lh-sm' style={{ fontSize: '11px', marginLeft: '10px' }} >
                     <div style={{ height: '33.3%', writingMode: 'vertical-lr', display: 'flex' }} >
                         <span className='h-50'>ᠨᠡᠷ᠎ᠡ:</span>
                         {printDatas?.student?.first_name_uig}
@@ -265,13 +340,12 @@ export default function PrintAttachmentMongolia()
                     </div>
                 </div>
 
-                <div className='d-flex flex-column lh-sm' style={{ fontSize: '9px', marginLeft: '10px' }} >
+                <div className='d-flex flex-column lh-sm' style={{ fontSize: '11px', marginLeft: '10px' }} >
                     <div style={{ height: '33.3%', writingMode: 'vertical-lr', display: 'flex' }}>
                         <span className='h-50'>
-                            {/* TODO: регистр эхний 2 үсэг монгол бичгээр болгох */}
                             ᠷᠧᢉᠢᠰᠲ᠋ᠧᠷ ᠦ᠋ᠨ ᠳ᠋ᠤᠭᠠᠷ:
                         </span>
-                        {printDatas?.student?.register_num}
+                        {uigVseg(printDatas?.student?.register_num[0])} {uigVseg(printDatas?.student?.register_num[1])}  &nbsp;{tooBichih(printDatas?.student?.register_num.slice(-8))}
                     </div>
                     <div style={{ height: '66.6%', writingMode: 'vertical-lr', display: 'flex' }}>
                         <span className='h-50'>ᠮᠡᠷᢉᠡᠵᠢᠯ:</span>
@@ -281,7 +355,7 @@ export default function PrintAttachmentMongolia()
 
             </header>
 
-            <footer className={`${isPageBreak && 'footer-margin'}`} style={{ fontFamily: 'mongolianScript', fontSize: '9px' }} >
+            <footer className={`${isPageBreak && 'footer-margin'}`} style={{ fontFamily: 'mongolianScript', fontSize: '11px' }} >
                 <div className='d-flex'>
 
                     <div className='d-flex' style={{ writingMode: 'vertical-lr', marginRight: '30px' }} >
@@ -298,11 +372,15 @@ export default function PrintAttachmentMongolia()
                     </div>
 
                     <div style={{ writingMode: 'vertical-lr', marginRight: '6px' }} >
-                        {datas?.graduation_work?.lesson_type == 1 ? 'ᠲᠡᢉᠦᠰᠦᠯᠲᠡ ᠶ᠋ᠢᠨ ᠰᠢᠯᠭᠠᠯᠲᠠ:' : 'ᠲᠡᢉᠦᠰᠦᠯᠲᠡ ᠶ᠋ᠢᠨ ᠰᠢᠯᠭᠠᠯᠲᠠ:'}
+                        {datas?.graduation_work?.lesson_type == 1 ? 'ᠲᠡᢉᠦᠰᠦᠯᠲᠡ ᠶ᠋ᠢᠨ ᠠᠵᠢᠯ:' : 'ᠲᠡᢉᠦᠰᠦᠯᠲᠡ ᠶ᠋ᠢᠨ ᠰᠢᠯᠭᠠᠯᠲᠠ:'}
                     </div>
 
                     <div style={{ writingMode: 'vertical-lr', display: 'flex', marginRight: '70px' }} >
                     {
+                    datas?.graduation_work?.lesson_type == 1
+                    ?
+                        <span style={{ height: '80%' }}>{datas?.graduation_work?.diplom_topic_uig}</span>
+                    :
                         datas?.graduation_work?.lesson?.map((val, idx) =>
                         {
                             return (
@@ -326,7 +404,7 @@ export default function PrintAttachmentMongolia()
                         })
                     }
 
-                    <div style={{ writingMode: 'vertical-lr', marginLeft: '9px', fontSize: '9px' }} >
+                    <div style={{ writingMode: 'vertical-lr', marginLeft: '11px', fontSize: '11px' }} >
                         <span>ᠡᠨᠡᢈᠦ ᠬᠠᠪᠰᠤᠷᠤᠯᠲᠠ {tooBichih(new Date().getFullYear())} ᠣᠨ ᠤ᠋ <span style={{ fontFamily: 'cmdashitseden', fontSize: '12px' }}>{printDatas?.student?.group?.degree?.degree_code}</span>{tooBichih(printDatas?.student?.graduation_work?.diplom_num)} ᠳ᠋ᠤᠭᠠᠷ ᠲᠠᠢ ᠳ᠋ᠢᠫᠯᠣᠮ ᠤ᠋ᠨ ᠬᠠᠮᠲᠤ ᢈᠦᠴᠦᠨ ᠲᠡᠢ</span>
                     </div>
                 </div>

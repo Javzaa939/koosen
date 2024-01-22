@@ -558,7 +558,13 @@ const Graduation = () => {
                     />
                 </div>
         	</Card>
-            <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} select_value={select_value}/>
+            {
+                modal
+                ?
+                    <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} select_value={select_value} graduate_id={graduate_id}/>
+                :
+                null
+            }
             {
                 edit_modal
                 ?
