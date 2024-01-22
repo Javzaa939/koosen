@@ -322,7 +322,7 @@ export default function PrintAttachmentEnglish()
                             datas?.graduation_work?.lesson?.map((val, idx) =>
                             {
                                 return (
-                                    <span className='ms-5' key={idx} >{idx + 1}. {val?.name} / {(val?.score_register?.teach_score || 0) + (val?.score_register?.exam_score || 0)} {val?.score_register?.assessment} /</span>
+                                    <span className='ms-5' key={idx} >{idx + 1}. {val?.name_eng} / {(val?.score_register?.teach_score || 0) + (val?.score_register?.exam_score || 0)} {val?.score_register?.assessment} /</span>
                                 )
                             })
                     }
