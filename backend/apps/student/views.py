@@ -1,6 +1,5 @@
 import os
 
-from googletrans import Translator
 
 from datetime import date
 
@@ -95,9 +94,49 @@ from .serializers import StudentVizListSerializer
 from .serializers import StudentVizSerializer
 from .serializers import StudentSimpleListSerializer
 
-translator = Translator()
-
 STUDY_YEAR = 12
+
+
+# Төгссөн оюутны мэдээлэл авах
+@permission_classes([IsAuthenticated])
+class StudentGraduate1APIView(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    generics.GenericAPIView
+):  
+    queryset = Student.objects.all().order_by('first_name')
+    serializer_class = StudentListSerializer
+
+    pagination_class = CustomPagination
+    filter_backends = [SearchFilter]
+    search_fields = ['first_name', 'last_name', 'code', 'register_num', 'group__name', 'group__profession__name']
+
+    def get_queryset(self):
+        queryset = self.queryset
+        department = self.request.query_params.get('department')
+        degree = self.request.query_params.get('degree')
+        profession = self.request.query_params.get('profession')
+        group = self.request.query_params.get('group')
+        if department:
+            queryset = queryset.filter(department=department)
+        if degree:
+            queryset = queryset.filter(group__degree_id=degree)
+        if profession:
+            queryset = queryset.filter(group__profession_id=profession)
+        if group:
+            queryset = queryset.filter(group_id=group)
+        return queryset 
+
+    def get(self, request):
+        
+        status = StudentRegister.objects.filter(Q(Q(code=2) | Q(name__icontains='Төгссөн'))).first()
+        self.queryset = self.queryset.filter(status=status)
+
+        all_list = self.list(request).data
+    
+        return request.send_data(all_list)
+
+
 
 @permission_classes([IsAuthenticated])
 class GroupOneAPIView(
@@ -443,7 +482,7 @@ class StudentRegisterAPIView(
         # Ангиар хайлт хийх
         if group:
             queryset = queryset.filter(group_id=group)
-
+        # Төлвөөр хайлт хийх
         if status:
             queryset = queryset.filter(status=status)
 

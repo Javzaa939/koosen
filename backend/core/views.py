@@ -260,7 +260,7 @@ class DepartmentAPIView(
 
         department = self.queryset.get(id=pk)
         if not department:
-            return request.send_error("ERR_002", "Тэнхимийн мэдээлэлэ олдсонгүй")
+            return request.send_error("ERR_002", "Тэнхимийн мэдээлэл олдсонгүй")
 
         errors = []
         datas = request.data
