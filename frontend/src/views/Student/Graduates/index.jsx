@@ -1,5 +1,5 @@
 // ** React Imports
-import { Fragment, useState, useEffect, useContext } from 'react'
+import { Fragment, useState, useEffect } from 'react'
 
 import {
     Row,
@@ -17,9 +17,8 @@ import {
     UncontrolledButtonDropdown
 } from 'reactstrap'
 
-import { ChevronDown, Plus, Search, FileText, Grid, Download } from 'react-feather'
+import { ChevronDown, Search, FileText, Grid, Download } from 'react-feather'
 
-import { useNavigate } from 'react-router-dom'
 
 import Select from 'react-select'
 import classnames from "classnames";
@@ -31,10 +30,7 @@ import useLoader from '@hooks/useLoader';
 
 import { useForm, Controller } from "react-hook-form";
 
-import AuthContext from '@context/AuthContext'
-import SchoolContext from '@context/SchoolContext'
-
-import { getPagination, ReactSelectStyles, generateLessonYear, level_option } from '@utils'
+import { getPagination, ReactSelectStyles } from '@utils'
 
 import { getColumns } from './helpers'
 
@@ -43,9 +39,6 @@ import { downloadCSV, downloadExcel } from '@utils'
 
 const Graduates = () => {
 
-    const { user } = useContext(AuthContext)
-    const { school_id } = useContext(SchoolContext)
-    const navigate = useNavigate()
 
     const { t } = useTranslation()
 
@@ -55,8 +48,6 @@ const Graduates = () => {
         'first_name': 'Нэр',
         'register_num': 'Регистрийн дугаар',
         'profession_name': 'Хөтөлбөр',
-        'group_name': 'Анги',
-        'group_level': 'Курс',
     }
 
     // ** Hook
@@ -67,8 +58,7 @@ const Graduates = () => {
         join_year: '',
         group: '',
         department: '',
-        degree: '',
-        status: ''
+        degree: ''
     }
     const [select_value, setSelectValue] = useState(values)
     const default_page = [10, 15, 50, 75, 100]
@@ -78,7 +68,6 @@ const Graduates = () => {
     const [degree_option, setDegree] = useState([])
     const [profession_option, setProfessionOption] = useState([])
     const [groupOption, setGroup] = useState([])
-    const [level, setLevel] = useState('')
 
     // Хуудаслалтын анхны утга
     const [currentPage, setCurrentPage] = useState(1)
@@ -107,7 +96,7 @@ const Graduates = () => {
     // API
     useEffect(() => {
         getDatas()
-    }, [sortField, currentPage, rowsPerPage, level, select_value])
+    }, [sortField, currentPage, rowsPerPage, select_value])
 
     useEffect(
         () =>
@@ -117,7 +106,7 @@ const Graduates = () => {
             getGroup()
             getDepartmentOption()
         },
-        [select_value, school_id]
+        [select_value]
     )
 
     // Тэнхимын жагсаалт
@@ -167,19 +156,6 @@ const Graduates = () => {
         }
     }
 
-    /* Устгах функц */
-	const handleDelete = async(id) => {
-        const { success, data } = await fetchData(studentApi.delete(id))
-        if(success)
-        {
-            getDatas()
-        }
-	};
-
-    const editModal = (student_id) => {
-    navigate(`/student/register/${student_id}/detail/`)
-    }
-
     // ** Function to handle filter
     const handleFilter = e => {
         const value = e.target.value.trimStart();
@@ -220,7 +196,7 @@ const Graduates = () => {
     async function excelDownload(type) {
         var keys = Object.keys(excelColumns)
 
-        const { success, data } = await fetchData(studentApi.download(searchValue, select_value.department, select_value.degree, select_value.profession, select_value.group, select_value.join_year, select_value?.status, level))
+        const { success, data } = await fetchData(studentApi.download(searchValue, select_value.department, select_value.degree, select_value.profession, select_value.group, select_value.join_year, select_value?.status))
         if (success) {
             data.forEach((cdata) => {
                 for(let key in cdata) {
@@ -250,7 +226,7 @@ const Graduates = () => {
                 <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
                     <CardTitle tag='h4' style={{ marginTop: '20px' }}>{t('Төгссөн оюутны мэдээлэл')}</CardTitle>
                     <div className='d-flex flex-wrap mt-md-0 mt-1'>
-                    <UncontrolledButtonDropdown disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-read')?false : true}>
+                    <UncontrolledButtonDropdown>
                         <DropdownToggle color='secondary' className='m-50' caret outline>
                             <Download size={15} />
                             <span className='align-middle ms-50'>Export</span>
@@ -504,7 +480,7 @@ const Graduates = () => {
                         )}
                         onSort={handleSort}
                         sortIcon={<ChevronDown size={10} />}
-                        columns={getColumns(currentPage, rowsPerPage, total_count, editModal, handleDelete, user)}
+                        columns={getColumns(currentPage, rowsPerPage, total_count)}
                         paginationPerPage={rowsPerPage}
                         paginationDefaultPage={currentPage}
                         paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}

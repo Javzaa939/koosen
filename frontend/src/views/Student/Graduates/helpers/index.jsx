@@ -1,21 +1,14 @@
 import { useContext } from 'react';
 
-import { X, Edit } from 'react-feather'
-import {Badge, UncontrolledTooltip} from 'reactstrap'
-
-import useModal from "@hooks/useModal"
 import { t } from 'i18next';
 
 import SchoolContext from "@context/SchoolContext"
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, total_count, editModal, handleDelete, user) {
-
-	const { school_id } = useContext(SchoolContext)
+export function getColumns (currentPage, rowsPerPage, total_count) {
 
 	const page_count = Math.ceil(total_count / rowsPerPage)
 
-	const { showWarning } = useModal()
 
 	/** Сонгосон хуудасны тоо датаны тооноос их болсон үед хуудаслалт 1-ээс эхлэнэ */
     if (currentPage > page_count) {
@@ -67,10 +60,12 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 			wrap: true,
         },
 		{
+			header: 'graduated_year',
 			name: t("Төгссөн он"),
-			selector: (row) => row?.join_year,
+			selector: (row) => row?.graduated_year,
 			sortable: true,
 			width: '250px',
+			center: true,
 		},
 	]
 
