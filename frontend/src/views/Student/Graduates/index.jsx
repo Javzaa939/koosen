@@ -38,8 +38,6 @@ import { getPagination, ReactSelectStyles, generateLessonYear, level_option } fr
 
 import { getColumns } from './helpers'
 
-import Addmodal from '../Register/Add'
-
 import { useTranslation } from 'react-i18next'
 import { downloadCSV, downloadExcel } from '@utils'
 
@@ -74,15 +72,12 @@ const Graduates = () => {
     }
     const [select_value, setSelectValue] = useState(values)
     const default_page = [10, 15, 50, 75, 100]
-    const [modal, setModal] = useState(false)
 
     const [datas, setDatas] = useState([])
     const [department_option, setDepartmentOption] = useState([])
-    const [status_option, setStatusOption] = useState([])
     const [degree_option, setDegree] = useState([])
     const [profession_option, setProfessionOption] = useState([])
     const [groupOption, setGroup] = useState([])
-    const [yearOption, setYear] = useState(generateLessonYear(10))
     const [level, setLevel] = useState('')
 
     // Хуудаслалтын анхны утга
@@ -108,7 +103,6 @@ const Graduates = () => {
     const departmentApi = useApi().hrms.department
     const degreeApi = useApi().settings.professionaldegree
     const professionApi = useApi().study.professionDefinition
-    const settingsApi = useApi().settings.studentRegisterType
 
     // API
     useEffect(() => {
@@ -164,7 +158,6 @@ const Graduates = () => {
         var profession = select_value?.profession
         var degree = select_value?.degree
         var group = select_value?.group
-        var join_year = select_value?.join_year
 
         const {success: success1, data: data1} = await allFetch(studentApi.getGraduate1(rowsPerPage, currentPage, sortField, searchValue, department, degree, profession, group))
         if(success1)

@@ -66,7 +66,6 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 			left: true,
 			wrap: true,
         },
-		
 		{
 			name: t("Төгссөн он"),
 			selector: (row) => row?.join_year,
@@ -74,45 +73,6 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 			width: '250px',
 		},
 	]
-
-	if(Object.keys(user).length > 0) {
-		var delete_column = {
-			name: t("Үйлдэл"),
-			width: "120px",
-			center: true,
-			selector: (row) => (
-				<div className="text-center" style={{ width: "auto" }}>
-					<a role="button" onClick={() => { editModal(row.id)} }
-						id={`complaintListDatatableEdit${row?.id}`}
-						className="me-1"
-					>
-						<Badge color="light-secondary" pill><Edit  width={"15px"} /></Badge>
-					</a>
-					<UncontrolledTooltip placement='top' target={`complaintListDatatableEdit${row.id}`} >Засах</UncontrolledTooltip>
-					{
-						(user.permissions.includes('lms-student-register-delete')  && school_id) &&
-						<>
-						<a role="button"
-							onClick={() => showWarning({
-								header: {
-									title: t(`Оюутан устгах`),
-								},
-								question: t("Та энэ мэдээллийг устгахдаа итгэлтэй байна уу? Оюутны бүх мэдээлэл устахыг анхаарна уу"),
-								onClick: () => handleDelete(row.id),
-								btnText: t('Устгах'),
-							})}
-							id={`complaintListDatatableCancel${row?.id}`}
-						>
-							<Badge color="light-danger" pill><X width={"100px"} /></Badge>
-						</a>
-						<UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${row.id}`} >Устгах</UncontrolledTooltip>
-						</>
-					}
-				</div>
-			),
-		}
-		columns.push(delete_column)
-	}
 
     return columns
 
