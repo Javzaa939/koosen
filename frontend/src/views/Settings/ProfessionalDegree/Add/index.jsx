@@ -1,5 +1,5 @@
 // ** React imports
-import React, { Fragment } from 'react'
+import React, { Fragment, useEffect } from 'react'
 
 import { X } from "react-feather";
 
@@ -16,14 +16,14 @@ import { validate, convertDefaultValue } from "@utils"
 
 import { validateSchema } from './validateSchema';
 
-const Addmodal = ({ open, handleModal, refreshDatas }) => {
+const Addmodal = ({ open, handleModal, refreshDatas, editId }) => {
 
     const CloseBtn = (
         <X className="cursor-pointer" size={15} onClick={handleModal} />
     )
 
     // ** Hook
-    const { control, handleSubmit, formState: { errors }, reset, setError } = useForm(validate(validateSchema));
+    const { control, handleSubmit, formState: { errors }, reset, setError, setValue} = useForm(validate(validateSchema));
 
 	// Loader
 	const { Loader, isLoading, fetchData } = useLoader({});
@@ -33,18 +33,51 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
     const professionaldegreeApi = useApi().settings.professionaldegree
 
 	async function onSubmit(cdata) {
-        cdata = convertDefaultValue(cdata, ['degree_name_eng'])
-        const { success, errors } = await postFetch(professionaldegreeApi.post(cdata))
-        if(success) {
-            reset()
-            handleModal()
-            refreshDatas()
-        }
-        else {
-            /** Алдааны мессэжийг input дээр харуулна */
+        if (editId){
+            cdata = convertDefaultValue(cdata)
+            const { success, errors } = await fetchData(professionaldegreeApi.put(cdata, editId))
+            if(success) {
+                refreshDatas()
+                handleModal()
+            }
+            else {
+                /** Алдааны мессэжийг input дээр харуулна */
                 setError(errors.field, { type: 'custom', message:  errors.msg});
+            }
+        }
+        else{
+            cdata = convertDefaultValue(cdata, ['degree_name_eng'])
+            const { success, errors } = await postFetch(professionaldegreeApi.post(cdata))
+            if(success) {
+                reset()
+                handleModal()
+                refreshDatas()
+            }
+            else {
+                /** Алдааны мессэжийг input дээр харуулна */
+                    setError(errors.field, { type: 'custom', message:  errors.msg});
+            }
         }
 	}
+
+     async function getDatas() {
+        if(editId) {
+            const { success, data } = await fetchData(professionaldegreeApi.getOne(editId))
+            if(success) {
+                // засах үед дата байх юм бол setValue-р дамжуулан утгыг харуулна
+                if(data === null) return
+                for(let key in data) {
+                    if(data[key] !== null)
+                        setValue(key, data[key])
+                    else setValue(key, '')
+                }
+            }
+        }
+    }
+
+    useEffect(() => {
+        getDatas()
+    },[editId])
 
 	return (
         <Fragment>
@@ -61,7 +94,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                     close={CloseBtn}
                     tag="div"
                 >
-                    <h5 className="modal-title">{t('Боловсролын зэрэг нэмэх')}</h5>
+                    <h5 className="modal-title">{ editId ?  t('Боловсролын зэрэг засах'): t('Боловсролын зэрэг нэмэх')}</h5>
                 </ModalHeader>
                 <ModalBody className="flex-grow-1">
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
@@ -133,14 +166,44 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                             />
                             {errors.degree_eng_name && <FormFeedback className='d-block'>{t(errors.degree_eng_name.message)}</FormFeedback>}
                         </Col>
-                        <Col md={12} className="mt-2">
+                        <Col md={12}>
+                            <Label className="form-label" for="degree_uig_name">
+                                {t('Зэргийн нэр уйгаржин')}
+                            </Label>
+                            <Controller
+                                defaultValue=''
+                                control={control}
+                                id="degree_uig_name"
+                                name="degree_uig_name"
+                                render={({ field }) => {
+                                    return(
+                                        <Input
+                                            id="degree_uig_name"
+                                            bsSize="sm"
+                                            placeholder={t('Зэргийн нэр уйгаржин')}
+                                            {...field}
+                                            style={{fontFamily: 'CMs Urga', fontSize:'15px'}}
+                                            type="text"
+                                            invalid={errors.degree_uig_name && true}
+                                        />
+                                    )
+                                }}
+                            />
+                            {errors.degree_uig_name && <FormFeedback className='d-block'>{t(errors.degree_uig_name.message)}</FormFeedback>}
+                        </Col>
+                        <Col md={12} className=" text-center mt-2">
                             <Button className="me-2" color="primary" type="submit" disabled={postLoading}>
                                 {postLoading &&<Spinner size='sm' className='me-1'/>}
                                 {t('Хадгалах')}
                             </Button>
-                            <Button color="secondary" type="reset" outline  onClick={handleModal}>
-                                {t('Буцах')}
-                            </Button>
+                            {
+                                editId ?
+                                    null
+                                :
+                                <Button color="secondary" type="reset" outline  onClick={handleModal}>
+                                    {t('Буцах')}
+                                </Button>
+                            }
                         </Col>
                     </Row>
                 </ModalBody>

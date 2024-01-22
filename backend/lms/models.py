@@ -23,6 +23,7 @@ class ProfessionalDegree(models.Model):
     degree_code = models.CharField(unique=True, max_length=255)
     degree_name = models.CharField(max_length=255, verbose_name="Зэргийн нэр")
     degree_eng_name = models.CharField(max_length=255, null=True, verbose_name="Зэргийн англи нэр")
+    degree_uig_name = models.CharField(max_length=255, null=True, verbose_name="Зэргийн уйгаржин нэр")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -106,7 +107,7 @@ class Score(models.Model):
     score_max = models.FloatField(verbose_name="Дүнгийн доод оноо")
     score_min = models.FloatField(verbose_name="Дүнгийн дээд оноо")
     gpa = models.FloatField(verbose_name="Голч дүн")
-    assesment = models.CharField(max_length=1, verbose_name="Үсгэн үнэлгээ")
+    assesment = models.CharField(max_length=10, verbose_name="Үсгэн үнэлгээ")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -419,7 +420,7 @@ class LearningPlan(models.Model):
     DOC_DIPLOM = 23
 
     LESSON_LEVEL = (
-        (BASIC, 'Ерөнхий суурь хичээл'),
+        (BASIC, 'Дээд боловсролын суурь хичээл'),
         (PROF_BASIC, 'Мэргэжлийн суурь хичээл'),
         (PROFESSION, 'Мэргэжлийн хичээл'),
         (DIPLOM, 'Диплом'),
@@ -2512,7 +2513,7 @@ class TeacherCreditVolumePlan(models.Model):
     lesson_year = models.CharField(max_length=20, null=True, verbose_name='Хичээлийн жил')
     lesson_season = models.ForeignKey(Season, on_delete=models.SET_NULL, null=True, verbose_name='Улирал')
     teacher = models.ForeignKey(Teachers, on_delete=models.PROTECT, null=True, verbose_name="Багш")
-    type = models.PositiveIntegerField(choices=Lesson_title_plan.LESSON_TYPE, db_index=True, default=Lesson_title_plan.LECT, verbose_name="Хичээллэх төрөл")
+    type = models.PositiveIntegerField(choices=TimeTable.LESSON_TYPE, db_index=True, default=TimeTable.LECT, verbose_name="Хичээллэх төрөл")
     credit = models.PositiveIntegerField(null=True, verbose_name="Хичээлийн төрөлд хамаарах кредит цаг")
     department = models.ForeignKey(Salbars, on_delete=models.SET_NULL, null=True, verbose_name="Хөтөлбөрийн баг")
     school = models.ForeignKey(SubOrgs, on_delete=models.SET_NULL, null=True, verbose_name="Сургууль")
@@ -3320,7 +3321,7 @@ class CalculatedGpaOfDiploma(models.Model):
     kredit = models.FloatField(verbose_name="Кредит")
     score = models.FloatField(null=True, verbose_name="Нийт оноо")
     gpa = models.FloatField(verbose_name="Голч дүн")
-    assesment = models.CharField(max_length=1, verbose_name="Үсгэн үнэлгээ")
+    assesment = models.CharField(max_length=2, verbose_name="Үсгэн үнэлгээ")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

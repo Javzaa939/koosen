@@ -79,7 +79,7 @@ const EditModal = ({ open, handleModal, group_id, refreshDatas }) => {
         }
     },[user])
 
-    //Мэргэжлийн жагсаалт авах
+    //Хөтөлбөрийн жагсаалт авах
     async function getProfession () {
 
         const { success, data } = await fetchData(professionApi.getList(degree_id, dep_id))
@@ -336,7 +336,7 @@ const EditModal = ({ open, handleModal, group_id, refreshDatas }) => {
                         </Col>
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="profession">
-                               {t('Мэргэжил')}
+                               {t('Хөтөлбөр')}
                             </Label>
                             <Controller
                                 control={control}

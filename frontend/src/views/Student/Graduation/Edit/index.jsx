@@ -39,7 +39,7 @@ import { validateSchema } from '../validateSchema';
 
 const EditModal = ({ open, handleModal, graduate_id, refreshDatas }) => {
 
-    const { control, handleSubmit, setValue, reset, setError, formState: { errors } } = useForm(validate(validateSchema));
+    const { control, handleSubmit, setValue, reset, setError, formState: { errors } } = useForm();
 
     const { user } = useContext(AuthContext)
 
@@ -89,8 +89,12 @@ const EditModal = ({ open, handleModal, graduate_id, refreshDatas }) => {
 
     useEffect(()=>{
         getStudentOption()
-        getDatas()
     },[])
+
+    useEffect(()=>{
+        getStudentOption()
+        getDatas()
+    },[graduate_id])
 
     useEffect(
         () =>
@@ -133,7 +137,9 @@ const EditModal = ({ open, handleModal, graduate_id, refreshDatas }) => {
                         else
                         {
                             setRadio('shalgalt', true)
-                            setSelectLessonIds(data['lesson'])
+                            if (data['lesson']) {
+                                setSelectLessonIds(data['lesson'])
+                            }
                         }
                     }
 
@@ -145,23 +151,26 @@ const EditModal = ({ open, handleModal, graduate_id, refreshDatas }) => {
 
 	async function onSubmit(cdata)
     {
+
         cdata = convertDefaultValue(cdata)
         cdata['school'] = school_id
         cdata['lesson_year'] = cyear_name
         cdata['lesson_season'] = cseason_id
         cdata['lesson_type'] = radio === 'diploma' ? 1 : 2
-
-        let selectLesson_ids = radio === 'diploma' ? selectLessonIds ? [selectLessonIds] : [] : selectLessonIds
         let allSelectLessonIds = []
+        if (selectLessonIds.length > 0) {
+            let selectLesson_ids = (radio === 'diploma' && selectLessonIds) ? [selectLessonIds] : selectLessonIds
 
-        for (let selectLessonId of selectLesson_ids)
-        {
-            allSelectLessonIds.push(selectLessonId.id)
+            for (let selectLessonId of selectLesson_ids)
+            {
+                allSelectLessonIds.push(selectLessonId.id)
+            }
         }
 
         cdata['lesson'] = allSelectLessonIds
 
         const { success, errors } = await fetchData(graduateApi.put(cdata, graduate_id))
+
         if(success) {
             reset()
             handleModal()
@@ -184,9 +193,9 @@ const EditModal = ({ open, handleModal, graduate_id, refreshDatas }) => {
 
 	return (
         <Fragment>
-            <Modal isOpen={open} toggle={handleModal} className="modal-dialog-centered modal-lg" onClosed={handleModal}>
+            <Modal isOpen={open} toggle={() => handleModal('')} className="modal-dialog-centered modal-lg">
             {isLoading && <div className='suspense-loader'><Spinner size='xl'/></div>}
-                <ModalHeader className='bg-transparent pb-0' toggle={handleModal}></ModalHeader>
+                <ModalHeader className='bg-transparent pb-0' toggle={() => handleModal('')}></ModalHeader>
                 <ModalBody className="px-sm-3 pt-50 pb-3">
                     <div className='text-center'>
                         <h4>{t('Төгсөлтийн ажил засах')}</h4>
@@ -257,8 +266,6 @@ const EditModal = ({ open, handleModal, graduate_id, refreshDatas }) => {
                                             isLoading={isLoading}
                                             placeholder={t(`-- Сонгоно уу --`)}
                                             options={lesson_option || []}
-                                            // value={value && lesson_option.find((c) => c.id === value)}
-                                            // value={selectLessonIds}
                                             value={radio === 'diploma' ? value && lesson_option.find((c) => c.id === value) : selectLessonIds}
                                             noOptionsMessage={() => t('Хоосон байна')}
                                             onChange={(val) => {
@@ -276,7 +283,7 @@ const EditModal = ({ open, handleModal, graduate_id, refreshDatas }) => {
                             ></Controller>
                             {errors.lesson && <FormFeedback className='d-block'>{t(errors.lesson.message)}</FormFeedback>}
                         </Col>
-                        <Col lg={6} md={12}>
+                        <Col md={6}>
                             <Label className="form-label" for="diplom_topic">
                                 {t('Төгсөлтийн ажлын сэдэв')}
                             </Label>
@@ -292,15 +299,58 @@ const EditModal = ({ open, handleModal, graduate_id, refreshDatas }) => {
                                             placeholder={t('Төгсөлтийн ажлын сэдэв оруулах')}
                                             {...field}
                                             type="text"
-                                            disabled={is_disabled}
-                                            readOnly={is_disabled}
                                             invalid={errors.diplom_topic && true}
                                         />
                                     )}
                                 />
                             {errors.diplom_topic && <FormFeedback className='d-block'>{t(errors.diplom_topic.message)}</FormFeedback>}
                         </Col>
-                        <Col lg={6} md={12}>
+                        <Col md={6}>
+                            <Label className="form-label" for="diplom_topic_eng">
+                                {t('Төгсөлтийн ажлын сэдэв англи')}
+                            </Label>
+                                <Controller
+                                    defaultValue=''
+                                    control={control}
+                                    id="diplom_topic_eng"
+                                    name="diplom_topic_eng"
+                                    render={({ field }) => (
+                                        <Input
+                                            id ="diplom_topic_eng"
+                                            bsSize="sm"
+                                            placeholder={t('Төгсөлтийн ажлын сэдэв англи оруулах')}
+                                            {...field}
+                                            type="text"
+                                            invalid={errors.diplom_topic_eng && true}
+                                        />
+                                    )}
+                                />
+                            {errors.diplom_topic_eng && <FormFeedback className='d-block'>{t(errors.diplom_topic_eng.message)}</FormFeedback>}
+                        </Col>
+                        <Col md={6}>
+                            <Label className="form-label" for="diplom_topic_uig">
+                                {t('Төгсөлтийн ажлын сэдэв уйгаржин')}
+                            </Label>
+                                <Controller
+                                    defaultValue=''
+                                    control={control}
+                                    id="diplom_topic_uig"
+                                    name="diplom_topic_uig"
+                                    render={({ field }) => (
+                                        <Input
+                                            id ="diplom_topic_uig"
+                                            bsSize="sm"
+                                            placeholder={t('Төгсөлтийн ажлын сэдэв уйгаржин оруулах')}
+                                            {...field}
+                                            type="text"
+                                            style={{ fontFamily: 'cmdashitseden', fontSize: '15px'}}
+                                            invalid={errors.diplom_topic_uig && true}
+                                        />
+                                    )}
+                                />
+                            {errors.diplom_topic_uig && <FormFeedback className='d-block'>{t(errors.diplom_topic_uig.message)}</FormFeedback>}
+                        </Col>
+                        <Col lg={6} md={6}>
                             <Label className="form-label" for="leader">
                                 {t('Удирдагчийн овог нэр цол')}
                             </Label>

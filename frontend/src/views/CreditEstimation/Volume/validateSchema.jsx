@@ -1,13 +1,10 @@
 import * as Yup from 'yup';
 
 export const validateSchema = Yup.object().shape({
-	lesson: Yup.string()
-		.trim()
+	lesson: Yup.number()
 		.required('Хоосон байна'),
-	teacher: Yup.string()
-		.trim()
+	teacher: Yup.number()
 		.required('Хоосон байна'),
-	type: Yup.string()
-        .trim()
+	type: Yup.number()
         .required('Хоосон байна'),
 });

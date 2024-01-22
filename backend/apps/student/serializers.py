@@ -1,4 +1,5 @@
 import os
+import re
 from datetime import date
 
 from rest_framework import serializers
@@ -68,6 +69,9 @@ from main.utils.function.utils import fix_format_date
 from main.utils.function.utils import json_load
 from main.utils.function.utils import get_active_year_season
 
+from googletrans import Translator
+
+translator = Translator()
 
 # ------------------- Оюутан бүртгэл -----------------
 
@@ -393,10 +397,15 @@ class StudentListSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField(read_only=True)
     group = GroupListSerializerWithProfessional(many=False, read_only=True)
     citizenship = CountryListSerializer(many=False, read_only=True)
+    school_name = serializers.CharField(source='school.name', default='')
+    school_name_eng = serializers.CharField(source='school.name_eng', default='')
+    school_name_uig = serializers.CharField(source='school.name_uig', default='')
+    lastname = serializers.SerializerMethodField()
+    isman = serializers.SerializerMethodField()
 
     class Meta:
         model = Student
-        fields = ["id", 'code', 'first_name', 'last_name', 'register_num', 'full_name', 'group', 'citizenship', 'last_name_eng', 'first_name_eng', 'last_name_uig', 'first_name_uig' ]
+        fields = ["id", 'code', 'first_name', 'last_name', 'register_num', 'full_name', 'group', 'citizenship', 'last_name_eng', 'first_name_eng', 'last_name_uig', 'first_name_uig', 'school_name', 'lastname', 'school_name_eng', 'school_name_uig', 'isman' ]
 
     def get_full_name(self, obj):
         first_name = obj.first_name
@@ -406,6 +415,50 @@ class StudentListSerializer(serializers.ModelSerializer):
         full_name = obj.code + " " + full_name + " " + obj.register_num
 
         return full_name
+
+    def get_lastname(self, obj):
+        ovog = obj.last_name
+        reverse_ovog = ovog[::-1]
+
+        # хоолойн г ээр төгссөн өол
+        if ovog.endswith("г") or ovog.endswith("ж") or ovog.endswith("ч") or ovog.endswith("ш"):
+            ovog = ovog + 'ийн'
+        elif ovog.endswith("н"):
+            ovog = ovog + 'гийн'
+        elif ovog.endswith("й"):
+            ovog = ovog + 'гийн'
+        elif ovog.endswith("н") and ('а' in ovog or 'о' in ovog or 'у' in ovog):
+            ovog = ovog + 'ы'
+        elif ovog.endswith("ь"):
+            ovog = ovog + 'ийн'
+        elif ovog.endswith("я") or  ovog.endswith("яа"):
+            ovog = ovog + 'гийн'
+        elif ovog.endswith("аа") or ovog.endswith("ээ") or ovog.endswith("ий") or ovog.endswith("оо") or ovog.endswith("уу") or ovog.endswith("өө") or ovog.endswith("үү"):
+            ovog = ovog + 'гийн'
+        elif ovog.endswith("а")  or ovog.endswith("о") or ovog.endswith("у"):
+            ovog = ovog[:-1] + ''
+            ovog = ovog + 'ын'
+        elif ovog.endswith("э") or ovog.endswith("и") or ovog.endswith("ө") or ovog.endswith("ү"):
+            split_ovog = ovog[:-1]
+            ovog = split_ovog + 'ийн'
+        elif ovog.endswith("н") and ('э' in ovog or 'ө' in ovog or 'ү' in ovog or 'и' in ovog):
+            ovog = ovog + 'гийн'
+        elif 'а' in reverse_ovog or 'о' in reverse_ovog or 'у' in reverse_ovog:
+            ovog = ovog + 'ын'
+        elif 'э' in reverse_ovog or 'ө' in reverse_ovog or 'ү' in reverse_ovog or 'и' in ovog:
+            ovog = ovog + 'ийн'
+
+        return ovog
+
+
+    def get_isman(self, obj):
+        is_man = False
+        ovog = obj.last_name
+        reverse_ovog = ovog[::-1]
+        if reverse_ovog.endswith("а")  or reverse_ovog.endswith("о") or reverse_ovog.endswith("у"):
+            is_man = True
+
+        return is_man
 
 
 class StudentSimpleListSerializer(serializers.ModelSerializer):
@@ -874,15 +927,17 @@ class StudentDefinitionSerializer(serializers.ModelSerializer):
 
 
 class ScoreRegisterDefinitionSerializer(serializers.ModelSerializer):
-
-    lesson = LessonStandartSerializer(many=False, read_only=True)
+    lesson_name = serializers.CharField(source='lesson.name', default='')
+    lesson_code = serializers.CharField(source='lesson.code', default='')
+    lesson_kredit = serializers.CharField(source='lesson.kredit', default='')
+    lesson_id = serializers.IntegerField(source='lesson.id')
 
     assessment = serializers.SerializerMethodField()
-    lesson_season = SeasonSerializer(many=False)
+    lesson_season_name = serializers.CharField(source='lesson_season.season_name', default='')
 
     class Meta:
         model = ScoreRegister
-        fields = "__all__"
+        fields = "id", 'lesson_name', 'lesson_year', 'lesson_code', 'lesson_kredit', 'assessment', 'lesson_season_name', 'exam_score', 'teach_score', 'lesson_id'
 
     def get_assessment(self, obj):
 
@@ -929,7 +984,7 @@ class GraduationWorkPrintSerailizer(serializers.ModelSerializer):
 
             les_data = LessonStandartSerializer(lesson, many=False).data
 
-            score_reg_qs = ScoreRegister.objects.filter(student=obj.student, lesson=lesson).last()
+            score_reg_qs = ScoreRegister.objects.filter(student=obj.student, lesson=lesson).first()
             if score_reg_qs:
                 score_reg_data = ScoreRegisterDefinitionSerializer(score_reg_qs, many=False).data
                 les_data['score_register'] = score_reg_data
@@ -949,6 +1004,7 @@ class StudentAttachmentSerializer(serializers.ModelSerializer):
 
     score_code = serializers.SerializerMethodField()
     graduation_work = serializers.SerializerMethodField()
+    register_num_eng = serializers.SerializerMethodField()
 
     class Meta:
         model = Student
@@ -995,6 +1051,24 @@ class StudentAttachmentSerializer(serializers.ModelSerializer):
                 if score_qs:
                     score_assesment = score_qs.gpa
         return { 'score_code': score_assesment, 'max_kredit': max_kredit }
+
+
+    def get_register_num_eng(self, obj):
+        regex = r'[А-Яа-я]{2}[0-9]{8}'
+        return_reg_num = obj.register_num
+
+        regex_matches = re.search(regex, str(return_reg_num))
+        if regex_matches:
+            register_num = regex_matches[0]
+
+            st_2 = register_num[:2]
+            number = register_num[2:10]
+
+            eng = translator.translate(st_2, dest='en').text
+
+            return_reg_num = eng + number
+
+        return return_reg_num
 
 
 class CalculatedGpaOfDiplomaPrintSerializer(serializers.ModelSerializer):
@@ -1073,4 +1147,12 @@ class StudentVizSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = StudentViz
+        fields = "__all__"
+
+
+class GraduationWorkStudentListSerializer(serializers.ModelSerializer):
+    student = StudentListSerializer()
+
+    class Meta:
+        model = GraduationWork
         fields = "__all__"

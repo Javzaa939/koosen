@@ -97,6 +97,9 @@ class TeacherListApiView(
     queryset = Teachers.objects
     serializer_class = TeacherListSerializer
 
+    filter_backends = [SearchFilter]
+    search_fields = ['first_name', 'last_name']
+
     def get_queryset(self):
         queryset = get_teacher_queryset()
 
@@ -133,7 +136,7 @@ class TeacherLessonListApiView(
         teacher_ids = []
 
         if lesson:
-            teacher_ids = TimeTable.objects.filter(lesson=lesson).values_list('teacher', flat=True)
+            teacher_ids = Lesson_to_teacher.objects.filter(lesson=lesson).values_list('teacher', flat=True)
 
             self.queryset = self.queryset.filter(id__in=teacher_ids)
 
@@ -177,19 +180,15 @@ class SchoolAPIView(
 ):
     """" Сургууль, Хамгийн том Байгууллага"""
 
-    queryset = Schools.objects
+    queryset = Schools.objects.all()
     serializer_class = SchoolsRegisterSerailizer
 
     def get(self, request, pk=None):
         " Сургуулийн жагсаалт "
-        self.serializer_class = SchoolsRegisterSerailizer
+        instance = Schools.objects.first()
+        school_data = self.get_serializer(instance).data
 
-        if pk:
-            group = self.retrieve(request, pk).data
-            return request.send_data(group)
-
-        group_list = self.list(request).data
-        return request.send_data(group_list)
+        return request.send_data(school_data)
 
 
 @permission_classes([IsAuthenticated])
@@ -266,7 +265,7 @@ class DepartmentAPIView(
 
         department = self.queryset.get(id=pk)
         if not department:
-            return request.send_error("ERR_002", "Тэнхимийн мэдээлэлэ олдсонгүй")
+            return request.send_error("ERR_002", "Тэнхимийн мэдээлэл олдсонгүй")
 
         errors = []
         datas = request.data
@@ -380,7 +379,7 @@ class SubSchoolAPIView(
 ):
     """" Бүрэлдэхүүн сургууль """
 
-    queryset = SubOrgs.objects.order_by("-created_at")
+    queryset = SubOrgs.objects.order_by("name")
     serializer_class = SubSchoolRegisterSerailizer
 
     filter_backends = [SearchFilter]
@@ -581,31 +580,23 @@ class TeacherListAPIView(
 
     """ Багшийн мэдээллийн жагсаалт """
 
-    def get_queryset(self):
-        "Багшийн мэдээллийг сургууль, Хөтөлбөрийн багаар харуулах "
+    def get(self, request):
+        " нийт багшийн жагсаалт"
 
-        queryset = self.queryset
-        teacher_queryset = queryset.all().values_list('user', flat=True)
-        qs_employee_user = Employee.objects.filter(user_id__in=list(teacher_queryset), org_position__is_teacher=True, state=Employee.STATE_WORKING).values_list('user', flat=True)
-        if qs_employee_user:
-            queryset = queryset.filter(user_id__in = list(qs_employee_user))
+        queryset = get_teacher_queryset()
 
         sub_org = self.request.query_params.get('sub_org')
+        salbar = self.request.query_params.get('salbar')
 
         # сургууль
         if sub_org:
             queryset = queryset.filter(sub_org=sub_org)
 
-        salbar = self.request.query_params.get('salbar')
-
         # салбар, тэнхим
         if salbar:
             queryset = queryset.filter(salbar=salbar)
 
-        return queryset
-
-    def get(self, request):
-        " нийт багшийн жагсаалт"
+        self.queryset = queryset
 
         teach_info = self.list(request).data
         return request.send_data(teach_info)
@@ -634,6 +625,9 @@ class TeacherApiView(
 
         sub_org = self.request.query_params.get('sub_org')
         salbar = self.request.query_params.get('salbar')
+        position = self.request.query_params.get('position')
+        sorting = self.request.query_params.get('sorting')
+
 
         # Бүрэлдэхүүн сургууль
         if sub_org:
@@ -642,6 +636,18 @@ class TeacherApiView(
         # салбар, тэнхим
         if salbar:
             queryset = queryset.filter(salbar=salbar)
+
+        # Албан тушаалаар хайх
+        if position:
+            user_ids = Employee.objects.filter(org_position=position, state=Employee.STATE_WORKING).values_list('user', flat=True)
+
+            queryset = queryset.filter(user_id__in=user_ids)
+        # Sort хийх үед ажиллана
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
 
         return queryset
 
@@ -890,6 +896,24 @@ class OrgPositionListAPIView(
         self.queryset = self.queryset.filter(is_teacher=True)
         datas = self.list(request).data
         return request.send_data(datas)
+
+
+@permission_classes([IsAuthenticated])
+class OrgPositionAllListAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+):
+    """ Албан тушаалын жагсаалт """
+
+    queryset = OrgPosition.objects
+    serializer_class = OrgPositionSerializer
+
+    def get(self, request):
+
+        self.queryset = self.queryset.all()
+        datas = self.list(request).data
+        return request.send_data(datas)
+
 
 @permission_classes([IsAuthenticated])
 class DepLeaderAPIView(

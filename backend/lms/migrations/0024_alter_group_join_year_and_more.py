@@ -50,7 +50,7 @@ class Migration(migrations.Migration):
                 ('lesson', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='lms.lessonstandart', verbose_name='Хичээл')),
                 ('lesson_season', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='lms.season', verbose_name='Улирал')),
                 ('room', models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to='lms.room', verbose_name='Шалгалт авах өрөө')),
-                ('school', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='core.subschools', verbose_name='Сургууль')),
+                ('school', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='core.suborgs', verbose_name='Сургууль')),
                 ('teacher', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='core.teachers', verbose_name='Хянах багш')),
                 ('updated_user', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='ett_up_user', to=settings.AUTH_USER_MODEL, verbose_name='Зассан хэрэглэгч')),
             ],

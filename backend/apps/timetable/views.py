@@ -406,8 +406,12 @@ class TimeTableAPIView(
                 return request.send_error("ERR_003", errors)
 
         request_data['created_user'] = user.id
-        serializer = self.get_serializer(data=request_data)
+        if not request_data.get('school'):
+            lesson_data = LessonStandart.objects.get(id=lesson)
+            if lesson_data and lesson_data.school:
+                request_data['school'] = lesson_data.school.id if lesson_data else None
 
+        serializer = self.get_serializer(data=request_data)
         if serializer.is_valid(raise_exception=False):
 
             group_ids = [item.get('id') for item in group_data]
@@ -768,6 +772,7 @@ class TimeTableAPIView(
                     print(e)
                     return request.send_error("ERR_002", "Хичээлийн хуваарь давхцаж байна.")
         else:
+            print(serializer.errors)
             # Олон алдааны мессэж буцаах бол үүнийг ашиглана
             for key in serializer.errors:
                 msg = "Хоосон байна"
@@ -2265,16 +2270,12 @@ class TimeTableNewAPIView(
 
         dep_id = self.request.query_params.get('selectedValue')
 
+        # Хайх төрлөөс хамаараад сонгогдсон утга
+        option_filter = self.request.query_params.get('option')
+
         year, season = get_active_year_season()
 
         self.queryset = self.queryset.filter(lesson_year=year.strip(), lesson_season=season)
-
-        # Хөтөлбөрийн багаар хайлт хийх
-        if dep_id:
-            group_ids = Group.objects.filter(department_id=dep_id).values_list('id', flat=True)
-            t_ids = TimeTable_to_group.objects.filter(group_id__in=group_ids).values_list('timetable', flat=True)
-
-            self.queryset = self.queryset.filter(id__in=t_ids)
 
         query = '''
             SELECT tt.color, tt.id as event_id, tt.day, tt.time,  tt.lesson_id AS lesson,  tt.room_id AS room, tt.teacher_id as teacher, ls.name as lesson_name, tt.odd_even, CONCAT(r.code , ' ', r.name) as room_name, CONCAT(SUBSTRING(cu.last_name, 1, 1), '.', cu.first_name) as teacher_name,
@@ -2329,8 +2330,8 @@ class TimeTableNewAPIView(
                 ) AS group_list
             ) ta
 
-            WHERE tt.lesson_year='{year}' and tt.lesson_season_id ='{season}' and tt.begin_date >='{begin_date}' and tt.end_date <= '{end_date}' or  tt.begin_date is null
-        '''.format(year=year, season=season, begin_date=begin_date, end_date=end_date)
+            WHERE tt.lesson_year='{year}' and tt.lesson_season_id ='{season}' and tt.begin_date >='{begin_date}' and tt.end_date <= '{end_date}' or  tt.begin_date is null {dep_condition}
+        '''.format(year=year, season=season, begin_date=begin_date, end_date=end_date, dep_condition=f"AND tt.id in ( SELECT timetable_id FROM lms_timetable_to_group WHERE group_id in (SELECT id FROM lms_group WHERE department_id={dep_id}))" if dep_id else '')
 
         cursor = connection.cursor()
         cursor.execute(query)
@@ -2642,7 +2643,16 @@ class TimeTableResource1(
         # Calendar төрөл (энгийн, курац)
         stype = self.request.query_params.get('stype')
 
+        # Хайх төрлөөс хамаараад сонгогдсон утга
+        option_filter = self.request.query_params.get('option')
+
         time_tablequeryset = TimeTable.objects.all().filter(lesson_year=year.strip(), lesson_season=season)
+
+        if selectedValue:
+            group_ids = Group.objects.filter(department_id=selectedValue).values_list('id', flat=True)
+            t_ids = TimeTable_to_group.objects.filter(group_id__in=group_ids).values_list('timetable', flat=True)
+
+            time_tablequeryset = time_tablequeryset.filter(id__in=t_ids)
 
         if end_date and begin_date:
             time_tablequeryset = time_tablequeryset.filter(Q(begin_date__isnull=True) | Q(begin_date__gte=begin_date, end_date__lte=end_date))
@@ -2655,7 +2665,10 @@ class TimeTableResource1(
             # Ангиар хайлт хийх хэсэг
             if stype == 'group':
                 if selectedValue:
-                    qs_tgroup = qs_tgroup.filter(group__department=selectedValue)
+                    qs_tgroup = qs_tgroup.filter(group__department=selectedValue).order_by('group__name')
+
+                if option_filter:
+                    qs_tgroup = qs_tgroup.filter(group=option_filter)
 
                 groups = qs_tgroup.order_by('group__name').values('group__name', 'group')
 
@@ -2670,14 +2683,17 @@ class TimeTableResource1(
             # Багшаар хайлт хийх хэсэг
             elif stype == 'teacher':
 
-                timetable_teachers = time_tablequeryset.values_list('teacher', flat=True)
+                timetable_teachers = time_tablequeryset.values_list('teacher', flat=True).order_by('teacher__first_name')
                 qs_teacher = qs_teacher.filter(id__in=timetable_teachers)
+
+                if school:
+                    qs_teacher = qs_teacher.filter(Q(Q(sub_org=school) | Q(sub_org__org_code=10)))
 
                 if selectedValue:
                     qs_teacher = qs_teacher.filter(salbar_id=selectedValue)
 
-                if school:
-                    qs_teacher = qs_teacher.filter(Q(Q(sub_org=school) | Q(sub_org__org_code=10)))
+                if option_filter:
+                    qs_teacher = qs_teacher.filter(id=option_filter)
 
                 all_list = qs_teacher.values('id', 'first_name', 'last_name')
 
@@ -2695,7 +2711,10 @@ class TimeTableResource1(
             # Хичээлээр хайх үед тухайн сургуулийн сургалтын төлөвлөгөөнд байгаа идэвхтэй улиралд шивэгдсэн хичээлүүдийг авна
             elif stype == 'lesson':
 
-                lesson_ids = time_tablequeryset.values('lesson', 'teacher', 'lesson__name', 'teacher__first_name', 'teacher__last_name')
+                if option_filter:
+                    time_tablequeryset = time_tablequeryset.filter(lesson=option_filter)
+
+                lesson_ids = time_tablequeryset.values('lesson', 'teacher', 'lesson__name', 'teacher__first_name', 'teacher__last_name').order_by('lesson__name')
 
                 for timetable in lesson_ids:
                     lesson_id = timetable.get('lesson')
@@ -2705,7 +2724,6 @@ class TimeTableResource1(
                     lastName = timetable.get('teacher__last_name')
 
                     obj_datas= {}
-                    fullName = None
 
                     if firstName and lastName:
                         fullName = get_fullName(lastName, firstName, is_dot=True, is_strim_first=True)
@@ -2720,10 +2738,14 @@ class TimeTableResource1(
 
                     all_list.append(obj_datas)
             else:
-                all_list = Room.objects.values('id', 'code').order_by('code')
+                room_queryset = Room.objects.all()
+                if option_filter:
+                    room_queryset = room_queryset.filter(id=option_filter)
+
+                all_list = room_queryset.values('id', 'code').order_by('code')
 
                 for item in all_list:
-                    room_obj =  Room.objects.filter(id=item.get('id')).first()
+                    room_obj =  room_queryset.filter(id=item.get('id')).first()
                     item['title'] = room_obj.full_name
 
                 return request.send_data(list(all_list))
@@ -2929,9 +2951,9 @@ class ExamTimeTableCreateAPIView(
             try:
                 for timetable in timetables:
                     lesson = timetable.get('lesson')
-                    create_lesson = timetable.get('school')
+                    create_lesson_school = timetable.get('school')
 
-                    all_students = get_lesson_choice_student(lesson=lesson, lesson_season=season, lesson_year=year)
+                    all_students = get_lesson_choice_student(lesson=lesson, teacher='', school=school, lesson_year=year, lesson_season=season )
 
                     # Шалгалт үүсгэх
                     exam, created = ExamTimeTable.objects.update_or_create(
@@ -2939,7 +2961,7 @@ class ExamTimeTableCreateAPIView(
                         lesson_year=year.strip(),
                         lesson_season=lesson_season,
                         defaults={
-                            'school_id': create_lesson,
+                            'school_id': create_lesson_school,
                             'created_user': request.user,
                         }
                     )

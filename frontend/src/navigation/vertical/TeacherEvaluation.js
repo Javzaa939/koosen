@@ -6,7 +6,7 @@ export default [
         title: 'Багшийн үнэлгээ',
         icon:<i className="fal fa-question-circle"></i>,
         navLink: "evaluation/question",
-        children: [
+        navChildren: [
             {
                 id: 'evaluation1',
                 title: 'Үнэлгээний асуулт',

@@ -54,7 +54,7 @@ export const AddPerformancemodal = ( { open, refreshDatas, handleModal, editData
     const performanceApi = useApi().credit.performance
     const schoolApi = useApi().hrms.subschool
 
-    // Мэргэжлийн жагсаалт
+    // Хөтөлбөрийн жагсаалт
     async function getSchools() {
         const { success, data } = await fetchData(schoolApi.get())
         if (success) {

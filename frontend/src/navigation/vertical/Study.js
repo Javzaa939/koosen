@@ -7,7 +7,7 @@ export default [
         title: 'Сургалт',
         icon: <i className="fas fa-users-class"></i>,
         navLink: "/study",
-        children: [
+        navChildren: [
             {
                 id: 'study1',
                 title: 'Хичээлийн стандарт',
@@ -16,7 +16,7 @@ export default [
             },
             {
                 id: 'study2',
-                title: 'Мэргэжлийн тодорхойлолт',
+                title: 'Хөтөлбөр',
                 icon: <Circle size={8} />,
                 navLink: "study/profession-definition/"
             },

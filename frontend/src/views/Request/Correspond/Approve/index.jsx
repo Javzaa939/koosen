@@ -110,7 +110,7 @@ export default function ApproveModal({ open, handleModal, approveId, datas, refr
                         </Col>
                         <Col tag="dd" sm="8" className="mb-1">{datas?.correspond_type_name}</Col>
                         <Col tag="dt" sm="4" className="fw-bolder mb-1" >
-                            Мэргэжил:
+                            Хөтөлбөр:
                         </Col>
                         <Col tag="dd" sm="8" className="mb-1">{datas?.profession_name}</Col>
                     </Row>

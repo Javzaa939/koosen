@@ -31,7 +31,7 @@ export function getColumns (currentPage, rowsPerPage, datas) {
 			left: true,
 		},
 		{
-			header: 'name',
+			header: 'first_name',
 			name: `${t("Нэр")}`,
 			selector: (row) => <span title={row?.first_name}>{row?.first_name}</span>,
             sortable: true,
@@ -39,10 +39,9 @@ export function getColumns (currentPage, rowsPerPage, datas) {
 			left: true,
 		},
         {
-			header: 'last_name',
+			header: 'org_position',
 			name: `${t("Албан тушаал")}`,
 			selector: (row) => <span title={row?.org_position}>{row?.org_position}</span>,
-            sortable: true,
 			minWidth: "30px",
 			left: true,
 		},

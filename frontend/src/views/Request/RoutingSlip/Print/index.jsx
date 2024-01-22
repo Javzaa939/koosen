@@ -114,7 +114,7 @@ export default function Print()
                                 <small className="fw-bolder">Бүрэлдэхүүн сургууль: {datas?.school_name}</small>
                             </div>
                             <div className="d-inline-block" style={{ width: '50%' }} >
-                                <small className="fw-bolder">Мэргэжил: {datas?.profession_name}</small>
+                                <small className="fw-bolder">Хөтөлбөр: {datas?.profession_name}</small>
                             </div>
                         </div>
 

@@ -1,6 +1,6 @@
 @page {
     size: A4 landscape;
-    margin: 20px 40px 15px 20px;
+    margin: 40px 50px 40px 40px;
 }
 
 body {
@@ -12,12 +12,12 @@ body {
     page-break-after: always;
 }
 
-.header {
+header {
     position: fixed;
     top: 0px;
 }
 
-.footer {
+footer {
     position: fixed;
     top: 0px;
     right: 0px;
@@ -51,6 +51,7 @@ table td {
     text-align: start;
     line-height: 1;
     padding: 5px 4px;
+    font-size: 10px;
 }
 
 .footer-cell1 {
@@ -67,4 +68,9 @@ table td {
 
 .footer-margin {
     margin-right: 44px;
+}
+
+.footer3-cell {
+    font-family: serif;
+    rotate: 360deg;
 }

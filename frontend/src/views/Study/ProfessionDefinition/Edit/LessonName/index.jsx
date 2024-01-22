@@ -1,65 +1,60 @@
 // ** React imports
 import React, { Fragment, useState, useEffect, useContext } from 'react'
 
-import Select from 'react-select'
-
-import { useTranslation } from 'react-i18next';
-
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
 
-import { ReactSelectStyles } from "@utils"
-
-import classnames from "classnames";
-
-import { useForm, Controller } from "react-hook-form";
-
+import { Plus  } from 'react-feather'
+import { useForm } from "react-hook-form";
 import { useParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+
+import DataTable from 'react-data-table-component'
 
 import {
-    Row,
     Col,
-	Form,
-	Input,
-	Label,
 	Button,
 	Card,
     CardHeader,
-    CardBody,
-	FormFeedback,
     Spinner
 } from "reactstrap";
 
 import AuthContext from "@context/AuthContext"
 import SchoolContext from "@context/SchoolContext"
 
-import { validate, convertDefaultValue } from "@utils"
+import { validate } from "@utils"
 import { validateSchema } from './validateSchema';
+import { getColumns } from './helpers';
+
+import Addmodal from './Add'
 
 const MainInformation = ({ }) => {
 
     const { definition_Id } = useParams()
-
+    const { t } = useTranslation()
     const { user } = useContext(AuthContext)
-
     const { school_id } = useContext(SchoolContext)
 
-    const { t } = useTranslation()
-
+    const [currentPage, setCurrentPage] = useState(1);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [total_count, setTotalCount] = useState(1);
     // UseState
     const [is_valid, setValid] = useState(true)
     const [lesson_option, setLessonOption] = useState([])
     const [admission_lessons, setAdmissionLesson] = useState([])
     const [datas, setDatas] = useState([])
+    const [modal, setModal] = useState(false)
+    const { Loader, isLoading, fetchData } = useLoader({});
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
 
     // ** Hook
     const { control, handleSubmit, reset, setValue, setError, formState: { errors } } = useForm(validate(validateSchema));
-	// Loader
-	const { Loader, isLoading, fetchData } = useLoader({});
 
     // Api
     const definationApi = useApi().study.professionDefinition
     const AdmissionlessonApi = useApi().settings.admissionlesson
+
+    const [test, setTest] = useState([])
 
     // ЭЕШ хичээлийн жагсаалт
     async function getLessonOption() {
@@ -79,10 +74,12 @@ const MainInformation = ({ }) => {
         if(definition_Id) {
 
             const { success, data } = await fetchData(definationApi.getOne(definition_Id))
-            // const { success, data } = await fetchData(definationApi.getAddScoreOne(definition_Id))
             if(success) {
 
                 setDatas(data)
+                setTotalCount(data.admission_lesson.length)
+                setTest(data.admission_lesson)
+
                 setValue('profession', data?.name)
                 setValue('bottom_score', data?.admission_lesson[0]?.bottom_score)
                 var admission_lesson_id = []
@@ -95,6 +92,18 @@ const MainInformation = ({ }) => {
                 setAdmissionLesson(admission_lesson_id)
             }
         }
+    }
+
+    const handleDelete = async(id) => {
+        const { success, data } = await fetchData(definationApi.deleteScore(id))
+        if(success)
+        {
+            getDatas()
+        }
+    };
+
+    const handleModal = () => {
+        setModal(!modal)
     }
 
     useEffect(() => {
@@ -116,128 +125,62 @@ const MainInformation = ({ }) => {
         }
     },[lesson_option,datas])
 
-	async function onSubmit(cdata) {
-        cdata = convertDefaultValue(cdata)
-        cdata['profession'] = definition_Id
-        cdata['admission_lesson'] = admission_lessons
-
-        const { success, error } = await fetchData(definationApi.putScore(cdata, definition_Id))
-        if(success) {
-            reset()
-            getDatas()
-        } else {
-            /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in error) {
-                setError(error[key].field, { type: 'custom', message:  error[key].msg});
-            }
-        }
-	}
+    const lesson_datas = admission_lessons.map(data => {
+        const newDatas = test.find(test => test.admission_lesson_id === data.id);
+        return {
+            ...data,
+            bottom_score: newDatas ? newDatas.bottom_score : null
+        };
+    });
 
 	return (
         <Fragment>
             <Card className="modal-dialog-left modal-lg">
             {isLoading && <div className='suspense-loader'><Spinner size='xl'/></div>}
-                <CardHeader className='bg-transparent pb-0'></CardHeader>
-                <CardBody className="px-sm-3 pt-50 pb-3">
-                    <div className='text-center'>
-                        <h4>{t('ЭЕШ-ийн хичээл, босго оноо')}</h4>
-                    </div>
-                    <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
-                        <Col lg={6} xs={12}>
-                            <Label className="form-label" for="profession">
-                                {t('Мэргэжил')}
-                            </Label>
-                            <Controller
-                                defaultValue=''
-                                control={control}
-                                name="profession"
-                                render={({ field }) => {
-                                    return (
-                                        <Input
-                                            {...field}
-                                            id ="profession"
-                                            name = "profession"
-                                            bsSize="sm"
-                                            placeholder={t('Мэргэжлийн нэр')}
-                                            type="text"
-                                            readOnly={true}
-                                            disabled={true}
-                                            invalid={errors.profession && true}
-                                        />
-                                    )
-                                }}
-                            />
-                            {errors.profession && <FormFeedback className='d-block'>{t(errors.profession.message)}</FormFeedback>}
-                        </Col>
-                        <Col lg={6} xs={12}>
-                            <Label className="form-label" for="admission_lesson">
-                                {t('ЭЕШ өгөх хичээл')}
-                            </Label>
-                            <Controller
-                                control={control}
-                                defaultValue=''
-                                name="admission_lesson"
-                                render={({ field: { value, onChange} }) => {
-                                    return (
-                                        <Select
-                                            name="admission_lesson"
-                                            id="admission_lesson"
-                                            classNamePrefix='select'
-                                            isClearable
-                                            className={classnames('react-select', { 'is-invalid': errors.admission_lesson })}
-                                            isLoading={isLoading}
-                                            placeholder={t('-- Сонгоно уу --')}
-                                            options={lesson_option || []}
-                                            value={admission_lessons}
-                                            noOptionsMessage={() => {t('Хоосон байна.')}}
-                                            onChange={(val) => {
-                                                onChange(val?.id || '')
-                                                setAdmissionLesson(val)
-                                            }}
-                                            isMulti
-                                            styles={ReactSelectStyles}
-                                            getOptionValue={(option) => option.id}
-                                            getOptionLabel={(option) => option.lesson_name}
-                                        />
-                                    )
-                                }}
-                            ></Controller>
-                            {errors.admission_lesson && <FormFeedback className='d-block'>{t(errors.admission_lesson.message)}</FormFeedback>}
-                        </Col>
-                        <Col lg={6} xs={12}>
-                            <Label className="form-label" for="bottom_score">
-                                {t('Босго оноо')}
-                            </Label>
-                            <Controller
-                                control={control}
-                                defaultValue=''
-                                name="bottom_score"
-                                render={({ field }) => {
-                                    return (
-                                        <Input
-                                        {...field}
-                                        id ="bottom_score"
-                                        bsSize="sm"
-                                        placeholder={t('Босго оноо')}
-                                        type="number"
-                                        invalid={errors.bottom_score && true}
-                                        />
-                                    )
-                                }}
-                            ></Controller>
-                            {errors.bottom_score && <FormFeedback className='d-block'>{t(errors.bottom_score.message)}</FormFeedback>}
-                        </Col>
-                        <Col className='text-center mt-2' md={12}>
-                            <Button className="me-2" disabled={is_valid} size='sm' color="primary" type="submit">
-                                {t('Хадгалах')}
-                            </Button>
-                        </Col>
-                    </Row>
-                </CardBody>
+                <CardHeader className='bg-transparent pgetColumb-0'>
+                    <Col>
+                        <div className='text-center'>
+                            <h4>{t('ЭЕШ-ийн хичээл, босго оноо')}</h4>
+                        </div>
+                        <div className='text-center'>
+                            <h5>Мэргэжил "{datas.name}"</h5>
+                        </div>
+                    </Col>
+                </CardHeader>
+                <div className='d-flex flex-wrap justify-content-end mb-1'>
+                    <Button
+                        color='primary'
+                        onClick={() => handleModal()}
+                        >
+                        <Plus size={15} />
+                        <span className='align-middle ms-50'>{t('Нэмэх')}</span>
+                    </Button>
+                </div>
+                {isTableLoading ?
+					<div className=" text-center" sm={12}>
+						<Spinner size='sm' />
+						<span className='ms-50'>{t("Түр хүлээнэ үү...")}</span>
+					</div>
+				:
+					<div className="react-dataTable react-dataTable-selectable-rows">
+						<DataTable
+                            noHeader
+                            className='react-dataTable'
+                            noDataComponent={(
+                                <div className="my-2">
+                                    <h5>Өгөгдөл байхгүй байна.</h5>
+                                </div>
+                            )}
+                            columns={getColumns(currentPage, rowsPerPage, handleDelete, user)}
+                            data={lesson_datas}
+                            fixedHeader
+                            fixedHeaderScrollHeight='62vh'
+                        />
+					</div>
+				}
             </Card>
+            {modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} admission_lessons={admission_lessons}/>}
         </Fragment>
 	);
 };
 export default MainInformation;
-
-

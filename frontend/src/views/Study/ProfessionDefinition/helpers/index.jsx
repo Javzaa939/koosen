@@ -40,13 +40,14 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 		},
 		{
 			header: 'name',
-			name: `${t('Мэргэжил')}`,
+			name: `${t('Хөтөлбөр')}`,
 			selector: (row) => row?.code + ' ' + row?.name,
             sortable: true,
 			minWidth: "350px",
 			maxWidth: "250px",
 			left: true,
-			wrap: true
+			wrap: true,
+			center: true,
 		},
 		{
 			header: 'degree',
@@ -59,7 +60,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
         },
 		{
 			header: 'general_direct',
-			name: `${t('Мэргэжлийн ерөнхий чиглэл')}`,
+			name: `${t('Хөтөлбөрийн ерөнхий чиглэл')}`,
 			selector: (row) => row?.gen_direct_type_name,
             sortable: true,
 			minWidth: "350px",
@@ -68,7 +69,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
         },
 		{
 			header: 'dep_name',
-			name: `${t('Мэргэжлийн төрөлжсөн чиглэл')}`,
+			name: `${t('Хөтөлбөрийн төрөлжсөн чиглэл')}`,
 			selector: (row) => row?.dep_name,
 			sortable: true,
 			minWidth: "300px",
@@ -126,9 +127,9 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 							<a role="button"
 								onClick={() => showWarning({
 									header: {
-										title: `${t('Мэргэжлийн тодорхойлолт устгах')}`,
+										title: `${t('Хөтөлбөр устгах')}`,
 									},
-									question: `Та "${row.code}" кодтой мэргэжлийн тодорхойлолтыг устгахдаа итгэлтэй байна уу?`,
+									question: `Та "${row.code}" индекстэй хөтөлбөрыг устгахдаа итгэлтэй байна уу?`,
 									onClick: () => handleDelete(row.id),
 									btnText: `${t('Устгах')}`,
 								})}

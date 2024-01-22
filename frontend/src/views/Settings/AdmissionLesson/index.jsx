@@ -19,8 +19,6 @@ import { getColumns } from './helpers';
 
 import Addmodal from './Add'
 
-import UpdateModal from "./Update"
-
 const AdmissionLesson = () =>{
 
     const { t } = useTranslation()
@@ -35,7 +33,6 @@ const AdmissionLesson = () =>{
     const [datas, setDatas] = useState([]);
 
     const [edit_id, setEditId] = useState('')
-
     // нийт датаны тоо
     const [total_count, setTotalCount] = useState(datas.length || 1)
 
@@ -44,7 +41,6 @@ const AdmissionLesson = () =>{
 
     // Modal
     const [modal, setModal] = useState(false);
-    const [update_modal, setUpdateModal] = useState(false)
 
     // Api
     const admissionlessonApi = useApi().settings.admissionlesson
@@ -52,12 +48,17 @@ const AdmissionLesson = () =>{
     /* Модал setState функц */
     const handleModal = () =>{
         setModal(!modal)
+        if(modal){
+            setEditId()
+        }
     }
 
     // Засах функц
     function handleUpdateModal(id) {
-        setEditId(id)
-        setUpdateModal(!update_modal)
+        if (id){
+            setEditId(id)
+        }
+        handleModal()
     }
 
     /*Жагсаалт дата авах функц */
@@ -69,9 +70,21 @@ const AdmissionLesson = () =>{
         }
     }
 
+
     useEffect(() => {
         getDatas()
     }, [])
+
+
+    /* Жагсаалтын дата устгах функц */
+	async function handleDelete(id){
+		if(id){
+			const{ success} = await fetchData(admissionlessonApi.delete(id))
+			if (success){
+				getDatas()
+			}
+		}
+	}
 
     // Хайлт хийх үед ажиллах хэсэг
     const handleFilter = (e) => {
@@ -161,7 +174,7 @@ const AdmissionLesson = () =>{
                                     <h5>{t('Өгөгдөл байхгүй байна')}</h5>
                                 </div>
                             )}
-                            columns={getColumns(currentPage, rowsPerPage, searchValue.length ? filteredData : datas, handleUpdateModal, user)}
+                            columns={getColumns(currentPage, rowsPerPage, searchValue.length ? filteredData : datas, handleUpdateModal, user, handleDelete)}
                             sortIcon={<ChevronDown size={10} />}
                             paginationPerPage={rowsPerPage}
                             paginationDefaultPage={currentPage}
@@ -172,8 +185,8 @@ const AdmissionLesson = () =>{
                         />
 					</div>
                 }
-                {modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas}/>}
-                { update_modal && <UpdateModal editId={edit_id} open={update_modal} handleEdit={handleUpdateModal} refreshDatas={getDatas} /> }
+                {modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} editId={edit_id} handleEdit={handleUpdateModal}/>}
+
             </Card>
         </Fragment>
     )

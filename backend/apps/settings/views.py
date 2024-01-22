@@ -4,6 +4,7 @@ import json
 from rest_framework import mixins
 from rest_framework import generics
 from rest_framework.views import APIView
+from rest_framework.filters import SearchFilter
 
 from lms.models import Score
 from lms.models import Group
@@ -24,8 +25,12 @@ from lms.models import ProfessionalDegree
 from lms.models import ProfessionDefinition
 from lms.models import StudentAdmissionScore
 from lms.models import Country
-from lms.models import PaymentSeasonClosing
+from lms.models import TimeTable
 from lms.models import DefinitionSignature
+from lms.models import Permissions
+from lms.models import Roles
+from lms.models import AdmissionBottomScore
+from lms.models import OrgPosition
 
 from .serializers import ScoreSerailizer
 from .serializers import SeasonSerailizer
@@ -44,14 +49,21 @@ from .serializers import AdmissionLessonListSerializer
 from .serializers import ProfessionalDegreePutSerializer
 from .serializers import CountrySerializer
 from .serializers import DefinitionSignatureSerializer
+from .serializers import PermissionsSerializer
+from .serializers import RolesSerializer
+from .serializers import RolesListSerializer
 
 from django.db import transaction
-from django.db.models import Max
+from django.db.models import Max, Q
 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 
+from main.utils.function.pagination import CustomPagination
 from main.utils.function.utils import has_permission, list_to_dict
+from main.decorators import login_required
+from main.utils.function.serializer import post_put_action
+
 
 @permission_classes([IsAuthenticated])
 class ProfessionalDegreeAPIView(
@@ -118,9 +130,11 @@ class ProfessionalDegreeAPIView(
         self.serializer_class = ProfessionalDegreePutSerializer
 
         datas = request.data
+        prof_qs = ProfessionDefinition.objects.exclude(degree=pk).filter(code=datas.get('code'))
+        if len(prof_qs) > 0:
+            return request.send_error("ERR_003", "Зэргийн код давхцаж байна.")
 
         instance = self.queryset.filter(id=pk).first()
-
         serializer = self.get_serializer(instance, data=datas)
 
         if serializer.is_valid(raise_exception=False):
@@ -144,6 +158,15 @@ class ProfessionalDegreeAPIView(
                 }
 
             return request.send_error_valid(return_error)
+
+    @has_permission(must_permissions=['lms-settings-degree-delete'])
+    def delete(self, request, pk=None):
+        prof_qs = ProfessionDefinition.objects.filter(degree=pk)
+        if prof_qs:
+            return request.send_error("ERR_003", "Мэргэжлийн тодорхойлолтод холбогдсон байгаа тул устгах боломжгүй")
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
 
 
 @permission_classes([IsAuthenticated])
@@ -235,6 +258,19 @@ class LearningAPIView(
 
             return request.send_error_valid(return_error)
 
+    @has_permission(must_permissions=['lms-settings-learningstatus-delete'])
+    def delete(self, request, pk=None):
+        "Суралцах хэлбэр устгах"
+
+        # Анги
+        group_qs = Group.objects.filter(learning_status=pk)
+        if len(group_qs) > 0:
+            return request.send_error("ERR_003", "Ангитай холбогдсон байгаа тул устгах боломжгүй")
+
+        self.destroy(request, pk)
+
+        return request.send_info("INF_003")
+
 
 @permission_classes([IsAuthenticated])
 class StudentRegisterAPIView(
@@ -323,6 +359,15 @@ class StudentRegisterAPIView(
                 }
             return request.send_error_valid(return_error)
 
+    @has_permission(must_permissions=['lms-settings-registerstatus-delete'])
+    def delete(self, request, pk=None):
+        " Оюутны бүртгэл устгах "
+
+        stud_qs = Student.objects.filter(status=pk)
+        if len(stud_qs) >0:
+            return request.send_error("ERR_004", "Оюутны бүртгэлтэй холбогдсон тул устгах боломжгүй")
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
 
 @permission_classes([IsAuthenticated])
 class LessonCategoryAPIView(
@@ -380,7 +425,7 @@ class LessonCategoryAPIView(
 
     @has_permission(must_permissions=['lms-settings-lessoncategory-update'])
     def put(self, request, pk=None):
-        "Хичээлийн ангилал  засах"
+        "Хичээлийн ангилал засах"
 
         datas = request.data
         instance = self.queryset.filter(id=pk).first()
@@ -403,7 +448,14 @@ class LessonCategoryAPIView(
                     "msg": "Код бүртгэгдсэн байна"
                 }
 
-            return request.send_error_valid(return_error)
+                return request.send_error_valid(return_error)
+
+    @has_permission(must_permissions=['lms-settings-lessoncategory-delete'])
+    def delete(self, request, pk=None):
+        " Хичээлийн ангилал устгах "
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
 
 
 @permission_classes([IsAuthenticated])
@@ -499,6 +551,13 @@ class LessonTypeAPIView(
             if len(errors) > 0:
                 return request.send_error("ERR_003", errors)
 
+    @has_permission(must_permissions=['lms-settings-lessontype-delete'])
+    def delete(self, request, pk=None):
+        " Хичээлийн төрөл устгах "
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
+
 @permission_classes([IsAuthenticated])
 class LessonLevelAPIView(
     mixins.CreateModelMixin,
@@ -560,7 +619,7 @@ class LessonLevelAPIView(
 
     @has_permission(must_permissions=['lms-settings-lessonlevel-update'])
     def put(self, request, pk=None):
-        " Хичээлийн бүлэг засах"
+        " Хичээлийн түвшин засах"
 
         datas = request.data
         serializer = self.get_serializer(data=datas)
@@ -589,6 +648,13 @@ class LessonLevelAPIView(
 
             if len(errors) > 0:
                 return request.send_error("ERR_003", errors)
+
+    # @has_permission(must_permissions=['lms-settings-lessonlevel-delete'])
+    def delete(self, request, pk=None):
+        " Хичээлийн түвшин устгах "
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
 
 @permission_classes([IsAuthenticated])
 class LessonGroupAPIView(
@@ -669,6 +735,12 @@ class LessonGroupAPIView(
 
             return request.send_error_valid(return_error)
 
+    @has_permission(must_permissions=['lms-settings-lessongroup-delete'])
+    def delete(self, request, pk=None):
+        " Хичээлийн бүлэг устгах "
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
 
 @permission_classes([IsAuthenticated])
 class SeasonAPIView(
@@ -753,6 +825,17 @@ class SeasonAPIView(
 
             return request.send_error("ERR_002")
 
+    @has_permission(must_permissions=['lms-settings-season-delete'])
+    def delete(self, request, pk=None):
+        " Улирал устгах "
+
+        timetable_qs = TimeTable.objects.filter(lesson_season=pk)
+        if len(timetable_qs) > 0:
+            return request.send_error("Хичээлийн хуваарьтай холбогдсон байгаа тул устгах боломжгүй")
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
+
 @permission_classes([IsAuthenticated])
 class ScoreAPIView(
     mixins.CreateModelMixin,
@@ -765,7 +848,7 @@ class ScoreAPIView(
 
     """ Үнэлгээний бүртгэл """
 
-    queryset = Score.objects.all().order_by("-created_at")
+    queryset = Score.objects.all().order_by("-score_max")
     serializer_class = ScoreSerailizer
 
     @has_permission(must_permissions=['lms-settings-score-read'])
@@ -798,7 +881,6 @@ class ScoreAPIView(
         else:
             # Олон алдааны мессэж буцаах бол үүнийг ашиглана
             for key in serializer.errors:
-
                 return_error = {
                     "field": key,
                     "msg": "Код бүртгэгдсэн байна"
@@ -811,30 +893,32 @@ class ScoreAPIView(
         "Үнэлгээний бүртгэл засах"
 
         datas = request.data
+        code = datas.get('score_code')
 
-        instance = self.queryset.filter(id=pk).first()
-        serializer = self.get_serializer(instance, data=datas)
-
-        if serializer.is_valid(raise_exception=False):
-            with transaction.atomic():
-                try:
-                    self.perform_create(serializer)
-
-                except Exception:
-                    return request.send_error("ERR_002")
-
-            return request.send_info("INF_002")
-
-        else:
-            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
-            for key in serializer.errors:
-
-                return_error = {
-                    "field": key,
-                    "msg": "Код бүртгэгдсэн байна"
-                }
-
+        checked_qs = Score.objects.exclude(id=pk).filter(score_code=code)
+        if len(checked_qs) > 0:
+            return_error = {
+                "field": 'score_code',
+                "msg": "Код бүртгэгдсэн байна"
+            }
             return request.send_error_valid(return_error)
+
+        with transaction.atomic():
+            try:
+                self.queryset.filter(id=pk).update(**datas)
+            except Exception as e:
+                print(e)
+                return request.send_error("ERR_002")
+
+        return request.send_info("INF_002")
+
+
+    @has_permission(must_permissions=['lms-settings-score-delete'])
+    def delete(self, request, pk=None):
+        " Үнэлгээний бүртгэл устгах "
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
 
 
 @permission_classes([IsAuthenticated])
@@ -909,9 +993,8 @@ class SystemSettingsAPIView(
             prev_lesson_season = instance.prev_lesson_season
             check_qs = self.queryset.filter(active_lesson_year=prev_lesson_year, active_lesson_season=prev_lesson_season, season_type=SystemSettings.CLOSED)
 
-            if len(self.queryset) > 1:
-                if not check_qs:
-                    return request.send_error('ERR_02', 'Та өмнөх улирлаа хаана уу?')
+            if not check_qs:
+                return request.send_error('ERR_02', 'Та өмнөх улирлаа хаана уу?')
 
             self.queryset.filter(season_type=SystemSettings.ACTIVE).update(season_type=SystemSettings.INACTIVE)
 
@@ -1018,6 +1101,16 @@ class AdmissionLessonAPIView(
 
             return request.send_error_valid(return_error)
 
+    def delete(self, request, pk=None):
+        "ЭЕШ-ын хичээл устгах "
+
+        score = AdmissionBottomScore.objects.filter(admission_lesson=pk)
+        if len(score) > 0:
+            return request.send_error("ERR_002", "Элсэлтийн шалгалтын хичээлд холбогдсон байгаа тул устгах боломжгүй")
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
+
 
 class SystemSettingsActiveYearAPIView(
     mixins.CreateModelMixin,
@@ -1112,7 +1205,6 @@ class DiscountTypeAPIView(
                     return request.send_error("ERR_002")
 
             return request.send_info("INF_002")
-
         else:
             # Олон алдааны мессэж буцаах бол үүнийг ашиглана
             for key in serializer.errors:
@@ -1124,7 +1216,12 @@ class DiscountTypeAPIView(
 
             return request.send_error_valid(return_error)
 
+    @has_permission(must_permissions=['lms-settings-discounttype-delete'])
+    def delete(self, request, pk=None):
+        "Төлбөрийн хөнгөлөлтийн төрөл устгах "
 
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
 
 @permission_classes([IsAuthenticated])
 class CountryAPIView(
@@ -1207,6 +1304,12 @@ class CountryAPIView(
 
             return request.send_error_valid(return_error)
 
+    @has_permission(must_permissions=['lms-settings-country-delete'])
+    def delete(self, request, pk=None):
+        "Улс устгах "
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
 
 @permission_classes([IsAuthenticated])
 class SignatureAPIView(
@@ -1388,3 +1491,229 @@ class SignatureOrderAPIView(APIView):
         from_qs.update(order=to_order)
 
         return request.send_info("INF_013")
+
+
+@permission_classes([IsAuthenticated])
+class PermissionAPIView(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    generics.GenericAPIView
+):
+    """ Эрх
+    """
+
+    queryset = Permissions.objects.order_by("-created_at")
+    serializer_class = PermissionsSerializer
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = [
+        'name',
+        'description',
+        'created_at',
+    ]
+
+    def get_queryset(self):
+        queryset = self.queryset
+
+        sorting = self.request.query_params.get('sorting')
+
+        # Sort хийх үед ажиллана
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
+
+        return queryset
+
+    @login_required()
+    def get(self, request, pk=None):
+        """ Эрх жагсаалт
+        """
+
+        list = self.list(request, pk).data
+        return request.send_data(list)
+
+    @login_required()
+    @transaction.atomic
+    def post(self, request):
+        """ Эрх үүсгэх
+        """
+
+        return post_put_action(self, request, 'post', request.data)
+
+    @login_required()
+    @transaction.atomic
+    def put(self, request, pk=None):
+        """ Эрх засах
+        """
+
+        return post_put_action(self, request, 'put', request.data, pk)
+
+    @login_required()
+    @transaction.atomic
+    def delete(self, request, pk=None):
+        """ Эрх устгах
+        """
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
+
+
+@permission_classes([IsAuthenticated])
+class PermissionListAPIView(
+    generics.GenericAPIView
+):
+    queryset = Permissions.objects.filter(name__startswith='lms-').order_by("-created_at")
+    serializer_class = PermissionsSerializer
+
+    @login_required()
+    def get(self, request, pk=None):
+        """ Эрх жагсаалт
+        """
+
+        crud_perms = list()
+
+        # read create update delete орсон утгууд
+        crud_perms_qs = self.queryset.filter(Q(name__endswith='-read') | Q(name__endswith='-create') | Q(name__endswith='-update') | Q(name__endswith='-delete'))
+        crud_perms_datas = self.serializer_class(crud_perms_qs, many=True).data
+
+        # read create update delete ороогүй утгууд
+        non_crud_perms_qs = self.queryset.exclude(Q(name__endswith='-read') | Q(name__endswith='-create') | Q(name__endswith='-update') | Q(name__endswith='-delete'))
+        non_crud_perms = self.serializer_class(non_crud_perms_qs, many=True).data
+
+
+        for crud_perms_data in crud_perms_qs.values_list('name', flat=True):
+
+            name = crud_perms_data
+
+            if '-read' in crud_perms_data:
+                name = crud_perms_data.replace('-read', '')
+
+            if '-create' in crud_perms_data:
+                name = crud_perms_data.replace('-create', '')
+
+            if '-update' in crud_perms_data:
+                name = crud_perms_data.replace('-update', '')
+
+            if '-delete' in crud_perms_data:
+                name = crud_perms_data.replace('-delete', '')
+
+            if not any(name == d.get('name') for d in crud_perms):
+
+                filtered = list(filter(lambda crud_perms_data: (f'{name}-read' == dict(crud_perms_data).get('name') or f'{name}-create' == dict(crud_perms_data).get('name') or f'{name}-update' == dict(crud_perms_data).get('name') or f'{name}-delete' == dict(crud_perms_data).get('name')), crud_perms_datas))
+
+                description = ''
+
+                if len(filtered) != 1:
+                    chars = {}
+                    for char1 in filtered:
+                        for char in dict(char1).get('description').split(" "):
+                            if char not in chars:
+                                chars[char] = 1
+                            else:
+                                chars[char] += 1
+
+                    duplicates = []
+
+                    for char, count in chars.items():
+                        if count > 1:
+                            duplicates.append(char)
+
+                    description = (" ".join(duplicates)).replace(' эрх', '')
+
+                else:
+                    description = filtered[0].get('description')
+
+
+                crud_perms.append({
+                    'name': name,
+                    'description': description,
+                    'filtered': filtered
+                })
+
+
+        return request.send_data({
+            'non_crud_perms': non_crud_perms,
+            'crud_perms': crud_perms
+        })
+
+
+@permission_classes([IsAuthenticated])
+class RolesAPIView(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    generics.GenericAPIView
+):
+    """ Role
+    """
+
+    queryset = Roles.objects.order_by("-created_at")
+    serializer_class = RolesSerializer
+
+    @login_required()
+    def get(self, request, pk=None):
+        """ Role жагсаалт
+        """
+
+        self.serializer_class = RolesListSerializer
+        list = self.list(request, pk).data
+        return request.send_data(list)
+
+    @login_required()
+    @transaction.atomic
+    def post(self, request):
+        """ Role үүсгэх
+        """
+
+        orgpositions = request.data['orgpositions']
+        del request.data['orgpositions']
+
+        created_qs = post_put_action(self, request, 'post', request.data, None, True)
+
+        # Албан тушаалууд дээр сонгогдсон role-ийг оноож өгөх
+        for orgposition in orgpositions:
+            OrgPosition.objects.get(pk=orgposition).roles.add(created_qs.id)
+
+
+        return request.send_info("INF_001")
+
+    @login_required()
+    @transaction.atomic
+    def put(self, request, pk=None):
+        """ Role засах
+        """
+
+        orgpositions = request.data['orgpositions']
+        del request.data['orgpositions']
+
+        updated_qs = post_put_action(self, request, 'put', request.data, pk, True)
+
+        # Тухайн role дээрх бүх албан тушаалууд олно
+        orgpositions_qs = OrgPosition.objects.filter(roles__id=updated_qs.id)
+
+        # Тухайн role-д хамааралтай албан тушаалуудаас (role-ийг) устгана
+        for orgposition_qs in orgpositions_qs:
+            orgposition_qs.roles.remove(updated_qs)
+
+        # Тухайн role-ийг сонгогдсон албан тушаалуудад онооно
+        for orgposition in orgpositions:
+            OrgPosition.objects.get(pk=orgposition).roles.add(updated_qs.id)
+
+        return request.send_info("INF_002")
+
+    @login_required()
+    @transaction.atomic
+    def delete(self, request, pk=None):
+        """ Role устгах
+        """
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")

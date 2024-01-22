@@ -296,7 +296,7 @@ const Family = () => {
                             {
                                 <Col className='text-center' md={12}>
                                     <Button disabled={disabled} size='sm' className="me-2" color="primary" type="submit">
-                                        {isLoading && Loader}
+                                        {/* {isLoading && Loader} */}
                                         {is_edit ? t('Засах') : t('Хадгалах')}
                                     </Button>
                                     <Button color="secondary" size='sm' type="reset" outline onClick={onModalClosed}>

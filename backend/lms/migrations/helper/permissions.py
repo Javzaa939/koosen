@@ -1130,4 +1130,40 @@ permissions = [
         'name' : 'lms-settings-signature-delete',
         'description' : 'Тодорхойлолтын гарын үсэг устгах эрх'
     },
+    # ----------------------Шалгалт цэс ------------------------
+
+    # Шалгалтын асуулт бэлдэх
+    {
+        'name' : 'lms-exam-question-read',
+        'description' : 'Шалгалтын асуулт унших эрх'
+    },
+    {
+        'name' : 'lms-exam-question-create',
+        'description' : 'Шалгалтын асуулт шинээр үүсгэх эрх'
+    },
+    {
+        'name' : 'lms-exam-question-update',
+        'description' : 'Шалгалтын асуулт засах эрх'
+    },
+    {
+        'name' : 'lms-exam-question-delete',
+        'description' : 'Шалгалтын асуулт устгах эрх'
+    },
+    # Шалгалт үүсгэх
+    {
+        'name' : 'lms-exam-read',
+        'description' : 'Шалгалт унших эрх'
+    },
+    {
+        'name' : 'lms-exam-create',
+        'description' : 'Шалгалт шинээр үүсгэх'
+    },
+    {
+        'name' : 'lms-exam-update',
+        'description' : 'Шалгалт засах'
+    },
+    {
+        'name' : 'lms-exam-delete',
+        'description' : 'Шалгалт устгах эрх'
+    },
 ]
