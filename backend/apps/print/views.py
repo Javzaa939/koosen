@@ -26,6 +26,9 @@ from main.utils.function.utils import get_lesson_choice_student, student__full_n
 from main.utils.function.utils import str2bool, has_permission
 from rest_framework.decorators import permission_classes
 
+from datetime import datetime
+from dateutil import parser
+from django.db import transaction
 
 class StudentListByLessonTeacherAPIView(
     mixins.ListModelMixin,
@@ -735,6 +738,21 @@ class AdmissionAPIView(
         all_data = self.list(request).data
 
         return request.send_data(all_data)
+
+    def put(self, request):
+
+        student_data = request.data
+        sid = transaction.savepoint()
+        try:
+            with transaction.atomic():
+                now =datetime.now()
+                admission_date = parser.parse(student_data["admission_date"])
+                self.queryset.filter(pk__in=student_data["id"]).update(admission_date=admission_date, admission_number=student_data["admission_number"], updated_at=now)
+        except Exception as e:
+            transaction.savepoint_rollback(sid)
+            return request.send_error("ERR_002", e.__str__)
+
+        return request.send_info('INF_002')
 
 
 class GroupsListFilterWithSubSchoolApiView(

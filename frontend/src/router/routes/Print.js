@@ -5,7 +5,6 @@ const Schedule = lazy(() => import("@views/Print/Schedule"))
 // const ExamName = lazy(() => import("@views/Print/ExamName"))
 const GPA = lazy(() => import("@views/Print/GPA"))
 const Graduation = lazy(() => import("@views/Print/Graduation"))
-const Enrollment = lazy(() => import("@views/Print/Enrollment"))
 
 const PrintRoutes = [
     {
@@ -23,10 +22,6 @@ const PrintRoutes = [
     {
         path: 'print/graduation/',
         element: <Graduation />
-    },
-    {
-        path: 'print/enrollment/',
-        element: <Enrollment />
     },
 ]
 
