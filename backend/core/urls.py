@@ -59,4 +59,5 @@ urlpatterns = [
 
     path('dashboard/', DashboardAPIView().as_view()),
 
+    path('calendar1/', CalendarCountAPIView().as_view()),
 ]

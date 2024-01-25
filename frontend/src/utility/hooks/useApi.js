@@ -1524,7 +1524,10 @@ function useApi(isDisplay=false) {
 	},
 	dashboard: {
 		get: () => instance.get(`/core/dashboard/`),
-	}
+	},
+	calendar1: {
+		get: () => instance.get('/core/calendar1/'),
+ 	}
 	}
 }
 

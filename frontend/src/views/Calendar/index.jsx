@@ -1,9 +1,9 @@
 // ** React Imports
-import { Fragment, useState, useEffect } from 'react'
+import  React,{ Fragment, useState, useEffect } from 'react'
 
 // ** Third Party Components
 import classnames from 'classnames'
-import { Row, Col } from 'reactstrap'
+import { Card, Row, Col } from 'reactstrap'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
@@ -22,7 +22,16 @@ import '@styles/react/apps/app-calendar.scss'
 
 import { VOLUNTEER_ACTION_TYPE } from '@utility/consts'
 
+
+import {Book, User} from 'react-feather'
+import StatsHorizontal from '@components/widgets/stats/StatsHorizontal'
+
+import '@styles/react/apps/app-users.scss'
+
+
+import './style.scss'
 const CalendarComponent = () => {
+
 
     const blankEvent = {
         title: '',
@@ -30,7 +39,6 @@ const CalendarComponent = () => {
         end: '',
     }
 
-    const { fetchData } = useLoader({})
 
     // ** states
     const [addSidebarOpen, setAddSidebarOpen] = useState(false)
@@ -58,6 +66,30 @@ const CalendarComponent = () => {
 
     // ** LeftSidebar Toggle Function
     const toggleSidebar = val => setLeftSidebarOpen(val)
+
+
+    // Card
+    const parentschoolApi1 = useApi().calendar1
+    const { fetchData } = useLoader({})
+
+
+    //Салбарын өгөгдөл авах
+    const [ info, setinfo ] = useState({
+        salbar_data: []
+    })
+
+    async function getDatas1() {
+        const {success, data} = await fetchData(parentschoolApi1.get())
+        if(success) {
+            setinfo(data)
+        }
+    }
+
+    useEffect(() => {
+        getDatas1()
+    },[])
+
+
 
     async function getDatas() {
         const { success, data } = await fetchData(calendarListApi.get(searchChecked))
@@ -100,6 +132,43 @@ const CalendarComponent = () => {
 
     return (
         <Fragment>
+                <div className='p-1 pt-0'>
+                        <Row>
+                            <Col lg='3' sm='6'>
+                                <StatsHorizontal
+                                color='warning'
+                                statTitle='Нийт хөтөлбөрийн тоо'
+                                icon={<Book size={20} />}
+                                renderStats={<h3 className='fw-bolder mb-75'>{info?.total_profession}</h3>}
+                                />
+                            </Col>
+                            <Col lg='3' sm='6'>
+                                <StatsHorizontal
+                                color='warning'
+                                statTitle='Нийт E-Хичээлийн тоо'
+                                icon={<Book size={20} />}
+                                renderStats={<h3 className='fw-bolder mb-75'>{info?.total_studies}</h3>}
+                                />
+                            </Col>
+                            <Col lg='3' sm='6'>
+                                <StatsHorizontal
+                                    color='primary'
+                                    statTitle='Нийт зөвлөх багшийн тоо'
+                                    icon={<User size={20} />}
+                                    renderStats={<h3 className='fw-bolder mb-75'>{info?.total_workers}</h3>}
+                                />
+                            </Col>
+                            <Col lg='3' sm='6'>
+                                <StatsHorizontal
+                                color='danger'
+                                statTitle='Нийт суралцагчдын тоо'
+                                icon={<User size={20} />}
+                                renderStats={<h3 className='fw-bolder mb-75'>{info?.total_studies}</h3>}
+                                />
+                            </Col>
+                        </Row>
+                    </div>
+
             <div className='app-calendar overflow-hidden border'>
                 <Row className='g-0'>
                     <Col

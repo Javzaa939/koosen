@@ -86,6 +86,7 @@ from .serializers import SubSchoolsRegisterPostSerailizer
 from .serializers import DepartmentPostSerailizer
 from .serializers import EmployeePostSerializer
 
+from lms.models import ProfessionDefinition
 
 @permission_classes([IsAuthenticated])
 class TeacherListApiView(
@@ -965,7 +966,7 @@ class TeacherPartListApiView(
 class DashboardAPIView(
     generics.GenericAPIView,
 ):
-    """ Хөтөлбөрийн багийн ахлагч жагсаалт """
+    """ Dashboard нь дах мэдээлэл """
 
 
     def get(self, request):
@@ -994,5 +995,24 @@ class DashboardAPIView(
                 'name': v.name,
                 'count': Student.objects.filter(school=v).count()
             })
+
+        return request.send_data(collected_data)
+
+
+@permission_classes([IsAuthenticated])
+class CalendarCountAPIView(
+    generics.CreateAPIView
+):
+    def get(self, request):
+        collected_data = dict()
+
+        collected_data['total_profession'] = ProfessionDefinition.objects.count()
+        collected_data['total_workers'] = Teachers.objects.filter(action_status = Teachers.PENDING).count()
+        collected_data['total_students'] = Student.objects.count()
+        collected_data['total_studies'] = TimeTable.objects.filter(type = TimeTable.ONLINE).count()
+
+        salbar_data1 = []
+
+        collected_data['salbar_data1'] = salbar_data1
 
         return request.send_data(collected_data)
