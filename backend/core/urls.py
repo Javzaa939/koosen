@@ -57,7 +57,6 @@ urlpatterns = [
     # Хөтөлбөрийн багийн ахлагчийн жагсаалт
     path('leader/list/', DepLeaderAPIView().as_view()),
 
-    path('dashboard/', DashboardAPIView().as_view()),
-
+    # Хуанли доторх картнуудын жагсаалт
     path('calendar1/', CalendarCountAPIView().as_view()),
 ]

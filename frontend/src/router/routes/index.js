@@ -36,7 +36,6 @@ import PublicRoute from "@components/routes/PublicRoute"
 
 // ** Utils
 import { isObjEmpty } from "@utils"
-import DashboardRoutes from "./Dashboard"
 
 const getLayout = {
   blank: <BlankLayout />,
@@ -49,7 +48,6 @@ const DefaultRoute = "/login"
 
 // ** Merge Routes
 const Routes = [
-    ...DashboardRoutes,
     ...CalendarRoutes,
     ...UserRoutes,
     ...SettingsRoutes,

@@ -1522,9 +1522,6 @@ function useApi(isDisplay=false) {
 			get: () => instance.get(`/statistic/db10/`),
 		}
 	},
-	dashboard: {
-		get: () => instance.get(`/core/dashboard/`),
-	},
 	calendar1: {
 		get: () => instance.get('/core/calendar1/'),
  	}

@@ -963,42 +963,7 @@ class TeacherPartListApiView(
 
         return request.send_data(all_data)
 
-@permission_classes([IsAuthenticated])
-class DashboardAPIView(
-    generics.GenericAPIView,
-):
-    """ Dashboard нь дах мэдээлэл """
-
-
-    def get(self, request):
-
-        collected_data = dict()
-
-        collected_data['total_workers'] = Teachers.objects.count()
-        collected_data['total_students'] = Student.objects.count()
-        collected_data['total_students_male'] = Student.objects.filter(gender=Student.GENDER_MALE).count()
-        collected_data['total_students_female'] = Student.objects.filter(gender=Student.GENDER_FEMALE).count()
-
-        degrees = ProfessionalDegree.objects.all()
-
-        if degrees:
-            for x in degrees:
-                collected_data['total_' + x.degree_code.lower()] = Student.objects.filter(group__degree__degree_code=x.degree_code).count()
-
-        salbar_sur_list = SubOrgs.objects.all()
-
-        salbar_data = []
-
-        collected_data['salbar_data'] = salbar_data
-
-        for index, v in enumerate(salbar_sur_list):
-            salbar_data.append({
-                'name': v.name,
-                'count': Student.objects.filter(school=v).count()
-            })
-
-        return request.send_data(collected_data)
-
+# Хуанли цэс доторх картнууд
 
 @permission_classes([IsAuthenticated])
 class CalendarCountAPIView(

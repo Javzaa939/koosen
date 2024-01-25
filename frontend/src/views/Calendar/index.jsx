@@ -30,6 +30,7 @@ import '@styles/react/apps/app-users.scss'
 
 
 import './style.scss'
+import { bottom } from '@popperjs/core';
 const CalendarComponent = () => {
 
 
@@ -132,42 +133,42 @@ const CalendarComponent = () => {
 
     return (
         <Fragment>
-                <div className='p-1 pt-0'>
-                        <Row>
-                            <Col lg='3' sm='6'>
-                                <StatsHorizontal
-                                color='warning'
-                                statTitle='Нийт хөтөлбөрийн тоо'
-                                icon={<Book size={20} />}
-                                renderStats={<h3 className='fw-bolder mb-75'>{info?.total_profession}</h3>}
-                                />
-                            </Col>
-                            <Col lg='3' sm='6'>
-                                <StatsHorizontal
-                                color='warning'
-                                statTitle='Нийт E-Хичээлийн тоо'
-                                icon={<Book size={20} />}
-                                renderStats={<h3 className='fw-bolder mb-75'>{info?.total_studies}</h3>}
-                                />
-                            </Col>
-                            <Col lg='3' sm='6'>
-                                <StatsHorizontal
-                                    color='primary'
-                                    statTitle='Нийт зөвлөх багшийн тоо'
-                                    icon={<User size={20} />}
-                                    renderStats={<h3 className='fw-bolder mb-75'>{info?.total_workers}</h3>}
-                                />
-                            </Col>
-                            <Col lg='3' sm='6'>
-                                <StatsHorizontal
-                                color='danger'
-                                statTitle='Нийт суралцагчдын тоо'
+            <div className=' pt-0'>
+                    <Row>
+                        <Col lg='3' sm='6'>
+                            <StatsHorizontal
+                            color='warning'
+                            statTitle='Нийт хөтөлбөрийн тоо'
+                            icon={<Book size={20} />}
+                            renderStats={<h3 className='fw-bolder mb-75'>{info?.total_profession}</h3>}
+                            />
+                        </Col>
+                        <Col lg='3' sm='6'>
+                            <StatsHorizontal
+                            color='warning'
+                            statTitle='Нийт E - Хичээлийн тоо'
+                            icon={<Book size={20} />}
+                            renderStats={<h3 className='fw-bolder mb-75'>{info?.total_studies}</h3>}
+                            />
+                        </Col>
+                        <Col lg='3' sm='6'>
+                            <StatsHorizontal
+                                color='primary'
+                                statTitle='Нийт зөвлөх багшийн тоо'
                                 icon={<User size={20} />}
-                                renderStats={<h3 className='fw-bolder mb-75'>{info?.total_studies}</h3>}
-                                />
-                            </Col>
-                        </Row>
-                    </div>
+                                renderStats={<h3 className='fw-bolder mb-75'>{info?.total_workers}</h3>}
+                            />
+                        </Col>
+                        <Col lg='3' sm='6'>
+                            <StatsHorizontal
+                            color='danger'
+                            statTitle='Нийт суралцагчдын тоо'
+                            icon={<User size={20} />}
+                            renderStats={<h3 className='fw-bolder mb-75'>{info?.total_studies}</h3>}
+                            />
+                        </Col>
+                    </Row>
+            </div>
 
             <div className='app-calendar overflow-hidden border'>
                 <Row className='g-0'>

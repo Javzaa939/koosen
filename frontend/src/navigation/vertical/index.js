@@ -20,11 +20,9 @@ import TeacherEvaluation from './TeacherEvaluation'
 import Role from './Role'
 // import Science from './Science'
 import Statistic from './Statistic'
-import Dashboard from './Dashboard'
 import Test from './Test'
 
 export default [
-  ...Dashboard,
   ...Calendar,
   ...Reference,
   ...Study,
