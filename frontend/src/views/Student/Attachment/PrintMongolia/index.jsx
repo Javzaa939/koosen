@@ -56,6 +56,7 @@ export default function PrintAttachmentMongolia()
         })
     ]);
 
+    console.log(datas)
 
     useEffect(
         () =>

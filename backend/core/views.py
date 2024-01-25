@@ -40,6 +40,7 @@ from lms.models import UserModelCertPatent
 from lms.models import UserSymbolCert
 from lms.models import UserLicenseCert
 from lms.models import UserRightCert
+from lms.models import LessonStandart
 
 from lms.models import Student
 from lms.models import ProfessionalDegree
@@ -1006,10 +1007,11 @@ class CalendarCountAPIView(
     def get(self, request):
         collected_data = dict()
 
+        teacher_qs = get_teacher_queryset()
         collected_data['total_profession'] = ProfessionDefinition.objects.count()
-        collected_data['total_workers'] = Teachers.objects.filter(action_status = Teachers.PENDING).count()
+        collected_data['total_workers'] = teacher_qs.count()
         collected_data['total_students'] = Student.objects.count()
-        collected_data['total_studies'] = TimeTable.objects.filter(type = TimeTable.ONLINE).count()
+        collected_data['total_studies'] = LessonStandart.objects.count()
 
         salbar_data1 = []
 
