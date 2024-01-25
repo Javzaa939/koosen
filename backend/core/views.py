@@ -20,7 +20,7 @@ from core.models import Teachers
 from core.models import Employee
 from core.models import OrgPosition
 from core.models import Notification
-
+from core.models import SubOrgs
 
 from lms.models import Country
 from lms.models import TimeTable
@@ -40,6 +40,10 @@ from lms.models import UserModelCertPatent
 from lms.models import UserSymbolCert
 from lms.models import UserLicenseCert
 from lms.models import UserRightCert
+from lms.models import LessonStandart
+
+from lms.models import Student
+from lms.models import ProfessionalDegree
 
 from .serializers import SchoolsRegisterSerailizer
 from .serializers import DepartmentRegisterSerailizer
@@ -77,10 +81,13 @@ from .serializers import SubSchoolPutRegisterSerailizer
 from .serializers import TeacherLongListSerializer
 from .serializers import LessonTeacherListSerializer
 from .serializers import TeacherListSchoolFilterSerializer
+from .serializers import DashboardSerializer
+
 from .serializers import SubSchoolsRegisterPostSerailizer
 from .serializers import DepartmentPostSerailizer
 from .serializers import EmployeePostSerializer
 
+from lms.models import ProfessionDefinition
 
 @permission_classes([IsAuthenticated])
 class TeacherListApiView(
@@ -955,3 +962,24 @@ class TeacherPartListApiView(
         all_data = self.list(request).data
 
         return request.send_data(all_data)
+
+# Хуанли цэс доторх картнууд
+
+@permission_classes([IsAuthenticated])
+class CalendarCountAPIView(
+    generics.CreateAPIView
+):
+    def get(self, request):
+        collected_data = dict()
+
+        teacher_qs = get_teacher_queryset()
+        collected_data['total_profession'] = ProfessionDefinition.objects.count()
+        collected_data['total_workers'] = teacher_qs.count()
+        collected_data['total_students'] = Student.objects.count()
+        collected_data['total_studies'] = LessonStandart.objects.count()
+
+        salbar_data1 = []
+
+        collected_data['salbar_data1'] = salbar_data1
+
+        return request.send_data(collected_data)

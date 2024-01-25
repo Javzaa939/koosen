@@ -1521,7 +1521,10 @@ function useApi(isDisplay=false) {
 		db10:{
 			get: () => instance.get(`/statistic/db10/`),
 		}
-	}
+	},
+	calendar1: {
+		get: () => instance.get('/core/calendar1/'),
+ 	}
 	}
 }
 
