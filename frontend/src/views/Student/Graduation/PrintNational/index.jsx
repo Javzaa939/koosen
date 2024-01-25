@@ -118,9 +118,8 @@ export default function PrintMongolia()
                         ᠳ᠋ᠤᠭᠠᠷ <span style={{ fontFamily: 'cmdashitseden', fontSize: '24px' }}>{data?.student?.group?.degree?.degree_code}</span>{tooBichih(data?.diplom_num)}
                     </div>
                     <div style={{ writingMode: 'vertical-lr', marginLeft: '36px', lineHeight: '46px' }} >
-                        ᠮᠣᠩᠭᠣᠯ ᠤᠯᠤᠰ ᠤ᠋ᠨ ᠢᠷᢉᠡᠨ {data?.student?.last_name_uig} ᠶ᠋ᠢᠨ / ᠤ᠋ᠨ {data?.student?.first_name_uig} ᠨᠢ <span style={{ fontFamily: 'CMSUB', fontSize: '25px' }}>{data?.student?.group?.join_year?.substring(0, 4)} - {data?.lesson_year?.substring(5, 9)}</span> ᠣᠨ ᠳ᠋ᠤ 
-                        <br/>
-                        {data?.student?.school_name_uig} ᠳ᠋ᠤ {data?.student?.group?.profession?.name_uig} ᠮᠡᠷᢉᠡᠵᠢᠯ <span style={{ fontFamily: 'cmdashitseden', fontSize: '24px' }}>
+                        ᠮᠣᠩᠭᠣᠯ ᠤᠯᠤᠰ ᠤ᠋ᠨ ᠢᠷᢉᠡᠨ {data?.student?.last_name_uig} ᠶ᠋ᠢᠨ / ᠤ᠋ᠨ {data?.student?.first_name_uig} ᠨᠢ <span style={{ fontFamily: 'CMSUB', fontSize: '25px' }}>{data?.student?.group?.join_year?.substring(0, 4)} - {data?.lesson_year?.substring(5, 9)}</span> ᠣᠨ ᠳ᠋ᠤ &nbsp;
+                        <span style={{ textWrap: 'nowrap' }}>{data?.student?.school_name_uig}</span> ᠳ᠋ᠤ {data?.student?.group?.profession?.name_uig} ᠮᠡᠷᢉᠡᠵᠢᠯ <span style={{ fontFamily: 'cmdashitseden', fontSize: '24px' }}>
                         <br />
                         ({data?.student?.group?.degree?.degree_code}</span>{tooBichih(data?.student?.group?.profession?.code)}) ᠢ᠋ᠶᠡᠷ ᠰᠤᠷᠤᠯᠴᠠᠵᠤ ᠲᠡᢉᠦᠰᠦᢉᠰᠡᠨ ᠲᠤᠯᠠ ᠶᠡᢈᠡ ᠰᠤᠷᠭᠠᠭᠤᠯᠢ ᠶ᠋ᠢᠨ ᠵᠠᢈᠢᠷᠤᠯ ᠤ᠋ᠨ {tooBichih(data?.decision_date?.substring(0, 4))} ᠣᠨ ᠤ᠋ {tooBichih(data?.decision_date?.substring(5, 7))} {dugeerUg(data?.decision_date?.substring(5, 7) && data?.decision_date?.substring(5, 7).charAt(data?.decision_date?.substring(5, 7).length - 1))} ᠰᠠᠷ᠎ᠠ ᠶ᠋ᠢᠨ {tooBichih(data?.decision_date?.substring(8, 10))}{tooBichih('-')} ᠪ
                         ᠡᠳᠦᠷ ᠦ᠋ᠨ {tushaal(data?.graduation_number)} {dugeerUg(data?.graduation_number && data?.graduation_number.charAt(data?.graduation_number.length - 1))} ᠲᠤᠰᠢᠶᠠᠯ ᠢ᠋ᠶᠠᠷ {data?.student?.group?.profession?.dep_name_uig} ᠶ᠋ᠢᠨ <span className='fs-3'>{data?.student?.group?.degree?.degree_uig_name}</span> ᠤ᠋ᠨ ᠵᠡᠷᢉᠡ ᠣᠯᠭᠤᠪᠠ.
