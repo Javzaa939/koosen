@@ -226,7 +226,8 @@ const Enrollment = () => {
                             <Button
                                 color='primary'
                                 className='m-50'
-                                // onClick={() => {navigate(`printlist`,  { state: selectedRows })}}
+                                disabled={datas.length == 0}
+                                onClick={() => {navigate(`printlist`,  { state: { 'selectedRows': selectedRows, 'select_value': select_value }, })}}
                             >
                                 <Printer size={15} />
                                 <span className='align-middle ms-50'>{t('Хэвлэх')}</span>

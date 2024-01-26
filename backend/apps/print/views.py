@@ -685,7 +685,7 @@ class AdmissionAPIView(
     search_fields = ['group__profession__code', 'group__profession__name', 'register_num', 'admission_date', 'admission_number', 'code', 'last_name', 'first_name']
 
     def get_queryset(self):
-        queryset = self.queryset
+        queryset = self.queryset.filter(group__level=1)
         learning = self.request.query_params.get('learning')
         lesson_year = self.request.query_params.get('lesson_year')
         lesson_season = self.request.query_params.get('lesson_season')
@@ -754,6 +754,62 @@ class AdmissionAPIView(
 
         return request.send_info('INF_002')
 
+
+@permission_classes([IsAuthenticated])
+class AdmissionPrintAPIView(
+    mixins.ListModelMixin,
+    generics.GenericAPIView,
+):
+    ''' Элсэлтийн тушаал хэвлэлтэнд зориулсан api '''
+
+    queryset = Student.objects.all()
+    # serializer_class = AdmissionPrintListSerializer
+
+    def get(self, request):
+
+        queryset = self.queryset.filter(group__level=1)
+        learning = self.request.query_params.get('learning')
+        group = self.request.query_params.get('group')
+        degree = self.request.query_params.get('degree')
+        schoolId = self.request.query_params.get('school')
+        department = self.request.query_params.get('department')
+        profession = self.request.query_params.get('profession')
+
+        if learning:
+            queryset = queryset.filter(group__learning_status=learning)
+
+        # Сургуулиар хайлт хийх
+        if schoolId:
+            queryset = queryset.filter(school=schoolId)
+
+        # Тэнхимээр хайх
+        if department:
+            queryset = queryset.filter(department=department)
+
+        # Ангиар хайх
+        if group:
+            queryset = queryset.filter(group=group)
+
+        # Боловсролын зэргээр хайлт хийх
+        if degree:
+            queryset = queryset.filter(group__degree=degree)
+
+        # Мэргэжлээр хайх
+        if profession:
+            queryset = queryset.filter(group__profession=profession)
+
+        stud_qs = queryset.distinct("group").values("group", "group__name")
+        prof_data = list(stud_qs)
+
+        datas = queryset.values("id", "code", "last_name", "first_name", "register_num", "group","group__name", "school", "department", "group__profession__name", "group__profession__code", "foregin_password", "citizenship")
+        all_data = list(datas)
+
+        return request.send_data(
+            {
+                'groups': prof_data,
+                'students': all_data
+            }
+        )
 
 class GroupsListFilterWithSubSchoolApiView(
     generics.GenericAPIView,

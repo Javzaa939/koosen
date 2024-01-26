@@ -34,5 +34,7 @@ urlpatterns = [
     #  Элсэлтийн тушаал
     path('admission/', AdmissionAPIView.as_view()),
 
+    #  Элсэлтийн тушаал хэвлэх
+    path('admission/print/', AdmissionPrintAPIView.as_view()),
 
 ]
