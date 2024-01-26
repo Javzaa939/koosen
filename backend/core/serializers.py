@@ -810,3 +810,10 @@ class DepartmentUpdateSerailizer(serializers.ModelSerializer):
     class Meta:
         model = Salbars
         fields = "__all__"
+
+
+class DashboardSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Teachers
+        fields = "__all__"
