@@ -146,7 +146,7 @@ const CalendarComponent = () => {
                         <Col lg='3' sm='6'>
                             <StatsHorizontal
                             color='warning'
-                            statTitle='Нийт E - Хичээлийн тоо'
+                            statTitle='Нийт хичээлийн тоо'
                             icon={<Book size={20} />}
                             renderStats={<h3 className='fw-bolder mb-75'>{info?.total_studies}</h3>}
                             />
@@ -154,7 +154,7 @@ const CalendarComponent = () => {
                         <Col lg='3' sm='6'>
                             <StatsHorizontal
                                 color='primary'
-                                statTitle='Нийт зөвлөх багшийн тоо'
+                                statTitle='Нийт багшийн тоо'
                                 icon={<User size={20} />}
                                 renderStats={<h3 className='fw-bolder mb-75'>{info?.total_workers}</h3>}
                             />
@@ -164,7 +164,7 @@ const CalendarComponent = () => {
                             color='danger'
                             statTitle='Нийт суралцагчдын тоо'
                             icon={<User size={20} />}
-                            renderStats={<h3 className='fw-bolder mb-75'>{info?.total_studies}</h3>}
+                            renderStats={<h3 className='fw-bolder mb-75'>{info?.total_students}</h3>}
                             />
                         </Col>
                     </Row>
