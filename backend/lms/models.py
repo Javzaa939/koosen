@@ -3838,3 +3838,70 @@ class InventoryRequest(models.Model):
                 kwargs.pop('force_insert')
 
         super(InventoryRequest, self).save(*args, **kwargs)
+
+
+class AdmissionRegister(models.Model):
+    """ Элсэлтийн үйл явцын бүртгэл"""
+
+    name = models.CharField(max_length=200, verbose_name="Элсэлтийн нэр")
+    degree = models.ForeignKey(ProfessionalDegree, on_delete=models.SET_NULL, null=True, verbose_name="Мэргэжлийн зэрэг")
+    lesson_year = models.CharField(max_length=50, verbose_name="Хичээлийн жил")
+    begin_date = models.DateTimeField(verbose_name="Элсэлт эхлэх хугацаа")
+    end_date = models.DateTimeField(verbose_name="Дуусах хугацаа")
+
+
+class AdmissionRegisterProfession(models.Model):
+    """ Элсэлт мэргэжлийн бүртгэл"""
+
+    admission=models.ForeignKey(AdmissionRegister, on_delete=models.CASCADE, verbose_name="Элсэлт")
+    profession = models.ForeignKey(ProfessionDefinition, on_delete=models.PROTECT, verbose_name="Мэргэжил")
+
+
+class AdmissionIndicator(models.Model):
+    """Мэргэжил бүрийн шалгуур үзүүлэлтийн  бүртгэл"""
+
+    PUBLIC = 1
+    SPECIFIC = 2
+    INDICATOR_TYPE = (
+        (PUBLIC, 'Нийтлэг шалгуур'),
+        (SPECIFIC, 'Тусгай шалгуур'),
+
+    )
+
+    EESH_EXAM = 1
+    XYANALTIIN_TOO = 2
+    NAS = 3
+    YAL_SHIITGEL = 4
+    ERUUL_MEND = 5
+    BIE_BYALDAR = 6
+    SETGEL_ZUI = 7
+    TUGSSUN_SURGUULI = 8
+    INDICATOR_VALUE = (
+
+        (EESH_EXAM, 'ЭЕШ-ын оноо'),
+        (XYANALTIIN_TOO, 'Хяналтын тоо'),
+
+        (NAS, 'Нас'),
+        (YAL_SHIITGEL, 'Ял шийтгэл'),
+        (ERUUL_MEND, 'Эрүүл мэнд'),
+        (BIE_BYALDAR, 'Бие бялдар'),
+        (SETGEL_ZUI, 'Сэтгэлзүйн ярилцлага'),
+        (TUGSSUN_SURGUULI, 'Төгссөн сургууль'),
+    )
+
+    admission_prof = models.ForeignKey(AdmissionRegisterProfession, on_delete=models.CASCADE, verbose_name="Мэргэжил")
+    type = models.PositiveSmallIntegerField(choices=INDICATOR_TYPE, db_index=True, null=False, default=PUBLIC, verbose_name="Шалгуурын төpөл")
+    value = models.PositiveIntegerField(choices=INDICATOR_VALUE, db_index=True, null=False, default=EESH_EXAM, verbose_name="Шалгуур үзүүлэлт")
+    orderby = models.PositiveIntegerField(verbose_name="Шалгуурын эрэмбэ")
+    limit_min = models.FloatField(null=True, verbose_name="Насны шалгуурын доод хязгаар")
+    limit_mах = models.FloatField(null=True, verbose_name="Насны шалгуурын дээд хязгаар")
+
+
+class AdmissionXyanaltToo(models.Model):
+    """ Мэргэжлийн хяналтын тоо"""
+
+    indicator=models.ForeignKey(AdmissionIndicator, on_delete=models.CASCADE, verbose_name="Шалгуур үзүүлэлт")
+    norm_all = models.PositiveIntegerField(null=True, verbose_name="Нийт хяналтын тоо")
+    is_gender = models.BooleanField(default=False, verbose_name="Хүйсээр ялгах эсэх")
+    norm1 = models.PositiveIntegerField(null=True, verbose_name="Эрэгтэй суралцагчийн тоо")
+    norm2 = models.PositiveIntegerField(null=True, verbose_name="Эмэгтэй суралцагчийн тоо")
