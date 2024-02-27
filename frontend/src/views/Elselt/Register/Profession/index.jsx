@@ -2,7 +2,6 @@ import React from 'react'
 import { Card, CardBody, Col, Row, CardHeader, Button, CardTitle } from 'reactstrap'
 import BreadCrumbs from '@components/breadcrumbs';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Plus } from 'react-feather'
 import DragProfession from './DragProfession';
 
 export default function Profession() {
@@ -14,13 +13,13 @@ export default function Profession() {
                 <BreadCrumbs title={'Элсэлт'} data={[{ title: 'Элсэлтийн жагсаалт', link: '/elselt/register/' }, { title: 'Хөтөлбөрийн жагсаалт' }]} />
             </Row>
             <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
-                <div>
+                <div className='fs-5'>
                     <span className='fw-bold'>{datas?.name}
                     <br/> <span>{datas?.begin_date} -  {datas?.end_date}</span></span>
                 </div>
             </CardHeader>
             <CardBody>
-                <DragProfession/>
+                <DragProfession cdatas={datas}/>
             </CardBody>
         </Card>
     )

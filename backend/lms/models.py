@@ -360,6 +360,7 @@ class ProfessionDefinition(models.Model):
     introduction = models.TextField(null=True, verbose_name="Мэргэжлийн танилцуулга")
     department = models.ForeignKey(Salbars, on_delete=models.SET_NULL, null=True, verbose_name="Хөтөлбөрийн баг")
     school = models.ForeignKey(SubOrgs, on_delete=models.SET_NULL, null=True, verbose_name="Сургууль")
+    poster_image = models.ImageField(upload_to='profession/', null=True, verbose_name='Танилцуулга зураг')
     created_user = models.ForeignKey(User, related_name='prof_cr_user', on_delete=models.SET_NULL, null=True, verbose_name="Бүртгэсэн хэрэглэгч")
     updated_user = models.ForeignKey(User, related_name='prof_up_user', on_delete=models.SET_NULL, null=True, verbose_name="Зассан хэрэглэгч")
     gen_direct_type = models.PositiveIntegerField(choices=GENERAL_DIRECT_TYPE, db_index=True, default=EDUCATION, verbose_name="Мэргэжлийн ерөнхий чиглэл")
@@ -3923,3 +3924,4 @@ class ContactInfo(models.Model):
     admission_juram = models.FileField(upload_to='admission', null=True, verbose_name='Элсэлтийн журам')
     admission_advice = models.FileField(upload_to='admission', null=True, verbose_name='Элсэгчдэд зориулсан зөвлөмж')
     home_description = models.CharField(max_length=5000, null=True, verbose_name='Нүүр хуудасны харуулах тайлбар')
+    home_image = models.ImageField(upload_to='home/', null=True, verbose_name='Нүүр зураг')

@@ -12,13 +12,15 @@ import { getPagination, ReactSelectStyles, generateLessonYear } from '@utils'
 import Select from 'react-select'
 
 import {
-    Card, CardHeader,  CardBody, CardText,
+    Card, CardHeader,  CardBody, InputGroup, InputGroupText,
     Row, Col, ListGroupItem, Badge, Label,
     Input, Button, Table, UncontrolledTooltip
 } from 'reactstrap'
-import { Plus, Minus,  AlertCircle, Search, Edit } from 'react-feather'
+import { Plus, Minus,  AlertCircle, Search, X, Save, Edit, Feather } from 'react-feather'
 
-const DragProfession = () => {
+import ShalguurModal from './ShalguurModal';
+
+const DragProfession = ({ cdatas }) => {
     var values = {
         degree: '',
         department: '',
@@ -26,13 +28,19 @@ const DragProfession = () => {
   // ** States
     const [listArr1, setListArr1] = useState([])
     const [listArr2, setListArr2] = useState([])
-    const [ degreeOption, setDegree] = useState([])
-    const [ depOption, setDepartment] = useState([])
-    const [ profOption, setProfession] = useState([])
+    const [degreeOption, setDegree] = useState([])
+    const [depOption, setDepartment] = useState([])
+    const [profOption, setProfession] = useState([])
     const [select_value, setSelectValue] = useState(values)
     const [searchValue, setSearchValue] = useState("");
+    const [modal, setModal] = useState(false)
+    const [admission_data, setAdmission] = useState({})
+    const [admissionDatas, setAdmissionDatas] = useState([])
+    const [file, setFile] = useState('')
+    const [removePoster, setRemovePoster] = useState(false)
 
 	const [filteredData, setFilteredData] = useState([]);
+    const [profId, setProfId] = useState('')
 
     const professionApi = useApi().study.professionDefinition
     const depApi = useApi().hrms.department
@@ -115,17 +123,108 @@ const DragProfession = () => {
         setSearchValue(value);
 	};
 
+    async function getProps() {
+        const { success, data } = await fetchData(elseltApi.get(cdatas.id))
+        if (success) {
+            const { datas, admission_datas } = data
+            setListArr1(datas)
+            setAdmissionDatas(admission_datas)
+        }
+    }
+
     async function moveProp(order) {
-        var options = searchValue.length > 0 ? [...filteredData] : [...profOption]
+        var options = searchValue.length > 0 ? [...filteredData] : [...listArr2]
         let update_id = options[order.oldIndex].id
-        const { success, data } = await fetchData(elseltApi.postPro)
+
+        var datas = {
+            'profession': update_id,
+            'admission': cdatas.id
+        }
+        const { success, data } = await fetchData(elseltApi.post(datas))
+        if (success) {
+            getProps()
+        }
+    }
+
+    async function removeProp(order) {
+        var options = [...listArr1]
+        let update_id = options[order.oldIndex].id
+
+        const { success, data } = await fetchData(elseltApi.delete(update_id,  cdatas.id))
+        if (success) {
+            getProps()
+        }
+    }
+
+    useEffect(
+        () =>
+        {
+            getProps()
+        },
+        []
+    )
+
+    function getDifference(array1, array2) {
+        return array1.filter(object1 => {
+          return !array2.some(object2 => {
+            return object1.id === object2.id;
+          });
+        });
+    }
+
+    useEffect(
+        () =>
+        {
+            if (listArr1.length > 0 && profOption.length > 0) {
+                const difference_list = getDifference(profOption, listArr1)
+                setListArr2(difference_list)
+            }
+        },
+        [listArr1, profOption]
+    )
+
+    const addShalgur = (prof) =>
+    {
+        setModal(!modal)
+        var admission = admissionDatas.find((c) => c.profession == prof.id)
+        setAdmission(admission || {})
+    }
+
+    const getFile = (e, action, poster_image, id) => {
+        if (action == 'Get') {
+            const files = e.target.files
+
+            if (files.length > 0) {
+                setFile(files[0])
+            }
+        } else if (file) {
+            setFile('')
+        } else if (poster_image) {
+            setRemovePoster(true)
+        }
+    }
+
+    async function fileSave(id) {
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('profession', id)
+        if (file) {
+            const { success, data } = await fetchData(professionApi.postFile(formData))
+            if (success) {
+                setProfId('')
+                getProps()
+            }
+        } else if (removePoster) {
+            const { success, data } = await fetchData(professionApi.removeFile(id))
+            if (success) {
+                setProfId('')
+                getProps()
+            }
+        }
     }
 
     return (
         <Card>
-            <CardHeader className='justify-content-end'>
-                <span tag='h4' className='text-warning'><AlertCircle></AlertCircle> Сонгох хөтөлбөрөөс нэмэх хөтөлбөр лүү зөөнө үү</span>
-            </CardHeader>
             <CardBody>
                 <Row className='mb-1'>
                     <Col sm={6} lg={3}>
@@ -209,6 +308,7 @@ const DragProfession = () => {
                                 <th>№</th>
                                 <th>Хөтөлбөрийн нэр</th>
                                 <th>Шалгуур нэмэх</th>
+                                <th>Зураг оруулах( <small style={{fontSize: '10px'}} className='text-warning'>Танилцуулга дээр оруулах нягтаршил өндөртэй зураг оруулна уу </small>) </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -218,13 +318,39 @@ const DragProfession = () => {
                                         <td>{idx + 1}</td>
                                         <td>{item?.full_name}</td>
                                         <td>
-                                        <a role="button" onClick={() => { editModal(row)} }
-                                            id={`edit${idx}`}
-                                            className="me-1"
-                                        >
-                                            <Badge color="light-success" pill><Plus  width={"15px"} /></Badge>
-                                        </a>
-                                        <UncontrolledTooltip placement='top' target={`edit${idx}`} >Нэмэх</UncontrolledTooltip>
+                                            <a role="button" onClick={() => { addShalgur(item)} }
+                                                id={`edit${idx}`}
+                                                className="me-1"
+                                            >
+                                                <Badge color="light-success" pill><Plus  width={"15px"} /></Badge>
+                                            </a>
+                                            <UncontrolledTooltip placement='top' target={`edit${idx}`} >Нэмэх</UncontrolledTooltip>
+                                        </td>
+                                        <td>
+                                            <InputGroup>
+                                                <Input
+                                                    type='file'
+                                                    bsSize='sm'
+                                                    disabled={profId === item?.id ? false : true}
+                                                    accept='image/*'
+                                                    onChange={(e) => getFile(e, 'Get')}
+                                                />
+                                                <InputGroupText>
+                                                    <X className='' role="button" color="red" size={15} onClick={(e) => getFile(e, 'Delete', item?.poster_image, item?.id)}></X>
+                                                </InputGroupText>
+                                                <InputGroupText>
+                                                    {
+                                                        profId === item?.id
+                                                        ?
+                                                            <Save  role="button" color="#198754" size={15} onClick={(e) => fileSave(item?.id)}></Save>
+                                                        :
+                                                            <Edit  role="button" color="gray" size={15} onClick={(e) => setProfId(item?.id)}></Edit>
+                                                    }
+                                                </InputGroupText>
+                                            </InputGroup>
+                                            {
+                                                item?.poster_image && <small>Зургийн нэр: <span className='fw-bold'>{item?.poster_image.replace('/files/profession/', '')}</span></small>
+                                            }
                                         </td>
                                     </tr>
                                 )
@@ -232,6 +358,9 @@ const DragProfession = () => {
                         </tbody>
                     </Table>
                 </Row>
+                <div className='justify-content-center py-50'>
+                    <h4 className=''>Сонгох хөтөлбөрөөс сонгогдсон хөтөлбөр лүү зөөнө үү</h4>
+                </div>
                 <Row id='dd-with-handle' className='border-top'>
                     <Col md='6' sm='12'>
                         <h4 className='my-1'>Сонгогдсон хөтөлбөрүүд</h4>
@@ -241,6 +370,7 @@ const DragProfession = () => {
                             group='shared-group'
                             list={listArr1}
                             setList={setListArr1}
+                            onEnd={removeProp}
                         >
                         {listArr1.map((item) => {
                             return (
@@ -260,8 +390,8 @@ const DragProfession = () => {
                             tag='ul'
                             className='list-group list-group-flush sortable'
                             group='shared-group'
-                            list={searchValue.length > 0 ? filteredData : profOption}
-                            setList={setProfession}
+                            list={searchValue.length > 0 ? filteredData : listArr2}
+                            setList={setListArr2}
                             onEnd={moveProp}
                         >
                         {
@@ -278,7 +408,7 @@ const DragProfession = () => {
                                 )
                             })
                             :
-                            profOption.map(item => {
+                            listArr2.map(item => {
                                 return (
                                 <ListGroupItem className='draggable' key={item?.id}>
                                     <Badge color='light-primary' pill className='me-50'>
@@ -293,6 +423,9 @@ const DragProfession = () => {
                     </Col>
                 </Row>
             </CardBody>
+            {
+                modal && <ShalguurModal open={modal} handleModal={addShalgur} admission_data={admission_data} refreshDatas={getProps}/>
+            }
         </Card>
     )
 }

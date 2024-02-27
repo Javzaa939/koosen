@@ -380,6 +380,9 @@ function useApi(isDisplay=false) {
 				// Танилцуулга дээр зураг хадгалах
 				saveFile: data => instance.post(`/learning/profession/file/`, data),
 				delete: (pk) => instance.delete(`/learning/profession/file/${pk}/`),
+
+				postFile: (data) => instance.post(`/learning/profession/poster-file/`, data),
+				removeFile: (id) => instance.delete(`/learning/profession/poster-file/${id}/`),
 			},
 			/** Сургалтын төлөвлөгөө */
 			plan: {
@@ -825,56 +828,56 @@ function useApi(isDisplay=false) {
 			}
 
 		},
-		/** Сургалтын төлбөр */
-		payment: {
-			/* Сургалтын төлбөрийн эхний үлдэгдэл */
-			beginbalance:{
-				// get: () => instance.get(`/payment/beginbalance/`),
-				get: (limit, page, sort, search, departId, degree, joined_year, group, is_iluu) =>
-					instance.get(`/payment/beginbalance/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&department=${departId}&degree=${degree}&joined_year=${joined_year}&group=${group}&school=${school_id}&is_iluu=${is_iluu}`),
-				post: data => instance.post('/payment/beginbalance/', data),
-				getOne: (pk) => instance.get(`/payment/beginbalance/${pk}/`),
-				put: (data, pk) => instance.put(`/payment/beginbalance/${pk}/`, data),
-				delete: (pk) => instance.delete(`/payment/beginbalance/${pk}/`),
-			},
-			/* Сургалтын төлбөрийн тохиргоо */
-			paymentsetting:{
-				// get: () => instance.get(`/payment/paymentsettings/`),
-				get: (limit, page, sort, search, degree, join_year) =>
-					instance.get(`/payment/paymentsettings/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&school=${school_id}&degree=${degree}&join_year=${join_year}`),
-				post: data => instance.post('/payment/paymentsettings/', data),
-				getOne: (pk) => instance.get(`/payment/paymentsettings/${pk}/`),
-				put: (data, pk) => instance.put(`/payment/paymentsettings/${pk}/`, data),
-				delete: (pk) => instance.delete(`/payment/paymentsettings/${pk}/`),
-			},
-			/* Сургалтын төлбөрийн гүйлгээ */
-			paymentbalance: {
-				get: (limit, page, sort, search, departId, degree, joined_year, group, flag) =>
-					instance.get(`/payment/paymentbalance/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&department=${departId}&degree=${degree}&joined_year=${joined_year}&group=${group}&school=${school_id}&flag=${flag}`),
-				post: data => instance.post('/payment/paymentbalance/', data),
-				getOne: (pk) => instance.get(`/payment/paymentbalance/${pk}/`),
-				put: (data, pk) => instance.put(`/payment/paymentbalance/${pk}/`, data),
-				delete: (pk) => instance.delete(`/payment/paymentbalance/${pk}/`),
-			},
-			estimate: {
-				get: (limit, page, sort, search, departId, degree, joined_year, group) =>
-					instance.get(`/payment/estimate/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&department=${departId}&degree=${degree}&joined_year=${joined_year}&group=${group}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&school=${school_id}`),
-				post: () => instance.post(`/payment/estimate/?lesson_year=${cyear_name}&lesson_season=${cseason_id}&school=${school_id}`),
-			},
-			/* Сургалтын төлбөрийн хөнгөлөлт */
-			discount: {
-				get: (limit, page, sort, search) =>
-					instance.get(`/payment/discount/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&school=${school_id}`),
-				post: data => instance.post(`/payment/discount/`, data),
-				getOne: (pk) => instance.get(`/payment/discount/${pk}/`),
-				put: (data, pk) => instance.put(`/payment/discount/${pk}/`, data),
-				delete: (pk) => instance.delete(`/payment/discount/${pk}/`),
-			},
-			/* Сургалтын төлбөрийн улирлын хаалт */
-			seasonclosed:{
-				getIsClosed: () => instance.get(`/payment/seasonclosed/?lesson_year=${cyear_name}&lesson_season=${cseason_id}&school=${school_id}`)
-			},
-		},
+		// /** Сургалтын төлбөр */
+		// payment: {
+		// 	/* Сургалтын төлбөрийн эхний үлдэгдэл */
+		// 	beginbalance:{
+		// 		// get: () => instance.get(`/payment/beginbalance/`),
+		// 		get: (limit, page, sort, search, departId, degree, joined_year, group, is_iluu) =>
+		// 			instance.get(`/payment/beginbalance/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&department=${departId}&degree=${degree}&joined_year=${joined_year}&group=${group}&school=${school_id}&is_iluu=${is_iluu}`),
+		// 		post: data => instance.post('/payment/beginbalance/', data),
+		// 		getOne: (pk) => instance.get(`/payment/beginbalance/${pk}/`),
+		// 		put: (data, pk) => instance.put(`/payment/beginbalance/${pk}/`, data),
+		// 		delete: (pk) => instance.delete(`/payment/beginbalance/${pk}/`),
+		// 	},
+		// 	/* Сургалтын төлбөрийн тохиргоо */
+		// 	paymentsetting:{
+		// 		// get: () => instance.get(`/payment/paymentsettings/`),
+		// 		get: (limit, page, sort, search, degree, join_year) =>
+		// 			instance.get(`/payment/paymentsettings/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&school=${school_id}&degree=${degree}&join_year=${join_year}`),
+		// 		post: data => instance.post('/payment/paymentsettings/', data),
+		// 		getOne: (pk) => instance.get(`/payment/paymentsettings/${pk}/`),
+		// 		put: (data, pk) => instance.put(`/payment/paymentsettings/${pk}/`, data),
+		// 		delete: (pk) => instance.delete(`/payment/paymentsettings/${pk}/`),
+		// 	},
+		// 	/* Сургалтын төлбөрийн гүйлгээ */
+		// 	paymentbalance: {
+		// 		get: (limit, page, sort, search, departId, degree, joined_year, group, flag) =>
+		// 			instance.get(`/payment/paymentbalance/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&department=${departId}&degree=${degree}&joined_year=${joined_year}&group=${group}&school=${school_id}&flag=${flag}`),
+		// 		post: data => instance.post('/payment/paymentbalance/', data),
+		// 		getOne: (pk) => instance.get(`/payment/paymentbalance/${pk}/`),
+		// 		put: (data, pk) => instance.put(`/payment/paymentbalance/${pk}/`, data),
+		// 		delete: (pk) => instance.delete(`/payment/paymentbalance/${pk}/`),
+		// 	},
+		// 	estimate: {
+		// 		get: (limit, page, sort, search, departId, degree, joined_year, group) =>
+		// 			instance.get(`/payment/estimate/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&department=${departId}&degree=${degree}&joined_year=${joined_year}&group=${group}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&school=${school_id}`),
+		// 		post: () => instance.post(`/payment/estimate/?lesson_year=${cyear_name}&lesson_season=${cseason_id}&school=${school_id}`),
+		// 	},
+		// 	/* Сургалтын төлбөрийн хөнгөлөлт */
+		// 	discount: {
+		// 		get: (limit, page, sort, search) =>
+		// 			instance.get(`/payment/discount/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&school=${school_id}`),
+		// 		post: data => instance.post(`/payment/discount/`, data),
+		// 		getOne: (pk) => instance.get(`/payment/discount/${pk}/`),
+		// 		put: (data, pk) => instance.put(`/payment/discount/${pk}/`, data),
+		// 		delete: (pk) => instance.delete(`/payment/discount/${pk}/`),
+		// 	},
+		// 	/* Сургалтын төлбөрийн улирлын хаалт */
+		// 	seasonclosed:{
+		// 		getIsClosed: () => instance.get(`/payment/seasonclosed/?lesson_year=${cyear_name}&lesson_season=${cseason_id}&school=${school_id}`)
+		// 	},
+		// },
 		/**Дүнгийн бүртгэл*/
 		score: {
 			print: {
@@ -1541,7 +1544,9 @@ function useApi(isDisplay=false) {
 			put: (datas, id, data) =>
 				datas?.length > 0 ? instance.put(`/elselt/sysinfo/${datas[0]?.id}/`, data)
 				:
-				instance.post(`/elselt/sysinfo/`, data)
+				instance.post(`/elselt/sysinfo/`, data),
+			delete: (id, elselt_id) => instance.delete(`/elselt/profession/${id}/?elselt=${elselt_id}`),
+			postShalguur: (datas) => instance.post(`/elselt/profession/shalguur/`, datas)
 		}
 	}
 	}
