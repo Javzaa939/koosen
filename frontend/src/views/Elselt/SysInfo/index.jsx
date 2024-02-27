@@ -18,7 +18,7 @@ function SysInfo() {
 
     const sysinfoApi = useApi().elselt.sysinfo
 
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
+    const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: true, bg:3 })
     const [datas, setDatas] = useState()
     const [admissionJuram, setAdmissionJuram] = useState('')
     const [admissionAdvice, setAdmissionAdvice] = useState('')
@@ -74,6 +74,7 @@ function SysInfo() {
 
     return (
         <Card>
+            {isLoading && Loader}
             <CardTitle className='p-1 pb-0'>
                 <h4>
                     Элсэлтийн системийн мэдээлэл
@@ -404,7 +405,7 @@ function SysInfo() {
                         </Col>
                     </Row>
                     <div className='d-flex justify-content-center mt-3'>
-                        <Button color='primary' type='submit'>
+                        <Button color='primary' type='submit' disabled={isLoading}>
                             Хадгалах
                         </Button>
                     </div>
