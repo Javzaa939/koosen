@@ -3849,6 +3849,7 @@ class AdmissionRegister(models.Model):
     lesson_year = models.CharField(max_length=50, verbose_name="Хичээлийн жил")
     begin_date = models.DateField(verbose_name="Элсэлт эхлэх хугацаа")
     end_date = models.DateField(verbose_name="Дуусах хугацаа")
+    is_active = models.BooleanField(default=False, verbose_name='Идэвхтэй эсэх')
 
 
 class AdmissionRegisterProfession(models.Model):
