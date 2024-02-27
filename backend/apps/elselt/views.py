@@ -10,11 +10,13 @@ from main.utils.function.pagination import CustomPagination
 
 
 from lms.models import (
-    AdmissionRegister
+    AdmissionRegister,
+    ContactInfo
 )
 
 from .serializer import (
-    AdmissionSerializer
+    AdmissionSerializer,
+    ElseltSysInfoSerializer
 )
 
 
@@ -71,3 +73,66 @@ class ElseltProfession(
     def get(self, request):
         elselt = request.query_params.get('elselt')
         return request.send_data([])
+
+class ElseltSysInfo(
+    generics.GenericAPIView,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin
+):
+    """ Элсэлтийн системийн мэдээлэл """
+    queryset = ContactInfo.objects.all()
+    serializer_class = ElseltSysInfoSerializer
+
+    def get(self, request):
+
+        datas = []
+        info = self.queryset.first()
+
+        datas = self.list(request).data
+
+        return request.send_data(datas)
+
+
+    def post(self, request):
+
+        data = request.data
+        contact_info_serializer = ElseltSysInfoSerializer(data=data)
+        if not contact_info_serializer.is_valid():
+            return request.send_error_valid(contact_info_serializer.errors)
+
+        contact_info_serializer.save()
+        return request.send_info("INF_001")
+
+
+    def put(self, request, pk=None):
+
+        data = request.data
+        instance = self.get_object()
+        errors = []
+
+        # contact_info_serializer = ElseltSysInfoSerializer(data=data)
+        # if not contact_info_serializer.is_valid():
+        #     return request.send_error_valid(contact_info_serializer.errors)
+
+        # contact_info_serializer.save()
+        serializer = self.get_serializer(instance, data=data)
+        if serializer.is_valid(raise_exception=True):
+            self.update(request, pk)
+            print(serializer.errors,'errors')
+
+        else:
+            for key in serializer.errors:
+                return_error = {
+                    "field": key,
+                    "msg": serializer.errors
+                }
+
+                errors.append(return_error)
+
+            if len(errors) > 0:
+                return request.send_error("ERR_003", errors)
+
+        return request.send_info("INF_002")
+

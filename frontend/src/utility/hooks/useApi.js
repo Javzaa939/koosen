@@ -1535,6 +1535,13 @@ function useApi(isDisplay=false) {
 			get: (elselt_id) => instance.get(`/elselt/profession/?elselt=${elselt_id}`),
 			post: (data) => instance.post('/elselt/profession/', data),
 			delete: (id) => instance.post(`/elselt/profession/${id}/`),
+		},
+		sysinfo: {
+			get: () => instance.get(`/elselt/sysinfo/`),
+			put: (datas, id, data) =>
+				datas?.length > 0 ? instance.put(`/elselt/sysinfo/${datas[0]?.id}/`, data)
+				:
+				instance.post(`/elselt/sysinfo/`, data)
 		}
 	}
 	}

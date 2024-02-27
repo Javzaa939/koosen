@@ -13,6 +13,12 @@ export default [
                 icon: <Circle size={8} />,
                 navLink: "elselt/register"
             },
+            {
+                id: 'elselt2',
+                title: 'Элсэлт системийн мэдээлэл',
+                icon: <Circle size={8} />,
+                navLink: "elselt/sysinfo"
+            },
         ]
     }
 ]
