@@ -1524,7 +1524,19 @@ function useApi(isDisplay=false) {
 	},
 	calendar1: {
 		get: () => instance.get('/core/calendar1/'),
- 	}
+ 	},
+
+	elselt: {
+		get: (limit, page, sort, search, lesson_year) => instance.get(`/elselt/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year=${lesson_year}`),
+		post: (data) => instance.post('/elselt/', data),
+		put: (data, id) => instance.put(`/elselt/${id}/`, data),
+		delete: (id) => instance.delete(`/elselt/${id}/`),
+		profession: {
+			get: (elselt_id) => instance.get(`/elselt/profession/?elselt=${elselt_id}`),
+			post: (data) => instance.post('/elselt/profession/', data),
+			delete: (id) => instance.post(`/elselt/profession/${id}/`),
+		}
+	}
 	}
 }
 

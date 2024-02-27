@@ -1,134 +1,94 @@
 // ** React imports
-import React, { Fragment, useState, useContext } from 'react'
+import React, { Fragment, useState } from 'react'
 
-import { AlertCircle, X } from "react-feather";
+import { X } from "react-feather";
 
 import Select from 'react-select'
 import classnames from "classnames";
-import { ReactSelectStyles } from "@utils"
 
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
-import SchoolContext from "@context/SchoolContext"
 import Flatpickr from 'react-flatpickr'
 
 import { useForm, Controller } from "react-hook-form";
 
-import { Row, Col, Form, Modal, Collapse, Label, Button, ModalBody, ModalHeader, FormFeedback, Spinner, Input, Table } from "reactstrap";
+import { Row, Col, Form, Modal,  Label, Button, ModalBody, ModalHeader, FormFeedback, Spinner, Input } from "reactstrap";
 
-import { validate, generateLessonYear } from "@utils"
+import { generateLessonYear, validate, formatDate, ReactSelectStyles } from "@utils"
 import '@styles/react/libs/flatpickr/flatpickr.scss'
 
-// import { validateSchema } from '../validateSchema';
 import { useEffect } from 'react';
 import { t } from 'i18next';
 
-const shalguurs = [
-    {
-        'name': 'Нийтлэг шалгуур',
-        'datas': [
-            {
-                'id': 1,
-                'name': 'ЭЕШ-ын оноо'
-            },
-            {
-                'id': 2,
-                'name': 'Хяналтын тоо'
-            }
-        ]
-    },
-    {
-        'name': 'Тусгай шалгуур',
-        'datas': [
-            {
-                'id': 3,
-                'name': 'Нас'
-            },
-            {
-                'id': 4,
-                'name': 'Ял шийтгэл'
-            },
-            {
-                'id': 5,
-                'name': 'Бие бялдар'
-            },
-            {
-                'id': 6,
-                'name': 'Сэтгэлзүйн ярилцлага'
-            },
-            {
-                'id': 7,
-                'name': 'Төгссөн сургууль'
-            },
-        ]
-    }
-]
+import * as Yup from 'yup';
 
-const Addmodal = ({ open, handleModal, refreshDatas }) => {
+export const validateSchema = Yup.object().shape({
+	name: Yup.string()
+		.trim()
+		.required('Хоосон байна'),
+	lesson_year: Yup.string()
+		.trim()
+		.required('Хоосон байна'),
+	begin_date: Yup.string()
+		.trim()
+		.required('Хоосон байна'),
+	end_date: Yup.string()
+        .trim()
+        .required('Хоосон байна'),
+});
+
+
+const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
+
+    console.log(editData)
 
     const CloseBtn = (
         <X className="cursor-pointer" size={15} onClick={handleModal} />
     )
 
-    const { school_id } = useContext(SchoolContext)
-
     // ** Hook
-    const { control, handleSubmit, reset, setValue, setError, formState: { errors } } = useForm();
+    const { control, handleSubmit, reset, setValue, setError, getValues, formState: { errors } } = useForm(validate(validateSchema));
 
-    const [ profOption, setProfession] = useState([])
-    const [isOpen, setIsOpen] = useState(false)
     const [ yearOption, setYear] = useState([])
-    const [ shalguurId, setShalguurId ] = useState('')
-    const [ hutuburId, setHutulburId ] = useState('')
-    const [ shalguurIds, setShalguurIds ] = useState([])
-    const [ submitDatas, setSubmitDatas ] = useState([])
-    const [ hynaltToo, setHynaltToo ] = useState({
-        'all': '',
-        'men': '',
-        'women': ''
-    })
-
-    const [ nasYear, setNasYear ] = useState({
-        'men': '',
-        'women': ''
-    })
-
 
 	// Loader
 	const { Loader, isLoading, fetchData } = useLoader({});
 	const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
 
-    const groupApi = useApi().student.group
-    const professionApi = useApi().study.professionDefinition
-
-
-    // Хөтөлбөрийн жагсаалт авах
-    async function getProfession () {
-        const { success, data } = await fetchData(professionApi.getList('', ''))
-        if (success) {
-            setProfession(data)
-        }
-	}
+    const elseltApi = useApi().elselt
 
     // хичээлийн жилийн жагсаалт авах
     async function getYear () {
         setYear(generateLessonYear(10))
 	}
 
-    const toggle = () => setIsOpen(!isOpen)
-
     // Хадгалах
 	async function onSubmit(cdata) {
-        cdata['school'] = school_id
-        const { success, errors } = await postFetch(groupApi.post(cdata))
-        if(success) {
-            reset()
-            refreshDatas()
-            handleModal()
+        if (editData?.id) {
+            const { success, errors } = await postFetch(elseltApi.put(cdata, editData?.id))
+            if(success) {
+                reset()
+                refreshDatas()
+                handleModal()
+            } else {
+                /** Алдааны мессэжийг input дээр харуулна */
+                for (let key in errors) {
+                    console.log(errors)
+                    setError(key, { type: 'custom', message:  errors[key][0]});
+                }
+            }
         } else {
-            /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in errors) {
-                setError(key, { type: 'custom', message:  errors[key][0]});
+            const { success, errors } = await postFetch(elseltApi.post(cdata))
+            if(success) {
+                reset()
+                refreshDatas()
+                handleModal()
+            } else {
+                /** Алдааны мессэжийг input дээр харуулна */
+                for (let key in errors) {
+                    console.log(errors)
+                    setError(key, { type: 'custom', message:  errors[key][0]});
+                }
             }
         }
 	}
@@ -136,50 +96,26 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
     useEffect(
         () =>
         {
-            getProfession()
             getYear()
 
         },
         []
     )
 
-    const handleShalguur = (checked, id) => {
-        if (checked) {
-            setShalguurId(id)
-            setShalguurIds([...shalguurIds, id])
-        } else {
-            setShalguurId('')
-            let checked_ids = [...shalguurIds]
-            if (id === 1) {
-                setHynaltToo({
-                    all: '',
-                    men: '',
-                    women: ''
-                })
+    useEffect(
+        () =>
+        {
+            if (Object.keys(editData).length > 0) {
+                for(let key in editData) {
+                    if(editData[key] !== null)
+                        setValue(key, editData[key])
+                    else setValue(key,'')
+                }
             }
 
-            if (id === 3) {
-                setNasYear({
-                    men: '',
-                    women: ''
-                })
-            }
-
-            let removeVal = checked_ids.findIndex(({ id }) => id == id)
-            checked_ids.splice(removeVal, 1)
-            setShalguurIds(checked_ids)
-        }
-    }
-
-    const handleHutulbur = () => {
-        var push_datas = {
-            'profession': hutuburId,
-            'checked_ids': setShalguurIds,
-            'hynalt_too': hynaltToo,
-            'nasYear': nasYear
-        }
-        setSubmitDatas([...submitDatas, push_datas])
-    }
+        },
+        [editData]
+    )
 
 	return (
         <Fragment>
@@ -220,22 +156,22 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                             {errors.name && <FormFeedback className='d-block'>{errors.name.message}</FormFeedback>}
                         </Col>
                         <Col md={6}>
-                            <Label className="form-label" for="join_year">
+                            <Label className="form-label" for="lesson_year">
                                 {t('Хичээлийн жил')}
                             </Label>
                             <Controller
                                 defaultValue=''
                                 control={control}
-                                id="join_year"
-                                name="join_year"
+                                id="lesson_year"
+                                name="lesson_year"
                                 render={({ field: { value, onChange} }) => {
                                     return (
                                         <Select
-                                            name="profession"
-                                            id="profession"
+                                            name="lesson_year"
+                                            id="lesson_year"
                                             classNamePrefix='select'
                                             isClearable
-                                            className={classnames('react-select', { 'is-invalid': errors.profession })}
+                                            className={classnames('react-select', { 'is-invalid': errors.lesson_year })}
                                             isLoading={isLoading}
                                             placeholder={t(`-- Сонгоно уу --`)}
                                             options={yearOption || []}
@@ -251,26 +187,26 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                     )
                                 }}
                             />
-                            {errors.join_year && <FormFeedback className='d-block'>{errors.join_year.message}</FormFeedback>}
+                            {errors.lesson_year && <FormFeedback className='d-block'>{errors.lesson_year.message}</FormFeedback>}
                         </Col>
                         <Col md={6}>
-                            <Label className="form-label" for="start_date">
+                            <Label className="form-label" for="begin_date">
                                 {t('Эхлэх хугацаа')}
                             </Label>
                             <Controller
                                 defaultValue={new Date()}
                                 control={control}
-                                name='start_date'
+                                name='begin_date'
                                 className="form-control"
                                 render={({ field: { value, onChange} }) => {
                                     return (
                                         <Flatpickr
-                                            id='start_date'
+                                            id='begin_date'
                                             className='form-control'
                                             onChange={dates => {
-                                                onChange(dates[0]);
+                                                onChange(formatDate(dates[0]));
                                             }}
-                                            value={value}
+                                            value={formatDate(value)}
                                             style={{height: "30px"}}
                                             options={{
                                                 dateFormat: 'Y-m-d',
@@ -280,7 +216,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                     )
                                 }}
                             />
-                            {errors.start_date && <FormFeedback className='d-block'>{t(errors.start_date.message)}</FormFeedback>}
+                            {errors.begin_date && <FormFeedback className='d-block'>{t(errors.begin_date.message)}</FormFeedback>}
                         </Col>
                         <Col md={6}>
                             <Label className="form-label" for="end_date">
@@ -297,173 +233,20 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                             id='end_date'
                                             className='form-control'
                                             onChange={dates => {
-                                                onChange(dates[0]);
+                                                onChange(formatDate(dates[0]));
                                             }}
-                                            value={value}
+                                            value={formatDate(value)}
                                             style={{height: "30px"}}
                                             options={{
                                                 dateFormat: 'Y-m-d',
                                                 utc: true,
+                                                minDate: getValues("begin_date"),
                                             }}
                                         />
                                     )
                                 }}
                             />
                             {errors.start_date && <FormFeedback className='d-block'>{t(errors.start_date.message)}</FormFeedback>}
-                        </Col>
-                        <Col xs={12} className='text-start'>
-                            <Button size='sm' color='primary'  onClick={toggle}  className='mb-25'>Хөтөлбөр нэмэх</Button>
-                        </Col>
-                        <Col sm={12} md={12}>
-                            <Collapse isOpen={isOpen}>
-                                <Col md={6} className='mb-1'>
-                                    <Label className="form-label" for="profession">
-                                    {t('Хөтөлбөр')}
-                                    </Label>
-                                    <Select
-                                        name="profession"
-                                        id="profession"
-                                        classNamePrefix='select'
-                                        isClearable
-                                        className={classnames('react-select')}
-                                        isLoading={isLoading}
-                                        placeholder={t(`-- Сонгоно уу --`)}
-                                        options={profOption || []}
-                                        value={hutuburId && profOption.find((c) => c.id === hutuburId)}
-                                        noOptionsMessage={() => t('Хоосон байна')}
-                                        onChange={(val) => {
-                                            setHutulburId(val?.id || '')
-                                        }}
-                                        styles={ReactSelectStyles}
-                                        getOptionValue={(option) => option.id}
-                                        getOptionLabel={(option) => option.full_name}
-                                    />
-                                </Col>
-                                <div className='d-flex row p-1 border'>
-                                    <Col md={6} sm={12}>
-                                        {
-                                            shalguurs.map((shalguur, cidx) => {
-                                                return (
-                                                    <Fragment key={cidx}>
-                                                        <div className='d-flex justify-content-start'>
-                                                            <AlertCircle size={15} className='me-25'/>
-                                                            <h5>{shalguur?.name}</h5>
-                                                        </div>
-                                                        {
-                                                            shalguur?.datas?.map((data, idx) =>
-                                                                <div className='ms-1' key={idx}>
-                                                                    <Input
-                                                                        type='checkbox'
-                                                                        onChange={(e) => handleShalguur(e.target.checked, data?.id)}
-                                                                    />
-                                                                    <Label className='ms-50'>{data?.name}</Label>
-                                                                </div>
-                                                            )
-                                                        }
-                                                    </Fragment>
-                                                )
-                                            })
-                                        }
-                                    </Col>
-                                    <Col md={6} className='border p-1'>
-                                        {
-                                            shalguurId == 2
-                                            ?
-                                                <Fragment>
-                                                    <Row>
-                                                        <Col className={4}>
-                                                            <Label>Нийт тоо</Label>
-                                                            <Input
-                                                                type='number'
-                                                                bsSize='sm'
-                                                                value={hynaltToo.all}
-                                                                onChange={(e) => setHynaltToo(current => {
-                                                                    return {
-                                                                        ...current,
-                                                                        all: e.target.value
-                                                                    }
-                                                                })}
-                                                                placeholder='Нийт тоо'
-                                                            />
-                                                        </Col>
-                                                        <Col className={4}>
-                                                            <Label>Эрэгтэй тоо</Label>
-                                                            <Input
-                                                                type='number'
-                                                                bsSize='sm'
-                                                                value={hynaltToo.men}
-                                                                placeholder='Эрэгтэй тоо'
-                                                                onChange={(e) => setHynaltToo(current => {
-                                                                    return {
-                                                                        ...current,
-                                                                        men: e.target.value
-                                                                    }
-                                                                })}
-                                                            />
-                                                        </Col>
-                                                        <Col className={4}>
-                                                            <Label>Эмэгтэй тоо</Label>
-                                                            <Input
-                                                                type='number'
-                                                                bsSize='sm'
-                                                                placeholder='Эмэгтэй тоо'
-                                                                value={hynaltToo.women}
-                                                                onChange={(e) => setHynaltToo(current => {
-                                                                    return {
-                                                                        ...current,
-                                                                        women: e.target.value
-                                                                    }
-                                                                })}
-                                                            />
-                                                        </Col>
-                                                    </Row>
-                                                </Fragment>
-                                            :
-                                                shalguurId === 3
-                                                ?
-                                                <Fragment>
-                                                    <Row>
-                                                        <Col className={4}>
-                                                            <Label>Эрэгтэй он ... хойш</Label>
-                                                            <Input
-                                                                type='number'
-                                                                bsSize='sm'
-                                                                value={nasYear.men}
-                                                                placeholder='Эрэгтэй он ... хойш'
-                                                                onChange={(e) => setNasYear(current => {
-                                                                    return {
-                                                                        ...current,
-                                                                        men: e.target.value
-                                                                    }
-                                                                })}
-                                                            />
-                                                        </Col>
-                                                        <Col className={4}>
-                                                            <Label>Эмэгтэй он ... хойш</Label>
-                                                            <Input
-                                                                type='number'
-                                                                bsSize='sm'
-                                                                placeholder='Эмэгтэй он ... хойш'
-                                                                value={nasYear.women}
-                                                                onChange={(e) => setNasYear(current => {
-                                                                    return {
-                                                                        ...current,
-                                                                        women: e.target.value
-                                                                    }
-                                                                })}
-                                                            />
-                                                        </Col>
-                                                    </Row>
-                                                </Fragment>
-                                                :
-                                                ''
-                                        }
-                                    </Col>
-                                </div>
-                                <Col className='mt-50' md={4}>
-                                    <Button size='sm' color='primary' onChange={handleHutulbur} type={'button'}>Хөтөлбөр хадгалах</Button>
-                                </Col>
-                            </Collapse>
                         </Col>
                         <Col md={12} className="mt-2">
                             <Button className="me-2" color="primary" type="submit" disabled={postLoading}>

@@ -25,7 +25,7 @@ import {
 
 const BreadCrumbs = (props) => {
   // ** Props
-  const { data, title } = props
+  const { data, title, parentTitle, parentUrl } = props
 
   const renderBreadCrumbs = () => {
     return data.map((item, index) => {
@@ -59,7 +59,7 @@ const BreadCrumbs = (props) => {
             <div className="breadcrumb-wrapper vs-breadcrumbs d-sm-block d-none col-12">
               <Breadcrumb>
                 <BreadcrumbItem tag="li">
-                  <Link to="/">Home</Link>
+                  <Link to={parentUrl || '/'}>{parentTitle || 'Home'}</Link>
                 </BreadcrumbItem>
                 {renderBreadCrumbs()}
               </Breadcrumb>
@@ -67,7 +67,7 @@ const BreadCrumbs = (props) => {
           </div>
         </div>
       </div>
-      <div className="content-header-right text-md-end col-md-3 col-12 d-md-block d-none">
+      {/* <div className="content-header-right text-md-end col-md-3 col-12 d-md-block d-none">
         <div className="breadcrumb-right dropdown">
           <UncontrolledButtonDropdown>
             <DropdownToggle
@@ -96,7 +96,7 @@ const BreadCrumbs = (props) => {
             </DropdownMenu>
           </UncontrolledButtonDropdown>
         </div>
-      </div>
+      </div> */}
     </div>
   )
 }

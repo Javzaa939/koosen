@@ -21,26 +21,16 @@ import useLoader from '@hooks/useLoader';
 
 import AuthContext from "@context/AuthContext"
 
-import SchoolContext from "@context/SchoolContext"
-
 import { getPagination, ReactSelectStyles, generateLessonYear } from '@utils'
 
 import { getColumns } from './helpers';
 
 import Addmodal from './Add'
+import { useNavigate } from 'react-router-dom';
 
 const ElseltRegister = () => {
 
 	const { user } = useContext(AuthContext)
-	const { school_id } = useContext(SchoolContext)
-
-    var values = {
-        profession: '',
-        department: '',
-        join_year: '',
-        degree: '',
-    }
-
     // ** Hook
     const { control, setValue, formState: { errors } } = useForm({});
 
@@ -56,13 +46,9 @@ const ElseltRegister = () => {
     const default_page = [10, 20, 50, 75, 100]
 
 	const [searchValue, setSearchValue] = useState("");
-    const [checkOnlyStudy, setOnlyStudy] = useState('');
-    const [select_value, setSelectValue] = useState(values)
+    const [join_year, setJoinYear] = useState('')
 
 	const [datas, setDatas] = useState([]);
-    const [ profOption, setProfession] = useState([])
-    const [ degreeOption, setDegree] = useState([])
-    const [ depOption, setDepartment] = useState([])
     const [ yearOption, setYear] = useState([])
 
     // Нийт датаны тоо
@@ -75,47 +61,14 @@ const ElseltRegister = () => {
 	const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false});
     const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
 
-
 	// Modal
 	const [modal, setModal] = useState(false);
     const [edit_modal, setEditModal] = useState(false)
-    const [group_id, setGroupId] = useState('')
+    const [editData, setEditData] = useState({})
 
-    // Api
-    const professionApi = useApi().study.professionDefinition
-    const degreeApi = useApi().settings.professionaldegree
+	const elseltApi = useApi().elselt
 
-    const depApi = useApi().hrms.department
-	const groupApi = useApi().student.group
-
-    //Хөтөлбөрийн жагсаалт авах
-    async function getProfession () {
-
-        var degree_id=select_value?.degree
-        var salbar=select_value?.department
-
-        const { success, data } = await fetchData(professionApi.getList(degree_id, salbar))
-        if (success) {
-            setProfession(data)
-        }
-	}
-
-    //Боловсролын зэргийн жагсаалт авах
-    async function getDegree () {
-
-        const { success, data } = await fetchData(degreeApi.get())
-        if (success) {
-            setDegree(data)
-        }
-	}
-
-    // Салбарын жагсаалт авах
-    async function getDepartment () {
-        const { success, data } = await fetchData(depApi.get())
-        if (success) {
-            setDepartment(data)
-        }
-	}
+    const navigate = useNavigate()
 
 	/* Модал setState функц */
 	const handleModal = () => {
@@ -124,7 +77,7 @@ const ElseltRegister = () => {
 
 	/* Устгах функц */
 	const handleDelete = async(id) => {
-        const {success} = await fetchData(groupApi.delete(id))
+        const {success} = await fetchData(elseltApi.delete(id))
 		if(success) {
             getDatas()
 		}
@@ -132,12 +85,8 @@ const ElseltRegister = () => {
 
 	/* Жагсаалтын дата авах функц */
 	async function getDatas() {
-        var department = select_value.department
-        var degree = select_value.degree
-        var profession = select_value.profession
-        var join_year = select_value.join_year
 
-        const {success, data} = await allFetch(groupApi.get(rowsPerPage, currentPage, sortField, searchValue, checkOnlyStudy, department, degree, profession, join_year))
+        const {success, data} = await allFetch(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, join_year))
         if(success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
@@ -148,21 +97,13 @@ const ElseltRegister = () => {
         }
 	}
 
-	const editModal = (id) => {
+	const editModal = (row={}) => {
         /** NOTE Засах гэж буй хичээлийн стандартын id-г авна */
-        setGroupId(id)
         setEditModal(!edit_modal)
+        setEditData(row)
     }
 
-    const handleCheck = id => {
-        if (id) {
-            id == 1 ? setOnlyStudy(true) : setOnlyStudy(false)
-        } else {
-            setOnlyStudy('')
-        }
-    }
-
-	  // ** Function to handle filter
+    // ** Function to handle filter
 	const handleFilter = e => {
         const value = e.target.value.trimStart();
         setSearchValue(value)
@@ -186,7 +127,6 @@ const ElseltRegister = () => {
 	};
 
 	// Хайлтийн хэсэг хоосон болох үед анхны датаг дуудна
-
 	useEffect(() => {
         if (searchValue.length == 0) {
 			getDatas();
@@ -197,21 +137,20 @@ const ElseltRegister = () => {
 
 			return () => clearTimeout(timeoutId);
 		}
-    }, [sortField, currentPage, rowsPerPage, searchValue, checkOnlyStudy, select_value])
+    }, [sortField, currentPage, rowsPerPage, searchValue])
 
     useEffect(() => {
-        getProfession()
-    }, [select_value.degree, select_value.department])
-
-    useEffect(() => {
-        getDepartment()
-        getDegree()
         setYear(generateLessonYear(10))
     }, [])
 
     // ** Function to handle per page
     function handlePerPage(e) {
         setRowsPerPage(parseInt(e.target.value))
+    }
+
+    // Хөтөлбөр нэмэх
+    const handleAdd = (row) => {
+        navigate('/elselt/profession', {state: row})
     }
 
 	return (
@@ -232,155 +171,60 @@ const ElseltRegister = () => {
                     </div>
                 </CardHeader>
                 <Row className='justify-content-start mx-0 my-1'>
-                <Col md={4} sm={6} xs={12}>
-                    <Label className="form-label" for="start_date">
-                        {t('Эхлэх хугацаа')}
-                    </Label>
-                    <Controller
-                        defaultValue=''
-                        name='start_date'
-                        control={control}
-                        render={({ field }) => (
-                            <Input
-                                {...field}
-                                bsSize='sm'
-                                id='start_date'
-                                placeholder='Сонгох'
-                                type="date"
-                                disabled={true}
-                                readOnly={true}
-                                invalid={errors.start_date && true}
-                            />
-                        )}
-                    />
-                </Col>
-                <Col md={4} sm={6} xs={12}>
-                    <Label className="form-label" for="end_date">
-                        {t('Дуусах хугацаа')}
-                    </Label>
-                    <Input
-                        bsSize='sm'
-                        id='end_date'
-                        placeholder='Сонгох'
-                        type="date"
-                    />
-                </Col>
-                </Row>
-                <Row className="justify-content-between mx-0 mb-1">
-                    <Col sm={6} lg={4}>
-                        <Label className="form-label" for="department">
-                            {t('Тэнхим')}
+                    <Col md={4} sm={6} xs={12}>
+                        <Label className="form-label" for="start_date">
+                            {t('Эхлэх хугацаа')}
                         </Label>
                         <Controller
-                            control={control}
                             defaultValue=''
-                            name="department"
-                            render={({ field: { value, onChange} }) => {
-                                return (
-                                    <Select
-                                        name="department"
-                                        id="department"
-                                        classNamePrefix='select'
-                                        isClearable
-                                        className={classnames('react-select', { 'is-invalid': errors.department })}
-                                        isLoading={isLoading}
-                                        placeholder={t('-- Сонгоно уу --')}
-                                        options={depOption || []}
-                                        value={depOption.find((c) => c.id === value)}
-                                        noOptionsMessage={() => t('Хоосон байна.')}
-                                        onChange={(val) => {
-                                            onChange(val?.id || '')
-                                                setSelectValue({
-                                                degree: select_value.degree,
-                                                join_year: select_value.join_year,
-                                                department: val?.id || '',
-                                                profession: '',
-                                            }),
-                                            setValue('profession','')
-                                        }}
-                                        styles={ReactSelectStyles}
-                                        getOptionValue={(option) => option.id}
-                                        getOptionLabel={(option) => option.name}
-                                    />
-                                )
-                            }}
-                        ></Controller>
-                    </Col>
-                    <Col sm={6} lg={4}>
-                        <Label className="form-label" for="degree">
-                            {t('Боловсролын зэрэг')}
-                        </Label>
-                        <Controller
+                            name='start_date'
                             control={control}
-                            defaultValue=''
-                            name="degree"
-                            render={({ field: { value, onChange} }) => {
-                                return (
-                                    <Select
-                                        name="degree"
-                                        id="degree"
-                                        classNamePrefix='select'
-                                        isClearable
-                                        className={classnames('react-select', { 'is-invalid': errors.degree })}
-                                        isLoading={isLoading}
-                                        placeholder={t('-- Сонгоно уу --')}
-                                        options={degreeOption || []}
-                                        value={degreeOption.find((c) => c.id === value)}
-                                        noOptionsMessage={() => t('Хоосон байна.')}
-                                        onChange={(val) => {
-                                            onChange(val?.id || '')
-                                                setSelectValue({
-                                                    join_year: select_value.join_year,
-                                                    degree: val?.id || '',
-                                                    department: select_value.department,
-                                                    profession: '',
-                                                }),
-                                                setValue('profession','')
-                                        }}
-                                        styles={ReactSelectStyles}
-                                        getOptionValue={(option) => option.id}
-                                        getOptionLabel={(option) => option.degree_name}
-                                    />
-                                )
-                            }}
+                            render={({ field }) => (
+                                <Input
+                                    {...field}
+                                    bsSize='sm'
+                                    id='start_date'
+                                    placeholder='Сонгох'
+                                    type="date"
+                                    disabled={true}
+                                    readOnly={true}
+                                    invalid={errors.start_date && true}
+                                />
+                            )}
                         />
-                        </Col>
-                        <Col sm={6} lg={4} >
-                            <Label className="form-label" for="join_year">
-                                {t('Хичээлийн жил')}
-                            </Label>
-                            <Controller
-                                control={control}
-                                defaultValue=''
+                    </Col>
+                    <Col md={4} sm={6} xs={12}>
+                        <Label className="form-label" for="end_date">
+                            {t('Дуусах хугацаа')}
+                        </Label>
+                        <Input
+                            bsSize='sm'
+                            id='end_date'
+                            placeholder='Сонгох'
+                            type="date"
+                        />
+                    </Col>
+                    <Col sm={6} lg={4} >
+                        <Label className="form-label" for="join_year">
+                            {t('Хичээлийн жил')}
+                        </Label>
+                            <Select
                                 name="join_year"
-                                render={({ field: { value, onChange} }) => {
-                                    return (
-                                        <Select
-                                            name="join_year"
-                                            id="join_year"
-                                            classNamePrefix='select'
-                                            isClearable
-                                            className={classnames('react-select', { 'is-invalid': errors.join_year })}
-                                            isLoading={isLoading}
-                                            placeholder={t('-- Сонгоно уу --')}
-                                            options={yearOption || []}
-                                            value={value && yearOption.find((c) => c.id === value)}
-                                            noOptionsMessage={() => t('Хоосон байна.')}
-                                            onChange={(val) => {
-                                                onChange(val?.id || '')
-                                                setSelectValue({
-                                                    degree: select_value.degree,
-                                                    join_year: val?.id || '',
-                                                    profession: select_value.profession,
-                                                    department: select_value.department,
-                                                })
-                                            }}
-                                            styles={ReactSelectStyles}
-                                            getOptionValue={(option) => option.id}
-                                            getOptionLabel={(option) => option.name}
-                                        />
-                                    )
+                                id="join_year"
+                                classNamePrefix='select'
+                                isClearable
+                                className={classnames('react-select', { 'is-invalid': errors.join_year })}
+                                isLoading={isLoading}
+                                placeholder={t('-- Сонгоно уу --')}
+                                options={yearOption || []}
+                                value={yearOption.find((c) => c.id === join_year)}
+                                noOptionsMessage={() => t('Хоосон байна.')}
+                                onChange={(val) => {
+                                    setJoinYear(val?.id || '')
                                 }}
+                                styles={ReactSelectStyles}
+                                getOptionValue={(option) => option.id}
+                                getOptionLabel={(option) => option.name}
                             />
                     </Col>
                 </Row>
@@ -449,7 +293,7 @@ const ElseltRegister = () => {
                                 </div>
                             )}
 							onSort={handleSort}
-                            columns={getColumns(currentPage, rowsPerPage, pageCount, editModal, handleDelete, user)}
+                            columns={getColumns(currentPage, rowsPerPage, pageCount, editModal, handleDelete, user, handleAdd)}
                             sortIcon={<ChevronDown size={10} />}
                             paginationPerPage={rowsPerPage}
                             paginationDefaultPage={currentPage}
@@ -459,7 +303,8 @@ const ElseltRegister = () => {
                             fixedHeaderScrollHeight='62vh'
                         />
 					</div>
-				{modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} />}
+				{modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} editData={{}}/>}
+				{edit_modal && <Addmodal open={edit_modal} handleModal={editModal} refreshDatas={getDatas} editData={editData}/>}
         	</Card>
         </Fragment>
     )

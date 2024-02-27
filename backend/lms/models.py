@@ -3846,8 +3846,8 @@ class AdmissionRegister(models.Model):
     name = models.CharField(max_length=200, verbose_name="Элсэлтийн нэр")
     degree = models.ForeignKey(ProfessionalDegree, on_delete=models.SET_NULL, null=True, verbose_name="Мэргэжлийн зэрэг")
     lesson_year = models.CharField(max_length=50, verbose_name="Хичээлийн жил")
-    begin_date = models.DateTimeField(verbose_name="Элсэлт эхлэх хугацаа")
-    end_date = models.DateTimeField(verbose_name="Дуусах хугацаа")
+    begin_date = models.DateField(verbose_name="Элсэлт эхлэх хугацаа")
+    end_date = models.DateField(verbose_name="Дуусах хугацаа")
 
 
 class AdmissionRegisterProfession(models.Model):
