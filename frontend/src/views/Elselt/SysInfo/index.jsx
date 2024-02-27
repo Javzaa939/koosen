@@ -75,9 +75,9 @@ function SysInfo() {
         }
 
         const { success, errors } = await fetchData(sysinfoApi.put(datas?.id, formData))
-        if (success) {
-            getDatas()
-        }
+        // if (success) {
+        // }
+        getDatas()
     }
 
     const clickLogoImage = () =>

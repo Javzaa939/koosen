@@ -108,7 +108,6 @@ class ElseltSysInfo(
 
         return request.send_data(serializer.data)
 
-
     def post(self, request):
 
         data = request.data
@@ -126,8 +125,7 @@ class ElseltSysInfo(
         instance = self.get_object()
         errors = []
         home_image = data.get('home_image')
-
-        if home_image == 'null' or not home_image:
+        if home_image == 'null' or not home_image or isinstance(home_image, str):
             del data['home_image']
 
         serializer = self.get_serializer(instance, data=data)
