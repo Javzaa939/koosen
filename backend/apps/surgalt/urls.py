@@ -25,6 +25,8 @@ urlpatterns = [
     path('profession/', ProfessionDefinitionAPIView.as_view()),
     path('profession/<int:pk>/', ProfessionDefinitionAPIView.as_view()),
     path('profession/list/', ProfessionDefinitionListAPIView.as_view()),
+    path('profession/poster-file/', ProfessionPosterFile.as_view()),
+    path('profession/poster-file/<int:pk>/', ProfessionPosterFile.as_view()),
     path('profession/plan/', ProfessionPlanListAPIView.as_view()),
     path('profession/file/', ProfessionIntroductionFileAPIView.as_view()),
     path('profession/intro/<int:pk>/', ProfessionIntroductionFileAPIView.as_view()),

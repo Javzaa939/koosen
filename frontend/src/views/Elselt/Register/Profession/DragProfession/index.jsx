@@ -12,11 +12,11 @@ import { getPagination, ReactSelectStyles, generateLessonYear } from '@utils'
 import Select from 'react-select'
 
 import {
-    Card, CardHeader,  CardBody, CardText,
+    Card, CardHeader,  CardBody, InputGroup, InputGroupText,
     Row, Col, ListGroupItem, Badge, Label,
     Input, Button, Table, UncontrolledTooltip
 } from 'reactstrap'
-import { Plus, Minus,  AlertCircle, Search, Edit } from 'react-feather'
+import { Plus, Minus,  AlertCircle, Search, X, Save, Edit, Feather } from 'react-feather'
 
 import ShalguurModal from './ShalguurModal';
 
@@ -36,8 +36,11 @@ const DragProfession = ({ cdatas }) => {
     const [modal, setModal] = useState(false)
     const [admission_data, setAdmission] = useState({})
     const [admissionDatas, setAdmissionDatas] = useState([])
+    const [file, setFile] = useState('')
+    const [removePoster, setRemovePoster] = useState(false)
 
 	const [filteredData, setFilteredData] = useState([]);
+    const [profId, setProfId] = useState('')
 
     const professionApi = useApi().study.professionDefinition
     const depApi = useApi().hrms.department
@@ -187,6 +190,39 @@ const DragProfession = ({ cdatas }) => {
         setAdmission(admission || {})
     }
 
+    const getFile = (e, action, poster_image, id) => {
+        if (action == 'Get') {
+            const files = e.target.files
+
+            if (files.length > 0) {
+                setFile(files[0])
+            }
+        } else if (file) {
+            setFile('')
+        } else if (poster_image) {
+            setRemovePoster(true)
+        }
+    }
+
+    async function fileSave(id) {
+        const formData = new FormData()
+        formData.append('file', file)
+        formData.append('profession', id)
+        if (file) {
+            const { success, data } = await fetchData(professionApi.postFile(formData))
+            if (success) {
+                setProfId('')
+                getProps()
+            }
+        } else if (removePoster) {
+            const { success, data } = await fetchData(professionApi.removeFile(id))
+            if (success) {
+                setProfId('')
+                getProps()
+            }
+        }
+    }
+
     return (
         <Card>
             <CardHeader className='justify-content-end'>
@@ -275,6 +311,7 @@ const DragProfession = ({ cdatas }) => {
                                 <th>№</th>
                                 <th>Хөтөлбөрийн нэр</th>
                                 <th>Шалгуур нэмэх</th>
+                                <th>Зураг оруулах( <small style={{fontSize: '10px'}} className='text-warning'>Танилцуулга дээр оруулах нягтаршил өндөртэй зураг оруулна уу </small>) </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -284,13 +321,39 @@ const DragProfession = ({ cdatas }) => {
                                         <td>{idx + 1}</td>
                                         <td>{item?.full_name}</td>
                                         <td>
-                                        <a role="button" onClick={() => { addShalgur(item)} }
-                                            id={`edit${idx}`}
-                                            className="me-1"
-                                        >
-                                            <Badge color="light-success" pill><Plus  width={"15px"} /></Badge>
-                                        </a>
-                                        <UncontrolledTooltip placement='top' target={`edit${idx}`} >Нэмэх</UncontrolledTooltip>
+                                            <a role="button" onClick={() => { addShalgur(item)} }
+                                                id={`edit${idx}`}
+                                                className="me-1"
+                                            >
+                                                <Badge color="light-success" pill><Plus  width={"15px"} /></Badge>
+                                            </a>
+                                            <UncontrolledTooltip placement='top' target={`edit${idx}`} >Нэмэх</UncontrolledTooltip>
+                                        </td>
+                                        <td>
+                                            <InputGroup>
+                                                <Input
+                                                    type='file'
+                                                    bsSize='sm'
+                                                    disabled={profId === item?.id ? false : true}
+                                                    accept='image/*'
+                                                    onChange={(e) => getFile(e, 'Get')}
+                                                />
+                                                <InputGroupText>
+                                                    <X className='' role="button" color="red" size={15} onClick={(e) => getFile(e, 'Delete', item?.poster_image, item?.id)}></X>
+                                                </InputGroupText>
+                                                <InputGroupText>
+                                                    {
+                                                        profId === item?.id
+                                                        ?
+                                                            <Save  role="button" color="#198754" size={15} onClick={(e) => fileSave(item?.id)}></Save>
+                                                        :
+                                                            <Edit  role="button" color="gray" size={15} onClick={(e) => setProfId(item?.id)}></Edit>
+                                                    }
+                                                </InputGroupText>
+                                            </InputGroup>
+                                            {
+                                                item?.poster_image && <small>Зургийн нэр: <span className='fw-bold'>{item?.poster_image.replace('/files/profession/', '')}</span></small>
+                                            }
                                         </td>
                                     </tr>
                                 )

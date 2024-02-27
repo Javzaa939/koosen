@@ -70,6 +70,7 @@ INSTALLED_APPS = [
     'lms',
     "apps.user",
     'apps.permissions.apps.PermissionsConfig',
+    'django_cleanup.apps.CleanupConfig',
 ]
 
 MIDDLEWARE = [

@@ -3078,3 +3078,41 @@ class LessonStandartGroupAPIView(
         }
 
         return request.send_data(return_datas)
+
+
+class ProfessionPosterFile(
+    generics.GenericAPIView,
+    mixins.UpdateModelMixin
+):
+    """ Постер зураг"""
+    queryset = ProfessionDefinition.objects.all()
+    serializer_class = ProfessionDefinitionSerializer
+
+    def post(self, request):
+        datas = request.data
+        profession = datas.get('profession')
+        file = request.FILES.get('file')
+
+        datas = {
+            'poster_image': file
+        }
+
+        instance = ProfessionDefinition.objects.get(id=profession)
+        with transaction.atomic():
+            serializer =  self.get_serializer(instance, datas, partial=True)
+            if serializer.is_valid(raise_exception=False):
+                self.perform_update(serializer)
+            else:
+                return request.send_error_valid(serializer.errors)
+
+        return request.send_info('INF_001')
+
+    def delete(self, request, pk=None):
+        ''' Poster зураг устгах '''
+
+        with transaction.atomic():
+            instance = ProfessionDefinition.objects.get(id=pk)
+            instance.poster_image = None
+            instance.save()
+
+        return request.send_info('INF_003')

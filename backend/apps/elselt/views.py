@@ -72,6 +72,8 @@ class ElseltApiView(
         return request.send_info("INF_003")
 
 
+
+@permission_classes([IsAuthenticated])
 class ElseltProfession(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -113,6 +115,8 @@ class ElseltProfession(
         return request.send_info('INF_003')
 
 
+
+@permission_classes([IsAuthenticated])
 class ProfessionShalguur(
     generics.GenericAPIView
 ):
