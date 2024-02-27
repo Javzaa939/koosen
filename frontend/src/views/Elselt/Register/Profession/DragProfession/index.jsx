@@ -225,9 +225,6 @@ const DragProfession = ({ cdatas }) => {
 
     return (
         <Card>
-            <CardHeader className='justify-content-end'>
-                <span tag='h4' className='text-warning'><AlertCircle></AlertCircle> Сонгох хөтөлбөрөөс нэмэх хөтөлбөр лүү зөөнө үү</span>
-            </CardHeader>
             <CardBody>
                 <Row className='mb-1'>
                     <Col sm={6} lg={3}>
@@ -361,6 +358,9 @@ const DragProfession = ({ cdatas }) => {
                         </tbody>
                     </Table>
                 </Row>
+                <div className='justify-content-center py-50'>
+                    <h4 className=''>Сонгох хөтөлбөрөөс сонгогдсон хөтөлбөр лүү зөөнө үү</h4>
+                </div>
                 <Row id='dd-with-handle' className='border-top'>
                     <Col md='6' sm='12'>
                         <h4 className='my-1'>Сонгогдсон хөтөлбөрүүд</h4>

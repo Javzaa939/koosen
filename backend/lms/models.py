@@ -3924,3 +3924,4 @@ class ContactInfo(models.Model):
     admission_juram = models.FileField(upload_to='admission', null=True, verbose_name='Элсэлтийн журам')
     admission_advice = models.FileField(upload_to='admission', null=True, verbose_name='Элсэгчдэд зориулсан зөвлөмж')
     home_description = models.CharField(max_length=5000, null=True, verbose_name='Нүүр хуудасны харуулах тайлбар')
+    home_image = models.ImageField(upload_to='home/', null=True, verbose_name='Нүүр зураг')
