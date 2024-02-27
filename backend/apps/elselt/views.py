@@ -11,6 +11,7 @@ from main.utils.function.pagination import CustomPagination
 
 from lms.models import (
     AdmissionRegister,
+    ContactInfo,
     AdmissionRegisterProfession,
     ProfessionDefinition,
     AdmissionIndicator,
@@ -23,6 +24,7 @@ from surgalt.serializers import (
 
 from .serializer import (
     AdmissionSerializer,
+    ElseltSysInfoSerializer,
     AdmissionProfessionSerializer
 )
 
@@ -86,20 +88,69 @@ class ElseltProfession(
 
     def get(self, request):
         elselt = request.query_params.get('elselt')
+        return request.send_data([])
 
-        admission_querysets = self.queryset.filter(admission=elselt)
-        prof_ids = self.queryset.filter(admission=elselt).values_list('profession', flat=True)
-        querysets = ProfessionDefinition.objects.filter(id__in=list(prof_ids))
+class ElseltSysInfo(
+    generics.GenericAPIView,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin
+):
+    """ Элсэлтийн системийн мэдээлэл """
+    queryset = ContactInfo.objects.all()
+    serializer_class = ElseltSysInfoSerializer
 
-        datas = ProfessionDefinitionSerializer(querysets, many=True).data
-        admission_datas =AdmissionProfessionSerializer(admission_querysets, many=True).data
+    def get(self, request):
 
-        return_datas = {
-            'datas': datas,
-            'admission_datas': admission_datas
-        }
+        info = self.queryset.first()
+        serializer = self.get_serializer(info)
 
-        return request.send_data(return_datas)
+        return request.send_data(serializer.data)
+
+
+    def post(self, request):
+
+        data = request.data
+        contact_info_serializer = ElseltSysInfoSerializer(data=data)
+        if not contact_info_serializer.is_valid():
+            return request.send_error_valid(contact_info_serializer.errors)
+
+        contact_info_serializer.save()
+        return request.send_info("INF_001")
+
+
+    def put(self, request, pk=None):
+
+        data = request.data.dict()
+        instance = self.get_object()
+        errors = []
+        home_image = data.get('home_image')
+
+        if home_image == 'null' or not home_image:
+            del data['home_image']
+
+        serializer = self.get_serializer(instance, data=data)
+        if serializer.is_valid(raise_exception=False):
+            self.perform_update(serializer)
+
+            if home_image == 'null' or not home_image:
+                obj = self.queryset.get(pk=pk)
+                obj.home_image = None
+                obj.save()
+        else:
+            for key in serializer.errors:
+                return_error = {
+                    "field": key,
+                    "msg": serializer.errors
+                }
+
+                errors.append(return_error)
+
+            if len(errors) > 0:
+                return request.send_error("ERR_003", errors)
+
+        return request.send_info("INF_002")
 
     def post(self, request):
 

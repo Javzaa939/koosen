@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from lms.models import  (
     AdmissionRegister,
+    ContactInfo,
     AdmissionRegisterProfession,
     AdmissionIndicator,
     AdmissionXyanaltToo
@@ -14,6 +15,11 @@ class AdmissionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class ElseltSysInfoSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ContactInfo
+        fields = '__all__'
 class AdmissionProfessionSerializer(serializers.ModelSerializer):
     shalguur_ids = serializers.SerializerMethodField()
     nas = serializers.SerializerMethodField()
