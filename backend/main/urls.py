@@ -84,6 +84,9 @@ urlpatterns = [
     # статистик
     path('statistic/', include("apps.statistic.urls")),
 
+    # элсэлт
+    path('elselt/', include("apps.elselt.urls")),
+
 ]
 
 if settings.DEBUG is False:

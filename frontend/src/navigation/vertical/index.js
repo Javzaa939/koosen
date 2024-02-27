@@ -21,9 +21,11 @@ import Role from './Role'
 // import Science from './Science'
 import Statistic from './Statistic'
 import Test from './Test'
+import Elselt from './Elselt'
 
 export default [
   ...Calendar,
+  ...Elselt,
   ...Reference,
   ...Study,
   ...Student,
