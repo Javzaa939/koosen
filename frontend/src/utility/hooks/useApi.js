@@ -1534,7 +1534,8 @@ function useApi(isDisplay=false) {
 		profession: {
 			get: (elselt_id) => instance.get(`/elselt/profession/?elselt=${elselt_id}`),
 			post: (data) => instance.post('/elselt/profession/', data),
-			delete: (id) => instance.post(`/elselt/profession/${id}/`),
+			delete: (id, elselt_id) => instance.delete(`/elselt/profession/${id}/?elselt=${elselt_id}`),
+			postShalguur: (datas) => instance.post(`/elselt/profession/shalguur/`, datas)
 		}
 	}
 	}

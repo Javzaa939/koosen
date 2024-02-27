@@ -7,5 +7,6 @@ urlpatterns = [
     path('<int:pk>/', ElseltApiView.as_view()),
 
     path('profession/', ElseltProfession.as_view()),
-    path('profession/<int:pk>/', ElseltProfession.as_view())
+    path('profession/<int:pk>/', ElseltProfession.as_view()),
+    path('profession/shalguur/', ProfessionShalguur.as_view())
 ]

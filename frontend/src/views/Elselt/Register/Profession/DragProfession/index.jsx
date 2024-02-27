@@ -18,7 +18,9 @@ import {
 } from 'reactstrap'
 import { Plus, Minus,  AlertCircle, Search, Edit } from 'react-feather'
 
-const DragProfession = () => {
+import ShalguurModal from './ShalguurModal';
+
+const DragProfession = ({ cdatas }) => {
     var values = {
         degree: '',
         department: '',
@@ -26,11 +28,14 @@ const DragProfession = () => {
   // ** States
     const [listArr1, setListArr1] = useState([])
     const [listArr2, setListArr2] = useState([])
-    const [ degreeOption, setDegree] = useState([])
-    const [ depOption, setDepartment] = useState([])
-    const [ profOption, setProfession] = useState([])
+    const [degreeOption, setDegree] = useState([])
+    const [depOption, setDepartment] = useState([])
+    const [profOption, setProfession] = useState([])
     const [select_value, setSelectValue] = useState(values)
     const [searchValue, setSearchValue] = useState("");
+    const [modal, setModal] = useState(false)
+    const [admission_data, setAdmission] = useState({})
+    const [admissionDatas, setAdmissionDatas] = useState([])
 
 	const [filteredData, setFilteredData] = useState([]);
 
@@ -115,10 +120,71 @@ const DragProfession = () => {
         setSearchValue(value);
 	};
 
+    async function getProps() {
+        const { success, data } = await fetchData(elseltApi.get(cdatas.id))
+        if (success) {
+            const { datas, admission_datas } = data
+            setListArr1(datas)
+            setAdmissionDatas(admission_datas)
+        }
+    }
+
     async function moveProp(order) {
-        var options = searchValue.length > 0 ? [...filteredData] : [...profOption]
+        var options = searchValue.length > 0 ? [...filteredData] : [...listArr2]
         let update_id = options[order.oldIndex].id
-        const { success, data } = await fetchData(elseltApi.postPro)
+
+        var datas = {
+            'profession': update_id,
+            'admission': cdatas.id
+        }
+        const { success, data } = await fetchData(elseltApi.post(datas))
+        if (success) {
+            getProps()
+        }
+    }
+
+    async function removeProp(order) {
+        var options = [...listArr1]
+        let update_id = options[order.oldIndex].id
+
+        const { success, data } = await fetchData(elseltApi.delete(update_id,  cdatas.id))
+        if (success) {
+            getProps()
+        }
+    }
+
+    useEffect(
+        () =>
+        {
+            getProps()
+        },
+        []
+    )
+
+    function getDifference(array1, array2) {
+        return array1.filter(object1 => {
+          return !array2.some(object2 => {
+            return object1.id === object2.id;
+          });
+        });
+    }
+
+    useEffect(
+        () =>
+        {
+            if (listArr1.length > 0 && profOption.length > 0) {
+                const difference_list = getDifference(profOption, listArr1)
+                setListArr2(difference_list)
+            }
+        },
+        [listArr1, profOption]
+    )
+
+    const addShalgur = (prof) =>
+    {
+        setModal(!modal)
+        var admission = admissionDatas.find((c) => c.profession == prof.id)
+        setAdmission(admission || {})
     }
 
     return (
@@ -218,7 +284,7 @@ const DragProfession = () => {
                                         <td>{idx + 1}</td>
                                         <td>{item?.full_name}</td>
                                         <td>
-                                        <a role="button" onClick={() => { editModal(row)} }
+                                        <a role="button" onClick={() => { addShalgur(item)} }
                                             id={`edit${idx}`}
                                             className="me-1"
                                         >
@@ -241,6 +307,7 @@ const DragProfession = () => {
                             group='shared-group'
                             list={listArr1}
                             setList={setListArr1}
+                            onEnd={removeProp}
                         >
                         {listArr1.map((item) => {
                             return (
@@ -260,8 +327,8 @@ const DragProfession = () => {
                             tag='ul'
                             className='list-group list-group-flush sortable'
                             group='shared-group'
-                            list={searchValue.length > 0 ? filteredData : profOption}
-                            setList={setProfession}
+                            list={searchValue.length > 0 ? filteredData : listArr2}
+                            setList={setListArr2}
                             onEnd={moveProp}
                         >
                         {
@@ -278,7 +345,7 @@ const DragProfession = () => {
                                 )
                             })
                             :
-                            profOption.map(item => {
+                            listArr2.map(item => {
                                 return (
                                 <ListGroupItem className='draggable' key={item?.id}>
                                     <Badge color='light-primary' pill className='me-50'>
@@ -293,6 +360,9 @@ const DragProfession = () => {
                     </Col>
                 </Row>
             </CardBody>
+            {
+                modal && <ShalguurModal open={modal} handleModal={addShalgur} admission_data={admission_data} refreshDatas={getProps}/>
+            }
         </Card>
     )
 }
