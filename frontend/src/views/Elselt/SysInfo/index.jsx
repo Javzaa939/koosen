@@ -1,39 +1,43 @@
 import React, { useEffect, useState } from 'react'
-import { Edit3, Mail, MapPin, Phone, PhoneCall, Smartphone, UploadCloud, X } from 'react-feather'
+import { Edit3, Mail, MapPin, PhoneCall, Smartphone, UploadCloud, X } from 'react-feather'
 import { Controller, useForm } from 'react-hook-form'
 import { Button, Card, CardBody, CardTitle, Col, Form, FormFeedback, Input, InputGroup, InputGroupText, Label, Row } from 'reactstrap'
 import classnames from "classnames";
 
-import {useDropzone} from 'react-dropzone'
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import { validateSchema } from './validateSchema';
 import { validate, convertDefaultValue } from '@utils'
-
+import empty from "@src/assets/images/empty-image.jpg"
 import './style.scss'
 
 function SysInfo() {
 
-    const { control, handleSubmit, watch, setError, reset, setValue, formState: { errors } } = useForm(validate(validateSchema))
+    const { control, handleSubmit, setValue, formState: { errors } } = useForm(validate(validateSchema))
 
     const sysinfoApi = useApi().elselt.sysinfo
 
-    const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: true, bg:3 })
+    const { Loader, isLoading, fetchData } = useLoader({ })
     const [datas, setDatas] = useState()
     const [admissionJuram, setAdmissionJuram] = useState('')
     const [admissionAdvice, setAdmissionAdvice] = useState('')
+    const [featurefile, setFeaturedImg] = useState('')
+    const [image_old, setImageOld] = useState('')
 
     async function getDatas() {
         const { success, data } = await fetchData(sysinfoApi.get())
         if(success) {
-
             setDatas(data)
 
-            if(data.length == 0) return
-            for(let key in data[0]) {
-                if(data[0][key] !== null)
-                    setValue(key, data[0][key])
+            if(Object.keys(data).length == 0) return
+            for(let key in data) {
+                if(data[key] !== null)
+                    setValue(key, data[key])
                 else setValue(key,'')
+
+                if (key == 'home_image') {
+                    setImageOld(data[key])
+                }
             }
         }
     }
@@ -52,6 +56,12 @@ function SysInfo() {
             data['admission_juram'] = admissionJuram
         }
 
+        if(featurefile) {
+            data['home_image'] = featurefile
+        } else if (!image_old) {
+            data['home_image'] = null
+        }
+
         if(!admissionAdvice) {
             delete data['admission_advice']
         } else {
@@ -64,20 +74,44 @@ function SysInfo() {
             formData.append(key, data[key])
         }
 
-        const id = 1
-
-        const { success, errors } = await fetchData(sysinfoApi.put(datas, id, formData))
+        const { success, errors } = await fetchData(sysinfoApi.put(datas?.id, formData))
         if (success) {
             getDatas()
         }
     }
+
+    const clickLogoImage = () =>
+    {
+        var logoInput = document.getElementById(`logoInput1`)
+        logoInput.click()
+
+    }
+
+    const handleDeleteImage = () =>
+        {
+            setFeaturedImg('')
+            setImageOld('')
+        }
+
+
+    const onChange = (e) => {
+		const reader = new FileReader()
+        const files = e.target.files
+        if (files.length > 0) {
+            setFeaturedImg(files[0])
+            reader.onload = function () {
+                setImageOld(reader.result)
+            }
+            reader.readAsDataURL(files[0])
+        }
+	}
 
     return (
         <Card>
             {isLoading && Loader}
             <CardTitle className='p-1 pb-0'>
                 <h4>
-                    Элсэлтийн системийн мэдээлэл
+                    Элсэлтийн системийн нүүр хуудасны мэдээлэл
                 </h4>
             </CardTitle>
             <CardBody className='p-0 px-2 pb-1'>
@@ -87,6 +121,7 @@ function SysInfo() {
                             <h6>
                                 Холбоо барих хэсэг
                             </h6>
+                            <hr/>
                             <div className='form_elements_over'>
                                 <Label className="mb-50">
                                     Байгууллагын и-мэйл
@@ -232,40 +267,107 @@ function SysInfo() {
                             <h6>
                                 Ерөнхий мэдээлэл
                             </h6>
-                            <div className='form_elements_over'>
-                                <Label className="mb-50">
-                                    Элсэлтийн журам
-                                </Label>
-                                <Controller
-                                    id='admission_juram'
-                                    name='admission_juram'
-                                    control={control}
-                                    defaultValue=''
-                                    render={({ field: {onChange, value}  }) => {
-                                        return (
+                            <div className='row'>
+                                <Col md={6} sm={12}>
+                                    <Label className="mb-50">
+                                        Элсэлтийн журам
+                                    </Label>
+                                    <Controller
+                                        id='admission_juram'
+                                        name='admission_juram'
+                                        control={control}
+                                        defaultValue=''
+                                        render={({ field: {onChange, value}  }) => {
+                                            return (
+                                                <div className="dropzone-container">
+                                                    <input
+                                                        id='admission_juram'
+                                                        name='admission_juram'
+                                                        multiple={false}
+                                                        type='file'
+                                                        className='d-none'
+                                                        accept="application/pdf"
+                                                        placeholder='test'
+                                                        onChange={(e) => {
+                                                            onChange(e.target.files?.[0] ?? null)
+                                                            setAdmissionJuram(e.target.files?.[0] ?? null)
+                                                            console.log(e.target.files?.[0] ?? null,'llll')
+                                                        }}
+                                                        onError={() => {'Алдаа'}}
+
+                                                    />
+                                                    <Label className={`${value ? 'border-success' : 'border'} rounded-3 ${classnames({ 'is-invalid': errors.admission_juram })}`} htmlFor='admission_juram'>
+                                                        <div>
+                                                            <div className='mt-2 mb-1 d-flex flex-column align-items-center justify-content-center'>
+                                                                <UploadCloud color={`${errors.admission_juram ? '#c72e2e' : 'gray'}`} size={60}/>
+                                                                <span className={`mx-1 px-1 ${errors.admission_juram ? 'text-danger' : ''}`} style={{ fontSize: 12 }}>
+                                                                    Файл оруулна уу. Зөвхөн .pdf файл хүлээж авна
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <div>
+                                                            {
+                                                                value ?
+                                                                    <div className='p-50 d-flex justify-content-between file_style'>
+                                                                        <div className='text-truncate fw-bold'>
+                                                                        {/* <div className='text-truncate' style={{ maxWidth: '400px', minWidth: '250px' }}> */}
+                                                                            {typeof value == 'string' ? value.split(`/`)[value.split('/').length - 1] : value?.name
+                                                                                // value.length > 30 ?
+                                                                                // `${value.substring(0, 27)}...${value.substring(value.length - 4)}` :
+                                                                                // value
+                                                                            }
+                                                                            {/* {value.length > 30 ?
+                                                                                `${value.substring(0, 27)}...${value.substring(value.length - 4)}` :
+                                                                                value
+                                                                            } */}
+                                                                        </div>
+                                                                        <div>
+                                                                            <X onClick={(e) => {e.preventDefault(), onChange(null)}} size={16} role='button'/>
+                                                                        </div>
+                                                                    </div>
+                                                                :
+                                                                    <div>
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    </Label>
+                                                </div>
+                                            )
+                                        }}
+                                    />
+                                </Col>
+                                <Col md={6} sm={12}>
+                                    <Label className="mb-50">
+                                        Элсэгчдэд зориулсан зөвлөмж
+                                    </Label>
+                                    <Controller
+                                        id='admission_advice'
+                                        name='admission_advice'
+                                        control={control}
+                                        defaultValue=''
+                                        render={({ field: {onChange, value}  }) => (
                                             <div className="dropzone-container">
                                                 <input
-                                                    id='admission_juram'
-                                                    name='admission_juram'
+                                                    id='admission_advice'
+                                                    name='admission_advice'
                                                     multiple={false}
                                                     type='file'
-                                                    // value={value}
                                                     className='d-none'
                                                     accept="application/pdf"
                                                     placeholder='test'
                                                     onChange={(e) => {
+                                                        setAdmissionAdvice(e.target.files?.[0] ?? null)
                                                         onChange(e.target.files?.[0] ?? null)
-                                                        setAdmissionJuram(e.target.files?.[0] ?? null)
-                                                        console.log(e.target.files?.[0] ?? null,'llll')
-                                                    }}
+                                                    }
+                                                    }
                                                     onError={() => {'aldaa'}}
 
                                                 />
-                                                <Label className={`${value ? 'border-success' : 'border'} rounded-3 ${classnames({ 'is-invalid': errors.admission_juram })}`} htmlFor='admission_juram'>
+                                                <Label className={`${value ? 'border-success' : 'border'} rounded-3 ${classnames({ 'is-invalid': errors.admission_advice })}`} htmlFor='admission_advice'>
                                                     <div>
                                                         <div className='mt-2 mb-1 d-flex flex-column align-items-center justify-content-center'>
-                                                            <UploadCloud color={`${errors.admission_juram ? '#c72e2e' : 'gray'}`} size={60}/>
-                                                            <span className={`mx-1 px-1 ${errors.admission_juram ? 'text-danger' : ''}`} style={{ fontSize: 12 }}>
+                                                            <UploadCloud color={`${errors.admission_advice ? '#c72e2e' : 'gray'}`} size={60}/>
+                                                            <span className={`mx-1 px-1 ${errors.admission_advice ? 'text-danger' : ''}`} style={{ fontSize: 12 }}>
                                                                 Файл оруулна уу. Зөвхөн .pdf файл хүлээж авна
                                                             </span>
                                                         </div>
@@ -275,107 +377,57 @@ function SysInfo() {
                                                     </div>
                                                     <div>
                                                         {
-                                                            value ?
-                                                            <div className='p-50 d-flex justify-content-between file_style'>
-                                                                <div className='text-truncate'>
-                                                                {/* <div className='text-truncate' style={{ maxWidth: '400px', minWidth: '250px' }}> */}
-                                                                    {typeof value == 'string' ? value.split(`/`)[value.split('/').length - 1] : value?.name
-                                                                        // value.length > 30 ?
-                                                                        // `${value.substring(0, 27)}...${value.substring(value.length - 4)}` :
-                                                                        // value
-                                                                    }
-                                                                    {/* {value.length > 30 ?
-                                                                        `${value.substring(0, 27)}...${value.substring(value.length - 4)}` :
-                                                                        value
-                                                                    } */}
+                                                            value
+                                                            ?
+                                                                <div className='p-50 d-flex justify-content-between file_style'>
+                                                                    <div className='text-truncate fw-bold'>
+                                                                    {/* <div className='text-truncate' style={{ maxWidth: '400px', minWidth: '250px' }}> */}
+                                                                        {/* {value} */}
+                                                                            {typeof value == 'string' ? value.split(`/`)[value.split('/').length - 1] : value?.name}
+                                                                        {/* {value.length > 30 ?
+                                                                            `${value.substring(0, 27)}...${value.substring(value.length - 4)}` :
+                                                                            value
+                                                                        } */}
+                                                                    </div>
+                                                                    <div>
+                                                                        <X onClick={(e) => {e.preventDefault(), onChange(null)}} size={16} role='button'/>
+                                                                    </div>
                                                                 </div>
+                                                            :
                                                                 <div>
-                                                                    <X onClick={(e) => {e.preventDefault(), onChange(null)}} size={16} role='button'/>
-                                                                </div>
-                                                            </div>
-                                                        :
-                                                            <div>
                                                             </div>
                                                         }
                                                     </div>
                                                 </Label>
                                             </div>
-                                        )
-                                    }}
-                                />
+                                        )}
+                                    />
+                                </Col>
                             </div>
-                            <div className='form_elements_over'>
-                                <Label className="mb-50">
-                                    Элсэгчдэд зориулсан зөвлөмж
-                                </Label>
-                                <Controller
-                                    id='admission_advice'
-                                    name='admission_advice'
-                                    control={control}
-                                    defaultValue=''
-                                    render={({ field: {onChange, value}  }) => (
-                                        <div className="dropzone-container">
-                                            <input
-                                                id='admission_advice'
-                                                name='admission_advice'
-                                                multiple={false}
-                                                // type='file'
-                                                // {...getInputProps()}
-                                                type='file'
-                                                // value={value}
-                                                className='d-none'
-                                                accept="application/pdf"
-                                                placeholder='test'
-                                                onChange={(e) => {
-                                                    setAdmissionAdvice(e.target.files?.[0] ?? null)
-                                                    onChange(e.target.files?.[0] ?? null)
-                                                }
-                                                }
-                                                onError={() => {'aldaa'}}
-
-                                            />
-                                            <Label className={`${value ? 'border-success' : 'border'} rounded-3 ${classnames({ 'is-invalid': errors.admission_advice })}`} htmlFor='admission_advice'>
-                                                <div>
-                                                    <div className='mt-2 mb-1 d-flex flex-column align-items-center justify-content-center'>
-                                                        <UploadCloud color={`${errors.admission_advice ? '#c72e2e' : 'gray'}`} size={60}/>
-                                                        <span className={`mx-1 px-1 ${errors.admission_advice ? 'text-danger' : ''}`} style={{ fontSize: 12 }}>
-                                                            Файл оруулна уу. Зөвхөн .pdf файл хүлээж авна
-                                                        </span>
-                                                    </div>
-                                                    {/* <div className='p-1'>
-                                                        Файл
-                                                    </div> */}
-                                                </div>
-                                                <div>
-                                                    {
-                                                        value ?
-                                                        <div className='p-50 d-flex justify-content-between file_style'>
-                                                            <div className='text-truncate'>
-                                                            {/* <div className='text-truncate' style={{ maxWidth: '400px', minWidth: '250px' }}> */}
-                                                                {/* {value} */}
-                                                                    {typeof value == 'string' ? value.split(`/`)[value.split('/').length - 1] : value?.name}
-                                                                {/* {value.length > 30 ?
-                                                                    `${value.substring(0, 27)}...${value.substring(value.length - 4)}` :
-                                                                    value
-                                                                } */}
-                                                            </div>
-                                                            <div>
-                                                                <X onClick={(e) => {e.preventDefault(), onChange(null)}} size={16} role='button'/>
-                                                            </div>
-                                                        </div>
-                                                    :
-                                                        <div>
-                                                        </div>
-                                                    }
-                                                </div>
-                                            </Label>
+                            <div className='row mt-1'>
+                                <Label>Нүүр хэсэгт харуулах banner зураг</Label>
+                                <div className="d-flex custom-flex">
+                                    <div className="me-2">
+                                        <div className='d-flex justify-content-end'>
+                                            <X size={15} color='red' onClick={() => {handleDeleteImage(image_old)}}></X>
                                         </div>
-                                    )}
-                                />
+                                        <div className="orgLogoDiv image-responsive">
+                                            <img id={`logoImg${image_old}`} className="image-responsive" src = { image_old ? image_old : empty  } onClick={() => {clickLogoImage()}}/>
+                                            <input
+                                                accept="image/*"
+                                                type="file"
+                                                id={`logoInput1`}
+                                                name="image_old"
+                                                className="form-control d-none image-responsive"
+                                                onChange={(e) => onChange(e)}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div className='form_elements_over'>
+                            <div className='form_elements_over mt-50'>
                                 <Label className="mb-50">
-                                    Нүүр хуудасны харуулах тайлбар
+                                    Нүүр хуудсанд харуулах тайлбар
                                 </Label>
                                 <Controller
                                     id='home_description'

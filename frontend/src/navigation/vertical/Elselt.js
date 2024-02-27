@@ -15,7 +15,7 @@ export default [
             },
             {
                 id: 'elselt2',
-                title: 'Элсэлт системийн мэдээлэл',
+                title: 'Үндсэн мэдээлэл',
                 icon: <Circle size={8} />,
                 navLink: "elselt/sysinfo"
             },

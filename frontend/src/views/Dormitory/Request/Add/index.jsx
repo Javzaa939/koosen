@@ -9,12 +9,10 @@ import { Row, Col, Form, Modal, Label, Button, ModalBody, ModalHeader, FormFeedb
 
 import { useTranslation } from 'react-i18next';
 
-import Select from 'react-select'
-import classnames from 'classnames'
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
 import {Input}from "reactstrap";
-import {ReactSelectStyles, validate, get_state, convertDefaultValue} from "@utils"
+import { validate, convertDefaultValue} from "@utils"
 
 import {validateSchema} from  "../validateSchema";
 import empty from "@src/assets/images/empty-image.jpg"
@@ -33,7 +31,6 @@ const AddModal = ({ open, handleModal, refreshDatas }) => {
 	// Loader
 	const { isLoading, fetchData } = useLoader({});
 	const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
-	const { isLoading: barLoading, fetchData: barFetch } = useLoader({});
 
     // State
     const [featurefile, setFeaturedImg] = useState('')
@@ -44,11 +41,11 @@ const AddModal = ({ open, handleModal, refreshDatas }) => {
 
     // Зураг дээр дарахад
     const clickLogoImage = () =>
-        {
-            var logoInput = document.getElementById(`logoInput1`)
-            logoInput.click()
+    {
+        var logoInput = document.getElementById(`logoInput1`)
+        logoInput.click()
 
-        }
+    }
 
     const handleDeleteImage = () =>
         {

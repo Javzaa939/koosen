@@ -1541,10 +1541,12 @@ function useApi(isDisplay=false) {
 		},
 		sysinfo: {
 			get: () => instance.get(`/elselt/sysinfo/`),
-			put: (datas, id, data) =>
-				datas?.length > 0 ? instance.put(`/elselt/sysinfo/${datas[0]?.id}/`, data)
+			put: (id, data) =>
+				id
+				?
+					instance.put(`/elselt/sysinfo/${id}/`, data)
 				:
-				instance.post(`/elselt/sysinfo/`, data),
+					instance.post(`/elselt/sysinfo/`, data),
 			delete: (id, elselt_id) => instance.delete(`/elselt/profession/${id}/?elselt=${elselt_id}`),
 			postShalguur: (datas) => instance.post(`/elselt/profession/shalguur/`, datas)
 		}

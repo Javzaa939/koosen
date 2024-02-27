@@ -103,12 +103,10 @@ class ElseltSysInfo(
 
     def get(self, request):
 
-        datas = []
         info = self.queryset.first()
+        serializer = self.get_serializer(info)
 
-        datas = self.list(request).data
-
-        return request.send_data(datas)
+        return request.send_data(serializer.data)
 
 
     def post(self, request):
@@ -124,20 +122,22 @@ class ElseltSysInfo(
 
     def put(self, request, pk=None):
 
-        data = request.data
+        data = request.data.dict()
         instance = self.get_object()
         errors = []
+        home_image = data.get('home_image')
 
-        # contact_info_serializer = ElseltSysInfoSerializer(data=data)
-        # if not contact_info_serializer.is_valid():
-        #     return request.send_error_valid(contact_info_serializer.errors)
+        if home_image == 'null' or not home_image:
+            del data['home_image']
 
-        # contact_info_serializer.save()
         serializer = self.get_serializer(instance, data=data)
-        if serializer.is_valid(raise_exception=True):
-            self.update(request, pk)
-            print(serializer.errors,'errors')
+        if serializer.is_valid(raise_exception=False):
+            self.perform_update(serializer)
 
+            if home_image == 'null' or not home_image:
+                obj = self.queryset.get(pk=pk)
+                obj.home_image = None
+                obj.save()
         else:
             for key in serializer.errors:
                 return_error = {
@@ -151,20 +151,6 @@ class ElseltSysInfo(
                 return request.send_error("ERR_003", errors)
 
         return request.send_info("INF_002")
-
-        admission_querysets = self.queryset.filter(admission=elselt)
-        prof_ids = self.queryset.filter(admission=elselt).values_list('profession', flat=True)
-        querysets = ProfessionDefinition.objects.filter(id__in=list(prof_ids))
-
-        datas = ProfessionDefinitionSerializer(querysets, many=True).data
-        admission_datas =AdmissionProfessionSerializer(admission_querysets, many=True).data
-
-        return_datas = {
-            'datas': datas,
-            'admission_datas': admission_datas
-        }
-
-        return request.send_data(return_datas)
 
     def post(self, request):
 
