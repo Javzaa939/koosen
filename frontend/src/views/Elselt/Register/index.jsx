@@ -171,7 +171,7 @@ const ElseltRegister = () => {
                     </div>
                 </CardHeader>
                 <Row className='justify-content-start mx-0 my-1'>
-                    <Col md={4} sm={6} xs={12}>
+                    {/* <Col md={4} sm={6} xs={12}>
                         <Label className="form-label" for="start_date">
                             {t('Эхлэх хугацаа')}
                         </Label>
@@ -203,7 +203,7 @@ const ElseltRegister = () => {
                             placeholder='Сонгох'
                             type="date"
                         />
-                    </Col>
+                    </Col> */}
                     <Col sm={6} lg={4} >
                         <Label className="form-label" for="join_year">
                             {t('Хичээлийн жил')}

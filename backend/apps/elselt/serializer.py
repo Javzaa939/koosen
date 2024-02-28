@@ -9,6 +9,7 @@ from lms.models import  (
 )
 
 class AdmissionSerializer(serializers.ModelSerializer):
+    degree_name = serializers.CharField(source='degree.degree_name', default='')
 
     class Meta:
         model = AdmissionRegister
