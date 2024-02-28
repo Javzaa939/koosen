@@ -40,8 +40,6 @@ export const validateSchema = Yup.object().shape({
 
 const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
 
-    console.log(editData)
-
     const CloseBtn = (
         <X className="cursor-pointer" size={15} onClick={handleModal} />
     )
