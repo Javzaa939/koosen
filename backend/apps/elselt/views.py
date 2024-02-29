@@ -18,6 +18,7 @@ from lms.models import (
     ProfessionDefinition,
     AdmissionIndicator,
     AdmissionXyanaltToo,
+    AdmissionUserProfession
 )
 
 from surgalt.serializers import (
@@ -121,6 +122,10 @@ class ElseltProfession(
 
     def delete(self, request, pk=None):
         elselt = request.query_params.get('elselt')
+        user_admission = AdmissionUserProfession.objects.filter(profession=pk)
+
+        if len(user_admission) > 0:
+            request.send_error('ERR_002', 'Энэ хөтөлбөрт элсэгчид бүртгүүлсэн тул устгах боломжгүй')
 
         with transaction.atomic():
             self.queryset.filter(admission=elselt, profession=pk).delete()

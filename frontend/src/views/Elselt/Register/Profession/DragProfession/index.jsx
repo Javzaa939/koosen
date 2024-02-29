@@ -175,15 +175,13 @@ const DragProfession = ({ cdatas }) => {
     useEffect(
         () =>
         {
-            if (profOption.length > 0) {
-                const difference_list = getDifference(profOption, listArr1)
-                setListArr2(difference_list)
-            }
+            const difference_list = getDifference(profOption, listArr1)
+            setListArr2(difference_list)
         },
         [listArr1, profOption]
     )
 
-    const addShalgur = (prof) =>
+    function addShalgur(prof={})
     {
         setModal(!modal)
         var admission = admissionDatas.find((c) => c.profession == prof.id)
@@ -241,7 +239,7 @@ const DragProfession = ({ cdatas }) => {
                             placeholder={'-- Сонгоно уу --'}
                             options={depOption || []}
                             value={depOption.find((c) => c.id === select_value.department)}
-                            noOptionsMessage={() => t('Хоосон байна.')}
+                            noOptionsMessage={() => 'Хоосон байна.'}
                             onChange={(val) => {
                                 setSelectValue({
                                     degree: select_value.degree,
@@ -267,7 +265,7 @@ const DragProfession = ({ cdatas }) => {
                             placeholder={'-- Сонгоно уу --'}
                             options={degreeOption || []}
                             value={degreeOption.find((c) => c.id === select_value.degree)}
-                            noOptionsMessage={() => t('Хоосон байна.')}
+                            noOptionsMessage={() => 'Хоосон байна.'}
                             onChange={(val) => {
                                 setSelectValue({
                                     degree: val?.id || '',
