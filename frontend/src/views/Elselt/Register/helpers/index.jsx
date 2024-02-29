@@ -54,8 +54,28 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 			center: true
 		},
 		{
+			name: t("Боловсролын зэрэг"),
+			selector: (row) => row?.degree_name,
+			center: true
+		},
+		{
 			name: t("Хичээлийн жил"),
 			selector: (row) => row?.lesson_year,
+			center: true
+		},
+		{
+			name: t("Идэвхтэй эсэх"),
+			selector: (row) => (
+				row?.is_active
+				?
+					<Badge color="light-success" pill>
+						{'Идэвхтэй'}
+					</Badge>
+				:
+					<Badge color="light-primary" pill>
+						{'Идэвхгүй'}
+					</Badge>
+			),
 			center: true
 		},
 	]

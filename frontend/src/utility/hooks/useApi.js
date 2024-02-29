@@ -1538,8 +1538,10 @@ function useApi(isDisplay=false) {
 		profession: {
 			get: (elselt_id) => instance.get(`/elselt/profession/?elselt=${elselt_id}`),
 			post: (data) => instance.post('/elselt/profession/', data),
-			delete: (id) => instance.post(`/elselt/profession/${id}/`),
+			delete: (id, elselt_id) => instance.delete(`/elselt/profession/${id}/?elselt=${elselt_id}`),
+			postShalguur: (datas) => instance.post(`/elselt/profession/shalguur/`, datas)
 		},
+
 		sysinfo: {
 			get: () => instance.get(`/elselt/sysinfo/`),
 			put: (id, data) =>
@@ -1548,13 +1550,12 @@ function useApi(isDisplay=false) {
 					instance.put(`/elselt/sysinfo/${id}/`, data)
 				:
 					instance.post(`/elselt/sysinfo/`, data),
-			delete: (id, elselt_id) => instance.delete(`/elselt/profession/${id}/?elselt=${elselt_id}`),
-			postShalguur: (datas) => instance.post(`/elselt/profession/shalguur/`, datas)
 		},
 		admissionuserdata: {
 			get: (limit, page, sort, search, lesson_year_id, profession_id, unit1_id, gender) => instance.get(`/elselt/admissionuserdata/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}&unit1_id=${unit1_id}&gender=${gender}`)
 		}
 	}
+
 	}
 }
 

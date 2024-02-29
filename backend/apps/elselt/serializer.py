@@ -15,6 +15,13 @@ from elselt.models import (
 )
 
 class AdmissionSerializer(serializers.ModelSerializer):
+    degree_name = serializers.CharField(source='degree.degree_name', default='')
+
+    class Meta:
+        model = AdmissionRegister
+        fields = '__all__'
+
+class AdmissionPostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AdmissionRegister
@@ -26,6 +33,7 @@ class ElseltSysInfoSerializer(serializers.ModelSerializer):
     class Meta:
         model = ContactInfo
         fields = '__all__'
+
 class AdmissionProfessionSerializer(serializers.ModelSerializer):
     shalguur_ids = serializers.SerializerMethodField()
     nas = serializers.SerializerMethodField()

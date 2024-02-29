@@ -175,7 +175,7 @@ const DragProfession = ({ cdatas }) => {
     useEffect(
         () =>
         {
-            if (listArr1.length > 0 && profOption.length > 0) {
+            if (profOption.length > 0) {
                 const difference_list = getDifference(profOption, listArr1)
                 setListArr2(difference_list)
             }
@@ -403,7 +403,9 @@ const DragProfession = ({ cdatas }) => {
                                     <Badge color='light-primary' pill className='me-50'>
                                         <Plus size={15}></Plus>
                                     </Badge>
-                                    {item?.full_name}
+                                    <span className='cursor-pointer' style={{ userSelect: 'none' }}>
+                                        {item?.full_name}
+                                    </span>
                                 </ListGroupItem>
                                 )
                             })
@@ -414,7 +416,9 @@ const DragProfession = ({ cdatas }) => {
                                     <Badge color='light-primary' pill className='me-50'>
                                         <Plus size={15}></Plus>
                                     </Badge>
-                                    {item?.full_name}
+                                    <span className='cursor-pointer' style={{ userSelect: 'none' }}>
+                                        {item?.full_name}
+                                    </span>
                                 </ListGroupItem>
                                 )
                             })

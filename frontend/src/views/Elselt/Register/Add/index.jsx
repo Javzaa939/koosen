@@ -48,16 +48,26 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
     const { control, handleSubmit, reset, setValue, setError, getValues, formState: { errors } } = useForm(validate(validateSchema));
 
     const [ yearOption, setYear] = useState([])
+    const [degreeOption, setDegree] = useState([])
 
 	// Loader
 	const { Loader, isLoading, fetchData } = useLoader({});
 	const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
 
     const elseltApi = useApi().elselt
+    const degreeApi = useApi().settings.professionaldegree
 
     // хичээлийн жилийн жагсаалт авах
     async function getYear () {
         setYear(generateLessonYear(10))
+	}
+
+    async function getDegree () {
+
+        const { success, data } = await fetchData(degreeApi.get())
+        if (success) {
+            setDegree(data)
+        }
 	}
 
     // Хадгалах
@@ -95,6 +105,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
         () =>
         {
             getYear()
+            getDegree()
 
         },
         []
@@ -188,6 +199,40 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
                             {errors.lesson_year && <FormFeedback className='d-block'>{errors.lesson_year.message}</FormFeedback>}
                         </Col>
                         <Col md={6}>
+                            <Label className="form-label" for="degree">
+                                {t('Боловсролын зэрэг')}
+                            </Label>
+                            <Controller
+                                defaultValue=''
+                                control={control}
+                                id="degree"
+                                name="degree"
+                                render={({ field: { value, onChange} }) => {
+                                    return (
+                                        <Select
+                                            name="degree"
+                                            id="degree"
+                                            classNamePrefix='select'
+                                            isClearable
+                                            className={classnames('react-select', { 'is-invalid': errors.degree })}
+                                            isLoading={isLoading}
+                                            placeholder={t(`-- Сонгоно уу --`)}
+                                            options={degreeOption || []}
+                                            value={value && degreeOption.find((c) => c.id === value)}
+                                            noOptionsMessage={() => t('Хоосон байна')}
+                                            onChange={(val) => {
+                                                onChange(val?.id || '')
+                                            }}
+                                            styles={ReactSelectStyles}
+                                            getOptionValue={(option) => option.id}
+                                            getOptionLabel={(option) => option.degree_name}
+                                        />
+                                    )
+                                }}
+                            />
+                            {errors.degree && <FormFeedback className='d-block'>{errors.degree.message}</FormFeedback>}
+                        </Col>
+                        <Col md={6}>
                             <Label className="form-label" for="begin_date">
                                 {t('Эхлэх хугацаа')}
                             </Label>
@@ -245,6 +290,29 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
                                 }}
                             />
                             {errors.start_date && <FormFeedback className='d-block'>{t(errors.start_date.message)}</FormFeedback>}
+                        </Col>
+                        <Col md={6}>
+                            <Controller
+                                defaultValue={false}
+                                control={control}
+                                id='is_active'
+                                name='is_active'
+                                render={({ field }) => {
+                                    return (
+                                        <Input
+                                            {...field}
+                                            checked={field.value}
+                                            className='me-50'
+                                            type='checkbox'
+                                            name='is_active'
+                                            id='is_active'
+                                        />
+                                    )
+                                }}
+                            />
+                            <Label className='form-label' for='is_active'>
+                                {t('Идэвхтэй эсэх')}
+                            </Label>
                         </Col>
                         <Col md={12} className="mt-2">
                             <Button className="me-2" color="primary" type="submit" disabled={postLoading}>
