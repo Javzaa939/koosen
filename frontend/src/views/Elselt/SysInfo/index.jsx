@@ -58,7 +58,7 @@ function SysInfo() {
 
         if(featurefile) {
             data['home_image'] = featurefile
-        } else if (!image_old && !featurefile) {
+        } else if (!image_old) {
             data['home_image'] = null
         }
 
@@ -75,9 +75,9 @@ function SysInfo() {
         }
 
         const { success, errors } = await fetchData(sysinfoApi.put(datas?.id, formData))
-        // if (success) {
-        // }
-        getDatas()
+        if (success) {
+            getDatas()
+        }
     }
 
     const clickLogoImage = () =>
@@ -291,6 +291,7 @@ function SysInfo() {
                                                         onChange={(e) => {
                                                             onChange(e.target.files?.[0] ?? null)
                                                             setAdmissionJuram(e.target.files?.[0] ?? null)
+                                                            console.log(e.target.files?.[0] ?? null,'llll')
                                                         }}
                                                         onError={() => {'Алдаа'}}
 
