@@ -54,6 +54,7 @@ const DragProfession = ({ cdatas }) => {
 
         const { success, data } = await fetchData(professionApi.getList(select_value.degree, select_value.department))
         if (success) {
+            console.log(data)
             setProfession(data)
         }
 	}
@@ -175,8 +176,9 @@ const DragProfession = ({ cdatas }) => {
     useEffect(
         () =>
         {
-            if (listArr1.length > 0 && profOption.length > 0) {
+            if (profOption.length > 0) {
                 const difference_list = getDifference(profOption, listArr1)
+                console.log(difference_list)
                 setListArr2(difference_list)
             }
         },

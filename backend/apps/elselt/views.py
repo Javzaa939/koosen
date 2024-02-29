@@ -77,7 +77,6 @@ class ElseltApiView(
         return request.send_info("INF_003")
 
 
-
 @permission_classes([IsAuthenticated])
 class ElseltProfession(
     generics.GenericAPIView,
@@ -91,7 +90,21 @@ class ElseltProfession(
 
     def get(self, request):
         elselt = request.query_params.get('elselt')
-        return request.send_data([])
+
+        admission_querysets = self.queryset.filter(admission=elselt)
+        prof_ids = self.queryset.filter(admission=elselt).values_list('profession', flat=True)
+        querysets = ProfessionDefinition.objects.filter(id__in=list(prof_ids))
+
+        datas = ProfessionDefinitionSerializer(querysets, many=True).data
+        admission_datas =AdmissionProfessionSerializer(admission_querysets, many=True).data
+
+        return_datas = {
+            'datas': datas,
+            'admission_datas': admission_datas
+        }
+
+        return request.send_data(return_datas)
+
 
 class ElseltSysInfo(
     generics.GenericAPIView,
