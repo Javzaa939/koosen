@@ -65,6 +65,11 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 			selector: (row) => row?.lesson_year,
 			center: true
 		},
+		{
+			name: t("Хүйс"),
+			selector: (row) => row?.gender_name,
+			center: true
+		},
 	]
 
 	// if(Object.keys(user).length > 0) {

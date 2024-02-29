@@ -55,18 +55,6 @@ class ElseltUser(models.Model):
 
         return self.user.email
 
-    @property
-    def gender(self):
-
-        if self.register[8].is_digit():
-            gender_num = int(self.register[8])
-            if gender_num % 2 == 0:
-                return False
-            else:
-                return True
-        else:
-            return None
-
 
 class UserInfo(models.Model):
     """ Хэрэглэгчийн дэлгэрэнгүй мэдээлэл """

@@ -82,6 +82,7 @@ class AdmissionUserInfoSerializer(serializers.ModelSerializer):
     userinfo = serializers.SerializerMethodField()
     full_name = serializers.CharField(source='user.full_name', default='')
     profession = serializers.CharField(source='profession.profession.name', default='')
+    gender_name = serializers.SerializerMethodField()
 
     class Meta:
         model = AdmissionUserProfession
@@ -94,3 +95,13 @@ class AdmissionUserInfoSerializer(serializers.ModelSerializer):
         userinfo_data = UserinfoSerializer(data).data
 
         return userinfo_data
+
+    def get_gender_name(self, obj):
+
+        gender = obj.gender
+
+        if gender.isnumeric():
+            if (int(obj.gender)%2) != 0:
+                return 'Эрэгтэй'
+            return 'Эмэгтэй'
+        return ''

@@ -346,9 +346,9 @@ class AdmissionUserInfoAPIView(
 
         if gender:
             if gender == 'Эрэгтэй':
-                queryset = queryset = queryset.filter(gender__in=[1, 3, 5, 7, 9])
+                queryset = queryset = queryset.filter(gender__in=['1', '3', '5', '7', '9'])
             else:
-                queryset = queryset = queryset.filter(gender__in=[0, 2, 4, 6, 8])
+                queryset = queryset = queryset.filter(gender__in=['0', '2', '4', '6', '8'])
 
         # Sort хийх үед ажиллана
         if sorting:
