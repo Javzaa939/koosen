@@ -13,8 +13,8 @@ export const validateSchema = Yup.object().shape({
 		.required('Хоосон байна'),
     admission_juram: Yup.string()
 		.required('Хоосон байна'),
-    admission_advice: Yup.string()
-        .required('Хоосон байна'),
+    // admission_advice: Yup.string()
+    //     .required('Хоосон байна'),
     home_description: Yup.string()
         .required('Хоосон байна'),
 })

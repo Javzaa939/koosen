@@ -291,7 +291,6 @@ function SysInfo() {
                                                         onChange={(e) => {
                                                             onChange(e.target.files?.[0] ?? null)
                                                             setAdmissionJuram(e.target.files?.[0] ?? null)
-                                                            console.log(e.target.files?.[0] ?? null,'llll')
                                                         }}
                                                         onError={() => {'Алдаа'}}
 
