@@ -3907,28 +3907,3 @@ class AdmissionXyanaltToo(models.Model):
     is_gender = models.BooleanField(default=False, verbose_name="Хүйсээр ялгах эсэх")
     norm1 = models.PositiveIntegerField(null=True, verbose_name="Эрэгтэй суралцагчийн тоо")
     norm2 = models.PositiveIntegerField(null=True, verbose_name="Эмэгтэй суралцагчийн тоо")
-    alert_description = models.CharField(max_length=5000, null=True, verbose_name='Тухайн элсэлтэд зориулаад санамж гаргах')
-
-
-class AdmissionUserProfession(models.Model):
-    STATE_SEND = 1
-    STATE_APPROVE = 2
-    STATE_REJECT = 3
-
-    STATE = (
-        (STATE_SEND, 'ИЛГЭЭСЭН'),
-        (STATE_APPROVE, 'ТЭНЦСЭН'),
-        (STATE_REJECT, 'ТЭНЦЭЭГҮЙ'),
-    )
-
-    class Meta:
-        db_table = 'elselt_admissionuserprofession'
-        managed=False
-
-    user = models.ForeignKey(User, verbose_name='Элсэгч', on_delete=models.CASCADE)
-    profession = models.ForeignKey(AdmissionRegisterProfession, verbose_name='Элссэн мэргэжил', on_delete=models.PROTECT)
-    state = models.PositiveIntegerField(choices=STATE, db_index=True, null=False, default=STATE_SEND, verbose_name="Тэнцсэн эсэх")
-
-
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)

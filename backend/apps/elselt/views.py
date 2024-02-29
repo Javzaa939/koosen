@@ -18,7 +18,6 @@ from lms.models import (
     ProfessionDefinition,
     AdmissionIndicator,
     AdmissionXyanaltToo,
-    AdmissionUserProfession
 )
 
 from surgalt.serializers import (
@@ -346,6 +345,7 @@ class AdmissionUserInfoAPIView(
         lesson_year_id = self.request.query_params.get('lesson_year')
         profession_id = self.request.query_params.get('profession_id')
         unit1_id = self.request.query_params.get('unit1_id')
+        state = self.request.query_params.get('state')
         gender = self.request.query_params.get('gender')
         sorting = self.request.query_params.get('sorting')
 
@@ -357,6 +357,9 @@ class AdmissionUserInfoAPIView(
 
         if unit1_id:
             queryset = queryset.filter(user__aimag__id=unit1_id)
+
+        if state:
+            queryset = queryset.filter(state=state)
 
         if gender:
             if gender == 'Эрэгтэй':

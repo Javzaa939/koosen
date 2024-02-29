@@ -65,7 +65,7 @@ const ElseltUser = () => {
     const [adm, setAdm] = useState('')
     const [unit1op, setUnit1op] = useState([])
     const [unit1, setUnit1] = useState('')
-    
+
     const genderOp = [
         {
             id: 1,
@@ -76,6 +76,23 @@ const ElseltUser = () => {
             name: 'Эмэгтэй'
         }
     ]
+
+    const stateop = [
+        {
+            'id': 1,
+            'name': 'ИЛГЭЭСЭН'
+        },
+        {
+            'id': 2,
+            'name': 'ТЭНЦСЭН'
+        },
+        {
+            'id': 3,
+            'name': 'ТЭНЦЭЭГҮЙ'
+        }
+    ]
+    const [state, setState] = useState('')
+
     const [gender, setGender] = useState('')
 
 	const elseltApi = useApi().elselt.admissionuserdata
@@ -121,7 +138,7 @@ const ElseltUser = () => {
 	/* Жагсаалтын дата авах функц */
 	async function getDatas() {
 
-        const {success, data} = await allFetch(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, adm, profession_id, unit1, gender))
+        const {success, data} = await allFetch(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, adm, profession_id, unit1, gender, state))
         if(success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
@@ -131,8 +148,6 @@ const ElseltUser = () => {
             setPageCount(cpage_count)
         }
 	}
-
-    console.log(datas);
 
 	const editModal = (row={}) => {
         /** NOTE Засах гэж буй хичээлийн стандартын id-г авна */
@@ -174,7 +189,7 @@ const ElseltUser = () => {
 
 			return () => clearTimeout(timeoutId);
 		}
-    }, [sortField, currentPage, rowsPerPage, searchValue, adm, profession_id, unit1, gender])
+    }, [sortField, currentPage, rowsPerPage, searchValue, adm, profession_id, unit1, gender, state])
 
     useEffect(() => {
         getAdmissionYear()
@@ -191,9 +206,9 @@ const ElseltUser = () => {
 		<Fragment>
             {isLoading && Loader}
 			<Card>
-				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
+				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom m-auto">
 					<CardTitle tag="h4">{t('Элсэгчдийн жагсаалт')}</CardTitle>
-                    <div className='d-flex flex-wrap mt-md-0 mt-1'>
+                    {/* <div className='d-flex flex-wrap mt-md-0 mt-1'>
                         <Button
                             color='primary'
                             // disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-elselt-create'))? false : true}
@@ -202,7 +217,7 @@ const ElseltUser = () => {
                             <Plus size={15} />
                             <span className='align-middle ms-50'>{t('Нэмэх')}</span>
                         </Button>
-                    </div>
+                    </div> */}
                 </CardHeader>
                 <Row className='justify-content-start mx-0 my-1'>
                     <Col sm={6} lg={3} >
@@ -330,6 +345,31 @@ const ElseltUser = () => {
                             type="date"
                         />
                     </Col> */}
+                </Row>
+                <Row className='justify-content-start mx-0 my-1'>
+                    <Col md={3} sm={6} xs={12} className='mx-auto'>
+                        <Label className="form-label" for="state">
+                            {t('Төлөв')}
+                        </Label>
+                            <Select
+                                name="state"
+                                id="state"
+                                classNamePrefix='select'
+                                isClearable
+                                className={classnames('react-select')}
+                                isLoading={isLoading}
+                                placeholder={t('-- Сонгоно уу --')}
+                                options={stateop || []}
+                                value={stateop.find((c) => c.id === state)}
+                                noOptionsMessage={() => t('Хоосон байна.')}
+                                onChange={(val) => {
+                                    setState(val?.id || '')
+                                }}
+                                styles={ReactSelectStyles}
+                                getOptionValue={(option) => option.id}
+                                getOptionLabel={(option) => option.name}
+                            />
+                    </Col>
                 </Row>
                 <Row className="justify-content-between mx-0" >
                     <Col className='d-flex align-items-center justify-content-start' md={4}>

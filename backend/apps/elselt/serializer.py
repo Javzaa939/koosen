@@ -84,6 +84,7 @@ class AdmissionUserInfoSerializer(serializers.ModelSerializer):
     profession = serializers.CharField(source='profession.profession.name', default='')
     gender_name = serializers.SerializerMethodField()
     gpa = serializers.FloatField(default='')
+    state_name = serializers.SerializerMethodField()
 
     class Meta:
         model = AdmissionUserProfession
@@ -97,6 +98,7 @@ class AdmissionUserInfoSerializer(serializers.ModelSerializer):
 
         return userinfo_data
 
+
     def get_gender_name(self, obj):
 
         gender = obj.gender
@@ -106,3 +108,14 @@ class AdmissionUserInfoSerializer(serializers.ModelSerializer):
                 return 'Эрэгтэй'
             return 'Эмэгтэй'
         return ''
+
+
+    def get_state_name(self, obj):
+
+        state_name = ''
+        state_op = [*AdmissionUserProfession.STATE]
+        for state in state_op:
+            if state[0] == obj.state:
+                state_name = state[1]
+                return state_name
+        return state_name

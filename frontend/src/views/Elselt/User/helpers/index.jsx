@@ -8,7 +8,9 @@ import { Badge, UncontrolledTooltip } from "reactstrap";
 
 import { t } from 'i18next'
 
-import SchoolContext from "@context/SchoolContext"
+import SchoolContext from "@context/SchoolContext";
+
+import moment from 'moment'
 
 // Хүснэгтийн баганууд
 export function getColumns (currentPage, rowsPerPage, page_count, editModal, handleDelete, user, handleAdd) {
@@ -63,8 +65,10 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 			center: true
 		},
         {
+			header: 'state',
+			sortable: true,
 			name: t("Төлөв"),
-			selector: (row) => row?.lesson_year,
+			selector: (row) => row?.state_name,
 			center: true
 		},
 		{
@@ -76,8 +80,8 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 			header: 'created_at',
 			sortable: true,
 			name: t("Бүртгүүлсэн огноо"),
-			selector: (row) => row?.created_at,
-			center: true
+			selector: (row) => row?.created_at? moment(row?.created_at).format("YYYY-MM-DD h:mm") : '',
+			center: true,
 		},
 	]
 

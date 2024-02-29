@@ -82,8 +82,19 @@ class AdmissionUserProfession(models.Model):
         db_table = 'elselt_admissionuserprofession'
         managed = False
 
+    STATE_SEND = 1
+    STATE_APPROVE = 2
+    STATE_REJECT = 3
+
+    STATE = (
+        (STATE_SEND, 'ИЛГЭЭСЭН'),
+        (STATE_APPROVE, 'ТЭНЦСЭН'),
+        (STATE_REJECT, 'ТЭНЦЭЭГҮЙ'),
+    )
+
     user = models.ForeignKey(ElseltUser, verbose_name='Элсэгч', on_delete=models.CASCADE)
     profession = models.ForeignKey(AdmissionRegisterProfession, verbose_name='Элссэн мэргэжил', on_delete=models.PROTECT)
+    state = models.PositiveIntegerField(choices=STATE, db_index=True, null=False, default=STATE_SEND, verbose_name="Тэнцсэн эсэх")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -105,4 +116,6 @@ class ContactInfo(models.Model):
     admission_juram = models.FileField(upload_to='admission', null=True, verbose_name='Элсэлтийн журам')
     admission_advice = models.FileField(upload_to='admission', null=True, verbose_name='Элсэгчдэд зориулсан зөвлөмж')
     home_description = models.CharField(max_length=5000, null=True, verbose_name='Нүүр хуудасны харуулах тайлбар')
+    alert_description = models.CharField(max_length=5000, null=True, verbose_name='Тухайн элсэлтэд зориулаад санамж гаргах')
+
     home_image = models.ImageField(upload_to='home/', null=True, verbose_name='Нүүр зураг')
