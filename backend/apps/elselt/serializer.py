@@ -15,12 +15,19 @@ class AdmissionSerializer(serializers.ModelSerializer):
         model = AdmissionRegister
         fields = '__all__'
 
+class AdmissionPostSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = AdmissionRegister
+        fields = '__all__'
+
 
 class ElseltSysInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ContactInfo
         fields = '__all__'
+
 class AdmissionProfessionSerializer(serializers.ModelSerializer):
     shalguur_ids = serializers.SerializerMethodField()
     nas = serializers.SerializerMethodField()

@@ -25,7 +25,8 @@ from surgalt.serializers import (
 from .serializer import (
     AdmissionSerializer,
     ElseltSysInfoSerializer,
-    AdmissionProfessionSerializer
+    AdmissionProfessionSerializer,
+    AdmissionPostSerializer
 )
 
 
@@ -49,7 +50,7 @@ class ElseltApiView(
         return request.send_data(datas)
 
     def post(self, request):
-
+        self.serializer_class = AdmissionPostSerializer
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid(raise_exception=False):
             self.perform_create(serializer)
@@ -110,12 +111,17 @@ class ElseltSysInfo(
 
     def post(self, request):
 
-        data = request.data
-        contact_info_serializer = ElseltSysInfoSerializer(data=data)
-        if not contact_info_serializer.is_valid():
-            return request.send_error_valid(contact_info_serializer.errors)
+        data = request.data.dict()
+        home_image = data.get('home_image')
+        if home_image == 'null' or not home_image:
+            del data['home_image']
 
-        contact_info_serializer.save()
+        serializer = self.get_serializer(data=data)
+        if serializer.is_valid(raise_exception=False):
+            self.perform_create(serializer)
+        else:
+            return request.send_error_valid(serializer.errors)
+
         return request.send_info("INF_001")
 
 

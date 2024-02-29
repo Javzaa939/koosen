@@ -58,7 +58,7 @@ function SysInfo() {
 
         if(featurefile) {
             data['home_image'] = featurefile
-        } else if (!image_old) {
+        } else if (!image_old && !featurefile) {
             data['home_image'] = null
         }
 
