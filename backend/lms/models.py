@@ -3907,22 +3907,3 @@ class AdmissionXyanaltToo(models.Model):
     is_gender = models.BooleanField(default=False, verbose_name="Хүйсээр ялгах эсэх")
     norm1 = models.PositiveIntegerField(null=True, verbose_name="Эрэгтэй суралцагчийн тоо")
     norm2 = models.PositiveIntegerField(null=True, verbose_name="Эмэгтэй суралцагчийн тоо")
-
-
-class ContactInfo(models.Model):
-    """ Холбоо барих """
-
-    class Meta:
-        db_table = 'elselt_contactinfo'
-        managed=False
-
-    email = models.CharField(max_length=500, verbose_name='Байгууллагын и-мэйл')
-    address = models.CharField(max_length=5000, verbose_name='Байгууллагын хаяг')
-    jijvvr_mobile = models.IntegerField(verbose_name='Жижүүрийн дугаар')
-    mobile = models.IntegerField(verbose_name='Байгууллагын дугаар')
-    contact_mobile = models.IntegerField(verbose_name='Олон нийттэй харилцах хэсгийн дугаар')
-
-    admission_juram = models.FileField(upload_to='admission', null=True, verbose_name='Элсэлтийн журам')
-    admission_advice = models.FileField(upload_to='admission', null=True, verbose_name='Элсэгчдэд зориулсан зөвлөмж')
-    home_description = models.CharField(max_length=5000, null=True, verbose_name='Нүүр хуудасны харуулах тайлбар')
-    home_image = models.ImageField(upload_to='home/', null=True, verbose_name='Нүүр зураг')

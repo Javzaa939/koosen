@@ -5,6 +5,10 @@ from .views import *
 urlpatterns = [
     path('', ElseltApiView.as_view()),
     path('<int:pk>/', ElseltApiView.as_view()),
+    path('all/', AdmissionYearAPIView.as_view()),
+
+    # Элсэгчдийн мэдээлэл
+    path('admissionuserdata/', AdmissionUserInfoAPIView.as_view()),
 
     path('profession/', ElseltProfession.as_view()),
     path('profession/<int:pk>/', ElseltProfession.as_view()),

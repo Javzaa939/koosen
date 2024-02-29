@@ -2,10 +2,16 @@ from rest_framework import serializers
 
 from lms.models import  (
     AdmissionRegister,
-    ContactInfo,
     AdmissionRegisterProfession,
     AdmissionIndicator,
     AdmissionXyanaltToo
+)
+
+from elselt.models import (
+    ContactInfo,
+    AdmissionUserProfession,
+    ElseltUser,
+    UserInfo
 )
 
 class AdmissionSerializer(serializers.ModelSerializer):
@@ -48,3 +54,35 @@ class AdmissionProfessionSerializer(serializers.ModelSerializer):
             'norm1': hynalt_too.norm1 if hynalt_too else '',
             'norm2': hynalt_too.norm2 if hynalt_too else '',
         }
+
+
+class UserinfoSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = UserInfo
+        fields = "__all__"
+
+class ElseltUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ElseltUser
+        exclude = ['password']
+
+
+class AdmissionUserInfoSerializer(serializers.ModelSerializer):
+    user = ElseltUserSerializer(many=False, read_only=True)
+    userinfo = serializers.SerializerMethodField()
+    full_name = serializers.CharField(source='user.full_name', default='')
+    profession = serializers.CharField(source='profession.profession.name', default='')
+
+    class Meta:
+        model = AdmissionUserProfession
+        fields = '__all__'
+
+
+    def get_userinfo(self, obj):
+
+        data = UserInfo.objects.filter(id=obj.user.id).first()
+        userinfo_data = UserinfoSerializer(data).data
+
+        return userinfo_data

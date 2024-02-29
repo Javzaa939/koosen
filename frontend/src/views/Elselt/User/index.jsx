@@ -60,8 +60,21 @@ const ElseltUser = () => {
     const [edit_modal, setEditModal] = useState(false)
     const [editData, setEditData] = useState({})
     const [profOption, setProfession] = useState([])
+    const [profession_id, setProfession_id] = useState('')
+    const [admop, setAdmop] = useState([])
+    const [adm, setAdm] = useState('')
+    const [unit1op, setUnit1op] = useState([])
+    const [unit1, setUnit1] = useState('')
+    
+    const genderOp = [
+        {name: 'Эрэгтэй'},
+        {name: 'Эмэгтэй'}
+    ]
+    const [gender, setGender] = useState('')
 
-	const elseltApi = useApi().elselt
+	const elseltApi = useApi().elselt.admissionuserdata
+    const admissionYearApi = useApi().elselt
+    const unit1Api = useApi().hrms.unit1
     const professionApi = useApi().study.professionDefinition
 
     // Хөтөлбөрийн жагсаалт авах
@@ -69,6 +82,20 @@ const ElseltUser = () => {
         const { success, data } = await fetchData(professionApi.getList('', ''))
         if (success) {
             setProfession(data)
+        }
+	}
+
+    async function getAdmissionYear() {
+        const { success, data } = await fetchData(admissionYearApi.getAll())
+        if (success) {
+            setAdmop(data)
+        }
+	}
+
+    async function getUnit1() {
+        const { success, data } = await fetchData(unit1Api.get())
+        if (success) {
+            setUnit1op(data)
         }
 	}
 
@@ -88,7 +115,7 @@ const ElseltUser = () => {
 	/* Жагсаалтын дата авах функц */
 	async function getDatas() {
 
-        const {success, data} = await allFetch(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, join_year))
+        const {success, data} = await allFetch(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, adm, profession_id, unit1, gender))
         if(success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
@@ -139,11 +166,12 @@ const ElseltUser = () => {
 
 			return () => clearTimeout(timeoutId);
 		}
-    }, [sortField, currentPage, rowsPerPage, searchValue])
+    }, [sortField, currentPage, rowsPerPage, searchValue, adm, profession_id, unit1, gender])
 
     useEffect(() => {
-        setYear(generateLessonYear(10))
+        getAdmissionYear()
         getProfession()
+        getUnit1()
     }, [])
 
     // ** Function to handle per page
@@ -170,68 +198,68 @@ const ElseltUser = () => {
                 </CardHeader>
                 <Row className='justify-content-start mx-0 my-1'>
                     <Col sm={6} lg={3} >
-                        <Label className="form-label" for="join_year">
+                        <Label className="form-label" for="lesson_year">
                             {t('Элсэлт')}
                         </Label>
                             <Select
-                                name="join_year"
-                                id="join_year"
+                                name="lesson_year"
+                                id="lesson_year"
                                 classNamePrefix='select'
                                 isClearable
                                 className={classnames('react-select')}
                                 isLoading={isLoading}
                                 placeholder={t('-- Сонгоно уу --')}
-                                options={yearOption || []}
-                                value={yearOption.find((c) => c.id === join_year)}
+                                options={admop || []}
+                                value={admop.find((c) => c.id === adm)}
                                 noOptionsMessage={() => t('Хоосон байна.')}
                                 onChange={(val) => {
-                                    setJoinYear(val?.id || '')
+                                    setAdm(val?.id || '')
                                 }}
                                 styles={ReactSelectStyles}
                                 getOptionValue={(option) => option.id}
-                                getOptionLabel={(option) => option.name}
+                                getOptionLabel={(option) => option.lesson_year + ' ' + option.name}
                             />
                     </Col>
                     <Col sm={6} lg={3} >
-                        <Label className="form-label" for="join_year">
+                        <Label className="form-label" for="genderOp">
                             {t('Хүйс')}
                         </Label>
                             <Select
-                                name="join_year"
-                                id="join_year"
+                                name="genderOp"
+                                id="genderOp"
                                 classNamePrefix='select'
                                 isClearable
                                 className={classnames('react-select')}
                                 isLoading={isLoading}
                                 placeholder={t('-- Сонгоно уу --')}
-                                options={yearOption || []}
-                                value={yearOption.find((c) => c.id === join_year)}
+                                options={genderOp || []}
+                                value={genderOp.find((c) => c.name === gender)}
                                 noOptionsMessage={() => t('Хоосон байна.')}
                                 onChange={(val) => {
-                                    setJoinYear(val?.id || '')
+                                    setGender(val?.name || '')
                                 }}
                                 styles={ReactSelectStyles}
-                                getOptionValue={(option) => option.id}
+                                // getOptionValue={(option) => option.id}
                                 getOptionLabel={(option) => option.name}
                             />
                     </Col>
                     <Col sm={6} lg={3} >
-                        <Label className="form-label" for="join_year">
+                        <Label className="form-label" for="profession">
                             {t('Хөтөлбөр')}
                         </Label>
                             <Select
-                                name="join_year"
-                                id="join_year"
+                                name="profession"
+                                id="profession"
                                 classNamePrefix='select'
                                 isClearable
                                 className={classnames('react-select')}
                                 isLoading={isLoading}
                                 placeholder={t('-- Сонгоно уу --')}
                                 options={profOption || []}
-                                value={profOption.find((c) => c.id === join_year)}
+                                value={profOption.find((c) => c.id === profession_id)}
                                 noOptionsMessage={() => t('Хоосон байна.')}
                                 onChange={(val) => {
-                                    setJoinYear(val?.id || '')
+                                    setProfession_id(val?.id || '')
                                 }}
                                 styles={ReactSelectStyles}
                                 getOptionValue={(option) => option.id}
@@ -239,22 +267,22 @@ const ElseltUser = () => {
                             />
                     </Col>
                     <Col sm={6} lg={3} >
-                        <Label className="form-label" for="join_year">
+                        <Label className="form-label" for="unit1">
                             {t('Харьяалал')}
                         </Label>
                             <Select
-                                name="join_year"
-                                id="join_year"
+                                name="unit1"
+                                id="unit1"
                                 classNamePrefix='select'
                                 isClearable
                                 className={classnames('react-select')}
                                 isLoading={isLoading}
                                 placeholder={t('-- Сонгоно уу --')}
-                                options={yearOption || []}
-                                value={yearOption.find((c) => c.id === join_year)}
+                                options={unit1op || []}
+                                value={unit1op.find((c) => c.id === unit1)}
                                 noOptionsMessage={() => t('Хоосон байна.')}
                                 onChange={(val) => {
-                                    setJoinYear(val?.id || '')
+                                    setUnit1(val?.id || '')
                                 }}
                                 styles={ReactSelectStyles}
                                 getOptionValue={(option) => option.id}

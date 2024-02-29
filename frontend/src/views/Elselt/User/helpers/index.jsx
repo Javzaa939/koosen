@@ -30,34 +30,34 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 			center: true
 		},
 		{
-			header: 'name',
+			header: 'user__first_name',
 			name: t("Овог нэр"),
-			cell: (row) => (row?.name),
+			cell: (row) => (row?.full_name),
 			sortable: true,
 			center: true,
 			wrap: true,
 		},
         {
-			header: 'register_num',
+			header: 'register',
 			name: t("РД"),
-			selector: (row) => row?.end_date,
+			selector: (row) => row?.user?.register,
 			center: true
 		},
 		{
-			header: 'begin_date',
+			header: 'profession__profession__name',
 			name: t("Хөтөлбөр"),
-			selector: (row) => <span title={row?.begin_date}>{row?.begin_date}</span>,
+			selector: (row) => <span title={row?.profession}>{row?.profession}</span>,
             sortable: true,
 			left: true
 		},
 		{
 			name: t("Голч дүн"),
-			selector: (row) => row?.lesson_year,
+			selector: (row) => row?.userinfo?.gpa,
 			center: true
 		},
         {
 			name: t("Төгссөн сургууль"),
-			selector: (row) => row?.lesson_year,
+			selector: (row) => row?.userinfo?.graduated_school,
 			center: true
 		},
         {
