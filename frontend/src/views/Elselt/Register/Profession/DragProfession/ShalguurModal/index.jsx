@@ -69,7 +69,7 @@ const ShalguurModal = ({ open, handleModal, refreshDatas, admission_data }) => {
     const [ hynaltToo, setHynaltToo ] = useState({
         'norm_all': '',
         'norm1': '',
-        'women': ''
+        'norm2': ''
     })
 
     const [ nasYear, setNasYear ] = useState({
@@ -78,7 +78,6 @@ const ShalguurModal = ({ open, handleModal, refreshDatas, admission_data }) => {
     })
 
 	// Loader
-	const { Loader, isLoading, fetchData } = useLoader({});
 	const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
 
     const elseltApi = useApi().elselt.profession
@@ -209,7 +208,7 @@ const ShalguurModal = ({ open, handleModal, refreshDatas, admission_data }) => {
                                                 <Input
                                                     type='number'
                                                     bsSize='sm'
-                                                    value={hynaltToo.norm_all}
+                                                    value={hynaltToo.norm_all || ''}
                                                     onChange={(e) => setHynaltToo(current => {
                                                         return {
                                                             ...current,
@@ -224,7 +223,7 @@ const ShalguurModal = ({ open, handleModal, refreshDatas, admission_data }) => {
                                                 <Input
                                                     type='number'
                                                     bsSize='sm'
-                                                    value={hynaltToo.norm1}
+                                                    value={hynaltToo.norm1 || ''}
                                                     placeholder='Эрэгтэй тоо'
                                                     onChange={(e) => setHynaltToo(current => {
                                                         return {
@@ -240,7 +239,7 @@ const ShalguurModal = ({ open, handleModal, refreshDatas, admission_data }) => {
                                                     type='number'
                                                     bsSize='sm'
                                                     placeholder='Эмэгтэй тоо'
-                                                    value={hynaltToo.norm2}
+                                                    value={hynaltToo.norm2 || ''}
                                                     onChange={(e) => setHynaltToo(current => {
                                                         return {
                                                             ...current,

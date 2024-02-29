@@ -404,26 +404,33 @@ function SysInfo() {
                                     />
                                 </Col>
                             </div>
-                            <div className='row mt-1'>
-                                <Label>Нүүр хэсэгт харуулах banner зураг</Label>
-                                <div className="d-flex custom-flex">
-                                    <div className="me-2">
-                                        <div className='d-flex justify-content-end'>
-                                            <X size={15} color='red' onClick={() => {handleDeleteImage(image_old)}}></X>
-                                        </div>
-                                        <div className="orgLogoDiv image-responsive">
-                                            <img id={`logoImg${image_old}`} className="image-responsive" src = { image_old ? image_old : empty  } onClick={() => {clickLogoImage()}}/>
-                                            <input
-                                                accept="image/*"
-                                                type="file"
-                                                id={`logoInput1`}
-                                                name="image_old"
-                                                className="form-control d-none image-responsive"
-                                                onChange={(e) => onChange(e)}
+                            <div className='form_elements_over mt-50'>
+                                <Label className="mb-50">
+                                    Элсэлтэд зориулсан санамж
+                                </Label>
+                                <Controller
+                                    id='alert_description'
+                                    name='alert_description'
+                                    control={control}
+                                    defaultValue=''
+                                    render={({ field: {onChange, value}  }) => (
+                                        <InputGroup className={`input-group-merge ${classnames({ 'is-invalid': errors.alert_description })}`}>
+                                            <InputGroupText>
+                                                <Edit3 size={15} color={`${errors?.email ? 'red' : 'gray'}`}/>
+                                            </InputGroupText>
+                                            <Input
+                                                name='alert_description'
+                                                value={value}
+                                                id='alert_description'
+                                                style={{ minHeight: '100px' }}
+                                                type='text'
+                                                onChange={(e) => {onChange(e.target.value|| '')}}
+                                                invalid={errors.alert_description && true}
+                                                className={classnames({ 'is-invalid': errors.alert_description })}
                                             />
-                                        </div>
-                                    </div>
-                                </div>
+                                        </InputGroup>
+                                    )}
+                                />
                             </div>
                             <div className='form_elements_over mt-50'>
                                 <Label className="mb-50">
@@ -453,6 +460,27 @@ function SysInfo() {
                                     )}
                                 />
                                 {errors.home_description && <FormFeedback className='d-block'>{errors.home_description.message}</FormFeedback>}
+                            </div>
+                            <div className='row mt-1'>
+                                <Label>Нүүр хэсэгт харуулах banner зураг</Label>
+                                <div className="d-flex custom-flex">
+                                    <div className="me-2">
+                                        <div className='d-flex justify-content-end'>
+                                            <X size={15} color='red' onClick={() => {handleDeleteImage(image_old)}}></X>
+                                        </div>
+                                        <div className="orgLogoDiv image-responsive">
+                                            <img id={`logoImg${image_old}`} className="image-responsive" src = { image_old ? image_old : empty  } onClick={() => {clickLogoImage()}}/>
+                                            <input
+                                                accept="image/*"
+                                                type="file"
+                                                id={`logoInput1`}
+                                                name="image_old"
+                                                className="form-control d-none image-responsive"
+                                                onChange={(e) => onChange(e)}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </Col>
                     </Row>
