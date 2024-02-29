@@ -5,7 +5,7 @@ from rest_framework.decorators import permission_classes
 from rest_framework.filters import SearchFilter
 
 from django.db import transaction
-from django.db.models import F
+from django.db.models import F, Subquery, OuterRef
 from django.db.models.functions import Substr
 
 from main.utils.function.utils import has_permission
@@ -323,12 +323,21 @@ class AdmissionUserInfoAPIView(
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['user__first_name', 'user__register', 'user__email']
+    search_fields = ['user__first_name', 'user__register', 'user__email', 'gpa']
 
     def get_queryset(self):
 
         queryset = self.queryset
         queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
+
+        userinfo_qs = UserInfo.objects.filter(user=OuterRef('user')).values('gpa')[:1]
+
+        queryset = (
+            queryset
+            .annotate(
+                gpa=Subquery(userinfo_qs)
+            )
+        )
         lesson_year_id = self.request.query_params.get('lesson_year')
         profession_id = self.request.query_params.get('profession_id')
         unit1_id = self.request.query_params.get('unit1_id')

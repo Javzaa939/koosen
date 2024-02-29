@@ -51,8 +51,10 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 			left: true
 		},
 		{
+			header: 'gpa',
+			sortable: true,
 			name: t("Голч дүн"),
-			selector: (row) => row?.userinfo?.gpa,
+			selector: (row) => row?.gpa,
 			center: true
 		},
         {
@@ -68,6 +70,13 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 		{
 			name: t("Хүйс"),
 			selector: (row) => row?.gender_name,
+			center: true
+		},
+		{
+			header: 'created_at',
+			sortable: true,
+			name: t("Бүртгүүлсэн огноо"),
+			selector: (row) => row?.created_at,
 			center: true
 		},
 	]

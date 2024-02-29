@@ -132,6 +132,8 @@ const ElseltUser = () => {
         }
 	}
 
+    console.log(datas);
+
 	const editModal = (row={}) => {
         /** NOTE Засах гэж буй хичээлийн стандартын id-г авна */
         setEditModal(!edit_modal)

@@ -83,6 +83,7 @@ class AdmissionUserInfoSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(source='user.full_name', default='')
     profession = serializers.CharField(source='profession.profession.name', default='')
     gender_name = serializers.SerializerMethodField()
+    gpa = serializers.FloatField(default='')
 
     class Meta:
         model = AdmissionUserProfession
