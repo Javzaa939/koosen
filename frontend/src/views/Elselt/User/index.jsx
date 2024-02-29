@@ -5,8 +5,6 @@ import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, Spinner } 
 
 import { ChevronDown, Plus, Search } from 'react-feather'
 
-import { useForm, Controller } from "react-hook-form";
-
 import DataTable from 'react-data-table-component'
 
 import classnames from "classnames";
@@ -16,7 +14,6 @@ import { useTranslation } from 'react-i18next'
 import Select from 'react-select'
 
 import useApi from '@hooks/useApi';
-
 import useLoader from '@hooks/useLoader';
 
 import AuthContext from "@context/AuthContext"
@@ -25,17 +22,14 @@ import { getPagination, ReactSelectStyles, generateLessonYear } from '@utils'
 
 import { getColumns } from './helpers';
 
-import Addmodal from './Add'
-import { useNavigate } from 'react-router-dom';
+// import Addmodal from './Add'
 
-const ElseltRegister = () => {
+const ElseltUser = () => {
 
 	const { user } = useContext(AuthContext)
-    // ** Hook
-    const { control, setValue, formState: { errors } } = useForm({});
 
     const [currentPage, setCurrentPage] = useState(1);
-    const [rowsPerPage, setRowsPerPage] = useState(10)
+    const [rowsPerPage, setRowsPerPage] = useState(20)
 
     // Эрэмбэлэлт
     const [sortField, setSort] = useState('')
@@ -65,10 +59,18 @@ const ElseltRegister = () => {
 	const [modal, setModal] = useState(false);
     const [edit_modal, setEditModal] = useState(false)
     const [editData, setEditData] = useState({})
+    const [profOption, setProfession] = useState([])
 
 	const elseltApi = useApi().elselt
+    const professionApi = useApi().study.professionDefinition
 
-    const navigate = useNavigate()
+    // Хөтөлбөрийн жагсаалт авах
+    async function getProfession() {
+        const { success, data } = await fetchData(professionApi.getList('', ''))
+        if (success) {
+            setProfession(data)
+        }
+	}
 
 	/* Модал setState функц */
 	const handleModal = () => {
@@ -141,6 +143,7 @@ const ElseltRegister = () => {
 
     useEffect(() => {
         setYear(generateLessonYear(10))
+        getProfession()
     }, [])
 
     // ** Function to handle per page
@@ -148,17 +151,12 @@ const ElseltRegister = () => {
         setRowsPerPage(parseInt(e.target.value))
     }
 
-    // Хөтөлбөр нэмэх
-    const handleAdd = (row) => {
-        navigate('/elselt/profession', {state: row})
-    }
-
 	return (
 		<Fragment>
             {isLoading && Loader}
 			<Card>
 				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
-					<CardTitle tag="h4">{t('Элсэлтийн бүртгэл')}</CardTitle>
+					<CardTitle tag="h4">{t('Элсэгчдийн жагсаалт')}</CardTitle>
                     <div className='d-flex flex-wrap mt-md-0 mt-1'>
                         <Button
                             color='primary'
@@ -171,38 +169,16 @@ const ElseltRegister = () => {
                     </div>
                 </CardHeader>
                 <Row className='justify-content-start mx-0 my-1'>
-                    {/* <Col md={4} sm={6} xs={12}>
-                        <Label className="form-label" for="start_date">
-                            {t('Эхлэх хугацаа')}
-                        </Label>
-                        <Input
-                            bsSize='sm'
-                            id='start_date'
-                            placeholder='Сонгох'
-                            type="date"
-                        />
-                    </Col>
-                    <Col md={4} sm={6} xs={12}>
-                        <Label className="form-label" for="end_date">
-                            {t('Дуусах хугацаа')}
-                        </Label>
-                        <Input
-                            bsSize='sm'
-                            id='end_date'
-                            placeholder='Сонгох'
-                            type="date"
-                        />
-                    </Col> */}
-                    <Col sm={6} lg={4} >
+                    <Col sm={6} lg={3} >
                         <Label className="form-label" for="join_year">
-                            {t('Хичээлийн жил')}
+                            {t('Элсэлт')}
                         </Label>
                             <Select
                                 name="join_year"
                                 id="join_year"
                                 classNamePrefix='select'
                                 isClearable
-                                className={classnames('react-select', { 'is-invalid': errors.join_year })}
+                                className={classnames('react-select')}
                                 isLoading={isLoading}
                                 placeholder={t('-- Сонгоно уу --')}
                                 options={yearOption || []}
@@ -216,8 +192,110 @@ const ElseltRegister = () => {
                                 getOptionLabel={(option) => option.name}
                             />
                     </Col>
+                    <Col sm={6} lg={3} >
+                        <Label className="form-label" for="join_year">
+                            {t('Хүйс')}
+                        </Label>
+                            <Select
+                                name="join_year"
+                                id="join_year"
+                                classNamePrefix='select'
+                                isClearable
+                                className={classnames('react-select')}
+                                isLoading={isLoading}
+                                placeholder={t('-- Сонгоно уу --')}
+                                options={yearOption || []}
+                                value={yearOption.find((c) => c.id === join_year)}
+                                noOptionsMessage={() => t('Хоосон байна.')}
+                                onChange={(val) => {
+                                    setJoinYear(val?.id || '')
+                                }}
+                                styles={ReactSelectStyles}
+                                getOptionValue={(option) => option.id}
+                                getOptionLabel={(option) => option.name}
+                            />
+                    </Col>
+                    <Col sm={6} lg={3} >
+                        <Label className="form-label" for="join_year">
+                            {t('Хөтөлбөр')}
+                        </Label>
+                            <Select
+                                name="join_year"
+                                id="join_year"
+                                classNamePrefix='select'
+                                isClearable
+                                className={classnames('react-select')}
+                                isLoading={isLoading}
+                                placeholder={t('-- Сонгоно уу --')}
+                                options={profOption || []}
+                                value={profOption.find((c) => c.id === join_year)}
+                                noOptionsMessage={() => t('Хоосон байна.')}
+                                onChange={(val) => {
+                                    setJoinYear(val?.id || '')
+                                }}
+                                styles={ReactSelectStyles}
+                                getOptionValue={(option) => option.id}
+                                getOptionLabel={(option) => option.name}
+                            />
+                    </Col>
+                    <Col sm={6} lg={3} >
+                        <Label className="form-label" for="join_year">
+                            {t('Харьяалал')}
+                        </Label>
+                            <Select
+                                name="join_year"
+                                id="join_year"
+                                classNamePrefix='select'
+                                isClearable
+                                className={classnames('react-select')}
+                                isLoading={isLoading}
+                                placeholder={t('-- Сонгоно уу --')}
+                                options={yearOption || []}
+                                value={yearOption.find((c) => c.id === join_year)}
+                                noOptionsMessage={() => t('Хоосон байна.')}
+                                onChange={(val) => {
+                                    setJoinYear(val?.id || '')
+                                }}
+                                styles={ReactSelectStyles}
+                                getOptionValue={(option) => option.id}
+                                getOptionLabel={(option) => option.name}
+                            />
+                    </Col>
+                    {/* <Col md={3} sm={6} xs={12} className='mt-1'>
+                        <Label className="form-label" for="start_date">
+                            {t('Эхлэх хугацаа')}
+                        </Label>
+                        <Controller
+                            defaultValue=''
+                            name='start_date'
+                            control={control}
+                            render={({ field }) => (
+                                <Input
+                                    {...field}
+                                    bsSize='sm'
+                                    id='start_date'
+                                    placeholder='Сонгох'
+                                    type="date"
+                                    disabled={true}
+                                    readOnly={true}
+                                    invalid={errors.start_date && true}
+                                />
+                            )}
+                        />
+                    </Col>
+                    <Col md={3} sm={6} xs={12} className='mt-1'>
+                        <Label className="form-label" for="end_date">
+                            {t('Дуусах хугацаа')}
+                        </Label>
+                        <Input
+                            bsSize='sm'
+                            id='end_date'
+                            placeholder='Сонгох'
+                            type="date"
+                        />
+                    </Col> */}
                 </Row>
-                <Row className="justify-content-between mx-0">
+                <Row className="justify-content-between mx-0" >
                     <Col className='d-flex align-items-center justify-content-start' md={4}>
                         <Col md={3} sm={2} className='pe-1'>
                             <Input
@@ -282,7 +360,7 @@ const ElseltRegister = () => {
                                 </div>
                             )}
 							onSort={handleSort}
-                            columns={getColumns(currentPage, rowsPerPage, pageCount, editModal, handleDelete, user, handleAdd)}
+                            columns={getColumns(currentPage, rowsPerPage, pageCount, editModal, handleDelete, user)}
                             sortIcon={<ChevronDown size={10} />}
                             paginationPerPage={rowsPerPage}
                             paginationDefaultPage={currentPage}
@@ -292,11 +370,11 @@ const ElseltRegister = () => {
                             fixedHeaderScrollHeight='62vh'
                         />
 					</div>
-				{modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} editData={{}}/>}
-				{edit_modal && <Addmodal open={edit_modal} handleModal={editModal} refreshDatas={getDatas} editData={editData}/>}
+				{/* {modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} editData={{}}/>}
+				{edit_modal && <Addmodal open={edit_modal} handleModal={editModal} refreshDatas={getDatas} editData={editData}/>} */}
         	</Card>
         </Fragment>
     )
 }
 
-export default ElseltRegister;
+export default ElseltUser;

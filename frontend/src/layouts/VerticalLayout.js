@@ -91,6 +91,7 @@ const VerticalLayout = (props) =>
                         /** Элсэлт */
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-read', 'elselt1')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-read', 'elselt2')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-read', 'elselt3')
 
                         /** ----------------------------Оюутан ------------------------------- */
 
@@ -121,10 +122,10 @@ const VerticalLayout = (props) =>
                         /** ----------------------------- Тохиргоо ---------------------------- */
 
                         /** Ажиллах жил */
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-employee-settings-read', 'settings_employee')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-settings-employee-read', 'settings_employee')
 
                         /** Боловсролын зэрэг */
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-settings-read', 'settings_student')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-settings-student-read', 'settings_student')
 
                         /** Эрх */
                         childrenDatas = checkPerm(childrenDatas, menus, user.is_superuser, 'settingsLevel15')

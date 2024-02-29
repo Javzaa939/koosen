@@ -49,7 +49,7 @@ const DragProfession = ({ cdatas }) => {
 
     const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false});
 
-    //Хөтөлбөрийн жагсаалт авах
+    // Хөтөлбөрийн жагсаалт авах
     async function getProfession() {
 
         const { success, data } = await fetchData(professionApi.getList(select_value.degree, select_value.department))
