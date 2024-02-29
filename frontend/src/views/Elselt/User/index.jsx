@@ -67,8 +67,14 @@ const ElseltUser = () => {
     const [unit1, setUnit1] = useState('')
     
     const genderOp = [
-        {name: 'Эрэгтэй'},
-        {name: 'Эмэгтэй'}
+        {
+            id: 1,
+            name: 'Эрэгтэй',
+        },
+        {
+            id: 2,
+            name: 'Эмэгтэй'
+        }
     ]
     const [gender, setGender] = useState('')
 
@@ -239,7 +245,7 @@ const ElseltUser = () => {
                                     setGender(val?.name || '')
                                 }}
                                 styles={ReactSelectStyles}
-                                // getOptionValue={(option) => option.id}
+                                getOptionValue={(option) => option.id}
                                 getOptionLabel={(option) => option.name}
                             />
                     </Col>
