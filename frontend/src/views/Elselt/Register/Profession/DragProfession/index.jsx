@@ -403,7 +403,9 @@ const DragProfession = ({ cdatas }) => {
                                     <Badge color='light-primary' pill className='me-50'>
                                         <Plus size={15}></Plus>
                                     </Badge>
-                                    {item?.full_name}
+                                    <span className='cursor-pointer' style={{ userSelect: 'none' }}>
+                                        {item?.full_name}
+                                    </span>
                                 </ListGroupItem>
                                 )
                             })
@@ -414,7 +416,9 @@ const DragProfession = ({ cdatas }) => {
                                     <Badge color='light-primary' pill className='me-50'>
                                         <Plus size={15}></Plus>
                                     </Badge>
-                                    {item?.full_name}
+                                    <span className='cursor-pointer' style={{ userSelect: 'none' }}>
+                                        {item?.full_name}
+                                    </span>
                                 </ListGroupItem>
                                 )
                             })
