@@ -106,6 +106,16 @@ function SysInfo() {
         }
 	}
 
+    function ftext(val) {
+
+        var text = val.split(`/`)[val.split('/').length - 1]
+
+        var vdata = `${text?.substring(0, 27)}...${text?.substring(text?.length - 4)}`
+
+        return vdata
+
+    }
+
     return (
         <Card>
             {isLoading && Loader}
@@ -123,7 +133,7 @@ function SysInfo() {
                             </h6>
                             <hr/>
                             <div className='form_elements_over'>
-                                <Label className="mb-50">
+                                <Label className="mb-50" for='email'>
                                     Байгууллагын и-мэйл
                                 </Label>
                                 <Controller
@@ -151,7 +161,7 @@ function SysInfo() {
                                 {errors.email && <FormFeedback className='d-block'>{errors.email.message}</FormFeedback>}
                             </div>
                             <div className='form_elements_over'>
-                                <Label className="mb-50">
+                                <Label className="mb-50" for='address'>
                                     Байгууллагын хаяг
                                 </Label>
                                 <Controller
@@ -179,7 +189,7 @@ function SysInfo() {
                                 {errors.address && <FormFeedback className='d-block'>{errors.address.message}</FormFeedback>}
                             </div>
                             <div className='form_elements_over'>
-                                <Label className="mb-50">
+                                <Label className="mb-50" for='jijvvr_mobile'>
                                     Жижүүрийн дугаар
                                 </Label>
                                 <Controller
@@ -207,7 +217,7 @@ function SysInfo() {
                                 {errors.jijvvr_mobile && <FormFeedback className='d-block'>{errors.jijvvr_mobile.message}</FormFeedback>}
                             </div>
                             <div className='form_elements_over'>
-                                <Label className="mb-50">
+                                <Label className="mb-50" for='mobile'>
                                     Байгууллагын дугаар
                                 </Label>
                                 <Controller
@@ -235,7 +245,7 @@ function SysInfo() {
                                 {errors.mobile && <FormFeedback className='d-block'>{errors.mobile.message}</FormFeedback>}
                             </div>
                             <div className='form_elements_over'>
-                                <Label className="mb-50">
+                                <Label className="mb-50" for='contact_mobile'>
                                     Олон нийттэй харилцах хэсгийн дугаар
                                 </Label>
                                 <Controller
@@ -269,7 +279,7 @@ function SysInfo() {
                             </h6>
                             <div className='row'>
                                 <Col md={6} sm={12}>
-                                    <Label className="mb-50">
+                                    <Label className="mb-50" for='admission_juram'>
                                         Элсэлтийн журам
                                     </Label>
                                     <Controller
@@ -291,7 +301,6 @@ function SysInfo() {
                                                         onChange={(e) => {
                                                             onChange(e.target.files?.[0] ?? null)
                                                             setAdmissionJuram(e.target.files?.[0] ?? null)
-                                                            console.log(e.target.files?.[0] ?? null,'llll')
                                                         }}
                                                         onError={() => {'Алдаа'}}
 
@@ -311,10 +320,16 @@ function SysInfo() {
                                                                     <div className='p-50 d-flex justify-content-between file_style'>
                                                                         <div className='text-truncate fw-bold'>
                                                                         {/* <div className='text-truncate' style={{ maxWidth: '400px', minWidth: '250px' }}> */}
-                                                                            {typeof value == 'string' ? value.split(`/`)[value.split('/').length - 1] : value?.name
+                                                                            {/* {typeof value == 'string' ? value.split(`/`)[value.split('/').length - 1] : value?.name
                                                                                 // value.length > 30 ?
                                                                                 // `${value.substring(0, 27)}...${value.substring(value.length - 4)}` :
                                                                                 // value
+                                                                            } */}
+
+                                                                            {typeof value == 'string' ? ftext(value) :
+                                                                                value?.name?.length > 30 ?
+                                                                                `${value?.name?.substring(0, 27)}...${value?.name?.substring(value?.name?.length - 4)}` :
+                                                                                value?.name
                                                                             }
                                                                             {/* {value.length > 30 ?
                                                                                 `${value.substring(0, 27)}...${value.substring(value.length - 4)}` :
@@ -337,7 +352,7 @@ function SysInfo() {
                                     />
                                 </Col>
                                 <Col md={6} sm={12}>
-                                    <Label className="mb-50">
+                                    <Label className="mb-50" for='admission_advice'>
                                         Элсэгчдэд зориулсан зөвлөмж
                                     </Label>
                                     <Controller
@@ -383,7 +398,16 @@ function SysInfo() {
                                                                     <div className='text-truncate fw-bold'>
                                                                     {/* <div className='text-truncate' style={{ maxWidth: '400px', minWidth: '250px' }}> */}
                                                                         {/* {value} */}
-                                                                            {typeof value == 'string' ? value.split(`/`)[value.split('/').length - 1] : value?.name}
+
+
+                                                                        {typeof value == 'string' ? ftext(value) :
+                                                                            value?.name?.length > 30 ?
+                                                                            `${value?.name?.substring(0, 27)}...${value?.name?.substring(value?.name?.length - 4)}` :
+                                                                            value?.name
+                                                                        }
+
+                                                                            {/* {typeof value == 'string' ? value.split(`/`)[value.split('/').length - 1] : value?.name} */}
+
                                                                         {/* {value.length > 30 ?
                                                                             `${value.substring(0, 27)}...${value.substring(value.length - 4)}` :
                                                                             value
@@ -405,7 +429,7 @@ function SysInfo() {
                                 </Col>
                             </div>
                             <div className='form_elements_over mt-50'>
-                                <Label className="mb-50">
+                                <Label className="mb-50" for='alert_description'>
                                     Элсэлтэд зориулсан санамж
                                 </Label>
                                 <Controller
@@ -433,7 +457,7 @@ function SysInfo() {
                                 />
                             </div>
                             <div className='form_elements_over mt-50'>
-                                <Label className="mb-50">
+                                <Label className="mb-50" for='home_description'>
                                     Нүүр хуудсанд харуулах тайлбар
                                 </Label>
                                 <Controller
@@ -462,7 +486,7 @@ function SysInfo() {
                                 {errors.home_description && <FormFeedback className='d-block'>{errors.home_description.message}</FormFeedback>}
                             </div>
                             <div className='row mt-1'>
-                                <Label>Нүүр хэсэгт харуулах banner зураг</Label>
+                                <Label for='logoInput1'>Нүүр хэсэгт харуулах banner зураг</Label>
                                 <div className="d-flex custom-flex">
                                     <div className="me-2">
                                         <div className='d-flex justify-content-end'>
