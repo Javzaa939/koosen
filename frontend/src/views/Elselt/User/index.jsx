@@ -20,6 +20,8 @@ import AuthContext from "@context/AuthContext"
 
 import { getPagination, ReactSelectStyles, generateLessonYear } from '@utils'
 
+import EditModal from './Edit';
+
 import { getColumns } from './helpers';
 
 // import Addmodal from './Add'
@@ -418,7 +420,7 @@ const ElseltUser = () => {
                         </Button>
                     </Col>
                 </Row>
-					<div className="react-dataTable react-dataTable-selectable-rows">
+					<div className="react-dataTable react-dataTable-selectable-rows" id="datatableLeftTwoRightOne">
 						<DataTable
                             noHeader
 							paginationServer
@@ -441,13 +443,13 @@ const ElseltUser = () => {
                             paginationPerPage={rowsPerPage}
                             paginationDefaultPage={currentPage}
                             data={datas}
-                            paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
+                            paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count,)}
                             fixedHeader
                             fixedHeaderScrollHeight='62vh'
                         />
 					</div>
-				{/* {modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} editData={{}}/>}
-				{edit_modal && <Addmodal open={edit_modal} handleModal={editModal} refreshDatas={getDatas} editData={editData}/>} */}
+				{/* {modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} editData={{}}/>} */}
+				{<EditModal open={edit_modal} handleModal={editModal} refreshDatas={getDatas} editData={editData} close={setEditModal}/>}
         	</Card>
         </Fragment>
     )

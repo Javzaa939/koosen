@@ -38,7 +38,7 @@ export const validateSchema = Yup.object().shape({
 });
 
 
-const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
+const EditModal = ({ open, handleModal, refreshDatas, editData }) => {
 
     const CloseBtn = (
         <X className="cursor-pointer" size={15} onClick={handleModal} />
@@ -124,8 +124,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
 
         },
         [editData]
-        )
-        console.log(open, handleModal, refreshDatas, editData);
+    )
 
 	return (
         <Fragment>
@@ -320,7 +319,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
                                 {postLoading &&<Spinner size='sm' className='me-1'/>}
                                 {t('Хадгалах')}
                             </Button>
-                            <Button color="secondary">
+                            <Button color="secondary" type="reset" outline  onClick={handleModal}>
                                 {t('Буцах')}
                             </Button>
                         </Col>
@@ -330,4 +329,4 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
         </Fragment>
 	);
 };
-export default Addmodal;
+export default EditModal;
