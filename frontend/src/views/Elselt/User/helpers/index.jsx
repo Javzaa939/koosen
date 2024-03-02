@@ -1,6 +1,8 @@
-import { useContext } from 'react';
+import { useContext, useRef } from 'react';
 
-import { X, Edit, PlusCircle, AlignCenter } from "react-feather";
+import { Input }  from 'reactstrap';
+
+import { X, Edit, PlusCircle, AlignCenter, AlertOctagon } from "react-feather";
 
 import useModal from '@hooks/useModal'
 
@@ -11,6 +13,8 @@ import { t } from 'i18next'
 import SchoolContext from "@context/SchoolContext";
 
 import moment from 'moment'
+import useApi from '@hooks/useApi';
+import useLoader from "@hooks/useLoader";
 
 // Хүснэгтийн баганууд
 export function getColumns (currentPage, rowsPerPage, page_count, editModal, handleDelete, user, handleAdd) {
@@ -19,15 +23,52 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 
 	const { showWarning } = useModal()
 
+	const { fetchData } = useLoader({ isFullScreen: false })
+
+	const focusData = useRef(undefined)
+
+	const gpaApi = useApi().elselt.gpa
+
     /** Сонгосон хуудасны тоо датаны тооноос их болсон үед хуудаслалт 1-ээс эхлэнэ */
     if (currentPage > page_count) {
         currentPage = 1
     }
 
+	const focusOut = (event) => {
+		if (focusData.current || focusData.current == '')
+		{
+			event.target.value = focusData.current
+		}
+	}
+
+	const handleSetGpaResult = async(event, id, index, key) => {
+
+		var value = event.target.value
+		console.log(id, value);
+
+		if(event.key === 'Enter'){
+			let cdata = {
+				[key]: parseFloat(value)
+			}
+			console.log(parseFloat(value));
+			if (id){
+				const { success } = await fetchData(gpaApi.put(cdata, id))
+				if (success){
+					focusData.current = undefined
+
+					var nextElementId = `${key}-${index + 1}-input`
+					var element = document.getElementById(`${nextElementId}`)
+
+					if (element) element.focus()
+				}
+			}
+		}
+	};
+
     const columns = [
 		{
 			name: "№",
-			selector: (row, index) => (currentPage-1) * rowsPerPage + index + 1,
+			selector: (row, index) => {(currentPage-1) * rowsPerPage + index + 1, console.log(row);},
 			maxWidth: "30px",
 			center: true,
 			maxWidth: "80px",
@@ -62,12 +103,38 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 			center: true,
 		},
 		{
-			maxWidth: "150px",
-			minWidth: "150px",
+			maxWidth: "200px",
+			minWidth: "200px",
 			header: 'gpa',
 			sortable: true,
 			name: t("Голч дүн"),
-			selector: (row) => row?.gpa,
+			selector: (row) => {
+				return(
+					<>
+						<div className='d-flex'>
+							<Input
+								className='text-center'
+								id={`gpa-${row.id}-input`}
+								type="number"
+								step="0.1"
+								min='0'
+								max='4'
+								bsSize='sm'
+								placeholder={(`Голч дүн`)}
+								defaultValue={row?.gpa}
+								onBlur={focusOut}
+								onFocus={(e) => focusData.current = (e.target.value)}
+								disabled={(Object.keys(user).length > 0 && user?.is_superuser) ? false : true}
+								onKeyPress={(e) => {
+									handleSetGpaResult(e, `${row?.user?.id}`, row?.gpa, 'gpa')
+								}}
+							/>
+							<AlertOctagon id={`gpa-${row?.id}-input`} width={"20px"} className='ms-1' />
+							<UncontrolledTooltip placement='top' target={`gpa-${row?.id}-input`} >Enter дарсан тохиолдолд бүртгэлийн дугаар хадгалагдах болно.</UncontrolledTooltip>
+						</div>
+					</>
+				)
+			},
 			center: true,
 		},
         {

@@ -93,8 +93,11 @@ class AdmissionUserInfoSerializer(serializers.ModelSerializer):
 
     def get_userinfo(self, obj):
 
-        data = UserInfo.objects.filter(id=obj.user.id).first()
-        userinfo_data = UserinfoSerializer(data).data
+        userinfo_data = []
+
+        if obj.user:
+            data = UserInfo.objects.get(user=obj.user)
+            userinfo_data = UserinfoSerializer(data).data
 
         return userinfo_data
 

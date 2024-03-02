@@ -342,6 +342,7 @@ class AdmissionUserInfoAPIView(
                 gpa=Subquery(userinfo_qs)
             )
         )
+
         lesson_year_id = self.request.query_params.get('lesson_year')
         profession_id = self.request.query_params.get('profession_id')
         unit1_id = self.request.query_params.get('unit1_id')
@@ -396,3 +397,20 @@ class AdmissionYearAPIView(
         all_data = self.list(request).data
 
         return request.send_data(all_data)
+
+
+class AdmissionGpaAPIView(
+    generics.GenericAPIView,
+    mixins.UpdateModelMixin
+):
+    @transaction.atomic()
+    def put(self, request, pk=None):
+
+        data = request.data
+        userinfo_id = UserInfo.objects.filter(user=pk).first().id
+        UserInfo.objects.update_or_create(
+            user=userinfo_id,
+            defaults=data
+        )
+
+        return request.send_info("INF_002")

@@ -1552,7 +1552,10 @@ function useApi(isDisplay=false) {
 					instance.post(`/elselt/sysinfo/`, data),
 		},
 		admissionuserdata: {
-			get: (limit, page, sort, search, lesson_year_id, profession_id, unit1_id, gender, state) => instance.get(`/elselt/admissionuserdata/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}&unit1_id=${unit1_id}&gender=${gender}&state=${state}`)
+			get: (limit, page, sort, search, lesson_year_id, profession_id, unit1_id, gender, state) => instance.get(`/elselt/admissionuserdata/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}&unit1_id=${unit1_id}&gender=${gender}&state=${state}`),
+		},
+		gpa: {
+			put: (data, id) => instance.put(`/elselt/gpa/${id}/`, data)
 		}
 	}}
 }

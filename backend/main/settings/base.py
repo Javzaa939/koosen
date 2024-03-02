@@ -187,3 +187,50 @@ END_DAY = 28
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
 
 STUDENT_DOMAIN_URL = 'http://student.mnun.edu.mn/'
+
+# QUERY DEBUG хийхэд хэрэгтэй LOGGING=1 ./manage.py runserver
+# гэж асаавал server дээр ажиллаж query -г буцаана
+if os.environ.get("LOGGING") == "1":
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'formatters': {
+            'console': {
+                'format': '%(asctime)s %(levelname)s [%(name)s:%(lineno)s] %(module)s %(process)d %(thread)d %(message)s',
+                'datefmt': "%H:%M:%S"
+            },
+            'sql': {
+                'format': (
+                        ''
+                        # '%(asctime)s %(levelname)s [%(name)s:%(lineno)s] %(module)s %(process)d %(thread)d \n'
+                        # '%(duration).3f %(sql)s\n'
+                        # '%(sql)s\n'
+                        # 'args=%(params)s\n'
+                    ),
+                'datefmt': "%H:%M:%S"
+            },
+        },
+        'handlers': {
+            'console': {
+                'class': 'logging.StreamHandler',
+                'formatter': 'console',
+            },
+            'sql': {
+                'class': 'logging.StreamHandler',
+                'class': 'logging.FileHandler',
+                'filename': './debug.log',
+                'formatter': 'sql',
+            },
+        },
+        'loggers': {
+            'django.db.backends': {
+                'handlers': ['sql'],
+                'level': 'DEBUG',
+                'propagate': False,
+            },
+            '': {
+                'handlers': ['console'],
+                'level': 'INFO',
+            },
+        },
+    }
