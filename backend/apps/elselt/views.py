@@ -339,7 +339,7 @@ class AdmissionUserInfoAPIView(
         queryset = (
             queryset
             .annotate(
-                gpa=Subquery(userinfo_qs)
+                gpa=Subquery(userinfo_qs),
             )
         )
 
@@ -407,9 +407,8 @@ class AdmissionGpaAPIView(
     def put(self, request, pk=None):
 
         data = request.data
-        userinfo_id = UserInfo.objects.filter(user=pk).first().id
         UserInfo.objects.update_or_create(
-            user=userinfo_id,
+            id=pk,
             defaults=data
         )
 

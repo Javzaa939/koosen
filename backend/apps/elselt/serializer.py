@@ -83,7 +83,6 @@ class AdmissionUserInfoSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(source='user.full_name', default='')
     profession = serializers.CharField(source='profession.profession.name', default='')
     gender_name = serializers.SerializerMethodField()
-    gpa = serializers.FloatField(default='')
     state_name = serializers.SerializerMethodField()
 
     class Meta:
@@ -93,11 +92,8 @@ class AdmissionUserInfoSerializer(serializers.ModelSerializer):
 
     def get_userinfo(self, obj):
 
-        userinfo_data = []
-
-        if obj.user:
-            data = UserInfo.objects.get(user=obj.user)
-            userinfo_data = UserinfoSerializer(data).data
+        data = UserInfo.objects.filter(user=obj.user).first()
+        userinfo_data = UserinfoSerializer(data).data
 
         return userinfo_data
 

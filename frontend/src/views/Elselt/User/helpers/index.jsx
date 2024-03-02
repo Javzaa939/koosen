@@ -2,11 +2,9 @@ import { useContext, useRef } from 'react';
 
 import { Input }  from 'reactstrap';
 
-import { X, Edit, PlusCircle, AlignCenter, AlertOctagon } from "react-feather";
+import { AlertOctagon } from "react-feather";
 
-import useModal from '@hooks/useModal'
-
-import { Badge, UncontrolledTooltip } from "reactstrap";
+import { UncontrolledTooltip } from "reactstrap";
 
 import { t } from 'i18next'
 
@@ -20,8 +18,6 @@ import useLoader from "@hooks/useLoader";
 export function getColumns (currentPage, rowsPerPage, page_count, editModal, handleDelete, user, handleAdd) {
 
 	const { school_id } = useContext(SchoolContext)
-
-	const { showWarning } = useModal()
 
 	const { fetchData } = useLoader({ isFullScreen: false })
 
@@ -44,13 +40,11 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 	const handleSetGpaResult = async(event, id, index, key) => {
 
 		var value = event.target.value
-		console.log(id, value);
 
 		if(event.key === 'Enter'){
 			let cdata = {
 				[key]: parseFloat(value)
 			}
-			console.log(parseFloat(value));
 			if (id){
 				const { success } = await fetchData(gpaApi.put(cdata, id))
 				if (success){
@@ -68,7 +62,7 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
     const columns = [
 		{
 			name: "№",
-			selector: (row, index) => {(currentPage-1) * rowsPerPage + index + 1, console.log(row);},
+			selector: (row, index) => (currentPage-1) * rowsPerPage + index + 1,
 			maxWidth: "30px",
 			center: true,
 			maxWidth: "80px",
@@ -99,7 +93,6 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 			name: 'Хөтөлбөр',
 			selector: (row) => <span title={row?.profession}>{row?.profession}</span>,
             sortable: true,
-			// left: true,
 			center: true,
 		},
 		{
@@ -121,12 +114,12 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 								max='4'
 								bsSize='sm'
 								placeholder={(`Голч дүн`)}
-								defaultValue={row?.gpa}
+								defaultValue={row?.userinfo?.gpa}
 								onBlur={focusOut}
 								onFocus={(e) => focusData.current = (e.target.value)}
 								disabled={(Object.keys(user).length > 0 && user?.is_superuser) ? false : true}
 								onKeyPress={(e) => {
-									handleSetGpaResult(e, `${row?.user?.id}`, row?.gpa, 'gpa')
+									handleSetGpaResult(e, `${row?.userinfo?.id}`, row?.gpa, 'gpa')
 								}}
 							/>
 							<AlertOctagon id={`gpa-${row?.id}-input`} width={"20px"} className='ms-1' />
@@ -141,7 +134,7 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 			maxWidth: "250px",
 			minWidth: "250px",
 			name: t("Төгссөн сургууль"),
-			selector: (row) => row?.userinfo?.graduated_school,
+			selector: (row) => row?.userinfo?.graduate_school,
 			center: true
 		},
         {
@@ -161,7 +154,6 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 			center: true
 		},
 		{
-			// text: center,
 			maxWidth: "300px",
 			minWidth: "300px",
 			header: 'created_at',
@@ -172,51 +164,51 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 		},
 	]
 
-	if(Object.keys(user).length > 0) {
-		var delete_column = {
-			name: t("Үйлдэл"),
-			center: true,
-			maxWidth: "100px",
-			minWidth: "100px",
-			selector: (row) => (
-				<div className="text-center" style={{ width: "auto" }}>
-					<a role="button" onClick={() => { editModal(row)} }
-						id={`edit${row?.id}`}
-						className="me-1"
-					>
-						<Badge color="light-secondary" pill><Edit  width={"15px"} /></Badge>
-					</a>
-					<UncontrolledTooltip placement='top' target={`edit${row.id}`} >Засах</UncontrolledTooltip>
-					{/* <a role="button" onClick={() => { handleAdd(row)} }
-						id={`complaintListDatatableEdit${row?.id}`}
-						className="me-1"
-					>
-						<Badge color="light-primary" pill><PlusCircle  width={"15px"} /></Badge>
-					</a>
-					<UncontrolledTooltip placement='top' target={`complaintListDatatableEdit${row.id}`}>Хөтөлбөр нэмэх</UncontrolledTooltip>
-					{
-						<>
-							<a role="button"
-								onClick={() => showWarning({
-									header: {
-										title: t(`Элсэлт устгах`),
-									},
-									question: t(`Та энэ мэдээллийг устгахдаа итгэлтэй байна уу?`),
-									onClick: () => handleDelete(row.id),
-									btnText: t('Устгах'),
-								})}
-								id={`complaintListDatatableCancel${row?.id}`}
-							>
-								<Badge color="light-danger" pill><X width={"100px"} /></Badge>
-							</a>
-							<UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${row.id}`} >Устгах</UncontrolledTooltip>
-						</>
-					} */}
-				</div>
-			),
-		}
-		columns.push(delete_column)
-	}
+	// if(Object.keys(user).length > 0) {
+	// 	var delete_column = {
+	// 		name: t("Үйлдэл"),
+	// 		center: true,
+	// 		maxWidth: "100px",
+	// 		minWidth: "100px",
+	// 		selector: (row) => (
+	// 			<div className="text-center" style={{ width: "auto" }}>
+	// 				<a role="button" onClick={() => { editModal(row)} }
+	// 					id={`edit${row?.id}`}
+	// 					className="me-1"
+	// 				>
+	// 					<Badge color="light-secondary" pill><Edit  width={"15px"} /></Badge>
+	// 				</a>
+	// 				<UncontrolledTooltip placement='top' target={`edit${row.id}`} >Засах</UncontrolledTooltip>
+	// 				{/* <a role="button" onClick={() => { handleAdd(row)} }
+	// 					id={`complaintListDatatableEdit${row?.id}`}
+	// 					className="me-1"
+	// 				>
+	// 					<Badge color="light-primary" pill><PlusCircle  width={"15px"} /></Badge>
+	// 				</a>
+	// 				<UncontrolledTooltip placement='top' target={`complaintListDatatableEdit${row.id}`}>Хөтөлбөр нэмэх</UncontrolledTooltip>
+	// 				{
+	// 					<>
+	// 						<a role="button"
+	// 							onClick={() => showWarning({
+	// 								header: {
+	// 									title: t(`Элсэлт устгах`),
+	// 								},
+	// 								question: t(`Та энэ мэдээллийг устгахдаа итгэлтэй байна уу?`),
+	// 								onClick: () => handleDelete(row.id),
+	// 								btnText: t('Устгах'),
+	// 							})}
+	// 							id={`complaintListDatatableCancel${row?.id}`}
+	// 						>
+	// 							<Badge color="light-danger" pill><X width={"100px"} /></Badge>
+	// 						</a>
+	// 						<UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${row.id}`} >Устгах</UncontrolledTooltip>
+	// 					</>
+	// 				} */}
+	// 			</div>
+	// 		),
+	// 	}
+	// 	columns.push(delete_column)
+	// }
 
     return columns
 

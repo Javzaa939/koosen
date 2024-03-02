@@ -3,7 +3,7 @@ import { Fragment, useState, useEffect, useContext } from 'react'
 
 import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, Spinner } from 'reactstrap'
 
-import { ChevronDown, Plus, Search } from 'react-feather'
+import { ChevronDown, Search } from 'react-feather'
 
 import DataTable from 'react-data-table-component'
 
@@ -19,8 +19,6 @@ import useLoader from '@hooks/useLoader';
 import AuthContext from "@context/AuthContext"
 
 import { getPagination, ReactSelectStyles, generateLessonYear } from '@utils'
-
-import EditModal from './Edit';
 
 import { getColumns } from './helpers';
 
@@ -42,10 +40,7 @@ const ElseltUser = () => {
     const default_page = [10, 20, 50, 75, 100]
 
 	const [searchValue, setSearchValue] = useState("");
-    const [join_year, setJoinYear] = useState('')
-
 	const [datas, setDatas] = useState([]);
-    const [ yearOption, setYear] = useState([])
 
     // Нийт датаны тоо
     const [total_count, setTotalCount] = useState(datas.length || 1)
@@ -60,11 +55,15 @@ const ElseltUser = () => {
 	// Modal
 	const [modal, setModal] = useState(false);
     const [edit_modal, setEditModal] = useState(false)
+
     const [editData, setEditData] = useState({})
+
     const [profOption, setProfession] = useState([])
     const [profession_id, setProfession_id] = useState('')
+
     const [admop, setAdmop] = useState([])
     const [adm, setAdm] = useState('')
+
     const [unit1op, setUnit1op] = useState([])
     const [unit1, setUnit1] = useState('')
 
@@ -210,16 +209,6 @@ const ElseltUser = () => {
 			<Card>
 				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom m-auto">
 					<CardTitle tag="h4">{t('Элсэгчдийн жагсаалт')}</CardTitle>
-                    {/* <div className='d-flex flex-wrap mt-md-0 mt-1'>
-                        <Button
-                            color='primary'
-                            // disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-elselt-create'))? false : true}
-                            onClick={() => handleModal()}
-                        >
-                            <Plus size={15} />
-                            <span className='align-middle ms-50'>{t('Нэмэх')}</span>
-                        </Button>
-                    </div> */}
                 </CardHeader>
                 <Row className='justify-content-start mx-0 my-1'>
                     <Col sm={6} lg={3} >
@@ -314,39 +303,6 @@ const ElseltUser = () => {
                                 getOptionLabel={(option) => option.name}
                             />
                     </Col>
-                    {/* <Col md={3} sm={6} xs={12} className='mt-1'>
-                        <Label className="form-label" for="start_date">
-                            {t('Эхлэх хугацаа')}
-                        </Label>
-                        <Controller
-                            defaultValue=''
-                            name='start_date'
-                            control={control}
-                            render={({ field }) => (
-                                <Input
-                                    {...field}
-                                    bsSize='sm'
-                                    id='start_date'
-                                    placeholder='Сонгох'
-                                    type="date"
-                                    disabled={true}
-                                    readOnly={true}
-                                    invalid={errors.start_date && true}
-                                />
-                            )}
-                        />
-                    </Col>
-                    <Col md={3} sm={6} xs={12} className='mt-1'>
-                        <Label className="form-label" for="end_date">
-                            {t('Дуусах хугацаа')}
-                        </Label>
-                        <Input
-                            bsSize='sm'
-                            id='end_date'
-                            placeholder='Сонгох'
-                            type="date"
-                        />
-                    </Col> */}
                 </Row>
                 <Row className='justify-content-start mx-0 my-1'>
                     <Col md={3} sm={6} xs={12} className='mx-auto'>
@@ -420,36 +376,34 @@ const ElseltUser = () => {
                         </Button>
                     </Col>
                 </Row>
-					<div className="react-dataTable react-dataTable-selectable-rows" id="datatableLeftTwoRightOne">
-						<DataTable
-                            noHeader
-							paginationServer
-							pagination
-                            className='react-dataTable'
-                            progressPending={isTableLoading}
-                            progressComponent={
-                                <div className='my-2 d-flex align-items-center justify-content-center'>
-                                    <Spinner className='me-1' color="" size='sm'/><h5>Түр хүлээнэ үү...</h5>
-                                </div>
-                            }
-                            noDataComponent={(
-                                <div className="my-2">
-                                    <h5>{t('Өгөгдөл байхгүй байна')}</h5>
-                                </div>
-                            )}
-							onSort={handleSort}
-                            columns={getColumns(currentPage, rowsPerPage, pageCount, editModal, handleDelete, user)}
-                            sortIcon={<ChevronDown size={10} />}
-                            paginationPerPage={rowsPerPage}
-                            paginationDefaultPage={currentPage}
-                            data={datas}
-                            paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count,)}
-                            fixedHeader
-                            fixedHeaderScrollHeight='62vh'
-                        />
-					</div>
-				{/* {modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} editData={{}}/>} */}
-				{<EditModal open={edit_modal} handleModal={editModal} refreshDatas={getDatas} editData={editData} close={setEditModal}/>}
+                <div className="react-dataTable react-dataTable-selectable-rows" id="datatableLeftTwo">
+                    <DataTable
+                        noHeader
+                        paginationServer
+                        pagination
+                        className='react-dataTable'
+                        progressPending={isTableLoading}
+                        progressComponent={
+                            <div className='my-2 d-flex align-items-center justify-content-center'>
+                                <Spinner className='me-1' color="" size='sm'/><h5>Түр хүлээнэ үү...</h5>
+                            </div>
+                        }
+                        noDataComponent={(
+                            <div className="my-2">
+                                <h5>{t('Өгөгдөл байхгүй байна')}</h5>
+                            </div>
+                        )}
+                        onSort={handleSort}
+                        columns={getColumns(currentPage, rowsPerPage, pageCount, editModal, handleDelete, user)}
+                        sortIcon={<ChevronDown size={10} />}
+                        paginationPerPage={rowsPerPage}
+                        paginationDefaultPage={currentPage}
+                        data={datas}
+                        paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count,)}
+                        fixedHeader
+                        fixedHeaderScrollHeight='62vh'
+                    />
+                </div>
         	</Card>
         </Fragment>
     )
