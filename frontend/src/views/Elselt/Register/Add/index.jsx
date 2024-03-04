@@ -124,8 +124,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
 
         },
         [editData]
-        )
-        console.log(open, handleModal, refreshDatas, editData);
+    )
 
 	return (
         <Fragment>
