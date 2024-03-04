@@ -316,6 +316,7 @@ class ProfessionShalguur(
         return request.send_info('INF_001')
 
 
+@permission_classes([IsAuthenticated])
 class AdmissionUserInfoAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,

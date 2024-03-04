@@ -107,7 +107,7 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 						<div className='d-flex'>
 							<Input
 								className='text-center'
-								id={`gpa-${row.id}-input`}
+								// id={`gpa-${row.id}-input`}
 								type="number"
 								step="0.1"
 								min='0'

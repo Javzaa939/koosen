@@ -210,7 +210,7 @@ const ElseltUser = () => {
 				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom m-auto">
 					<CardTitle tag="h4">{t('Элсэгчдийн жагсаалт')}</CardTitle>
                 </CardHeader>
-                <Row className='justify-content-start mx-0 my-1'>
+                <Row className='justify-content-start mx-0 mt-1'>
                     <Col sm={6} lg={3} >
                         <Label className="form-label" for="lesson_year">
                             {t('Элсэлт')}
@@ -304,8 +304,8 @@ const ElseltUser = () => {
                             />
                     </Col>
                 </Row>
-                <Row className='justify-content-start mx-0 my-1'>
-                    <Col md={3} sm={6} xs={12} className='mx-auto'>
+                <Row className='justify-content-start mx-0 mt-1'>
+                    <Col md={3} sm={6} xs={12} >
                         <Label className="form-label" for="state">
                             {t('Төлөв')}
                         </Label>
