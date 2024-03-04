@@ -319,7 +319,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
                                 {postLoading &&<Spinner size='sm' className='me-1'/>}
                                 {t('Хадгалах')}
                             </Button>
-                            <Button color="secondary" type="reset" outline  onClick={handleModal}>
+                            <Button color="secondary">
                                 {t('Буцах')}
                             </Button>
                         </Col>

@@ -1,22 +1,23 @@
 from rest_framework import mixins
 from rest_framework import generics
-
-from django.db import transaction
-
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
+from rest_framework.filters import SearchFilter
+
+from django.db import transaction
+from django.db.models import F, Subquery, OuterRef
+from django.db.models.functions import Substr
+
 from main.utils.function.utils import has_permission
 from main.utils.function.pagination import CustomPagination
 
 
 from lms.models import (
     AdmissionRegister,
-    ContactInfo,
     AdmissionRegisterProfession,
     ProfessionDefinition,
     AdmissionIndicator,
     AdmissionXyanaltToo,
-    AdmissionUserProfession
 )
 
 from surgalt.serializers import (
@@ -27,7 +28,15 @@ from .serializer import (
     AdmissionSerializer,
     ElseltSysInfoSerializer,
     AdmissionProfessionSerializer,
-    AdmissionPostSerializer
+    AdmissionPostSerializer,
+    AdmissionUserInfoSerializer
+)
+
+from elselt.models import (
+    AdmissionUserProfession,
+    UserInfo,
+    ElseltUser,
+    ContactInfo
 )
 
 
@@ -307,3 +316,101 @@ class ProfessionShalguur(
         return request.send_info('INF_001')
 
 
+@permission_classes([IsAuthenticated])
+class AdmissionUserInfoAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+):
+
+    queryset = AdmissionUserProfession.objects.all()
+
+    serializer_class = AdmissionUserInfoSerializer
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['user__first_name', 'user__register', 'user__email', 'gpa']
+
+    def get_queryset(self):
+
+        queryset = self.queryset
+        queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
+
+        userinfo_qs = UserInfo.objects.filter(user=OuterRef('user')).values('gpa')[:1]
+
+        queryset = (
+            queryset
+            .annotate(
+                gpa=Subquery(userinfo_qs),
+            )
+        )
+
+        lesson_year_id = self.request.query_params.get('lesson_year')
+        profession_id = self.request.query_params.get('profession_id')
+        unit1_id = self.request.query_params.get('unit1_id')
+        state = self.request.query_params.get('state')
+        gender = self.request.query_params.get('gender')
+        sorting = self.request.query_params.get('sorting')
+
+        if lesson_year_id:
+            queryset = queryset.filter(profession__admission__id=lesson_year_id)
+
+        if profession_id:
+            queryset = queryset.filter(profession__profession__id=profession_id)
+
+        if unit1_id:
+            queryset = queryset.filter(user__aimag__id=unit1_id)
+
+        if state:
+            queryset = queryset.filter(state=state)
+
+        if gender:
+            if gender == 'Эрэгтэй':
+                queryset = queryset = queryset.filter(gender__in=['1', '3', '5', '7', '9'])
+            else:
+                queryset = queryset = queryset.filter(gender__in=['0', '2', '4', '6', '8'])
+
+        # Sort хийх үед ажиллана
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
+
+        return queryset
+
+    def get(self, request):
+
+        all_data = self.list(request).data
+
+        return request.send_data(all_data)
+
+
+class AdmissionYearAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+):
+
+    queryset = AdmissionRegister.objects.all()
+    serializer_class = AdmissionSerializer
+
+    def get(self, request):
+
+        all_data = self.list(request).data
+
+        return request.send_data(all_data)
+
+
+class AdmissionGpaAPIView(
+    generics.GenericAPIView,
+    mixins.UpdateModelMixin
+):
+    @transaction.atomic()
+    def put(self, request, pk=None):
+
+        data = request.data
+        UserInfo.objects.update_or_create(
+            id=pk,
+            defaults=data
+        )
+
+        return request.send_info("INF_002")
