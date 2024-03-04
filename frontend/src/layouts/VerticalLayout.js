@@ -119,6 +119,8 @@ const VerticalLayout = (props) =>
                         /** Оюутан тодорхойлолт */
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-definition-read', 'student11')
 
+                        /** Элсэлтийн тушаал */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-print-admission-read', 'student19')
                         /** ----------------------------- Тохиргоо ---------------------------- */
 
                         /** Ажиллах жил */

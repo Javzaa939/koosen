@@ -28,6 +28,8 @@ const StatementPrint = lazy(() => import("@views/Student/Transfer/Irsen/Print"))
 const ScoreSeasonPrint = lazy(() => import("@views/Student/Definition/ScoreSeason"))
 //nemsen zuil ni
 const Graduates = lazy(() => import("@views/Student/Graduates"))
+const Enrollment = lazy(() => import("@views/Student/Enrollment"))
+const PrintList = lazy(() => import("@views/Student/Enrollment/PrintList"))
 
 const StudentRoutes = [
      //shineer nemsen zam ni:
@@ -170,6 +172,17 @@ const StudentRoutes = [
         meta: {
             layout: 'blank'
         }
+    },
+    {
+        path: 'student/enrollment/printlist',
+        element: <PrintList />,
+        meta: {
+            layout: 'blank'
+        }
+    },
+    {
+        path: 'student/enrollment/',
+        element: <Enrollment />
     },
 ]
 

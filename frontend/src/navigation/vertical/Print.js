@@ -37,12 +37,6 @@ export default [
                 icon: <Circle size={8} />,
                 navLink: "print/graduation/"
             },
-            {
-                id: 'print7',
-                title: 'Элсэлтийн тушаал',
-                icon: <Circle size={8} />,
-                navLink: "print/enrollment/"
-            },
         ]
     }
 ]

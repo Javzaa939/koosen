@@ -965,6 +965,12 @@ function useApi(isDisplay=false) {
 			admission:{
 				get:(limit, page, sort, search, degree, department, group, profession, learning) =>
 				instance.get(`/print/admission/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&degree=${degree}&group=${group}&department=${department}&profession=${profession}&learning=${learning}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&school=${school_id}`),
+				put: (data) => instance.put(`/print/admission/`, data),
+			},
+			/** Элсэлтийн тушаал*/
+			admissionprint:{
+				get:(degree, department, group, profession, learning) =>
+				instance.get(`/print/admission/print/?degree=${degree}&group=${group}&department=${department}&profession=${profession}&learning=${learning}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&school=${school_id}`),
 			},
 		},
 		/* Тэтгэлэг бүртгэх */
