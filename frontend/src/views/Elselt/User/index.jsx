@@ -1,7 +1,7 @@
 // ** React Imports
 import { Fragment, useState, useEffect, useContext } from 'react'
 
-import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, Spinner, Modal, ModalHeader, ModalBody, Badge } from 'reactstrap'
+import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, Spinner, Modal, ModalHeader, ModalBody, Badge, UncontrolledTooltip } from 'reactstrap'
 
 import { ChevronDown, Search, User } from 'react-feather'
 
@@ -22,6 +22,11 @@ import { getPagination, ReactSelectStyles, generateLessonYear } from '@utils'
 
 import { getColumns } from './helpers';
 import { useNavigate } from 'react-router-dom';
+
+import { utils, writeFile } from 'xlsx-js-style';
+
+import { HiOutlineDocumentReport } from "react-icons/hi";
+import moment from 'moment';
 
 // import Addmodal from './Add'
 
@@ -210,6 +215,193 @@ const ElseltUser = () => {
         window.open(`elselt/user/${row.id}`)
     }
 
+    function convert(){
+
+        const header = Array.from({length: 1},(_) => {
+            return(
+                {
+                    '№': '',
+                    'Овог': '',
+                    'Нэр': '',
+                    'РД': '',
+                    'Хүйс': '',
+                    'Имейл': '',
+                    'Утасны дугаар': '',
+                    'Яаралтай холбогдох': '',
+                    'Хөтөлбөр': '',
+                    'Бүртгүүлсэн огноо': '',
+                    'Төгссөн сургууль': '',
+                    'Мэргэжил': '',
+                    'Голч': '',
+                    'Ажиллаж байгаа байгууллагын нэр': '',
+                    'Албан тушаал': '',
+                    'Хэлтэс': '',
+                    'Цол': '',
+                }
+            )
+        })
+
+        const mainData = datas.map((data, idx) => {
+            return(
+
+                {
+                    '№': idx + 1,
+                    'Овог': data?.user?.last_name || '',
+                    'Нэр': data?.user?.first_name || '',
+                    'РД': data?.user?.register || '',
+                    'Хүйс': data?.gender_name || '',
+                    'Имейл': data?.user?.email || '',
+                    'Утасны дугаар': data?.user?.mobile || '',
+                    'Яаралтай холбогдох': data?.user?.parent_mobile || '',
+                    'Хөтөлбөр': data?.profession || '',
+                    'Бүртгүүлсэн огноо': moment(data?.created_at).format('YYYY MM DD') || '',
+                    'Төгссөн сургууль': data?.userinfo?.graduate_school || '',
+                    'Мэргэжил': data?.userinfo?.graduate_profession || '',
+                    'Төгссөн он': data?.userinfo?.graduate_school_year || '',
+                    'Голч': '',
+                    'Ажиллаж байгаа байгууллагын нэр': data?.userinfo?.work_organization || '',
+                    'Албан тушаал': data?.userinfo?.position_name || '',
+                    'Хэлтэс': data?.userinfo?.work_heltes || '' || '',
+                    'Цол': data?.userinfo?.tsol_name || '',
+                }
+            )
+        })
+
+        const combo = [
+            // ...header,
+            ...mainData
+        ]
+
+        const worksheet = utils.json_to_sheet(combo);
+
+        const workbook = utils.book_new();
+        utils.book_append_sheet(workbook, worksheet, "Элсэгчдийн мэдээлэл");
+
+        const staticCells = [
+            '№',
+            'Овог',
+            'Нэр',
+            'РД',
+            'Хүйс',
+            'Имейл',
+            'Утасны дугаар',
+            'Яаралтай холбогдох',
+            'Хөтөлбөр',
+            'Бүртгүүлсэн огноо',
+            'Төгссөн сургууль',
+            'Мэргэжил',
+            'Төгссөн он',
+            'Голч',
+            'Ажиллаж байгаа байгууллагын нэр',
+            'Албан тушаал',
+            'Хэлтэс',
+            'Цол',
+        ];
+
+        utils.sheet_add_aoa(worksheet, [staticCells], { origin: "A1" });
+
+
+        const headerCell = {
+            border: {
+                top: { style: "thin", color: { rgb: "000000" } },
+                bottom: { style: "thin", color: { rgb: "000000" } },
+                left: { style: "thin", color: { rgb: "000000" } },
+                right: { style: "thin", color: { rgb: "000000" } }
+            },
+            alignment: {
+                horizontal: 'center',
+                vertical: 'center',
+                wrapText: true
+            },
+            font:{
+                sz:10,
+                bold:true
+            }
+        };
+
+        const defaultCell = {
+            border: {
+                top: { style: "thin", color: { rgb: "000000" } },
+                bottom: { style: "thin", color: { rgb: "000000" } },
+                left: { style: "thin", color: { rgb: "000000" } },
+                right: { style: "thin", color: { rgb: "000000" } }
+            },
+            alignment: {
+                horizontal: 'left',
+                vertical: 'center',
+                wrapText: true
+            },
+            font:{
+                sz:10
+            }
+        };
+
+        const defaultCenteredCell = {
+            border: {
+                top: { style: "thin", color: { rgb: "000000" } },
+                bottom: { style: "thin", color: { rgb: "000000" } },
+                left: { style: "thin", color: { rgb: "000000" } },
+                right: { style: "thin", color: { rgb: "000000" } }
+            },
+            alignment: {
+                horizontal: 'center',
+                vertical: 'center',
+                wrapText: true
+            },
+            font:{
+                sz:10
+            }
+        };
+
+        const styleRow = 0;
+        const sendRow = datas?.length + 1;
+        const styleCol = 0;
+        const sendCol = 17;
+
+        for (let row = styleRow; row <= sendRow; row++) {
+            for (let col = styleCol; col <= sendCol; col++) {
+            const cellNum = utils.encode_cell({ r: row, c: col });
+
+                if (!worksheet[cellNum]) {
+                    worksheet[cellNum] = {};
+                }
+
+                worksheet[cellNum].s = row === 0 ? headerCell : col === 0 ? defaultCenteredCell : defaultCell
+
+            }
+        }
+
+        const phaseZeroCells = Array.from({length: 4}, (_) => {return({wch: 10})})
+
+        worksheet["!cols"] = [
+            { wch: 3 },
+            ...phaseZeroCells,
+            { wch: 25 },
+            { wch: 10 },
+            { wch: 10 },
+            { wch: 25 },
+            { wch: 10 },
+            { wch: 25 },
+            { wch: 25 },
+            { wch: 10 },
+            { wch: 5 },
+            { wch: 25 },
+            { wch: 25 },
+            { wch: 25 },
+            { wch: 15 },
+        ];
+
+        const phaseOneRow = Array.from({length: datas.length}, (_) => {return({hpx: 30})})
+
+        worksheet["!rows"] = [
+            { hpx: 40 },
+            ...phaseOneRow
+        ]
+
+        writeFile(workbook, "Элсэгчдийн мэдээлэл.xlsx", { compression: true });
+
+    }
+
 	return (
 		<Fragment>
             {isLoading && Loader}
@@ -336,6 +528,19 @@ const ElseltUser = () => {
                             />
                     </Col>
                 </Row>
+                <Row>
+                    <Col>
+                        <div className='d-flex justify-content-end px-1'>
+                            <Button color='primary' className='d-flex align-items-center px-75' id='excel_button' onClick={() => convert()}>
+                                <HiOutlineDocumentReport className='me-25'/>
+                                Excel
+                            </Button>
+                            <UncontrolledTooltip target='excel_button'>
+                                Доорхи хүснэгтэнд харагдаж байгаа мэдээллийн жагсаалтаар эксел файл үүсгэнэ
+                            </UncontrolledTooltip>
+                        </div>
+                    </Col>
+                </Row>
                 <Row className="justify-content-between mx-0" >
                     <Col className='d-flex align-items-center justify-content-start' md={4}>
                         <Col md={3} sm={2} className='pe-1'>
@@ -389,7 +594,7 @@ const ElseltUser = () => {
                         paginationServer
                         pagination
                         className='react-dataTable'
-                        // progressPending={isTableLoading}
+                        progressPending={isTableLoading}
                         progressComponent={
                             <div className='my-2 d-flex align-items-center justify-content-center'>
                                 <Spinner className='me-1' color="" size='sm'/><h5>Түр хүлээнэ үү...</h5>
