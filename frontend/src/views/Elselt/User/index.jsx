@@ -70,10 +70,6 @@ const ElseltUser = () => {
     const [unit1op, setUnit1op] = useState([])
     const [unit1, setUnit1] = useState('')
 
-    const [infoModal, setInfoModal] = useState(false)
-    const [infoModalData, setInfoModalData] = useState(null)
-
-
     const genderOp = [
         {
             id: 1,
@@ -210,15 +206,8 @@ const ElseltUser = () => {
         setRowsPerPage(parseInt(e.target.value))
     }
 
-    function infoModalHandler (event, data) {
-        setInfoModal(!infoModal)
-        setInfoModalData(data)
-    }
-
     function handleRowClicked(row) {
-        console.log(row, 'row')
         window.open(`elselt/user/${row.id}`)
-        // window.open(`${}`)
     }
 
 	return (
@@ -412,7 +401,7 @@ const ElseltUser = () => {
                             </div>
                         )}
                         onSort={handleSort}
-                        columns={getColumns(currentPage, rowsPerPage, pageCount, editModal, handleDelete, user, infoModalHandler)}
+                        columns={getColumns(currentPage, rowsPerPage, pageCount, editModal, handleDelete, user)}
                         sortIcon={<ChevronDown size={10} />}
                         paginationPerPage={rowsPerPage}
                         paginationDefaultPage={currentPage}
@@ -425,126 +414,6 @@ const ElseltUser = () => {
                         fixedHeaderScrollHeight='62vh'
                     />
                 </div>
-                <Modal size='lg' isOpen={infoModal} centered toggle={infoModalHandler}>
-                    <ModalHeader toggle={infoModalHandler}>
-                        {t('Дэлгэрэнгүй мэдээлэл')}
-                    </ModalHeader>
-                    <ModalBody>
-                        {
-                            infoModalData ?
-                            <>
-                                <div>
-                                    <Row>
-                                        <Col>
-                                            <div className='border shadow p-1 m-1 rounded-3'>
-                                                <div className='d-flex justify-content-between'>
-                                                    <div className='d-flex align-items-end'>
-                                                        <User className='me-50'/>
-                                                        <span style={{ fontSize: 16 }}>
-                                                            Хувийн мэдээлэл
-                                                        </span>
-                                                    </div>
-                                                    <Badge
-                                                        className='d-flex align-items-center badge-glow p-0'
-                                                        pill
-                                                        color={`${infoModalData?.state == 1 ? 'primary' : infoModalData?.state == 2 ? 'success' : infoModalData?.state == 3 ? 'danger' : 'primary'
-                                                        }`}
-                                                    >
-                                                        <span className='mx-75 mt-25'>
-                                                            {infoModalData?.state_name}
-                                                        </span>
-                                                    </Badge>
-                                                </div>
-                                                <div className='mt-2'>
-                                                    <div className='p-50'>
-                                                        Овог: {infoModalData?.user?.last_name}
-                                                    </div>
-                                                    <div className='p-50'>
-                                                        Нэр: {infoModalData?.user?.first_name}
-                                                    </div>
-                                                    <div className='p-50'>
-                                                        Регистрийн дугаар: {infoModalData?.user?.register}
-                                                    </div>
-                                                    <div className='p-50'>
-                                                        Утасны дугаар: {infoModalData?.user?.mobile}
-                                                    </div>
-                                                    <div className='p-50'>
-                                                        Яаралтай холбогдох: {infoModalData?.user?.parent_mobile}
-                                                    </div>
-                                                    <div className='p-50'>
-                                                        Имейл: {infoModalData?.user?.email}
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div className='border shadow p-1 m-1 rounded-3'>
-                                                <div className='d-flex justify-content-between'>
-                                                    <div className='d-flex align-items-end'>
-                                                        <User className='me-50'/>
-                                                        <span style={{ fontSize: 16 }}>
-                                                            Мэдээлэл
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                <div className='mt-2'>
-                                                    <div className='p-50'>
-                                                        Төгссөн сургууль: {infoModalData?.user?.register}
-                                                    </div>
-                                                    <div className='p-50'>
-                                                        Мэргэжил: {infoModalData?.user?.mobile}
-                                                    </div>
-                                                    <div className='p-50'>
-                                                        Е-Монголиа дипломын хуулбар: {infoModalData?.user?.first_name}
-                                                    </div>
-                                                    <div className='p-50'>
-                                                        Албан тушаал: {infoModalData?.user?.parent_mobile}
-                                                    </div>
-                                                    <div className='p-50'>
-                                                        Ажиллаж байгаа байгууллагын нэр: {infoModalData?.user?.work_organization}
-                                                    </div>
-                                                    <div className='p-50'>
-                                                        Хэлтэс: {infoModalData?.user?.work_heltes}
-                                                    </div>
-                                                    <div className='p-50'>
-                                                        Цол: {infoModalData?.user?.last_name}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            {/* <div>
-                                                <Label>
-                                                    Овог
-                                                </Label>
-                                                <div>
-                                                    {infoModalData?.user?.last_name}
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <Label>
-                                                    Нэр
-                                                </Label>
-                                                <div>
-                                                    {infoModalData?.user?.first_name}
-                                                </div>
-                                            </div> */}
-                                        </Col>
-                                        {/* <Col>
-                                            <div>
-                                                <Label>
-                                                    test
-                                                </Label>
-                                                <div>
-                                                    {infoModalData?.user?.first_name}
-                                                </div>
-                                            </div>
-                                        </Col> */}
-                                    </Row>
-                                </div>
-                            </>
-                            :
-                            <div style={{ minHeight: 660 }}></div>
-                        }
-                    </ModalBody>
-                </Modal>
         	</Card>
         </Fragment>
     )

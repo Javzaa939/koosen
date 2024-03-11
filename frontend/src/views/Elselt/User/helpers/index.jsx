@@ -15,7 +15,7 @@ import useApi from '@hooks/useApi';
 import useLoader from "@hooks/useLoader";
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, page_count, editModal, handleDelete, user, infoModalHandler) {
+export function getColumns (currentPage, rowsPerPage, page_count, editModal, handleDelete, user) {
 
 	const { school_id } = useContext(SchoolContext)
 
@@ -138,15 +138,6 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 			selector: (row) => <span title={row?.userinfo?.graduate_school}>{row?.userinfo?.graduate_school}</span>,
 			center: true
 		},
-        {
-			maxWidth: "150px",
-			minWidth: "150px",
-			header: 'state',
-			sortable: true,
-			name: t("Төлөв"),
-			selector: (row) => row?.state_name,
-			center: true,
-		},
 		{
 			maxWidth: "100px",
 			minWidth: "100px",
@@ -163,26 +154,41 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 			selector: (row) => row?.created_at? moment(row?.created_at).format("YYYY-MM-DD h:mm") : '',
 			center: true,
 		},
-		{
-			maxWidth: "100px",
-			minWidth: "100px",
-			name: t("Үйлдэл"),
-			center: true,
+		// {
+		// 	maxWidth: "100px",
+		// 	minWidth: "100px",
+		// 	name: t("Үйлдэл"),
+		// 	center: true,
+		// 	selector: (row) => (
+		// 		<div>
+		// 			<Badge
+		// 				color='light-info'
+		// 				pill
+		// 				role='button'
+		// 				id={`description${row.id}`}
+		// 				onClick = {
+		// 					() => infoModalHandler(row?.id, row)}
+		// 			>
+		// 				<Eye />
+		// 			</Badge>
+	 	// 			{/* <UncontrolledTooltip placement='top' target={`description${row.id}`} >Дэлгэрэнгүй мэдээлэл</UncontrolledTooltip> */}
+		// 		</div>
+		// 	)
+		// },
+        {
+			maxWidth: "150px",
+			minWidth: "150px",
+			header: 'state',
+			sortable: true,
+			name: t("Төлөв"),
 			selector: (row) => (
-				<div>
-					<Badge
-						color='light-info'
-						pill
-						role='button'
-						id={`description${row.id}`}
-						onClick = {
-							() => infoModalHandler(row?.id, row)}
-					>
-						<Eye />
-					</Badge>
-	 				{/* <UncontrolledTooltip placement='top' target={`description${row.id}`} >Дэлгэрэнгүй мэдээлэл</UncontrolledTooltip> */}
-				</div>
-			)
+				<Badge
+					color={`${row?.state == 1 ? 'primary' : row?.state == 2 ? 'success' : row?.state == 3 ? 'danger' : 'primary'}`}
+					pill
+				>
+					{row?.state_name}
+				</Badge>),
+			center: true,
 		},
 	]
 
