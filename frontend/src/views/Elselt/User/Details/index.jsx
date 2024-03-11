@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
-import { ChevronsLeft, Download, User } from 'react-feather';
+import { Book, ChevronsLeft, Download, User } from 'react-feather';
 import { Badge, Col, Row } from 'reactstrap';
 
 import { LuGoal } from "react-icons/lu";
@@ -119,7 +119,7 @@ function Details() {
                             <div className='border shadow p-1 m-1 rounded-3'>
                                 <div className='d-flex justify-content-between'>
                                     <div className='d-flex align-items-end'>
-                                        <User className='me-50'/>
+                                        <Book className='me-50'/>
                                         <span style={{ fontSize: 16 }}>
                                             Мэдээлэл
                                         </span>
