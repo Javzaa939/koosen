@@ -212,7 +212,7 @@ const ElseltUser = () => {
 
 	return (
 		<Fragment>
-            {/* {isLoading && Loader} */}
+            {isLoading && Loader}
 			<Card>
 				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom m-auto">
 					<CardTitle tag="h4">{t('Элсэгчдийн жагсаалт')}</CardTitle>
