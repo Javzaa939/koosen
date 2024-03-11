@@ -131,10 +131,11 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 			center: true,
 		},
         {
-			maxWidth: "250px",
-			minWidth: "250px",
+			maxWidth: "350px",
+			minWidth: "350px",
+			wrap: true,
 			name: t("Төгссөн сургууль"),
-			selector: (row) => row?.userinfo?.graduate_school,
+			selector: (row) => <span title={row?.userinfo?.graduate_school}>{row?.userinfo?.graduate_school}</span>,
 			center: true
 		},
         {
