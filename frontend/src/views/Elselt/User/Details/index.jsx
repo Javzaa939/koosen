@@ -9,6 +9,7 @@ import { Badge, Col, Row } from 'reactstrap';
 import { LuGoal } from "react-icons/lu";
 
 import './style.scss'
+import moment from 'moment';
 
 function Details() {
 
@@ -16,7 +17,7 @@ function Details() {
     const id = param?.student
 	const elseltApi = useApi().elselt.admissionuserdata
 
-	const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true, bg: 2, initValue: true});
+	const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true, bg: 3, initValue: true});
 
     const [datas, setDatas] = useState()
 
@@ -51,10 +52,9 @@ function Details() {
 
     }
 
-
     return (
         <div style={{ minHeight: '80dvh' }}>
-            <div className='d-flex align-items-center' role='button' onClick={() => {window.close()}}>
+            <div className='d-flex align-items-center ms-1' role='button' onClick={() => {window.close()}}>
                 <ChevronsLeft size={18}/> Буцах
             </div>
             {isLoading ?
@@ -149,6 +149,9 @@ function Details() {
                                     </div>
                                     <div className='p-50'>
                                         <span className='text_prefixer'>Цол:</span> {datas?.userinfo?.tsol_name}
+                                    </div>
+                                    <div className='p-50'>
+                                        <span className='text_prefixer'>Бүртгүүлсэн огноо:</span> {moment(datas?.created_at).format('YYYY MM DD')}
                                     </div>
                                 </div>
                             </div>
