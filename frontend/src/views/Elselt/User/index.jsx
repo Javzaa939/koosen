@@ -1,9 +1,9 @@
 // ** React Imports
 import { Fragment, useState, useEffect, useContext } from 'react'
 
-import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, Spinner } from 'reactstrap'
+import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, Spinner, Modal, ModalHeader, ModalBody, Badge } from 'reactstrap'
 
-import { ChevronDown, Search } from 'react-feather'
+import { ChevronDown, Search, User } from 'react-feather'
 
 import DataTable from 'react-data-table-component'
 
@@ -21,6 +21,7 @@ import AuthContext from "@context/AuthContext"
 import { getPagination, ReactSelectStyles, generateLessonYear } from '@utils'
 
 import { getColumns } from './helpers';
+import { useNavigate } from 'react-router-dom';
 
 // import Addmodal from './Add'
 
@@ -30,6 +31,8 @@ const ElseltUser = () => {
 
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(20)
+
+    const navigate = useNavigate()
 
     // Эрэмбэлэлт
     const [sortField, setSort] = useState('')
@@ -66,6 +69,10 @@ const ElseltUser = () => {
 
     const [unit1op, setUnit1op] = useState([])
     const [unit1, setUnit1] = useState('')
+
+    const [infoModal, setInfoModal] = useState(false)
+    const [infoModalData, setInfoModalData] = useState(null)
+
 
     const genderOp = [
         {
@@ -203,9 +210,20 @@ const ElseltUser = () => {
         setRowsPerPage(parseInt(e.target.value))
     }
 
+    function infoModalHandler (event, data) {
+        setInfoModal(!infoModal)
+        setInfoModalData(data)
+    }
+
+    function handleRowClicked(row) {
+        console.log(row, 'row')
+        window.open(`elselt/user/${row.id}`)
+        // window.open(`${}`)
+    }
+
 	return (
 		<Fragment>
-            {isLoading && Loader}
+            {/* {isLoading && Loader} */}
 			<Card>
 				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom m-auto">
 					<CardTitle tag="h4">{t('Элсэгчдийн жагсаалт')}</CardTitle>
@@ -376,13 +394,13 @@ const ElseltUser = () => {
                         </Button>
                     </Col>
                 </Row>
-                <div className="react-dataTable react-dataTable-selectable-rows" id="datatableLeftTwo">
+                <div className="react-dataTable react-dataTable-selectable-rows" id="datatableLeftOneRightOne">
                     <DataTable
                         noHeader
                         paginationServer
                         pagination
                         className='react-dataTable'
-                        progressPending={isTableLoading}
+                        // progressPending={isTableLoading}
                         progressComponent={
                             <div className='my-2 d-flex align-items-center justify-content-center'>
                                 <Spinner className='me-1' color="" size='sm'/><h5>Түр хүлээнэ үү...</h5>
@@ -394,16 +412,139 @@ const ElseltUser = () => {
                             </div>
                         )}
                         onSort={handleSort}
-                        columns={getColumns(currentPage, rowsPerPage, pageCount, editModal, handleDelete, user)}
+                        columns={getColumns(currentPage, rowsPerPage, pageCount, editModal, handleDelete, user, infoModalHandler)}
                         sortIcon={<ChevronDown size={10} />}
                         paginationPerPage={rowsPerPage}
                         paginationDefaultPage={currentPage}
+                        highlightOnHover
+                        pointerOnHover
+                        onRowClicked={handleRowClicked}
                         data={datas}
                         paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count,)}
                         fixedHeader
                         fixedHeaderScrollHeight='62vh'
                     />
                 </div>
+                <Modal size='lg' isOpen={infoModal} centered toggle={infoModalHandler}>
+                    <ModalHeader toggle={infoModalHandler}>
+                        {t('Дэлгэрэнгүй мэдээлэл')}
+                    </ModalHeader>
+                    <ModalBody>
+                        {
+                            infoModalData ?
+                            <>
+                                <div>
+                                    <Row>
+                                        <Col>
+                                            <div className='border shadow p-1 m-1 rounded-3'>
+                                                <div className='d-flex justify-content-between'>
+                                                    <div className='d-flex align-items-end'>
+                                                        <User className='me-50'/>
+                                                        <span style={{ fontSize: 16 }}>
+                                                            Хувийн мэдээлэл
+                                                        </span>
+                                                    </div>
+                                                    <Badge
+                                                        className='d-flex align-items-center badge-glow p-0'
+                                                        pill
+                                                        color={`${infoModalData?.state == 1 ? 'primary' : infoModalData?.state == 2 ? 'success' : infoModalData?.state == 3 ? 'danger' : 'primary'
+                                                        }`}
+                                                    >
+                                                        <span className='mx-75 mt-25'>
+                                                            {infoModalData?.state_name}
+                                                        </span>
+                                                    </Badge>
+                                                </div>
+                                                <div className='mt-2'>
+                                                    <div className='p-50'>
+                                                        Овог: {infoModalData?.user?.last_name}
+                                                    </div>
+                                                    <div className='p-50'>
+                                                        Нэр: {infoModalData?.user?.first_name}
+                                                    </div>
+                                                    <div className='p-50'>
+                                                        Регистрийн дугаар: {infoModalData?.user?.register}
+                                                    </div>
+                                                    <div className='p-50'>
+                                                        Утасны дугаар: {infoModalData?.user?.mobile}
+                                                    </div>
+                                                    <div className='p-50'>
+                                                        Яаралтай холбогдох: {infoModalData?.user?.parent_mobile}
+                                                    </div>
+                                                    <div className='p-50'>
+                                                        Имейл: {infoModalData?.user?.email}
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className='border shadow p-1 m-1 rounded-3'>
+                                                <div className='d-flex justify-content-between'>
+                                                    <div className='d-flex align-items-end'>
+                                                        <User className='me-50'/>
+                                                        <span style={{ fontSize: 16 }}>
+                                                            Мэдээлэл
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div className='mt-2'>
+                                                    <div className='p-50'>
+                                                        Төгссөн сургууль: {infoModalData?.user?.register}
+                                                    </div>
+                                                    <div className='p-50'>
+                                                        Мэргэжил: {infoModalData?.user?.mobile}
+                                                    </div>
+                                                    <div className='p-50'>
+                                                        Е-Монголиа дипломын хуулбар: {infoModalData?.user?.first_name}
+                                                    </div>
+                                                    <div className='p-50'>
+                                                        Албан тушаал: {infoModalData?.user?.parent_mobile}
+                                                    </div>
+                                                    <div className='p-50'>
+                                                        Ажиллаж байгаа байгууллагын нэр: {infoModalData?.user?.work_organization}
+                                                    </div>
+                                                    <div className='p-50'>
+                                                        Хэлтэс: {infoModalData?.user?.work_heltes}
+                                                    </div>
+                                                    <div className='p-50'>
+                                                        Цол: {infoModalData?.user?.last_name}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            {/* <div>
+                                                <Label>
+                                                    Овог
+                                                </Label>
+                                                <div>
+                                                    {infoModalData?.user?.last_name}
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <Label>
+                                                    Нэр
+                                                </Label>
+                                                <div>
+                                                    {infoModalData?.user?.first_name}
+                                                </div>
+                                            </div> */}
+                                        </Col>
+                                        {/* <Col>
+                                            <div>
+                                                <Label>
+                                                    test
+                                                </Label>
+                                                <div>
+                                                    {infoModalData?.user?.first_name}
+                                                </div>
+                                            </div>
+                                        </Col> */}
+                                    </Row>
+                                </div>
+                            </>
+                            :
+                            <div style={{ minHeight: 660 }}></div>
+                        }
+                    </ModalBody>
+                </Modal>
         	</Card>
         </Fragment>
     )

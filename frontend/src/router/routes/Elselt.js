@@ -4,6 +4,7 @@ const ElseltRegister = lazy(() => import("@views/Elselt/Register"))
 const ElseltProfession = lazy(() => import("@views/Elselt/Register/Profession"))
 const SysInfo = lazy(() => import("@views/Elselt/SysInfo"))
 const User = lazy(() => import("@views/Elselt/User"))
+const Details = lazy(() => import("@views/Elselt/User/Details"))
 
 const ElseltRoutes = [
     {
@@ -21,6 +22,10 @@ const ElseltRoutes = [
     {
         path: 'elselt/user/',
         element: <User />
+    },
+    {
+        path: 'elselt/user/:student',
+        element: <Details />
     },
 ]
 

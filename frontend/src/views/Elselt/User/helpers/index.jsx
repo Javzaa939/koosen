@@ -1,8 +1,8 @@
 import { useContext, useRef } from 'react';
 
-import { Input }  from 'reactstrap';
+import { Badge, Input }  from 'reactstrap';
 
-import { AlertOctagon } from "react-feather";
+import { AlertOctagon, Eye } from "react-feather";
 
 import { UncontrolledTooltip } from "reactstrap";
 
@@ -15,7 +15,7 @@ import useApi from '@hooks/useApi';
 import useLoader from "@hooks/useLoader";
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, page_count, editModal, handleDelete, user, handleAdd) {
+export function getColumns (currentPage, rowsPerPage, page_count, editModal, handleDelete, user, infoModalHandler) {
 
 	const { school_id } = useContext(SchoolContext)
 
@@ -161,6 +161,27 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 			name: t("Бүртгүүлсэн огноо"),
 			selector: (row) => row?.created_at? moment(row?.created_at).format("YYYY-MM-DD h:mm") : '',
 			center: true,
+		},
+		{
+			maxWidth: "100px",
+			minWidth: "100px",
+			name: t("Үйлдэл"),
+			center: true,
+			selector: (row) => (
+				<div>
+					<Badge
+						color='light-info'
+						pill
+						role='button'
+						id={`description${row.id}`}
+						onClick = {
+							() => infoModalHandler(row?.id, row)}
+					>
+						<Eye />
+					</Badge>
+	 				{/* <UncontrolledTooltip placement='top' target={`description${row.id}`} >Дэлгэрэнгүй мэдээлэл</UncontrolledTooltip> */}
+				</div>
+			)
 		},
 	]
 
