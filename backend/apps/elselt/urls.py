@@ -9,6 +9,7 @@ urlpatterns = [
 
     # Элсэгчдийн мэдээлэл
     path('admissionuserdata/', AdmissionUserInfoAPIView.as_view()),
+    path('admissionuserdata/<int:pk>/', AdmissionUserInfoAPIView.as_view()),
 
     path('profession/', ElseltProfession.as_view()),
     path('profession/<int:pk>/', ElseltProfession.as_view()),

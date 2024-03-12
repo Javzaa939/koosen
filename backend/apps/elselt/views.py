@@ -320,6 +320,7 @@ class ProfessionShalguur(
 class AdmissionUserInfoAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
 ):
 
     queryset = AdmissionUserProfession.objects.all()
@@ -378,7 +379,13 @@ class AdmissionUserInfoAPIView(
 
         return queryset
 
-    def get(self, request):
+    def get(self, request, pk=None):
+
+        if pk:
+
+            all_data = self.retrieve(request, pk).data
+
+            return request.send_data(all_data)
 
         all_data = self.list(request).data
 

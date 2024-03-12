@@ -87,7 +87,7 @@ class AdmissionUserProfession(models.Model):
     STATE_REJECT = 3
 
     STATE = (
-        (STATE_SEND, 'ИЛГЭЭСЭН'),
+        (STATE_SEND, 'БҮРТГҮҮЛСЭН'),
         (STATE_APPROVE, 'ТЭНЦСЭН'),
         (STATE_REJECT, 'ТЭНЦЭЭГҮЙ'),
     )

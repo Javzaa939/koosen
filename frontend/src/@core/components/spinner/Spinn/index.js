@@ -9,7 +9,7 @@ const Spinn = ({bg}) => {
 		return (
 			<div className="d-flex justify-content-center align-items-center background-glassf w-100 h-100">
 				<div className="fallback-spinnerf app-loaderf background-lightf  position-absolute top-50 start-50 translate-middle ">
-					<img className="fallback-logof  position-absolute top-50 start-50 translate-middle " src={window.localStorage.skin === '"dark"' ? whitelogo : logo} alt="logo" style={{ width: 100 }}/>
+					<img className="fallback-logof  position-absolute top-50 start-50 translate-middle " src={window.localStorage.skin === '"dark"' ? whitelogo : logo} alt="logo"/>
 					<div className="loadingf  position-absolute top-50 start-50 translate-middle ">
 						<div className="effect-1f effectsf"></div>
 						<div className="effect-2f effectsf"></div>
@@ -20,9 +20,9 @@ const Spinn = ({bg}) => {
 			)
 		} else if(bg === 2) {
 			return(
-				<div className="d-flex justify-content-center align-items-center background-glassf top-50 start-50 translate-middle rounded-5 shadow" style={{ width: '80vw', height: '70vh' }}>
+				<div className="d-flex justify-content-center align-items-center mt-5 background-glassf top-50 start-50 translate-middle rounded-5 shadow" style={{ width: '80vw', height: '70vh' }}>
 					<div className="fallback-spinnerf app-loaderf background-lightf  position-absolute top-50 start-50 translate-middle ">
-						<img className="fallback-logof  position-absolute top-50 start-50 translate-middle " src={window.localStorage.skin === '"dark"' ? whitelogo : logo} alt="logo" style={{ width: 100 }}/>
+						<img className="fallback-logof  position-absolute top-50 start-50 translate-middle " src={window.localStorage.skin === '"dark"' ? whitelogo : logo} alt="logo"/>
 						<div className="loadingf  position-absolute top-50 start-50 translate-middle ">
 							<div className="effect-1f effectsf"></div>
 							<div className="effect-2f effectsf"></div>
@@ -33,9 +33,9 @@ const Spinn = ({bg}) => {
 				)
 		} else if(bg === 3) {
 			return(
-				<div className="d-flex justify-content-center align-items-center background-glassf w-25 h-50 top-50 start-50 translate-middle rounded-5 shadow">
+				<div className="d-flex justify-content-center align-items-center background-glassf w-75 top-50 start-50 translate-middle rounded-5 shadow">
 					<div className="fallback-spinnerf app-loaderf background-lightf  position-absolute top-50 start-50 translate-middle ">
-						<img className="fallback-logof  position-absolute top-50 start-50 translate-middle " src={window.localStorage.skin === '"dark"' ? whitelogo : logo} alt="logo" style={{ width: 100 }}/>
+						<img className="fallback-logof  position-absolute top-50 start-50 translate-middle " src={window.localStorage.skin === '"dark"' ? whitelogo : logo} alt="logo"/>
 						<div className="loadingf  position-absolute top-50 start-50 translate-middle ">
 							<div className="effect-1f effectsf"></div>
 							<div className="effect-2f effectsf"></div>

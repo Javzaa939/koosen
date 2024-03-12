@@ -1,9 +1,9 @@
 // ** React Imports
 import { Fragment, useState, useEffect, useContext } from 'react'
 
-import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, Spinner } from 'reactstrap'
+import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, Spinner, Modal, ModalHeader, ModalBody, Badge } from 'reactstrap'
 
-import { ChevronDown, Search } from 'react-feather'
+import { ChevronDown, Search, User } from 'react-feather'
 
 import DataTable from 'react-data-table-component'
 
@@ -21,6 +21,7 @@ import AuthContext from "@context/AuthContext"
 import { getPagination, ReactSelectStyles, generateLessonYear } from '@utils'
 
 import { getColumns } from './helpers';
+import { useNavigate } from 'react-router-dom';
 
 // import Addmodal from './Add'
 
@@ -30,6 +31,8 @@ const ElseltUser = () => {
 
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(20)
+
+    const navigate = useNavigate()
 
     // Эрэмбэлэлт
     const [sortField, setSort] = useState('')
@@ -201,6 +204,10 @@ const ElseltUser = () => {
     // ** Function to handle per page
     function handlePerPage(e) {
         setRowsPerPage(parseInt(e.target.value))
+    }
+
+    function handleRowClicked(row) {
+        window.open(`elselt/user/${row.id}`)
     }
 
 	return (
@@ -376,13 +383,13 @@ const ElseltUser = () => {
                         </Button>
                     </Col>
                 </Row>
-                <div className="react-dataTable react-dataTable-selectable-rows" id="datatableLeftTwo">
+                <div className="react-dataTable react-dataTable-selectable-rows" id="datatableLeftOneRightOne">
                     <DataTable
                         noHeader
                         paginationServer
                         pagination
                         className='react-dataTable'
-                        progressPending={isTableLoading}
+                        // progressPending={isTableLoading}
                         progressComponent={
                             <div className='my-2 d-flex align-items-center justify-content-center'>
                                 <Spinner className='me-1' color="" size='sm'/><h5>Түр хүлээнэ үү...</h5>
@@ -398,6 +405,9 @@ const ElseltUser = () => {
                         sortIcon={<ChevronDown size={10} />}
                         paginationPerPage={rowsPerPage}
                         paginationDefaultPage={currentPage}
+                        highlightOnHover
+                        pointerOnHover
+                        onRowClicked={handleRowClicked}
                         data={datas}
                         paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count,)}
                         fixedHeader
