@@ -130,6 +130,25 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 			},
 			center: true,
 		},
+		{
+			name: t("Хүйс"),
+			selector: (row) => row?.gender_name,
+			center: true
+		},
+		{
+			minWidth: "120px",
+			name: t("Утас"),
+			selector: (row) => row?.user?.mobile,
+			wrap: true,
+			center: true
+		},
+		{
+			minWidth: "120px",
+			name: t("Имэйл"),
+			selector: (row) => row?.user?.email,
+			wrap: true,
+			center: true
+		},
         {
 			maxWidth: "350px",
 			minWidth: "350px",
@@ -139,10 +158,24 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 			center: true
 		},
 		{
-			maxWidth: "100px",
-			minWidth: "100px",
-			name: t("Хүйс"),
-			selector: (row) => row?.gender_name,
+			maxWidth: "350px",
+			minWidth: "350px",
+			wrap: true,
+			name: t("Мэргэжил"),
+			selector: (row) => <span title={row?.userinfo?.graduate_profession}>{row?.userinfo?.graduate_profession}</span>,
+			center: true
+		},
+		{
+			name: t("Цол"),
+			selector: (row) => row?.userinfo?.tsol_name,
+			wrap: true,
+			center: true
+		},
+		{
+			minWidth: "120px",
+			name: t("Яаралтай холбогдох утас"),
+			selector: (row) => row?.user?.parent_mobile,
+			wrap: true,
 			center: true
 		},
 		{
@@ -150,31 +183,10 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 			minWidth: "300px",
 			header: 'created_at',
 			sortable: true,
-			name: t("Бүртгүүлсэн огноо"),
+			name: t("Бүрт/огноо"),
 			selector: (row) => row?.created_at? moment(row?.created_at).format("YYYY-MM-DD h:mm") : '',
 			center: true,
 		},
-		// {
-		// 	maxWidth: "100px",
-		// 	minWidth: "100px",
-		// 	name: t("Үйлдэл"),
-		// 	center: true,
-		// 	selector: (row) => (
-		// 		<div>
-		// 			<Badge
-		// 				color='light-info'
-		// 				pill
-		// 				role='button'
-		// 				id={`description${row.id}`}
-		// 				onClick = {
-		// 					() => infoModalHandler(row?.id, row)}
-		// 			>
-		// 				<Eye />
-		// 			</Badge>
-	 	// 			{/* <UncontrolledTooltip placement='top' target={`description${row.id}`} >Дэлгэрэнгүй мэдээлэл</UncontrolledTooltip> */}
-		// 		</div>
-		// 	)
-		// },
         {
 			maxWidth: "150px",
 			minWidth: "150px",

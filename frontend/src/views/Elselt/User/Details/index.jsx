@@ -132,12 +132,23 @@ function Details() {
                                     <div className='p-50'>
                                         <span className='text_prefixer'>Мэргэжил:</span> {datas?.userinfo?.graduate_profession}
                                     </div>
-                                    <div className='p-50 d-flex align-items-center'>
-                                        <span className='text_prefixer me-50'>Е-Монголиа дипломын хуулбар:</span>
-                                        <span className='text-primary d-flex align-items-center' role='button' onClick={() => {window.open(`${process.env.REACT_APP_SERVER_URL}${datas?.userinfo?.emongolia_diplom_pdf}`)}}>
-                                            {ftext(datas?.userinfo?.emongolia_diplom_pdf)} <Download className='ms-25' size={14}/>
-                                        </span>
-                                    </div>
+                                    {
+                                        datas?.userinfo?.emongolia_diplom_pdf
+                                        ?
+                                            <div className='p-50 d-flex align-items-center'>
+                                                <span className='text_prefixer me-50'>Е-Монголиа дипломын хуулбар:</span>
+                                                <span className='text-primary d-flex align-items-center' role='button' onClick={() => {window.open(`${process.env.REACT_APP_SERVER_FILE_URL}${datas?.userinfo?.emongolia_diplom_pdf}`)}}>
+                                                    {ftext(datas?.userinfo?.emongolia_diplom_pdf)} <Download className='ms-25' size={14}/>
+                                                </span>
+                                            </div>
+                                        :
+                                            <div className='p-50 d-flex align-items-center'>
+                                                <span className='text_prefixer me-50'>Төгссөн тушаал/ архивын лавлагаа хавсаргах:</span>
+                                                <span className='text-primary d-flex align-items-center' role='button' onClick={() => {window.open(`${process.env.REACT_APP_SERVER_FILE_URL}${datas?.userinfo?.graduate_pdf}`)}}>
+                                                    {ftext(datas?.userinfo?.graduate_pdf)} <Download className='ms-25' size={14}/>
+                                                </span>
+                                            </div>
+                                    }
                                     <div className='p-50'>
                                         <span className='text_prefixer'>Албан тушаал:</span> {datas?.userinfo?.position_name}
                                     </div>
