@@ -114,7 +114,6 @@ const ElseltUser = () => {
         const { success, data } = await fetchData(professionApi.getList())
         if (success) {
             setProfession(data)
-            console.log(data,'datas')
         }
 	}
 
@@ -575,7 +574,7 @@ const ElseltUser = () => {
                             id='search-input'
                             placeholder={t("Хайх үг....")}
                             value={searchValue}
-                            onChange={(e) => {handleFilter(e), console.log(e.target.value)}}
+                            onChange={(e) => {handleFilter(e)}}
                             onKeyPress={e => e.key === 'Enter' && handleSearch()}
                         />
                         <Button
