@@ -15,13 +15,13 @@ export default [
             },
             {
                 id: 'elselt2',
-                title: 'Элсэлт бүртгэх',
+                title: 'Элсэлт',
                 icon: <Circle size={8} />,
                 navLink: "elselt/register"
             },
             {
                 id: 'elselt3',
-                title: 'Элсэгчдийн бүртгэл',
+                title: 'Бүртгүүлэгчид',
                 icon: <Circle size={8} />,
                 navLink: "elselt/user"
             },
