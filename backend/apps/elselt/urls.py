@@ -14,6 +14,9 @@ urlpatterns = [
     path('profession/', ElseltProfession.as_view()),
     path('profession/<int:pk>/', ElseltProfession.as_view()),
 
+    # Элсэлт явагдаж байгаа хөтөлбөрийн жагсаалт
+    path('profession/list/', ElseltActiveListProfession.as_view()),
+
     # Элсэлтийн системийн мэдээлэл
     path('sysinfo/', ElseltSysInfo.as_view()),
     path('sysinfo/<int:pk>/', ElseltSysInfo.as_view()),

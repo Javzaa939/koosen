@@ -11,6 +11,8 @@ from django.db.models.functions import Substr
 from main.utils.function.utils import has_permission
 from main.utils.function.pagination import CustomPagination
 
+import datetime as dt
+
 
 from lms.models import (
     AdmissionRegister,
@@ -29,6 +31,7 @@ from .serializer import (
     ElseltSysInfoSerializer,
     AdmissionProfessionSerializer,
     AdmissionPostSerializer,
+    AdmissionActiveProfession,
     AdmissionUserInfoSerializer
 )
 
@@ -182,6 +185,35 @@ class ProfessionShalguur(
                 return request.send_error('ERR_001', 'Системийн админд хандана уу')
 
         return request.send_info('INF_001')
+
+
+class ElseltActiveListProfession(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin
+):
+    """ Идэвхитэй элсэлтийн мэргэжил """
+
+    queryset = AdmissionRegisterProfession.objects.all()
+    serializer_class = AdmissionActiveProfession
+
+    def get(self, request):
+
+        now = dt.date.today()
+
+        self.queryset = (
+            self.queryset
+            .filter(
+                admission__begin_date__lte=now,
+                admission__end_date__gte=now,
+                admission__is_active=True
+            )
+        )
+
+
+        all_data = self.list(request).data
+
+        return request.send_data(all_data)
 
 
 class ElseltSysInfo(

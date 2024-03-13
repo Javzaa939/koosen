@@ -64,6 +64,16 @@ class AdmissionProfessionSerializer(serializers.ModelSerializer):
         }
 
 
+class AdmissionActiveProfession(serializers.ModelSerializer):
+
+    prof_id = serializers.CharField(source="profession.id")
+    name = serializers.CharField(source="profession.name")
+
+    class Meta:
+        model = AdmissionRegisterProfession
+        fields = 'prof_id', 'name'
+
+
 class UserinfoSerializer(serializers.ModelSerializer):
 
     class Meta:

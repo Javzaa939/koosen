@@ -107,13 +107,14 @@ const ElseltUser = () => {
 	const elseltApi = useApi().elselt.admissionuserdata
     const admissionYearApi = useApi().elselt
     const unit1Api = useApi().hrms.unit1
-    const professionApi = useApi().study.professionDefinition
+    const professionApi = useApi().elselt.profession
 
     // Хөтөлбөрийн жагсаалт авах
     async function getProfession() {
-        const { success, data } = await fetchData(professionApi.getList('', ''))
+        const { success, data } = await fetchData(professionApi.getList())
         if (success) {
             setProfession(data)
+            console.log(data,'datas')
         }
 	}
 
@@ -258,7 +259,7 @@ const ElseltUser = () => {
                     'Төгссөн сургууль': data?.userinfo?.graduate_school || '',
                     'Мэргэжил': data?.userinfo?.graduate_profession || '',
                     'Төгссөн он': data?.userinfo?.graduate_school_year || '',
-                    'Голч': '',
+                    'Голч': data?.userinfo?.gpa || '',
                     'Ажиллаж байгаа байгууллагын нэр': data?.userinfo?.work_organization || '',
                     'Албан тушаал': data?.userinfo?.position_name || '',
                     'Хэлтэс': data?.userinfo?.work_heltes || '' || '',
@@ -469,13 +470,13 @@ const ElseltUser = () => {
                                 isLoading={isLoading}
                                 placeholder={t('-- Сонгоно уу --')}
                                 options={profOption || []}
-                                value={profOption.find((c) => c.id === profession_id)}
+                                value={profOption.find((c) => c?.prof_id === profession_id)}
                                 noOptionsMessage={() => t('Хоосон байна.')}
                                 onChange={(val) => {
-                                    setProfession_id(val?.id || '')
+                                    setProfession_id(val?.prof_id || '')
                                 }}
                                 styles={ReactSelectStyles}
-                                getOptionValue={(option) => option.id}
+                                getOptionValue={(option) => option?.prof_id}
                                 getOptionLabel={(option) => option.name}
                             />
                     </Col>
@@ -574,7 +575,7 @@ const ElseltUser = () => {
                             id='search-input'
                             placeholder={t("Хайх үг....")}
                             value={searchValue}
-                            onChange={handleFilter}
+                            onChange={(e) => {handleFilter(e), console.log(e.target.value)}}
                             onKeyPress={e => e.key === 'Enter' && handleSearch()}
                         />
                         <Button
