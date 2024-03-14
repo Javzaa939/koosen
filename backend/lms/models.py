@@ -3850,13 +3850,27 @@ class AdmissionRegister(models.Model):
     begin_date = models.DateField(verbose_name="Элсэлт эхлэх хугацаа")
     end_date = models.DateField(verbose_name="Дуусах хугацаа")
     is_active = models.BooleanField(default=False, verbose_name='Идэвхтэй эсэх')
+    home_description = models.CharField(max_length=5000, null=True, verbose_name='Нүүр хуудасны харуулах тайлбар')
+    alert_description = models.CharField(max_length=5000, null=True, verbose_name='Тухайн элсэлтэд зориулаад санамж гаргах')
 
 
 class AdmissionRegisterProfession(models.Model):
     """ Элсэлт мэргэжлийн бүртгэл"""
 
+    EESH = 1
+    CIVIL_TWO = 2
+    CIVIL_WORKERS = 3
+    WORKERS = 4
+    ADMISSION_TYPE = (
+        (EESH, 'Элсэлтийн ерөнхий шалгалтын оноогоор'),
+        (CIVIL_TWO, 'Дээд боловсролтой иргэн (2 жил)'),
+        (CIVIL_WORKERS, 'Дээд боловсролтой албан хаагч)'),
+        (WORKERS, 'Албан хаагч (бүрэн дунд боловсролтой)'),
+    )
+
     admission=models.ForeignKey(AdmissionRegister, on_delete=models.CASCADE, verbose_name="Элсэлт")
     profession = models.ForeignKey(ProfessionDefinition, on_delete=models.PROTECT, verbose_name="Мэргэжил")
+    state = models.PositiveSmallIntegerField(choices=ADMISSION_TYPE, db_index=True, null=False, default=EESH, verbose_name="Элсэлтийн төрөл")
 
 
 class AdmissionIndicator(models.Model):
@@ -3867,7 +3881,6 @@ class AdmissionIndicator(models.Model):
     INDICATOR_TYPE = (
         (PUBLIC, 'Нийтлэг шалгуур'),
         (SPECIFIC, 'Тусгай шалгуур'),
-
     )
 
     EESH_EXAM = 1
@@ -3878,6 +3891,8 @@ class AdmissionIndicator(models.Model):
     BIE_BYALDAR = 6
     SETGEL_ZUI = 7
     TUGSSUN_SURGUULI = 8
+    ESSE = 9
+
     INDICATOR_VALUE = (
 
         (EESH_EXAM, 'ЭЕШ-ын оноо'),
@@ -3889,6 +3904,7 @@ class AdmissionIndicator(models.Model):
         (BIE_BYALDAR, 'Бие бялдар'),
         (SETGEL_ZUI, 'Сэтгэлзүйн ярилцлага'),
         (TUGSSUN_SURGUULI, 'Төгссөн сургууль'),
+        (ESSE, 'Эссэ'),
     )
 
     admission_prof = models.ForeignKey(AdmissionRegisterProfession, on_delete=models.CASCADE, verbose_name="Мэргэжил")
