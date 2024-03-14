@@ -54,7 +54,7 @@ const DragProfession = ({ cdatas }) => {
 
         const { success, data } = await fetchData(professionApi.getList(select_value?.degree, select_value.department))
         if (success) {
-            setProfession(data)
+            setProfession(cdatas?.degree ? data.filter(val => val?.degree == cdatas?.degree) : data)
         }
 	}
 
