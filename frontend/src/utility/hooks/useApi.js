@@ -1549,6 +1549,7 @@ function useApi(isDisplay=false) {
 
 			// Элсэлт явагдаж байгаа хөтөлбөрийн жагсаалт
 			getList: () => instance.get(`/elselt/profession/list/`),
+			putPropState: (datas) => instance.put(`/elselt/profession/`, datas)
 		},
 
 		sysinfo: {

@@ -4,7 +4,8 @@ from lms.models import  (
     AdmissionRegister,
     AdmissionRegisterProfession,
     AdmissionIndicator,
-    AdmissionXyanaltToo
+    AdmissionXyanaltToo,
+    ProfessionalDegree
 )
 
 from elselt.models import (
@@ -15,11 +16,21 @@ from elselt.models import (
 )
 
 class AdmissionSerializer(serializers.ModelSerializer):
-    degree_name = serializers.CharField(source='degree.degree_name', default='')
+    degree_name = serializers.SerializerMethodField()
 
     class Meta:
         model = AdmissionRegister
         fields = '__all__'
+
+    def get_degree_name(self, obj):
+        degrees = obj.degrees
+        degree_names = ''
+
+        if degrees:
+            names = ProfessionalDegree.objects.filter(id__in=degrees).values_list('degree_name', flat=True)
+            degree_names = ', '.join(names)
+
+        return degree_names
 
 class AdmissionPostSerializer(serializers.ModelSerializer):
 

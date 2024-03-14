@@ -5,18 +5,17 @@ import '@styles/react/libs/drag-and-drop/drag-and-drop.scss'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
-
-import classnames from "classnames";
-import { getPagination, ReactSelectStyles, generateLessonYear } from '@utils'
-
 import Select from 'react-select'
+import classnames from "classnames";
+import { ReactSelectStyles } from '@utils'
+import { Plus, Minus, Search} from 'react-feather'
+import { t } from 'i18next';
 
 import {
-    Card, CardHeader,  CardBody, InputGroup, InputGroupText,
+    Card,  CardBody,
     Row, Col, ListGroupItem, Badge, Label,
     Input, Button, Table, UncontrolledTooltip
 } from 'reactstrap'
-import { Plus, Minus,  AlertCircle, Search, X, Save, Edit, Feather } from 'react-feather'
 
 import ShalguurModal from './ShalguurModal';
 
@@ -25,7 +24,26 @@ const DragProfession = ({ cdatas }) => {
         degree: '',
         department: '',
     }
-  // ** States
+
+    const shalguurs = [
+        {
+            'id': 1,
+            'name': 'Элсэлтийн ерөнхий шалгалтын оноогоор'
+        },
+        {
+            'id': 2,
+            'name': 'Дээд боловсролтой иргэн (2 жил)'
+        },
+        {
+            'id': 3,
+            'name': 'Дээд боловсролтой албан хаагч)'
+        },
+        {
+            'id': 4,
+            'name': 'Албан хаагч (бүрэн дунд боловсролтой))'
+        },
+    ]
+
     const [listArr1, setListArr1] = useState([])
     const [listArr2, setListArr2] = useState([])
     const [degreeOption, setDegree] = useState([])
@@ -36,11 +54,8 @@ const DragProfession = ({ cdatas }) => {
     const [modal, setModal] = useState(false)
     const [admission_data, setAdmission] = useState({})
     const [admissionDatas, setAdmissionDatas] = useState([])
-    const [file, setFile] = useState('')
-    const [removePoster, setRemovePoster] = useState(false)
 
 	const [filteredData, setFilteredData] = useState([]);
-    const [profId, setProfId] = useState('')
 
     const professionApi = useApi().study.professionDefinition
     const depApi = useApi().hrms.department
@@ -54,7 +69,7 @@ const DragProfession = ({ cdatas }) => {
 
         const { success, data } = await fetchData(professionApi.getList(select_value?.degree, select_value.department))
         if (success) {
-            setProfession(cdatas?.degree ? data.filter(val => val?.degree == cdatas?.degree) : data)
+            setProfession(cdatas?.degrees.length > 0 ? data.filter(val => cdatas?.degrees?.includes(val?.degree)) : data)
         }
 	}
 
@@ -132,6 +147,8 @@ const DragProfession = ({ cdatas }) => {
         }
     }
 
+    console.log(listArr1)
+
     async function moveProp(order) {
         var options = searchValue.length > 0 ? [...filteredData] : [...listArr2]
         let update_id = options[order.oldIndex].id
@@ -188,36 +205,16 @@ const DragProfession = ({ cdatas }) => {
         setAdmission(admission || {})
     }
 
-    const getFile = (e, action, poster_image, id) => {
-        if (action == 'Get') {
-            const files = e.target.files
 
-            if (files.length > 0) {
-                setFile(files[0])
-            }
-        } else if (file) {
-            setFile('')
-        } else if (poster_image) {
-            setRemovePoster(true)
+    async function saveState(profId, state) {
+        var datas = {
+            'profession': profId,
+            'state': state,
+            'admission': cdatas?.id
         }
-    }
-
-    async function fileSave(id) {
-        const formData = new FormData()
-        formData.append('file', file)
-        formData.append('profession', id)
-        if (file) {
-            const { success, data } = await fetchData(professionApi.postFile(formData))
-            if (success) {
-                setProfId('')
-                getProps()
-            }
-        } else if (removePoster) {
-            const { success, data } = await fetchData(professionApi.removeFile(id))
-            if (success) {
-                setProfId('')
-                getProps()
-            }
+        const { success } = await fetchData(elseltApi.putPropState(datas))
+        if (success) {
+            getProps()
         }
     }
 
@@ -306,7 +303,7 @@ const DragProfession = ({ cdatas }) => {
                                 <th>№</th>
                                 <th>Хөтөлбөрийн нэр</th>
                                 <th>Шалгуур нэмэх</th>
-                                <th>Зураг оруулах( <small style={{fontSize: '10px'}} className='text-warning'>Танилцуулга дээр оруулах нягтаршил өндөртэй зураг оруулна уу </small>) </th>
+                                <th>Элсэлтийн төрөл сонгох </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -325,30 +322,25 @@ const DragProfession = ({ cdatas }) => {
                                             <UncontrolledTooltip placement='top' target={`edit${idx}`} >Нэмэх</UncontrolledTooltip>
                                         </td>
                                         <td>
-                                            <InputGroup>
-                                                <Input
-                                                    type='file'
-                                                    bsSize='sm'
-                                                    disabled={profId === item?.id ? false : true}
-                                                    accept='image/*'
-                                                    onChange={(e) => getFile(e, 'Get')}
-                                                />
-                                                <InputGroupText>
-                                                    <X className='' role="button" color="red" size={15} onClick={(e) => getFile(e, 'Delete', item?.poster_image, item?.id)}></X>
-                                                </InputGroupText>
-                                                <InputGroupText>
-                                                    {
-                                                        profId === item?.id
-                                                        ?
-                                                            <Save  role="button" color="#198754" size={15} onClick={(e) => fileSave(item?.id)}></Save>
-                                                        :
-                                                            <Edit  role="button" color="gray" size={15} onClick={(e) => setProfId(item?.id)}></Edit>
-                                                    }
-                                                </InputGroupText>
-                                            </InputGroup>
-                                            {
-                                                item?.poster_image && <small>Зургийн нэр: <span className='fw-bold'>{item?.poster_image.replace('/files/profession/', '')}</span></small>
-                                            }
+                                            <Select
+                                                name="degrees"
+                                                id="degrees"
+                                                classNamePrefix='select'
+                                                isClearable
+                                                className={classnames('react-select')}
+                                                isLoading={isLoading}
+                                                defaultValue={item?.state}
+                                                menuPortalTarget={document.body}
+                                                placeholder={t(`-- Сонгоно уу --`)}
+                                                options={shalguurs || []}
+                                                noOptionsMessage={() => t('Хоосон байна')}
+                                                onChange={(val) => {
+                                                    saveState(item?.id, val?.id)
+                                                }}
+                                                styles={ReactSelectStyles}
+                                                getOptionValue={(option) => option.id}
+                                                getOptionLabel={(option) => option.name}
+                                            />
                                         </td>
                                     </tr>
                                 )

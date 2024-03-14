@@ -35,7 +35,7 @@ from lms.models import Lesson_assignment_student
 from lms.models import Lesson_assignment_student_file
 from lms.models import Lesson_materials
 from lms.models import Lesson_material_file
-from lms.models import Lesson_assignment
+from lms.models import Lesson_assignment, AdmissionRegisterProfession
 
 from main.utils.file import split_root_path
 
@@ -210,8 +210,7 @@ class ProfessionDefinitionSerializer(serializers.ModelSerializer):
 
     full_name = serializers.SerializerMethodField(read_only=True)
     prof_name = serializers.SerializerMethodField(read_only=True)
-
-    # degree = ProfessionalDegreeSerializer(read_only=True)post үйлдэл хийхэд алдаа гарч байгаа тул comment хийв.
+    state = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = ProfessionDefinition
@@ -256,6 +255,14 @@ class ProfessionDefinitionSerializer(serializers.ModelSerializer):
             full_name = full_name +  ' ' + name
 
         return full_name
+
+    def get_state(self, obj):
+        state = ''
+        admission = self.context.get('admission')
+        if admission:
+            admission_prof_obj = AdmissionRegisterProfession.objects.filter(profession=obj, admission=admission).first()
+            state = admission_prof_obj.state
+        return state
 
 # ------------------- Сургалтын төлөвлөгөө ---------------------
 

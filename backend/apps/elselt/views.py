@@ -107,7 +107,7 @@ class ElseltProfession(
         prof_ids = self.queryset.filter(admission=elselt).values_list('profession', flat=True)
         querysets = ProfessionDefinition.objects.filter(id__in=list(prof_ids))
 
-        datas = ProfessionDefinitionSerializer(querysets, many=True).data
+        datas = ProfessionDefinitionSerializer(querysets, many=True, context={'admission': elselt}).data
         admission_datas =AdmissionProfessionSerializer(admission_querysets, many=True).data
 
         return_datas = {
@@ -121,6 +121,17 @@ class ElseltProfession(
 
         datas = self.create(request).data
         return request.send_info('INF_001', datas)
+
+    def put(self, request):
+
+        datas = request.data
+        with transaction.atomic():
+            AdmissionRegisterProfession.objects.filter(
+                admission=datas.get('admission'),
+                profession=datas.get('profession')
+            ).update(state=datas.get('state'))
+
+        return request.send_info('INF_002')
 
     def delete(self, request, pk=None):
         elselt = request.query_params.get('elselt')
@@ -377,7 +388,7 @@ class AdmissionUserInfoAPIView(
             )
         )
 
-        lesson_year_id = self.request.query_params.get('lesson_year')
+        lesson_year_id = self.request.query_params.get('lesson_year_id')
         profession_id = self.request.query_params.get('profession_id')
         unit1_id = self.request.query_params.get('unit1_id')
         state = self.request.query_params.get('state')
@@ -385,7 +396,7 @@ class AdmissionUserInfoAPIView(
         sorting = self.request.query_params.get('sorting')
 
         if lesson_year_id:
-            queryset = queryset.filter(profession__admission__id=lesson_year_id)
+            queryset = queryset.filter(profession__admission=lesson_year_id)
 
         if profession_id:
             queryset = queryset.filter(profession__profession__id=profession_id)
