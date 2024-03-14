@@ -14,7 +14,7 @@ import { useForm, Controller } from "react-hook-form";
 
 import { Row, Col, Form, Modal,  Label, Button, ModalBody, ModalHeader, FormFeedback, Spinner, Input } from "reactstrap";
 
-import { generateLessonYear, validate, formatDate, ReactSelectStyles } from "@utils"
+import { generateLessonYear, validate, formatDate, ReactSelectStyles, convertDefaultValue } from "@utils"
 import '@styles/react/libs/flatpickr/flatpickr.scss'
 
 import { useEffect } from 'react';
@@ -49,6 +49,8 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
 
     const [ yearOption, setYear] = useState([])
     const [degreeOption, setDegree] = useState([])
+    const [selectedDegrees, setSelectedDegrees] = useState([])
+
 
 	// Loader
 	const { Loader, isLoading, fetchData } = useLoader({});
@@ -72,6 +74,12 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
 
     // Хадгалах
 	async function onSubmit(cdata) {
+        var degree_ids = selectedDegrees.map((c) => c.id)
+
+        cdata['degrees'] = degree_ids
+
+        cdata = convertDefaultValue(cdata)
+
         if (editData?.id) {
             const { success, errors } = await postFetch(elseltApi.put(cdata, editData?.id))
             if(success) {
@@ -119,11 +127,16 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
                     if(editData[key] !== null)
                         setValue(key, editData[key])
                     else setValue(key,'')
+
+                    if (key === 'degrees') {
+                        var degrees = degreeOption.filter((c) => editData[key]?.includes(c.id))
+                        setSelectedDegrees(degrees)
+                    }
                 }
             }
 
         },
-        [editData]
+        [editData, degreeOption]
     )
 
 	return (
@@ -144,7 +157,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
                 </ModalHeader>
                 <ModalBody className="flex-grow-1">
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
-                    <Col md={6}>
+                        <Col md={6}>
                             <Label className="form-label" for="name">
                                {t('Элсэлтийн нэр')}
                             </Label>
@@ -199,45 +212,11 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
                             {errors.lesson_year && <FormFeedback className='d-block'>{errors.lesson_year.message}</FormFeedback>}
                         </Col>
                         <Col md={6}>
-                            <Label className="form-label" for="degree">
-                                {t('Боловсролын зэрэг')}
-                            </Label>
-                            <Controller
-                                defaultValue=''
-                                control={control}
-                                id="degree"
-                                name="degree"
-                                render={({ field: { value, onChange} }) => {
-                                    return (
-                                        <Select
-                                            name="degree"
-                                            id="degree"
-                                            classNamePrefix='select'
-                                            isClearable
-                                            className={classnames('react-select', { 'is-invalid': errors.degree })}
-                                            isLoading={isLoading}
-                                            placeholder={t(`-- Сонгоно уу --`)}
-                                            options={degreeOption || []}
-                                            value={value && degreeOption.find((c) => c.id === value)}
-                                            noOptionsMessage={() => t('Хоосон байна')}
-                                            onChange={(val) => {
-                                                onChange(val?.id || '')
-                                            }}
-                                            styles={ReactSelectStyles}
-                                            getOptionValue={(option) => option.id}
-                                            getOptionLabel={(option) => option.degree_name}
-                                        />
-                                    )
-                                }}
-                            />
-                            {errors.degree && <FormFeedback className='d-block'>{errors.degree.message}</FormFeedback>}
-                        </Col>
-                        <Col md={6}>
                             <Label className="form-label" for="begin_date">
                                 {t('Эхлэх хугацаа')}
                             </Label>
                             <Controller
-                                defaultValue={new Date()}
+                                defaultValue={formatDate(new Date())}
                                 control={control}
                                 name='begin_date'
                                 className="form-control"
@@ -266,7 +245,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
                                 {t('Дуусах хугацаа')}
                             </Label>
                             <Controller
-                                defaultValue={new Date()}
+                                defaultValue={formatDate(new Date())}
                                 control={control}
                                 name='end_date'
                                 className="form-control"
@@ -292,6 +271,41 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
                             {errors.start_date && <FormFeedback className='d-block'>{t(errors.start_date.message)}</FormFeedback>}
                         </Col>
                         <Col md={6}>
+                            <Label className="form-label" for="degrees">
+                                {t('Боловсролын зэрэг')}
+                            </Label>
+                            <Controller
+                                defaultValue=''
+                                control={control}
+                                id="degrees"
+                                name="degrees"
+                                render={({ field }) => {
+                                    return (
+                                        <Select
+                                            name="degrees"
+                                            id="degrees"
+                                            classNamePrefix='select'
+                                            isClearable
+                                            className={classnames('react-select', { 'is-invalid': errors.degrees })}
+                                            isLoading={isLoading}
+                                            isMulti
+                                            placeholder={t(`-- Сонгоно уу --`)}
+                                            options={degreeOption || []}
+                                            value={selectedDegrees}
+                                            noOptionsMessage={() => t('Хоосон байна')}
+                                            onChange={(val) => {
+                                                setSelectedDegrees(val)
+                                            }}
+                                            styles={ReactSelectStyles}
+                                            getOptionValue={(option) => option.id}
+                                            getOptionLabel={(option) => option.degree_name}
+                                        />
+                                    )
+                                }}
+                            />
+                            {errors.degrees && <FormFeedback className='d-block'>{errors.degrees.message}</FormFeedback>}
+                        </Col>
+                        <Col md={6}>
                             <Controller
                                 defaultValue={false}
                                 control={control}
@@ -313,6 +327,46 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
                             <Label className='form-label' for='is_active'>
                                 {t('Идэвхтэй эсэх')}
                             </Label>
+                        </Col>
+                        <Col md={6}>
+                            <Label className="form-label" for="home_description">
+                               {t('Нүүр хуудасны харуулах тайлбар')}
+                            </Label>
+                            <Controller
+                                control={control}
+                                defaultValue=''
+                                name="home_description"
+                                render={({ field }) => (
+                                    <Input
+                                        id='home_description'
+                                        placeholder='Нүүр хуудасны харуулах тайлбар'
+                                        invalid={errors.home_description && true}
+                                        {...field}
+                                        bsSize="sm"
+                                        type='textarea'
+                                    />
+                                )}
+                            ></Controller>
+                            {errors.home_description && <FormFeedback className='d-block'>{errors.home_description.message}</FormFeedback>}
+                        </Col>
+                        <Col md={6}>
+                            <Label className="form-label" for="alert_description">
+                               {t('Тухайн элсэлтэд зориулаад санамж')}
+                            </Label>
+                            <Controller
+                                control={control}
+                                defaultValue=''
+                                name="alert_description"
+                                render={({ field }) => (
+                                    <Input
+                                        id='alert_description'
+                                        placeholder='Тухайн элсэлтэд зориулаад санамж'
+                                        {...field}
+                                        bsSize="sm"
+                                        type='textarea'
+                                    />
+                                )}
+                            ></Controller>
                         </Col>
                         <Col md={12} className="mt-2">
                             <Button className="me-2" color="primary" type="submit" disabled={postLoading}>

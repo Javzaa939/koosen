@@ -428,63 +428,6 @@ function SysInfo() {
                                     />
                                 </Col>
                             </div>
-                            <div className='form_elements_over mt-50'>
-                                <Label className="mb-50" for='alert_description'>
-                                    Элсэлтэд зориулсан санамж
-                                </Label>
-                                <Controller
-                                    id='alert_description'
-                                    name='alert_description'
-                                    control={control}
-                                    defaultValue=''
-                                    render={({ field: {onChange, value}  }) => (
-                                        <InputGroup className={`input-group-merge ${classnames({ 'is-invalid': errors.alert_description })}`}>
-                                            <InputGroupText>
-                                                <Edit3 size={15} color={`${errors?.email ? 'red' : 'gray'}`}/>
-                                            </InputGroupText>
-                                            <Input
-                                                name='alert_description'
-                                                value={value}
-                                                id='alert_description'
-                                                style={{ minHeight: '100px' }}
-                                                type='text'
-                                                onChange={(e) => {onChange(e.target.value|| '')}}
-                                                invalid={errors.alert_description && true}
-                                                className={classnames({ 'is-invalid': errors.alert_description })}
-                                            />
-                                        </InputGroup>
-                                    )}
-                                />
-                            </div>
-                            <div className='form_elements_over mt-50'>
-                                <Label className="mb-50" for='home_description'>
-                                    Нүүр хуудсанд харуулах тайлбар
-                                </Label>
-                                <Controller
-                                    id='home_description'
-                                    name='home_description'
-                                    control={control}
-                                    defaultValue=''
-                                    render={({ field: {onChange, value}  }) => (
-                                        <InputGroup className={`input-group-merge ${classnames({ 'is-invalid': errors.home_description })}`}>
-                                            <InputGroupText>
-                                                <Edit3 size={15} color={`${errors?.email ? 'red' : 'gray'}`}/>
-                                            </InputGroupText>
-                                            <Input
-                                                name='home_description'
-                                                value={value}
-                                                id='home_description'
-                                                style={{ minHeight: '100px' }}
-                                                type='text'
-                                                onChange={(e) => {onChange(e.target.value|| '')}}
-                                                invalid={errors.home_description && true}
-                                                className={classnames({ 'is-invalid': errors.home_description })}
-                                            />
-                                        </InputGroup>
-                                    )}
-                                />
-                                {errors.home_description && <FormFeedback className='d-block'>{errors.home_description.message}</FormFeedback>}
-                            </div>
                             <div className='row mt-1'>
                                 <Label for='logoInput1'>Нүүр хэсэгт харуулах banner зураг</Label>
                                 <div className="d-flex custom-flex">

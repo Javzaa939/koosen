@@ -52,7 +52,7 @@ const DragProfession = ({ cdatas }) => {
     // Хөтөлбөрийн жагсаалт авах
     async function getProfession() {
 
-        const { success, data } = await fetchData(professionApi.getList(select_value.degree, select_value.department))
+        const { success, data } = await fetchData(professionApi.getList(select_value?.degree, select_value.department))
         if (success) {
             setProfession(data)
         }

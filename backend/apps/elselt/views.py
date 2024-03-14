@@ -76,10 +76,10 @@ class ElseltApiView(
         instance = self.get_object()
         self.serializer_class = AdmissionPostSerializer
         serializer = self.get_serializer(instance=instance, data=request.data, partial=True)
+
         if serializer.is_valid(raise_exception=False):
             self.perform_update(serializer)
         else:
-            print
             return request.send_error_valid(serializer.errors)
 
         return request.send_info('INF_002')

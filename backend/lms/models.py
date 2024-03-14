@@ -3845,13 +3845,18 @@ class AdmissionRegister(models.Model):
     """ Элсэлтийн үйл явцын бүртгэл"""
 
     name = models.CharField(max_length=200, verbose_name="Элсэлтийн нэр")
-    degree = models.ForeignKey(ProfessionalDegree, on_delete=models.SET_NULL, null=True, verbose_name="Мэргэжлийн зэрэг")
+    degrees = ArrayField(
+        models.IntegerField(null=True),
+        blank=True,
+        null=True,
+        verbose_name='Мэргэжлийн зэргүүдийг хадгалах'
+    )
     lesson_year = models.CharField(max_length=50, verbose_name="Хичээлийн жил")
     begin_date = models.DateField(verbose_name="Элсэлт эхлэх хугацаа")
     end_date = models.DateField(verbose_name="Дуусах хугацаа")
     is_active = models.BooleanField(default=False, verbose_name='Идэвхтэй эсэх')
     home_description = models.CharField(max_length=5000, null=True, verbose_name='Нүүр хуудасны харуулах тайлбар')
-    alert_description = models.CharField(max_length=5000, null=True, verbose_name='Тухайн элсэлтэд зориулаад санамж гаргах')
+    alert_description = models.CharField(max_length=5000, null=True, verbose_name='Тухайн элсэлтэд зориулаад санамж')
 
 
 class AdmissionRegisterProfession(models.Model):
