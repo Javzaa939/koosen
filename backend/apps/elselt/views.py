@@ -90,6 +90,10 @@ class ElseltApiView(
         return request.send_info('INF_002')
 
     def delete(self, request, pk=None):
+        with transaction.atomic():
+            # Тухайн элсэлтэд бүртгүүлсэн хэрэглэгчдийг устгах
+            AdmissionUserProfession.objects.filter(profession__admission=pk).delete()
+
         self.destroy(request, pk)
 
         return request.send_info("INF_003")
