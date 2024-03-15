@@ -3857,6 +3857,7 @@ class AdmissionRegister(models.Model):
     is_active = models.BooleanField(default=False, verbose_name='Идэвхтэй эсэх')
     home_description = models.CharField(max_length=5000, null=True, verbose_name='Нүүр хуудасны харуулах тайлбар')
     alert_description = models.CharField(max_length=5000, null=True, verbose_name='Тухайн элсэлтэд зориулаад санамж')
+    admission_juram = models.FileField(upload_to='admission', null=True, verbose_name='Элсэлтийн журам')
 
 
 class AdmissionRegisterProfession(models.Model):

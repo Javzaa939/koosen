@@ -19,7 +19,6 @@ function SysInfo() {
 
     const { Loader, isLoading, fetchData } = useLoader({ })
     const [datas, setDatas] = useState()
-    const [admissionJuram, setAdmissionJuram] = useState('')
     const [admissionAdvice, setAdmissionAdvice] = useState('')
     const [featurefile, setFeaturedImg] = useState('')
     const [image_old, setImageOld] = useState('')
@@ -49,12 +48,6 @@ function SysInfo() {
     async function onSubmit(data) {
 
         data = convertDefaultValue(data)
-
-        if(!admissionJuram) {
-            delete data['admission_juram']
-        } else {
-            data['admission_juram'] = admissionJuram
-        }
 
         if(featurefile) {
             data['home_image'] = featurefile
@@ -88,11 +81,10 @@ function SysInfo() {
     }
 
     const handleDeleteImage = () =>
-        {
-            setFeaturedImg('')
-            setImageOld('')
-        }
-
+    {
+        setFeaturedImg('')
+        setImageOld('')
+    }
 
     const onChange = (e) => {
 		const reader = new FileReader()
@@ -278,79 +270,6 @@ function SysInfo() {
                                 Ерөнхий мэдээлэл
                             </h6>
                             <div className='row'>
-                                <Col md={6} sm={12}>
-                                    <Label className="mb-50" for='admission_juram'>
-                                        Элсэлтийн журам
-                                    </Label>
-                                    <Controller
-                                        id='admission_juram'
-                                        name='admission_juram'
-                                        control={control}
-                                        defaultValue=''
-                                        render={({ field: {onChange, value}  }) => {
-                                            return (
-                                                <div className="dropzone-container">
-                                                    <input
-                                                        id='admission_juram'
-                                                        name='admission_juram'
-                                                        multiple={false}
-                                                        type='file'
-                                                        className='d-none'
-                                                        accept="application/pdf"
-                                                        placeholder='test'
-                                                        onChange={(e) => {
-                                                            onChange(e.target.files?.[0] ?? null)
-                                                            setAdmissionJuram(e.target.files?.[0] ?? null)
-                                                        }}
-                                                        onError={() => {'Алдаа'}}
-
-                                                    />
-                                                    <Label className={`${value ? 'border-success' : 'border'} rounded-3 ${classnames({ 'is-invalid': errors.admission_juram })}`} htmlFor='admission_juram'>
-                                                        <div>
-                                                            <div className='mt-2 mb-1 d-flex flex-column align-items-center justify-content-center'>
-                                                                <UploadCloud color={`${errors.admission_juram ? '#c72e2e' : 'gray'}`} size={60}/>
-                                                                <span className={`mx-1 px-1 ${errors.admission_juram ? 'text-danger' : ''}`} style={{ fontSize: 12 }}>
-                                                                    Файл оруулна уу. Зөвхөн .pdf файл хүлээж авна
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                        <div>
-                                                            {
-                                                                value ?
-                                                                    <div className='p-50 d-flex justify-content-between file_style'>
-                                                                        <div className='text-truncate fw-bold'>
-                                                                        {/* <div className='text-truncate' style={{ maxWidth: '400px', minWidth: '250px' }}> */}
-                                                                            {/* {typeof value == 'string' ? value.split(`/`)[value.split('/').length - 1] : value?.name
-                                                                                // value.length > 30 ?
-                                                                                // `${value.substring(0, 27)}...${value.substring(value.length - 4)}` :
-                                                                                // value
-                                                                            } */}
-
-                                                                            {typeof value == 'string' ? ftext(value) :
-                                                                                value?.name?.length > 30 ?
-                                                                                `${value?.name?.substring(0, 27)}...${value?.name?.substring(value?.name?.length - 4)}` :
-                                                                                value?.name
-                                                                            }
-                                                                            {/* {value.length > 30 ?
-                                                                                `${value.substring(0, 27)}...${value.substring(value.length - 4)}` :
-                                                                                value
-                                                                            } */}
-                                                                        </div>
-                                                                        <div>
-                                                                            <X onClick={(e) => {e.preventDefault(), onChange(null)}} size={16} role='button'/>
-                                                                        </div>
-                                                                    </div>
-                                                                :
-                                                                    <div>
-                                                                </div>
-                                                            }
-                                                        </div>
-                                                    </Label>
-                                                </div>
-                                            )
-                                        }}
-                                    />
-                                </Col>
                                 <Col md={6} sm={12}>
                                     <Label className="mb-50" for='admission_advice'>
                                         Элсэгчдэд зориулсан зөвлөмж

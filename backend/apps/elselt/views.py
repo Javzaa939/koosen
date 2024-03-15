@@ -8,7 +8,7 @@ from django.db import transaction
 from django.db.models import F, Subquery, OuterRef
 from django.db.models.functions import Substr
 
-from main.utils.function.utils import has_permission
+from main.utils.function.utils import json_load
 from main.utils.function.pagination import CustomPagination
 
 import datetime as dt
@@ -74,8 +74,13 @@ class ElseltApiView(
 
     def put(self, request, pk=None):
         instance = self.get_object()
+
+        datas = request.data.dict()
+        degree_ids = json_load(datas.get('degrees'))
+        datas['degrees'] = degree_ids
+
         self.serializer_class = AdmissionPostSerializer
-        serializer = self.get_serializer(instance=instance, data=request.data, partial=True)
+        serializer = self.get_serializer(instance=instance, data=datas, partial=True)
 
         if serializer.is_valid(raise_exception=False):
             self.perform_update(serializer)

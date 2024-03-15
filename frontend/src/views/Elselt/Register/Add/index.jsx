@@ -1,7 +1,7 @@
 // ** React imports
 import React, { Fragment, useState } from 'react'
 
-import { X } from "react-feather";
+import { X, UploadCloud } from "react-feather";
 
 import Select from 'react-select'
 import classnames from "classnames";
@@ -50,7 +50,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
     const [ yearOption, setYear] = useState([])
     const [degreeOption, setDegree] = useState([])
     const [selectedDegrees, setSelectedDegrees] = useState([])
-
+    const [admissionJuram, setAdmissionJuram] = useState('')
 
 	// Loader
 	const { Loader, isLoading, fetchData } = useLoader({});
@@ -76,12 +76,22 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
 	async function onSubmit(cdata) {
         var degree_ids = selectedDegrees.map((c) => c.id)
 
-        cdata['degrees'] = degree_ids
+        cdata['degrees'] = JSON.stringify(degree_ids)
+        if(!admissionJuram) {
+            delete cdata['admission_juram']
+        } else {
+            cdata['admission_juram'] = admissionJuram
+        }
 
         cdata = convertDefaultValue(cdata)
+        const formData = new FormData()
+
+        for (let key in cdata) {
+            formData.append(key, cdata[key])
+        }
 
         if (editData?.id) {
-            const { success, errors } = await postFetch(elseltApi.put(cdata, editData?.id))
+            const { success, errors } = await postFetch(elseltApi.put(formData, editData?.id))
             if(success) {
                 reset()
                 refreshDatas()
@@ -94,7 +104,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
                 }
             }
         } else {
-            const { success, errors } = await postFetch(elseltApi.post(cdata))
+            const { success, errors } = await postFetch(elseltApi.post(formData))
             if(success) {
                 reset()
                 refreshDatas()
@@ -138,6 +148,15 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
         },
         [editData, degreeOption]
     )
+
+    function ftext(val) {
+
+        var text = val.split(`/`)[val.split('/').length - 1]
+
+        var vdata = `${text?.substring(0, 27)}...${text?.substring(text?.length - 4)}`
+        return vdata
+
+    }
 
 	return (
         <Fragment>
@@ -367,6 +386,68 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
                                     />
                                 )}
                             ></Controller>
+                        </Col>
+                        <Col md={12} sm={12}>
+                            <Label className="" for='admission_juram'>
+                                Элсэлтийн журам
+                            </Label>
+                            <Controller
+                                id='admission_juram'
+                                name='admission_juram'
+                                control={control}
+                                defaultValue=''
+                                render={({ field: {onChange, value}  }) => {
+                                    return (
+                                        <div className="dropzone-container">
+                                            <input
+                                                id='admission_juram'
+                                                name='admission_juram'
+                                                multiple={false}
+                                                type='file'
+                                                className='d-none'
+                                                accept="application/pdf"
+                                                placeholder='test'
+                                                onChange={(e) => {
+                                                    onChange(e.target.files?.[0] ?? null)
+                                                    setAdmissionJuram(e.target.files?.[0] ?? null)
+                                                }}
+                                                onError={() => {'Алдаа'}}
+
+                                            />
+                                            <Label className={`${value ? 'border-success' : 'border'} rounded-3 ${classnames({ 'is-invalid': errors.admission_juram })}`} htmlFor='admission_juram'>
+                                                <div>
+                                                    <div className='mt-2 mb-1 d-flex flex-column align-items-center justify-content-center'>
+                                                        <UploadCloud color={`${errors.admission_juram ? '#c72e2e' : 'gray'}`} size={60}/>
+                                                        <span className={`mx-1 px-1 ${errors.admission_juram ? 'text-danger' : ''}`} style={{ fontSize: 12 }}>
+                                                            Файл оруулна уу. Зөвхөн .pdf файл хүлээж авна
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    {
+                                                        value ?
+                                                            <div className='p-50 d-flex justify-content-between file_style'>
+                                                                <div className='text-truncate fw-bold'>
+                                                                    {typeof value == 'string' ? ftext(value) :
+                                                                        value?.name?.length > 30 ?
+                                                                        `${value?.name?.substring(0, 27)}...${value?.name?.substring(value?.name?.length - 4)}` :
+                                                                        value?.name
+                                                                    }
+                                                                </div>
+                                                                <div>
+                                                                    <X onClick={(e) => {e.preventDefault(), onChange(null)}} size={16} role='button'/>
+                                                                </div>
+                                                            </div>
+                                                        :
+                                                            <div>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </Label>
+                                        </div>
+                                    )
+                                }}
+                            />
                         </Col>
                         <Col md={12} className="mt-2">
                             <Button className="me-2" color="primary" type="submit" disabled={postLoading}>
