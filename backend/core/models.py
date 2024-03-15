@@ -104,6 +104,13 @@ class Schools(models.Model):
     todorkhoilolt_signature = models.ImageField(upload_to="orgs/logo", null=True, blank=True, verbose_name='лого')
     todorkhoilolt_tamga = models.ImageField(upload_to="orgs/logo", null=True, blank=True, verbose_name='лого')
 
+    email_host_user = models.EmailField(max_length=255, unique=False, blank=False, null=True, verbose_name="Системийн и-мэйл")
+    email_use_tls = models.BooleanField(default=False, verbose_name="USE TLS")
+    email_host_name = models.CharField(max_length=255, null=True, blank=True, verbose_name="HOST NAME")
+    email_host = models.CharField(max_length=255, null=True, blank=True, verbose_name="EMAIL HOST")
+    email_port = models.IntegerField(null=True, blank=True, verbose_name="EMAIL PORT")
+    email_password = models.CharField(max_length=255, null=True, blank=True, verbose_name="EMAIL PASSWORD")
+
     unit1 = models.ForeignKey(AimagHot, null=True, blank=True, on_delete=models.CASCADE, verbose_name='аймаг,хот')
     unit2 = models.ForeignKey(SumDuureg, null=True, blank=True, on_delete=models.CASCADE, verbose_name='сум, дүүрэг')
 
