@@ -82,7 +82,7 @@ class AdmissionActiveProfession(serializers.ModelSerializer):
 
     class Meta:
         model = AdmissionRegisterProfession
-        fields = 'prof_id', 'name'
+        fields = 'id', 'prof_id', 'name'
 
 
 class UserinfoSerializer(serializers.ModelSerializer):
@@ -101,7 +101,7 @@ class ElseltUserSerializer(serializers.ModelSerializer):
 class AdmissionUserInfoSerializer(serializers.ModelSerializer):
     user = ElseltUserSerializer(many=False, read_only=True)
     userinfo = serializers.SerializerMethodField()
-    full_name = serializers.CharField(source='user.full_name', default='')
+    full_name = serializers.CharField(source='user.full_name', default='', read_only=True)
     profession = serializers.CharField(source='profession.profession.name', default='')
     gender_name = serializers.SerializerMethodField()
     state_name = serializers.SerializerMethodField()
@@ -139,3 +139,10 @@ class AdmissionUserInfoSerializer(serializers.ModelSerializer):
                 state_name = state[1]
                 return state_name
         return state_name
+
+
+class AdmissionUserProfessionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = AdmissionUserProfession
+        fields = '__all__'

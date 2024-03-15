@@ -32,7 +32,8 @@ from .serializer import (
     AdmissionProfessionSerializer,
     AdmissionPostSerializer,
     AdmissionActiveProfession,
-    AdmissionUserInfoSerializer
+    AdmissionUserInfoSerializer,
+    AdmissionUserProfessionSerializer,
 )
 
 from elselt.models import (
@@ -433,6 +434,26 @@ class AdmissionUserInfoAPIView(
         all_data = self.list(request).data
 
         return request.send_data(all_data)
+
+    @transaction.atomic()
+    def put(self, request, pk=None):
+        data = request.data.copy()
+        instance = self.get_object()
+
+        try:
+            # Элсэгчийн хөтөлбөр засах
+            serializer = AdmissionUserProfessionSerializer(instance, data=data, partial=True)
+
+            if not serializer.is_valid(raise_exception=False):
+                print(serializer.errors)
+                return request.send_error_valid(serializer.errors)
+
+            serializer.save()
+
+        except Exception as e:
+            return request.send_error('ERR_002', e.__str__())
+
+        return request.send_info('INF_002')
 
 
 class AdmissionYearAPIView(

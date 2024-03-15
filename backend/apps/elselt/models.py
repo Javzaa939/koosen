@@ -95,6 +95,7 @@ class AdmissionUserProfession(models.Model):
     user = models.ForeignKey(ElseltUser, verbose_name='Элсэгч', on_delete=models.CASCADE)
     profession = models.ForeignKey(AdmissionRegisterProfession, verbose_name='Элссэн мэргэжил', on_delete=models.PROTECT)
     state = models.PositiveIntegerField(choices=STATE, db_index=True, null=False, default=STATE_SEND, verbose_name="Тэнцсэн эсэх")
+    description = models.CharField(max_length=5000, null=True, verbose_name='Тайлбар')
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
