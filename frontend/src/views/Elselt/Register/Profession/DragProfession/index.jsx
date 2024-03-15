@@ -42,6 +42,10 @@ const DragProfession = ({ cdatas }) => {
             'id': 4,
             'name': 'Албан хаагч (бүрэн дунд боловсролтой))'
         },
+        {
+            'id': 5,
+            'name': 'Хамаарахгүй'
+        }
     ]
 
     const [listArr1, setListArr1] = useState([])
@@ -146,8 +150,6 @@ const DragProfession = ({ cdatas }) => {
             setAdmissionDatas(admission_datas)
         }
     }
-
-    console.log(listArr1)
 
     async function moveProp(order) {
         var options = searchValue.length > 0 ? [...filteredData] : [...listArr2]
@@ -331,6 +333,7 @@ const DragProfession = ({ cdatas }) => {
                                                 isLoading={isLoading}
                                                 defaultValue={item?.state}
                                                 menuPortalTarget={document.body}
+                                                value={shalguurs.find((c) => c.id === item.state)}
                                                 placeholder={t(`-- Сонгоно уу --`)}
                                                 options={shalguurs || []}
                                                 noOptionsMessage={() => t('Хоосон байна')}

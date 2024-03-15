@@ -3867,16 +3867,18 @@ class AdmissionRegisterProfession(models.Model):
     CIVIL_TWO = 2
     CIVIL_WORKERS = 3
     WORKERS = 4
+    NOT = 5
     ADMISSION_TYPE = (
         (EESH, 'Элсэлтийн ерөнхий шалгалтын оноогоор'),
         (CIVIL_TWO, 'Дээд боловсролтой иргэн (2 жил)'),
         (CIVIL_WORKERS, 'Дээд боловсролтой албан хаагч)'),
         (WORKERS, 'Албан хаагч (бүрэн дунд боловсролтой)'),
+        (NOT, 'Хамаарахгүй'),
     )
 
     admission=models.ForeignKey(AdmissionRegister, on_delete=models.CASCADE, verbose_name="Элсэлт")
     profession = models.ForeignKey(ProfessionDefinition, on_delete=models.PROTECT, verbose_name="Мэргэжил")
-    state = models.PositiveSmallIntegerField(choices=ADMISSION_TYPE, db_index=True, null=False, default=EESH, verbose_name="Элсэлтийн төрөл")
+    state = models.PositiveSmallIntegerField(choices=ADMISSION_TYPE, db_index=True, null=False, default=NOT, verbose_name="Элсэлтийн төрөл")
 
 
 class AdmissionIndicator(models.Model):
