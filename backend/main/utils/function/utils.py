@@ -618,7 +618,7 @@ def get_domain_url():
     """ domain url авах """
 
     if settings.DEBUG is False:
-        domain_url = 'http://157.230.34.184'
+        domain_url = 'http://sis.uia.gov.mn'
     else:
         domain_url = 'http://localhost:8000'
 
