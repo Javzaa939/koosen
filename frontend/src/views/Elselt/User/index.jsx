@@ -1,11 +1,13 @@
 // ** React Imports
 import { Fragment, useState, useEffect, useContext } from 'react'
 
-import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, Spinner, Modal, ModalHeader, ModalBody, Badge, UncontrolledTooltip } from 'reactstrap'
+import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, Spinner, UncontrolledTooltip } from 'reactstrap'
 
-import { ChevronDown, Search, User } from 'react-feather'
+import { ChevronDown, Search } from 'react-feather'
 
 import DataTable from 'react-data-table-component'
+
+import moment from 'moment';
 
 import classnames from "classnames";
 
@@ -18,7 +20,7 @@ import useLoader from '@hooks/useLoader';
 
 import AuthContext from "@context/AuthContext"
 
-import { getPagination, ReactSelectStyles, generateLessonYear } from '@utils'
+import { getPagination, ReactSelectStyles } from '@utils'
 
 import { getColumns } from './helpers';
 import { useNavigate } from 'react-router-dom';
@@ -26,7 +28,8 @@ import { useNavigate } from 'react-router-dom';
 import { utils, writeFile } from 'xlsx-js-style';
 
 import { HiOutlineDocumentReport } from "react-icons/hi";
-import moment from 'moment';
+
+import EditModal from './Edit';
 
 // import Addmodal from './Add'
 
@@ -588,7 +591,7 @@ const ElseltUser = () => {
                         </Button>
                     </Col>
                 </Row>
-                <div className="react-dataTable react-dataTable-selectable-rows" id="datatableLeftOneRightOne">
+                <div className="react-dataTable react-dataTable-selectable-rows" id="datatableLeftTwoRightTwo">
                     <DataTable
                         noHeader
                         paginationServer
@@ -606,20 +609,29 @@ const ElseltUser = () => {
                             </div>
                         )}
                         onSort={handleSort}
-                        columns={getColumns(currentPage, rowsPerPage, pageCount, editModal, handleDelete, user)}
+                        columns={getColumns(currentPage, rowsPerPage, total_count, editModal, handleDelete, user, handleRowClicked)}
                         sortIcon={<ChevronDown size={10} />}
                         paginationPerPage={rowsPerPage}
                         paginationDefaultPage={currentPage}
-                        highlightOnHover
-                        pointerOnHover
-                        onRowClicked={handleRowClicked}
                         data={datas}
-                        paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count,)}
+                        paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
                         fixedHeader
                         fixedHeaderScrollHeight='62vh'
                     />
                 </div>
         	</Card>
+            {
+                edit_modal &&
+                <EditModal
+                    open={edit_modal}
+                    rowData={editData}
+                    handleModal={() => {
+                        setEditModal(!edit_modal)
+                        setEditData({})
+                    }}
+                    refreshDatas={getDatas}
+                />
+            }
         </Fragment>
     )
 }
