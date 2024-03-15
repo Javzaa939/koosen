@@ -1,5 +1,5 @@
 // ** React imports
-import React, { Fragment, useState, useEffect, useContext } from 'react'
+import React, { Fragment, useState, useEffect } from 'react'
 
 import { useForm, Controller } from "react-hook-form";
 
@@ -30,8 +30,6 @@ const validateSchema = Yup.object().shape(
         .required('Хоосон байна'),
 });
 
-import AuthContext from "@context/AuthContext"
-
 const EditModal = ({ open, handleModal, refreshDatas, rowData }) => {
 
     const { control, handleSubmit,  formState: { errors }, setError, reset} = useForm(validate(validateSchema))
@@ -43,7 +41,6 @@ const EditModal = ({ open, handleModal, refreshDatas, rowData }) => {
 	const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
 
     // State
-    const { user } = useContext(AuthContext)
     const [profOption, setProfession] = useState([])
 
     // Api
