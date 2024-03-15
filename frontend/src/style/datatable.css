@@ -176,7 +176,7 @@
 #datatableLeftTwoRightTwo .rdt_TableCell:nth-child(2) {
     box-shadow: 6px 0px 6px -3px rgba(9, 30, 66, 0.25);
     position: sticky;
-    left: 50px;
+    left: 80px;
     backdrop-filter: blur(30px);
     z-index: 5;
 }

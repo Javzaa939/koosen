@@ -445,7 +445,6 @@ class AdmissionUserInfoAPIView(
             serializer = AdmissionUserProfessionSerializer(instance, data=data, partial=True)
 
             if not serializer.is_valid(raise_exception=False):
-                print(serializer.errors)
                 return request.send_error_valid(serializer.errors)
 
             serializer.save()

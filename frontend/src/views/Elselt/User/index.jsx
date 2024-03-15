@@ -609,15 +609,12 @@ const ElseltUser = () => {
                             </div>
                         )}
                         onSort={handleSort}
-                        columns={getColumns(currentPage, rowsPerPage, pageCount, editModal, handleDelete, user, handleRowClicked)}
+                        columns={getColumns(currentPage, rowsPerPage, total_count, editModal, handleDelete, user, handleRowClicked)}
                         sortIcon={<ChevronDown size={10} />}
                         paginationPerPage={rowsPerPage}
                         paginationDefaultPage={currentPage}
-                        // highlightOnHover
-                        // pointerOnHover
-                        // onRowClicked={handleRowClicked}
                         data={datas}
-                        paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count,)}
+                        paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
                         fixedHeader
                         fixedHeaderScrollHeight='62vh'
                     />

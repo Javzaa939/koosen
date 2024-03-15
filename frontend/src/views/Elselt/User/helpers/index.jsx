@@ -14,6 +14,8 @@ import moment from 'moment'
 import useApi from '@hooks/useApi';
 import useLoader from "@hooks/useLoader";
 
+import './style.css'
+
 // Хүснэгтийн баганууд
 export function getColumns (currentPage, rowsPerPage, page_count, editModal, handleDelete, user, handleDetail) {
 
@@ -64,9 +66,8 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 			name: "№",
 			selector: (row, index) => (currentPage-1) * rowsPerPage + index + 1,
 			center: true,
-			width: '50px',
-			maxWidth: "50px",
-			minWidth: "50px",
+			maxWidth: "80px",
+			minWidth: "80px",
 		},
 		{
 			maxWidth: "200px",
@@ -167,9 +168,14 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 		},
 		{
 			name: t("Цол"),
-			selector: (row) => row?.userinfo?.tsol_name,
+			selector: (row) => {
+				return (
+					<span className='text-truncate-container' title={row?.userinfo?.tsol_name}>{row?.userinfo?.tsol_name}</span>
+				)
+			},
 			wrap: true,
-			center: true
+			left: true,
+			minWidth: "250px",
 		},
 		{
 			minWidth: "120px",
@@ -184,7 +190,7 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 			header: 'created_at',
 			sortable: true,
 			name: t("Бүрт/огноо"),
-			selector: (row) => moment,
+			selector: (row) => row?.created_at? moment(row?.created_at).format("YYYY-MM-DD h:mm") : '',
 			center: true,
 		},
         {
