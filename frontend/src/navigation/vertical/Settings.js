@@ -21,6 +21,12 @@ export default [
                 navLink: "settings/student/"
             },
             {
+                id: 'settings_mail',
+                title: 'Цахим шуудан тохиргоо',
+                icon: <Circle size={8} />,
+                navLink: "settings/mail/"
+            },
+            {
                 id: 'settingsLevel15',
                 title: 'Эрх',
                 icon: <Circle size={8} />,

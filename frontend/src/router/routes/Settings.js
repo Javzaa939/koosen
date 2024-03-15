@@ -4,6 +4,7 @@ const Student = lazy(() => import("@views/Settings/StudentSettings"))
 const Teacher = lazy(() => import("@views/Settings/TeacherSettings"))
 const Permission = lazy(() => import("@views/Settings/Permission"))
 const Role = lazy(() => import("@views/Settings/Role"))
+const Mail = lazy(() => import("@views/Settings/Mail"))
 
 const SettingsRoutes = [
     {
@@ -21,6 +22,10 @@ const SettingsRoutes = [
     {
         path: 'settings/role/',
         element: <Role />
+    },
+    {
+        path: 'settings/mail/',
+        element: <Mail />
     },
 ]
 

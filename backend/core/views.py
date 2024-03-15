@@ -192,6 +192,17 @@ class SchoolAPIView(
 
         return request.send_data(school_data)
 
+    def put(self, request):
+
+        datas = request.data
+        instance = Schools.objects.first()
+        with transaction.atomic():
+            Schools.objects.filter(pk=instance.id).update(
+                **datas
+            )
+
+        return request.send_info('INF_002')
+
 
 @permission_classes([IsAuthenticated])
 class DepartmentAPIView(

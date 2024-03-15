@@ -128,6 +128,7 @@ const VerticalLayout = (props) =>
 
                         /** Боловсролын зэрэг */
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-settings-student-read', 'settings_student')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-settings-mail-read', 'settings_mail')
 
                         /** Эрх */
                         childrenDatas = checkPerm(childrenDatas, menus, user.is_superuser, 'settingsLevel15')
