@@ -3912,7 +3912,7 @@ class AdmissionIndicator(models.Model):
         (BIE_BYALDAR, 'Бие бялдар'),
         (SETGEL_ZUI, 'Сэтгэлзүйн ярилцлага'),
         (TUGSSUN_SURGUULI, 'Төгссөн сургууль'),
-        (ESSE, 'Эссэ'),
+        (ESSE, 'Cудалгааны ажлын агуулга чиглэл, зорилгын талаар бичсэн танилцуулга'),
     )
 
     admission_prof = models.ForeignKey(AdmissionRegisterProfession, on_delete=models.CASCADE, verbose_name="Мэргэжил")
