@@ -1568,6 +1568,9 @@ function useApi(isDisplay=false) {
 		},
 		gpa: {
 			put: (data, id) => instance.put(`/elselt/gpa/${id}/`, data)
+		},
+		dashboard: {
+			get: () => instance.get(`/elselt/dashboard/`),
 		}
 	}}
 }

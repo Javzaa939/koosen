@@ -2,6 +2,7 @@ import { lazy } from "react";
 
 const ElseltRegister = lazy(() => import("@views/Elselt/Register"))
 const ElseltProfession = lazy(() => import("@views/Elselt/Register/Profession"))
+const Dashboard = lazy(() => import("@views/Elselt/Dashboard"))
 const SysInfo = lazy(() => import("@views/Elselt/SysInfo"))
 const User = lazy(() => import("@views/Elselt/User"))
 const Details = lazy(() => import("@views/Elselt/User/Details"))
@@ -26,6 +27,10 @@ const ElseltRoutes = [
     {
         path: 'elselt/user/:student',
         element: <Details />
+    },
+    {
+        path: 'elselt/dashboard/',
+        element: <Dashboard />
     },
 ]
 
