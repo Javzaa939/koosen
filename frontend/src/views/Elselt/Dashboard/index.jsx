@@ -18,7 +18,6 @@ require('highcharts/indicators/macd')(Highcharts)
 require('highcharts/modules/exporting')(Highcharts)
 require('highcharts/modules/map')(Highcharts)
 
-import { GiGraduateCap } from "react-icons/gi";
 import { FaBook, FaGlobe, FaGraduationCap, FaUser, FaUsers } from "react-icons/fa6";
 
 import { useSkin } from "@hooks/useSkin"
@@ -32,7 +31,7 @@ function Dashboard() {
 	const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false});
     const { t } = useTranslation()
 
-    const [chosenElselt, setChosenElselt] = useState(1)
+    const [chosenElselt, setChosenElselt] = useState('all')
 
     const data = [
         ['Дархан-Уул', 2822, 22,11],
@@ -168,7 +167,6 @@ function Dashboard() {
         chartz();
     }, [])
 
-
     return (
         <Card className='p-2' style={{ minHeight: '70dvh' }}>
             <div>
@@ -278,8 +276,6 @@ function Dashboard() {
                 <div className='my-2'>
                     <div id='map_chart'></div>
                 </div>
-            </div>
-            <div>
             </div>
         </Card>
     )
