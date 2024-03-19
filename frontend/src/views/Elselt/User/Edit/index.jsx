@@ -32,7 +32,7 @@ const validateSchema = Yup.object().shape(
 
 const EditModal = ({ open, handleModal, refreshDatas, rowData }) => {
 
-    const { control, handleSubmit,  formState: { errors }, setError, reset} = useForm(validate(validateSchema))
+    const { control, handleSubmit,  formState: { errors }, setError, reset, watch } = useForm(validate(validateSchema))
 
     const { t } = useTranslation()
 
@@ -112,8 +112,17 @@ const EditModal = ({ open, handleModal, refreshDatas, rowData }) => {
                                 <b className={`w-50 ms-25`} style={{ color: 'black', fontSize: '13px' }}>{rowData?.created_at? moment(rowData?.created_at).format("YYYY-MM-DD h:mm") : ''}</b>
                             </div>
                         </Col>
-                        <Col md={12}>
-                            <Row className='gy-1 border mt-1'>
+                        {
+                            rowData?.description &&
+                            <Col md={12} className='gy-1 border p-50'>
+                                <b className='text-dark ms-25'>Хөтөлбөр сольсон түүх</b>
+                                <span className='d-flex ms-25 mt-25' style={{ fontSize: '13px' }}>
+                                    <b>{rowData?.description}</b>
+                                </span>
+                            </Col>
+                        }
+                        <Col md={12} className="mt-2">
+                            <Row className='gy-1 border'>
                                 <Col md={12} sm={12}>
                                    <b className='text-dark'>Шинэ хөтөлбөр сонгох</b>
                                    <Alert color="primary" className="p-50" style={{ fontSize: '13px' }}>
