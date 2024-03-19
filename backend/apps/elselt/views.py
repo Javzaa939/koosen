@@ -5,7 +5,7 @@ from rest_framework.decorators import permission_classes
 from rest_framework.filters import SearchFilter
 
 from django.db import transaction
-from django.db.models import F, Subquery, OuterRef
+from django.db.models import F, Subquery, OuterRef, Count
 from django.db.models.functions import Substr
 
 from main.utils.function.utils import json_load
@@ -20,6 +20,7 @@ from lms.models import (
     ProfessionDefinition,
     AdmissionIndicator,
     AdmissionXyanaltToo,
+    AimagHot
 )
 
 from surgalt.serializers import (
@@ -220,17 +221,10 @@ class ElseltActiveListProfession(
 
     def get(self, request):
 
-        now = dt.date.today()
+        elselt = request.query_params.get('elselt')
 
-        self.queryset = (
-            self.queryset
-            .filter(
-                admission__begin_date__lte=now,
-                admission__end_date__gte=now,
-                admission__is_active=True
-            )
-        )
-
+        if elselt:
+            self.queryset = self.queryset.filter(admission=elselt)
 
         all_data = self.list(request).data
 
@@ -419,9 +413,9 @@ class AdmissionUserInfoAPIView(
 
         if gender:
             if gender == 'Эрэгтэй':
-                queryset = queryset = queryset.filter(gender__in=['1', '3', '5', '7', '9'])
+                queryset = queryset.filter(gender__in=['1', '3', '5', '7', '9'])
             else:
-                queryset = queryset = queryset.filter(gender__in=['0', '2', '4', '6', '8'])
+                queryset = queryset.filter(gender__in=['0', '2', '4', '6', '8'])
 
         # Sort хийх үед ажиллана
         if sorting:
@@ -464,6 +458,7 @@ class AdmissionUserInfoAPIView(
         return request.send_info('INF_002')
 
 
+@permission_classes([IsAuthenticated])
 class AdmissionYearAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -479,6 +474,7 @@ class AdmissionYearAPIView(
         return request.send_data(all_data)
 
 
+@permission_classes([IsAuthenticated])
 class AdmissionGpaAPIView(
     generics.GenericAPIView,
     mixins.UpdateModelMixin
@@ -493,3 +489,49 @@ class AdmissionGpaAPIView(
         )
 
         return request.send_info("INF_002")
+
+
+@permission_classes([IsAuthenticated])
+class DashboardAPIView(
+    generics.GenericAPIView
+):
+    """ Дашбоард мэдээлэл """
+
+    queryset = AdmissionUserProfession.objects.all()
+    def get(self, request):
+
+        elselt = request.query_params.get('elselt')
+
+        if elselt == 'all':
+            admission_ids = AdmissionRegister.objects.all().values_list('id', flat=True)
+        else:
+            admission_ids = [elselt]
+
+        queryset = self.queryset.annotate(gender=(Substr('user__register', 9, 1)))
+        queryset = queryset.filter(profession__admission__in=admission_ids)
+        all_student = queryset.count()
+        male =  queryset.filter(gender__in=['1', '3', '5', '7', '9']).count()
+        female =  queryset.filter(gender__in=['0', '2', '4', '6', '8']).count()
+        bachelor = queryset.filter(profession__profession__degree__degree_code='D').count()
+        master = queryset.filter(profession__profession__degree__degree_code='E').count()
+        doctor = queryset.filter(profession__profession__degree__degree_code='F').count()
+
+        aimag_subquery =Subquery(
+            AimagHot.objects.filter(
+                id=OuterRef('user__aimag')
+            ).values('name')[:1]
+        )
+        queryset = queryset.annotate(name=aimag_subquery)
+        aimag_values = queryset.values('name').annotate(total=Count('name')).order_by('name').exclude(total=0).values('name', 'total')
+
+        datas = {
+            'all_student': all_student,
+            'male': male,
+            'female': female,
+            'master': master,
+            'doctor': doctor,
+            'bachelor': bachelor,
+            'haryalal': list(aimag_values)
+        }
+
+        return request.send_data(datas)

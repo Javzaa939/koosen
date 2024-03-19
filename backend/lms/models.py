@@ -3852,8 +3852,8 @@ class AdmissionRegister(models.Model):
         verbose_name='Мэргэжлийн зэргүүдийг хадгалах'
     )
     lesson_year = models.CharField(max_length=50, verbose_name="Хичээлийн жил")
-    begin_date = models.DateField(verbose_name="Элсэлт эхлэх хугацаа")
-    end_date = models.DateField(verbose_name="Дуусах хугацаа")
+    begin_date = models.DateTimeField(verbose_name="Элсэлт эхлэх хугацаа")
+    end_date = models.DateTimeField(verbose_name="Дуусах хугацаа")
     is_active = models.BooleanField(default=False, verbose_name='Идэвхтэй эсэх')
     home_description = models.CharField(max_length=5000, null=True, verbose_name='Нүүр хуудасны харуулах тайлбар')
     alert_description = models.CharField(max_length=5000, null=True, verbose_name='Тухайн элсэлтэд зориулаад санамж')

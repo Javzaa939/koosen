@@ -5,6 +5,7 @@ import { X, UploadCloud } from "react-feather";
 
 import Select from 'react-select'
 import classnames from "classnames";
+import moment from 'moment';
 
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
@@ -51,6 +52,8 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
     const [degreeOption, setDegree] = useState([])
     const [selectedDegrees, setSelectedDegrees] = useState([])
     const [admissionJuram, setAdmissionJuram] = useState('')
+    const [endPicker, setEndPicker] = useState(new Date())
+    const [startPicker, setStartPicker] = useState(new Date())
 
 	// Loader
 	const { Loader, isLoading, fetchData } = useLoader({});
@@ -83,7 +86,12 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
             cdata['admission_juram'] = admissionJuram
         }
 
+        cdata['begin_date'] = moment(startPicker).format('YYYY-MM-DD HH:mm:ss')
+        cdata['end_date'] =  moment(endPicker).format('YYYY-MM-DD HH:mm:ss')
+
         cdata = convertDefaultValue(cdata)
+
+        console.log(cdata)
         const formData = new FormData()
 
         for (let key in cdata) {
@@ -99,7 +107,6 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
             } else {
                 /** Алдааны мессэжийг input дээр харуулна */
                 for (let key in errors) {
-                    console.log(errors)
                     setError(key, { type: 'custom', message:  errors[key][0]});
                 }
             }
@@ -112,7 +119,6 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
             } else {
                 /** Алдааны мессэжийг input дээр харуулна */
                 for (let key in errors) {
-                    console.log(errors)
                     setError(key, { type: 'custom', message:  errors[key][0]});
                 }
             }
@@ -141,6 +147,13 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
                     if (key === 'degrees') {
                         var degrees = degreeOption.filter((c) => editData[key]?.includes(c.id))
                         setSelectedDegrees(degrees)
+                    }
+
+                    if(key === 'begin_date') {
+                        setStartPicker(editData[key])
+                    }
+                    if(key === 'end_date') {
+                        setEndPicker(editData[key])
                     }
                 }
             }
@@ -245,12 +258,15 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
                                             id='begin_date'
                                             className='form-control'
                                             onChange={dates => {
-                                                onChange(formatDate(dates[0]));
+                                                onChange(formatDate(dates[0], 'YYYY-MM-DD H:M:S'));
+                                                setStartPicker(dates[0])
                                             }}
-                                            value={formatDate(value)}
+                                            value={startPicker}
                                             style={{height: "30px"}}
                                             options={{
-                                                dateFormat: 'Y-m-d',
+                                                dateFormat: 'Y-m-d H:i',
+                                                enableTime: true,
+                                                time_24hr: true,
                                                 utc: true,
                                             }}
                                         />
@@ -274,13 +290,16 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
                                             id='end_date'
                                             className='form-control'
                                             onChange={dates => {
-                                                onChange(formatDate(dates[0]));
+                                                onChange(formatDate(dates[0], 'YYYY-MM-DD HH:MM:SS'));
+                                                setEndPicker(dates[0])
                                             }}
-                                            value={formatDate(value)}
+                                            value={endPicker}
                                             style={{height: "30px"}}
                                             options={{
-                                                dateFormat: 'Y-m-d',
+                                                dateFormat: 'Y-m-d H:i',
                                                 utc: true,
+                                                time_24hr: true,
+                                                enableTime: true,
                                                 minDate: getValues("begin_date"),
                                             }}
                                         />

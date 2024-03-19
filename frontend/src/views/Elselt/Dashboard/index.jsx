@@ -27,23 +27,16 @@ import './style.scss'
 
 function Dashboard() {
     const { skin } = useSkin()
+    const { t } = useTranslation()
 
 	const elseltApi = useApi().elselt
 	const dashApi = useApi().elselt.dashboard
 	const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false});
-    const { t } = useTranslation()
 
     const [chosenElselt, setChosenElselt] = useState('all')
 
-    const chartdata = [
-        ['Дархан-Уул', 2822, 22,11],
-        ['Завхан', 2822, 22,11],
-        ['Хөвсгөл', 2822, 22,11],
-        ['Увс', 2822, 22,11],
-        ['Улаанбаатар', 2822, 22,11],
-    ]
-
-    const [dataz, setDatas] = useState([])
+    const [dataz, setDatas] = useState({})
+    const [aimagData, setAimagData] = useState([])
     const [professions, setProffesions] = useState([])
 
 	/* Жагсаалтын дата авах функц */
@@ -66,17 +59,27 @@ function Dashboard() {
 	}
 
 	async function getDatas() {
-        const {success, data} = await fetchData(dashApi.get())
+        const {success, data} = await fetchData(dashApi.get(chosenElselt))
         if(success) {
-            console.log(data,'irjn')
             setDatas(data)
-            console.log('irjn')
+
+            var seriesData = datas.map(function(item) {
+                return {
+                    'hc-key': item.aimag_name, // Assuming 'aimag_name' corresponds to the country code
+                    value: item.total
+                };
+            });
+
+            setAimagData(seriesData)
         }
 	}
+    useEffect(() => {
+        getDatas()
+    }, [chosenElselt]
+    )
 
     useEffect(() => {
         getElselts();
-        getDatas()
     }, [])
 
     const demColor = '#4956e6'
@@ -84,7 +87,13 @@ function Dashboard() {
     const libColor = '#f788df'
 
     async function chartz(){
-
+        var seriesData = dataz?.haryalal?.map(function(item) {
+            console.log(item)
+            return {
+                'hc-key': item.name,
+                'value': item.total
+            };
+        });
         const mapData = await fetch(
             `${process.env.PUBLIC_URL}/assets/data/chart/mongolia.json`
         ).then(response => response.json());
@@ -114,42 +123,28 @@ function Dashboard() {
                 style: { color: `${skin == 'dark' ? '#cccccc' : '#545454'}`, fontWeight: 600 },
                 text: 'Элсэгчдийн харьяалал',
             },
-            // colorAxis: {
-            //     min: 1,
-            //     type: 'logarithmic',
-            //     minColor: '#EEEEFF',
-            //     maxColor: '#000022',
-            //     stops: [
-            //         [0, '#EFEFFF'],
-            //         [0.67, '#4444FF'],
-            //         [1, '#000022']
-            //     ]
-            // },
-            // plotOptions: {
-            //     pie: {
-            //         clip: true,
-            //         dataLabels: {
-            //             enabled: true
-            //         },
-            //         states: {
-            //             hover: {
-            //                 halo: {
-            //                     size: 5
-            //                 }
-            //             }
-            //         },
-            //         tooltip: {
-            //             headerFormat: ''
-            //         }
-            //     }
-            // },
             series: [{
                 mapData,
-                data: datas?.hariyalal,
+                data: seriesData,
                 name: 'Mongolia',
                 borderColor: '#e0e0e0',
-                joinBy: ['name', 'id'],
+                joinBy: 'hc-key',
                 keys: ['id', 'demVotes', 'repVotes', 'libVotes'],
+                states: {
+                    hover: {
+                        color: '#BADA55' // Color when hovering over a data point
+                    }
+                },
+                dataLabels: {
+                    enabled: true,
+                    format: '{point.name}'
+                },
+                mapNavigation: {
+                    enabled: true,
+                    buttonOptions: {
+                        verticalAlign: 'bottom'
+                    }
+                },
                 tooltip: {
                     headerFormat: '',
                     pointFormatter()
@@ -178,7 +173,7 @@ function Dashboard() {
 
     useEffect(() => {
         chartz();
-    }, [])
+    }, [dataz])
 
     return (
         <Card className='p-2' style={{ minHeight: '70dvh' }}>
@@ -211,7 +206,7 @@ function Dashboard() {
                                 Нийт элсэгчид
                             </div>
                             <div className='dash_card_number'>
-                                {datas?.all_student}
+                                {dataz?.all_student}
                             </div>
                         </div>
                         <div className='card_icon simple_icon'>
@@ -224,7 +219,7 @@ function Dashboard() {
                                 Бакалавр
                             </div>
                             <div className='dash_card_number'>
-                                {datas?.bachelor}
+                                {dataz?.bachelor}
                             </div>
                         </div>
                         <div className='card_icon simple_icon'>
@@ -237,7 +232,7 @@ function Dashboard() {
                                 Магистр
                             </div>
                             <div className='dash_card_number'>
-                                {datas?.master}
+                                {dataz?.master}
                             </div>
                         </div>
                         <div className='card_icon simple_icon'>
@@ -250,7 +245,7 @@ function Dashboard() {
                                 Доктор
                             </div>
                             <div className='dash_card_number'>
-                                {datas?.doctor}
+                                {dataz?.doctor}
                             </div>
                         </div>
                         <div className='card_icon simple_icon'>
@@ -265,7 +260,7 @@ function Dashboard() {
                                 Эрэгтэй
                             </div>
                             <div className='dash_card_number'>
-                                {datas?.male}
+                                {dataz?.male}
                             </div>
                         </div>
                         <div className='card_icon male_icon'>
@@ -278,7 +273,7 @@ function Dashboard() {
                                 Эмэгтэй
                             </div>
                             <div className='dash_card_number'>
-                                {datas?.female}
+                                {dataz?.female}
                             </div>
                         </div>
                         <div className='card_icon female_icon'>

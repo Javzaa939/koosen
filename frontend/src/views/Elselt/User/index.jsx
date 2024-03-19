@@ -92,7 +92,7 @@ const ElseltUser = () => {
     const stateop = [
         {
             'id': 1,
-            'name': 'ИЛГЭЭСЭН'
+            'name': 'БҮРТГҮҮЛСЭН'
         },
         {
             'id': 2,
@@ -114,7 +114,7 @@ const ElseltUser = () => {
 
     // Хөтөлбөрийн жагсаалт авах
     async function getProfession() {
-        const { success, data } = await fetchData(professionApi.getList())
+        const { success, data } = await fetchData(professionApi.getList(adm))
         if (success) {
             setProfession(data)
         }
@@ -209,6 +209,10 @@ const ElseltUser = () => {
         getUnit1()
     }, [])
 
+    useEffect(() => {
+        getProfession()
+    }, [adm])
+
     // ** Function to handle per page
     function handlePerPage(e) {
         setRowsPerPage(parseInt(e.target.value))
@@ -219,31 +223,6 @@ const ElseltUser = () => {
     }
 
     function convert(){
-
-        const header = Array.from({length: 1},(_) => {
-            return(
-                {
-                    '№': '',
-                    'Овог': '',
-                    'Нэр': '',
-                    'РД': '',
-                    'Хүйс': '',
-                    'Имейл': '',
-                    'Утасны дугаар': '',
-                    'Яаралтай холбогдох': '',
-                    'Хөтөлбөр': '',
-                    'Бүртгүүлсэн огноо': '',
-                    'Төгссөн сургууль': '',
-                    'Мэргэжил': '',
-                    'Голч': '',
-                    'Ажиллаж байгаа байгууллагын нэр': '',
-                    'Албан тушаал': '',
-                    'Хэлтэс': '',
-                    'Цол': '',
-                }
-            )
-        })
-
         const mainData = datas.map((data, idx) => {
             return(
 
