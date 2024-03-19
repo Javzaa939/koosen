@@ -113,13 +113,11 @@ const EditModal = ({ open, handleModal, refreshDatas, rowData }) => {
                             </div>
                         </Col>
                         {
-                            watch('profession') &&
+                            rowData?.description &&
                             <Col md={12} className='gy-1 border p-50'>
-                                <b className='text-dark ms-25'>Хөтөлбөрийн түүх</b>
-                                <span className='d-flex ms-25' style={{ fontSize: '13px', fontWeight: '500', color: '#4f4f4f' }}>
-                                    <b style={{ color: 'black', fontSize: '13px' }}>{rowData?.profession}&nbsp;</b> хөтөлбөрийг&nbsp;
-                                    <b style={{ color: 'black', fontSize: '13px' }}>{profOption?.find((val) => val?.id === watch('profession'))?.name}&nbsp;</b>
-                                    болголоо.
+                                <b className='text-dark ms-25'>Хөтөлбөр сольсон түүх</b>
+                                <span className='d-flex ms-25 mt-25' style={{ fontSize: '13px' }}>
+                                    <b>{rowData?.description}</b>
                                 </span>
                             </Col>
                         }
