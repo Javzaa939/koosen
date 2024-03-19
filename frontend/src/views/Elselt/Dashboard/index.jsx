@@ -22,25 +22,28 @@ import { FaBook, FaGlobe, FaGraduationCap, FaUser, FaUsers } from "react-icons/f
 
 import { useSkin } from "@hooks/useSkin"
 
+import { datas } from './sampledata';
 import './style.scss'
 
 function Dashboard() {
     const { skin } = useSkin()
 
 	const elseltApi = useApi().elselt
+	const dashApi = useApi().elselt.dashboard
 	const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false});
     const { t } = useTranslation()
 
     const [chosenElselt, setChosenElselt] = useState('all')
 
-    const data = [
+    const chartdata = [
         ['Дархан-Уул', 2822, 22,11],
         ['Завхан', 2822, 22,11],
         ['Хөвсгөл', 2822, 22,11],
         ['Увс', 2822, 22,11],
         ['Улаанбаатар', 2822, 22,11],
     ]
-    const [datas, setDatas] = useState([])
+
+    const [dataz, setDatas] = useState([])
     const [professions, setProffesions] = useState([])
 
 	/* Жагсаалтын дата авах функц */
@@ -62,8 +65,18 @@ function Dashboard() {
         }
 	}
 
+	async function getDatas() {
+        const {success, data} = await fetchData(dashApi.get())
+        if(success) {
+            console.log(data,'irjn')
+            setDatas(data)
+            console.log('irjn')
+        }
+	}
+
     useEffect(() => {
-        getElselts()
+        getElselts();
+        getDatas()
     }, [])
 
     const demColor = '#4956e6'
@@ -132,7 +145,7 @@ function Dashboard() {
             // },
             series: [{
                 mapData,
-                data: data,
+                data: datas?.hariyalal,
                 name: 'Mongolia',
                 borderColor: '#e0e0e0',
                 joinBy: ['name', 'id'],
@@ -198,7 +211,7 @@ function Dashboard() {
                                 Нийт элсэгчид
                             </div>
                             <div className='dash_card_number'>
-                                255
+                                {datas?.all_student}
                             </div>
                         </div>
                         <div className='card_icon simple_icon'>
@@ -211,7 +224,7 @@ function Dashboard() {
                                 Бакалавр
                             </div>
                             <div className='dash_card_number'>
-                                255
+                                {datas?.bachelor}
                             </div>
                         </div>
                         <div className='card_icon simple_icon'>
@@ -224,7 +237,7 @@ function Dashboard() {
                                 Магистр
                             </div>
                             <div className='dash_card_number'>
-                                255
+                                {datas?.master}
                             </div>
                         </div>
                         <div className='card_icon simple_icon'>
@@ -237,7 +250,7 @@ function Dashboard() {
                                 Доктор
                             </div>
                             <div className='dash_card_number'>
-                                255
+                                {datas?.doctor}
                             </div>
                         </div>
                         <div className='card_icon simple_icon'>
@@ -252,7 +265,7 @@ function Dashboard() {
                                 Эрэгтэй
                             </div>
                             <div className='dash_card_number'>
-                                120
+                                {datas?.male}
                             </div>
                         </div>
                         <div className='card_icon male_icon'>
@@ -265,7 +278,7 @@ function Dashboard() {
                                 Эмэгтэй
                             </div>
                             <div className='dash_card_number'>
-                                44
+                                {datas?.female}
                             </div>
                         </div>
                         <div className='card_icon female_icon'>
