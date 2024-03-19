@@ -32,7 +32,7 @@ const validateSchema = Yup.object().shape(
 
 const EditModal = ({ open, handleModal, refreshDatas, rowData }) => {
 
-    const { control, handleSubmit,  formState: { errors }, setError, reset} = useForm(validate(validateSchema))
+    const { control, handleSubmit,  formState: { errors }, setError, reset, watch } = useForm(validate(validateSchema))
 
     const { t } = useTranslation()
 
@@ -112,8 +112,19 @@ const EditModal = ({ open, handleModal, refreshDatas, rowData }) => {
                                 <b className={`w-50 ms-25`} style={{ color: 'black', fontSize: '13px' }}>{rowData?.created_at? moment(rowData?.created_at).format("YYYY-MM-DD h:mm") : ''}</b>
                             </div>
                         </Col>
-                        <Col md={12}>
-                            <Row className='gy-1 border mt-1'>
+                        {
+                            watch('profession') &&
+                            <Col md={12} className='gy-1 border p-50'>
+                                <b className='text-dark ms-25'>Хөтөлбөрийн түүх</b>
+                                <span className='d-flex ms-25' style={{ fontSize: '13px', fontWeight: '500', color: '#4f4f4f' }}>
+                                    <b style={{ color: 'black', fontSize: '13px' }}>{rowData?.profession}&nbsp;</b> хөтөлбөрийг&nbsp;
+                                    <b style={{ color: 'black', fontSize: '13px' }}>{profOption?.find((val) => val?.id === watch('profession'))?.name}&nbsp;</b>
+                                    болголоо.
+                                </span>
+                            </Col>
+                        }
+                        <Col md={12} className="mt-2">
+                            <Row className='gy-1 border'>
                                 <Col md={12} sm={12}>
                                    <b className='text-dark'>Шинэ хөтөлбөр сонгох</b>
                                    <Alert color="primary" className="p-50" style={{ fontSize: '13px' }}>
