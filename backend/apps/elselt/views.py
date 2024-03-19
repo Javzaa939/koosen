@@ -64,8 +64,12 @@ class ElseltApiView(
         return request.send_data(datas)
 
     def post(self, request):
+        datas = request.data.dict()
+        degree_ids = json_load(datas.get('degrees'))
+        datas['degrees'] = degree_ids
         self.serializer_class = AdmissionPostSerializer
-        serializer = self.get_serializer(data=request.data)
+
+        serializer = self.get_serializer(data=datas)
         if serializer.is_valid(raise_exception=False):
             self.perform_create(serializer)
         else:
