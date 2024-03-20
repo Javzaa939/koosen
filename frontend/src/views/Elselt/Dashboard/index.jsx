@@ -22,22 +22,24 @@ import { FaBook, FaGlobe, FaGraduationCap, FaUser, FaUsers } from "react-icons/f
 
 import { useSkin } from "@hooks/useSkin"
 
-import { datas } from './sampledata';
+import { dataz } from './sampledata';
 import './style.scss'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, linearGradient } from 'recharts';
+
 
 function Dashboard() {
     const { skin } = useSkin()
-    const { t } = useTranslation()
 
 	const elseltApi = useApi().elselt
 	const dashApi = useApi().elselt.dashboard
 	const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false});
+    const { t } = useTranslation()
 
     const [chosenElselt, setChosenElselt] = useState('all')
 
-    const [dataz, setDatas] = useState({})
-    const [aimagData, setAimagData] = useState([])
+    const [datas, setDatas] = useState([])
     const [professions, setProffesions] = useState([])
+    const [aimagz, setAimagz] = useState([])
 
 	/* Жагсаалтын дата авах функц */
 	async function getElselts() {
@@ -63,23 +65,19 @@ function Dashboard() {
         if(success) {
             setDatas(data)
 
-            var seriesData = datas.map(function(item) {
-                return {
-                    'hc-key': item.aimag_name, // Assuming 'aimag_name' corresponds to the country code
-                    value: item.total
-                };
-            });
+            var serdata = data?.haryalal.map((data) => {
+                return(
+                    [data?.name || '', data?.total, data?.total, data?.total ]
+                )
+            })
 
-            setAimagData(seriesData)
+            setAimagz(serdata)
         }
 	}
-    useEffect(() => {
-        getDatas()
-    }, [chosenElselt]
-    )
 
     useEffect(() => {
         getElselts();
+        getDatas()
     }, [])
 
     const demColor = '#4956e6'
@@ -87,13 +85,7 @@ function Dashboard() {
     const libColor = '#f788df'
 
     async function chartz(){
-        var seriesData = dataz?.haryalal?.map(function(item) {
-            console.log(item)
-            return {
-                'hc-key': item.name,
-                'value': item.total
-            };
-        });
+
         const mapData = await fetch(
             `${process.env.PUBLIC_URL}/assets/data/chart/mongolia.json`
         ).then(response => response.json());
@@ -123,28 +115,22 @@ function Dashboard() {
                 style: { color: `${skin == 'dark' ? '#cccccc' : '#545454'}`, fontWeight: 600 },
                 text: 'Элсэгчдийн харьяалал',
             },
+            dataLabels: {
+                enabled: true,
+                format: '{point.name}'
+            },
+            states: {
+                hover: {
+                    color: '#BADA55' // Color when hovering over a data point
+                }
+            },
             series: [{
                 mapData,
-                data: seriesData,
+                data: aimagz,
                 name: 'Mongolia',
                 borderColor: '#e0e0e0',
-                joinBy: 'hc-key',
+                joinBy: ['name', 'id'],
                 keys: ['id', 'demVotes', 'repVotes', 'libVotes'],
-                states: {
-                    hover: {
-                        color: '#BADA55' // Color when hovering over a data point
-                    }
-                },
-                dataLabels: {
-                    enabled: true,
-                    format: '{point.name}'
-                },
-                mapNavigation: {
-                    enabled: true,
-                    buttonOptions: {
-                        verticalAlign: 'bottom'
-                    }
-                },
                 tooltip: {
                     headerFormat: '',
                     pointFormatter()
@@ -173,7 +159,51 @@ function Dashboard() {
 
     useEffect(() => {
         chartz();
-    }, [dataz])
+    }, [aimagz])
+
+    function customizedTick(props) {
+        const { x, y, index, payload, width } = props;
+        if (index % 3 === 1) {
+            return (
+                <g>
+                    <line x1={x - 1.5 * width} y1={y} x2={x - 1.5 * width} y2={y + 10} />
+                    <text x={x} y={y} textAnchor="middle" dominantBaseline="hanging">
+                        {payload.value}
+                    </text>
+                </g>
+            );
+        }
+        return null;
+    }
+
+    const CustomTooltip = data => {
+        if (data.active && data.payload) {
+            return (
+                <div className='recharts_custom_tooltip shadow p-2 rounded-3'>
+                    <p className='fw-bold mb-0'>{data.label}</p>
+                    <hr />
+                    <div className='active'>
+                        {data.payload.map(i => {
+                            return (
+                                <div className='d-flex align-items-center' key={i.dataKey}>
+                                <span
+                                    className='bullet bullet-sm bullet-bordered me-50'
+                                    style={{
+                                        backgroundColor: i?.fill ? i.fill : '#fff'
+                                    }}
+                                ></span>
+                                <span className='text-capitalize me-75'>
+                                    {i.dataKey == 'male' ? 'Эрэгтэй' : 'Эмэгтэй'} : {i.payload[i.dataKey]}
+                                </span>
+                                </div>
+                            )
+                        })}
+                    </div>
+                </div>
+            )
+        }
+        return null
+    }
 
     return (
         <Card className='p-2' style={{ minHeight: '70dvh' }}>
@@ -206,7 +236,7 @@ function Dashboard() {
                                 Нийт элсэгчид
                             </div>
                             <div className='dash_card_number'>
-                                {dataz?.all_student}
+                                {datas?.all_student}
                             </div>
                         </div>
                         <div className='card_icon simple_icon'>
@@ -219,7 +249,7 @@ function Dashboard() {
                                 Бакалавр
                             </div>
                             <div className='dash_card_number'>
-                                {dataz?.bachelor}
+                                {datas?.bachelor}
                             </div>
                         </div>
                         <div className='card_icon simple_icon'>
@@ -232,7 +262,7 @@ function Dashboard() {
                                 Магистр
                             </div>
                             <div className='dash_card_number'>
-                                {dataz?.master}
+                                {datas?.master}
                             </div>
                         </div>
                         <div className='card_icon simple_icon'>
@@ -245,7 +275,7 @@ function Dashboard() {
                                 Доктор
                             </div>
                             <div className='dash_card_number'>
-                                {dataz?.doctor}
+                                {datas?.doctor}
                             </div>
                         </div>
                         <div className='card_icon simple_icon'>
@@ -260,7 +290,7 @@ function Dashboard() {
                                 Эрэгтэй
                             </div>
                             <div className='dash_card_number'>
-                                {dataz?.male}
+                                {datas?.male}
                             </div>
                         </div>
                         <div className='card_icon male_icon'>
@@ -273,7 +303,7 @@ function Dashboard() {
                                 Эмэгтэй
                             </div>
                             <div className='dash_card_number'>
-                                {dataz?.female}
+                                {datas?.female}
                             </div>
                         </div>
                         <div className='card_icon female_icon'>
@@ -281,8 +311,44 @@ function Dashboard() {
                         </div>
                     </Col>
                 </Row>
-                <div className='my-2'>
+                <div className='my-2 shadow p-1 rounded-3'>
                     <div id='map_chart'></div>
+                </div>
+                <div>
+                    <div className='shadow p-1 rounded-3 mt-5 mb-2'>
+                        <div className='d-flex justify-content-center mb-2 mt-50' style={{ fontWeight: 900, fontSize: 16 }}>
+                            Элсэгчдийн мэдээлэл мэргэжил, хүйсээр
+                        </div>
+                        <div className='recharts-wrapper bar-chart' style={{ height: '500px' }}>
+                            <ResponsiveContainer>
+                                <BarChart height={300} data={dataz?.profs} barSize={25}>
+                                    <defs>
+                                        <linearGradient id="colorMale" x1="0" y1="0" x2="0" y2="1">
+                                            {/* <stop offset='10%' stopColor="#FFFFFF" stopOpacity={0.2} /> */}
+                                            <stop offset='5%' stopColor="#003fa3" stopOpacity={0.9} />
+                                            <stop offset='80%' stopColor="#4287f5" stopOpacity={0.8} />
+                                            <stop offset='200%' stopColor={`${skin == 'dark' ? '#161d31' : '#fff'}`} stopOpacity={0.2} />
+                                        </linearGradient>
+
+                                        <linearGradient id="colorFemale" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset='5%' stopColor="#9923a8" stopOpacity={0.9} />
+                                            <stop offset='80%' stopColor="#dc8ee6" stopOpacity={0.8} />
+                                            <stop offset='200%' stopColor={`${skin == 'dark' ? '#161d31' : '#fff'}`} stopOpacity={0.2} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeOpacity={0.3} />
+
+                                    <XAxis dataKey="name" />
+                                    <YAxis />
+
+                                    <Tooltip content={CustomTooltip} cursor={{fill: 'rgba(148, 148, 148, 0.1)'}}/>
+
+                                    <Bar dataKey='male' fill="url(#colorMale)" radius={[50,50,0,0]}/>
+                                    <Bar dataKey='female' fill='url(#colorFemale)' radius={[50,50,0,0]}/>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
                 </div>
             </div>
         </Card>
