@@ -32,7 +32,12 @@ function Dashboard() {
 
 	const elseltApi = useApi().elselt
 	const dashApi = useApi().elselt.dashboard
-	const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false});
+	const { isLoading, fetchData } = useLoader({});
+	const {
+        Loader,
+        isLoading: mainDataLoading,
+        fetchData: fetchMainData
+    } = useLoader({isFullScreen: false});
     const { t } = useTranslation()
 
     const [chosenElselt, setChosenElselt] = useState('all')
@@ -61,7 +66,7 @@ function Dashboard() {
 	}
 
 	async function getDatas() {
-        const {success, data} = await fetchData(dashApi.get(chosenElselt))
+        const {success, data} = await fetchMainData(dashApi.get(chosenElselt))
         if(success) {
             setDatas(data)
 
@@ -300,7 +305,7 @@ function Dashboard() {
                     </Col>
                 </Row>
                 {
-                    isLoading && Loader
+                    mainDataLoading && Loader
                 }
                 <>
                     <div className='my-2 shadow p-1 rounded-3'>
