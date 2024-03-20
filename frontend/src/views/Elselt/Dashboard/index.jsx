@@ -80,6 +80,11 @@ function Dashboard() {
         getDatas()
     }, [])
 
+
+    useEffect(() => {
+        getDatas()
+    }, [chosenElselt])
+
     const demColor = '#4956e6'
     const repColor = '#51a4fc'
     const libColor = '#f788df'
@@ -311,45 +316,50 @@ function Dashboard() {
                         </div>
                     </Col>
                 </Row>
-                <div className='my-2 shadow p-1 rounded-3'>
-                    <div id='map_chart'></div>
-                </div>
-                <div>
-                    <div className='shadow p-1 rounded-3 mt-5 mb-2'>
-                        <div className='d-flex justify-content-center mb-2 mt-50' style={{ fontWeight: 900, fontSize: 16 }}>
-                            Элсэгчдийн мэдээлэл мэргэжил, хүйсээр
-                        </div>
-                        <div className='recharts-wrapper bar-chart' style={{ height: '500px' }}>
-                            <ResponsiveContainer>
-                                <BarChart height={300} data={dataz?.profs} barSize={25}>
-                                    <defs>
-                                        <linearGradient id="colorMale" x1="0" y1="0" x2="0" y2="1">
-                                            {/* <stop offset='10%' stopColor="#FFFFFF" stopOpacity={0.2} /> */}
-                                            <stop offset='5%' stopColor="#003fa3" stopOpacity={0.9} />
-                                            <stop offset='80%' stopColor="#4287f5" stopOpacity={0.8} />
-                                            <stop offset='200%' stopColor={`${skin == 'dark' ? '#161d31' : '#fff'}`} stopOpacity={0.2} />
-                                        </linearGradient>
+                {
+                    isLoading && Loader
+                }
+                <>
+                    <div className='my-2 shadow p-1 rounded-3'>
+                        <div id='map_chart'></div>
+                    </div>
+                    <div>
+                        <div className='shadow p-1 rounded-3 mt-5 mb-2'>
+                            <div className='d-flex justify-content-center mb-2 mt-50' style={{ fontWeight: 900, fontSize: 16 }}>
+                                Элсэгчдийн мэдээлэл мэргэжил, хүйсээр
+                            </div>
+                            <div className='recharts-wrapper bar-chart' style={{ height: '500px' }}>
+                                <ResponsiveContainer>
+                                    <BarChart height={300} data={dataz?.profs} barSize={25}>
+                                        <defs>
+                                            <linearGradient id="colorMale" x1="0" y1="0" x2="0" y2="1">
+                                                {/* <stop offset='10%' stopColor="#FFFFFF" stopOpacity={0.2} /> */}
+                                                <stop offset='5%' stopColor="#003fa3" stopOpacity={0.9} />
+                                                <stop offset='80%' stopColor="#4287f5" stopOpacity={0.8} />
+                                                <stop offset='200%' stopColor={`${skin == 'dark' ? '#161d31' : '#fff'}`} stopOpacity={0.2} />
+                                            </linearGradient>
 
-                                        <linearGradient id="colorFemale" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset='5%' stopColor="#9923a8" stopOpacity={0.9} />
-                                            <stop offset='80%' stopColor="#dc8ee6" stopOpacity={0.8} />
-                                            <stop offset='200%' stopColor={`${skin == 'dark' ? '#161d31' : '#fff'}`} stopOpacity={0.2} />
-                                        </linearGradient>
-                                    </defs>
-                                    <CartesianGrid strokeOpacity={0.3} />
+                                            <linearGradient id="colorFemale" x1="0" y1="0" x2="0" y2="1">
+                                                <stop offset='5%' stopColor="#9923a8" stopOpacity={0.9} />
+                                                <stop offset='80%' stopColor="#dc8ee6" stopOpacity={0.8} />
+                                                <stop offset='200%' stopColor={`${skin == 'dark' ? '#161d31' : '#fff'}`} stopOpacity={0.2} />
+                                            </linearGradient>
+                                        </defs>
+                                        <CartesianGrid strokeOpacity={0.3} />
 
-                                    <XAxis dataKey="name" />
-                                    <YAxis />
+                                        <XAxis dataKey="name" />
+                                        <YAxis />
 
-                                    <Tooltip content={CustomTooltip} cursor={{fill: 'rgba(148, 148, 148, 0.1)'}}/>
+                                        <Tooltip content={CustomTooltip} cursor={{fill: 'rgba(148, 148, 148, 0.1)'}}/>
 
-                                    <Bar dataKey='male' fill="url(#colorMale)" radius={[50,50,0,0]}/>
-                                    <Bar dataKey='female' fill='url(#colorFemale)' radius={[50,50,0,0]}/>
-                                </BarChart>
-                            </ResponsiveContainer>
+                                        <Bar dataKey='male' fill="url(#colorMale)" radius={[50,50,0,0]}/>
+                                        <Bar dataKey='female' fill='url(#colorFemale)' radius={[50,50,0,0]}/>
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </>
             </div>
         </Card>
     )
