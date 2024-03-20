@@ -67,7 +67,7 @@ function Dashboard() {
 
             var serdata = data?.haryalal.map((data) => {
                 return(
-                    [data?.name || '', data?.total, data?.total, data?.total ]
+                    [data?.name || '', data?.total, data?.male, data?.female ]
                 )
             })
 
@@ -330,7 +330,7 @@ function Dashboard() {
                             </div>
                             <div className='recharts-wrapper bar-chart' style={{ height: '500px' }}>
                                 <ResponsiveContainer>
-                                    <BarChart height={300} data={dataz?.profs} barSize={25}>
+                                    <BarChart height={300} data={datas?.profs} barSize={25}>
                                         <defs>
                                             <linearGradient id="colorMale" x1="0" y1="0" x2="0" y2="1">
                                                 {/* <stop offset='10%' stopColor="#FFFFFF" stopOpacity={0.2} /> */}
@@ -347,7 +347,7 @@ function Dashboard() {
                                         </defs>
                                         <CartesianGrid strokeOpacity={0.3} />
 
-                                        <XAxis dataKey="name" />
+                                        <XAxis dataKey="prof_name" />
                                         <YAxis />
 
                                         <Tooltip content={CustomTooltip} cursor={{fill: 'rgba(148, 148, 148, 0.1)'}}/>
