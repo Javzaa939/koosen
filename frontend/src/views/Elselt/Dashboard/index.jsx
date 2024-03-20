@@ -77,9 +77,7 @@ function Dashboard() {
 
     useEffect(() => {
         getElselts();
-        getDatas()
     }, [])
-
 
     useEffect(() => {
         getDatas()
@@ -165,21 +163,6 @@ function Dashboard() {
     useEffect(() => {
         chartz();
     }, [aimagz])
-
-    function customizedTick(props) {
-        const { x, y, index, payload, width } = props;
-        if (index % 3 === 1) {
-            return (
-                <g>
-                    <line x1={x - 1.5 * width} y1={y} x2={x - 1.5 * width} y2={y + 10} />
-                    <text x={x} y={y} textAnchor="middle" dominantBaseline="hanging">
-                        {payload.value}
-                    </text>
-                </g>
-            );
-        }
-        return null;
-    }
 
     const CustomTooltip = data => {
         if (data.active && data.payload) {
@@ -331,9 +314,8 @@ function Dashboard() {
                             <div className='recharts-wrapper bar-chart' style={{ height: '500px' }}>
                                 <ResponsiveContainer>
                                     <BarChart height={300} data={dataz?.profs} barSize={25}>
-                                        <defs>
+                                        {/* <defs>
                                             <linearGradient id="colorMale" x1="0" y1="0" x2="0" y2="1">
-                                                {/* <stop offset='10%' stopColor="#FFFFFF" stopOpacity={0.2} /> */}
                                                 <stop offset='5%' stopColor="#003fa3" stopOpacity={0.9} />
                                                 <stop offset='80%' stopColor="#4287f5" stopOpacity={0.8} />
                                                 <stop offset='200%' stopColor={`${skin == 'dark' ? '#161d31' : '#fff'}`} stopOpacity={0.2} />
@@ -344,7 +326,7 @@ function Dashboard() {
                                                 <stop offset='80%' stopColor="#dc8ee6" stopOpacity={0.8} />
                                                 <stop offset='200%' stopColor={`${skin == 'dark' ? '#161d31' : '#fff'}`} stopOpacity={0.2} />
                                             </linearGradient>
-                                        </defs>
+                                        </defs> */}
                                         <CartesianGrid strokeOpacity={0.3} />
 
                                         <XAxis dataKey="name" />
@@ -352,8 +334,12 @@ function Dashboard() {
 
                                         <Tooltip content={CustomTooltip} cursor={{fill: 'rgba(148, 148, 148, 0.1)'}}/>
 
-                                        <Bar dataKey='male' fill="url(#colorMale)" radius={[50,50,0,0]}/>
-                                        <Bar dataKey='female' fill='url(#colorFemale)' radius={[50,50,0,0]}/>
+                                        <Bar dataKey='male' fill="#4287f5" radius={[50,50,0,0]}/>
+                                        <Bar dataKey='female' fill='#dc8ee6' radius={[50,50,0,0]}/>
+
+                                        {/* Gradient Chart */}
+                                        {/* <Bar dataKey='male' fill="url(#colorMale)" radius={[50,50,0,0]}/>
+                                        <Bar dataKey='female' fill='url(#colorFemale)' radius={[50,50,0,0]}/> */}
                                     </BarChart>
                                 </ResponsiveContainer>
                             </div>
