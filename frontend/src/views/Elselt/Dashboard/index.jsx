@@ -24,6 +24,7 @@ import { useSkin } from "@hooks/useSkin"
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 import './style.scss'
+import mapData from './mongolz.json'
 
 function Dashboard() {
     const { skin } = useSkin()
@@ -92,10 +93,11 @@ function Dashboard() {
 
     async function chartz(){
 
-        const mapData = await fetch(
-            `${process.env.PUBLIC_URL}/assets/data/chart/mongolia.json`
-        ).then(response => response.json());
+        // const mapData = await fetch(
+        //     `${process.env.PUBLIC_URL}/assets/data/chart/mongolia.json`
+        // ).then(response => response.json());
 
+        // console.log(mapData,'mapdata')
 
         Highcharts.mapChart('map_chart', {
             colorAxis: {
