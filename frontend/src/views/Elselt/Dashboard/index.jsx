@@ -67,7 +67,7 @@ function Dashboard() {
 
             var serdata = data?.haryalal.map((data) => {
                 return(
-                    [data?.name || '', data?.total, data?.total, data?.total ]
+                    [data?.name || '', data?.total, data?.male, data?.female ]
                 )
             })
 
@@ -329,7 +329,7 @@ function Dashboard() {
                                         </defs> */}
                                         <CartesianGrid strokeOpacity={0.3} />
 
-                                        <XAxis dataKey="name" />
+                                        <XAxis dataKey="prof_name" />
                                         <YAxis />
 
                                         <Tooltip content={CustomTooltip} cursor={{fill: 'rgba(148, 148, 148, 0.1)'}}/>

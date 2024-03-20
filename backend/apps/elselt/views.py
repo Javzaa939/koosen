@@ -516,13 +516,80 @@ class DashboardAPIView(
         master = queryset.filter(profession__profession__degree__degree_code='E').count()
         doctor = queryset.filter(profession__profession__degree__degree_code='F').count()
 
+        # Аймгаар дотор нь хүйсээр нь ялгах
+        female_qs = (
+            queryset
+                .filter(gender__in=['0', '2', '4', '6', '8'], user__aimag=OuterRef('user__aimag'))
+                .annotate(count=Count("*"))
+                .values("count")
+        )
+        female_qs.query.set_group_by()
+
+        male_qs = (
+            queryset
+                .filter(gender__in=['1', '3', '5', '7', '9'], user__aimag=OuterRef('user__aimag'))
+                .annotate(count=Count("*"))
+                .values("count")
+        )
+        male_qs.query.set_group_by()
+
         aimag_subquery =Subquery(
             AimagHot.objects.filter(
                 id=OuterRef('user__aimag')
             ).values('name')[:1]
         )
-        queryset = queryset.annotate(name=aimag_subquery)
-        aimag_values = queryset.values('name').annotate(total=Count('name')).order_by('name').exclude(total=0).values('name', 'total')
+
+        aimag_queryset = queryset.annotate(name=aimag_subquery)
+
+        aimag_values = (
+            aimag_queryset
+            .values('name')
+            .annotate(
+                total=Count("name"),
+                male=Subquery(male_qs),
+                female=Subquery(female_qs)
+            )
+            .order_by('name')
+            .exclude(total=0)
+            .values('name', 'total', 'male', 'female')
+        )
+
+        # Мэргэжлээр хүйсээр
+        prof_query =Subquery(
+            ProfessionDefinition.objects.filter(
+                id=OuterRef('profession__profession')
+            ).values('name')[:1]
+        )
+
+        prof_queryset = queryset.annotate(prof_name=prof_query)
+
+        pfemale_qs = (
+            queryset
+                .filter(gender__in=['0', '2', '4', '6', '8'], profession=OuterRef('profession'))
+                .annotate(count=Count("*"))
+                .values("count")
+        )
+        pfemale_qs.query.set_group_by()
+
+        pmale_qs = (
+            queryset
+                .filter(gender__in=['1', '3', '5', '7', '9'], profession=OuterRef('profession'))
+                .annotate(count=Count("*"))
+                .values("count")
+        )
+        pmale_qs.query.set_group_by()
+        prof_values = (
+            prof_queryset
+            .values('prof_name')
+            .annotate(
+                total=Count("prof_name"),
+                male=Subquery(pmale_qs),
+                female=Subquery(pfemale_qs)
+            )
+            .order_by('prof_name')
+            .exclude(total=0)
+            .values('prof_name', 'total', 'male', 'female')
+        )
 
         datas = {
             'all_student': all_student,
@@ -531,7 +598,8 @@ class DashboardAPIView(
             'master': master,
             'doctor': doctor,
             'bachelor': bachelor,
-            'haryalal': list(aimag_values)
+            'haryalal': list(aimag_values),
+            'profs': list(prof_values)
         }
 
         return request.send_data(datas)
