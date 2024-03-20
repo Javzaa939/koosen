@@ -24,7 +24,7 @@ import { useSkin } from "@hooks/useSkin"
 
 import { dataz } from './sampledata';
 import './style.scss'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, linearGradient } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, linearGradient, LabelList } from 'recharts';
 
 
 function Dashboard() {
@@ -42,7 +42,7 @@ function Dashboard() {
 
     const [chosenElselt, setChosenElselt] = useState('all')
 
-    const [datas, setDatas] = useState([])
+    const [datas, setDatas] = useState({})
     const [professions, setProffesions] = useState([])
     const [aimagz, setAimagz] = useState([])
 
@@ -176,6 +176,17 @@ function Dashboard() {
                     <p className='fw-bold mb-0'>{data.label}</p>
                     <hr />
                     <div className='active'>
+                        <div className='d-flex align-items-center'>
+                            <span
+                                className='bullet bullet-sm bullet-bordered me-50'
+                                style={{
+                                    backgroundColor: 'black'
+                                }}
+                            ></span>
+                            <span className='text-capitalize me-75'>
+                                Нийт : {data.payload.map(i => i.payload[i.dataKey]).reduce((accumulator, currentValue) => accumulator + currentValue)}
+                            </span>
+                        </div>
                         {data.payload.map(i => {
                             return (
                                 <div className='d-flex align-items-center' key={i.dataKey}>
@@ -318,7 +329,7 @@ function Dashboard() {
                             </div>
                             <div className='recharts-wrapper bar-chart' style={{ height: '500px' }}>
                                 <ResponsiveContainer>
-                                    <BarChart height={300} data={dataz?.profs} barSize={25}>
+                                    <BarChart height={300} data={datas?.profs} barSize={25}>
                                         {/* <defs>
                                             <linearGradient id="colorMale" x1="0" y1="0" x2="0" y2="1">
                                                 <stop offset='5%' stopColor="#003fa3" stopOpacity={0.9} />
@@ -337,10 +348,11 @@ function Dashboard() {
                                         <XAxis dataKey="prof_name" />
                                         <YAxis />
 
+                                        <Legend />
                                         <Tooltip content={CustomTooltip} cursor={{fill: 'rgba(148, 148, 148, 0.1)'}}/>
 
-                                        <Bar dataKey='male' fill="#4287f5" radius={[50,50,0,0]}/>
-                                        <Bar dataKey='female' fill='#dc8ee6' radius={[50,50,0,0]}/>
+                                        <Bar dataKey='male' name='Эрэгтэй' fill="#4287f5" radius={[50,50,0,0]}/>
+                                        <Bar dataKey='female' name='Эмэгтэй' fill='#dc8ee6' radius={[50,50,0,0]}/>
 
                                         {/* Gradient Chart */}
                                         {/* <Bar dataKey='male' fill="url(#colorMale)" radius={[50,50,0,0]}/>

@@ -36,6 +36,10 @@
     color: #5d5d5d;
 }
 
+.recharts_custom_tooltip{
+    background-color: white!important;
+}
+
 .dark-layout{
     .dash_card{
         color: #b9b9b9;
@@ -46,9 +50,8 @@
         font-weight: 200;
         color: #d0d0d0;
     }
-}
-
-.recharts_custom_tooltip{
-    background-color: white;
+    .recharts_custom_tooltip{
+        background-color: rgb(23, 21, 21)!important;
+    }
 }
 
