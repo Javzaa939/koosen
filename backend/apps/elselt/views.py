@@ -502,7 +502,7 @@ class DashboardAPIView(
 
         elselt = request.query_params.get('elselt')
 
-        if elselt == 'all':
+        if elselt == 'all' or not elselt:
             admission_ids = AdmissionRegister.objects.all().values_list('id', flat=True)
         else:
             admission_ids = [elselt]
