@@ -1,9 +1,9 @@
 import React from 'react'
-import { Fragment, useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 
 import useApi from '@hooks/useApi';
 
-import { getPagination, ReactSelectStyles, generateLessonYear } from '@utils'
+import {  ReactSelectStyles } from '@utils'
 import useLoader from '@hooks/useLoader';
 import { Card, Col, Row } from 'reactstrap';
 import Select from 'react-select'
@@ -11,7 +11,6 @@ import Select from 'react-select'
 import { useTranslation } from 'react-i18next'
 import Highcharts from 'highcharts';
 
-import HighchartsReact from 'highcharts-react-official'
 require('highcharts/indicators/indicators')(Highcharts)
 require('highcharts/indicators/pivot-points')(Highcharts)
 require('highcharts/indicators/macd')(Highcharts)
@@ -22,10 +21,9 @@ import { FaBook, FaGlobe, FaGraduationCap, FaUser, FaUsers } from "react-icons/f
 
 import { useSkin } from "@hooks/useSkin"
 
-import { dataz } from './sampledata';
-import './style.scss'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, linearGradient, LabelList } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
+import './style.scss'
 
 function Dashboard() {
     const { skin } = useSkin()
@@ -319,30 +317,17 @@ function Dashboard() {
                     mainDataLoading && Loader
                 }
                 <>
-                    <div className='my-2 shadow p-1 rounded-3'>
+                    <div className='my-1 shadow p-1 rounded-3'>
                         <div id='map_chart'></div>
                     </div>
                     <div>
-                        <div className='shadow p-1 rounded-3 mt-5 mb-2'>
+                        <div className='shadow p-1 rounded-3 mt-1 mb-2'>
                             <div className='d-flex justify-content-center mb-2 mt-50' style={{ fontWeight: 900, fontSize: 16 }}>
                                 Элсэгчдийн мэдээлэл мэргэжил, хүйсээр
                             </div>
                             <div className='recharts-wrapper bar-chart' style={{ height: '500px' }}>
                                 <ResponsiveContainer>
                                     <BarChart height={300} data={datas?.profs} barSize={25}>
-                                        {/* <defs>
-                                            <linearGradient id="colorMale" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset='5%' stopColor="#003fa3" stopOpacity={0.9} />
-                                                <stop offset='80%' stopColor="#4287f5" stopOpacity={0.8} />
-                                                <stop offset='200%' stopColor={`${skin == 'dark' ? '#161d31' : '#fff'}`} stopOpacity={0.2} />
-                                            </linearGradient>
-
-                                            <linearGradient id="colorFemale" x1="0" y1="0" x2="0" y2="1">
-                                                <stop offset='5%' stopColor="#9923a8" stopOpacity={0.9} />
-                                                <stop offset='80%' stopColor="#dc8ee6" stopOpacity={0.8} />
-                                                <stop offset='200%' stopColor={`${skin == 'dark' ? '#161d31' : '#fff'}`} stopOpacity={0.2} />
-                                            </linearGradient>
-                                        </defs> */}
                                         <CartesianGrid strokeOpacity={0.3} />
 
                                         <XAxis dataKey="prof_name" />
@@ -354,9 +339,6 @@ function Dashboard() {
                                         <Bar dataKey='male' name='Эрэгтэй' fill="#4287f5" radius={[50,50,0,0]}/>
                                         <Bar dataKey='female' name='Эмэгтэй' fill='#dc8ee6' radius={[50,50,0,0]}/>
 
-                                        {/* Gradient Chart */}
-                                        {/* <Bar dataKey='male' fill="url(#colorMale)" radius={[50,50,0,0]}/>
-                                        <Bar dataKey='female' fill='url(#colorFemale)' radius={[50,50,0,0]}/> */}
                                     </BarChart>
                                 </ResponsiveContainer>
                             </div>
