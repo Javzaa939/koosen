@@ -1549,7 +1549,7 @@ function useApi(isDisplay=false) {
 			postShalguur: (datas) => instance.post(`/elselt/profession/shalguur/`, datas),
 
 			// Элсэлт явагдаж байгаа хөтөлбөрийн жагсаалт
-			getList: () => instance.get(`/elselt/profession/list/`),
+			getList: (elselt) => instance.get(`/elselt/profession/list/?elselt=${elselt}`),
 			putPropState: (datas) => instance.put(`/elselt/profession/`, datas)
 		},
 
@@ -1569,6 +1569,9 @@ function useApi(isDisplay=false) {
 		},
 		gpa: {
 			put: (data, id) => instance.put(`/elselt/gpa/${id}/`, data)
+		},
+		dashboard: {
+			get: (elselt) => instance.get(`/elselt/dashboard/?elselt=${elselt}`),
 		}
 	}}
 }

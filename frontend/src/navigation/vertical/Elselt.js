@@ -8,6 +8,12 @@ export default [
         navLink: "/elselt",
         navChildren: [
             {
+                id: 'elselt0',
+                title: 'Дашбоард',
+                icon: <Circle size={8} />,
+                navLink: "elselt/dashboard"
+            },
+            {
                 id: 'elselt1',
                 title: 'Үндсэн мэдээлэл',
                 icon: <Circle size={8} />,

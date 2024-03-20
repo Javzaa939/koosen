@@ -6,6 +6,7 @@ urlpatterns = [
     path('', ElseltApiView.as_view()),
     path('<int:pk>/', ElseltApiView.as_view()),
     path('all/', AdmissionYearAPIView.as_view()),
+    path('dashboard/', DashboardAPIView.as_view()),
 
     # Элсэгчдийн мэдээлэл
     path('admissionuserdata/', AdmissionUserInfoAPIView.as_view()),

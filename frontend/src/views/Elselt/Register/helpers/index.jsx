@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-
+import moment from 'moment';
 import { X, Edit, PlusCircle } from "react-feather";
 
 import useModal from '@hooks/useModal'
@@ -41,15 +41,16 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 		{
 			header: 'begin_date',
 			name: t("Эхлэх хугацаа"),
-			selector: (row) => <span title={row?.begin_date}>{row?.begin_date}</span>,
+			selector: (row) => row?.begin_date ? moment(row?.begin_date).format('YYYY-MM-DD HH:mm:ss') : '',
             sortable: true,
 			minWidth: "80px",
-			left: true
+			left: true,
+			wrap: true
 		},
 		{
 			header: 'end_date',
 			name: t("Дуусах хугацаа"),
-			selector: (row) => row?.end_date,
+			selector: (row) => row?.end_date ? moment(row?.end_date).format('YYYY-MM-DD HH:mm:ss') : '',
 			minWidth: "200px",
 			center: true
 		},
