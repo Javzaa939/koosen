@@ -105,6 +105,7 @@ class AdmissionUserInfoSerializer(serializers.ModelSerializer):
     profession = serializers.CharField(source='profession.profession.name', default='')
     gender_name = serializers.SerializerMethodField()
     state_name = serializers.SerializerMethodField()
+    admission = serializers.IntegerField(source='profession.admission.id', default='')
 
     class Meta:
         model = AdmissionUserProfession

@@ -49,7 +49,7 @@ const EditModal = ({ open, handleModal, refreshDatas, rowData }) => {
 
     // Хөтөлбөрийн жагсаалт авах
     async function getProfession() {
-        const { success, data } = await fetchData(professionApi.getList())
+        const { success, data } = await fetchData(professionApi.getList(rowData?.admission))
         if (success) {
             setProfession(data)
         }
