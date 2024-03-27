@@ -103,6 +103,7 @@ class AdmissionUserInfoSerializer(serializers.ModelSerializer):
     userinfo = serializers.SerializerMethodField()
     full_name = serializers.CharField(source='user.full_name', default='', read_only=True)
     profession = serializers.CharField(source='profession.profession.name', default='')
+    profession_degree = serializers.CharField(source='profession.profession.degree.degree_code', default='')
     gender_name = serializers.SerializerMethodField()
     state_name = serializers.SerializerMethodField()
     admission = serializers.IntegerField(source='profession.admission.id', default='')
