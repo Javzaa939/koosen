@@ -79,7 +79,7 @@ function ExamReport() {
                                     <div></div>
                                 <div className="d-flex flex-column text-center fw-bolder">
                                     <span className='mt-1 fs-3 fw-bolder' style={{ color: '#000' }}>
-                                        {parentschoolName} {/* Монголын Үндэсний Их Сургууль */}
+                                        {parentschoolName}
                                     </span>
                                     {/* <span style={{ marginTop: '6px' }}>{datas?.school?.name_eng.toUpperCase()}</span> */}
                                 </div>
