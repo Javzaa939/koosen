@@ -1,6 +1,7 @@
 import os
 import openpyxl_dictreader
 
+from datetime import datetime
 from rest_framework import mixins
 from rest_framework import generics
 
@@ -11,9 +12,8 @@ from django.db.models.functions import Concat
 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
-from rest_framework.filters import SearchFilter
 
-from main.utils.function.utils import get_lesson_choice_student, has_permission, remove_key_from_dict, get_fullName, json_load
+from main.utils.function.utils import get_lesson_choice_student, has_permission, remove_key_from_dict, get_fullName, get_active_year_season, json_load
 from main.utils.file import save_file, remove_folder
 from lms.models import ScoreRegister
 from lms.models import Student
@@ -25,6 +25,7 @@ from lms.models import TeacherScore
 from lms.models import Lesson_teacher_scoretype
 from lms.models import LearningPlan
 from lms.models import Season, Group
+from core.models import User
 
 from .serializers import CorrespondSerailizer
 from .serializers import CorrespondListSerailizer
@@ -36,6 +37,9 @@ from .serializers import ScoreRegisterPrintSerializer
 
 from apps.student.serializers import StudentListSerializer
 from main.utils.function.pagination import CustomPagination
+from rest_framework.filters import SearchFilter
+from django.db.models import Count
+from django.db.models import Sum
 
 @permission_classes([IsAuthenticated])
 class ScoreRegisterAPIView(
@@ -75,6 +79,7 @@ class ScoreRegisterAPIView(
             total_score = total_score + float(exam_score)
 
         if not total_score == 0:
+            total_score = round(total_score, 2)
             assessment = Score.objects.filter(score_max__gte=total_score,score_min__lte=total_score).values('id').first()
             if assessment:
                 request.data['assessment'] = assessment['id']
@@ -136,11 +141,16 @@ class ScoreRegisterAPIView(
         if exam_score:
             total_score = total_score + float(exam_score)
 
-        if not total_score == 0:
-            assessment = Score.objects.filter(score_max__gte=total_score, score_min__lte=total_score).values('id', 'assesment').first()
-            request.data['assessment'] = assessment['id']
+        if total_score > 100:
+            return request.send_error("ERR_002", "0-100 хооронд утга оруулна уу")
 
-        instance = self.queryset.filter(student=pk, lesson=lesson, lesson_year=lesson_year, lesson_season=lesson_season).last()
+        if not total_score == 0:
+            total_score = round(total_score, 2)
+            assessment = Score.objects.filter(score_max__gte=total_score, score_min__lte=total_score).first()
+            if assessment:
+                request.data['assessment'] = assessment.id
+
+        instance = self.queryset.filter(student=pk, lesson=lesson, lesson_year=lesson_year, lesson_season=lesson_season).first()
 
         serializer = self.get_serializer(instance, data=data)
 
@@ -173,13 +183,7 @@ class ScoreRegisterAPIView(
 
     @has_permission(must_permissions=['lms-score-register-delete'])
     def delete(self, request, pk=None):
-        " Дүйцүүлсэн дүн устгах "
-
-        student = Student.objects.filter(id=pk)
-        lesson = LessonStandart.objects.filter(id=pk)
-
-        if student or lesson:
-            return request.send_error("ERR_002", "Устгах боломжгүй байна.")
+        ''' Хичээлийн дүн устгах '''
 
         self.destroy(request, pk)
         return request.send_info("INF_003")
@@ -302,6 +306,7 @@ class CorrespondAPIView(
             total_score = total_score + float(exam_score)
 
         if not total_score == 0:
+            total_score = round(total_score, 2)
             assessments = Score.objects.filter(score_max__gte=total_score,score_min__lte=total_score).values('id').first()
             if assessments:
                 request.data['assessment'] = assessments['id']
@@ -346,6 +351,7 @@ class CorrespondAPIView(
             total_score = total_score + float(exam_score)
 
         if not total_score == 0:
+            total_score = round(total_score, 2)
             assessments = Score.objects.filter(score_max__gte=total_score,score_min__lte=total_score).values('id').first()
             if assessments:
                 request.data['assessment'] = assessments['id']
@@ -635,7 +641,7 @@ class ScoreRegisterListAPIView(
 ):
     """ дүн crud """
 
-    queryset = ScoreRegister.objects.all().exclude(status=ScoreRegister.CORRESPOND).order_by('-student__first_name')
+    queryset = ScoreRegister.objects.all().exclude(status=ScoreRegister.CORRESPOND).order_by('-teach_score', '-exam_score')
 
     serializer_class = ScoreRegisterListSerializer
 
@@ -654,11 +660,9 @@ class ScoreRegisterListAPIView(
 
         have_teach_score = False
 
-        lesson_year = request.query_params.get('lesson_year')
-        lesson_season = request.query_params.get('lesson_season')
+        lesson_year, lesson_season = get_active_year_season()
 
-        if not lesson_year and not lesson_season:
-            self.queryset = self.queryset.filter(lesson_year=lesson_year, lesson_season=lesson_season)
+        self.queryset = self.queryset.filter(lesson_year=lesson_year, lesson_season=lesson_season)
 
         if teacher:
             self.queryset = self.queryset.filter(teacher=teacher)
@@ -766,6 +770,7 @@ class ScoreTeacherDownloadAPIView(
                 student_score = ScoreRegister.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season, student=student_id, lesson=lesson)
 
                 # Үсгэн үнэлгээ
+                student_score_total =round(student_score_total, 2)
                 assessment = Score.objects.filter(score_max__gte=student_score_total, score_min__lte=student_score_total).values('id', 'assesment').first()
 
                 student = Student.objects.filter(id=student_id).first()
@@ -801,6 +806,7 @@ class ScoreTeacherDownloadAPIView(
                     student = Student.objects.filter(id=student_id).first()
 
                     # Үсгэн үнэлгээ
+                    student_score_total = round(student_score_total, 2)
                     assessment = Score.objects.filter(score_max__gte=student_score_total, score_min__lte=student_score_total).values('id', 'assesment').first()
 
                     # Өмнө нь дүн орчихсон байвал update хийнэ
@@ -892,7 +898,7 @@ class ScoreOldAPIView(
 
             for lesson in list(lessons):
                 score = row.get('{}'.format(lesson.get('full_name')))
-                if not score:
+                if not score and score != 0:
                     obj = {}
                     obj['student_code'] = student_code
                     obj['lesson_code'] = lesson.get('full_name')
@@ -936,9 +942,11 @@ class ScoreOldAPIView(
                     lesson_year = score_start_year + '-' + score_end_year
 
                 if score and not isinstance(score, str):
+                    score = round(score, 2)
                     assessment = Score.objects.filter(score_max__gte=score, score_min__lte=score).first()
                 elif score:
                     score  = float(score)
+                    score = round(score, 2)
                     assessment = Score.objects.filter(score_max__gte=score, score_min__lte=score).first()
 
                 create_datas = {
@@ -982,16 +990,36 @@ class ScoreOldAPIView(
         """ Хуучин дүн тулгах """
 
         datas = request.data
+        user = request.user
+        not_score = datas.get('not_score')
+        now = datetime.now()
 
-        score = datas.get('score_total')
+        if 'not_score' in datas:
+            del datas['not_score']
+
+        datas['updated_user'] = user
+        datas['updated_at'] = now
 
         score_obj = ScoreRegister.objects.get(pk=pk)
 
+        # Дүн засахад үсгэн үнэлгээ өөрчлөх
         with transaction.atomic():
-            score_obj.exam_score = score
-            score_obj.save()
+            ScoreRegister.objects.filter(pk=pk).update(
+                **datas
+            )
+
+            if not not_score:
+                score_obj = ScoreRegister.objects.get(pk=pk)
+                score = round(score_obj.score_total, 2)
+
+                assessment = Score.objects.filter(score_max__gte=score,score_min__lt=score).first()
+                score_obj.assessment = assessment
+                score_obj.updated_user = request.user
+                score_obj.save()
 
         return request.send_info('INF_002')
+
+
 class ScoreImportAPIView(
     generics.GenericAPIView
 ):
@@ -1000,6 +1028,7 @@ class ScoreImportAPIView(
     def post(self, request):
 
         datas = request.data
+        user = request.user
 
         with transaction.atomic():
             try:
@@ -1016,11 +1045,28 @@ class ScoreImportAPIView(
 
                     create_data = remove_key_from_dict(create_data, ['student_code', 'lesson_code', 'lesson_name'])
 
-                    score_obj = ScoreRegister.objects.filter(student=student, lesson=lesson_id, status=ScoreRegister.START_SYSTEM_SCORE).first()
+                    score_obj = ScoreRegister.objects.filter(student=student, lesson=lesson_id).first()
 
                     if score_obj:
-                        continue
+                        teach_score =  score_obj.teach_score if score_obj.teach_score else 0
+                        total_score = teach_score + float(score)
+
+                        # Дүн засахад үсгэн үнэлгээ өөрчлөх
+                        total_score = round(total_score, 2)
+                        assessment = Score.objects.filter(score_max__gte=total_score,score_min__lte=total_score).first()
+                        score_obj.exam_score = float(score)
+                        score_obj.assessment = assessment
+                        score_obj.updated_user = User.objects.get(id=user.id)
+
+                        if create_data.get('lesson_year'):
+                            score_obj.lesson_year = create_data.get('lesson_year')
+
+                        if create_data.get('lesson_season_id'):
+                            score_obj.lesson_season__id = create_data.get('lesson_season_id')
+
+                        score_obj.save()
                     else:
+                        create_data['created_user'] = User.objects.get(id=user.id)
                         ScoreRegister.objects.create(**create_data)
             except Exception as e:
                 print(e)
@@ -1078,7 +1124,7 @@ class ScoreRegisterPrintAPIView(
             year = ''
 
             # жил улирал
-            if qs.lesson_year and qs.lesson_season.season_name:
+            if qs.lesson_year and qs.lesson_season:
                 year = qs.lesson_year + " " + qs.lesson_season.season_name
 
             if year not in score_info:
@@ -1110,16 +1156,18 @@ class ScoreRegisterPrintAPIView(
             # суралцсан жил,улирал болгоны дүнгүүд
             for eachScore in score_info[key]:
                 assessments = None
-                status_num=None
+                status_num = None
+                gpa = ''
 
                 total_scores = eachScore.score_total
                 status_num = eachScore.status
 
                 # exam + teach
-                if total_scores:
-                    assessment = Score.objects.filter(score_max__gte=total_scores, score_min__gte=total_scores).first()
-                    if assessment:
-                        assessments = assessment.assesment
+                total_scores = round(total_scores, 2)
+                assessment = Score.objects.filter(score_max__gte=total_scores, score_min__lte=total_scores).first()
+                if assessment:
+                    assessments = assessment.assesment
+                    gpa = assessment.gpa
 
                 # оюутны мэдээлэл
                 student_code = eachScore.student.code
@@ -1134,12 +1182,12 @@ class ScoreRegisterPrintAPIView(
                     "lesson_code":eachScore.lesson.code if eachScore.lesson.code else '',
                     "lesson_name":eachScore.lesson.name if eachScore.lesson.name else '',
                     "lesson_kr":eachScore.lesson.kredit if eachScore.lesson.kredit else 0,
-                    "exam_score":eachScore.exam_score if eachScore.exam_score else '',
-                    "teach_score":eachScore.teach_score if eachScore.teach_score else '',
-                    "total_scores":total_scores if total_scores else '',
+                    "exam_score":eachScore.exam_score if eachScore.exam_score is not None else '',
+                    "teach_score":eachScore.teach_score if eachScore.teach_score is not None else '',
+                    "total_scores":total_scores if total_scores else 0,
                     "assessment":assessments if assessments else '',
-                    "status_num":status_num if status_num else 0
-
+                    "status_num":status_num if status_num else 0,
+                    "gpa": gpa
                 })
 
                 total_kr = total_kr + eachScore.lesson.kredit
@@ -1160,9 +1208,11 @@ class ScoreRegisterPrintAPIView(
                 total_gpa=score.gpa
 
             # жил,улирал болгоны kr and lesson жагсаалт
+            year_splitted = key.split(' ')
             all_data.append(
                 {
-                    "year_season": key,
+                    "year": year_splitted[0] if len(year_splitted) > 0 else '',
+                    "season": year_splitted[-1] if len(year_splitted) > 0 else '',
                     "total":{
                         "kr":total_kr,
                         "onoo":total_onoo,

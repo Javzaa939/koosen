@@ -1,12 +1,7 @@
-import React, { Fragment, useState, useEffect, useContext} from "react";
-
+import React, { Fragment, useState, useEffect, useContext } from "react";
 import Select from 'react-select'
-
-import classnames from "classnames";
-
 import { useForm, Controller } from "react-hook-form";
-
-import {ChevronDown, Printer, Search} from "react-feather"
+import {ChevronDown, Search} from "react-feather"
 
 import {
     Row,
@@ -22,85 +17,90 @@ import {
     ModalBody,
     FormFeedback,
 } from "reactstrap";
-
 import DataTable from 'react-data-table-component'
 import { useTranslation } from 'react-i18next'
 
+import classnames from "classnames";
+
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
+
 import SchoolContext from "@context/SchoolContext"
 
 import { getPagination, ReactSelectStyles } from '@utils'
 
 import { getColumns } from './helpers'
-import { read, utils, writeFile } from 'xlsx';
-
-import { validateSchema } from "./validateSchema";
 import './style.scss'
-import ActiveYearContext from "@context/ActiveYearContext"
 
 
-const Class = ({setMainData, setChosenGroup, setFileName}) => {
-    const { cseason_id, cyear_name } = useContext(ActiveYearContext)
-    var values = {
-        department: '',
-        group: ''
-    }
+const Class = ({ setMainData, setChosenGroup, setFileName, yearAndSeason, printValues }) =>
+{
     // ** Hook
     const { handleSubmit, setError, reset, control, formState: { errors } } = useForm({});
 
     const [depOption, setDepartment] = useState([])
     const [groupOption, setGroup] = useState([])
+    const [lessonOption, setLesson] = useState([])
+
     const [radio, setRadio] = useState(false)
     const [datas, setDatas] = useState([]);
     const [pmodal, setPmodal] = useState(false)
 
     var values = {
         group: '',
-        department: ''
+        department: '',
+        lesson: ''
     }
     // Нэг хуудсанд харуулах нийт датаны тоо
     const [rowsPerPage, setRowsPerPage] = useState(15)
-
     const [searchValue, setSearchValue] = useState("");
-
-    // Хуудаслалтын анхны утга
     const [currentPage, setCurrentPage] = useState(1)
-
-    // Нийт датаны тоо
     const [total_count, setTotalCount] = useState(1)
-
     // Эрэмбэлэлт
+    const [sortField, setSort] = useState('')
+
     const [select_value, setSelectValue] = useState(values)
 
-    const [sortField, setSort] = useState('')
+    const [chosenYear, setChosenYear] = useState(null)
+    const [chosenSeason, setChosenSeason] = useState(null)
+
     const { school_id } = useContext(SchoolContext)
 
     // Api
     const depApi = useApi().hrms.department
     const groupApi = useApi().student.group
     const getListApi = useApi().print.score
+    const lessonApi = useApi().study.lessonStandart
 
     // Translate
     const { t } = useTranslation()
 
     // Нийт датаны тоо
-    const default_page = [10, 15, 50, 75, 100]
+    const default_page = [10, 20, 50, 75, 100]
 
     // Loader
     const { Loader, isLoading, fetchData } = useLoader({})
     const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({})
 
-    /*Жагсаалт дата авах функц */
-    async function getDatas() {
+    // Хичээлийн жагсаалт
+    async function getLesson() {
+        const { success, data } = await fetchData(lessonApi.getList())
+        if(success) {
+            setLesson(data)
+        }
+    }
+
+    /* Жагсаалт дата авах функц */
+    async function getDatas()
+    {
         const department = select_value?.department
         const group = select_value?.group
 
-        const { success, data } = await allFetch(getListApi.getList(rowsPerPage, currentPage, sortField, searchValue, department, group, radio ))
-        if (success) {
+        const { success, data } = await allFetch(getListApi.getList(rowsPerPage, currentPage, sortField, searchValue, department, group, radio, chosenYear, chosenSeason, select_value.lesson))
+        if (success)
+        {
             setDatas(data?.results)
             setTotalCount(data?.count)
-
         }
     }
 
@@ -119,29 +119,72 @@ const Class = ({setMainData, setChosenGroup, setFileName}) => {
 	}
 
     // Ангийн жагсаалт
-    async function getGroup() {
+    async function getGroup()
+    {
         const department = select_value.department
         const { success, data } = await fetchData(groupApi.getList(department))
         if(success) {
             setGroup(data)
         }
     }
-	useEffect(() => {
-		if (searchValue.length == 0) {
-			getDatas();
-		} else {
-			const timeoutId = setTimeout(() => {
-				getDatas();
-			}, 600);
 
-			return () => clearTimeout(timeoutId);
-		}
-	},[rowsPerPage, currentPage, sortField, searchValue, select_value, school_id, radio])
+	useEffect(
+        () =>
+        {
+            if (!radio)
+            {
+                if (searchValue.length == 0)
+                {
+                    getDatas();
+                }
+                else
+                {
+                    const timeoutId = setTimeout(
+                        () =>
+                        {
+                            getDatas();
+                        },
+                        600
+                    );
+
+                    return () => clearTimeout(timeoutId);
+                }
+            }
+            else
+            {
+                if (chosenYear && chosenSeason)
+                {
+                    getDatas();
+                }
+            }
+        },
+        [rowsPerPage, currentPage, sortField, searchValue, select_value, school_id, radio, chosenYear, chosenSeason]
+    )
+
+    useEffect(
+        () =>
+        {
+            if (!radio)
+            {
+                printValues.current = {
+                    'chosenYear': null,
+                    'chosenSeason': null,
+                    'group': false,
+                }
+
+                setChosenYear(null)
+                setChosenSeason(null)
+            }
+        },
+        [radio]
+    )
 
 
     useEffect(() => {
         getDepartment()
-    },[school_id, select_value])
+        getLesson()
+        setChosenGroup()
+    },[])
 
     useEffect(
         () =>
@@ -173,7 +216,6 @@ const Class = ({setMainData, setChosenGroup, setFileName}) => {
 
     }
 
-    // ** Function to handle per page
     function handlePerPage(e) {
         setRowsPerPage(parseInt(e.target.value))
     }
@@ -182,7 +224,7 @@ const Class = ({setMainData, setChosenGroup, setFileName}) => {
 		setCurrentPage(page.selected + 1);
 	};
 
-     // Хайх товч дарсан үед ажиллах функц
+    // Хайх товч дарсан үед ажиллах функц
     async function handleSearch() {
         getDatas()
     }
@@ -194,13 +236,9 @@ const Class = ({setMainData, setChosenGroup, setFileName}) => {
                     Ангийн жагсаалтаар хэвлэх
                 </ModalHeader>
                 <ModalBody className="print">
-                    <div className=''>
-
-
-                    </div>
                     <div>
-                    <table>
-                        <thead><th>№</th><th>Овог Нэр</th><th>Дүн</th></thead>
+                        <table>
+                            <thead><th>№</th><th>Овог Нэр</th><th>Дүн</th></thead>
                             <tbody>
                                 <tr>
                                     <td>#</td>
@@ -211,11 +249,11 @@ const Class = ({setMainData, setChosenGroup, setFileName}) => {
                                     <th>Улирал</th>
                                 </tr>
                                 {datas.map((row, idx) => (
-                                <tr key={`tr${idx}`}>
-                                    <td>{idx + 1}</td>
-                                    <td>{row?.student?.first_name}</td>
-                                    <td>{row.score_total}</td>
-                                </tr>
+                                    <tr key={`tr${idx}`}>
+                                        <td>{idx + 1}</td>
+                                        <td>{row?.student?.first_name}</td>
+                                        <td>{row.score_total}</td>
+                                    </tr>
                                 ))}
                             </tbody>
                         </table>
@@ -223,95 +261,107 @@ const Class = ({setMainData, setChosenGroup, setFileName}) => {
                 </ModalBody>
             </Modal>
             <Card className="main">
-            {isLoading && Loader}
-                <Row className="justify-content-between mx-0 align-items-start mb-1" tag={Form}  onSubmit={handleSubmit(handlePrintModal)}>
-                    <Col md={4}>
+
+                {isLoading && Loader}
+
+                <Row className="mx-0 align-items-start mb-1" tag={Form} onSubmit={handleSubmit(handlePrintModal)}>
+                    <Col md={3}>
                         <Label className="form-label" for="department">
                             {t('Тэнхим')}
                         </Label>
-                        <Controller
-                            control={control}
-                            defaultValue=''
+                        <Select
                             name="department"
-                            render={({ field: { value, onChange} }) => {
-                                return (
-                                    <Select
-                                        name="department"
-                                        id="department"
-                                        classNamePrefix='select'
-                                        isClearable
-                                        className={classnames('react-select', { 'is-invalid': errors.department })}
-                                        isLoading={isLoading}
-                                        placeholder={t('-- Сонгоно уу --')}
-                                        options={depOption || []}
-                                        value={depOption.find((c) => c.id === value)}
-                                        noOptionsMessage={() => t('Хоосон байна.')}
-                                        onChange={(val) => {
-                                            onChange(val?.id || '')
-                                            setSelectValue(current => {
-                                                return {
-                                                    ...current,
-                                                    department: val?.id || '',
-                                                }
-                                            })
-                                        }}
-                                        styles={ReactSelectStyles}
-                                        getOptionValue={(option) => option.id}
-                                        getOptionLabel={(option) => option.name}
-                                    />
-                                )
+                            id="department"
+                            classNamePrefix='select'
+                            isClearable
+                            className={classnames('react-select')}
+                            isLoading={isLoading}
+                            placeholder={t('-- Сонгоно уу --')}
+                            options={depOption || []}
+                            value={depOption.find((c) => c.id === select_value.department)}
+                            noOptionsMessage={() => t('Хоосон байна.')}
+                            onChange={(val) => {
+                                setSelectValue(current => {
+                                    return {
+                                        ...current,
+                                        group: '',
+                                        department: val?.id || '',
+                                    }
+                                })
                             }}
+                            styles={ReactSelectStyles}
+                            getOptionValue={(option) => option.id}
+                            getOptionLabel={(option) => option.name}
                         />
                     </Col>
-                    <Col md={4}>
+                    <Col md={3}>
                         <Label className="form-label" for="group">
                             {t('Анги')}
                         </Label>
-                        <Controller
-                            control={control}
-                            defaultValue=''
+                        <Select
                             name="group"
-                            render={({ field: { value, onChange} }) => {
-                                return (
-                                    <Select
-                                        name="group"
-                                        id="group"
-                                        classNamePrefix='select'
-                                        isClearable
-                                        className={classnames('react-select', { 'is-invalid': errors.group })}
-                                        isLoading={isLoading}
-                                        placeholder={t('-- Сонгоно уу --')}
-                                        options={groupOption || []}
-                                        value={groupOption.find((c) => c.id === value)}
-                                        noOptionsMessage={() => t('Хоосон байна.')}
-                                        onChange={(val) => {
-                                            onChange(val?.id || '')
-                                            setSelectValue(current => {
-                                                return {
-                                                    ...current,
-                                                    group: val?.id || '',
-                                                }
-                                            });
-                                            setChosenGroup(val?.id)
-                                            setFileName(val?.name)
-                                        }}
-                                        styles={ReactSelectStyles}
-                                        getOptionValue={(option) => option.id}
-                                        getOptionLabel={(option) => option.name}
-                                    />
-                                )
+                            id="group"
+                            classNamePrefix='select'
+                            isClearable
+                            className={classnames('react-select')}
+                            isLoading={isLoading}
+                            placeholder={t('-- Сонгоно уу --')}
+                            options={groupOption || []}
+                            value={select_value.group && groupOption.find((c) => c.id === select_value.group)}
+                            noOptionsMessage={() => t('Хоосон байна.')}
+                            onChange={(val) => {
+                                setSelectValue(current => {
+                                    return {
+                                        ...current,
+                                        group: val?.id || '',
+                                    }
+                                });
+                                setChosenGroup(val?.id)
+                                setFileName(val?.name)
                             }}
+                            styles={ReactSelectStyles}
+                            getOptionValue={(option) => option.id}
+                            getOptionLabel={(option) => option.name}
                         />
-                        {errors.group && <FormFeedback className='d-block'>{errors.group.message}</FormFeedback>}
-
                     </Col>
-                    <Col md={4} className="datatable-search-text  d-flex align-items-end mt-2">
+                    <Col md={3}>
+                        <Label className="form-label" for="lesson">
+                            {t('Хичээл')}
+                        </Label>
+                        <Select
+                            name="lesson"
+                            id="lesson"
+                            classNamePrefix='select'
+                            isClearable
+                            className={classnames('react-select')}
+                            isLoading={isLoading}
+                            placeholder={t('-- Сонгоно уу --')}
+                            options={lessonOption || []}
+                            value={lessonOption.find((c) => c.id === select_value.lesson)}
+                            noOptionsMessage={() => t('Хоосон байна.')}
+                            onChange={(val) => {
+                                setSelectValue(current => {
+                                    return {
+                                        ...current,
+                                        lesson: val?.id || '',
+                                    }
+                                });
+                            }}
+                            styles={ReactSelectStyles}
+                            getOptionValue={(option) => option.id}
+                            getOptionLabel={(option) => option.name}
+                        />
+                    </Col>
+                    <Col md={3} className="datatable-search-text  d-flex align-items-end mt-2">
                         <Input
                             id="Total_time"
                             className="dataTable-check mb-50 me-50"
                             type="radio"
                             bsSize="sm-5"
-                            onChange={(e) => setRadio(!e.target.checked)}
+                            onChange={(e) => {
+                                setRadio(!e.target.checked)
+                                printValues.current['group'] = !e.target.checked
+                            }}
                             checked={!radio}
                         />
                         <Label className="me-1 checkbox-wrapper " for="Total_time">
@@ -322,13 +372,66 @@ const Class = ({setMainData, setChosenGroup, setFileName}) => {
                             className="dataTable-check mb-50 me-50"
                             type="radio"
                             bsSize="sm-5"
-                            onChange={(e) => setRadio(e.target.checked)}
+                            onChange={(e) => {
+                                setRadio(e.target.checked)
+                                printValues.current['group'] = e.target.checked
+                            }}
                             checked={radio}
                         />
                         <Label className="me-1 checkbox-wrapper " for="Season">
                             {t('Зөвхөн тухайн улирал')}
                         </Label>
                     </Col>
+                    {
+                        radio
+                        ?
+                        <Row className="mt-1">
+                            <Col md={3}>
+                                <Label className="form-label" for="yearList">
+                                    {t('Хичээлийн жил')}
+                                </Label>
+                                <Select
+                                    name="yearList"
+                                    id="yearList"
+                                    classNamePrefix='select'
+                                    className={classnames('react-select')}
+                                    isLoading={isLoading}
+                                    placeholder={t('-- Сонгоно уу --')}
+                                    options={yearAndSeason?.year_list ? yearAndSeason?.year_list.map(year => ({ label: year, value: year })) : []}
+                                    noOptionsMessage={() => t('Хоосон байна.')}
+                                    onChange={(val) => {
+                                        setChosenYear(val.value)
+                                        printValues.current['chosenYear'] = val.value
+                                    }}
+                                    styles={ReactSelectStyles}
+                                />
+                            </Col>
+                            <Col md={3}>
+                                <Label className="form-label" for="seasonList">
+                                    {t('Улирал')}
+                                </Label>
+                                <Select
+                                    name="seasonList"
+                                    id="seasonList"
+                                    classNamePrefix='select'
+                                    className={classnames('react-select')}
+                                    isLoading={isLoading}
+                                    placeholder={t('-- Сонгоно уу --')}
+                                    options={yearAndSeason?.season_list || []}
+                                    noOptionsMessage={() => t('Хоосон байна.')}
+                                    onChange={(val) => {
+                                        setChosenSeason(val.id)
+                                        printValues.current['chosenSeason'] = val.id
+                                    }}
+                                    styles={ReactSelectStyles}
+                                    getOptionValue={(option) => option.id}
+                                    getOptionLabel={(option) => option.season_name}
+                                />
+                            </Col>
+                        </Row>
+                        :
+                            null
+                    }
                 </Row>
                 <Row className='mt-1 d-flex justify-content-between mx-0'>
                     <Col className='d-flex align-items-center justify-content-start ' >
@@ -356,7 +459,7 @@ const Class = ({setMainData, setChosenGroup, setFileName}) => {
                             <Label for='sort-select'>{t('Хуудсанд харуулах тоо')}</Label>
                         </Col>
                     </Col>
-                    <Col className='d-flex align-items-center mobile-datatable-search'>
+                    <Col className='d-flex align-items-center mobile-datatable-search' >
                         <Input
                                 className='dataTable-filter mb-50'
                                 type='text'
@@ -378,7 +481,7 @@ const Class = ({setMainData, setChosenGroup, setFileName}) => {
                         </Button>
                     </Col>
                 </Row>
-                <div className="react-dataTable react-dataTable-selectable-rows">
+                <div className="react-dataTable react-dataTable-selectable-rows" id="datatableLeftTwoRightOne">
                     <DataTable
                         noHeader
                         paginationServer

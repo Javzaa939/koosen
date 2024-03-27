@@ -31,7 +31,6 @@ const Learning = () => {
 
 	const [filteredData, setFilteredData] = useState([]);
 	const [datas, setDatas] = useState([]);
-	const [editId, setEditId] = useState(null);
 
     // Нийт датаны тоо
     const [total_count, setTotalCount] = useState(datas.length || 1)
@@ -46,10 +45,7 @@ const Learning = () => {
 	const [modal, setModal] = useState(false);
 
 	/* Модал setState функц */
-	const handleModal = (id) => {
-		if(id){
-			setEditId(id);
-		}
+	const handleModal = () => {
 		setModal(!modal)
 	}
 
@@ -119,7 +115,7 @@ const Learning = () => {
 				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
 					<CardTitle tag="h4">{t('Хичээлийн байр')}</CardTitle>
                     <div className='d-flex flex-wrap mt-md-0 mt-1'>
-                        <Button color='primary' disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-timetable-building-create')? false : true} onClick={() => {setEditId(null), handleModal()}}>
+                        <Button color='primary' disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-timetable-building-create')? false : true} onClick={() => handleModal()}>
                             <Plus size={15} />
                             <span className='align-middle ms-50'>{t('Нэмэх')}</span>
                         </Button>
@@ -157,7 +153,7 @@ const Learning = () => {
                                     <h5>{t('Өгөгдөл байхгүй байна')}</h5>
                                 </div>
                             )}
-                            columns={getColumns(currentPage, rowsPerPage, searchValue.length ? filteredData : datas, handleDelete, user, handleModal)}
+                            columns={getColumns(currentPage, rowsPerPage, searchValue.length ? filteredData : datas, handleDelete, user)}
                             sortIcon={<ChevronDown size={10} />}
                             paginationPerPage={rowsPerPage}
                             paginationDefaultPage={currentPage}
@@ -167,7 +163,7 @@ const Learning = () => {
                             fixedHeaderScrollHeight='62vh'
                         />
 					</div>
-				{modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} editId={editId}/>}
+				{modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas}/>}
 			</Card>
         </Fragment>
     )

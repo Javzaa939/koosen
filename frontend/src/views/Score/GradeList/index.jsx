@@ -1,5 +1,5 @@
 // ** React Imports
-import { Fragment, useState, useEffect,} from 'react'
+import { Fragment, useState, useEffect, useRef } from 'react'
 
 import {
     Card,
@@ -12,12 +12,13 @@ import {
     Button
 } from 'reactstrap'
 
-import { Printer, FileText, Download} from 'react-feather'
+import { Printer, FileText, Download, RefreshCcw } from 'react-feather'
 
 import FileModal from '@lms_components/FileModal'
 
 import useLoader from '@hooks/useLoader';
 import useApi from '@hooks/useApi';
+import useModal from "@hooks/useModal";
 
 import { useNavigate } from "react-router-dom"
 import  useUpdateEffect  from '@hooks/useUpdateEffect'
@@ -33,10 +34,25 @@ import DetailModal from './DetailModal';
 // import LessonV2 from './LessonV2';
 import PrintModal from './PrintModal';
 
+const KIND_ANGI = 1
+const KIND_HICHEEL = 2
+const KIND_OYUTAN = 3
+
 const GradeList = () => {
     const navigate = useNavigate()
 
     const { t } = useTranslation()
+
+    const printValues = useRef({
+        'chosenYear': null,
+        'chosenSeason': null,
+        'group': false,
+    })
+
+    /**
+     * navbar section changing
+     */
+    const [active, setActive] = useState(1)
     const [component, setComponent] = useState('')
 
     const [open_file, setFileModal] = useState(false)
@@ -52,36 +68,61 @@ const GradeList = () => {
     const [file_name, setFileName] = useState('')
     const [group_name, setGroupName] = useState('')
 
-    const [showModal, setShowModal] = useState(false)
+    const [studentSectionData, setStudentSectionData] = useState()
+    const [ chosenGroupStudent, setChosenGroupStudent ] = useState('')
 
-    const [active, setActive] = useState(1)
+    const [showModal, setShowModal] = useState(false)
+    const [ yearAndSeason, setYearAndSeason ] = useState(null)
+
     const { Loader, isLoading, fetchData } = useLoader({})
+    const { showWarning } = useModal()
 
     const scoreApi = useApi().score.register
     const lessonApi = useApi().study.lessonStandart
+    const settingsApi = useApi().activeYearAndSeason
 
     const nav_menus = [
         {
-            active_id: 1,
+            active_id: KIND_ANGI,
             name: t('Анги'),
-            component: <Class setMainData={setMainData} setChosenGroup={setChosenGroup} setFileName={setGroupName}/>
+            component: <Class setMainData={setMainData} setChosenGroup={setChosenGroup} setFileName={setGroupName} yearAndSeason={yearAndSeason} printValues={printValues} />
         },
         {
-            active_id: 2,
+            active_id: KIND_HICHEEL,
             name: t('Хичээл'),
             component: <Lesson setMainData={setMainData} setChosenGroup={setChosenGroup}/>
         },
         {
-            active_id: 3,
+            active_id: KIND_OYUTAN,
             name: t('Оюутан'),
-            component: <Student setMainData={setMainData} setChosenGroup={setChosenGroup}/>
+            component: <Student setMainData={setMainData} setChosenGroup={setChosenGroup} chosenGroupStudent={chosenGroupStudent} setChosenGroupStudent={setChosenGroupStudent} setFileName={setGroupName} setStudentSectionData={setStudentSectionData}/>
         },
     ]
 
+    async function getActiveYearAndSeason()
+    {
+        const { success, data } = await fetchData(settingsApi.get())
+        if (success)
+        {
+            setYearAndSeason(data)
+        }
+    }
+
+    useEffect(
+        () =>
+        {
+            getActiveYearAndSeason()
+        },
+        []
+    )
+
     useEffect(() => {
-        var check = nav_menus.find(menus => menus.active_id == active)
-        setComponent(check.component)
-    }, [active])
+        if (yearAndSeason)
+        {
+            var check = nav_menus.find(menus => menus.active_id == active)
+            setComponent(check.component)
+        }
+    }, [active, yearAndSeason, chosenGroupStudent])
 
     const toggle = (active_id) => {
         setActive(active_id)
@@ -126,7 +167,6 @@ const GradeList = () => {
                 }
                 setDetailDatas(data)
             }
-
         }
     }
 
@@ -135,7 +175,6 @@ const GradeList = () => {
     }
 
     const modalToggler = () => {setPmodal(!pmodal)}
-
 
     useUpdateEffect(
         () =>
@@ -147,7 +186,7 @@ const GradeList = () => {
         [chosenGroup]
     )
 
-    function convert() {
+    function excelAngi() {
         var lessons = lessonOption.map((c) => c.full_name)
 
         const staticCells = [
@@ -172,10 +211,10 @@ const GradeList = () => {
             return dynamicKey;
         });
 
-
         const worksheet = utils.json_to_sheet(columns);
         const workbook = utils.book_new();
         utils.book_append_sheet(workbook, worksheet, "Sheet1");
+
 
         utils.sheet_add_aoa(worksheet, [staticCells], { origin: "A1" });
 
@@ -218,14 +257,103 @@ const GradeList = () => {
         worksheet["!rows"] = [
             { hpx: 100 },
         ];
-
-
         return writeFile(workbook,'zagwar.xlsx')
+    }
+
+
+    function excelOyutan() {
+
+        var dataz = studentSectionData.map((data, idx) => {
+            return(
+                {
+                    "№": idx + 1,
+                    "Оюутны код": data?.student?.code || '',
+                    "Овог": data?.student?.last_name || '',
+                    "Нэр": data?.student?.first_name || '',
+                    'Хичээлийн нэр': data?.lesson?.name || '',
+                    'Багш': data?.teacher?.full_name || '',
+                    'Багшийн оноо': data?.teach_score || '',
+                    'Шалгалтын оноо': data?.exam_score || '',
+                    'Улирал': data?.lesson_season?.season_name || '',
+                    'Нийт оноо': data?.score_total || '',
+                    'Үнэлгээ': data?.assessment[0] || '',
+                }
+            )
+        })
+
+        const staticCells = [
+            "№",
+            "Оюутны код",
+            "Овог",
+            "Нэр",
+            'Хичээлийн нэр',
+            'Багш',
+            'Багшийн оноо',
+            'Шалгалтын оноо',
+            'Улирал',
+            'Нийт оноо',
+            'Үнэлгээ',
+        ]
+
+        const worksheet = utils.json_to_sheet(dataz);
+        const workbook = utils.book_new();
+        utils.book_append_sheet(workbook, worksheet, "Sheet1");
+
+
+        utils.sheet_add_aoa(worksheet, [staticCells], { origin: "A1" });
+
+        const normalCells = {
+            border: {
+                top: { style: "thin", color: { rgb: "000000" } },
+                bottom: { style: "thin", color: { rgb: "000000" } },
+                left: { style: "thin", color: { rgb: "000000" } },
+                right: { style: "thin", color: { rgb: "000000" } }
+            },
+            font:{
+                sz:10
+            },
+            alignment: {
+                horizontal: 'center',
+                vertical: 'center',
+                wrapText: true
+            },
+        };
+
+        const startRow = 0;
+        const endRow = studentSectionData.length + 1;
+        const startCol = 0;
+        const endCol = 11;
+
+        for (let row = startRow; row <= endRow; row++) {
+            for (let col = startCol; col <= endCol; col++) {
+              const cellAddress = utils.encode_cell({ r: row, c: col });
+
+                if (!worksheet[cellAddress]) {
+                    worksheet[cellAddress] = {};
+                }
+
+              worksheet[cellAddress].s = normalCells
+            }
+        }
+
+        worksheet["!cols"] = [{ wch: dataz.length > 100 ? 3 : 2 }, { wch: 15 }, { wch: 15 }, { wch: 20 }, {wch: 40}, {wch: 20}  ];
+
+        worksheet["!rows"] = [
+            { hpx: 40 },
+        ];
+        return writeFile(workbook,'oyutan_dvn.xlsx')
+    }
+
+
+    async function handleRefresh() {
+        const { success, data } = await fetchData(scoreApi.refresh(chosenGroup))
+        if (success) {
+        }
     }
 
     return (
         <Fragment>
-            {pmodal ? <PrintModal pmodal={pmodal} modalToggler={modalToggler} navigatePrint={navigatePrint} groupId={chosenGroup} file_name={group_name}/> : ''}
+            {pmodal ? <PrintModal pmodal={pmodal} modalToggler={modalToggler} navigatePrint={navigatePrint} groupId={chosenGroup} file_name={group_name} printValues={printValues} /> : ''}
             <Card>
                 <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom pt-0'">
 					<CardTitle tag="h4">{t('Дүнгийн жагсаалт')}</CardTitle>
@@ -233,8 +361,36 @@ const GradeList = () => {
                             <Button
                                 color='primary'
                                 className='m-50'
-                                onClick={() => {convert()}}
-                                disabled={chosenGroup ? false : true}
+                                onClick={() => showWarning({
+                                    header: {
+                                        title: `${t('Дүнгийн үнэлгээ дахин унших')}`,
+                                    },
+                                    question: `Тухайн ангийн үзсэн бүх хичээлийн дүнгийн үнэлгээ дахин шинэчлэхэд итгэлтэй байна уу?`,
+                                    onClick: () => handleRefresh(),
+                                    btnText: 'Шинэчлэх',
+                                })}
+                                disabled={!chosenGroup}
+                            >
+                                <RefreshCcw size={15} />
+                                <span className='align-middle ms-50'>{t('Үнэлгээ шинэчлэх')}</span>
+                            </Button>
+                            <Button
+                                color='primary'
+                                className='m-50'
+                                onClick={() => {
+                                    active === KIND_ANGI ? excelAngi()
+                                        :
+                                    active === KIND_HICHEEL ? console.log('hicheel')
+                                        :
+                                    active === KIND_OYUTAN && excelOyutan()
+                                }}
+                                disabled={
+                                    active === KIND_ANGI ? !chosenGroup
+                                        :
+                                    active === KIND_HICHEEL ? true
+                                        :
+                                    active === KIND_OYUTAN && false
+                                }
                             >
                                 <Download size={15} />
                                 <span className='align-middle ms-1'>{t('Загвар татах')}</span>

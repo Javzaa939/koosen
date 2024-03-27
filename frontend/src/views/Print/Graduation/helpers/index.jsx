@@ -21,14 +21,14 @@ export function getColumns (currentPage, rowsPerPage, total_count) {
 		},
 		{
 			header: 'profession_index',
-			name: t("Хөтөлбөрийн индекс"),
+			name: t("Мэргэжлийн индекс"),
 			selector: (row) => row?.mergejil_code,
             center: true,
 			minWidth: "210px",
 		},
 		{
 			header: 'profession_name',
-			name: t("Хөтөлбөрийн нэр"),
+			name: t("Мэргэжлийн нэр"),
 			selector: (row) => row?.mergejil_name,
             center: true,
             minWidth: "180px"

@@ -108,7 +108,7 @@ const Block = ({  handleRoomModal, editValues, handleModal, roomModal, is_loadin
 
     // Багшийн жагсаалт
     async function getTeacher() {
-        const { success, data } = await fetchData(teacherApi.getTeacher())
+        const { success, data } = await fetchData(teacherApi.getTeacher(select_value.lesson))
         if(success) {
             setTeacher(data)
         }
@@ -291,7 +291,7 @@ const Block = ({  handleRoomModal, editValues, handleModal, roomModal, is_loadin
         {
             getTeacher()
         },
-        [select_value?.teacher]
+        [select_value?.lesson]
     )
 
 	async function onSubmit(cdata) {

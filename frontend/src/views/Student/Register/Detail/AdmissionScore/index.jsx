@@ -37,6 +37,7 @@ import { useTranslation } from 'react-i18next'
 
 import SchoolContext from "@context/SchoolContext"
 
+
 const AdmissionScore = () => {
 
     const { school_id } = useContext(SchoolContext)
@@ -127,28 +128,28 @@ const AdmissionScore = () => {
         if(is_edit) {
             /** Засах */
             var id = cdata['id']
-            const { success, errors } = await fetchData(admissionApi.put(cdata, id, studentId))
+            const { success, error } = await fetchData(admissionApi.put(cdata, id, studentId))
             if(success)
             {
                 onModalClosed()
                 getDatas()
             } else {
                 /** Алдааны мессэжийг input дээр харуулна */
-                for (let key in errors) {
-                    setError(key, { type: 'custom', message:  errors[key][0]});
+                for (let key in error) {
+                    setError(error[key].field, { type: 'custom', message:  error[key].msg});
                 }
             }
         } else {
             /** Нэмэх */
-            const { success, errors } = await fetchData(admissionApi.post(cdata))
+            const { success, error } = await fetchData(admissionApi.post(cdata))
             if(success)
             {
                 onModalClosed()
                 getDatas()
             } else {
                 /** Алдааны мессэжийг input дээр харуулна */
-                for (let key in errors) {
-                    setError(key, { type: 'custom', message:  errors[key][0]});
+                for (let key in error) {
+                    setError(error[key].field, { type: 'custom', message:  error[key].msg});
                 }
             }
         }

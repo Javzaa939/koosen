@@ -7,7 +7,7 @@ import useApi from "@hooks/useApi";
 
 import useLoader from "@hooks/useLoader";
 
-import { ReactSelectStyles } from "@utils"
+import { ReactSelectStyles, stipent_is_own_or_other } from "@utils"
 
 import classnames from "classnames";
 
@@ -50,7 +50,7 @@ const EditModal = ({ open, handleEdit, edit_id, refreshDatas }) => {
      // ** Hook
 
     const { cyear_name, cseason_id} = useContext(ActiveYearContext);
-   
+
     const { watch, control, handleSubmit, reset, setError, setValue, formState: { errors } } = useForm(validate(validateSchema));
     const quillValue = watch("body");
 
@@ -59,7 +59,8 @@ const EditModal = ({ open, handleEdit, edit_id, refreshDatas }) => {
     const [is_disabled, setDisabled] = useState(true);
 
     const { user } = useContext(AuthContext);
-    
+    const [isOwnOption, setIsOwn] = useState(stipent_is_own_or_other())
+
     // Loader
     const { isLoading, fetchData } = useLoader({});
 
@@ -84,11 +85,11 @@ const EditModal = ({ open, handleEdit, edit_id, refreshDatas }) => {
                 for (let key in data) {
                     if (data[key] !== null)
                         setValue(key, data[key])
-                    
+
                       else setValue(key, '')
                     if (key === 'stipend_type') {
                         setValue(key, data[key]?.id)
-                    }   
+                    }
                 }
             }
         }
@@ -104,7 +105,6 @@ const EditModal = ({ open, handleEdit, edit_id, refreshDatas }) => {
     useEffect(() => {
         getDatas()
         getStipendType()
-        // getDates()
     }, [open])
 
     // submit data
@@ -112,7 +112,7 @@ const EditModal = ({ open, handleEdit, edit_id, refreshDatas }) => {
         cdata['body'] = quill.root.innerHTML
         cdata['lesson_year'] = cyear_name
         cdata['lesson_season'] = cseason_id
-       
+
         cdata = convertDefaultValue(cdata)
         const { success, error } = await fetchData(stipendApi.put(cdata, edit_id))
         if (success) {
@@ -163,7 +163,7 @@ const EditModal = ({ open, handleEdit, edit_id, refreshDatas }) => {
         },
         [quillValue]
     )
-   
+
     return (
         <Fragment>
             <Modal isOpen={open} toggle={handleEdit} className="modal-dialog-centered modal-lg" style={{maxWidth: '900px', width: '100%'}} onClosed={handleEdit}>
@@ -207,6 +207,61 @@ const EditModal = ({ open, handleEdit, edit_id, refreshDatas }) => {
                                 }}
                             ></Controller>
                             {errors.stipend_type && <FormFeedback className='d-block'>{t(errors.stipend_type.message)}</FormFeedback>}
+                        </Col>
+                        <Col md={12}>
+                            <Label className="form-label" for="is_own">
+                                {t('Тэтгэлэгийн төрөл')}
+                            </Label>
+                            <Controller
+                                control={control}
+                                defaultValue=''
+                                name="is_own"
+                                render={({ field: { value, onChange } }) => {
+                                    return (
+                                        <Select
+                                            name="is_own"
+                                            id="is_own"
+                                            classNamePrefix='select'
+                                            isClearable
+                                            className={classnames('react-select', {'is-invalid': errors.is_own})}
+                                            isLoading={isLoading}
+                                            placeholder={t('-- Сонгоно уу --')}
+                                            options={isOwnOption || []}
+                                            value={isOwnOption.find((c) => c.id === value)}
+                                            noOptionsMessage={() => t('Хоосон байна')}
+                                            onChange={(val) => {
+                                                onChange(val?.id || '')
+                                            }}
+                                            styles={ReactSelectStyles}
+                                            getOptionValue={(option) => option.id}
+                                            getOptionLabel={(option) => option.name}
+                                        />
+                                    )
+                                }}
+                            />
+                            {errors.is_own && <FormFeedback className='d-block'>{errors.is_own.message}</FormFeedback>}
+                        </Col>
+                        <Col md={12}>
+                            <Label className="form-label" for="stipend_amount">
+                                {t('Тэтгэлэгийн хэмжээ')}
+                            </Label>
+                            <Controller
+                                defaultValue=''
+                                control={control}
+                                id="stipend_amount"
+                                name="stipend_amount"
+                                render={({ field }) => (
+                                    <Input
+                                        id ="stipend_amount"
+                                        bsSize="sm"
+                                        placeholder={t('Тэтгэлэгийн хэмжээ')}
+                                        {...field}
+                                        type="number"
+                                        invalid={errors.stipend_amount && true}
+                                    />
+                                )}
+                            />
+                            {errors.stipend_amount && <FormFeedback className='d-block'>{t(errors.stipend_amount.message)}</FormFeedback>}
                         </Col>
                         <Col lg={12} xs={12}>
                             <Label className="form-label" for="body">

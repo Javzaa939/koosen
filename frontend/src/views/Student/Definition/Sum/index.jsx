@@ -22,7 +22,7 @@ export default function Sum()
     const [ listArr, setListArr ] = useState([])
 
     // Loader
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
 
     // Api
     const signatureApi = useApi().signature
@@ -67,6 +67,8 @@ export default function Sum()
         return ('0' + n).slice(-2);
     }
 
+    const logo = require("@src/assets/images/logo/dxis_logo.png").default
+
     return (
         <>
             <div className='fontchange ps-1' >
@@ -77,7 +79,7 @@ export default function Sum()
                     {isLoading && Loader}
                     <div className='d-flex flex-column justify-content-center align-items-center w-100 mt-3' style={{ fontSize: '14px' }} >
                         {/* <img className="fallback-logo" width={100} height={100} src={`http://hr.mnun.edu.mn/media/orgs/logo/MNU-Logo_1.png`} alt="logo" onLoad={imageLoaded} /> */}
-                        <img className="fallback-logo" width={100} height={100} src={`${process.env.REACT_APP_MUIS_HR_MEDIA_URL}${datas?.school?.logo_url}`} alt="logo" onLoad={imageLoaded} />
+                        <img className="fallback-logo" width={100} height={100} src={logo} alt="logo" onLoad={imageLoaded} />
                         <div className="d-flex flex-column text-center fw-bolder">
                             <span className='mt-1'>
                                 {datas?.school?.name.toUpperCase()}
@@ -108,15 +110,15 @@ export default function Sum()
                                     ?
                                         datas?.student?.status?.code == 1
                                         ?
-                                            `${datas?.student?.last_name} овогтой ${datas?.student?.first_name} /${datas?.student?.first_name}/ нь ДХИС-д ${datas?.student?.group?.degree?.degree_name}-н зэргийн ${datas?.student?.group?.profession?.name} мэргэжлээр ${datas?.student?.group?.level}-р курст сурдаг нь үнэн бөгөөд ${datas?.score?.score_obj?.gpa} голч дүнтэй суралцсан нь үнэн болно.`
+                                            `${datas?.student?.last_name} овогтой ${datas?.student?.first_name} /${datas?.student?.first_name}/ нь ${datas?.school?.name}-д  ${datas?.student?.group?.profession?.name} мэргэжлээр ${datas?.student?.group?.level}-р курст сурдаг нь үнэн бөгөөд ${datas?.score?.score_obj?.gpa} голч дүнтэй суралцсан нь үнэн болно.`
                                         :
                                             datas?.student?.status?.code == 5
                                             ?
-                                                `${datas?.student?.last_name} овогтой ${datas?.student?.first_name} /${datas?.student?.first_name}/ нь ДХИС-д ${datas?.student?.group?.degree?.degree_name}-н зэргийн ${datas?.student?.group?.profession?.name} мэргэжлээр ${datas?.student?.group?.level}-р курст сурдаг нь үнэн бөгөөд ${datas?.student?.group?.join_year?.substring(0, 4)}-${datas?.graduation_work?.substring(datas?.graduation_work?.length - 4)} оны хичээлийн жил ${datas?.score?.score_obj?.gpa} голч дүнтэй суралцсан нь үнэн болно.`
+                                                `${datas?.student?.last_name} овогтой ${datas?.student?.first_name} /${datas?.student?.first_name}/ нь ${datas?.school?.name}-д  ${datas?.student?.group?.profession?.name} мэргэжлээр ${datas?.student?.group?.level}-р курст сурдаг нь үнэн бөгөөд ${datas?.student?.group?.join_year?.substring(0, 4)}-${datas?.graduation_work?.substring(datas?.graduation_work?.length - 4)} оны хичээлийн жил ${datas?.score?.score_obj?.gpa} голч дүнтэй суралцсан нь үнэн болно.`
                                             :
-                                                `${datas?.student?.last_name} овогтой ${datas?.student?.first_name} /${datas?.student?.first_name}/ нь ДХИС-д ${datas?.student?.group?.degree?.degree_name}-н зэргийн ${datas?.student?.group?.profession?.name} мэргэжлээр ${datas?.score?.score_obj?.gpa} голч дүнтэй нь үнэн болно.`
+                                                `${datas?.student?.last_name} овогтой ${datas?.student?.first_name} /${datas?.student?.first_name}/ нь ${datas?.school?.name}-д  ${datas?.student?.group?.profession?.name} мэргэжлээр ${datas?.score?.score_obj?.gpa} голч дүнтэй нь үнэн болно.`
                                     :
-                                        `${datas?.student?.last_name} овогтой ${datas?.student?.first_name} /${datas?.student?.first_name}/ нь ДХИС-д ${datas?.student?.group?.degree?.degree_name}-н зэргийн ${datas?.student?.group?.profession?.name} мэргэжлээр ${datas?.student?.group?.level}-р курст сурдаг нь үнэн бөгөөд ${data?.year_value} хичээлийн жилийн ${datas?.season_name} ${datas?.score?.score_obj?.gpa} голч дүнтэй суралцсан нь үнэн болно.`
+                                        `${datas?.student?.last_name} овогтой ${datas?.student?.first_name} /${datas?.student?.first_name}/ нь ${datas?.school?.name}-д  ${datas?.student?.group?.profession?.name} мэргэжлээр ${datas?.student?.group?.level}-р курст сурдаг нь үнэн бөгөөд ${data?.year_value} хичээлийн жилийн ${datas?.season_name} ${datas?.score?.score_obj?.gpa} голч дүнтэй суралцсан нь үнэн болно.`
                                 }
                             </div>
                         </div>

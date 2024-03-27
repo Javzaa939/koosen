@@ -87,12 +87,28 @@ const MainInformation = () => {
     const sumApi = useApi().hrms.unit2
     const countryApi = useApi().hrms.country
 
+    /** Id-гаар хайж олоод tag дээр утга оноох */
+    function changeTextById(id, text)
+    {
+        let tag = document.getElementById(id)
+        if (tag)
+        {
+            tag.innerHTML = text
+        }
+    }
+
     const getDatas = async() => {
         const { success, data } = await fetchData(studentApi.getOne(studentId, 'main'))
         if(success)
         {
             if(data === null) return
-            for(let key in data) {
+            for(let key in data)
+            {
+                /** Уйгаржин бичиглэл ялгахын тулд */
+                if (key === 'last_name_uig' || key === 'first_name_uig')
+                {
+                    changeTextById(`${key}_span`, data[key])
+                }
 
                 if(data[key] !== null)
                     setValue(key, data[key])
@@ -198,7 +214,7 @@ const MainInformation = () => {
         }
 
         if (!errorImage) {
-            const { success, errors } = await fetchData(studentApi.put(formData, studentId,'main'))
+            const { success, error } = await fetchData(studentApi.put(formData, studentId,'main'))
             if(success)
             {
                 getDatas()
@@ -206,8 +222,8 @@ const MainInformation = () => {
 
             } else {
                 /** Алдааны мессэжийг input дээр харуулна */
-                for (let key in errors) {
-                    setError(key, { type: 'custom', message:  errors[key][0]});
+                for (let key in error) {
+                    setError(error[key].field, { type: 'custom', message:  error[key].msg});
                 }
             }
         }
@@ -310,7 +326,7 @@ const MainInformation = () => {
                         <Row className='gy-50'>
                             <Col lg={4} sm={6} xs={12}>
                                 <Label className="form-label" for="department">
-                                    {t("Тэнхим")}
+                                    {t("Хөтөлбөрийн баг")}
                                 </Label>
                                 <Controller
                                     control={control}
@@ -492,18 +508,23 @@ const MainInformation = () => {
                                         <Input
                                             id ="last_name_uig"
                                             bsSize="sm"
-                                            placeholder={t('Эцэг/эхийн нэр уйгаржин')}
                                             {...field}
                                             type="text"
                                             readOnly={is_edit}
                                             disabled={is_edit}
                                             className="opacity-100"
-                                            style={{ fontFamily: 'cmdashitseden', fontSize: '15px'}}
+                                            style={{ fontFamily: 'CMs Urga', fontSize: '40px'}}
                                             invalid={errors.last_name_uig && true}
+                                            onChange={(e) =>
+                                            {
+                                                field.onChange(e.target.value)
+                                                changeTextById(`last_name_uig_span`, e.target.value)
+                                            }}
                                         />
                                     )}
                                 />
                                 {errors.last_name_uig && <FormFeedback className='d-block'>{errors.last_name_uig.message}</FormFeedback>}
+                                <code><small>Англи утга: <span id='last_name_uig_span'></span></small></code>
                             </Col>
                             <Col lg={4} sm={6} xs={12}>
                                 <Label className="form-label" for="first_name">
@@ -568,18 +589,23 @@ const MainInformation = () => {
                                         <Input
                                             id ="first_name_uig"
                                             bsSize="sm"
-                                            placeholder={t('Өөрийн нэр уйгаржин')}
                                             {...field}
                                             type="text"
-                                            style={{ fontFamily: 'cmdashitseden', fontSize: '15px'}}
+                                            style={{ fontFamily: 'CMs Urga', fontSize: '40px'}}
                                             readOnly={is_edit}
                                             disabled={is_edit}
                                             className="opacity-100"
                                             invalid={errors.first_name_uig && true}
+                                            onChange={(e) =>
+                                            {
+                                                field.onChange(e.target.value)
+                                                changeTextById(`first_name_uig_span`, e.target.value)
+                                            }}
                                         />
                                     )}
                                 />
                                 {errors.first_name_uig && <FormFeedback className='d-block'>{errors.first_name_uig.message}</FormFeedback>}
+                                <code><small>Англи утга: <span id='first_name_uig_span'></span></small></code>
                             </Col>
                             <Col lg={4} sm={6} xs={12}>
                                 <Label className="form-label" for="register_num">
@@ -810,7 +836,7 @@ const MainInformation = () => {
                             </Col>
                             <Col lg={4} sm={6} xs={12}>
                                 <Label className="form-label" for="admission_before">
-                                    {t("Элсэхийн өмнөх байдал")}
+                                    {t("Элсэлтийн өмнөх байдал")}
                                 </Label>
                                 <Controller
                                     defaultValue=''
@@ -976,7 +1002,7 @@ const MainInformation = () => {
                                 />
                                 {errors.unit2 && <FormFeedback className='d-block'>{errors.unit2.message}</FormFeedback>}
                             </Col>
-                            <Col lg={4} sm={6} xs={12}>
+                            {/* <Col lg={4} sm={6} xs={12}>
                                 <Label className='form-label' for="private_score">
                                     {t('Хувийн оноо')}
                                 </Label>
@@ -1003,7 +1029,7 @@ const MainInformation = () => {
                                     }}
                                 />
                                 {errors.private_score && <FormFeedback className='d-block'>{errors.private_score.message}</FormFeedback>}
-                            </Col>
+                            </Col> */}
                             <Col lg={4} sm={6} xs={12}>
                                 <Label className="form-label" for="pay_type">
                                     {t('Төлбөр төлөлт')}

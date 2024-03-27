@@ -65,7 +65,7 @@ const UpdateModal = ({ open, handleUpdate, refreshDatas, editDatas, editId }) =>
     const groupApi = useApi().student.group
     const studentmovementApi = useApi().student.arrived
 
-     // Тэнхимын жагсаалт
+     // Хөтөлбөрийн багын жагсаалт
      async function getDepartmentOption() {
         const { success, data } = await fetchData(departmentApi.get(school_id))
         if(success) {
@@ -125,7 +125,7 @@ const UpdateModal = ({ open, handleUpdate, refreshDatas, editDatas, editId }) =>
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
                         {/* <Col md={12}>
                             <Label className="form-label" for="department">
-                                {t('Тэнхим')}
+                                {t('Хөтөлбөрийн баг')}
                             </Label>
                             <Controller
                                 control={control}

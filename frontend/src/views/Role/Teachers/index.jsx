@@ -32,11 +32,11 @@ import DetailModal from "./Detail"
 import { getColumns } from './helpers'
 
 
-const Teachers = () => {
+const RoleRegister = () => {
     const { control, handleSubmit, reset, setError, formState: { errors } } = useForm();
 
     const { Loader, isLoading, fetchData } = useLoader({})
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
 
     const { t } = useTranslation()
     const { user } = useContext(AuthContext)
@@ -206,7 +206,7 @@ const Teachers = () => {
                                         }}
                                         styles={ReactSelectStyles}
                                         getOptionValue={(option) => option.id}
-                                        getOptionLabel={(option) => option.full_name}
+                                        getOptionLabel={(option) => option.code}
                                     />
                                 )
                             }}
@@ -296,4 +296,4 @@ const Teachers = () => {
         </Fragment>
     )
 }
-export default Teachers
+export default RoleRegister

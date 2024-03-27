@@ -1,10 +1,10 @@
 
-import React, { Fragment, useState, useEffect, useContext } from "react"
+import React, { Fragment, useState, useEffect } from "react"
 
 import { Card, CardHeader, CardTitle, Row, Col, Input, Label, Button, ListGroupItem, Spinner } from "reactstrap"
 import { ChevronDown, Plus, Search, Menu, Trash2, Edit } from 'react-feather'
 import { useTranslation } from 'react-i18next'
-import DataTable from 'react-data-table-component'
+import DataTable, { ExpanderComponentProps } from 'react-data-table-component'
 
 import { ReactSortable } from 'react-sortablejs'
 
@@ -13,9 +13,6 @@ import { getPagination } from '@utils'
 import useApi from '@hooks/useApi'
 import useLoader from '@hooks/useLoader'
 import useModal from '@hooks/useModal'
-
-import SchoolContext from '@context/SchoolContext'
-import useUpdateEffect from '@hooks/useUpdateEffect'
 
 // drag-and-drop.scss
 import '@styles/react/libs/drag-and-drop/drag-and-drop.scss'
@@ -30,12 +27,10 @@ export default function Specification()
     const { showWarning } = useModal()
     const { t } = useTranslation()
 
-    const { school_id } = useContext(SchoolContext)
-
     const studentApi = useApi().student
     const signatureApi = useApi().signature
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
+    const { Loader, isLoading, fetchData } = useLoader({})
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({})
 
     const [ datas, setDatas ] = useState([])
     // Хуудаслалтын анхны утга
@@ -57,21 +52,28 @@ export default function Specification()
     useEffect(
         () =>
         {
-            getDatas();
-        },
-        [rowsPerPage, currentPage, sortField, school_id]
-    )
-
-    useUpdateEffect(
-        () =>
-        {
-            // Хайлт хийсэн утгаа хоослох үед бүх датаг дуудна
             if (searchValue.length == 0) {
                 getDatas();
+            } else {
+                const timeoutId = setTimeout(() => {
+                    getDatas();
+                }, 600);
+                return () => clearTimeout(timeoutId);
             }
         },
-        [searchValue]
+        [rowsPerPage, currentPage, sortField, searchValue]
     )
+    function getAllData()
+    {
+        Promise.all([
+            fetchData(studentApi.getDefinitionLite(rowsPerPage, currentPage, sortField, searchValue)),
+            fetchData(signatureApi.get(1)),
+        ]).then((values) => {
+            setDatas(values[0]?.data?.results)
+            setListArr(values[1]?.data)
+            sessionStorage.setItem("signature_data", JSON.stringify(values[1]?.data))
+        })
+    }
 
     // Function to handle per page
     function handlePerPage(e)
@@ -118,7 +120,7 @@ export default function Specification()
             setCurrentPage(page_count)
         }
 
-        const { success, data } = await allFetch(studentApi.getDefinition(rowsPerPage, currentPage, sortField, searchValue))
+        const { success, data } = await allFetch(studentApi.getDefinitionLite(rowsPerPage, currentPage, sortField, searchValue))
         if(success)
         {
             setTotalCount(data?.count)
@@ -162,7 +164,7 @@ export default function Specification()
     useEffect(
         () =>
         {
-            getSignatureDatas()
+            getAllData()
         },
         []
     )
@@ -183,7 +185,7 @@ export default function Specification()
 
     return (
         <Fragment>
-            {/* { isLoading && Loader } */}
+            { isLoading && Loader }
             <Card>
                 <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start'>
                     <CardTitle tag='h4'>{t('Тохиргоо ')} <small>( гарын үсэг зурах хүмүүс )</small> </CardTitle>
@@ -195,67 +197,61 @@ export default function Specification()
                     </div>
                 </CardHeader>
                 {
-                    isLoading ?
-
-                        Loader
-
-                    :
-                        listArr.length != 0
-                        ?
-                            <ReactSortable
-                                tag='ul'
-                                className='list-group'
-                                list={listArr}
-                                setList={setListArr}
-                                onSort={changeOrder}
-                            >
-                            {
-                                listArr.map((val, idx) => {
-                                    return (
-                                        <ListGroupItem className='draggable' key={idx} value={val.id} >
-                                            <div className='d-flex align-items-center justify-content-between'>
-                                                <div className="d-flex align-items-center">
-                                                    <div>
-                                                        <Menu size={16} className="me-2" />
-                                                    </div>
-                                                    <div>
-                                                        <h5 className='mt-0'>{val?.last_name} {val?.first_name}</h5>
-                                                        {val?.position_name}
-                                                    </div>
+                    listArr.length != 0
+                    ?
+                        <ReactSortable
+                            tag='ul'
+                            className='list-group'
+                            list={listArr}
+                            setList={setListArr}
+                            onSort={changeOrder}
+                        >
+                        {
+                            listArr.map((val, idx) => {
+                                return (
+                                    <ListGroupItem className='draggable' key={idx} value={val.id} >
+                                        <div className='d-flex align-items-center justify-content-between'>
+                                            <div className="d-flex align-items-center">
+                                                <div>
+                                                    <Menu size={16} className="me-2" />
                                                 </div>
                                                 <div>
-                                                    <a role="button"
-                                                        onClick={() => handleUpdateModal(val?.id, val)}
-                                                        className="ms-1"
-                                                    >
-                                                        <Edit color="gray" width={"18px"} />
-                                                    </a>
-                                                    <a role="button"
-                                                        onClick={() => showWarning({
-                                                            header: {
-                                                                title: t(`Устгах үйлдэл`),
-                                                            },
-                                                            question: t(`Та энэхүү тохиргоог устгахдаа итгэлтэй байна уу?`),
-                                                            onClick: () => handleDelete(val?.id),
-                                                            btnText: t('Устгах'),
-                                                        })}
-                                                        className="ms-1"
-                                                    >
-                                                        <Trash2 color="red" width={"18px"} />
-                                                    </a>
+                                                    <h5 className='mt-0'>{val?.last_name} {val?.first_name}</h5>
+                                                    {val?.position_name}
                                                 </div>
                                             </div>
-                                        </ListGroupItem>
-                                    )
-                                })
-                            }
-                            </ReactSortable>
-                        :
-                            <p className="text-center">Өгөгдөл байхгүй байна.</p>
+                                            <div>
+                                                <a role="button"
+                                                    onClick={() => handleUpdateModal(val?.id, val)}
+                                                    className="ms-1"
+                                                >
+                                                    <Edit color="gray" width={"18px"} />
+                                                </a>
+                                                <a role="button"
+                                                    onClick={() => showWarning({
+                                                        header: {
+                                                            title: t(`Устгах үйлдэл`),
+                                                        },
+                                                        question: t(`Та энэхүү тохиргоог устгахдаа итгэлтэй байна уу?`),
+                                                        onClick: () => handleDelete(val?.id),
+                                                        btnText: t('Устгах'),
+                                                    })}
+                                                    className="ms-1"
+                                                >
+                                                    <Trash2 color="red" width={"18px"} />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </ListGroupItem>
+                                )
+                            })
+                        }
+                        </ReactSortable>
+                    :
+                        <p className="text-center">Өгөгдөл байхгүй байна.</p>
                 }
             </Card>
             <Card>
-                {/* {isLoading && Loader} */}
                 <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
                     <CardTitle tag='h4'>{t('Тодорхойлолт')}</CardTitle>
                 </CardHeader>
@@ -317,7 +313,9 @@ export default function Specification()
                             className='react-dataTable'
                             progressPending={isTableLoading}
                             progressComponent={
-                                Loader
+                                <div className='my-2 d-flex align-items-center justify-content-center'>
+                                    <Spinner className='me-1' color="" size='sm'/><h5>Түр хүлээнэ үү...</h5>
+                                </div>
                             }
                             noDataComponent={(
                                 <div className="my-2">

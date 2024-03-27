@@ -66,8 +66,8 @@ const Leave = () => {
     // Хайлт хийхэд ажиллах хувьсагч
     const [searchValue, setSearchValue] = useState('')
 
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
 
 
     // API

@@ -53,8 +53,8 @@ export default function ExamRepeat() {
     const [student_id, setStudentId] = useState('')
 
     // Loader
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
 
 	const [statusOption] = useState(get_EXAM_STATUS())
 

@@ -5,9 +5,9 @@ export const validateSchema = Yup.object().shape({
     confirmation_num: Yup.string()
         .trim()
         .required(t('Хоосон байна')),
-    // admission_lesson: Yup.string()
-    //     .trim()
-    //     .required(t('Хоосон байна')),
+    admission_lesson: Yup.string()
+        .trim()
+        .required(t('Хоосон байна')),
     score: Yup.string()
         .trim()
         .required(t('Хоосон байна')),

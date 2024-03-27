@@ -52,9 +52,12 @@ const AddModal = ({ isOpen, handleAddModal, refreshDatas }) => {
 
     const [select_student, setStudentOption] = useState([])
     const [student_id , setStudentId] = useState('')
+    const [bottom_check, setBottomCheck] = useState(3)
 
     const [startPicker, setStartPicker] = useState(new Date());
 
+    const [student_search_value, setStudentSearchValue] = useState([]);
+    const [scroll_bottom_datas, setScrollBottomDatas] = useState([]);
 
     const hourDelay = (date) => {
         if (!date) {
@@ -70,12 +73,28 @@ const AddModal = ({ isOpen, handleAddModal, refreshDatas }) => {
     // Api
     const permissionStudentApi = useApi().role.student
 
-    //  Оюутны жагсаалт
-    async function getStudentOption() {
-        const { success, data } = await fetchData(permissionStudentApi.getStudent(student_id))
+    //  Оюутны жагсаалт хайлтаар
+    async function getStudentOption(searchValue) {
+        const { success, data } = await fetchData(permissionStudentApi.getStudent(searchValue))
         if(success) {
             setStudentOption(data)
         }
+    }
+
+    //  Оюутны жагсаалт select ашигласан
+    async function getSelectBottomDatas(state){
+        const { success, data } = await fetchData(permissionStudentApi.getSelectStudents(state))
+        if(success){
+            setScrollBottomDatas((prev) => [...prev, ...data])
+        }
+    }
+
+    useEffect(() => {
+        getSelectBottomDatas(2)
+    }, []);
+
+    function handleStudentSelect(value){
+        getStudentOption(value)
     }
 
     async function onSubmit(cdata) {
@@ -141,13 +160,9 @@ const AddModal = ({ isOpen, handleAddModal, refreshDatas }) => {
             }
     };
 
-
-    useEffect(() =>{
-        getStudentOption()
-    }, [student_id])
     return (
         <Fragment>
-            {isLoading && Loader}
+            {isLoading}
             <Modal
                 isOpen={isOpen}
                 toggle={handleAddModal}
@@ -173,7 +188,7 @@ const AddModal = ({ isOpen, handleAddModal, refreshDatas }) => {
                                 control={control}
                                 defaultValue=''
                                 name="student"
-                                render={({ field: { onChange } }) => {
+                                render={({ field: {value, onChange } }) => {
                                     return (
                                         <Select
                                             name="student"
@@ -181,13 +196,41 @@ const AddModal = ({ isOpen, handleAddModal, refreshDatas }) => {
                                             classNamePrefix='select'
                                             isClearable
                                             className={classnames('react-select', {'is-invalid': errors.student})}
+                                            placeholder={`Хайх`}
                                             isLoading={isLoading}
-                                            placeholder={t('-- Сонгоно уу --')}
-                                            options={select_student || []}
-                                            noOptionsMessage={() => t('Хоосон байна')}
+                                            loadingMessage={() => "Түр хүлээнэ үү..."}
+                                            options={
+                                                student_search_value.length === 0
+                                                    ? scroll_bottom_datas || []
+                                                    : select_student || []
+                                            }
+                                            value={
+                                                student_search_value.length === 0
+                                                    ? scroll_bottom_datas.find((c) => c.id === value)
+                                                    : select_student.find((c) => c.id === value)
+                                            }
+                                            noOptionsMessage={() =>
+												student_search_value.length > 1
+													? t('Хоосон байна')
+													: null
+                                            }
+                                            onMenuScrollToBottom={() => {
+                                                if(student_search_value.length === 0){
+                                                    setBottomCheck(bottom_check + 1)
+                                                    getSelectBottomDatas(bottom_check)
+                                                }
+                                            }}
                                             onChange={(val) => {
                                                 onChange(val?.id || '')
                                                 setStudentId(val?.id || '')
+                                            }}
+                                            onInputChange={(e) => {
+                                                setStudentSearchValue(e);
+                                                if(e.length > 1 && e !== student_search_value){
+                                                    handleStudentSelect(e);
+                                                } else if (e.length === 0){
+                                                    setStudentOption([]);
+                                                }
                                             }}
                                             styles={ReactSelectStyles}
                                             getOptionValue={(option) => option.id}

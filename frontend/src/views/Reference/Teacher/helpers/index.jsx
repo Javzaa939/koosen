@@ -23,7 +23,7 @@ export function getColumns (currentPage, rowsPerPage, handleEdit) {
         {
 			header: 'org_position',
 			name: `${t("Албан тушаал")}`,
-			selector: (row) => <span title={row?.org_position}>{row?.org_position}</span>,
+			selector: (row) => <span title={row?.org_position_name}>{row?.org_position_name}</span>,
 			minWidth: "30px",
 			center: true,
 		},

@@ -27,7 +27,7 @@ import { useForm, Controller } from "react-hook-form";
 import AuthContext from '@context/AuthContext'
 import SchoolContext from '@context/SchoolContext'
 
-import { getPagination, ReactSelectStyles, get_status} from '@utils'
+import { getPagination, ReactSelectStyles, generateLessonYear, get_status} from '@utils'
 
 import { getColumns, customStyles } from './helpers'
 
@@ -45,7 +45,7 @@ const Viz = () => {
     const { t } = useTranslation()
 
     // ** Hook
-    const { control } = useForm();
+    const { control, handleSubmit, reset, setError, setValue, formState: { errors } } = useForm();
 
     var values = {
         department: '',
@@ -78,8 +78,8 @@ const Viz = () => {
     const [is_change, setIsChange] = useState(false);
     const [check, setCheck] = useState(false)
     // Laoder
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
 
     // API
     const studentApi = useApi().student.viz
@@ -88,7 +88,7 @@ const Viz = () => {
     const groupApi = useApi().student.group
 
 
-    // Тэнхимаар жагсаалт авна.
+    // Хөтөлбөрийн багаар жагсаалт авна.
     async function getDepartmentOption() {
         const { success, data } = await fetchData(departmentApi.get(school_id))
 
@@ -96,7 +96,7 @@ const Viz = () => {
             setDepartmentOption(data)
         }
     }
-    // Хөтөлбөрийн жагсаалтын getList функц хөтөлбөрийн багаар жагсаалт авна.
+    // Мэргэжлийн жагсаалтын getList функц хөтөлбөрийн багаар жагсаалт авна.
     async function getProfession() {
         var department = select_value.department
         const { success, data } = await fetchData(professionApi.getList("", department))
@@ -104,7 +104,7 @@ const Viz = () => {
             setProfessionOption(data)
         }
     }
-    // оюутны визний мэдээлэл сургууль, хөтөлбөрийн баг, Хөтөлбөр,анги, төлвөөр шүүж жагсаалт авна.
+    // оюутны визний мэдээлэл сургууль, хөтөлбөрийн баг, мэргэжил,анги, төлвөөр шүүж жагсаалт авна.
     async function getDatas() {
         var school = school_id
         var departId = select_value.department
@@ -136,7 +136,7 @@ const Viz = () => {
         if(Object.keys(user).length > 0 && user.permissions.includes('lms-foreign-student-viz-read')? true: false){
             getDatas()
         }
-    }, [rowsPerPage, currentPage, school_id, select_value.department, select_value.profession,select_value.group, select_value.status, school_id])
+    }, [rowsPerPage, currentPage, school_id, select_value.department, select_value.profession,select_value.group, select_value.status])
 
     useEffect(
         () =>
@@ -231,7 +231,7 @@ const Viz = () => {
                 <Row className="justify-content-between mx-0 mt-1 mb-1" sm={12}>
                     <Col sm={6} lg={3} >
                         <Label className="form-label" for="department">
-                            {t('Тэнхим')}
+                            {t('Хөтөлбөрийн баг')}
                         </Label>
                         <Controller
                             control={control}
@@ -278,7 +278,7 @@ const Viz = () => {
                     </Col>
                     <Col sm={6} lg={3}>
                         <Label className="form-label" for="profession">
-                            {t('Хөтөлбөр')}
+                            {t('Мэргэжил')}
                         </Label>
                          <Controller
                             control={control}

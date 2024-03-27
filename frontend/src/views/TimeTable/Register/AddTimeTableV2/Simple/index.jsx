@@ -106,7 +106,7 @@ const Simple = ({ handleRoomModal, editValues, handleModal, roomModal, is_loadin
 
     // Багшийн жагсаалт
     async function getTeacher() {
-        const { success, data } = await fetchData(teacherApi.getTeacher(select_value?.lesson))
+        const { success, data } = await fetchData(teacherApi.getTeacher(select_value.lesson))
         if(success) {
             setTeacher(data)
         }
@@ -285,9 +285,7 @@ const Simple = ({ handleRoomModal, editValues, handleModal, roomModal, is_loadin
     useEffect(
         () =>
         {
-            if (select_value?.lesson) {
-                getTeacher()
-            }
+            getTeacher()
         },
         [select_value?.lesson]
     )
@@ -323,7 +321,7 @@ const Simple = ({ handleRoomModal, editValues, handleModal, roomModal, is_loadin
             cdata['group'] = !checked ? selectedGroups : []
             cdata['addgroup'] = !checked ? selectedAddGroups : []
 
-            cdata['school'] = school_id ? school_id : ''
+            cdata['school'] = school_id
             cdata['lesson_year'] = cyear_name
             cdata['lesson_season'] = cseason_id
 
@@ -368,7 +366,7 @@ const Simple = ({ handleRoomModal, editValues, handleModal, roomModal, is_loadin
             <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
                 <div className='mt-1'>
                     <Row className='mb-1'>
-                        <Col md={4} sm={12}>
+                        <Col md={3} sm={12}>
                             <Label className="form-label" for="lesson">
                                 {t('Хичээл')}
                             </Label>
@@ -404,7 +402,7 @@ const Simple = ({ handleRoomModal, editValues, handleModal, roomModal, is_loadin
                             />
                             {errors.lesson && <FormFeedback className='d-block'>{t(errors.lesson.message)}</FormFeedback>}
                         </Col>
-                        <Col md={4} sm={12}>
+                        <Col md={3} sm={12}>
                             <Label className="form-label" for="potok">
                                 {t('Потокийн дугаар')}
                             </Label>
@@ -438,7 +436,7 @@ const Simple = ({ handleRoomModal, editValues, handleModal, roomModal, is_loadin
                             />
                             {errors.potok && <FormFeedback className='d-block'>{t(errors.potok.message)}</FormFeedback>}
                         </Col>
-                        <Col md={4} sm={12}>
+                        <Col md={3} sm={12}>
                             <Label className="form-label" for="teacher">
                                 {t("Багш")}
                             </Label>
@@ -471,6 +469,38 @@ const Simple = ({ handleRoomModal, editValues, handleModal, roomModal, is_loadin
                                 }}
                             />
                             {errors.teacher && <FormFeedback className='d-block'>{t(errors.teacher.message)}</FormFeedback>}
+                        </Col>
+                        <Col md={3} sm={12}>
+                            <Label className="form-label" for="support_teacher">
+                                {t("Туслах багш")}
+                            </Label>
+                            <Controller
+                                control={control}
+                                defaultValue=''
+                                name="support_teacher"
+                                render={({ field: { value, onChange} }) => {
+                                    return (
+                                        <Select
+                                            name="support_teacher"
+                                            id="support_teacher"
+                                            classNamePrefix='select'
+                                            isClearable
+                                            className={classnames('react-select', { 'is-invalid': errors.support_teacher })}
+                                            isLoading={isLoading}
+                                            placeholder={t(`-- Сонгоно уу --`)}
+                                            options={teacherOption || []}
+                                            value={teacherOption.find((c) => c.id === (value || editValues?.support_teacher))}
+                                            noOptionsMessage={() => t('Хоосон байна.')}
+                                            onChange={(val) => {
+                                                onChange(val?.id || '')
+                                            }}
+                                            styles={ReactSelectStyles}
+                                            getOptionValue={(option) => option.id}
+                                            getOptionLabel={(option) => option.full_name}
+                                        />
+                                    )
+                                }}
+                            />
                         </Col>
                     </Row>
                 </div>

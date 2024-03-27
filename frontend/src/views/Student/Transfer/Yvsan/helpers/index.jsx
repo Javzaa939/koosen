@@ -36,7 +36,6 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 			selector: (row) => row?.student?.code +' '+ row?.student?.last_name[0] + '.' + row?.student?.first_name,
             sortable: true,
 			minWidth: "250px",
-			center: true
         },
 		{
 			header: 'is_internal',
@@ -54,7 +53,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 						</Badge>
 				)
 			},
-			minWidth: "250px",
+			minWidth: "150px",
 			center: true
 		},
 		{
@@ -62,15 +61,15 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 			name: `${t('Хаашаа шилжих')}`,
 			selector: (row) => <span title={`${row?.school_name}`}>{row?.school_name}</span>,
             sortable: true,
-			minWidth: "250px",
+			minWidth: "150px",
 			center: true,
         },
 		{
 			header: 'destination_pro',
-			name: `${t('Хөтөлбөр')}`,
+			name: `${t('Мэргэжил')}`,
 			selector: (row) => <span title={`${row?.pro_name}`}>{row?.pro_name}</span>,
             sortable: true,
-			minWidth: "250px",
+			minWidth: "150px",
 			center: true,
         },
 		{
@@ -78,7 +77,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 			name: `${t('Анги')}`,
 			selector: (row) => <span title={`${row?.group?.name}`}>{row?.group?.name}</span>,
             sortable: true,
-			minWidth: "250px",
+			minWidth: "150px",
 			center: true,
         },
         {
@@ -86,7 +85,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 			name: `${t('Тушаал')}`,
 			selector: (row) => row?.statement,
             sortable: true,
-			minWidth: "150px",
+			minWidth: "50px",
 			center: true
         },
 		{
@@ -94,7 +93,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 			name: `${t('Тушаалын огноо')}`,
 			selector: (row) => row?.statement_date,
             sortable: true,
-			minWidth: "100px",
+			minWidth: "80px",
 			center: true
         },
 	]

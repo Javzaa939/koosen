@@ -5,10 +5,12 @@ export function getColumns (currentPage, rowsPerPage, total_count) {
 
 	const page_count = Math.ceil(total_count / rowsPerPage)
 
+
 	/** Сонгосон хуудасны тоо датаны тооноос их болсон үед хуудаслалт 1-ээс эхлэнэ */
     if (currentPage > page_count) {
         currentPage = 1
     }
+
 
     const columns = [
 		{
@@ -18,21 +20,13 @@ export function getColumns (currentPage, rowsPerPage, total_count) {
 			center: true
 		},
 		{
-			header: 'student__code',
+			header: 'student__first_name',
 			name: `${t('Оюутны код')}`,
-			selector: (row)=> row?.student?.code,
+			selector: (row)=> row?.student?.code + " " + row?.student?.last_name + ' ' + row?.student?.first_name,
             sortable: true,
 			minWidth: "150px",
 			wrap: true
 		},
-		{
-			header: 'student__first_name',
-			name: `${t('Овог нэр')}`,
-			selector: (row) =>row?.student?.last_name + ' ' + row?.student?.first_name,
-            sortable: true,
-			minWidth: "200px",
-			wrap: true
-        },
 		{
 			header: 'lesson__name',
 			name: t('Хичээлийн нэр'),
@@ -42,21 +36,6 @@ export function getColumns (currentPage, rowsPerPage, total_count) {
 			left: true,
 			wrap: true
 		},
-		{
-			header: 'volume_kr',
-			name: `${t('Кр')}`,
-			selector: (row) => row?.volume_kr,
-            sortable: false,
-			center: true
-        },
-        // {
-		// 	header: 'teacher__code',
-		// 	name: `${t('Багшийн код')}`,
-		// 	selector: (row) => row?.teacher?.code,
-        //     sortable: true,
-		// 	minWidth: "150px",
-		// 	center: true
-        // },
 		{
 			header: 'teacher__first_name',
 			name: `${t('Багшийн нэр')}`,
@@ -84,22 +63,6 @@ export function getColumns (currentPage, rowsPerPage, total_count) {
 			center: true
         },
 		{
-			header: 'total',
-			name: `${t('Нийт оноо')}`,
-			selector: (row) => row?.score_total,
-            sortable: false,
-			minWidth: "130px",
-			center: true
-        },
-		{
-			header: 'assessment',
-			name: `${t('Үсгэн үнэлгээ')}`,
-			selector: (row) => row?.assessment,
-            sortable: true,
-			minWidth: "180px",
-			center: true
-        },
-		{
 			header: 'lesson_year',
 			name: `${t('Хичээлийн жил')}`,
 			selector: (row) => row?.lesson_year,
@@ -115,6 +78,12 @@ export function getColumns (currentPage, rowsPerPage, total_count) {
 			minWidth: "50px",
 			center: true
         },
+		{
+			header: 'total',
+			name: 'Нийт оноо үнэлгээ',
+			center: true,
+			selector: (row) => row?.score_total + ' ' + row?.assessment
+		},
 	]
 
     return columns

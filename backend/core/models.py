@@ -263,6 +263,18 @@ class Roles(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
+class MainPosition(models.Model):
+    """ Үндсэн төрөлүүд
+    """
+
+    class Meta:
+        db_table = 'core_mainposition'
+        managed = False
+
+    name = models.CharField(max_length=250, null=False, verbose_name="Нэр")
+    code = models.CharField(max_length=255, null=True, blank=True, verbose_name="Код")
+
+
 class OrgPosition(models.Model):
     """ Тухайн байгууллагын албан тушаал
     """
@@ -279,12 +291,14 @@ class OrgPosition(models.Model):
     is_director =  models.BooleanField(default=False, verbose_name="Удирдах албан тушаалтан эсэх")
     removed_perms = models.ManyToManyField(Permissions, related_name="remove", blank=True)
     is_teacher = models.BooleanField(default=False, verbose_name="Багшлах эсэх")
+    main_position = models.ForeignKey(MainPosition, null=True, blank=True, on_delete=models.CASCADE, verbose_name="Үндсэн албан тушаалын төрөлүүд")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     # def __str__(self):
     #     return self.name
+
 
 
 class Teachers(models.Model):
@@ -405,6 +419,42 @@ class Employee(models.Model):
         (WORKER_TYPE_PARTTIME, 'Түр ажилтан.'),
     )
 
+    TEACHER_RANK_TYPE_TRAINEE = 1
+    TEACHER_RANK_TYPE_TEACHER = 2
+    TEACHER_RANK_TYPE_SENIOR = 3
+    TEACHER_RANK_TYPE_ASSOCIATE_PRO = 4
+    TEACHER_RANK_TYPE_PRO = 5
+
+    TEACHER_RANK_TYPE = (
+        (TEACHER_RANK_TYPE_TRAINEE, 'Дадлагажигч багш'),
+        (TEACHER_RANK_TYPE_TEACHER, 'Багш'),
+        (TEACHER_RANK_TYPE_SENIOR, 'Ахлах багш'),
+        (TEACHER_RANK_TYPE_ASSOCIATE_PRO, 'Дэд профессор'),
+        (TEACHER_RANK_TYPE_PRO, 'Профессор'),
+    )
+
+    EDUCATION_LEVEL_TRAINEE = 1
+    EDUCATION_LEVEL_TEACHER = 2
+    EDUCATION_LEVEL_SENIOR = 3
+    EDUCATION_LEVEL_ASSOCIATE_PRO = 4
+
+    EDUCATION_LEVEL = (
+        (EDUCATION_LEVEL_TRAINEE, 'Дипломын'),
+        (EDUCATION_LEVEL_TEACHER, 'Бакалавр'),
+        (EDUCATION_LEVEL_SENIOR, 'Магистр'),
+        (EDUCATION_LEVEL_ASSOCIATE_PRO, 'Доктор'),
+    )
+
+    DEGREE_TYPE_ASSOCIATE_PRO = 1
+    DEGREE_TYPE_PRO = 2
+    DEGREE_TYPE_ACADEMICIAN = 3
+
+    DEGREE_TYPE = (
+        (DEGREE_TYPE_ASSOCIATE_PRO, 'Дэд профессор'),
+        (DEGREE_TYPE_PRO, 'Профессор'),
+        (DEGREE_TYPE_ACADEMICIAN, 'Академич'),
+    )
+
     org = models.ForeignKey(Schools, blank=True, null=True, on_delete=models.CASCADE, verbose_name="Байгууллага")
     sub_org = models.ForeignKey(SubOrgs, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Харьяалагдах алба нэгж")
     salbar = models.ForeignKey(Salbars, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Салбар")
@@ -424,11 +474,41 @@ class Employee(models.Model):
 
     date_joined = models.DateTimeField(auto_now_add=True, verbose_name="Ажилд орсон хугацаа")
     date_left = models.DateTimeField(blank=True, null=True, verbose_name="Ажлаас гарсан хугацаа")
+
+    teacher_rank_type = models.PositiveIntegerField(choices=TEACHER_RANK_TYPE, db_index=True, null=True, blank=True, default=None, verbose_name="Албан тушаал")
+    education_level = models.PositiveIntegerField(choices=EDUCATION_LEVEL, db_index=True, null=True, blank=True, default=None, verbose_name="Боловсролын түвшин")
+    degree_type = models.PositiveIntegerField(choices=DEGREE_TYPE, db_index=True, null=True, blank=True, default=None, verbose_name="Эрдмийн зэрэг")
     updated_at = models.DateTimeField(auto_now=True)
 
     @property
+    def is_hr(self):
+        return self.user.is_superuser or (self.org_position.is_hr if self.org_position else False)
+
+    @property
+    def real_photo(self):
+        return self.user.real_photo
+
+    @property
     def full_name(self):
-        return self.user.get_full_name()
+        return self.user.full_name
+
+    @staticmethod
+    def exactly_our_employees(request):
+        return Employee.objects.filter(**request.exactly_org_filter, state=Employee.STATE_WORKING)
+
+    @staticmethod
+    def get_filter(request):
+        filters = {
+            "org": request.org_filter.get("org")
+        }
+
+        if "sub_org" in request.org_filter:
+            filters['sub_org'] = request.org_filter.get("sub_org").id
+
+        if "salbar" in request.org_filter:
+            filters['salbar'] = request.org_filter.get("salbar").id
+
+        return filters
 
 
 # -----------------------------------------------Notification--------------------------------------------------------------------------------
@@ -559,3 +639,35 @@ class Notification(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, verbose_name="Үүсгэсэн", related_name="+")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+class UserProfessionInfo(models.Model):
+    """
+        Хэрэглэгчийн мэргэжил дээшлүүлсэн байдал 3.1. Мэргэшлийн бэлтгэл
+    """
+
+    class Meta:
+        db_table = 'core_userprofessioninfo'
+        managed = False
+
+    WHERE_COUNTRY_DOTOOD = 1
+    WHERE_COUNTRY_GADAAD = 2
+
+    WHERE_COUNTRY_TYPE = (
+        (WHERE_COUNTRY_DOTOOD, 'Дотоодод'),
+        (WHERE_COUNTRY_GADAAD, 'Гадаадад'),
+    )
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    where = models.CharField(max_length=256, verbose_name='ХААНА, ЯМАР БАЙГУУЛЛАГАД', null=True, blank=True)
+
+    start_date = models.DateField(verbose_name="Элссэн он сар", null=True, blank=True)
+    end_date = models.DateField(verbose_name="Төгссөн он сар", null=True, blank=True)
+    learned_days = models.IntegerField(verbose_name="Хугацаа хоногоор", default=0, null=True, blank=True)
+
+    profession = models.CharField(max_length=256, verbose_name="эзэмшсэн мэргэжил", null=True, blank=True)
+    license_number = models.CharField(max_length=256, verbose_name="Үнэмлэх, гэрчилгээний дугаар", null=True, blank=True)
+
+    where_country = models.PositiveBigIntegerField(choices=WHERE_COUNTRY_TYPE, db_index=True, default=WHERE_COUNTRY_DOTOOD, verbose_name="Мэргэжил дээшлүүлсэн байдал", null=True, blank=True)
+
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Системд өгөгдөл шинээр оруулсан огноо")

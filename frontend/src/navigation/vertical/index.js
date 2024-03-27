@@ -41,10 +41,10 @@ export default [
   // ...Request,
   // ...Order,
   ...Service,
-  ...Print,
+  // ...Print,
   // ...Report,
   ...Settings,
-  ...Role,
+  // ...Role,
   // ...Science
-  ...Test,
+  // ...Test,
 ]

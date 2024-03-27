@@ -2,10 +2,11 @@ import { lazy } from "react";
 
 const Student = lazy(() => import("@views/Settings/StudentSettings"))
 const Teacher = lazy(() => import("@views/Settings/TeacherSettings"))
-const Permission = lazy(() => import("@views/Settings/Permission"))
-const Role = lazy(() => import("@views/Settings/Role"))
+const Country = lazy(() => import("@views/Settings/Country"))
 const Mail = lazy(() => import("@views/Settings/Mail"))
 
+const Permission = lazy(() => import("@views/Settings/Permission"))
+const Role = lazy(() => import("@views/Settings/Role"))
 const SettingsRoutes = [
     {
         path: 'settings/student/',
@@ -16,16 +17,20 @@ const SettingsRoutes = [
         element: <Teacher />
     },
     {
+        path: 'settings/country/',
+        element: <Country />
+    },
+    {
+        path: 'settings/mail/',
+        element: <Mail />
+    },
+    {
         path: 'settings/permission/',
         element: <Permission />
     },
     {
         path: 'settings/role/',
         element: <Role />
-    },
-    {
-        path: 'settings/mail/',
-        element: <Mail />
     },
 ]
 

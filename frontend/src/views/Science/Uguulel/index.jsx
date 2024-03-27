@@ -71,8 +71,8 @@ const SciencePaper = () => {
 
     const { control, formState: { errors } } = useForm();
 
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
 
     const { t } = useTranslation()
     const [select_value, setSelectValue] = useState(values);
@@ -196,7 +196,7 @@ const SciencePaper = () => {
 				<Row className="mx-0 mt-1">
                     <Col md={3}>
                         <Label className="form-label" for="department">
-                            {t('Тэнхим')}
+                            {t('Хөтөлбөрийн баг')}
                         </Label>
                         <Controller
                             control={control}

@@ -1,20 +1,24 @@
 import React, { useState, useRef, useContext} from "react";
 
 import useLoader from "@hooks/useLoader";
+import useModal from '@hooks/useModal'
 
 import {
     Input,
 	FormFeedback,
+	Badge,
+	UncontrolledTooltip
 } from "reactstrap";
 
 import AuthContext from '@context/AuthContext'
 
 import useApi from '@hooks/useApi';
+import { X } from 'react-feather'
 
 import { t } from "i18next";
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, total_count) {
+export function getColumns (currentPage, rowsPerPage, total_count, seasonNameOption, handleDelete) {
 
 	const { user } = useContext(AuthContext)
 	const { fetchData } = useLoader({ isFullScreen: false })
@@ -32,6 +36,7 @@ export function getColumns (currentPage, rowsPerPage, total_count) {
 
 	// Api
 	const scoreApi = useApi().score.register
+	const { showWarning } = useModal()
 
 	/** Input-ээс идэвхгүй болох үеийн event */
 	const focusOut = (event) => {
@@ -41,19 +46,20 @@ export function getColumns (currentPage, rowsPerPage, total_count) {
 		}
 	}
 
-	async function onSubmit(row, value, index, key)
+	async function onSubmit(row, value, index, key, not_score=true)
 	{
 		let cdata = {}
 
 		cdata = {
-			[key]: value
+			[key]: value,
+			'not_score': not_score
 		}
         if(row.id) {
             const { success } = await fetchData(scoreApi.putScore(row?.id, cdata))
             if(success) {
 				focusData.current = (undefined)
 
-				row['exam_score'] = value
+				row[`${key}`] = value
 
 				var nextElementId = `${key}-${index + 1}-input`
 				var element = document.getElementById(`${nextElementId}`)
@@ -62,7 +68,8 @@ export function getColumns (currentPage, rowsPerPage, total_count) {
         }
     }
 
-	const handleChangeScore = (event, code, index, key) => {
+	const handleChangeScore = (event, code, index, key, check_score=100) => {
+		setErrorMessage('')
 		if (["e", "E", "+", "-"].includes(event.key)) {
 			event.preventDefault()
 		}
@@ -70,12 +77,26 @@ export function getColumns (currentPage, rowsPerPage, total_count) {
 
 			const value = event.target.value || 0
 
-			if (value > 100) {
-                setErrorMessage(`100-иас их утга авах боломжгүй`)
+			if (value > check_score) {
+                setErrorMessage(`${check_score}-иас их утга авахгүй`)
             } else {
                 setErrorMessage('')
 
 				onSubmit(code, value, index, key)
+            }
+		}
+	};
+
+	const handleChangeValue = (event, code, index, key) => {
+		if (["e", "E", "+", "-"].includes(event.key)) {
+			event.preventDefault()
+		}
+		else if (event.key === 'Enter') {
+
+			const value = event.target.value || ''
+
+			if (value ) {
+				onSubmit(code, value, index, key, false)
             }
 		}
 	};
@@ -88,36 +109,21 @@ export function getColumns (currentPage, rowsPerPage, total_count) {
 			center: true
 		},
 		{
-			header: 'student__code',
-			name: t("Оюутны код"),
-			selector: (row) => row?.student?.code,
+			header: 'student__first_name',
+			name: t("Оюутны нэр"),
+			selector: (row) => row?.student?.code + ' ' +  row?.student?.last_name + ' ' + row?.student?.first_name,
             center: true,
 			sortable: true,
 			minWidth: "150px",
 		},
 		{
-			header: 'student__first_name',
-			name: t("Оюутны нэр"),
-			selector: (row) => row?.student?.last_name + ' ' + row?.student?.first_name,
-            left: true,
-			sortable: true,
-			minWidth: "200px",
-			wrap: true
-		},
-		{
 			header: 'lesson__name',
 			name: t("Хичээлийн нэр"),
-			selector: (row) => row?.lesson?.code + ' ' + row?.lesson?.name,
+			selector: (row) => (<span title={row?.lesson?.code + ' ' + row?.lesson?.name}>{ row?.lesson?.code + ' ' + row?.lesson?.name}</span>),
 			minWidth: "200px",
 			sortable: true,
 			left: true,
 			wrap: true
-		},
-		{
-			header: 'volume_kr',
-			name: t("Кр"),
-			selector: (row) => row?.volume_kr,
-			center: true,
 		},
 		{
 			header: 'teacher__first_name',
@@ -134,76 +140,151 @@ export function getColumns (currentPage, rowsPerPage, total_count) {
 
             sortable: true,
             center: true,
-			minWidth: "150px",
 		},
 		{
 			header: 'teach_score',
-			name: t("Багшийн оноо"),
-			selector: (row) => row?.teach_score,
+			name: t("Багшийн оноо  (enter дарж хадгална уу)"),
+			selector: (row, index) => {
+				return (
+					<>
+						<Input
+							id={`teach_score-${index}-input`}
+							defaultValue={row?.teach_score}
+							onBlur={focusOut}
+							type="number"
+							bsSize='sm'
+							placeholder={`Багшийн оноо`}
+							disabled={(Object.keys(user).length > 0 && (user?.permissions.includes('lms-score-update')) || user?.is_superuser) ? false : true}
+							onFocus={(e) => focusData.current = (e.target.value)}
+							onKeyPress={(e) => {
+								setIndName(`teach_score-${index}-input`)
+								handleChangeScore(e, row, index, 'teach_score', 70)
+							}}
+							invalid={(`teach_score-${index}-input` === index_name) && error_message ? true : false}
+						/>
+						{(`teach_score-${index}-input` == index_name) && error_message && <FormFeedback className='d-block'>{error_message}</FormFeedback>}
+					</>
+				)
+			},
             sortable: true,
             center: true,
 			minWidth: "150px",
 		},
 		{
 			header: 'exam_score',
-			name: t("Шалгалтын оноо"),
-			selector: (row) => row?.exam_score,
+			name: t("Шалгалтын оноо (enter дарж хадгална уу)"),
+			selector: (row, index) => {
+				return (
+					<>
+						<Input
+							id={`exam_score-${index}-input`}
+							defaultValue={row?.exam_score }
+							onBlur={focusOut}
+							type="number"
+							bsSize='sm'
+							placeholder={`Шалгалтын оноо`}
+							disabled={(Object.keys(user).length > 0 && (user?.permissions.includes('lms-score-update')) || user?.is_superuser) ? false : true}
+							onFocus={(e) => focusData.current = (e.target.value)}
+							onKeyPress={(e) => {
+								setIndName(`exam_score-${index}-input`)
+								handleChangeScore(e, row, index, 'exam_score', 30)
+							}}
+							invalid={(`exam_score-${index}-input` === index_name) && error_message ? true : false}
+						/>
+						{(`exam_score-${index}-input` == index_name) && error_message && <FormFeedback className='d-block'>{error_message}</FormFeedback>}
+					</>
+				)
+			},
 			minWidth: "150px",
 			sortable: true,
             center: true,
 		},
 		{
-			header: 'total',
-			name: 'Нийт оноо (enter дарж хадгална уу)',
-			center: true,
-			minWidth: "150px",
+			header: 'lesson_year',
+			name: `${t('Хичээлийн жил (enter дарж хадгална уу)')}`,
 			selector: (row, index) => {
 				return (
-					<>
-						<Input
-							id={`score_total-${index}-input`}
-							defaultValue={row?.score_total}
-							onBlur={focusOut}
-							type="number"
-							bsSize='sm'
-							placeholder={`Нийт оноо`}
-							disabled={(Object.keys(user).length > 0 && (user?.permissions.includes('lms-score-update')) || user?.is_superuser) ? false : true}
-							onFocus={(e) => focusData.current = (e.target.value)}
-							onKeyPress={(e) => {
-								setIndName(`score_total-${index}-input`)
-								handleChangeScore(e, row, index, 'score_total')
-							}}
-							invalid={(`score_total-${index}-input` === index_name) && error_message ? true : false}
-						/>
-						{(`score_total-${index}-input` == index_name) && error_message && <FormFeedback className='d-block'>{error_message}</FormFeedback>}
-					</>
+					<Input
+						id={`lesson_year-${index}-input`}
+						defaultValue={row?.lesson_year}
+						onBlur={focusOut}
+						type="text"
+						bsSize='sm'
+						placeholder={`Хичээлийн жил`}
+						disabled={(Object.keys(user).length > 0 && (user?.permissions.includes('lms-score-update')) || user?.is_superuser) ? false : true}
+						onFocus={(e) => focusData.current = (e.target.value)}
+						onKeyPress={(e) => {
+							setIndName(`lesson_year-${index}-input`)
+							handleChangeValue(e, row, index, 'lesson_year')
+						}}
+					/>
 				)
-			}
-		},
-		{
-			header: 'assessment',
-			name: `${t('Үсгэн үнэлгээ')}`,
-			selector: (row) => row?.assessment,
-            sortable: true,
-			minWidth: "180px",
-			center: true
-        },
-		{
-			header: 'lesson_year',
-			name: `${t('Хичээлийн жил')}`,
-			selector: (row) => row?.lesson_year,
+			},
 			center: true,
 			minWidth: "180px",
         },
 		{
 			header: 'lesson_season',
-			name: `${t('Улирал')}`,
-			selector: (row) => row?.lesson_season?.season_name,
+			name: `${t('Улирал (enter дарж хадгална уу)')}`,
+			selector: (row, index) => {
+				return (
+					<Input
+						id={`lesson_season-${index}-input`}
+						defaultValue={row?.lesson_season?.id || ''}
+						onBlur={focusOut}
+						type="select"
+						bsSize='sm'
+						disabled={(Object.keys(user).length > 0 && (user?.permissions.includes('lms-score-update')) || user?.is_superuser) ? false : true}
+						onFocus={(e) => focusData.current = (e.target.value)}
+						onKeyPress={(e) => {
+							setIndName(`lesson_season-${index}-input`)
+							handleChangeValue(e, row, index, 'lesson_season')
+						}}
+					>
+						{
+							seasonNameOption.map((season, idx) => (
+								<option
+									key={idx}
+									value={season.id}
+								>
+									{season.season_name}
+								</option>
+						))}
+					</Input>
+				)
+			},
 			center: true,
 			minWidth: "130px",
         },
+		{
+			header: 'total',
+			name: 'Нийт оноо үнэлгээ',
+			center: true,
+			selector: (row) => row?.score_total + ' ' + row?.assessment
+		},
+		{
+			name: 'Үйлдэл',
+			center: true,
+			selector: (row) => (
+				<>
+					<a role="button"
+						onClick={() => showWarning({
+							header: {
+								title: `${t('Дүн устгах')}`,
+							},
+							question: `Та "${row?.lesson?.code + ' ' + row?.lesson?.name}" хичээлийн дүн устгахдаа итгэлтэй байна уу?`,
+							onClick: () => handleDelete(row.id),
+							btnText: 'Устгах',
+						})}
+						id={`complaintListDatatableCancel${row?.id}`}
+					>
+						<Badge color="light-danger" pill><X width={"100px"} /></Badge>
+					</a>
+					<UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${row.id}`} >Устгах</UncontrolledTooltip>
+				</>
+			)
+		},
 	]
-
 
     return columns
 

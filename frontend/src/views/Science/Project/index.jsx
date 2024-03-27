@@ -71,8 +71,8 @@ const ScienceProject = () => {
 
     const { control} = useForm();
 
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
 
     const { t } = useTranslation()
 
@@ -107,7 +107,7 @@ const ScienceProject = () => {
         }
     }
 
-    /* Тэнхимийн жагсаалт */
+    /* Хөтөлбөрийн баг жагсаалт */
     async function getDepartmentOption() {
         const { success, data } = await fetchData(departmentApi.get())
         if(success) {
@@ -194,7 +194,7 @@ const ScienceProject = () => {
 				<Row className="mx-0 mt-1">
                     <Col md={3}>
                         <Label className="form-label" for="department">
-                            {t('Тэнхим')}
+                            {t('Хөтөлбөрийн баг')}
                         </Label>
                         <Controller
                             control={control}

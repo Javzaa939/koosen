@@ -27,6 +27,7 @@ urlpatterns = [
     path('student/<int:pk>/', PermissionsStudentChoiceAPIView.as_view()),
 
     path('students/', PermissionsStudentAPIView.as_view()),
+    path('students/select_bottom/', PermissionsStudentSelectAPIView.as_view()),
 
     # Хандах эрх шалгах
     path('check/', PermissionsCheckAPIView.as_view()),

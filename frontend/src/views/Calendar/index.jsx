@@ -1,38 +1,26 @@
 // ** React Imports
-import  React,{ Fragment, useState, useEffect } from 'react'
-
-// ** Third Party Components
+import { Fragment, useState, useEffect } from 'react'
+import { Book, User } from 'react-feather'
+import { Card, CardBody, CardTitle, Row, Col } from 'reactstrap'
 import classnames from 'classnames'
-import { Card, Row, Col } from 'reactstrap'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
+import { useRTL } from '@hooks/useRTL'
 
 // ** Calendar App Component Imports
 import Calendar from './Calendar'
 import SidebarLeft from './SidebarLeft'
 import AddEventSidebar from './Add'
+import SwiperFade from './SwiperFade';
 
-// ** Custom Hooks
-import { useRTL } from '@hooks/useRTL'
-import  useUpdateEffect  from '@hooks/useUpdateEffect'
-
-// ** Styles
 import '@styles/react/apps/app-calendar.scss'
 
 import { VOLUNTEER_ACTION_TYPE } from '@utility/consts'
 
-
-import {Book, User} from 'react-feather'
 import StatsHorizontal from '@components/widgets/stats/StatsHorizontal'
-
-import '@styles/react/apps/app-users.scss'
-
-
 import './style.scss'
-import { bottom } from '@popperjs/core';
 const CalendarComponent = () => {
-
 
     const blankEvent = {
         title: '',
@@ -40,6 +28,7 @@ const CalendarComponent = () => {
         end: '',
     }
 
+    const { fetchData } = useLoader({})
 
     // ** states
     const [addSidebarOpen, setAddSidebarOpen] = useState(false)
@@ -50,12 +39,18 @@ const CalendarComponent = () => {
     const [searchChecked, setSearchChecked] = useState([])
     const [dates, setDates] = useState(blankEvent)
     const [active_week, setActiveWeek] = useState(1)
+    const [info, setInfo] = useState({
+        salbar_data: []
+    })
+    const [datas1, setDatas1] = useState([])
 
     // ** Hooks
     const [isRtl] = useRTL()
 
     // Api
     const calendarListApi = useApi().calendar
+    const parentschoolApi = useApi().calendarCard
+    const calendarNewsApi = useApi().calendarNews
 
     // ** AddEventSidebar Toggle Function
     const handleAddEventSidebar = () => {
@@ -68,31 +63,8 @@ const CalendarComponent = () => {
     // ** LeftSidebar Toggle Function
     const toggleSidebar = val => setLeftSidebarOpen(val)
 
-
-    // Card
-    const parentschoolApi1 = useApi().calendar1
-    const { fetchData } = useLoader({})
-
-
-    //Салбарын өгөгдөл авах
-    const [ info, setinfo ] = useState({
-        salbar_data: []
-    })
-
-    async function getDatas1() {
-        const {success, data} = await fetchData(parentschoolApi1.get())
-        if(success) {
-            setinfo(data)
-        }
-    }
-
-    useEffect(() => {
-        getDatas1()
-    },[])
-
-
-
-    async function getDatas() {
+    async function getDatas()
+    {
         const { success, data } = await fetchData(calendarListApi.get(searchChecked))
         if(success) {
             setActiveWeek(data?.active_week)
@@ -115,59 +87,84 @@ const CalendarComponent = () => {
         }
     }
 
+    useEffect(() => {
+        getDatas()
+    },[searchChecked])
+
+
+    // Хуанли дах card-уудын мэдээлэл
+    async function getDatas1() {
+        const {success, data} = await fetchData(parentschoolApi.get())
+        if(success) {
+            setInfo(data)
+        }
+    }
+
     useEffect(
         () =>
         {
-            getDatas()
+            getDatas1()
         },
         []
     )
 
-    useUpdateEffect(
+
+    // Хуанли дах мэдээлэллийн хэсэг
+
+    async function getDatas2()
+    {
+        const { success, data } = await fetchData(calendarNewsApi.get())
+        if(success)
+        {
+            setDatas1(data)
+        }
+    }
+
+    useEffect(
         () =>
         {
-            getDatas()
+            getDatas2()
         },
-        [searchChecked]
+        []
     )
 
     return (
         <Fragment>
             <div className=' pt-0'>
-                    <Row>
-                        <Col lg='3' sm='6'>
-                            <StatsHorizontal
+                <Row>
+                    <Col lg='3' sm='6'>
+                        <StatsHorizontal
                             color='warning'
                             statTitle='Нийт хөтөлбөрийн тоо'
                             icon={<Book size={20} />}
                             renderStats={<h3 className='fw-bolder mb-75'>{info?.total_profession}</h3>}
-                            />
-                        </Col>
-                        <Col lg='3' sm='6'>
-                            <StatsHorizontal
+                        />
+                    </Col>
+                    <Col lg='3' sm='6'>
+                        <StatsHorizontal
                             color='warning'
                             statTitle='Нийт хичээлийн тоо'
                             icon={<Book size={20} />}
                             renderStats={<h3 className='fw-bolder mb-75'>{info?.total_studies}</h3>}
-                            />
-                        </Col>
-                        <Col lg='3' sm='6'>
-                            <StatsHorizontal
-                                color='primary'
-                                statTitle='Нийт багшийн тоо'
-                                icon={<User size={20} />}
-                                renderStats={<h3 className='fw-bolder mb-75'>{info?.total_workers}</h3>}
-                            />
-                        </Col>
-                        <Col lg='3' sm='6'>
-                            <StatsHorizontal
+                        />
+                    </Col>
+                    <Col lg='3' sm='6'>
+                        <StatsHorizontal
+                            color='primary'
+                            statTitle='Нийт багшийн тоо'
+                            icon={<User size={20} />}
+                            renderStats={<h3 className='fw-bolder mb-75'>{info?.total_workers}</h3>}
+                        />
+                    </Col>
+                    <Col lg='3' sm='6'>
+                        <StatsHorizontal
                             color='danger'
                             statTitle='Нийт суралцагчдын тоо'
                             icon={<User size={20} />}
                             renderStats={<h3 className='fw-bolder mb-75'>{info?.total_students}</h3>}
-                            />
-                        </Col>
-                    </Row>
+                        />
+                    </Col>
+                </Row>
             </div>
 
             <div className='app-calendar overflow-hidden border'>
@@ -198,6 +195,16 @@ const CalendarComponent = () => {
                             getDates={setDates}
                         />
                     </Col>
+
+                    <Col lg = '3' sm ='9' className='m-2'>
+                        <Card className='text-center'>
+                            <CardBody>
+                                <CardTitle tag = 'h3'>Сүүлд нэмэгдсэн мэдээ, мэдээлэл</CardTitle>
+                                {datas1.length > 0 ? <SwiperFade datas={datas1} /> : <h5>Мэдээлэл байхгүй байна!</h5>}
+                            </CardBody>
+                        </Card>
+                    </Col>
+
                     <div
                         className={classnames('body-content-overlay', {
                             show: leftSidebarOpen === true
@@ -206,6 +213,7 @@ const CalendarComponent = () => {
                     ></div>
                 </Row>
             </div>
+
             <AddEventSidebar
                 open={addSidebarOpen}
                 handleAddEventSidebar={handleAddEventSidebar}

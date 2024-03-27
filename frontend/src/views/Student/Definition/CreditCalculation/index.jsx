@@ -26,7 +26,7 @@ export default function CreditCalculation()
     const [ listArr, setListArr ] = useState([])
 
     // Loader
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
 
     // Api
     const signatureApi = useApi().signature
@@ -125,7 +125,7 @@ export default function CreditCalculation()
                 <>
                     {isLoading && Loader}
                     <div className='d-flex flex-column justify-content-center align-items-center w-100 mt-5' style={{ fontSize: '12px' }} >
-                        <img className="fallback-logo" width={100} height={100} src={`http://hr.mnun.edu.mn/media/orgs/logo/MNU-Logo_1.png`}  alt="logo" onLoad={imageLoaded} />
+                        <img className="fallback-logo" width={100} height={100} src={`https://hr.sus.mn/media/orgs/logo/shine-mongol-bosoo.png`}  alt="logo" onLoad={imageLoaded} />
                         {/* <img className="fallback-logo" width={100} height={100} src={`${process. env.REACT_APP_MUIS_HR_MEDIA_URL}${datas?.school?.logo_url}`} alt="logo" onLoad={imageLoaded} /> */}
                         <div className="d-flex flex-column text-center fw-bolder">
                             <span className='mt-1'>
@@ -163,7 +163,7 @@ export default function CreditCalculation()
                                 Регистр: <span className="fw-normal">{datas?.student?.register_num}</span>
                             </div>
                             <div className="w-50 d-inline-block">
-                                Хөтөлбөр: <span className="fw-normal">{datas?.student?.group?.profession?.name}</span>
+                                Мэргэжил: <span className="fw-normal">{datas?.student?.group?.profession?.name}</span>
                             </div>
                         </div>
 

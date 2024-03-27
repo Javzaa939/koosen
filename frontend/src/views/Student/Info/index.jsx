@@ -23,7 +23,7 @@ export default function Info()
     const [ datas, setDatas ] = useState({})
 
     /** Loader */
-    const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: false });
+    const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: true });
 
     useEffect(
         () =>
@@ -65,7 +65,7 @@ export default function Info()
                             <Col md={6}>
                                 <Row tag="dl" className="mb-0">
                                     <Col tag="dt" sm="4" className="fw-bolder mb-1" >
-                                        Тэнхим:
+                                        Хөтөлбөрийн баг:
                                     </Col>
                                     <Col tag="dd" sm="8" className="mb-1">{datas?.mainInfo?.department?.name || 'хоосон'}</Col>
                                     <Col tag="dt" sm="4" className="fw-bolder mb-1" >

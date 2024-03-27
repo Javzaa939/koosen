@@ -1,5 +1,3 @@
-
-
 import React, { useEffect, useState, useContext } from "react";
 import { useParams, useLocation } from 'react-router-dom';
 import './style.css'
@@ -69,10 +67,12 @@ function ExamReport() {
         return filter
     }
 
+    const logo = require("@src/assets/images/logo/dxis_logo.png").default
+
     return(
         <>
         {isLoading && Loader}
-        {Object.keys(datas).length > 0 ?
+        {Object.keys(datas).length && datas?.student_group_list.length > 0 ?
             datas?.student_group_list.map((vdata, vidx ) => {
                 return(
                     <div key={`groups${vidx}`} className={`d-flex align-items-center flex-column justify-content-start align-items-center mt-0 ${vidx + 1 === datas.student_group_list.length ? '' : 'page-break-always border-0'}`}>
@@ -81,9 +81,8 @@ function ExamReport() {
                                     <div></div>
                                 <div className="d-flex flex-column text-center fw-bolder">
                                     <span className='mt-1 fs-3 fw-bolder' style={{ color: '#000' }}>
-                                        {parentschoolName} {/* Дотоод Хэргийн Их Сургууль */}
+                                        {parentschoolName}
                                     </span>
-                                    {/* <span style={{ marginTop: '6px' }}>{datas?.school?.name_eng.toUpperCase()}</span> */}
                                 </div>
                                 <img className="fallback-logo" width={50} height={50} src={logo} alt="logo" onLoad={vidx === 0 ? imageLoaded : null}  />
                             </div>
@@ -206,7 +205,7 @@ function ExamReport() {
         :
             <div className="d-flex justify-content-center align-items-center" style={{ height: '300px'}}>
                 <Badge className="d-flex align-items-center" style={{ fontSize: 16}} pill color="light-warning">
-                    <AlertTriangle style={{ height: 20, width: 20}}/> Уучлаарай өгөгдөл олдсонгүй
+                    <AlertTriangle className="me-50" style={{ height: 20, width: 20}}/> Уучлаарай өгөгдөл олдсонгүй
                 </Badge>
             </div>
         }

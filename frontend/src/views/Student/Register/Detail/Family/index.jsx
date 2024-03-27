@@ -107,28 +107,28 @@ const Family = () => {
         /** Засах */
         if(is_edit) {
             var id = cdata['id']
-            const { success, errors } = await fetchData(studentFamilyApi.put(cdata, id, studentId))
+            const { success, error } = await fetchData(studentFamilyApi.put(cdata, id, studentId))
             if(success)
             {
                 getDatas()
                 onModalClosed()
             } else {
                 /** Алдааны мессэжийг input дээр харуулна */
-                for (let key in errors) {
-                    setError(key, { type: 'custom', message:  errors[key][0]});
+                for (let key in error) {
+                    setError(error[key].field, { type: 'custom', message:  error[key].msg});
                 }
             }
         } else {
             /** Нэмэх */
-            const { success, errors } = await fetchData(studentFamilyApi.post(cdata))
+            const { success, error } = await fetchData(studentFamilyApi.post(cdata))
             if(success)
             {
                 getDatas()
                 onModalClosed()
             } else {
                 /** Алдааны мессэжийг input дээр харуулна */
-                for (let key in errors) {
-                    setError(key, { type: 'custom', message:  errors[key][0]});
+                for (let key in error) {
+                    setError(error[key].field, { type: 'custom', message:  error[key].msg});
                 }
             }
         }
@@ -296,7 +296,7 @@ const Family = () => {
                             {
                                 <Col className='text-center' md={12}>
                                     <Button disabled={disabled} size='sm' className="me-2" color="primary" type="submit">
-                                        {/* {isLoading && Loader} */}
+                                        {isLoading && Loader}
                                         {is_edit ? t('Засах') : t('Хадгалах')}
                                     </Button>
                                     <Button color="secondary" size='sm' type="reset" outline onClick={onModalClosed}>

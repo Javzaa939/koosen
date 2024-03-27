@@ -15,18 +15,24 @@ urlpatterns = [
     # Цагийн ачааллаас хичээлийн хуваарь авах
     path('resource1/', TimeTableResource1.as_view()),
     path('register-new/', TimeTableNewAPIView.as_view()),
+
+    # Цагийн ачааллаас
     path('register/new/<int:pk>/', TimeTableNewAPIView.as_view()),
 
-    # Цагийн хуваарь
+    path('print/', TimeTablePrint.as_view()),
+
+    # Цагийн хуваарь үүссэний дараа
     path('register/', TimeTableAPIView.as_view()),
     path('register/<int:pk>/', TimeTableAPIView.as_view()),
+
+    # Цагийн хуваариас event зөөх үед үүссэний дараа
+    path('event/<int:pk>/', TimeTableEvent.as_view()),
 
     # Хичээлийн хуваарь шивэх V1
     # path('register1/', TimeTable1APIView.as_view()),
     path('register1/kurats/', TimeTableKuratsAPIView.as_view()),
     path('resource/', TimeTableResource.as_view()),
 
-    path('event/<int:pk>/', TimeTableEvent.as_view()),
     path('file/', TimeTableFile.as_view()),
 
     # Хичээлийн хуваарийн хайлтын select option авах

@@ -226,7 +226,7 @@ const Enrollment = () => {
                             <Button
                                 color='primary'
                                 className='m-50'
-                                disabled={datas.length == 0}
+                                disabled={datas?.length < 1}
                                 onClick={() => {navigate(`printlist`,  { state: { 'selectedRows': selectedRows, 'select_value': select_value }, })}}
                             >
                                 <Printer size={15} />

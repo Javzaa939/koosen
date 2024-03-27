@@ -1,0 +1,25 @@
+.timetable_report{
+    border: 1px solid rgba(0, 0, 0, 0.4);
+    border-collapse: separate!important;
+    border-radius: 10px;
+    box-shadow: 5px 5px 5px 1px rgba(0, 0, 0, 0.1);
+    color: #000;
+}
+
+.blank_cell{
+}
+
+.pbreak{
+    page-break-after: always;
+}
+
+.root_parent{
+    // background-color: white;
+    color: black;
+    height: 100%;
+}
+
+@page {
+    size: portrait A4;
+    margin: 0
+}

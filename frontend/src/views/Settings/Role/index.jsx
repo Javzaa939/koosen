@@ -590,9 +590,9 @@ export default function Role()
                                             positions.map((val, idx) =>
                                             {
                                                 return (
-                                                    <ListGroupItem key={idx} active={checkedPos.includes(val.id)} onClick={() => checkPos(val.id)} id={`orgposition-${val.id}`} >
+                                                    <ListGroupItem key={idx} active={checkedPos?.includes(val.id)} onClick={() => checkPos(val.id)} id={`orgposition-${val.id}`} >
                                                         <div>
-                                                            <h6 className={`${checkedPos.includes(val.id) && 'text-white'} m-0`}>{val.name}</h6>
+                                                            <h6 className={`${checkedPos?.includes(val.id) && 'text-white'} m-0`}>{val.name}</h6>
                                                         </div>
                                                     </ListGroupItem>
                                                 )

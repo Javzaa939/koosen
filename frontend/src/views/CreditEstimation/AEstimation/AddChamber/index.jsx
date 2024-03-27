@@ -136,7 +136,7 @@ export default function AddChamber({ isOpen, handleModal, editId }) {
 
     const [ datas, setDatas ] = useState([])
 
-    const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: false })
+    const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: true })
 
     // API
     const estimateTypeApi = useApi().credit.estimation
@@ -168,7 +168,7 @@ export default function AddChamber({ isOpen, handleModal, editId }) {
                 toggle={handleModal}
                 className="modal-dialog-centered modal-lg"
             >
-                <ModalHeader toggle={handleModal}>{'Танхисийн бус цаг нэмэх'}</ModalHeader>
+                <ModalHeader toggle={handleModal}>{'Танхимийн бус цаг нэмэх'}</ModalHeader>
                 <ModalBody>
                     <CTable
                         headers={headers}

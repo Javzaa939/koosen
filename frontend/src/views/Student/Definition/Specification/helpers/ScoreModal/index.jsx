@@ -1,5 +1,18 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Badge, Button, Col, Input, Label, Modal, ModalBody, ModalFooter, ModalHeader, Row, Spinner } from "reactstrap";
+import {
+    Badge,
+    Col,
+    Input,
+    Label,
+    Modal,
+    ModalBody,
+    ModalHeader,
+    Row,
+    UncontrolledDropdown,
+    DropdownToggle,
+    DropdownMenu,
+    DropdownItem,
+} from "reactstrap";
 import { useTranslation } from 'react-i18next'
 import './style.scss'
 import { AlertTriangle, Check, Eye, Printer } from "react-feather";
@@ -7,6 +20,7 @@ import ActiveYearContext from "@context/ActiveYearContext"
 import { useNavigate } from 'react-router-dom';
 import { ReactSelectStyleWidth } from "@utils"
 import Select from 'react-select'
+import ReactCountryFlag from 'react-country-flag'
 
 import useApi from '@hooks/useApi'
 import useLoader from '@hooks/useLoader'
@@ -21,9 +35,7 @@ function ScoreModal({ isOpen, handleModal, studentId }) {
     const [ radio, setRadio ] = useState(false)
     const [ chosenYear, setYear ] = useState('')
     const [ chosenSeason, setSeason ] = useState('')
-    const [ haveDun, setHaveDun ] = useState(false)
     const [ def, setDef ] = useState({})
-    const [relayer, setRelayer] = useState(false)
 
     const { isLoading, Loader, fetchData } = useLoader({isSmall: true, initValue: true})
     const { isLoading: isDataLoading,fetchData: fetchMainData } = useLoader({isSmall: true, initValue: true})
@@ -37,14 +49,12 @@ function ScoreModal({ isOpen, handleModal, studentId }) {
     const { success, data } = await fetchData(studentApi.getDefinitionStudent(AMOUNT_DETAILS_TYPE, studentId));
         if (success) {
             setDef(data)
-            setRelayer(true)
         }
     }
 
     async function getDatas()
     {
         const { success, data } = await fetchMainData(scoreApi.get(studentId, chosenYear, chosenSeason))
-        // const { success, data } = await fetchData(scoreApi.get(3289, chosenYear, chosenSeason))
         if (success)
         {
             setDatas(data)
@@ -76,6 +86,10 @@ function ScoreModal({ isOpen, handleModal, studentId }) {
     ]
 
     const seasonlist = [
+        {
+            value: '',
+            label: 'Бүгд'
+        },
         {
             value: 1,
             label: 'Намар'
@@ -155,7 +169,7 @@ function ScoreModal({ isOpen, handleModal, studentId }) {
                                 <Select
                                     classNamePrefix='select'
                                     className={`react-select me-1 mb-50`}
-                                    defaultValue={seasonlist.filter(option => option.value === cseason_id )}
+                                    defaultValue={seasonlist.filter(option => option.value === chosenSeason )}
                                     isLoading={isLoading}
                                     placeholder={t(`-- Сонгоно уу --`)}
                                     options={seasonlist || []}
@@ -188,27 +202,45 @@ function ScoreModal({ isOpen, handleModal, studentId }) {
                                 </Badge>
                             </div>
                     }
-                    {/* <Button color="primary" className="ps-1 me-1" onClick={() => {console.log('test')})}>
-                        <Eye size={18} className="m-0 me-25"/>
-                        Харах
-                    </Button> */}
-                    <Button color="primary" style={{ minHeight: 35 }} disabled={ isDataLoading || isLoading || !data?.scoreregister.length > 0} className="ps-1 d-flex align-items-center" onClick={() => {
-                        radio ?
-                            navigate('/student/amount-details', { state: {studentId: studentId, data: data, year: chosenYear, season: chosenSeason, def: def} })
-
-                            // navigate('/student/student-season-print', { state: {student: studentId, data: data, year: chosenYear, season: chosenSeason, def: def} })
-                        :
-                            navigate('/student/amount-details', { state: {studentId: studentId, data: data, year: chosenYear, season: chosenSeason, def: def} })}
-                    }>
-                        {isLoading || isDataLoading ?
-
-                            <Spinner className="m-0 me-25" style={{ height: 12, width: 12 }}/>
-                            :
-                            <Printer size={14} className="m-0 me-25"/>
-
-                        }
-                        Хэвлэх
-                    </Button>
+                    <UncontrolledDropdown className='dropdown-language nav-item d-inline-block' >
+                        <DropdownToggle
+                            caret
+                            size='sm'
+                            className='ms-50 mb-50'
+                            color='primary'
+                        >
+                            <Printer size={15} />
+                            <span className='align-middle ms-50'>{t('Хэвлэх')}</span>
+                        </DropdownToggle>
+                        <DropdownMenu>
+                            <DropdownItem style={{width: '100%'}} onClick={() => {
+                                radio ?
+                                    navigate('/student/amount-details', { state: {studentId: studentId, data: data, year: chosenYear, season: chosenSeason, def: def} })
+                                :
+                                    navigate('/student/amount-details', { state: {studentId: studentId, data: data, year: chosenYear, season: chosenSeason, def: def} })}
+                            }>
+                                Монгол
+                                <ReactCountryFlag
+                                    svg
+                                    className='country-flag flag-icon mx-50'
+                                    countryCode='mn'
+                                />
+                            </DropdownItem>
+                            <DropdownItem style={{width: '100%'}} onClick={() => {
+                                radio ?
+                                    navigate('/student/amount-details/en', { state: {studentId: studentId, data: data, year: chosenYear, season: chosenSeason, def: def} })
+                                :
+                                    navigate('/student/amount-details/en', { state: {studentId: studentId, data: data, year: chosenYear, season: chosenSeason, def: def} })}
+                            }>
+                                English
+                                <ReactCountryFlag
+                                    svg
+                                    className='country-flag flag-icon mx-50'
+                                    countryCode='us'
+                                />
+                            </DropdownItem>
+                        </DropdownMenu>
+                    </UncontrolledDropdown>
                 </div>
             </ModalBody>
         </Modal>

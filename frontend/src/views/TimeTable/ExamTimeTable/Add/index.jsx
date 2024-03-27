@@ -132,22 +132,22 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
         cdata['school'] = school_id
         cdata['is_online'] = online_checked
         cdata = convertDefaultValue(cdata)
-        const { success, errors } = await postFetch(examApi.post(cdata))
+        const { success, error } = await postFetch(examApi.post(cdata))
         if (success) {
             handleModal()
             refreshDatas()
         } else {
             /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in errors) {
-                if(key === 'student') {
+            for (let key in error) {
+                if(error[key].field === 'student') {
                     addToast(
                         {
                             type: 'warning',
-                            text: errors[key][0]
+                            text: error[key].msg
                         }
                     )
                 } else {
-                    setError(key, { type: 'custom', message: errors[key][0] });
+                    setError(error[key].field, { type: 'custom', message: error[key].msg });
                 }
             }
         }
@@ -156,11 +156,8 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
     useEffect(() => {
         getRoom()
         getTeachers()
-    }, [])
-
-    useEffect(() => {
         getLessonOption()
-    }, [school_id])
+    }, [])
 
     // Шалгалт өгөх оюутнуудын id авах функц
     function handleSelectedModal(params) {

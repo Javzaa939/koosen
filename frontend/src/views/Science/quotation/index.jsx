@@ -96,8 +96,8 @@ const Invention = () => {
 	const [total_count, setTotalCount] = useState(1);
 
 	// Loader
-	const { isLoading, fetchData } = useLoader({isFullScreen: false});
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
+	const { isLoading, fetchData } = useLoader({isFullScreen: true});
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
 
 	// Api
 	const departmentApi = useApi().hrms.department
@@ -121,7 +121,7 @@ const Invention = () => {
         setRowsPerPage(parseInt(e.target.value))
     }
 
-	 /* Тэнхим жагсаалт */
+	 /* Хөтөлбөрийн баг жагсаалт */
 	async function getDepartmentOption() {
         const { success, data } = await fetchData(departmentApi.get())
         if(success) {
@@ -196,7 +196,7 @@ const Invention = () => {
 				<Row className="justify-content-between mx-0 mt-1 mb-1" sm={12}>
                     <Col md={4}>
                         <Label className="form-label" for="department">
-                            {t('Тэнхим')}
+                            {t('Хөтөлбөрийн баг')}
                         </Label>
                         <Controller
                             control={control}

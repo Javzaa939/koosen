@@ -75,7 +75,7 @@ const Patent = () => {
     const [total_count, setTotalCount] = useState(datas)
 
     // loader
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
 
     // Api
     const scienceApi = useApi().science

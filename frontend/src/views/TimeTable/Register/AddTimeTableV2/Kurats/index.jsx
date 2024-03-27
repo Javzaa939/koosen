@@ -100,7 +100,7 @@ const Kurats = ({  handleRoomModal, editValues, handleModal, roomModal,  is_load
 
     // Багшийн жагсаалт
     async function getTeacher() {
-        const { success, data } = await fetchData(teacherApi.getTeacher())
+        const { success, data } = await fetchData(teacherApi.getTeacher(select_value.lesson))
         if(success) {
             setTeacher(data)
         }
@@ -279,7 +279,7 @@ const Kurats = ({  handleRoomModal, editValues, handleModal, roomModal,  is_load
         {
             getTeacher()
         },
-        [select_value?.teacher]
+        [select_value?.lesson]
     )
 
 	async function onSubmit(cdata) {
@@ -458,7 +458,7 @@ const Kurats = ({  handleRoomModal, editValues, handleModal, roomModal,  is_load
                                         }}
                                         styles={ReactSelectStyles}
                                         getOptionValue={(option) => option.id}
-                                        getOptionLabel={(option) => option.full_name}
+                                        getOptionLabel={(option) => option.last_name + ' ' + option.first_name}
                                     />
                                 )
                             }}
@@ -680,7 +680,7 @@ const Kurats = ({  handleRoomModal, editValues, handleModal, roomModal,  is_load
                                     id="room"
                                     classNamePrefix='select'
                                     isClearable
-                                    className={classnames('react-select', { 'is-invalid': errors.room })}
+                                    className={classnames('react-select')}
                                     isLoading={isLoading}
                                     placeholder={t(`-- Сонгоно уу --`)}
                                     options={roomOption || []}
@@ -703,7 +703,6 @@ const Kurats = ({  handleRoomModal, editValues, handleModal, roomModal,  is_load
                         )
                     }}
                 />
-                {errors.room && <FormFeedback className='d-block'>{t(errors.room.message)}</FormFeedback>}
             </Col>
             <Col md={12} sm={12}>
                 <Label className="form-label" for="kurats_time">

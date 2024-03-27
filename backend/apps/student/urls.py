@@ -14,16 +14,16 @@ urlpatterns = [
     path('info/all/<int:pk>/', StudentInfoAPIView.as_view()),
     path('info/simplelist/', StudentsListSimpleAPIView.as_view()),
 
-    # Төгссөн оюутны жагсаалт
-    path('info/graduate1/', StudentGraduate1APIView.as_view()),
 
     # Оюутны дэлгэрэнгүй мэдээлэл
     path('info/lesson/<int:lessonId>/', StudentLessonListAPIView.as_view()),
 
     path('definition/', StudentDefinitionListAPIView.as_view()),
+    path('definition/lite/', StudentDefinitionListLiteAPIView.as_view()),
     path('definition/value/', StudentDefinitionValueListAPIView.as_view()),
     path('definition/season/option/', StudentSeasonOptionAPIView.as_view()),
     path('definition/sum/', DefinitionSumAPIView.as_view()),
+
     # Оюутны гэр бүлийн байдал
     path('family/', StudentFamilyAPIView.as_view()),
     path('family/<int:student>/', StudentFamilyAPIView.as_view()),
@@ -92,8 +92,12 @@ urlpatterns = [
     # тушаал гаргах
     path('command/', CommandAPIView.as_view()),
     path('graduate/list/', StudentCommandListAPIView.as_view()),
-
-    # тушаалын бүртгэл болон дипломын дугаар
     path('regisanddiplom/<int:pk>/', RegistrationAndDiplomAPIView.as_view()),
+
+    # Төгссөн оюутны жагсаалт
+    path('info/graduate1/', StudentGraduate1APIView.as_view()),
+
+    # Оюутны нууц үгийг сэргээх
+    path('defaultPass/<int:pk>/', DefaultPassApi().as_view()),
 
 ]

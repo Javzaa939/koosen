@@ -80,7 +80,7 @@ function PrintList() {
                         <div className='w-100 d-flex justify-content-end'>
                             <div className='text-wrap' style={{ width: '40%' }}>
                                 <div className='text-center pe-1'>
-                                    МҮИС-ийн захирлын 2023 оны 11 сарын 08-ны өдрийн ....... дугаар тушаалын хавсралт №{gindex + 1}
+                                    Сургуулийн захирлын 2023 оны 11 сарын 08-ны өдрийн ....... дугаар тушаалын хавсралт №{gindex + 1}
                                 </div>
                             </div>
                         </div>

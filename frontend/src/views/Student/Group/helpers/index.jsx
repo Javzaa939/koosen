@@ -33,21 +33,22 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 		},
 		{
 			header: 'name',
-			name: t("Дамжааны нэр"),
+			name: t("Ангийн нэр"),
 			cell: (row) => (row?.name),
 			minWidth: "200px",
 			sortable: true,
 			left: true,
 			wrap: true,
-			left: true
+			center: true
 		},
 		{
 			header: 'profession',
-			name: t("Хөтөлбөр"),
-			selector: (row) => <span title={row?.profession?.name}>{row?.profession?.name}</span>,
+			name: t("Мэргэжил"),
+			selector: (row) => row?.profession?.name,
             sortable: true,
 			minWidth: "80px",
-			left: true
+			center: true,
+			wrap: true,
 		},
 		{
 			header: 'degree',
@@ -72,7 +73,7 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 		{
 			header: 'teacher',
 			name: t("Багш"),
-			selector: (row) => <span title={row?.teacher?.first_name}>{row?.teacher?.first_name}</span>,
+			selector: (row) => row?.teacher?.first_name,
             sortable: true,
 			minWidth: "80px",
 			center: true

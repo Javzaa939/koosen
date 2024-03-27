@@ -109,20 +109,21 @@ export function getDetailColumns ( editModal, handleDelete, user) {
 			name: `${t('Хичээллэх төрөл')}`,
 			selector: (row) => row?.type_name,
             sortable: true,
-			minWidth: "100px",
+			maxWidth: "150px",
 			center: true
         },
 		{
 			header: 'exec_kr',
 			name: `${t('Гүйцэтгэлийн кр')}`,
 			selector: (row) => row?.exec_kr,
-            maxWidth: "50px",
+            maxWidth: "30px",
 			center: true
         },
 		{
 			header: 'credit',
 			name: `${t('Цаг')}`,
 			selector: (row) => row?.credit,
+			maxWidth: "30px",
             sortable: true,
 			center: true
         },
@@ -130,7 +131,7 @@ export function getDetailColumns ( editModal, handleDelete, user) {
 			header: 'group_name',
 			name: `${t('Анги бүлэг')}`,
 			selector: (row) => row?.group_name,
-            minWidth: "200px",
+            minWidth: "400px",
 			wrap: true
         },
 	]

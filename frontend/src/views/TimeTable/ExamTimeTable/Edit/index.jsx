@@ -325,14 +325,12 @@ const Editmodal = ({ editId, open, handleModal, refreshDatas }) => {
                                 {errors.room && <FormFeedback className='d-block'>{t(errors.room.message)}</FormFeedback>}
                             </Col>
                         }
-                        {
-                            select_value && select_value?.lesson && (online_checked || room_capacity) &&
-                            <Col md={12}>
-                                <Button disabled={is_disabled} color='primary' onClick={() => setStudentListView(!student_list_view)}>
-                                    <Eye size="15" className='me-50' />{t('Оюутны жагсаалт')}
-                                </Button>
-                            </Col>
-                        }
+
+                        <Col md={12}>
+                            <Button disabled={is_disabled} color='primary' onClick={() => setStudentListView(!student_list_view)}>
+                                <Eye size="15" className='me-50' />{t('Оюутны жагсаалт')}
+                            </Button>
+                        </Col>
                         <Col md={12}>
                             <Label className="form-label" for="exam_date">
                                 {t('Шалгалт авах өдөр')}

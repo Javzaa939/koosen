@@ -1,10 +1,8 @@
 
-import React, { useEffect, useState } from "react"
+import React, { useEffect } from "react"
 
 import { Row } from 'reactstrap'
-import { useLocation } from 'react-router-dom';
 
-import useApi from "@hooks/useApi"
 import useLoader from '@hooks/useLoader';
 
 // ** Styles
@@ -14,44 +12,19 @@ import './style.css'
 
 export default function LearningTrue()
 {
-    const LEARNING_TRUE_TYPE = 'def1'
 
-    const location = useLocation()
-    const studentId = location.state
-
-    // State
-    const [ datas, setDatas ] = useState({})
-    const [ listArr, setListArr ] = useState([])
-
-    // Loader
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
-
-    // Api
-    const signatureApi = useApi().signature
-    const studentApi = useApi().student
-
-    function getAllData()
-    {
-        if (studentId)
-        {
-            Promise.all([
-                fetchData(signatureApi.get(1)),
-                fetchData(studentApi.getDefinitionStudent(LEARNING_TRUE_TYPE, studentId))
-            ]).then((values) => {
-                setListArr(values[0]?.data)
-                setDatas(values[1]?.data)
-            })
-        }
-    }
+    const datas = sessionStorage.getItem("student_data")? JSON.parse(sessionStorage.getItem("student_data")) : null;
+    const listArr = sessionStorage.getItem("signature_data")? JSON.parse(sessionStorage.getItem("signature_data")) : null;
+    const studentId = datas["id"]
 
     useEffect(
         () =>
         {
-            getAllData()
-
             window.onafterprint = function()
             {
-                window.history.go(-1);
+                window.close()
+                sessionStorage.removeItem("student_data")
+                sessionStorage.removeItem("signature_data")
             }
         },
         []
@@ -70,6 +43,8 @@ export default function LearningTrue()
         return ('0' + n).slice(-2);
     }
 
+    const logo = require("@src/assets/images/logo/dxis_logo.png").default
+
     return (
         <>
         <div className='ps-1 d-flex flex-column justify-content-center align-items-center fontchange'>
@@ -77,15 +52,15 @@ export default function LearningTrue()
                 studentId
                 ?
                 <>
-                    {isLoading && Loader}
+                    {/* {!isLoading && Loader} */}
                     <div className='d-flex flex-column justify-content-center align-items-center w-100 mt-3' style={{ fontSize: '14px' }} >
                         {/* <img className="fallback-logo" width={100} height={100} src='http://hr.mnun.edu.mn/media/orgs/logo/MNU-Logo_1.png' alt="logo" onLoad={imageLoaded} /> */}
-                        <img className="fallback-logo" width={100} height={100} src={`${process.env.REACT_APP_MUIS_HR_MEDIA_URL}${datas?.school?.logo_url}`} alt="logo" onLoad={imageLoaded} />
+                        <img className="fallback-logo" width={100} height={100} src={logo} alt="logo" onLoad={imageLoaded} />
                         <div className="d-flex flex-column text-center fw-bolder">
                             <span className='mt-1'>
-                                {datas?.school?.name.toUpperCase()}
+                                {datas?.school_data?.name?.toUpperCase()}
                             </span>
-                            <span style={{ marginTop: '6px' }}>{datas?.school?.name_eng.toUpperCase()}</span>
+                            <span style={{ marginTop: '6px' }}>{datas?.school_data?.name_eng?.toUpperCase()}</span>
                         </div>
                     </div>
                     <Row className="pb-2 ps-1 pe-3 pt-1" style={{ fontSize: '14px' }} >
@@ -93,8 +68,8 @@ export default function LearningTrue()
                         {/* <p>Огноо: {new Date().getFullYear()}-{zeroFill(new Date().getMonth() + 1)}-{new Date().getDate()}</p> */}
 
                         <div className="text-center mt-1">
-                            {datas?.school?.address} {datas?.school?.phone_number && `Утас: ${datas?.school?.phone_number}`} {datas?.school?.home_phone && `Факс: ${datas?.school?.home_phone}`}
-                            <div>{datas?.school?.email && `E-mail: ${datas?.school?.email}`}</div>
+                            {datas?.school_data?.address} {datas?.school_data?.phone_number && `Утас: ${datas?.school_data?.phone_number}`} {datas?.school_data?.home_phone && `Факс: ${datas?.school_data?.home_phone}`}
+                            <div>{datas?.school_data?.email && `E-mail: ${datas?.school_data?.email}`}</div>
                         </div>
                         <div className="text-center fst-italic">
                             _______________________________№_______________________________
@@ -106,15 +81,15 @@ export default function LearningTrue()
 
                         <div className="text-center mt-2">
                         {
-                            datas?.student?.status?.code == 1
+                            datas?.status_code == 1
                             ?
-                                `${datas?.student?.code} кодтой ${datas?.student?.last_name} овогтой ${datas?.student?.first_name} нь ДХИС-д ${datas?.student?.group?.degree?.degree_name} зэргийн ${datas?.student?.group?.profession?.name} мэргэжлээр ${datas?.student?.group?.level}-р курст суралцдаг нь үнэн болохыг тодорхойлов.`
+                                `${datas?.code} кодтой ${datas?.last_name} овогтой ${datas?.first_name} нь ${datas?.school_data?.name}-д ${datas?.degree_name} зэргийн ${datas?.profession_name} мэргэжлээр ${datas?.group_level}-р курст суралцдаг нь үнэн болохыг тодорхойлов.`
                             :
-                                datas?.student?.status?.code == 5
+                                datas?.status_code == 5
                                 ?
-                                    `${datas?.student?.code} кодтой ${datas?.student?.last_name} овогтой ${datas?.student?.first_name} нь ДХИС-д ${datas?.student.group?.degree?.degree_name}-н зэргийн ${datas?.student?.group?.profession?.name} мэргэжлээр ${datas?.student?.group?.join_year?.substring(0, 4)}-${datas?.graduation_work?.substring(datas?.graduation_work?.length - 4)} оны хооронд суралцаж ${datas?.graduation_work?.diplom_num} дипломын дугаартай төгссөн нь үнэн болохыг тодорхойлов.`
+                                    `${datas?.code} кодтой ${datas?.last_name} овогтой ${datas?.first_name} нь ${datas?.school_data?.name}-д ${datas?.degree_name}-н зэргийн ${datas?.group_name} мэргэжлээр ${datas?.group_join_year?.substring(0, 4)}-${datas?.graduation_work?.graduation_year?.substring(0, 4)} оны хооронд суралцаж ${datas?.graduation_work?.diplom_num} дипломын дугаартай төгссөн нь үнэн болохыг тодорхойлов.`
                                 :
-                                    `${datas?.student?.code} кодтой ${datas?.student?.last_name} овогтой ${datas?.student?.first_name} нь ДХИС-ээс ${datas?.student?.status?.name?.toLowerCase()} нь үнэн болохыг тодорхойлов.`
+                                    `${datas?.code} кодтой ${datas?.last_name} овогтой ${datas?.first_name} нь ${datas?.school_data?.name}-ээс ${datas?.status_name?.toLowerCase()} нь үнэн болохыг тодорхойлов.`
                         }
                         </div>
 

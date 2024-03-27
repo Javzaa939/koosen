@@ -14,6 +14,7 @@ import {
     Card,
     CardHeader,
     CardTitle,
+    UncontrolledTooltip,
 } from 'reactstrap'
 
 import Select from "react-select"
@@ -28,7 +29,6 @@ import ActiveYearContext from '@context/ActiveYearContext'
 import SchoolContext from '@context/SchoolContext'
 
 import { useTranslation } from 'react-i18next'
-import { useSkin } from "@hooks/useSkin"
 
 // ** Custom Hooks
 import { useRTL } from '@hooks/useRTL'
@@ -39,10 +39,14 @@ import { get_time_date, ReactSelectStyles, get_par_from_strTime, convert_kurats_
 // import Addmodal from '../Add'
 import AddModalV2 from '../AddTimeTableV2';
 import EditModal from '../Edit'
-// import FileModal from './FileModal';
+import GroupModal from './GroupModal';
 
 // ** Styles
 import '@styles/react/apps/app-calendar.scss'
+import { Eye, FileText, Printer, AlertCircle } from 'react-feather';
+
+import { excelDownLoad } from './excelDownload';
+import { useNavigate } from 'react-router-dom';
 
 const AddTimetableComponent = ({ }) => {
 
@@ -77,6 +81,7 @@ const AddTimetableComponent = ({ }) => {
     const { school_id } = useContext(SchoolContext)
     const { cyear_name, cseason_id } = useContext(ActiveYearContext)
 
+    const navigate = useNavigate()
     const { t } = useTranslation()
     const { fetchData, isLoading, Loader } = useLoader({})
     const [is_loading, setLoader] = useState(false)
@@ -89,6 +94,7 @@ const AddTimetableComponent = ({ }) => {
     const [rangeDate, setRangeDate] = useState(range_date)
 
     const [addmodal, setModal] = useState(false)
+    const [groupModal, setGroupModal] = useState(false)
     // const [importModal, setFileModal] = useState(false)
     const [edit_modal, setEditModal] = useState(false)
 
@@ -126,7 +132,11 @@ const AddTimetableComponent = ({ }) => {
     }
 
     const editModal = () => {
-        setEditModal(!edit_modal)
+        setEditModal(true)
+    }
+
+    const editCloseModal = () => {
+        setEditModal(false)
     }
 
     // const fileModal = () => {
@@ -217,7 +227,6 @@ const AddTimetableComponent = ({ }) => {
         }
     }
 
-
     async function getSelectOption() {
         // Хичээл
         if (selectedMntName === 'Хичээл') {
@@ -246,43 +255,18 @@ const AddTimetableComponent = ({ }) => {
         }
     }
 
+    async function getUpdateEvent(body, event_id) {
+        const { success } = await fetchData(calendarListApi.moveEvent(body, event_id))
+        if (success) {
+            getAll()
+        }
+    }
+
     // Нэг хичээлийн хуваарь onchange хийх хэсэг
-    const setEventChange = async () => {
-        if (eventValue.start) {
-            var start_date = eventValue.start
-            var event_id = eventValue.id
-            var odd_even = eventValue.odd_even
-
-            var splitted_array = start_date.split('T')
-
-            var date = new Date(`${splitted_array[0]}`)
-            var day = date.getDay()
-
-            var time_split = splitted_array[1].split('.')
-            var time_str = time_split[0]
-            var time = get_par_from_strTime(time_str)
-
-            var body = {
-                'day': day,
-                'time': time,
-                'lesson_year': cyear_name,
-                'lesson_season': cseason_id,
-                'odd_even': odd_even || 3,
-            }
-
-            if (eventValue.is_default) {
-                const { success } = await fetchData(calendarListApi.moveEvent(body, event_id))
-                setLoader(false)
-                if (success) {
-                    getAll()
-                }
-            } else {
-                const { success } = await fetchData(calendarListApi.setEvent(body, event_id))
-                setLoader(false)
-                if (success) {
-                    getAll()
-                }
-            }
+    const setEventChange = async (body, event_id) => {
+        const { success } = await fetchData(calendarListApi.setEvent(body, event_id))
+        if (success) {
+            getAll()
         }
     }
 
@@ -305,9 +289,9 @@ const AddTimetableComponent = ({ }) => {
         setLoader(true)
         Promise.all([
             // Хичээлийн хуваарийн дата
-            fetchData(calendarListApi.getCalendar(isCalendar, selectedValue, radioName, optionFilter)),
+            fetchData(calendarListApi.getCalendar(isCalendar, selectedValue, radioName, optionFilter, resourceGroupField === 'lesson' ? true : false)),
             // Resource дата
-            fetchData(calendarListApi.selectionDatas(radioName, selectedValue, optionFilter)),
+            fetchData(calendarListApi.selectionDatas(radioName, selectedValue, optionFilter, resourceGroupField === 'lesson' ? true : false)),
         ]).then((values) => {
             if(values[0]?.data) {
                 var data = values[0]?.data
@@ -321,7 +305,8 @@ const AddTimetableComponent = ({ }) => {
 
                     data[i].start= stimes?.start_time
                     data[i].end = stimes?.end_time
-                    data[i].textColor = data[i]?.textcolor
+                    data[i].title = data[i].title + ' ' + `${data[i].is_optional ? 'сон' : ''}`
+                    data[i].textColor = data[i]?.textcolor || 'white'
 
                     switch (radioName) {
                         case 'group':
@@ -446,10 +431,6 @@ const AddTimetableComponent = ({ }) => {
         [useMouseOver]
     )
 
-    useUpdateEffect(() => {
-        setEventChange()
-    }, [eventValue])
-
     const calendarMemo = useMemo(
         () =>
         {
@@ -473,38 +454,119 @@ const AddTimetableComponent = ({ }) => {
                             eventDatas={datas}
                             resources={resourceOption}
                             blankEvent={blankEvent}
+                            height={'70dvh'}
+                            is_volume={resourceGroupField === 'lesson' ? true : false}
                             getDates={setDates}
                             eventValues={eventChangeValues}
                             resourceGroupField={resourceGroupField}
                             setEditDatas={setEditDatas}
                             getEventValue={setEventValue}
                             setLoader={setLoader}
+                            getUpdateEvent={getUpdateEvent}
+                            setEventChange={setEventChange}
                         />
             )
         },
         [isCalendar, datas, resourceOption]
     )
 
+    const handleGroupModal = () =>
+    {
+        setGroupModal(!groupModal)
+    }
+
+    /**
+     * Экселийн хэсэг
+     */
+
+    const excelApi = useApi().timetable.excel
+    const { fetchData: fetchExcel, isLoading: excelLoading } = useLoader({})
+
+    /**
+     * excel-д зориулсан API-г дуудаж, датаг экселрүү хөрвүүлэх функцыг ажиллуулна
+     */
+    async function getExcelData() {
+        const {success, data} = await fetchExcel(excelApi.get())
+        if (success) {
+            excelDownLoad(data)
+        }
+    }
+
+    /**
+        * Өрөөгөөр шүүсэн дата
+        * Өрөөгөөр хэвлэх үед ашиглана
+    */
+    const filteredData = datas.filter(val => val.room === optionFilter)
+
     return (
         <Fragment>
             <Card className=''>
                 <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
                     <CardTitle tag='h4'>{t('Хичээлийн хуваарь')}</CardTitle>
-                    <div className='d-flex justify-content-end'>
-                        <Button className='ms-1' color='primary' onClick={() => { handleModal(), setEditValues(edit_values)}} disabled={school_id ? false : true}>Хуваарь нэмэх</Button>
+                    <div
+                        className='
+                            d-flex
+                            justify-content-lg-end
+                            justify-content-xl-end
+                            justify-content-center
+                            flex-wrap
+                            '
+                            // justify-content-md-center
+                            // justify-content-md-center
+                    >
+                        {
+                            radioName === "room" ?
+                                <div className='puff-in-center ms-1 my-50'>
+                                    <AlertCircle size={16} id='fontSizeDetail' />
+                                    <UncontrolledTooltip placement='top' target='fontSizeDetail' >Үсгийн хэмжээ</UncontrolledTooltip>
+                                    <input
+                                        type="number"
+                                        defaultValue={6}
+                                        min="0"
+                                        style={{ width: '30px', marginRight: '3px', marginLeft: '3px' }}
+                                        id='fontSizeValue'
+                                        onKeyDown={(e) =>["e", "E", "+", "-", "."].includes(e.key) && e.preventDefault()}
+                                    />
+                                    <Button
+                                        className=''
+                                        color='primary'
+                                        disabled={resourceOption.length !== 1}
+                                        onClick={() => {navigate(`print`, { state: { datas: filteredData, fontSizeValue: document.getElementById('fontSizeValue').value }})}}
+                                    >
+                                        <Printer size='12'/> Хэвлэх
+                                    </Button>
+                                </div>
+                            :
+                                ''
+                        }
+
+                        {/* Api бэлэн болох үед ашиглах нь */}
+                        <Button className='ms-1 my-50' color='primary' disabled={excelLoading || !school_id} onClick={() => { getExcelData() }}>{excelLoading ? <Spinner size='sm'/> : <FileText size={15}/>} Эксел татах</Button>
+                        {/* <Button className='ms-1' color='primary' onClick={() => { excelDownLoad() }}><Printer size={15}/> Хэвлэх</Button> */}
+
+                        <Button className='ms-1 my-50' color='primary' onClick={() => { handleModal(), setEditValues(edit_values)}} disabled={school_id ? false : true}>Хуваарь нэмэх</Button>
+                        <Button className='ms-1 my-50' color='primary' disabled={!school_id} onClick={() => { handleGroupModal() }}><Eye size={15}/> Анги багшаар харах</Button>
                     </div>
                 </CardHeader>
                 <div className='app-calendar overflow-hidden border'>
                     <Row className='g-0'>
                         <Row md={12} className='mx-0' >
-                            <Col md={3} sm={6} xs={12} className="mt-2 ps-0 mx-0 d-flex">
+                            <Col md={6} sm={6} xs={12} className="mt-2 ps-0 mx-0 d-flex w-fill">
                                 <span data-bs-toggle="tooltip" data-bs-placement="top" title={selectedMntName} >
-                                    <Button className='pe-1' outline size="sm" onMouseOver={() => setIsOpen(true)} onMouseOut={() => setIsOpen(false)} >
-                                        <i className={`far ${selectedIconName} fs-4`} ></i>
+                                    <Button
+                                        className='pe-1'
+                                        outline size="sm"
+                                        onClick={() => {setIsOpen(true)}}
+                                        onMouseOver={() => setIsOpen(true)}
+                                        onBlur={() => {setIsOpen(false)}}
+                                    >
+                                        {/* хуучин хувилбар нь */}
+                                    {/* <Button className='pe-1' outline size="sm" onMouseOver={() => setIsOpen(true)} onMouseOut={() => setIsOpen(false)} > */}
+                                        <i className={`far ${selectedIconName} fs-6 fs-lg-4 fs-xl-4`} ></i>
                                     </Button>
                                 </span>
 
-                                <Collapse isOpen={isOpen} horizontal={true} className='w-fill' onMouseOver={handleMouseOver} onMouseOut={() => setIsOpen(false)} >
+                                <Collapse isOpen={isOpen} horizontal={true} className='' onMouseOver={handleMouseOver} onMouseOut={() => setIsOpen(false)}>
                                     <div className='d-flex justify-content-between px-1'>
                                         <div className='d-flex justify-content-start'>
                                             <span data-bs-toggle="tooltip" data-bs-placement="top" title="Хичээл">
@@ -515,7 +577,7 @@ const AddTimetableComponent = ({ }) => {
                                                     size="sm"
                                                     disabled={radioName === 'lesson'}
                                                 >
-                                                    <i className="far fa-book fs-4 " ></i>
+                                                    <i className="far fa-book fs-6 fs-lg-4 fs-xl-4"></i>
                                                 </Button>
                                             </span>
                                         </div>
@@ -528,7 +590,7 @@ const AddTimetableComponent = ({ }) => {
                                                     size="sm"
                                                     disabled={radioName === 'group'}
                                                 >
-                                                    <i className="far fa-users-class fs-4 " ></i>
+                                                    <i className="far fa-users-class fs-6 fs-lg-4 fs-xl-4"></i>
                                                 </Button>
                                             </span>
                                         </div>
@@ -542,7 +604,7 @@ const AddTimetableComponent = ({ }) => {
                                                     disabled={radioName === 'teacher'}
 
                                                 >
-                                                    <i className="far fa-chalkboard-teacher fs-4 " ></i>
+                                                    <i className="far fa-chalkboard-teacher fs-6 fs-lg-4 fs-xl-4"></i>
                                                 </Button>
                                             </span>
                                         </div>
@@ -556,14 +618,14 @@ const AddTimetableComponent = ({ }) => {
                                                     disabled={radioName === 'room'}
                                                     onChange={() => handleChange("room")}
                                                 >
-                                                    <i className="far fa-door-open fs-4 " ></i>
+                                                    <i className="far fa-door-open  fs-6 fs-lg-4 fs-xl-4"></i>
                                                 </Button>
                                             </span>
                                         </div>
                                     </div>
                                 </Collapse>
                             </Col>
-                            <Col md={3} sm={6} xs={12}  className='mt-1'>
+                            <Col md={2} sm={6} xs={12} lg={2}  className='mt-1'>
                                 <Label className="form label ms-1" for="department">
                                     {t('Хөтөлбөрийн баг')}
                                 </Label>
@@ -586,7 +648,7 @@ const AddTimetableComponent = ({ }) => {
                                     getOptionLabel={(option) => option.name}
                                 />
                             </Col>
-                            <Col md={3} sm={6} xs={12}  className='mt-1'>
+                            <Col md={2} sm={6} xs={12}  className='mt-1'>
                                 <Label className="form label ms-1" for="selected">
                                     {`${selectedMntName} хайх`}
                                 </Label>
@@ -596,6 +658,7 @@ const AddTimetableComponent = ({ }) => {
                                     classNamePrefix='select'
                                     isClearable
                                     className={classnames('react-select')}
+                                    isDisabled={isLoading}
                                     isLoading={isLoading}
                                     placeholder={t('-- Сонгоно уу --')}
                                     options={selectedOption || []}
@@ -609,7 +672,7 @@ const AddTimetableComponent = ({ }) => {
                                     getOptionLabel={(option) => selectedMntName === 'Багш' ? option.last_name + " " + option.first_name : selectedMntName === 'Өрөө' ? option.full_name : option.name}
                                 />
                             </Col>
-                            <Col md={3}  sm={6} xs={12} className='d-flex justify-content-end mt-3 ms-auto'>
+                            <Col md={2} sm={6} xs={12} className='d-flex justify-content-end mt-3 ms-auto'>
                                 <div className=" form-check form-switch ">
                                     <Label className='form-label pe-1' for='is_calendar'>
                                         {isCalendar ? "Календарь" : "Курац Календарь"}
@@ -632,15 +695,16 @@ const AddTimetableComponent = ({ }) => {
                                 //     <span className='ms-50'>{t('Түр хүлээнэ үү...')}</span>
                                 // </div>
                         }
-                        <Col className='position-relative'>
+                        <div className='position-relative overflow-hidden'>
                         {
                             calendarMemo
                         }
-                        </Col>
+                        </div>
                     </Row>
                 </div>
                 {addmodal && <AddModalV2 open={addmodal} handleModal={handleModal} refreshDatas={getRefresh} editValues={editValues}/>}
-                {edit_modal && <EditModal open={edit_modal} handleModal={editModal} editDatas={editDatas} refreshDatas={getRefresh} editValues={editValues}/>}
+                {edit_modal && <EditModal open={edit_modal} handleModal={editCloseModal} editDatas={editDatas} refreshDatas={getRefresh} editValues={editValues}/>}
+                {groupModal && <GroupModal open={groupModal} handleModal={handleGroupModal} isRtl={isRtl}/>}
             </Card>
         </Fragment>
     )

@@ -15,7 +15,6 @@ import DataTable from 'react-data-table-component'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
-import useUpdateEffect from '@hooks/useUpdateEffect'
 
 import AuthContext from '@context/AuthContext'
 
@@ -48,8 +47,8 @@ const List = ({ type }) => {
     // Эрэмбэлэлт
     const [sortField, setSort] = useState('')
 
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
 
     // Api
     const settingsApi = useApi().credit.settings
@@ -112,9 +111,15 @@ const List = ({ type }) => {
     }
 
     // Хайлтийн хэсэг хоосон болох үед анхны датаг дуудна
-	useUpdateEffect(() => {
+	useEffect(() => {
 		if (searchValue.length == 0) {
 			getDatas();
+		} else {
+			const timeoutId = setTimeout(() => {
+				getDatas();
+			}, 600);
+
+			return () => clearTimeout(timeoutId);
 		}
 	}, [searchValue]);
 
@@ -129,7 +134,10 @@ const List = ({ type }) => {
                 <div className='d-flex flex-wrap justify-content-end mt-md-0 mt-1'>
                     <Button
                         color='primary'
-                        onClick={() => { handleModal(), setEditData({}) }}
+                        onClick={() => {
+                            handleModal()
+                            setEditData({})
+                        }}
                         disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-stipend-create') ? false : true}
                     >
                         <Plus size={15} />
