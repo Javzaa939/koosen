@@ -48,7 +48,7 @@ const ElseltUser = () => {
     // Translate
     const { t } = useTranslation()
 
-    const default_page = [10, 20, 50, 75, 100]
+    const default_page = ['Бүгд', 10, 20, 50, 75, 100]
 
 	const [searchValue, setSearchValue] = useState("");
 	const [datas, setDatas] = useState([]);
@@ -156,7 +156,7 @@ const ElseltUser = () => {
             setDatas(data?.results)
 
             // Нийт хуудасны тоо
-            var cpage_count = Math.ceil(data?.count / rowsPerPage)
+            var cpage_count = Math.ceil(data?.count / rowsPerPage === 'Бүгд' ? 1 : rowsPerPage)
             setPageCount(cpage_count)
         }
 	}
@@ -214,8 +214,9 @@ const ElseltUser = () => {
     }, [adm])
 
     // ** Function to handle per page
-    function handlePerPage(e) {
-        setRowsPerPage(parseInt(e.target.value))
+    function handlePerPage(e)
+    {
+        setRowsPerPage(e.target.value === 'Бүгд' ? e.target.value : parseInt(e.target.value))
     }
 
     function handleRowClicked(row) {
@@ -588,12 +589,12 @@ const ElseltUser = () => {
                             </div>
                         )}
                         onSort={handleSort}
-                        columns={getColumns(currentPage, rowsPerPage, total_count, editModal, handleDelete, user, handleRowClicked)}
+                        columns={getColumns(currentPage, rowsPerPage === 'Бүгд' ? 1 : rowsPerPage, total_count, editModal, handleDelete, user, handleRowClicked)}
                         sortIcon={<ChevronDown size={10} />}
-                        paginationPerPage={rowsPerPage}
+                        paginationPerPage={rowsPerPage === 'Бүгд' ? 1 : rowsPerPage}
                         paginationDefaultPage={currentPage}
                         data={datas}
-                        paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
+                        paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage === 'Бүгд' ? total_count : rowsPerPage, total_count)}
                         fixedHeader
                         fixedHeaderScrollHeight='62vh'
                     />
