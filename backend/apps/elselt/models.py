@@ -63,17 +63,21 @@ class UserInfo(models.Model):
         managed = False
 
     user = models.ForeignKey(ElseltUser, on_delete=models.CASCADE, verbose_name='Хэрэглэгч')
-    graduate_school = models.CharField(max_length=255, null=True, verbose_name='Төгссөн сургууль')
+    graduate_school = models.CharField(max_length=1000, null=True, verbose_name='Төгссөн сургууль')
     graduate_school_year = models.IntegerField(null=True, verbose_name='Төгссөн он')
-    graduate_profession = models.CharField(max_length=255, null=True, verbose_name='Төгссөн мэргэжил')
+    graduate_profession = models.CharField(max_length=1000, null=True, verbose_name='Төгссөн мэргэжил')
     diplom_pdf = models.FileField(upload_to='diplom/', null=True, verbose_name='Дипломын файл')
     emongolia_diplom_pdf = models.FileField(upload_to='emongolia/', null=True, verbose_name='EMongolia дээд боловсролын байгууллагын дипломын тодорхойлолт файл')
-    tsol_name = models.CharField(max_length=255, null=True, verbose_name='Цолын нэр')
-    work_organization = models.CharField(max_length=255, null=True, verbose_name='Ажиллаж байгаа байгууллагын нэр')
-    work_heltes = models.CharField(max_length=255, null=True, verbose_name='Хэлтэс газар')
-    position_name = models.CharField(max_length=255, null=True, verbose_name='Албан тушаал')
+    tsol_name = models.CharField(max_length=1000, null=True, verbose_name='Цолын нэр')
+    work_organization = models.CharField(max_length=1000, null=True, verbose_name='Ажиллаж байгаа байгууллагын нэр')
+    work_heltes = models.CharField(max_length=1000, null=True, verbose_name='Хэлтэс газар')
+    position_name = models.CharField(max_length=1000, null=True, verbose_name='Албан тушаал')
     gpa = models.FloatField(null=True, verbose_name='Голч дүн')
     graduate_pdf = models.FileField(upload_to='diplom/', null=True, verbose_name='Төгссөн тушаал/ архивын лавлагаа хавсаргах')
+    esse_pdf = models.FileField(upload_to='diplom/', null=True, verbose_name='Эссэ бичсэн файлаа хавсаргах')
+    ndsh_file = models.FileField(upload_to='ndsh/', null=True, verbose_name='НД-ын шимтгэл төлөлтийн лавлагаа файл')
+    other_file = models.FileField(upload_to='other/', null=True, verbose_name='Бусад файл')
+    invention_file = models.FileField(upload_to='invention/', null=True, verbose_name='Бүтээлийн жагсаалт файл')
 
 
 class AdmissionUserProfession(models.Model):
