@@ -3,10 +3,8 @@ import { useParams } from 'react-router-dom'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
-import { Book, ChevronsLeft, Download, User } from 'react-feather';
+import { Book, ChevronsLeft, Download, Star, User } from 'react-feather';
 import { Badge, Col, Row } from 'reactstrap';
-
-import { LuGoal } from "react-icons/lu";
 
 import './style.scss'
 import moment from 'moment';
@@ -47,9 +45,9 @@ function Details() {
                 return text
             }
         } else {
+            console.warn('ftext функцыг хоосон дуудах шаардлага байхгүй !')
             return ''
         }
-
     }
 
     return (
@@ -64,9 +62,14 @@ function Details() {
                     <Row>
                         <Col>
                             <div className='border shadow p-1 m-1 rounded-3'>
-                                <div className=''>
+                                <div className='d-flex justify-content-between align-items-center'>
                                     <div className='p-50'>
                                         <span className='text_prefixer'>Горилж буй мэргэжил:</span> {datas?.profession}
+                                    </div>
+                                    <div className='p-50'>
+                                        <span>
+                                            {datas?.degree_name}
+                                        </span>
                                     </div>
                                 </div>
                             </div>
@@ -114,6 +117,87 @@ function Details() {
                                     </div>
                                 </div>
                             </div>
+                            {
+                                (datas?.degree_name == "Магистр" || datas?.degree_name == "Доктор")
+                                &&
+                                <div className='border shadow p-1 m-1 rounded-3'>
+                                    <div className='d-flex justify-content-between'>
+                                        <div className='d-flex align-items-end'>
+                                            <Star className='me-50'/>
+                                            <span style={{ fontSize: 16 }}>
+                                                Нэмэлт мэдээлэл
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className='mt-2'>
+                                        <div className='p-50 d-flex align-items-center'>
+                                            <span className='text_prefixer me-50'>Төгссөн тушаал/ архивын лавлагаа:</span>
+                                            {
+                                                datas?.userinfo?.graduate_pdf ?
+                                                    <span className='text-primary d-flex align-items-center' role='button' onClick={() => {window.open(`${process.env.REACT_APP_SERVER_FILE_URL}${datas?.userinfo?.graduate_pdf}`)}}>
+                                                        {ftext(datas?.userinfo?.graduate_pdf)} <Download className='ms-25' size={14}/>
+                                                    </span>
+                                                :
+                                                <span>
+                                                    Файл байхгүй
+                                                </span>
+                                            }
+                                        </div>
+                                        <div className='p-50 d-flex align-items-center'>
+                                            <span className='text_prefixer me-50'>Эссэ бичсэн файл:</span>
+                                            {
+                                                datas?.userinfo?.esse_pdf ?
+                                                    <span className='text-primary d-flex align-items-center' role='button' onClick={() => {window.open(`${process.env.REACT_APP_SERVER_FILE_URL}${datas?.userinfo?.esse_pdf}`)}}>
+                                                        {ftext(datas?.userinfo?.esse_pdf)} <Download className='ms-25' size={14}/>
+                                                    </span>
+                                                :
+                                                <span>
+                                                    Файл байхгүй
+                                                </span>
+                                            }
+                                        </div>
+                                        <div className='p-50 d-flex align-items-center'>
+                                            <span className='text_prefixer me-50'>НД-ын шимтгэл төлөлтийн лавлагаа:</span>
+                                            {
+                                                datas?.userinfo?.ndsh_file ?
+                                                    <span className='text-primary d-flex align-items-center' role='button' onClick={() => {window.open(`${process.env.REACT_APP_SERVER_FILE_URL}${datas?.userinfo?.ndsh_file}`)}}>
+                                                        {ftext(datas?.userinfo?.ndsh_file)} <Download className='ms-25' size={14}/>
+                                                    </span>
+                                                :
+                                                <span>
+                                                    Файл байхгүй
+                                                </span>
+                                            }
+                                        </div>
+                                        <div className='p-50 d-flex align-items-center'>
+                                            <span className='text_prefixer me-50'>Бусад файл:</span>
+                                            {
+                                                datas?.userinfo?.other_file ?
+                                                    <span className='text-primary d-flex align-items-center' role='button' onClick={() => {window.open(`${process.env.REACT_APP_SERVER_FILE_URL}${datas?.userinfo?.other_file}`)}}>
+                                                        {ftext(datas?.userinfo?.other_file)} <Download className='ms-25' size={14}/>
+                                                    </span>
+                                                :
+                                                <span>
+                                                    Файл байхгүй
+                                                </span>
+                                            }
+                                        </div>
+                                        <div className='p-50 d-flex align-items-center'>
+                                            <span className='text_prefixer me-50'>Бүтээлийн жагсаалт файл:</span>
+                                            {
+                                                datas?.userinfo?.invention_file ?
+                                                    <span className='text-primary d-flex align-items-center' role='button' onClick={() => {window.open(`${process.env.REACT_APP_SERVER_FILE_URL}${datas?.userinfo?.invention_file}`)}}>
+                                                        {ftext(datas?.userinfo?.invention_file)} <Download className='ms-25' size={14}/>
+                                                    </span>
+                                                :
+                                                <span>
+                                                    Файл байхгүй
+                                                </span>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
                         </Col>
                         <Col>
                             <div className='border shadow p-1 m-1 rounded-3'>
@@ -132,28 +216,28 @@ function Details() {
                                     <div className='p-50'>
                                         <span className='text_prefixer'>Мэргэжил:</span> {datas?.userinfo?.graduate_profession}
                                     </div>
-                                    {
-                                        datas?.userinfo?.emongolia_diplom_pdf
-                                        ?
-                                            <div className='p-50 d-flex align-items-center'>
-                                                <span className='text_prefixer me-50'>Е-Монголиа дипломын хуулбар:</span>
-                                                <span className='text-primary d-flex align-items-center' role='button' onClick={() => {window.open(`${process.env.REACT_APP_SERVER_FILE_URL}${datas?.userinfo?.emongolia_diplom_pdf}`)}}>
-                                                    {ftext(datas?.userinfo?.emongolia_diplom_pdf)} <Download className='ms-25' size={14}/>
-                                                </span>
-                                            </div>
-                                        :
-                                            <div className='p-50 d-flex align-items-center'>
-                                                <span className='text_prefixer me-50'>Төгссөн тушаал/ архивын лавлагаа хавсаргах:</span>
-                                                <span className='text-primary d-flex align-items-center' role='button' onClick={() => {window.open(`${process.env.REACT_APP_SERVER_FILE_URL}${datas?.userinfo?.graduate_pdf}`)}}>
-                                                    {ftext(datas?.userinfo?.graduate_pdf)} <Download className='ms-25' size={14}/>
-                                                </span>
-                                            </div>
-                                    }
                                     <div className='p-50'>
-                                        <span className='text_prefixer'>Албан тушаал:</span> {datas?.userinfo?.position_name}
+                                        <span className='text_prefixer'>Голч:</span> {datas?.userinfo?.gpa}
+                                    </div>
+                                    <div className='p-50 d-flex align-items-center'>
+                                        <span className='text_prefixer me-50'>Е-Монголиа дипломын хуулбар:</span>
+                                        {
+                                            datas?.userinfo?.emongolia_diplom_pdf
+                                                ?
+                                                    <span className='text-primary d-flex align-items-center' role='button' onClick={() => {window.open(`${process.env.REACT_APP_SERVER_FILE_URL}${datas?.userinfo?.emongolia_diplom_pdf}`)}}>
+                                                        {ftext(datas?.userinfo?.emongolia_diplom_pdf)} <Download className='ms-25' size={14}/>
+                                                    </span>
+                                                :
+                                                    <span>
+                                                        Файл байхгүй
+                                                    </span>
+                                        }
                                     </div>
                                     <div className='p-50'>
                                         <span className='text_prefixer'>Ажиллаж байгаа байгууллагын нэр:</span> {datas?.userinfo?.work_organization}
+                                    </div>
+                                    <div className='p-50'>
+                                        <span className='text_prefixer'>Албан тушаал:</span> {datas?.userinfo?.position_name}
                                     </div>
                                     <div className='p-50'>
                                         <span className='text_prefixer'>Хэлтэс:</span> {datas?.userinfo?.work_heltes}
