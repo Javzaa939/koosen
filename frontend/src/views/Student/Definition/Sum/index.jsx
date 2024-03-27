@@ -67,6 +67,8 @@ export default function Sum()
         return ('0' + n).slice(-2);
     }
 
+    const logo = require("@src/assets/images/logo/dxis_logo.png").default
+
     return (
         <>
             <div className='fontchange ps-1' >
@@ -77,7 +79,7 @@ export default function Sum()
                     {isLoading && Loader}
                     <div className='d-flex flex-column justify-content-center align-items-center w-100 mt-3' style={{ fontSize: '14px' }} >
                         {/* <img className="fallback-logo" width={100} height={100} src={`http://hr.mnun.edu.mn/media/orgs/logo/MNU-Logo_1.png`} alt="logo" onLoad={imageLoaded} /> */}
-                        <img className="fallback-logo" width={100} height={100} src={`${process.env.REACT_APP_MUIS_HR_MEDIA_URL}${datas?.school?.logo_url}`} alt="logo" onLoad={imageLoaded} />
+                        <img className="fallback-logo" width={100} height={100} src={logo} alt="logo" onLoad={imageLoaded} />
                         <div className="d-flex flex-column text-center fw-bolder">
                             <span className='mt-1'>
                                 {datas?.school?.name.toUpperCase()}

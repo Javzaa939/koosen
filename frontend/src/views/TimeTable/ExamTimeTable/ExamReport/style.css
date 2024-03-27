@@ -39,6 +39,7 @@
 
 @page {
     size: A4 portrait;
+    margin: 10 0 0 10;
 }
 
 .wraptext{

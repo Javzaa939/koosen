@@ -118,6 +118,8 @@ export default function AmountDetails()
         return roundedChanar;
     }
 
+    const logo = require("@src/assets/images/logo/dxis_logo.png").default
+
     return (
         <div className='fontchange ps-1' >
             {
@@ -130,7 +132,7 @@ export default function AmountDetails()
                         <div className="mt-1 d-flex  align-items-center">
                             <div style={{width: '20%'}} className="d-inline-block">
                                 <div className='d-flex flex-column justify-content-evenly align-items-center w-100' style={{ fontSize: '12px' }} >
-                                    <img className="fallback-logo" style={{objectFit: 'cover'}} width={150} height={160} src={`https://hr.sus.mn/media/orgs/logo/shine-mongol-bosoo.png`} alt="logo" />
+                                    <img className="fallback-logo" style={{objectFit: 'cover'}} width={100} height={100} src={logo} alt="logo" />
                                 </div>
                             </div>
                             <div style={{width: '80%'}} className="d-inline-block">
