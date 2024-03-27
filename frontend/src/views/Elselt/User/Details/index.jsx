@@ -220,6 +220,20 @@ function Details() {
                                         <span className='text_prefixer'>Голч:</span> {datas?.userinfo?.gpa}
                                     </div>
                                     <div className='p-50 d-flex align-items-center'>
+                                        <span className='text_prefixer me-50'>Дипломын хуулбар:</span>
+                                        {
+                                            datas?.userinfo?.diplom_pdf
+                                                ?
+                                                    <span className='text-primary d-flex align-items-center' role='button' onClick={() => {window.open(`${process.env.REACT_APP_SERVER_FILE_URL}${datas?.userinfo?.diplom_pdf}`)}}>
+                                                        {ftext(datas?.userinfo?.emongolia_diplom_pdf)} <Download className='ms-25' size={14}/>
+                                                    </span>
+                                                :
+                                                    <span>
+                                                        Файл байхгүй
+                                                    </span>
+                                        }
+                                    </div>
+                                    <div className='p-50 d-flex align-items-center'>
                                         <span className='text_prefixer me-50'>Е-Монголиа дипломын хуулбар:</span>
                                         {
                                             datas?.userinfo?.emongolia_diplom_pdf
