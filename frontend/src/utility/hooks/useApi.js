@@ -510,7 +510,7 @@ function useApi(isDisplay=false) {
 			/** Тэнхим */
 			department: {
 				get: () => instance.get(`/core/department/?school=${school_id}`),
-				getSelectSchool: (school) => instance.get(`/core/department/?school=${school}`),
+				getSelectSchool: (school) => instance.get(`/core/department/?school=${school ? school : school_id}`),
 
 				// тэнхимийн эрхлэгчийн мэдээлэл
 				getRegister: (search='') => instance.get(`/core/department/register/?school=${school_id}&search=${search}`),

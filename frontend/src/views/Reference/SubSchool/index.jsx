@@ -134,7 +134,7 @@ const SubSchool = () => {
 						placeholder={t('Хайх...')}
 					/>
 				</Col>
-					<div className="react-dataTable react-dataTable-selectable-rows mx-1" id="datatableLeftTwoRightOne">
+					<div className="react-dataTable react-dataTable-selectable-rows mx-1">
 						<DataTable
                             noHeader
                             pagination

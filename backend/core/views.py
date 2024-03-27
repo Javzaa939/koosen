@@ -4,11 +4,9 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 from rest_framework.filters import SearchFilter
 
-from main.utils.function.utils import filter_queries
-from main.utils.function.pagination import CustomPagination
-from main.utils.function.utils import get_teacher_queryset, remove_key_from_dict, null_to_none,override_get_queryset
 from django.db import transaction
-from django.db.models import Q
+from main.utils.function.pagination import CustomPagination
+from main.utils.function.utils import get_teacher_queryset,  null_to_none, calculate_birthday
 
 from core.models import Schools
 from core.models import Salbars
@@ -20,7 +18,6 @@ from core.models import Teachers
 from core.models import Employee
 from core.models import OrgPosition
 from core.models import User
-
 
 from lms.models import Country
 from lms.models import TimeTable
@@ -84,6 +81,10 @@ from lms.models import Student
 from lms.models import StudentLogin
 from django.contrib.auth.hashers import make_password
 
+
+from .serializers import *
+
+from django.db.models import Q
 
 @permission_classes([IsAuthenticated])
 class TeacherListApiView(
@@ -187,14 +188,22 @@ class SchoolAPIView(
 
     def get(self, request, pk=None):
         " Сургуулийн жагсаалт "
-        self.serializer_class = SchoolsRegisterSerailizer
+        instance = Schools.objects.first()
+        school_data = self.get_serializer(instance).data
 
-        if pk:
-            group = self.retrieve(request, pk).data
-            return request.send_data(group)
+        return request.send_data(school_data)
 
-        group_list = self.list(request).data
-        return request.send_data(group_list)
+    def put(self, request):
+
+        datas = request.data
+        instance = Schools.objects.first()
+        with transaction.atomic():
+            Schools.objects.filter(pk=instance.id).update(
+                **datas
+            )
+
+        return request.send_info('INF_002')
+
 
 @permission_classes([IsAuthenticated])
 class DepartmentAPIView(
@@ -240,42 +249,33 @@ class DepartmentAPIView(
 
         errors = []
         datas = request.data
+        instance = self.get_object()
 
-        leader = datas.get('lead') # Багш
+        leader = datas.get('leader') # Багш
         if leader:
             teacher = Teachers.objects.get(id=leader)
             user = teacher.user.id
-
             datas['leader'] = user
+        else:
+            if instance.leader:
+                instance.leader = None
+                instance.save()
 
-        instance = self.get_object()
-
-        if 'lead' in datas:
-            del datas['lead']
-
-        if 'leaders' in datas:
-            del datas['leaders']
-
-        if 'branch_pos' in datas:
-            del datas['branch_pos']
-
-        serializer = self.get_serializer(instance, data=datas)
+        serializer = self.get_serializer(instance, data=datas, partial=True)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
-
         else:
-            for key in serializer.errors:
-                return_error = {
-                    "field": key,
-                    "msg": serializer.errors
-                }
-
-                errors.append(return_error)
-
-            if len(errors) > 0:
-                return request.send_error("ERR_003", errors)
+            return request.send_error_valid(serializer.errors)
 
         return request.send_info("INF_002")
+
+    def delete(self, request, pk=None):
+        qs = self.queryset.filter(id=pk).first()
+        if qs:
+            qs.delete()
+
+        return request.send_info("INF_003")
+
 
 @permission_classes([IsAuthenticated])
 class DepartmentListAPIView(
@@ -540,9 +540,11 @@ class TeacherApiView(
         if qs_employee_user:
             queryset = queryset.filter(user_id__in = list(qs_employee_user))
 
+        queryset = get_teacher_queryset()
         sub_org = self.request.query_params.get('sub_org')
         salbar = self.request.query_params.get('salbar')
-        search = self.request.query_params.get('search')
+        position = self.request.query_params.get('position')
+        sorting = self.request.query_params.get('sorting')
 
         # Бүрэлдэхүүн сургууль
         if sub_org:
@@ -552,8 +554,18 @@ class TeacherApiView(
         if salbar:
             queryset = queryset.filter(salbar=salbar)
 
-        # if search:
-        #     queryset = filter_queries(queryset.model, search)
+        # Албан тушаалаар хайх
+        if position:
+            user_ids = Employee.objects.filter(org_position=position, state=Employee.STATE_WORKING).values_list('user', flat=True)
+
+            queryset = queryset.filter(user_id__in=user_ids)
+
+        # Sort хийх үед ажиллана
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
 
         return queryset
 
@@ -562,6 +574,102 @@ class TeacherApiView(
 
         teach_info = self.list(request).data
         return request.send_data(teach_info)
+
+
+class EmployeeApiView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin
+):
+    """ Багшийн жагсаалт """
+
+    queryset = Employee.objects.all()
+    serializer_class = EmployeePostSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['first_name', 'last_name', 'register_code']
+
+    def post(self, request):
+        with transaction.atomic():
+
+            sid = transaction.savepoint()
+            if not request.data.get('email'):
+                del request.data['email']
+
+            def check_field(field, value):
+                if not request.data.get(field):
+                    request.data[field] = value
+
+            check_field('body_height', 0)
+            check_field('body_weight', 0)
+            check_field('emdd_number', None)
+            check_field('hudul_number', None)
+            check_field('ndd_number', None)
+            check_field("home_phone", 0)
+            check_field("register_code", None)
+
+            check_user = Teachers.objects.filter(register=request.data['register'], action_status=Teachers.APPROVED, user__email=request.data['email'])
+            sub_org = SubOrgs.objects.get(id=request.data.get('sub_org'))
+
+            if check_user and check_user.exists:
+                return request.send_error_valid(
+                    [
+                        {
+                            'field': 'register',
+                            'msg': 'Системд бүртгэлтэй хэрэглэгч байна'
+                        }
+                    ]
+                )
+            else:
+                # Register ийн сүүлийн 8 оронг нууц үг болгох нь
+                request.data['password'] = request.data['register'][-8:]
+                request.data['org'] = sub_org.org.id
+
+                # User моделийн датаг эхлэээд үүсгэнэ
+                user_serializer = UserRegisterSerializer(
+                    data=request.data,
+                )
+
+                if not user_serializer.is_valid():
+                    transaction.savepoint_rollback(sid)
+                    print('user алдаа', user_serializer.errors)
+                    return request.send_error_valid(user_serializer.errors)
+
+                #  UserInfo үүсгэхэд хэрэгтэй датануудыг цуглуулах нь
+                user = user_serializer.save()
+                request.data['user'] = str(user.id)
+                request.data['birthday'], request.data['gender'] = calculate_birthday(request.data['register'])
+                if not request.data['birthday']:
+                    transaction.savepoint_rollback(sid)
+                    return request.send_error_valid({ "register": ["Регистрийн дугаар алдаатай байна."] })
+
+                request.data['action_status'] = Teachers.APPROVED
+                request.data['action_status_type'] = Teachers.ACTION_TYPE_ALL
+
+                userinfo_serializer = UserInfoSerializer(
+                    data=request.data,
+                )
+
+                if not userinfo_serializer.is_valid():
+                    print(userinfo_serializer.errors)
+                    transaction.savepoint_rollback(sid)
+                    return request.send_error_valid(userinfo_serializer.errors)
+                userinfo_serializer.save()
+
+            if 'worker_type' in request.data:
+                request.data['worker_type'] = Employee.WORKER_TYPE_EMPLOYEE
+
+            employee_serializer = EmployeeSerializer(data=request.data)
+            if not employee_serializer.is_valid(raise_exception=True):
+                transaction.savepoint_rollback(sid)
+                return request.send_error_valid(employee_serializer.errors)
+
+            employee_serializer.save()
+
+        return request.send_info("INF_001")
 
 
 @permission_classes([IsAuthenticated])

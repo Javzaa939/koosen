@@ -872,7 +872,7 @@ def calculate_birthday(register):
 
         return date(year, month, day), gender
 
-    except:
+    except Exception as e:
         return None, gender
 
 

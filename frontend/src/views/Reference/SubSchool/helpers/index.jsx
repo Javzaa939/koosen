@@ -1,7 +1,7 @@
 import useModal from '@hooks/useModal';
 import { t } from 'i18next';
 import { Badge, UncontrolledTooltip} from 'reactstrap'
-import { CheckCircle, X } from 'react-feather'
+import { Edit, X } from 'react-feather'
 
 // Хүснэгтийн баганууд
 export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, handleDelete) {
@@ -41,33 +41,39 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 			maxwidth: "250px",
 			center: true
 		},
-        {
-			name: `${t('Нийтийн сүлжээ')}`,
-			selector: (row) => row?.social,
-			maxwidth: "250px",
-			wrap: false,
-			center: true
-		},
-        {
-			name: `${t('Вэб')}`,
-			selector: (row) => row?.web,
-			maxWidth: "250px",
-			wrap: false,
-			center: true
-		},
 		{
-			name: `${t('Хаяг')}`,
-			selector: (row) => (
-				<>
-					<div id={`address${row?.id}`} className='cursor-default'>
-						{row?.address}
-					</div>
-					<UncontrolledTooltip placement='top' target={`address${row?.id}`}>{row?.address}</UncontrolledTooltip>
-				</>
-			),
-			maxWidth: "250px",
+			name: `${t('Цолын нэр')}`,
+			selector: (row) => <span title={row?.tsol_name}>{row?.tsol_name}</span>,
+			maxwidth: "250px",
 			center: true
 		},
+        // {
+		// 	name: `${t('Нийтийн сүлжээ')}`,
+		// 	selector: (row) => row?.social,
+		// 	maxwidth: "250px",
+		// 	wrap: false,
+		// 	center: true
+		// },
+        // {
+		// 	name: `${t('Вэб')}`,
+		// 	selector: (row) => row?.web,
+		// 	maxWidth: "250px",
+		// 	wrap: false,
+		// 	center: true
+		// },
+		// {
+		// 	name: `${t('Хаяг')}`,
+		// 	selector: (row) => (
+		// 		<>
+		// 			<div id={`address${row?.id}`} className='cursor-default'>
+		// 				{row?.address}
+		// 			</div>
+		// 			<UncontrolledTooltip placement='top' target={`address${row?.id}`}>{row?.address}</UncontrolledTooltip>
+		// 		</>
+		// 	),
+		// 	maxWidth: "250px",
+		// 	center: true
+		// },
 		{
             name: `${t('үйлдэл')}`,
             selector:  (row) => (
@@ -78,7 +84,7 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
                                 onClick={() => handleUpdateModal(row?.id, false, row)}
                                 id={`updateSchool${row?.id}`}
                             >
-                                <Badge color="light-success" pill><CheckCircle width={"100px"} /></Badge>
+                                <Badge color="light-primary" pill><Edit width={"100px"} /></Badge>
                             </a>
                             <UncontrolledTooltip placement='top' target={`updateSchool${row?.id}`}>засах</UncontrolledTooltip>
 						</>
