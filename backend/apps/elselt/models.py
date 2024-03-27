@@ -86,6 +86,7 @@ class AdmissionUserProfession(models.Model):
 
     class Meta:
         db_table = 'elselt_admissionuserprofession'
+        managed = False
 
     STATE_SEND = 1
     STATE_APPROVE = 2
