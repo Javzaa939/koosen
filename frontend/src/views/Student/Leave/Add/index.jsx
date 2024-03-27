@@ -53,6 +53,7 @@ const Addleavemodal = ({ open, handleModal, refreshDatas }) => {
 
     const { Loader, isLoading, fetchData } = useLoader({});
     const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
+    const { isLoading: studentLoading, fetchData: fetchStudent } = useLoader({});
 
     const CloseBtn = (
         <X className="cursor-pointer" size={15} onClick={handleModal} />
@@ -63,10 +64,24 @@ const Addleavemodal = ({ open, handleModal, refreshDatas }) => {
     const studentRegisterTypeApi = useApi().settings.studentRegisterType
     const leaveApi = useApi().student.leave
 
-    async function getStudentOption() {
-        const { success, data } = await fetchData(studentApi.getList())
+    const [bottom_check, setBottomCheck] = useState(3)
+    const [scroll_bottom_datas, setScrollBottomDatas] = useState([]);
+    const [student_search_value, setStudentSearchValue] = useState([]);
+    const SelectStudentApi = useApi().role.student
+
+    //  Оюутны жагсаалт хайлтаар
+    async function getStudentOption(searchValue) {
+        const { success, data } = await fetchStudent(SelectStudentApi.getStudent(searchValue))
         if(success) {
             setStudentOption(data)
+        }
+    }
+
+    //  Оюутны жагсаалт select ашигласан
+    async function getSelectBottomDatas(state){
+        const { success, data } = await fetchStudent(SelectStudentApi.getSelectStudents(state))
+        if(success){
+            setScrollBottomDatas((prev) => [...prev, ...data])
         }
     }
 
@@ -87,18 +102,22 @@ const Addleavemodal = ({ open, handleModal, refreshDatas }) => {
     }
 
     useEffect(()=>{
-        getStudentOption()
         getLesson()
         setyearOption(generateLessonYear(5))
         getRegisterType()
+        getSelectBottomDatas(2)
     },[])
+
+    function handleStudentSelect(value){
+        getStudentOption(value)
+    }
 
     async function onSubmit(cdata) {
         cdata['statement_date'] = moment(sdate).format('YYYY-MM-DD')
         cdata = convertDefaultValue(cdata)
         cdata['school'] = school_id
 
-        const { success, errors } = await postFetch(leaveApi.post(cdata))
+        const { success, error } = await postFetch(leaveApi.post(cdata))
 
         if(success)
         {
@@ -107,9 +126,10 @@ const Addleavemodal = ({ open, handleModal, refreshDatas }) => {
             reset()
 
         } else {
+
             /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in errors) {
-                setError(key, { type: 'custom', message:  errors[key][0]});
+            for (let key in error) {
+                setError(error[key].field, { type: 'custom', message:  error[key].msg});
             }
         }
 	}
@@ -141,21 +161,48 @@ const Addleavemodal = ({ open, handleModal, refreshDatas }) => {
                                 control={control}
                                 defaultValue=''
                                 name="student"
-                                render={({ field: { value, onChange} }) => {
+                                render={({ field: {value, onChange } }) => {
                                     return (
                                         <Select
                                             name="student"
                                             id="student"
-                                            isClearable
                                             classNamePrefix='select'
-                                            isLoading={isLoading}
-                                            className={classnames('react-select', { 'is-invalid': errors.student })}
-                                            placeholder={t(`-- Сонгоно уу --`)}
-                                            options={studentOption || []}
-                                            value={studentOption.find((c) => c.id === value)}
-                                            noOptionsMessage={() => t('Хоосон байна')}
+                                            isClearable
+                                            className={classnames('react-select', {'is-invalid': errors.student})}
+                                            placeholder={`Хайх`}
+                                            isLoading={studentLoading}
+                                            loadingMessage={() => "Түр хүлээнэ үү..."}
+                                            options={
+                                                student_search_value.length === 0
+                                                    ? scroll_bottom_datas || []
+                                                    : studentOption || []
+                                            }
+                                            value={
+                                                student_search_value.length === 0
+                                                    ? scroll_bottom_datas.find((c) => c.id === value)
+                                                    : studentOption.find((c) => c.id === value)
+                                            }
+                                            noOptionsMessage={() =>
+												student_search_value.length > 1
+													? t('Хоосон байна')
+													: null
+                                            }
+                                            onMenuScrollToBottom={() => {
+                                                if(student_search_value.length === 0){
+                                                    setBottomCheck(bottom_check + 1)
+                                                    getSelectBottomDatas(bottom_check)
+                                                }
+                                            }}
                                             onChange={(val) => {
                                                 onChange(val?.id || '')
+                                            }}
+                                            onInputChange={(e) => {
+                                                setStudentSearchValue(e);
+                                                if(e.length > 1 && e !== student_search_value){
+                                                    handleStudentSelect(e);
+                                                } else if (e.length === 0){
+                                                    setStudentOption([]);
+                                                }
                                             }}
                                             styles={ReactSelectStyles}
                                             getOptionValue={(option) => option.id}
@@ -163,8 +210,8 @@ const Addleavemodal = ({ open, handleModal, refreshDatas }) => {
                                         />
                                     )
                                 }}
-                                ></Controller>
-                            {errors.student && <FormFeedback className='d-block'>{errors.student.message}</FormFeedback>}
+                            ></Controller>
+                            {errors.student && <FormFeedback className='d-block'>{t(errors.student.message)}</FormFeedback>}
                         </Col>
                         <Col md={12}>
                             <Label className="form-label" for="lesson_year">

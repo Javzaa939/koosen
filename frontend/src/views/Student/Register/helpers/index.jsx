@@ -1,21 +1,26 @@
 import { useContext } from 'react';
 
-import { X, Edit } from 'react-feather'
+import { X, Edit, Lock } from 'react-feather'
 import {Badge, UncontrolledTooltip} from 'reactstrap'
 
 import useModal from "@hooks/useModal"
+import useLoader from '@hooks/useLoader';
 import { t } from 'i18next';
 
 import SchoolContext from "@context/SchoolContext"
 
+
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, total_count, editModal, handleDelete, user) {
+export function getColumns (currentPage, rowsPerPage, total_count, editModal, handleDelete, user, changePassModal)
+{
 
 	const { school_id } = useContext(SchoolContext)
 
 	const page_count = Math.ceil(total_count / rowsPerPage)
 
 	const { showWarning } = useModal()
+
+    const { Loader, isLoading} = useLoader({isFullScreen: true})
 
 	/** Сонгосон хуудасны тоо датаны тооноос их болсон үед хуудаслалт 1-ээс эхлэнэ */
     if (currentPage > page_count) {
@@ -40,7 +45,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 		{
 			header: 'last_name',
 			name: t("Овог"),
-			selector: (row) => `${row?.last_name}`,
+			selector: (row) => `${row?.last_name ? row?.last_name : ''}`,
             sortable: true,
 			center: true
         },
@@ -53,24 +58,28 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
         },
 		{
 			header: 'register_num',
-			name: t("Регистр дугаар"),
+			name: t("Регистрийн дугаар"),
 			selector: (row) => row?.register_num,
             sortable: true,
 			center: true
         },
         {
 			header: 'profession',
-			name: t("Хөтөлбөр"),
+			name: t("Мэргэжил"),
 			selector: (row) => <span title={row?.profession_name}>{row?.profession_name}</span>,
             sortable: true,
-			left: true,
-			wrap: true
+			center: true
         },
 		{
 			name: t("Анги"),
 			selector: (row) => row?.group_name,
 			center: true,
 			width: '250px'
+        },
+		{
+			name: t("Курс"),
+			selector: (row) => row?.group_level,
+			center: true
         },
 		{
 			header: 'status',
@@ -88,7 +97,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 	if(Object.keys(user).length > 0) {
 		var delete_column = {
 			name: t("Үйлдэл"),
-			width: "120px",
+			width: "160px",
 			center: true,
 			selector: (row) => (
 				<div className="text-center" style={{ width: "auto" }}>
@@ -99,6 +108,22 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 						<Badge color="light-secondary" pill><Edit  width={"15px"} /></Badge>
 					</a>
 					<UncontrolledTooltip placement='top' target={`complaintListDatatableEdit${row.id}`} >Засах</UncontrolledTooltip>
+					{isLoading && Loader}
+					<a
+						role="button"
+						onClick={() => showWarning({
+							header: {
+								title: t(`Оюутны нууц үг`),
+							},
+							question: t(`Оюутны нууц үг сэргээх үү?`),
+							onClick: () => changePassModal(row.id)
+						})}
+						id={`complaintListDatatableEditPass${row?.id}`}
+						className="me-1"
+					>
+						<Badge color="light-info" pill><Lock  width={"15px"} /></Badge>
+					</a>
+					<UncontrolledTooltip placement='top' target={`complaintListDatatableEditPass${row.id}`} >Нууц үг сэргээх</UncontrolledTooltip>
 					{
 						(user.permissions.includes('lms-student-register-delete')  && school_id) &&
 						<>

@@ -28,6 +28,4 @@ urlpatterns = [
     # дүнгийн тодорхойлолт
     path('print/<int:student>/', ScoreRegisterPrintAPIView.as_view()),
 
-
 ]
-

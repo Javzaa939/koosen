@@ -6,7 +6,7 @@ import useLoader from '@hooks/useLoader';
 import { Button, Modal, ModalBody, ModalFooter, ModalHeader } from "reactstrap";
 import { utils, writeFile } from 'xlsx-js-style';
 
-function PrintModal({ pmodal, modalToggler, groupId, file_name }) {
+function PrintModal({ pmodal, modalToggler, groupId, file_name, printValues }) {
 
         // Loader
     const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
@@ -53,9 +53,6 @@ function PrintModal({ pmodal, modalToggler, groupId, file_name }) {
             '№',
             ...keys
         ]
-
-        // console.log(prefix,'prefix')
-
 
         utils.sheet_add_aoa(worksheet, [prefix], { origin: "A4" });
 
@@ -258,8 +255,9 @@ function PrintModal({ pmodal, modalToggler, groupId, file_name }) {
 
     /*Жагсаалт дата авах функц */
     async function getDatas() {
-        const { success, data } = await fetchData(getListApi.getListNoLimit( groupId, '', '' ))
-        if (success && data.length > 0) {
+        const { success, data } = await fetchData(getListApi.getListNoLimit( groupId, printValues.current['group'], printValues.current['chosenYear'], printValues.current['chosenSeason'] ))
+        if (success && data.length > 0)
+        {
             var one_data = data[2]
             var headers = []
             Object.keys(one_data).forEach((c) =>
@@ -278,7 +276,6 @@ function PrintModal({ pmodal, modalToggler, groupId, file_name }) {
         () =>
         {
             getDatas();
-
         },
         []
     )

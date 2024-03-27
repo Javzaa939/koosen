@@ -10,6 +10,7 @@ const Leave = lazy(() => import("@views/Student/Leave"))
 const Info = lazy(() => import("@views/Student/Info"))
 const Specification = lazy(() => import("@views/Student/Definition/Specification"))
 const LearningTrue = lazy(() => import("@views/Student/Definition/LearningTrue"))
+const LearningTrueEn = lazy(() => import("@views/Student/Definition/LearningTrue/LearningTrueEn"))
 const CreditCalculation = lazy(() => import("@views/Student/Definition/CreditCalculation"))
 const AmountDetails = lazy(() => import("@views/Student/Definition/AmountDetails"))
 const Sum = lazy(() => import("@views/Student/Definition/Sum"))
@@ -87,6 +88,13 @@ const StudentRoutes = [
     {
         path: 'student/learning-true/',
         element: <LearningTrue />,
+        meta: {
+            layout: 'blank'
+        }
+    },
+    {
+        path: 'student/learning-true/en/',
+        element: <LearningTrueEn />,
         meta: {
             layout: 'blank'
         }

@@ -36,7 +36,7 @@ const Request = () => {
     const { control, formState: { errors } } = useForm({});
 
 	// Loader
-	const{ Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
+	const{ Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
 
 	// Usestate
 	const [currentPage, setCurrentPage] = useState(1)

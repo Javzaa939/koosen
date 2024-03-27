@@ -12,7 +12,7 @@ import { useForm, Controller } from "react-hook-form";
 import SchoolContext from "@context/SchoolContext"
 import { getColumns } from './helpers'
 
-const Student  = ({setMainData}) => {
+const Student  = ({ setMainData, printIsAllTimeType, chosenGroupStudent, setChosenGroupStudent, setFileName, setStudentSectionData }) => {
 
     //Hook
     const { control, formState: { errors } } = useForm({});
@@ -24,15 +24,19 @@ const Student  = ({setMainData}) => {
 
     //Api
     const seasonNameApi = useApi().settings.season
-    const professionApi = useApi().settings.professionaldegree
     const getStudentApi = useApi().print.score
+    const scoreApi = useApi().score.register
+    const groupApi = useApi().student.group
 
     //useState
     const [select_value, setSelectValue] = useState(values)
+    const [groupOption, setGroup] = useState([])
     const [yearOption, setYear] = useState([])
     const [seasonNameOption, setseasonNameOption] = useState ([])
     const [rowsPerPage, setRowsPerPage] = useState(10)
     const [searchValue, setSearchValue] = useState("");
+    const [start_value, setStartValue] = useState("");
+    const [end_value, setEndValue] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [total_count, setTotalCount] = useState(1)
     const [datas, setDatas] = useState([]);
@@ -46,7 +50,7 @@ const Student  = ({setMainData}) => {
     const { t } = useTranslation()
 
     // Нийт датаны тоо
-    const default_page = [10, 15, 50, 75, 100]
+    const default_page = [10, 20, 50, 75, 100]
 
     //Function to handle per page
     function handlePerPage(e) {
@@ -60,7 +64,7 @@ const Student  = ({setMainData}) => {
 
     //Хайх товч дарсан үед ажиллах функц
      async function handleSearch() {
-        getDatas()
+        getStudentLists()
     }
 
     // Эрэмбэлэлт
@@ -72,25 +76,11 @@ const Student  = ({setMainData}) => {
         const lesson_year = select_value?.lesson_year
         const lesson_season = select_value?.lesson_season
 
-        const { success, data } = await allFetch(getStudentApi.getStudentList(rowsPerPage, currentPage, sortField, searchValue,student, lesson_year, lesson_season))
+        const { success, data } = await allFetch(getStudentApi.getStudentList(rowsPerPage, currentPage, sortField, searchValue,student, lesson_year, lesson_season, start_value, end_value, chosenGroupStudent))
         if (success) {
             setDatas(data?.results)
             setTotalCount(data?.count)
-
-        }
-    }
-
-    async function getDatas() {
-        const page_count = Math.ceil(total_count / rowsPerPage)
-
-        if (page_count < currentPage && page_count != 0) {
-            setCurrentPage(page_count)
-        }
-
-        const { success, data } = await fetchData(professionApi.get(rowsPerPage, currentPage, sortField, searchValue, select_value.department, select_value.degree, select_value.group))
-        if(success)
-        {
-            setTotalCount(data?.count)
+            setStudentSectionData(data?.results)
         }
     }
 
@@ -119,8 +109,22 @@ const Student  = ({setMainData}) => {
         {
             getseasonName()
             setYear(generateLessonYear(5))
+            getGroup()
         },
         []
+    )
+
+    useEffect(
+        () =>
+        {
+            if (start_value && end_value) {
+                const timeoutId = setTimeout(() => {
+                    getStudentLists()
+                }, 600);
+                return () => clearTimeout(timeoutId);
+            }
+        },
+        [start_value, end_value]
     )
 
 	useEffect(() => {
@@ -135,6 +139,28 @@ const Student  = ({setMainData}) => {
 		}
 	}, [rowsPerPage, currentPage, sortField, searchValue, select_value, school_id])
 
+    /* Устгах функц */
+	const handleDelete = async(id) => {
+        const {success} = await fetchData(scoreApi.delete(id))
+		if(success) {
+            getStudentLists()
+		}
+	};
+
+
+    // Ангийн жагсаалт
+    async function getGroup()
+    {
+        const department = select_value.department
+        const { success, data } = await fetchData(groupApi.getList(department))
+        if(success) {
+            setGroup(data)
+        }
+    }
+
+
+
+
     return (
         <Fragment>
             <Card>
@@ -142,7 +168,7 @@ const Student  = ({setMainData}) => {
                 <CardHeader className='lex-md-row flex-column align-md-items-center align-items-start border-bottom pt-0'>
                 </CardHeader>
                 <Row className="mx-0 mt-1 mb-1" sm={12}>
-                    <Col md={4}>
+                    <Col md={3}>
                         <Label className="form-label me-1" for="building">
                             {t('Хичээлийн жил')}
                         </Label>
@@ -179,7 +205,7 @@ const Student  = ({setMainData}) => {
                             getOptionLabel={(option) => option.name}
                         />
                     </Col>
-                    <Col md={4}>
+                    <Col md={3}>
                         <Label className="form-label" for="lesson_season">
                             {t('Улирал')}
                         </Label>
@@ -217,6 +243,56 @@ const Student  = ({setMainData}) => {
                             }}
                         />
                     </Col>
+                    <Col md={3}>
+                        <Label className="form-label" for="group">
+                            {t('Анги')}
+                        </Label>
+                        <Select
+                            name="group"
+                            id="group"
+                            classNamePrefix='select'
+                            isClearable
+                            className={classnames('react-select')}
+                            isLoading={isLoading}
+                            placeholder={t('-- Сонгоно уу --')}
+                            options={groupOption || []}
+                            value={groupOption.find((c) => c.id === select_value.group)}
+                            noOptionsMessage={() => t('Хоосон байна.')}
+                            onChange={(val) => {
+                                setSelectValue(current => {
+                                    return {
+                                        ...current,
+                                        group: val?.id || '',
+                                    }
+                                });
+                                setChosenGroupStudent(val?.id)
+                                setFileName(val?.name)
+                            }}
+                            styles={ReactSelectStyles}
+                            getOptionValue={(option) => option.id}
+                            getOptionLabel={(option) => option.name}
+                        />
+                    </Col>
+                    <Col md={3} sm={6} xs={12}>
+                        <Label for="score">Дүнгийн утгаар хайх</Label>
+                        <div className='d-flex'>
+                            <Input
+                                type="number"
+                                bsSize="sm"
+                                placeholder="Эхний утга"
+                                onChange={(e) => setStartValue(e.target.value)}
+                            />
+                            <Input
+                                type="number"
+                                className="ms-1"
+                                bsSize="sm"
+                                placeholder="Сүүлийн утга"
+                                onChange={(e) => setEndValue(e.target.value)}
+
+                            />
+                        </div>
+                    </Col>
+                   
                 </Row>
                 <Row className='mt-1 d-flex justify-content-between mx-0'>
                     <Col className='d-flex align-items-center justify-content-start ' >
@@ -266,7 +342,7 @@ const Student  = ({setMainData}) => {
                         </Button>
                     </Col>
                 </Row>
-                <div className="react-dataTable react-dataTable-selectable-rows">
+                <div className="react-dataTable react-dataTable-selectable-rows" id="datatableLeftTwoRightOne">
                     <DataTable
                         noHeader
                         paginationServer
@@ -284,7 +360,7 @@ const Student  = ({setMainData}) => {
                             </div>
                         )}
                         onSort={handleSort}
-                        columns={getColumns(currentPage, rowsPerPage, total_count)}
+                        columns={getColumns(currentPage, rowsPerPage, total_count, seasonNameOption, handleDelete)}
                         sortIcon={<ChevronDown size={10} />}
                         paginationPerPage={rowsPerPage}
                         paginationDefaultPage={currentPage}

@@ -1731,3 +1731,25 @@ export const get_emp_state = () =>
 
   return options
 }
+
+export const get_print_type = () => {
+
+	const option = [
+		{ id: 1, name: 'см'},
+    { id: 2, name: 'мм'},
+	]
+
+	return option
+}
+
+// тэтгэлэгийн төрөл
+export const stipent_is_own_or_other = () =>
+{
+  const options = [
+    { id: 1, name: 'Дотоод тэтгэлэг' },
+    { id: 2, name: 'Гадны тэтгэлэг' },
+  ]
+
+  return options
+}
+

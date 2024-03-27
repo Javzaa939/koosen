@@ -12,8 +12,8 @@ from main.utils.file import remove_folder
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 from main.utils.function.pagination import CustomPagination
-from main.utils.function.utils import str2bool, get_domain_url
-from main.utils.function.utils import has_permission
+from main.utils.function.utils import get_domain_url
+from main.utils.function.utils import has_permission, null_to_none
 
 from main.utils.file import save_file
 
@@ -65,51 +65,25 @@ class StudentNoticeAPIView(
     def post(self, request):
         " зар мэдээ нэмэх "
 
-        data = request.data
+        data = request.data.dict()
+        data = null_to_none(data)
+
+        if not data.get('department'):
+            del data['department']
+
         serializer = self.get_serializer(data=data)
 
         if serializer.is_valid(raise_exception=False):
-            is_success = False
             with transaction.atomic():
                 try:
-                    self.create(request).data
-                    is_success = True
-                except Exception:
-                    raise
-            if is_success:
-                return request.send_info("INF_001")
+                    self.perform_create(serializer)
+                except Exception as e:
+                    print(e)
+                    return request.send_error("ERR_002")
+            return request.send_info("INF_001")
 
-            return request.send_error("ERR_002")
         else:
-            error_obj = []
-            for key in serializer.errors:
-                msg = "Хоосон байна"
-
-                return_error = {
-                    "field": key,
-                    "msg": msg
-                }
-
-                error_obj.append(return_error)
-
-            if len(error_obj) > 0:
-                return request.send_error("ERR_003", error_obj)
-
-            return request.send_error("ERR_002")
-        # if serializer.is_valid(raise_exception=False):
-        #     with transaction.atomic():
-        #         try:
-
-        #             print('5555')
-        #             self.create(request).data
-        #             print('66')
-
-        #         except Exception:
-        #             return request.send_error("ERR_002")
-
-        #     return request.send_info("INF_001")
-
-        # return request.send_info("INF_001")
+            return request.send_error_valid(serializer.errors)
 
     @has_permission(must_permissions=['lms-service-news-update'])
     def put(self, request, pk=None):
@@ -119,36 +93,19 @@ class StudentNoticeAPIView(
 
         instance = self.get_object()
 
-        serializer = self.get_serializer(instance, data=request_data)
+        serializer = self.get_serializer(instance, data=request_data, partial=True)
 
         if serializer.is_valid(raise_exception=False):
-            is_success = False
             with transaction.atomic():
                 try:
-                    self.update(request).data
-                    is_success = True
+                    self.perform_update(serializer)
                 except Exception:
-                    raise
-            if is_success:
-                return request.send_info("INF_002")
-
-            return request.send_error("ERR_002")
+                    return request.send_error("ERR_002")
+                return request.send_error_valid(serializer.errors)
         else:
             error_obj = []
-            for key in serializer.errors:
-                msg = "Хоосон байна"
+            return request.send_error("ERR_003", error_obj)
 
-                return_error = {
-                    "field": key,
-                    "msg": msg
-                }
-
-                error_obj.append(return_error)
-
-            if len(error_obj) > 0:
-                return request.send_error("ERR_003", error_obj)
-
-            return request.send_error("ERR_002")
 
     @has_permission(must_permissions=['lms-service-news-delete'])
     def delete(self, request, pk=None):
@@ -193,7 +150,7 @@ class StudentNoticeFileAPIView(
         return_url = '{domain}{path}'.format(domain=domain, path=file_path)
 
         return request.send_data(return_url)
-    
+
 class StudentNoticeNotNewsAPIView(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
@@ -232,4 +189,26 @@ class StudentNoticeNotNewsAPIView(
 
         return_datas = self.list(request).data
 
+        return request.send_data(return_datas)
+
+
+# ----------------- Хуанли Зар Мэдээ ---------------
+
+@permission_classes([IsAuthenticated])
+class CalendarNoticeApiView(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    generics.GenericAPIView
+):
+
+    queryset = StudentNotice.objects.all()
+    serializer_class = StudentNoticeSerializer
+
+    @has_permission(must_permissions=['lms-service-news-read'])
+    def get(self, request):
+
+        self.serializer_class = StudentNoticeListSerializer
+        self.queryset = self.queryset.filter(is_news=True).order_by('-created_at')[:5]
+
+        return_datas = self.get_serializer(self.queryset, many=True).data
         return request.send_data(return_datas)

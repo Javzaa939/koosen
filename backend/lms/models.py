@@ -116,14 +116,30 @@ class Country(models.Model):
 
     """ Улс """
 
+    AFRICA = 1
+    NA = 2
+    LAATC = 3
+    ASIA = 4
+    EUROPE = 5
+    PC = 6
+
+    CONTINENT_TYPE = (
+        (AFRICA, 'Африк'),
+        (NA, 'Хойд Америк'),
+        (LAATC, 'Латин Америк ба Карибын тэнгис'),
+        (ASIA, 'Ази'),
+        (EUROPE, 'Европ'),
+        (PC, 'Номхон далайн орнууд'),
+    )
+
     code = models.CharField(max_length=20, unique=True, verbose_name='Улсын код')
     name = models.CharField(max_length=100, verbose_name='Улсын нэр')
     name_eng = models.CharField(max_length=500, null=True, verbose_name="Улсын нэр англи")
     name_uig = models.CharField(max_length=500, null=True, verbose_name="Улсын нэр уйгаржин")
+    continent = models.PositiveIntegerField(choices=CONTINENT_TYPE, db_index=True, default=ASIA, verbose_name="Тивүүдийн нэр")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
 
 # -------------------------------- Сургалт --------------------
 class LessonStandart(models.Model):
@@ -135,6 +151,7 @@ class LessonStandart(models.Model):
     name_uig = models.CharField(max_length=500, null=True, verbose_name="Хичээлийн нэр уйгаржин")
     kredit = models.FloatField(verbose_name="Кредит")
     category = models.ForeignKey(LessonCategory, on_delete=models.SET_NULL, null=True, verbose_name="Хичээлийн ангилал")
+    is_general = models.BooleanField(default=False, verbose_name='Ерөнхий эрдэм хичээл')
     definition = models.TextField(null=True, verbose_name="Хичээлийн тодорхойлолт")
     purpose = models.TextField(null=True, verbose_name="Хичээлийн зорилго")
     knowledge = models.TextField(null=True, verbose_name="Олгох мэдлэг")
@@ -1016,6 +1033,7 @@ class TimeTable(models.Model):
     end_date = models.DateField(null=True, verbose_name="Дуусах огноо")
     color = models.CharField(max_length=250, null=True, verbose_name="Өнгө")
     kurats_room = models.CharField(max_length=200, null=True, verbose_name="Курацийн хичээл орох байрлал")
+    support_teacher = ArrayField(models.IntegerField(null=True), blank=True,null=True,verbose_name='Туслах багш')
     school = models.ForeignKey(SubOrgs, verbose_name="Сургууль", on_delete=models.PROTECT)
     created_user = models.ForeignKey(User, related_name='tt_cr_user', on_delete=models.SET_NULL, null=True, verbose_name="Бүртгэсэн хэрэглэгч")
     updated_user = models.ForeignKey(User, related_name='tt_up_user', on_delete=models.SET_NULL, null=True, verbose_name="Зассан хэрэглэгч")
@@ -3564,6 +3582,8 @@ class DefinitionSignature(models.Model):
     STUDENT_MARK = 2
     STUDENT_DIAMETER_MARK = 3
     COMMAND = 4
+    TIMETABLE = 5
+    MONITOR = 6
 
     DEDICATION_TYPE=(
         (STUDENT_DEFINITION, 'Оюутны тодорхойлолт'),
@@ -3931,3 +3951,34 @@ class AdmissionXyanaltToo(models.Model):
     is_gender = models.BooleanField(default=False, verbose_name="Хүйсээр ялгах эсэх")
     norm1 = models.PositiveIntegerField(null=True, verbose_name="Эрэгтэй суралцагчийн тоо")
     norm2 = models.PositiveIntegerField(null=True, verbose_name="Эмэгтэй суралцагчийн тоо")
+
+class PrintSettings(models.Model):
+
+    SM =1
+    MM =2
+
+    PRINT_TYPE = (
+        (SM, "см"),
+        (MM, "мм"),
+    )
+
+    deed = models.FloatField(verbose_name="дээд хэмжээ")
+    dood = models.FloatField(verbose_name="доод хэмжээ")
+    right = models.FloatField(verbose_name="баруун хэмжээ")
+    left = models.FloatField(verbose_name="зүүн хэмжээ")
+    types = models.PositiveIntegerField(choices=PRINT_TYPE, db_index=True, default=SM, verbose_name="Хэвлэх төрөл")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+class StudentGrade(models.Model):
+    """ Хичээлийн улирлын үндсэн дүн """
+
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, verbose_name="Оюутан", null=True)
+    score = models.ForeignKey(Score, on_delete=models.CASCADE, verbose_name="Дүнгийн бүртгэл", null=True)
+    lesson_year = models.CharField(max_length=20, null=True, verbose_name="Хичээлийн жил")
+    lesson_season = models.ForeignKey(Season, on_delete=models.CASCADE, related_name="Улирал", null=True)
+    credit = models.FloatField(verbose_name="Улирлын цуглуулсан нийт кредит")
+    average = models.FloatField(verbose_name="Улирлын дундаж")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)

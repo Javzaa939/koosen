@@ -32,7 +32,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
     // Боловсролын зэргийн id
     const [ degree_id, setDegreeId] = useState('')
 
-    // Тэнхимын id
+    // Хөтөлбөрийн багын id
     const [ dep_id, setDepId] = useState('')
 
     // ** Hook
@@ -58,7 +58,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
 
     const teacherApi = useApi().hrms.teacher
 
-    //Хөтөлбөрийн жагсаалт авах
+    //Мэргэжлийн жагсаалт авах
     async function getProfession () {
         const { success, data } = await fetchData(professionApi.getList(degree_id, dep_id))
         if (success) {
@@ -109,15 +109,15 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
     // Хадгалах
 	async function onSubmit(cdata) {
         cdata['school'] = school_id
-        const { success, errors } = await postFetch(groupApi.post(cdata))
+        const { success, error } = await postFetch(groupApi.post(cdata))
         if(success) {
             reset()
             refreshDatas()
             handleModal()
         } else {
             /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in errors) {
-                setError(key, { type: 'custom', message:  errors[key][0]});
+            for (let key in error) {
+                setError(error[key].field, { type: 'custom', message:  error[key].msg});
             }
         }
 	}
@@ -126,20 +126,19 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
         getDepartment()
         getYear()
         getDegree()
+        getProfession()
         getStatus()
+        getTeacher()
     },[])
 
     useEffect(
         () =>
         {
             getProfession()
+            getTeacher()
         },
         [degree_id, dep_id]
     )
-
-    useEffect(() => {
-        getTeacher()
-    }, [dep_id, school_id])
 
 	return (
         <Fragment>
@@ -163,7 +162,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
                         <Col md={12}>
                             <Label className="form-label" for="department">
-                               {t('Тэнхим')}
+                               {t('Хөтөлбөрийн баг')}
                             </Label>
                             <Controller
                                 control={control}
@@ -237,7 +236,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                         </Col>
                         <Col md={12}>
                             <Label className="form-label" for="profession">
-                               {t('Хөтөлбөр')}
+                               {t('Мэргэжил')}
                             </Label>
                             <Controller
                                 control={control}
@@ -299,7 +298,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                         </Col>
                         <Col md={12}>
                             <Label className="form-label" for="name">
-                                {t('Дамжааны нэр')}
+                                {t('Ангийн нэр')}
                             </Label>
                             <Controller
                                 defaultValue=''
@@ -310,7 +309,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                     <Input
                                         id ="name"
                                         bsSize="sm"
-                                        placeholder={t("Дамжааны нэр")}
+                                        placeholder={t("Ангийн нэр")}
                                         {...field}
                                         type="text"
                                         invalid={errors.name && true}

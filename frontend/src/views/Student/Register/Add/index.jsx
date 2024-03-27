@@ -91,13 +91,11 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
     function check_year(group_year) {
         var checked = false
         var start_active_year = cyear_name.split('-')[0]
-        if(group_year) {
-            var group_active_year = group_year.split('-')[0]
-            if (parseInt(group_active_year) < parseInt(start_active_year)) {
-                checked = true
-            }
-        }
+        var group_active_year = group_year.split('-')[0]
 
+        if (parseInt(group_active_year) < parseInt(start_active_year)) {
+            checked = true
+        }
 
         setGroupChecked(checked)
     }
@@ -129,11 +127,11 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
 	async function onSubmit(cdata) {
         cdata['school'] = school_id
         cdata['is_khur'] = is_khur
-        // cdata['citizen_name'] = citizen_name
-        // cdata['citizenship'] = citizen_id
+        cdata['citizen_name'] = citizen_name
+        cdata['citizenship'] = citizen_id
         cdata = convertDefaultValue(cdata)
 
-        const { success, errors } = await postFetch(studentApi.post(cdata))
+        const { success, error } = await postFetch(studentApi.post(cdata))
         if(success)
         {
             handleModal()
@@ -141,8 +139,8 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
             reset()
         } else {
             /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in errors) {
-                setError(key, { type: 'custom', message:  errors[key][0]});
+            for (let key in error) {
+                setError(error[key].field, { type: 'custom', message:  error[key].msg});
             }
         }
 	}
@@ -173,7 +171,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
             getGroup()
             if (departId == undefined) setValue('group', '')
         },
-        [departId, school_id]
+        [departId]
     )
 
 	return (
@@ -205,7 +203,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="department">
-                                {t('Тэнхим')}
+                                {t('Хөтөлбөрийн баг')}
                             </Label>
                             <Controller
                                 control={control}
@@ -260,7 +258,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                             noOptionsMessage={() => t('Хоосон байна')}
                                             onChange={(val) => {
                                                 onChange(val?.id || '')
-                                                check_year(val?.join_year || '')
+                                                check_year(val?.join_year)
                                             }}
                                             styles={ReactSelectStyles}
                                             getOptionValue={(option) => option.id}
@@ -290,7 +288,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                             isLoading={isLoading}
                                             placeholder={t(`-- Сонгоно уу --`)}
                                             options={country_option || []}
-                                            value={country_option.find((c) => c.id === value)}
+                                            value={country_option.find((c) => c.id === (value || citizen_id))}
                                             noOptionsMessage={() => t('Хоосон байна')}
                                             onChange={(val) => {
                                                 setCitizenId(val?.id || '')
@@ -308,7 +306,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                         </Col>
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="register_num">
-                                {citizen_name?.includes('Монгол') ? t('Регистрийн дугаар') : t('Гадаад пасспорт дугаар')}
+                                {citizen_name.includes('Монгол') ? t('Регистрийн дугаар') : t('Гадаад пасспорт дугаар')}
                             </Label>
                             <Controller
                                 defaultValue=''
@@ -319,7 +317,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                     <Input
                                         id ="register_num"
                                         bsSize="sm"
-                                        placeholder={citizen_name?.includes('Монгол') ? t('Регистрийн дугаар') : t('Гадаад пасспорт дугаар')}
+                                        placeholder={citizen_name.includes('Монгол') ? t('Регистрийн дугаар') : t('Гадаад пасспорт дугаар')}
                                         {...field}
                                         type="text"
                                         invalid={errors.register_num && true}
@@ -346,30 +344,30 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                     {is_khur && <FormFeedback className='d-block'>{'ХУР мэдээллийн сангаас иргэний мэдээлэл авах үед үндсэн мэдээлэл бөглөх шаардлагагүй.'}</FormFeedback>}
                                 </Col>
                         } */}
-                        {/* {
+                        {
                             groupChecked
-                            && */}
-                        <Col lg={6} xs={12}>
-                            <Label className="form-label" for="code">
-                                {t('Оюутны код')}
-                            </Label>
-                            <Controller
-                                defaultValue=''
-                                control={control}
-                                id="code"
-                                name="code"
-                                render={({ field }) => (
-                                    <Input
-                                        id ="code"
-                                        bsSize="sm"
-                                        placeholder={t("Оюутны код")}
-                                        {...field}
-                                        type="text"
+                            &&
+                                <Col lg={6} xs={12}>
+                                    <Label className="form-label" for="code">
+                                        {t('Оюутны хуучин код')}
+                                    </Label>
+                                    <Controller
+                                        defaultValue=''
+                                        control={control}
+                                        id="code"
+                                        name="code"
+                                        render={({ field }) => (
+                                            <Input
+                                                id ="code"
+                                                bsSize="sm"
+                                                placeholder={t("Оюутны хуучин код")}
+                                                {...field}
+                                                type="text"
+                                            />
+                                        )}
                                     />
-                                )}
-                            />
-                        </Col>
-                        {/* } */}
+                                </Col>
+                        }
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="family_name">
                                 {t('Ургийн овог')}

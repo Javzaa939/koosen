@@ -559,3 +559,47 @@ class Notification(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, null=True, verbose_name="Үүсгэсэн", related_name="+")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+class MainPosition(models.Model):
+    """ Үндсэн төрөлүүд
+    """
+
+    class Meta:
+        db_table = 'core_mainposition'
+        managed = False
+
+    name = models.CharField(max_length=250, null=False, verbose_name="Нэр")
+    code = models.CharField(max_length=255, null=True, blank=True, verbose_name="Код")
+
+
+class UserProfessionInfo(models.Model):
+    """
+        Хэрэглэгчийн мэргэжил дээшлүүлсэн байдал 3.1. Мэргэшлийн бэлтгэл
+    """
+
+    class Meta:
+        db_table = 'core_userprofessioninfo'
+        managed = False
+
+    WHERE_COUNTRY_DOTOOD = 1
+    WHERE_COUNTRY_GADAAD = 2
+
+    WHERE_COUNTRY_TYPE = (
+        (WHERE_COUNTRY_DOTOOD, 'Дотоодод'),
+        (WHERE_COUNTRY_GADAAD, 'Гадаадад'),
+    )
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+    where = models.CharField(max_length=256, verbose_name='ХААНА, ЯМАР БАЙГУУЛЛАГАД', null=True, blank=True)
+
+    start_date = models.DateField(verbose_name="Элссэн он сар", null=True, blank=True)
+    end_date = models.DateField(verbose_name="Төгссөн он сар", null=True, blank=True)
+    learned_days = models.IntegerField(verbose_name="Хугацаа хоногоор", default=0, null=True, blank=True)
+
+    profession = models.CharField(max_length=256, verbose_name="эзэмшсэн мэргэжил", null=True, blank=True)
+    license_number = models.CharField(max_length=256, verbose_name="Үнэмлэх, гэрчилгээний дугаар", null=True, blank=True)
+
+    where_country = models.PositiveBigIntegerField(choices=WHERE_COUNTRY_TYPE, db_index=True, default=WHERE_COUNTRY_DOTOOD, verbose_name="Мэргэжил дээшлүүлсэн байдал", null=True, blank=True)
+
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Системд өгөгдөл шинээр оруулсан огноо")

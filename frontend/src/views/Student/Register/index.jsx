@@ -56,7 +56,7 @@ const Register = () => {
         'last_name': 'Овог',
         'first_name': 'Нэр',
         'register_num': 'Регистрийн дугаар',
-        'profession_name': 'Хөтөлбөр',
+        'profession_name': 'Мэргэжил',
         'group_name': 'Анги',
         'group_level': 'Курс',
     }
@@ -100,8 +100,8 @@ const Register = () => {
     // Эрэмбэлэлт
     const [sortField, setSort] = useState('')
 
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
 
     const studentApi = useApi().student
     const groupApi = useApi().student.group
@@ -109,6 +109,8 @@ const Register = () => {
     const degreeApi = useApi().settings.professionaldegree
     const professionApi = useApi().study.professionDefinition
     const settingsApi = useApi().settings.studentRegisterType
+    const studentPassApi = useApi().studentPass
+
 
     // API
     useEffect(() => {
@@ -134,7 +136,7 @@ const Register = () => {
         []
     )
 
-    // Тэнхимын жагсаалт
+    // Хөтөлбөрийн багын жагсаалт
     async function getDepartmentOption() {
         const { success, data } = await fetchData(departmentApi.get())
         if(success) {
@@ -159,7 +161,7 @@ const Register = () => {
 
     }
 
-    // Хөтөлбөрийн жагсаалтын getList функц боловсролын зэргээс хамаарч жагсаалтаа авна. Шаардлагагүй үед хоосон string явуулна.
+    // Мэргэжлийн жагсаалтын getList функц боловсролын зэргээс хамаарч жагсаалтаа авна. Шаардлагагүй үед хоосон string явуулна.
     async function getProfession() {
         const { success, data } = await fetchData(professionApi.getList(select_value?.degree, select_value.department,''))
         if(success) {
@@ -174,6 +176,7 @@ const Register = () => {
             setGroup(data)
         }
     }
+
 
     async function getDatas() {
 
@@ -205,6 +208,11 @@ const Register = () => {
             getDatas()
         }
 	};
+
+    /* Password сэргээх функц */
+    const changePassModal = async(id) => {
+        await fetchData(studentPassApi.changePass(id))
+    }
 
     // ** Function to handle Modal toggle
     const handleModal = () => {
@@ -243,7 +251,6 @@ const Register = () => {
     async function handleSearch() {
         if (searchValue.length > 0) getDatas()
     }
-
     // Хайлтийн хэсэг хоосон болох үед анхны датаг дуудна
 	useEffect(() => {
 		if (searchValue.length == 0) {
@@ -282,7 +289,6 @@ const Register = () => {
             })
         }
     }
-
     return (
         <Fragment>
             <Card>
@@ -291,9 +297,8 @@ const Register = () => {
                 <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
                     <CardTitle tag='h4'>{t('Оюутны бүртгэл')}</CardTitle>
                     <div className='d-flex flex-wrap mt-md-0 mt-1'>
-                    <UncontrolledButtonDropdown disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-read')?false : true}>
-                    {/* <UncontrolledButtonDropdown disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-read')  && school_id? false : true}> */}
-                        <DropdownToggle color='secondary' className='m-50' caret outline>
+                    <UncontrolledButtonDropdown disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-read')  && school_id? false : true}>
+                        <DropdownToggle color='secondary' caret outline>
                             <Download size={15} />
                             <span className='align-middle ms-50'>Export</span>
                         </DropdownToggle>
@@ -311,8 +316,8 @@ const Register = () => {
                     <Button
                         color='primary'
                         onClick={() => handleModal()}
-                        className="m-50"
-                        disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-create') ? false : true}
+                        className="ms-1"
+                        disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-create')  && school_id? false : true}
                     >
                         <Plus size={15} />
                         <span className='align-middle ms-50'>{t('Нэмэх')}</span>
@@ -322,7 +327,7 @@ const Register = () => {
                 <Row className="justify-content-start mx-0 mt-1 mb-1" sm={12}>
                     <Col sm={6} lg={3} >
                         <Label className="form-label" for="department">
-                            {t('Тэнхим')}
+                            {t('Хөтөлбөрийн баг')}
                         </Label>
                         <Controller
                             control={control}
@@ -416,7 +421,7 @@ const Register = () => {
                     </Col>
                     <Col sm={6} lg={3}>
                         <Label className="form-label" for="profession">
-                            {t('Хөтөлбөр')}
+                            {t('Мэргэжил')}
                         </Label>
                         <Select
                             name="profession"
@@ -667,7 +672,7 @@ const Register = () => {
                         )}
                         onSort={handleSort}
                         sortIcon={<ChevronDown size={10} />}
-                        columns={getColumns(currentPage, rowsPerPage, total_count, editModal, handleDelete, user)}
+                        columns={getColumns(currentPage, rowsPerPage, total_count, editModal, handleDelete, user, changePassModal)}
                         paginationPerPage={rowsPerPage}
                         paginationDefaultPage={currentPage}
                         paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}

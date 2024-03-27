@@ -36,9 +36,9 @@ import {  get_day, get_time, ReactSelectStyles, get_lesson_type, get_potok, get_
 import { useTranslation } from 'react-i18next';
 
 import useModal from "@hooks/useModal";
-import useToast from "@hooks/useToast"
 
 import { RoomAdd } from '../Add/roomAdd';
+import useUpdateEffect from '@src/utility/hooks/useUpdateEffect';
 
 const EditModal = ({ open, handleModal, editDatas, refreshDatas }) => {
     const { school_id } = useContext(SchoolContext)
@@ -48,7 +48,8 @@ const EditModal = ({ open, handleModal, editDatas, refreshDatas }) => {
         if(Object.keys(user).length > 0 && user.permissions.includes('lms-timetable-register-update') && !editDatas?.is_score) {
             setDisabled(false)
         }
-    },[user])
+    },[])
+
     var values = {
         lesson: '',
         teacher: '',
@@ -62,7 +63,6 @@ const EditModal = ({ open, handleModal, editDatas, refreshDatas }) => {
     const { showWarning } = useModal()
 
     const { t } = useTranslation()
-    const addToast = useToast()
 
     // ** Hook
     const { control, handleSubmit, reset, setError, clearErrors, setValue, formState: { errors } } = useForm();
@@ -242,13 +242,6 @@ const EditModal = ({ open, handleModal, editDatas, refreshDatas }) => {
         setTime(get_time())
         setDay(get_day())
         setOnlineOption(get_lesson_type())
-        // if (!school_id) {
-        //     setDisabled(true)
-        //     addToast({
-        //         type: "warning",
-        //         text: t("Та салбар сургуулиа сонгоно уу")
-        //     })
-        // }
     },[])
 
     // Хичээл үзэх анги
@@ -285,10 +278,10 @@ const EditModal = ({ open, handleModal, editDatas, refreshDatas }) => {
         {
             getOneData()
         },
-        [editDatas]
+        []
     )
 
-    useEffect(
+    useUpdateEffect(
         () =>
         {
             if (selectedGroups.length > 0) {
@@ -299,7 +292,7 @@ const EditModal = ({ open, handleModal, editDatas, refreshDatas }) => {
         [selectedGroups]
     )
 
-    useEffect(
+    useUpdateEffect(
         () =>
         {
             if (select_value.potok) {
@@ -395,7 +388,9 @@ const EditModal = ({ open, handleModal, editDatas, refreshDatas }) => {
 
         if (!checked && selectedGroups.length == 0) {
             setError('group', { type: 'custom', message: 'Хоосон байна'})
-        } else {
+        }
+
+        if(Object.keys(errors).length === 0) {
             setLoader(true)
 
             var student_ids = []
@@ -452,7 +447,6 @@ const EditModal = ({ open, handleModal, editDatas, refreshDatas }) => {
                 }
             }
             setLoader(false)
-            refreshDatas()
         }
 	}
 
@@ -523,9 +517,6 @@ const EditModal = ({ open, handleModal, editDatas, refreshDatas }) => {
             if (Object.keys(datas).length > 0) {
                 for(let key in datas) {
                     if(datas[key] !== null) {
-                        if (key === 'school') {
-                            if (datas[key] !== school_id) setDisabled(true)
-                        }
                         if (key === 'is_optional') setOnlyCheck(datas[key])
 
                         if (key === 'is_kurats' && datas[key]) setRadio('kurats')
@@ -533,7 +524,12 @@ const EditModal = ({ open, handleModal, editDatas, refreshDatas }) => {
 
                         if (key === 'room' || key === 'teacher' || key === 'lesson') setValue(key, datas[key]?.id)
                         else setValue(key, datas[key])
+
                     } else setValue(key,'')
+
+                    if (key === 'support_teachers') {
+                        setValue('support_teacher', datas[key])
+                    }
 
                     if (key === 'event_id') {
                         setTimeId(datas[key])
@@ -616,7 +612,6 @@ const EditModal = ({ open, handleModal, editDatas, refreshDatas }) => {
             >
                 <ModalHeader
                     className="mb-1"
-                    toggle={handleModal}
                     close={CloseBtn}
                     tag="div"
                 >
@@ -633,7 +628,7 @@ const EditModal = ({ open, handleModal, editDatas, refreshDatas }) => {
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
                     <div className='mt-1'>
                         <Row className='mb-1'>
-                            <Col md={4} sm={12}>
+                            <Col md={3} sm={12}>
                                 <Label className="form-label" for="lesson">
                                     {t('Хичээл')}
                                 </Label>
@@ -670,7 +665,7 @@ const EditModal = ({ open, handleModal, editDatas, refreshDatas }) => {
                                 />
                                 {errors.lesson && <FormFeedback className='d-block'>{t(errors.lesson.message)}</FormFeedback>}
                             </Col>
-                            <Col md={4} sm={12}>
+                            <Col md={3} sm={12}>
                                 <Label className="form-label" for="potok">
                                     {t('Потокийн дугаар')}
                                 </Label>
@@ -705,7 +700,7 @@ const EditModal = ({ open, handleModal, editDatas, refreshDatas }) => {
                                 />
                                 {errors.potok && <FormFeedback className='d-block'>{t(errors.potok.message)}</FormFeedback>}
                             </Col>
-                            <Col md={4} sm={12}>
+                            <Col md={3} sm={12}>
                                 <Label className="form-label" for="teacher">
                                     {t("Багш")}
                                 </Label>
@@ -740,6 +735,38 @@ const EditModal = ({ open, handleModal, editDatas, refreshDatas }) => {
                                 />
                                 {errors.teacher && <FormFeedback className='d-block'>{t(errors.teacher.message)}</FormFeedback>}
                             </Col>
+                            <Col md={3} sm={12}>
+                            <Label className="form-label" for="support_teacher">
+                                {t("Туслах багш")}
+                            </Label>
+                            <Controller
+                                control={control}
+                                defaultValue=''
+                                name="support_teacher"
+                                render={({ field: { value, onChange} }) => {
+                                    return (
+                                        <Select
+                                            name="support_teacher"
+                                            id="support_teacher"
+                                            classNamePrefix='select'
+                                            isClearable
+                                            className={classnames('react-select', { 'is-invalid': errors.support_teacher })}
+                                            isLoading={isLoading}
+                                            placeholder={t(`-- Сонгоно уу --`)}
+                                            options={teacherOption || []}
+                                            value={teacherOption.find((c) => c.id === value)}
+                                            noOptionsMessage={() => t('Хоосон байна.')}
+                                            onChange={(val) => {
+                                                onChange(val?.id || '')
+                                            }}
+                                            styles={ReactSelectStyles}
+                                            getOptionValue={(option) => option.id}
+                                            getOptionLabel={(option) => option.full_name}
+                                        />
+                                    )
+                                }}
+                            />
+                        </Col>
                         </Row>
                     </div>
                     {

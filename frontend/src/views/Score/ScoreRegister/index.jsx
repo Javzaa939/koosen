@@ -45,15 +45,15 @@ const ScoreRegister = () => {
     // ** Hook
     const { control, setValue, formState: { errors } } = useForm({});
 
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
 
-    const default_page = [10, 15, 50, 75, 100]
+    const default_page = [10, 20, 50, 75, 100]
 
     // Хуудаслалтын анхны утга
     const [currentPage, setCurrentPage] = useState(1)
 
     // Нэг хуудсанд харуулах нийт датаны тоо
-    const [rowsPerPage, setRowsPerPage] = useState(10)
+    const [rowsPerPage, setRowsPerPage] = useState(20)
 
     // Хайлт хийхэд ажиллах хувьсагч
     const [searchValue, setSearchValue] = useState('')
@@ -69,10 +69,12 @@ const ScoreRegister = () => {
     const [teacher_option, setTeacherOption] = useState([])
     const [group_option, setGroupOption] = useState([])
     const [teach_score, setHaveTeachScore] = useState(false)
+    const [isDadlaga, setIsDadlaga] = useState(false)
 
     const [select_value, setSelectValue] = useState(values)
 
     const [valid_date, setValidDate] = useState(false)
+    const [exam_date, setExamDate] = useState(false)
 
     // API
     const groupApi = useApi().student.group
@@ -115,6 +117,14 @@ const ScoreRegister = () => {
         }
     }
 
+    // Хугацаа шалгах
+    async function getScoreEnter() {
+        const { success, data } = await fetchData(permissionApi.get(2))
+        if(success) {
+            setExamDate(data)
+        }
+    }
+
     // Дүнгийн жагсаалт
     async function getDatas() {
         const lesson = select_value.lesson
@@ -145,6 +155,7 @@ const ScoreRegister = () => {
         {
             getLessonOption()
             getTime()
+            getScoreEnter()
         },
         []
     )
@@ -218,7 +229,6 @@ const ScoreRegister = () => {
     return (
         <Fragment>
             <Card>
-                {/* {isLoading && Loader} */}
                 <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
                     <CardTitle tag='h4'>{t('Дүнгийн бүртгэл')}</CardTitle>
                 </CardHeader>
@@ -252,6 +262,7 @@ const ScoreRegister = () => {
                                                 class: '',
                                             })
                                             setValue('teacher', '')
+                                            setIsDadlaga(val?.is_dadlaga)
                                         }}
                                         styles={ReactSelectStyles}
                                         getOptionValue={(option) => option.id}
@@ -353,12 +364,12 @@ const ScoreRegister = () => {
                             >
                                 {
                                     default_page.map((page, idx) => (
-                                    <option
-                                        key={idx}
-                                        value={page}
-                                    >
-                                        {page}
-                                    </option>
+                                        <option
+                                            key={idx}
+                                            value={page}
+                                        >
+                                            {page}
+                                        </option>
                                 ))}
                             </Input>
                         </Col>
@@ -406,7 +417,7 @@ const ScoreRegister = () => {
                             </div>
                         )}
                         onSort={handleSort}
-                        columns={getColumns(currentPage, rowsPerPage, total_count, select_value)}
+                        columns={getColumns(currentPage, rowsPerPage, total_count, select_value, exam_date, isDadlaga)}
                         sortIcon={<ChevronDown size={10} />}
                         paginationPerPage={rowsPerPage}
                         paginationDefaultPage={currentPage}

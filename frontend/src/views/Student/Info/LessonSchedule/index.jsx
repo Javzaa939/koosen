@@ -12,7 +12,7 @@ export default function LessonSchedule({ datas })
     function getDayName(day)
     {
         const day_names = days.find(value => value.id === day)
-        return day_names.name
+        return day_names?.name
     }
 
     return (

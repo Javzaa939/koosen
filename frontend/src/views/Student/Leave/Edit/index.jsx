@@ -123,16 +123,15 @@ const EditModal = ({ open, handleModal, edit_id, refreshDatas }) => {
     async function onSubmit(cdata) {
         cdata['statement_date'] = moment(sdate).format('YYYY-MM-DD')
         cdata = convertDefaultValue(cdata)
-        const { success, errors } = await fetchData(leaveApi.put(cdata, edit_id))
+        const { success, error } = await fetchData(leaveApi.put(cdata, edit_id))
         if(success)
         {
             reset()
             handleModal()
             refreshDatas()
         } else {
-            /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in errors) {
-                setError(key, { type: 'custom', message:  errors[key][0]});
+            for (let key in error) {
+                setError(error[key].field, { type: 'custom', message:  error[key].msg});
             }
         }
 	}

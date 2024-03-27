@@ -207,6 +207,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, editId }) => {
                                         bsSize="sm"
                                         placeholder={t('Үсгэн үнэлгээ')}
                                         type="text"
+                                        maxLength={1}
                                         invalid={errors.assesment && true}
                                     />
                                 )}

@@ -957,3 +957,21 @@ def score_register__score_total(teach_score, exam_score):
 
         return full
 
+def calculate_age(birth_date):
+
+    now_date = dt.datetime.now()
+    age = 0
+    if birth_date:
+        year = now_date.year - birth_date.year
+        month = now_date.month - birth_date.month
+        day = now_date.day - birth_date.day
+        if(day <= 0):
+            if month != 0:
+                month -= 1
+            day += get_days_in_month(birth_date.month, birth_date.year)
+        if month == 0:
+            year -= 1
+            month += 12
+        age = dt.datetime(year, month, day)
+
+    return age

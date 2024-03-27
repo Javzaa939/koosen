@@ -48,6 +48,9 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
     const [departmentOptions, setDepartmentOption] = useState([])
     const [isStudent, setStudent] = useState('')
 
+    const [is_new_upload_file, setUploadNewFile] = useState(false)
+    const [featurefile, setFeaturedImg] = useState([])
+
     const {quill, quillRef } = useQuill({
         modules: {
             toolbar: [
@@ -105,6 +108,23 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
 
         const formData = new FormData()
 
+        if(featurefile && featurefile.length > 0) {
+            featurefile.forEach((file) => {
+                if(is_new_upload_file) {
+                    formData.append('image', file.file, file.file.name);
+                }
+                else {
+                    formData.append('image', file.file);
+                    if(file?.file_change) {
+                        formData.append('image', file.file, file.file.name);
+                    }
+                    formData.append('file_change', file?.file_change || false);
+                    formData.append('file_id', file?.id);
+                }
+                formData.append('descriptions', file.description);
+            });
+        }
+
         for (let key in cdata)
         {
             formData.append(key, cdata[key])
@@ -120,6 +140,45 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
             /** Алдааны мессеж */
             for (let key in error) {
                 setError(error[key].field, { type: 'custom', message: error[key].msg});
+            }
+        }
+    }
+
+    const onChangeFile = (e, action) => {
+        setUploadNewFile(true)
+
+        //action 0 үед файлыг устгана.
+        if (action === 0){
+            setFeaturedImg([])
+        } else {
+            const selectedFile = e.target.files[0];
+
+            //Хэрвээ оруулсан файлын төрөл image гэж эхэлсэн үед тус файлыг авна бусад үед алерт илгээнэ.
+            if (selectedFile && selectedFile.type.startsWith('image/')){
+                //Анхны удаа файл оруулхад ажилна.
+                if (featurefile.length === 0){
+                    if(action == 'Get_File') {
+                        const files = Array.prototype.slice.call(e.target.files)
+                        const hereFiles = [...featurefile]
+                        files.map(file => {
+                            if(file) hereFiles.push({file: file, description: file.name})
+                        })
+                        setFeaturedImg(hereFiles)
+                    }
+                //Оруулсан файлаа өөчлөх үед өмнөх файлыг устгаад нэмнэ.
+                } else if (featurefile.length > 0 & action == 'Get_File'){
+                    setFeaturedImg(featurefile.splice(0, 1))
+                    const files = Array.prototype.slice.call(e.target.files)
+                    const hereFiles = [...featurefile]
+                    files.map(file => {
+                        if(file) hereFiles.push({file: file, description: file.name})
+                    })
+                    setFeaturedImg(hereFiles)
+                }
+            } else {
+                //алерт илгээгээд input-ээ хоосон утгатай болгоно.
+                alert('Зөвхөн зураг оруулна уу.');
+                e.target.value = '';
             }
         }
     }
@@ -220,6 +279,43 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                 )}
                             />
                             {errors.body && <FormFeedback className='d-block'>{t(errors.body.message)}</FormFeedback>}
+                        </Col>
+                        <Col md={12} >
+                            <Label for='image'>
+                                Мэдээний зураг оруулах
+                            </Label>
+                            <Controller
+								name='image'
+								control={control}
+								defaultValue=''
+								render={({ field }) => {
+									field.value = field.value ? field.value : ''
+									return (
+										<Input
+											{...field}
+											id='image'
+											type="file"
+											bsSize='sm'
+                                            accept="image/*"
+											onChange={(e) => onChangeFile(e, 'Get_File')}
+										/>
+									)
+								}}
+							/>
+                        </Col>
+                        <Col md={12} className='mt-50'>
+                            {
+                                featurefile.map((image, index) => {
+                                    return (
+                                        <div key={index}>
+                                            {
+                                                image.description || image?.file?.name
+                                            }
+                                            <X className='ms-50' role="button" color="red" size={15} onClick={(e) => onChangeFile(e, index)}></X>
+                                        </div>
+                                    )
+                                })
+                            }
                         </Col>
                         <Col md={12}>
                             <Label className='form-label' for="scope">

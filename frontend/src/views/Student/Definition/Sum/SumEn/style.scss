@@ -1,0 +1,14 @@
+.fontchange{
+    font-family: 'Times New Roman', Times, serif;
+}
+
+@page {
+    size: portrait A4;
+    margin: 0;
+    margin-right: 30px;
+}
+
+@media print {
+// print дарах үед угтах css
+
+}

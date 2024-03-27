@@ -18,8 +18,8 @@ import Detail from './Detail'
 const Register = () => {
 
      // Loader
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
 
     //Context
     const { user } = useContext(AuthContext)

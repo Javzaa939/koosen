@@ -10,7 +10,7 @@ from lms.models import Score
 from lms.models import Group
 from lms.models import Season
 from lms.models import Student
-from lms.models import Stipend
+from lms.models import PaymentSeasonClosing
 from lms.models import Learning
 from lms.models import LessonType
 from lms.models import LessonType
@@ -27,10 +27,12 @@ from lms.models import StudentAdmissionScore
 from lms.models import Country
 from lms.models import TimeTable
 from lms.models import DefinitionSignature
-from lms.models import Permissions
-from lms.models import Roles
+from core.models import Permissions
+from core.models import Roles
 from lms.models import AdmissionBottomScore
-from lms.models import OrgPosition
+from lms.models import PrintSettings
+from lms.models import ScoreRegister
+from lms.models import StudentGrade
 
 from .serializers import ScoreSerailizer
 from .serializers import SeasonSerailizer
@@ -52,6 +54,10 @@ from .serializers import DefinitionSignatureSerializer
 from .serializers import PermissionsSerializer
 from .serializers import RolesSerializer
 from .serializers import RolesListSerializer
+from .serializers import PrintSettingsListSerializer
+from .serializers import PrintSettingsSerializer
+from .serializers import StudentGradeSerializer
+
 
 from django.db import transaction
 from django.db.models import Max, Q
@@ -60,7 +66,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 
 from main.utils.function.pagination import CustomPagination
-from main.utils.function.utils import has_permission, list_to_dict
+from main.utils.function.utils import has_permission, list_to_dict, get_active_year_season
 from main.decorators import login_required
 from main.utils.function.serializer import post_put_action
 
@@ -848,7 +854,7 @@ class ScoreAPIView(
 
     """ Үнэлгээний бүртгэл """
 
-    queryset = Score.objects.all().order_by("-score_max")
+    queryset = Score.objects.all().order_by("-created_at")
     serializer_class = ScoreSerailizer
 
     @has_permission(must_permissions=['lms-settings-score-read'])
@@ -881,6 +887,7 @@ class ScoreAPIView(
         else:
             # Олон алдааны мессэж буцаах бол үүнийг ашиглана
             for key in serializer.errors:
+
                 return_error = {
                     "field": key,
                     "msg": "Код бүртгэгдсэн байна"
@@ -893,25 +900,30 @@ class ScoreAPIView(
         "Үнэлгээний бүртгэл засах"
 
         datas = request.data
-        code = datas.get('score_code')
 
-        checked_qs = Score.objects.exclude(id=pk).filter(score_code=code)
-        if len(checked_qs) > 0:
-            return_error = {
-                "field": 'score_code',
-                "msg": "Код бүртгэгдсэн байна"
-            }
+        instance = self.queryset.filter(id=pk).first()
+        serializer = self.get_serializer(instance, data=datas)
+
+        if serializer.is_valid(raise_exception=False):
+            with transaction.atomic():
+                try:
+                    self.perform_create(serializer)
+
+                except Exception:
+                    return request.send_error("ERR_002")
+
+            return request.send_info("INF_002")
+
+        else:
+            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
+            for key in serializer.errors:
+
+                return_error = {
+                    "field": key,
+                    "msg": "Код бүртгэгдсэн байна"
+                }
+
             return request.send_error_valid(return_error)
-
-        with transaction.atomic():
-            try:
-                self.queryset.filter(id=pk).update(**datas)
-            except Exception as e:
-                print(e)
-                return request.send_error("ERR_002")
-
-        return request.send_info("INF_002")
-
 
     @has_permission(must_permissions=['lms-settings-score-delete'])
     def delete(self, request, pk=None):
@@ -971,6 +983,7 @@ class SystemSettingsAPIView(
         return request.send_info('INF_001')
 
     @has_permission(must_permissions=['lms-settings-аctiveyear-update'])
+    @transaction.atomic()
     def put(self, request, pk=None):
         " ажиллах жилийн тохиргоо засах "
 
@@ -1003,17 +1016,124 @@ class SystemSettingsAPIView(
 
             active_lesson_year = instance.active_lesson_year
             active_lesson_season = instance.active_lesson_season
-            # closing_qs = PaymentSeasonClosing.objects.filter(lesson_year=active_lesson_year, lesson_season=active_lesson_season)
+            closing_qs = PaymentSeasonClosing.objects.filter(lesson_year=active_lesson_year, lesson_season=active_lesson_season)
 
-            # if not closing_qs:
-            #     return request.send_error('ERR_02', 'Сургалтын төлбөрийн улирлын хаалт хийгээгүй байна')
+            if not closing_qs:
+                return request.send_error('ERR_02', 'Сургалтын төлбөрийн улирлын хаалт хийгээгүй байна')
 
         serializer = self.get_serializer(instance, data=data, partial=True)
-
         if not serializer.is_valid(raise_exception=False):
             return request.send_error_valid(serializer.errors)
 
         serializer.save()
+
+        # Бодогдсон голчуудыг хадгалах хүснэгт
+        student_grade_list = []
+
+        # Тухайн жил, улирал болон идэвхитэй суралцаж байгаа оюутнуудын дүн авах хэсэг
+        score_qs = ScoreRegister.objects.filter(student__status__code=1, lesson_year=active_lesson_year, lesson_season=season)
+        try:
+            # Идэвхитэй суралцаж байгаа оюутнуудын ID-г авах хэсэг
+            student_list = Student.objects.filter(status__code=1).values_list("id", flat=True)
+
+            # оюутнуудын ID-гаар гүйлгэх хэсэг
+            for student in student_list:
+                # Хувьсагчдыг зарлах хэсэг
+                grade_cr_sum = 0
+                cr_sum = 0
+                average = 0
+                # Оюутны тухайн улирлын дүнг авах хэсэг
+                student_grade = score_qs.filter(student=student)
+
+                # Хичээлүүдээр гүйлгэх хэсэг
+                for lesson in student_grade:
+                    cr = lesson.lesson.kredit
+                    score_total = lesson.score_total
+                    cr_sum += cr
+                    grade_cr_sum += (score_total * cr)
+
+                if cr_sum != 0 and grade_cr_sum != 0:
+                    average = grade_cr_sum / cr_sum
+                    average = round(average, 2)
+
+                # Авсан датагаар instance үүсгэх хэсэг
+                student_grade_list.append(StudentGrade(
+                    student = Student.objects.get(id=student),
+                    score = Score.objects.filter(score_max__gte=average, score_min__lte=average).first(),
+                    lesson_year = active_lesson_year,
+                    lesson_season = Season.objects.get(id=season),
+                    credit = cr_sum,
+                    average = average
+                ))
+
+            # Өгөгдлийн санд хадгалах хэсэг
+            StudentGrade.objects.bulk_create(student_grade_list)
+
+            # Сурагчдын дүнгийн мэдээллийг авах хэсэг
+            grade_qs = StudentGrade.objects.all()
+
+            # Бодогдогдсон дүнг хадгалах хэсэг
+            student_grade_list_create = []
+            student_grade_list_update = []
+
+            # Сурагч сурагчаар дүн бодох хэсэг
+            for student in student_list:
+                cr_sum = 0                  # Кредитүүдийн нийлбэрийг хадгалах хувьсагч
+                grade_cr_sum = 0            # Кредит болон дундажуудын нийлбэрийг хадгалах хувьсагч
+                all_sem_average = 0         # Бодогдсон дүнг хадгалах хувьсагч
+
+                # Сурагчийн мэдээллийг авах хэсэг
+                grade_qs_student = grade_qs.filter(student=student)
+
+                # 1 үед тухайн семистерт шинээр элссэн сурагч гэж үзэн энэ семистерт бодогдсон дүнгээр бүх дүнг хадгална
+                if grade_qs_student.count() == 1:
+
+                    all_sem_average_obj = grade_qs_student.first()
+
+                    # Тухайн оюутны үндсэн дүнг шинээр оруулан обьект болгон хүснэгтэд оруулах хэсэг
+                    student_grade_list_create.append(StudentGrade(
+                        student = Student.objects.get(id=student),
+                        score = Score.objects.filter(score_max__gte=all_sem_average_obj.average, score_min__lte=all_sem_average_obj.average).first(),
+                        lesson_year = None,
+                        lesson_season = None,
+                        credit = all_sem_average_obj.credit,
+                        average = all_sem_average_obj.average
+                    ))
+                else:
+
+                    # Тухайн оюутны өмнөх семистерт бодогдсон дүнгээр бодолт хийх хэсэг
+                    for grade in grade_qs_student:
+                        if grade.lesson_season != None and grade.lesson_year != None:
+
+                            if not grade.credit:
+                                cr_sum += grade.credit
+                            if grade.average and grade.credit:
+                                grade_cr_sum += grade.credit * grade.average
+                        else:
+
+                            all_sem_average_before = grade
+
+                    if grade_cr_sum != 0 and cr_sum != 0:
+                        all_sem_average = round((grade_cr_sum / cr_sum), 2)
+
+                    all_sem_average_before.score = Score.objects.filter(score_max__gte=all_sem_average, score_max__lte=all_sem_average).first()
+                    all_sem_average_before.average = all_sem_average
+                    all_sem_average_before.credit = cr_sum
+
+                    # Тухайн оюутны үндсэн дүнг засаж оруулан обьект болгон хүснэгтэд оруулах хэсэг
+                    student_grade_list_update.append(all_sem_average_before)
+
+            # Шинээр оруулах мэдээлэл байхгүй үед уг үйлдлийг хийхгүй
+            if len(student_grade_list_create) > 0:
+                # Өгөгдлийн санд оруулах хэсэг
+                StudentGrade.objects.bulk_create(student_grade_list_create)
+
+            # Өгөгдлийн санд оруулах хэсэг
+            StudentGrade.objects.bulk_update(student_grade_list_update, ["average", "credit", "score"])
+
+        except Exception as e:
+            return request.send_error("ERR_002", e.__str__)
+
         return request.send_info('INF_002')
 
     def delete(self, request, pk=None):
@@ -1673,17 +1793,7 @@ class RolesAPIView(
         """ Role үүсгэх
         """
 
-        orgpositions = request.data['orgpositions']
-        del request.data['orgpositions']
-
-        created_qs = post_put_action(self, request, 'post', request.data, None, True)
-
-        # Албан тушаалууд дээр сонгогдсон role-ийг оноож өгөх
-        for orgposition in orgpositions:
-            OrgPosition.objects.get(pk=orgposition).roles.add(created_qs.id)
-
-
-        return request.send_info("INF_001")
+        return post_put_action(self, request, 'post', request.data)
 
     @login_required()
     @transaction.atomic
@@ -1691,23 +1801,7 @@ class RolesAPIView(
         """ Role засах
         """
 
-        orgpositions = request.data['orgpositions']
-        del request.data['orgpositions']
-
-        updated_qs = post_put_action(self, request, 'put', request.data, pk, True)
-
-        # Тухайн role дээрх бүх албан тушаалууд олно
-        orgpositions_qs = OrgPosition.objects.filter(roles__id=updated_qs.id)
-
-        # Тухайн role-д хамааралтай албан тушаалуудаас (role-ийг) устгана
-        for orgposition_qs in orgpositions_qs:
-            orgposition_qs.roles.remove(updated_qs)
-
-        # Тухайн role-ийг сонгогдсон албан тушаалуудад онооно
-        for orgposition in orgpositions:
-            OrgPosition.objects.get(pk=orgposition).roles.add(updated_qs.id)
-
-        return request.send_info("INF_002")
+        return post_put_action(self, request, 'put', request.data, pk)
 
     @login_required()
     @transaction.atomic
@@ -1717,3 +1811,108 @@ class RolesAPIView(
 
         self.destroy(request, pk)
         return request.send_info("INF_003")
+
+
+class PrintAPIView(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    generics.GenericAPIView,
+):
+    """ Хэвлэх тохиргоо  """
+
+    queryset = PrintSettings.objects.order_by("-created_at")
+    serializer_class = PrintSettingsSerializer
+
+    @has_permission(must_permissions=['lms-settings-print-read'])
+    def get(self, request, pk=None):
+        " Хэвлэх тохиргоо жагсаалт "
+
+        self.serializer_class = PrintSettingsListSerializer
+
+        if pk:
+            one_data = self.retrieve(request, pk).data
+            return request.send_data(one_data)
+
+        all_data = self.list(request).data
+        return request.send_data(all_data)
+
+    @has_permission(must_permissions=['lms-settings-print-create'])
+    def post(self, request):
+        " Хэвлэх тохиргоо шинээр үүсгэх "
+
+        data = request.data
+
+        serializer = self.get_serializer(data=data)
+        if serializer.is_valid(raise_exception=False):
+            with transaction.atomic():
+                try:
+                    self.perform_create(serializer)
+                except Exception:
+                    return request.send_error("ERR_002")
+
+            return request.send_info("INF_001")
+
+        else:
+            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
+            for key in serializer.errors:
+
+                return_error = {
+                    "field": key,
+                    "msg": "Хоосон байна"
+                }
+
+                return request.send_error_valid(return_error)
+
+
+    @has_permission(must_permissions=['lms-settings-print-update'])
+    def put(self, request, pk=None):
+        "Хэвлэх тохиргоо засах"
+
+
+        datas = request.data
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=datas)
+
+        if serializer.is_valid(raise_exception=False):
+            with transaction.atomic():
+                try:
+                    self.perform_create(serializer)
+                except Exception:
+                    return request.send_error("ERR_002")
+            return request.send_info("INF_002")
+        else:
+            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
+            for key in serializer.errors:
+                return_error = {
+                    "field": key,
+                    "msg": "Хоосон байна"
+                }
+
+            return request.send_error_valid(return_error)
+
+    @has_permission(must_permissions=['lms-settings-print-delete'])
+    def delete(self, request, pk=None):
+        "Хэвлэх устгах "
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
+
+
+@permission_classes([IsAuthenticated])
+class YearSeasonListAPIView(
+    generics.GenericAPIView,
+):
+    def get(self, request, pk=None):
+        """ жил улирлын жагсаалт
+        """
+
+        year_list = list(SystemSettings.objects.order_by('active_lesson_year').values_list('active_lesson_year', flat=True).distinct())
+        season_list = SeasonSerailizer(Season.objects.order_by("-created_at"), many=True).data
+
+        return request.send_data({
+            'year_list': year_list,
+            'season_list': season_list
+        })

@@ -63,7 +63,7 @@ export function getColumns () {
         },
 		{
 			name: `${'Зөрүү гүйц/кр '}`,
-			selector: (row) => ((row?.exec_kr + row?.not_chamber_exec_kr) - row?.teacher_norm),
+			selector: (row) => ((row?.exec_kr + row?.not_chamber_exec_kr) - row?.teacher_norm).toFixed(2),
 			center: true
         },
 	]

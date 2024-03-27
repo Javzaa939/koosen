@@ -15,8 +15,8 @@ import {
 import Select from 'react-select'
 import { useTranslation } from 'react-i18next'
 import DataTable from 'react-data-table-component'
-import { ChevronDown ,Search } from "react-feather"
-import { getPagination, ReactSelectStyles } from '@utils'
+import { ChevronDown, Search, Printer, Plus } from "react-feather"
+import { getPagination, ReactSelectStyles, printTableHtml } from '@utils'
 
 // ** Styles Imports
 import '@styles/react/libs/react-select/_react-select.scss'
@@ -24,6 +24,7 @@ import '@styles/react/libs/flatpickr/flatpickr.scss'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
+import useUpdateEffect from '@hooks/useUpdateEffect'
 
 import { getColumns } from './helpers'
 
@@ -31,8 +32,8 @@ const Estimate = () => {
 
     const { t } = useTranslation()
 
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
+    const { Loader, isLoading, fetchData } = useLoader({})
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
 
     const default_page = [10, 15, 50, 75, 100]
 
@@ -48,6 +49,24 @@ const Estimate = () => {
     const [searchValue, setSearchValue] = useState('')
     const [departmentOption, setDepartmentOption] = useState([])
     const [salbar, setSalbar] = useState('')
+
+    /** useState */
+    const [ columnNames, setColumnNames ] = useState(
+    [
+        {
+            name: "Багшийн овог нэр ",
+            keys: [ 'full_name' ]
+        },
+        {
+            name: "албан тушаал",
+            keys: [ 'org_position']
+        },
+        {
+            name: "Кредит цаг",
+            keys: [ 'score' ]
+        },
+    ])
+    const [ printTitle, setPrintTitle ] = useState('Б цагийн тооцооны нэгтгэл')
 
     // API
     const salbarApi = useApi().hrms.department
@@ -68,19 +87,11 @@ const Estimate = () => {
         }
     }
 
-    useEffect(
-        () =>
-        {
-            getDatas()
-        },
-        [currentPage, rowsPerPage, salbar]
-    )
-
     useEffect(() => {
         getDepartmentDatas()
     }, [])
 
-	useEffect(() => {
+	useUpdateEffect(() => {
 		if (searchValue.length == 0) {
 			getDatas();
 		} else {
@@ -118,17 +129,39 @@ const Estimate = () => {
         setCurrentPage(page.selected + 1)
     }
 
+    function handlerPrint()
+    {
+        printTableHtml(columnNames, datas, printTitle)
+    }
+
+    useUpdateEffect(
+        () =>
+        {
+            getDatas()
+        },
+        [currentPage, rowsPerPage, salbar]
+    )
+
     return (
         <Fragment>
             <Card>
                 {isTableLoading && Loader}
                 <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
                     <CardTitle tag='h4'>{t('Б цагийн тооцооны нэгтгэл')}</CardTitle>
+                        <div className='d-flex flex-wrap mt-md-0 mt-1'>
+                            <Button
+                                color='primary'
+                                onClick={() => handlerPrint()}
+                            >
+                                <Printer size={15} />
+                                <span className='align-middle ms-50'>{t('Хэвлэх')}</span>
+                            </Button>
+                        </div>
                 </CardHeader>
                 <Row className="mx-0 mt-1">
                     <Col md={3}>
                         <Label className="form-label" for="department">
-                            {t('Тэнхим')}
+                            {t('Хөтөлбөрийн баг')}
                         </Label>
                         <Select
                             name="department"
@@ -151,6 +184,16 @@ const Estimate = () => {
                             getOptionValue={(option) => option.id}
                             getOptionLabel={(option) => option.name}
                         />
+                    </Col>
+                    <Col className="d-flex align-items-center justify-content-end ">
+                        <Button
+                            color='primary'
+                            disabled={ salbar ? false : true}
+                            onClick={() => getDatas()}
+                        >
+                            <Plus size={15} />
+                            <span className='align-middle ms-50'>{t('Тооцох')}</span>
+                        </Button>
                     </Col>
                 </Row>
                 <Row className="d-flex justify-content-between mx-0 mt-1 mb-1">

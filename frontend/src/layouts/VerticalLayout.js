@@ -343,7 +343,7 @@ const VerticalLayout = (props) =>
                         if (menus.id === 'service' && !user.permissions?.includes('lms-service-news-read')) delete cNavigation[idx];
     
                         /** Статистик */
-                        if (menus.id === 'statistic' && !user.permissions?.includes('lms-statistic-read')) delete cNavigation[idx];
+                        if (menus.id === 'statistic' && !user.permissions?.includes('lms-statistic-read'))
     
                         /** Хандах эрх */
                         if (menus.id === 'role' && !user.permissions?.includes('role-read')) delete cNavigation[idx];

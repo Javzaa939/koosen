@@ -84,8 +84,8 @@ const Score = () => {
     const [pageCount, setPageCount] = useState(1)
 
 	// Loader
-	const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false});
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
+	const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true});
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
 
 
 	// Modal
@@ -100,7 +100,7 @@ const Score = () => {
     const depApi = useApi().hrms.department
 	const groupApi = useApi().student.group
 
-    //Хөтөлбөрийн жагсаалт авах
+    //Мэргэжлийн жагсаалт авах
     async function getProfession () {
 
         var degree_id=select_value?.degree
@@ -233,8 +233,7 @@ const Score = () => {
 				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
 					<CardTitle tag="h4">{t('Анги бүлгийн бүртгэл')}</CardTitle>
                     <div className='d-flex flex-wrap mt-md-0 mt-1'>
-                        <Button color='primary' disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-student-group-create'))? false : true} onClick={() => handleModal()}>
-                        {/* <Button color='primary' disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-student-group-create')  && school_id )? false : true} onClick={() => handleModal()}> */}
+                        <Button color='primary' disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-student-group-create')  && school_id )? false : true} onClick={() => handleModal()}>
                             <Plus size={15} />
                             <span className='align-middle ms-50'>{t('Нэмэх')}</span>
                         </Button>
@@ -243,7 +242,7 @@ const Score = () => {
                 <Row className="justify-content-between mx-0 mt-1 mb-1">
                     <Col sm={6} lg={3}>
                         <Label className="form-label" for="department">
-                            {t('Тэнхим')}
+                            {t('Хөтөлбөрийн баг')}
                         </Label>
                         <Controller
                             control={control}
@@ -321,7 +320,7 @@ const Score = () => {
                         </Col>
                         <Col sm={6} lg={3}>
                             <Label className="form-label" for="profession">
-                                {t('Хөтөлбөр')}
+                                {t('Мэргэжил')}
                             </Label>
                             <Controller
                                 control={control}

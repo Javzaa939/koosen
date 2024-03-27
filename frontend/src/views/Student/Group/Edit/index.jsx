@@ -46,7 +46,7 @@ const EditModal = ({ open, handleModal, group_id, refreshDatas }) => {
 
     const { school_id } = useContext(SchoolContext)
 
-    // Тэнхимын id
+    // Хөтөлбөрийн багын id
     const [ dep_id, setDepId] = useState('')
 
     const [ profOption, setProfession] = useState([])
@@ -79,7 +79,7 @@ const EditModal = ({ open, handleModal, group_id, refreshDatas }) => {
         }
     },[user])
 
-    //Хөтөлбөрийн жагсаалт авах
+    //Мэргэжлийн жагсаалт авах
     async function getProfession () {
 
         const { success, data } = await fetchData(professionApi.getList(degree_id, dep_id))
@@ -129,7 +129,9 @@ const EditModal = ({ open, handleModal, group_id, refreshDatas }) => {
         getDepartment()
         getYear()
         getDegree()
+        getProfession()
         getStatus()
+        getTeacher()
         getDatas()
     },[])
 
@@ -137,13 +139,10 @@ const EditModal = ({ open, handleModal, group_id, refreshDatas }) => {
         () =>
         {
             getProfession()
+            getTeacher()
         },
         [degree_id, dep_id]
     )
-
-    useEffect(() => {
-        getTeacher()
-    }, [dep_id, school_id])
 
     async function getDatas() {
         if(group_id) {
@@ -158,13 +157,6 @@ const EditModal = ({ open, handleModal, group_id, refreshDatas }) => {
 
                     if(key === 'profession' || key === 'degree' || key === 'learning_status' || key === 'teacher' || key === 'department') {
                         setValue(key, data[key]?.id)
-                        if(key === 'degree') {
-                            setDegreeId(data[key]?.id)
-                        }
-
-                        if(key === 'department') {
-                            setDepId(data[key]?.id)
-                        }
                     }
 
                     if (key === 'is_finish') {
@@ -177,17 +169,25 @@ const EditModal = ({ open, handleModal, group_id, refreshDatas }) => {
     }
 
 	async function onSubmit(cdata) {
+        var selected_students = students.filter((item) => {
+            item?.is_selected ?  (item?.is_selected == true  && item.id)  : item?.id
+            if (item?.is_selected && item?.is_selected) {
+                return item.id
+            } else {
+                item.id
+            }
+        })
         cdata['is_finish'] = is_finish
         cdata['finish_students'] = add_students
-        const { success, errors } = await fetchData(groupApi.put(cdata, group_id))
+        const { success, error } = await fetchData(groupApi.put(cdata, group_id))
         if(success) {
             reset()
             handleModal()
             refreshDatas()
         } else {
             /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in errors) {
-                setError(key, { type: 'custom', message:  errors[key][0]});
+            for (let key in error) {
+                setError(error[key].field, { type: 'custom', message:  error[key].msg});
             }
         }
 	}
@@ -233,7 +233,7 @@ const EditModal = ({ open, handleModal, group_id, refreshDatas }) => {
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="department">
-                               {t('Тэнхим')}
+                               {t('Хөтөлбөрийн баг')}
                             </Label>
                             <Controller
                                 control={control}
@@ -336,7 +336,7 @@ const EditModal = ({ open, handleModal, group_id, refreshDatas }) => {
                         </Col>
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="profession">
-                               {t('Хөтөлбөр')}
+                               {t('Мэргэжил')}
                             </Label>
                             <Controller
                                 control={control}
@@ -370,7 +370,7 @@ const EditModal = ({ open, handleModal, group_id, refreshDatas }) => {
                         </Col>
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="name">
-                                {t("Дамжааны нэр")}
+                                {t("Ангийн нэр")}
                             </Label>
                             <Controller
                                 defaultValue=''
@@ -381,7 +381,7 @@ const EditModal = ({ open, handleModal, group_id, refreshDatas }) => {
                                     <Input
                                         id ="name"
                                         bsSize="sm"
-                                        placeholder={t('Дамжааны нэр')}
+                                        placeholder={t('Ангийн нэр')}
                                         {...field}
                                         type="text"
                                         readOnly={is_disabled}

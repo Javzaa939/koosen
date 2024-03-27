@@ -1,4 +1,4 @@
-import  { useContext, useState, useEffect, useRef } from 'react'
+import  { useContext, useState, useRef } from 'react'
 import { AlertOctagon } from 'react-feather'
 import { UncontrolledTooltip, Input, FormFeedback } from 'reactstrap'
 
@@ -12,21 +12,19 @@ import SchoolContext from "@context/SchoolContext"
 import ActiveYearContext from "@context/ActiveYearContext"
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, total_count, select_value)
+export function getColumns (currentPage, rowsPerPage, total_count, select_value, exam_date, isDadlaga)
 {
 	const page_count = Math.ceil(total_count / rowsPerPage)
-
-	const focusData = useRef(undefined)
 
 	const [ errors, setErrors ] = useState({ teach_score: [], exam_score: [] })
 
     const { user } = useContext(AuthContext)
     const { school_id } = useContext(SchoolContext)
 	const { cyear_name, cseason_id } = useContext(ActiveYearContext)
+	const focusData = useRef(undefined)
+	const { fetchData } = useLoader({});
 
 	const scoreApi = useApi().score.register
-
-	const { isLoading, Loader, fetchData } = useLoader({});
 
 	/** Сонгосон хуудасны тоо датаны тооноос их болсон үед хуудаслалт 1-ээс эхлэнэ */
     if (currentPage > page_count) {
@@ -127,7 +125,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, select_value)
 		}
 		else if (event.key === 'Enter')
 		{
-			if (event.target.value < 0 || event.target.value > 30 || event.target.value == '' || event.target.value == undefined)
+			if (event.target.value < 0 || event.target.value > (isDadlaga ? 100 : 30) || event.target.value == '' || event.target.value == undefined)
 			{
 				let examErrors = errors.exam_score
 				examErrors.push(id)
@@ -146,10 +144,10 @@ export function getColumns (currentPage, rowsPerPage, total_count, select_value)
 		}
 	};
 
+
 	/** Input-ээс идэвхгүй болох үеийн event */
 	const focusOut = (event) => {
-		if (focusData.current || focusData.current == '')
-		{
+		if (focusData.current || focusData.current == ''){
 			event.target.value = focusData.current
 		}
 	}
@@ -172,9 +170,10 @@ export function getColumns (currentPage, rowsPerPage, total_count, select_value)
 		{
 			header: 'student',
 			name: `${t('Оюутны нэр')}`,
-			selector: (row) => row?.student?.full_name,
+			selector: (row) => (row?.student?.last_name + '  ' + row?.student?.first_name),
             sortable: true,
-			center: true,
+			wrap:true,
+			left: true,
         },
 		{
 			header: 'teach_score',
@@ -197,7 +196,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, select_value)
 						<AlertOctagon id={`complaintListDatatableTeachInput${row?.id}`} width={"20px"} className='ms-1' />
 						<UncontrolledTooltip placement='top' target={`complaintListDatatableTeachInput${row.id}`} >Enter дарсан тохиолдолд дүн батлагдах болно.</UncontrolledTooltip>
 					</div>
-					<FormFeedback className='d-block'>{errors?.teach_score && errors?.teach_score.includes(`${row.lesson}${row?.id}`) && `0-30 хооронд утга оруулна уу.`}</FormFeedback>
+					<FormFeedback className='d-block'>{errors?.teach_score && errors?.teach_score.includes(`${row.lesson}${row?.id}`) && `0-70 хооронд утга оруулна уу.`}</FormFeedback>
 				</>
 			),
             sortable: true,
@@ -215,6 +214,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, select_value)
 								id={`${count}-input`}
 								className=''
 								type='number'
+								disabled={!exam_date && Object.keys(user).length && user.permissions.includes('lms-score-register-update') ? false : true}
 								bsSize='sm'
 								placeholder={t('Дүн')}
 								defaultValue={row?.exam_score}

@@ -1,3 +1,11 @@
 .emptybutton{
     cursor: not-allowed;
 }
+
+.lesson_hover{
+	transition: 0.35s;
+}
+
+.lesson_hover:hover {
+	color: #0066ff !important;
+}

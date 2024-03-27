@@ -68,8 +68,15 @@ const Createmodal = ({ open, handleModal, refreshDatas, edit_id }) => {
 	const { Loader, isLoading, fetchData } = useLoader({});
 
     const studentApi = useApi().student
-    const schoolApi = useApi().survey.surveyrange;
+    const schoolApi = useApi().hrms.subschool
     const studentmovementApi = useApi().student.movement
+
+    const { isLoading: studentLoading, fetchData: fetchStudent } = useLoader({});
+
+    const [bottom_check, setBottomCheck] = useState(3)
+    const [scroll_bottom_datas, setScrollBottomDatas] = useState([]);
+    const [student_search_value, setStudentSearchValue] = useState([]);
+    const SelectStudentApi = useApi().role.student
 
     // Сургуулийн жагсаалт
     async function getSchoolOption() {
@@ -81,20 +88,30 @@ const Createmodal = ({ open, handleModal, refreshDatas, edit_id }) => {
         }
     }
 
-    // Сургуулийн жагсаалт
-    async function getStudentOption() {
-        if(!edit_id){
-            const { success, data } = await fetchData(studentApi.getList())
-            if(success) {
-                setStudentOption(data)
-            }
+    //  Оюутны жагсаалт хайлтаар
+    async function getStudentOption(searchValue) {
+        const { success, data } = await fetchStudent(SelectStudentApi.getStudent(searchValue))
+        if(success) {
+            setStudentOption(data)
+        }
+    }
+
+    //  Оюутны жагсаалт select ашигласан
+    async function getSelectBottomDatas(state){
+        const { success, data } = await fetchStudent(studentApi.getList(state))
+        if(success){
+            setScrollBottomDatas((prev) => [...prev, ...data])
         }
     }
 
     useEffect(()=>{
         getSchoolOption()
-        getStudentOption()
+        getSelectBottomDatas(2)
     },[])
+
+    function handleStudentSelect(value){
+        getStudentOption(value)
+    }
 
 	async function onSubmit(cdata) {
         cdata['is_internal'] = school_checked
@@ -109,27 +126,27 @@ const Createmodal = ({ open, handleModal, refreshDatas, edit_id }) => {
             }
             cdata['student'] = studentInfo?.student.id
             cdata = convertDefaultValue(cdata)
-            const { success, errors } = await fetchData(studentmovementApi.put(cdata, studentInfo.id))
+            const { success, error } = await fetchData(studentmovementApi.put(cdata, studentInfo.id))
             if(success){
                 reset()
                 handleModal()
                 refreshDatas()
             } else {
                 /** Алдааны мессэжийг input дээр харуулна */
-                for (let key in errors) {
-                    setError(key, { type: 'custom', message: errors[key][0]});
+                for (let key in error) {
+                    setError(error[key].field, { type: 'custom', message:  error[key].msg});
                 }
             }
         } else {
-            const { success, errors } = await fetchData(studentmovementApi.post(cdata))
+            const { success, error } = await fetchData(studentmovementApi.post(cdata))
             if(success) {
                 reset()
                 handleModal()
                 refreshDatas()
             } else {
                 /** Алдааны мессэжийг input дээр харуулна */
-                for (let key in errors) {
-                    setError(key, { type: 'custom', message:  errors[key][0]});
+                for (let key in error) {
+                    setError(error[key].field, { type: 'custom', message:  error[key].msg});
                 }
             }
         }
@@ -257,21 +274,48 @@ const Createmodal = ({ open, handleModal, refreshDatas, edit_id }) => {
                                     control={control}
                                     defaultValue=''
                                     name="student"
-                                    render={({ field: { value, onChange} }) => {
+                                    render={({ field: {value, onChange } }) => {
                                         return (
                                             <Select
                                                 name="student"
                                                 id="student"
                                                 classNamePrefix='select'
                                                 isClearable
-                                                className={classnames('react-select', { 'is-invalid': errors.student })}
-                                                isLoading={isLoading}
-                                                placeholder={t(`-- Сонгоно уу --`)}
-                                                options={studentOption || []}
-                                                value={studentOption.find((c) => c.id === value)}
-                                                noOptionsMessage={() => t('Хоосон байна')}
+                                                className={classnames('react-select', {'is-invalid': errors.student})}
+                                                placeholder={`Хайх`}
+                                                isLoading={studentLoading}
+                                                loadingMessage={() => "Түр хүлээнэ үү..."}
+                                                options={
+                                                    student_search_value.length === 0
+                                                        ? scroll_bottom_datas || []
+                                                        : studentOption || []
+                                                }
+                                                value={
+                                                    student_search_value.length === 0
+                                                        ? scroll_bottom_datas.find((c) => c.id === value)
+                                                        : studentOption.find((c) => c.id === value)
+                                                }
+                                                noOptionsMessage={() =>
+                                                    student_search_value.length > 1
+                                                        ? t('Хоосон байна')
+                                                        : null
+                                                }
+                                                onMenuScrollToBottom={() => {
+                                                    if(student_search_value.length === 0){
+                                                        setBottomCheck(bottom_check + 1)
+                                                        getSelectBottomDatas(bottom_check)
+                                                    }
+                                                }}
                                                 onChange={(val) => {
                                                     onChange(val?.id || '')
+                                                }}
+                                                onInputChange={(e) => {
+                                                    setStudentSearchValue(e);
+                                                    if(e.length > 1 && e !== student_search_value){
+                                                        handleStudentSelect(e);
+                                                    } else if (e.length === 0){
+                                                        setStudentOption([]);
+                                                    }
                                                 }}
                                                 styles={ReactSelectStyles}
                                                 getOptionValue={(option) => option.id}
@@ -431,7 +475,7 @@ const Createmodal = ({ open, handleModal, refreshDatas, edit_id }) => {
                                                         isClearable={!selectedPro}
                                                         className={classnames('react-select', { 'is-invalid': errors.destination_department})}
                                                         isLoading={isLoading}
-                                                        placeholder={t(`Та тэнхим сонгоно уу`)}
+                                                        placeholder={t(`Та хөтөлбөрийн багаа сонгоно уу`)}
                                                         options={selectedValue?.children}
                                                         value={selectedValue?.children.find((val) => val.id === value)}
                                                         noOptionsMessage={() => t('Хоосон байна')}
@@ -450,7 +494,7 @@ const Createmodal = ({ open, handleModal, refreshDatas, edit_id }) => {
                                     </Col>
                                     <Col md={12} className='mt-1'>
                                         <Label className="form-label mb-0" for="destination_pro">
-                                            {t('Хөтөлбөр')}
+                                            {t('Мэргэжил')}
                                         </Label>
                                         <Controller
                                             control={control}

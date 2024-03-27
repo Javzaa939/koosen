@@ -26,8 +26,16 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleRequest
 			maxWidth: "30px"
 		},
 		{
-			header: 'stipend_type',
+			header: 'is_own',
 			name: `${t("Тэтгэлгийн төрөл")}`,
+			selector: (row) => (row?.is_own===1 ? "Дотоод тэтгэлэг" : "Гадны тэтгэлэг"),
+            sortable: true,
+			minWidth: "150px",
+			maxWidth: "300px"
+		},
+		{
+			header: 'stipend_type',
+			name: `${t("Тэтгэлэгүүд")}`,
 			selector: (row) => (row?.stipend_type?.name),
             sortable: true,
 			minWidth: "150px",
@@ -37,6 +45,14 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleRequest
 			header: 'start_date',
 			name: t("Эхлэх хугацаа"),
 			selector: (row) => row?.start_date,
+			minWidth: "150px",
+			maxWidth: "300px",
+            sortable: true,
+		},
+		{
+			header: 'finish_date',
+			name: t("Дуусах хугацаа"),
+			selector: (row) => row?.finish_date,
 			minWidth: "150px",
 			maxWidth: "300px",
             sortable: true,
@@ -103,9 +119,9 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleRequest
 								<a role="button"
 									onClick={() => showWarning({
 										header: {
-											title: t(`Тэтгэлгийн бүртгэл`),
+											title: t(`Тэтгэлэг устгах`),
 										},
-										question: t(`Та энэ мэдээллийг устгахдаа итгэлтэй байна уу?`),
+										question: t(`${row?.is_own===1 ? "Дотоод тэтгэлэг" : "Гадны тэтгэлэг"} мэдээлэл устгахдаа итгэлтэй байна уу?`),
 										onClick: () => handleDelete(row.id),
 										btnText: t('Устгах'),
 									})}
@@ -113,7 +129,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleRequest
 							>
 								<Badge color="light-danger" pill><X width={"15px"} /></Badge>
 							</a>
-							<UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${row.id}`} >Устгах</UncontrolledTooltip>
+							<UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${row?.id}`} >Устгах</UncontrolledTooltip>
 							</>
 						}
 					</div>

@@ -7,6 +7,7 @@ import Learning from '../../TimeTable/Building'
 import Room from '../../TimeTable/Room'
 import Season from '../Season'
 import Country from '../Country'
+import Print from '../Print'
 
 function Teacher() {
 
@@ -49,6 +50,12 @@ function Teacher() {
             icon: 'Activity',
             id: 5,
             component: <Country />
+        },
+        {
+            name: 'Хэвлэх маягт хэмжээс',
+            icon: 'Activity',
+            id: 6,
+            component: <Print />
         }
     ]
 

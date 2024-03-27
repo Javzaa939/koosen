@@ -16,10 +16,11 @@ from lms.models import AdmissionLesson
 from lms.models import DiscountType
 from lms.models import Country
 from lms.models import DefinitionSignature
+from lms.models import PrintSettings
+from lms.models import StudentGrade
 
 from core.models import Permissions
 from core.models import Roles
-from core.models import OrgPosition
 
 from main.utils.function.utils import get_week_num_from_date
 
@@ -226,7 +227,6 @@ class RolesSerializer(serializers.ModelSerializer):
 class RolesListSerializer(serializers.ModelSerializer):
 
     permissions = serializers.SerializerMethodField()
-    positions = serializers.SerializerMethodField()
 
     class Meta:
         model = Roles
@@ -237,8 +237,27 @@ class RolesListSerializer(serializers.ModelSerializer):
         permissions = obj.permissions.filter(name__startswith='lms-').values_list('id', flat=True)
         return list(permissions)
 
-    def get_positions(self, obj):
+# ---------------------- хэвлэх тохиргоо ----------------------
 
-        org_pos_ids = OrgPosition.objects.filter(roles__in=[obj.id]).values_list('id', flat=True).distinct()
+class PrintSettingsListSerializer(serializers.ModelSerializer):
+    type_name = serializers.SerializerMethodField()
 
-        return list(org_pos_ids)
+    class Meta:
+        model = PrintSettings
+        fields = "__all__"
+
+    def get_type_name(self, obj):
+        return obj.get_types_display()
+
+class PrintSettingsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = PrintSettings
+        fields = "__all__"
+
+
+class StudentGradeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = StudentGrade
+        fields = "__all__"

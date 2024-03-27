@@ -2,7 +2,7 @@ import classNames from "classnames"
 import { t } from "i18next"
 import React, { Fragment, useState, useContext, useEffect } from 'react'
 import Select from 'react-select'
-import { ReactSelectStyles, convertDefaultValue } from "@utils"
+import { ReactSelectStyles, convertDefaultValue, stipent_is_own_or_other } from "@utils"
 import { useForm, Controller } from "react-hook-form";
 import { X } from "react-feather";
 import useLoader from "@hooks/useLoader";
@@ -71,7 +71,10 @@ const Createmodal = ({ open, handleModal,refreshDatas }) => {
 	const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
 
     //useState
-    const [stipendOption, setStipendOption] = useState([])
+    const [stipendOption, setStipendOption] = useState([]) // тэтгэлгүүдын төрлүүдыг авах нь
+    const [isOwnOption, setIsOwn] = useState(stipent_is_own_or_other()) // сургуулийн дотоод, гадаад тэтгэлэг эсэх авах нь
+    const [isOwnId, setIsOwnId] = useState('')  // тэтгэлгийн id авах нь
+
 
     // Api
     const stipendApi = useApi().stipend.register
@@ -172,8 +175,69 @@ const Createmodal = ({ open, handleModal,refreshDatas }) => {
                 <ModalBody className="flex-grow-1">
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
                         <Col md={12}>
+                            <Label className="form-label" for="is_own">
+                                {t('Тэтгэлэгийн төрөл')}
+                            </Label>
+                            <Controller
+                                control={control}
+                                defaultValue=''
+                                name="is_own"
+                                render={({ field: { value, onChange } }) => {
+                                    return (
+                                        <Select
+                                            name="is_own"
+                                            id="is_own"
+                                            classNamePrefix='select'
+                                            isClearable
+                                            className={classNames('react-select', {'is-invalid': errors.is_own})}
+                                            isLoading={isLoading}
+                                            placeholder={t('-- Сонгоно уу --')}
+                                            options={isOwnOption || []}
+                                            value={isOwnOption.find((c) => c.id === value)}
+                                            noOptionsMessage={() => t('Хоосон байна')}
+                                            onChange={(val) => {
+                                                onChange(val?.id || '')
+                                                setIsOwnId(val?.id)
+                                            }}
+                                            styles={ReactSelectStyles}
+                                            getOptionValue={(option) => option.id}
+                                            getOptionLabel={(option) => option.name}
+                                        />
+                                    )
+                                }}
+                            />
+                            {errors.is_own && <FormFeedback className='d-block'>{errors.is_own.message}</FormFeedback>}
+                        </Col>
+                        {
+                            isOwnId ===2 &&
+                            <>
+                            <Col md={12}>
+                                <Label className="form-label" for="stipend_amount">
+                                    {t('Тэтгэлэгийн хэмжээ')}
+                                </Label>
+                                <Controller
+                                    defaultValue=''
+                                    control={control}
+                                    id="stipend_amount"
+                                    name="stipend_amount"
+                                    render={({ field }) => (
+                                        <Input
+                                            id ="stipend_amount"
+                                            bsSize="sm"
+                                            placeholder={t('Тэтгэлэгийн хэмжээ')}
+                                            {...field}
+                                            type="number"
+                                            invalid={errors.stipend_amount && true}
+                                        />
+                                    )}
+                                />
+                                {errors.stipend_amount && <FormFeedback className='d-block'>{t(errors.stipend_amount.message)}</FormFeedback>}
+                            </Col>
+                            </>
+                        }
+                        <Col md={12}>
                             <Label className="form-label" for="stipend_type">
-                                {t('Тэтгэлгийн төрөл')}
+                                {t('Тэтгэлэгүүд')}
                             </Label>
                             <Controller
                                 control={control}

@@ -22,3 +22,14 @@ class DB3Serializer(serializers.ModelSerializer):
     class Meta:
         model = Student
         fields = "__all__"
+
+class DB4Serializer(serializers.ModelSerializer):
+    "DB4"
+
+    unit1 = serializers.CharField(source='unit1.name', default=True)
+    unit2 = serializers.CharField(source='unit2.name', default=True)
+
+
+    class Meta:
+        model = Student
+        fields ="__all__"

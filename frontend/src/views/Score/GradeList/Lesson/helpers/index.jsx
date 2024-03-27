@@ -47,16 +47,15 @@ export function getColumns (currentPage, rowsPerPage, total_count) {
         }
         if (event.key === 'Enter')
         {
-            // const rowsInput = [...datas];
-            // var item_datas = rowsInput[rowIdx]
+
             if (value > 100) {
-                setErrorMessage(`100-иас их утга авах боломжгүй`)
+                setErrorMessage(`100-иас их утга авахгүй`)
             } else {
                 setErrorMessage('')
 
                 row[key] = value || 0;
 
-                const { success, data } = await fetchData(scoreApi.putScore(row?.id, row))
+                const { success } = await fetchData(scoreApi.putScore(row?.id, row))
                 if(success)
                 {
                     focusData.current = undefined
@@ -98,6 +97,13 @@ export function getColumns (currentPage, rowsPerPage, total_count) {
 			wrap: true
         },
 		{
+			header: 'volume_kr',
+			name: `${t('Кр')}`,
+			selector: (row) => row?.volume_kr,
+            sortable: false,
+			center: true
+        },
+		{
 			header: 'teach_score',
 			name: `${t('Багшийн оноо')}`,
 			selector: (row) => row?.teach_score,
@@ -112,43 +118,6 @@ export function getColumns (currentPage, rowsPerPage, total_count) {
             sortable: true,
 			center: true,
 			minWidth: "180px",
-        },
-		{
-			header: 'total',
-			name: `${t('Нийт оноо')}`,
-			selector: (row, index) => {
-				return (
-					<>
-						<Input
-							id={`score_total-${index}-input`}
-							defaultValue={row?.score_total}
-							onBlur={focusOut}
-							type="number"
-							bsSize='sm'
-							placeholder={`Нийт оноо`}
-							disabled={(Object.keys(user).length > 0 && (user?.permissions.includes('lms-score-update')) || user?.is_superuser)  ? false : true}
-							onFocus={(e) => focusData.current = (e.target.value)}
-							onKeyPress={(e) => {
-								setIndName(`score_total-${index}-input`)
-								handleSetTeachResult(e, index, row, 'score_total')
-							}}
-							invalid={(`score_total-${index}-input` === index_name) && error_message ? true : false}
-						/>
-						{(`score_total-${index}-input` == index_name) && error_message && <FormFeedback className='d-block'>{error_message}</FormFeedback>}
-					</>
-				)
-			},
-            sortable: false,
-			center: true,
-			minWidth: "50px",
-        },
-		{
-			header: 'assessment',
-			name: `${t('Үсгэн үнэлгээ')}`,
-			selector: (row) => row?.assessment,
-            sortable: true,
-			minWidth: "50px",
-			center: true
         },
 		{
 			header: 'lesson_year',
@@ -166,6 +135,12 @@ export function getColumns (currentPage, rowsPerPage, total_count) {
 			minWidth: "50px",
 			center: true
         },
+		{
+			header: 'total',
+			name: 'Нийт оноо үнэлгээ',
+			center: true,
+			selector: (row) => row?.score_total + ' ' + row?.assessment
+		},
 	]
 
     return columns

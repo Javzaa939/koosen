@@ -1,6 +1,9 @@
 import * as Yup from 'yup';
 
 export const validateSchema = Yup.object().shape({
+    is_own: Yup.string()
+        .trim()
+        .required('Хоосон байна.'),
     stipend_type: Yup.string()
         .trim()
         .required('Хоосон байна.'),

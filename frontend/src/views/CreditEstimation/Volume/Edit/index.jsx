@@ -150,7 +150,7 @@ const Editmodal = ({ open, handleEdit, editData, refreshDatas, season }) => {
                     setValue(key, editData[key])
                 else setValue(key,'')
 
-                if(key === 'teacher' || key === 'lesson_season' || key === 'lesson') {
+                if(key === 'teacher' || key === 'lesson_season' || key === 'lesson' || key === 'department') {
                     setValue(key, editData[key]?.id)
                 }
 

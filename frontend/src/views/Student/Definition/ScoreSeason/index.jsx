@@ -1,21 +1,24 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useContext } from 'react'
 import { useLocation } from 'react-router-dom';
 
 import useApi from "@hooks/useApi"
 import useLoader from '@hooks/useLoader';
+import SchoolContext from '@context/SchoolContext'
+
 import './style.scss'
 
 export default function ScoreSeason() {
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
-
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
 
     const location = useLocation()
+
     const studentId = location?.state?.student
     const datas = location?.state?.data
     const year = location?.state?.year
     const season = location?.state?.season
     const def = location?.state?.def
     const studentInfo = datas?.all_total[0].student_info
+    const { parentschoolName} = useContext(SchoolContext)
 
 
     function imageLoaded()
@@ -45,12 +48,12 @@ export default function ScoreSeason() {
                     <div className='d-flex flex-column justify-content-evenly align-items-center w-100' style={{ fontSize: '12px' }} >
                         {/* <img className="fallback-logo" width={100} height={100} src={`${process.env.REACT_APP_MUIS_HR_MEDIA_URL}${def?.school?.logo_url}`} alt="logo" onLoad={imageLoaded} /> */}
                         {/* <img className="fallback-logo" width={100} height={100} src={`http://hr.mnun.edu.mn/media/orgs/logo/MNU-Logo_1.png`} alt="logo" onLoad={() => {imageLoaded()}} /> */}
-                        <img className="fallback-logo" width={100} height={100} src={`http://hr.mnun.edu.mn/media/orgs/logo/MNU-Logo_1.png`} alt="logo"/>
+                        <img className="fallback-logo" width={100} height={100} src={`https://hr.sus.mn/media/orgs/logo/shine-mongol-bosoo.png`} alt="logo"/>
                         <div className="d-flex flex-column text-center fw-bolder">
                             <span className='mt-1'>
-                                Дотоод Хэргийн Их Сургууль
+                                {parentschoolName}
                             </span>
-                            <span style={{ marginTop: '6px' }}>MONGOLIAN NATIONAL UNIVERSITY</span>
+                            {/* <span style={{ marginTop: '6px' }}>MONGOLIAN NATIONAL UNIVERSITY</span> */}
                         </div>
                     </div>
                 </div>
@@ -75,7 +78,7 @@ export default function ScoreSeason() {
                             <div style={{ width: 100 }}>
                                 <div>Оюутны код</div>
                                 <div>Овог нэр</div>
-                                <div>Хөтөлбөр</div>
+                                <div>Мэргэжил</div>
                                 <div>Элссэн он</div>
                                 <div>Зэрэг</div>
                             </div>

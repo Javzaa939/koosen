@@ -44,7 +44,7 @@ export default [
   ...Print,
   // ...Report,
   ...Settings,
-  ...Role,
+  // ...Role,
   // ...Science
   ...Test,
 ]

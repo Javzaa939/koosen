@@ -27,16 +27,14 @@ import {
 	FormFeedback,
     Spinner
 } from "reactstrap";
-import { X } from "react-feather";
+
 import AuthContext from '@context/AuthContext'
 
 import { validate, convertDefaultValue, get_room_type } from "@utils"
 import { validateSchema } from '../validateSchema';
 
 const EditModal = ({ open, handleModal, room_id, refreshDatas }) => {
-    const CloseBtn = (
-        <X className="cursor-pointer" size={15} onClick={handleModal} />
-    )
+
     // ** Hook
     const { control, handleSubmit, reset, setError, setValue, formState: { errors } } = useForm(validate(validateSchema));
 
@@ -58,7 +56,7 @@ const EditModal = ({ open, handleModal, room_id, refreshDatas }) => {
     const buildingApi = useApi().timetable.building
     const schoolApi = useApi().hrms.subschool
 
-    // Тэнхимын жагсаалт
+    // Хөтөлбөрийн багын жагсаалт
     async function getBuilding() {
         const { success, data } = await fetchData(buildingApi.get())
         if(success) {
@@ -145,28 +143,15 @@ const EditModal = ({ open, handleModal, room_id, refreshDatas }) => {
 
 	return (
         <Fragment>
-            <Modal
-                isOpen={open}
-                toggle={handleModal}
-                className="sidebar-lg hr-register"
-                modalClassName="modal-slide-in "
-                contentClassName="pt-0"
-                onClosed={handleModal}
-            >
+            <Modal isOpen={open} toggle={handleModal} className="modal-dialog-centered modal-lg" onClosed={handleModal}>
             {isLoading && <div className='suspense-loader'><Spinner size='xl'/></div>}
-
-                <ModalHeader
-                    className="mb-1"
-                    toggle={handleModal}
-                    tag="div"
-                    close={CloseBtn}
-                >
-                <h5 className="modal-title" >{t('Өрөөний мэдээлэл засах')}</h5>
-
-                </ModalHeader>
-                <ModalBody className="flex-grow-1">
+                <ModalHeader className='bg-transparent pb-0' toggle={handleModal}></ModalHeader>
+                <ModalBody className="px-sm-3 pt-50 pb-3">
+                    <div className='text-center'>
+                        <h4>{t('Өрөөний мэдээлэл засах')}</h4>
+                    </div>
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
-                         <Col  md={12}>
+                         <Col  lg={6} xs={12}>
                             <Label className="form-label" for="school">
                                 {t('Сургууль')}
                             </Label>
@@ -199,7 +184,7 @@ const EditModal = ({ open, handleModal, room_id, refreshDatas }) => {
                             ></Controller>
                              {errors.school && <FormFeedback className='d-block'>{t(errors.school.message)}</FormFeedback>}
                         </Col>
-                        <Col  md={12}>
+                        <Col  lg={6} xs={12}>
                             <Label className="form-label" for="building">
                                 {t('Хичээлийн байр')}
                             </Label>
@@ -232,7 +217,7 @@ const EditModal = ({ open, handleModal, room_id, refreshDatas }) => {
                             ></Controller>
                              {errors.building && <FormFeedback className='d-block'>{t(errors.building.message)}</FormFeedback>}
                         </Col>
-                        <Col md={12}>
+                        <Col lg={6} xs={12}>
                             <Label className="form-label" for="code">
                                 {t('Өрөөний дугаар')}
                             </Label>
@@ -255,7 +240,7 @@ const EditModal = ({ open, handleModal, room_id, refreshDatas }) => {
                             />
                             {errors.code && <FormFeedback className='d-block'>{t(errors.code.message)}</FormFeedback>}
                         </Col>
-                        <Col md={12}>
+                        <Col lg={6} xs={12}>
                             <Label className="form-label" for="name">
                                 {t('Өрөөний нэр')}
                             </Label>
@@ -278,7 +263,7 @@ const EditModal = ({ open, handleModal, room_id, refreshDatas }) => {
                             />
                             {errors.name && <FormFeedback className='d-block'>{t(errors.name.message)}</FormFeedback>}
                         </Col>
-                        <Col md={12}>
+                        <Col lg={6} xs={12}>
                             <Label className="form-label" for="type">
                                 {t('Өрөөний төрөл')}
                             </Label>
@@ -312,7 +297,7 @@ const EditModal = ({ open, handleModal, room_id, refreshDatas }) => {
                             ></Controller>
                             {errors.type && <FormFeedback className='d-block'>{t(errors.type.message)}</FormFeedback>}
                         </Col>
-                        <Col md={12}>
+                        <Col lg={6} xs={12}>
                             <Label className="form-label" for="volume">
                                 {t('Өрөөний багтаамж')}
                             </Label>
@@ -335,7 +320,7 @@ const EditModal = ({ open, handleModal, room_id, refreshDatas }) => {
                             />
                             {errors.volume && <FormFeedback className='d-block'>{t(errors.volume.message)}</FormFeedback>}
                         </Col>
-                        <Col md={12}>
+                        <Col lg={6} xs={12}>
                             <Label className="form-label  me-1" for="description">
                                {t('Тайлбар')}
                             </Label>
@@ -362,9 +347,9 @@ const EditModal = ({ open, handleModal, room_id, refreshDatas }) => {
                             <Button className="me-2" disabled={is_valid} size='sm' color="primary" type="submit">
                                 {t('Хадгалах')}
                             </Button>
-                            {/* <Button color="secondary" size='sm' type="reset" outline  onClick={handleModal}>
+                            <Button color="secondary" size='sm' type="reset" outline  onClick={handleModal}>
                                 {t('Буцах')}
-                            </Button> */}
+                            </Button>
                         </Col>
                     </Row>
                 </ModalBody>

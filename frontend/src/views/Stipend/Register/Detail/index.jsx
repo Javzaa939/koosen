@@ -8,7 +8,6 @@ import { useTranslation } from 'react-i18next';
 export default function Detail({ isOpen, handleModal, datas })
 {
     const { t } = useTranslation()
-
     return (
         <Fragment>
             <Modal
@@ -41,6 +40,22 @@ export default function Detail({ isOpen, handleModal, datas })
                                             <tr className='border-bottom'>
                                                 <td className='pe-1' style={{ width: '33%' }}>{t('Тэтгэлгийн төрөл')}:</td>
                                                 <td>
+                                                    <span className='fw-bold'>{datas?.is_own===1 ? "Сургуулийн дотоод тэтгэлэг" : "Гадны тэтгэлэг" }</span>
+                                                </td>
+                                            </tr>
+                                            {
+                                                datas?.is_own===2 &&
+
+                                                <tr className='border-bottom'>
+                                                    <td className='pe-1' style={{ width: '33%' }}>{t('Тэтгэлэгийн хэмжээ')}:</td>
+                                                    <td>
+                                                        <span className='fw-bold'>{datas?.stipend_amount}</span>
+                                                    </td>
+                                                </tr>
+                                            }
+                                            <tr className='border-bottom'>
+                                                <td className='pe-1' style={{ width: '33%' }}>{t('Тэтгэлэгүүд')}:</td>
+                                                <td>
                                                     <span className='fw-bold'>{datas?.stipend_type?.name}</span>
                                                 </td>
                                             </tr>
@@ -57,7 +72,7 @@ export default function Detail({ isOpen, handleModal, datas })
                                                 <td className='pe-1'>{t('Дуусах хугацаа')}:</td>
                                                 <td>{datas?.finish_date}</td>
                                             </tr>
-                                            
+
                                             <tr className='border-bottom'>
                                                 <td className='pe-1'>{t('Нээлттэй эсэх')}:</td>
                                                 <td>{datas?.is_open? "Тийм" : "Үгүй"}</td>

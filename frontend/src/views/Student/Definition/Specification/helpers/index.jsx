@@ -1,8 +1,16 @@
 
 import React, { useState } from 'react';
 
-import { Card, Row, Col, Button, Input, Label } from 'reactstrap'
-import { useNavigate } from 'react-router-dom';
+import {
+    Card,
+    Row,
+    Col,
+    Button,
+    DropdownToggle,
+    DropdownMenu,
+    DropdownItem,
+    UncontrolledDropdown
+}from 'reactstrap'
 
 import Avatar from "@components/avatar"
 
@@ -10,6 +18,7 @@ import { t } from 'i18next';
 
 import SumModal from './SumModal';
 import ScoreModal from './ScoreModal';
+import ReactCountryFlag from 'react-country-flag'
 
 export function getColumns (currentPage, rowsPerPage, total_count)
 {
@@ -70,8 +79,6 @@ export function ExpandedComponent({ data })
     const [ scoreModal, setScoreModal ] = useState(false)
     const [ scoreModalData, setScoreModalData ] = useState({})
 
-    const navigate = useNavigate()
-
     async function handleRequestSum(studentId)
     {
 		setSumModalOpen(!sumModalOpen)
@@ -120,12 +127,34 @@ export function ExpandedComponent({ data })
                     </div>
                 </Col>
                 <Col md={6} className='p-0 mt-2 ps-1' >
-                    <Button
-                        size='sm'
-                        className='ms-50 mb-50'
-                        color='primary'
-                        onClick={() => navigate('/student/learning-true', { state: data.id })}
-                    >Тодорхойлолт</Button>
+                    <UncontrolledDropdown className='dropdown-language nav-item d-inline-block' >
+                        <DropdownToggle
+                            caret
+                            size='sm'
+                            className='ms-50 mb-50'
+                            color='primary'
+                        >
+                            Тодорхойлолт
+                        </DropdownToggle>
+                        <DropdownMenu>
+                            <DropdownItem style={{width: '100%'}} onClick={() => {sessionStorage.setItem("student_data", JSON.stringify(data)), window.open('/student/learning-true')}}>
+                                Монгол
+                                <ReactCountryFlag
+                                    svg
+                                    className='country-flag flag-icon mx-50'
+                                    countryCode='mn'
+                                />
+                            </DropdownItem>
+                            <DropdownItem style={{width: '100%'}} onClick={() => {sessionStorage.setItem("student_data", JSON.stringify(data)), window.open('/student/learning-true/en')}}>
+                                English
+                                <ReactCountryFlag
+                                    svg
+                                    className='country-flag flag-icon mx-50'
+                                    countryCode='us'
+                                />
+                            </DropdownItem>
+                        </DropdownMenu>
+                    </UncontrolledDropdown>
                     <Button
                         size='sm'
                         className='ms-50 mb-50'
@@ -136,15 +165,14 @@ export function ExpandedComponent({ data })
                         size='sm'
                         className='ms-50 mb-50'
                         color='primary'
-                        // onClick={() => navigate('/student/amount-details', { state: data.id })}
                         onClick={() => handleScoreModal(data.id)}
                     >Дүнгийн дэлгэрэнгүй</Button>
-                    <Button
+                    {/* <Button
                         size='sm'
                         className='ms-50 mb-50'
                         color='primary'
-                        onClick={() => navigate('/student/credit-calculation', { state: data.id })}
-                    >Судлах кредитийн тооцоо дэд цэс үүсгэх</Button>
+                        onClick={() => window.open('/student/credit-calculation', { state: data.id })}
+                    >Судлах кредитийн тооцоо дэд цэс үүсгэх</Button> */}
                 </Col>
             </Row>
             { sumModalOpen && <SumModal isOpen={sumModalOpen} handleModal={handleRequestSum} datas={sumModalData} /> }

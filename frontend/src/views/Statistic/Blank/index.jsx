@@ -2,23 +2,9 @@ import React, { useState } from "react";
 import { AlertCircle } from "react-feather";
 import { Badge } from "reactstrap";
 
-function Blank({
-        text,
-        color,
-        zasvar
-    }) {
+function Blank({ text, color }){
 
-
-    const recievedText =
-
-        text && text.length > 0 ? text :
-
-            zasvar
-
-                ?
-                    'Засвартай байгаа'
-                :
-                    'Хийгдэж байгаа'
+    const recievedText = text && text.length > 0 ? text : 'Засвартай байгаа'
 
     const colorList = [
         'danger',

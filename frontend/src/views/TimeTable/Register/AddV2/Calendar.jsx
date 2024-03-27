@@ -7,15 +7,14 @@ import resourceTimelinePlugin from "@fullcalendar/resource-timeline";
 import interactionPlugin from '@fullcalendar/interaction';
 
 import { Card, CardBody } from 'reactstrap'
-import { sliceEvents, createPlugin } from '@fullcalendar/core';
-
-// import AuthContext from "@context/AuthContext"
 
 import useWindowDimensions from '@lms_components/useWindowDimensions'
 import styled from "@emotion/styled";
 
 import { Popover } from "bootstrap";
+import { get_par_from_strTime } from "@utils"
 
+import SchoolContext from '@context/SchoolContext'
 import './style.css'
 
 export const StyleWrapper = styled.div`
@@ -45,11 +44,10 @@ const Calendar1 = props => {
     const calendarRef = useRef(null)
 
     const { t } = useTranslation()
+    const { school_id } = useContext(SchoolContext)
 
     // Дэлгэцний өргөн, өндөр авах
     const { width } = useWindowDimensions()
-
-    // const { user } = useContext(AuthContext)
 
     // ** Props
     const {
@@ -58,14 +56,17 @@ const Calendar1 = props => {
         eventDatas,
         getDates,
         // isCalendar,
+        getUpdateEvent,
         resources,
+        height,
         setLoader,
         blankEvent,
         eventValues,
         setEditDatas,
-        getEventValue,
+        setEventChange,
         handleEventClick,
-        resourceGroupField
+        resourceGroupField,
+        is_volume
     } = props
 
 
@@ -74,7 +75,7 @@ const Calendar1 = props => {
         plugins: [interactionPlugin, resourceTimelinePlugin],
         initialView: 'resourceTimelineWeek',
         headerToolbar: false,
-        firstDay: 1,
+        firstDay: is_volume ? 0 : 1,
         aspectRatio: 1.5,
         resourceAreaWidth: '15%',
         timeZone: 'UTC',
@@ -84,8 +85,6 @@ const Calendar1 = props => {
         eventOrderStrict: true,
 
         dayMaxEvents: true,
-
-        // slotMinWidth: 33,
 
         eventResizableFromStart: true,
         scrollTime: "08:00:00",
@@ -100,26 +99,32 @@ const Calendar1 = props => {
         slotMaxTime: "20:00",
         slotDuration: '01:30:00',
         selectMirror: true,
+        stickyHeaderDates: true,
 
         slotLabelFormat: [
             function(data) {
                 var date = data.date
                 const fd = moment(date).toDate().getDay();
-                const days = [t('Ня'), t('Да'), t('Мя'), t('Лх'), t('Пү'), t('Ба'), t('Бя')]
+                if(is_volume) {
+                    var days = [t('Ц/a'), t('Да'), t('Мя'), t('Лх'), t('Пү'), t('Ба'), t('Бя')]
+                    var weekdays = [t('Цагийн ачаалал'), t('Даваа'), t('Мягмар'), t('Лхагва'), t('Пүрэв'), t('Баасан'), t('Бямба')]
+                } else {
+                    days = [t('Ня'), t('Да'), t('Мя'), t('Лх'), t('Пү'), t('Ба'), t('Бя')]
+                    weekdays = [t('Ням'), t('Даваа'), t('Мягмар'), t('Лхагва'), t('Пүрэв'), t('Баасан'), t('Бямба')]
+                }
                 if (width < 1000) {
                     return days[fd]
                 }
-                const weekdays = [t('Ням'), t('Даваа'), t('Мягмар'), t('Лхагва'), t('Пүрэв'), t('Баасан'), t('Бямба')]
 
                 return weekdays[fd]
             },
 
             function(data) {
                 var hours = moment(data.date)
-                // const fd = moment(hours).toDate().getDay();
-                // if (fd == 0) {
-                //     return
-                // }
+                const fd = moment(hours).toDate().getDay();
+                if (fd == 0) {
+                    return
+                }
 
                 const times = [t('1'), t('2'), t('3'), t('4'), t('5'), t('6'), t('7'), t('8')]
 
@@ -204,8 +209,9 @@ const Calendar1 = props => {
         eventAllow: function(dropInfo, draggedEvent) {
             var self_resource = draggedEvent._def.resourceIds
             // Яг тухайн сургуулийн хэрэглэгч ашиглаж эхлэх үед өөрийнхөө сургуулийн хуваарийг л зөөнө
-            // var school = draggedEvent._def.extendedProps.school
-            // && school === user?.school_id
+            var school = draggedEvent._def.extendedProps.school_id
+            var is_general = draggedEvent._def.extendedProps.is_general
+
             var is_score = draggedEvent._def.extendedProps.is_score
             var drop_resource = dropInfo.resource._resource.id
 
@@ -215,36 +221,54 @@ const Calendar1 = props => {
             else if (self_resource && self_resource.includes(drop_resource) ) {
                 return true;
             }
-            else {
-              return false;
-            }
+            // if  ((school === school_id) || is_general)
+            // {
+            //     var is_score = draggedEvent._def.extendedProps.is_score
+            //     var drop_resource = dropInfo.resource._resource.id
+
+            //     if (is_score) {
+            //         return false;
+            //     }
+            //     else if (self_resource && self_resource.includes(drop_resource) ) {
+            //         return true;
+            //     }
+
+            // }
+            // else {
+            //   return false;
+            // }
         },
 
-        // eventContent: function(args) {
-        //     var event = args.event
-        //     var odd_even = event._def.extendedProps.odd_even
 
-        // },
+        eventChange: async function(changeInfo) {
+            // setLoader(true)
 
-        eventChange: function(changeInfo) {
-            setLoader(true)
-
-            const ev = eventValues
             var event_range = changeInfo.event._instance.range
             var event_data = changeInfo.event._def.extendedProps
 
             var start_time = event_range.start.toISOString()
-            var end_time = event_range.end.toISOString()
 
-            ev.end = end_time
-            ev.start = start_time
-            ev.id = event_data?.event_id
-            ev.odd_even = event_data?.odd_even
-            if (event_data?.is_default) {
-                ev.is_default = event_data?.is_default
+            var splitted_array = start_time.split('T')
+
+            var date = new Date(`${splitted_array[0]}`)
+            var day = date.getDay()
+
+            var time_split = splitted_array[1].split('.')
+            var time_str = time_split[0]
+            var time = get_par_from_strTime(time_str)
+
+            var body = {
+                'day': day,
+                'time': time,
+                'odd_even': event_data?.odd_even || 3,
+                'school': school_id
             }
 
-            getEventValue(ev)
+            if (event_data?.is_default) {
+                getUpdateEvent(body, event_data?.event_id)
+            } else {
+                setEventChange(body, event_data?.event_id)
+            }
 
             const boxes = document.querySelectorAll('.popoverStyle');
 
@@ -292,7 +316,7 @@ const Calendar1 = props => {
     }
 
     return (
-        <Card className='shadow-none border-0 mb-0 rounded-0'>
+        <Card className='shadow-none border-0 mb-0 rounded-0' style={{height: height, overflow: 'auto'}}>
             <CardBody className='pb-0'>
                 <StyleWrapper>
                     <FullCalendar {...calendarOptions} />{' '}

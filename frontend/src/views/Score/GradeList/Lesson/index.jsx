@@ -24,8 +24,6 @@ import DataTable from 'react-data-table-component'
 
 import useApi from '@hooks/useApi';
 
-import { useForm, Controller } from "react-hook-form";
-
 import { useTranslation } from 'react-i18next'
 
 import { getPagination, generateLessonYear} from '@utils'
@@ -39,10 +37,10 @@ const Lesson = () => {
         lesson_year: '',
         season: '',
         group: '',
+        teacher: ''
     }
 
     // ** Hook
-    const { control, formState: { errors } } = useForm({});
     const [rowsPerPage, setRowsPerPage] = useState(10)
 
     const [searchValue, setSearchValue] = useState("");
@@ -52,6 +50,7 @@ const Lesson = () => {
     const [lessonOption, setLesson] = useState([])
     const [groupOption, setGroup] = useState([])
     const [season_option, setSeasonOption] = useState([])
+    const [teacherOption, setTeacher] = useState([])
     const [select_value, setSelectValue] = useState(values)
 
     const { school_id } = useContext(SchoolContext)
@@ -60,22 +59,21 @@ const Lesson = () => {
 
     // Хуудаслалтын анхны утга
     const [currentPage, setCurrentPage] = useState(1)
-
     const [total_count, setTotalCount] = useState(1)
 
-    // Эрэмбэлэлт
 
     // Api
     const lessonApi = useApi().study.lessonStandart
     const groupApi = useApi().student.group
     const seasonApi = useApi().settings.season
     const lessonListApi = useApi().print.score
+    const teacherApi = useApi().hrms.teacher
 
     // Translate
     const { t } = useTranslation()
 
     // Нийт датаны тоо
-    const default_page = [10, 15, 50, 75, 100]
+    const default_page = [10, 20, 50, 75, 100]
 
     // Loader
     const { Loader, isLoading, fetchData } = useLoader({})
@@ -88,10 +86,18 @@ const Lesson = () => {
         const lesson_season = select_value?.season
         const group = select_value?.group
 
-        const { success, data } = await allFetch(lessonListApi.getLessonList(rowsPerPage, currentPage, sortField, searchValue,lesson,lesson_year, lesson_season, group))
+        const { success, data } = await allFetch(lessonListApi.getLessonList(rowsPerPage, currentPage, sortField, searchValue,lesson,lesson_year, lesson_season, group, select_value.teacher))
         if (success) {
             setDatas(data?.results)
             setTotalCount(data?.count)
+        }
+    }
+
+    // Багшийн жагсаалт
+    async function getTeacher() {
+        const { success, data } = await fetchData(teacherApi.getTeacher(select_value.lesson))
+        if(success) {
+            setTeacher(data)
         }
     }
 
@@ -123,6 +129,16 @@ const Lesson = () => {
             getSeasonOption()
         },
         [school_id]
+    )
+
+    useEffect(
+        () =>
+        {
+            if (select_value.lesson) {
+                getTeacher()
+            }
+        },
+        [select_value?.lesson]
     )
 
     // Хичээлийн жагсаалт
@@ -175,193 +191,190 @@ const Lesson = () => {
             <Card>
             {isLoading && Loader}
                 <Row className="justify-content-between mx-0 mt-1 mb-1" sm={12}>
-                <Col sm={6} lg={3}>
+                    <Col sm={6} md={3} xs={12}>
                         <Label className="form-label" for="lesson">
                             {t('Хичээл')}
                         </Label>
-                        <Controller
-                            control={control}
-                            defaultValue=''
+                        <Select
                             name="lesson"
-                            render={({ field: { value, onChange} }) => {
-                                return (
-                                    <Select
-                                        name="lesson"
-                                        id="lesson"
-                                        classNamePrefix='select'
-                                        isClearable
-                                        className={classnames('react-select', { 'is-invalid': errors.lesson })}
-                                        isLoading={isLoading}
-                                        placeholder={`-- Сонгоно уу --`}
-                                        options={lessonOption || []}
-                                        value={lessonOption.find((c) => c.id === value)}
-                                        noOptionsMessage={() => t('Хоосон байна.')}
-                                        onChange={(val) => {
-                                            onChange(val?.id || '')
-                                            if (val?.id) {
-                                                setSelectValue(current => {
-                                                    return {
-                                                        ...current,
-                                                        lesson: val?.id
-                                                    }
-                                                })
-                                            } else {
-                                                setSelectValue(current => {
-                                                    return {
-                                                        ...current,
-                                                        lesson: ''
-                                                    }
-                                                })
-                                            }
-                                        }}
-                                        styles={ReactSelectStyles}
-                                        getOptionValue={(option) => option.id}
-                                        getOptionLabel={(option) => option.full_name}
-                                    />
-                                )
+                            id="lesson"
+                            classNamePrefix='select'
+                            isClearable
+                            className={classnames('react-select')}
+                            isLoading={isLoading}
+                            placeholder={`-- Сонгоно уу --`}
+                            options={lessonOption || []}
+                            value={lessonOption.find((c) => c.id === select_value.lesson)}
+                            noOptionsMessage={() => t('Хоосон байна.')}
+                            onChange={(val) => {
+                                if (val?.id) {
+                                    setSelectValue(current => {
+                                        return {
+                                            ...current,
+                                            lesson: val?.id
+                                        }
+                                    })
+                                } else {
+                                    setSelectValue(current => {
+                                        return {
+                                            ...current,
+                                            lesson: ''
+                                        }
+                                    })
+                                }
                             }}
-                        ></Controller>
+                            styles={ReactSelectStyles}
+                            getOptionValue={(option) => option.id}
+                            getOptionLabel={(option) => option.full_name}
+                        />
                     </Col>
-                    <Col sm={6} lg={3}>
+                    <Col sm={6} md={3} xs={12}>
+                        <Label className="form-label" for="lesson">
+                            {t('Багш')}
+                        </Label>
+                        <Select
+                            name="lesson"
+                            id="lesson"
+                            classNamePrefix='select'
+                            isClearable
+                            className={classnames('react-select')}
+                            isLoading={isLoading}
+                            placeholder={`-- Сонгоно уу --`}
+                            options={teacherOption || []}
+                            value={teacherOption.find((c) => c.id === select_value.te)}
+                            noOptionsMessage={() => t('Хоосон байна.')}
+                            onChange={(val) => {
+                                if (val?.id) {
+                                    setSelectValue(current => {
+                                        return {
+                                            ...current,
+                                            teacher: val?.id
+                                        }
+                                    })
+                                } else {
+                                    setSelectValue(current => {
+                                        return {
+                                            ...current,
+                                            teacher: ''
+                                        }
+                                    })
+                                }
+                            }}
+                            styles={ReactSelectStyles}
+                            getOptionValue={(option) => option.id}
+                            getOptionLabel={(option) => option.last_name + ' ' + option.first_name}
+                        />
+                    </Col>
+                    <Col sm={6} md={2} xs={12}>
 						<Label className="form-label me-1" for="lesson_year">
 							{t('Хичээлийн жил')}
 						</Label>
-                        <Controller
-                            control={control}
-                            defaultValue=''
+                        <Select
                             name="lesson_year"
-                            render={({ field: { value, onChange} }) => {
-                                return (
-                                    <Select
-                                        name="lesson_year"
-                                        id="lesson_year"
-                                        classNamePrefix='select'
-                                        isClearable
-                                        className={classnames('react-select', { 'is-invalid': errors.lesson_year })}
-                                        isLoading={isLoading}
-                                        options = {yearOption || []}
-                                        placeholder={t('-- Сонгоно уу --')}
-                                        noOptionsMessage={() => t('Хоосон байна')}
-                                        styles={ReactSelectStyles}
-                                        value={value && yearOption.find((e) => e.id === value)}
-                                        onChange={(val) => {
-                                            onChange(val?.id || '')
-                                            if (val?.id) {
-                                                setSelectValue(current => {
-                                                    return {
-                                                        ...current,
-                                                        lesson_year: val?.id
-                                                    }
-                                                })
-                                            } else {
-                                                setSelectValue(current => {
-                                                    return {
-                                                        ...current,
-                                                        lesson_year: ''
-                                                    }
-                                                })
-                                            }
-                                        }}
-                                        getOptionValue={(option) => option.id}
-                                        getOptionLabel={(option) => option.name}
-                                />
-                                )
+                            id="lesson_year"
+                            classNamePrefix='select'
+                            isClearable
+                            className={classnames('react-select')}
+                            isLoading={isLoading}
+                            options = {yearOption || []}
+                            placeholder={t('-- Сонгоно уу --')}
+                            noOptionsMessage={() => t('Хоосон байна')}
+                            styles={ReactSelectStyles}
+                            value={yearOption.find((e) => e.id === select_value.lesson_year)}
+                            onChange={(val) => {
+                                if (val?.id) {
+                                    setSelectValue(current => {
+                                        return {
+                                            ...current,
+                                            lesson_year: val?.id
+                                        }
+                                    })
+                                } else {
+                                    setSelectValue(current => {
+                                        return {
+                                            ...current,
+                                            lesson_year: ''
+                                        }
+                                    })
+                                }
                             }}
-                        ></Controller>
+                            getOptionValue={(option) => option.id}
+                            getOptionLabel={(option) => option.name}
+                    />
                     </Col>
-                    <Col sm={6} lg={3} >
+                    <Col sm={6} md={2} xs={12}>
                         <Label className="form-label" for="season">
                             {t('Улирал')}
                         </Label>
-                        <Controller
-                            control={control}
-                            defaultValue=''
+                        <Select
                             name="season"
-                            render={({ field: { value, onChange} }) => {
-                                return (
-                                    <Select
-                                        name="season"
-                                        id="season"
-                                        classNamePrefix='select'
-                                        isClearable
-                                        className={classnames('react-select', { 'is-invalid': errors.season })}
-                                        isLoading={isLoading}
-                                        placeholder={t('-- Сонгоно уу --')}
-                                        options={season_option || []}
-                                        value={value && season_option.find((c) => c.id === value)}
-                                        noOptionsMessage={() => 'Хоосон байна'}
-                                        onChange={(val) => {
-                                            onChange(val?.id || '')
-                                            if (val?.id) {
-                                                setSelectValue(current => {
-                                                    return {
-                                                        ...current,
-                                                        season: val?.id
-                                                    }
-                                                })
-                                            } else {
-                                                setSelectValue(current => {
-                                                    return {
-                                                        ...current,
-                                                        season: ''
-                                                    }
-                                                })
-                                            }
-                                        }}
-                                        styles={ReactSelectStyles}
-                                        getOptionValue={(option) => option.id}
-                                        getOptionLabel={(option) => option.season_name}
-                                    />
-                                )
+                            id="season"
+                            classNamePrefix='select'
+                            isClearable
+                            className={classnames('react-select')}
+                            isLoading={isLoading}
+                            placeholder={t('-- Сонгоно уу --')}
+                            options={season_option || []}
+                            value={season_option.find((c) => c.id === select_value.season)}
+                            noOptionsMessage={() => 'Хоосон байна'}
+                            onChange={(val) => {
+                                if (val?.id) {
+                                    setSelectValue(current => {
+                                        return {
+                                            ...current,
+                                            season: val?.id
+                                        }
+                                    })
+                                } else {
+                                    setSelectValue(current => {
+                                        return {
+                                            ...current,
+                                            season: ''
+                                        }
+                                    })
+                                }
                             }}
-                        ></Controller>
+                            styles={ReactSelectStyles}
+                            getOptionValue={(option) => option.id}
+                            getOptionLabel={(option) => option.season_name}
+                        />
                     </Col>
-                    <Col sm={6} lg={3}>
+                    <Col sm={6} md={2} xs={12}>
                         <Label className="form-label" for="group">
                             {t("Анги")}
                         </Label>
-                        <Controller
-                            control={control}
-                            defaultValue=''
+                        <Select
                             name="group"
-                            render={({ field: { value, onChange} }) => {
-                                return (
-                                    <Select
-                                        name="group"
-                                        id="group"
-                                        classNamePrefix='select'
-                                        isClearable
-                                        className={classnames('react-select', { 'is-invalid': errors.group })}
-                                        isLoading={isLoading}
-                                        placeholder={t('-- Сонгоно уу --')}
-                                        options={groupOption || []}
-                                        value={value && groupOption.find((c) => c.id === value)}
-                                        noOptionsMessage={() => 'Хоосон байна'}
-                                        onChange={(val) => {
-                                            onChange(val?.id || '')
-                                            if (val?.id) {
-                                                setSelectValue(current => {
-                                                    return {
-                                                        ...current,
-                                                        group: val?.id
-                                                    }
-                                                })
-                                            } else {
-                                                setSelectValue(current => {
-                                                    return {
-                                                        ...current,
-                                                        group: ''
-                                                    }
-                                                })
-                                            }
-                                        }}
-                                        styles={ReactSelectStyles}
-                                        getOptionValue={(option) => option.id}
-                                        getOptionLabel={(option) => option.name}
-                                    />
-                                )
+                            id="group"
+                            classNamePrefix='select'
+                            isClearable
+                            className={classnames('react-select')}
+                            isLoading={isLoading}
+                            placeholder={t('-- Сонгоно уу --')}
+                            options={groupOption || []}
+                            value={groupOption.find((c) => c.id === select_value.group)}
+                            noOptionsMessage={() => 'Хоосон байна'}
+                            onChange={(val) => {
+                                if (val?.id) {
+                                    setSelectValue(current => {
+                                        return {
+                                            ...current,
+                                            group: val?.id
+                                        }
+                                    })
+                                } else {
+                                    setSelectValue(current => {
+                                        return {
+                                            ...current,
+                                            group: ''
+                                        }
+                                    })
+                                }
                             }}
-                        ></Controller>
+                            styles={ReactSelectStyles}
+                            getOptionValue={(option) => option.id}
+                            getOptionLabel={(option) => option.name}
+                        />
                     </Col>
                     </Row>
                     <Row className='mt-1 d-flex justify-content-between mx-0'>
@@ -412,7 +425,7 @@ const Lesson = () => {
                         </Button>
                     </Col>
                 </Row>
-                <div className="react-dataTable react-dataTable-selectable-rows">
+                <div className="react-dataTable react-dataTable-selectable-rows"  id="datatableLeftTwoRightOne">
                     <DataTable
                         noHeader
                         paginationServer

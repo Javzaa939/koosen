@@ -36,23 +36,17 @@ import { getColumns, getDetailColumns } from './helpers'
 import Addmodal from './Add'
 import EditModal from './Edit'
 
-export function ExpandedComponent({ data, season_id })
+export function ExpandedComponent({ data, season_id, refreshDatas })
 {
 
     const navigate = useNavigate();
 
     const [edit_modal, setEditModal] = useState(false)
-    const [editId, setEditId] = useState('')
     const { user } = useContext(AuthContext)
     const [editData, setEditData] = useState({})
 
     const creditVolumeApi = useApi().credit.volume
     const { Loader, isLoading, fetchData } = useLoader({})
-
-    const addModal = (id) => {
-        setEditModal(!edit_modal)
-        setEditId(id)
-    }
 
     const { skin } = useSkin()
     const tableCustomStyles = {
@@ -67,7 +61,7 @@ export function ExpandedComponent({ data, season_id })
 	const handleDelete = async(id) => {
 		const { success } = await fetchData(creditVolumeApi.delete(id))
 		if(success) {
-			getDatas()
+			refreshDatas()
 		}
 	};
 
@@ -76,7 +70,6 @@ export function ExpandedComponent({ data, season_id })
         setEditData(row)
         setEditModal(!edit_modal)
     }
-
 
     return (
         <Card className='mb-0 rounded-0 border-bottom p-2 pt-0'>
@@ -103,7 +96,7 @@ export function ExpandedComponent({ data, season_id })
                     fixedHeaderScrollHeight='62vh'
                 />
             </div>
-            {edit_modal && <EditModal open={edit_modal} handleEdit={editModal} editData={editData} season={season_id}/>}
+            {edit_modal && <EditModal open={edit_modal} handleEdit={editModal} editData={editData} season={season_id} refreshDatas={refreshDatas}/>}
         </Card>
     )
 }
@@ -410,7 +403,7 @@ const CreditVolume = () => {
                         <Button
                             color='primary'
                             size='sm'
-                            disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-credit-volume-create') && school_id && dep_id && year && season_id) ? false : true}
+                            disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-credit-volume-create') && dep_id && year && season_id) ? false : true}
                             onClick={() => handleEstimate()}
                             className='mb-1 mb-sm-0'
                         >
@@ -420,7 +413,7 @@ const CreditVolume = () => {
                         <Button
                             color='primary'
                             size='sm'
-                            disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-credit-volume-create') && school_id && dep_id && year && season_id) ? false : true}
+                            disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-credit-volume-create') && dep_id && year && season_id) ? false : true}
                             onClick={() => handleModal()}
                             className='mb-1 ms-1 mb-sm-0'
                         >
@@ -504,15 +497,16 @@ const CreditVolume = () => {
                         )}
                         onSort={handleSort}
                         sortIcon={<ChevronDown size={10} />}
-                        columns={getColumns(currentPage, rowsPerPage, total_count, handleRowModal)}
+                        columns={getColumns(currentPage, rowsPerPage, total_count, handleRowModal,getDatas )}
                         paginationPerPage={rowsPerPage}
                         paginationDefaultPage={currentPage}
-                        paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
+                        paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count, )}
                         data={datas}
                         fixedHeader
                         fixedHeaderScrollHeight='62vh'
                         expandableRows
                         expandableRowsComponent={(state) => ExpandedComponent(state, season_id)}
+                        expandableRowsComponentProps={{'refreshDatas': getDatas}}
                     />
                 </div>
             </Card>

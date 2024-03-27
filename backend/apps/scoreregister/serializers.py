@@ -89,7 +89,8 @@ class ReScoreListSerializer(serializers.ModelSerializer):
             if score_list['exam_score']:
                 exam_score = score_list['exam_score']
             score_list['total_score'] = teach_score + exam_score
-            assess = Score.objects.filter(score_max__gte=teach_score+exam_score,score_min__lte=teach_score+exam_score).values('assesment').first()
+            total_score = round((teach_score + exam_score), 2)
+            assess = Score.objects.filter(score_max__gte=total_score,score_min__lte=total_score).values('assesment').first()
             if assess:
                 score_list['assessment'] = assess['assesment']
 

@@ -40,7 +40,7 @@ const LessonName = () => {
 	const default_page = [10, 15, 50, 75, 100]
 
 	// Loader
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false})
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
 
 	// Эрэмбэлэлт
 	const [sortField, setSort] = useState('')

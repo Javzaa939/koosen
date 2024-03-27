@@ -36,7 +36,7 @@ function ADB5(){
 
 	// // Loader
 	const { Loader, isLoading, fetchData } = useLoader({isSmall: true});
-    const [localLoaderDB3, setLocalLoaderDB3] = useState(false)
+    const [localLoaderDB5, setLocalLoaderDB5] = useState(false)
 
 
 
@@ -66,7 +66,7 @@ function ADB5(){
         const {success, data} = await fetchData(infoApi.get())
         if(success) {
             setDatas(data)
-            setLocalLoaderDB3(false)
+            setLocalLoaderDB5(false)
         }
     }
 
@@ -901,7 +901,7 @@ function ADB5(){
             <Button color="primary" className="mb-2 p-75" disabled={isLoading} onClick={() => {convert()}}>
                 <FileText size={18} /> Excel татах
             </Button>
-            {(isLoading || localLoaderDB3) ?
+            {(isLoading || localLoaderDB5) ?
                 Loader
                 :
                     <table>

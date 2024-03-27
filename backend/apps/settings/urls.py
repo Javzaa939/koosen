@@ -1,25 +1,5 @@
 from django.urls import path
-from .views import ProfessionalDegreeAPIView
-from .views import LearningAPIView
-from .views import StudentRegisterAPIView
-from .views import LessonCategoryAPIView
-from .views import LessonGroupAPIView
-from .views import LessonTypeAPIView
-from .views import LessonLevelAPIView
-from .views import ScoreAPIView
-from .views import SeasonAPIView
-from .views import SystemSettingsAPIView
-from .views import DiscountTypeAPIView
-from .views import AdmissionLessonAPIView
-from .views import SystemSettingsActiveYearAPIView
-from .views import CountryAPIView
-from .views import SignatureAPIView
-from .views import SignatureDataTableAPIView
-from .views import SignatureTableAPIView
-from .views import SignatureOrderAPIView
-from .views import PermissionAPIView
-from .views import RolesAPIView
-from .views import PermissionListAPIView
+from .views import *
 
 
 urlpatterns = [
@@ -91,4 +71,12 @@ urlpatterns = [
     # Role
     path('role/', RolesAPIView.as_view()),
     path('role/<int:pk>/', RolesAPIView.as_view()),
+
+    # Хэвлэх
+    path('print/', PrintAPIView.as_view()),
+    path('print/<int:pk>/', PrintAPIView.as_view()),
+
+    # Жил болон улирлын жагсаалт
+    path('year-season/', YearSeasonListAPIView.as_view()),
+
 ]

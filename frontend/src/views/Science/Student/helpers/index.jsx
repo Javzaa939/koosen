@@ -60,7 +60,7 @@ export function getExpandColumns () {
 			width: '250px'
 		},
 		{
-			name: t("Хөтөлбөр"),
+			name: t("Мэргэжил"),
 			selector: (row) => (row?.profession_name),
 			center: true
 		},

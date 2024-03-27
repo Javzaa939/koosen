@@ -848,8 +848,8 @@ function ADB8(){
 
     return(
         <div className="overflow-auto" style={{ minHeight: 200 }}>
-            <Button color="primary" className="mb-2 p-75" disabled={false} onClick={() => {convert()}}>
-            {/* <Button color="primary" className="mb-2 p-75" disabled={isLoading} onClick={() => {convert()}}> */}
+            {/* <Button color="primary" className="mb-2 p-75" disabled={false} onClick={() => {convert()}}> */}
+            <Button color="primary" className="mb-2 p-75" disabled={isLoading} onClick={() => {convert()}}>
                 <FileText size={18} /> Excel татах
             </Button>
             {(isLoading || localLoaderDB8) ?

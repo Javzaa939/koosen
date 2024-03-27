@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from django.db.models import Q
 
 from lms.models import Room
 from lms.models import Building
@@ -18,7 +17,7 @@ from core.serializers import SubSchoolListSerailizer
 
 from main.utils.function.utils import get_fullName, start_time, end_time
 
-from surgalt.serializers import LessonStandartListSerializer
+from ..surgalt.serializers import LessonStandartListSerializer
 from core.serializers import TeacherListSerializer
 
 
@@ -167,6 +166,7 @@ class TimeTableListSerializer(serializers.ModelSerializer):
 
     lesson = LessonStandartListSerializer(many=False, read_only=True)
     teacher = TeacherListSerializer(many=False, read_only=True)
+    support_teachers = serializers.SerializerMethodField()
     room = RoomListSerializer(many=False, read_only=True)
 
     group = serializers.SerializerMethodField()
@@ -183,7 +183,14 @@ class TimeTableListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TimeTable
-        exclude = ['created_at', 'updated_at']
+        exclude = ['created_at', 'updated_at', 'support_teacher']
+
+    def get_support_teachers(self, obj):
+        teacher_id = 0
+        teacher_ids = obj.support_teacher if obj.support_teacher is not None else []
+        if len(teacher_ids) > 0:
+            teacher_id = teacher_ids[0]
+        return teacher_id
 
     def get_group(self, obj):
         group_names = ''
@@ -492,23 +499,19 @@ class ExamTimeTableListSerializer(serializers.ModelSerializer):
     student_list = serializers.SerializerMethodField()
     student_group_list = serializers.SerializerMethodField()
 
+
     class Meta:
         model = ExamTimeTable
         fields = "__all__"
 
 
     def get_student_list(self, obj):
-        def exam_score_converter(percentage):
-            percentage = min(100, max(0, percentage))
-            normalized_value = percentage / 100
-            result = normalized_value * 30
-            return result
 
         request = self.context.get('request')
         school = request.query_params.get('school')
 
         student_list = []
-        status = StudentRegister.objects.filter(Q(Q(name__contains='Суралцаж буй') | Q(code=1))).first()
+        status = StudentRegister.objects.filter(name__contains='Суралцаж буй').first()
 
         student_queryset = Exam_to_group.objects.filter(exam_id=obj.id, student__status=status)
         if school:
@@ -532,6 +535,7 @@ class ExamTimeTableListSerializer(serializers.ModelSerializer):
 
                 exam_score = 0
                 teach_score = 0
+                result_score = 0
                 score = ScoreRegister.objects.filter(student=student_id, lesson_year=obj.lesson_year, lesson_season=obj.lesson_season, lesson=obj.lesson).first()
 
                 if score:
@@ -540,8 +544,10 @@ class ExamTimeTableListSerializer(serializers.ModelSerializer):
 
                 student_datas['exam'] = exam_score
                 student_datas['teach_score'] = teach_score
+                result_score = exam_score + teach_score
+                student_datas['result_score'] = result_score
+                result_score = round(result_score, 2)
 
-                result_score = exam_score_converter(exam_score) + teach_score
                 assessment = Score.objects.filter(score_max__gte=result_score,score_min__lte=result_score).first()
 
                 student_datas['assesment'] = assessment.assesment if assessment else ''
@@ -554,8 +560,10 @@ class ExamTimeTableListSerializer(serializers.ModelSerializer):
 
                 student_list.append(student_datas)
 
-        return student_list
+            if len(student_list) > 0:
+                student_list = sorted(student_list, key=lambda x: x["result_score"], reverse=True)
 
+        return student_list
 
     def get_student_group_list(self, obj):
 
@@ -678,7 +686,7 @@ class ScoreGpaListSerializer(serializers.ModelSerializer):
 
 
         if all_score > 0:
-            final_gpa = all_score / total_lesson_kr
+            final_gpa = round((all_score / total_lesson_kr), 2)
             score_qs = Score.objects.filter(
                     score_max__gte=final_gpa,
                     score_min__lte=final_gpa
@@ -816,3 +824,22 @@ class PotokSerializer(serializers.ModelSerializer):
     def get_odd_even_name(seld, obj):
 
         return obj.get_odd_even_display()
+
+
+class TimetablePrintSerializer(serializers.ModelSerializer):
+    room_name = serializers.CharField(source='room.code', default='')
+    lesson_name = serializers.SerializerMethodField()
+    teacher_name = serializers.CharField(source='teacher.full_name', default='')
+
+    class Meta:
+        model = TimeTable
+        fields = 'id', 'day', 'time', 'teacher_name', 'lesson_name', 'odd_even', 'room_name'
+
+    def get_lesson_name(self, obj):
+
+        name = obj.lesson.name
+        type_name = obj.get_type_display()
+
+        lesson_name = name + ' ' + '/' + type_name + "/"
+
+        return lesson_name
