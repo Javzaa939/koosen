@@ -177,7 +177,7 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                             />
                             {errors.leader && <FormFeedback className='d-block'>{t(errors.leader.message)}</FormFeedback>}
                         </Col>
-                        <Col md={12}>
+                        {/* <Col md={12}>
                             <Label className="form-label" for="social">
                                 {t('Нийтийн сүлжээ')}
                             </Label>
@@ -236,7 +236,7 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                                     />
                                 )}
                             />
-                        </Col>
+                        </Col> */}
                         <Col md={12}>
                             <Button className="me-2" color="primary" type="submit" disabled={postLoading}>
                                 {postLoading &&<Spinner size='sm' className='me-1'/>}

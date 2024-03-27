@@ -3222,12 +3222,14 @@ class Challenge(models.Model):
     SORIL2 = 2
     SEMESTR_EXAM = 3
     SELF_TEST = 4
+    MENTAL_TEST = 5
 
     CHALLENGE_TYPE = (
         (SORIL1, 'Cорил 1'),
         (SORIL2, 'Cорил 2'),
         (SEMESTR_EXAM, 'Улирлын шалгалт'),
         (SELF_TEST, 'Өөрийгөө сорих тест'),
+        (MENTAL_TEST, 'Сэтгэлзүйн сорил')
     )
 
     #  Хамрах хүрээ нь
@@ -3247,9 +3249,9 @@ class Challenge(models.Model):
     duration = models.PositiveIntegerField(verbose_name='Үргэлжлэх хугацаа', null=True)
 
     send_type = models.PositiveIntegerField(choices=SEND_TYPE, db_index=True, verbose_name="Шалгалт илгээсэн төрөл", null=True)
-    challenge_type = models.PositiveIntegerField(choices=CHALLENGE_TYPE, db_index=True, default=SELF_TEST, verbose_name="Шалгалтын төрөл",)
-    comment = models.TextField(null=True, verbose_name='ХБА татгалзсан тайлбар бичих')
+    challenge_type = models.PositiveIntegerField(choices=CHALLENGE_TYPE, db_index=True, default=SELF_TEST, verbose_name="Шалгалтын төрөл")
 
+    comment = models.TextField(null=True, verbose_name='ХБА татгалзсан тайлбар бичих')
     assess = models.IntegerField(choices=ASSESS_CHOICES, default=MAX_SCORE, verbose_name='Үнэлэх арга')
 
     try_number = models.IntegerField(default=1, verbose_name='Оролдлогын тоо')
