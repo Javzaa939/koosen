@@ -89,24 +89,24 @@ function ADB10(){
                     'Улс': data?.country_name,
                     ' ': '',
                     'МД': idx + 1,
-                    'Нийт суралцагчид': data.degree[0].all,
-                        'Эрэгтэй': data.degree[0].men,
-                        'Эмэгтэй': data.degree[0].women,
-                    'Дипломын боловсрол': data.degree[1].all,
-                        'Эрэгтэй2': data.degree[1].men,
-                        'Эмэгтэй2': data.degree[1].women,
-                    'Бакалаврын боловсрол': data.degree[2].all,
-                        'Эрэгтэй3': data.degree[2].men,
-                        'Эмэгтэй3': data.degree[2].women,
-                    'Магистрын боловсрол': data.degree[3].all,
-                        'Эрэгтэй4': data.degree[3].men,
-                        'Эмэгтэй4': data.degree[3].women,
+                    'Нийт суралцагчид': data.degree[0]?.all,
+                        'Эрэгтэй': data.degree[0]?.men,
+                        'Эмэгтэй': data.degree[0]?.women,
+                    'Дипломын боловсрол': data.degree[1]?.all,
+                        'Эрэгтэй2': data.degree[1]?.men,
+                        'Эмэгтэй2': data.degree[1]?.women,
+                    'Бакалаврын боловсрол': data.degree[2]?.all,
+                        'Эрэгтэй3': data.degree[2]?.men,
+                        'Эмэгтэй3': data.degree[2]?.women,
+                    'Магистрын боловсрол': data.degree[3]?.all,
+                        'Эрэгтэй4': data.degree[3]?.men,
+                        'Эмэгтэй4': data.degree[3]?.women,
                     'Тив2': data?.continent,
                     'Улс2': data?.country_name,
                     'МД2': idx + 1,
-                    'Докторын боловсрол': data.degree[0].all,
-                        'Эрэгтэй5': data.degree[0].all,
-                        'Эмэгтэй5': data.degree[0].all,
+                    'Докторын боловсрол': data.degree[0]?.all,
+                        'Эрэгтэй5': data.degree[0]?.all,
+                        'Эмэгтэй5': data.degree[0]?.all,
                     'Монгол Улсын Засгийн газрын тэтгэлэг': data.study_type[0]?.student,
                     'Дотоод, гадаадын аж ахуйн нэгж, байгууллага, сан, хүвь хүний нэрэмжит тэтгэлэг': data.study_type[1]?.student,
                     'Тухайн сургуулийн тэтгэлэг': data.study_type[2]?.student,
@@ -851,48 +851,48 @@ function ADB10(){
 
                                 {/* Нийт оюутны тоо */}
                                         <td>
-                                            {value.degree.filter((deg, didx) => deg.degree_code === degreeAll)[0].all}
+                                            {value.degree.filter((deg, didx) => deg.degree_code === degreeAll)[0]?.all}
                                         </td>
                                         <td>
-                                            {value.degree.filter((deg, didx) => deg.degree_code === degreeAll)[0].men}
+                                            {value.degree.filter((deg, didx) => deg.degree_code === degreeAll)[0]?.men}
                                         </td>
                                         <td>
-                                            {value.degree.filter((deg, didx) => deg.degree_code === degreeAll)[0].women}
+                                            {value.degree.filter((deg, didx) => deg.degree_code === degreeAll)[0]?.women}
                                         </td>
 
                                 {/* Дипломын боловсролд хамрагдах оюутны тоо */}
                                         <td>
-                                            {value.degree.filter((deg, didx) => deg.degree_code === degreeDiplom)[0].all}
+                                            {value.degree.filter((deg, didx) => deg.degree_code === degreeDiplom)[0]?.all}
                                         </td>
                                         <td>
-                                            {value.degree.filter((deg, didx) => deg.degree_code === degreeDiplom)[0].men}
+                                            {value.degree.filter((deg, didx) => deg.degree_code === degreeDiplom)[0]?.men}
                                         </td>
                                         <td>
-                                            {value.degree.filter((deg, didx) => deg.degree_code === degreeDiplom)[0].women}
+                                            {value.degree.filter((deg, didx) => deg.degree_code === degreeDiplom)[0]?.women}
                                         </td>
 
 
                                 {/* Бакалаврын боловсролд хамрагдах оюутны тоо */}
                                         <td>
-                                            {value.degree.filter((deg, didx) => deg.degree_code === degreeBakalavr)[0].all}
+                                            {value.degree.filter((deg, didx) => deg.degree_code === degreeBakalavr)[0]?.all}
                                         </td>
                                         <td>
-                                            {value.degree.filter((deg, didx) => deg.degree_code === degreeBakalavr)[0].men}
+                                            {value.degree.filter((deg, didx) => deg.degree_code === degreeBakalavr)[0]?.men}
                                         </td>
                                         <td>
-                                            {value.degree.filter((deg, didx) => deg.degree_code === degreeBakalavr)[0].women}
+                                            {value.degree.filter((deg, didx) => deg.degree_code === degreeBakalavr)[0]?.women}
                                         </td>
 
 
                                 {/* Магистрын боловсролд хамрагдах оюутны тоо */}
                                         <td>
-                                            {value.degree.filter((deg, didx) => deg.degree_code === degreeMagistr)[0].all}
+                                            {value.degree.filter((deg, didx) => deg.degree_code === degreeMagistr)[0]?.all}
                                         </td>
                                         <td>
-                                            {value.degree.filter((deg, didx) => deg.degree_code === degreeMagistr)[0].men}
+                                            {value.degree.filter((deg, didx) => deg.degree_code === degreeMagistr)[0]?.men}
                                         </td>
                                         <td>
-                                            {value.degree.filter((deg, didx) => deg.degree_code === degreeMagistr)[0].women}
+                                            {value.degree.filter((deg, didx) => deg.degree_code === degreeMagistr)[0]?.women}
                                         </td>
 
 
@@ -910,13 +910,13 @@ function ADB10(){
                                     </td>
                                 {/* Докторын боловсролд хамрагдах оюутны тоо */}
                                         <td>
-                                            {value.degree.filter((deg, didx) => deg.degree_code === degreeDoctor)[0].all}
+                                            {value.degree.filter((deg, didx) => deg.degree_code === degreeDoctor)[0]?.all}
                                         </td>
                                         <td>
-                                            {value.degree.filter((deg, didx) => deg.degree_code === degreeDoctor)[0].men}
+                                            {value.degree.filter((deg, didx) => deg.degree_code === degreeDoctor)[0]?.men}
                                         </td>
                                         <td>
-                                            {value.degree.filter((deg, didx) => deg.degree_code === degreeDoctor)[0].women}
+                                            {value.degree.filter((deg, didx) => deg.degree_code === degreeDoctor)[0]?.women}
                                         </td>
 
                                     {value.study_type.map((value, vidx) => {
