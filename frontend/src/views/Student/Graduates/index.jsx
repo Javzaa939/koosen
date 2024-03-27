@@ -222,29 +222,28 @@ const Graduates = () => {
         <Fragment>
             <Card>
             {isLoading && Loader}
-
                 <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
-                    <CardTitle tag='h4' style={{ marginTop: '20px' }}>{t('Төгссөн оюутны мэдээлэл')}</CardTitle>
-                    <div className='d-flex flex-wrap mt-md-0 mt-1'>
-                    <UncontrolledButtonDropdown>
-                        <DropdownToggle color='secondary' className='m-50' caret outline>
-                            <Download size={15} />
-                            <span className='align-middle ms-50'>Export</span>
-                        </DropdownToggle>
-                        <DropdownMenu>
-                            <DropdownItem className='w-100' onClick={() => excelDownload('csv')}>
-                                <FileText size={15} />
-                                <span className='align-middle ms-50'>CSV</span>
-                            </DropdownItem>
-                            <DropdownItem className='w-100' onClick={() => excelDownload('excel')}>
-                                <Grid size={15} />
-                                <span className='align-middle ms-50' >Excel</span>
-                            </DropdownItem>
-                        </DropdownMenu>
-                    </UncontrolledButtonDropdown>
+                    <CardTitle tag='h4'>{t('Төгссөн оюутны мэдээлэл')}</CardTitle>
+                    <div className='d-flex flex-wrap mt-md-0'>
+                        <UncontrolledButtonDropdown>
+                            <DropdownToggle color='secondary' className='m-50' caret outline>
+                                <Download size={15} />
+                                <span className='align-middle ms-50'>Export</span>
+                            </DropdownToggle>
+                            <DropdownMenu>
+                                <DropdownItem className='w-100' onClick={() => excelDownload('csv')}>
+                                    <FileText size={15} />
+                                    <span className='align-middle ms-50'>CSV</span>
+                                </DropdownItem>
+                                <DropdownItem className='w-100' onClick={() => excelDownload('excel')}>
+                                    <Grid size={15} />
+                                    <span className='align-middle ms-50' >Excel</span>
+                                </DropdownItem>
+                            </DropdownMenu>
+                        </UncontrolledButtonDropdown>
                     </div>
                 </CardHeader>
-                <Row className="justify-content-start mx-0 mt-1 mb-1" sm={12}>
+                <Row className="justify-content-start mx-0 my-50" sm={12}>
                     <Col sm={6} lg={3} >
                         <Label className="form-label" for="department">
                             {t('Тэнхим')}

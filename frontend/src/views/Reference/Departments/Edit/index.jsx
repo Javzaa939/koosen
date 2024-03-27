@@ -79,6 +79,7 @@ const UpdateModal = ({ open, editId, refreshDatas, handleEdit}) => {
             }
         }
 	}
+
 	return (
         <Fragment>
             <Modal
@@ -108,7 +109,7 @@ const UpdateModal = ({ open, editId, refreshDatas, handleEdit}) => {
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
                         <Col  md={12}>
                             <Label className="form-label" for="leader">
-                                {t('Тэнхимийн ахлагч')}
+                                {t('Тэнхимийн эрхлэгч')}
                             </Label>
                             <Controller
                                 control={control}
@@ -162,72 +163,6 @@ const UpdateModal = ({ open, editId, refreshDatas, handleEdit}) => {
                                 )}
                             />
                             {errors.name && <FormFeedback className='d-block'>{t(errors.name.message)}</FormFeedback>}
-                        </Col>
-                        <Col md={12}>
-                            <Label className="form-label" for="social">
-                                {t('Нийтийн сүлжээ')}
-                            </Label>
-                            <Controller
-                                defaultValue=''
-                                control={control}
-                                id="social"
-                                name="social"
-                                render={({ field }) => (
-                                    <Input
-                                        id ="social"
-                                        bsSize="sm"
-                                        placeholder={t('Нийтийн сүлжээ')}
-                                        {...field}
-                                        type="textarea"
-                                        invalid={errors.social && true}
-                                    />
-                                )}
-                            />
-                            {errors.social && <FormFeedback className='d-block'>{t(errors.social.message)}</FormFeedback>}
-                        </Col>
-                        <Col md={12}>
-                            <Label className="form-label" for="web">
-                                {t('Веб')}
-                            </Label>
-                            <Controller
-                                defaultValue=''
-                                control={control}
-                                id="web"
-                                name="web"
-                                render={({ field }) => (
-                                    <Input
-                                        id ="web"
-                                        bsSize="sm"
-                                        placeholder={t('Веб')}
-                                        {...field}
-                                        type="textarea"
-                                        invalid={errors.web && true}
-                                    />
-                                )}
-                            />
-                            {errors.web && <FormFeedback className='d-block'>{t(errors.web.message)}</FormFeedback>}
-                        </Col>
-                        <Col md={12}>
-                            <Label className="form-label" for="address">
-                                {t('Хаяг')}
-                            </Label>
-                            <Controller
-                                defaultValue=''
-                                control={control}
-                                id="address"
-                                name="address"
-                                render={({ field }) => (
-                                    <Input
-                                        id ="address"
-                                        bsSize="sm"
-                                        placeholder={t('Хаяг')}
-                                        {...field}
-                                        type="textarea"
-                                        invalid={errors.address && true}
-                                    />
-                                )}
-                            />
-                            {errors.address && <FormFeedback className='d-block'>{t(errors.address.message)}</FormFeedback>}
                         </Col>
                         <Col className='text-center mt-2' md={12}>
                             <Button className="me-2" size='sm' color="primary" type="submit">

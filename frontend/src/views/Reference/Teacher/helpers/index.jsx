@@ -1,13 +1,11 @@
 import { t } from 'i18next';
+import { Badge, UncontrolledTooltip} from 'reactstrap'
+import { CheckCircle, Edit, X} from 'react-feather'
+import useModal from "@hooks/useModal"
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, datas) {
-
-	// const page_count = Math.ceil(datas.length / rowsPerPage)
-	//  /** Сонгосон хуудасны тоо датаны тооноос их болсон үед хуудаслалт 1-с эхлэнэ */
-    // if (currentPage > page_count) {
-    //     currentPage = 1
-    // }
+export function getColumns (currentPage, rowsPerPage, handleEdit) {
+	const { showWarning } = useModal()
 
     const columns = [
 		{
@@ -17,33 +15,17 @@ export function getColumns (currentPage, rowsPerPage, datas) {
 			center: true
 		},
 		{
-			name: `${t("Код")}`,
-			selector: (row) => row?.code,
-			maxWidth: "100px",
-			center: true
-		},
-		{
-			header: 'last_name',
-			name: `${t("Овог")}`,
-			selector: (row) => <span title={row?.last_name}>{row?.last_name}</span>,
-            sortable: true,
-			minWidth: "100px",
-			left: true,
-		},
-		{
-			header: 'first_name',
 			name: `${t("Нэр")}`,
-			selector: (row) => <span title={row?.first_name}>{row?.first_name}</span>,
-            sortable: true,
-			minWidth: "100px",
-			left: true,
+			selector: (row) => <span title={row?.last_name}>{row?.last_name + ' ' + row?.first_name } <span>{row?.code ? '/' + row?.code + '/' : ''}</span></span>,
+			maxWidth: "300px",
+			center: true
 		},
         {
 			header: 'org_position',
 			name: `${t("Албан тушаал")}`,
 			selector: (row) => <span title={row?.org_position}>{row?.org_position}</span>,
 			minWidth: "30px",
-			left: true,
+			center: true,
 		},
         {
 			name: `${t("Тэнхим")}`,
@@ -53,12 +35,46 @@ export function getColumns (currentPage, rowsPerPage, datas) {
 			wrap: true,
 		},
 		{
-			name: `${t("Бүрэлдэхүүн сургууль")}`,
-			selector: (row) => row?.sub_org?.name,
-			minWidth: "30px",
-			center: true,
-			wrap: true,
-		},
+            name: `${t('Үйлдэл')}`,
+
+            selector:  (row) => (
+                <div className="text-center" style={{ width: "auto" }}>
+                    {/* {
+                        <>
+                            <a role="button"
+                                onClick={() => handleEdit(row)}
+                                id={`updateSchool${row?.id}`}
+                            >
+                                <Badge color="light-primary" pill><Edit width={"100px"} /></Badge>
+                            </a>
+                            <UncontrolledTooltip placement='top' target={`updateSchool${row?.id}`}>засах</UncontrolledTooltip>
+						</>
+                    } */}
+					{
+						<>
+							<a role="button"
+								className='ms-1'
+								onClick={() => showWarning({
+									header: {
+										title: `${t('Тэнхимийн мэдээлэл устгах')}`,
+									},
+									question: `Та  ${row?.name} устгахдаа итгэлтэй байна уу?`,
+									onClick: () => handleDelete(row?.id),
+									btnText: 'Устгах',
+								})}
+								id={`complaintListDatatableCancel${row?.id}`}
+							>
+								<Badge color="light-danger" pill><X width={"100px"} /></Badge>
+							</a>
+							<UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${row?.id}`} >Устгах</UncontrolledTooltip>
+						</>
+					}
+				</div>
+            ),
+            minWidth: "200px",
+            maxWidth: "200px",
+            center: true,
+        },
 	]
     return columns
 }

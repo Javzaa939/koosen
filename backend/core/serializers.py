@@ -42,9 +42,36 @@ from lms.models import UserSymbolCert
 from lms.models import UserLicenseCert
 from lms.models import UserRightCert
 
-class SubSchoolListSerailizer(serializers.ModelSerializer):
-    """ Дэд сургуулийн жагсаалт """
 
+class UserRegisterSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = 'email', 'password', 'phone_number', 'home_phone'
+
+    def create(self, validated_data):
+        password = validated_data.pop('password', None)
+        instance = self.Meta.model(**validated_data)
+        if password is not None:
+            instance.set_password(password)
+
+        instance.save()
+
+        return instance
+
+class UserInfoSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Teachers
+        fields = "__all__"
+
+
+class EmployeeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Employee
+        fields = '__all__'
+
+class SubSchoolListSerailizer(serializers.ModelSerializer):
     class Meta:
         model = SubOrgs
         fields = "__all__"
@@ -90,9 +117,7 @@ class DepartmentsSerializer(serializers.ModelSerializer):
         model = Salbars
         fields = ["id", "name"]
 
-
 class SubSchoolsSerializer(serializers.ModelSerializer):
-
     class Meta:
         model = SubOrgs
         fields = ["id","name"]
@@ -186,7 +211,6 @@ class DepartmentRegisterSerailizer(serializers.ModelSerializer):
     school_eng = serializers.CharField(source="sub_orgs.name_eng", default="")
     school_uig = serializers.CharField(source="sub_orgs.name_uig", default="")
     leaders = serializers.SerializerMethodField()
-    lead = serializers.SerializerMethodField()
 
     class Meta:
         model = Salbars
@@ -202,18 +226,6 @@ class DepartmentRegisterSerailizer(serializers.ModelSerializer):
                 name = teacher.full_name
 
         return name
-
-    def get_lead(self, obj):
-
-        teacher_id = None
-        user = obj.leader
-        if user:
-            teacher = Teachers.objects.filter(user=user).first()
-            if teacher:
-                teacher_id = teacher.id
-
-        return teacher_id
-
 
 class DepartmentRegisterListSerailizer(serializers.ModelSerializer):
     """ Салбар, тэнхим хөтөлбөрийн ахлах жагсаалт """
@@ -379,19 +391,25 @@ class TeacherListSchoolFilterSerializer(serializers.ModelSerializer):
 # Багшийн мэдээллийн жагсаалт
 class TeacherNameSerializer(serializers.ModelSerializer):
     salbar = DepartmentsSerializer(many=False)
-    sub_org = SubSchoolsSerializer(many=False)
     code = serializers.SerializerMethodField()
+    email = serializers.SerializerMethodField()
+    org_position_name = serializers.SerializerMethodField()
     org_position = serializers.SerializerMethodField()
     state = serializers.SerializerMethodField()
     full_name = serializers.SerializerMethodField()
+    phone_number = serializers.SerializerMethodField()
 
     class Meta:
         model = Teachers
-        fields = ["id", "last_name", "first_name", "salbar", "sub_org", "code", "org_position", "state", "full_name"]
+        fields = ["id", "last_name", "first_name", "salbar", "sub_org", "code", "org_position", "state", "full_name", 'register', 'org_position_name', 'email', 'phone_number', 'email']
 
+    def get_email(self, obj):
+        return User.objects.get(id=obj.user.id).email
+
+    def get_phone_number(self, obj):
+        return User.objects.get(id=obj.user.id).phone_number
 
     def get_code(self, obj):
-        """ Багшийн код авах """
         register_code = ""
         qs_worker = Employee.objects.filter(user=obj.user).first()
         if qs_worker:
@@ -399,9 +417,7 @@ class TeacherNameSerializer(serializers.ModelSerializer):
 
         return  register_code
 
-    def get_org_position(self, obj):
-        " албан тушаал "
-
+    def get_org_position_name(self, obj):
         pos_name = ''
         qs_worker = Employee.objects.filter(user=obj.user).first()
         if qs_worker:
@@ -411,9 +427,17 @@ class TeacherNameSerializer(serializers.ModelSerializer):
 
         return pos_name
 
+    def get_org_position(self, obj):
+        position = None
+        qs_worker = Employee.objects.filter(user=obj.user).first()
+        if qs_worker:
+            org_pos = qs_worker.org_position
+            if org_pos:
+                position = org_pos.id
+
+        return position
 
     def get_state(self, obj):
-        " Ажиллаж байгаа "
         state_name = ''
         state = Employee.objects.filter(state=Employee.STATE_WORKING).first()
 

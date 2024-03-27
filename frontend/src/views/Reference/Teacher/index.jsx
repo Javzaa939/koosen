@@ -20,7 +20,7 @@ import AuthContext from '@context/AuthContext'
 import SchoolContext from '@context/SchoolContext'
 
 import { getColumns } from './helpers';
-// import AddModal from './Add'
+import AddModal from './Add'
 
 const Teacher = () => {
 
@@ -39,7 +39,6 @@ const Teacher = () => {
 
 	// Эрэмбэлэлт
 	const [sortField, setSort] = useState('')
-
 	const [searchValue, setSearchValue] = useState("");
 
 	const { user } = useContext(AuthContext)
@@ -49,7 +48,8 @@ const Teacher = () => {
 	const [department, setDepartmentData] = useState([]);
 	const [position_option, setOrgPositions] = useState([]);
 	const [selected_values, setSelectValue] = useState(values);
-	const [add_modal, setAddModal]=useState(false)
+	const [add_modal, setAddModal] = useState(false)
+	const [editData, setEditData] = useState({})
 
     // Нийт датаны тоо
     const [total_count, setTotalCount] = useState(1)
@@ -79,7 +79,7 @@ const Teacher = () => {
 
 	/* Тэнхим дата авах функц */
 	async function getDepartmentOption() {
-		const { success, data } = await fetchData(departmentApi.getSelectSchool(school_id))
+		const { success, data } = await fetchData(departmentApi.getSelectSchool())
 		if (success) {
 			setDepartmentData(data)
 		}
@@ -117,12 +117,14 @@ const Teacher = () => {
 	},[selected_values])
 
 	useEffect(() => {
-		getDepartmentOption()
-	},[school_id])
-
-	useEffect(() => {
 		getPositionData()
+		getDepartmentOption()
 	},[])
+
+	function handleEdit(data) {
+        setAddModal(!add_modal)
+        setEditData(data)
+    }
 
 	// ** Function to handle filter
 	const handleFilter = e => {
@@ -150,14 +152,14 @@ const Teacher = () => {
 				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
 					<CardTitle tag="h4">{t('Багшийн мэдээлэл')}</CardTitle>
 					<div className='d-flex flex-wrap mt-md-0 mt-1'>
-						{/* <Button
+						<Button
                             color='primary'
                             // disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-subschools-create') && school_id) ? false : true}
                             disabled={Object.keys(user).length > 0 && school_id ? false : true}
                             onClick={() => handleModal()}>
                             <Plus size={15} />
                             <span className='align-middle ms-50'>{t('Нэмэх')}</span>
-                        </Button> */}
+                        </Button>
                     </div>
                 </CardHeader>
                 <Row className="justify-content-between mx-0 mb-1 mt-1">
@@ -252,7 +254,7 @@ const Teacher = () => {
                                     <h5>Өгөгдөл байхгүй байна.</h5>
                                 </div>
                             )}
-                            columns={getColumns(currentPage, rowsPerPage, datas)}
+                            columns={getColumns(currentPage, rowsPerPage, handleEdit)}
 							onSort={handleSort}
                             sortIcon={<ChevronDown size={10} />}
                             paginationPerPage={rowsPerPage}
@@ -265,7 +267,7 @@ const Teacher = () => {
 					</div>
 				}
 			</Card>
-			{/* { add_modal && <AddModal open={add_modal} handleModal={handleModal} refreshDatas={getDatas} /> } */}
+			{ add_modal && <AddModal open={add_modal} handleModal={handleModal} refreshDatas={getDatas} editData={editData}/> }
         </Fragment>
     )
 }

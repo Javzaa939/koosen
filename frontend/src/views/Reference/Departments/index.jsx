@@ -139,7 +139,7 @@ const Departments = () => {
 						<span className='ms-50'>{t('Түр хүлээнэ үү...')}</span>
 					</div>
 					:
-					<div className="react-dataTable react-dataTable-selectable-rows mx-1" id="datatableLeftTwoRightOne">
+					<div className="react-dataTable react-dataTable-selectable-rows mx-1" >
 						<DataTable
 							noHeader
 							pagination
