@@ -134,7 +134,7 @@ const EditModal = ({ open, handleEdit, refreshDatas, edit_id }) => {
             for (let key in cdata) {
                 formData.append(key, cdata[key])
             }
-            const { success, error } = await fetchData(newsApi.put(cdata, edit_id))
+            const { success, error, errors } = await fetchData(newsApi.put(cdata, edit_id))
             if(edit_id) {
                 if(success) {
                     reset()
@@ -142,6 +142,8 @@ const EditModal = ({ open, handleEdit, refreshDatas, edit_id }) => {
                     handleEdit()
                 }
                 else {
+                    console.log(error)
+                    console.log(errors)
                     /** Алдааны мессеж */
                     for (let key in error) {
                         setError(error[key].field, { type: 'custom', message: error[key].msg});

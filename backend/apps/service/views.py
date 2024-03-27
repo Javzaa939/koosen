@@ -68,7 +68,7 @@ class StudentNoticeAPIView(
         data = request.data.dict()
         data = null_to_none(data)
 
-        if not data.get('department'):
+        if 'department'  in data and not data.get('department'):
             del data['department']
 
         serializer = self.get_serializer(data=data)
@@ -96,15 +96,10 @@ class StudentNoticeAPIView(
         serializer = self.get_serializer(instance, data=request_data, partial=True)
 
         if serializer.is_valid(raise_exception=False):
-            with transaction.atomic():
-                try:
-                    self.perform_update(serializer)
-                except Exception:
-                    return request.send_error("ERR_002")
-                return request.send_error_valid(serializer.errors)
+            self.perform_update(serializer)
+            return request.send_info('INF_002')
         else:
-            error_obj = []
-            return request.send_error("ERR_003", error_obj)
+            return request.send_error_valid(serializer.errors)
 
 
     @has_permission(must_permissions=['lms-service-news-delete'])

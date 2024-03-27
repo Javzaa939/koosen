@@ -13,6 +13,7 @@ from django.db.models import Max, Sum, F, FloatField, Q, Value
 from django.db.models.functions import Replace, Upper
 from django.db.models.functions import Coalesce
 from django.contrib.auth.hashers import make_password
+from django.db import connection
 
 from main.utils.function.pagination import CustomPagination
 from main.decorators import login_required
@@ -22,7 +23,7 @@ from main.utils.file import remove_folder, split_root_path
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 from main.utils.function.pagination import CustomPagination
-from main.utils.function.utils import str2bool, has_permission, get_lesson_choice_student, remove_key_from_dict, get_fullName, get_student_score_register, calculate_birthday, null_to_none, bytes_image_encode, get_active_year_season,start_time, json_load
+from main.utils.function.utils import str2bool, has_permission, get_lesson_choice_student, remove_key_from_dict, get_fullName, get_student_score_register, calculate_birthday, null_to_none, bytes_image_encode, get_active_year_season,start_time, json_load, dict_fetchall
 # from main.khur.XypClient import citizen_regnum, highschool_regnum
 
 from lms.models import Student, StudentAdmissionScore, StudentEducation, StudentLeave, StudentLogin, TimeTable
@@ -695,7 +696,7 @@ class StudentListAPIView(
 
         state = request.query_params.get('state')
 
-        if state != 'undefined' and state is not None:
+        if state != 'undefined' and state is not None and state:
 
             if state == '2':
                 qs_start = (int(state) - 2) * 10
@@ -745,7 +746,7 @@ class StudentListAPIView(
         if class_id:
             self.queryset = self.queryset.filter(group=class_id)
 
-        if state != 'undefined' and state is not None:
+        if state != 'undefined' and state is not None and state:
             status = StudentRegister.objects.filter(name__contains='Суралцаж буй').first()
             self.queryset = self.queryset.filter(status=status)
 
@@ -2438,41 +2439,65 @@ class StudentGpaDiplomaValuesAPIView(
 
         student_prof_qs = Student.objects.get(id=student_id).group.profession
 
-        score_qs = None
         all_data = dict()
-        calculated_data = list()
 
-        for data in qs:
+        learning_plan_levels = LearningPlan.objects.filter(profession=student_prof_qs).values_list('lesson_level', flat=True).distinct('lesson_level')
 
-            data = CalculatedGpaOfDiplomaPrintSerializer(data, context={ "student_prof_qs": student_prof_qs }, many=False).data
-            calculated_data.append(data)
-            max_kredit = max_kredit + data['kredit']
-            all_score = all_score + (data['score'] * data['kredit'])
+        all_learn_levels = dict(LearningPlan.LESSON_LEVEL)
 
-        newlist = sorted(calculated_data, key=lambda i: (i['lesson']['lesson_level'], i['lesson']['lesson_type'], i['lesson']['season']))
+        all_datas = []
+        for level in list(learning_plan_levels):
+            if level == (LearningPlan.DIPLOM or LearningPlan.MAG_DIPLOM or LearningPlan.DOC_DIPLOM):
+                continue
 
-        lastAddList = list()
+            obj_datas = {}
+            obj_datas['name'] = all_learn_levels[level]
 
-        for idx, newListData in enumerate(newlist):
-            if newListData.get('lesson'):
-                if newListData.get('lesson').get('lesson'):
-                    if newListData.get('lesson').get('lesson').get('name'):
-                        if (newListData.get('lesson').get('lesson').get('name') in ['Магистрын судалгааны ажил', "Master's Thesis"]):
-                            lastAddList.append(newListData)
-                            del newlist[idx]
+            lesson_datas = []
 
-        for lastAddData in lastAddList:
-            newlist.append(lastAddData)
+            obj_datas['eng_name'] = 'Education subject'
+            obj_datas['uig_name'] = 'ᠳᠡᢉᠡᠳᠦ ᠪᠣᠯᠪᠠᠰᠤᠷᠠᠯ ᠤ᠋ᠨ ᠰᠠᠭᠤᠷᠢ ᢈᠢᠴᠢᠶᠡᠯ'
+            if level == 2:
+                obj_datas['eng_name'] = 'Core'
+                obj_datas['uig_name'] = 'ᠮᠡᠷᢉᠡᠵᠢᠯ ᠦ᠋ᠨ ᠰᠠᠭᠤᠷᠢ ᢈᠢᠴᠢᠶᠡᠯ'
+            if level == 3:
+                obj_datas['eng_name'] = 'Major course'
+                obj_datas['uig_name'] = 'ᠮᠡᠷᢉᠡᠵᠢᠯ ᠦ᠋ᠨ ᢈᠢᠴᠢᠶᠡᠯ'
 
-        if all_score or max_kredit:
-            final_gpa = round((all_score / max_kredit), 2)
-            score_qs = Score.objects.filter(score_max__gte=final_gpa, score_min__lte=final_gpa).first()
+            for data_qs in qs:
+                lesson_first_data = data_qs.lesson.all()
+                lesson_obj = lesson_first_data.first()
 
-        if score_qs:
-            score_assesment = score_qs.gpa
+                query = '''
+                    select lp.lesson_level, ls.name, ls.code, ls.id, ls.name_eng, ls.name_uig, ls.kredit from lms_learningplan lp
+                    inner join lms_lessonstandart ls
+                    on lp.lesson_id=ls.id
+                    where lp.profession_id = {profession_id} and lp.lesson_id = {lesson_id}
+                '''.format(profession_id=student_prof_qs.id, lesson_id=lesson_obj.id)
 
-        all_data['score'] = { 'assesment': score_assesment, 'max_kredit': max_kredit }
-        all_data['lessons'] = newlist
+                cursor = connection.cursor()
+                cursor.execute(query)
+                rows = list(dict_fetchall(cursor))
+
+                if len(rows) > 0:
+                    if rows[0]['lesson_level'] == level:
+                        lesson = rows[0]
+                        lesson['score'] = data_qs.score
+                        lesson['assesment'] = data_qs.assesment
+                        lesson_datas.append(lesson)
+
+                        max_kredit = max_kredit + lesson.get('kredit')
+                        score_qs = Score.objects.filter(score_max__gte=data_qs.score, score_min__lte=data_qs.score).first()
+                        all_score = all_score + (score_qs.gpa * lesson.get('kredit'))
+
+            obj_datas['lessons'] = lesson_datas
+            all_datas.append(obj_datas)
+
+        final_gpa = all_score / max_kredit
+        final_gpa = format(final_gpa, ".2f")
+
+        all_data['score'] = { 'assesment': final_gpa, 'max_kredit': max_kredit }
+        all_data['lessons'] = all_datas
 
         # GraduationWork
         graduationwork_qs = GraduationWork.objects.filter(student_id=student_id).last()

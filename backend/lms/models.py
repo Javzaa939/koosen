@@ -1531,6 +1531,15 @@ class PaymentSeasonClosing(models.Model):
 class Stipend(models.Model):
     """Тэтгэлэгийн бүртгэл"""
 
+    OWN = 1
+    OTHER = 2
+
+    STIPEND_FORM = (
+        (OWN, 'Сургуулийн дотоод тэтгэлэг'),
+        (OTHER, 'Гадны тэтгэлэг')
+    )
+
+    is_own = models.PositiveIntegerField(choices=STIPEND_FORM, db_index=True, null=False, default=OWN, verbose_name="Сургуулийн дотоод тэтгэлэг эсэх")
     stipend_type = models.ForeignKey(DiscountType, on_delete=models.SET_NULL, null=True, verbose_name='Тэтгэлэгийн төрөл')
     lesson_year = models.CharField(max_length=20, verbose_name='Хичээлийн жил')
     lesson_season = models.ForeignKey(Season, on_delete=models.SET_NULL, null=True, verbose_name='Улирал')

@@ -4,6 +4,7 @@ from rest_framework import generics
 from datetime import datetime
 from django.db import transaction
 from django.views.decorators.http import require_GET
+from lms_package.notif import create_notif
 
 from lms.models import Teachers
 from lms.models import Student
@@ -15,6 +16,10 @@ from lms.models import Lesson_teacher_scoretype
 from lms.models import PermissionsTeacherScore
 from lms.models import PermissionsStudentChoice
 from lms.models import Crontab
+from lms.models import Notification
+from lms.models import Employee
+
+from core.models import User
 
 from rest_framework.filters import SearchFilter
 from main.utils.function.pagination import CustomPagination
@@ -122,8 +127,12 @@ class PermissionTeacherAPIView(
         request_data = null_to_none(request_datas)
 
         teacher_score_type = request_data.get('teacher_scoretype')
+        teacher = request_data.get('teacher')
+        end_date = request_data.get('finish_date')
 
-        if not teacher_score_type:
+        if teacher_score_type is not None:
+            score_type_name = dict(Lesson_teacher_scoretype.SCORE_TYPE).get(teacher_score_type)
+        else:
             return request.send_error('ERR_002', " Тухайн багшийн заасан хичээл дээр дүгнэх хэлбэр олдсонгүй.")
 
 
@@ -137,6 +146,19 @@ class PermissionTeacherAPIView(
 
         if season and year:
            self.queryset = self.queryset.filter(lesson_year=year, lesson_season=season)
+
+        scope_teacher_id = Teachers.objects.filter(id=teacher).values_list('user', flat=True).first()
+        employees_id = list(Employee.objects.filter(user=scope_teacher_id).values_list('id', flat=True))
+
+        create_notif(
+            request,
+            employees_id,
+            "Таны {score_type_name} дүн оруулах эрх нээгдлээ.".format(score_type_name=score_type_name),
+            "Дүн оруулах эрх {end_date}-д хаагдахыг анхаарна уу.".format(end_date=end_date),
+            Notification.FROM_KIND_USER,
+            Notification.SCOPE_KIND_EMPLOYEE,
+            "important",
+        )
 
         serializer = self.get_serializer(data=request_data)
         if serializer.is_valid(raise_exception=False):
@@ -291,7 +313,8 @@ class LessonTeacherScoretypeAPIView(
         teacher = request.query_params.get('teacher')
 
         lesson_teacher_id = Lesson_to_teacher.objects.filter(teacher=teacher,lesson=lesson).values_list("id", flat=True)
-        self.queryset = self.queryset.filter(lesson_teacher_id__in=lesson_teacher_id)
+        exclude_ids = self.queryset.filter(lesson_teacher_id__in=lesson_teacher_id).values_list("score_type", flat=True).exclude(score_type__in=[Lesson_teacher_scoretype.QUIZ1, Lesson_teacher_scoretype.QUIZ2])
+        self.queryset = self.queryset.filter(lesson_teacher_id__in=lesson_teacher_id).exclude(score_type__in=exclude_ids)
 
         data = self.list(request).data
 
@@ -367,8 +390,11 @@ class PermissionOtherAPIView(
         request_data = null_to_none(request_datas)
 
         permission_type = request_data.get('permission_type')
-
-        if not permission_type:
+        if permission_type is not None:
+            permission_type_tuple = PermissionsOtherInterval.PERMISSION_TYPE
+            permission_type_dict = dict((key, value) for key, value in permission_type_tuple)
+            permission_type_name = permission_type_dict.get(int(permission_type))
+        else:
             return request.send_error('ERR_002', "Хандах эрх олдсонгүй.")
 
 
@@ -376,7 +402,7 @@ class PermissionOtherAPIView(
         season = request.query_params.get('lesson_season')
         year = request.query_params.get('lesson_year')
 
-
+        end_date = request_data.get('finish_date')
 
         qs = self.queryset.filter(lesson_year=year, lesson_season=season, permission_type=permission_type)
         if qs:
@@ -384,6 +410,22 @@ class PermissionOtherAPIView(
 
         if season and year:
            self.queryset = self.queryset.filter(lesson_year=year, lesson_season=season)
+
+        #Эхлээд зөвшөөрөгдсөн багш нарын user id-г авна.
+        approved_teacher_ids = list(Teachers.objects.filter(action_status=Teachers.APPROVED).values_list('user', flat=True))
+
+        #Дараа нь тэр user id-р Employee id-u авна.
+        employees_ids = list(Employee.objects.filter(user__in=approved_teacher_ids, org_position__is_teacher=True, state=Employee.STATE_WORKING).values_list('id', flat=True))
+
+        create_notif(
+            request,
+            employees_ids,
+            "Таны {permission_type_name} нээгдлээ.".format(permission_type_name=permission_type_name),
+            "Дүн оруулах эрх {end_date}-д хаагдахыг анхаарна уу.".format(end_date=end_date),
+            Notification.FROM_KIND_USER,
+            Notification.SCOPE_KIND_EMPLOYEE,
+            "important",
+        )
 
         serializer = self.get_serializer(data=request_data)
         if serializer.is_valid(raise_exception=False):
@@ -619,6 +661,8 @@ class PermissionsStudentAPIView(
     queryset = Student.objects
     serializer_class = PermissionsStudentSerializer
 
+    filter_backends = [SearchFilter]
+    search_fields = ['code', 'first_name']
 
     def get(self, request):
         """ Оюутны жагсаалт
@@ -633,6 +677,37 @@ class PermissionsStudentAPIView(
 
         return_datas = self.list(request).data
 
+        return request.send_data(return_datas)
+
+class PermissionsStudentSelectAPIView(
+    mixins.ListModelMixin,
+    generics.GenericAPIView
+):
+    ''' Оюутны хичээл сонголтыг төлбөрөөс хамааралгүйгээр хийх эрх '''
+
+    queryset = Student.objects
+    serializer_class = PermissionsStudentSerializer
+
+    def get(self, request):
+        """ Оюутны жагсаалт
+        """
+        # Идэвхтэй жил ,улирал
+        season = request.query_params.get('season')
+        year = request.query_params.get('year')
+        state = request.query_params.get('state')
+
+        if state == '2':
+            qs_start = (int(state) - 2) * 10
+            qs_filter = int(state) * 10
+        else:
+            qs_start = (int(state) - 1) * 10
+            qs_filter = int(state) * 10
+
+        if season and year:
+            self.queryset = self.queryset.filter(lesson_year=year, lesson_season=season)
+
+        self.queryset = self.queryset.order_by('id')[qs_start:qs_filter]
+        return_datas = self.list(request).data
         return request.send_data(return_datas)
 
 class PermissionsCheckAPIView(

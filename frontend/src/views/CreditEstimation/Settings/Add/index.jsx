@@ -103,6 +103,10 @@ export const Addmodal = ( { open, refreshDatas, handleModal, type, editData } ) 
             if (Object.keys(editData).length > 0) {
                 for (let key in editData) {
                     setValue(key, editData[key])
+
+                    if(key === 'position') {
+                        setValue(key, editData[key]?.id)
+                    }
                 }
             }
         }, [editData]
