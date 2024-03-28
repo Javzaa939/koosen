@@ -428,6 +428,7 @@ const ElseltUser = () => {
 	return (
 		<Fragment>
             <StateModal
+                getDatas={getDatas}
                 stateModalHandler={stateModalHandler}
                 stateModal={stateModal}
                 selectedStudents={selectedStudents}

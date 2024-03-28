@@ -1,20 +1,30 @@
-import React, { Fragment } from 'react'
-import { Controller, useForm } from 'react-hook-form'
-import { Button, Form, FormFeedback, Input, Label, Modal, ModalBody, ModalHeader } from 'reactstrap'
-import { validate } from '@utils'
+import React, { Fragment } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { Button, Form, FormFeedback, Input, Label, Modal, ModalBody, ModalHeader } from 'reactstrap';
+import { validate } from '@utils';
+import useApi from '@hooks/useApi';
+import useLoader from '@hooks/useLoader';
 
-import { validateSchema } from './validateSchema'
+import { validateSchema } from './validateSchema';
 
-function StateModal({ stateModalHandler, stateModal, selectedStudents, stateop }) {
+function StateModal({ stateModalHandler, stateModal, selectedStudents, stateop, getDatas }) {
 
-    const { formState: { errors }, handleSubmit, control } = useForm(validate(validateSchema))
+    const { formState: { errors }, handleSubmit, control, reset } = useForm(validate(validateSchema));
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true});
 
-    var students_list = selectedStudents.map(val => val?.id)
+    const admissionStateChangeApi = useApi().elselt.admissionuserdata.all;
 
-    function onSubmit(cdata){
-        cdata['students'] = students_list
-        console.log(cdata,'cdata')
-    }
+    var students_list = selectedStudents.map(val => val?.id);
+
+    async function onSubmit(cdata){
+        cdata['students'] = students_list;
+        const { success } = await fetchData(admissionStateChangeApi.put(cdata));
+        if (success) {
+            reset();
+            stateModalHandler();
+            getDatas();
+        };
+    };
 
     return (
         <Modal centered toggle={stateModalHandler} isOpen={stateModal}>
@@ -39,10 +49,10 @@ function StateModal({ stateModalHandler, stateModal, selectedStudents, stateop }
                                                         type='radio'
                                                         name='state'
                                                         id={`radio${idx}`}
-                                                        value={idx + 1}
-                                                        checked={idx + 1 === value}
+                                                        value={data?.id}
+                                                        checked={value === data?.id}
                                                         onChange={(e) => {
-                                                            onChange(Number(e.target.value) || '')
+                                                            onChange(Number(data?.id) || '')
                                                         }}
                                                         className='m-50 p-50'
                                                         invalid={errors?.state}
