@@ -216,7 +216,7 @@ const ElseltUser = () => {
 
 			return () => clearTimeout(timeoutId);
 		}
-    }, [sortField, currentPage, rowsPerPage, searchValue, adm, profession_id, unit1, gender, state])
+    }, [sortField, currentPage, rowsPerPage, searchValue, adm, profession_id, unit1, gender, state, gpa_state])
 
     useEffect(() => {
         getAdmissionYear()
