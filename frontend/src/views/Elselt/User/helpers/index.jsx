@@ -185,9 +185,9 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 			center: true
 		},
 		{
+			header: 'created_at',
 			maxWidth: "300px",
 			minWidth: "300px",
-			header: 'created_at',
 			sortable: true,
 			name: t("Бүрт/огноо"),
 			selector: (row) => row?.created_at? moment(row?.created_at).format("YYYY-MM-DD h:mm") : '',

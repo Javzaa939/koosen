@@ -385,6 +385,8 @@ const ElseltUser = () => {
 
     }
 
+    console.log(datas)
+
 	return (
 		<Fragment>
             {isLoading && Loader}
@@ -571,7 +573,7 @@ const ElseltUser = () => {
                         </Button>
                     </Col>
                 </Row>
-                <div className="react-dataTable react-dataTable-selectable-rows" id="datatableLeftTwoRightTwo">
+                <div className="react-dataTable react-dataTable-selectable-rows">
                     <DataTable
                         noHeader
                         paginationServer
@@ -588,6 +590,8 @@ const ElseltUser = () => {
                                 <h5>{t('Өгөгдөл байхгүй байна')}</h5>
                             </div>
                         )}
+                        print='true'
+                        theme="solarized"
                         onSort={handleSort}
                         columns={getColumns(currentPage, rowsPerPage === 'Бүгд' ? 1 : rowsPerPage, total_count, editModal, handleDelete, user, handleRowClicked)}
                         sortIcon={<ChevronDown size={10} />}
