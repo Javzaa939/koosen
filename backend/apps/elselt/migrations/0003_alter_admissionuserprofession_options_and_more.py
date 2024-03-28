@@ -7,7 +7,6 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('lms', '218_challenge_type'),
         ('elselt', '0002_physqueuser_messageinfo_healthuser_healthupuser_and_more'),
     ]
 

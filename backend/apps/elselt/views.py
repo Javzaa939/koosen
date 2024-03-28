@@ -374,7 +374,7 @@ class AdmissionUserInfoAPIView(
     mixins.RetrieveModelMixin,
 ):
 
-    queryset = AdmissionUserProfession.objects.all()
+    queryset = AdmissionUserProfession.objects.all().order_by('created_at')
 
     serializer_class = AdmissionUserInfoSerializer
     pagination_class = CustomPagination
