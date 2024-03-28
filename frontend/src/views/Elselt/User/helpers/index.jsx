@@ -54,7 +54,18 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
     const columns = [
 		{
 			name: "№",
-			selector: (row, index) => (currentPage-1) * rowsPerPage + index + 1,
+			selector: (row, index) => {
+				let tableRow = document.getElementById(`row-${row.id}`)
+
+				// Тэнцсэн тэнцээгүйгээс хамаарж border-left-д улаан ногоон border өгөх
+				if (tableRow)
+				{
+					let border = row.state == 1 ? '' : row.state == 2 ? '2px solid rgba(40, 199, 111, 1)' : '2px solid #EA5455'
+					tableRow.style.borderLeft = `${border}`
+				}
+
+				return (currentPage-1) * rowsPerPage + index + 1
+			},
 			center: true,
 			maxWidth: "80px",
 			minWidth: "80px",
@@ -66,14 +77,20 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 			minWidth: "250px",
 			selector: (row) => (
 				<div className="text-center" style={{ width: "auto" }}>
-					<a role="button"
-						onClick={() => editModal(row)}
-						id={`edit${row?.id}`}
-						className={`me-1 ${row?.state !== 1 ? 'pe-none' : ''} `}
-					>
-						<Badge color="light-secondary" pill><Edit disabled={row?.state !== 1} width={"15px"} /></Badge>
-					</a>
-					<UncontrolledTooltip placement='top' target={`edit${row.id}`}>Хөтөлбөр солих</UncontrolledTooltip>
+					{
+						row?.state == 1
+						&&
+						<>
+							<a role="button"
+								onClick={() => editModal(row)}
+								id={`edit${row?.id}`}
+								className={`me-1`}
+							>
+								<Badge color="light-secondary" pill><Edit disabled={row?.state !== 1} width={"15px"} /></Badge>
+							</a>
+							<UncontrolledTooltip placement='top' target={`edit${row.id}`}>Хөтөлбөр солих</UncontrolledTooltip>
+						</>
+					}
 					<a role="button" onClick={() => { handleDetail(row)} }
 						id={`detail${row?.id}`}
 						className="me-1"
