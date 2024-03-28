@@ -12,18 +12,9 @@ import useLoader from "@hooks/useLoader";
 
 import { validate, convertDefaultValue } from "@utils"
 
-import * as Yup from 'yup'
-
-const validateSchema = Yup.object().shape(
-{
-    info_description: Yup.string()
-        .trim()
-        .required('Хоосон байна'),
-});
-
 const DescModal = ({ open, handleModal, refreshDatas, rowData }) => {
 
-    const { control, handleSubmit,  formState: { errors }, setError, reset } = useForm(validate(validateSchema))
+    const { control, handleSubmit,  formState: { errors }, setError, reset, setValue } = useForm()
 
     const { t } = useTranslation()
 
@@ -49,6 +40,18 @@ const DescModal = ({ open, handleModal, refreshDatas, rowData }) => {
             }
         }
     }
+
+    useEffect(
+        () =>
+        {
+            for(let key in rowData) {
+                if (key === 'userinfo') {
+                    setValue('info_description', rowData[key]?.info_description)
+                }
+            }
+        },
+        [rowData]
+    )
 
     return (
         <Fragment>
