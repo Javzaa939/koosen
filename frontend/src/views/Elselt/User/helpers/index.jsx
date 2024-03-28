@@ -1,14 +1,7 @@
-import { useContext, useRef } from 'react';
-
-import { Badge, Input }  from 'reactstrap';
-
-import { AlertOctagon, Edit, Eye, Type } from "react-feather";
-
-import { UncontrolledTooltip } from "reactstrap";
-
+import { useRef } from 'react';
+import { Badge, Input, UncontrolledTooltip }  from 'reactstrap';
+import { Edit, Eye, Type } from "react-feather";
 import { t } from 'i18next'
-
-import SchoolContext from "@context/SchoolContext";
 
 import moment from 'moment'
 import useApi from '@hooks/useApi';
@@ -19,12 +12,8 @@ import './style.css'
 // Хүснэгтийн баганууд
 export function getColumns (currentPage, rowsPerPage, page_count, editModal, handleDelete, user, handleDetail, handleDescModal) {
 
-	const { school_id } = useContext(SchoolContext)
-
 	const { fetchData } = useLoader({ isFullScreen: false })
-
 	const focusData = useRef(undefined)
-
 	const gpaApi = useApi().elselt.gpa
 
     /** Сонгосон хуудасны тоо датаны тооноос их болсон үед хуудаслалт 1-ээс эхлэнэ */
