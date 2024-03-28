@@ -470,6 +470,29 @@ class AdmissionUserInfoAPIView(
         return request.send_info('INF_002')
 
 
+class AdmissionUserAllChange(
+    generics.GenericAPIView,
+    mixins.UpdateModelMixin
+):
+
+    queryset = AdmissionUserProfession.objects.all()
+
+    def put(self, request):
+
+        data = request.data
+        sid = transaction.savepoint()
+        try:
+            with transaction.atomic():
+                now = dt.now()
+                print(now)
+                self.queryset.filter(pk__in=data["id"]).update(state=data["state"], updated_at=now, state_description=data["state_description"])
+        except Exception as e:
+            transaction.savepoint_rollback(sid)
+            return request.send_error("ERR_002", e.__str__)
+
+        return request.send_info("INF_002")
+
+
 @permission_classes([IsAuthenticated])
 class AdmissionYearAPIView(
     generics.GenericAPIView,
