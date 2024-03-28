@@ -600,7 +600,8 @@ const ElseltUser = () => {
                             </UncontrolledTooltip>
                         </div>
                         <div className='px-1'>
-                            <Button color='primary' disabled={selectedStudents.length == 0} className='d-flex align-items-center px-75' id='email_button' onClick={() => emailModalHandler()}>
+                            <Button color='primary' disabled className='d-flex align-items-center px-75' id='email_button' onClick={() => emailModalHandler()}>
+                            {/* <Button color='primary' disabled={selectedStudents.length == 0} className='d-flex align-items-center px-75' id='email_button' onClick={() => emailModalHandler()}> */}
                                 <MdMailOutline className='me-25'/>
                                 Email илгээх
                             </Button>
@@ -609,7 +610,8 @@ const ElseltUser = () => {
                             </UncontrolledTooltip>
                         </div>
                         <div className='px-1'>
-                            <Button color='primary' disabled={selectedStudents.length == 0} className='d-flex align-items-center px-75' id='message_button' onClick={() => messageModalHandler()}>
+                            <Button color='primary' disabled className='d-flex align-items-center px-75' id='message_button' onClick={() => messageModalHandler()}>
+                            {/* <Button color='primary' disabled={selectedStudents.length == 0} className='d-flex align-items-center px-75' id='message_button' onClick={() => messageModalHandler()}> */}
                                 <BiMessageRoundedError className='me-25'/>
                                 Мессеж илгээх
                             </Button>
