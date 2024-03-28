@@ -9,13 +9,13 @@ import { Card, Col, Row } from 'reactstrap';
 import Select from 'react-select'
 
 import { useTranslation } from 'react-i18next'
-import Highcharts from 'highcharts';
+// import Highcharts from 'highcharts';
 
-require('highcharts/indicators/indicators')(Highcharts)
-require('highcharts/indicators/pivot-points')(Highcharts)
-require('highcharts/indicators/macd')(Highcharts)
-require('highcharts/modules/exporting')(Highcharts)
-require('highcharts/modules/map')(Highcharts)
+// require('highcharts/indicators/indicators')(Highcharts)
+// require('highcharts/indicators/pivot-points')(Highcharts)
+// require('highcharts/indicators/macd')(Highcharts)
+// require('highcharts/modules/exporting')(Highcharts)
+// require('highcharts/modules/map')(Highcharts)
 
 import { FaBook, FaGlobe, FaGraduationCap, FaUser, FaUsers } from "react-icons/fa6";
 
@@ -166,7 +166,7 @@ function Dashboard() {
     }
 
     useEffect(() => {
-        chartz();
+        // chartz();
     }, [aimagz])
 
     const CustomTooltip = data => {
