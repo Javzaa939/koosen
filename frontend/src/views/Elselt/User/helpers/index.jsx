@@ -96,7 +96,7 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 			minWidth: "200px",
 			header: 'user__first_name',
 			name: t("Овог нэр"),
-			cell: (row) => (row?.full_name),
+			cell: (row) => (row?.last_name + '.' + row.first_name),
 			sortable: true,
 			reorder: true,
 			center: true,
