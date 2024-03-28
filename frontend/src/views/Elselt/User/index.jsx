@@ -30,6 +30,7 @@ import { utils, writeFile } from 'xlsx-js-style';
 import { HiOutlineDocumentReport } from "react-icons/hi";
 
 import EditModal from './Edit';
+import DescModal from './DescModal';
 
 // import Addmodal from './Add'
 
@@ -52,6 +53,7 @@ const ElseltUser = () => {
 
 	const [searchValue, setSearchValue] = useState("");
 	const [datas, setDatas] = useState([]);
+    const [modalDesc, setDescModal] = useState(false)
 
     // Нийт датаны тоо
     const [total_count, setTotalCount] = useState(datas.length || 1)
@@ -103,7 +105,19 @@ const ElseltUser = () => {
             'name': 'ТЭНЦЭЭГҮЙ'
         }
     ]
+
+    const infop = [
+        {
+            'id': 1,
+            'name': 'ЗӨВ ОРУУЛСАН'
+        },
+        {
+            'id': 2,
+            'name': 'ЗАСАГДСАН'
+        },
+    ]
     const [state, setState] = useState('')
+    const [gpa_state, setGpaState] = useState('')
 
     const [gender, setGender] = useState('')
 
@@ -135,8 +149,9 @@ const ElseltUser = () => {
 	}
 
 	/* Модал setState функц */
-	const handleModal = () => {
-		setModal(!modal)
+	const handleDescModal = (row) => {
+		setDescModal(!modal)
+        setEditData(row)
 	}
 
 	/* Устгах функц */
@@ -150,7 +165,7 @@ const ElseltUser = () => {
 	/* Жагсаалтын дата авах функц */
 	async function getDatas() {
 
-        const {success, data} = await allFetch(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, adm, profession_id, unit1, gender, state))
+        const {success, data} = await allFetch(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, adm, profession_id, unit1, gender, state, gpa_state))
         if(success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
@@ -237,14 +252,13 @@ const ElseltUser = () => {
                     'Утасны дугаар': data?.user?.mobile || '',
                     'Яаралтай холбогдох': data?.user?.parent_mobile || '',
                     'Хөтөлбөр': data?.profession || '',
-                    'Бүртгүүлсэн огноо': moment(data?.created_at).format('YYYY MM DD') || '',
+                    'Бүртгүүлсэн огноо': moment(data?.created_at).format('YYYY-MM-DD HH:SS:MM') || '',
                     'Төгссөн сургууль': data?.userinfo?.graduate_school || '',
                     'Мэргэжил': data?.userinfo?.graduate_profession || '',
                     'Төгссөн он': data?.userinfo?.graduate_school_year || '',
                     'Голч': data?.userinfo?.gpa || '',
                     'Ажиллаж байгаа байгууллагын нэр': data?.userinfo?.work_organization || '',
                     'Албан тушаал': data?.userinfo?.position_name || '',
-                    'Хэлтэс': data?.userinfo?.work_heltes || '' || '',
                     'Цол': data?.userinfo?.tsol_name || '',
                 }
             )
@@ -277,7 +291,6 @@ const ElseltUser = () => {
             'Голч',
             'Ажиллаж байгаа байгууллагын нэр',
             'Албан тушаал',
-            'Хэлтэс',
             'Цол',
         ];
 
@@ -382,10 +395,7 @@ const ElseltUser = () => {
         ]
 
         writeFile(workbook, "Элсэгчдийн мэдээлэл.xlsx", { compression: true });
-
     }
-
-    console.log(datas)
 
 	return (
 		<Fragment>
@@ -512,6 +522,29 @@ const ElseltUser = () => {
                                 getOptionLabel={(option) => option.name}
                             />
                     </Col>
+                    <Col md={3} sm={6} xs={12} >
+                        <Label className="form-label" for="state">
+                            {t('Мэдээллийн төлөв')}
+                        </Label>
+                            <Select
+                                name="state"
+                                id="state"
+                                classNamePrefix='select'
+                                isClearable
+                                className={classnames('react-select')}
+                                isLoading={isLoading}
+                                placeholder={t('-- Сонгоно уу --')}
+                                options={infop || []}
+                                value={infop.find((c) => c.id === gpa_state)}
+                                noOptionsMessage={() => t('Хоосон байна.')}
+                                onChange={(val) => {
+                                    setGpaState(val?.id || '')
+                                }}
+                                styles={ReactSelectStyles}
+                                getOptionValue={(option) => option.id}
+                                getOptionLabel={(option) => option.name}
+                            />
+                    </Col>
                 </Row>
                 <Row>
                     <Col>
@@ -593,7 +626,7 @@ const ElseltUser = () => {
                         print='true'
                         theme="solarized"
                         onSort={handleSort}
-                        columns={getColumns(currentPage, rowsPerPage === 'Бүгд' ? 1 : rowsPerPage, total_count, editModal, handleDelete, user, handleRowClicked)}
+                        columns={getColumns(currentPage, rowsPerPage === 'Бүгд' ? 1 : rowsPerPage, total_count, editModal, handleDelete, user, handleRowClicked, handleDescModal)}
                         sortIcon={<ChevronDown size={10} />}
                         paginationPerPage={rowsPerPage === 'Бүгд' ? 1 : rowsPerPage}
                         paginationDefaultPage={currentPage}
@@ -601,6 +634,8 @@ const ElseltUser = () => {
                         paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage === 'Бүгд' ? total_count : rowsPerPage, total_count)}
                         fixedHeader
                         fixedHeaderScrollHeight='62vh'
+                        direction="auto"
+                        defaultSortFieldId={'created_at'}
                     />
                 </div>
         	</Card>
@@ -615,6 +650,20 @@ const ElseltUser = () => {
                     }}
                     refreshDatas={getDatas}
                 />
+            }
+            {
+                modalDesc
+                &&
+                <DescModal
+                    open={modalDesc}
+                    rowData={editData}
+                    handleModal={() => {
+                        setDescModal(!modalDesc)
+                        setEditData({})
+                    }}
+                    refreshDatas={getDatas}
+                />
+
             }
         </Fragment>
     )
