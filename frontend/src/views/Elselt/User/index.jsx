@@ -28,9 +28,15 @@ import { useNavigate } from 'react-router-dom';
 import { utils, writeFile } from 'xlsx-js-style';
 
 import { HiOutlineDocumentReport } from "react-icons/hi";
-
+import { BiMessageRoundedError } from "react-icons/bi";
+import { CiMail } from "react-icons/ci";
+import { MdMailOutline } from "react-icons/md";
+import { RiEditFill } from "react-icons/ri";
 import EditModal from './Edit';
+import StateModal from './StateModal';
 import DescModal from './DescModal';
+import EmailModal from './EmailModal';
+import MessageModal from './MessageModal';
 
 // import Addmodal from './Add'
 
@@ -79,6 +85,12 @@ const ElseltUser = () => {
 
     const [unit1op, setUnit1op] = useState([])
     const [unit1, setUnit1] = useState('')
+
+    const [selectedStudents, setSelectedStudents] = useState([])
+    const [stateModal, setStateModal] = useState(false)
+
+    const [emailModal, setEmailModal] = useState(false)
+    const [messageModal, setMessageModal] = useState(false)
 
     const genderOp = [
         {
@@ -399,8 +411,39 @@ const ElseltUser = () => {
         writeFile(workbook, "Элсэгчдийн мэдээлэл.xlsx", { compression: true });
     }
 
+    function onSelectedRowsChange(state) {
+        setSelectedStudents(state?.selectedRows)
+    }
+
+    function stateModalHandler() {
+        setStateModal(!stateModal)
+    }
+
+    function emailModalHandler() {
+        setEmailModal(!emailModal)
+    }
+
+    function messageModalHandler() {
+        setMessageModal(!messageModal)
+    }
+
 	return (
 		<Fragment>
+            <StateModal
+                getDatas={getDatas}
+                stateModalHandler={stateModalHandler}
+                stateModal={stateModal}
+                selectedStudents={selectedStudents}
+                stateop={stateop}
+            />
+            <EmailModal
+                emailModalHandler={emailModalHandler}
+                emailModal={emailModal}
+            />
+            <MessageModal
+                messageModalHandler={messageModalHandler}
+                messageModal={messageModal}
+            />
             {isLoading && Loader}
 			<Card>
 				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom m-auto">
@@ -548,19 +591,48 @@ const ElseltUser = () => {
                             />
                     </Col>
                 </Row>
-                <Row>
-                    <Col>
-                        <div className='d-flex justify-content-end px-1'>
-                            <Button color='primary' className='d-flex align-items-center px-75' id='excel_button' onClick={() => convert()}>
-                                <HiOutlineDocumentReport className='me-25'/>
-                                Excel
+                <div className='d-flex justify-content-between my-50 mt-1'>
+                    <div className='d-flex'>
+                        <div className='px-1'>
+                            <Button color='primary' disabled={selectedStudents.length == 0} className='d-flex align-items-center px-75' id='state_button' onClick={() => stateModalHandler()}>
+                                <RiEditFill className='me-25'/>
+                                Төлөв солих
                             </Button>
-                            <UncontrolledTooltip target='excel_button'>
-                                Доорхи хүснэгтэнд харагдаж байгаа мэдээллийн жагсаалтаар эксел файл үүсгэнэ
+                            <UncontrolledTooltip target='state_button'>
+                                Доорхи сонгосон оюутнуудын төлөвийг нэг дор солих
                             </UncontrolledTooltip>
                         </div>
-                    </Col>
-                </Row>
+                        <div className='px-1'>
+                            <Button color='primary' disabled className='d-flex align-items-center px-75' id='email_button' onClick={() => emailModalHandler()}>
+                            {/* <Button color='primary' disabled={selectedStudents.length == 0} className='d-flex align-items-center px-75' id='email_button' onClick={() => emailModalHandler()}> */}
+                                <MdMailOutline className='me-25'/>
+                                Email илгээх
+                            </Button>
+                            <UncontrolledTooltip target='email_button'>
+                                Сонгосон оюутнууд руу имейл илгээх
+                            </UncontrolledTooltip>
+                        </div>
+                        <div className='px-1'>
+                            <Button color='primary' disabled className='d-flex align-items-center px-75' id='message_button' onClick={() => messageModalHandler()}>
+                            {/* <Button color='primary' disabled={selectedStudents.length == 0} className='d-flex align-items-center px-75' id='message_button' onClick={() => messageModalHandler()}> */}
+                                <BiMessageRoundedError className='me-25'/>
+                                Мессеж илгээх
+                            </Button>
+                            <UncontrolledTooltip target='message_button'>
+                                Сонгосон оюутнууд руу мессеж илгээх
+                            </UncontrolledTooltip>
+                        </div>
+                    </div>
+                    <div className='px-1'>
+                        <Button color='primary' className='d-flex align-items-center px-75' id='excel_button' onClick={() => convert()}>
+                            <HiOutlineDocumentReport className='me-25'/>
+                            Excel
+                        </Button>
+                        <UncontrolledTooltip target='excel_button'>
+                            Доорхи хүснэгтэнд харагдаж байгаа мэдээллийн жагсаалтаар эксел файл үүсгэнэ
+                        </UncontrolledTooltip>
+                    </div>
+                </div>
                 <Row className="justify-content-between mx-0" >
                     <Col className='d-flex align-items-center justify-content-start' md={4}>
                         <Col md={3} sm={2} className='pe-1'>
@@ -636,11 +708,14 @@ const ElseltUser = () => {
                         paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage === 'Бүгд' ? total_count : rowsPerPage, total_count)}
                         fixedHeader
                         fixedHeaderScrollHeight='62vh'
+                        selectableRows
+                        onSelectedRowsChange={(state) => onSelectedRowsChange(state)}
                         direction="auto"
                         defaultSortFieldId={'created_at'}
+                        style={{ border: '1px solid red' }}
                     />
                 </div>
-        	</Card>
+            </Card>
             {
                 edit_modal &&
                 <EditModal

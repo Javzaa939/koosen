@@ -338,13 +338,13 @@ const VerticalLayout = (props) =>
                     {
                         /** Хуанли */
                         if (menus.id === 'calendar' && !user.permissions?.includes('lms-calendar-read')) delete cNavigation[idx];
-    
+
                         /** Зар мэдээ */
                         if (menus.id === 'service' && !user.permissions?.includes('lms-service-news-read')) delete cNavigation[idx];
-    
+
                         /** Статистик */
                         if (menus.id === 'statistic' && !user.permissions?.includes('lms-statistic-read')) delete cNavigation[idx];
-    
+
                         /** Хандах эрх */
                         if (menus.id === 'role' && !user.permissions?.includes('role-read')) delete cNavigation[idx];
                     }
