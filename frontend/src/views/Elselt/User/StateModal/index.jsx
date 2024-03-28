@@ -16,10 +16,8 @@ function StateModal({ stateModalHandler, stateModal, selectedStudents, stateop, 
 
     const admissionStateChangeApi = useApi().elselt.admissionuserdata.all;
 
-    var students_list = selectedStudents.map(val => val?.id);
-
     async function onSubmit(cdata){
-        cdata['students'] = students_list;
+        cdata['students'] = selectedStudents.map(val => val?.id) || [];
         const { success } = await fetchData(admissionStateChangeApi.put(cdata));
         if (success) {
             reset();
