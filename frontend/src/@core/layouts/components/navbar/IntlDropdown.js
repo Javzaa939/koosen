@@ -13,8 +13,6 @@ import useLoader from '@hooks/useLoader';
 import SchoolContext from '@context/SchoolContext'
 import AuthContext from "@context/AuthContext"
 
-import  useUpdateEffect  from '@hooks/useUpdateEffect'
-
 const IntlDropdown = () => {
 
     const [ schools, setSchools ] = useState([]);
@@ -68,7 +66,7 @@ const IntlDropdown = () => {
         []
     )
 
-    useUpdateEffect(() => {
+    useEffect(() => {
         /** Хэрэглэгчийн харьяалагдах сургуулийн мэдээллийг авна */
         var school_detail = []
         if(school_id) {
@@ -82,21 +80,23 @@ const IntlDropdown = () => {
 
     return (
         <UncontrolledDropdown href='/' tag='li' className='dropdown-language nav-item '>
-            <DropdownToggle href='/' tag='a' className='nav-link' onClick={e => e.preventDefault()}>
+            <DropdownToggle href='/' tag='a' className='nav-link text-decoration-underline' onClick={e => e.preventDefault()}>
                 <i className="far fa-university me-50"></i>
                 <span className='selected-language'>{schoolName}</span>
             </DropdownToggle>
             {
                 /** Хэрэглэгчийн сургуулийн харьяалал 0 байвал бүх сургуулийг харах эрхтэй байна. */
-               !schoolId &&
-                    <DropdownMenu className='me-0'  style={{ maxHeight: '600px', overflowY: 'auto'}}>
+               !schoolId
+               ?
+                    <DropdownMenu className='me-0'  style={{ maxHeight: '400px', overflowY: 'auto'}}>
                         <DropdownItem href='/' tag='a' onClick={e => handleLangUpdate(e, parentschoolName, schoolId)}>
                             <ReactCountryFlag className='country-flag' svg />
                             <i className="far fa-university me-50"></i>
                             <span className='ms-1' style={{ fontSize: '13px'}}>{parentschoolName}</span>
                         </DropdownItem>
                         {
-                            schools.map((school, idx) => {
+                            schools.map((school, idx) =>
+                            {
                                 return (
                                     <DropdownItem key={idx} href='/' tag='a' onClick={e => handleLangUpdate(e, school.name, school.id)} data-bs-spy="scroll">
                                         <ReactCountryFlag className='country-flag' svg />
@@ -107,6 +107,8 @@ const IntlDropdown = () => {
                             })
                         }
                     </DropdownMenu>
+                :
+                    null
             }
         </UncontrolledDropdown>
     )
