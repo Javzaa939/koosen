@@ -483,9 +483,9 @@ class AdmissionUserAllChange(
         sid = transaction.savepoint()
         try:
             with transaction.atomic():
-                now = dt.now()
+                now = dt.datetime.now()
                 print(now)
-                self.queryset.filter(pk__in=data["id"]).update(state=data["state"], updated_at=now, state_description=data["state_description"])
+                self.queryset.filter(pk__in=data["students"]).update(state=data["state"], updated_at=now, state_description=data["state_description"])
         except Exception as e:
             transaction.savepoint_rollback(sid)
             return request.send_error("ERR_002", e.__str__)
