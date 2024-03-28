@@ -89,6 +89,7 @@ function StateModal({ stateModalHandler, stateModal, selectedStudents, stateop }
                     </div>
                     <div className='text-center my-50'>
                         <Button color='primary' type='submit'>Хадгалах</Button>
+                        <Button onClick={() => stateModalHandler()}>Гарах</Button>
                     </div>
                 </Form>
             </ModalBody>

@@ -35,6 +35,8 @@ import { RiEditFill } from "react-icons/ri";
 import EditModal from './Edit';
 import StateModal from './StateModal';
 import DescModal from './DescModal';
+import EmailModal from './EmailModal';
+import MessageModal from './MessageModal';
 
 // import Addmodal from './Add'
 
@@ -86,6 +88,9 @@ const ElseltUser = () => {
 
     const [selectedStudents, setSelectedStudents] = useState([])
     const [stateModal, setStateModal] = useState(false)
+
+    const [emailModal, setEmailModal] = useState(false)
+    const [messageModal, setMessageModal] = useState(false)
 
     const genderOp = [
         {
@@ -412,6 +417,14 @@ const ElseltUser = () => {
         setStateModal(!stateModal)
     }
 
+    function emailModalHandler() {
+        setEmailModal(!emailModal)
+    }
+
+    function messageModalHandler() {
+        setMessageModal(!messageModal)
+    }
+
 	return (
 		<Fragment>
             <StateModal
@@ -419,6 +432,14 @@ const ElseltUser = () => {
                 stateModal={stateModal}
                 selectedStudents={selectedStudents}
                 stateop={stateop}
+            />
+            <EmailModal
+                emailModalHandler={emailModalHandler}
+                emailModal={emailModal}
+            />
+            <MessageModal
+                messageModalHandler={messageModalHandler}
+                messageModal={messageModal}
             />
             {isLoading && Loader}
 			<Card>
@@ -579,21 +600,23 @@ const ElseltUser = () => {
                             </UncontrolledTooltip>
                         </div>
                         <div className='px-1'>
-                            <Button color='primary' disabled={selectedStudents.length == 0} className='d-flex align-items-center px-75' id='email_button' onClick={() => convert()}>
+                            <Button color='primary' disabled className='d-flex align-items-center px-75' id='email_button' onClick={() => emailModalHandler()}>
+                            {/* <Button color='primary' disabled={selectedStudents.length == 0} className='d-flex align-items-center px-75' id='email_button' onClick={() => emailModalHandler()}> */}
                                 <MdMailOutline className='me-25'/>
                                 Email илгээх
                             </Button>
                             <UncontrolledTooltip target='email_button'>
-                                Доорхи сонгосон оюутнууд руу имейл илгээх
+                                Сонгосон оюутнууд руу имейл илгээх
                             </UncontrolledTooltip>
                         </div>
                         <div className='px-1'>
-                            <Button color='primary' disabled={selectedStudents.length == 0} className='d-flex align-items-center px-75' id='message_button' onClick={() => convert()}>
+                            <Button color='primary' disabled className='d-flex align-items-center px-75' id='message_button' onClick={() => messageModalHandler()}>
+                            {/* <Button color='primary' disabled={selectedStudents.length == 0} className='d-flex align-items-center px-75' id='message_button' onClick={() => messageModalHandler()}> */}
                                 <BiMessageRoundedError className='me-25'/>
                                 Мессеж илгээх
                             </Button>
                             <UncontrolledTooltip target='message_button'>
-                                Доорхи сонгосон оюутнууд руу мессеж илгээх
+                                Сонгосон оюутнууд руу мессеж илгээх
                             </UncontrolledTooltip>
                         </div>
                     </div>
