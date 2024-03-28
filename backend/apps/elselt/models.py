@@ -26,6 +26,7 @@ class ElseltUser(models.Model):
     image = models.ImageField(upload_to='elselt', null=True, verbose_name='Хэрэглэгчийн зураг')
     aimag = models.ForeignKey(AimagHot, on_delete=models.CASCADE, null=True, verbose_name='Үндсэн захиргаа - Аймаг/хот')
     is_justice = models.BooleanField(default=False, verbose_name='Ял шийтгэлтэй эсэх')
+    is_payment = models.BooleanField(default=False, verbose_name="Бүртгэлийн хураамж төлсөн эсэх")
 
     created = models.DateTimeField(auto_now_add=True, null=True, verbose_name='Огноо')
 
