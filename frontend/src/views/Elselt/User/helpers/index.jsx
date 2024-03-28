@@ -1,14 +1,7 @@
-import { useContext, useRef } from 'react';
-
-import { Badge, Input }  from 'reactstrap';
-
-import { AlertOctagon, Edit, Eye } from "react-feather";
-
-import { UncontrolledTooltip } from "reactstrap";
-
+import { useRef } from 'react';
+import { Badge, Input, UncontrolledTooltip }  from 'reactstrap';
+import { Edit, Eye, Type } from "react-feather";
 import { t } from 'i18next'
-
-import SchoolContext from "@context/SchoolContext";
 
 import moment from 'moment'
 import useApi from '@hooks/useApi';
@@ -17,14 +10,10 @@ import useLoader from "@hooks/useLoader";
 import './style.css'
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, page_count, editModal, handleDelete, user, handleDetail) {
-
-	const { school_id } = useContext(SchoolContext)
+export function getColumns (currentPage, rowsPerPage, page_count, editModal, handleDelete, user, handleDetail, handleDescModal) {
 
 	const { fetchData } = useLoader({ isFullScreen: false })
-
 	const focusData = useRef(undefined)
-
 	const gpaApi = useApi().elselt.gpa
 
     /** Сонгосон хуудасны тоо датаны тооноос их болсон үед хуудаслалт 1-ээс эхлэнэ */
@@ -45,7 +34,8 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 
 		if(event.key === 'Enter'){
 			let cdata = {
-				[key]: parseFloat(value)
+				[key]: parseFloat(value),
+				'gpa_state': 2
 			}
 			if (id){
 				const { success } = await fetchData(gpaApi.put(cdata, id))
@@ -70,152 +60,10 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 			minWidth: "80px",
 		},
 		{
-			maxWidth: "200px",
-			minWidth: "200px",
-			header: 'user__first_name',
-			name: t("Овог нэр"),
-			cell: (row) => (row?.full_name),
-			sortable: true,
-			center: true,
-			wrap: true,
-		},
-        {
-			maxWidth: "180px",
-			minWidth: "180px",
-			header: 'register',
-			name: t("РД"),
-			selector: (row) => row?.user?.register,
-			center: true
-		},
-		{
-			maxWidth: "250px",
-			minWidth: "250px",
-			header: 'profession__profession__name',
-			name: 'Хөтөлбөр',
-			selector: (row) => <span title={row?.profession}>{row?.profession}</span>,
-            sortable: true,
-			center: true,
-		},
-		{
-			maxWidth: "200px",
-			minWidth: "200px",
-			header: 'gpa',
-			sortable: true,
-			name: t("Голч дүн"),
-			selector: (row) => {
-				return(
-					<>
-						<div className='d-flex'>
-							<Input
-								className='text-center'
-								// id={`gpa-${row.id}-input`}
-								type="number"
-								step="0.1"
-								min='0'
-								max='4'
-								bsSize='sm'
-								placeholder={(`Голч дүн`)}
-								defaultValue={row?.userinfo?.gpa}
-								onBlur={focusOut}
-								onFocus={(e) => focusData.current = (e.target.value)}
-								disabled={(Object.keys(user).length > 0 && user?.is_superuser) ? false : true}
-								onKeyPress={(e) => {
-									handleSetGpaResult(e, `${row?.userinfo?.id}`, row?.gpa, 'gpa')
-								}}
-							/>
-							<AlertOctagon id={`gpa-${row?.id}-input`} width={"20px"} className='ms-1' />
-							<UncontrolledTooltip placement='top' target={`gpa-${row?.id}-input`} >Enter дарсан тохиолдолд бүртгэлийн дугаар хадгалагдах болно.</UncontrolledTooltip>
-						</div>
-					</>
-				)
-			},
-			center: true,
-		},
-		{
-			name: t("Хүйс"),
-			selector: (row) => row?.gender_name,
-			center: true
-		},
-		{
-			minWidth: "120px",
-			name: t("Утас"),
-			selector: (row) => row?.user?.mobile,
-			wrap: true,
-			center: true
-		},
-		{
-			minWidth: "120px",
-			name: t("Имэйл"),
-			selector: (row) => row?.user?.email,
-			wrap: true,
-			center: true
-		},
-        {
-			maxWidth: "350px",
-			minWidth: "350px",
-			wrap: true,
-			name: t("Төгссөн сургууль"),
-			selector: (row) => <span title={row?.userinfo?.graduate_school}>{row?.userinfo?.graduate_school}</span>,
-			center: true
-		},
-		{
-			maxWidth: "350px",
-			minWidth: "350px",
-			wrap: true,
-			name: t("Мэргэжил"),
-			selector: (row) => <span title={row?.userinfo?.graduate_profession}>{row?.userinfo?.graduate_profession}</span>,
-			center: true
-		},
-		{
-			name: t("Цол"),
-			selector: (row) => {
-				return (
-					<span className='text-truncate-container' title={row?.userinfo?.tsol_name}>{row?.userinfo?.tsol_name}</span>
-				)
-			},
-			wrap: true,
-			left: true,
-			minWidth: "250px",
-		},
-		{
-			minWidth: "120px",
-			name: t("Яаралтай холбогдох утас"),
-			selector: (row) => row?.user?.parent_mobile,
-			wrap: true,
-			center: true
-		},
-		{
-			maxWidth: "300px",
-			minWidth: "300px",
-			header: 'created_at',
-			sortable: true,
-			name: t("Бүрт/огноо"),
-			selector: (row) => row?.created_at? moment(row?.created_at).format("YYYY-MM-DD h:mm") : '',
-			center: true,
-		},
-        {
-			maxWidth: "150px",
-			minWidth: "150px",
-			header: 'state',
-			sortable: true,
-			name: t("Төлөв"),
-			selector: (row) => (
-				<Badge
-					color={`${row?.state == 1 ? 'primary' : row?.state == 2 ? 'success' : row?.state == 3 ? 'danger' : 'primary'}`}
-					pill
-				>
-					{row?.state_name}
-				</Badge>),
-			center: true,
-		},
-	]
-
-	if(Object.keys(user).length > 0) {
-		var delete_column = {
 			name: t("Үйлдэл"),
 			center: true,
-			maxWidth: "150px",
-			minWidth: "150px",
+			maxWidth: "250px",
+			minWidth: "250px",
 			selector: (row) => (
 				<div className="text-center" style={{ width: "auto" }}>
 					<a role="button"
@@ -233,36 +81,175 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 						<Badge color="light-secondary" pill><Eye width={"15px"} /></Badge>
 					</a>
 					<UncontrolledTooltip placement='top' target={`detail${row.id}`} >Дэлгэрэнгүй</UncontrolledTooltip>
-					{/* <a role="button" onClick={() => { handleAdd(row)} }
-						id={`complaintListDatatableEdit${row?.id}`}
+					<a role="button" onClick={() => { handleDescModal(row)} }
+						id={`description${row?.id}`}
 						className="me-1"
 					>
-						<Badge color="light-primary" pill><PlusCircle  width={"15px"} /></Badge>
+						<Badge color="light-primary" pill><Type  width={"15px"} /></Badge>
 					</a>
-					<UncontrolledTooltip placement='top' target={`complaintListDatatableEdit${row.id}`}>Хөтөлбөр нэмэх</UncontrolledTooltip>
-					{
-						<>
-							<a role="button"
-								onClick={() => showWarning({
-									header: {
-										title: t(`Элсэлт устгах`),
-									},
-									question: t(`Та энэ мэдээллийг устгахдаа итгэлтэй байна уу?`),
-									onClick: () => handleDelete(row.id),
-									btnText: t('Устгах'),
-								})}
-								id={`complaintListDatatableCancel${row?.id}`}
-							>
-								<Badge color="light-danger" pill><X width={"100px"} /></Badge>
-							</a>
-							<UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${row.id}`} >Устгах</UncontrolledTooltip>
-						</>
-					} */}
+					<UncontrolledTooltip placement='top' target={`description${row.id}`}>Тайлбар оруулах</UncontrolledTooltip>
 				</div>
 			),
-		}
-		columns.push(delete_column)
-	}
+		},
+		{
+			maxWidth: "200px",
+			minWidth: "200px",
+			header: 'user__first_name',
+			name: t("Овог нэр"),
+			cell: (row) => (row?.full_name),
+			sortable: true,
+			reorder: true,
+			center: true,
+			wrap: true,
+		},
+        {
+			maxWidth: "180px",
+			minWidth: "180px",
+			header: 'register',
+			name: t("РД"),
+			reorder: true,
+			selector: (row) => row?.user?.register,
+			center: true
+		},
+		{
+			maxWidth: "250px",
+			minWidth: "250px",
+			header: 'profession__profession__name',
+			name: 'Хөтөлбөр',
+			reorder: true,
+			selector: (row) => <span title={row?.profession}>{row?.profession}</span>,
+            sortable: true,
+			center: true,
+		},
+		{
+			maxWidth: "200px",
+			minWidth: "200px",
+			header: 'gpa',
+			sortable: true,
+			name: t("Голч дүн"),
+			reorder: true,
+			selector: (row) => {
+				return(
+					<>
+						<div className={`d-flex`}>
+							<Input
+								className={`text-center ${row?.userinfo?.gpa_state === 1 ? 'border-success' : 'border-danger'}`}
+								// id={`gpa-${row.id}-input`}
+								type="number"
+								step="0.1"
+								min='0'
+								max='4'
+								bsSize='sm'
+								placeholder={(`Голч дүн`)}
+								defaultValue={row?.userinfo?.gpa}
+								onBlur={focusOut}
+								onFocus={(e) => focusData.current = (e.target.value)}
+								disabled={(Object.keys(user).length > 0 && user?.is_superuser) ? false : true}
+								onKeyPress={(e) => {
+									handleSetGpaResult(e, `${row?.userinfo?.id}`, row?.gpa, 'gpa')
+								}}
+							/>
+						</div>
+					</>
+				)
+			},
+			center: true,
+		},
+		{
+			minWidth: "250px",
+			name: 'Мэдээллийн тайлбар',
+			reorder: true,
+			selector: (row) => <span title={row?.userinfo?.info_description} style={{fontSize:'10px'}}>{row?.userinfo?.info_description}</span>,
+			wrap:true
+		},
+		{
+			name: t("Хүйс"),
+			selector: (row) => row?.gender_name,
+			center: true,
+			reorder: true,
+		},
+		{
+			minWidth: "120px",
+			name: t("Утас"),
+			selector: (row) => row?.user?.mobile,
+			wrap: true,
+			reorder: true,
+			center: true
+		},
+		{
+			minWidth: "200px",
+			name: t("Имэйл"),
+			selector: (row) => <span style={{fontSize:'11px'}}>{row?.user?.email}</span>,
+			wrap: true,
+			reorder: true,
+			center: true
+		},
+        {
+			maxWidth: "350px",
+			minWidth: "350px",
+			wrap: true,
+			name: t("Төгссөн сургууль"),
+			selector: (row) => <span title={row?.userinfo?.graduate_school}>{row?.userinfo?.graduate_school}</span>,
+			center: true,
+			reorder: true,
+
+		},
+		{
+			maxWidth: "350px",
+			minWidth: "350px",
+			wrap: true,
+			name: t("Мэргэжил"),
+			selector: (row) => <span title={row?.userinfo?.graduate_profession}>{row?.userinfo?.graduate_profession}</span>,
+			center: true,
+			reorder: true,
+		},
+		{
+			name: t("Цол"),
+			selector: (row) => {
+				return (
+					<span className='text-truncate-container' title={row?.userinfo?.tsol_name}>{row?.userinfo?.tsol_name}</span>
+				)
+			},
+			wrap: true,
+			reorder: true,
+			left: true,
+			minWidth: "250px",
+		},
+		{
+			minWidth: "120px",
+			name: t("Яаралтай холбогдох утас"),
+			selector: (row) => row?.user?.parent_mobile,
+			wrap: true,
+			center: true
+		},
+		{
+			sortField: 'created_at',
+			header: 'created_at',
+			maxWidth: "300px",
+			minWidth: "300px",
+			reorder: true,
+			sortable: true,
+			name: t("Бүрт/огноо"),
+			selector: (row) => row?.created_at? moment(row?.created_at).format("YYYY-MM-DD h:mm") : '',
+			center: true,
+		},
+        {
+			maxWidth: "150px",
+			minWidth: "150px",
+			header: 'state',
+			reorder: true,
+			sortable: true,
+			name: t("Төлөв"),
+			selector: (row) => (
+				<Badge
+					color={`${row?.state == 1 ? 'primary' : row?.state == 2 ? 'success' : row?.state == 3 ? 'danger' : 'primary'}`}
+					pill
+				>
+					{row?.state_name}
+				</Badge>),
+			center: true,
+		},
+	]
 
     return columns
 

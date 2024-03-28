@@ -105,6 +105,7 @@ class ElseltApiView(
         return request.send_info("INF_003")
 
 
+@permission_classes([IsAuthenticated])
 class ElseltProfession(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -161,6 +162,7 @@ class ElseltProfession(
         return request.send_info('INF_003')
 
 
+@permission_classes([IsAuthenticated])
 class ProfessionShalguur(
     generics.GenericAPIView
 ):
@@ -213,6 +215,7 @@ class ProfessionShalguur(
         return request.send_info('INF_001')
 
 
+@permission_classes([IsAuthenticated])
 class ElseltActiveListProfession(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -235,6 +238,7 @@ class ElseltActiveListProfession(
         return request.send_data(all_data)
 
 
+@permission_classes([IsAuthenticated])
 class ElseltSysInfo(
     generics.GenericAPIView,
     mixins.RetrieveModelMixin,
@@ -383,7 +387,6 @@ class AdmissionUserInfoAPIView(
     search_fields = ['user__first_name', 'user__register', 'user__email', 'gpa']
 
     def get_queryset(self):
-
         queryset = self.queryset
         queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
 
@@ -400,6 +403,7 @@ class AdmissionUserInfoAPIView(
         profession_id = self.request.query_params.get('profession_id')
         unit1_id = self.request.query_params.get('unit1_id')
         state = self.request.query_params.get('state')
+        gpa_state = self.request.query_params.get('gpa_state')
         gender = self.request.query_params.get('gender')
         sorting = self.request.query_params.get('sorting')
 
@@ -414,6 +418,10 @@ class AdmissionUserInfoAPIView(
 
         if state:
             queryset = queryset.filter(state=state)
+
+        if gpa_state:
+            user_ids = UserInfo.objects.filter(gpa_state=gpa_state).values_list('user', flat=True)
+            queryset = queryset.filter(user__in=user_ids)
 
         if gender:
             if gender == 'Эрэгтэй':
@@ -489,7 +497,7 @@ class AdmissionGpaAPIView(
         data = request.data
         UserInfo.objects.update_or_create(
             id=pk,
-            defaults=data
+            defaults=data,
         )
 
         return request.send_info("INF_002")
@@ -607,3 +615,24 @@ class DashboardAPIView(
         }
 
         return request.send_data(datas)
+
+
+@permission_classes([IsAuthenticated])
+class ElseltDescApiView(
+    generics.GenericAPIView
+):
+    """ Мэдээллийг шалгаад тайлбар оруулах """
+
+    def put(self, request, pk=None):
+
+        admisson_user = AdmissionUserProfession.objects.get(pk=pk)
+        user = admisson_user.user.id
+
+        with transaction.atomic():
+            UserInfo.objects.filter(
+                user=user
+            ).update(
+                **request.data
+            )
+
+        return request.send_info('INF_002')

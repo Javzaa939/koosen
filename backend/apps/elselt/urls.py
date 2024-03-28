@@ -4,6 +4,7 @@ from .views import *
 
 urlpatterns = [
     path('', ElseltApiView.as_view()),
+    path('desc/<int:pk>/', ElseltDescApiView.as_view()),
     path('<int:pk>/', ElseltApiView.as_view()),
     path('all/', AdmissionYearAPIView.as_view()),
     path('dashboard/', DashboardAPIView.as_view()),
