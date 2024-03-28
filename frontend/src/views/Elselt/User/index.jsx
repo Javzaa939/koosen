@@ -710,9 +710,10 @@ const ElseltUser = () => {
                         onSelectedRowsChange={(state) => onSelectedRowsChange(state)}
                         direction="auto"
                         defaultSortFieldId={'created_at'}
+                        style={{ border: '1px solid red' }}
                     />
                 </div>
-        	</Card>
+            </Card>
             {
                 edit_modal &&
                 <EditModal
