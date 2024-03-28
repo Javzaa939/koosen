@@ -260,6 +260,7 @@ const ElseltUser = () => {
                     'Ажиллаж байгаа байгууллагын нэр': data?.userinfo?.work_organization || '',
                     'Албан тушаал': data?.userinfo?.position_name || '',
                     'Цол': data?.userinfo?.tsol_name || '',
+                    'Мэдээлэл шалгасан тайлбар': data?.userinfo?.info_description || '',
                 }
             )
         })
@@ -292,6 +293,7 @@ const ElseltUser = () => {
             'Ажиллаж байгаа байгууллагын нэр',
             'Албан тушаал',
             'Цол',
+            'Мэдээлэл шалгасан тайлбар'
         ];
 
         utils.sheet_add_aoa(worksheet, [staticCells], { origin: "A1" });
