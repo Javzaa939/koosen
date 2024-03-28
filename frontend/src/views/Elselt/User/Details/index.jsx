@@ -260,7 +260,7 @@ function Details() {
                                         <span className='text_prefixer'>Цол:</span> {datas?.userinfo?.tsol_name}
                                     </div>
                                     <div className='p-50'>
-                                        <span className='text_prefixer'>Бүртгүүлсэн огноо:</span> {moment(datas?.created_at).format('YYYY MM DD')}
+                                        <span className='text_prefixer'>Бүртгүүлсэн огноо:</span> {moment(datas?.created_at).format('YYYY-MM-DD HH:MM:SS')}
                                     </div>
                                 </div>
                             </div>
