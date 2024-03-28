@@ -109,13 +109,13 @@ function StateModal({ stateModalHandler, stateModal, selectedStudents, stateop, 
                                             style={{ maxHeight: 230 }}
                                         >
                                             <div className='m-25 px-1 p-25' style={{ borderLeft: `8px solid ${'#4287f5'}`, borderTop: '5px solid transparent', borderBottom: '5px solid transparent' }}>
-                                                Бүртгүүлсэн:{state1}
+                                                Бүртгүүлсэн: <b>{state1}</b>
                                             </div>
                                             <div className='m-25 px-1 p-25' style={{ borderLeft: `8px solid ${'rgba(40,199,11, 1)'}`, borderTop: '5px solid transparent', borderBottom: '5px solid transparent' }}>
-                                                Тэнцсэн:{state2}
+                                                Тэнцсэн: <b>{state2}</b>
                                             </div>
                                             <div className='m-25 px-1 p-25' style={{ borderLeft: `8px solid ${'#EA5455'}`, borderTop: '5px solid transparent', borderBottom: '5px solid transparent' }}>
-                                                Тэнцээгүй:{state3}
+                                                Тэнцээгүй: <b>{state3}</b>
                                             </div>
                                         </PopoverBody>
                                     </Popover>
