@@ -12,7 +12,8 @@ from elselt.models import (
     ContactInfo,
     AdmissionUserProfession,
     ElseltUser,
-    UserInfo
+    UserInfo,
+    EmailInfo
 )
 
 class AdmissionSerializer(serializers.ModelSerializer):
@@ -148,4 +149,11 @@ class AdmissionUserProfessionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AdmissionUserProfession
+        fields = '__all__'
+
+
+class EmailInfoSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = EmailInfo
         fields = '__all__'

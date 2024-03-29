@@ -10,6 +10,7 @@ from django.db.models.functions import Substr
 
 from main.utils.function.utils import json_load
 from main.utils.function.pagination import CustomPagination
+from django.core.mail import send_mail
 
 import datetime as dt
 
@@ -35,13 +36,15 @@ from .serializer import (
     AdmissionActiveProfession,
     AdmissionUserInfoSerializer,
     AdmissionUserProfessionSerializer,
+    EmailInfoSerializer
 )
 
 from elselt.models import (
     AdmissionUserProfession,
     UserInfo,
     ElseltUser,
-    ContactInfo
+    ContactInfo,
+    EmailInfo
 )
 
 
@@ -490,6 +493,21 @@ class AdmissionUserAllChange(
             return request.send_error("ERR_002", e.__str__)
 
         return request.send_info("INF_002")
+
+
+class AdmissionUserEmailAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin
+):
+
+    queryset = EmailInfo.objects
+    serializer_class = EmailInfoSerializer
+
+    def get(self, request):
+
+        send_data = self.list(request).data
+
+        return request.send_data(send_data)
 
 
 @permission_classes([IsAuthenticated])
