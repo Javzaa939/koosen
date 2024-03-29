@@ -12,6 +12,7 @@ from django.db.models.functions import Substr
 
 from main.utils.function.utils import json_load, make_connection, get_domain_url_link, get_domain_url
 from main.utils.function.pagination import CustomPagination
+from main.decorators import login_required
 
 import datetime as dt
 
@@ -46,6 +47,12 @@ from elselt.models import (
     ElseltUser,
     ContactInfo,
     EmailInfo
+)
+
+from core.models import (
+    User,
+    Employee,
+    Schools
 )
 
 
@@ -501,7 +508,7 @@ class AdmissionUserEmailAPIView(
     mixins.ListModelMixin
 ):
 
-    queryset = EmailInfo.objects
+    queryset = EmailInfo.objects.all()
     serializer_class = EmailInfoSerializer
 
 
@@ -511,54 +518,58 @@ class AdmissionUserEmailAPIView(
 
         return request.send_data(send_data)
 
-
+    @login_required()
     def post(self, request):
 
-        print(request.user)
+        user = request.user
         data = request.data
+
         sid = transaction.savepoint()
         try:
             with transaction.atomic():
 
+                link_domain = get_domain_url_link()
+                link_domain = get_domain_url()
+                logo_url = "{domain}/static/media/dxis_logo.png".format(domain=link_domain)
+
+                datas = {
+                    'logo_url': logo_url,
+                    'description': data['description'] if data['description'] else ""
+                }
+
+                html_body = render_to_string('mail_state.html', datas)
+
+                create_email_info = []
+
+                for value in data["students"]:
+                    create_email_info.append(
+                        EmailInfo(
+                            user = ElseltUser.objects.get(id=value),
+                            message = html_body,
+                            send_user = User.objects.get(id=user.id),
+                        )
+                    )
+
+                self.queryset.bulk_create(create_email_info)
+
+                school_info = Employee.objects.filter(user=user.id).first().org
+
                 config = {
-                    "email_password": "quwhtfcgkptkonpi",
-                    "email_port": "587",
-                    "email_host": "smtp.gmail.com",
+                    "email_password": school_info.email_password,
+                    "email_port": school_info.email_port,
+                    "email_host": school_info.email_host,
                     "email_use_tsl": True,
                 }
 
                 send_mail(
-                    subject = 'hello',
-                    message = 'wsapp bro',
-                    from_email = 'mnhrsystem@gmail.com',
-                    recipient_list = ['ajawzaa939@gmail.com', 'narenk27@gmail.com', 'tnyambuu@gmail.com', 'tnyambuu@gmail.com'],
-                    connection = make_connection("mnhrsystem@gmail.com", config)
+                    subject = 'Элсэлт',
+                    message = 'Элсэлтийн дүн гарлаа',
+                    from_email = school_info.email_host_user,
+                    recipient_list = data["email_list"],
+                    connection = make_connection(school_info.email_host_user, config),
+                    html_message = html_body
                 )
 
-                now = dt.datetime.now()
-                create_email_info = []
-                for value in data["students"]:
-                    self.queryset.filter(pk__in=data["students"]).update(state=data["state"], updated_at=now, state_description=data["state_description"])
-                    create_email_info.append(
-                        EmailInfo(
-                            user = ElseltUser.objects.filter(id=value).first(),
-                            message = data
-                        )
-                    )
-
-                link_domain = get_domain_url_link()
-                link_domain = get_domain_url()
-                logo_url = "{domain}/static/media/dxis_logo.5dc32fff.png".format(domain=link_domain)
-                html_path = "{domain}/"
-
-                datas = {
-                    'logo_url': logo_url,
-                    'state': data['state'],
-                    'description': data['description']
-                }
-
-                html_body = render_to_string('mail_state.html', datas)
-                
 
         except Exception as e:
             transaction.savepoint_rollback(sid)

@@ -4,14 +4,25 @@ import { Controller, useForm } from 'react-hook-form';
 import { Button, Form, FormFeedback, Input, Label, Modal, ModalBody, ModalHeader, Popover, PopoverBody, PopoverHeader, UncontrolledPopover, UncontrolledTooltip } from 'reactstrap';
 import { validateSchema } from './validateSchema';
 import { AlertTriangle } from 'react-feather';
+import useApi from '@hooks/useApi';
+import useLoader from '@hooks/useLoader';
 
 function EmailModal({ emailModalHandler, emailModal, selectedStudents, getDatas }) {
 
-    const { formState: { errors }, handleSubmit, control } = useForm(validate(validateSchema));
+    const { formState: { errors }, handleSubmit, control, reset } = useForm(validate(validateSchema));
+    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true});
+    const admissionStateChangeApi = useApi().elselt.admissionuserdata.email;
 
     async function onSubmit(cdata) {
+        cdata['students'] = selectedStudents.map(val => val?.user?.id) || [];
         cdata['email_list'] = selectedStudents.map(val => val?.user?.email) || [];
-        console.log(cdata)
+        console.log(cdata);
+        const { success } = await fetchData(admissionStateChangeApi.post(cdata));
+        if (success) {
+            reset();
+            emailModalHandler();
+            getDatas();
+        };
     }
 
     const state1 = selectedStudents.filter(data => data?.state === 1).length
