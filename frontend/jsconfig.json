@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "baseUrl": "src",
+        "paths": {
+            "@src/*": [ "*" ],
+            "@assets/*": [ "@core/assets/*" ],
+            "@components/*": [ "@core/components/*" ],
+            "@layouts/*": [ "@core/layouts/*" ],
+            "@store/*": [ "redux/*" ],
+            "@styles/*": [ "@core/scss/*" ],
+            "@mstyle/*": [ "@core/style/*" ],
+            "@configs/*": [ "configs/*" ],
+            "@utils/*": [ "utility/Utils/*" ],
+            "@hooks/*": [ "utility/hooks/*" ],
+            "@context/*" : [ "utility/context/*"],
+            "@utility/*" : [ "utility/*" ],
+            "@lms_components/*" : [ "components/*" ],
+            "@views/*" : [ "views/*" ]
+        }
+    },
+    "include": [ "src" ]
+}
