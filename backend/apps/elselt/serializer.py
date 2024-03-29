@@ -173,7 +173,14 @@ class EmailInfoSerializer(serializers.ModelSerializer):
             if state[0] == state_data.state:
                 state_name = state[1]
                 return state_name
-        return state_name
+
+        admission_id = state.profession.admission.id if state.profession.admission.id else ''
+
+        data = {
+            'state_name': state_name,
+            'admission_id': admission_id
+        }
+        return data
 
 
     def get_gender_name(self, obj):
