@@ -516,6 +516,8 @@ class AdmissionUserEmailAPIView(
     queryset = EmailInfo.objects.all().order_by('send_date')
     serializer_class = EmailInfoSerializer
 
+    pagination_class = CustomPagination
+
     def get_queryset(self):
 
         queryset = self.queryset
