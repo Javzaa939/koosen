@@ -4,13 +4,14 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 from rest_framework.filters import SearchFilter
 
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
 from django.db import transaction
 from django.db.models import F, Subquery, OuterRef, Count
 from django.db.models.functions import Substr
 
-from main.utils.function.utils import json_load
+from main.utils.function.utils import json_load, make_connection, get_domain_url_link, get_domain_url
 from main.utils.function.pagination import CustomPagination
-from django.core.mail import send_mail
 
 import datetime as dt
 
@@ -503,11 +504,66 @@ class AdmissionUserEmailAPIView(
     queryset = EmailInfo.objects
     serializer_class = EmailInfoSerializer
 
+
     def get(self, request):
 
         send_data = self.list(request).data
 
         return request.send_data(send_data)
+
+
+    def post(self, request):
+
+        print(request.user)
+        data = request.data
+        sid = transaction.savepoint()
+        try:
+            with transaction.atomic():
+
+                config = {
+                    "email_password": "quwhtfcgkptkonpi",
+                    "email_port": "587",
+                    "email_host": "smtp.gmail.com",
+                    "email_use_tsl": True,
+                }
+
+                send_mail(
+                    subject = 'hello',
+                    message = 'wsapp bro',
+                    from_email = 'mnhrsystem@gmail.com',
+                    recipient_list = ['ajawzaa939@gmail.com', 'narenk27@gmail.com', 'tnyambuu@gmail.com', 'tnyambuu@gmail.com'],
+                    connection = make_connection("mnhrsystem@gmail.com", config)
+                )
+
+                now = dt.datetime.now()
+                create_email_info = []
+                for value in data["students"]:
+                    self.queryset.filter(pk__in=data["students"]).update(state=data["state"], updated_at=now, state_description=data["state_description"])
+                    create_email_info.append(
+                        EmailInfo(
+                            user = ElseltUser.objects.filter(id=value).first(),
+                            message = data
+                        )
+                    )
+
+                link_domain = get_domain_url_link()
+                link_domain = get_domain_url()
+                logo_url = "{domain}/static/media/dxis_logo.5dc32fff.png".format(domain=link_domain)
+                html_path = "{domain}/"
+
+                datas = {
+                    'logo_url': logo_url,
+                    'state': data['state'],
+                    'description': data['description']
+                }
+
+                html_body = render_to_string('mail_state.html', datas)
+                
+
+        except Exception as e:
+            transaction.savepoint_rollback(sid)
+            return request.send_error("ERR_002", e.__str__)
+        return request.send_info('INF_001')
 
 
 @permission_classes([IsAuthenticated])
