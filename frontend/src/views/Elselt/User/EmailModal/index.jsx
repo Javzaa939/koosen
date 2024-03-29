@@ -10,7 +10,7 @@ function EmailModal({ emailModalHandler, emailModal, selectedStudents, getDatas 
     const { formState: { errors }, handleSubmit, control } = useForm(validate(validateSchema));
 
     async function onSubmit(cdata) {
-        console.log('irjinoo')
+        cdata['email_list'] = selectedStudents.map(val => val?.user?.email) || [];
         console.log(cdata)
     }
 
@@ -27,7 +27,8 @@ function EmailModal({ emailModalHandler, emailModal, selectedStudents, getDatas 
                 <div>
                     <div className='mx-25 p-50'>
                         {
-                            (
+                            selectedStudents.length !== 1 &&
+                            !(
                                 state1 === selectedStudents.length ||
                                 state2 === selectedStudents.length ||
                                 state3 === selectedStudents.length
