@@ -157,6 +157,7 @@ class EmailInfoSerializer(serializers.ModelSerializer):
     state_name = serializers.SerializerMethodField()
     gender_name = serializers.SerializerMethodField()
     userinfo = serializers.SerializerMethodField()
+    admission = serializers.IntegerField(source='profession.admission.id', default='')
 
     class Meta:
         model = EmailInfo
@@ -173,7 +174,9 @@ class EmailInfoSerializer(serializers.ModelSerializer):
             if state[0] == state_data.state:
                 state_name = state[1]
                 return state_name
-        return state_name
+
+        admission_id = state.profession.admission.id if state.profession.admission.id else ''
+        return [state_name, admission_id]
 
 
     def get_gender_name(self, obj):
