@@ -1,18 +1,81 @@
 import React from 'react'
-import { Button, Modal, ModalBody, ModalFooter, ModalHeader } from 'reactstrap'
+import { validate } from '@utils';
+import { Controller, useForm } from 'react-hook-form';
+import { Button, Form, FormFeedback, Input, Label, Modal, ModalBody, ModalHeader, Popover, PopoverBody, PopoverHeader, UncontrolledPopover, UncontrolledTooltip } from 'reactstrap';
+import { validateSchema } from './validateSchema';
+import { AlertTriangle } from 'react-feather';
 
-function EmailModal({ emailModalHandler, emailModal }) {
+function EmailModal({ emailModalHandler, emailModal, selectedStudents, getDatas }) {
+
+    const { formState: { errors }, handleSubmit, control } = useForm(validate(validateSchema));
+
+    async function onSubmit(cdata) {
+        console.log('irjinoo')
+        console.log(cdata)
+    }
+
+    const state1 = selectedStudents.filter(data => data?.state === 1).length
+    const state2 = selectedStudents.filter(data => data?.state === 2).length
+    const state3 = selectedStudents.filter(data => data?.state === 3).length
 
     return (
         <Modal centered toggle={emailModalHandler} isOpen={emailModal}>
             <ModalHeader toggle={emailModalHandler}>
                 Оюутнуудруу Имейл илгээх
             </ModalHeader>
-            <ModalBody>
+            <ModalBody className='d-flex flex-column justify-content-between' style={{ minHeight: 300 }} tag={Form} onSubmit={handleSubmit(onSubmit)}>
+                <div>
+                    <div className='mx-25 p-50'>
+                        {
+                            (
+                                state1 === selectedStudents.length ||
+                                state2 === selectedStudents.length ||
+                                state3 === selectedStudents.length
+                            ) &&
+                                <div className='bg-light-warning p-50 rounded-3 d-flex align-items-center'>
+                                    <AlertTriangle className='m-25 me-1' style={{ width: 36 }}/>
+                                    <div>
+                                        Таны сонгоносон оюутнууд өөр өөр төлөвтэй байгааг анхаарна уу !
+                                    </div>
+                                </div>
+                        }
+
+                        <div className='mt-1'>
+                            test
+                        </div>
+                    </div>
+                    <div className='rounded-3 mx-25'>
+                        <Label className='p-50' htmlFor='description'>
+                            Тайлбар
+                        </Label>
+                        <Controller
+                            control={control}
+                            defaultValue=''
+                            name="description"
+                            render={({ field: { value, onChange } }) => {
+                                return(
+                                    <Input
+                                        type='textarea'
+                                        name='description'
+                                        id='description'
+                                        invalid={errors?.description}
+                                        value={value}
+                                        onChange={(e) => {
+                                            onChange(e.target.value || '')
+                                        }}
+                                        style={{ minHeight: 100 }}
+                                    />
+                                )
+                            }}
+                        />
+                        {errors?.description && <FormFeedback className='d-block'>{errors?.description?.message}</FormFeedback>}
+                    </div>
+                </div>
+                <div className='text-center my-50'>
+                    <Button className='m-50' color='primary' type='submit'>Хадгалах</Button>
+                    <Button className='m-50 ' onClick={() => emailModalHandler()}>Гарах</Button>
+                </div>
             </ModalBody>
-            <ModalFooter>
-                <Button onClick={() => emailModalHandler()}>Гарах</Button>
-            </ModalFooter>
         </Modal>
     )
 }

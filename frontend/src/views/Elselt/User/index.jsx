@@ -439,6 +439,8 @@ const ElseltUser = () => {
             <EmailModal
                 emailModalHandler={emailModalHandler}
                 emailModal={emailModal}
+                selectedStudents={selectedStudents}
+                getDatas={getDatas}
             />
             <MessageModal
                 messageModalHandler={messageModalHandler}
@@ -603,8 +605,8 @@ const ElseltUser = () => {
                             </UncontrolledTooltip>
                         </div>
                         <div className='px-1'>
-                            <Button color='primary' disabled className='d-flex align-items-center px-75' id='email_button' onClick={() => emailModalHandler()}>
-                            {/* <Button color='primary' disabled={selectedStudents.length == 0} className='d-flex align-items-center px-75' id='email_button' onClick={() => emailModalHandler()}> */}
+                            {/* <Button color='primary' disabled className='d-flex align-items-center px-75' id='email_button' onClick={() => emailModalHandler()}> */}
+                            <Button color='primary' disabled={selectedStudents.length == 0} className='d-flex align-items-center px-75' id='email_button' onClick={() => emailModalHandler()}>
                                 <MdMailOutline className='me-25'/>
                                 Email илгээх
                             </Button>
