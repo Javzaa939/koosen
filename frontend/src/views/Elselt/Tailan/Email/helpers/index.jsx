@@ -22,7 +22,7 @@ export function getColumns ( currentPage, rowsPerPage, page_count, emailModalHan
 				// Тэнцсэн тэнцээгүйгээс хамаарж border-left-д улаан ногоон border өгөх
 				if (tableRow)
 				{
-					let border = row.state == 1 ? '' : row.state == 2 ? '4px solid rgba(40, 199, 111, 1)' : '4px solid #EA5455'
+					let border = row?.state_name?.state == 1 ? '' : row?.state_name?.state == 2 ? '4px solid rgba(40, 199, 111, 1)' : '4px solid #EA5455'
 					tableRow.style.borderLeft = `${border}`
 				}
 
@@ -84,8 +84,8 @@ export function getColumns ( currentPage, rowsPerPage, page_count, emailModalHan
 			header: 'profession__profession__name',
 			name: 'Хөтөлбөр',
 			reorder: true,
-			selector: (row) => <span title={row?.profession}>{row?.profession}</span>,
-            sortable: true,
+			selector: (row) => <span title={row?.state_name?.profession_name}>{row?.state_name?.profession_name}</span>,
+            // sortable: true,
 			center: true,
 		},
 		{
@@ -118,14 +118,14 @@ export function getColumns ( currentPage, rowsPerPage, page_count, emailModalHan
 			center: true
 		},
 		{
-			sortField: 'created_at',
-			header: 'created_at',
+			sortField: 'send_date',
+			header: 'send_date',
 			maxWidth: "300px",
 			minWidth: "300px",
 			reorder: true,
-			sortable: true,
+			// sortable: true,
 			name: t("Бүрт/огноо"),
-			selector: (row) => row?.created_at? moment(row?.created_at).format("YYYY-MM-DD h:mm") : '',
+			selector: (row) => row?.send_date? moment(row?.send_date).format("YYYY-MM-DD h:mm") : '',
 			center: true,
 		},
         {
@@ -137,10 +137,10 @@ export function getColumns ( currentPage, rowsPerPage, page_count, emailModalHan
 			name: t("Төлөв"),
 			selector: (row) => (
 				<Badge
-					color={`${row?.state == 1 ? 'primary' : row?.state == 2 ? 'success' : row?.state == 3 ? 'danger' : 'primary'}`}
+					color={`${row?.state_name?.state == 1 ? 'primary' : row?.state_name?.state == 2 ? 'success px-1' : row?.state_name?.state == 3 ? 'danger' : 'primary'}`}
 					pill
 				>
-					{row?.state_name}
+					{row?.state_name?.state_name}
 				</Badge>),
 			center: true,
 		},

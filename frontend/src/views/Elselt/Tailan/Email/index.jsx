@@ -27,6 +27,7 @@ import { dataz } from './sampledata'
 import { getColumns } from './helpers';
 import EmailModal from './EmailModal';
 import TableLoader from '@src/components/TableLoader';
+import TableBlank from '@src/components/TableBlank';
 
 function Email() {
 
@@ -46,11 +47,7 @@ function Email() {
     // Translate
     const default_page = [10, 20, 50, 75, 100]
 
-
 	const [searchValue, setSearchValue] = useState("");
-    const [join_year, setJoinYear] = useState('')
-
-    const [ yearOption, setYear] = useState([])
 
     // Нийт датаны тоо
     const [total_count, setTotalCount] = useState(dataz.length || 1)
@@ -79,12 +76,6 @@ function Email() {
         setSelectedEmail(data)
     }
 
-	const { user } = useContext(AuthContext)
-
-    const navigate = useNavigate()
-
-    // Эрэмбэлэлт
-
     // Translate
     const { t } = useTranslation()
 
@@ -98,11 +89,6 @@ function Email() {
 
     const [unit1op, setUnit1op] = useState([])
     const [unit1, setUnit1] = useState('')
-
-    const [selectedStudents, setSelectedStudents] = useState([])
-    const [stateModal, setStateModal] = useState(false)
-
-    const [messageModal, setMessageModal] = useState(false)
 
     const genderOp = [
         {
@@ -140,6 +126,7 @@ function Email() {
             'name': 'ЗАСАГДСАН'
         },
     ]
+
     const [state, setState] = useState('')
     const [gpa_state, setGpaState] = useState('')
 
@@ -341,7 +328,6 @@ function Email() {
                             />
                     </Col>
                 </Row>
-
                 <Row className='justify-content-start mx-0 mt-1'>
                     <Col md={3} sm={6} xs={12} >
                         <Label className="form-label" for="state">
@@ -447,14 +433,9 @@ function Email() {
                         progressPending={isLoading}
                         progressComponent={
                             <TableLoader/>
-                            // <div className='my-2 d-flex align-items-center justify-content-center' style={{ minHeight: 500 }}>
-                            //     <Spinner className='me-1' color="" size='sm'/><h5>Түр хүлээнэ үү...</h5>
-                            // </div>
                         }
                         noDataComponent={(
-                            <div className="my-2">
-                                <h5>Өгөгдөл байхгүй байна</h5>
-                            </div>
+                            <TableBlank/>
                         )}
                         onSort={handleSort}
                         columns={getColumns(currentPage, rowsPerPage, pageCount, emailModalHandler, setSelectedEmail)}
