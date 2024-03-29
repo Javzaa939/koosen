@@ -29,24 +29,27 @@ import EmailModal from './EmailModal';
 
 function Email() {
 
-    // const [datas, setDatas] = useState(1)
+    const [datas, setDatas] = useState(1)
 
 	const { isLoading, fetchData } = useLoader({});
 
-	// const elseltApi = useApi().elselt.admissionuserdata.email
+	const elseltApi = useApi().elselt.admissionuserdata.email
 
-	// async function getDatas() {
-    //     const {success, data} = await fetchData(elseltApi.get())
-    //     if(success) {
-    //         setDatas(data)
-    //     }
-	// }
+	async function getDatas() {
+        const {success, data} = await fetchData(elseltApi.get())
+        if(success) {
+            setDatas(data)
+        }
+	}
 
-    // useEffect(() => {
-    //     getDatas()
-    // }, [])
+    useEffect(() => {
+        getDatas()
+    }, [])
 
-    // console.log(datas,'datas')
+    console.log('test')
+
+
+    console.log(datas,'datas')
     const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({})
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -62,7 +65,6 @@ function Email() {
 	const [searchValue, setSearchValue] = useState("");
     const [join_year, setJoinYear] = useState('')
 
-	const [datas, setDatas] = useState([]);
     const [ yearOption, setYear] = useState([])
 
     // Нийт датаны тоо
@@ -165,7 +167,7 @@ function Email() {
 
     const [gender, setGender] = useState('')
 
-	const elseltApi = useApi().elselt.admissionuserdata
+	// const elseltApi = useApi().elselt.admissionuserdata
     const admissionYearApi = useApi().elselt
     const unit1Api = useApi().hrms.unit1
     const professionApi = useApi().elselt.profession
@@ -192,39 +194,19 @@ function Email() {
         }
 	}
 
-	/* Модал setState функц */
-	const handleDescModal = (row) => {
-		setDescModal(!modal)
-        setEditData(row)
-	}
+	// /* Жагсаалтын дата авах функц */
+	// async function getDatas() {
 
-	/* Устгах функц */
-	const handleDelete = async(id) => {
-        const {success} = await fetchData(elseltApi.delete(id))
-		if(success) {
-            getDatas()
-		}
-	};
+    //     const {success, data} = await allFetch(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, adm, profession_id, unit1, gender, state, gpa_state))
+    //     if(success) {
+    //         setTotalCount(data?.count)
+    //         setDatas(data?.results)
 
-	/* Жагсаалтын дата авах функц */
-	async function getDatas() {
-
-        const {success, data} = await allFetch(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, adm, profession_id, unit1, gender, state, gpa_state))
-        if(success) {
-            setTotalCount(data?.count)
-            setDatas(data?.results)
-
-            // Нийт хуудасны тоо
-            var cpage_count = Math.ceil(data?.count / rowsPerPage === 'Бүгд' ? 1 : rowsPerPage)
-            setPageCount(cpage_count)
-        }
-	}
-
-	const editModal = (row={}) => {
-        /** NOTE Засах гэж буй хичээлийн стандартын id-г авна */
-        setEditModal(!edit_modal)
-        setEditData(row)
-    }
+    //         // Нийт хуудасны тоо
+    //         var cpage_count = Math.ceil(data?.count / rowsPerPage === 'Бүгд' ? 1 : rowsPerPage)
+    //         setPageCount(cpage_count)
+    //     }
+	// }
 
     // ** Function to handle filter
 	const handleFilter = e => {
@@ -238,10 +220,6 @@ function Email() {
         } else {
             setSort('-' + column.header)
         }
-    }
-
-    function handleSearch() {
-        getDatas()
     }
 
     // Хуудас солих үед ажиллах хэсэг
