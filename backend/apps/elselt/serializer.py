@@ -154,7 +154,42 @@ class AdmissionUserProfessionSerializer(serializers.ModelSerializer):
 
 class EmailInfoSerializer(serializers.ModelSerializer):
     user = ElseltUserSerializer(many=False, read_only=True)
+    state_name = serializers.SerializerMethodField()
+    gender_name = serializers.SerializerMethodField()
+    userinfo = serializers.SerializerMethodField()
 
     class Meta:
         model = EmailInfo
         fields = '__all__'
+
+    def get_state_name(self, obj):
+
+        user_id = obj.user
+        state_data = AdmissionUserProfession.objects.filter(user=user_id).first()
+
+        state_name = ''
+        state_op = [*AdmissionUserProfession.STATE]
+        for state in state_op:
+            if state[0] == state_data.state:
+                state_name = state[1]
+                return state_name
+        return state_name
+
+
+    def get_gender_name(self, obj):
+
+        gender = obj.gender
+
+        if gender.isnumeric():
+            if (int(obj.gender)%2) != 0:
+                return 'Эрэгтэй'
+            return 'Эмэгтэй'
+        return ''
+
+
+    def get_userinfo(self, obj):
+
+        data = UserInfo.objects.filter(user=obj.user.id).first()
+        userinfo_data = UserinfoSerializer(data).data
+
+        return userinfo_data

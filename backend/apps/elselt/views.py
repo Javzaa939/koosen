@@ -488,6 +488,10 @@ class AdmissionUserAllChange(
 ):
 
     queryset = AdmissionUserProfession.objects.all()
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['user__first_name', 'user__register', 'user__email']
 
     def put(self, request):
 
@@ -511,6 +515,22 @@ class AdmissionUserEmailAPIView(
 
     queryset = EmailInfo.objects.all().order_by('send_date')
     serializer_class = EmailInfoSerializer
+
+    def get_queryset(self):
+
+        queryset = self.queryset
+        userinfo_qs = UserInfo.objects.filter(user=OuterRef('user')).values('gpa')[:1]
+
+        queryset = (
+            queryset
+            .annotate(
+                gpa=Subquery(userinfo_qs),
+            )
+        )
+
+        queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
+
+        return queryset
 
 
     def get(self, request):
