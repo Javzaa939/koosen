@@ -40,10 +40,6 @@ function EmailModal({ emailModalHandler, emailModal, selectedStudents, getDatas 
                                     </div>
                                 </div>
                         }
-
-                        <div className='mt-1'>
-                            test
-                        </div>
                     </div>
                     <div className='rounded-3 mx-25'>
                         <Label className='p-50' htmlFor='description'>

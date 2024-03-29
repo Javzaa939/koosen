@@ -11,11 +11,11 @@ function Tailan() {
             name: 'Имейл',
             component: <Email/>
         },
-        {
-            active_id: 2,
-            name: 'Мессеж',
-            component: <Message/>
-        }
+        // {
+        //     active_id: 2,
+        //     name: 'Мессеж',
+        //     component: <Message/>
+        // }
     ]
     const [component, setComponent] = useState('')
     const [active, setActive] = useState(1)
