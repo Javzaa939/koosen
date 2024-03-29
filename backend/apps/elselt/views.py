@@ -544,16 +544,21 @@ class AdmissionUserEmailAPIView(
         sorting = self.request.query_params.get('sorting')
 
         if lesson_year_id:
-            queryset = queryset.filter(profession__admission=lesson_year_id)
+            admission_id = AdmissionRegisterProfession.objects.filter(admission=lesson_year_id).values_list('id', flat=True)
+            user_ids = AdmissionUserProfession.objects.filter(profession__in=admission_id).values_list('user', flat=True)
+            queryset = queryset.filter(user__in=user_ids)
 
         if profession_id:
-            queryset = queryset.filter(profession__profession__id=profession_id)
+            profession_ids = AdmissionRegisterProfession.objects.filter(profession=profession_id).values_list('id', flat=True)
+            user_ids = AdmissionUserProfession.objects.filter(profession__in=profession_ids).values_list('user', flat=True)
+            queryset = queryset.filter(user__in=user_ids)
 
         if unit1_id:
             queryset = queryset.filter(user__aimag__id=unit1_id)
 
         if state:
-            queryset = queryset.filter(state=state)
+            user_ids = AdmissionUserProfession.objects.filter(state=state).values_list('user', flat=True)
+            queryset = queryset.filter(user__in=user_ids)
 
         if gpa_state:
             user_ids = UserInfo.objects.filter(gpa_state=gpa_state).values_list('user', flat=True)
