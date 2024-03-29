@@ -172,16 +172,16 @@ class EmailInfoSerializer(serializers.ModelSerializer):
         for state in state_op:
             if state[0] == state_data.state:
                 state_name = state[0]
-                return state_name
 
         admission_id = state.profession.admission.id if state.profession.admission.id else ''
-        profession_name = state.profession.profession.name
+        profession_name = state.profession.profession.name if state.profession.profession.name else ''
 
         data = {
             'state_name': state_name,
             'admission_id': admission_id,
             'profession_name': profession_name
         }
+        print(data)
         return data
 
 
