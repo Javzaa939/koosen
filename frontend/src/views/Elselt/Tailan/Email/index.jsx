@@ -26,6 +26,7 @@ import { utils, writeFile } from 'xlsx-js-style';
 import { dataz } from './sampledata'
 import { getColumns } from './helpers';
 import EmailModal from './EmailModal';
+import TableLoader from '@src/components/TableLoader';
 
 function Email() {
 
@@ -34,22 +35,6 @@ function Email() {
 	const { isLoading, fetchData } = useLoader({});
 
 	const elseltApi = useApi().elselt.admissionuserdata.email
-
-	async function getDatas() {
-        const {success, data} = await fetchData(elseltApi.get())
-        if(success) {
-            setDatas(data)
-        }
-	}
-
-    useEffect(() => {
-        getDatas()
-    }, [])
-
-    console.log('test')
-
-
-    console.log(datas,'datas')
     const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({})
 
     const [currentPage, setCurrentPage] = useState(1);
@@ -94,9 +79,7 @@ function Email() {
         setSelectedEmail(data)
     }
 
-
 	const { user } = useContext(AuthContext)
-
 
     const navigate = useNavigate()
 
@@ -105,12 +88,7 @@ function Email() {
     // Translate
     const { t } = useTranslation()
 
-
 	// Modal
-	const [modal, setModal] = useState(false);
-    const [edit_modal, setEditModal] = useState(false)
-
-    const [editData, setEditData] = useState({})
 
     const [profOption, setProfession] = useState([])
     const [profession_id, setProfession_id] = useState('')
@@ -195,18 +173,23 @@ function Email() {
 	}
 
 	// /* Жагсаалтын дата авах функц */
-	// async function getDatas() {
+	async function getDatas() {
 
-    //     const {success, data} = await allFetch(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, adm, profession_id, unit1, gender, state, gpa_state))
-    //     if(success) {
-    //         setTotalCount(data?.count)
-    //         setDatas(data?.results)
+        const {success, data} = await allFetch(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, adm, profession_id, unit1, gender, state, gpa_state))
+        if(success) {
+            console.log(data,'data')
+            setTotalCount(data?.count)
+            setDatas(data?.results)
 
-    //         // Нийт хуудасны тоо
-    //         var cpage_count = Math.ceil(data?.count / rowsPerPage === 'Бүгд' ? 1 : rowsPerPage)
-    //         setPageCount(cpage_count)
-    //     }
-	// }
+            // Нийт хуудасны тоо
+            var cpage_count = Math.ceil(data?.count / rowsPerPage === 'Бүгд' ? 1 : rowsPerPage)
+            setPageCount(cpage_count)
+        }
+	}
+
+    useEffect(() => {
+        getDatas()
+    }, [])
 
     // ** Function to handle filter
 	const handleFilter = e => {
@@ -226,6 +209,13 @@ function Email() {
 	function handlePagination(page) {
 		setCurrentPage(page.selected + 1);
 	};
+
+
+    // ** Function to handle per page
+    function handlePerPage(e)
+    {
+        setRowsPerPage(e.target.value === 'Бүгд' ? e.target.value : parseInt(e.target.value))
+    }
 
 	// Хайлтийн хэсэг хоосон болох үед анхны датаг дуудна
 	useEffect(() => {
@@ -250,6 +240,9 @@ function Email() {
         getProfession()
     }, [adm])
 
+    function handleSearch() {
+        getDatas()
+    }
 
     return (
         <div>
@@ -383,7 +376,7 @@ function Email() {
                                 classNamePrefix='select'
                                 isClearable
                                 className={classnames('react-select')}
-                                isLoading={isLoading}
+                                isLoading={isTableLoading}
                                 placeholder={t('-- Сонгоно уу --')}
                                 options={infop || []}
                                 value={infop.find((c) => c.id === gpa_state)}
@@ -397,34 +390,83 @@ function Email() {
                             />
                     </Col>
                 </Row>
-            <div className="react-dataTable react-dataTable-selectable-rows my-2">
-                <DataTable
-                    noHeader
-                    paginationServer
-                    pagination
-                    className='react-dataTable'
-                    // progressPending={isLoading}
-                    // progressComponent={
-                    //     <div className='my-2 d-flex align-items-center justify-content-center'>
-                    //         <Spinner className='me-1' color="" size='sm'/><h5>Түр хүлээнэ үү...</h5>
-                    //     </div>
-                    // }
-                    noDataComponent={(
-                        <div className="my-2">
-                            <h5>Өгөгдөл байхгүй байна</h5>
-                        </div>
-                    )}
-                    onSort={handleSort}
-                    columns={getColumns(currentPage, rowsPerPage, pageCount, emailModalHandler, setSelectedEmail)}
-                    sortIcon={<ChevronDown size={10} />}
-                    paginationPerPage={rowsPerPage}
-                    paginationDefaultPage={currentPage}
-                    data={dataz}
-                    paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
-                    fixedHeader
-                    fixedHeaderScrollHeight='62vh'
-                />
-            </div>
+                <Row className="justify-content-between mx-0" >
+                    <Col className='d-flex align-items-center justify-content-start' md={4}>
+                        <Col md={3} sm={2} className='pe-1'>
+                            <Input
+                                type='select'
+                                bsSize='sm'
+                                style={{ height: "30px" }}
+                                value={rowsPerPage}
+                                onChange={e => handlePerPage(e)}
+                            >
+                                {
+                                    default_page.map((page, idx) => (
+                                    <option
+                                        key={idx}
+                                        value={page}
+                                    >
+                                        {page}
+                                    </option>
+                                ))}
+                            </Input>
+                        </Col>
+                        <Col md={9} sm={3}>
+                            <Label for='sort-select'>{t('Хуудсанд харуулах тоо')}</Label>
+                        </Col>
+                    </Col>
+                    <Col className='d-flex align-items-center mobile-datatable-search mt-1' md={4} sm={12}>
+                        <Input
+                            className='dataTable-filter mb-50'
+                            type='text'
+                            bsSize='sm'
+                            id='search-input'
+                            placeholder={t("Хайх үг....")}
+                            value={searchValue}
+                            onChange={(e) => {handleFilter(e)}}
+                            onKeyPress={e => e.key === 'Enter' && handleSearch()}
+                        />
+                        <Button
+                            size='sm'
+                            className='ms-50 mb-50'
+                            color='primary'
+                            onClick={handleSearch}
+                            onContextMenu={(e) => {console.log('hi')}}
+                        >
+                            <Search size={15} />
+                            <span className='align-middle ms-50'></span>
+                        </Button>
+                    </Col>
+                </Row>
+                <div className="react-dataTable react-dataTable-selectable-rows">
+                    <DataTable
+                        noHeader
+                        paginationServer
+                        pagination
+                        className='react-dataTable'
+                        progressPending={!isLoading}
+                        progressComponent={
+                            <TableLoader/>
+                            // <div className='my-2 d-flex align-items-center justify-content-center' style={{ minHeight: 500 }}>
+                            //     <Spinner className='me-1' color="" size='sm'/><h5>Түр хүлээнэ үү...</h5>
+                            // </div>
+                        }
+                        noDataComponent={(
+                            <div className="my-2">
+                                <h5>Өгөгдөл байхгүй байна</h5>
+                            </div>
+                        )}
+                        onSort={handleSort}
+                        columns={getColumns(currentPage, rowsPerPage, pageCount, emailModalHandler, setSelectedEmail)}
+                        sortIcon={<ChevronDown size={10} />}
+                        paginationPerPage={rowsPerPage}
+                        paginationDefaultPage={currentPage}
+                        data={datas}
+                        paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
+                        fixedHeader
+                        fixedHeaderScrollHeight='62vh'
+                    />
+                </div>
         </div>
     )
 }

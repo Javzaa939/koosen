@@ -1629,7 +1629,7 @@ function useApi(isDisplay=false) {
 				put: (data) => instance.put(`/elselt/admissionuserdata/all/`, data),
 			},
 			email: {
-				get: () => instance.get(`/elselt/admissionuserdata/email/`),
+				get: (limit, page, sort, search, lesson_year_id, profession_id, unit1_id, gender, state, gpa_state) => instance.get(`/elselt/admissionuserdata/email/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}&unit1_id=${unit1_id}&gender=${gender}&state=${state}&gpa_state=${gpa_state}`),
 				post: (data) => instance.post(`/elselt/admissionuserdata/email/`, data),
 			}
 		},
