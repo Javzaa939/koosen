@@ -36,7 +36,7 @@ function EmailModal({ emailModalHandler, emailModal, selectedStudents, getDatas 
                                 <div className='bg-light-warning p-50 rounded-3 d-flex align-items-center'>
                                     <AlertTriangle className='m-25 me-1' style={{ width: 36 }}/>
                                     <div>
-                                        Таны сонгоносон оюутнууд өөр өөр төлөвтэй байгааг анхаарна уу !
+                                        Таны сонгосон оюутнууд өөр өөр төлөвтэй байгааг анхаарна уу !
                                     </div>
                                 </div>
                         }
