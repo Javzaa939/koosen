@@ -444,7 +444,7 @@ function Email() {
                         paginationServer
                         pagination
                         className='react-dataTable'
-                        progressPending={!isLoading}
+                        progressPending={isLoading}
                         progressComponent={
                             <TableLoader/>
                             // <div className='my-2 d-flex align-items-center justify-content-center' style={{ minHeight: 500 }}>

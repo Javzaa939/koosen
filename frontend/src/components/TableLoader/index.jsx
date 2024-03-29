@@ -12,14 +12,19 @@ function TableLoader({
 
     const { skin  } = useSkin()
 
-    console.log(skin,'sss')
-
     if(type === 1) {
         return (
-            <div>
-                <div className='my-2 d-flex align-items-center justify-content-center' style={{ minHeight: 500 }}>
-                    <Spinner className='me-1' color="" size='sm'/><h5>Түр хүлээнэ үү...</h5>
-                </div>
+            <div className='my-2 d-flex align-items-center justify-content-center' style={{ minHeight: 500 }}>
+                {
+                    skin == 'light' ?
+                    <>
+                        <Spinner className='me-50' style={{ color: '#666666' }} size='sm'/><h5>Түр хүлээнэ үү...</h5>
+                    </>
+                    :
+                    <>
+                        <Spinner className='me-1' color="" size='sm'/><h5>Түр хүлээнэ үү...</h5>
+                    </>
+                }
             </div>
         )
     }
