@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@amcharts/amcharts5": "^5.7.7",
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@casl/ability": "^5.4.3",
     "@casl/react": "^2.3.0",
     "@craco/craco": "^6.4.3",
