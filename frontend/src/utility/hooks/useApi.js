@@ -1626,7 +1626,11 @@ function useApi(isDisplay=false) {
 			put: (data, id) => instance.put(`/elselt/admissionuserdata/${id}/`, data),
 			putDesc: (data, id) => instance.put(`/elselt/desc/${id}/`, data),
 			all: {
-				put: (data) => instance.put(`/elselt/admissionuserdata/all/`, data)
+				put: (data) => instance.put(`/elselt/admissionuserdata/all/`, data),
+			},
+			email: {
+				get: () => instance.get(`/elselt/admissionuserdata/email/`),
+				post: (data) => instance.post(`/elselt/admissionuserdata/email/`, data),
 			}
 		},
 		gpa: {
