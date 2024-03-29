@@ -153,6 +153,7 @@ class AdmissionUserProfessionSerializer(serializers.ModelSerializer):
 
 
 class EmailInfoSerializer(serializers.ModelSerializer):
+    user = ElseltUserSerializer(many=False, read_only=True)
 
     class Meta:
         model = EmailInfo

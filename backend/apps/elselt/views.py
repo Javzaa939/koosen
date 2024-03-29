@@ -509,7 +509,7 @@ class AdmissionUserEmailAPIView(
     mixins.ListModelMixin
 ):
 
-    queryset = EmailInfo.objects.all()
+    queryset = EmailInfo.objects.all().order_by('send_date')
     serializer_class = EmailInfoSerializer
 
 
@@ -520,6 +520,7 @@ class AdmissionUserEmailAPIView(
         return request.send_data(send_data)
 
     @login_required()
+    @transaction.atomic()
     def post(self, request):
 
         user = request.user
@@ -542,16 +543,16 @@ class AdmissionUserEmailAPIView(
 
                 create_email_info = []
 
-                # for value in data["students"]:
-                #     create_email_info.append(
-                #         EmailInfo(
-                #             user_id = value,
-                #             message = html_body,
-                #             send_user_id = user.id,
-                #         )
-                #     )
+                for value in data["students"]:
+                    create_email_info.append(
+                        EmailInfo(
+                            user_id = value,
+                            message = html_body,
+                            send_user_id = user.id,
+                        )
+                    )
 
-                # self.queryset.bulk_create(create_email_info)
+                self.queryset.bulk_create(create_email_info)
 
                 config = {
                     "email_password": user.employee.org.email_password,
@@ -560,39 +561,19 @@ class AdmissionUserEmailAPIView(
                     "email_use_tsl": user.employee.org.email_use_tls,
                 }
 
-                messages = [('Элсэлт', '<b>Элсэлтийн дүн гарлаа</b>', user.employee.org.email_host_user, [recipient]) for recipient in data["email_list"]]
-
-                send_mass_mail(
-                    datatuple = messages,
-                    connection = make_connection(user.employee.org.email_host_user, config)
-                )
-
-                # send_mail(
-                #     subject = 'Элсэлт',
-                #     message = 'Элсэлтийн дүн гарлаа',
-                #     from_email = user.employee.org.email_host_user,
-                #     recipient_list = data["email_list"],
-                #     html_message = html_body,
-                #     connection = make_connection(user.employee.org.email_host_user, config),
-                # )
-
-
-                # for mail in data["email_list"]:
-
-
-                #     send_mail(
-                #         subject = 'Элсэлт',
-                #         message = 'Элсэлтийн дүн гарлаа',
-                #         from_email = user.employee.org.email_host_user,
-                #         # recipient_list = data["email_list"],
-                #         recipient_list = [mail],
-                #         connection = make_connection(user.employee.org.email_host_user, config),
-                #         html_message = html_body
-                #     )
+                for mail in data["email_list"]:
+                    send_mail(
+                        subject = 'Элсэлт',
+                        message = 'Элсэлтийн дүн гарлаа',
+                        from_email = user.employee.org.email_host_user,
+                        recipient_list = [mail],
+                        connection = make_connection(user.employee.org.email_host_user, config),
+                        html_message = html_body
+                    )
 
 
         except Exception as e:
-            print('e', e)
+            print(e)
             transaction.savepoint_rollback(sid)
             return request.send_error("ERR_002", e.__str__)
         return request.send_info('INF_001')
