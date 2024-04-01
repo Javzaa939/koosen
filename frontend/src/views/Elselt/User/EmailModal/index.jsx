@@ -10,7 +10,7 @@ import useLoader from '@hooks/useLoader';
 function EmailModal({ emailModalHandler, emailModal, selectedStudents, getDatas }) {
 
     const { formState: { errors }, handleSubmit, control, reset } = useForm(validate(validateSchema));
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true});
+    const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: true, bg: 2 });
     const admissionStateChangeApi = useApi().elselt.admissionuserdata.email;
 
     async function onSubmit(cdata) {
@@ -31,6 +31,7 @@ function EmailModal({ emailModalHandler, emailModal, selectedStudents, getDatas 
 
     return (
         <Modal centered toggle={emailModalHandler} isOpen={emailModal}>
+            {isLoading && Loader}
             <ModalHeader toggle={emailModalHandler}>
                 Оюутнуудруу Имейл илгээх
             </ModalHeader>
@@ -80,8 +81,8 @@ function EmailModal({ emailModalHandler, emailModal, selectedStudents, getDatas 
                     </div>
                 </div>
                 <div className='text-center my-50'>
-                    <Button className='m-50' color='primary' type='submit'>Хадгалах</Button>
-                    <Button className='m-50 ' onClick={() => emailModalHandler()}>Гарах</Button>
+                    <Button className='m-50' color='primary' type='submit' disabled={isLoading}>Хадгалах</Button>
+                    <Button className='m-50 ' onClick={() => emailModalHandler()} disabled={isLoading}>Гарах</Button>
                 </div>
             </ModalBody>
         </Modal>
