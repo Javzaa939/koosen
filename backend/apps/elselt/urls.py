@@ -29,3 +29,4 @@ urlpatterns = [
     # Элсэгчдэд мэдээлэл илгээх хэсэг
     path('admissionuserdata/email/', AdmissionUserEmailAPIView.as_view()),
 ]
+

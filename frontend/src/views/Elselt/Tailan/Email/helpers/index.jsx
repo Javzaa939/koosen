@@ -149,3 +149,4 @@ export function getColumns ( currentPage, rowsPerPage, page_count, emailModalHan
     return columns
 
 }
+

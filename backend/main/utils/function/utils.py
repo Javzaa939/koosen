@@ -1012,3 +1012,4 @@ def get_domain_url():
         domain_url = 'http://localhost:8000'
 
     return domain_url
+
