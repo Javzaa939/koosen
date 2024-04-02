@@ -4,12 +4,16 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 from rest_framework.filters import SearchFilter
 
+from django.core.mail import send_mail
+from django.core.mail import send_mass_mail
+from django.template.loader import render_to_string
 from django.db import transaction
 from django.db.models import F, Subquery, OuterRef, Count
 from django.db.models.functions import Substr
 
-from main.utils.function.utils import json_load
+from main.utils.function.utils import json_load, make_connection, get_domain_url_link, get_domain_url
 from main.utils.function.pagination import CustomPagination
+from main.decorators import login_required
 
 import datetime as dt
 
@@ -35,13 +39,21 @@ from .serializer import (
     AdmissionActiveProfession,
     AdmissionUserInfoSerializer,
     AdmissionUserProfessionSerializer,
+    EmailInfoSerializer
 )
 
 from elselt.models import (
     AdmissionUserProfession,
     UserInfo,
     ElseltUser,
-    ContactInfo
+    ContactInfo,
+    EmailInfo
+)
+
+from core.models import (
+    User,
+    Employee,
+    Schools
 )
 
 
@@ -476,6 +488,10 @@ class AdmissionUserAllChange(
 ):
 
     queryset = AdmissionUserProfession.objects.all()
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['user__first_name', 'user__register', 'user__email']
 
     def put(self, request):
 
@@ -490,6 +506,144 @@ class AdmissionUserAllChange(
             return request.send_error("ERR_002", e.__str__)
 
         return request.send_info("INF_002")
+
+
+class AdmissionUserEmailAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin
+):
+
+    queryset = EmailInfo.objects.all().order_by('send_date')
+    serializer_class = EmailInfoSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['user__first_name', 'user__register', 'user__email', 'gpa']
+
+    def get_queryset(self):
+
+        queryset = self.queryset
+        userinfo_qs = UserInfo.objects.filter(user=OuterRef('user')).values('gpa')[:1]
+
+        queryset = (
+            queryset
+            .annotate(
+                gpa=Subquery(userinfo_qs),
+            )
+        )
+
+        queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
+
+        lesson_year_id = self.request.query_params.get('lesson_year_id')
+        profession_id = self.request.query_params.get('profession_id')
+        unit1_id = self.request.query_params.get('unit1_id')
+        state = self.request.query_params.get('state')
+        gpa_state = self.request.query_params.get('gpa_state')
+        gender = self.request.query_params.get('gender')
+        sorting = self.request.query_params.get('sorting')
+
+        if lesson_year_id:
+            admission_id = AdmissionRegisterProfession.objects.filter(admission=lesson_year_id).values_list('id', flat=True)
+            user_ids = AdmissionUserProfession.objects.filter(profession__in=admission_id).values_list('user', flat=True)
+            queryset = queryset.filter(user__in=user_ids)
+
+        if profession_id:
+            profession_ids = AdmissionRegisterProfession.objects.filter(profession=profession_id).values_list('id', flat=True)
+            user_ids = AdmissionUserProfession.objects.filter(profession__in=profession_ids).values_list('user', flat=True)
+            queryset = queryset.filter(user__in=user_ids)
+
+        if unit1_id:
+            queryset = queryset.filter(user__aimag__id=unit1_id)
+
+        if state:
+            user_ids = AdmissionUserProfession.objects.filter(state=state).values_list('user', flat=True)
+            queryset = queryset.filter(user__in=user_ids)
+
+        if gpa_state:
+            user_ids = UserInfo.objects.filter(gpa_state=gpa_state).values_list('user', flat=True)
+            queryset = queryset.filter(user__in=user_ids)
+
+        if gender:
+            if gender == 'Эрэгтэй':
+                queryset = queryset.filter(gender__in=['1', '3', '5', '7', '9'])
+            else:
+                queryset = queryset.filter(gender__in=['0', '2', '4', '6', '8'])
+
+        # Sort хийх үед ажиллана
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
+
+        return queryset
+
+
+    def get(self, request):
+
+        send_data = self.list(request).data
+
+        return request.send_data(send_data)
+
+    @login_required()
+    @transaction.atomic()
+    def post(self, request):
+
+        user = request.user
+        data = request.data
+
+        sid = transaction.savepoint()
+        try:
+            with transaction.atomic():
+
+                link_domain = get_domain_url_link()
+                link_domain = get_domain_url()
+                logo_url = "{domain}/static/media/dxis_logo.png".format(domain=link_domain)
+
+                datas = {
+                    'logo_url': logo_url,
+                    'description': data['description'] if data['description'] else ""
+                }
+
+                html_body = render_to_string('mail_state.html', datas)
+
+                create_email_info = []
+
+                for value in data["students"]:
+                    create_email_info.append(
+                        EmailInfo(
+                            user_id = value,
+                            message = html_body,
+                            send_user_id = user.id,
+                        )
+                    )
+
+                self.queryset.bulk_create(create_email_info)
+
+                config = {
+                    "email_password": user.employee.org.email_password,
+                    "email_port": user.employee.org.email_port,
+                    "email_host": user.employee.org.email_host,
+                    "email_use_tsl": user.employee.org.email_use_tls,
+                }
+
+                for mail in data["email_list"]:
+                    send_mail(
+                        subject = 'Элсэлт',
+                        message = 'Элсэлтийн дүн гарлаа',
+                        from_email = user.employee.org.email_host_user,
+                        recipient_list = [mail],
+                        connection = make_connection(user.employee.org.email_host_user, config),
+                        html_message = html_body
+                    )
+
+
+        except Exception as e:
+            print(e)
+            transaction.savepoint_rollback(sid)
+            return request.send_error("ERR_002", e.__str__)
+        return request.send_info('INF_001')
 
 
 @permission_classes([IsAuthenticated])

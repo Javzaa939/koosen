@@ -12,6 +12,7 @@ import PIL.Image as Image
 
 from django.apps import apps
 from django.conf import settings
+from django.core.mail import get_connection
 from django.db import connections
 
 from django.db.models import PositiveIntegerField
@@ -975,3 +976,40 @@ def calculate_age(birth_date):
         age = dt.datetime(year, month, day)
 
     return age
+
+
+def make_connection(from_email, config):
+    connection = get_connection(
+        username = from_email,
+        password = config["email_password"],
+        port = config["email_port"],
+        host = config["email_host"],
+        use_tls = config["email_use_tsl"],
+        use_ssl = False,
+        fail_silently = False
+    )
+
+    return connection
+
+
+def get_domain_url_link():
+    """ domain url авах """
+
+    if settings.DEBUG is False:
+        domain_url = 'http://sis.uia.gov.mn'
+    else:
+        domain_url = 'http://192.168.1.7:3001'
+
+    return domain_url
+
+
+def get_domain_url():
+    """ domain url авах """
+
+    if settings.DEBUG is False:
+        domain_url = 'http://sis.uia.gov.mn'
+    else:
+        domain_url = 'http://localhost:8000'
+
+    return domain_url
+
