@@ -20,8 +20,7 @@ import Select from 'react-select'
 import AuthContext from "@context/AuthContext"
 
 import { useNavigate } from 'react-router-dom';
-
-import { utils, writeFile } from 'xlsx-js-style';
+import useUpdateEffect from '@hooks/useUpdateEffect'
 
 import { dataz } from './sampledata'
 import { getColumns } from './helpers';
@@ -164,7 +163,6 @@ function Email() {
 
         const {success, data} = await allFetch(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, adm, profession_id, unit1, gender, state, gpa_state))
         if(success) {
-            console.log(data,'data')
             setTotalCount(data?.count)
             setDatas(data?.results)
 
@@ -205,7 +203,7 @@ function Email() {
     }
 
 	// Хайлтийн хэсэг хоосон болох үед анхны датаг дуудна
-	useEffect(() => {
+	useUpdateEffect(() => {
         if (searchValue.length == 0) {
 			getDatas();
 		} else {
@@ -223,7 +221,7 @@ function Email() {
         getUnit1()
     }, [])
 
-    useEffect(() => {
+    useUpdateEffect(() => {
         getProfession()
     }, [adm])
 
