@@ -31,6 +31,12 @@ export default [
                 icon: <Circle size={8} />,
                 navLink: "elselt/user"
             },
+            {
+                id: 'elselt4',
+                title: 'Тайлан',
+                icon: <Circle size={8} />,
+                navLink: "elselt/tailan"
+            },
         ]
     }
 ]

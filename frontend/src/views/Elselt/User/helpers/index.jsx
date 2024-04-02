@@ -60,7 +60,7 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 				// Тэнцсэн тэнцээгүйгээс хамаарж border-left-д улаан ногоон border өгөх
 				if (tableRow)
 				{
-					let border = row.state == 1 ? '' : row.state == 2 ? '2px solid rgba(40, 199, 111, 1)' : '2px solid #EA5455'
+					let border = row.state == 1 ? '' : row.state == 2 ? '4px solid rgba(40, 199, 111, 1)' : '4px solid #EA5455'
 					tableRow.style.borderLeft = `${border}`
 				}
 
