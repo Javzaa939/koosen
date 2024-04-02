@@ -16,7 +16,6 @@ function EmailModal({ emailModalHandler, emailModal, selectedStudents, getDatas 
     async function onSubmit(cdata) {
         cdata['students'] = selectedStudents.map(val => val?.user?.id) || [];
         cdata['email_list'] = selectedStudents.map(val => val?.user?.email) || [];
-        console.log(cdata);
         const { success } = await fetchData(admissionStateChangeApi.post(cdata));
         if (success) {
             reset();

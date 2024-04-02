@@ -37,6 +37,7 @@ import StateModal from './StateModal';
 import DescModal from './DescModal';
 import EmailModal from './EmailModal';
 import MessageModal from './MessageModal';
+import useUpdateEffect from '@hooks/useUpdateEffect'
 
 // import Addmodal from './Add'
 
@@ -236,7 +237,7 @@ const ElseltUser = () => {
         getUnit1()
     }, [])
 
-    useEffect(() => {
+    useUpdateEffect(() => {
         getProfession()
     }, [adm])
 
@@ -253,7 +254,6 @@ const ElseltUser = () => {
     function convert(){
         const mainData = datas.map((data, idx) => {
             return(
-
                 {
                     '№': idx + 1,
                     'Овог': data?.user?.last_name || '',
@@ -605,7 +605,6 @@ const ElseltUser = () => {
                             </UncontrolledTooltip>
                         </div>
                         <div className='px-1'>
-                            {/* <Button color='primary' disabled className='d-flex align-items-center px-75' id='email_button' onClick={() => emailModalHandler()}> */}
                             <Button color='primary' disabled={selectedStudents.length == 0} className='d-flex align-items-center px-75' id='email_button' onClick={() => emailModalHandler()}>
                                 <MdMailOutline className='me-25'/>
                                 Email илгээх
