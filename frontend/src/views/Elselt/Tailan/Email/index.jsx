@@ -22,7 +22,6 @@ import AuthContext from "@context/AuthContext"
 import { useNavigate } from 'react-router-dom';
 import useUpdateEffect from '@hooks/useUpdateEffect'
 
-import { dataz } from './sampledata'
 import { getColumns } from './helpers';
 import EmailModal from './EmailModal';
 import TableLoader from '@src/components/TableLoader';
@@ -49,7 +48,7 @@ function Email() {
 	const [searchValue, setSearchValue] = useState("");
 
     // Нийт датаны тоо
-    const [total_count, setTotalCount] = useState(dataz.length || 1)
+    const [total_count, setTotalCount] = useState(datas.length || 0)
 
     // Нийт хуудасны тоо
     const [pageCount, setPageCount] = useState(1)
