@@ -838,6 +838,7 @@ class ElseltHealthAnhanShat(
         queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
         gender = self.request.query_params.get('gender')
         sorting = self.request.query_params.get('sorting')
+        state  = self.request.query_params.get('state')
 
         queryset = queryset.filter(state=AdmissionUserProfession.STATE_APPROVE)
 
@@ -853,6 +854,10 @@ class ElseltHealthAnhanShat(
                 sorting = str(sorting)
 
             queryset = queryset.order_by(sorting)
+
+        if state:
+            user_id = HealthUser.objects.filter(state=state).values_list('user', flat=True)
+            queryset = queryset.filter(user__in=user_id)
 
         return queryset
 
