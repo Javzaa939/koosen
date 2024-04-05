@@ -60,7 +60,7 @@ function AddModal({ addModal, addModalHandler, addModalData, getDatas, STATE_LIS
          * Edit Бүртгэх хоёр нь эндээсээ хийгдчихвэл амар байх дөө.
          */
         var editz = addModalData?.health_user_data
-        var keyz = Object.keys(editz)
+        var keyz = editz ? Object.keys(editz) : []
 
         if(editz && keyz.length > 0) {
             if(editz === null) return

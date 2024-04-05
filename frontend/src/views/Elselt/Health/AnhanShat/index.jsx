@@ -111,7 +111,6 @@ function AnhanShat() {
         }
     }
 
-    console.log(chosenState)
     function handleSearch() {
         getDatas()
     }
