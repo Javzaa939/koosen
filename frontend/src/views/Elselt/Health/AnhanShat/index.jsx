@@ -9,6 +9,7 @@ import { ChevronDown, File, FileText, Printer, Search } from 'react-feather'
 import DataTable from 'react-data-table-component'
 
 import { useTranslation } from 'react-i18next'
+import Select from 'react-select'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
@@ -19,6 +20,7 @@ import { getColumns } from './helpers';
 import { useNavigate } from 'react-router-dom';
 import { FaFileExcel } from 'react-icons/fa'
 import AddModal from './AddModal'
+import { excelDownLoad } from './downloadExcel'
 
 const STATE_LIST = [
     {
@@ -40,8 +42,6 @@ function AnhanShat() {
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10)
 
-    const navigate = useNavigate()
-
     // Эрэмбэлэлт
     const [sortField, setSort] = useState('')
 
@@ -52,6 +52,7 @@ function AnhanShat() {
 
 	const [searchValue, setSearchValue] = useState("");
 	const [datas, setDatas] = useState([]);
+    const [chosenState, setChosenState] = useState('')
 
     const [descModal, setDescModal] = useState(false)
     const [descModalData ,setDescModalData] = useState(null)
@@ -71,7 +72,7 @@ function AnhanShat() {
 	/* Жагсаалтын дата авах функц */
 	async function getDatas() {
 
-        const {success, data} = await fetchData(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, '', '', '', '', '', ''))
+        const {success, data} = await fetchData(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, chosenState))
         if(success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
@@ -93,7 +94,7 @@ function AnhanShat() {
 
 			return () => clearTimeout(timeoutId);
 		}
-    }, [sortField, currentPage, rowsPerPage, searchValue])
+    }, [sortField, currentPage, rowsPerPage, searchValue, chosenState])
 
 
     // ** Function to handle filter
@@ -110,10 +111,10 @@ function AnhanShat() {
         }
     }
 
+    console.log(chosenState)
     function handleSearch() {
         getDatas()
     }
-
 
     // ** Function to handle per page
     function handlePerPage(e)
@@ -127,17 +128,18 @@ function AnhanShat() {
 	};
 
     function descModalHandler(e, data) {
-
         setDescModal(!descModal)
         setDescModalData(data || null)
-
     }
 
     function addModalHandler(e, data) {
-
         setAddModal(!addModal)
         setAddModalData(data || null)
+    }
 
+    function excelHandler() {
+        console.log('irjin')
+        excelDownLoad(datas)
     }
 
     return (
@@ -162,12 +164,35 @@ function AnhanShat() {
                     <Col>
                     </Col>
                     <Col className='d-flex justify-content-end'>
-                        <Button color='primary' className='d-flex align-items-center'>
+                        <Button color='primary' className='d-flex align-items-center' onClick={() => excelHandler()}>
                             <FileText className='me-50' size={14}/>
                             <div>
                                 Excel татах
                             </div>
                         </Button>
+                    </Col>
+                </Row>
+                <Row>
+                    <Col>
+                        <div className='m-1'>
+                            <Col md={6} lg={3}>
+                                <Label for='sort-select'>{t('Үзлэгийн төлөвөөр шүүх')}</Label>
+                                <Select
+                                    classNamePrefix='select'
+                                    isClearable
+                                    placeholder={`-- Сонгоно уу --`}
+                                    options={STATE_LIST || []}
+                                    value={STATE_LIST.find((c) => c.id === chosenState)}
+                                    noOptionsMessage={() => 'Хоосон байна'}
+                                    onChange={(val) => {
+                                        setChosenState(val?.id || '')
+                                    }}
+                                    styles={ReactSelectStyles}
+                                    getOptionValue={(option) => option.id}
+                                    getOptionLabel={(option) => option.name}
+                                />
+                            </Col>
+                        </div>
                     </Col>
                 </Row>
                 <Row className="justify-content-between mx-0" >

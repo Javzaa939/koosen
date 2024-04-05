@@ -136,7 +136,7 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 			minWidth: "120px",
 			selector: (row) => (
 				<div className="text-center" style={{ width: "auto" }}>
-					<a
+					{/* <a
 						id={`requestLeaveDatatableDetails${row.id}`}
 						onClick={() => console.log(row?.id, row)}
 						className="me-50"
@@ -144,7 +144,7 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 						<Badge color="light-info" pill><Book width={"15px"} /></Badge>
 					</a>
 
-					<UncontrolledTooltip placement='top' target={`requestLeaveDatatableDetails${row.id}`}>Дэлгэрэнгүй</UncontrolledTooltip>
+					<UncontrolledTooltip placement='top' target={`requestLeaveDatatableDetails${row.id}`}>Дэлгэрэнгүй</UncontrolledTooltip> */}
 
 					<a role="button" onClick={(e) => { addModalHandler(e, row)} }
 						id={`description${row?.id}`}
