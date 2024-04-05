@@ -874,6 +874,7 @@ class ElseltHealthAnhanShat(
         serializer = HealthUserSerializer(data=data)
 
         if serializer.is_valid():
+
             serializer.save()
             return request.send_info('INF_001')
 
@@ -893,3 +894,12 @@ class ElseltHealthAnhanShat(
                 return request.send_error("ERR_003", error_obj)
 
             return request.send_error("ERR_002")
+
+
+    @transaction.atomic
+    def put(self, request, pk=None):
+
+        data = request.data
+        HealthUser.objects.filter(user=pk).update(**data)
+
+        return request.send_info('INF_002')
