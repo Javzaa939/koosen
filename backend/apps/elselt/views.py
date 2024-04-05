@@ -815,34 +815,6 @@ class ElseltDescApiView(
 
         return request.send_info('INF_002')
 
-# @permission_classes([IsAuthenticated])
-# class ElseltHealthAnhanShat(
-#     generics.GenericAPIView,
-#     mixins.ListModelMixin,
-#     mixins.RetrieveModelMixin,
-# ):
-
-#     queryset = HealthUser.objects.all().order_by('created_at')
-
-#     serializer_class = HealthUserSerializer
-#     pagination_class = CustomPagination
-
-#     filter_backends = [SearchFilter]
-#     search_fields = ['user__first_name', 'user__register', 'user__email']
-
-#     def get(self, request, pk=None):
-
-#         print('irjenoo')
-#         if pk:
-
-#             all_data = self.retrieve(request, pk).data
-
-#             return request.send_data(all_data)
-
-#         all_data = self.list(request).data
-
-#         return request.send_data(all_data)
-
 
 @permission_classes([IsAuthenticated])
 class ElseltHealthAnhanShat(
@@ -857,44 +829,15 @@ class ElseltHealthAnhanShat(
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['user__first_name', 'user__register', 'user__email', 'gpa']
+    search_fields = ['full_name', 'user_register']
 
     def get_queryset(self):
         queryset = self.queryset
         queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
-
-        userinfo_qs = UserInfo.objects.filter(user=OuterRef('user')).values('gpa')[:1]
-
-        queryset = (
-            queryset
-            .annotate(
-                gpa=Subquery(userinfo_qs),
-            )
-        )
-
-        lesson_year_id = self.request.query_params.get('lesson_year_id')
-        profession_id = self.request.query_params.get('profession_id')
-        unit1_id = self.request.query_params.get('unit1_id')
-        state = self.request.query_params.get('state')
-        gpa_state = self.request.query_params.get('gpa_state')
         gender = self.request.query_params.get('gender')
         sorting = self.request.query_params.get('sorting')
 
-        if lesson_year_id:
-            queryset = queryset.filter(profession__admission=lesson_year_id)
-
-        if profession_id:
-            queryset = queryset.filter(profession__profession__id=profession_id)
-
-        if unit1_id:
-            queryset = queryset.filter(user__aimag__id=unit1_id)
-
-        if state:
-            queryset = queryset.filter(state=state)
-
-        if gpa_state:
-            user_ids = UserInfo.objects.filter(gpa_state=gpa_state).values_list('user', flat=True)
-            queryset = queryset.filter(user__in=user_ids)
+        queryset = queryset.filter(state=AdmissionUserProfession.STATE_APPROVE)
 
         if gender:
             if gender == 'Эрэгтэй':
@@ -914,7 +857,6 @@ class ElseltHealthAnhanShat(
     def get(self, request, pk=None):
 
         if pk:
-
             all_data = self.retrieve(request, pk).data
 
             return request.send_data(all_data)
