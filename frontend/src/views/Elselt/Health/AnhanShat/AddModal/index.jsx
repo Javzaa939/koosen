@@ -84,7 +84,7 @@ function AddModal({ addModal, addModalHandler, addModalData, getDatas, STATE_LIS
             <ModalBody>
                 <div style={{ minHeight: 550 }}>
                     {
-                        !isLoading && Loader
+                        isLoading && Loader
                     }
                     {
                         addModalData ?
