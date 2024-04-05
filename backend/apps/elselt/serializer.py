@@ -214,7 +214,7 @@ class HealthUserSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class AdmissionUserInfoSerializer(serializers.ModelSerializer):
+class HealthUserDataSerializer(serializers.ModelSerializer):
     user_register = serializers.CharField(source='user.register', default='', read_only=True)
     full_name = serializers.CharField(source='user.full_name', default='', read_only=True)
     gender_name = serializers.SerializerMethodField()

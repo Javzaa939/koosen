@@ -40,7 +40,8 @@ from .serializer import (
     AdmissionUserInfoSerializer,
     AdmissionUserProfessionSerializer,
     EmailInfoSerializer,
-    HealthUserSerializer
+    HealthUserSerializer,
+    HealthUserDataSerializer
 )
 
 from elselt.models import (
@@ -825,7 +826,7 @@ class ElseltHealthAnhanShat(
 
     queryset = AdmissionUserProfession.objects.all().order_by('created_at')
 
-    serializer_class = AdmissionUserInfoSerializer
+    serializer_class = HealthUserDataSerializer
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
