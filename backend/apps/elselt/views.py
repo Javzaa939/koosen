@@ -831,7 +831,7 @@ class ElseltHealthAnhanShat(
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['full_name', 'user_register']
+    search_fields = ['user__first_name', 'user__first_name', 'user__register']
 
     def get_queryset(self):
         queryset = self.queryset
