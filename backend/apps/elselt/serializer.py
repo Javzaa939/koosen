@@ -100,6 +100,51 @@ class ElseltUserSerializer(serializers.ModelSerializer):
         exclude = ['password']
 
 
+class AdmissionUserInfoSerializer(serializers.ModelSerializer):
+    user = ElseltUserSerializer(many=False, read_only=True)
+    userinfo = serializers.SerializerMethodField()
+    full_name = serializers.CharField(source='user.full_name', default='', read_only=True)
+    profession = serializers.CharField(source='profession.profession.name', default='')
+    degree_code = serializers.CharField(source='profession.profession.degree.degree_code', default='')
+    degree_name = serializers.CharField(source='profession.profession.degree.degree_name', default='')
+    gender_name = serializers.SerializerMethodField()
+    state_name = serializers.SerializerMethodField()
+    admission = serializers.IntegerField(source='profession.admission.id', default='')
+
+    class Meta:
+        model = AdmissionUserProfession
+        fields = '__all__'
+
+
+    def get_userinfo(self, obj):
+
+        data = UserInfo.objects.filter(user=obj.user.id).first()
+        userinfo_data = UserinfoSerializer(data).data
+
+        return userinfo_data
+
+
+    def get_gender_name(self, obj):
+
+        gender = obj.gender
+
+        if gender.isnumeric():
+            if (int(obj.gender)%2) != 0:
+                return 'Эрэгтэй'
+            return 'Эмэгтэй'
+        return ''
+
+
+    def get_state_name(self, obj):
+
+        state_name = ''
+        state_op = [*AdmissionUserProfession.STATE]
+        for state in state_op:
+            if state[0] == obj.state:
+                state_name = state[1]
+                return state_name
+        return state_name
+
 
 class AdmissionUserProfessionSerializer(serializers.ModelSerializer):
 

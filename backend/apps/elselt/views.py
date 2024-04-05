@@ -864,3 +864,8 @@ class ElseltHealthAnhanShat(
         all_data = self.list(request).data
 
         return request.send_data(all_data)
+
+
+    def post(self, request):
+
+        data = request.data
