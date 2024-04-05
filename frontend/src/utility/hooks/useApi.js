@@ -1643,7 +1643,7 @@ function useApi(isDisplay=false) {
 			anhan:{
 				get: (limit, page, sort, search, state) => instance.get(`/elselt/health/anhan/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}`),
 				post: (cdata) => instance.post(`/elselt/health/anhan/`, cdata),
-				put: (id, cdata) => instance.put(`/elselt/health/anhan/${id}`, cdata)
+				put: (id, cdata) => instance.put(`/elselt/health/anhan/${id}/`, cdata)
 			},
 		}
 	}

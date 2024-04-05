@@ -822,6 +822,7 @@ class ElseltHealthAnhanShat(
     generics.GenericAPIView,
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin
 ):
 
     queryset = AdmissionUserProfession.objects.all().order_by('created_at')
@@ -830,13 +831,14 @@ class ElseltHealthAnhanShat(
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['full_name', 'user_register']
+    search_fields = ['user__first_name', 'user__first_name', 'user__register']
 
     def get_queryset(self):
         queryset = self.queryset
         queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
         gender = self.request.query_params.get('gender')
         sorting = self.request.query_params.get('sorting')
+        state  = self.request.query_params.get('state')
 
         queryset = queryset.filter(state=AdmissionUserProfession.STATE_APPROVE)
 
@@ -852,6 +854,10 @@ class ElseltHealthAnhanShat(
                 sorting = str(sorting)
 
             queryset = queryset.order_by(sorting)
+
+        if state:
+            user_id = HealthUser.objects.filter(state=state).values_list('user', flat=True)
+            queryset = queryset.filter(user__in=user_id)
 
         return queryset
 
@@ -900,6 +906,35 @@ class ElseltHealthAnhanShat(
     def put(self, request, pk=None):
 
         data = request.data
-        HealthUser.objects.filter(user=pk).update(**data)
+        health_user = HealthUser.objects.filter(id=pk).first()
+        serializer = HealthUserSerializer(health_user, data)
 
-        return request.send_info('INF_002')
+        if serializer.is_valid():
+
+            serializer.save()
+            return request.send_info('INF_002')
+
+        else:
+            error_obj = []
+            print(serializer.errors)
+            for key in serializer.errors:
+                msg = "Хоосон байна"
+
+                return_error = {
+                    "field": key,
+                    "msg": msg
+                }
+
+                error_obj.append(return_error)
+
+            if len(error_obj) > 0:
+                return request.send_error("ERR_003", error_obj)
+
+            return request.send_error("ERR_002")
+
+
+    @transaction.atomic
+    def delete(self, request, pk=None):
+
+        self.destroy(request, pk)
+        return request.send_info('INF_003')
