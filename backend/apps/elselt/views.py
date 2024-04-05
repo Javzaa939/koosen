@@ -822,6 +822,7 @@ class ElseltHealthAnhanShat(
     generics.GenericAPIView,
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin
 ):
 
     queryset = AdmissionUserProfession.objects.all().order_by('created_at')
@@ -900,6 +901,35 @@ class ElseltHealthAnhanShat(
     def put(self, request, pk=None):
 
         data = request.data
-        HealthUser.objects.filter(user=pk).update(**data)
+        health_user = HealthUser.objects.filter(id=pk).first()
+        serializer = HealthUserSerializer(health_user, data)
 
-        return request.send_info('INF_002')
+        if serializer.is_valid():
+
+            serializer.save()
+            return request.send_info('INF_002')
+
+        else:
+            error_obj = []
+            print(serializer.errors)
+            for key in serializer.errors:
+                msg = "Хоосон байна"
+
+                return_error = {
+                    "field": key,
+                    "msg": msg
+                }
+
+                error_obj.append(return_error)
+
+            if len(error_obj) > 0:
+                return request.send_error("ERR_003", error_obj)
+
+            return request.send_error("ERR_002")
+
+
+    @transaction.atomic
+    def delete(self, request, pk=None):
+
+        self.destroy(request, pk)
+        return request.send_info('INF_003')
