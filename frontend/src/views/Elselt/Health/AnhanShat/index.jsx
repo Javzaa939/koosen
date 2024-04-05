@@ -20,6 +20,20 @@ import { useNavigate } from 'react-router-dom';
 import { FaFileExcel } from 'react-icons/fa'
 import AddModal from './AddModal'
 
+const STATE_LIST = [
+    {
+        name: 'Хүлээгдэж буй',
+        id: 1
+    },
+    {
+        name: 'Тэнцсэн',
+        id: 2
+    },
+    {
+        name: 'Тэнцээгүй',
+        id: 3
+    },
+]
 
 function AnhanShat() {
 
@@ -59,7 +73,6 @@ function AnhanShat() {
 
         const {success, data} = await fetchData(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, '', '', '', '', '', ''))
         if(success) {
-            console.log(data,'data')
             setTotalCount(data?.count)
             setDatas(data?.results)
 
@@ -129,7 +142,16 @@ function AnhanShat() {
 
     return (
         <Card>
-            <AddModal addModal={addModal} addModalHandler={addModalHandler} addModalData={addModalData} getDatas={getDatas}/>
+            {
+                addModal &&
+                <AddModal
+                    addModal={addModal}
+                    addModalHandler={addModalHandler}
+                    addModalData={addModalData}
+                    getDatas={getDatas}
+                    STATE_LIST={STATE_LIST}
+                />
+            }
             <CardHeader>
                 <h5>
                     Эрүүл мэндийн анхан шатны үзлэг
@@ -195,7 +217,7 @@ function AnhanShat() {
                         </Button>
                     </Col>
                 </Row>
-                <div className="react-dataTable react-dataTable-selectable-rows">
+                <div className="react-dataTable react-dataTable-selectable-rows" id='datatableLeftTwoRightOne'>
                     <DataTable
                         noHeader
                         paginationServer
@@ -215,7 +237,7 @@ function AnhanShat() {
                         print='true'
                         theme="solarized"
                         onSort={handleSort}
-                        columns={getColumns(currentPage, rowsPerPage, total_count, addModalHandler)}
+                        columns={getColumns(currentPage, rowsPerPage, total_count, addModalHandler, STATE_LIST)}
                         sortIcon={<ChevronDown size={10} />}
                         paginationPerPage={rowsPerPage}
                         paginationDefaultPage={currentPage}

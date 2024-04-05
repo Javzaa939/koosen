@@ -15,34 +15,29 @@ import ActiveYearContext from "@context/ActiveYearContext"
 
 import { validateSchema } from './validateSchema'
 
-function AddModal({ addModal, addModalHandler, addModalData, getDatas }) {
+function AddModal({ addModal, addModalHandler, addModalData, getDatas, STATE_LIST }) {
 
-    const { control, handleSubmit, formState: { errors }, reset, resetField, setError } = useForm(validate(validateSchema));
+    const { control, handleSubmit, formState: { errors }, reset, resetField, setValue, setError } = useForm(validate(validateSchema));
 
-    const STATE_LIST = [
-        {
-            id: 1,
-            name: 'Зөвшөөрөв'
-        },
-        {
-            id: 2,
-            name: 'Татгалзав'
-        },
-        {
-            id: 3,
-            name: 'Түдгэлзүүлэв'
-        }
-    ]
-
-	const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: false });
+	const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: true, bg: 3 });
 	const elseltApi = useApi().elselt.health.anhan
 
     async function onSubmit(cdata) {
         cdata['user'] = addModalData?.user
-        console.log(cdata,'cdata')
 
         if(addModalData?.health_user_data) {
-            console.log('put')
+            const { success, error } = await fetchData(elseltApi.put(addModalData?.health_user_data?.id, cdata))
+            if(success) {
+                reset()
+                getDatas()
+                addModalHandler()
+            }
+            else {
+                /** Алдааны мессеж */
+                for (let key in error) {
+                    setError(error[key].field, { type: 'custom', message: error[key].msg});
+                }
+            }
         } else {
             const { success, error } = await fetchData(elseltApi.post(cdata))
             if(success) {
@@ -57,8 +52,25 @@ function AddModal({ addModal, addModalHandler, addModalData, getDatas }) {
                 }
             }
         }
-
     }
+
+    useEffect(() => {
+
+        /**
+         * Edit Бүртгэх хоёр нь эндээсээ хийгдчихвэл амар байх дөө.
+         */
+        var editz = addModalData?.health_user_data
+        var keyz = Object.keys(editz)
+
+        if(editz && keyz.length > 0) {
+            if(editz === null) return
+            for(let key in editz) {
+                if(editz[key] !== null)
+                    setValue(key, editz[key])
+                else setValue(key,'')
+            }
+        }
+    }, [])
 
     return (
         <Modal
@@ -71,6 +83,9 @@ function AddModal({ addModal, addModalHandler, addModalData, getDatas }) {
             </ModalHeader>
             <ModalBody>
                 <div style={{ minHeight: 550 }}>
+                    {
+                        !isLoading && Loader
+                    }
                     {
                         addModalData ?
                             <Form className='d-flex flex-column' style={{ minHeight: 550 }} onSubmit={handleSubmit(onSubmit)}>
@@ -270,7 +285,7 @@ function AddModal({ addModal, addModalHandler, addModalData, getDatas }) {
                                     </div>
                                 </div>
                                 <div className='m-50'>
-                                    <Button type='submit' color='primary'>
+                                    <Button type='submit' color='primary' disabled={isLoading}>
                                         Хадгалах
                                     </Button>
                                 </div>
