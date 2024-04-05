@@ -34,9 +34,35 @@ function AddModal({ addModal, addModalHandler, addModalData }) {
         }
     ]
 
+	const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: false });
+	const elseltApi = useApi().elselt.health.anhan
+
     async function onSubmit(cdata) {
+        cdata['user'] = addModalData?.user
         console.log(cdata)
+
+        if(addModalData?.health_user_data) {
+            console.log('put')
+        } else {
+            const { success, error } = await fetchData(elseltApi.post(cdata))
+            if(success) {
+                reset()
+                console.log('boloo2')
+                // refreshDatas()
+                // handleModal()
+            }
+            else {
+                console.log('errooooor')
+                /** Алдааны мессеж */
+                for (let key in error) {
+                    setError(error[key].field, { type: 'custom', message: error[key].msg});
+                }
+            }
+        }
+
     }
+
+    console.log(addModalData)
 
     return (
         <Modal
