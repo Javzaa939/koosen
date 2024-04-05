@@ -207,7 +207,6 @@ class EmailInfoSerializer(serializers.ModelSerializer):
 
 
 class HealthUserSerializer(serializers.ModelSerializer):
-    user = ElseltUserSerializer(many=False, read_only=True)
 
     class Meta:
         model = HealthUser

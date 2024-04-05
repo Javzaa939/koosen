@@ -874,8 +874,8 @@ class ElseltHealthAnhanShat(
         serializer = HealthUserSerializer(data=data)
 
         if serializer.is_valid():
-
             serializer.save()
+            return request.send_info('INF_001')
 
         else:
             error_obj = []
