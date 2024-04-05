@@ -867,6 +867,29 @@ class ElseltHealthAnhanShat(
         return request.send_data(all_data)
 
 
+    @transaction.atomic
     def post(self, request):
 
         data = request.data
+        serializer = HealthUserSerializer(data=data)
+
+        if serializer.is_valid():
+
+            serializer.save()
+
+        else:
+            error_obj = []
+            for key in serializer.errors:
+                msg = "Хоосон байна"
+
+                return_error = {
+                    "field": key,
+                    "msg": msg
+                }
+
+                error_obj.append(return_error)
+
+            if len(error_obj) > 0:
+                return request.send_error("ERR_003", error_obj)
+
+            return request.send_error("ERR_002")
