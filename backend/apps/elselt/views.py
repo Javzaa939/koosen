@@ -39,7 +39,8 @@ from .serializer import (
     AdmissionActiveProfession,
     AdmissionUserInfoSerializer,
     AdmissionUserProfessionSerializer,
-    EmailInfoSerializer
+    EmailInfoSerializer,
+    HealthUserSerializer
 )
 
 from elselt.models import (
@@ -47,7 +48,8 @@ from elselt.models import (
     UserInfo,
     ElseltUser,
     ContactInfo,
-    EmailInfo
+    EmailInfo,
+    HealthUser
 )
 
 from core.models import (
@@ -812,3 +814,111 @@ class ElseltDescApiView(
             )
 
         return request.send_info('INF_002')
+
+# @permission_classes([IsAuthenticated])
+# class ElseltHealthAnhanShat(
+#     generics.GenericAPIView,
+#     mixins.ListModelMixin,
+#     mixins.RetrieveModelMixin,
+# ):
+
+#     queryset = HealthUser.objects.all().order_by('created_at')
+
+#     serializer_class = HealthUserSerializer
+#     pagination_class = CustomPagination
+
+#     filter_backends = [SearchFilter]
+#     search_fields = ['user__first_name', 'user__register', 'user__email']
+
+#     def get(self, request, pk=None):
+
+#         print('irjenoo')
+#         if pk:
+
+#             all_data = self.retrieve(request, pk).data
+
+#             return request.send_data(all_data)
+
+#         all_data = self.list(request).data
+
+#         return request.send_data(all_data)
+
+
+@permission_classes([IsAuthenticated])
+class ElseltHealthAnhanShat(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+):
+
+    queryset = AdmissionUserProfession.objects.all().order_by('created_at')
+
+    serializer_class = AdmissionUserInfoSerializer
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['user__first_name', 'user__register', 'user__email', 'gpa']
+
+    def get_queryset(self):
+        queryset = self.queryset
+        queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
+
+        userinfo_qs = UserInfo.objects.filter(user=OuterRef('user')).values('gpa')[:1]
+
+        queryset = (
+            queryset
+            .annotate(
+                gpa=Subquery(userinfo_qs),
+            )
+        )
+
+        lesson_year_id = self.request.query_params.get('lesson_year_id')
+        profession_id = self.request.query_params.get('profession_id')
+        unit1_id = self.request.query_params.get('unit1_id')
+        state = self.request.query_params.get('state')
+        gpa_state = self.request.query_params.get('gpa_state')
+        gender = self.request.query_params.get('gender')
+        sorting = self.request.query_params.get('sorting')
+
+        if lesson_year_id:
+            queryset = queryset.filter(profession__admission=lesson_year_id)
+
+        if profession_id:
+            queryset = queryset.filter(profession__profession__id=profession_id)
+
+        if unit1_id:
+            queryset = queryset.filter(user__aimag__id=unit1_id)
+
+        if state:
+            queryset = queryset.filter(state=state)
+
+        if gpa_state:
+            user_ids = UserInfo.objects.filter(gpa_state=gpa_state).values_list('user', flat=True)
+            queryset = queryset.filter(user__in=user_ids)
+
+        if gender:
+            if gender == 'Эрэгтэй':
+                queryset = queryset.filter(gender__in=['1', '3', '5', '7', '9'])
+            else:
+                queryset = queryset.filter(gender__in=['0', '2', '4', '6', '8'])
+
+        # Sort хийх үед ажиллана
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
+
+        return queryset
+
+    def get(self, request, pk=None):
+
+        if pk:
+
+            all_data = self.retrieve(request, pk).data
+
+            return request.send_data(all_data)
+
+        all_data = self.list(request).data
+
+        return request.send_data(all_data)

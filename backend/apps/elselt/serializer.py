@@ -13,7 +13,8 @@ from elselt.models import (
     AdmissionUserProfession,
     ElseltUser,
     UserInfo,
-    EmailInfo
+    EmailInfo,
+    HealthUser
 )
 
 class AdmissionSerializer(serializers.ModelSerializer):
@@ -203,3 +204,11 @@ class EmailInfoSerializer(serializers.ModelSerializer):
         userinfo_data = UserinfoSerializer(data).data
 
         return userinfo_data
+
+
+class HealthUserSerializer(serializers.ModelSerializer):
+    user = ElseltUserSerializer(many=False, read_only=True)
+
+    class Meta:
+        model = HealthUser
+        fields = '__all__'

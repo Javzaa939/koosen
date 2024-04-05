@@ -1638,6 +1638,11 @@ function useApi(isDisplay=false) {
 		},
 		dashboard: {
 			get: (elselt) => instance.get(`/elselt/dashboard/?elselt=${elselt}`),
+		},
+		health: {
+			anhan:{
+				get: (limit, page, sort, search, lesson_year_id, profession_id, unit1_id, gender, state, gpa_state) => instance.get(`/elselt/health/anhan/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}&unit1_id=${unit1_id}&gender=${gender}&state=${state}&gpa_state=${gpa_state}`),
+			},
 		}
 	}
 }
