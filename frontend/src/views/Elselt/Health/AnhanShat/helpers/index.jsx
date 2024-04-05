@@ -28,52 +28,45 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 			minWidth: '80px',
 			maxWidth: '80px',
 		},
-		// {
-		// 	header: 'last_name',
-		// 	name: <div className="px-1">Овог</div>,
-		// 	minWidth: '160px',
-		// 	maxWidth: '160px',
-		// 	selector: (row) => row?.user?.last_name || ''
-		// },
-		// {
-		// 	header: 'first_name',
-		// 	name: <div className="px-1">Нэр</div>,
-		// 	minWidth: '160px',
-		// 	maxWidth: '160px',
-		// 	selector: (row) => row?.user?.first_name || ''
-		// },
-		// {
-		// 	header: 'register',
-		// 	name: <div className="px-1">РД</div>,
-		// 	selector: (row) => row?.user?.register || '',
-        //     sortable: true,
-		// 	minWidth: '140px',
-		// 	maxWidth: '140px',
-		// },
-		// {
-		// 	header: 'gender',
-		// 	name: <div className="px-1">Хүйс</div>,
-		// 	selector: (row) => row?.gender_name || '',
-        //     sortable: true,
-		// 	minWidth: '140px',
-		// 	maxWidth: '140px',
-		// },
-        // {
-		// 	maxWidth: "200px",
-		// 	minWidth: "200px",
-		// 	header: 'state',
-		// 	reorder: true,
-		// 	sortable: true,
-		// 	name: "Үзлэгийн төлөв",
-		// 	selector: (row) => (
-		// 		<Badge
-		// 			color={`${row?.health_user?.state == 1 ? 'gradient-primary' : row?.state == 2 ? 'gradient-success' : row?.state == 3 ? 'gradient-danger' : 'gradient-primary'}`}
-		// 			pill
-		// 		>
-		// 			{row?.state_name}
-		// 		</Badge>),
-		// 	center: true,
-		// },
+		{
+			header: 'full_name',
+			name: <div className="px-1">Нэр</div>,
+			minWidth: '160px',
+			maxWidth: '160px',
+			selector: (row) => row?.full_name || ''
+		},
+		{
+			header: 'register',
+			name: <div className="px-1">РД</div>,
+			selector: (row) => row?.user_register || '',
+            sortable: true,
+			minWidth: '140px',
+			maxWidth: '140px',
+		},
+		{
+			header: 'gender',
+			name: <div className="px-1">Хүйс</div>,
+			selector: (row) => row?.gender_name || '',
+            sortable: true,
+			minWidth: '140px',
+			maxWidth: '140px',
+		},
+        {
+			maxWidth: "200px",
+			minWidth: "200px",
+			header: 'state',
+			reorder: true,
+			sortable: true,
+			name: "Үзлэгийн төлөв",
+			selector: (row) => (
+				<Badge
+					color={`${row?.health_user?.state == 1 ? 'gradient-primary' : row?.state == 2 ? 'gradient-success' : row?.state == 3 ? 'gradient-danger' : 'gradient-primary'}`}
+					pill
+				>
+					{row?.state_name}
+				</Badge>),
+			center: true,
+		},
 		{
 			header: 'height',
 			name: <div className="px-1">Өндөр</div>,

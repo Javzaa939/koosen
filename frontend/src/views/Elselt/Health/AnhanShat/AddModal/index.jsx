@@ -15,7 +15,7 @@ import ActiveYearContext from "@context/ActiveYearContext"
 
 import { validateSchema } from './validateSchema'
 
-function AddModal({ addModal, addModalHandler, addModalData }) {
+function AddModal({ addModal, addModalHandler, addModalData, getDatas }) {
 
     const { control, handleSubmit, formState: { errors }, reset, resetField, setError } = useForm(validate(validateSchema));
 
@@ -39,7 +39,7 @@ function AddModal({ addModal, addModalHandler, addModalData }) {
 
     async function onSubmit(cdata) {
         cdata['user'] = addModalData?.user
-        console.log(cdata)
+        console.log(cdata,'cdata')
 
         if(addModalData?.health_user_data) {
             console.log('put')
@@ -47,12 +47,10 @@ function AddModal({ addModal, addModalHandler, addModalData }) {
             const { success, error } = await fetchData(elseltApi.post(cdata))
             if(success) {
                 reset()
-                console.log('boloo2')
-                // refreshDatas()
-                // handleModal()
+                getDatas()
+                addModalHandler()
             }
             else {
-                console.log('errooooor')
                 /** Алдааны мессеж */
                 for (let key in error) {
                     setError(error[key].field, { type: 'custom', message: error[key].msg});
@@ -61,8 +59,6 @@ function AddModal({ addModal, addModalHandler, addModalData }) {
         }
 
     }
-
-    console.log(addModalData)
 
     return (
         <Modal
@@ -113,7 +109,7 @@ function AddModal({ addModal, addModalHandler, addModalData }) {
                                                     id='height'
                                                     placeholder='Өндөр'
                                                     bsSize='sm'
-                                                    invalid={errors.name && true}
+                                                    invalid={errors.height}
                                                 >
                                                 </Input>
                                             )}
@@ -137,7 +133,7 @@ function AddModal({ addModal, addModalHandler, addModalData }) {
                                                     id='weight'
                                                     placeholder='Жин'
                                                     bsSize='sm'
-                                                    invalid={errors.name && true}
+                                                    invalid={errors.weight && true}
                                                 >
                                                 </Input>
                                             )}
@@ -146,7 +142,7 @@ function AddModal({ addModal, addModalHandler, addModalData }) {
                                     </div>
                                     <div className='m-50'>
                                         <Controller
-                                            defaultValue=''
+                                            defaultValue={false}
                                             control={control}
                                             id='is_chalk'
                                             name='is_chalk'
@@ -158,7 +154,7 @@ function AddModal({ addModal, addModalHandler, addModalData }) {
                                                     type='checkbox'
                                                     className='me-50'
                                                     checked={field.value}
-                                                    invalid={errors.name && true}
+                                                    invalid={errors.is_chalk}
                                                 >
                                                 </Input>
                                             )}
@@ -170,7 +166,7 @@ function AddModal({ addModal, addModalHandler, addModalData }) {
                                     </div>
                                     <div className='m-50'>
                                         <Controller
-                                            defaultValue=''
+                                            defaultValue={false}
                                             control={control}
                                             id='is_tattoo'
                                             name='is_tattoo'
@@ -182,7 +178,7 @@ function AddModal({ addModal, addModalHandler, addModalData }) {
                                                     type='checkbox'
                                                     className='me-50'
                                                     checked={field.value}
-                                                    invalid={errors.name && true}
+                                                    invalid={errors.is_tattoo}
                                                 >
                                                 </Input>
                                             )}
@@ -194,7 +190,7 @@ function AddModal({ addModal, addModalHandler, addModalData }) {
                                     </div>
                                     <div className='m-50 d-flex'>
                                         <Controller
-                                            defaultValue=''
+                                            defaultValue={false}
                                             control={control}
                                             id='is_drug'
                                             name='is_drug'
@@ -206,7 +202,7 @@ function AddModal({ addModal, addModalHandler, addModalData }) {
                                                     type='checkbox'
                                                     className='me-50'
                                                     checked={field.value}
-                                                    invalid={errors.name && true}
+                                                    invalid={errors.is_drug && true}
                                                 >
                                                 </Input>
                                             )}
@@ -234,7 +230,7 @@ function AddModal({ addModal, addModalHandler, addModalData }) {
                                                     placeholder='Тайлбар'
                                                     style={{ minHeight: 100 }}
                                                     bsSize='sm'
-                                                    invalid={errors.name && true}
+                                                    invalid={errors.description && true}
                                                 >
                                                 </Input>
                                             )}

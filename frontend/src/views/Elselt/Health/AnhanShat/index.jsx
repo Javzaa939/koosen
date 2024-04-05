@@ -129,7 +129,7 @@ function AnhanShat() {
 
     return (
         <Card>
-            <AddModal addModal={addModal} addModalHandler={addModalHandler} addModalData={addModalData}/>
+            <AddModal addModal={addModal} addModalHandler={addModalHandler} addModalData={addModalData} getDatas={getDatas}/>
             <CardHeader>
                 <h5>
                     Эрүүл мэндийн анхан шатны үзлэг
@@ -200,7 +200,7 @@ function AnhanShat() {
                         noHeader
                         paginationServer
                         pagination
-                        className='react-dataTable'
+                        className='react-dataTable-header-md'
                         progressPending={isLoading}
                         progressComponent={
                             <div className='my-2 d-flex align-items-center justify-content-center'>
