@@ -17,8 +17,6 @@ import useLoader from '@hooks/useLoader';
 import { getPagination, ReactSelectStyles } from '@utils'
 
 import { getColumns } from './helpers';
-import { useNavigate } from 'react-router-dom';
-import { FaFileExcel } from 'react-icons/fa'
 import AddModal from './AddModal'
 import { excelDownLoad } from './downloadExcel'
 

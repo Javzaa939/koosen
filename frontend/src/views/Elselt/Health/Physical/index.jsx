@@ -17,10 +17,7 @@ import useLoader from '@hooks/useLoader';
 import { getPagination, ReactSelectStyles } from '@utils'
 
 import { getColumns } from './helpers';
-import { useNavigate } from 'react-router-dom';
-import { FaFileExcel } from 'react-icons/fa'
 import AddModal from './AddModal'
-import { excelDownLoad } from './downloadExcel'
 
 const STATE_LIST = [
     {
@@ -53,9 +50,6 @@ function Physical() {
 	const [datas, setDatas] = useState([]);
     const [chosenState, setChosenState] = useState('')
 
-    const [descModal, setDescModal] = useState(false)
-    const [descModalData ,setDescModalData] = useState(null)
-
     const [addModal, setAddModal] = useState(false)
     const [addModalData, setAddModalData] = useState(null)
 
@@ -67,8 +61,6 @@ function Physical() {
 
 	const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false});
 	const elseltApi = useApi().elselt.health.physical
-
-    console.log(elseltApi)
 
 	/* Жагсаалтын дата авах функц */
 	async function getDatas() {
@@ -127,18 +119,9 @@ function Physical() {
 		setCurrentPage(page.selected + 1);
 	};
 
-    function descModalHandler(e, data) {
-        setDescModal(!descModal)
-        setDescModalData(data || null)
-    }
-
     function addModalHandler(e, data) {
         setAddModal(!addModal)
         setAddModalData(data || null)
-    }
-
-    function excelHandler() {
-        excelDownLoad(datas, STATE_LIST)
     }
 
     return (
