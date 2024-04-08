@@ -2,7 +2,7 @@ import { Book, CheckCircle, Type } from "react-feather"
 import { Badge, UncontrolledTooltip } from "reactstrap"
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, page_count, STATE_LIST) {
+export function getColumns (currentPage, rowsPerPage, page_count, STATE_LIST, detailHandler) {
 
     // /** Сонгосон хуудасны тоо датаны тооноос их болсон үед хуудаслалт 1-ээс эхлэнэ */
     if (currentPage > page_count) {
@@ -174,33 +174,44 @@ export function getColumns (currentPage, rowsPerPage, page_count, STATE_LIST) {
 			minWidth: '220px',
 			maxWidth: '220px',
 		},
-		// {
-		// 	name: "Үйлдэл",
-		// 	center: true,
-		// 	maxWidth: "120px",
-		// 	minWidth: "120px",
-		// 	selector: (row) => (
-		// 		<div className="text-center" style={{ width: "auto" }}>
-		// 			{/* <a
-		// 				id={`requestLeaveDatatableDetails${row.id}`}
-		// 				onClick={() => console.log(row?.id, row)}
-		// 				className="me-50"
-		// 			>
-		// 				<Badge color="light-info" pill><Book width={"15px"} /></Badge>
-		// 			</a>
+		{
+			name: "Үйлдэл",
+			center: true,
+			maxWidth: "120px",
+			minWidth: "120px",
+			selector: (row) => (
+				<div className="text-center d-flex" style={{ width: "auto" }}>
+					{row?.health_up_user_data ?
 
-		// 			<UncontrolledTooltip placement='top' target={`requestLeaveDatatableDetails${row.id}`}>Дэлгэрэнгүй</UncontrolledTooltip> */}
+							<a
+								id={`requestLeaveDatatableDetails${row.id}`}
+								title="Дэлгэрэнгүй"
+								onClick={() => detailHandler(row?.id, row)}
+								className="me-50"
+							>
+								<Badge color="light-info" pill><Book width={"15px"} /></Badge>
+							</a>
+						:
+							<div
+								title="Тухайн оюутны мэдээлэл ирээгүй байна."
+								className="me-50"
+								style={{ cursor: 'not-allowed' }}
+							>
+								<Badge color="light-secondary" pill><Book width={"15px"} /></Badge>
+							</div>
 
-		// 			<a role="button" onClick={(e) => { addModalHandler(e, row)} }
-		// 				id={`description${row?.id}`}
-		// 				className="me-1"
-		// 			>
-		// 				<Badge color="light-success" pill><CheckCircle  width={"15px"} /></Badge>
-		// 			</a>
-		// 			<UncontrolledTooltip placement='top' target={`description${row.id}`}>Мэдээлэл оруулах</UncontrolledTooltip>
-		// 		</div>
-		// 	),
-		// },
+					}
+
+					{/* <a role="button" onClick={(e) => { addModalHandler(e, row)} }
+						id={`description${row?.id}`}
+						className="me-1"
+					>
+						<Badge color="light-success" pill><CheckCircle  width={"15px"} /></Badge>
+					</a>
+					<UncontrolledTooltip placement='top' target={`description${row.id}`}>Мэдээлэл оруулах</UncontrolledTooltip> */}
+				</div>
+			),
+		},
 	]
     return columns
 

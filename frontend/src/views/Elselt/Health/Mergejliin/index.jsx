@@ -17,6 +17,7 @@ import useLoader from '@hooks/useLoader';
 import { getPagination, ReactSelectStyles } from '@utils'
 
 import { getColumns } from './helpers';
+import Detail from './Detail'
 
 const STATE_LIST = [
     {
@@ -49,6 +50,9 @@ function Mergejliin() {
 	const [searchValue, setSearchValue] = useState("");
 	const [datas, setDatas] = useState([]);
     const [chosenState, setChosenState] = useState('')
+
+    const [ detail, setDetail ] = useState(false)
+    const [ detailData, setDetailData ] = useState(false)
 
     // Нийт датаны тоо
     const [total_count, setTotalCount] = useState(datas.length || 1)
@@ -116,8 +120,18 @@ function Mergejliin() {
 		setCurrentPage(page.selected + 1);
 	};
 
+    function detailHandler(e, data) {
+        setDetail(!detail)
+        setDetailData(data)
+    }
+
     return (
         <Card>
+            {/* {
+                detail &&
+                <Detail detail={detail} detailHandler={detailHandler} />
+            } */}
+            <Detail detail={detail} detailHandler={detailHandler} detailData={detailData}/>
             <CardHeader>
                 <h5>
                     Элсэгчийн нарийн мэргэжлийн шатны эрүүл мэндийн үзлэг
@@ -226,7 +240,7 @@ function Mergejliin() {
                         print='true'
                         theme="solarized"
                         onSort={handleSort}
-                        columns={getColumns(currentPage, rowsPerPage, total_count, STATE_LIST)}
+                        columns={getColumns(currentPage, rowsPerPage, total_count, STATE_LIST, detailHandler)}
                         sortIcon={<ChevronDown size={10} />}
                         paginationPerPage={rowsPerPage}
                         paginationDefaultPage={currentPage}
