@@ -26,10 +26,10 @@ function AddModal({ addModal, addModalHandler, addModalData, getDatas, STATE_LIS
         cdata['user'] = addModalData?.user
 
         /**
-         * 
+         *
          */
-        if(addModalData?.health_user_data) {
-            const { success, error } = await fetchData(elseltApi.put(addModalData?.health_user_data?.id, cdata))
+        if(addModalData?.health_up_user_data) {
+            const { success, error } = await fetchData(elseltApi.put(addModalData?.health_up_user_data?.id, cdata))
             if(success) {
                 reset()
                 getDatas()
@@ -62,7 +62,7 @@ function AddModal({ addModal, addModalHandler, addModalData, getDatas, STATE_LIS
         /**
          * Edit Бүртгэх хоёр нь эндээсээ хийгдчихвэл амар байх дөө.
          */
-        var editz = addModalData?.health_user_data
+        var editz = addModalData?.health_up_user_data
         var keyz = editz ? Object.keys(editz) : []
 
         if(editz && keyz.length > 0) {

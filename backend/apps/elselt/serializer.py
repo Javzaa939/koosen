@@ -15,7 +15,8 @@ from elselt.models import (
     UserInfo,
     EmailInfo,
     HealthUser,
-    HealthUpUser
+    HealthUpUser,
+    PhysqueUser
 )
 
 class AdmissionSerializer(serializers.ModelSerializer):
@@ -281,9 +282,16 @@ class HealthUpUserInfoSerializer(serializers.ModelSerializer):
 
         health_user_data = None
 
-        user_data = HealthUpUser.objects.filter(user=obj.user).first()
+        user_data = PhysqueUser.objects.filter(user=obj.user).first()
 
         if user_data:
-            health_user_data = HealthUpUserSerializer(user_data).data
+            health_user_data = PhysqueUserSerializer(user_data).data
 
         return health_user_data
+
+class PhysqueUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = PhysqueUser
+        fields = '__all__'
+

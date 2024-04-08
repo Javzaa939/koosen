@@ -19,9 +19,9 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 				if (tableRow)
 				{
 					let border =
-						row?.health_user_data?.state == 1 ? '4px solid rgba(20, 78, 151, 1)'
-						: row?.health_user_data?.state == 2 ? '4px solid rgba(40, 199, 111, 1)'
-						: row?.health_user_data?.state == 3 ? '4px solid #EA5455' : '4px solid transparent'
+						row?.health_up_user_data?.state == 1 ? '4px solid rgba(20, 78, 151, 1)'
+						: row?.health_up_user_data?.state == 2 ? '4px solid rgba(40, 199, 111, 1)'
+						: row?.health_up_user_data?.state == 3 ? '4px solid #EA5455' : '4px solid transparent'
 					tableRow.style.borderLeft = `${border}`
 				}
 
@@ -64,12 +64,12 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 			name: "Үзлэгийн төлөв",
 			selector: (row) => (
 				<Badge
-					color={`${row?.health_user_data?.state == 1 ? 'primary' : row?.health_user_data?.state == 2 ? 'success' : row?.health_user_data?.state == 3 ? 'danger' : 'primary'}`}
+					color={`${row?.health_up_user_data?.state == 1 ? 'primary' : row?.health_up_user_data?.state == 2 ? 'success' : row?.health_up_user_data?.state == 3 ? 'danger' : 'primary'}`}
 					pill
 				>
-					{row?.health_user_data ?
+					{row?.health_up_user_data ?
 
-						STATE_LIST.find(val => val.id === row?.health_user_data?.state).name
+						STATE_LIST.find(val => val.id === row?.health_up_user_data?.state).name
 
 					:
 						''
@@ -81,56 +81,68 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 
 		// TODO: SORT ALDAA ZASAH
 		{
-			header: 'height',
-			name: <div className="px-1">Өндөр / см</div>,
-			selector: (row) => row?.health_user_data?.height || '',
+			header: 'description',
+			name: <div className="px-1">Тайлбар</div>,
+			selector: (row) => row?.health_up_user_data?.description || '',
             // sortable: true,
 			minWidth: '140px',
 			maxWidth: '140px',
 		},
 		{
-			header: 'weight',
-			name: <div className="px-1">Жин / кг</div>,
-			selector: (row) => row?.health_user_data?.weight || '',
+			header: 'turnik',
+			name: <div className="px-1">Савлуурт суниах</div>,
+			selector: (row) => row?.health_up_user_data?.turnik || '',
             // sortable: true,
 			minWidth: '140px',
 			maxWidth: '140px',
 		},
 		{
-			header: 'is_chalk',
-			name: <div className="px-1">Шарх сорвитой эсэх</div>,
-			selector: (row) => (
-				row?.health_user_data &&
-				<div className="p-25 px-50 rounded-4 bg-light-secondary">
-					{row?.health_user_data?.is_chalk ? 'Тийм' : 'Үгүй'}
-				</div>
-			),
-			minWidth: '200px',
-			maxWidth: '200px',
-		},
-		{
-			header: 'is_tattoo',
-			name: <div className="px-1">Шивээстэй эсэх</div>,
-			selector: (row) => (
-				row?.health_user_data &&
-				<div className="p-25 px-50 rounded-4 bg-light-secondary">
-					{row?.health_user_data?.is_tattoo ? 'Тийм' : 'Үгүй'}
-				</div>
-			),
+			header: 'belly_draught',
+			name: <div className="px-1">Гэдэсний даралт</div>,
+			selector: (row) => row?.health_up_user_data?.belly_draught || '',
+            // sortable: true,
 			minWidth: '140px',
 			maxWidth: '140px',
 		},
 		{
-			header: 'is_drug',
-			name: <div className="px-1">Сэтгэцэд нөлөөт бодисын хамаарал</div>,
-			selector: (row) => (
-				row?.health_user_data &&
-				<div className="p-25 px-50 rounded-4 bg-light-secondary">
-					{row?.health_user_data?.is_drug ? 'Тийм' : 'Үгүй'}
-				</div>
-			),
-			minWidth: '220px',
-			maxWidth: '220px',
+			header: 'patience_1000m',
+			name: <div className="px-1">Тэсвэр 1000м</div>,
+			selector: (row) => row?.health_up_user_data?.patience_1000m || '',
+            // sortable: true,
+			minWidth: '140px',
+			maxWidth: '140px',
+		},
+		{
+			header: 'speed_100m',
+			name: <div className="px-1">Хурд 100м</div>,
+			selector: (row) => row?.health_up_user_data?.speed_100m || '',
+            // sortable: true,
+			minWidth: '140px',
+			maxWidth: '140px',
+		},
+		{
+			header: 'quickness',
+			name: <div className="px-1">Авхаалж самбаа</div>,
+			selector: (row) => row?.health_up_user_data?.quickness || '',
+            // sortable: true,
+			minWidth: '140px',
+			maxWidth: '140px',
+		},
+		{
+			header: 'flexible',
+			name: <div className="px-1">Уян хатан</div>,
+			selector: (row) => row?.health_up_user_data?.flexible || '',
+            // sortable: true,
+			minWidth: '140px',
+			maxWidth: '140px',
+		},
+		{
+			header: 'total_score',
+			name: <div className="px-1">Нийт оноо</div>,
+			selector: (row) => row?.health_up_user_data?.total_score || '',
+            // sortable: true,
+			minWidth: '140px',
+			maxWidth: '140px',
 		},
 		{
 			name: "Үйлдэл",

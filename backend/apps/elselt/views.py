@@ -43,7 +43,8 @@ from .serializer import (
     HealthUserSerializer,
     HealthUserDataSerializer,
     HealthUpUserInfoSerializer,
-    HealthUpUserSerializer
+    HealthUpUserSerializer,
+    PhysqueUserSerializer
 )
 
 from elselt.models import (
@@ -53,6 +54,7 @@ from elselt.models import (
     ContactInfo,
     EmailInfo,
     HealthUser,
+    PhysqueUser,
     HealthUpUser
 )
 
@@ -1076,6 +1078,7 @@ class ElseltHealthPhysical(
     queryset = HealthUser.objects.all().order_by('created_at')
 
     serializer_class = HealthUpUserInfoSerializer
+    physique_serializer_class = PhysqueUserSerializer
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
@@ -1120,16 +1123,49 @@ class ElseltHealthPhysical(
 
         return request.send_data(all_data)
 
-
     @transaction.atomic
     def post(self, request):
-        print('irjinoo post')
-        return request.send_info("INF_002")
+
+        new_serializer = None
+
+        try:
+            data = request.data
+            sid = transaction.savepoint()
+
+            serializer = self.physique_serializer_class(data=data)
+
+            if not serializer.is_valid():
+                transaction.savepoint_rollback(sid)
+                return request.send_error_valid(serializer.errors)
+
+            new_serializer = serializer.save()
+
+        except Exception as e:
+            print(e)
+            return request.send_error('ERR_002', 'Хадгалахад алдаа гарлаа')
+
+        return request.send_info('INF_001', new_serializer.id if new_serializer else '')
 
 
     @transaction.atomic
     def put(self, request, pk=None):
-        print('irjinoo put')
+
+        try:
+            if not pk:
+                return request.send_error('ERR_005')
+
+            data = request.data
+            physque_user = PhysqueUser.objects.filter(id=pk).first()
+            serializer = PhysqueUserSerializer(physque_user, data)
+
+            if not serializer.is_valid(raise_exception=False):
+                return request.send_error_valid(serializer.errors)
+
+            serializer.save()
+
+        except Exception as e:
+            print(e)
+            return request.send_error('ERR_002')
 
         return request.send_info("INF_002")
 
