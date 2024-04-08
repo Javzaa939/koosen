@@ -226,7 +226,7 @@ function Mergejliin() {
                         print='true'
                         theme="solarized"
                         onSort={handleSort}
-                        columns={getColumns(currentPage, rowsPerPage, total_count, addModalHandler, STATE_LIST)}
+                        columns={getColumns(currentPage, rowsPerPage, total_count, STATE_LIST)}
                         sortIcon={<ChevronDown size={10} />}
                         paginationPerPage={rowsPerPage}
                         paginationDefaultPage={currentPage}
