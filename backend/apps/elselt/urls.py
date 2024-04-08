@@ -36,5 +36,9 @@ urlpatterns = [
     # Эрүүл мэнд мэргэжлийн үзлэг хэсэг
     path('health/professional/', ElseltHealthProfessional.as_view()),
     path('health/professional/<int:pk>/', ElseltHealthProfessional.as_view()),
+
+    # Эрүүл мэнд бие бялдарын үзлэг
+    path('health/physical/', ElseltHealthPhysical.as_view()),
+    path('health/physical/<int:pk>/', ElseltHealthPhysical.as_view()),
 ]
 

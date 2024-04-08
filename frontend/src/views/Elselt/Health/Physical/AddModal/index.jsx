@@ -20,7 +20,7 @@ function AddModal({ addModal, addModalHandler, addModalData, getDatas, STATE_LIS
     const { control, handleSubmit, formState: { errors }, reset, resetField, setValue, setError } = useForm(validate(validateSchema));
 
 	const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: true, bg: 3 });
-	const elseltApi = useApi().elselt.health.anhan
+	const elseltApi = useApi().elselt.health.physical
 
     async function onSubmit(cdata) {
         cdata['user'] = addModalData?.user
@@ -111,124 +111,172 @@ function AddModal({ addModal, addModalHandler, addModalData, getDatas, STATE_LIS
                                         </div>
                                     </div>
                                     <div className='m-50'>
-                                        <Label className='form-label' for='height'>
-                                            Өндөр / см
+                                        <Label className='form-label' for='turnik'>
+                                            Савлуурт суниах
                                         </Label>
                                         <Controller
                                             defaultValue=''
                                             control={control}
-                                            id='height'
-                                            name='height'
+                                            id='turnik'
+                                            name='turnik'
                                             render={({ field }) => (
                                                 <Input
                                                     {...field}
                                                     type='number'
-                                                    name='height'
-                                                    id='height'
-                                                    placeholder='Өндөр'
+                                                    name='turnik'
+                                                    id='turnik'
+                                                    placeholder='Савлуурт суниах'
                                                     bsSize='sm'
-                                                    invalid={errors.height}
+                                                    invalid={errors.turnik}
                                                 >
                                                 </Input>
                                             )}
                                             />
-                                        {errors.height && <FormFeedback className='d-block'>{errors.height.message}</FormFeedback>}
+                                        {errors.turnik && <FormFeedback className='d-block'>{errors.turnik.message}</FormFeedback>}
                                     </div>
                                     <div className='m-50'>
-                                        <Label className='form-label' for='weight'>
-                                            Жин / кг
+                                        <Label className='form-label' for='belly_draught'>
+                                            Гэдэсний таталт
                                         </Label>
                                         <Controller
                                             defaultValue=''
                                             control={control}
-                                            id='weight'
-                                            name='weight'
+                                            id='belly_draught'
+                                            name='belly_draught'
                                             render={({ field }) => (
                                                 <Input
                                                     {...field}
                                                     type='number'
-                                                    name='weight'
-                                                    id='weight'
-                                                    placeholder='Жин'
+                                                    name='belly_draught'
+                                                    id='belly_draught'
+                                                    placeholder='Гэдэсний таталт'
                                                     bsSize='sm'
-                                                    invalid={errors.weight && true}
+                                                    invalid={errors.belly_draught && true}
                                                 >
                                                 </Input>
                                             )}
                                             />
-                                        {errors.weight && <FormFeedback className='d-block'>{errors.weight.message}</FormFeedback>}
+                                        {errors.belly_draught && <FormFeedback className='d-block'>{errors.belly_draught.message}</FormFeedback>}
                                     </div>
                                     <div className='m-50'>
+                                        <Label className='form-label' for='patience_1000m'>
+                                            Тэсвэр 1000м
+                                        </Label>
                                         <Controller
-                                            defaultValue={false}
+                                            defaultValue=''
                                             control={control}
-                                            id='is_chalk'
-                                            name='is_chalk'
-                                            render={({field}) => (
+                                            id='patience_1000m'
+                                            name='patience_1000m'
+                                            render={({ field }) => (
                                                 <Input
                                                     {...field}
-                                                    name='is_chalk'
-                                                    id='is_chalk'
-                                                    type='checkbox'
-                                                    className='me-50'
-                                                    checked={field.value}
-                                                    invalid={errors.is_chalk}
+                                                    type='number'
+                                                    name='patience_1000m'
+                                                    id='patience_1000m'
+                                                    placeholder='Тэсвэр 1000м'
+                                                    bsSize='sm'
+                                                    invalid={errors.patience_1000m && true}
                                                 >
                                                 </Input>
                                             )}
-                                        />
-                                        <Label className='form-label' for='is_chalk'>
-                                            Шарх сорвитой эсэх
-                                        </Label>
-                                        {errors.is_chalk && <FormFeedback className='d-block'>{errors.is_chalk.message}</FormFeedback>}
+                                            />
+                                        {errors.patience_1000m && <FormFeedback className='d-block'>{errors.patience_1000m.message}</FormFeedback>}
                                     </div>
                                     <div className='m-50'>
+                                        <Label className='form-label' for='speed_100m'>
+                                            Хурд 100м
+                                        </Label>
                                         <Controller
-                                            defaultValue={false}
+                                            defaultValue=''
                                             control={control}
-                                            id='is_tattoo'
-                                            name='is_tattoo'
-                                            render={({field}) => (
+                                            id='speed_100m'
+                                            name='speed_100m'
+                                            render={({ field }) => (
                                                 <Input
                                                     {...field}
-                                                    name='is_tattoo'
-                                                    id='is_tattoo'
-                                                    type='checkbox'
-                                                    className='me-50'
-                                                    checked={field.value}
-                                                    invalid={errors.is_tattoo}
+                                                    type='number'
+                                                    name='speed_100m'
+                                                    id='speed_100m'
+                                                    placeholder='Хурд 100м'
+                                                    bsSize='sm'
+                                                    invalid={errors.speed_100m && true}
                                                 >
                                                 </Input>
                                             )}
-                                        />
-                                        <Label className='form-label' for='is_tattoo'>
-                                            Шивээстэй эсэх
-                                        </Label>
-                                        {errors.is_tattoo && <FormFeedback className='d-block'>{errors.is_tattoo.message}</FormFeedback>}
+                                            />
+                                        {errors.speed_100m && <FormFeedback className='d-block'>{errors.speed_100m.message}</FormFeedback>}
                                     </div>
-                                    <div className='m-50 d-flex'>
+                                    <div className='m-50'>
+                                        <Label className='form-label' for='quickness'>
+                                            Авхаалж самбаа
+                                        </Label>
                                         <Controller
-                                            defaultValue={false}
+                                            defaultValue=''
                                             control={control}
-                                            id='is_drug'
-                                            name='is_drug'
-                                            render={({field}) => (
+                                            id='quickness'
+                                            name='quickness'
+                                            render={({ field }) => (
                                                 <Input
                                                     {...field}
-                                                    name='is_drug'
-                                                    id='is_drug'
-                                                    type='checkbox'
-                                                    className='me-50'
-                                                    checked={field.value}
-                                                    invalid={errors.is_drug && true}
+                                                    type='number'
+                                                    name='quickness'
+                                                    id='quickness'
+                                                    placeholder='Авхаалж самбаа'
+                                                    bsSize='sm'
+                                                    invalid={errors.quickness && true}
                                                 >
                                                 </Input>
                                             )}
-                                        />
-                                        <Label className='form-label' for='is_drug'>
-                                            Мансууруулах эм, сэтгэцэд нөлөөт бодисын хамаарлын шинжилгээ
+                                            />
+                                        {errors.quickness && <FormFeedback className='d-block'>{errors.quickness.message}</FormFeedback>}
+                                    </div>
+                                    <div className='m-50'>
+                                        <Label className='form-label' for='flexible'>
+                                            Уян хатан
                                         </Label>
-                                        {errors.is_drug && <FormFeedback className='d-block'>{errors.is_drug.message}</FormFeedback>}
+                                        <Controller
+                                            defaultValue=''
+                                            control={control}
+                                            id='flexible'
+                                            name='flexible'
+                                            render={({ field }) => (
+                                                <Input
+                                                    {...field}
+                                                    type='number'
+                                                    name='flexible'
+                                                    id='flexible'
+                                                    placeholder='Уян хатан'
+                                                    bsSize='sm'
+                                                    invalid={errors.flexible && true}
+                                                >
+                                                </Input>
+                                            )}
+                                            />
+                                        {errors.flexible && <FormFeedback className='d-block'>{errors.flexible.message}</FormFeedback>}
+                                    </div>
+                                    <div className='m-50'>
+                                        <Label className='form-label' for='total_score'>
+                                            Нийт оноо
+                                        </Label>
+                                        <Controller
+                                            defaultValue=''
+                                            control={control}
+                                            id='total_score'
+                                            name='total_score'
+                                            render={({ field }) => (
+                                                <Input
+                                                    {...field}
+                                                    type='number'
+                                                    name='total_score'
+                                                    id='total_score'
+                                                    placeholder='Нийт оноо'
+                                                    bsSize='sm'
+                                                    invalid={errors.total_score && true}
+                                                >
+                                                </Input>
+                                            )}
+                                            />
+                                        {errors.total_score && <FormFeedback className='d-block'>{errors.total_score.message}</FormFeedback>}
                                     </div>
                                     <div className='m-50'>
                                         <Label className='form-label' for='description'>
