@@ -137,8 +137,7 @@ function AnhanShat() {
     }
 
     function excelHandler() {
-        console.log('irjin')
-        excelDownLoad(datas)
+        excelDownLoad(datas, STATE_LIST)
     }
 
     return (

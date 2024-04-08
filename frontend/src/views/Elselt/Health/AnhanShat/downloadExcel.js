@@ -1,54 +1,50 @@
 
 import { utils, writeFile } from 'xlsx-js-style';
 
-export function excelDownLoad(datas) {
+export function excelDownLoad(datas, STATE_LIST) {
 
-        const header = Array.from({length: 14},(_, hidx) => {
+        const mainData = datas.map((data, idx) => {
             return(
                 {
-                    '':''
-                })})
+                    '№': idx + 1,
+                    'Нэр': data?.full_name || '',
+                    'РД': data?.user_register || '',
+                    'Хүйс': data?.gender_name || '',
+                    'Үзлэгийн төлөв': data?.health_user_data ?
+                            STATE_LIST.find(val => val.id === data?.health_user_data?.state).name
+                        :
+                            '',
+                    'Өндөр (см)': data?.health_user_data?.height || '',
+                    'Жин (кг)': data?.health_user_data?.weight || '',
+                    'Шарх сорви': data?.health_user_data?.is_chalk ? 'Байгаа' : 'Байхгүй',
+                    'Шивээс': data?.health_user_data?.is_tattoo ? 'Байгаа' : 'Байхгүй',
+                    'Сэтгэцэд нөлөөт бодисын хамаарал': data?.health_user_data?.is_drug ? 'Байгаа' : 'Байхгүй',
+                }
+            )}
+        )
 
-                const mainData = datas.map((data, idx) => {
-                    return(
-                        {
-                            'test':idx,
-                            'kk':''
-                        })})
-
-                const footer = Array.from({length: 15},(_, hidx) => {
-                    return(
-                        {
-                            '':''
-                        })})
-
-        const combo = [...header, ...mainData, ...footer]
+        const combo = [
+            ...mainData,
+        ]
 
         const worksheet = utils.json_to_sheet(combo);
 
         const workbook = utils.book_new();
         utils.book_append_sheet(workbook, worksheet, "A-DB-8-Report")
         const staticCells = [
-                'Байгууллагын ангилал',
-                ' ',
-                'МД',
+                '№',
+                'Нэр',
+                'РД',
+                'Хүйс',
+                'Үзлэгийн төлөв',
+                'Өндөр (см)',
+                'Жин (кг)',
+                'Шарх сорви',
+                'Шивээс',
+                'Сэтгэцэд нөлөөт бодисын хамаарал',
             ];
 
-            utils.sheet_add_aoa(worksheet, [staticCells], { origin: "A12" });
-        const textCellStyle = {
-            border: {
-                top: { style: "thin", color: { rgb: "ffffff" } },
-                bottom: { style: "thin", color: { rgb: "ffffff" } },
-                left: { style: "thin", color: { rgb: "ffffff" } },
-                right: { style: "thin", color: { rgb: "ffffff" } }
-            },
-            font: {
-                sz: 10
-            },
-            alignment: {
-                wrapText: true
-            },
-        }
+        utils.sheet_add_aoa(worksheet, [staticCells], { origin: "A1" });
 
         const numberCellStyle = {
             border: {
@@ -67,157 +63,60 @@ export function excelDownLoad(datas) {
             }
         };
 
-        const rotatedTextStyle = {
+        const tableHeader = {
             border: {
                 top: { style: "thin", color: { rgb: "000000" } },
-                bottom: { style: "thin", color: { rgb: "000000" } },
+                bottom: { style: "thin", color: { rgb: "0000000" } },
                 left: { style: "thin", color: { rgb: "000000" } },
-                right: { style: "thin", color: { rgb: "000000" } }
+                right: { style: "thin", color: { rgb: "000000" } },
+                wrapText: true
             },
             alignment: {
-                textRotation: 90,
-                horizontal: 'center',
-                vertical: 'bottom',
+                vertical: 'center',
                 wrapText: true
             },
             font:{
-                sz:10
-            }
-        };
-
-        const footerBorder = {
-            border: {
-                top: { style: "thin", color: { rgb: "000000" } },
-                bottom: { style: "thin", color: { rgb: "ffffff" } },
-                left: { style: "thin", color: { rgb: "ffffff" } },
-                right: { style: "thin", color: { rgb: "ffffff" } },
-                wrapText: true
-            },
-            font:{
-                sz: 10
-            }
-
-        };
-
-        const bottomBorder = {
-            border: {
-                top: { style: "thin", color: { rgb: "ffffff" } },
-                bottom: { style: "thin", color: { rgb: "0000000" } },
-                left: { style: "thin", color: { rgb: "ffffff" } },
-                right: { style: "thin", color: { rgb: "ffffff" } },
-                wrapText: true
-            },
-            font:{
-                sz: 10
-            }
-
-        };
-
-        const headerStyle = {
-            font: {
+                sz: 12,
                 bold: true
             }
 
         };
-        const nullCell1 = {
-            border: {
-                top: { style: "thin", color: { rgb: "000000" } },
-                bottom: { style: "thin", color: { rgb: "000000" } },
-                left: { style: "thin", color: { rgb: "ffffff" } },
-                right: { style: "thin", color: { rgb: "ffffff" } }
-            },
-            alignment: {
-                vertical: 'center',
-                horizontal: 'center'
+
+        const styleRow = 0;
+        const sendRow = mainData.length;
+        const styleCol = 0;
+        const sendCol = 20;
+
+        for (let row = styleRow; row <= sendRow; row++) {
+            for (let col = styleCol; col <= sendCol; col++) {
+            const cellNum = utils.encode_cell({ r: row, c: col });
+
+                if (!worksheet[cellNum]) {
+                    worksheet[cellNum] = {};
+                }
+
+                worksheet[cellNum].s =
+                    (row === styleRow)
+                        ? tableHeader
+                            : numberCellStyle;
             }
         }
 
-        const nullCell2 = {
-            border: {
-                top: { style: "thin", color: { rgb: "000000" } },
-                bottom: { style: "thin", color: { rgb: "000000" } },
-                left: { style: "thin", color: { rgb: "ffffff" } },
-                right: { style: "thin", color: { rgb: "000000" } }}
-        }
+        const phaseTwoCells = Array.from({length: 8}, (_) => {return({wch: 15})})
 
+        worksheet["!cols"] = [
+            { wch: 5 },
+            ...phaseTwoCells,
+            { wch: 20 }
+        ];
 
-                    // Толгой хэсэгт стайл болон Текст өгж буй хэсэг
-                    const startRow = 0;
-                    const endRow = 10;
-                    const startCol = 0;
-                    const endCol = 20;
+        const tableRow = Array.from({length: mainData.length}, (_) => {return({hpx: 20})})
 
-                    for (let row = startRow; row <= endRow; row++) {
-                        for (let col = startCol; col <= endCol; col++) {
-                        const cellAddress = utils.encode_cell({ r: row, c: col });
+        worksheet["!rows"] = [
+            { hpx: 40 },
+            ...tableRow
+        ];
 
-                            if (!worksheet[cellAddress]) {
-                                worksheet[cellAddress] = {};
-                            }
+    writeFile(workbook, "uzlegiin_jagsaalt.xlsx");
 
-                        worksheet[cellAddress].s = row === endRow ? bottomBorder : textCellStyle
-                        }
-                    }
-
-                    const styleRow = endRow + 1;
-                    const sendRow = endRow + mainData.length + 3;
-                    const styleCol = 0;
-                    const sendCol = 20;
-
-                    for (let row = styleRow; row <= sendRow; row++) {
-                        for (let col = styleCol; col <= sendCol; col++) {
-                        const cellNum = utils.encode_cell({ r: row, c: col });
-
-                            if (!worksheet[cellNum]) {
-                                worksheet[cellNum] = {};
-                            }
-
-                            worksheet[cellNum].s =
-                                (row === styleRow && col !== 0 && col !== 2)
-                                    ? rotatedTextStyle
-                                            : numberCellStyle;
-                        }
-                    }
-
-                    const fRow = sendRow + 1;
-                    const fendRow = sendRow + 15;
-                    const fCol = 0;
-                    const fendCol = 20;
-
-                    for (let row = fRow; row <= fendRow; row++) {
-                        for (let col = fCol; col <= fendCol; col++) {
-                        const cellNum = utils.encode_cell({ r: row, c: col });
-
-                            if (!worksheet[cellNum]) {
-                                worksheet[cellNum] = {};
-                            }
-
-                            worksheet[cellNum].s = row === fRow ? footerBorder : textCellStyle
-                        }
-                    }
-
-                const phaseTwoCells = Array.from({length: 18}, (_) => {return({wch: 5})})
-
-                worksheet["!cols"] = [
-                    { wch: 20 },
-                    { wch: 2 },
-                    ...phaseTwoCells
-                ];
-
-                const phaseOneRow = Array.from({length: 7}, (_) => {return({hpx: 10})})
-                const tableRow = Array.from({length: mainData.length + 1}, (_) => {return({hpx: 20})})
-
-                    worksheet["!rows"] = [
-                        { hpx: 10 },
-                        { hpx: 40 },
-                        { hpx: 10 },
-                        { hpx: 40 },
-                        ...phaseOneRow,
-                        { hpx: 30 },
-                        { hpx: 20 },
-                        { hpx: 120 },
-                        ...tableRow
-                    ];
-
-            writeFile(workbook, "A-DB-12.xlsx");
 }
