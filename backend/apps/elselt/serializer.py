@@ -282,10 +282,10 @@ class HealthUpUserInfoSerializer(serializers.ModelSerializer):
 
         health_user_data = None
 
-        user_data = PhysqueUser.objects.filter(user=obj.user).first()
+        user_data = HealthUpUser.objects.filter(user=obj.user).first()
 
         if user_data:
-            health_user_data = PhysqueUserSerializer(user_data).data
+            health_user_data = HealthUpUserSerializer(user_data).data
 
         return health_user_data
 
@@ -295,3 +295,36 @@ class PhysqueUserSerializer(serializers.ModelSerializer):
         model = PhysqueUser
         fields = '__all__'
 
+
+class HealthPhysicalUserInfoSerializer(serializers.ModelSerializer):
+    user_register = serializers.CharField(source='user.register', default='', read_only=True)
+    full_name = serializers.CharField(source='user.full_name', default='', read_only=True)
+    gender_name = serializers.SerializerMethodField()
+    health_up_user_data = serializers.SerializerMethodField()
+
+    class Meta:
+        model = HealthUser
+        fields = '__all__'
+
+
+    def get_gender_name(self, obj):
+
+        gender = obj.gender
+
+        if gender.isnumeric():
+            if (int(obj.gender)%2) != 0:
+                return 'Эрэгтэй'
+            return 'Эмэгтэй'
+        return ''
+
+
+    def get_health_up_user_data(self, obj):
+
+        health_user_data = None
+
+        user_data = PhysqueUser.objects.filter(user=obj.user).first()
+
+        if user_data:
+            health_user_data = PhysqueUserSerializer(user_data).data
+
+        return health_user_data

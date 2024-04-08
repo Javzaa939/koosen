@@ -44,7 +44,8 @@ from .serializer import (
     HealthUserDataSerializer,
     HealthUpUserInfoSerializer,
     HealthUpUserSerializer,
-    PhysqueUserSerializer
+    PhysqueUserSerializer,
+    HealthPhysicalUserInfoSerializer
 )
 
 from elselt.models import (
@@ -1077,7 +1078,7 @@ class ElseltHealthPhysical(
 
     queryset = HealthUser.objects.all().order_by('created_at')
 
-    serializer_class = HealthUpUserInfoSerializer
+    serializer_class = HealthPhysicalUserInfoSerializer
     physique_serializer_class = PhysqueUserSerializer
     pagination_class = CustomPagination
 
