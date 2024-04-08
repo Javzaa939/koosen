@@ -21,7 +21,7 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 					let border =
 						row?.health_user_data?.state == 1 ? '4px solid rgba(20, 78, 151, 1)'
 						: row?.health_user_data?.state == 2 ? '4px solid rgba(40, 199, 111, 1)'
-						: row?.health_user_data?.state == 3 ? '4px solid #EA5455' : ''
+						: row?.health_user_data?.state == 3 ? '4px solid #EA5455' : '4px solid transparent'
 					tableRow.style.borderLeft = `${border}`
 				}
 
@@ -32,14 +32,15 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 			maxWidth: '100px',
 		},
 		{
-			header: 'full_name',
+			header: 'user__first_name',
 			name: <div className="px-1">Нэр</div>,
 			minWidth: '160px',
 			maxWidth: '160px',
+			sortable: true,
 			selector: (row) => row?.full_name || ''
 		},
 		{
-			header: 'register',
+			header: 'user__register',
 			name: <div className="px-1">РД</div>,
 			selector: (row) => row?.user_register || '',
             sortable: true,
@@ -54,31 +55,36 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 			minWidth: '140px',
 			maxWidth: '140px',
 		},
+
+		// SORT ERROR
         {
 			maxWidth: "200px",
 			minWidth: "200px",
 			header: 'state',
-			reorder: true,
-			sortable: true,
 			name: "Үзлэгийн төлөв",
 			selector: (row) => (
 				<Badge
-					color={`${row?.health_user_data?.state == 1 ? 'primary' : row?.health_user_data?.state == 2 ? 'success' : row?.health_user_data?.state == 3 ? 'danger' : 'secondary'}`}
+					color={`${row?.health_user_data?.state == 1 ? 'primary' : row?.health_user_data?.state == 2 ? 'success' : row?.health_user_data?.state == 3 ? 'danger' : 'primary'}`}
 					pill
 				>
 					{row?.health_user_data ?
 
 						STATE_LIST.find(val => val.id === row?.health_user_data?.state).name
 
-					: ''}
+					:
+						''
+						// STATE_LIST.find(val => val.id === 1)?.name
+						}
 				</Badge>),
 			center: true,
 		},
+
+		// TODO: SORT ALDAA ZASAH
 		{
 			header: 'height',
 			name: <div className="px-1">Өндөр / см</div>,
 			selector: (row) => row?.health_user_data?.height || '',
-            sortable: true,
+            // sortable: true,
 			minWidth: '140px',
 			maxWidth: '140px',
 		},
@@ -86,7 +92,7 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 			header: 'weight',
 			name: <div className="px-1">Жин / кг</div>,
 			selector: (row) => row?.health_user_data?.weight || '',
-            sortable: true,
+            // sortable: true,
 			minWidth: '140px',
 			maxWidth: '140px',
 		},
@@ -99,7 +105,6 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 					{row?.health_user_data?.is_chalk ? 'Тийм' : 'Үгүй'}
 				</div>
 			),
-            sortable: true,
 			minWidth: '200px',
 			maxWidth: '200px',
 		},
@@ -112,7 +117,6 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 					{row?.health_user_data?.is_tattoo ? 'Тийм' : 'Үгүй'}
 				</div>
 			),
-            sortable: true,
 			minWidth: '140px',
 			maxWidth: '140px',
 		},
@@ -125,7 +129,6 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 					{row?.health_user_data?.is_drug ? 'Тийм' : 'Үгүй'}
 				</div>
 			),
-            sortable: true,
 			minWidth: '220px',
 			maxWidth: '220px',
 		},
