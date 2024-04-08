@@ -41,7 +41,9 @@ from .serializer import (
     AdmissionUserProfessionSerializer,
     EmailInfoSerializer,
     HealthUserSerializer,
-    HealthUserDataSerializer
+    HealthUserDataSerializer,
+    HealthUpUserInfoSerializer,
+    HealthUpUserSerializer
 )
 
 from elselt.models import (
@@ -50,7 +52,8 @@ from elselt.models import (
     ElseltUser,
     ContactInfo,
     EmailInfo,
-    HealthUser
+    HealthUser,
+    HealthUpUser
 )
 
 from core.models import (
@@ -908,6 +911,129 @@ class ElseltHealthAnhanShat(
         data = request.data
         health_user = HealthUser.objects.filter(id=pk).first()
         serializer = HealthUserSerializer(health_user, data)
+
+        if serializer.is_valid():
+
+            serializer.save()
+            return request.send_info('INF_002')
+
+        else:
+            error_obj = []
+            print(serializer.errors)
+            for key in serializer.errors:
+                msg = "Хоосон байна"
+
+                return_error = {
+                    "field": key,
+                    "msg": msg
+                }
+
+                error_obj.append(return_error)
+
+            if len(error_obj) > 0:
+                return request.send_error("ERR_003", error_obj)
+
+            return request.send_error("ERR_002")
+
+
+    @transaction.atomic
+    def delete(self, request, pk=None):
+
+        self.destroy(request, pk)
+        return request.send_info('INF_003')
+
+
+@permission_classes([IsAuthenticated])
+class ElseltHealthProfessional(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin
+):
+
+    queryset = HealthUser.objects.all().order_by('created_at')
+
+    serializer_class = HealthUpUserInfoSerializer
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['user__first_name', 'user__first_name', 'user__register']
+
+    def get_queryset(self):
+        queryset = self.queryset
+        queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
+        gender = self.request.query_params.get('gender')
+        sorting = self.request.query_params.get('sorting')
+        state  = self.request.query_params.get('state')
+
+        queryset = queryset.filter(state=AdmissionUserProfession.STATE_APPROVE)
+
+        if gender:
+            if gender == 'Эрэгтэй':
+                queryset = queryset.filter(gender__in=['1', '3', '5', '7', '9'])
+            else:
+                queryset = queryset.filter(gender__in=['0', '2', '4', '6', '8'])
+
+        # Sort хийх үед ажиллана
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
+
+        if state:
+            user_id = HealthUser.objects.filter(state=state).values_list('user', flat=True)
+            queryset = queryset.filter(user__in=user_id)
+
+        return queryset
+
+    def get(self, request, pk=None):
+
+        if pk:
+            all_data = self.retrieve(request, pk).data
+
+            return request.send_data(all_data)
+
+        all_data = self.list(request).data
+
+        return request.send_data(all_data)
+
+
+    @transaction.atomic
+    def post(self, request):
+
+        data = request.data
+        serializer = HealthUpUserSerializer(data=data)
+
+        if serializer.is_valid():
+
+            serializer.save()
+            return request.send_info('INF_001')
+
+        else:
+            error_obj = []
+            for key in serializer.errors:
+                msg = "Хоосон байна"
+
+                return_error = {
+                    "field": key,
+                    "msg": msg
+                }
+
+                error_obj.append(return_error)
+
+            if len(error_obj) > 0:
+                return request.send_error("ERR_003", error_obj)
+
+            return request.send_error("ERR_002")
+
+
+    @transaction.atomic
+    def put(self, request, pk=None):
+
+        data = request.data
+        health_user = HealthUpUser.objects.filter(id=pk).first()
+        serializer = HealthUpUserSerializer(health_user, data)
 
         if serializer.is_valid():
 
