@@ -56,12 +56,6 @@ export default [
                 icon: <Circle size={8} />,
                 navLink: "student/specification"
             },
-            {
-                id: 'student19',
-                title: 'Элсэлтийн тушаал',
-                icon: <Circle size={8} />,
-                navLink: "student/enrollment"
-            },
             // {
             //     id: 'student12',
             //     title: 'Виз',

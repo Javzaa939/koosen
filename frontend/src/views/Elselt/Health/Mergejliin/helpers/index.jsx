@@ -19,9 +19,9 @@ export function getColumns (currentPage, rowsPerPage, page_count, STATE_LIST) {
 				if (tableRow)
 				{
 					let border =
-						row?.state == 1 ? '4px solid rgba(20, 78, 151, 1)'
-						: row?.state == 2 ? '4px solid rgba(40, 199, 111, 1)'
-						: row?.state == 3 ? '4px solid #EA5455' : '4px solid transparent'
+						row?.health_up_user_data?.state == 1 ? '4px solid rgba(20, 78, 151, 1)'
+						: row?.health_up_user_data?.state == 2 ? '4px solid rgba(40, 199, 111, 1)'
+						: row?.health_up_user_data?.state == 3 ? '4px solid #EA5455' : '4px solid transparent'
 					tableRow.style.borderLeft = `${border}`
 				}
 
@@ -64,12 +64,12 @@ export function getColumns (currentPage, rowsPerPage, page_count, STATE_LIST) {
 			name: "Үзлэгийн төлөв",
 			selector: (row) => (
 				<Badge
-					color={`${row?.state == 1 ? 'primary' : row?.state == 2 ? 'success' : row?.state == 3 ? 'danger' : 'primary'}`}
+					color={`${row?.health_up_user_data?.state == 1 ? 'primary' : row?.health_up_user_data?.state == 2 ? 'success' : row?.health_up_user_data?.state == 3 ? 'danger' : 'primary'}`}
 					pill
 				>
 					{row ?
 
-						STATE_LIST.find(val => val.id === row?.state).name
+						STATE_LIST.find(val => val.id === row?.health_up_user_data?.state)?.name
 
 					:
 						''
@@ -79,7 +79,6 @@ export function getColumns (currentPage, rowsPerPage, page_count, STATE_LIST) {
 			center: true,
 		},
 
-		// TODO: SORT ALDAA ZASAH
 		{
 			header: 'height',
 			name: <div className="px-1">Өндөр / см</div>,
@@ -89,6 +88,49 @@ export function getColumns (currentPage, rowsPerPage, page_count, STATE_LIST) {
 			maxWidth: '140px',
 		},
 		{
+			header: 'weight',
+			name: <div className="px-1">Жин / кг</div>,
+			selector: (row) => row?.weight || '',
+            // sortable: true,
+			minWidth: '140px',
+			maxWidth: '140px',
+		},
+		{
+			header: 'is_chalk',
+			name: <div className="px-1">Шарх сорвитой эсэх</div>,
+			selector: (row) => (
+				row &&
+				<div className="p-25 px-50 rounded-4 bg-light-secondary">
+					{row?.is_chalk ? 'Тийм' : 'Үгүй'}
+				</div>
+			),
+			minWidth: '200px',
+			maxWidth: '200px',
+		},
+		{
+			header: 'is_tattoo',
+			name: <div className="px-1">Шивээстэй эсэх</div>,
+			selector: (row) => (
+				row &&
+				<div className="p-25 px-50 rounded-4 bg-light-secondary">
+					{row?.is_tattoo ? 'Тийм' : 'Үгүй'}
+				</div>
+			),
+			minWidth: '140px',
+			maxWidth: '140px',
+		},
+		{
+			header: 'is_drug',
+			name: <div className="px-1">Сэтгэцэд нөлөөт бодисын хамаарал</div>,
+			selector: (row) => (
+				row &&
+				<div className="p-25 px-50 rounded-4 bg-light-secondary">
+					{row?.is_drug ? 'Тийм' : 'Үгүй'}
+				</div>
+			),
+			minWidth: '220px',
+			maxWidth: '220px',
+		},		{
 			header: 'weight',
 			name: <div className="px-1">Жин / кг</div>,
 			selector: (row) => row?.weight || '',

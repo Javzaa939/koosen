@@ -55,6 +55,12 @@ export default [
                 icon: <Circle size={8} />,
                 navLink: "elselt/physical"
             },
+            {
+                id: 'student19',
+                title: 'Элсэлтийн тушаал',
+                icon: <Circle size={8} />,
+                navLink: "student/enrollment"
+            },
         ]
     }
 ]
