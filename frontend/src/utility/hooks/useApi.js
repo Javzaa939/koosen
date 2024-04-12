@@ -1638,6 +1638,23 @@ function useApi(isDisplay=false) {
 		},
 		dashboard: {
 			get: (elselt) => instance.get(`/elselt/dashboard/?elselt=${elselt}`),
+		},
+		health: {
+			anhan:{
+				get: (limit, page, sort, search, state) => instance.get(`/elselt/health/anhan/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}`),
+				post: (cdata) => instance.post(`/elselt/health/anhan/`, cdata),
+				put: (id, cdata) => instance.put(`/elselt/health/anhan/${id}/`, cdata)
+			},
+			professional:{
+				get: (limit, page, sort, search, state) => instance.get(`/elselt/health/professional/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}`),
+				post: (cdata) => instance.post(`/elselt/health/professional/`, cdata),
+				put: (id, cdata) => instance.put(`/elselt/health/professional/${id}/`, cdata)
+			},
+			physical:{
+				get: (limit, page, sort, search, state) => instance.get(`/elselt/health/physical/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}`),
+				post: (cdata) => instance.post(`/elselt/health/physical/`, cdata),
+				put: (id, cdata) => instance.put(`/elselt/health/physical/${id}/`, cdata)
+			},
 		}
 	}
 }

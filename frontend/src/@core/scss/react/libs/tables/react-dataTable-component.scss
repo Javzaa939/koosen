@@ -92,6 +92,98 @@
   }
 }
 
+
+.react-dataTable-header-md {
+  border-radius: 0;
+  .rdt_TableHead {
+    .rdt_TableHeadRow {
+      background-color: $table-head-bg;
+      border-top: 1px solid;
+      border-color: $border-color;
+      min-height: 0;
+      height: 58px;
+
+      .rdt_TableCol {
+        // padding: 0.72rem 1.5rem;
+        .rdt_TableCol_Sortable {
+          color: $body-color;
+          font-weight: bold;
+          font-style: 0.857rem;
+          letter-spacing: 0.5px;
+          text-transform: uppercase;
+          &:hover {
+            opacity: 1;
+          }
+          span {
+            margin-left: 0.35rem;
+          }
+        }
+        &:first-child {
+          .form-check {
+            transform: translateX(-10px);
+          }
+        }
+      }
+    }
+  }
+
+  .rdt_TableBody {
+    .rdt_TableRow {
+      color: $body-color;
+      .rdt_TableCell {
+        height: 53px;
+        padding: 0.72rem 1.5rem;
+
+        .column-action {
+          svg {
+            stroke: $body-color;
+          }
+
+          .dropdown-item:hover {
+            svg {
+              stroke: $primary;
+            }
+          }
+
+          .dropdown-item:active {
+            svg {
+              stroke: $white;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .react-paginate {
+    &.separated-pagination {
+      .page-item:first-child .page-link,
+      .page-item:last-child .page-link {
+        border-radius: 50%;
+      }
+    }
+  }
+
+  &.roles-table {
+    .rdt_TableHead .rdt_TableHeadRow .rdt_TableCol:first-child .form-check {
+      transform: translateX(0);
+    }
+    .rdt_TableBody .rdt_TableRow .rdt_TableCell:first-child .form-check {
+      transform: translateX(10px);
+    }
+  }
+
+  &.react-dataTable-selectable-rows {
+    .rdt_TableHead {
+      .rdt_TableHeadRow {
+        .rdt_TableCol:not(:first-child) {
+          padding-left: 0.2rem;
+        }
+      }
+    }
+  }
+}
+
 .permission-header {
   @media (max-width: 740px) {
     .add-permission {
