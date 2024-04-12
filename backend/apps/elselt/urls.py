@@ -28,5 +28,17 @@ urlpatterns = [
 
     # Элсэгчдэд мэдээлэл илгээх хэсэг
     path('admissionuserdata/email/', AdmissionUserEmailAPIView.as_view()),
+
+    # Эрүүл мэнд анхан шатны үзлэг
+    path('health/anhan/', ElseltHealthAnhanShat.as_view()),
+    path('health/anhan/<int:pk>/', ElseltHealthAnhanShat.as_view()),
+
+    # Эрүүл мэнд мэргэжлийн үзлэг хэсэг
+    path('health/professional/', ElseltHealthProfessional.as_view()),
+    path('health/professional/<int:pk>/', ElseltHealthProfessional.as_view()),
+
+    # Эрүүл мэнд бие бялдарын үзлэг
+    path('health/physical/', ElseltHealthPhysical.as_view()),
+    path('health/physical/<int:pk>/', ElseltHealthPhysical.as_view()),
 ]
 

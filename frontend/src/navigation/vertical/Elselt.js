@@ -37,6 +37,30 @@ export default [
                 icon: <Circle size={8} />,
                 navLink: "elselt/tailan"
             },
+            {
+                id: 'elselt5',
+                title: 'Анхан шатны үзлэг',
+                icon: <Circle size={8} />,
+                navLink: "elselt/health/anhan"
+            },
+            {
+                id: 'elselt6',
+                title: 'Мэргэжлийн үзлэг',
+                icon: <Circle size={8} />,
+                navLink: "elselt/health/mergejliin"
+            },
+            {
+                id: 'elselt7',
+                title: 'Бие бялдар',
+                icon: <Circle size={8} />,
+                navLink: "elselt/physical"
+            },
+            {
+                id: 'student19',
+                title: 'Элсэлтийн тушаал',
+                icon: <Circle size={8} />,
+                navLink: "student/enrollment"
+            },
         ]
     }
 ]
