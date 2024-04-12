@@ -13,7 +13,10 @@ from elselt.models import (
     AdmissionUserProfession,
     ElseltUser,
     UserInfo,
-    EmailInfo
+    EmailInfo,
+    HealthUser,
+    HealthUpUser,
+    PhysqueUser
 )
 
 class AdmissionSerializer(serializers.ModelSerializer):
@@ -203,3 +206,125 @@ class EmailInfoSerializer(serializers.ModelSerializer):
         userinfo_data = UserinfoSerializer(data).data
 
         return userinfo_data
+
+
+class HealthUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = HealthUser
+        fields = '__all__'
+
+
+class HealthUserDataSerializer(serializers.ModelSerializer):
+    user_register = serializers.CharField(source='user.register', default='', read_only=True)
+    full_name = serializers.CharField(source='user.full_name', default='', read_only=True)
+    gender_name = serializers.SerializerMethodField()
+    health_user_data = serializers.SerializerMethodField()
+
+    class Meta:
+        model = AdmissionUserProfession
+        fields = '__all__'
+
+
+    def get_gender_name(self, obj):
+
+        gender = obj.gender
+
+        if gender.isnumeric():
+            if (int(obj.gender)%2) != 0:
+                return 'Эрэгтэй'
+            return 'Эмэгтэй'
+        return ''
+
+
+    def get_health_user_data(self, obj):
+
+        health_user_data = None
+
+        user_data = HealthUser.objects.filter(user=obj.user).first()
+
+        if user_data:
+            health_user_data = HealthUserSerializer(user_data).data
+
+        return health_user_data
+
+
+class HealthUpUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = HealthUpUser
+        fields = '__all__'
+
+
+class HealthUpUserInfoSerializer(serializers.ModelSerializer):
+    user_register = serializers.CharField(source='user.register', default='', read_only=True)
+    full_name = serializers.CharField(source='user.full_name', default='', read_only=True)
+    gender_name = serializers.SerializerMethodField()
+    health_up_user_data = serializers.SerializerMethodField()
+
+    class Meta:
+        model = HealthUser
+        fields = '__all__'
+
+
+    def get_gender_name(self, obj):
+
+        gender = obj.gender
+
+        if gender.isnumeric():
+            if (int(obj.gender)%2) != 0:
+                return 'Эрэгтэй'
+            return 'Эмэгтэй'
+        return ''
+
+
+    def get_health_up_user_data(self, obj):
+
+        health_user_data = None
+
+        user_data = HealthUpUser.objects.filter(user=obj.user).first()
+
+        if user_data:
+            health_user_data = HealthUpUserSerializer(user_data).data
+
+        return health_user_data
+
+class PhysqueUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = PhysqueUser
+        fields = '__all__'
+
+
+class HealthPhysicalUserInfoSerializer(serializers.ModelSerializer):
+    user_register = serializers.CharField(source='user.register', default='', read_only=True)
+    full_name = serializers.CharField(source='user.full_name', default='', read_only=True)
+    gender_name = serializers.SerializerMethodField()
+    health_up_user_data = serializers.SerializerMethodField()
+
+    class Meta:
+        model = HealthUser
+        fields = '__all__'
+
+
+    def get_gender_name(self, obj):
+
+        gender = obj.gender
+
+        if gender.isnumeric():
+            if (int(obj.gender)%2) != 0:
+                return 'Эрэгтэй'
+            return 'Эмэгтэй'
+        return ''
+
+
+    def get_health_up_user_data(self, obj):
+
+        health_user_data = None
+
+        user_data = PhysqueUser.objects.filter(user=obj.user).first()
+
+        if user_data:
+            health_user_data = PhysqueUserSerializer(user_data).data
+
+        return health_user_data

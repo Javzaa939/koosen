@@ -601,7 +601,7 @@ const ElseltUser = () => {
                                 Төлөв солих
                             </Button>
                             <UncontrolledTooltip target='state_button'>
-                                Доорхи сонгосон оюутнуудын төлөвийг нэг дор солих
+                                Доорхи сонгосон элсэгчдийн төлөвийг нэг дор солих
                             </UncontrolledTooltip>
                         </div>
                         <div className='px-1'>
@@ -610,7 +610,7 @@ const ElseltUser = () => {
                                 Email илгээх
                             </Button>
                             <UncontrolledTooltip target='email_button'>
-                                Сонгосон оюутнууд руу имейл илгээх
+                                Сонгосон элсэгчид руу имейл илгээх
                             </UncontrolledTooltip>
                         </div>
                         <div className='px-1'>
@@ -620,7 +620,7 @@ const ElseltUser = () => {
                                 Мессеж илгээх
                             </Button>
                             <UncontrolledTooltip target='message_button'>
-                                Сонгосон оюутнууд руу мессеж илгээх
+                                Сонгосон элсэгчид руу мессеж илгээх
                             </UncontrolledTooltip>
                         </div>
                     </div>
