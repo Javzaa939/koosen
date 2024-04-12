@@ -6,7 +6,7 @@ function MessageModal({ messageModalHandler, messageModal }) {
     return (
         <Modal centered toggle={messageModalHandler} isOpen={messageModal}>
             <ModalHeader toggle={messageModalHandler}>
-                Оюутнуудруу мессеж илгээх
+                Элсэгчид рүү мессеж илгээх
             </ModalHeader>
             <ModalBody>
             </ModalBody>

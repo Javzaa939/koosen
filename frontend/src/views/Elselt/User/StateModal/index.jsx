@@ -92,7 +92,7 @@ function StateModal({ stateModalHandler, stateModal, selectedStudents, stateop, 
                                         onClick={() => popoverHandler()}
                                         style={{ cursor:'help' }}
                                     >
-                                        Сонгогдсон оюутны тоо: <b>{selectedStudents.length}</b>
+                                        Сонгогдсон элсэгчдийн тоо: <b>{selectedStudents.length}</b>
                                     </div>
                                     <Popover
                                         // isOpen={true}
@@ -102,7 +102,7 @@ function StateModal({ stateModalHandler, stateModal, selectedStudents, stateop, 
                                         toggle={popoverHandler}
                                     >
                                         <PopoverHeader>
-                                            Сонгогдсон оюутнуудын нэрс
+                                            Сонгогдсон элсэгчдийн нэрс
                                         </PopoverHeader>
                                         <PopoverBody
                                             className='overflow-hidden'

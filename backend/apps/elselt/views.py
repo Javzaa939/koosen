@@ -631,7 +631,7 @@ class AdmissionUserEmailAPIView(
                 for mail in data["email_list"]:
                     send_mail(
                         subject = 'Элсэлт',
-                        message = 'Элсэлтийн дүн гарлаа',
+                        message = 'Дотоод хэргийн их сургууль',
                         from_email = user.employee.org.email_host_user,
                         recipient_list = [mail],
                         connection = make_connection(user.employee.org.email_host_user, config),
