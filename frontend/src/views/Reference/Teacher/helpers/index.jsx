@@ -20,6 +20,12 @@ export function getColumns (currentPage, rowsPerPage, handleEdit) {
 			maxWidth: "300px",
 			center: true
 		},
+		{
+			name: `${t("И-мэйл")}`,
+			selector: (row) => {row?.email},
+			maxWidth: "300px",
+			center: true
+		},
         {
 			header: 'org_position',
 			name: `${t("Албан тушаал")}`,
