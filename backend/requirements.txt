@@ -2,7 +2,7 @@ anyio==4.2.0
 appdirs==1.4.4
 asgiref==3.5.2
 attrs==21.4.0
-backports.zoneinfo==0.2.1
+backports.zoneinfo==0.2.1;python_version<"3.9"
 cached-property==1.5.2
 certifi==2021.10.8
 chardet==3.0.4
@@ -26,10 +26,10 @@ hstspreload==2023.1.1
 httpcore==0.9.1
 httpx==0.13.3
 hyperframe==5.2.0
-idna==3.6
+idna==2.10
 isodate==0.6.1
 jdcal==1.4.1
-lms-package==0.0.1
+# lms-package==0.0.1
 lxml==4.8.0
 numpy==1.22.3
 openpyxl==3.0.3
