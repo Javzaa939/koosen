@@ -32,7 +32,7 @@ function EmailModal({ emailModalHandler, emailModal, selectedStudents, getDatas 
         <Modal centered toggle={emailModalHandler} isOpen={emailModal}>
             {isLoading && Loader}
             <ModalHeader toggle={emailModalHandler}>
-                Оюутнуудруу Имейл илгээх
+                Элсэгчид рүү Имейл илгээх
             </ModalHeader>
             <ModalBody className='d-flex flex-column justify-content-between' style={{ minHeight: 300 }} tag={Form} onSubmit={handleSubmit(onSubmit)}>
                 <div>
