@@ -456,6 +456,12 @@ class EmployeePostSerializer(serializers.ModelSerializer):
         fields = ["user", "register_code",'org_position',  'org', "sub_org", "salbar", "state"]
 
 
+class OrgPositionSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = OrgPosition
+        fields = ["id", "name"]
+
 # --------------------- Багшийн мэдээлэл -------------------------
 
 class TeacherInfoSerializer(serializers.ModelSerializer):
@@ -835,9 +841,4 @@ class DashboardSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Teachers
-        fields = "__all__"
-
-class OrgPositionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = OrgPosition
         fields = "__all__"
