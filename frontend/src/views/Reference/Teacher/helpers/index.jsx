@@ -22,7 +22,7 @@ export function getColumns (currentPage, rowsPerPage, handleEdit) {
 		},
 		{
 			name: `${t("И-мэйл")}`,
-			selector: (row) => {row?.email},
+			selector: (row) => row?.email,
 			maxWidth: "300px",
 			center: true
 		},
