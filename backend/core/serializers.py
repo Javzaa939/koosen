@@ -401,7 +401,7 @@ class TeacherNameSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Teachers
-        fields = ["id", "last_name", "first_name", "salbar", "sub_org", "code", "org_position", "state", "full_name", 'register', 'org_position_name', 'email', 'phone_number', 'email']
+        fields = ["id", "last_name", "first_name", "salbar", "sub_org", "code", "org_position", "state", "full_name", 'register', 'org_position_name', 'email', 'phone_number', 'register']
 
     def get_email(self, obj):
         return User.objects.get(id=obj.user.id).email
@@ -454,6 +454,7 @@ class EmployeePostSerializer(serializers.ModelSerializer):
     class Meta:
         model = Employee
         fields = ["user", "register_code",'org_position',  'org', "sub_org", "salbar", "state"]
+
 
 class OrgPositionSerializer(serializers.ModelSerializer):
 
