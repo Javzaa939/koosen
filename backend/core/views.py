@@ -77,6 +77,7 @@ from .serializers import SubSchoolPutRegisterSerailizer
 from .serializers import TeacherLongListSerializer
 from .serializers import LessonTeacherListSerializer
 from .serializers import TeacherListSchoolFilterSerializer
+from .serializers import DepartmentPostSerailizer
 
 from lms.models import ProfessionDefinition
 from lms.models import LessonStandart
@@ -235,6 +236,32 @@ class DepartmentAPIView(
 
         group_list = self.list(request).data
         return request.send_data(group_list)
+
+    def post(self, request):
+
+        self.serializer_class = DepartmentPostSerailizer
+        datas = request.data
+        sub_org = SubOrgs.objects.filter(id=datas.get('sub_orgs')).first()
+        datas['org'] = sub_org.org.id
+        serializer = self.get_serializer(data=datas)
+
+        if serializer.is_valid(raise_exception=False):
+            with transaction.atomic():
+                try:
+                    self.perform_create(serializer)
+                except Exception:
+                    return request.send_error("ERR_002")
+            return request.send_info("INF_001")
+
+        else:
+            return request.send_error_valid(serializer.errors)
+
+    def delete(self, request, pk=None):
+        qs = self.queryset.filter(id=pk).first()
+        if qs:
+            qs.delete()
+
+        return request.send_info("INF_003")
 
     def put(self, request, pk=None):
         " хөтөлбөрийн багийн мэдээлэл засах "
