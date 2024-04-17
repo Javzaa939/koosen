@@ -10,7 +10,8 @@ export const downloadTemplate = async (department_option, groupOption) => {
         properties: {
             tabColor:{
                 argb:'071a52'
-            }
+            },
+            defaultRowHeight: 35
         },
         views:[{state: 'frozen', ySplit:1}]
     });
@@ -80,9 +81,8 @@ export const downloadTemplate = async (department_option, groupOption) => {
     }
 
     row.height = 30
-
-    ws.eachRow((row) => {
-        row.eachCell((cell) => {
+    ws.eachRow((row, rowNumber) => {
+        row.eachCell((cell, colNumber) => {
             cell.font = {
                 name: 'Verdana',
                 size: 10,
@@ -103,10 +103,15 @@ export const downloadTemplate = async (department_option, groupOption) => {
 
     const link = document.createElement('a');
     link.href = excelUrl;
-    link.download = 'template.xlsx';
+
+    const currentDate = new Date();
+    const formattedDate = currentDate.toISOString().split('T')[0];
+
+    link.download = `oyutan-zagvar-${formattedDate}.xlsx`;
     document.body.appendChild(link);
     link.click();
 
     URL.revokeObjectURL(excelUrl);
     document.body.removeChild(link);
+
 };
