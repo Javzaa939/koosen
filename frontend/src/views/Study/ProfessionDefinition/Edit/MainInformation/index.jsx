@@ -595,7 +595,7 @@ const MainInformation = ({ }) => {
                                     </Col>
                                     <Col md={4}>
                                         <Label className="form-label" for="professional_base">
-                                            {t('Хөтөлбөрийн суурь хичээл')}
+                                            {t('Мэргэжлийн суурь хичээл')}
                                         </Label>
                                         <Controller
                                             control={control}
@@ -611,7 +611,7 @@ const MainInformation = ({ }) => {
                                                         bsSize='sm'
                                                         readOnly={is_valid}
                                                         disabled={is_valid}
-                                                        placeholder={t('Хөтөлбөрийн суурь хичээл')}
+                                                        placeholder={t('Мэргэжлийн суурь хичээл')}
                                                     />
                                                 )
                                             }}
@@ -619,7 +619,7 @@ const MainInformation = ({ }) => {
                                     </Col>
                                     <Col md={4}>
                                         <Label className="form-label" for="professional_lesson">
-                                            {t('Хөтөлбөрийн хичээл')}
+                                            {t('Мэргэжлийн хичээл')}
                                         </Label>
                                         <Controller
                                             control={control}
@@ -635,7 +635,7 @@ const MainInformation = ({ }) => {
                                                         bsSize='sm'
                                                         readOnly={is_valid}
                                                         disabled={is_valid}
-                                                        placeholder={t('Хөтөлбөрийн хичээл')}
+                                                        placeholder={t('Мэргэжлийн хичээл')}
                                                     />
                                                 )
                                             }}

@@ -276,7 +276,7 @@ const ProfBasicLesson = ({ datas, isOpen, mergejil_id, degree }) => {
                 <div className='added-cards'>
                     <div className={classnames('cardMaster rounded border p-1')}>
                         <h5 className='text-center pb-50'>
-                            { degree === 1 ? '2.1. Заавал судлах хичээл' : '1.1. Судалгааны арга зүй' }
+                            { degree === 1 ? '2.1. Заавал судлах хичээл' : '1.1. Заавал судлах' }
                         </h5>
                         <div>
                             <Table size='sm' bordered>
@@ -321,7 +321,7 @@ const ProfBasicLesson = ({ datas, isOpen, mergejil_id, degree }) => {
                             </>
                         }
                         <h5 className='text-center pb-50 mt-2'>
-                            { degree === 1 ? '2.2. Сонгон судлах хичээл' : '1.2. Онолын суурь хичээл' }
+                            { degree === 1 ? '2.2. Сонгон судлах хичээл' : '1.2. Сонгон судлах' }
                         </h5>
                         <div>
                             <Table size='sm' bordered>
