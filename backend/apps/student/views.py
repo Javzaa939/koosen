@@ -390,9 +390,6 @@ def generate_student_code(school_id, group):
 
     new_student_code = f'{int(student_register_count):0{len(with_start)}d}'
 
-    print(new_student_code)
-    print('generate_code', generate_code)
-
     generate_code = f'{generate_code}{new_student_code}'
 
     return generate_code
@@ -1421,7 +1418,6 @@ class StudentAddressAPIView(
         # qs = self.queryset.filter(student_id=student)
 
         try:
-            print('data', data)
             if serializer.is_valid(raise_exception=False):
                 obj, created = self.queryset.filter(student_id=student).update_or_create(
                     student_id=student,
@@ -3086,7 +3082,7 @@ class StudentImportAPIView(
         error_datas = list()
         correct_datas = list()
 
-        excel_data = pd.read_excel(full_path, sheet_name='Оюутны бүртгэл')
+        excel_data = pd.read_excel(full_path)
         datas = excel_data.to_dict(orient='records')
 
         try:

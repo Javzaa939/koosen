@@ -75,7 +75,6 @@ export default function DetailModal({ isOpen, handleModal, datas, file_name, err
     )
 
     const { isLoading, Loader, fetchData } = useLoader({})
-    const scoreApi = useApi().score.register
     const studentApi = useApi().student
 
     const headers = [
@@ -202,13 +201,11 @@ export default function DetailModal({ isOpen, handleModal, datas, file_name, err
                                 Object.values(datas).map((data, idx) => {
                                     return (
                                         <Row key={idx}>
-                                            <h5 className='ms-1'>{idx == 0 ? `Зөв оруулах датанууд` : idx == 1 ? 'Хичээлийн мэдээлэл олдоогүй датанууд' : 'Оюутны мэдээлэл олдоогүй датанууд'}{`(${data.length})`}</h5>
+                                            <h5 className='ms-1'>{idx == 0 ? `Зөв оруулах датанууд` : idx == 1 ? 'Оюутны код давхцаж байгаа болон бусад шаардлагатай баганы утга дутуу датанууд' : ''}{`(${data.length})`}</h5>
                                             {
                                                 idx == 1 &&
                                                 <div className='ms-1'>
-                                                    <small>Хичээлийн код болон нэрээр хичээлийн стандарт цэснээс хайгаад олдсонгүй.</small> <br/>
-                                                    <small>Хичээлийн кодонд англи монгол үсэг холилдсон, </small>
-                                                    <small>хичээлийн нэрний урд хойно нь үг үлдсэн гэх мэт алдаануудыг шалгаж файлаа засаад оруулах боломжтой.</small>
+                                                    <small>Таны бүртгэсэн оюутны код нь давхцах ёсгүй. Мөн багана тус бүрийн мэдээлэл бүрэн байх ёстой гэдгийг анхаарна уу.</small> <br/>
                                                 </div>
                                             }
                                             {

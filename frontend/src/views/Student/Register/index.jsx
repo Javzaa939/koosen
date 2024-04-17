@@ -44,15 +44,16 @@ import Addmodal from './Add'
 import { useTranslation } from 'react-i18next'
 import { downloadCSV, downloadExcel } from '@utils'
 import { downloadTemplate } from './downLoadExcel'
-import ImportModal from './ImportModal'
 import FileModal from '@src/components/FileModal'
 import DetailModal from './DetailModal'
+import { useSkin } from '@src/utility/hooks/useSkin'
 
 const Register = () => {
 
     const { user } = useContext(AuthContext)
     const { school_id } = useContext(SchoolContext)
     const navigate = useNavigate()
+    const { skin } = useSkin()
 
     const { t } = useTranslation()
 
@@ -108,7 +109,6 @@ const Register = () => {
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
 
-    const [importModal, setImportModal] = useState(false)
 
     const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
     const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
@@ -187,7 +187,6 @@ const Register = () => {
             setGroup(data)
         }
     }
-
 
     async function getDatas() {
 
@@ -303,8 +302,6 @@ const Register = () => {
 
     const toggle = () => setDropdownOpen((prevState) => !prevState);
     const toggleExport = () => {setExportDropdownOpen((prevState) => !prevState)}
-    const importModalHandler = () => {setImportModal((prevState) => !prevState)}
-
 
     const [open_file, setFileModal] = useState(false)
     const [file, setFile] = useState(false)
@@ -329,15 +326,8 @@ const Register = () => {
             const formData = new FormData()
             formData.append('file', file)
 
-            // console.log({file:file})
-            // handleFileModal()
-            // handleShowDetailModal()
-            // setFileName('test')
-
             const { success, data }  = await fetchData(studentImportApi.postImportStudent(formData))
             if (success) {
-                console.log(data)
-                // setErrorDatas(data?.error_datas)
 
                 handleFileModal()
                 handleShowDetailModal()
@@ -355,14 +345,9 @@ const Register = () => {
         }
     }
 
-
     return (
         <Fragment>
             <Card>
-                {/* <ImportModal
-                    importModal={importModal}
-                    importModalHandler={importModalHandler}
-                /> */}
             {open_file &&
                 <FileModal
                     isOpen={open_file}
@@ -392,14 +377,9 @@ const Register = () => {
                     <CardTitle tag='h4'>{t('Оюутны бүртгэл')}</CardTitle>
                     <div className='d-flex flex-wrap gap-1 mt-md-0 mt-1'>
 
-                        {/* <Button color='light' className='' caret outline onClick={() => downloadTemplate()}>
-                            <PenTool size={15} />
-                            <span className='align-middle ms-50'>Загвар</span>
-                        </Button> */}
-
                         <Dropdown isOpen={dropdownOpen} toggle={toggle}>
                         {/* <Dropdown isOpen={dropdownOpen} toggle={toggle} disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-read')  && school_id? false : true}> */}
-                            <DropdownToggle color='light' className='' caret outline>
+                            <DropdownToggle color={skin === 'light' ? 'dark' : 'light'} className='' caret outline>
                                 <PenTool size={15} />
                                 <span className='align-middle ms-50'>Загвар</span>
                             </DropdownToggle>
@@ -414,7 +394,6 @@ const Register = () => {
                                     <span className='align-middle ms-50'>Татах</span>
                                 </DropdownItem>
                                 <DropdownItem className='w-100' onClick={() => handleFileModal()}>
-                                {/* <DropdownItem className='w-100' onClick={() => importModalHandler()}> */}
                                     <UploadCloud size={15} />
                                     <span className='align-middle ms-50' >Оруулах</span>
                                 </DropdownItem>
