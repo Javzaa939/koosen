@@ -100,4 +100,7 @@ urlpatterns = [
     # Оюутны нууц үгийг сэргээх
     path('defaultPass/<int:pk>/', DefaultPassApi().as_view()),
 
+    # excel-с import
+    path('import/', StudentImportAPIView().as_view())
+
 ]

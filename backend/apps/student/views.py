@@ -56,7 +56,7 @@ from lms.models import PaymentBeginBalance
 from lms.models import Country
 
 
-from core.models import SubOrgs, AimagHot, SumDuureg, BagHoroo
+from core.models import SubOrgs, AimagHot, SumDuureg, User
 
 from .serializers import StudentListSerializer
 from .serializers import StudentRegisterSerializer
@@ -3061,3 +3061,51 @@ class StudentDefinitionListLiteAPIView(
 
         student_list = self.list(request).data
         return request.send_data(student_list)
+
+
+class StudentImportAPIView(
+    generics.GenericAPIView
+):
+    """ Оюутны жагсаалт import хийх """
+    queryset = Student.objects.all()
+
+    def get(self, request):
+
+        datas = request.data
+        user = request.user
+        with transaction.atomic():
+            try:
+               for created_data in datas:
+                    print("created_data", created_data)
+                    code = created_data.get('code')
+                    last_name = created_data.get('last_name')
+                    first_name = created_data.get('first_name')
+                    register_num = created_data.get('register_num')
+                    group = created_data.get('group')
+                    level = created_data.get('level')
+                    status = created_data.get('status')
+                    profession = created_data.get('profession')
+
+                    if isinstance(level, int):
+                        created_data['group'] = int(level)
+                    else:
+                        created_data['exam_score'] = 0
+
+                    create_data = remove_key_from_dict(created_data, ['code', 'last_name', 'first_name', 'register_num', 'group', 'level', 'status'])
+
+                    student_obj = Student.objects.filter(code=code, register_num=register_num).first()
+                    if student_obj:
+                        # if created_data.get('season'):
+
+
+                        student_obj.save()
+
+                    else:
+                        created_data['created_user'] = User.objects.filter(id=user.id)
+                        # Student.objects.create(**created_data)
+
+            except Exception as e:
+                print(e)
+                return request.send_error('ERR_002')
+
+        return request.send_info('INF_013')
