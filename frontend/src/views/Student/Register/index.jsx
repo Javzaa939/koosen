@@ -120,6 +120,7 @@ const Register = () => {
     const professionApi = useApi().study.professionDefinition
     const settingsApi = useApi().settings.studentRegisterType
     const studentPassApi = useApi().studentPass
+    const studentImportApi = useApi().student
 
 
     // API
@@ -328,27 +329,29 @@ const Register = () => {
             const formData = new FormData()
             formData.append('file', file)
 
-            console.log({file:file})
-            handleFileModal()
-            handleShowDetailModal()
-            setFileName('test')
-            //     handleFileModal()
-            //     handleShowDetailModal()
-            // const { success, data }  = await fetchData(studentPassApi.postOldScore(formData))
-            // if (success) {
-            //     handleFileModal()
-            //     handleShowDetailModal()
-            //     if (data?.file_name) {
-            //         setFileName(data?.file_name)
-            //         delete data['file_name']
-            //     }
+            // console.log({file:file})
+            // handleFileModal()
+            // handleShowDetailModal()
+            // setFileName('test')
 
-            //     if (data?.all_error_datas) {
-            //         setErrorDatas(data?.all_error_datas)
-            //         delete data['all_error_datas']
-            //     }
-            //     setDetailDatas(data)
-            // }
+            const { success, data }  = await fetchData(studentImportApi.postImportStudent(formData))
+            if (success) {
+                console.log(data)
+                // setErrorDatas(data?.error_datas)
+
+                handleFileModal()
+                handleShowDetailModal()
+                if (data?.file_name) {
+                    setFileName(data?.file_name)
+                    delete data['file_name']
+                }
+
+                if (data?.all_error_datas) {
+                    setErrorDatas(data?.all_error_datas)
+                    delete data['all_error_datas']
+                }
+                setDetailDatas(data)
+            }
         }
     }
 

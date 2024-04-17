@@ -653,6 +653,9 @@ function useApi(isDisplay=false) {
 
 			getLessonStudent: (student) => instance.get(`/student/score-lesson/${student}/`),
 
+			postImportStudent: data => instance.post(`/student/import/`, data),
+			postStudentImportData: data => instance.post(`/student/postData/`, data),
+
 			/* Анги бүлгийн бүртгэл */
 			group:{
 				getList: (departId, degree, profession, joined_year) => {

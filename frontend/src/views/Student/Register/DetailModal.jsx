@@ -57,7 +57,7 @@ export default function DetailModal({ isOpen, handleModal, datas, file_name, err
     const excelColumns = {
         "department": "Хөтөлбөрийн баг",
         "group": "Анги",
-        "register": "РД",
+        "register_num": "РД",
         "family_name": "Ургийн овог",
         "last_name": "Эцэг эхийн нэр",
         "last_name_eng": "Эцэг эхийн нэр англи",
@@ -65,8 +65,8 @@ export default function DetailModal({ isOpen, handleModal, datas, file_name, err
         "first_name_eng": "Өөрийн нэр англи",
         "gender": "Хүйс",
         "yas_undes": "Яс үндэс",
-        "state": "Бүртгэлийн байдал",
-        "payment": "Төлбөр төлөлт",
+        "status": "Бүртгэлийн байдал",
+        "pay_type": "Төлбөр төлөлт",
     }
 
     const CloseBtn = (
@@ -75,6 +75,7 @@ export default function DetailModal({ isOpen, handleModal, datas, file_name, err
 
     const { isLoading, Loader, fetchData } = useLoader({})
     const scoreApi = useApi().score.register
+    const studentApi = useApi().student
 
     const headers = [
 
@@ -131,10 +132,10 @@ export default function DetailModal({ isOpen, handleModal, datas, file_name, err
     async function onSubmit() {
 
         console.log(datas,'datas')
-        // const { success, data }  = await fetchData(scoreApi.postImportData(datas?.create_datas))
-        // if (success) {
-        //     handleModal()
-        // }
+        const { success, data }  = await fetchData(studentApi.postStudentImportData(datas?.create_datas))
+        if (success) {
+            // handleModal()
+        }
 
     }
 
@@ -142,7 +143,6 @@ export default function DetailModal({ isOpen, handleModal, datas, file_name, err
         if (errorDatas?.length > 0) {
             downloadExcel(errorDatas, excelColumns, `${file_name}_алдаа`)
         }
-
     }
 
     return (
@@ -194,54 +194,57 @@ export default function DetailModal({ isOpen, handleModal, datas, file_name, err
                     {
                         Object.keys(datas).length > 0 &&
                         <div>
-                            {Object.values(datas).map((data, idx) => (
-                                <Row key={idx}>
-                                    <h5 className='ms-1'>{idx == 0 ? `Зөв оруулах датанууд` : idx == 1 ? 'Хичээлийн мэдээлэл олдоогүй датанууд' : 'Оюутны мэдээлэл олдоогүй датанууд'}{`(${data.length})`}</h5>
-                                    {
-                                        idx == 1 &&
-                                        <div className='ms-1'>
-                                            <small>Хичээлийн код болон нэрээр хичээлийн стандарт цэснээс хайгаад олдсонгүй.</small> <br/>
-                                            <small>Хичээлийн кодонд англи монгол үсэг холилдсон, </small>
-                                            <small>хичээлийн нэрний урд хойно нь үг үлдсэн гэх мэт алдаануудыг шалгаж файлаа засаад оруулах боломжтой.</small>
-                                        </div>
-                                    }
-                                    {
-                                        idx == 2 &&
-                                        <div className='ms-1'>
-                                            <small>Тухайн кодтой оюутны мэдээлэл олдсонгүй.</small> <br/>
-                                        </div>
-                                    }
-                                    <div className='m-1' style={{maxHeight: '300px', overflowX: 'scroll'}}>
-                                        <Table size='sm' responsive>
-                                            <thead>
-                                                <tr>
-                                                    <th style={{width: '80px'}}>№</th>
-                                                    {
-                                                        headers.map((header) =>
-                                                            <th key={header.key} className='text-left '>
-                                                                {header.name}
-                                                            </th>
-                                                        )
-                                                    }
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {
-                                                    data.map((row, idx) =>
-                                                        <tr key={idx}>
-                                                            <td className='bg-transparent'>{idx + 1}</td>
+                            {
+                                Object.values(datas).map((data, idx) => {
+                                    return (
+                                        <Row key={idx}>
+                                            <h5 className='ms-1'>{idx == 0 ? `Зөв оруулах датанууд` : idx == 1 ? 'Хичээлийн мэдээлэл олдоогүй датанууд' : 'Оюутны мэдээлэл олдоогүй датанууд'}{`(${data.length})`}</h5>
+                                            {
+                                                idx == 1 &&
+                                                <div className='ms-1'>
+                                                    <small>Хичээлийн код болон нэрээр хичээлийн стандарт цэснээс хайгаад олдсонгүй.</small> <br/>
+                                                    <small>Хичээлийн кодонд англи монгол үсэг холилдсон, </small>
+                                                    <small>хичээлийн нэрний урд хойно нь үг үлдсэн гэх мэт алдаануудыг шалгаж файлаа засаад оруулах боломжтой.</small>
+                                                </div>
+                                            }
+                                            {
+                                                idx == 2 &&
+                                                <div className='ms-1'>
+                                                    <small>Тухайн кодтой оюутны мэдээлэл олдсонгүй.</small> <br/>
+                                                </div>
+                                            }
+                                            <div className='m-1' style={{maxHeight: '300px', overflowX: 'scroll'}}>
+                                                <Table size='sm' responsive>
+                                                    <thead>
+                                                        <tr>
+                                                            <th style={{width: '80px'}}>№</th>
                                                             {
-                                                                headers.map((column, idx2) => (
-                                                                    <td key={`score-${idx2}${idx}`} className='bg-transparent'>{row[column.key]}</td>
+                                                                headers.map((header) =>
+                                                                    <th key={header.key} className='text-left '>
+                                                                        {header.name}
+                                                                    </th>
                                                                 )
-                                                            )}
+                                                            }
                                                         </tr>
-                                                )}
-                                            </tbody>
-                                        </Table>
-                                    </div>
-                                </Row>
-                                )
+                                                    </thead>
+                                                    <tbody>
+                                                        {
+                                                            data?.map((row, idx) =>
+                                                                <tr key={idx}>
+                                                                    <td className='bg-transparent'>{idx + 1}</td>
+                                                                    {
+                                                                        headers.map((column, idx2) => (
+                                                                            <td key={`score-${idx2}${idx}`} className='bg-transparent'>{row[column.key]}</td>
+                                                                        )
+                                                                    )}
+                                                                </tr>
+                                                        )}
+                                                    </tbody>
+                                                </Table>
+                                            </div>
+                                        </Row>
+                                    )
+                                }
                             )}
                             <hr/>
                         </div>
