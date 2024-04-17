@@ -44,6 +44,7 @@ import Addmodal from './Add'
 import { useTranslation } from 'react-i18next'
 import { downloadCSV, downloadExcel } from '@utils'
 import { downloadTemplate } from './downLoadExcel'
+import ImportModal from './ImportModal'
 
 const Register = () => {
 
@@ -103,10 +104,9 @@ const Register = () => {
     const [sortField, setSort] = useState('')
 
     const [dropdownOpen, setDropdownOpen] = useState(false);
-
     const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
 
-
+    const [importModal, setImportModal] = useState(false)
 
     const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
     const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
@@ -300,11 +300,16 @@ const Register = () => {
 
     const toggle = () => setDropdownOpen((prevState) => !prevState);
     const toggleExport = () => {setExportDropdownOpen((prevState) => !prevState)}
+    const importModalHandler = () => {setImportModal((prevState) => !prevState)}
 
     return (
         <Fragment>
             <Card>
-            {isLoading && Loader}
+                <ImportModal
+                    importModal={importModal}
+                    importModalHandler={importModalHandler}
+                />
+                {isLoading && Loader}
                 <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
                     <CardTitle tag='h4'>{t('Оюутны бүртгэл')}</CardTitle>
                     <div className='d-flex flex-wrap gap-1 mt-md-0 mt-1'>
@@ -330,7 +335,7 @@ const Register = () => {
                                     <Download size={15} />
                                     <span className='align-middle ms-50'>Татах</span>
                                 </DropdownItem>
-                                <DropdownItem className='w-100' onClick={() => excelDownload('excel')}>
+                                <DropdownItem className='w-100' onClick={() => importModalHandler()}>
                                     <UploadCloud size={15} />
                                     <span className='align-middle ms-50' >Оруулах</span>
                                 </DropdownItem>
