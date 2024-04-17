@@ -45,6 +45,8 @@ import { useTranslation } from 'react-i18next'
 import { downloadCSV, downloadExcel } from '@utils'
 import { downloadTemplate } from './downLoadExcel'
 import ImportModal from './ImportModal'
+import FileModal from '@src/components/FileModal'
+import DetailModal from './DetailModal'
 
 const Register = () => {
 
@@ -302,13 +304,86 @@ const Register = () => {
     const toggleExport = () => {setExportDropdownOpen((prevState) => !prevState)}
     const importModalHandler = () => {setImportModal((prevState) => !prevState)}
 
+
+    const [open_file, setFileModal] = useState(false)
+    const [file, setFile] = useState(false)
+    const [errorDatas, setErrorDatas] = useState({})
+    const [detailDatas, setDetailDatas] = useState({})
+    const [showModal, setShowModal] = useState(false)
+    const [file_name, setFileName] = useState('')
+
+    // Хуучин дүн файл нээх
+    function handleFileModal() {
+        setFileModal(!open_file)
+        setFile('')
+    }
+
+    // Оруулах датаны жагсаалт харуулах модал
+    const handleShowDetailModal = () => {
+        setShowModal(!showModal)
+    }
+
+    async function onSubmit() {
+        if (file) {
+            const formData = new FormData()
+            formData.append('file', file)
+
+            console.log({file:file})
+            handleFileModal()
+            handleShowDetailModal()
+            setFileName('test')
+            //     handleFileModal()
+            //     handleShowDetailModal()
+            // const { success, data }  = await fetchData(studentPassApi.postOldScore(formData))
+            // if (success) {
+            //     handleFileModal()
+            //     handleShowDetailModal()
+            //     if (data?.file_name) {
+            //         setFileName(data?.file_name)
+            //         delete data['file_name']
+            //     }
+
+            //     if (data?.all_error_datas) {
+            //         setErrorDatas(data?.all_error_datas)
+            //         delete data['all_error_datas']
+            //     }
+            //     setDetailDatas(data)
+            // }
+        }
+    }
+
+
     return (
         <Fragment>
             <Card>
-                <ImportModal
+                {/* <ImportModal
                     importModal={importModal}
                     importModalHandler={importModalHandler}
+                /> */}
+            {open_file &&
+                <FileModal
+                    isOpen={open_file}
+                    handleModal={handleFileModal}
+                    isLoading={isLoading}
+                    file={file}
+                    setFile={setFile}
+                    title="Оюутны мэдээлэл оруулах"
+                    fileAccept='.csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
+                    extension={['xlsx']}
+                    onSubmit={onSubmit}
                 />
+            }
+            {
+                showModal &&
+                    <DetailModal
+                        isOpen={showModal}
+                        handleModal={handleShowDetailModal}
+                        datas={detailDatas}
+                        file_name={file_name}
+                        errorDatas={errorDatas}
+                    />
+
+            }
                 {isLoading && Loader}
                 <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
                     <CardTitle tag='h4'>{t('Оюутны бүртгэл')}</CardTitle>
@@ -335,7 +410,8 @@ const Register = () => {
                                     <Download size={15} />
                                     <span className='align-middle ms-50'>Татах</span>
                                 </DropdownItem>
-                                <DropdownItem className='w-100' onClick={() => importModalHandler()}>
+                                <DropdownItem className='w-100' onClick={() => handleFileModal()}>
+                                {/* <DropdownItem className='w-100' onClick={() => importModalHandler()}> */}
                                     <UploadCloud size={15} />
                                     <span className='align-middle ms-50' >Оруулах</span>
                                 </DropdownItem>
