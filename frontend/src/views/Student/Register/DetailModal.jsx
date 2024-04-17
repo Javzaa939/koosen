@@ -125,11 +125,11 @@ export default function DetailModal({ isOpen, handleModal, datas, file_name, err
             name: 'Яс үндэс',
         },
         {
-            key: 'state',
+            key: 'status',
             name: 'Бүртгэлийн байдал',
         },
         {
-            key: 'payment',
+            key: 'pay_type',
             name: 'Төлбөр төлөлт',
         },
     ]
