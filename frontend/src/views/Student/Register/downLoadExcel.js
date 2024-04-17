@@ -26,21 +26,21 @@ export const downloadTemplate = async (department_option, groupOption) => {
     ws.columns.map((col, index) => (col.width = 18));
 
     // @ts-ignore
-    ws.dataValidations.add('A2:A99999', {
+    ws.dataValidations.add('B2:A99999', {
         type: 'list',
         allowBlank: false,
         formulae: [formattedOptions],
     });
 
     // @ts-ignore
-    ws.dataValidations.add('B2:B99999', {
+    ws.dataValidations.add('C2:B99999', {
         type: 'list',
         allowBlank: false,
         formulae: [`"${options_group.join(',')}"`],
     });
 
     // @ts-ignore
-    ws.dataValidations.add('J2:J99999', {
+    ws.dataValidations.add('K2:J99999', {
         type: 'list',
         allowBlank: false,
         formulae: [`"${genderOpts.join(',')}"`],
