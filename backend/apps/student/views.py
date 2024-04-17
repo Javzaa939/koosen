@@ -56,7 +56,7 @@ from lms.models import PaymentBeginBalance
 from lms.models import Country
 
 
-from core.models import SubOrgs, AimagHot, SumDuureg, User
+from core.models import SubOrgs, AimagHot, SumDuureg, User, Salbars
 
 from .serializers import StudentListSerializer
 from .serializers import StudentRegisterSerializer
@@ -3077,32 +3077,80 @@ class StudentImportAPIView(
             try:
                for created_data in datas:
                     print("created_data", created_data)
-                    code = created_data.get('code')
-                    last_name = created_data.get('last_name')
-                    first_name = created_data.get('first_name')
-                    register_num = created_data.get('register_num')
+                    gen = 0 # хүйс
+                    pay_type_id = 0 # төлбөр төлөлтын төрөл
+
+                    department = created_data.get('department')
                     group = created_data.get('group')
-                    level = created_data.get('level')
+                    # register_num = created_data.get('register_num')
+                    # family_name = created_data.get('family_name')
+                    # last_name = created_data.get('last_name')
+                    # first_name = created_data.get('first_name')
+                    # last_name_eng = created_data.get('last_name_eng')
+                    # first_name_eng = created_data.get('first_name_eng')
+                    # phone = created_data.get('phone')
+                    # yas_undes = created_data.get('yas_undes')
+
+                    gender = created_data.get('gender')
                     status = created_data.get('status')
-                    profession = created_data.get('profession')
+                    pay_type = created_data('pay_type')
 
-                    if isinstance(level, int):
-                        created_data['group'] = int(level)
+                    # хүйс
+                    if gender == 'Эрэгтэй':
+                        gen = Student.GENDER_MALE
                     else:
-                        created_data['exam_score'] = 0
+                        gen = Student.GENDER_FEMALE
 
-                    create_data = remove_key_from_dict(created_data, ['code', 'last_name', 'first_name', 'register_num', 'group', 'level', 'status'])
+                    # төлбөр төлөлт
+                    if pay_type == 'Засгийн газар хоорондын тэтгэлэг':
+                        pay_type_id = Student.IG
+                    elif pay_type == 'Төрөөс үзүүлэх тэтгэлэ' :
+                        pay_type_id = Student.GG
+                    elif pay_type == 'Боловсролын зээлийн сангийн хөнгөлөлттэй зээл':
+                        pay_type_id = Student.LEL
+                    elif pay_type == 'Төрөөс үзүүлэх буцалтгүй тусламж':
+                        pay_type_id = Student.GRANTS
+                    elif pay_type == 'Дотоод, гадаадын аж ахуйн нэгж, байгууллага, сан, хүвь хүний нэрэмжит тэтгэлэг':
+                        pay_type_id = Student.IEEOF
+                    elif pay_type == 'Тухайн сургуулийн тэтгэлэг':
+                        pay_type_id = Student.SCHOLARSHIP
+                    elif pay_type == 'Хувийн зардал':
+                        pay_type_id = Student.EXPENSES
+                    elif pay_type == 'Бусад':
+                        pay_type_id = Student.OTHER
 
-                    student_obj = Student.objects.filter(code=code, register_num=register_num).first()
+                    # суралцах хэлбэр
+                    if status:
+                        status_id = StudentRegister.objects.filter(name__icontains=status).values_list('id', flat=True)
+
+
+                    dep_obj = Salbars.objects.filter(id=department).first()
+                    group_obj = Group.objects.filter(id=group).first()
+
+                    create_data = remove_key_from_dict(created_data, ['family_name', 'last_name', 'first_name', 'register_num', 'last_name_eng', 'first_name_eng', 'group', 'gender', 'yas_undes', 'status', 'pay_type'])
+
+                    student_obj = Student.objects.filter(group=group, department=department).first()
+                    print("student_obj", student_obj)
                     if student_obj:
-                        # if created_data.get('season'):
-
+                        student_obj.family_name if student_obj.family_name else ''
+                        student_obj.last_name if student_obj.last_name else ''
+                        student_obj.first_name if student_obj.first_name else ''
+                        student_obj.register_num if student_obj.register_num else ''
+                        student_obj.yas_undes if student_obj.yas_undes else ''
+                        student_obj.phone if student_obj.phone else ''
+                        student_obj.last_name_eng if student_obj.last_name_eng else ''
+                        student_obj.first_name_eng if student_obj.fist_name_eng else ''
+                        student_obj.gender if gen else 0
+                        student_obj.group if group_obj.name else ''
+                        student_obj.department if dep_obj.name else ''
+                        student_obj.pay_type if pay_type_id else 0
+                        student_obj.status if status_id else 0
 
                         student_obj.save()
 
                     else:
-                        created_data['created_user'] = User.objects.filter(id=user.id)
-                        # Student.objects.create(**created_data)
+                        create_data['created_user'] = User.objects.filter(id=user.id)
+                        Student.objects.create(**created_data)
 
             except Exception as e:
                 print(e)
