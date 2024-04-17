@@ -55,6 +55,7 @@ export default function DetailModal({ isOpen, handleModal, datas, file_name, err
     const { showWarning } = useModal()
 
     const excelColumns = {
+        "code": "Оюутны код",
         "department": "Хөтөлбөрийн баг",
         "group": "Анги",
         "register_num": "РД",
@@ -79,6 +80,10 @@ export default function DetailModal({ isOpen, handleModal, datas, file_name, err
 
     const headers = [
 
+        {
+            key: 'code',
+            name: 'Оюутны код',
+        },
         {
             key: 'department',
             name: 'Хөтөлбөрийн баг',

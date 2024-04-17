@@ -21,7 +21,7 @@ export const downloadTemplate = async (department_option, groupOption) => {
     const genderOpts = GENDER_LIST.map((opt) => opt)
 
     const formattedOptions = options_dep.map(option => `"${option}"`).join(',');
-    ws.addRow(['Хөтөлбөрийн баг', 'Анги', 'РД', 'Ургийн овог', 'Эцэг эхийн нэр', 'Эцэг эхийн нэр англи', 'Өөрийн нэр', 'Өөрийн нэр англи', 'Утасны дугаар', 'Хүйс', 'Яс үндэс', 'Бүртгэлийн байдал', 'Төлбөр төлөлт']);
+    ws.addRow(['Оюутны код', 'Хөтөлбөрийн баг', 'Анги', 'РД', 'Ургийн овог', 'Эцэг эхийн нэр', 'Эцэг эхийн нэр англи', 'Өөрийн нэр', 'Өөрийн нэр англи', 'Утасны дугаар', 'Хүйс', 'Яс үндэс', 'Бүртгэлийн байдал', 'Төлбөр төлөлт']);
 
     ws.columns.map((col, index) => (col.width = 18));
 
@@ -48,7 +48,7 @@ export const downloadTemplate = async (department_option, groupOption) => {
 
     const row = ws.getRow(1)
 
-    for (let i = 1; i <= 13; i++) {
+    for (let i = 1; i <= 14; i++) {
         const cell = row.getCell(i);
         cell.fill = {
             type: 'pattern',
