@@ -14,10 +14,11 @@ import {
     DropdownMenu,
     DropdownItem,
     DropdownToggle,
-    UncontrolledButtonDropdown
+    UncontrolledButtonDropdown,
+    Dropdown
 } from 'reactstrap'
 
-import { ChevronDown, Plus, Search, FileText, Grid, Download } from 'react-feather'
+import { ChevronDown, Plus, Search, FileText, Grid, Download, PenTool, UploadCloud } from 'react-feather'
 
 import { useNavigate } from 'react-router-dom'
 
@@ -42,6 +43,7 @@ import Addmodal from './Add'
 
 import { useTranslation } from 'react-i18next'
 import { downloadCSV, downloadExcel } from '@utils'
+import { downloadTemplate } from './downLoadExcel'
 
 const Register = () => {
 
@@ -99,6 +101,12 @@ const Register = () => {
 
     // Эрэмбэлэлт
     const [sortField, setSort] = useState('')
+
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+
+    const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
+
+
 
     const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
     const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
@@ -289,39 +297,71 @@ const Register = () => {
             })
         }
     }
+
+    const toggle = () => setDropdownOpen((prevState) => !prevState);
+    const toggleExport = () => {setExportDropdownOpen((prevState) => !prevState)}
+
     return (
         <Fragment>
             <Card>
             {isLoading && Loader}
-
                 <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
                     <CardTitle tag='h4'>{t('Оюутны бүртгэл')}</CardTitle>
-                    <div className='d-flex flex-wrap mt-md-0 mt-1'>
-                    <UncontrolledButtonDropdown disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-read')  && school_id? false : true}>
-                        <DropdownToggle color='secondary' caret outline>
-                            <Download size={15} />
-                            <span className='align-middle ms-50'>Export</span>
-                        </DropdownToggle>
-                        <DropdownMenu>
-                            <DropdownItem className='w-100' onClick={() => excelDownload('csv')}>
-                                <FileText size={15} />
-                                <span className='align-middle ms-50'>CSV</span>
-                            </DropdownItem>
-                            <DropdownItem className='w-100' onClick={() => excelDownload('excel')}>
-                                <Grid size={15} />
-                                <span className='align-middle ms-50' >Excel</span>
-                            </DropdownItem>
-                        </DropdownMenu>
-                    </UncontrolledButtonDropdown>
-                    <Button
-                        color='primary'
-                        onClick={() => handleModal()}
-                        className="ms-1"
-                        disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-create')  && school_id? false : true}
-                    >
-                        <Plus size={15} />
-                        <span className='align-middle ms-50'>{t('Нэмэх')}</span>
-                    </Button>
+                    <div className='d-flex flex-wrap gap-1 mt-md-0 mt-1'>
+
+                        {/* <Button color='light' className='' caret outline onClick={() => downloadTemplate()}>
+                            <PenTool size={15} />
+                            <span className='align-middle ms-50'>Загвар</span>
+                        </Button> */}
+
+                        <Dropdown isOpen={dropdownOpen} toggle={toggle}>
+                        {/* <Dropdown isOpen={dropdownOpen} toggle={toggle} disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-read')  && school_id? false : true}> */}
+                            <DropdownToggle color='light' className='' caret outline>
+                                <PenTool size={15} />
+                                <span className='align-middle ms-50'>Загвар</span>
+                            </DropdownToggle>
+                            <DropdownMenu >
+                                <DropdownItem header className='text-wrap'>
+                                    {/* Загвар татаж оюутнуудаа бүртгээд Оруулах товчин дээр дарж оюутнуудын мэдээллийг системд бүртгэнэ үү. */}
+                                    Эксэл файлаар оюутан бүртгэх хэсэг
+                                </DropdownItem>
+                                <DropdownItem divider />
+                                <DropdownItem className='w-100' onClick={() => downloadTemplate(department_option, groupOption)}>
+                                    <Download size={15} />
+                                    <span className='align-middle ms-50'>Татах</span>
+                                </DropdownItem>
+                                <DropdownItem className='w-100' onClick={() => excelDownload('excel')}>
+                                    <UploadCloud size={15} />
+                                    <span className='align-middle ms-50' >Оруулах</span>
+                                </DropdownItem>
+                            </DropdownMenu>
+                        </Dropdown>
+                        <Dropdown isOpen={exportDropdownOpen} toggle={toggleExport}>
+                        {/* <Dropdown isOpen={exportDropdownOpen} toggle={toggleExport} disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-read')  && school_id? false : true}> */}
+                            <DropdownToggle color='secondary' className='' caret outline>
+                                <Download size={15} />
+                                <span className='align-middle ms-50'>Export</span>
+                            </DropdownToggle>
+                            <DropdownMenu>
+                                <DropdownItem className='w-100' onClick={() => excelDownload('csv')}>
+                                    <FileText size={15} />
+                                    <span className='align-middle ms-50'>CSV</span>
+                                </DropdownItem>
+                                <DropdownItem className='w-100' onClick={() => excelDownload('excel')}>
+                                    <Grid size={15} />
+                                    <span className='align-middle ms-50' >Excel</span>
+                                </DropdownItem>
+                            </DropdownMenu>
+                        </Dropdown>
+                        <Button
+                            color='primary'
+                            onClick={() => handleModal()}
+                            className=""
+                            disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-create')  && school_id? false : true}
+                        >
+                            <Plus size={15} />
+                            <span className='align-middle ms-50'>{t('Нэмэх')}</span>
+                        </Button>
                     </div>
                 </CardHeader>
                 <Row className="justify-content-start mx-0 mt-1 mb-1" sm={12}>
