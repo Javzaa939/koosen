@@ -136,10 +136,9 @@ export default function DetailModal({ isOpen, handleModal, datas, file_name, err
 
     async function onSubmit() {
 
-        console.log(datas,'datas')
         const { success, data }  = await fetchData(studentApi.postStudentImportData(datas?.create_datas))
         if (success) {
-            // handleModal()
+            handleModal()
         }
 
     }

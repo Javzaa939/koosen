@@ -26,7 +26,7 @@ from rest_framework.decorators import permission_classes
 from main.utils.function.pagination import CustomPagination
 from main.utils.function.utils import str2bool, has_permission, get_lesson_choice_student, remove_key_from_dict, get_fullName, get_student_score_register, calculate_birthday, null_to_none, bytes_image_encode, get_active_year_season,start_time, json_load, dict_fetchall
 # from main.khur.XypClient import citizen_regnum, highschool_regnum
-from main.utils.file import save_file
+from main.utils.file import save_file, remove_folder
 from lms.models import Student, StudentAdmissionScore, StudentEducation, StudentLeave, StudentLogin, TimeTable
 from lms.models import StudentMovement
 from lms.models import Group
@@ -3071,7 +3071,6 @@ class StudentImportAPIView(
     generics.GenericAPIView
 ):
     """ Оюутны жагсаалт import хийх """
-    queryset = Student.objects.all()
 
     @transaction.atomic()
     def post(self, request):
@@ -3079,27 +3078,19 @@ class StudentImportAPIView(
 
         datas = request.data
         file = datas.get("file")
-        # bank_account = data.get('bank_account')
 
         # Файл түр хадгалах
-        path = save_file(file, 1, 'account_statement_sheet')
-
-        print(path)
+        path = save_file(file, 1, 'student')
         full_path = os.path.join(settings.MEDIA_ROOT, str(path))
 
-        print(full_path)
-
-        all_datas = list()
         error_datas = list()
         correct_datas = list()
 
         excel_data = pd.read_excel(full_path, sheet_name='Оюутны бүртгэл')
         datas = excel_data.to_dict(orient='records')
 
-        user = request.user
         try:
             for created_data in datas:
-                print("created_data", created_data)
                 gen = 0 # хүйс
                 pay_type_id = 0 # төлбөр төлөлтын төрөл
 
@@ -3117,12 +3108,7 @@ class StudentImportAPIView(
                 gender = created_data.get('Хүйс')
                 status = created_data.get('Бүртгэлийн байдал')
                 pay_type = created_data.get('Төлбөр төлөлт')
-
-                # хүйс
-                if gender == 'Эрэгтэй':
-                    gen = Student.GENDER_MALE
-                else:
-                    gen = Student.GENDER_FEMALE
+                code = created_data.get('Оюутны код')
 
                 # төлбөр төлөлт
                 if pay_type == 'Засгийн газар хоорондын тэтгэлэг':
@@ -3155,9 +3141,6 @@ class StudentImportAPIView(
                 dep_obj = Salbars.objects.filter(name__icontains=department).first()
                 group_obj = Group.objects.filter(name__icontains=group).first()
 
-                if not group_obj:
-                    print(123)
-
                 obj = {
                     'department': department,
                     'group': group,
@@ -3172,58 +3155,18 @@ class StudentImportAPIView(
                     'gender': gender,
                     'family_name': family_name,
                     'pay_type': pay_type,
+                    'code': code,
                 }
 
-                if not (dep_obj or group_obj or pay_type_id or register_num or last_name or first_name or phone or status_id or last_name_eng or first_name_eng):
+                student_qs = Student.objects.filter(code=code)
+
+                if not (code or dep_obj or group_obj or pay_type_id or register_num or last_name or first_name or phone or status_id or last_name_eng or first_name_eng) or student_qs:
                     error_datas.append(obj)
                 else:
                     correct_datas.append(obj)
 
-                # qs = Student(
-                #     school=group_obj.school if group_obj else None,
-                #     # code=code,
-                #     family_name=family_name,
-                #     register_num=register_num,
-                #     last_name=last_name,
-                #     first_name=first_name,
-                #     gender = gen,
-                #     phone=phone,
-                #     citizenship=Country.objects.get(name__icontains='Монгол'),
-                #     pay_type=pay_type_id,
-                #     status=status_id,
-                #     group=group_obj,
-                #     department=dep_obj,
-                #     yas_undes=yas_undes,
-                #     last_name_eng=last_name_eng,
-                #     first_name_eng=first_name_eng,
-                # )
-
-                # all_datas.append(qs)
-
-                # create_data = remove_key_from_dict(created_data, ['family_name', 'last_name', 'first_name', 'register_num', 'last_name_eng', 'first_name_eng', 'group', 'gender', 'yas_undes', 'status', 'pay_type'])
-
-                # student_obj = Student.objects.filter(group=group, department=department).first()
-                # print("student_obj", student_obj)
-                # if student_obj:
-                #     student_obj.family_name if student_obj.family_name else ''
-                #     student_obj.last_name if student_obj.last_name else ''
-                #     student_obj.first_name if student_obj.first_name else ''
-                #     student_obj.register_num if student_obj.register_num else ''
-                #     student_obj.yas_undes if student_obj.yas_undes else ''
-                #     student_obj.phone if student_obj.phone else ''
-                #     student_obj.last_name_eng if student_obj.last_name_eng else ''
-                #     student_obj.first_name_eng if student_obj.fist_name_eng else ''
-                #     student_obj.gender if gen else 0
-                #     student_obj.group if group_obj.name else ''
-                #     student_obj.department if dep_obj.name else ''
-                #     student_obj.pay_type if pay_type_id else 0
-                #     student_obj.status if status_id else 0
-
-                #     student_obj.save()
-
-                # else:
-                #     create_data['created_user'] = User.objects.filter(id=user.id)
-                #     Student.objects.create(**created_data)
+                if file:
+                    remove_folder(full_path)
 
         except Exception as e:
             print(e)
@@ -3232,7 +3175,8 @@ class StudentImportAPIView(
         return_datas = {
             'create_datas': correct_datas,
             'all_error_datas': error_datas,
-            'file_name': file.name
+            'file_name': file.name,
+            'not_found_student': error_datas,
         }
 
         return request.send_data(return_datas)
@@ -3242,12 +3186,10 @@ class StudentImportAPIView(
 class StudentPostDataAPIView(
     generics.GenericAPIView
 ):
-    """ Оюутны жагсаалт import хийх """
-    queryset = Student.objects.all()
+    """ Дата оруулах  """
 
     @transaction.atomic()
     def post(self, request):
-
 
         datas = request.data
         all_datas = list()
@@ -3255,10 +3197,10 @@ class StudentPostDataAPIView(
         user = request.user
         try:
             for created_data in datas:
-                print("created_data", created_data)
                 gen = 0 # хүйс
                 pay_type_id = 0 # төлбөр төлөлтын төрөл
 
+                code = created_data.get('code')
                 department = created_data.get('department')
                 group = created_data.get('group')
                 register_num = created_data.get('register_num')
@@ -3273,7 +3215,6 @@ class StudentPostDataAPIView(
                 gender = created_data.get('gender')
                 status = created_data.get('status')
                 pay_type = created_data.get('pay_type')
-                student_code = created_data.get('student_code')
 
                 # хүйс
                 if gender == 'Эрэгтэй':
@@ -3314,7 +3255,7 @@ class StudentPostDataAPIView(
 
                 qs = Student(
                     school=group_obj.school if group_obj else None,
-                    code=student_code,
+                    code=code,
                     family_name=family_name,
                     register_num=register_num,
                     last_name=last_name,
