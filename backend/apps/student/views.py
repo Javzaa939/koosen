@@ -6,6 +6,7 @@ from datetime import date
 
 from rest_framework import mixins
 from rest_framework import generics
+import pandas as pd
 
 from django.conf import settings
 from django.db import transaction
@@ -25,7 +26,7 @@ from rest_framework.decorators import permission_classes
 from main.utils.function.pagination import CustomPagination
 from main.utils.function.utils import str2bool, has_permission, get_lesson_choice_student, remove_key_from_dict, get_fullName, get_student_score_register, calculate_birthday, null_to_none, bytes_image_encode, get_active_year_season,start_time, json_load, dict_fetchall
 # from main.khur.XypClient import citizen_regnum, highschool_regnum
-
+from main.utils.file import save_file, remove_folder
 from lms.models import Student, StudentAdmissionScore, StudentEducation, StudentLeave, StudentLogin, TimeTable
 from lms.models import StudentMovement
 from lms.models import Group
@@ -56,7 +57,7 @@ from lms.models import PaymentBeginBalance
 from lms.models import Country
 
 
-from core.models import SubOrgs, AimagHot, SumDuureg, BagHoroo
+from core.models import SubOrgs, AimagHot, SumDuureg, User, Salbars
 
 from .serializers import StudentListSerializer
 from .serializers import StudentRegisterSerializer
@@ -1417,7 +1418,6 @@ class StudentAddressAPIView(
         # qs = self.queryset.filter(student_id=student)
 
         try:
-            print('data', data)
             if serializer.is_valid(raise_exception=False):
                 obj, created = self.queryset.filter(student_id=student).update_or_create(
                     student_id=student,
@@ -3061,3 +3061,222 @@ class StudentDefinitionListLiteAPIView(
 
         student_list = self.list(request).data
         return request.send_data(student_list)
+
+
+class StudentImportAPIView(
+    generics.GenericAPIView
+):
+    """ Оюутны жагсаалт import хийх """
+
+    @transaction.atomic()
+    def post(self, request):
+
+
+        datas = request.data
+        file = datas.get("file")
+
+        # Файл түр хадгалах
+        path = save_file(file, 1, 'student')
+        full_path = os.path.join(settings.MEDIA_ROOT, str(path))
+
+        error_datas = list()
+        correct_datas = list()
+
+        excel_data = pd.read_excel(full_path)
+        datas = excel_data.to_dict(orient='records')
+
+        try:
+            for created_data in datas:
+                pay_type_id = 8 # төлбөр төлөлтын төрөл
+
+                department = created_data.get('Хөтөлбөрийн баг')
+                group = created_data.get('Анги')
+                register_num = created_data.get('РД')
+                family_name = created_data.get('Ургийн овог')
+                last_name = created_data.get('Эцэг эхийн нэр')
+                first_name = created_data.get('Өөрийн нэр')
+                last_name_eng = created_data.get('Эцэг эхийн нэр англи')
+                first_name_eng = created_data.get('Өөрийн нэр англи')
+                phone = created_data.get('Утасны дугаар')
+                yas_undes = created_data.get('Яс үндэс')
+
+                gender = created_data.get('Хүйс')
+                status = created_data.get('Бүртгэлийн байдал')
+                pay_type = created_data.get('Төлбөр төлөлт')
+                code = created_data.get('Оюутны код')
+
+                # төлбөр төлөлт
+                if pay_type == 'Засгийн газар хоорондын тэтгэлэг':
+                    pay_type_id = Student.IG
+                elif pay_type == 'Төрөөс үзүүлэх тэтгэлэ' :
+                    pay_type_id = Student.GG
+                elif pay_type == 'Боловсролын зээлийн сангийн хөнгөлөлттэй зээл':
+                    pay_type_id = Student.LEL
+                elif pay_type == 'Төрөөс үзүүлэх буцалтгүй тусламж':
+                    pay_type_id = Student.GRANTS
+                elif pay_type == 'Дотоод, гадаадын аж ахуйн нэгж, байгууллага, сан, хүвь хүний нэрэмжит тэтгэлэг':
+                    pay_type_id = Student.IEEOF
+                elif pay_type == 'Тухайн сургуулийн тэтгэлэг':
+                    pay_type_id = Student.SCHOLARSHIP
+                elif pay_type == 'Хувийн зардал':
+                    pay_type_id = Student.EXPENSES
+                elif pay_type == 'Бусад':
+                    pay_type_id = Student.OTHER
+
+                status_id = None
+
+                # суралцах хэлбэр
+                if status:
+                    status_id = StudentRegister.objects.filter(name__icontains=status).first()
+
+                    if not status_id:
+                        count = StudentRegister.objects.count()
+                        status_id = StudentRegister.objects.create(name=status, code=count+1)
+
+                dep_obj = Salbars.objects.filter(name__icontains=department).first()
+                group_obj = Group.objects.filter(name__icontains=group).first()
+
+                obj = {
+                    'department': department,
+                    'group': group,
+                    'register_num': register_num,
+                    'last_name': last_name,
+                    'first_name': first_name,
+                    'phone': phone,
+                    'status': status,
+                    'last_name_eng': last_name_eng,
+                    'first_name_eng': first_name_eng,
+                    'yas_undes': yas_undes,
+                    'gender': gender,
+                    'family_name': family_name,
+                    'pay_type': pay_type,
+                    'code': code,
+                }
+
+                student_qs = Student.objects.filter(code=code)
+
+                if not (code or dep_obj or group_obj or pay_type_id or register_num or last_name or first_name or phone or status_id or last_name_eng or first_name_eng) or student_qs:
+                    error_datas.append(obj)
+                else:
+                    correct_datas.append(obj)
+
+                if file:
+                    remove_folder(full_path)
+
+        except Exception as e:
+            print(e)
+            return request.send_error('ERR_012')
+
+        return_datas = {
+            'create_datas': correct_datas,
+            'all_error_datas': error_datas,
+            'file_name': file.name,
+            'not_found_student': error_datas,
+        }
+
+        return request.send_data(return_datas)
+
+
+
+class StudentPostDataAPIView(
+    generics.GenericAPIView
+):
+    """ Дата оруулах  """
+
+    @transaction.atomic()
+    def post(self, request):
+
+        datas = request.data
+        all_datas = list()
+
+        user = request.user
+        try:
+            for created_data in datas:
+                gen = 0 # хүйс
+                pay_type_id = 0 # төлбөр төлөлтын төрөл
+
+                code = created_data.get('code')
+                department = created_data.get('department')
+                group = created_data.get('group')
+                register_num = created_data.get('register_num')
+                family_name = created_data.get('family_name')
+                last_name = created_data.get('last_name')
+                first_name = created_data.get('first_name')
+                last_name_eng = created_data.get('last_name_eng')
+                first_name_eng = created_data.get('first_name_eng')
+                phone = created_data.get('phone')
+                yas_undes = created_data.get('yas_undes')
+
+                gender = created_data.get('gender')
+                status = created_data.get('status')
+                pay_type = created_data.get('pay_type')
+
+                # хүйс
+                if gender == 'Эрэгтэй':
+                    gen = Student.GENDER_MALE
+                else:
+                    gen = Student.GENDER_FEMALE
+
+                # төлбөр төлөлт
+                if pay_type == 'Засгийн газар хоорондын тэтгэлэг':
+                    pay_type_id = Student.IG
+                elif pay_type == 'Төрөөс үзүүлэх тэтгэлэ' :
+                    pay_type_id = Student.GG
+                elif pay_type == 'Боловсролын зээлийн сангийн хөнгөлөлттэй зээл':
+                    pay_type_id = Student.LEL
+                elif pay_type == 'Төрөөс үзүүлэх буцалтгүй тусламж':
+                    pay_type_id = Student.GRANTS
+                elif pay_type == 'Дотоод, гадаадын аж ахуйн нэгж, байгууллага, сан, хүвь хүний нэрэмжит тэтгэлэг':
+                    pay_type_id = Student.IEEOF
+                elif pay_type == 'Тухайн сургуулийн тэтгэлэг':
+                    pay_type_id = Student.SCHOLARSHIP
+                elif pay_type == 'Хувийн зардал':
+                    pay_type_id = Student.EXPENSES
+                elif pay_type == 'Бусад':
+                    pay_type_id = Student.OTHER
+
+                status_id = None
+
+                # суралцах хэлбэр
+                if status:
+                    status_id = StudentRegister.objects.filter(name__icontains=status).first()
+
+                    if not status_id:
+                        count = StudentRegister.objects.count()
+                        status_id = StudentRegister.objects.create(name=status, code=count+1)
+
+                dep_obj = Salbars.objects.filter(name__icontains=department).first()
+                group_obj = Group.objects.filter(name__icontains=group).first()
+
+                qs = Student(
+                    school=group_obj.school if group_obj else None,
+                    code=code,
+                    family_name=family_name,
+                    register_num=register_num,
+                    last_name=last_name,
+                    first_name=first_name,
+                    gender = gen,
+                    phone=phone,
+                    citizenship=Country.objects.get(name__icontains='Монгол'),
+                    pay_type=pay_type_id,
+                    status=status_id,
+                    group=group_obj,
+                    department=dep_obj,
+                    yas_undes=yas_undes,
+                    last_name_eng=last_name_eng,
+                    first_name_eng=first_name_eng,
+                    created_user=user,
+                )
+
+                all_datas.append(qs)
+
+            if len(all_datas) > 0:
+                Student.objects.bulk_create(all_datas)
+
+        except Exception as e:
+            print(e)
+            return request.send_error('ERR_002')
+
+        return request.send_info("INF_001")
+
+
