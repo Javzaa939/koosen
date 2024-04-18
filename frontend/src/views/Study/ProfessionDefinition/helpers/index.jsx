@@ -2,7 +2,7 @@ import {useContext } from 'react'
 
 import css from '@mstyle/style.module.css'
 
-import { X, Edit, BookOpen } from 'react-feather'
+import { X, Edit, BookOpen, Copy } from 'react-feather'
 
 import { Button,Badge, UncontrolledTooltip } from 'reactstrap'
 
@@ -15,7 +15,7 @@ import useModal from '@hooks/useModal'
 import SchoolContext from "@context/SchoolContext"
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, total_count, editModal, handleDelete, planhandleModal, user) {
+export function getColumns (currentPage, rowsPerPage, total_count, editModal, handleDelete, planhandleModal, user, copyModalHandler) {
 
 	const { school_id } = useContext(SchoolContext)
 
@@ -95,6 +95,19 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 			center: true,
 			selector: (row) => (
 				<div style={{ width: "auto" }}>
+					{
+						user.permissions.includes('lms-study-learningplan-update')&& school_id&&
+						<>
+							<a role="button" onClick={(e) => { copyModalHandler(e, row)} }
+								id={`complaintCopyDatatablePlan${row?.id}`}
+								className="me-1"
+							>
+								<Badge color="light-success" pill><Copy  width={"15px"} /></Badge>
+							</a>
+							<UncontrolledTooltip placement='top' target={`complaintCopyDatatablePlan${row.id}`} >Хувилах</UncontrolledTooltip>
+						</>
+
+					}
 					{
 						user.permissions.includes('lms-study-learningplan-read')&& school_id&&
 						<>

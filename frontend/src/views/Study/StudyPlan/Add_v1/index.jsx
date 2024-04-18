@@ -33,6 +33,7 @@ const StudyPlanAdd = ({ open, handleModal, mergejil_id }) => {
     // Api
     const definationApi = useApi().study.professionDefinition
 
+    console.log(datas);
     async function getDatas() {
         if(mergejil_id) {
             const { success, data } = await fetchData(definationApi.getOne(mergejil_id))
@@ -47,9 +48,11 @@ const StudyPlanAdd = ({ open, handleModal, mergejil_id }) => {
                     setDegree(3)
                 }
                 setDatas(data)
+                console.log(data, mergejil_id);
             }
         }
     }
+
 
     useEffect(() => {
         getDatas()

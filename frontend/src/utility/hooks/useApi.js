@@ -384,6 +384,7 @@ function useApi(isDisplay=false) {
 				putScore: (data, pk,) => instance.put(`/learning/profession/score/${pk}/`, data),
 				deleteScore: (pk) => instance.delete(`/learning/profession/score/${pk}/`),
 				getAddScoreOne: (pk) => instance.get(`/learning/profession/score/${pk}/`),
+				getjustProfession: () => instance.get(`/learning/profession/justprofession/`),
 
 				// Танилцуулга дээр зураг хадгалах
 				saveFile: data => instance.post(`/learning/profession/file/`, data),
@@ -404,6 +405,8 @@ function useApi(isDisplay=false) {
 				deletePlan: (pk) => instance.delete(`/learning/profession/plan/${pk}/`),
 
 				printGetPlan: (department, profession) =>  instance.get(`/learning/profession/print/plan/?department=${department}&profession=${profession}&lesson_year=${cyear_name}&lesson_season=${cseason_id}`),
+
+				putCopyProfession: (data) => instance.put(`/learning/profession/copy/`, data),
 			},
 			confirmyear: {
 				get: () => instance.get(`/learning/confirmyear/`),

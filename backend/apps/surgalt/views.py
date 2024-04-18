@@ -80,6 +80,7 @@ from .serializers import LessonTitleSerializer
 from .serializers import LessonMaterialSerializer
 from .serializers import LessonMaterialListSerializer
 from .serializers import LessonTeacherSerializer
+from .serializers import ProfessionDefinitionJustProfessionSerializer
 
 from main.utils.function.utils import remove_key_from_dict, fix_format_date, get_domain_url
 from main.utils.function.utils import null_to_none, get_lesson_choice_student, get_active_year_season, json_load
@@ -3078,6 +3079,64 @@ class LessonStandartGroupAPIView(
         }
 
         return request.send_data(return_datas)
+
+
+class CopyProfesisonAPIView(
+    generics.GenericAPIView,
+    mixins.CreateModelMixin
+):
+
+    queryset = LearningPlan.objects.all()
+
+    @transaction.atomic
+    def put(self, request):
+
+        data = request.data
+        queryset = self.queryset
+
+        main_learning_plan = queryset.filter(profession=data['copying_prof'])
+        queryset.filter(profession=data['chosen_prof']).delete()
+        print(data)
+        chosen_prof = ProfessionDefinition.objects.get(id=data['chosen_prof'])
+
+        cloned_lessons = []
+        for value in main_learning_plan:
+            cloned_lessons.append(
+                LearningPlan(
+                    lesson = value.lesson,
+                    previous_lesson = value.previous_lesson,
+                    group_lesson = value.group_lesson,
+                    lesson_level = value.lesson_level,
+                    lesson_type = value.lesson_type,
+                    season = value.season,
+                    is_check_score = value.is_check_score,
+                    department = value.department,
+                    school = value.school,
+                    profession = chosen_prof
+                )
+            )
+
+        queryset.bulk_create(cloned_lessons)
+
+        return request.send_info('INF_018')
+
+
+class ProfessionJustProfessionAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin
+):
+    '''
+        Сургалтын төлөвлөгөөний хүснэгтэд хадгалагдсан мэргэжлүүдийг авах
+    '''
+
+    queryset = ProfessionDefinition.objects.all()
+    serializer_class = ProfessionDefinitionJustProfessionSerializer
+
+    def get(self, request):
+
+        profession_data = self.list(request).data
+
+        return request.send_data(profession_data)
 
 
 class ProfessionPosterFile(

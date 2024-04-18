@@ -31,6 +31,7 @@ urlpatterns = [
     path('profession/file/', ProfessionIntroductionFileAPIView.as_view()),
     path('profession/intro/<int:pk>/', ProfessionIntroductionFileAPIView.as_view()),
     path('profession/print/plan/', ProfessionPrintPlanAPIView.as_view()),
+    path('profession/copy/', CopyProfesisonAPIView.as_view()),
 
     # Сургалтын төлөвлөгөө
     path('plan/', LearningPlanAPIView.as_view()),
@@ -46,6 +47,9 @@ urlpatterns = [
 
     # Тухайн оюутны дипломын хичээлүүд
     path('lessonstandart/diploma/list/', LessonStandartDiplomaListAPIView.as_view()),
+
+    # Мэргэжлийн тодорхойлолтоос зөвхөн мэргэжлийн нэр авах
+    path('profession/justprofession/', ProfessionJustProfessionAPIView.as_view()),
 
     # --------------------------------------------------------------Tест-----------------------------------------------------------------------------
 

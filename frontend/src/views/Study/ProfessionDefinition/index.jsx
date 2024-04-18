@@ -38,6 +38,7 @@ import classnames from "classnames";
 import Addmodal from './Add'
 import EditModal from './Edit'
 import StudyPlanAdd from '../StudyPlan/Add_v1'
+import CopyPlan from '../StudyPlan/CopyPlan'
 
 const ProfessionDefinition = () => {
 
@@ -84,6 +85,8 @@ const ProfessionDefinition = () => {
     const [dep_option, setDepOption] = useState([])
     const [select_value, setSelectValue] = useState(values)
     const [mergejil_id, setMergejilId] = useState('')
+    const [copyModal, setCopyModal] = useState(false)
+    const [selectedProf, setSelectedProf] = useState(null)
 
     // Api
     const definationApi = useApi().study.professionDefinition
@@ -191,8 +194,16 @@ const ProfessionDefinition = () => {
 
     // Сургалтын төлөвлөгөө харуулах
     const planhandleModal = (id) => {
+        console.log(id);
         setMergejilId(id)
+
         setStudyPlanmodal(!studyPlanmodal)
+    }
+
+    function copyModalHandler(e, id) {
+        setCopyModal(!copyModal)
+        console.log(id);
+        setSelectedProf(id || null)
     }
 
     return (
@@ -353,7 +364,7 @@ const ProfessionDefinition = () => {
                         )}
                         onSort={handleSort}
                         sortIcon={<ChevronDown size={10} />}
-                        columns={getColumns(currentPage, rowsPerPage, total_count, editModal, handleDelete, planhandleModal, user)}
+                        columns={getColumns(currentPage, rowsPerPage, total_count, editModal, handleDelete, planhandleModal, user, copyModalHandler)}
                         paginationPerPage={rowsPerPage}
                         paginationDefaultPage={currentPage}
                         paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
@@ -366,6 +377,7 @@ const ProfessionDefinition = () => {
             {modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} />}
             {edit_modal && <EditModal open={edit_modal} handleModal={editModal} def_id={def_id} refreshDatas={getDatas} />}
             {studyPlanmodal && <StudyPlanAdd open={studyPlanmodal} handleModal={planhandleModal} mergejil_id={mergejil_id} />}
+            {copyModal && <CopyPlan copyModal={copyModal} copyModalHandler={copyModalHandler} selectedProf={selectedProf} datas={datas} refreshDatas={getDatas}/>}
         </Fragment>
     )
 }
