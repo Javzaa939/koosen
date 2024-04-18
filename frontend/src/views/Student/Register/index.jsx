@@ -14,10 +14,11 @@ import {
     DropdownMenu,
     DropdownItem,
     DropdownToggle,
-    UncontrolledButtonDropdown
+    UncontrolledButtonDropdown,
+    Dropdown
 } from 'reactstrap'
 
-import { ChevronDown, Plus, Search, FileText, Grid, Download } from 'react-feather'
+import { ChevronDown, Plus, Search, FileText, Grid, Download, PenTool, UploadCloud } from 'react-feather'
 
 import { useNavigate } from 'react-router-dom'
 
@@ -42,12 +43,17 @@ import Addmodal from './Add'
 
 import { useTranslation } from 'react-i18next'
 import { downloadCSV, downloadExcel } from '@utils'
+import { downloadTemplate } from './downLoadExcel'
+import FileModal from '@src/components/FileModal'
+import DetailModal from './DetailModal'
+import { useSkin } from '@src/utility/hooks/useSkin'
 
 const Register = () => {
 
     const { user } = useContext(AuthContext)
     const { school_id } = useContext(SchoolContext)
     const navigate = useNavigate()
+    const { skin } = useSkin()
 
     const { t } = useTranslation()
 
@@ -100,6 +106,10 @@ const Register = () => {
     // Эрэмбэлэлт
     const [sortField, setSort] = useState('')
 
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
+
+
     const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
     const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
 
@@ -110,6 +120,7 @@ const Register = () => {
     const professionApi = useApi().study.professionDefinition
     const settingsApi = useApi().settings.studentRegisterType
     const studentPassApi = useApi().studentPass
+    const studentImportApi = useApi().student
 
 
     // API
@@ -176,7 +187,6 @@ const Register = () => {
             setGroup(data)
         }
     }
-
 
     async function getDatas() {
 
@@ -289,39 +299,132 @@ const Register = () => {
             })
         }
     }
+
+    const toggle = () => setDropdownOpen((prevState) => !prevState);
+    const toggleExport = () => {setExportDropdownOpen((prevState) => !prevState)}
+
+    const [open_file, setFileModal] = useState(false)
+    const [file, setFile] = useState(false)
+    const [errorDatas, setErrorDatas] = useState({})
+    const [detailDatas, setDetailDatas] = useState({})
+    const [showModal, setShowModal] = useState(false)
+    const [file_name, setFileName] = useState('')
+
+    // Хуучин дүн файл нээх
+    function handleFileModal() {
+        setFileModal(!open_file)
+        setFile('')
+    }
+
+    // Оруулах датаны жагсаалт харуулах модал
+    const handleShowDetailModal = () => {
+        setShowModal(!showModal)
+    }
+
+    async function onSubmit() {
+        if (file) {
+            const formData = new FormData()
+            formData.append('file', file)
+
+            const { success, data }  = await fetchData(studentImportApi.postImportStudent(formData))
+            if (success) {
+
+                handleFileModal()
+                handleShowDetailModal()
+                if (data?.file_name) {
+                    setFileName(data?.file_name)
+                    delete data['file_name']
+                }
+
+                if (data?.all_error_datas) {
+                    setErrorDatas(data?.all_error_datas)
+                    delete data['all_error_datas']
+                }
+                setDetailDatas(data)
+            }
+        }
+    }
+
     return (
         <Fragment>
             <Card>
-            {isLoading && Loader}
+            {open_file &&
+                <FileModal
+                    isOpen={open_file}
+                    handleModal={handleFileModal}
+                    isLoading={isLoading}
+                    file={file}
+                    setFile={setFile}
+                    title="Оюутны мэдээлэл оруулах"
+                    fileAccept='.csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
+                    extension={['xlsx']}
+                    onSubmit={onSubmit}
+                />
+            }
+            {
+                showModal &&
+                    <DetailModal
+                        isOpen={showModal}
+                        handleModal={handleShowDetailModal}
+                        datas={detailDatas}
+                        file_name={file_name}
+                        errorDatas={errorDatas}
+                    />
 
+            }
+                {isLoading && Loader}
                 <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
                     <CardTitle tag='h4'>{t('Оюутны бүртгэл')}</CardTitle>
-                    <div className='d-flex flex-wrap mt-md-0 mt-1'>
-                    <UncontrolledButtonDropdown disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-read')  && school_id? false : true}>
-                        <DropdownToggle color='secondary' caret outline>
-                            <Download size={15} />
-                            <span className='align-middle ms-50'>Export</span>
-                        </DropdownToggle>
-                        <DropdownMenu>
-                            <DropdownItem className='w-100' onClick={() => excelDownload('csv')}>
-                                <FileText size={15} />
-                                <span className='align-middle ms-50'>CSV</span>
-                            </DropdownItem>
-                            <DropdownItem className='w-100' onClick={() => excelDownload('excel')}>
-                                <Grid size={15} />
-                                <span className='align-middle ms-50' >Excel</span>
-                            </DropdownItem>
-                        </DropdownMenu>
-                    </UncontrolledButtonDropdown>
-                    <Button
-                        color='primary'
-                        onClick={() => handleModal()}
-                        className="ms-1"
-                        disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-create')  && school_id? false : true}
-                    >
-                        <Plus size={15} />
-                        <span className='align-middle ms-50'>{t('Нэмэх')}</span>
-                    </Button>
+                    <div className='d-flex flex-wrap gap-1 mt-md-0 mt-1'>
+
+                        <Dropdown isOpen={dropdownOpen} toggle={toggle}>
+                        {/* <Dropdown isOpen={dropdownOpen} toggle={toggle} disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-read')  && school_id? false : true}> */}
+                            <DropdownToggle color={skin === 'light' ? 'dark' : 'light'} className='' caret outline>
+                                <PenTool size={15} />
+                                <span className='align-middle ms-50'>Загвар</span>
+                            </DropdownToggle>
+                            <DropdownMenu >
+                                <DropdownItem header className='text-wrap'>
+                                    {/* Загвар татаж оюутнуудаа бүртгээд Оруулах товчин дээр дарж оюутнуудын мэдээллийг системд бүртгэнэ үү. */}
+                                    Эксэл файлаар оюутан бүртгэх хэсэг
+                                </DropdownItem>
+                                <DropdownItem divider />
+                                <DropdownItem className='w-100' onClick={() => downloadTemplate(department_option, groupOption)}>
+                                    <Download size={15} />
+                                    <span className='align-middle ms-50'>Татах</span>
+                                </DropdownItem>
+                                <DropdownItem className='w-100' onClick={() => handleFileModal()}>
+                                    <UploadCloud size={15} />
+                                    <span className='align-middle ms-50' >Оруулах</span>
+                                </DropdownItem>
+                            </DropdownMenu>
+                        </Dropdown>
+                        <Dropdown isOpen={exportDropdownOpen} toggle={toggleExport}>
+                        {/* <Dropdown isOpen={exportDropdownOpen} toggle={toggleExport} disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-read')  && school_id? false : true}> */}
+                            <DropdownToggle color='secondary' className='' caret outline>
+                                <Download size={15} />
+                                <span className='align-middle ms-50'>Export</span>
+                            </DropdownToggle>
+                            <DropdownMenu>
+                                <DropdownItem className='w-100' onClick={() => excelDownload('csv')}>
+                                    <FileText size={15} />
+                                    <span className='align-middle ms-50'>CSV</span>
+                                </DropdownItem>
+                                <DropdownItem className='w-100' onClick={() => excelDownload('excel')}>
+                                    <Grid size={15} />
+                                    <span className='align-middle ms-50' >Excel</span>
+                                </DropdownItem>
+                            </DropdownMenu>
+                        </Dropdown>
+                        <Button
+                            color='primary'
+                            onClick={() => handleModal()}
+                            className=""
+                            disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-create')  && school_id? false : true}
+                        >
+                            <Plus size={15} />
+                            <span className='align-middle ms-50'>{t('Нэмэх')}</span>
+                        </Button>
                     </div>
                 </CardHeader>
                 <Row className="justify-content-start mx-0 mt-1 mb-1" sm={12}>
