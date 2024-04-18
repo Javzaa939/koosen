@@ -3166,7 +3166,7 @@ class StudentImportAPIView(
 
         except Exception as e:
             print(e)
-            return request.send_error('ERR_002')
+            return request.send_error('ERR_012')
 
         return_datas = {
             'create_datas': correct_datas,
