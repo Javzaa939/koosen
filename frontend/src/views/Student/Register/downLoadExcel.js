@@ -20,7 +20,18 @@ export const downloadTemplate = async (department_option, groupOption) => {
     const options_group = groupOption.map((opt) => opt?.name)
     const genderOpts = GENDER_LIST.map((opt) => opt)
 
-    const formattedOptions = options_dep.map(option => `"${option}"`).join(',');
+    var payment_type = [
+        'Засгийн газар хоорондын тэтгэлэг',
+        'Төрөөс үзүүлэх тэтгэлэг',
+        'Төрөөс үзүүлэх буцалтгүй тусламж',
+        'Дотоод, гадаадын аж ахуйн нэгж, байгууллага, сан, хүвь хүний нэрэмжит тэтгэлэг',
+        'Тухайн сургуулийн тэтгэлэг',
+        'Хувийн зардал',
+        'Бусад'
+    ]
+
+    const formattedDeps = options_dep.map(option => `"${option}"`).join(',');
+    const formattedPayment = payment_type.map(option => `"${option}"`).join(',');
     ws.addRow(['Оюутны код', 'Хөтөлбөрийн баг', 'Анги', 'РД', 'Ургийн овог', 'Эцэг эхийн нэр', 'Эцэг эхийн нэр англи', 'Өөрийн нэр', 'Өөрийн нэр англи', 'Утасны дугаар', 'Хүйс', 'Яс үндэс', 'Бүртгэлийн байдал', 'Төлбөр төлөлт']);
 
     ws.columns.map((col, index) => (col.width = 18));
@@ -29,7 +40,7 @@ export const downloadTemplate = async (department_option, groupOption) => {
     ws.dataValidations.add('B2:B99999', {
         type: 'list',
         allowBlank: false,
-        formulae: [formattedOptions],
+        formulae: [formattedDeps],
     });
 
     // @ts-ignore
@@ -44,6 +55,20 @@ export const downloadTemplate = async (department_option, groupOption) => {
         type: 'list',
         allowBlank: false,
         formulae: [`"${genderOpts.join(',')}"`],
+    });
+
+    // @ts-ignore
+    ws.dataValidations.add('M2:M99999', {
+        type: 'list',
+        allowBlank: false,
+        formulae: [`"${['Суралцаж буй', 'Төгссөн'].join(',')}"`],
+    });
+
+    // @ts-ignore
+    ws.dataValidations.add('N2:N99999', {
+        type: 'list',
+        allowBlank: false,
+        formulae: [formattedPayment],
     });
 
     const row = ws.getRow(1)

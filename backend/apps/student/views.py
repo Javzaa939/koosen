@@ -3087,8 +3087,7 @@ class StudentImportAPIView(
 
         try:
             for created_data in datas:
-                gen = 0 # хүйс
-                pay_type_id = 0 # төлбөр төлөлтын төрөл
+                pay_type_id = 8 # төлбөр төлөлтын төрөл
 
                 department = created_data.get('Хөтөлбөрийн баг')
                 group = created_data.get('Анги')
