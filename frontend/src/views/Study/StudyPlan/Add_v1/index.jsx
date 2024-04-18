@@ -113,7 +113,7 @@ const StudyPlanAdd = ({ open, handleModal, mergejil_id }) => {
                                 <Col tag="dt" sm="4" className="fw-bolder mb-1" >
                                     Суралцах хугацаа:
                                 </Col>
-                                <Col tag="dd" sm="8" className="mb-1" >4 жил</Col>
+                                <Col tag="dd" sm="8" className="mb-1" >{datas?.duration} жил</Col>
                                 <Col tag="dt" sm="4" className="fw-bolder mb-1" >
                                     Боловсролын зэрэг:
                                 </Col>
