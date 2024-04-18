@@ -68,7 +68,7 @@ export default function Print()
                             <span className="m-0 d-inline-block w-100">Нарийвчилсан чиглэл: {data?.name}</span>
                             <span className="m-0 d-inline-block w-100">Хөтөлбөрийн нэр: {data?.name}</span>
                             <span className="m-0 d-inline-block w-100">Суралцах хэлбэр: Өдөр</span>
-                            <span className="m-0 d-inline-block w-100">Суралцах хугацаа: 4 жил</span>
+                            <span className="m-0 d-inline-block w-100">Суралцах хугацаа: {data?.duration} жил</span>
                         </Col>
 
                         <div className={`d-flex px-0 mt-1`} style={{ width: '100%', fontSize: '8px' }} >
