@@ -399,9 +399,13 @@ const Register = () => {
                                 </DropdownItem>
                             </DropdownMenu>
                         </Dropdown>
-                        <Dropdown isOpen={exportDropdownOpen} toggle={toggleExport}>
-                        {/* <Dropdown isOpen={exportDropdownOpen} toggle={toggleExport} disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-read')  && school_id? false : true}> */}
-                            <DropdownToggle color='secondary' className='' caret outline>
+                        {/* <Dropdown isOpen={exportDropdownOpen} toggle={toggleExport}> */}
+                        <Dropdown isOpen={exportDropdownOpen} toggle={toggleExport} disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-read')  && school_id ? false : true}>
+                            <DropdownToggle
+                                color='secondary'
+                                className={``}
+                                title='Та оюутны жагсаалт экселээр татахын тулд салбар сургууль сонгох шаардлагатайг анхаарна уу.'
+                                style={{ cursor: Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-read')  && school_id ? 'pointer' : 'not-allowed' }} caret outline>
                                 <Download size={15} />
                                 <span className='align-middle ms-50'>Export</span>
                             </DropdownToggle>
@@ -791,3 +795,4 @@ const Register = () => {
 }
 
 export default Register;
+
