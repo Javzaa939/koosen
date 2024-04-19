@@ -4,7 +4,7 @@ import { CheckCircle, Edit, X} from 'react-feather'
 import useModal from "@hooks/useModal"
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, handleEdit) {
+export function getColumns (currentPage, rowsPerPage, handleEdit, handleDelete) {
 	const { showWarning } = useModal()
 
     const columns = [
@@ -40,47 +40,47 @@ export function getColumns (currentPage, rowsPerPage, handleEdit) {
 			center: true,
 			wrap: true,
 		},
-		{
-            name: `${t('Үйлдэл')}`,
+		// {
+        //     name: `${t('Үйлдэл')}`,
 
-            selector:  (row) => (
-                <div className="text-center" style={{ width: "auto" }}>
-                    {/* {
-                        <>
-                            <a role="button"
-                                onClick={() => handleEdit(row)}
-                                id={`updateSchool${row?.id}`}
-                            >
-                                <Badge color="light-primary" pill><Edit width={"100px"} /></Badge>
-                            </a>
-                            <UncontrolledTooltip placement='top' target={`updateSchool${row?.id}`}>засах</UncontrolledTooltip>
-						</>
-                    } */}
-					{
-						<>
-							<a role="button"
-								className='ms-1'
-								onClick={() => showWarning({
-									header: {
-										title: `${t('Тэнхимийн мэдээлэл устгах')}`,
-									},
-									question: `Та  ${row?.name} устгахдаа итгэлтэй байна уу?`,
-									onClick: () => handleDelete(row?.id),
-									btnText: 'Устгах',
-								})}
-								id={`complaintListDatatableCancel${row?.id}`}
-							>
-								<Badge color="light-danger" pill><X width={"100px"} /></Badge>
-							</a>
-							<UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${row?.id}`} >Устгах</UncontrolledTooltip>
-						</>
-					}
-				</div>
-            ),
-            minWidth: "200px",
-            maxWidth: "200px",
-            center: true,
-        },
+        //     selector:  (row) => (
+        //         <div className="text-center" style={{ width: "auto" }}>
+        //             {/* {
+        //                 <>
+        //                     <a role="button"
+        //                         onClick={() => handleEdit(row)}
+        //                         id={`updateSchool${row?.id}`}
+        //                     >
+        //                         <Badge color="light-primary" pill><Edit width={"100px"} /></Badge>
+        //                     </a>
+        //                     <UncontrolledTooltip placement='top' target={`updateSchool${row?.id}`}>засах</UncontrolledTooltip>
+		// 				</>
+        //             } */}
+		// 			{/* {
+		// 				<>
+		// 					<a role="button"
+		// 						className='ms-1'
+		// 						onClick={() => showWarning({
+		// 							header: {
+		// 								title: `${t('Багшийн мэдээлэл устгах')}`,
+		// 							},
+		// 							question: `Та  ${row?.full_name} багшийн мэдээллийг устгахдаа итгэлтэй байна уу?`,
+		// 							onClick: () => handleDelete(row?.id),
+		// 							btnText: 'Устгах',
+		// 						})}
+		// 						id={`complaintListDatatableCancel${row?.id}`}
+		// 					>
+		// 						<Badge color="light-danger" pill><X width={"100px"} /></Badge>
+		// 					</a>
+		// 					<UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${row?.id}`} >Устгах</UncontrolledTooltip>
+		// 				</>
+		// 			} */}
+		// 		</div>
+        //     ),
+        //     minWidth: "200px",
+        //     maxWidth: "200px",
+        //     center: true,
+        // },
 	]
     return columns
 }
