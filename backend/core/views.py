@@ -6,7 +6,7 @@ from rest_framework.filters import SearchFilter
 
 from main.utils.function.utils import filter_queries
 from main.utils.function.pagination import CustomPagination
-from main.utils.function.utils import get_teacher_queryset, remove_key_from_dict, null_to_none,override_get_queryset
+from main.utils.function.utils import get_teacher_queryset, remove_key_from_dict, null_to_none, override_get_queryset, calculate_birthday
 from django.db import transaction
 from django.db.models import Q
 
@@ -78,6 +78,10 @@ from .serializers import TeacherLongListSerializer
 from .serializers import LessonTeacherListSerializer
 from .serializers import TeacherListSchoolFilterSerializer
 from .serializers import DepartmentPostSerailizer
+from .serializers import EmployeePostSerializer
+from .serializers import UserRegisterSerializer
+from .serializers import UserInfoSerializer
+from .serializers import EmployeeSerializer
 
 from lms.models import ProfessionDefinition
 from lms.models import LessonStandart
@@ -937,3 +941,98 @@ class CalendarCountAPIView(
 #     f(i + 1)
 # f(0)
 
+
+class EmployeeApiView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin
+):
+    """ Багшийн жагсаалт """
+
+    queryset = Employee.objects.all()
+    serializer_class = EmployeePostSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['first_name', 'last_name', 'register_code']
+
+    def post(self, request):
+        with transaction.atomic():
+
+            sid = transaction.savepoint()
+            if not request.data.get('email'):
+                del request.data['email']
+
+            def check_field(field, value):
+                if not request.data.get(field):
+                    request.data[field] = value
+
+            check_field('body_height', 0)
+            check_field('body_weight', 0)
+            check_field('emdd_number', None)
+            check_field('hudul_number', None)
+            check_field('ndd_number', None)
+            check_field("home_phone", 0)
+            check_field("register_code", None)
+
+            check_user = Teachers.objects.filter(register=request.data['register'], action_status=Teachers.APPROVED, user__email=request.data['email'])
+            sub_org = SubOrgs.objects.get(id=request.data.get('sub_org'))
+
+            if check_user and check_user.exists:
+                return request.send_error_valid(
+                    [
+                        {
+                            'field': 'register',
+                            'msg': 'Системд бүртгэлтэй хэрэглэгч байна'
+                        }
+                    ]
+                )
+            else:
+                # Register ийн сүүлийн 8 оронг нууц үг болгох нь
+                request.data['password'] = request.data['register'][-8:]
+                request.data['org'] = sub_org.org.id
+
+                # User моделийн датаг эхлэээд үүсгэнэ
+                user_serializer = UserRegisterSerializer(
+                    data=request.data,
+                )
+
+                if not user_serializer.is_valid():
+                    transaction.savepoint_rollback(sid)
+                    print('user алдаа', user_serializer.errors)
+                    return request.send_error_valid(user_serializer.errors)
+
+                #  UserInfo үүсгэхэд хэрэгтэй датануудыг цуглуулах нь
+                user = user_serializer.save()
+                request.data['user'] = str(user.id)
+                request.data['birthday'], request.data['gender'] = calculate_birthday(request.data['register'])
+                if not request.data['birthday']:
+                    transaction.savepoint_rollback(sid)
+                    return request.send_error_valid({ "register": ["Регистрийн дугаар алдаатай байна."] })
+
+                request.data['action_status'] = Teachers.APPROVED
+                request.data['action_status_type'] = Teachers.ACTION_TYPE_ALL
+
+                userinfo_serializer = UserInfoSerializer(
+                    data=request.data,
+                )
+
+                if not userinfo_serializer.is_valid():
+                    print(userinfo_serializer.errors)
+                    transaction.savepoint_rollback(sid)
+                    return request.send_error_valid(userinfo_serializer.errors)
+                userinfo_serializer.save()
+
+            if 'worker_type' in request.data:
+                request.data['worker_type'] = Employee.WORKER_TYPE_EMPLOYEE
+
+            employee_serializer = EmployeeSerializer(data=request.data)
+            if not employee_serializer.is_valid(raise_exception=True):
+                transaction.savepoint_rollback(sid)
+                return request.send_error_valid(employee_serializer.errors)
+
+            employee_serializer.save()
+
+        return request.send_info("INF_001")
