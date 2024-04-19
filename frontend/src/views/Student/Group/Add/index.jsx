@@ -36,7 +36,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
     const [ dep_id, setDepId] = useState('')
 
     // ** Hook
-    const { control, handleSubmit, reset, setValue, setError, formState: { errors } } = useForm(validate(validateSchema));
+    const { control, handleSubmit, reset, setValue, setError, watch, formState: { errors } } = useForm(validate(validateSchema));
 
     const [ profOption, setProfession] = useState([])
     const [ degreeOption, setDegree] = useState([])
@@ -151,7 +151,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                 style={{ maxWidth: '500px', width: '100%' }}
             >
                 <ModalHeader
-                    className="mb-1"
+                    className="mb-1 justify-content-between"
                     toggle={handleModal}
                     close={CloseBtn}
                     tag="div"
