@@ -3086,20 +3086,30 @@ class CopyProfesisonAPIView(
     mixins.CreateModelMixin
 ):
 
+    ''' Өгөгдсөн хөтөлбөрийн сургалтын төлөвлөгөөний хичээлүүдийг өөр хөтөлбөрийн сургалтын төлөвлөгөөний хичээл рүү хуулах '''
+
     queryset = LearningPlan.objects.all()
 
+    # Өгөгдлийн сан дээр үйлдэл хийхэд алдаа гарах үед алдаа гарах хүртэл хийгдсэн үйлдлүүдийг буцаах функц
     @transaction.atomic
     def put(self, request):
 
         data = request.data
         queryset = self.queryset
 
+        # Хуулж авах хөтөлбөрийн сургалтын төлөвлөгөө
         main_learning_plan = queryset.filter(profession=data['copying_prof'])
+
+        # Хуулж тавих хөтөлбөрийн сургалтын төлөвлөгөөний хичээл устгах
         queryset.filter(profession=data['chosen_prof']).delete()
-        print(data)
+
+        # Хуулж авах хөтөлбөрийн мэдээллийг авах
         chosen_prof = ProfessionDefinition.objects.get(id=data['chosen_prof'])
 
+        # Хуулж тавих хөтөлбөрийн сургалтын төлөвлөгөөний хичээлийн объектийг хадгалах хүснэгт
         cloned_lessons = []
+
+        # Хуулж тавих хөтөлбөрийн сургалтын төлөвлөгөөний хичээлийн объектийг үүсгэж хадгалах хүснэгт рүү хийх
         for value in main_learning_plan:
             cloned_lessons.append(
                 LearningPlan(
@@ -3116,8 +3126,10 @@ class CopyProfesisonAPIView(
                 )
             )
 
+        # Хүснэгтэд хадгалсан объектуудыг өгөгдлийн санд хадгалах хэсэг
         queryset.bulk_create(cloned_lessons)
 
+        # Хүсэлт амжилттай явагдсан үед амжилттай явагдсан тухай мэдээлэл буцаах хэсэг
         return request.send_info('INF_018')
 
 
