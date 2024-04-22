@@ -37,6 +37,21 @@ export const notif_instance = axios.create({
         "Content-Type": "application/json",
     },
 });
+
+
+export const able_instance = axios.create({
+    baseURL: process.env.REACT_APP_ABLE_URL,
+    withCredentials: true,
+    xsrfHeaderName: 'X-CSRFTOKEN',
+    xsrfCookieName: 'csrftoken',
+    headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Content-Type": "application/json",
+		"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.kc3xuhFLonTzyzu4WzKlJETwuQaNPdX6hKeOuXHywWU"
+    },
+});
+
+
 /**
 	* @param {boolean} isDisplay Toast гаргах эсэх
  */
@@ -1660,6 +1675,10 @@ function useApi(isDisplay=false) {
 				put: (id, cdata) => instance.put(`/elselt/health/physical/${id}/`, cdata)
 			},
 		}
+	},
+	able: {
+		getWorker: () => able_instance.get(`/?a=ableApi&tsk=getWorkers&key=uia`),
+		getStructure: () => able_instance.get(`/?a=ableApi&tsk=getDeps&key=uia`),
 	}
 }
 }
