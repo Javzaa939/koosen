@@ -612,7 +612,7 @@ const Register = () => {
                     </Col>
                     <Col sm={6} lg={3} className='mt-1'>
                         <Label className="form-label" for="group">
-                            {t("Анги")}
+                            {t("Дамжаа")}
                         </Label>
                         <Select
                             name="group"

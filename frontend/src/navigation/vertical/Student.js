@@ -10,7 +10,7 @@ export default [
         navChildren: [
             {
                 id: 'student1',
-                title: 'Анги бүлгийн бүртгэл',
+                title: 'Анги дамжааны бүртгэл',
                 icon: <Circle size={8} />,
                 navLink: "student/group/"
             },

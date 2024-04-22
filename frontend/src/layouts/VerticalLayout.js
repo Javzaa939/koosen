@@ -141,6 +141,9 @@ const VerticalLayout = (props) =>
                         /** Role */
                         childrenDatas = checkPerm(childrenDatas, menus, 'role-read', 'settingsLevel16')
 
+                        /** Able */
+                        childrenDatas = checkPerm(childrenDatas, menus, true, 'settingsLevel17')
+
                         /** ----------------------------- Хичээлийн хуваарь ---------------------------- */
 
                         /** Цагийн хуваарь */
