@@ -898,7 +898,8 @@ class ScoreOldAPIView(
 
             for lesson in list(lessons):
                 score = row.get('{}'.format(lesson.get('full_name')))
-                if not score and score != 0:
+
+                if isinstance(score, str) or (not score and score != 0):
                     obj = {}
                     obj['student_code'] = student_code
                     obj['lesson_code'] = lesson.get('full_name')
