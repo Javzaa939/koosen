@@ -156,7 +156,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                     close={CloseBtn}
                     tag="div"
                 >
-                    <h5 className="modal-title">{t('Анги бүлгийн бүртгэл')}</h5>
+                    <h5 className="modal-title">{t('Анги дамжааны бүртгэл')}</h5>
                 </ModalHeader>
                 <ModalBody className="flex-grow-1">
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
