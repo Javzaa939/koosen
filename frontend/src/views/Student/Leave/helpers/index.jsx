@@ -32,10 +32,14 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 		{
 			header: 'full_name',
 			name: `${t('Оюутан')}`,
-			selector: (row) =>row?.student?.full_name,
+			selector: (row, index) =>(
+				<>
+					<div className='cursor-default' title={row?.student?.full_name} id={`student_num${index}`}>{row?.student?.full_name}</div>
+				</>
+			),
             sortable: true,
-			minWidth: "180px",
-			center: true
+			minWidth: "350px",
+			// center: true
         },
 		{
 			header: 'learn_week',

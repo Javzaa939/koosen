@@ -15,7 +15,7 @@ import { useForm, Controller } from "react-hook-form";
 
 import { Row, Col, Form, Modal, Input, Label, Button, ModalBody, ModalHeader, FormFeedback, Spinner } from "reactstrap";
 
-import { validate, generateLessonYear } from "@utils"
+import { validate, generateLessonYear, level_option } from "@utils"
 
 import { validateSchema } from '../validateSchema';
 import { useEffect } from 'react';
@@ -327,15 +327,37 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                 control={control}
                                 id="level"
                                 name="level"
-                                render={({ field }) => (
-                                    <Input
-                                        id ="level"
-                                        bsSize="sm"
-                                        placeholder={t("Курс")}
-                                        {...field}
-                                        type='number'
-                                        onKeyDown={(e) =>["e", "E", "+", "-", "."].includes(e.key) && e.preventDefault()}
-                                        invalid={errors.level && true}
+                                render={({ field: {value, onChange} }) => (
+                                    // <Input
+                                    //     id ="level"
+                                    //     bsSize="sm"
+                                    //     placeholder={t("Курс")}
+                                    //     {...field}
+                                    //     type='number'
+                                    //     onKeyDown={(e) =>["e", "E", "+", "-", "."].includes(e.key) && e.preventDefault()}
+                                    //     invalid={errors.level && true}
+                                    // />
+                                    <Select
+                                        name="level"
+                                        id="level"
+                                        classNamePrefix='select'
+                                        isClearable
+                                        className={classnames('react-select')}
+                                        isLoading={isLoading}
+                                        placeholder={`-- Сонгоно уу --`}
+                                        options={level_option() || []}
+                                        value={level_option().find((c) => c.id === value)}
+                                        noOptionsMessage={() => 'Хоосон байна'}
+                                        onChange={(val) => {
+                                            if (val?.id) {
+                                                onChange(val?.id)
+                                            } else {
+                                                onChange('')
+                                            }
+                                        }}
+                                        styles={ReactSelectStyles}
+                                        getOptionValue={(option) => option.id}
+                                        getOptionLabel={(option) => option.name}
                                     />
                                 )}
                             />

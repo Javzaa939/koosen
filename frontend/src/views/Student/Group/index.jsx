@@ -3,7 +3,7 @@ import { Fragment, useState, useEffect, useContext } from 'react'
 
 import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, Spinner } from 'reactstrap'
 
-import { ChevronDown, Plus, Search } from 'react-feather'
+import { ChevronDown, FileText, Plus, Search } from 'react-feather'
 
 import { useForm, Controller } from "react-hook-form";
 
@@ -30,6 +30,7 @@ import { getColumns } from './helpers'
 import Addmodal from './Add'
 
 import EditModal from './Edit'
+import excelDownload from '@src/utility/excelDownload';
 
 const Score = () => {
 
@@ -226,13 +227,44 @@ const Score = () => {
         setRowsPerPage(parseInt(e.target.value))
     }
 
+    function excelHandler() {
+        const rowInfo = {
+            headers: [
+                '№',
+                'Ангийн нэр',
+                'Мэргэжил',
+                'Боловсролын зэрэг',
+                'Курс',
+                'Багш',
+                'Төгссөн эсэх',
+            ],
+
+            datas: [
+                'index',
+                'name',
+                'profession.name',
+                'degree.degree_name',
+                'level',
+                'teacher.first_name',
+                'is_finish',
+            ],
+        }
+        excelDownload(datas, rowInfo, `Хөтөлбөр`)
+    }
+
 	return (
 		<Fragment>
             {isLoading && Loader}
 			<Card>
 				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
-					<CardTitle tag="h4">{t('Анги дамжааны бүртгэл')}</CardTitle>
-                    <div className='d-flex flex-wrap mt-md-0 mt-1'>
+					<CardTitle tag="h4">{t('Анги бүлгийн бүртгэл')}</CardTitle>
+                    <div className='d-flex flex-wrap mt-md-0 mt-1 gap-1'>
+                        <Button
+                            color='primary'
+                            onClick={() => {excelHandler()}}
+                        >
+                            <FileText size={16}/> Excel татах
+                        </Button>
                         <Button color='primary' disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-student-group-create')  && school_id )? false : true} onClick={() => handleModal()}>
                             <Plus size={15} />
                             <span className='align-middle ms-50'>{t('Нэмэх')}</span>

@@ -757,6 +757,7 @@ function useApi(isDisplay=false) {
 				getOne: (pk) => instance.get(`/student/leave/${pk}/`),
 				put: (data, pk) => instance.put(`/student/leave/${pk}/`, data),
 				delete: (pk) => instance.delete(`/student/leave/${pk}/`),
+				putMany: (data) => instance.put(`/student/leave-students/`, data),
 			},
 
 			/** Оюутны төгсөлтийн бүртгэл */

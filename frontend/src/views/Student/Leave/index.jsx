@@ -15,10 +15,10 @@ import {
 import Addleavemodal from './Add';
 
 import { useTranslation } from "react-i18next";
-import { ChevronDown, Plus, Search } from 'react-feather'
+import { ChevronDown, Edit, FileText, Plus, Printer, Search } from 'react-feather'
 
 import useLoader from '@hooks/useLoader';
-
+import useUpdateEffect from '@hooks/useUpdateEffect'
 import DataTable from 'react-data-table-component'
 
 import { getColumns } from './helpers'
@@ -32,12 +32,18 @@ import EditModal from './Edit'
 import Select from 'react-select'
 import {  ReactSelectStyles, generateLessonYear } from "@utils"
 
+import TushaalModal from './TushaalModal'
+import { useNavigate } from 'react-router-dom';
+import excelDownload from '@src/utility/excelDownload';
+
 const Leave = () => {
 
     var values = {
         'lesson_year': '',
         'leave_state': ''
     }
+    const navigate = useNavigate()
+
     const { t } = useTranslation()
     const default_page = [10, 15, 50, 75, 100]
     const [edit_modal, setEditModal] = useState(false)
@@ -48,6 +54,8 @@ const Leave = () => {
     const [yearOption, setYear] = useState([])
     const [stateOption, setStateOption] = useState([])
     const [edit_id, setEditId] = useState('')
+    const [selectedRows, setSelectedRows] = useState([])
+    const [tushaalModal, setTushaalModal] = useState(false)
 
     const { school_id } = useContext(SchoolContext)
 
@@ -144,7 +152,7 @@ const Leave = () => {
         }
     }
 
-    useEffect(
+    useUpdateEffect(
         () =>
         {
             if (searchValue.length == 0) {
@@ -156,7 +164,15 @@ const Leave = () => {
                 return () => clearTimeout(timeoutId);
             }
         },
-        [rowsPerPage, currentPage, sortField, select_values, searchValue]
+        [searchValue]
+    )
+
+    useEffect(
+        () =>
+        {
+            getDatas()
+        },
+        [rowsPerPage, currentPage, sortField, select_values]
     )
 
     useEffect(
@@ -168,13 +184,72 @@ const Leave = () => {
         []
     )
 
+    function onSelectedRowsChange(state) {
+        var selectedRows = state.selectedRows
+
+		setSelectedRows(selectedRows);
+    }
+
+    function tushaalModalHandler() {
+        setTushaalModal(!tushaalModal)
+    }
+
+    function printHandler() {
+        navigate(`/student/leave/print`, {state: selectedRows})
+    }
+
+    function excelHandler() {
+        const rowInfo = {
+            headers: [
+                '№',
+                'Оюутан',
+                '7 хоног',
+                'Тушаал',
+                'Хичээлийн жил',
+                'Чөлөө авсан улирал',
+            ],
+
+            datas: [
+                'index',
+                'student.full_name',
+                'learn_week',
+                'statement',
+                'lesson_year',
+                'lesson_season.season_name',
+            ],
+        }
+        excelDownload(datas, rowInfo, `Хөтөлбөр`)
+    }
+
     return(
         <Fragment>
             <Card>
             {isLoading && Loader}
                 <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
                 <CardTitle tag='h4'>{t('Чөлөөний бүртгэл')}</CardTitle>
-                <div className='d-flex flex-wrap mt-md-0 mt-1'>
+                <div className='d-flex flex-wrap mt-md-0 mt-1 gap-1'>
+                    <Button
+                        color='primary'
+                        onClick={() => {excelHandler()}}
+                    >
+                        <FileText size={16}/> Excel татах
+                    </Button>
+                    <Button
+                        color='primary'
+                        disabled={selectedRows.length > 0 ? false : true}
+                        onClick={() => printHandler()}
+                    >
+                        <Printer size={15} />
+                        <span className='align-middle ms-50'>{t('Хэвлэх')}</span>
+                    </Button>
+                    <Button
+                        color='primary'
+                        disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-student-leave-create') && selectedRows.length > 0) ? false : true}
+                        onClick={() => tushaalModalHandler()}
+                    >
+                        <Edit size={15} />
+                        <span className='align-middle ms-50'>{t('Тушаал бүртгэх')}</span>
+                    </Button>
                     <Button
                         color='primary'
                         disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-student-leave-create') && school_id) ? false : true}
@@ -336,11 +411,15 @@ const Leave = () => {
                         data={datas}
                         fixedHeader
                         fixedHeaderScrollHeight='62vh'
+						selectableRows
+						onSelectedRowsChange={(state) => onSelectedRowsChange(state)}
                     />
                 </div>
             </Card>
             {modal && <Addleavemodal open={modal} handleModal={handleModal} refreshDatas={getDatas} />}
             {edit_modal && <EditModal open={edit_modal} handleModal={editModal} edit_id={edit_id} refreshDatas={getDatas} />}
+            {tushaalModal && <TushaalModal tushaalModal={tushaalModal} tushaalModalHandler={tushaalModalHandler} selectedRows={selectedRows} getDatas={getDatas}/>}
+            {/* <TushaalModal editModal={editModal} toggleEditModal={toggleEditModal} selectedRows={selectedRows} getDatas={getDatas}/> */}
         </Fragment>
     )
 }

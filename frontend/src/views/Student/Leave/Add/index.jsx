@@ -67,11 +67,11 @@ const Addleavemodal = ({ open, handleModal, refreshDatas }) => {
     const [bottom_check, setBottomCheck] = useState(3)
     const [scroll_bottom_datas, setScrollBottomDatas] = useState([]);
     const [student_search_value, setStudentSearchValue] = useState([]);
-    const SelectStudentApi = useApi().role.student
+    const selectStudentApi = useApi().role.student
 
     //  Оюутны жагсаалт хайлтаар
     async function getStudentOption(searchValue) {
-        const { success, data } = await fetchStudent(SelectStudentApi.getStudent(searchValue))
+        const { success, data } = await fetchStudent(selectStudentApi.getStudent(searchValue))
         if(success) {
             setStudentOption(data)
         }
@@ -79,7 +79,7 @@ const Addleavemodal = ({ open, handleModal, refreshDatas }) => {
 
     //  Оюутны жагсаалт select ашигласан
     async function getSelectBottomDatas(state){
-        const { success, data } = await fetchStudent(SelectStudentApi.getSelectStudents(state))
+        const { success, data } = await fetchStudent(selectStudentApi.getSelectStudents(state))
         if(success){
             setScrollBottomDatas((prev) => [...prev, ...data])
         }
