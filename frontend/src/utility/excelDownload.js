@@ -12,7 +12,7 @@ import { utils, writeFile } from 'xlsx-js-style'
  * @param {Number} width Баганы өргөн
  * @returns
  */
-export default function excelDownload(datas, rowInfo, fileName, height, width) {
+export default function excelDownload(datas, rowInfo, fileName, booleanField) {
 
     /**
      * Функцыг ажиллуулахад шаардлагатай мэдээллүүдийн нэг л байхгүй бол явуулах
@@ -29,17 +29,49 @@ export default function excelDownload(datas, rowInfo, fileName, height, width) {
     }
 
     /**
-     * Функцыг дуудах үед оноох датаг экселийн сан унших хувилбарт оруулж байна.
+     *
+     * Хэрэв датаг шууд авч чадах бус Object дотроос авахаар байвал түүнийг олж ирэх
+     *
+     * @param {*} obj
+     * @param {*} path
+     * @returns children data-г буцаана.
      */
     function nestedProperty(obj, path) {
         return path.split('.').reduce((acc, key) => acc && acc[key] !== 'undefined' ? acc[key] : undefined, obj);
     }
 
+    /**
+     * Функцыг дуудах үед оноох датаг экселийн сан унших хувилбарт оруулж байна.
+     */
     const mainData = datas.map((data, idx) => ({
         ...rowInfo.datas.reduce((acc, val) => {
-            const newVal = val === 'index' ? idx + 1 : nestedProperty(data, val) || '';
-            acc[val === 'index' ? 'index' : val] = newVal !== undefined ? newVal : '';
+
+            const newVal = val === 'index' ? idx + 1 : nestedProperty(data, val);
+
+            acc[val === 'index' ? 'index' : val] =
+
+            /**
+             * Хэрэв дата байхгүй бол хоосон String буцааснаар Excel ийн стайл алдагдахгүй
+             */
+                newVal !== undefined ?
+                /**
+
+                * Хэрэв дата Boolean утгатай бол Тийм үгүй гэсэн текст шивих ба үүнийг доорхи байдлаар Customize хийж болно.
+
+                    const booleanField = {
+                        true:'Yes',
+                        false:'No'
+                    }
+
+                */
+                typeof newVal === 'boolean' ?
+                    `${newVal === true ?  `${booleanField ? booleanField?.true || 'Тийм' : 'Тийм'}` : `${booleanField ? booleanField?.false || 'Үгүй' : 'Үгүй'}`}`
+                        :
+                            newVal
+                :
+                    '';
             return acc;
+
         }, {})
     }));
 
@@ -50,10 +82,12 @@ export default function excelDownload(datas, rowInfo, fileName, height, width) {
     const workbook = utils.book_new();
     utils.book_append_sheet(workbook, worksheet)
 
+    /**
+     * Датаны тохиргооноос Толгой хэсэгт юу байхыг шийдэх хэсэг
+     */
     const staticCells = rowInfo?.headers
 
     utils.sheet_add_aoa(worksheet, [staticCells], { origin: "A1" });
-
 
     const headerStyle = {
         border: {

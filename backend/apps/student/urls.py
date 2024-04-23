@@ -65,6 +65,7 @@ urlpatterns = [
     # Оюутны чөлөөний бүртгэл
     path('leave/', StudentLeaveAPIView.as_view()),
     path('leave/<int:pk>/', StudentLeaveAPIView.as_view()),
+    path('leave-students/', StudentLeaveStudentsAPIView.as_view()),
 
     # Төгсөлтийн ажил
     path('graduation/', GraduationWorkAPIView.as_view()),

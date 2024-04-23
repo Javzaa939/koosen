@@ -13,7 +13,7 @@ import {
     Spinner,
 } from 'reactstrap'
 
-import { ChevronDown, Plus, Search } from 'react-feather'
+import { ChevronDown, FileText, Plus, Search } from 'react-feather'
 
 import Select from 'react-select'
 import DataTable from 'react-data-table-component'
@@ -199,7 +199,6 @@ const ProfessionDefinition = () => {
     function excelHandler() {
 
         const rowInfo = {
-
             headers: [
                 '№',
                 'Код',
@@ -223,11 +222,9 @@ const ProfessionDefinition = () => {
                 body: 30
             },
             width: 25
-
         }
 
         excelDownload(datas, rowInfo, `Хөтөлбөр`)
-
     }
 
 
@@ -237,12 +234,12 @@ const ProfessionDefinition = () => {
                 {isLoading && Loader}
                 <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
                     <CardTitle tag='h4'>{t('Хөтөлбөр')}</CardTitle>
-                    <div className='d-flex flex-wrap mt-md-0 mt-1'>
+                    <div className='d-flex flex-wrap mt-md-0 mt-1 gap-1'>
                         <Button
                             color='primary'
                             onClick={() => {excelHandler()}}
                         >
-                            Excel татах
+                            <FileText size={16}/> Excel татах
                         </Button>
                         <Button
                             color='primary'

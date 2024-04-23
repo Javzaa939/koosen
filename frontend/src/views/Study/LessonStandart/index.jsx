@@ -13,7 +13,7 @@ import {
     Spinner,
 } from 'reactstrap'
 
-import { ChevronDown, Plus, Search } from 'react-feather'
+import { ChevronDown, FileText, Plus, Search } from 'react-feather'
 
 import { useTranslation } from 'react-i18next'
 
@@ -226,7 +226,7 @@ const LessonStandart = () => {
                             color='primary'
                             onClick={() => excelHandler()}
                         >
-                            Excel татах
+                            <FileText size={16}/> Excel татах
                         </Button>
                         <Button
                             color='primary'
