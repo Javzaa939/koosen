@@ -13,7 +13,7 @@ import {
     Spinner,
 } from 'reactstrap'
 
-import { ChevronDown, Plus, Search } from 'react-feather'
+import { ChevronDown, FileText, Plus, Search } from 'react-feather'
 
 import { useTranslation } from 'react-i18next'
 
@@ -40,6 +40,7 @@ import { getPagination, ReactSelectStyles } from '@utils'
 import { getColumns } from './helpers'
 
 import Addmodal from './Add'
+import excelDownload from '@src/utility/excelDownload'
 
 const LessonStandart = () => {
 
@@ -189,13 +190,44 @@ const LessonStandart = () => {
         []
     )
 
+    function excelHandler() {
+
+        const rowInfo = {
+            headers: [
+                '№',
+                'Хичээлийн код',
+                'Хичээлийн нэр',
+                'Багц цаг',
+                'Тэнхим',
+                'Заах багш',
+            ],
+            datas: [
+                'index',
+                'code',
+                'name',
+                'kredit',
+                'department.name',
+                'teachers.teacher_name',
+            ]
+        }
+
+        excelDownload(datas, rowInfo, `Хичээлийн стандарт`)
+
+    }
+
     return (
         <Fragment>
             <Card>
             {isLoading && Loader}
                 <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
                     <CardTitle tag='h4'>{t('Хичээлийн стандарт')}</CardTitle>
-                    <div className='d-flex flex-wrap mt-md-0 mt-1'>
+                    <div className='d-flex flex-wrap mt-md-0 mt-1 gap-1'>
+                        <Button
+                            color='primary'
+                            onClick={() => excelHandler()}
+                        >
+                            <FileText size={16}/> Excel татах
+                        </Button>
                         <Button
                             color='primary'
                             disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-study-lessonstandart-create') && school_id) ? false : true}
