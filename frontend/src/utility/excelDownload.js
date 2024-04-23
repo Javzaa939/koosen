@@ -46,7 +46,7 @@ export default function excelDownload(datas, rowInfo, fileName, booleanField) {
     const mainData = datas.map((data, idx) => ({
         ...rowInfo.datas.reduce((acc, val) => {
 
-            const newVal = val === 'index' ? idx + 1 : nestedProperty(data, val);
+            const newVal = val === 'index' ? idx + 1 : nestedProperty(data, val) || '';
 
             acc[val === 'index' ? 'index' : val] =
 
