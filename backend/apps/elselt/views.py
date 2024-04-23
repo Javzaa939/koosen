@@ -1116,6 +1116,7 @@ class ElseltHealthPhysical(
 
             queryset = queryset.order_by(sorting)
 
+        # Төлөвөөр хайхаар бол тухайн мэргэжлийн эмнэлгийн үзлэгийн төлөвөөс хайна
         if state:
             user_ids = HealthUpUser.objects.filter(state=state).values_list('user', flat=True)
             queryset = queryset.filter(user__in=user_ids)
