@@ -33,33 +33,33 @@ export default [
             },
             {
                 id: 'elselt4',
-                title: 'Тайлан',
-                icon: <Circle size={8} />,
-                navLink: "elselt/tailan"
-            },
-            {
-                id: 'elselt5',
-                title: 'Анхан шатны үзлэг',
+                title: 'Эрүүл мэнд анхан шатны үзлэг',
                 icon: <Circle size={8} />,
                 navLink: "elselt/health/anhan"
             },
             {
-                id: 'elselt6',
-                title: 'Мэргэжлийн үзлэг',
+                id: 'elselt5',
+                title: 'Эрүүл мэнд мэргэжлийн үзлэг',
                 icon: <Circle size={8} />,
                 navLink: "elselt/health/mergejliin"
             },
             {
-                id: 'elselt7',
+                id: 'elselt6',
                 title: 'Бие бялдар',
                 icon: <Circle size={8} />,
                 navLink: "elselt/physical"
             },
             {
-                id: 'student19',
+                id: 'elselt7',
                 title: 'Элсэлтийн тушаал',
                 icon: <Circle size={8} />,
                 navLink: "student/enrollment"
+            },
+            {
+                id: 'elselt8',
+                title: 'Мэйл тайлан',
+                icon: <Circle size={8} />,
+                navLink: "elselt/tailan"
             },
         ]
     }

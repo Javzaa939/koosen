@@ -20,19 +20,11 @@ export function getColumns (currentPage, rowsPerPage, total_count) {
 			center: true
 		},
 		{
-			header: 'mergejil_code',
-			name: t("Мэргэжлийн код"),
-			selector: (row) => row?.mergejil_code,
-            sortable: false,
-			minWidth: "180px",
-            center: true,
-        },
-		{
 			header: 'mergejil_name',
 			name: t("Мэргэжлийн нэр"),
-			selector: (row) => row?.mergejil_name,
+			selector: (row) => row?.mergejil_code + ' ' + row?.mergejil_name,
             sortable: false,
-			minWidth: "180px",
+			minWidth: "300px",
             center: true,
         },
 		{

@@ -1,22 +1,14 @@
 import { Fragment, useState, useEffect, useContext } from 'react'
-
 import { Controller, useForm } from 'react-hook-form'
-
 import { Row, Col, Card, Input, Label, CardTitle, CardHeader, Spinner, Button } from 'reactstrap'
-
 import { ChevronDown , Edit, Edit2, Edit3, Printer, Search} from 'react-feather'
-
 import { useTranslation } from 'react-i18next'
-
 import Select from 'react-select'
-
 import DataTable from 'react-data-table-component'
-
 import useApi from '@hooks/useApi';
-
 import useLoader from '@hooks/useLoader';
 
-import SchoolContext from '@context/SchoolContext'
+// import SchoolContext from '@context/SchoolContext'
 
 import { getColumns } from './helpers';
 
@@ -27,24 +19,21 @@ import EditModal from './EditModal'
 const Enrollment = () => {
 
     var values = {
-        department: '',
-        degree: '',
+        admission: '',
         profession: '',
-        learning: '',
-        group: '',
     }
 
     const [sortField, setSort] = useState('')
     const navigate = useNavigate()
 
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
+    const { Loader, isLoading, fetchData } = useLoader({})
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({})
 
     const [datas, setDatas] = useState([])
 
     const [currentPage, setCurrentPage] = useState(1)
 
-    const { school_id } = useContext(SchoolContext)
+    // const { school_id } = useContext(SchoolContext)
 
     const { t } = useTranslation()
 
@@ -59,81 +48,40 @@ const Enrollment = () => {
     const default_page = [10, 15, 50, 75, 100]
 
     // Const Option
-    const [degreeOption, setDegreeOption] = useState([])
-    const [groupOption, setGroupOption] = useState([])
-    const [departmentOption, setDepartmentOption] = useState([])
+    const [admissionOption, setAdmisionOption] = useState([])
     const [professionOption, setProfessionOption] = useState([])
-    const [learningOption, setLearningOption] = useState([])
     const [selectedRows, setSelectedRows] = useState([])
 
     // API
-    const degreeApi = useApi().settings.professionaldegree
-    const groupApi = useApi().student.group
-    const departmentApi = useApi().hrms.department
-    const learningApi = useApi().settings.learning
-    const professionApi = useApi().study.professionDefinition
+    const professionApi = useApi().elselt.profession
     const admissionApi = useApi().print.admission
+    const admissionYearApi = useApi().elselt
 
-    // Боловсролын зэрэг
-    async function getDegreeOption() {
-        const { success, data } = await fetchData(degreeApi.get())
-        if(success) {
-            setDegreeOption(data)
+    async function getAdmissionYear() {
+        const { success, data } = await fetchData(admissionYearApi.getAll())
+        if (success) {
+            setAdmisionOption(data)
         }
-    }
+	}
 
-    // Анги
-    async function getGroupOption() {
-        const department = select_value.department
-        const degree = select_value.degree
-        const profession = select_value.profession
-        const { success, data } = await fetchData(groupApi.getList(department,degree,profession))
-        if(success) {
-            setGroupOption(data)
-        }
-    }
-
-    // Хөтөлбөрийн баг
-    async function getDepartmentOption() {
-        const { success, data } = await fetchData(departmentApi.get())
-        if(success) {
-            setDepartmentOption(data)
-        }
-    }
-
-    // Суралцах хэлбэр
-    async function getLearningOption() {
-        const { success, data } = await fetchData(learningApi.get())
-        if(success) {
-            setLearningOption(data)
-        }
-    }
-
-    // Мэргэжил
-    async function getProfessionOption() {
-        const degreeId = select_value.degree
-        const { success, data } = await fetchData(professionApi.getList(degreeId))
-        if(success) {
+    // Хөтөлбөрийн жагсаалт авах
+    async function getProfession() {
+        const { success, data } = await fetchData(professionApi.getList(select_value?.admission))
+        if (success) {
             setProfessionOption(data)
         }
-    }
+	}
 
     // data avah heseg
     async function getDatas() {
-
-        var department = select_value?.department
         var profession = select_value?.profession
-        var degree = select_value?.degree
-        var group = select_value?.group
-        var learning = select_value?.learning
-
+        var admission = select_value?.admission
         const page_count = Math.ceil(total_count / rowsPerPage)
-
         if (page_count < currentPage && page_count != 0) {
             setCurrentPage(page_count)
         }
 
-        const { success, data } = await allFetch(admissionApi.get(rowsPerPage, currentPage, sortField, searchValue, degree, department, group, profession, learning))
+        const { success, data } = await allFetch(admissionApi.get(rowsPerPage, currentPage, sortField, searchValue, admission, profession))
         if(success)
         {
             setTotalCount(data?.count)
@@ -167,17 +115,16 @@ const Enrollment = () => {
     }
 
     useEffect(() => {
-            getDegreeOption()
-            getGroupOption()
-            getDepartmentOption()
-            getLearningOption()
-            getProfessionOption()
+        getAdmissionYear()
     },[])
 
-    useEffect(() => {
-        getProfessionOption()
-        getGroupOption()
-    },[select_value])
+    useEffect(
+        () =>
+        {
+            getProfession()
+        },
+        [select_value.admission]
+    )
 
     useEffect(() => {
         getDatas()
@@ -235,192 +182,59 @@ const Enrollment = () => {
 
                         </div>
                 </CardHeader>
-                <Row className="justify-content-between mx-0 mt-1">
-                    <Col md={4}>
-                        <Label className="form-label" for="department">
-                            {t('Хөтөлбөрийн баг')}
-                        </Label>
-                        <Controller
-                            control={control}
-                            defaultValue=''
-                            name="department"
-                            render={({ field: { value, onChange} }) => {
-                                return (
-                                    <Select
-                                        name="department"
-                                        id="department"
-                                        classNamePrefix='select'
-                                        isClearable
-                                        className='react-select'
-                                        placeholder={t('-- Сонгоно уу --')}
-                                        options={departmentOption || []}
-                                        value={departmentOption.find((c) => c.id === value)}
-                                        noOptionsMessage={() => t('Хоосон байна.')}
-                                        onChange={(val) => {
-                                            onChange(val?.id || '')
-                                            setSelectValue(current => {
-                                                return {
-                                                    ...current,
-                                                    department: val?.id || '',
-                                                }
-                                            })
-                                        }}
-                                        styles={ReactSelectStyles}
-                                        getOptionValue={(option) => option.id}
-                                        getOptionLabel={(option) => option.name}
-                                    />
-                                )
-                            }}
-                        />
-                    </Col>
-                    <Col md={4}>
+                <Row className="justify-content-start mx-0 mt-1">
+                    <Col md={3}>
                         <Label className="form-label" for="degree">
-                            {t('Боловсролын зэрэг')}
+                            {t('Элсэлт')}
                         </Label>
-                        <Controller
-                            control={control}
-                            defaultValue=''
+                        <Select
                             name="degree"
-                            render={({ field: { value, onChange} }) => {
-                                return (
-                                    <Select
-                                        name="degree"
-                                        id="degree"
-                                        classNamePrefix='select'
-                                        isClearable
-                                        className='react-select'
-                                        placeholder={t('-- Сонгоно уу --')}
-                                        options={degreeOption || []}
-                                        value={degreeOption.find((c) => c.id === value)}
-                                        noOptionsMessage={() => t('Хоосон байна.')}
-                                        onChange={(val) => {
-                                            onChange(val?.id || '')
-                                            setSelectValue(current => {
-                                                return {
-                                                    ...current,
-                                                    degree: val?.id || '',
-                                                }
-                                            })
-                                        }}
-                                        styles={ReactSelectStyles}
-                                        getOptionValue={(option) => option.id}
-                                        getOptionLabel={(option) => option.degree_name}
-                                    />
-                                )
+                            id="degree"
+                            classNamePrefix='select'
+                            isClearable
+                            className='react-select'
+                            placeholder={t('-- Сонгоно уу --')}
+                            options={admissionOption || []}
+                            value={admissionOption.find((c) => c.id === select_value.admission)}
+                            noOptionsMessage={() => t('Хоосон байна.')}
+                            onChange={(val) => {
+                                setSelectValue(current => {
+                                    return {
+                                        ...current,
+                                        admission: val?.id || '',
+                                    }
+                                })
                             }}
+                            styles={ReactSelectStyles}
+                            getOptionValue={(option) => option.id}
+                            getOptionLabel={(option) => option.lesson_year + ' ' + option.name}
                         />
                     </Col>
-                    <Col md={4}>
+                    <Col md={3}>
                         <Label className="form-label" for="profession">
-                            {t('Мэргэжил')}
+                            {t('Хөтөлбөр')}
                         </Label>
-                        <Controller
-                            control={control}
-                            defaultValue=''
+                        <Select
                             name="profession"
-                            render={({ field: { value, onChange} }) => {
-                                return (
-                                    <Select
-                                        name="profession"
-                                        id="profession"
-                                        classNamePrefix='select'
-                                        isClearable
-                                        className='react-select'
-                                        placeholder={t('-- Сонгоно уу --')}
-                                        options={professionOption || []}
-                                        value={professionOption.find((c) => c.id === value)}
-                                        noOptionsMessage={() => t('Хоосон байна.')}
-                                        onChange={(val) => {
-                                            onChange(val?.id || '')
-                                            setSelectValue(current => {
-                                                return {
-                                                    ...current,
-                                                    profession: val?.id || '',
-                                                }
-                                            })
-                                        }}
-                                        styles={ReactSelectStyles}
-                                        getOptionValue={(option) => option.id}
-                                        getOptionLabel={(option) => option.name}
-                                    />
-                                )
+                            id="profession"
+                            classNamePrefix='select'
+                            isClearable
+                            className='react-select'
+                            placeholder={t('-- Сонгоно уу --')}
+                            options={professionOption || []}
+                            value={professionOption.find((c) => c.id === select_value.profession)}
+                            noOptionsMessage={() => t('Хоосон байна.')}
+                            onChange={(val) => {
+                                setSelectValue(current => {
+                                    return {
+                                        ...current,
+                                        profession: val?.id || '',
+                                    }
+                                })
                             }}
-                        />
-                    </Col>
-                </Row>
-                <Row className="mx-0 mb-1 mt-1">
-                    <Col md={4}>
-                        <Label className="form-label" for="learn_name">
-                            {t('Суралцах хэлбэр')}
-                        </Label>
-                        <Controller
-                            control={control}
-                            defaultValue=''
-                            name="learn_name"
-                            render={({ field: { value, onChange} }) => {
-                                return (
-                                    <Select
-                                        name="learn_name"
-                                        id="learn_name"
-                                        classNamePrefix='select'
-                                        isClearable
-                                        className='react-select'
-                                        placeholder={t('-- Сонгоно уу --')}
-                                        options={learningOption || []}
-                                        value={learningOption.find((c) => c.id === value)}
-                                        noOptionsMessage={() => t('Хоосон байна.')}
-                                        onChange={(val) => {
-                                            onChange(val?.id || '')
-                                            setSelectValue(current => {
-                                                return {
-                                                    ...current,
-                                                    learn_name: val?.id || '',
-                                                }
-                                            })
-                                        }}
-                                        styles={ReactSelectStyles}
-                                        getOptionValue={(option) => option.id}
-                                        getOptionLabel={(option) => option.learn_name}
-                                    />
-                                )
-                            }}
-                        />
-                    </Col>
-                    <Col md={4}>
-                        <Label className="form-label" for="group">
-                            {t('Анги')}
-                        </Label>
-                        <Controller
-                            control={control}
-                            defaultValue=''
-                            name="group"
-                            render={({ field: { value, onChange} }) => {
-                                return (
-                                    <Select
-                                        name="group"
-                                        id="group"
-                                        classNamePrefix='select'
-                                        isClearable
-                                        className='react-select'
-                                        placeholder={t('-- Сонгоно уу --')}
-                                        options={groupOption || []}
-                                        value={groupOption.find((c) => c.id === value)}
-                                        noOptionsMessage={() => t('Хоосон байна.')}
-                                        onChange={(val) => {
-                                            onChange(val?.id || '')
-                                            setSelectValue(current => {
-                                                return {
-                                                    ...current,
-                                                    group: val?.id || '',
-                                                }
-                                            })
-                                        }}
-                                        styles={ReactSelectStyles}
-                                        getOptionValue={(option) => option.id}
-                                        getOptionLabel={(option) => option.name}
-                                    />
-                                )
-                            }}
+                            styles={ReactSelectStyles}
+                            getOptionValue={(option) => option.id}
+                            getOptionLabel={(option) => option.name}
                         />
                     </Col>
                 </Row>
