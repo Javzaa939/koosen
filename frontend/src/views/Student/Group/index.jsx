@@ -249,7 +249,7 @@ const Score = () => {
                 'is_finish',
             ],
         }
-        excelDownload(datas, rowInfo, `Хөтөлбөр`)
+        excelDownload(datas, rowInfo, `анги_бүлэг`)
     }
 
 	return (

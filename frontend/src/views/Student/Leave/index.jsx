@@ -218,7 +218,7 @@ const Leave = () => {
                 'lesson_season.season_name',
             ],
         }
-        excelDownload(datas, rowInfo, `Хөтөлбөр`)
+        excelDownload(datas, rowInfo, `чөлөөний_бүртгэл`)
     }
 
     return(
