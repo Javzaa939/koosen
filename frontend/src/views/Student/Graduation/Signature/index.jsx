@@ -1,4 +1,4 @@
-import React, { Fragment } from 'react'
+import React, { Fragment, useEffect, useState } from 'react'
 
 import { useForm, Controller } from "react-hook-form";
 
@@ -13,6 +13,11 @@ import { validate } from "@utils"
 
 import { validateSchema } from './validateSchema';
 
+import Select from 'react-select'
+import classnames from "classnames";
+import { ReactSelectStyles } from '@src/utility/Utils';
+
+
 export default function SignatureModal({ open, handleModal, refreshDatas, defaultDatas })
 {
     const CloseBtn = (
@@ -20,13 +25,15 @@ export default function SignatureModal({ open, handleModal, refreshDatas, defaul
     )
 
     // Hook
-    const { control, handleSubmit, reset, setError, formState: { errors } } = useForm(validate(validateSchema));
+    const { control, handleSubmit, reset, setError, formState: { errors }} = useForm(validate(validateSchema));
+    const [ schools, setSchools ] = useState([]);
 
     // Loader
 	const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: false });
 
     // Api
     const signatureApi = useApi().signature
+    const schoolApi = useApi().hrms.subschool
 
     /** Хадгалах дарах */
     async function onSubmit(cdata)
@@ -47,6 +54,22 @@ export default function SignatureModal({ open, handleModal, refreshDatas, defaul
             }
         }
     }
+
+    /* Үндсэн сургуулуудийн жагсаалт авах */
+    async function getDatas() {
+        const {success, data} = await fetchData(schoolApi.get())
+        if(success) {
+            setSchools(data)
+        }
+    }
+
+    useEffect(
+        () =>
+        {
+            getDatas()
+        },
+        []
+    )
 
     return (
         <Fragment>
@@ -112,6 +135,39 @@ export default function SignatureModal({ open, handleModal, refreshDatas, defaul
                                 )}
                             />
                             {errors.first_name && <FormFeedback className='d-block'>{t(errors.first_name.message)}</FormFeedback>}
+                        </Col>
+                        <Col sm={12} className='mt-1'>
+                            <Label className="form-label" for="schools">
+                                {t('Салбар сургууль')}
+                            </Label>
+                            <Controller
+                                control={control}
+                                defaultValue={defaultDatas?.school_id || ''}
+                                name="school_id"
+                                render={({ field: { value, onChange } }) => {
+                                    return (
+                                        <Select
+                                            name="school_id"
+                                            id="school_id"
+                                            classNamePrefix='select'
+                                            isClearable
+                                            className={classnames('react-select', { 'is-invalid': errors.school_id })}
+                                            isLoading={isLoading}
+                                            placeholder={t('-- Сонгоно уу --')}
+                                            options={schools || []}
+                                            value={schools.find((c) => c.id === value)}
+                                            noOptionsMessage={() => t('Хоосон байна.')}
+                                            onChange={(val) => {
+                                                onChange(val?.id || '')
+                                            }}
+                                            styles={ReactSelectStyles}
+                                            getOptionValue={(option) => option.id}
+                                            getOptionLabel={(option) => option.name}
+                                        />
+                                    )
+                                }}
+                            />
+                            {errors.school_id && <FormFeedback className='d-block'>{t(errors.school_id.message)}</FormFeedback>}
                         </Col>
                         <Col sm={12} className='mt-1'>
                             <Label className="form-label" for="position_name">
@@ -219,7 +275,7 @@ export default function SignatureModal({ open, handleModal, refreshDatas, defaul
                                         bsSize="sm"
                                         type="text"
                                         placeholder={t('овог оруулна уу')}
-                                        style={{ fontFamily: 'cmdashitseden' }}
+                                        style={{ fontFamily: 'CMSHRDP' }}
                                         invalid={errors.last_name_uig && true}
                                     />
                                 )}
@@ -242,7 +298,7 @@ export default function SignatureModal({ open, handleModal, refreshDatas, defaul
                                         bsSize="sm"
                                         type="text"
                                         placeholder={t('нэр оруулна уу')}
-                                        style={{ fontFamily: 'cmdashitseden' }}
+                                        style={{ fontFamily: 'CMSHRDP' }}
                                         invalid={errors.first_name_uig && true}
                                     />
                                 )}
@@ -265,7 +321,7 @@ export default function SignatureModal({ open, handleModal, refreshDatas, defaul
                                         bsSize="sm"
                                         type="text"
                                         placeholder={t('албан тушаал оруулна уу')}
-                                        style={{ fontFamily: 'cmdashitseden' }}
+                                        style={{ fontFamily: 'CMSHRDP' }}
                                         invalid={errors.position_name_uig && true}
                                     />
                                 )}

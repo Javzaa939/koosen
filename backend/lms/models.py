@@ -2742,6 +2742,7 @@ class SignaturePeoples(models.Model):
     )
 
     dedication_type = models.PositiveIntegerField(choices=DEDICATION_TYPE, db_index=True, null=False, default=DIPLOM, verbose_name="Зориулалт")
+    school_id = models.PositiveIntegerField(null=True, verbose_name="Сургууль")
 
     last_name = models.CharField(max_length=200, null=True, blank=True, verbose_name='Эцэг/эхийн нэр')
     first_name = models.CharField(max_length=200, null=True, blank=True, verbose_name='Өөрийн нэр')

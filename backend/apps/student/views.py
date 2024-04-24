@@ -2086,6 +2086,10 @@ class SignatureAPIView(
     def get(self, request):
 
         dedication_type = self.request.query_params.get('type')
+        school_id = request.query_params.get('school_id')
+
+        if school_id:
+            self.queryset = self.queryset.filter(school_id=school_id)
 
         qs = self.queryset.filter(dedication_type=dedication_type).order_by('order')
         data = self.serializer_class(qs, many=True).data
@@ -2096,9 +2100,6 @@ class SignatureAPIView(
     def post(self, request):
 
         data = request.data
-
-        # transaction savepoint зарлах нь хэрэв алдаа гарвад roll back хийнэ
-        sid = transaction.savepoint()
 
         order = 1
 
@@ -2112,7 +2113,6 @@ class SignatureAPIView(
         try:
             serializer = self.serializer_class(data=data, many=False)
             if not serializer.is_valid():
-                transaction.savepoint_rollback(sid)
                 return request.send_error_valid(serializer.errors)
 
             serializer.save()

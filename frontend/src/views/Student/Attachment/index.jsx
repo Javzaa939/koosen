@@ -17,7 +17,6 @@ import SchoolContext from '@context/SchoolContext'
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import useModal from '@hooks/useModal';
-import useUpdateEffect from '@hooks/useUpdateEffect'
 
 import SignatureModal from '@views/Student/Attachment/Signature/index.jsx'
 import { getColumns } from '@views/Student/Attachment/helpers/index.jsx'
@@ -66,8 +65,8 @@ export default function Attachment()
     const [ signatureFormModal, setSignatureFormModal ] = useState(false)
     const [ signatureList, setSignatureList ] = useState([])
     // Loader
-	const { isLoading, fetchData, Loader } = useLoader({ isFullScreen: false })
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
+	const { isLoading, fetchData, Loader } = useLoader({ isFullScreen: true })
+    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
 
     // Api
     const depApi = useApi().hrms.department
@@ -75,6 +74,16 @@ export default function Attachment()
     const graduateApi = useApi().student.graduate
     const groupApi = useApi().student.group
     const signatureApi = useApi().signature
+
+    /** Бүх датаг нэгэн зэрэг авах */
+    function getAllData()
+    {
+        Promise.all([
+            fetchData(signatureApi.getGraduate(3, school_id)),
+        ]).then((values) => {
+            setSignatureList(values[0]?.data)
+        })
+    }
 
     async function getDatas()
     {
@@ -156,10 +165,16 @@ export default function Attachment()
     /** Гарын үсэг зурах дата-г авах */
     async function getSignatureDatas()
     {
-        const { success, data } = await fetchData(signatureApi.get(3))
-        if (success)
-        {
-            setSignatureList(data)
+        console.log('hello');
+        if (school_id){
+            const { success, data } = await fetchData(signatureApi.getGraduate(3, school_id))
+            if (success)
+            {
+                setSignatureList(data)
+            }
+        }
+        else{
+            setSignatureList([])
         }
     }
 
@@ -200,21 +215,15 @@ export default function Attachment()
     useEffect(
         () =>
         {
+            getDegree()
             getDatas()
+            getDepartment()
+            getGroup()
         },
-        [sortField, currentPage, rowsPerPage, select_value, school_id]
+        [sortField, currentPage, rowsPerPage, select_value]
     )
 
-    useEffect(() => {
-        getDegree()
-        getDepartment()
-    }, [school_id])
-
-    useEffect(() => {
-        getGroup()
-    }, [select_value.department, select_value.degree, school_id])
-
-    useUpdateEffect(
+    useEffect(
         () =>
         {
             if (!searchValue) getDatas()
@@ -225,7 +234,7 @@ export default function Attachment()
     useEffect(
         () =>
         {
-            getSignatureDatas()
+            getAllData()
         },
         []
     )
@@ -234,27 +243,24 @@ export default function Attachment()
         navigate('/student/attachment/attachment-student/', { state: row?.student?.id })
     };
 
-    const handlePerPage = (e) => {
-        setRowsPerPage(e.target.value)
-    }
-
     return (
         <Fragment>
-
-            <Card>
-                <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom align-items-center py-1">
-                    <CardTitle tag="h4">{t('Гарын үсэг зурах хүмүүс')}&nbsp;<small>(&nbsp;Хавсралт&nbsp;)</small></CardTitle>
-                    <div className='d-flex flex-wrap mt-md-0 mt-1'>
-                        <Button
-                            color='primary'
-                            onClick={toggleModalSignature}
-                        >
-                            <Plus size={15} />
-                            <span className='align-middle ms-50'>{t('Нэмэх')}</span>
-                        </Button>
-                    </div>
-                </CardHeader>
-                {
+            {
+                school_id &&
+                <Card>
+                    <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom align-items-center py-1">
+                        <CardTitle tag="h4">{t('Гарын үсэг зурах хүмүүс')}&nbsp;<small>(&nbsp;Хавсралт&nbsp;)</small></CardTitle>
+                        <div className='d-flex flex-wrap mt-md-0 mt-1'>
+                            <Button
+                                color='primary'
+                                onClick={toggleModalSignature}
+                            >
+                                <Plus size={15} />
+                                <span className='align-middle ms-50'>{t('Нэмэх')}</span>
+                            </Button>
+                        </div>
+                    </CardHeader>
+                    {
                     signatureList.length > 0
                     ?
                         <ReactSortable
@@ -306,12 +312,11 @@ export default function Attachment()
                         }
                         </ReactSortable>
                     :
-                        <p className="text-center my-2">Өгөгдөл байхгүй байна.</p>
-                        // <div className='my-2 d-flex align-items-center justify-content-center'>
-                        //     <Spinner className='me-1' color="" size='sm'/><h5>Түр хүлээнэ үү...</h5>
-                        // </div>
+                    <p className="text-center my-2">Өгөгдөл байхгүй байна.</p>
                 }
-            </Card>
+                </Card>
+            }
+
 
             <Card>
                 <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
@@ -320,7 +325,7 @@ export default function Attachment()
                 <Row className="justify-content-between mx-0 mt-1 mb-1" sm={12}>
                     <Col md={4}>
                         <Label className="form-label" for="department">
-                            {t('Тэнхим')}
+                            {t('Хөтөлбөрийн баг')}
                         </Label>
                         <Select
                             name="department"

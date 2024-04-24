@@ -22,7 +22,7 @@ export default function PrintMongolia()
     async function getAllData()
     {
         await Promise.all([
-            fetchData(signatureApi.get(2)),
+            fetchData(signatureApi.get(2, data?.student?.group?.profession?.school)),
         ]).then((values) => {
             setListArr(values[0]?.data)
         })
