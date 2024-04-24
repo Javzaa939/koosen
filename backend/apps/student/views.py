@@ -1799,6 +1799,19 @@ class StudentLeaveAPIView(
         return request.send_info("INF_003")
 
 
+class StudentLeaveStudentsAPIView(
+    generics.GenericAPIView
+):
+    @has_permission(must_permissions=['lms-student-leave-update'])
+    @transaction.atomic
+    def put(self, request):
+
+        data = request.data
+
+        StudentLeave.objects.filter(id__in=data.get('student_ids')).update(statement=data.get('statement'), statement_date=data.get('statement_date'))
+
+        return request.send_info("INF_002")
+
 class GraduationWorkAPIView(
     mixins.CreateModelMixin,
     mixins.UpdateModelMixin,

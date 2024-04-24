@@ -1,0 +1,9 @@
+.date_list{
+    transition: 0.2s;
+    background-color: transparent;
+    border-radius: 6px;
+}
+
+.date_list:hover{
+    background-color: rgba(0, 255, 255, 0.063);
+}

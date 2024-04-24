@@ -363,7 +363,7 @@ const MainInformation = () => {
                             </Col>
                             <Col lg={4} sm={6} xs={12}>
                                 <Label className="form-label" for="group">
-                                    {t('Анги')}
+                                    {t('Дамжаа')}
                                 </Label>
                                 <Controller
                                     control={control}

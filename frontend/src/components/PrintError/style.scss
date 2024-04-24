@@ -1,0 +1,40 @@
+@import '@core/scss/base/bootstrap-extended/_variables.scss';
+
+.custom_warning_badge{
+    background-color: rgba(255, 159, 67, 0.12) !important;
+    color: #ff9f43 !important;
+    border-radius: 12px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-inline: 10px;
+    font-weight: 600;
+}
+
+.null_page_parent{
+    background-color: $gray-200;
+}
+
+.null_page_content{
+    color: $gray-700;
+}
+
+.goback_button{
+    border: 1px solid rgba(0, 0, 0, 0.155);
+}
+
+
+.dark-layout{
+
+    .null_page_parent{
+        background-color: $gray-900;
+    }
+
+    .null_page_content{
+        color: $gray-200;
+    }
+
+    .goback_button{
+        border: 1px solid rgba(226, 226, 226, 0.155);
+    }
+
+}
