@@ -987,8 +987,8 @@ function useApi(isDisplay=false) {
 				getListNoLimit:(group, radio, chosenYear, chosenSeason) =>
 					instance.get(`/print/groupnolimit/?group=${group}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&is_season=${radio}&chosen_year=${chosenYear}&chosen_season=${chosenSeason}`),
 
-					// Ангийн жагсаалт авах api
-					// сургуулийн query явуулж filter-дэж болно
+				// Ангийн жагсаалт авах api
+				// сургуулийн query явуулж filter-дэж болно
 				getGroupList:( school ) =>
 					instance.get(`/print/groupsubschool/?school=${school}`),
 
@@ -1004,8 +1004,8 @@ function useApi(isDisplay=false) {
 			},
 			/** Элсэлтийн тушаал*/
 			admission:{
-				get:(limit, page, sort, search, degree, department, group, profession, learning) =>
-				instance.get(`/print/admission/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&degree=${degree}&group=${group}&department=${department}&profession=${profession}&learning=${learning}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&school=${school_id}`),
+				get:(limit, page, sort, search, admission, profession) =>
+				instance.get(`/print/admission/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&admission=${admission}&profession=${profession}`),
 				put: (data) => instance.put(`/print/admission/`, data),
 			},
 			/** Элсэлтийн тушаал*/

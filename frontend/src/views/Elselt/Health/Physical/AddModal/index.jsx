@@ -80,6 +80,7 @@ function AddModal({ addModal, addModalHandler, addModalData, getDatas, STATE_LIS
             isOpen={addModal}
             toggle={addModalHandler}
             centered
+            backdrop='static'
         >
             <ModalHeader toggle={addModalHandler}>
                 Үзлэгийн хариу

@@ -21,7 +21,6 @@ class ElseltUser(models.Model):
     parent_mobile = models.CharField(max_length=30, verbose_name="Шаардлагатай үед холбоо барих утас", default="")
     image = models.ImageField(upload_to='elselt', null=True, verbose_name='Хэрэглэгчийн зураг')
     aimag = models.ForeignKey(AimagHot, on_delete=models.CASCADE, null=True, verbose_name='Үндсэн захиргаа - Аймаг/хот')
-    is_justice = models.BooleanField(default=False, verbose_name='Ял шийтгэлтэй эсэх')
     is_payment = models.BooleanField(default=False, verbose_name="Бүртгэлийн хураамж төлсөн эсэх")
 
     created = models.DateTimeField(auto_now_add=True, null=True, verbose_name='Огноо')
@@ -148,9 +147,19 @@ class AdmissionUserProfession(models.Model):
 
     user = models.ForeignKey(ElseltUser, verbose_name='Элсэгч', on_delete=models.CASCADE)
     profession = models.ForeignKey(AdmissionRegisterProfession, verbose_name='Элссэн мэргэжил', on_delete=models.PROTECT)
+    description = models.CharField(max_length=5000, null=True, verbose_name='Хөтөлбөр сольсон тайлбар')
+
+    # Элсэгч бүх шалгуурыг даваад тэнцсэн төлөв тайлбар
     state = models.PositiveIntegerField(choices=STATE, db_index=True, null=False, default=STATE_SEND, verbose_name="Тэнцсэн элсэгчийн төлөв")
     state_description = models.CharField(max_length=5000, null=True, verbose_name='Тэнцсэн төлөвийн тайлбар')
-    description = models.CharField(max_length=5000, null=True, verbose_name='Хөтөлбөр сольсон тайлбар')
+
+    # Элсэгч ял шийтгэлтэй эсэх тайлбар
+    justice_state = models.PositiveIntegerField(choices=STATE, db_index=True, null=False, default=STATE_SEND, verbose_name="Ял шийтгэлтэй эсэх")
+    justice_description = models.CharField(max_length=5000, null=True, verbose_name='Ял шийтгэлтэй бол тайлбар')
+
+    # Тухайн элсэлтэд нас гэсэн шалгуур үзүүлэлттэй бол элсэгчийн насыг шалгаж тэнцсэн эсэх төлөв
+    age_state = models.PositiveIntegerField(choices=STATE, db_index=True, null=False, default=STATE_SEND, verbose_name="Нас шалгуурт тэнцсэн эсэх")
+    age_description = models.CharField(max_length=5000, null=True, verbose_name='Нас шалгуурт тэнцээгүй тайлбар')
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

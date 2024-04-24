@@ -303,7 +303,7 @@ class HealthPhysicalUserInfoSerializer(serializers.ModelSerializer):
     health_up_user_data = serializers.SerializerMethodField()
 
     class Meta:
-        model = HealthUser
+        model = AdmissionUserProfession
         fields = '__all__'
 
 
