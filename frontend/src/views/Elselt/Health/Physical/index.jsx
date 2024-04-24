@@ -155,29 +155,27 @@ function Physical() {
                     </Col>
                 </Row> */}
                 <Row>
-                    <Col>
-                        <div className='m-1'>
-                            <Col md={6} lg={3}>
-                                <Label for='sort-select'>{t('Үзлэгийн төлөвөөр шүүх')}</Label>
-                                <Select
-                                    classNamePrefix='select'
-                                    isClearable
-                                    placeholder={`-- Сонгоно уу --`}
-                                    options={STATE_LIST || []}
-                                    value={STATE_LIST.find((c) => c.id === chosenState)}
-                                    noOptionsMessage={() => 'Хоосон байна'}
-                                    onChange={(val) => {
-                                        setChosenState(val?.id || '')
-                                    }}
-                                    styles={ReactSelectStyles}
-                                    getOptionValue={(option) => option.id}
-                                    getOptionLabel={(option) => option.name}
-                                />
-                            </Col>
-                        </div>
-                    </Col>
+                    <div className=''>
+                        <Col md={6} lg={3}>
+                            <Label for='sort-select'>{t('Үзлэгийн төлөвөөр шүүх')}</Label>
+                            <Select
+                                classNamePrefix='select'
+                                isClearable
+                                placeholder={`-- Сонгоно уу --`}
+                                options={STATE_LIST || []}
+                                value={STATE_LIST.find((c) => c.id === chosenState)}
+                                noOptionsMessage={() => 'Хоосон байна'}
+                                onChange={(val) => {
+                                    setChosenState(val?.id || '')
+                                }}
+                                styles={ReactSelectStyles}
+                                getOptionValue={(option) => option.id}
+                                getOptionLabel={(option) => option.name}
+                            />
+                        </Col>
+                    </div>
                 </Row>
-                <Row className="justify-content-between mx-0" >
+                <Row className="justify-content-between " >
                     <Col className='d-flex align-items-center justify-content-start' md={4}>
                         <Col md={3} sm={2} className='pe-1'>
                             <Input
