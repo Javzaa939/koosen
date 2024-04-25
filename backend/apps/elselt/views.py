@@ -360,8 +360,16 @@ class ProfessionShalguur(
         # Элсэлтэд бүртгэлтэй байгаа мэргэжил
         admission_prof = AdmissionRegisterProfession.objects.get(pk=admission)
 
+        old_shalguur_ids = AdmissionIndicator.objects.filter(admission_prof=admission_prof).values_list('value', flat=True)
+        first_set = set(list(old_shalguur_ids))
+        sec_set = set(shalguur_ids)
+
+        # Устгах ids
+        delete_ids = first_set - sec_set
         with transaction.atomic():
             try:
+                # Check болиулсан үед устгана
+                AdmissionIndicator.objects.filter(admission_prof=admission_prof, value__in=delete_ids).delete()
                 for idx, shalguur_id in enumerate(shalguur_ids):
                     obj, created = AdmissionIndicator.objects.update_or_create(
                         value=shalguur_id,
