@@ -33,17 +33,17 @@ export function getColumns(checkScore, allCheck)
 		},
 		{
 			name: "Хич.код",
-			selector: (row, index) => <span title={row?.row.lesson?.code}>{row?.row.lesson?.code}</span>,
+			selector: (row, index) => <span title={row?.lesson?.code}>{row?.lesson?.code}</span>,
 			center: true,
 			width: '150px'
 		},
 		{
 			name: "Хич.нэр",
-			selector: (row, index) => <span title={row?.row.lesson?.name}>{row?.row.lesson?.name}</span>,
+			selector: (row, index) => <span title={row?.lesson?.name}>{row?.lesson?.name}</span>,
 		},
 		{
 			name: "Кр",
-			selector: (row, index) => <span>{row?.row.lesson?.kredit}</span>,
+			selector: (row, index) => <span>{row?.lesson?.kredit}</span>,
 			center: true,
 			width: '60px'
 		},
