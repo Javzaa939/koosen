@@ -19,7 +19,7 @@ export function getColumns(checkScore, allCheck)
 					type='checkbox'
 					id={`${row.lesson_id}lesson`}
 					name={`lesson`}
-					onChange={() => checkScore(row.lesson_id)}
+					onChange={() => checkScore(row.lesson?.id)}
 					value={row.lesson_id}
 				/>,
 			center: true,

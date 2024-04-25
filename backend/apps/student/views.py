@@ -2448,6 +2448,7 @@ class StudentGpaDiplomaValuesAPIView(
         all_score = 0
 
         student_id = self.request.query_params.get('id')
+        print('student_id', student_id)
         qs = CalculatedGpaOfDiploma.objects.filter(student_id=student_id)
 
         student_prof_qs = Student.objects.get(id=student_id).group.profession
@@ -2458,10 +2459,15 @@ class StudentGpaDiplomaValuesAPIView(
 
         all_learn_levels = dict(LearningPlan.LESSON_LEVEL)
 
+        print('learning_plan_levels', learning_plan_levels)
+        print('qs', len(qs))
+
         all_datas = []
         for level in list(learning_plan_levels):
             if level == (LearningPlan.DIPLOM or LearningPlan.MAG_DIPLOM or LearningPlan.DOC_DIPLOM):
                 continue
+
+            print('123', type(level))
 
             obj_datas = {}
             obj_datas['name'] = all_learn_levels[level]
@@ -2481,6 +2487,8 @@ class StudentGpaDiplomaValuesAPIView(
                 lesson_first_data = data_qs.lesson.all()
                 lesson_obj = lesson_first_data.first()
 
+                print('lesson_first_data', lesson_first_data)
+
                 query = '''
                     select lp.lesson_level, ls.name, ls.code, ls.id, ls.name_eng, ls.name_uig, ls.kredit from lms_learningplan lp
                     inner join lms_lessonstandart ls
@@ -2491,6 +2499,7 @@ class StudentGpaDiplomaValuesAPIView(
                 cursor = connection.cursor()
                 cursor.execute(query)
                 rows = list(dict_fetchall(cursor))
+                print('rows', rows)
 
                 if len(rows) > 0:
                     if rows[0]['lesson_level'] == level:
@@ -2501,10 +2510,14 @@ class StudentGpaDiplomaValuesAPIView(
 
                         max_kredit = max_kredit + lesson.get('kredit')
                         score_qs = Score.objects.filter(score_max__gte=data_qs.score, score_min__lte=data_qs.score).first()
+
+                        print('score_qs', score_qs)
                         all_score = all_score + (score_qs.gpa * lesson.get('kredit'))
 
             obj_datas['lessons'] = lesson_datas
             all_datas.append(obj_datas)
+
+        print('all_score', all_score, max_kredit)
 
         final_gpa = all_score / max_kredit
         final_gpa = format(final_gpa, ".2f")
@@ -2518,7 +2531,7 @@ class StudentGpaDiplomaValuesAPIView(
 
         return request.send_data(all_data)
 
-
+print(CalculatedGpaOfDiploma.objects.filter(student_id=21))
 @permission_classes([IsAuthenticated])
 class StudentVizStatusAPIView(
     mixins.CreateModelMixin,
