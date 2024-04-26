@@ -2531,7 +2531,7 @@ class StudentGpaDiplomaValuesAPIView(
 
         return request.send_data(all_data)
 
-print(CalculatedGpaOfDiploma.objects.filter(student_id=21))
+
 @permission_classes([IsAuthenticated])
 class StudentVizStatusAPIView(
     mixins.CreateModelMixin,

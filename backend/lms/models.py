@@ -428,6 +428,7 @@ class LearningPlan(models.Model):
     PROF_BASIC = 2
     PROFESSION = 3
     DIPLOM = 4
+    QUALIFICATION = 5
 
     MAG_PROF_BASIC = 11
     MAG_PROFESSION = 12
@@ -441,6 +442,7 @@ class LearningPlan(models.Model):
         (BASIC, 'Дээд боловсролын суурь хичээл'),
         (PROF_BASIC, 'Мэргэжлийн суурь хичээл'),
         (PROFESSION, 'Мэргэжлийн хичээл'),
+        (QUALIFICATION, 'Мэргэшлийн хичээл'),
         (DIPLOM, 'Диплом'),
 
         (MAG_PROF_BASIC, 'Мэргэжлийн суурь хичээл'),

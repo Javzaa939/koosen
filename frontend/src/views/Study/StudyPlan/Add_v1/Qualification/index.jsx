@@ -15,7 +15,7 @@ import classnames from "classnames";
 
 import TableRows from "../TableRows"
 
-const Diplom = ({ datas, isOpen, profession, degree }) => {
+const Qualification = ({ datas, isOpen, profession, degree }) => {
 
     const { t } = useTranslation()
     const { user } = useContext(AuthContext)
@@ -26,7 +26,7 @@ const Diplom = ({ datas, isOpen, profession, degree }) => {
         previous_lesson: '',
         group_lesson: '',
         season: '',
-        lesson_level: degree === 1 ? 4 : degree === 2 ? 13 : 23,
+        lesson_level: 5,
         lesson_type: 1,
         is_check_score: false,
     }
@@ -83,7 +83,7 @@ const Diplom = ({ datas, isOpen, profession, degree }) => {
             const department = datas?.department?.id || ''
             const school = datas?.school || ''
             const profession = datas?.id || ''
-            const lesson_level = degree === 1 ? 4 : degree === 2 ? 13 : 23
+            const lesson_level = 5
             const { success, data } = await fetchData(planApi.getPlan(department, school, profession, lesson_level, ''))
             if(success) {
                 initZaavalRow(data)
@@ -135,7 +135,7 @@ const Diplom = ({ datas, isOpen, profession, degree }) => {
     function toggleClosed() {
         showWarning({
             question: `Та хаахдаа итгэлтэй байна уу? Хадгалахгүй хааснаар таны хийсэн өөрчлөлтүүд хадгалагдахгүй болохыг анхаарна уу !!!`,
-            onClick: () => document.getElementById('toggler4').click(),
+            onClick: () => document.getElementById('toggler5').click(),
             btnText: 'Тийм',
         })
     }
@@ -143,11 +143,11 @@ const Diplom = ({ datas, isOpen, profession, degree }) => {
     return (
         <Card className='mt-1 m-0'>
             {isLoading && Loader}
-            <Collapse toggler="#toggler4" isOpen={isOpen}>
+            <Collapse toggler="#toggler5" isOpen={isOpen}>
                 <div className='added-cards'>
                     <div className={classnames('cardMaster rounded border p-1')}>
                         <h5 className='text-center pb-50'>
-                            {degree === 1 && '5.1. Дипломын хичээл'}
+                            4.1. Заавал судлах
                         </h5>
                         <Table size='sm' bordered>
                             <thead>
@@ -197,4 +197,4 @@ const Diplom = ({ datas, isOpen, profession, degree }) => {
     );
 };
 
-export default Diplom;
+export default Qualification;
