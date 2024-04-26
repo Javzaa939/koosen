@@ -442,7 +442,7 @@ class LearningPlan(models.Model):
         (BASIC, 'Дээд боловсролын суурь хичээл'),
         (PROF_BASIC, 'Мэргэжлийн суурь хичээл'),
         (PROFESSION, 'Мэргэжлийн хичээл'),
-        (QUALIFICATION, 'Мэргэшлийн хичээл'),
+        (QUALIFICATION, 'Мэргэших хичээл'),
         (DIPLOM, 'Диплом'),
 
         (MAG_PROF_BASIC, 'Мэргэжлийн суурь хичээл'),

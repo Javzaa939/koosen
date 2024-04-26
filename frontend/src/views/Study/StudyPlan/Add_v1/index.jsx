@@ -164,7 +164,7 @@ const StudyPlanAdd = ({ open, handleModal, mergejil_id }) => {
                                 <>
                                     <div className='added-cards' onClick={() => setIsQualification(!is_qualification)}>
                                         <div className={classnames('cardMaster rounded border p-1')} role="button" id="toggler5">
-                                            4. Мэргэшлийн хичээл
+                                            4. Мэргэших хичээл
                                         </div>
                                     </div>
                                     {
