@@ -83,11 +83,11 @@ export default function LearningTrue()
                         {
                             datas?.status_code == 1
                             ?
-                                `${datas?.code} кодтой ${datas?.last_name} овогтой ${datas?.first_name} нь ${datas?.school_data?.name}-д ${datas?.degree_name} зэргийн ${datas?.profession_name} мэргэжлээр ${datas?.group_level}-р курст суралцдаг нь үнэн болохыг тодорхойлов.`
+                                `${datas?.code} кодтой ${datas?.last_name} овогтой ${datas?.first_name} нь ${datas?.school_data?.name}-д ${datas?.degree_name?.toLowerCase()}-н ${datas?.profession_name} мэргэжлээр ${datas?.group_level}-р курст суралцдаг нь үнэн болохыг тодорхойлов.`
                             :
                                 datas?.status_code == 5
                                 ?
-                                    `${datas?.code} кодтой ${datas?.last_name} овогтой ${datas?.first_name} нь ${datas?.school_data?.name}-д ${datas?.degree_name}-н зэргийн ${datas?.group_name} мэргэжлээр ${datas?.group_join_year?.substring(0, 4)}-${datas?.graduation_work?.graduation_year?.substring(0, 4)} оны хооронд суралцаж ${datas?.graduation_work?.diplom_num} дипломын дугаартай төгссөн нь үнэн болохыг тодорхойлов.`
+                                    `${datas?.code} кодтой ${datas?.last_name} овогтой ${datas?.first_name} нь ${datas?.school_data?.name}-д ${datas?.degree_name?.toLowerCase()}-н ${datas?.group_name} мэргэжлээр ${datas?.group_join_year?.substring(0, 4)}-${datas?.graduation_work?.graduation_year?.substring(0, 4)} оны хооронд суралцаж ${datas?.graduation_work?.diplom_num} дипломын дугаартай төгссөн нь үнэн болохыг тодорхойлов.`
                                 :
                                     `${datas?.code} кодтой ${datas?.last_name} овогтой ${datas?.first_name} нь ${datas?.school_data?.name}-ээс ${datas?.status_name?.toLowerCase()} нь үнэн болохыг тодорхойлов.`
                         }

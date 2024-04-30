@@ -3943,7 +3943,7 @@ class AdmissionIndicator(models.Model):
         (NAS, 'Нас'),
         (YAL_SHIITGEL, 'Ял шийтгэл'),
         (ERUUL_MEND, 'Эрүүл мэнд'),
-        (BIE_BYALDAR, 'Бие бялдар'),
+        (BIE_BYALDAR, 'Ур чадвар'),
         (SETGEL_ZUI, 'Сэтгэлзүйн ярилцлага'),
         (TUGSSUN_SURGUULI, 'Төгссөн сургууль'),
         (ESSE, 'Cудалгааны ажлын агуулга чиглэл, зорилгын талаар бичсэн танилцуулга'),

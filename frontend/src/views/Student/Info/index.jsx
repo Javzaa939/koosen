@@ -107,7 +107,7 @@ export default function Info()
                                     <Col tag="dt" sm="4" className="fw-bolder mb-1" >
                                         Голч дүн:
                                     </Col>
-                                    <Col tag="dd" sm="8" className="mb-1" >{datas?.student_score_mini_detail?.score_obj?.gpa || 'хоосон'}</Col>
+                                    <Col tag="dd" sm="8" className="mb-1" >{datas?.student_score_mini_detail?.gpa || 'хоосон'}</Col>
                                 </Row>
                             </Col>
                         </Row>

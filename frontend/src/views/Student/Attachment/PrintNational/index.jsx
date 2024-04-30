@@ -114,11 +114,12 @@ export default function PrintAttachmentMongolia()
                                 else
                                 {
                                     let newCell1 = newRow.insertCell();
+                                    if (flattenedArray[count - 1]) {
+                                        newCell1.innerHTML = flattenedArray[count - 1]?.uig_name
+                                        newCell1.colSpan = 5
 
-                                    newCell1.innerHTML = flattenedArray[count - 1]?.uig_name
-                                    newCell1.colSpan = 5
-
-                                    newCell1.className = 'border-dark body-cell text-center'
+                                        newCell1.className = 'border-dark body-cell text-center'
+                                    }
                                 }
 
                             }
