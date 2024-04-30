@@ -412,18 +412,20 @@ class AdmissionUserInfoAPIView(
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['user__first_name', 'user__register', 'user__email', 'gpa']
+    search_fields = ['user__first_name', 'user__register', 'user__email', 'gpa', 'org']
 
     def get_queryset(self):
         queryset = self.queryset
         queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
 
         userinfo_qs = UserInfo.objects.filter(user=OuterRef('user')).values('gpa')[:1]
+        userinfo_org = UserInfo.objects.filter(user=OuterRef('user')).values('work_organization')[:1]
 
         queryset = (
             queryset
             .annotate(
                 gpa=Subquery(userinfo_qs),
+                org=Subquery(userinfo_org),
             )
         )
 

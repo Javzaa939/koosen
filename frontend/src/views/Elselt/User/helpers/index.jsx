@@ -249,6 +249,12 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 			center: true
 		},
 		{
+			minWidth: "150px",
+			name: t("А / байгууллага"),
+			selector: (row) => <span title={row?.userinfo?.work_organization}>{row?.userinfo?.work_organization}</span>,
+			center: true
+		},
+		{
 			sortField: 'created_at',
 			header: 'created_at',
 			maxWidth: "300px",
