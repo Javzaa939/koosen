@@ -2460,9 +2460,8 @@ class StudentGpaDiplomaValuesAPIView(
 
         all_datas = []
         for level in list(learning_plan_levels):
-            if level == (LearningPlan.DIPLOM or LearningPlan.MAG_DIPLOM or LearningPlan.DOC_DIPLOM):
+            if level == LearningPlan.DIPLOM or level == LearningPlan.MAG_DIPLOM or level == LearningPlan.DOC_DIPLOM:
                 continue
-
             obj_datas = {}
             obj_datas['name'] = all_learn_levels[level]
 
@@ -2506,8 +2505,6 @@ class StudentGpaDiplomaValuesAPIView(
 
             obj_datas['lessons'] = lesson_datas
             all_datas.append(obj_datas)
-
-        print('all_score', all_score, max_kredit)
 
         final_gpa = all_score / max_kredit
         final_gpa = format(final_gpa, ".2f")
