@@ -76,7 +76,12 @@ const GPA = () => {
     useEffect(() => {
         getProfessionOption()
         getGroupOption()
-        getDatas()
+    },[select_value])
+
+    useEffect(() => {
+        if (select_value) {
+            getDatas()
+        }
     },[select_value, currentPage, rowsPerPage])
 
     async function handleSearch() {
