@@ -54,6 +54,13 @@ export default function Sum()
         () =>
         {
             getAllData();
+        },
+        []
+    )
+
+    useEffect(
+        () =>
+        {
             window.onafterprint = function()
             {
                 window.history.go(-1);
@@ -78,7 +85,6 @@ export default function Sum()
                 <>
                     {isLoading && Loader}
                     <div className='d-flex flex-column justify-content-center align-items-center w-100 mt-3' style={{ fontSize: '14px' }} >
-                        {/* <img className="fallback-logo" width={100} height={100} src={`http://hr.mnun.edu.mn/media/orgs/logo/MNU-Logo_1.png`} alt="logo" onLoad={imageLoaded} /> */}
                         <img className="fallback-logo" width={100} height={100} src={logo} alt="logo" onLoad={imageLoaded} />
                         <div className="d-flex flex-column text-center fw-bolder">
                             <span className='mt-1'>
@@ -89,8 +95,6 @@ export default function Sum()
                     </div>
                     <Row className="pb-2 ps-3 pe-2 pt-1" style={{ fontSize: '14px' }} >
                     <div style={{ borderBottom: '1px solid gray' }} />
-                        {/* <p>Огноо: {new Date().getFullYear()}-{zeroFill(new Date().getMonth() + 1)}-{new Date().getDate()}</p> */}
-
                         <div className="text-center mt-1">
                             {datas?.school?.address} {datas?.school?.phone_number && `Утас: ${datas?.school?.phone_number}`} {datas?.school?.home_phone && `Факс: ${datas?.school?.home_phone}`}
                             <div>{datas?.school?.email && `E-mail: ${datas?.school?.email}`}</div>
@@ -110,15 +114,15 @@ export default function Sum()
                                     ?
                                         datas?.student?.status?.code == 1
                                         ?
-                                            `${datas?.student?.last_name} овогтой ${datas?.student?.first_name} /${datas?.student?.first_name}/ нь ${datas?.school?.name}-д  ${datas?.student?.group?.profession?.name} мэргэжлээр ${datas?.student?.group?.level}-р курст сурдаг нь үнэн бөгөөд ${datas?.score?.score_obj?.gpa} голч дүнтэй суралцсан нь үнэн болно.`
+                                            `${datas?.student?.last_name} овогтой ${datas?.student?.first_name} /${datas?.student?.register_num}/ нь ${datas?.student?.group?.department?.school}-д  ${datas?.student?.group?.profession?.name} мэргэжлээр ${datas?.student?.group?.level}-р курст сурдаг нь үнэн бөгөөд ${datas?.score?.gpa} голч дүнтэй суралцсан нь үнэн болно.`
                                         :
                                             datas?.student?.status?.code == 5
                                             ?
-                                                `${datas?.student?.last_name} овогтой ${datas?.student?.first_name} /${datas?.student?.first_name}/ нь ${datas?.school?.name}-д  ${datas?.student?.group?.profession?.name} мэргэжлээр ${datas?.student?.group?.level}-р курст сурдаг нь үнэн бөгөөд ${datas?.student?.group?.join_year?.substring(0, 4)}-${datas?.graduation_work?.substring(datas?.graduation_work?.length - 4)} оны хичээлийн жил ${datas?.score?.score_obj?.gpa} голч дүнтэй суралцсан нь үнэн болно.`
+                                                `${datas?.student?.last_name} овогтой ${datas?.student?.first_name} /${datas?.student?.register_num}/ нь ${datas?.student?.group?.department?.school}-д  ${datas?.student?.group?.profession?.name} мэргэжлээр ${datas?.student?.group?.level}-р курст сурдаг нь үнэн бөгөөд ${datas?.student?.group?.join_year?.substring(0, 4)}-${datas?.graduation_work?.substring(datas?.graduation_work?.length - 4)} оны хичээлийн жил ${datas?.score?.gpa} голч дүнтэй суралцсан нь үнэн болно.`
                                             :
-                                                `${datas?.student?.last_name} овогтой ${datas?.student?.first_name} /${datas?.student?.first_name}/ нь ${datas?.school?.name}-д  ${datas?.student?.group?.profession?.name} мэргэжлээр ${datas?.score?.score_obj?.gpa} голч дүнтэй нь үнэн болно.`
+                                                `${datas?.student?.last_name} овогтой ${datas?.student?.first_name} /${datas?.student?.register_num}/ нь ${datas?.student?.group?.department?.school}-д  ${datas?.student?.group?.profession?.name} мэргэжлээр ${datas?.score?.gpa} голч дүнтэй нь үнэн болно.`
                                     :
-                                        `${datas?.student?.last_name} овогтой ${datas?.student?.first_name} /${datas?.student?.first_name}/ нь ${datas?.school?.name}-д  ${datas?.student?.group?.profession?.name} мэргэжлээр ${datas?.student?.group?.level}-р курст сурдаг нь үнэн бөгөөд ${data?.year_value} хичээлийн жилийн ${datas?.season_name} ${datas?.score?.score_obj?.gpa} голч дүнтэй суралцсан нь үнэн болно.`
+                                        `${datas?.student?.last_name} овогтой ${datas?.student?.first_name} /${datas?.student?.register_num}/ нь ${datas?.student?.group?.department?.school}-д  ${datas?.student?.group?.profession?.name} мэргэжлээр ${datas?.student?.group?.level}-р курст сурдаг нь үнэн бөгөөд ${data?.year_value} хичээлийн жилийн ${datas?.season_name} ${datas?.score?.score_obj?.gpa} голч дүнтэй суралцсан нь үнэн болно.`
                                 }
                             </div>
                         </div>

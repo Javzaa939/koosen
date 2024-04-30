@@ -579,15 +579,17 @@ def get_student_score_register(student_id, season='', lesson_year = '',):
 
     total_kr = 0
     total_score = 0
-    score_obj = dict()
+    average = 0
 
     ScoreRegister = apps.get_model('lms', 'ScoreRegister')
     Score = apps.get_model('lms', 'Score')
 
     filter = {
         'student__id': student_id,
-        'lesson_year__contains': lesson_year,
     }
+
+    if lesson_year:
+        filter['lesson_year__contains'] = lesson_year
 
     if season:
         filter['lesson_season__season_code'] = season
@@ -601,17 +603,17 @@ def get_student_score_register(student_id, season='', lesson_year = '',):
         for score_data in stud_score_info:
             score = score_data.score_total
             total_kr = total_kr + score_data.lesson.kredit
-            total_score = total_score + score * score_data.lesson.kredit
+            score_qs = Score.objects.filter(score_max__gte=score, score_min__lte=score).first()
+            total_score = total_score + (score_qs.gpa * score_data.lesson.kredit)
 
-        average = total_score / total_kr
-
-        score_obj = Score.objects.filter(score_max__gte=average, score_min__lte=average).values("assesment", 'gpa').last()
+        if total_score != 0.0:
+            average = round((total_score / total_kr), 2)
 
     return (
     {
         'total_kr': total_kr,
         'total_score': total_score,
-        'score_obj': score_obj
+        'gpa': average
     })
 
 
