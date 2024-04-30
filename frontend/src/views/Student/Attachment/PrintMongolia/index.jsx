@@ -66,6 +66,11 @@ export default function PrintAttachmentMongolia()
                     let count = 0
                     let perCount = 0
                     let half = printDatas.tableRowCount.length / 2
+
+                    let divide = printDatas.tableRowCount.filter(element => element !== 0).length
+                    let dividePage1 = divide > 3 ? 3 : divide
+                    let dividePage2 = divide - 3 > 0 ? divide - 3 : 0
+
                     for (let [idx, val] of printDatas.tableRowCount.entries())
                     {
                         if (idx == half)
@@ -79,9 +84,39 @@ export default function PrintAttachmentMongolia()
                         if (val > 0)
                         {
                             let tableDoc = document.getElementById(`table${idx + 1}`)
+                            let parentTableDoc = document.getElementById(`table${idx + 1}-${idx + 1}`)
                             tableDoc.classList.toggle('d-none')
 
                             var tbodyRef = tableDoc.getElementsByTagName('tbody')[0];
+
+                            if (printDatas.tableRowCount[2] == 0 && printDatas.tableRowCount[1] == 0)
+                            {
+                                if (idx == 0)
+                                {
+                                    parentTableDoc.style.padding = '0px 76px 0px 70px'
+                                }
+                            }
+
+                            if (printDatas.tableRowCount[2] == 0 && printDatas.tableRowCount[1] !== 0)
+                            {
+                                if (idx == 0)
+                                {
+                                    parentTableDoc.style.padding = '0px 0px 0px 70px'
+                                }
+                                else
+                                {
+                                    parentTableDoc.style.padding = '0px 76px 0px 0px'
+                                }
+                            }
+
+                            if (half <= idx)
+                            {
+                                parentTableDoc.style.width = `${99.1 / dividePage2}%`
+                            }
+                            else
+                            {
+                                parentTableDoc.style.width = `${99.1 / dividePage1}%`
+                            }
 
                             for (let bodyIdx = 0; bodyIdx < val; bodyIdx++)
                             {
@@ -145,9 +180,9 @@ export default function PrintAttachmentMongolia()
         <>
             {isLoading && Loader}
 
-            <div className={`position-relative d-flex justify-content-between ${isPageBreak && 'page-break'}`} style={{ fontSize: '9px', marginTop: '135px', backgroundColor: 'white', color: 'black' }} >
+            <div className={`position-relative d-flex justify-content-between ${isPageBreak && 'page-break'}`} style={{ fontSize: '13px', marginTop: printDatas?.student?.group?.degree?.degree_code == 'D' ? '175px' : '180px', marginTop: '135px', backgroundColor: 'white', color: 'black', fontFamily: 'serif' }} >
 
-                <div className='d-flex flex-wrap align-content-start p-1' style={{ width: '33.1%' }} >
+                <div className='d-flex flex-wrap align-content-start' id='table1-1' >
 
                     <table className='w-100 text-center d-none' id='table1' >
                         <thead className='fw-bolder'>
@@ -165,7 +200,7 @@ export default function PrintAttachmentMongolia()
                     </table>
                 </div>
 
-                <div className='d-flex flex-wrap align-content-start p-1' style={{ width: '33.1%' }} >
+                <div className='d-flex flex-wrap align-content-start' id='table2-2' >
 
                     <table className='w-100 text-center d-none' id='table2' >
                         <thead className='fw-bolder'>
@@ -183,7 +218,7 @@ export default function PrintAttachmentMongolia()
                     </table>
                 </div>
 
-                <div className='d-flex flex-wrap align-content-start p-1' style={{ width: '33.1%' }} >
+                <div className='d-flex flex-wrap align-content-start' id='table3-3' >
 
                     <table className='w-100 text-center d-none' id='table3' >
                         <thead className='fw-bolder'>
@@ -220,9 +255,9 @@ export default function PrintAttachmentMongolia()
 
             </div>
 
-            <div className={`${!isPageBreak && 'd-none'}`} style={{ marginTop: '135px', breakInside: 'avoid', backgroundColor: 'white', color: 'black' }} >
-                <div className={`position-relative d-flex justify-content-between`} style={{ fontSize: '9px' }} >
-                    <div className='d-flex flex-wrap align-content-start p-1' style={{ width: '33.1%' }} >
+            <div className={`${!isPageBreak && 'd-none'}`} style={{ marginTop: '175px', breakInside: 'avoid', backgroundColor: 'white', color: 'black' }} >
+                <div className={`position-relative d-flex justify-content-between`} style={{ fontSize: '13px' }} >
+                    <div className='d-flex flex-wrap align-content-start' id='table4-4' >
                         <table className='w-100 text-center d-none' id='table4' >
                             <thead className='fw-bolder'>
                                 <tr style={{ height: '25px' }}>
@@ -239,7 +274,7 @@ export default function PrintAttachmentMongolia()
                         </table>
                     </div>
 
-                    <div className='d-flex flex-wrap align-content-start p-1' style={{ width: '33.1%' }} >
+                    <div className='d-flex flex-wrap align-content-start' id='table5-5' >
 
                         <table className='w-100 text-center d-none' id='table5' >
                             <thead className='fw-bolder'>
@@ -257,7 +292,7 @@ export default function PrintAttachmentMongolia()
                         </table>
                     </div>
 
-                    <div className='d-flex flex-wrap align-content-start p-1' style={{ width: '33.1%' }} >
+                    <div className='d-flex flex-wrap align-content-start' id='table6-6' >
 
                         <table className='w-100 text-center d-none' id='table6' >
                             <thead className='fw-bolder'>
