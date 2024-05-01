@@ -2181,14 +2181,14 @@ class StudentNotice(models.Model):
     """Зар мэдээлэл"""
 
     def file_directory_path(instance, filename):
-        return '{0}/{1}/{2}'.format(settings.NOTICE, instance.id, filename)
+        return '{0}/{1}/{2}'.format(settings.NEWS, instance.id, filename)
 
     title = models.CharField(max_length=200, verbose_name="Гарчиг")
     body = models.TextField(verbose_name="Мэдээний хэсэг")
+    image = models.ImageField(upload_to=file_directory_path, null=True, blank=True, verbose_name='зураг')
     scope = models.PositiveIntegerField(choices=LearningCalendar.SCOPE, db_index=True, default=LearningCalendar.OTHER, verbose_name="Хэн хамрагдах")
     student_level = models.PositiveIntegerField(null=True, verbose_name="Оюутны курс")
     department = models.ForeignKey(Salbars, on_delete=models.SET_NULL, null=True, verbose_name="Хөтөлбөрийн баг")
-    image = models.ImageField(upload_to='notice', max_length=255, null=True, verbose_name='Мэдээнд харуулах зураг')
     is_news = models.BooleanField(default=False)
     school = models.ForeignKey(SubOrgs, on_delete=models.SET_NULL, null=True, verbose_name="Сургууль")
     created_user = models.ForeignKey(User, related_name='news_cr_user', on_delete=models.SET_NULL, null=True, verbose_name="Бүртгэсэн хэрэглэгч")
