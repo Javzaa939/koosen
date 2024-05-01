@@ -182,7 +182,7 @@ export default function PrintAttachmentMongolia()
 
             <div className={`position-relative d-flex justify-content-between ${isPageBreak && 'page-break'}`} style={{ fontSize: '13px', marginTop: printDatas?.student?.group?.degree?.degree_code == 'D' ? '175px' : '180px', marginTop: '135px', backgroundColor: 'white', color: 'black', fontFamily: 'serif' }} >
 
-                <div className='d-flex flex-wrap align-content-start' id='table1-1' >
+                <div className='d-flex flex-wrap align-content-start mt-1' id='table1-1' >
 
                     <table className='w-100 text-center d-none' id='table1' >
                         <thead className='fw-bolder'>

@@ -121,7 +121,7 @@ export default function PrintMongolia()
             {/* Үндсэн хэсэг */}
             <div className='text-center' style={{ width: '100%', lineHeight: '30px', fontSize: '19px' }} >
                 <div className='m-auto' style={{ width: '700px' }}>
-                    {data?.student?.citizenship?.name} Улсын иргэн <span className='text-uppercase fw-bolder'>{data?.student?.lastname} {data?.student?.first_name}</span> нь
+                    {data?.student?.citizenship?.name} Улсын иргэн <span className='text-uppercase fw-bolder'>{data?.student?.last_name} {data?.student?.first_name}</span> нь
                     <br />
                     {data?.student?.group?.join_year?.substring(0, 4)}-{data?.lesson_year?.substring(5, 9)} онд {data?.student?.school_name}д
                     "{data?.student?.group?.profession?.name}" мэргэжил ({data?.student?.group?.degree?.degree_code}{data?.student?.group?.profession?.code})-ээр суралцаж төгссөн тул Их сургуулийн захирлын&nbsp;

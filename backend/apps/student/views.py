@@ -1827,7 +1827,7 @@ class GraduationWorkAPIView(
 
     filter_backends = [SearchFilter]
 
-    search_fields = ['student__code', 'student__first_name', 'diplom_num', 'lesson__code', 'lesson__name', 'diplom_topic', 'leader']
+    search_fields = ['student__code', 'student__first_name', 'diplom_num', 'lesson__code', 'lesson__name', 'diplom_topic', 'leader', 'student__register_num']
 
     @has_permission(must_permissions=['lms-student-graduate-read'])
     def get(self, request, pk=None):
@@ -2451,6 +2451,7 @@ class StudentGpaDiplomaValuesAPIView(
         qs = CalculatedGpaOfDiploma.objects.filter(student_id=student_id)
 
         student_prof_qs = Student.objects.get(id=student_id).group.profession
+        print(student_prof_qs)
 
         all_data = dict()
 
