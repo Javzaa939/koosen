@@ -1190,6 +1190,7 @@ class ScoreRegister(models.Model):
     school = models.ForeignKey(SubOrgs, on_delete=models.SET_NULL, null=True, verbose_name="Сургууль")
     created_user = models.ForeignKey(User, related_name='score_cr_user', on_delete=models.SET_NULL, null=True, verbose_name="Бүртгэсэн хэрэглэгч")
     updated_user = models.ForeignKey(User, related_name='score_up_user', on_delete=models.SET_NULL, null=True, verbose_name="Зассан хэрэглэгч")
+    grade_letter = models.ForeignKey(GradeLetter, on_delete=models.SET_NULL, null=True, verbose_name="Үсгэн үнэлгээ")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
