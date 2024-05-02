@@ -116,13 +116,16 @@ export default function PrintMongolia()
     }
 
     return (
-        <div className='vh-100 position-relative bg-white' style={{ fontFamily: 'Arial', color: 'black' }} >
-
+        //<div className='vh-100 position-relative  d-flex flex-column  bg-white' style={{ fontFamily: 'Arial', color: 'black' }} >
+        <div
+            className={`vh-100 position-relative d-flex flex-column justify-content-end align-items-center bg-white`}
+            style={{ fontFamily: 'Arial', color: 'black' }}
+        >
             {isLoading && Loader}
 
             {/* Үндсэн хэсэг */}
-            <div className='position-absolute text-center' style={{ top: '250px', width: '100%', fontSize: '19px', lineHeight: '30px' }} >
-                <div className='m-auto' style={{ width: '1000px' }}>
+            <div className='text-center' style={{ width: '100%', fontSize: '19px', lineHeight: '30px', top: '250px', }} >
+                <div className='m-auto' >
                     <span className='text-center'>This is to certify that
                         <br />
                         <span className='fw-bolder text-uppercase'>{data?.student?.first_name_eng}</span> <span className='fw-bolder'>{data?.student?.last_name_eng}</span>
@@ -141,17 +144,16 @@ export default function PrintMongolia()
             </div>
 
             {/* Гарын үсгийн хэсэг */}
-            <div className='position-absolute' style={{ bottom: '100px', fontSize: '15px' }} >
-                <div style={{ paddingLeft: '100px', paddingRight: '100px', lineHeight: '18px' }} >
-                    <div className='d-flex w-100 text-center justify-content-center'>
-
+            <div style={{ bottom: '0', fontSize: '15px' }} >
+                <div style={{ paddingLeft: '100px', paddingRight: '100px', lineHeight: '18px', marginTop: '80px', marginBottom: '10px' }} >
+                    <div className='d-flex text-center justify-content-center' style={{width: '400px'}}>
                         {
                             listArr.length != 0
                             &&
                             listArr.map((val, idx) =>
                             {
                                 return (
-                                    <div className='d-flex flex-column pt-4 pb-2' style={{ paddingRight: '20px', paddingLeft: '20px' }} key={idx} >
+                                    <div className='d-flex flex-column pt-2 pb-2' style={{ paddingRight: '20px', paddingLeft: '20px' }} key={idx} >
                                         <span className='border-top-black' style={{ paddingTop: '3px' }}>{val?.last_name_eng}{val?.first_name_eng}</span>
                                         <span>{val?.position_name_eng}</span>
                                     </div>
@@ -163,12 +165,11 @@ export default function PrintMongolia()
                 </div>
 
                 {/* Footer */}
-                <div className='d-flex justify-content-between'>
-                    <span style={{ paddingLeft: '130px' }} >ULAANBAATAR CITY</span>
-                    <span style={{ paddingRight: '150px' }} >REGISTER No {data?.registration_num}</span>
-                </div>
             </div>
-
+            <div className='d-flex justify-content-between w-100 mb-5'>
+                <span style={{ paddingLeft: '130px' }} >ULAANBAATAR CITY</span>
+                <span style={{ paddingRight: '150px' }} >REGISTER No {data?.registration_num}</span>
+            </div>
         </div>
     )
 }
