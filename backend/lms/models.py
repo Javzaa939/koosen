@@ -1142,6 +1142,18 @@ class Exam_repeat(models.Model):
 
 
 #--------------------------------------Дүнгийн бүртгэл-------------------------------------------
+
+
+class GradeLetter(models.Model):
+    """ Дүнгийн үсгэн үнэлгээ """
+
+    letter = models.CharField(max_length=10, verbose_name="Үсгэн тэмдэглэгээ")
+    description = models.CharField(max_length=300, verbose_name="Тайлбар")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
 class ScoreRegister(models.Model):
     """ Дүнгийн бүртгэл """
 
@@ -1178,6 +1190,7 @@ class ScoreRegister(models.Model):
     school = models.ForeignKey(SubOrgs, on_delete=models.SET_NULL, null=True, verbose_name="Сургууль")
     created_user = models.ForeignKey(User, related_name='score_cr_user', on_delete=models.SET_NULL, null=True, verbose_name="Бүртгэсэн хэрэглэгч")
     updated_user = models.ForeignKey(User, related_name='score_up_user', on_delete=models.SET_NULL, null=True, verbose_name="Зассан хэрэглэгч")
+    grade_letter = models.ForeignKey(GradeLetter, on_delete=models.SET_NULL, null=True, verbose_name="Үсгэн үнэлгээ")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
