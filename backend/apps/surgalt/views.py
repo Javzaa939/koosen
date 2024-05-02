@@ -3081,6 +3081,7 @@ class LessonStandartGroupAPIView(
         return request.send_data(return_datas)
 
 
+@permission_classes([IsAuthenticated])
 class CopyProfesisonAPIView(
     generics.GenericAPIView,
     mixins.CreateModelMixin
@@ -3133,6 +3134,7 @@ class CopyProfesisonAPIView(
         return request.send_info('INF_018')
 
 
+@permission_classes([IsAuthenticated])
 class ProfessionJustProfessionAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin
@@ -3156,6 +3158,7 @@ class ProfessionJustProfessionAPIView(
         return request.send_data(profession_data)
 
 
+@permission_classes([IsAuthenticated])
 class ProfessionPosterFile(
     generics.GenericAPIView,
     mixins.UpdateModelMixin
