@@ -1874,6 +1874,10 @@ class GraduationWorkAPIView(
 
         data = request.data
         lesson_ids = data['lesson']
+
+        if lesson_ids and None in lesson_ids:
+            return request.send_error('ERR_002', 'Дипломын хичээл сонгоно уу')
+
         del data['lesson']
         student = data.get("student")
 
@@ -1891,7 +1895,8 @@ class GraduationWorkAPIView(
             created_qs = self.queryset.get(id=created_qs.get("id"))
             created_qs.lesson.add(*lesson_ids)
 
-        except Exception:
+        except Exception as e:
+            print(e)
             return request.send_error("ERR_002")
 
         return request.send_info("INF_001")
@@ -2451,7 +2456,6 @@ class StudentGpaDiplomaValuesAPIView(
         qs = CalculatedGpaOfDiploma.objects.filter(student_id=student_id)
 
         student_prof_qs = Student.objects.get(id=student_id).group.profession
-        print(student_prof_qs)
 
         all_data = dict()
 

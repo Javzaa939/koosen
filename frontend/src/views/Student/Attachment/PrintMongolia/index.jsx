@@ -6,6 +6,8 @@ import useLoader from '@hooks/useLoader';
 
 import './style.css'
 
+import themeConfig from '@src/configs/themeConfig';
+
 export default function PrintAttachmentMongolia()
 {
     // Loader
@@ -315,7 +317,7 @@ export default function PrintAttachmentMongolia()
 
             <header className='w-100 px-1' style={{ backgroundColor: 'white', color: 'black' }} >
                 <div className='d-flex flex-column text-center fw-bolder'>
-                    <p className='text-uppercase' style={{ marginBottom: '0px' }} >Дотоод Хэргийн Их Сургууль</p>
+                    <p className='text-uppercase' style={{ marginBottom: '0px' }} >{themeConfig.school.name}</p>
                     <p className='text-uppercase' style={{ marginBottom: '0px' }} >{printDatas?.student?.department?.school}</p>
                     <p style={{ fontSize: '12px', fontWeight: '500' }} >{printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.graduation_work?.diplom_num} дугаартай <span className='text-lowercase'>{printDatas?.student?.group?.degree?.degree_name && `${printDatas?.student?.group?.degree?.degree_name}ын`}</span> дипломын хавсралт</p>
                 </div>
