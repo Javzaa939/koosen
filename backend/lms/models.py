@@ -1145,7 +1145,7 @@ class Exam_repeat(models.Model):
 
 
 class GradeLetter(models.Model):
-    """ Дүнгийн үсгэн тэмдэглэгээ """
+    """ Дүнгийн үсгэн үнэлгээ """
 
     letter = models.CharField(max_length=10, verbose_name="Үсгэн тэмдэглэгээ")
     description = models.CharField(max_length=300, verbose_name="Тайлбар")
