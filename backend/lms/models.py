@@ -1142,6 +1142,16 @@ class Exam_repeat(models.Model):
 
 
 #--------------------------------------Дүнгийн бүртгэл-------------------------------------------
+
+
+class GradeLetter(models.Model):
+    """ Дүнгийн үсгэн тэмдэглэгээ """
+
+    letter = models.CharField(max_length=10, verbose_name="Үсгэн тэмдэглэгээ")
+    description = models.CharField(max_length=300, verbose_name="Тайлбар")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 class ScoreRegister(models.Model):
     """ Дүнгийн бүртгэл """
 
