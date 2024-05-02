@@ -66,7 +66,6 @@ const ProfBasicLesson = ({ datas, isOpen, mergejil_id, degree }) => {
                         }
                     }
                 }
-                console.log(data);
             }
         }
     }
