@@ -268,7 +268,6 @@ const ProfBasicLesson = ({ datas, isOpen, mergejil_id, degree }) => {
             btnText: 'Тийм',
         })
     }
-    console.log(zaaval);
 
     return (
         <Card className='mt-1 m-0'>
