@@ -8,6 +8,8 @@ class Migration(migrations.Migration):
 
     def GradeLetterMigration(core_model, schema_editor):
 
+        """ Дүнгийн үсгэн тэмдэглэгээний хүснэгтийн тогтмол утгуудыг оруулах """
+
         GradeLetter = apps.get_model('lms', 'GradeLetter')
 
         print('   Starts GradeLetter migration ...')
