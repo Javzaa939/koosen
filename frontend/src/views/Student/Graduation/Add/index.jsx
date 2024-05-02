@@ -76,6 +76,7 @@ const Createmodal = ({ open, handleModal, refreshDatas, select_value }) => {
     // Дипломын хичээл жагсаалт
     async function getLessonOption()
     {
+        console.log(selected_student)
         const { success, data } = await allFetchData(lessonApi.getStudentDiplomaLessons(selected_student))
         if (success)
         {

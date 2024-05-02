@@ -1874,6 +1874,10 @@ class GraduationWorkAPIView(
 
         data = request.data
         lesson_ids = data['lesson']
+
+        if lesson_ids and None in lesson_ids:
+            return request.send_error('ERR_002', 'Дипломын хичээл сонгоно уу')
+
         del data['lesson']
         student = data.get("student")
 
@@ -1887,11 +1891,14 @@ class GraduationWorkAPIView(
                 transaction.savepoint_rollback(sid)
                 return request.send_error_valid(serializer.errors)
 
+            print(lesson_ids)
+
             created_qs = self.create(request).data
             created_qs = self.queryset.get(id=created_qs.get("id"))
             created_qs.lesson.add(*lesson_ids)
 
-        except Exception:
+        except Exception as e:
+            print(e)
             return request.send_error("ERR_002")
 
         return request.send_info("INF_001")
