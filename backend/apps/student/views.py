@@ -1891,8 +1891,6 @@ class GraduationWorkAPIView(
                 transaction.savepoint_rollback(sid)
                 return request.send_error_valid(serializer.errors)
 
-            print(lesson_ids)
-
             created_qs = self.create(request).data
             created_qs = self.queryset.get(id=created_qs.get("id"))
             created_qs.lesson.add(*lesson_ids)
@@ -2458,7 +2456,6 @@ class StudentGpaDiplomaValuesAPIView(
         qs = CalculatedGpaOfDiploma.objects.filter(student_id=student_id)
 
         student_prof_qs = Student.objects.get(id=student_id).group.profession
-        print(student_prof_qs)
 
         all_data = dict()
 
