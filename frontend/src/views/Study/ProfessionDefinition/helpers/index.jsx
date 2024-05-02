@@ -90,8 +90,8 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 	if(Object.keys(user).length > 0 ) {
 		var delete_column = {
 			name: `${t('Үйлдэл')}`,
-			minWidth: '160px',
-			maxWidth: "160px",
+			minWidth: '200px',
+			maxWidth: "200px",
 			center: true,
 			selector: (row) => (
 				<div style={{ width: "auto" }}>

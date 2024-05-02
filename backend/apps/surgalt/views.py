@@ -3146,6 +3146,11 @@ class ProfessionJustProfessionAPIView(
 
     def get(self, request):
 
+        # Сургуулиар хайх хэсэг
+        school = request.query_params.get('school')
+        if school:
+            self.queryset = self.queryset.filter(school=school)
+
         profession_data = self.list(request).data
 
         return request.send_data(profession_data)

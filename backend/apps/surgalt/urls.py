@@ -31,6 +31,8 @@ urlpatterns = [
     path('profession/file/', ProfessionIntroductionFileAPIView.as_view()),
     path('profession/intro/<int:pk>/', ProfessionIntroductionFileAPIView.as_view()),
     path('profession/print/plan/', ProfessionPrintPlanAPIView.as_view()),
+
+    # Мэргэжлийн тодорхойлолт хувилах
     path('profession/copy/', CopyProfesisonAPIView.as_view()),
 
     # Сургалтын төлөвлөгөө

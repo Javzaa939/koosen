@@ -384,7 +384,7 @@ function useApi(isDisplay=false) {
 				putScore: (data, pk,) => instance.put(`/learning/profession/score/${pk}/`, data),
 				deleteScore: (pk) => instance.delete(`/learning/profession/score/${pk}/`),
 				getAddScoreOne: (pk) => instance.get(`/learning/profession/score/${pk}/`),
-				getjustProfession: () => instance.get(`/learning/profession/justprofession/`),
+				getjustProfession: () => instance.get(`/learning/profession/justprofession/?school=${school_id}`),
 
 				// Танилцуулга дээр зураг хадгалах
 				saveFile: data => instance.post(`/learning/profession/file/`, data),
