@@ -127,19 +127,17 @@
     "format": "prettier --write \"src/**/*.js\""
   },
   "devDependencies": {
-    "prettier": "^2.6.2",
-    "sass-loader": "^12.6.0"
+      "@babel/plugin-proposal-class-properties": "^7.18.6",
+      "@babel/plugin-proposal-optional-chaining": "^7.21.0",
+      "@babel/plugin-proposal-private-methods": "^7.18.6",
+      "@babel/preset-env": "^7.24.4",
+      "@babel/preset-react": "^7.24.1",
+      "prettier": "^2.6.2",
+      "sass-loader": "^12.6.0"
   },
-  "browserslist": {
-    "production": [
+  "browserslist": [
       ">0.2%",
       "not dead",
       "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  }
+  ]
 }
