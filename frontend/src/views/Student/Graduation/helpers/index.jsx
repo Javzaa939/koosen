@@ -213,8 +213,8 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 									handleSetRegistrationResult(e, `${row?.id}`, registertion_num, 'registration_num')
 								}}
 							/>
-							<AlertOctagon id={`registrationNum${row?.registration_num}`} width={"20px"} className='ms-1' />
-							<UncontrolledTooltip placement='top' target={`registrationNum${row?.registration_num}`} >Enter дарсан тохиолдолд бүртгэлийн дугаар хадгалагдах болно.</UncontrolledTooltip>
+							<AlertOctagon id={`registrationNum${row?.id}`} width={"20px"} className='ms-1' />
+							<UncontrolledTooltip placement='top' target={`registrationNum${row?.id}`} >Enter дарсан тохиолдолд бүртгэлийн дугаар хадгалагдах болно.</UncontrolledTooltip>
 						</div>
 					</>
 				)
