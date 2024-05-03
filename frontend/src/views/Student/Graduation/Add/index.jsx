@@ -364,12 +364,14 @@ const Createmodal = ({ open, handleModal, refreshDatas, select_value }) => {
                                             placeholder={t('Төгсөлтийн ажлын сэдэв уйгаржин оруулах')}
                                             {...field}
                                             type="text"
-                                            style={{ fontFamily: 'cmdashitseden', fontSize: '15px'}}
+                                            style={{ fontFamily: 'CMs Urga', fontSize: '15px'}}
                                             invalid={errors.diplom_topic_uig && true}
                                         />
                                     )}
                                 />
                             {errors.diplom_topic_uig && <FormFeedback className='d-block'>{t(errors.diplom_topic_uig.message)}</FormFeedback>}
+                            <small>Цэгийг хэвээр нь ашиглах бол <code style={{ fontSize: '20px' }}>․</code></small><br />
+                            <small>Англи үг <a href="https://lingojam.com/Sans-SerifConverter" target='_blank'><code style={{ fontSize: '10px' }}>https://lingojam.com/Sans-SerifConverter</code></a></small>
                         </Col>
                         <Col md={12}>
                             <Label className="form-label" for="leader">

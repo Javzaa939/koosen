@@ -8,7 +8,7 @@ import { useTranslation } from 'react-i18next'
 import { useForm, Controller } from "react-hook-form";
 import Select from 'react-select'
 import { ReactSortable } from 'react-sortablejs'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 
 import classnames from "classnames";
 
@@ -40,7 +40,7 @@ const Graduation = () => {
     }
 
     const { showWarning } = useModal()
-    const navigate = useNavigate()
+
     // ** Hook
     const { control, formState: { errors } } = useForm({});
 
@@ -93,7 +93,6 @@ const Graduation = () => {
     // Loader
 	const { isLoading, fetchData, Loader } = useLoader({ isFullScreen: false })
     const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
-    const { isLoading: printLoading, fetchData: printFetch, Loader: PrintLoading } = useLoader({isSmall: true})
 
 	/* Устгах функц */
 	const handleDelete = async(id) => {
@@ -176,15 +175,6 @@ const Graduation = () => {
         }
     }
 
-    async function getAllPrintDatas()
-    {
-        const { success, data } = await printFetch(graduateApi.getAll(select_value.department, select_value.degree, select_value.group))
-        if(success)
-        {
-            navigate(`tushaal`, { state: data })
-        }
-    }
-
     async function getDatas()
     {
         const page_count = Math.ceil(total_count / rowsPerPage)
@@ -223,15 +213,10 @@ const Graduation = () => {
 
     async function getSignatureDatas()
     {
-        if(school_id){
-            const { success, data } = await fetchData(signatureApi.getGraduate(2, school_id))
-            if (success)
-            {
-                setListArr(data)
-            }
-        }
-        else {
-            setListArr([])
+        const { success, data } = await fetchData(signatureApi.get(2))
+        if (success)
+        {
+            setListArr(data)
         }
     }
 
@@ -282,78 +267,75 @@ const Graduation = () => {
 
 	return (
 		<Fragment>
-            {
-                school_id &&
-                <Card>
-                    {isLoading && Loader}
-                    <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom align-items-center py-1">
-                        <CardTitle tag="h4">{t('Гарын үсэг зурах хүмүүс')}</CardTitle>
-                        <div className='d-flex flex-wrap mt-md-0 mt-1'>
-                            <Button
-                                color='primary'
-                                onClick={() => handleModalSig()}
-                            >
-                                <Plus size={15} />
-                                <span className='align-middle ms-50'>{t('Нэмэх')}</span>
-                            </Button>
-                        </div>
-                    </CardHeader>
-                    {
-                        listArr.length != 0
-                        ?
-                            <ReactSortable
-                                tag='ul'
-                                className='list-group'
-                                list={listArr}
-                                setList={setListArr}
-                                onSort={changeOrder}
-                            >
-                            {
-                                listArr.map((val, idx) => {
-                                    return (
-                                        <ListGroupItem className='draggable' key={idx} value={val.id} >
-                                            <div className='d-flex align-items-center justify-content-between'>
-                                                <div className="d-flex align-items-center">
-                                                    <div>
-                                                        <Menu size={16} className="me-2" />
-                                                    </div>
-                                                    <div>
-                                                        <h5 className='form-label my-0'>{val?.last_name} {val?.first_name}</h5>
-                                                        <span className='form-label'>{val?.position_name}</span>
-                                                    </div>
+            <Card>
+                {isLoading && Loader}
+                <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom align-items-center py-1">
+                    <CardTitle tag="h4">{t('Гарын үсэг зурах хүмүүс')}</CardTitle>
+                    <div className='d-flex flex-wrap mt-md-0 mt-1'>
+                        <Button
+                            color='primary'
+                            onClick={() => handleModalSig()}
+                        >
+                            <Plus size={15} />
+                            <span className='align-middle ms-50'>{t('Нэмэх')}</span>
+                        </Button>
+                    </div>
+                </CardHeader>
+                {
+                    listArr.length != 0
+                    ?
+                        <ReactSortable
+                            tag='ul'
+                            className='list-group'
+                            list={listArr}
+                            setList={setListArr}
+                            onSort={changeOrder}
+                        >
+                        {
+                            listArr.map((val, idx) => {
+                                return (
+                                    <ListGroupItem className='draggable' key={idx} value={val.id} >
+                                        <div className='d-flex align-items-center justify-content-between'>
+                                            <div className="d-flex align-items-center">
+                                                <div>
+                                                    <Menu size={16} className="me-2" />
                                                 </div>
                                                 <div>
-                                                    <a role="button"
-                                                        onClick={() => handleUpdateModal(val?.id, val)}
-                                                        className="ms-1"
-                                                    >
-                                                        <Edit color="gray" width={"18px"} />
-                                                    </a>
-                                                    <a role="button"
-                                                        onClick={() => showWarning({
-                                                            header: {
-                                                                title: t(`Устгах үйлдэл`),
-                                                            },
-                                                            question: t(`Та энэхүү тохиргоог устгахдаа итгэлтэй байна уу?`),
-                                                            onClick: () => handleDeleteSig(val?.id),
-                                                            btnText: t('Устгах'),
-                                                        })}
-                                                        className="ms-1"
-                                                    >
-                                                        <Trash2 color="red" width={"18px"} />
-                                                    </a>
+                                                    <h5 className='form-label my-0'>{val?.last_name} {val?.first_name}</h5>
+                                                    <span className='form-label'>{val?.position_name}</span>
                                                 </div>
                                             </div>
-                                        </ListGroupItem>
-                                    )
-                                })
-                            }
-                            </ReactSortable>
-                        :
-                            <p className="text-center my-2">Өгөгдөл байхгүй байна.</p>
-                    }
-                </Card>
-            }
+                                            <div>
+                                                <a role="button"
+                                                    onClick={() => handleUpdateModal(val?.id, val)}
+                                                    className="ms-1"
+                                                >
+                                                    <Edit color="gray" width={"18px"} />
+                                                </a>
+                                                <a role="button"
+                                                    onClick={() => showWarning({
+                                                        header: {
+                                                            title: t(`Устгах үйлдэл`),
+                                                        },
+                                                        question: t(`Та энэхүү тохиргоог устгахдаа итгэлтэй байна уу?`),
+                                                        onClick: () => handleDeleteSig(val?.id),
+                                                        btnText: t('Устгах'),
+                                                    })}
+                                                    className="ms-1"
+                                                >
+                                                    <Trash2 color="red" width={"18px"} />
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </ListGroupItem>
+                                )
+                            })
+                        }
+                        </ReactSortable>
+                    :
+                        <p className="text-center my-2">Өгөгдөл байхгүй байна.</p>
+                }
+            </Card>
 
 			<Card>
                 <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
@@ -369,8 +351,8 @@ const Graduation = () => {
                         </Button>
                     </div>
                 </CardHeader>
-                <Row className="justify-content-between mx-0 mt-1 mb-1">
-                    <Col sm={6} md={6} lg={4} >
+                <Row className="justify-content-between mx-0 mt-1 mb-1" sm={12}>
+                    <Col sm={6} md={6} lg={3} >
                         <Label className="form-label" for="department">
                             {t('Тэнхим')}
                         </Label>
@@ -408,7 +390,7 @@ const Graduation = () => {
                             }}
                         />
                     </Col>
-                    <Col sm={6} md={6} lg={4}>
+                    <Col sm={6} md={6} lg={3}>
                         <Label className="form-label" for="degree">
                             {t('Боловсролын зэрэг')}
                         </Label>
@@ -446,7 +428,7 @@ const Graduation = () => {
                             }}
                         />
                     </Col>
-                    <Col sm={6} md={6} lg={4} >
+                    <Col sm={6} md={6} lg={3} >
                         <Label className="form-label" for="group">
                             {t('Анги')}
                         </Label>
@@ -484,14 +466,10 @@ const Graduation = () => {
                             }}
                         />
                     </Col>
-                    <div sm={6} md={6} lg={3} className='mt-2 d-flex justify-content-end flex-wrap'>
-                        <Button size='sm' className='me-1 mt-50' color='primary' disabled={select_value.group ? false : true} onClick={handleCreateModal}>Төгсөлтийн шалгалт үүсгэх</Button>
-                        <Button size='sm' className='me-1 mt-50' color='primary' disabled={datas.length > 0 ? false : true} onClick={handleCommandCreateModal}>Төгсөлтийн тушаал оруулах</Button>
-                        <Button size='sm' className='me-1 mt-50' color='primary' disabled={printLoading}  onClick={() => getAllPrintDatas()}>
-                            {printLoading && PrintLoading}
-                            <span className='ms-50'>Тушаал хэвлэх</span>
-                        </Button>
-                    </div>
+                    <Col sm={6} md={6} lg={3} className='mt-2 d-flex'>
+                        <Button size='sm' className='me-1' color='primary' disabled={select_value.group ? false : true} onClick={handleCreateModal}>Төгсөлтийн шалгалт үүсгэх</Button>
+                        <Button size='sm' className='me-1' color='primary' disabled={datas.length > 0 ? false : true} onClick={handleCommandCreateModal}>Төгсөлтийн тушаал оруулах</Button>
+                    </Col>
                 </Row>
                 <Row className='mt-1 d-flex justify-content-between mx-0'>
                     <Col className='d-flex align-items-center justify-content-start '>
@@ -541,7 +519,7 @@ const Graduation = () => {
                         </Button>
                     </Col>
                 </Row>
-                <div className="react-dataTable react-dataTable-selectable-rows" id="datatableLeftTwoRightOne">
+                <div className="react-dataTable react-dataTable-selectable-rows">
                     <DataTable
                         noHeader
                         paginationServer
