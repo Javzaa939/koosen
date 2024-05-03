@@ -132,7 +132,7 @@ export default function PrintMongolia()
                         <br />
                         citizen of {data?.student?.citizenship?.name_eng},
                         <br />
-                        has completed requirements of the programme {data?.student?.group?.profession?.name_eng} ({data?.student?.group?.degree?.degree_code}{data?.student?.group?.profession?.code})
+                        has completed requirements of the programme {data?.student?.group?.profession?.name_eng} ({data?.student?.group?.profession?.code})
                         <br />
                         was awarded the degree of <span className='text-uppercase'>{data?.student?.group?.degree?.degree_eng_name} OF {data?.student?.group?.profession?.dep_name_eng}</span>
                         <br />

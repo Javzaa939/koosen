@@ -1,6 +1,9 @@
 // You can customize the template with the help of this file
 //Template config options
 const themeConfig = {
+  school:{
+    name:'Дотоод Хэргийн Их Сургууль'
+  },
   app: {
     appName: "ДХИС",
     appLogoImage: require("@src/assets/images/logo/dxis_logo.png").default
