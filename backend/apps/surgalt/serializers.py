@@ -795,3 +795,38 @@ class LessonTeacherSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lesson_to_teacher
         fields = '__all__'
+
+
+class ProfessionDefinitionJustProfessionSerializer(serializers.ModelSerializer):
+
+    full_name = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = ProfessionDefinition
+        fields = '__all__'
+
+    def get_full_name(self, obj):
+        """ Мэргэжлийн зэргийн нэр код нэгтгэх """
+
+        full_name = ''
+        code = obj.code
+        name = obj.name
+
+        ognoo = obj.confirm_year
+
+        degree = obj.degree
+        if degree:
+            degree_code = degree.degree_code
+
+        if code:
+            full_name += code
+        if name:
+            full_name = full_name +  ' ' + name
+
+        if degree_code:
+            full_name = full_name + '({degree_code})'.format(degree_code=degree_code)
+
+        if ognoo:
+            full_name = full_name + '({ognoo})'.format(ognoo=ognoo)
+
+        return full_name
