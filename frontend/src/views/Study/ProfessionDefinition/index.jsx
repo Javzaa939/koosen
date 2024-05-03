@@ -195,7 +195,6 @@ const ProfessionDefinition = () => {
 
     // Сургалтын төлөвлөгөө харуулах
     const planhandleModal = (id) => {
-        console.log(id);
         setMergejilId(id)
 
         setStudyPlanmodal(!studyPlanmodal)
@@ -203,7 +202,6 @@ const ProfessionDefinition = () => {
 
     function copyModalHandler(e, id) {
         setCopyModal(!copyModal)
-        console.log(id);
         setSelectedProf(id || null)
     }
 
