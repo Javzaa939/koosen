@@ -202,7 +202,7 @@ export default function PrintAttachmentMongolia()
                     </table>
                 </div>
 
-                <div className='d-flex flex-wrap align-content-start' id='table2-2' >
+                <div className='d-flex flex-wrap align-content-start mt-1' id='table2-2' >
 
                     <table className='w-100 text-center d-none' id='table2' >
                         <thead className='fw-bolder'>
@@ -220,7 +220,7 @@ export default function PrintAttachmentMongolia()
                     </table>
                 </div>
 
-                <div className='d-flex flex-wrap align-content-start' id='table3-3' >
+                <div className='d-flex flex-wrap align-content-start mt-1' id='table3-3' >
 
                     <table className='w-100 text-center d-none' id='table3' >
                         <thead className='fw-bolder'>
@@ -259,7 +259,7 @@ export default function PrintAttachmentMongolia()
 
             <div className={`${!isPageBreak && 'd-none'}`} style={{ marginTop: '175px', breakInside: 'avoid', backgroundColor: 'white', color: 'black' }} >
                 <div className={`position-relative d-flex justify-content-between`} style={{ fontSize: '13px' }} >
-                    <div className='d-flex flex-wrap align-content-start' id='table4-4' >
+                    <div className='d-flex flex-wrap align-content-start mt-1' id='table4-4' >
                         <table className='w-100 text-center d-none' id='table4' >
                             <thead className='fw-bolder'>
                                 <tr style={{ height: '25px' }}>
@@ -276,7 +276,7 @@ export default function PrintAttachmentMongolia()
                         </table>
                     </div>
 
-                    <div className='d-flex flex-wrap align-content-start' id='table5-5' >
+                    <div className='d-flex flex-wrap align-content-start mt-1' id='table5-5' >
 
                         <table className='w-100 text-center d-none' id='table5' >
                             <thead className='fw-bolder'>
@@ -294,7 +294,7 @@ export default function PrintAttachmentMongolia()
                         </table>
                     </div>
 
-                    <div className='d-flex flex-wrap align-content-start' id='table6-6' >
+                    <div className='d-flex flex-wrap align-content-start mt-1' id='table6-6' >
 
                         <table className='w-100 text-center d-none' id='table6' >
                             <thead className='fw-bolder'>

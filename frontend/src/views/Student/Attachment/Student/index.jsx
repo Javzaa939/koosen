@@ -11,7 +11,6 @@ import { Mongolian } from "flatpickr/dist/l10n/mn.js"
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
-import  useUpdateEffect  from '@hooks/useUpdateEffect'
 
 import { getColumns } from '@views/Student/Attachment/Student/helpers/index.jsx'
 
@@ -28,7 +27,6 @@ export default function AttachmentStudent()
     const [ editDatatable, setEditDatatable ] = useState(false)
     const [ printValue, setPrintValue ] = useState("")
     const [ picker, setPicker ] = useState(new Date())
-    const [ is_loading, setLoading ] = useState(true)
 
     const [ checkedTableRowCount, setCheckedTableRowCount ] = useState([])
     const [ errorMessage, setErrorMessage ] = useState('')
@@ -44,7 +42,7 @@ export default function AttachmentStudent()
     const studentId = location.state
 
     // Loader
-	const { isLoading, fetchData, Loader } = useLoader({ isFullScreen: false })
+	const { isLoading, fetchData, Loader } = useLoader({ isFullScreen: true })
 
     // Api
     const studentApi = useApi().student
@@ -56,13 +54,11 @@ export default function AttachmentStudent()
             fetchData(studentApi.scoreRegister(studentId)),
             fetchData(studentApi.calculateGpaDimploma(studentId)),
         ]).then((values) => {
-            if (values[0]?.success) {
-                setLoading(false)
-            }
             setDatas(values[0]?.data),
-            setCalculatedDatas(values[1]?.data)
+            setCalculatedDatas(values[1].data)
         })
     }
+
 
     useEffect(
         () =>
@@ -76,12 +72,12 @@ export default function AttachmentStudent()
                 getAllData()
             }
         },
-        []
+        [studentId]
     )
 
     function changeTableRowValues(value)
     {
-        let defaultSum = datas?.calculated_length + 3
+        let defaultSum = datas?.calculated_length
 
         let sum = 0
 
@@ -189,7 +185,7 @@ export default function AttachmentStudent()
         }
     }
 
-    useUpdateEffect(
+    useEffect(
         () =>
         {
             checkedValues.current = []
@@ -210,7 +206,7 @@ export default function AttachmentStudent()
     {
         let tableRowData = []
 
-        if (tableCount * 12 < allLength)
+        if (tableCount * 13 < allLength)
         {
             let residual = allLength % tableCount
             let notResidualValue = allLength - residual
@@ -224,6 +220,7 @@ export default function AttachmentStudent()
                     data++
                     residual--
                 }
+
                 tableRowData.push(data)
 
                 document.getElementById(`table${i}`).value = data
@@ -256,19 +253,19 @@ export default function AttachmentStudent()
         setCheckedTableRowCount(tableRowData)
     }
 
-    useUpdateEffect(
+    useEffect(
         () =>
         {
-            let allLength = datas?.calculated_length + 3
+            let allLength = datas?.calculated_length
             switch (printValue)
             {
                 case 'mongolian':
-                    var tableMax = 12
+                    var tableMax = 13
                     calculatePrintTableValue(allLength, tableMax, 6)
                     break;
 
                 case 'english':
-                    var tableMax = 12
+                    var tableMax = 13
                     calculatePrintTableValue(allLength, tableMax, 6)
                     break;
 
@@ -300,6 +297,8 @@ export default function AttachmentStudent()
             tableRowCount: checkedTableRowCount,
             student: datas?.student,
             registration_num: registration_num,
+            isCenter: document.getElementById('isCenter') ? document.getElementById('isCenter').checked : null,
+            isLastNameOvog: document.getElementById('isLastNameOvog') ? document.getElementById('isLastNameOvog').checked : null,
         }
 
         localStorage.setItem('blankDatas', JSON.stringify(data))
@@ -333,7 +332,7 @@ export default function AttachmentStudent()
 
     return (
         <Fragment>
-            { (is_loading || isLoading) && Loader }
+            { isLoading && Loader }
             <Card>
                 <div className="cursor-pointer hover-shadow m-1" onClick={() => handleNavigate()}>
                     <ChevronsLeft /> Буцах
@@ -393,13 +392,6 @@ export default function AttachmentStudent()
                                 <code className='text-dark' ><span className='fw-bolder'>{calculatedDatas.length}</span> хичээл сонгогдож хавсралтанд <span className='fw-bolder'>{datas?.calculated_length}</span> хичээл харагдана</code><AlertCircle id='alertCaluclated' className='' size={15} />
                                 <UncontrolledTooltip placement='top' target={`alertCaluclated`} >Багц хичээл байвал хичээлүүд багцлагдаж бодогдоно.</UncontrolledTooltip>
                             </p>
-                            {
-                                datas?.calculated_length
-                                ?
-                                    <p><code className='text-dark'><span className='fw-bolder'>{datas?.calculated_length}</span> хичээл дээр нэмэх нь 3 гарчиг нийт <span className='fw-bolder'>({datas?.calculated_length + 3}) мөр</span></code></p>
-                                :
-                                    null
-                            }
                             <Row>
                                 <Col md={3}>
                                     <Label className="form-label" for="table1">
@@ -467,7 +459,7 @@ export default function AttachmentStudent()
                                 </Col>
                                 {
                                     (printValue == 'mongolian' || printValue == 'english')
-                                    &&
+                                    ?
                                     <>
                                         <Col md={3}>
                                             <Label className="form-label" for="table5">
@@ -502,7 +494,29 @@ export default function AttachmentStudent()
                                             />
                                         </Col>
                                     </>
+                                    :
+                                        <Col md={3} className='mt-1'>
+                                            <Input
+                                                type='checkbox'
+                                                name='isCenter'
+                                                id='isCenter'
+                                            />
+                                            <Label className="form-label ms-50" for="isCenter">
+                                                {t('Голлуулах эсэх')}
+                                            </Label>
+                                        </Col>
                                 }
+                                <Col md={3} className='mt-1'>
+                                    <Input
+                                        type='checkbox'
+                                        name='isLastNameOvog'
+                                        id='isLastNameOvog'
+                                        defaultChecked={true}
+                                    />
+                                    <Label className="form-label ms-50" for="isLastNameOvog">
+                                        {t('Овог харуулах')}
+                                    </Label>
+                                </Col>
                             </Row>
                             <p className='text-danger fs-6'>{errorMessage}</p>
                             <p className='mt-1 ms-1'>Олгосон огноо</p>
@@ -549,7 +563,6 @@ export default function AttachmentStudent()
                         <DataTable
                             noHeader
                             className='react-dataTable'
-                            progressPending={is_loading}
                             noDataComponent={(
                                 <div className="my-2">
                                     <h5>{t('Өгөгдөл байхгүй байна')}</h5>

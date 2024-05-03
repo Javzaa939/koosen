@@ -60,12 +60,16 @@ export default function PrintAttachmentEnglish()
         () =>
         {
             if (datas?.lessons)
-            {
+                {
                 if (datas?.lessons?.length != 0)
                 {
                     let count = 0
                     let perCount = 0
                     let half = printDatas.tableRowCount.length / 2
+
+                    let divide = printDatas.tableRowCount.filter(element => element !== 0).length
+                    let dividePage1 = divide > 3 ? 3 : divide
+                    let dividePage2 = divide - 3 > 0 ? divide - 3 : 0
 
                     for (let [idx, val] of printDatas.tableRowCount.entries())
                     {
@@ -80,12 +84,43 @@ export default function PrintAttachmentEnglish()
                         if (val > 0)
                         {
                             let tableDoc = document.getElementById(`table${idx + 1}`)
+                            let parentTableDoc = document.getElementById(`table${idx + 1}-${idx + 1}`)
                             tableDoc.classList.toggle('d-none')
 
                             var tbodyRef = tableDoc.getElementsByTagName('tbody')[0];
 
+                            if (printDatas.tableRowCount[2] == 0 && printDatas.tableRowCount[1] == 0)
+                            {
+                                if (idx == 0)
+                                {
+                                    parentTableDoc.style.padding = '0px 76px 0px 70px'
+                                }
+                            }
+
+                            if (printDatas.tableRowCount[2] == 0 && printDatas.tableRowCount[1] !== 0)
+                            {
+                                if (idx == 0)
+                                {
+                                    parentTableDoc.style.padding = '0px 0px 0px 70px'
+                                }
+                                else
+                                {
+                                    parentTableDoc.style.padding = '0px 76px 0px 0px'
+                                }
+                            }
+
+                            if (half <= idx)
+                            {
+                                parentTableDoc.style.width = `${99.1 / dividePage2}%`
+                            }
+                            else
+                            {
+                                parentTableDoc.style.width = `${99.1 / dividePage1}%`
+                            }
+
                             for (let bodyIdx = 0; bodyIdx < val; bodyIdx++)
                             {
+
                                 let newRow = tbodyRef.insertRow();
 
                                 count++
@@ -100,19 +135,26 @@ export default function PrintAttachmentEnglish()
 
                                     perCount++
 
-									newCell1.innerHTML = perCount
-									newCell2.innerHTML = flattenedArray[count - 1]?.name_eng || ''
-									newCell3.innerHTML = flattenedArray[count - 1]?.kredit || ''
+                                    newCell1.innerHTML = perCount
+                                    newCell2.innerHTML = flattenedArray[count - 1]?.name_eng || ''
+                                    newCell3.innerHTML = flattenedArray[count - 1]?.kredit || ''
 
+                                    // NaN буцаагаад байхаар нь шалгах функц бичсэн.
+                                    // ер нь бол шаардлагагүй гэхдээ яахав
+
+                                    // newCell4.innerHTML = !isNaN(flattenedArray[count - 1]?.score)
+                                    // 	? flattenedArray[count - 1]?.score
+                                    // 		: 'Default';
+ 
                                     newCell4.innerHTML = flattenedArray[count - 1]?.score ? flattenedArray[count - 1]?.score : ''
 
-									newCell5.innerHTML = flattenedArray[count - 1]?.assesment || ''
+                                    newCell5.innerHTML = flattenedArray[count - 1]?.assesment || ''
 
-									newCell1.className = 'border-dark mini-cell'
-									newCell2.className = 'border-dark body-cell'
-									newCell3.className = 'border-dark footer1-cell'
-									newCell4.className = 'border-dark footer2-cell'
-									newCell5.className = 'border-dark footer3-cell'
+                                    newCell1.className = 'border-dark mini-cell'
+                                    newCell2.className = 'border-dark body-cell'
+                                    newCell3.className = 'border-dark footer1-cell'
+                                    newCell4.className = 'border-dark footer2-cell'
+                                    newCell5.className = 'border-dark footer3-cell'
                                 }
                                 else
                                 {
@@ -214,10 +256,11 @@ export default function PrintAttachmentEnglish()
 
             <div className={`position-relative d-flex justify-content-between ${isPageBreak && 'page-break'}`} style={{ fontSize: '9px', marginTop: '135px' }} >
 
-                <div className='d-flex flex-wrap align-content-start p-1' style={{ width: '33.1%' }} >
+                <div className='d-flex flex-wrap align-content-start mt-1' id='table1-1' >
+
                     <table className='w-100 text-center d-none' id='table1' >
                         <thead className='fw-bolder'>
-                             <tr style={{ height: '25px' }}>
+                            <tr style={{ height: '25px' }}>
                                 <td className='border-dark' style={{ width: '6.25%' }}  >№</td>
                                 <td className='border-dark' style={{ width: '63.75%' }}  >Name of subject</td>
                                 <td className='border-dark' style={{ width: '12%' }}  >Cr</td>
@@ -231,13 +274,14 @@ export default function PrintAttachmentEnglish()
                     </table>
                 </div>
 
-                <div className='d-flex flex-wrap align-content-start p-1' style={{ width: '33.1%' }} >
+                <div className='d-flex flex-wrap align-content-start mt-1' id='table2-2' >
+
                     <table className='w-100 text-center d-none' id='table2' >
                         <thead className='fw-bolder'>
-                             <tr style={{ height: '25px' }}>
-                                <td className='border-dark' style={{ width: '6.25%' }}  >№</td>
-                                <td className='border-dark' style={{ width: '63.75%' }}  >Name of subject</td>
-                                <td className='border-dark' style={{ width: '12%' }}  >Cr</td>
+                            <tr style={{ height: '25px' }}>
+                                <td className='border-dark' style={{ width: '6.25%' }}>№</td>
+                                <td className='border-dark' style={{ width: '63.75%' }}>Name of subject</td>
+                                <td className='border-dark' style={{ width: '12%' }} >Cr</td>
                                 <td className='border-dark' style={{ width: '10%' }} >Point</td>
                                 <td className='border-dark' style={{ width: '8%' }} >Grade</td>
                             </tr>
@@ -248,11 +292,10 @@ export default function PrintAttachmentEnglish()
                     </table>
                 </div>
 
-                <div className='d-flex flex-wrap align-content-start p-1' style={{ width: '33.1%' }} >
-
+                <div className='d-flex flex-wrap align-content-start mt-1' id='table3-3' >
                     <table className='w-100 text-center d-none' id='table3' >
                         <thead className='fw-bolder'>
-                             <tr style={{ height: '25px' }}>
+                            <tr style={{ height: '25px' }}>
                                 <td className='border-dark' style={{ width: '6.25%' }}  >№</td>
                                 <td className='border-dark' style={{ width: '63.75%' }}  >Name of subject</td>
                                 <td className='border-dark' style={{ width: '12%' }}  >Cr</td>

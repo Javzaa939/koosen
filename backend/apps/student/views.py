@@ -412,7 +412,7 @@ class StudentRegisterAPIView(
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['department__name', 'code', 'first_name', 'register_num']
+    search_fields = ['code', 'department__name', 'first_name', 'register_num', 'last_name']
 
     def get_queryset(self):
         queryset = self.queryset
@@ -462,8 +462,8 @@ class StudentRegisterAPIView(
 
         self.serializer_class = StudentRegisterListSerializer
 
-        status = StudentRegister.objects.filter(Q(Q(code=2) | Q(name__icontains='Төгссөн'))).first()
-        self.queryset = self.queryset.exclude(status=status)
+        # status = StudentRegister.objects.filter(Q(Q(code=2) | Q(name__icontains='Төгссөн'))).first()
+        # self.queryset = self.queryset.exclude(status=status)
 
         if pk:
             student = self.retrieve(request, pk).data
@@ -1827,7 +1827,7 @@ class GraduationWorkAPIView(
 
     filter_backends = [SearchFilter]
 
-    search_fields = ['student__code', 'student__first_name', 'diplom_num', 'lesson__code', 'lesson__name', 'diplom_topic', 'leader', 'student__register_num']
+    search_fields = ['student__code', 'student__first_name', 'diplom_num', 'lesson__code', 'lesson__name', 'diplom_topic', 'leader', 'student__register_num', 'student__last_name']
 
     @has_permission(must_permissions=['lms-student-graduate-read'])
     def get(self, request, pk=None):
@@ -2512,8 +2512,10 @@ class StudentGpaDiplomaValuesAPIView(
             obj_datas['lessons'] = lesson_datas
             all_datas.append(obj_datas)
 
-        final_gpa = all_score / max_kredit
-        final_gpa = format(final_gpa, ".2f")
+        final_gpa = 0.0
+        if all_score != 0:
+            final_gpa = all_score / max_kredit
+            final_gpa = format(final_gpa, ".2f")
 
         all_data['score'] = { 'assesment': final_gpa, 'max_kredit': max_kredit }
         all_data['lessons'] = all_datas
