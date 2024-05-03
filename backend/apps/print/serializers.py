@@ -20,10 +20,11 @@ class ScoreRegisterSerializer(serializers.ModelSerializer):
     teacher = TeacherNameSerializer(many=False)
     lesson_season = SeasonSerailizer(many=False)
     assessment = serializers.SerializerMethodField()
+    grade_letter_desc = serializers.CharField(source='grade_letter.description', default='')
 
     class Meta:
         model = ScoreRegister
-        fields = "id", "student", "lesson","teacher","teach_score", "exam_score", "score_total" , "assessment" ,"volume_kr", "lesson_year", "lesson_season"
+        fields = "id", "student", "lesson","teacher","teach_score", "exam_score", "score_total" , "assessment" ,"volume_kr", "lesson_year", "lesson_season", 'grade_letter_desc'
 
     def get_volume_kr(self, obj):
         lesson_id = obj.lesson.id

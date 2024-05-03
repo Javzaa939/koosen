@@ -983,8 +983,8 @@ function useApi(isDisplay=false) {
 			},
 			/* Дүнгийн жагсаалт*/
 			score:{
-				getList:(limit, page, sort,search, department, group, radio, chosenYear, chosenSeason) =>
-					instance.get(`/print/group/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&department=${department}&group=${group}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&school=${school_id}&is_season=${radio}&chosen_year=${chosenYear}&chosen_season=${chosenSeason}`),
+				getList:(limit, page, sort,search, department, group, radio, chosenYear, chosenSeason, chosenLesson) =>
+					instance.get(`/print/group/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&department=${department}&group=${group}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&school=${school_id}&is_season=${radio}&chosen_year=${chosenYear}&chosen_season=${chosenSeason}&lesson=${chosenLesson}`),
 				getListNoLimit:(group, radio, chosenYear, chosenSeason) =>
 					instance.get(`/print/groupnolimit/?group=${group}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&is_season=${radio}&chosen_year=${chosenYear}&chosen_season=${chosenSeason}`),
 

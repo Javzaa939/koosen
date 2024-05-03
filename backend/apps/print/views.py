@@ -237,6 +237,7 @@ class GroupListAPIView(
 
         lesson_season = self.request.query_params.get('lesson_season')
         lesson_year = self.request.query_params.get('lesson_year')
+        lesson = self.request.query_params.get('lesson')
 
         department = self.request.query_params.get('department')
         group = self.request.query_params.get('group')
@@ -263,6 +264,10 @@ class GroupListAPIView(
         # ангиар хайх
         if group:
             queryset = queryset.filter(student__group=group)
+
+        # хичээлээр хайх
+        if lesson:
+            queryset = queryset.filter(lesson=lesson)
 
         if sorting:
             if not isinstance(sorting, str):

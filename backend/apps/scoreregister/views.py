@@ -24,7 +24,7 @@ from lms.models import Lesson_to_teacher
 from lms.models import TeacherScore
 from lms.models import Lesson_teacher_scoretype
 from lms.models import LearningPlan
-from lms.models import Season, Group
+from lms.models import Season, Group, GradeLetter
 from core.models import User
 
 from .serializers import CorrespondSerailizer
@@ -899,7 +899,7 @@ class ScoreOldAPIView(
             for lesson in list(lessons):
                 score = row.get('{}'.format(lesson.get('full_name')))
 
-                if isinstance(score, str) or (not score and score != 0):
+                if not score:
                     obj = {}
                     obj['student_code'] = student_code
                     obj['lesson_code'] = lesson.get('full_name')
@@ -942,13 +942,23 @@ class ScoreOldAPIView(
 
                     lesson_year = score_start_year + '-' + score_end_year
 
-                if score and not isinstance(score, str):
-                    score = round(score, 2)
-                    assessment = Score.objects.filter(score_max__gte=score, score_min__lte=score).first()
+                grade_letter = None
+
+                # Тооцов дүн оруулах хэсэг S үнэлгээ нь тооцов
+                if isinstance(score, str) and (score == 'S' or score == 's'):
+                    grade_letter = GradeLetter.objects.filter(letter__iexact=score).first()
                 elif score:
                     score  = float(score)
                     score = round(score, 2)
                     assessment = Score.objects.filter(score_max__gte=score, score_min__lte=score).first()
+
+                exam_score = None
+                if isinstance(score, int) or isinstance(score, float):
+                    exam_score = round(score, 2)
+
+                # Үсгэн үнэлгээ орж ирвэл
+                if isinstance(score, str):
+                    exam_score = score
 
                 create_datas = {
                     'student_id': student.id,
@@ -956,8 +966,9 @@ class ScoreOldAPIView(
                     'lesson_id': lesson.id,
                     'lesson_name': lesson.name,
                     'lesson_code': lesson.code,
-                    "exam_score": round(score, 2) if isinstance(score, int) or isinstance(score, float) else None,
+                    "exam_score": exam_score,
                     'assessment_id': assessment.id if assessment else None,
+                    'grade_letter_id': grade_letter.id if grade_letter else None,
                     'status': ScoreRegister.START_SYSTEM_SCORE,
                     'school_id': student.school.id if student.school else None,
                     'lesson_year': lesson_year,
@@ -1038,37 +1049,50 @@ class ScoreImportAPIView(
                     student = create_data.get('student_id')
                     lesson_id = create_data.get('lesson_id')
                     score = create_data.get('exam_score')
+                    score = create_data.get('exam_score')
 
                     if isinstance(score, int) or isinstance(score, float):
                         create_data['exam_score'] = float(score)
+
                     else:
                         create_data['exam_score'] = 0
 
                     create_data = remove_key_from_dict(create_data, ['student_code', 'lesson_code', 'lesson_name'])
 
+                    # Тухайн хичээл дүнтэй байвал
                     score_obj = ScoreRegister.objects.filter(student=student, lesson=lesson_id).first()
-
                     if score_obj:
-                        teach_score =  score_obj.teach_score if score_obj.teach_score else 0
-                        total_score = teach_score + float(score)
+                        # Үсгэн үнэлгээ хадгалах үед S, CR гээд тооцов
+                        if isinstance(score, str) and create_data.get('grade_letter_id'):
+                            score_obj.exam_score = 0
+                            score_obj.teach_score = 0
+                            score_obj.grade_letter = GradeLetter.objects.get(pk=create_data.get('grade_letter_id'))
+                        else:
+                            teach_score =  score_obj.teach_score if score_obj.teach_score else 0
+                            total_score = teach_score + float(score)
 
-                        # Дүн засахад үсгэн үнэлгээ өөрчлөх
-                        total_score = round(total_score, 2)
-                        assessment = Score.objects.filter(score_max__gte=total_score,score_min__lte=total_score).first()
-                        score_obj.exam_score = float(score)
-                        score_obj.assessment = assessment
-                        score_obj.updated_user = User.objects.get(id=user.id)
+                            # Дүн засахад үсгэн үнэлгээ өөрчлөх
+                            total_score = round(total_score, 2)
+                            assessment = Score.objects.filter(score_max__gte=total_score,score_min__lte=total_score).first()
+                            score_obj.exam_score = float(score)
+                            score_obj.assessment = assessment
+                            score_obj.updated_user = User.objects.get(id=user.id)
 
-                        if create_data.get('lesson_year'):
-                            score_obj.lesson_year = create_data.get('lesson_year')
+                            if create_data.get('lesson_year'):
+                                score_obj.lesson_year = create_data.get('lesson_year')
 
-                        if create_data.get('lesson_season_id'):
-                            score_obj.lesson_season__id = create_data.get('lesson_season_id')
+                            if create_data.get('lesson_season_id'):
+                                score_obj.lesson_season__id = create_data.get('lesson_season_id')
 
                         score_obj.save()
                     else:
+                        # Үсгэн үнэлгээ хадгалах үед
+                        if isinstance(score, str) and create_data.get('grade_letter_id'):
+                            create_data['exam_score'] = 0
+
                         create_data['created_user'] = User.objects.get(id=user.id)
                         ScoreRegister.objects.create(**create_data)
+
             except Exception as e:
                 print(e)
                 return request.send_error('ERR_002')

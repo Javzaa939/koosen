@@ -2423,6 +2423,7 @@ class StudentCalculateGpaDiplomaAPIView(
 
         unique_ids = list(set(lesson_ids) - set(grouped_ids))
 
+        # Багцалсан хичээлээр
         for grouped_data in grouped_datas:
 
             score_register_kredit_sum = ScoreRegister.objects.filter(lesson__in=grouped_datas[grouped_data], student_id=student_id).aggregate(Sum('lesson__kredit')).get('lesson__kredit__sum')

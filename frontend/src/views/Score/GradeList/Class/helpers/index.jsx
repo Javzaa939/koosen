@@ -82,7 +82,7 @@ export function getColumns (currentPage, rowsPerPage, total_count) {
 			header: 'total',
 			name: 'Нийт оноо үнэлгээ',
 			center: true,
-			selector: (row) => row?.score_total + ' ' + row?.assessment
+			selector: (row) => row?.grade_letter_desc ? row?.grade_letter_desc : (row?.score_total + ' ' + row?.assessment)
 		},
 	]
 
