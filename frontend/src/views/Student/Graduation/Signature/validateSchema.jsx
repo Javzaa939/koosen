@@ -46,5 +46,9 @@ export const validateSchema = Yup.object().shape(
 		.string()
 		.trim()
 		.required('Хоосон байна'),
+	school_id: Yup
+		.string()
+		.trim()
+		.required('Хоосон байна'),
 
 });

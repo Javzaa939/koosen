@@ -19,13 +19,8 @@ class ElseltUser(models.Model):
     email = models.CharField(max_length=254, unique=True, blank=False, null=True, verbose_name="И-мэйл", error_messages={ "unique": "И-мэйл давхцсан байна" })
     mobile = models.CharField(max_length=30, verbose_name="Өөрийн утасны дугаар", default="")
     parent_mobile = models.CharField(max_length=30, verbose_name="Шаардлагатай үед холбоо барих утас", default="")
-    exam_loc = models.CharField(max_length=200, verbose_name="Шалгалт өгсөн газар", default="")
-    exam_loc_code = models.SmallIntegerField(verbose_name="Шалгалт өгсөн газар", default=0)
-    year = models.SmallIntegerField(verbose_name="Шалгалт өгсөн он", default=2023)
-    semester = models.CharField(max_length=30, verbose_name="Улирал", default="")
     image = models.ImageField(upload_to='elselt', null=True, verbose_name='Хэрэглэгчийн зураг')
     aimag = models.ForeignKey(AimagHot, on_delete=models.CASCADE, null=True, verbose_name='Үндсэн захиргаа - Аймаг/хот')
-    is_justice = models.BooleanField(default=False, verbose_name='Ял шийтгэлтэй эсэх')
     is_payment = models.BooleanField(default=False, verbose_name="Бүртгэлийн хураамж төлсөн эсэх")
 
     created = models.DateTimeField(auto_now_add=True, null=True, verbose_name='Огноо')
@@ -57,6 +52,47 @@ class ElseltUser(models.Model):
             return name
 
         return self.user.email
+
+
+class UserScore(models.Model):
+    """ Хэрэглэгчийн ЭЕШ онооны мэдээлэл """
+
+    class Meta:
+        db_table = 'elselt_userscore'
+        managed = False
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Элсэгч')
+    exam_loc = models.CharField(max_length=200, verbose_name="Шалгалт өгсөн газар", default="")
+    exam_loc_code = models.IntegerField(verbose_name="Шалгалт өгсөн газар", default=0)
+    year = models.IntegerField(verbose_name="Шалгалт өгсөн он")
+    semester = models.CharField(max_length=30, verbose_name="Улирал", default="")
+    school_code = models.IntegerField(verbose_name="Сургуулийн код", null=True)
+    school_name = models.CharField(verbose_name="Сургуулийн нэр", max_length=500)
+    lesson_name = models.CharField(verbose_name="Хичээлийн нэр", max_length=500)
+    scaledScore = models.IntegerField(verbose_name="ЭЕШ оноо", null=True)
+    raw_score = models.IntegerField(verbose_name="Анхны оноо", null=True)
+    percentage_score = models.IntegerField(verbose_name="Хувь", null=True)
+    word_score = models.CharField(verbose_name="Үсгэн үнэлгээ", max_length=255, null=True)
+
+
+class Setting(models.Model):
+    class Meta:
+        db_table = 'elselt_setting'
+        managed = False
+
+    une = models.IntegerField(verbose_name="Нэгжийн үнэ", default=1)
+    eec_api_url = models.CharField(verbose_name="EEC API зам", default="", max_length=500)
+    eec_api_username = models.CharField(verbose_name="EEC api username", default="", max_length=500)
+    eec_api_password = models.CharField(verbose_name="EEC api password", default="", max_length=500)
+    qpay_api_url = models.CharField(verbose_name="QPAY API зам", max_length=500)
+    qpay_api_username = models.CharField(verbose_name="Qpay api username", default="", max_length=500)
+    qpay_api_password = models.CharField(verbose_name="Qpay api password", default="", max_length=500)
+    qpay_api_call = models.CharField(max_length=200, verbose_name="QPay api call_back", default="")
+    qpay_api_invoice_code = models.CharField(max_length=200, verbose_name="QPay invoice_code", default="")
+
+    class Meta:
+        verbose_name = ("Элсэлтийн тохиргоо")
+        verbose_name_plural = ("4 Элсэлтийн тохиргоонууд")
 
 
 class UserInfo(models.Model):
@@ -111,9 +147,19 @@ class AdmissionUserProfession(models.Model):
 
     user = models.ForeignKey(ElseltUser, verbose_name='Элсэгч', on_delete=models.CASCADE)
     profession = models.ForeignKey(AdmissionRegisterProfession, verbose_name='Элссэн мэргэжил', on_delete=models.PROTECT)
+    description = models.CharField(max_length=5000, null=True, verbose_name='Хөтөлбөр сольсон тайлбар')
+
+    # Элсэгч бүх шалгуурыг даваад тэнцсэн төлөв тайлбар
     state = models.PositiveIntegerField(choices=STATE, db_index=True, null=False, default=STATE_SEND, verbose_name="Тэнцсэн элсэгчийн төлөв")
     state_description = models.CharField(max_length=5000, null=True, verbose_name='Тэнцсэн төлөвийн тайлбар')
-    description = models.CharField(max_length=5000, null=True, verbose_name='Хөтөлбөр сольсон тайлбар')
+
+    # Элсэгч ял шийтгэлтэй эсэх тайлбар
+    justice_state = models.PositiveIntegerField(choices=STATE, db_index=True, null=False, default=STATE_SEND, verbose_name="Ял шийтгэлтэй эсэх")
+    justice_description = models.CharField(max_length=5000, null=True, verbose_name='Ял шийтгэлтэй бол тайлбар')
+
+    # Тухайн элсэлтэд нас гэсэн шалгуур үзүүлэлттэй бол элсэгчийн насыг шалгаж тэнцсэн эсэх төлөв
+    age_state = models.PositiveIntegerField(choices=STATE, db_index=True, null=False, default=STATE_SEND, verbose_name="Нас шалгуурт тэнцсэн эсэх")
+    age_description = models.CharField(max_length=5000, null=True, verbose_name='Нас шалгуурт тэнцээгүй тайлбар')
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

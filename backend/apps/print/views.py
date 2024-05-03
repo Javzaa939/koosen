@@ -1,3 +1,8 @@
+from datetime import datetime
+from dateutil import parser
+from django.db import transaction
+from django.db.models import F, Subquery, OuterRef, Count
+from django.db.models.functions import Substr
 
 from lms.models import Student, TimeTable_to_group, TimeTable_to_student
 from lms.models import TimeTable
@@ -5,6 +10,10 @@ from lms.models import GraduationWork
 from lms.models import ScoreRegister
 from lms.models import LessonStandart
 from lms.models import Group
+from lms.models import AdmissionRegister, AdmissionIndicator
+
+from elselt.models import AdmissionUserProfession, UserInfo
+from elselt.serializer import AdmissionUserInfoSerializer
 
 from rest_framework import mixins
 from rest_framework import generics
@@ -17,6 +26,7 @@ from rest_framework.permissions import IsAuthenticated
 from student.serializers import StudentListSerializer
 from apps.timetable.serializers import TimeTableListSerializer, TimeTableSerializer
 from apps.timetable.serializers import ScoreGpaListSerializer
+
 from .serializers import ScoreRegisterSerializer
 from .serializers import GraduationWorkListSerializer
 from .serializers import AdmissionListSerializer
@@ -25,10 +35,6 @@ from .serializers import GroupListFilterSubSchoolSerializer
 from main.utils.function.utils import get_lesson_choice_student, student__full_name, score_register__score_total, lesson_standart__code_name
 from main.utils.function.utils import str2bool, has_permission
 from rest_framework.decorators import permission_classes
-
-from datetime import datetime
-from dateutil import parser
-from django.db import transaction
 
 class StudentListByLessonTeacherAPIView(
     mixins.ListModelMixin,
@@ -676,55 +682,43 @@ class AdmissionAPIView(
 ):
     ''' Элсэлтийн тушаал '''
 
-    queryset = Student.objects.all()
-    serializer_class = AdmissionListSerializer
+    queryset = AdmissionUserProfession.objects.all().order_by('created_at')
+    serializer_class = AdmissionUserInfoSerializer
 
     pagination_class = CustomPagination
-
     filter_backends = [SearchFilter]
-    search_fields = ['group__profession__code', 'group__profession__name', 'register_num', 'admission_date', 'admission_number', 'code', 'last_name', 'first_name']
+    search_fields = ['user__first_name', 'user__register', 'user__email', 'gpa']
 
     def get_queryset(self):
-        queryset = self.queryset.filter(group__level=1)
-        learning = self.request.query_params.get('learning')
-        lesson_year = self.request.query_params.get('lesson_year')
-        lesson_season = self.request.query_params.get('lesson_season')
-        group = self.request.query_params.get('group')
-        degree = self.request.query_params.get('degree')
-        schoolId = self.request.query_params.get('school')
-        sorting = self.request.query_params.get('sorting')
-        department = self.request.query_params.get('department')
+
+        # Эрүүл мэнд, Бие бялдар гэх мэт шат дараалсан шалгуур үзүүлэлтгүй элсэлтийн мэргэжлүүд
+        # TODO цаашдаа элсэгч нь бүх үе шатыг давсны дараа элсэлтйин тушаал руу орох тул яаж шүүхийг тэр үед нь шийдий
+        all_not_shalguur_profession_ids = AdmissionIndicator.objects.filter(admission_prof__admission__is_active=True) \
+                                .exclude(value__in=[AdmissionIndicator.EESH_EXAM, AdmissionIndicator.ERUUL_MEND, AdmissionIndicator.BIE_BYALDAR, AdmissionIndicator.SETGEL_ZUI]) \
+                                .values_list('admission_prof', flat=True)
+
+        # Тэнцсэн төлөвтэй шалгуур үзүүлэлтүүдгүй элсэгчдийг шүүх
+        queryset = self.queryset.filter(state=AdmissionUserProfession.STATE_APPROVE, profession__in=all_not_shalguur_profession_ids)
+        userinfo_qs = UserInfo.objects.filter(user=OuterRef('user')).values('gpa')[:1]
+
+        queryset = (
+            queryset
+            .annotate(
+                gpa=Subquery(userinfo_qs),
+            )
+        )
+
+        admission = self.request.query_params.get('admission')
         profession = self.request.query_params.get('profession')
+        sorting = self.request.query_params.get('sorting')
 
-        if learning:
-            queryset = queryset.filter(group__learning_status=learning)
+        if admission:
+            queryset = queryset.filter(profession__admission=admission)
 
-        # Сургуулиар хайлт хийх
-        if schoolId:
-            queryset = queryset.filter(school=schoolId)
-
-        # Тэнхимээр хайх
-        if department:
-            queryset = queryset.filter(department=department)
-
-        # Ангиар хайх
-        if group:
-            queryset = queryset.filter(group=group)
-
-        # Боловсролын зэргээр хайлт хийх
-        if degree:
-            queryset = queryset.filter(group__degree=degree)
-
-        # Мэргэжлээр хайх
         if profession:
-            queryset = queryset.filter(group__profession=profession)
+            queryset = queryset.filter(profession__profession__id=profession)
 
-        # if lesson_year:
-        #     queryset = queryset.filter(lesson_year=lesson_year)
-
-        # if lesson_season:
-        #     queryset = queryset.filter(lesson_season=lesson_season)
-
+        # Sort хийх үед ажиллана
         if sorting:
             if not isinstance(sorting, str):
                 sorting = str(sorting)

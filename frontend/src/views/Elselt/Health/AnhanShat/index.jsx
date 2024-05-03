@@ -154,44 +154,34 @@ function AnhanShat() {
                 <h5>
                     Эрүүл мэндийн анхан шатны үзлэг
                 </h5>
+                <Col className='d-flex justify-content-end'>
+                    <Button color='primary' className='d-flex align-items-center' onClick={() => excelHandler()}>
+                        <FileText className='me-50' size={14}/>
+                        <div>
+                            Excel татах
+                        </div>
+                    </Button>
+                </Col>
             </CardHeader>
             <CardBody>
-                <Row>
-                    <Col>
-                    </Col>
-                    <Col className='d-flex justify-content-end'>
-                        <Button color='primary' className='d-flex align-items-center' onClick={() => excelHandler()}>
-                            <FileText className='me-50' size={14}/>
-                            <div>
-                                Excel татах
-                            </div>
-                        </Button>
-                    </Col>
-                </Row>
-                <Row>
-                    <Col>
-                        <div className='m-1'>
-                            <Col md={6} lg={3}>
-                                <Label for='sort-select'>{t('Үзлэгийн төлөвөөр шүүх')}</Label>
-                                <Select
-                                    classNamePrefix='select'
-                                    isClearable
-                                    placeholder={`-- Сонгоно уу --`}
-                                    options={STATE_LIST || []}
-                                    value={STATE_LIST.find((c) => c.id === chosenState)}
-                                    noOptionsMessage={() => 'Хоосон байна'}
-                                    onChange={(val) => {
-                                        setChosenState(val?.id || '')
-                                    }}
-                                    styles={ReactSelectStyles}
-                                    getOptionValue={(option) => option.id}
-                                    getOptionLabel={(option) => option.name}
-                                />
-                            </Col>
-                        </div>
-                    </Col>
-                </Row>
-                <Row className="justify-content-between mx-0" >
+                <Col md={6} lg={3}>
+                    <Label for='sort-select'>{t('Үзлэгийн төлөвөөр шүүх')}</Label>
+                    <Select
+                        classNamePrefix='select'
+                        isClearable
+                        placeholder={`-- Сонгоно уу --`}
+                        options={STATE_LIST || []}
+                        value={STATE_LIST.find((c) => c.id === chosenState)}
+                        noOptionsMessage={() => 'Хоосон байна'}
+                        onChange={(val) => {
+                            setChosenState(val?.id || '')
+                        }}
+                        styles={ReactSelectStyles}
+                        getOptionValue={(option) => option.id}
+                        getOptionLabel={(option) => option.name}
+                    />
+                </Col>
+                <Row className="justify-content-between">
                     <Col className='d-flex align-items-center justify-content-start' md={4}>
                         <Col md={3} sm={2} className='pe-1'>
                             <Input

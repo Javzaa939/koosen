@@ -22,7 +22,7 @@ export default function PrintMongolia()
     async function getAllData()
     {
         await Promise.all([
-            fetchData(signatureApi.get(2)),
+            fetchData(signatureApi.get(2, data?.student?.group?.profession?.school)),
         ]).then((values) => {
             setListArr(values[0]?.data)
         })
@@ -33,10 +33,10 @@ export default function PrintMongolia()
         {
             getAllData()
 
-            window.onafterprint = function()
-            {
-                window.close()
-            }
+            // window.onafterprint = function()
+            // {
+            //     window.close()
+            // }
         },
         []
     )
@@ -121,27 +121,28 @@ export default function PrintMongolia()
             {/* Үндсэн хэсэг */}
             <div className='text-center' style={{ width: '100%', lineHeight: '30px', fontSize: '19px' }} >
                 <div className='m-auto' style={{ width: '700px' }}>
-                    {data?.student?.citizenship?.name} Улсын иргэн <span className='text-uppercase fw-bolder'>{data?.student?.lastname} {data?.student?.first_name}</span> нь
-                    <br />
-                    {data?.student?.group?.join_year?.substring(0, 4)}-{data?.lesson_year?.substring(5, 9)} онд {data?.student?.school_name}д
-                    "{data?.student?.group?.profession?.name}" мэргэжил ({data?.student?.group?.degree?.degree_code}{data?.student?.group?.profession?.code})-ээр суралцаж төгссөн тул Их сургуулийн захирлын&nbsp;
-                    {data?.decision_date?.substring(0, 4)} оны {data?.decision_date?.substring(5, 7)} {dugeerUg(data?.decision_date?.substring(5, 7) && data?.decision_date?.substring(5, 7).charAt(data?.decision_date?.substring(5, 7).length - 1))} сарын {data?.decision_date?.substring(8, 10)}{niiUg(data?.decision_date?.substring(8, 10) && data?.decision_date?.substring(8, 10).charAt(data?.decision_date?.substring(8, 10).length - 1))} өдрийн {data?.graduation_number} {dugeerUg(data?.graduation_number && data?.graduation_number.charAt(data?.graduation_number.length - 1))} тушаалаар
+                    {data?.student?.citizenship?.name} Улсын иргэн <span className='text-uppercase'>{data?.student?.last_name}</span> овогтой <span className='text-uppercase'>{data?.student?.first_name}</span> нь
                     <br/>
+                    {/* {data?.student?.group?.join_year?.substring(0, 4)}-{data?.lesson_year?.substring(5, 9)} онд {data?.student?.school_name}д */}
+                    {data?.student?.group?.profession?.name}, {data?.student?.group?.profession?.code}
+                    <br/>
+                    хөтөлбөрөөр суралцан төгссөн тул
+                    <br/>
+                    захирлын {data?.decision_date?.substring(0, 4)} оны {data?.decision_date?.substring(5, 7)} {dugeerUg(data?.decision_date?.substring(5, 7) && data?.decision_date?.substring(5, 7).charAt(data?.decision_date?.substring(5, 7).length - 1))} сарын {data?.decision_date?.substring(8, 10)}{niiUg(data?.decision_date?.substring(8, 10) && data?.decision_date?.substring(8, 10).charAt(data?.decision_date?.substring(8, 10).length - 1))} өдрийн {data?.graduation_number} {dugeerUg(data?.graduation_number && data?.graduation_number.charAt(data?.graduation_number.length - 1))} тушаалаар
                     <span style={{ whiteSpace: 'nowrap' }}><span className='text-uppercase'> {data?.student?.group?.profession?.dep_name} {data?.student?.group?.degree?.degree_name}</span>-ын зэрэг олгов.</span>
                 </div>
             </div>
 
             {/* Гарын үсгийн хэсэг */}
             <div style={{ bottom: '0', fontSize: '15px' }} >
-                <div style={{ paddingLeft: '100px', paddingRight: '100px', lineHeight: '18px', marginTop: '100px', marginBottom: '10px' }} >
-                    <div className='d-flex w-100 text-center justify-content-center'>
-
+                <div style={{ paddingLeft: '100px', paddingRight: '100px', lineHeight: '18px', marginTop: '80px', marginBottom: '10px' }} >
+                    <div className='d-flex text-center justify-content-center' style={{width: '400px'}}>
                         {
                             listArr.map((val, idx) =>
                             {
                                 return (
                                     <div className='d-flex flex-column pt-2 pb-2' style={{ paddingRight: '20px', paddingLeft: '20px' }} key={idx} >
-                                        <span className='border-top-black'>{val?.position_name}</span>
+                                        <span className='border-top-black' style={{textWrap: 'wrap'}}>{val?.position_name}</span>
                                         <span>{val?.last_name}{val?.first_name}</span>
                                     </div>
                                 )
@@ -150,12 +151,10 @@ export default function PrintMongolia()
 
                     </div>
                 </div>
-
-                {/* Footer */}
-                <div className='d-flex justify-content-between'>
-                    <span style={{ paddingLeft: '180px' }} >Улаанбаатар хот</span>
-                    <span style={{ paddingRight: '230px' }} >Бүртгэлийн дугаар {data?.registration_num}</span>
-                </div>
+            </div>
+            <div className='d-flex justify-content-between w-100'>
+                <span style={{ paddingLeft: '180px' }} >Улаанбаатар хот</span>
+                <span style={{ paddingRight: '230px' }} >Бүртгэлийн дугаар {data?.registration_num}</span>
             </div>
         </div>
     )

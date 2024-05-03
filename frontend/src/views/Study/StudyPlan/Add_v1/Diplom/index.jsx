@@ -147,7 +147,7 @@ const Diplom = ({ datas, isOpen, profession, degree }) => {
                 <div className='added-cards'>
                     <div className={classnames('cardMaster rounded border p-1')}>
                         <h5 className='text-center pb-50'>
-                            {degree === 1 && '4.1. Дипломын хичээл'}
+                            {degree === 1 && '5.1. Дипломын хичээл'}
                         </h5>
                         <Table size='sm' bordered>
                             <thead>

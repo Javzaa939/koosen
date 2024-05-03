@@ -14,6 +14,7 @@ import Diplom from './Diplom';
 import BasicLesson from './BasicLesson';
 import ProfBasicLesson from './ProfBasicLesson';
 import ProfessionLesson from './ProfessionLesson';
+import Qualification from './Qualification';
 
 const StudyPlanAdd = ({ open, handleModal, mergejil_id }) => {
 
@@ -25,6 +26,7 @@ const StudyPlanAdd = ({ open, handleModal, mergejil_id }) => {
     const [is_profbasic_lesson, setIsProfBasicLesson] = useState(false)
     const [is_profession_lesson, setIsProfessionLesson] = useState(false)
     const [is_diplom, setIsDiplom] = useState(false)
+    const [is_qualification, setIsQualification] = useState(false)
     const [degree, setDegree] = useState(1)
 
     // Loader
@@ -156,12 +158,33 @@ const StudyPlanAdd = ({ open, handleModal, mergejil_id }) => {
                             is_profession_lesson &&
                             <ProfessionLesson datas={datas} isOpen={is_profession_lesson} mergejil_id={mergejil_id} degree={degree} />
                         }
+
+                        {
+                            degree === 1
+                            ?
+                                <>
+                                    <div className='added-cards' onClick={() => setIsQualification(!is_qualification)}>
+                                        <div className={classnames('cardMaster rounded border p-1')} role="button" id="toggler5">
+                                            4. Мэргэших хичээл
+                                        </div>
+                                    </div>
+                                    {
+                                        is_qualification
+                                        ?
+                                            <Qualification datas={datas} isOpen={is_qualification} mergejil_id={mergejil_id} degree={degree} />
+                                        :
+                                            null
+                                    }
+                                </>
+                            :
+                                null
+                        }
                         <div className='added-cards' onClick={() => setIsDiplom(!is_diplom)}>
                             <div className={classnames('cardMaster rounded border p-1')} role="button" id="toggler4">
                                 {
                                     degree === 1
                                     ?
-                                        '4. Диплом'
+                                        '5. Диплом'
                                     :
                                         degree === 2
                                     ?

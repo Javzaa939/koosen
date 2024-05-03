@@ -338,7 +338,6 @@ class ElseltSysInfo(
         return request.send_info('INF_003')
 
 
-
 @permission_classes([IsAuthenticated])
 class ProfessionShalguur(
     generics.GenericAPIView
@@ -361,8 +360,16 @@ class ProfessionShalguur(
         # Элсэлтэд бүртгэлтэй байгаа мэргэжил
         admission_prof = AdmissionRegisterProfession.objects.get(pk=admission)
 
+        old_shalguur_ids = AdmissionIndicator.objects.filter(admission_prof=admission_prof).values_list('value', flat=True)
+        first_set = set(list(old_shalguur_ids))
+        sec_set = set(shalguur_ids)
+
+        # Устгах ids
+        delete_ids = first_set - sec_set
         with transaction.atomic():
             try:
+                # Check болиулсан үед устгана
+                AdmissionIndicator.objects.filter(admission_prof=admission_prof, value__in=delete_ids).delete()
                 for idx, shalguur_id in enumerate(shalguur_ids):
                     obj, created = AdmissionIndicator.objects.update_or_create(
                         value=shalguur_id,
@@ -405,18 +412,20 @@ class AdmissionUserInfoAPIView(
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['user__first_name', 'user__register', 'user__email', 'gpa']
+    search_fields = ['user__first_name', 'user__register', 'user__email', 'gpa', 'org']
 
     def get_queryset(self):
         queryset = self.queryset
         queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
 
         userinfo_qs = UserInfo.objects.filter(user=OuterRef('user')).values('gpa')[:1]
+        userinfo_org = UserInfo.objects.filter(user=OuterRef('user')).values('work_organization')[:1]
 
         queryset = (
             queryset
             .annotate(
                 gpa=Subquery(userinfo_qs),
+                org=Subquery(userinfo_org),
             )
         )
 
@@ -842,11 +851,18 @@ class ElseltHealthAnhanShat(
     def get_queryset(self):
         queryset = self.queryset
         queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
+
+        # Эрүүл мэндийн шалгуур үзүүлэлттэй мэргэжлүүд
+        # TODO Одоогоор идэвхтэй байгаа элсэлтээс л харуулж байгаа гэсэн үг
+        health_profession_ids = AdmissionIndicator.objects.filter(admission_prof__admission__is_active=True, value__in=[AdmissionIndicator.ERUUL_MEND]).values_list('admission_prof', flat=True)
+        queryset = queryset.filter(profession__in=health_profession_ids)
+
         gender = self.request.query_params.get('gender')
         sorting = self.request.query_params.get('sorting')
         state  = self.request.query_params.get('state')
 
-        queryset = queryset.filter(state=AdmissionUserProfession.STATE_APPROVE)
+        # Ял шийтгэл, Насны үзүүлэлтүүдэд ТЭНЦЭЭГҮЙ элсэгчдийг хасах
+        queryset = queryset.exclude(justice_state=AdmissionUserProfession.STATE_REJECT, age_state=AdmissionUserProfession.STATE_REJECT)
 
         if gender:
             if gender == 'Эрэгтэй':
@@ -1076,7 +1092,7 @@ class ElseltHealthPhysical(
     mixins.DestroyModelMixin
 ):
 
-    queryset = HealthUser.objects.all().order_by('created_at')
+    queryset = AdmissionUserProfession.objects.all().order_by('created_at')
 
     serializer_class = HealthPhysicalUserInfoSerializer
     physique_serializer_class = PhysqueUserSerializer
@@ -1088,17 +1104,20 @@ class ElseltHealthPhysical(
     def get_queryset(self):
         queryset = self.queryset
         queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
-        gender = self.request.query_params.get('gender')
+
+        # Бие бялдар шалгуур үзүүлэлттэй мэргэжлүүд
+        # TODO Одоогоор идэвхтэй байгаа элсэлтээс л харуулж байгаа гэсэн үг Дараа жил яахыг үл мэднэ
+        physical_profession_ids = AdmissionIndicator.objects.filter(admission_prof__admission__is_active=True, value__in=[AdmissionIndicator.BIE_BYALDAR]).values_list('admission_prof', flat=True)
+
+        # Бие бялдар шалгуур үзүүлэлттэй мэргэжилд бүртгүүлсэн элсэгчид
+        queryset = queryset.filter(profession__in=physical_profession_ids)
+
         sorting = self.request.query_params.get('sorting')
         state  = self.request.query_params.get('state')
 
-        queryset = queryset.filter(state=AdmissionUserProfession.STATE_APPROVE)
-
-        if gender:
-            if gender == 'Эрэгтэй':
-                queryset = queryset.filter(gender__in=['1', '3', '5', '7', '9'])
-            else:
-                queryset = queryset.filter(gender__in=['0', '2', '4', '6', '8'])
+        # Нарийн мэргэжлийн үзлэгт тэнцсэн хүүхдүүд бие бялдарын шалгалтад орно
+        healt_user_ids = HealthUpUser.objects.filter(state=AdmissionUserProfession.STATE_APPROVE).values_list('user', flat=True)
+        queryset = queryset.filter(age_state=AdmissionUserProfession.STATE_APPROVE, justice_state=AdmissionUserProfession.STATE_APPROVE, user__in=healt_user_ids)
 
         # Sort хийх үед ажиллана
         if sorting:
@@ -1107,9 +1126,10 @@ class ElseltHealthPhysical(
 
             queryset = queryset.order_by(sorting)
 
+        # Төлөвөөр хайхаар бол тухайн мэргэжлийн эмнэлгийн үзлэгийн төлөвөөс хайна
         if state:
-            user_id = HealthUser.objects.filter(state=state).values_list('user', flat=True)
-            queryset = queryset.filter(user__in=user_id)
+            user_ids = HealthUpUser.objects.filter(state=state).values_list('user', flat=True)
+            queryset = queryset.filter(user__in=user_ids)
 
         return queryset
 

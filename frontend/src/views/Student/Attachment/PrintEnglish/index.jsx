@@ -24,7 +24,7 @@ export default function PrintAttachmentEnglish()
     async function getAllData(studentId)
     {
         await Promise.all([
-            fetchData(signatureApi.get(3)),
+            fetchData(signatureApi.get(3, printDatas.student?.department?.sub_orgs)),
             fetchData(studentApi.calculateGpaDimplomaGet(studentId))
         ]).then((values) => {
             setListArr(values[0]?.data)
@@ -117,11 +117,12 @@ export default function PrintAttachmentEnglish()
                                 else
                                 {
                                     let newCell1 = newRow.insertCell();
+                                    if (flattenedArray[count - 1]) {
+                                        newCell1.innerHTML = flattenedArray[count - 1]?.eng_name
+                                        newCell1.colSpan = 5
 
-									newCell1.innerHTML = flattenedArray[count - 1]?.eng_name
-									newCell1.colSpan = 5
-
-									newCell1.className = 'border-dark body-cell text-center'
+                                        newCell1.className = 'border-dark body-cell text-center'
+                                    }
                                 }
                             }
                         }

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-
+from django.db.models import F
 from lms.models import Room
 from lms.models import Building
 from lms.models import TimeTable
@@ -654,47 +654,28 @@ class ScoreGpaListSerializer(serializers.ModelSerializer):
         return max_kredit
 
     def get_total_gpa(self, obj):
-        # Голч дүнгийн жагсаалт
 
-        score_assesment = ''
         final_gpa = 0
         stud_id = obj.id
 
         score_register = ScoreRegister.objects
 
-        scoreRegister = score_register.filter(student=stud_id) \
-                                    .values(
-                                        "id",
-                                        "teach_score",
-                                        "exam_score",
-                                        "lesson__kredit"
-                                    )
+        scoreRegister = score_register.filter(student=stud_id).annotate(kredit=F('lesson__kredit'))
         total_lesson_kr = 0
         all_score = 0
         for scoreData in scoreRegister:
-            teach_score = scoreData['teach_score']
-            exam_score = scoreData['exam_score']
-
-            lesson_kr = scoreData['lesson__kredit']
+            total_score = scoreData.score_total
+            lesson_kr = scoreData.kredit
             if lesson_kr:
-                if teach_score:
-                    all_score = all_score + teach_score * lesson_kr
-                if exam_score:
-                    all_score = all_score + exam_score * lesson_kr
+                score_qs = Score.objects.filter(score_max__gte=total_score, score_min__lte=total_score).first()
+                all_score = all_score + (score_qs.gpa * lesson_kr)
 
                 total_lesson_kr += lesson_kr
 
-
         if all_score > 0:
             final_gpa = round((all_score / total_lesson_kr), 2)
-            score_qs = Score.objects.filter(
-                    score_max__gte=final_gpa,
-                    score_min__lte=final_gpa
-                ).first()
-            if score_qs:
-                score_assesment = round(score_qs.gpa,2)
 
-        return score_assesment
+        return final_gpa
 
     def get_total_avg(self, obj):
         # Дүнгийн онооны дундаж

@@ -12,7 +12,7 @@ import {
     Spinner
 } from 'reactstrap'
 
-import { ChevronDown, Plus, Search } from 'react-feather'
+import { ChevronDown, FileText, Plus, Search } from 'react-feather'
 import DataTable from 'react-data-table-component'
 import useApi from '@hooks/useApi';
 import useModal from '@hooks/useModal'
@@ -28,6 +28,7 @@ import { getColumns } from './helpers'
 import { useTranslation } from "react-i18next";
 
 import Createmodal from './Add'
+import excelDownload from "@src/utility/excelDownload";
 
 
 const Yvsan  = () => {
@@ -145,13 +146,47 @@ const Yvsan  = () => {
 		}
 	}, [searchValue]);
 
+    function excelHandler() {
+        const rowInfo = {
+            headers: [
+                '№',
+                'Оюутны код',
+                'Овог',
+                'Нэр',
+                'Сургууль дотор шилжих эсэх',
+                'Хаашаа шилжих',
+                'Мэргэжил',
+                'Тушаал',
+                'Тушаалын огноо',
+            ],
+
+            datas: [
+                'index',
+                'student.code',
+                'student.last_name',
+                'student.first_name',
+                'is_internal',
+                'school_name',
+                'group.name',
+                'statement',
+                'statement_date',
+            ]
+        }
+        excelDownload(datas, rowInfo, `шилжин_явсан`)
+    }
 
     return (
         <Fragment>
             <Card>
                 <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom pt-0'>
                     <CardTitle tag='h4'>{t('Шилжиж явсан оюутны бүртгэл')}</CardTitle>
-                    <div className='d-flex flex-wrap mt-md-0 mt-1'>
+                    <div className='d-flex flex-wrap mt-md-0 mt-1 gap-1'>
+                        <Button
+                            color='primary'
+                            onClick={() => {excelHandler()}}
+                        >
+                            <FileText size={16}/> Excel татах
+                        </Button>
                         <Button
                             color='primary'
                             disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-student-movement-create') && school_id)  ? false : true}

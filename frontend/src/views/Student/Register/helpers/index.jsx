@@ -71,7 +71,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 			center: true
         },
 		{
-			name: t("Анги"),
+			name: t("Дамжаа"),
 			selector: (row) => row?.group_name,
 			center: true,
 			width: '250px'

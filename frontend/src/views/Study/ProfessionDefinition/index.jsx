@@ -13,7 +13,7 @@ import {
     Spinner,
 } from 'reactstrap'
 
-import { ChevronDown, Plus, Search } from 'react-feather'
+import { ChevronDown, FileText, Plus, Search } from 'react-feather'
 
 import Select from 'react-select'
 import DataTable from 'react-data-table-component'
@@ -39,6 +39,7 @@ import Addmodal from './Add'
 import EditModal from './Edit'
 import StudyPlanAdd from '../StudyPlan/Add_v1'
 import CopyPlan from '../StudyPlan/CopyPlan'
+import excelDownload from '@src/utility/excelDownload'
 
 const ProfessionDefinition = () => {
 
@@ -206,13 +207,51 @@ const ProfessionDefinition = () => {
         setSelectedProf(id || null)
     }
 
+    function excelHandler() {
+
+        const rowInfo = {
+            headers: [
+                '№',
+                'Код',
+                'Хөтөлбөр',
+                'Боловсролын зэрэг',
+                'Хөтөлбөрийн ерөнхий чиглэл',
+                'Хөтөлбөрийн төрөлжсөн чиглэл',
+                'Батлагдсан он ',
+            ],
+
+            datas: [
+                'index',
+                'code',
+                'name',
+                'degree.degree_name',
+                'gen_direct_type_name',
+                'dep_name',
+                'confirm_year',
+            ],
+            height: {
+                body: 30
+            },
+            width: 25
+        }
+
+        excelDownload(datas, rowInfo, `Хөтөлбөр`)
+    }
+
+
     return (
         <Fragment>
             <Card>
                 {isLoading && Loader}
                 <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
                     <CardTitle tag='h4'>{t('Хөтөлбөр')}</CardTitle>
-                    <div className='d-flex flex-wrap mt-md-0 mt-1'>
+                    <div className='d-flex flex-wrap mt-md-0 mt-1 gap-1'>
+                        <Button
+                            color='primary'
+                            onClick={() => {excelHandler()}}
+                        >
+                            <FileText size={16}/> Excel татах
+                        </Button>
                         <Button
                             color='primary'
                             disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-study-profession-create') &&  school_id? false : true}

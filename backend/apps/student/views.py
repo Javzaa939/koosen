@@ -1799,6 +1799,19 @@ class StudentLeaveAPIView(
         return request.send_info("INF_003")
 
 
+class StudentLeaveStudentsAPIView(
+    generics.GenericAPIView
+):
+    @has_permission(must_permissions=['lms-student-leave-update'])
+    @transaction.atomic
+    def put(self, request):
+
+        data = request.data
+
+        StudentLeave.objects.filter(id__in=data.get('student_ids')).update(statement=data.get('statement'), statement_date=data.get('statement_date'))
+
+        return request.send_info("INF_002")
+
 class GraduationWorkAPIView(
     mixins.CreateModelMixin,
     mixins.UpdateModelMixin,
@@ -1814,7 +1827,7 @@ class GraduationWorkAPIView(
 
     filter_backends = [SearchFilter]
 
-    search_fields = ['student__code', 'student__first_name', 'diplom_num', 'lesson__code', 'lesson__name', 'diplom_topic', 'leader']
+    search_fields = ['student__code', 'student__first_name', 'diplom_num', 'lesson__code', 'lesson__name', 'diplom_topic', 'leader', 'student__register_num']
 
     @has_permission(must_permissions=['lms-student-graduate-read'])
     def get(self, request, pk=None):
@@ -1861,6 +1874,10 @@ class GraduationWorkAPIView(
 
         data = request.data
         lesson_ids = data['lesson']
+
+        if lesson_ids and None in lesson_ids:
+            return request.send_error('ERR_002', 'Дипломын хичээл сонгоно уу')
+
         del data['lesson']
         student = data.get("student")
 
@@ -1878,7 +1895,8 @@ class GraduationWorkAPIView(
             created_qs = self.queryset.get(id=created_qs.get("id"))
             created_qs.lesson.add(*lesson_ids)
 
-        except Exception:
+        except Exception as e:
+            print(e)
             return request.send_error("ERR_002")
 
         return request.send_info("INF_001")
@@ -2073,6 +2091,10 @@ class SignatureAPIView(
     def get(self, request):
 
         dedication_type = self.request.query_params.get('type')
+        school_id = request.query_params.get('school_id')
+
+        if school_id:
+            self.queryset = self.queryset.filter(school_id=school_id)
 
         qs = self.queryset.filter(dedication_type=dedication_type).order_by('order')
         data = self.serializer_class(qs, many=True).data
@@ -2083,9 +2105,6 @@ class SignatureAPIView(
     def post(self, request):
 
         data = request.data
-
-        # transaction savepoint зарлах нь хэрэв алдаа гарвад roll back хийнэ
-        sid = transaction.savepoint()
 
         order = 1
 
@@ -2099,7 +2118,6 @@ class SignatureAPIView(
         try:
             serializer = self.serializer_class(data=data, many=False)
             if not serializer.is_valid():
-                transaction.savepoint_rollback(sid)
                 return request.send_error_valid(serializer.errors)
 
             serializer.save()
@@ -2333,8 +2351,8 @@ class DefinitionSumAPIView(
             season_name = Season.objects.filter(season_code=data.get('season_code')).last()
             all_data['season_name'] = season_name.season_name
 
-        if score['total_kr'] == 0:
-            return request.send_data(all_data)
+        # if score['total_kr'] == 0:
+        #     return request.send_data(all_data)
 
         all_data['score'] = score
         return request.send_data(all_data)
@@ -2447,9 +2465,8 @@ class StudentGpaDiplomaValuesAPIView(
 
         all_datas = []
         for level in list(learning_plan_levels):
-            if level == (LearningPlan.DIPLOM or LearningPlan.MAG_DIPLOM or LearningPlan.DOC_DIPLOM):
+            if level == LearningPlan.DIPLOM or level == LearningPlan.MAG_DIPLOM or level == LearningPlan.DOC_DIPLOM:
                 continue
-
             obj_datas = {}
             obj_datas['name'] = all_learn_levels[level]
 
@@ -2488,6 +2505,7 @@ class StudentGpaDiplomaValuesAPIView(
 
                         max_kredit = max_kredit + lesson.get('kredit')
                         score_qs = Score.objects.filter(score_max__gte=data_qs.score, score_min__lte=data_qs.score).first()
+
                         all_score = all_score + (score_qs.gpa * lesson.get('kredit'))
 
             obj_datas['lessons'] = lesson_datas

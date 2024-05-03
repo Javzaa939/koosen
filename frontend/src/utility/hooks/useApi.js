@@ -37,6 +37,21 @@ export const notif_instance = axios.create({
         "Content-Type": "application/json",
     },
 });
+
+
+export const able_instance = axios.create({
+    baseURL: process.env.REACT_APP_ABLE_URL,
+    withCredentials: true,
+    xsrfHeaderName: 'X-CSRFTOKEN',
+    xsrfCookieName: 'csrftoken',
+    headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Content-Type": "application/json",
+		"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.kc3xuhFLonTzyzu4WzKlJETwuQaNPdX6hKeOuXHywWU"
+    },
+});
+
+
 /**
 	* @param {boolean} isDisplay Toast гаргах эсэх
  */
@@ -176,7 +191,8 @@ function useApi(isDisplay=false) {
 			get: () => instance.get(`/core/menu/`),
 		},
 		signature: {
-			get: (typeNumber) => instance.get(`/student/signature/?type=${typeNumber}`),
+			get: (typeNumber, school_id='') => instance.get(`/student/signature/?type=${typeNumber}&school_id=${school_id}`),
+			getGraduate: (typeNumber, school_id) => instance.get(`/student/signature/?type=${typeNumber}&school_id=${school_id}`),
 			post: (data) => instance.post(`/student/signature/`, data),
 			put: (data, pk) => instance.put(`/student/signature/${pk}/`, data),
 			delete: (pk) => instance.delete(`/student/signature/${pk}/`),
@@ -745,6 +761,7 @@ function useApi(isDisplay=false) {
 				getOne: (pk) => instance.get(`/student/leave/${pk}/`),
 				put: (data, pk) => instance.put(`/student/leave/${pk}/`, data),
 				delete: (pk) => instance.delete(`/student/leave/${pk}/`),
+				putMany: (data) => instance.put(`/student/leave-students/`, data),
 			},
 
 			/** Оюутны төгсөлтийн бүртгэл */
@@ -974,8 +991,8 @@ function useApi(isDisplay=false) {
 				getListNoLimit:(group, radio, chosenYear, chosenSeason) =>
 					instance.get(`/print/groupnolimit/?group=${group}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&is_season=${radio}&chosen_year=${chosenYear}&chosen_season=${chosenSeason}`),
 
-					// Ангийн жагсаалт авах api
-					// сургуулийн query явуулж filter-дэж болно
+				// Ангийн жагсаалт авах api
+				// сургуулийн query явуулж filter-дэж болно
 				getGroupList:( school ) =>
 					instance.get(`/print/groupsubschool/?school=${school}`),
 
@@ -991,8 +1008,8 @@ function useApi(isDisplay=false) {
 			},
 			/** Элсэлтийн тушаал*/
 			admission:{
-				get:(limit, page, sort, search, degree, department, group, profession, learning) =>
-				instance.get(`/print/admission/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&degree=${degree}&group=${group}&department=${department}&profession=${profession}&learning=${learning}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&school=${school_id}`),
+				get:(limit, page, sort, search, admission, profession) =>
+				instance.get(`/print/admission/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&admission=${admission}&profession=${profession}`),
 				put: (data) => instance.put(`/print/admission/`, data),
 			},
 			/** Элсэлтийн тушаал*/
@@ -1663,6 +1680,10 @@ function useApi(isDisplay=false) {
 				put: (id, cdata) => instance.put(`/elselt/health/physical/${id}/`, cdata)
 			},
 		}
+	},
+	able: {
+		getWorker: () => able_instance.get(`/?a=ableApi&tsk=getWorkers&key=uia`),
+		getStructure: () => able_instance.get(`/?a=ableApi&tsk=getDeps&key=uia`),
 	}
 }
 }

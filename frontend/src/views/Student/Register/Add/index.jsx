@@ -192,7 +192,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                 style={{ maxWidth: '700px', width: '100%' }}
             >
                 <ModalHeader
-                    className="mb-1"
+                    className="mb-1 justify-content-between"
                     toggle={handleModal}
                     close={CloseBtn}
                     tag="div"
@@ -237,7 +237,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                         </Col>
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="group">
-                                {t('Анги')}
+                                {t('Дамжаа')}
                             </Label>
                             <Controller
                                 control={control}

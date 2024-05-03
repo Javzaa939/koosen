@@ -365,9 +365,9 @@ class ProfessionDefinition(models.Model):
     name_eng = models.CharField(max_length=500, null=True, verbose_name="Мэргэжлийн нэр англи")
     name_uig = models.CharField(max_length=500, null=True, verbose_name="Мэргэжлийн нэр уйгаржин")
     degree = models.ForeignKey(ProfessionalDegree, on_delete=models.PROTECT, verbose_name="Боловсролын зэрэг")
-    dep_name = models.CharField(max_length=500, null=True, verbose_name="Мэргэжлийн зэргийн нэр монгол")
-    dep_name_eng = models.CharField(max_length=500, null=True, verbose_name="Мэргэжлийн зэргийн нэр англи")
-    dep_name_uig = models.CharField(max_length=500, null=True, verbose_name="Мэргэжлийн зэргийн нэр уйгаржин")
+    dep_name = models.CharField(max_length=500, null=True, verbose_name="Мэргэжлийн төрөлжсөн чиглэл  монгол")
+    dep_name_eng = models.CharField(max_length=500, null=True, verbose_name="Мэргэжлийн төрөлжсөн чиглэл англи")
+    dep_name_uig = models.CharField(max_length=500, null=True, verbose_name="Мэргэжлийн төрөлжсөн чиглэл уйгаржин")
     dedication = models.TextField(null=True, verbose_name="Мэргэжлийн тодорхойлолт")
     requirement = models.TextField(null=True, verbose_name="Мэргэжлийн зорилго")
     knowledge_skill = models.TextField(null=True, verbose_name="Олгох мэдлэг чадвар")
@@ -428,6 +428,7 @@ class LearningPlan(models.Model):
     PROF_BASIC = 2
     PROFESSION = 3
     DIPLOM = 4
+    QUALIFICATION = 5
 
     MAG_PROF_BASIC = 11
     MAG_PROFESSION = 12
@@ -441,6 +442,7 @@ class LearningPlan(models.Model):
         (BASIC, 'Дээд боловсролын суурь хичээл'),
         (PROF_BASIC, 'Мэргэжлийн суурь хичээл'),
         (PROFESSION, 'Мэргэжлийн хичээл'),
+        (QUALIFICATION, 'Мэргэших хичээл'),
         (DIPLOM, 'Диплом'),
 
         (MAG_PROF_BASIC, 'Мэргэжлийн суурь хичээл'),
@@ -626,6 +628,8 @@ class Student(models.Model):
     admission_number = models.CharField(null=True, max_length=50, verbose_name="Элсэлтийн тушаалын дугаар")
     admission_before = models.CharField(max_length=100, null=True, verbose_name="Элсэхийн өмнөх байдал")
     private_score = models.FloatField(default=1000, verbose_name="Хувийн оноо")
+    eysh_score = models.IntegerField(null=True, verbose_name="ЭЕШ-н оноо")
+    secondary_school = models.FloatField(null=True, verbose_name="Өмнөх шатны боловсролын үнэлгээний оноо")
 
     image = models.ImageField(upload_to=user_directory_path, max_length=255, null=True)
     department = models.ForeignKey(Salbars, on_delete=models.SET_NULL, null=True, verbose_name="Хөтөлбөрийн баг")
@@ -755,7 +759,9 @@ class GraduationWork(models.Model):
     graduation_number = models.CharField(null=True, max_length=50, verbose_name="Төгсөлтийн тушаалын дугаар")
     decision_date = models.DateField(null=True, verbose_name="Шийдвэрийн огноо")
     diplom_num = models.CharField(max_length=50, null=True, verbose_name='Дипломын дугаар')
+    back_diplom_num = models.CharField(max_length=50, null=True, verbose_name='Бакалаврын дипломын дугаар')
     registration_num = models.CharField(max_length=50, null=True, verbose_name='Бүртгэлийн дугаар')
+    shalgalt_onoo = models.CharField(max_length=50, null=True, verbose_name='Шалгалтын оноо')
     created_user = models.ForeignKey(User, related_name='grad_cr_user', on_delete=models.SET_NULL, null=True, verbose_name="Бүртгэсэн хэрэглэгч")
     updated_user = models.ForeignKey(User, related_name='grad_up_user', on_delete=models.SET_NULL, null=True, verbose_name="Зассан хэрэглэгч")
 
@@ -1138,6 +1144,18 @@ class Exam_repeat(models.Model):
 
 
 #--------------------------------------Дүнгийн бүртгэл-------------------------------------------
+
+
+class GradeLetter(models.Model):
+    """ Дүнгийн үсгэн үнэлгээ """
+
+    letter = models.CharField(max_length=10, verbose_name="Үсгэн тэмдэглэгээ")
+    description = models.CharField(max_length=300, verbose_name="Тайлбар")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
 class ScoreRegister(models.Model):
     """ Дүнгийн бүртгэл """
 
@@ -1174,6 +1192,7 @@ class ScoreRegister(models.Model):
     school = models.ForeignKey(SubOrgs, on_delete=models.SET_NULL, null=True, verbose_name="Сургууль")
     created_user = models.ForeignKey(User, related_name='score_cr_user', on_delete=models.SET_NULL, null=True, verbose_name="Бүртгэсэн хэрэглэгч")
     updated_user = models.ForeignKey(User, related_name='score_up_user', on_delete=models.SET_NULL, null=True, verbose_name="Зассан хэрэглэгч")
+    grade_letter = models.ForeignKey(GradeLetter, on_delete=models.SET_NULL, null=True, verbose_name="Үсгэн үнэлгээ")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -2179,10 +2198,11 @@ class StudentNotice(models.Model):
     """Зар мэдээлэл"""
 
     def file_directory_path(instance, filename):
-        return '{0}/{1}/{2}'.format(settings.NOTICE, instance.id, filename)
+        return '{0}/{1}/{2}'.format(settings.NEWS, instance.id, filename)
 
     title = models.CharField(max_length=200, verbose_name="Гарчиг")
     body = models.TextField(verbose_name="Мэдээний хэсэг")
+    image = models.ImageField(upload_to=file_directory_path, null=True, blank=True, verbose_name='зураг')
     scope = models.PositiveIntegerField(choices=LearningCalendar.SCOPE, db_index=True, default=LearningCalendar.OTHER, verbose_name="Хэн хамрагдах")
     student_level = models.PositiveIntegerField(null=True, verbose_name="Оюутны курс")
     department = models.ForeignKey(Salbars, on_delete=models.SET_NULL, null=True, verbose_name="Хөтөлбөрийн баг")
@@ -2742,6 +2762,7 @@ class SignaturePeoples(models.Model):
     )
 
     dedication_type = models.PositiveIntegerField(choices=DEDICATION_TYPE, db_index=True, null=False, default=DIPLOM, verbose_name="Зориулалт")
+    school_id = models.PositiveIntegerField(null=True, verbose_name="Сургууль")
 
     last_name = models.CharField(max_length=200, null=True, blank=True, verbose_name='Эцэг/эхийн нэр')
     first_name = models.CharField(max_length=200, null=True, blank=True, verbose_name='Өөрийн нэр')
@@ -3940,7 +3961,7 @@ class AdmissionIndicator(models.Model):
         (NAS, 'Нас'),
         (YAL_SHIITGEL, 'Ял шийтгэл'),
         (ERUUL_MEND, 'Эрүүл мэнд'),
-        (BIE_BYALDAR, 'Бие бялдар'),
+        (BIE_BYALDAR, 'Ур чадвар'),
         (SETGEL_ZUI, 'Сэтгэлзүйн ярилцлага'),
         (TUGSSUN_SURGUULI, 'Төгссөн сургууль'),
         (ESSE, 'Cудалгааны ажлын агуулга чиглэл, зорилгын талаар бичсэн танилцуулга'),
