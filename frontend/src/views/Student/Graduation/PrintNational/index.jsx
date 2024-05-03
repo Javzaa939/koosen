@@ -74,9 +74,9 @@ export default function PrintMongolia()
 
     function tushaal(text)
     {
-        let slash = text.split('/')
+        let slash = text?.split('/')
 
-        return <><span>ᠠ/</span><span style={{ fontFamily: 'CMSUB', fontSize: '25px' }}>{slash[1]}</span></>
+        return <><span>ᠠ/</span><span style={{ fontFamily: 'CMSUB', fontSize: '25px' }}>{slash?.length > 0 ? slash[1] : text}</span></>
     }
 
     function dugeerUg(too)
