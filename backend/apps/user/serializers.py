@@ -2,11 +2,17 @@ from rest_framework import serializers
 
 from django.db.models import Q
 
-from core.models import User
-from core.models import Employee
-from core.models import Permissions
-from core.models import Teachers
-from core.models import SubOrgs
+from core.models import (
+    User,
+    Employee,
+    Permissions,
+    Teachers,
+    SubOrgs
+)
+
+from lms.models import (
+    AccessHistoryLms
+)
 
 class UserListSerializer(serializers.ModelSerializer):
     """ Хэрэглэгчийн жагсаалтыг харуулах serializer """
@@ -99,3 +105,22 @@ class UserInfoSerializer(serializers.ModelSerializer):
         return list(permissions)
 
 
+class AccessHistoryLmsSerializer(serializers.ModelSerializer):
+
+    state_display =serializers.CharField(source="get_state_display", read_only=True)
+    in_time = serializers.DateTimeField(format=("%Y-%m-%d %H:%M:%S"), read_only=True)
+    system_type_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = AccessHistoryLms
+        fields = '__all__'
+
+    def get_system_type_name(self, obj):
+
+        for value in AccessHistoryLms.SYSTEM_TYPE:
+
+            if value[0] == obj.system_type:
+
+                return value[1]
+
+        return ''
