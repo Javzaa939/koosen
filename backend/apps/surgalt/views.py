@@ -80,6 +80,7 @@ from .serializers import LessonTitleSerializer
 from .serializers import LessonMaterialSerializer
 from .serializers import LessonMaterialListSerializer
 from .serializers import LessonTeacherSerializer
+from .serializers import ProfessionDefinitionJustProfessionSerializer
 
 from main.utils.function.utils import remove_key_from_dict, fix_format_date, get_domain_url
 from main.utils.function.utils import null_to_none, get_lesson_choice_student, get_active_year_season, json_load
@@ -3080,6 +3081,84 @@ class LessonStandartGroupAPIView(
         return request.send_data(return_datas)
 
 
+@permission_classes([IsAuthenticated])
+class CopyProfesisonAPIView(
+    generics.GenericAPIView,
+    mixins.CreateModelMixin
+):
+
+    ''' Өгөгдсөн хөтөлбөрийн сургалтын төлөвлөгөөний хичээлүүдийг өөр хөтөлбөрийн сургалтын төлөвлөгөөний хичээл рүү хуулах '''
+
+    queryset = LearningPlan.objects.all()
+
+    # Өгөгдлийн сан дээр үйлдэл хийхэд алдаа гарах үед алдаа гарах хүртэл хийгдсэн үйлдлүүдийг буцаах функц
+    @transaction.atomic
+    def put(self, request):
+
+        data = request.data
+        queryset = self.queryset
+
+        # Хуулж авах хөтөлбөрийн сургалтын төлөвлөгөө
+        main_learning_plan = queryset.filter(profession=data['copying_prof'])
+
+        # Хуулж тавих хөтөлбөрийн сургалтын төлөвлөгөөний хичээл устгах
+        queryset.filter(profession=data['chosen_prof']).delete()
+
+        # Хуулж авах хөтөлбөрийн мэдээллийг авах
+        chosen_prof = ProfessionDefinition.objects.get(id=data['chosen_prof'])
+
+        # Хуулж тавих хөтөлбөрийн сургалтын төлөвлөгөөний хичээлийн объектийг хадгалах хүснэгт
+        cloned_lessons = []
+
+        # Хуулж тавих хөтөлбөрийн сургалтын төлөвлөгөөний хичээлийн объектийг үүсгэж хадгалах хүснэгт рүү хийх
+        for value in main_learning_plan:
+            cloned_lessons.append(
+                LearningPlan(
+                    lesson = value.lesson,
+                    previous_lesson = value.previous_lesson,
+                    group_lesson = value.group_lesson,
+                    lesson_level = value.lesson_level,
+                    lesson_type = value.lesson_type,
+                    season = value.season,
+                    is_check_score = value.is_check_score,
+                    department = value.department,
+                    school = value.school,
+                    profession = chosen_prof
+                )
+            )
+
+        # Хүснэгтэд хадгалсан объектуудыг өгөгдлийн санд хадгалах хэсэг
+        queryset.bulk_create(cloned_lessons)
+
+        # Хүсэлт амжилттай явагдсан үед амжилттай явагдсан тухай мэдээлэл буцаах хэсэг
+        return request.send_info('INF_018')
+
+
+@permission_classes([IsAuthenticated])
+class ProfessionJustProfessionAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin
+):
+    '''
+        Сургалтын төлөвлөгөөний хүснэгтэд хадгалагдсан мэргэжлүүдийг авах
+    '''
+
+    queryset = ProfessionDefinition.objects.all()
+    serializer_class = ProfessionDefinitionJustProfessionSerializer
+
+    def get(self, request):
+
+        # Сургуулиар хайх хэсэг
+        school = request.query_params.get('school')
+        if school:
+            self.queryset = self.queryset.filter(school=school)
+
+        profession_data = self.list(request).data
+
+        return request.send_data(profession_data)
+
+
+@permission_classes([IsAuthenticated])
 class ProfessionPosterFile(
     generics.GenericAPIView,
     mixins.UpdateModelMixin

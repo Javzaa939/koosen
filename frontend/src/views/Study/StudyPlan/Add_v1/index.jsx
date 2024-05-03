@@ -53,6 +53,7 @@ const StudyPlanAdd = ({ open, handleModal, mergejil_id }) => {
         }
     }
 
+
     useEffect(() => {
         getDatas()
     },[mergejil_id])

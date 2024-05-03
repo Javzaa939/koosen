@@ -106,4 +106,10 @@ info = {
         "message": "Амжилттай идэхвжүүллээ",
         "status_code": 201
     },
+    "INF_018": {
+        "code": 18,
+        "name": "INF_018",
+        "message": "Амжилттай хуулагдлаа",
+        "status_code": 201
+    },
 }
