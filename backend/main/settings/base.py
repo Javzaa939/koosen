@@ -89,7 +89,7 @@ MIDDLEWARE = [
 
     'main.middleware.success_rp.success_rp',
     'main.middleware.error_handler.ErrorHandlerMiddleware',
-
+    'main.middleware.requestLog.RequestLogMiddleware',
 ]
 
 ROOT_URLCONF = 'main.urls'
