@@ -152,7 +152,7 @@ export default function PrintMongolia()
                     </div>
                 </div>
             </div>
-            <div className='d-flex justify-content-between w-100'>
+            <div className='d-flex justify-content-between w-100 mb-5'>
                 <span style={{ paddingLeft: '180px' }} >Улаанбаатар хот</span>
                 <span style={{ paddingRight: '230px' }} >Бүртгэлийн дугаар {data?.registration_num}</span>
             </div>
