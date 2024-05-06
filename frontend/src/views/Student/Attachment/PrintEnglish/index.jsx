@@ -330,7 +330,7 @@ export default function PrintAttachmentEnglish()
 
             <div className={`${!isPageBreak && 'd-none'}`} style={{ marginTop: '135px', breakInside: 'avoid' }} >
                 <div className={`position-relative d-flex justify-content-between`} >
-                    <div className='d-flex flex-wrap align-content-start p-1' style={{ width: '33.1%' }} >
+                    <div className='d-flex flex-wrap align-content-start p-1' style={{ width: '33.1%' }} id='table4-4'>
                         <table className='w-100 text-center d-none' id='table4' >
                             <thead className='fw-bolder'>
                                  <tr style={{ height: '25px' }}>
@@ -347,7 +347,7 @@ export default function PrintAttachmentEnglish()
                         </table>
                     </div>
 
-                    <div className='d-flex flex-wrap align-content-start p-1' style={{ width: '33.1%' }} >
+                    <div className='d-flex flex-wrap align-content-start p-1' style={{ width: '33.1%' }} id='table5-5'>
 
                         <table className='w-100 text-center d-none' id='table5' >
                             <thead className='fw-bolder'>
@@ -365,7 +365,7 @@ export default function PrintAttachmentEnglish()
                         </table>
                     </div>
 
-                    <div className='d-flex flex-wrap align-content-start p-1' style={{ width: '33.1%' }} >
+                    <div className='d-flex flex-wrap align-content-start p-1' style={{ width: '33.1%' }} id='table6-6'>
 
                         <table className='w-100 text-center d-none' id='table6' >
                             <thead className='fw-bolder'>
@@ -454,7 +454,7 @@ export default function PrintAttachmentEnglish()
                         listArr.map((val, idx) =>
                         {
                             return (
-                                <div className='px-1' style={{ width: `${100/listArr.length}%` }} key={idx} >
+                                <div className='px-1' style={{ width: `${100/2}%` }} key={idx} >
                                     <div className='d-inline-block text-center' >
                                         <div className='pt-50 px-2' style={{ textTransform: 'uppercase', borderTop: '1px solid black' }}>
                                         {`${val?.last_name_eng}${val?.first_name_eng}`}, {val?.position_name_eng}
