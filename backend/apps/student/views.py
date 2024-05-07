@@ -2409,35 +2409,65 @@ class StudentCalculateGpaDiplomaAPIView(
 
         profession_obj = Student.objects.get(pk=student_id).group.profession
 
+        # Оюутны бүх дүн
         all_score_register_qs = ScoreRegister.objects.filter(lesson_id__in=request.data, student_id=student_id)
 
+        # Оюутны дүнтэй хичээлүүд
         lesson_ids = all_score_register_qs.values_list('lesson', flat=True)
 
-        bagtsad_no_hariyalagdah = LearningPlan.objects.filter(lesson__in=lesson_ids, profession=profession_obj, group_lesson__isnull=False).values_list('group_lesson', flat=True).distinct()
+        # Багцлагдсан хичээлүүдийг багцалсан хичээлүүдийг аварх
+        bagtsad_hariyalagdah = LearningPlan.objects.filter(lesson__in=lesson_ids, profession=profession_obj, group_lesson__isnull=False).values_list('group_lesson', flat=True).distinct()
 
-        for bagtsad_no_hariyalagdah_id in bagtsad_no_hariyalagdah:
-            grouped_lessons_ids = LearningPlan.objects.filter(lesson__in=lesson_ids, profession=profession_obj, group_lesson=bagtsad_no_hariyalagdah_id).values_list('lesson', flat=True)
-            grouped_datas[bagtsad_no_hariyalagdah_id] = grouped_lessons_ids
+        # Багцалсан хичээлээр багцлуусан хичээлүүдийг авах
+        for bagtsad_hariyalagdah_id in bagtsad_hariyalagdah:
+            grouped_lessons_ids = LearningPlan.objects.filter(lesson__in=lesson_ids, profession=profession_obj, group_lesson=bagtsad_hariyalagdah_id).values_list('lesson', flat=True)
 
+            # Багц хичээлд хамаарагдах хичээлүүд
+            grouped_datas[bagtsad_hariyalagdah_id] = grouped_lessons_ids
+
+            # Багцлуулсан хичээлүүдийн ids
             grouped_ids.extend(grouped_lessons_ids)
 
+        # Нийт хичээлээс багцлуулсан хичээлүүдийг хасч үлдсэн хичээлийг авах
         unique_ids = list(set(lesson_ids) - set(grouped_ids))
 
         # Багцалсан хичээлээр
         for grouped_data in grouped_datas:
 
+            # Багц хичээлийн нийт кредитийг олох
             score_register_kredit_sum = ScoreRegister.objects.filter(lesson__in=grouped_datas[grouped_data], student_id=student_id).aggregate(Sum('lesson__kredit')).get('lesson__kredit__sum')
+
+            # Багц хичээлийн нийт дүнг олох
             score_register_score_sum = ScoreRegister.objects.filter(lesson__in=grouped_datas[grouped_data], student_id=student_id).aggregate(total=Sum(Coalesce(Coalesce(F('exam_score'), 0, output_field=FloatField()) + Coalesce(F('teach_score'), 0, output_field=FloatField()), 0, output_field=FloatField()) * F('lesson__kredit'))).get('total')
+
+            # Дундаж дүн
             score_register_score = round((score_register_score_sum / score_register_kredit_sum), 2)
+
+            # Үсгэн үнэлгээ
             score_qs = Score.objects.filter(score_max__gte=score_register_score, score_min__lte=score_register_score).first()
 
-            created_cal_qs = CalculatedGpaOfDiploma.objects.create(student_id=student_id, kredit=score_register_kredit_sum, score=score_register_score, gpa=score_qs.gpa, assesment=score_qs.assesment)
-            created_cal_qs.lesson.add(*grouped_datas[grouped_data])
+            # Дипломын хичээл бодуулах хэсгийг үүсгэх
+            created_cal_qs = CalculatedGpaOfDiploma.objects.create(
+                lesson_id=grouped_data,
+                student_id=student_id,
+                kredit=score_register_kredit_sum,
+                score=score_register_score,
+                gpa=score_qs.gpa,
+                assesment=score_qs.assesment
+            )
 
         for unique_id in unique_ids:
             score_register_qs = ScoreRegister.objects.filter(student_id=student_id, lesson_id=unique_id).first()
-            created_cal_qs = CalculatedGpaOfDiploma.objects.create(student_id=student_id, kredit=score_register_qs.lesson.kredit, score=((score_register_qs.teach_score or 0) + (score_register_qs.exam_score or 0)), gpa=score_register_qs.assessment.gpa, assesment=score_register_qs.assessment.assesment)
-            created_cal_qs.lesson.add(score_register_qs.lesson)
+
+            # Дипломын хичээл бодуулах хэсгийг үүсгэх
+            created_cal_qs = CalculatedGpaOfDiploma.objects.create(
+                lesson_id=unique_id,
+                student_id=student_id, kredit=score_register_qs.lesson.kredit,
+                score=((score_register_qs.teach_score or 0) + (score_register_qs.exam_score or 0)),
+                gpa=score_register_qs.assessment.gpa,
+                assesment=score_register_qs.assessment.assesment,
+                grade_letter=score_register_qs.grade_letter
+            )
 
         return request.send_info("INF_013", list(lesson_ids))
 
@@ -2452,8 +2482,12 @@ class StudentGpaDiplomaValuesAPIView(
         score_assesment = ''
         max_kredit = 0
         all_score = 0
+        all_gpa_score = 0
+        final_score = 0.0
 
         student_id = self.request.query_params.get('id')
+
+        # Дипломын голч бодогдсон хичээлүүд
         qs = CalculatedGpaOfDiploma.objects.filter(student_id=student_id)
 
         student_prof_qs = Student.objects.get(id=student_id).group.profession
@@ -2465,59 +2499,77 @@ class StudentGpaDiplomaValuesAPIView(
         all_learn_levels = dict(LearningPlan.LESSON_LEVEL)
 
         all_datas = []
+        # Нийт тооцов кредитийг хадгалах
+        all_s_kredit = 0
         for level in list(learning_plan_levels):
-            if level == LearningPlan.DIPLOM or level == LearningPlan.MAG_DIPLOM or level == LearningPlan.DOC_DIPLOM:
-                continue
             obj_datas = {}
-            obj_datas['name'] = all_learn_levels[level]
-
             lesson_datas = []
 
-            obj_datas['eng_name'] = 'Education subject'
-            obj_datas['uig_name'] = 'ᠳᠡᢉᠡᠳᠦ ᠪᠣᠯᠪᠠᠰᠤᠷᠠᠯ ᠤ᠋ᠨ ᠰᠠᠭᠤᠷᠢ ᢈᠢᠴᠢᠶᠡᠯ'
-            if level == 2:
-                obj_datas['eng_name'] = 'Core'
-                obj_datas['uig_name'] = 'ᠮᠡᠷᢉᠡᠵᠢᠯ ᠦ᠋ᠨ ᠰᠠᠭᠤᠷᠢ ᢈᠢᠴᠢᠶᠡᠯ'
-            if level == 3:
-                obj_datas['eng_name'] = 'Major course'
-                obj_datas['uig_name'] = 'ᠮᠡᠷᢉᠡᠵᠢᠯ ᠦ᠋ᠨ ᢈᠢᠴᠢᠶᠡᠯ'
+            if level != LearningPlan.DIPLOM and level != LearningPlan.MAG_DIPLOM and level != LearningPlan.DOC_DIPLOM:
+                obj_datas['name'] = all_learn_levels[level]
 
-            for data_qs in qs:
-                lesson_first_data = data_qs.lesson.all()
-                lesson_obj = lesson_first_data.first()
+                if level == 1:
+                    obj_datas['eng_name'] = 'Education subject'
+                    obj_datas['uig_name'] = 'ᠳᠡᢉᠡᠳᠦ ᠪᠣᠯᠪᠠᠰᠤᠷᠠᠯ ᠤ᠋ᠨ ᠰᠠᠭᠤᠷᠢ ᢈᠢᠴᠢᠶᠡᠯ'
+                if level == 2:
+                    obj_datas['eng_name'] = 'Core'
+                    obj_datas['uig_name'] = 'ᠮᠡᠷᢉᠡᠵᠢᠯ ᠦ᠋ᠨ ᠰᠠᠭᠤᠷᠢ ᢈᠢᠴᠢᠶᠡᠯ'
+                if level == 3 or level == 5:
+                    obj_datas['eng_name'] = 'Major course'
+                    obj_datas['uig_name'] = 'ᠮᠡᠷᢉᠡᠵᠢᠯ ᠦ᠋ᠨ ᢈᠢᠴᠢᠶᠡᠯ'
 
-                query = '''
-                    select lp.lesson_level, ls.name, ls.code, ls.id, ls.name_eng, ls.name_uig, ls.kredit from lms_learningplan lp
-                    inner join lms_lessonstandart ls
-                    on lp.lesson_id=ls.id
-                    where lp.profession_id = {profession_id} and lp.lesson_id = {lesson_id}
-                '''.format(profession_id=student_prof_qs.id, lesson_id=lesson_obj.id)
+                # Дипломын хичээлээр давталт гүйлгэх
+                for data_qs in qs:
+                    lesson_first_data = data_qs.lesson
 
-                cursor = connection.cursor()
-                cursor.execute(query)
-                rows = list(dict_fetchall(cursor))
+                    query = '''
+                        select lp.lesson_level, ls.name, ls.code, ls.id, ls.name_eng, ls.name_uig, ls.kredit from lms_learningplan lp
+                        inner join lms_lessonstandart ls
+                        on lp.lesson_id=ls.id
+                        where lp.profession_id = {profession_id} and lp.lesson_id = {lesson_id}
+                    '''.format(profession_id=student_prof_qs.id, lesson_id=lesson_first_data.id)
 
-                if len(rows) > 0:
-                    if rows[0]['lesson_level'] == level:
-                        lesson = rows[0]
-                        lesson['score'] = data_qs.score
-                        lesson['assesment'] = data_qs.assesment
-                        lesson_datas.append(lesson)
+                    cursor = connection.cursor()
+                    cursor.execute(query)
+                    rows = list(dict_fetchall(cursor))
 
-                        max_kredit = max_kredit + lesson.get('kredit')
-                        score_qs = Score.objects.filter(score_max__gte=data_qs.score, score_min__lte=data_qs.score).first()
+                    # Мэргэших хичээлийг мэргэжлийн хичээлтэй нэгтгэх
+                    if rows[0]['lesson_level'] == 5:
+                        rows[0]['lesson_level'] = 3
 
-                        all_score = all_score + (score_qs.gpa * lesson.get('kredit'))
+                    if len(rows) > 0:
+                        if rows[0]['lesson_level'] == level:
+                            lesson = rows[0]
+                            lesson['score'] = data_qs.score
+                            lesson['assesment'] = data_qs.assesment
+                            lesson['grade_letter'] = data_qs.grade_letter.description if data_qs.grade_letter else ''
+                            lesson_datas.append(lesson)
 
-            obj_datas['lessons'] = lesson_datas
-            all_datas.append(obj_datas)
+                            max_kredit = max_kredit + lesson.get('kredit')
+                            score_qs = Score.objects.filter(score_max__gte=data_qs.score, score_min__lte=data_qs.score).first()
+
+                            # Үсгэн үнэлгээ буюу S тооцов дүн оруулвал кредитийг нь тооцоод дүнд нөлөөлөхгүй
+                            if not data_qs.grade_letter:
+                                all_score = all_score + (score_qs.gpa * lesson.get('kredit'))
+                                all_gpa_score = all_score + (data_qs.score * lesson.get('kredit'))
+                            else:
+                                all_s_kredit = all_s_kredit + lesson.get('kredit')
+
+                obj_datas['lessons'] = lesson_datas
+                all_datas.append(obj_datas)
 
         final_gpa = 0.0
-        if all_score != 0:
-            final_gpa = all_score / max_kredit
+        if all_score != 0 and all_gpa_score != 0:
+            # Нийт кредитээс S үнэлгээ буюу тооцов үнэлгээг хасаж голч бодогдоно
+            estimate_kredit = max_kredit - all_s_kredit
+            final_gpa = all_score / estimate_kredit
+            # Нийт голч оноо
+            final_score = all_gpa_score / estimate_kredit
             final_gpa = format(final_gpa, ".2f")
+            # Нийт голч оноог бутархай руу шилжүүлэх
+            final_score = format(final_score, ".2f")
 
-        all_data['score'] = { 'assesment': final_gpa, 'max_kredit': max_kredit }
+        all_data['score'] = { 'assesment': final_gpa, 'max_kredit': max_kredit, 'average_score': final_score }
         all_data['lessons'] = all_datas
 
         # GraduationWork

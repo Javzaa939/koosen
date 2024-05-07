@@ -141,16 +141,21 @@ export default function PrintAttachmentMongolia()
                                     newCell2.innerHTML = flattenedArray[count - 1]?.name || ''
                                     newCell3.innerHTML = flattenedArray[count - 1]?.kredit || ''
 
-                                    // NaN буцаагаад байхаар нь шалгах функц бичсэн.
-                                    // ер нь бол шаардлагагүй гэхдээ яахав
+                                    if (flattenedArray[count - 1]?.grade_letter) {
+                                        newCell4.innerHTML = flattenedArray[count - 1]?.grade_letter ? flattenedArray[count - 1]?.grade_letter : ''
+                                        newCell4.colSpan = 2
+                                    } else {
+                                        newCell4.innerHTML = flattenedArray[count - 1]?.score ? flattenedArray[count - 1]?.score : ''
+                                        // NaN буцаагаад байхаар нь шалгах функц бичсэн.
+                                        // ер нь бол шаардлагагүй гэхдээ яахав
 
-                                    // newCell4.innerHTML = !isNaN(flattenedArray[count - 1]?.score)
-                                    // 	? flattenedArray[count - 1]?.score
-                                    // 		: 'Default';
+                                        // newCell4.innerHTML = !isNaN(flattenedArray[count - 1]?.score)
+                                        // 	? flattenedArray[count - 1]?.score
+                                        // 		: 'Default';
 
-                                    newCell4.innerHTML = flattenedArray[count - 1]?.score ? flattenedArray[count - 1]?.score : ''
+                                        newCell5.innerHTML = flattenedArray[count - 1]?.assesment || ''
+                                    }
 
-                                    newCell5.innerHTML = flattenedArray[count - 1]?.assesment || ''
 
                                     newCell1.className = 'border-dark mini-cell'
                                     newCell2.className = 'border-dark body-cell'
@@ -189,11 +194,11 @@ export default function PrintAttachmentMongolia()
                     <table className='w-100 text-center d-none' id='table1' >
                         <thead className='fw-bolder'>
                             <tr style={{ height: '25px' }}>
-                                <td className='border-dark' style={{ width: '6.25%' }}>№</td>
-                                <td className='border-dark' style={{ width: '63,75%' }}>Хичээлийн нэрс</td>
-                                <td className='border-dark' style={{ width: '12%' }}  >Кр</td>
-                                <td className='border-dark' style={{ width: '10%' }} >Оноо</td>
-                                <td className='border-dark' style={{ width: '8%' }} >Дүн</td>
+                                <td className='border-dark' style={{ width: '4%' }}>№</td>
+                                <td className='border-dark' style={{ width: '70%' }}>Хичээлийн нэр</td>
+                                <td className='border-dark' style={{ width: '7%' }}  >Багц цаг</td>
+                                <td className='border-dark' style={{ width: '11%' }} >Үсгэн үнэлгээ</td>
+                                <td className='border-dark' style={{ width: '8%' }} >Тоо үнэлгээ</td>
                             </tr>
                         </thead>
                         <tbody>
@@ -207,11 +212,11 @@ export default function PrintAttachmentMongolia()
                     <table className='w-100 text-center d-none' id='table2' >
                         <thead className='fw-bolder'>
                             <tr style={{ height: '25px' }}>
-                                <td className='border-dark' style={{ width: '6.25%' }}>№</td>
-                                <td className='border-dark' style={{ width: '63,75%' }}>Хичээлийн нэрс</td>
-                                <td className='border-dark' style={{ width: '12%' }}  >Кр</td>
-                                <td className='border-dark' style={{ width: '10%' }} >Оноо</td>
-                                <td className='border-dark' style={{ width: '8%' }} >Дүн</td>
+                                <td className='border-dark' style={{ width: '4%' }}>№</td>
+                                <td className='border-dark' style={{ width: '70%' }}>Хичээлийн нэр</td>
+                                <td className='border-dark' style={{ width: '7%' }}  >Багц цаг</td>
+                                <td className='border-dark' style={{ width: '11%' }} >Үсгэн үнэлгээ</td>
+                                <td className='border-dark' style={{ width: '8%' }} >Тоо үнэлгээ</td>
                             </tr>
                         </thead>
                         <tbody>
@@ -225,11 +230,11 @@ export default function PrintAttachmentMongolia()
                     <table className='w-100 text-center d-none' id='table3' >
                         <thead className='fw-bolder'>
                             <tr style={{ height: '25px' }}>
-                                <td className='border-dark' style={{ width: '6.25%' }}>№</td>
-                                <td className='border-dark' style={{ width: '63,75%' }}>Хичээлийн нэрс</td>
-                                <td className='border-dark' style={{ width: '12%' }}  >Кр</td>
-                                <td className='border-dark' style={{ width: '10%' }} >Оноо</td>
-                                <td className='border-dark' style={{ width: '8%' }} >Дүн</td>
+                                <td className='border-dark' style={{ width: '4%' }}>№</td>
+                                <td className='border-dark' style={{ width: '70%' }}>Хичээлийн нэр</td>
+                                <td className='border-dark' style={{ width: '7%' }}  >Багц цаг</td>
+                                <td className='border-dark' style={{ width: '11%' }} >Үсгэн үнэлгээ</td>
+                                <td className='border-dark' style={{ width: '8%' }} >Тоо үнэлгээ</td>
                             </tr>
                         </thead>
                         <tbody>
@@ -263,11 +268,11 @@ export default function PrintAttachmentMongolia()
                         <table className='w-100 text-center d-none' id='table4' >
                             <thead className='fw-bolder'>
                                 <tr style={{ height: '25px' }}>
-                                    <td className='border-dark' style={{ width: '6.25%' }}>№</td>
-                                    <td className='border-dark' style={{ width: '63,75%' }}>Хичээлийн нэрс</td>
-                                    <td className='border-dark' style={{ width: '12%' }}  >Кр</td>
-                                    <td className='border-dark' style={{ width: '10%' }} >Оноо</td>
-                                    <td className='border-dark' style={{ width: '8%' }} >Дүн</td>
+                                    <td className='border-dark' style={{ width: '4%' }}>№</td>
+                                    <td className='border-dark' style={{ width: '70%' }}>Хичээлийн нэр</td>
+                                    <td className='border-dark' style={{ width: '7%' }}  >Багц цаг</td>
+                                    <td className='border-dark' style={{ width: '11%' }} >Үсгэн үнэлгээ</td>
+                                    <td className='border-dark' style={{ width: '8%' }} >Тоо үнэлгээ</td>
                                 </tr>
                             </thead>
                             <tbody>
@@ -281,11 +286,11 @@ export default function PrintAttachmentMongolia()
                         <table className='w-100 text-center d-none' id='table5' >
                             <thead className='fw-bolder'>
                                 <tr style={{ height: '25px' }}>
-                                    <td className='border-dark' style={{ width: '6.25%' }}>№</td>
-                                    <td className='border-dark' style={{ width: '63,75%' }}>Хичээлийн нэрс</td>
-                                    <td className='border-dark' style={{ width: '12%' }}  >Кр</td>
-                                    <td className='border-dark' style={{ width: '10%' }} >Оноо</td>
-                                    <td className='border-dark' style={{ width: '8%' }} >Дүн</td>
+                                    <td className='border-dark' style={{ width: '4%' }}>№</td>
+                                    <td className='border-dark' style={{ width: '70%' }}>Хичээлийн нэр</td>
+                                    <td className='border-dark' style={{ width: '7%' }}  >Багц цаг</td>
+                                    <td className='border-dark' style={{ width: '11%' }} >Үсгэн үнэлгээ</td>
+                                    <td className='border-dark' style={{ width: '8%' }} >Тоо үнэлгээ</td>
                                 </tr>
                             </thead>
                             <tbody>
@@ -299,11 +304,11 @@ export default function PrintAttachmentMongolia()
                         <table className='w-100 text-center d-none' id='table6' >
                             <thead className='fw-bolder'>
                                 <tr style={{ height: '25px' }}>
-                                    <td className='border-dark' style={{ width: '6.25%' }}>№</td>
-                                    <td className='border-dark' style={{ width: '63,75%' }}>Хичээлийн нэрс</td>
-                                    <td className='border-dark' style={{ width: '12%' }}  >Кр</td>
-                                    <td className='border-dark' style={{ width: '10%' }} >Оноо</td>
-                                    <td className='border-dark' style={{ width: '8%' }} >Дүн</td>
+                                    <td className='border-dark' style={{ width: '4%' }}>№</td>
+                                    <td className='border-dark' style={{ width: '70%' }}>Хичээлийн нэр</td>
+                                    <td className='border-dark' style={{ width: '7%' }}  >Багц цаг</td>
+                                    <td className='border-dark' style={{ width: '11%' }} >Үсгэн үнэлгээ</td>
+                                    <td className='border-dark' style={{ width: '8%' }} >Тоо үнэлгээ</td>
                                 </tr>
                             </thead>
                             <tbody>
@@ -353,7 +358,9 @@ export default function PrintAttachmentMongolia()
                     </div>
                 </div>
             </header>
-
+            {/* <div className='mt-2'>
+                { datas?.graduation_work?.lesson_type == 1 ? printDatas?.student?.group?.degree?.degree_code !== 'D' ? 'Магистрын төгсөлтийн ажил/диссертацийн нэр:' : 'Дипломын ажлын нэр' : 'Төгсөлтийн шалгалт:' }
+            </div> */}
             <footer className='w-100' style={{ fontSize: '10px', backgroundColor: 'white', color: 'black' }} >
 
                 <div className='text-end  me-1'>
@@ -362,7 +369,6 @@ export default function PrintAttachmentMongolia()
                 </div>
 
                 <div className='px-1 mb-5' style={{ paddingTop: '2px', paddingBottom: '15px' }} >
-                    { datas?.graduation_work?.lesson_type == 1 ? 'Төгсөлтийн ажил:' : 'Төгсөлтийн шалгалт:' }
                     {
                         datas?.graduation_work?.lesson_type == 1
                         ?
@@ -384,7 +390,7 @@ export default function PrintAttachmentMongolia()
                         listArr.map((val, idx) =>
                         {
                             return (
-                                <div className='px-1' style={{ width: `${100/listArr.length}%` }} key={idx} >
+                                <div className='px-1' style={{ width: `${100/2}%` }} key={idx} >
                                     <div className='d-inline-block text-center' >
                                         <div className='pt-50 px-2' style={{ textTransform: 'uppercase', borderTop: '1px solid black' }}>
                                             {val?.position_name} <span style={{ textWrap: 'nowrap' }}>{`${val?.last_name}${val?.first_name}`}</span>

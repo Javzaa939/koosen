@@ -10,6 +10,7 @@ class ElseltUser(models.Model):
 
     class Meta:
         db_table = 'elselt_user'
+        managed = False
 
     first_name = models.CharField(max_length=150, blank=True, verbose_name='Нэр')
     last_name = models.CharField(max_length=150, blank=True, verbose_name='Овог')
