@@ -2483,6 +2483,7 @@ class StudentGpaDiplomaValuesAPIView(
         max_kredit = 0
         all_score = 0
         all_gpa_score = 0
+        final_score = 0.0
 
         student_id = self.request.query_params.get('id')
 
