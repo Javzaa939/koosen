@@ -27,25 +27,21 @@ footer {
     bottom: 10px;
 }
 
-.mini-cell {
-    width: 6.25%;
-}
-
 .body-cell {
-    width: 63.25%;
+    width: 72%;
     line-height: 1;
     padding: 5px 4px;
     text-align: start;
 }
 
 .footer1-cell {
-    width: 12%;
+    width: 7%;
 }
 
 .footer2-cell {
-    width: 10%;
+    width: 13%;
 }
 
 .footer3-cell {
-    width: 18%;
+    width: 8%;
 }
