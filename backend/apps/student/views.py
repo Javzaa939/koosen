@@ -2513,7 +2513,7 @@ class StudentGpaDiplomaValuesAPIView(
                 if level == 2:
                     obj_datas['eng_name'] = 'Core'
                     obj_datas['uig_name'] = 'ᠮᠡᠷᢉᠡᠵᠢᠯ ᠦ᠋ᠨ ᠰᠠᠭᠤᠷᠢ ᢈᠢᠴᠢᠶᠡᠯ'
-                if level == 3:
+                if level == 3 or level == 5:
                     obj_datas['eng_name'] = 'Major course'
                     obj_datas['uig_name'] = 'ᠮᠡᠷᢉᠡᠵᠢᠯ ᠦ᠋ᠨ ᢈᠢᠴᠢᠶᠡᠯ'
 
@@ -2531,6 +2531,10 @@ class StudentGpaDiplomaValuesAPIView(
                     cursor = connection.cursor()
                     cursor.execute(query)
                     rows = list(dict_fetchall(cursor))
+
+                    # Мэргэших хичээлийг мэргэжлийн хичээлтэй нэгтгэх
+                    if rows[0]['lesson_level'] == 5:
+                        rows[0]['lesson_level'] = 3
 
                     if len(rows) > 0:
                         if rows[0]['lesson_level'] == level:
