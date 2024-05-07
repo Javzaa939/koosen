@@ -2488,7 +2488,7 @@ class StudentGpaDiplomaValuesAPIView(
         student_id = self.request.query_params.get('id')
 
         # Дипломын голч бодогдсон хичээлүүд
-        qs = CalculatedGpaOfDiploma.objects.filter(student_id=student_id)
+        qs = CalculatedGpaOfDiploma.objects.filter(student_id=student_id, lesson__isnull=False)
 
         student_prof_qs = Student.objects.get(id=student_id).group.profession
 
