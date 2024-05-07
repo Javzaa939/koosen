@@ -92,24 +92,24 @@ function EmailModal({ emailModalHandler, emailModal, selectedStudents, getDatas 
                             <PerfectScrollbar
                                 className='border rounded-3 p-75 my-1'
                                 style={{ height: 250, overflow: 'auto' }}
-                        >
-                            <table className='p-1'>
-                                <tbody>
-                                {selectedStudents.map((data, idx) => {
-                                    return(
-                                        <tr
-                                            key={idx}
-                                            className='border-bottom'
-                                        >
-                                            <td className='px-25 py-50'>{idx + 1}.</td>
-                                            <td className='px-25 py-50'>{data?.full_name}</td>
-                                            <td className='px-25 py-50'>{data?.profession}</td>
-                                            <td className='px-25 py-50'>{data?.degree_name}</td>
-                                        </tr>
-                                    )
-                                })}
-                                </tbody>
-                            </table>
+                            >
+                                <table className='p-1'>
+                                    <tbody>
+                                    {selectedStudents.map((data, idx) => {
+                                        return(
+                                            <tr
+                                                key={idx}
+                                                className='border-bottom'
+                                            >
+                                                <td className='px-25 py-50'>{idx + 1}.</td>
+                                                <td className='px-25 py-50'>{data?.full_name}</td>
+                                                <td className='px-25 py-50'>{data?.profession}</td>
+                                                <td className='px-25 py-50'>{data?.degree_name}</td>
+                                            </tr>
+                                        )
+                                    })}
+                                    </tbody>
+                                </table>
                             </PerfectScrollbar>
                         </Col>
                     </Row>
