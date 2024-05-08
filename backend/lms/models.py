@@ -3371,8 +3371,8 @@ class CalculatedGpaOfDiploma(models.Model):
     lesson = models.ForeignKey(LessonStandart, on_delete=models.PROTECT, verbose_name="Хичээл", null=True)
     kredit = models.FloatField(verbose_name="Кредит")
     score = models.FloatField(null=True, verbose_name="Нийт оноо")
-    gpa = models.FloatField(verbose_name="Голч дүн")
-    assesment = models.CharField(max_length=2, verbose_name="Үсгэн тэмдэглэгэ")
+    gpa = models.FloatField(verbose_name="Голч дүн", null=True)
+    assesment = models.CharField(max_length=2, verbose_name="Үсгэн тэмдэглэгэ", null=True)
     grade_letter = models.ForeignKey(GradeLetter, on_delete=models.SET_NULL, null=True, verbose_name="Үсгэн үнэлгээ")
 
     created_at = models.DateTimeField(auto_now_add=True)
