@@ -32,6 +32,7 @@ import FileModal from '@lms_components/FileModal'
 // drag-and-drop.scss
 import '@styles/react/libs/drag-and-drop/drag-and-drop.scss'
 import DetailModal from './DetailModal'
+import excelDownload from '@src/utility/excelDownload'
 
 const Graduation = () => {
 
@@ -305,6 +306,31 @@ const Graduation = () => {
         }
     }
 
+    function excelHandler() {
+        const rowInfo = {
+            headers: [
+                '№',
+                'Оюутны код',
+                'Овог',
+                'Нэр',
+                '* Бүртгэлийн дугаар',
+                '* Дипломын дугаар',
+                '* ЭШ-ийн шалгалтын оноо',
+                '* Өмнөх шатны боловсролын үнэлгээний дундаж оноо',
+                'Төгсөлтийн ажлын дугаар',
+                '* Дипломын ажлийн оноо',
+            ],
+
+            datas: [
+                'index',
+                'student.code',
+                'student.last_name',
+                'student.first_name',
+            ],
+        }
+        excelDownload(datas, rowInfo, `tugsult_zagvar`)
+    }
+
 	return (
 		<Fragment>
             {importModal &&
@@ -409,7 +435,8 @@ const Graduation = () => {
                         <Button
                             color='primary'
                             onClick={() => {
-                                    window.open('/publicfiles/jishig_file.xlsx')
+                                    // window.open('/publicfiles/jishig_file.xlsx')
+                                    excelHandler()
                                 }
                             }
                         >
