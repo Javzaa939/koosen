@@ -464,19 +464,30 @@ export default function PrintAttachmentMongolia()
             <footer ref={footerSectionRef} className='w-100 font-dark' style={{ fontSize: '10px', backgroundColor: 'white', color: 'black' }} >
 
                 <div className='px-1 mb-25' style={{ paddingTop: '2px' }} >
-                    <span className=''>Магистрын төгсөлтийн ажил/диссертацийн нэр: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic}</span></span>
-                    {/* {
-                        datas?.graduation_work?.lesson_type == 1
+                {
+                    datas?.graduation_work?.lesson_type == 1
+                    ?
+                        printDatas?.student?.group?.degree?.degree_code !== 'D'
                         ?
-                            <span className='ms-5'>Магистрын төгсөлтийн ажил/диссертацийн нэр:{datas?.graduation_work?.diplom_topic}</span>
+                            <span className=''>Магистрын төгсөлтийн ажил/диссертацийн нэр: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic}</span></span>
                         :
-                            datas?.graduation_work?.lesson?.map((val, idx) =>
-                            {
-                                return (
-                                    <span className='ms-5' key={idx} >{idx + 1}. {val?.name} / {(val?.score_register?.teach_score || 0) + (val?.score_register?.exam_score || 0)} {val?.score_register?.assessment} /</span>
-                                )
-                            })
-                    } */}
+                            <span className=''>Дипломын ажлын нэр: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic}</span></span>
+
+                    :
+                        <>
+                            <span className=''>
+                                Төгсөлтийн шалгалт:
+                            </span>
+                                {
+                                    datas?.graduation_work?.lesson?.map((val, idx) =>
+                                    {
+                                        return (
+                                            <span className='ms-5' key={idx} >{idx + 1}. {val?.name} / {(val?.score_register?.teach_score || 0) + (val?.score_register?.exam_score || 0)} {val?.score_register?.assessment} /</span>
+                                        )
+                                    })
+                                }
+                        </>
+                }
                 </div>
 
                 <div className='d-flex justify-content-center gap-5 me-1'>

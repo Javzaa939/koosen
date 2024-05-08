@@ -2693,10 +2693,6 @@ class StudentGpaDiplomaValuesAPIView(
                 cursor.execute(query)
                 rows = list(dict_fetchall(cursor))
 
-                # Мэргэших хичээлийг мэргэжлийн хичээлтэй нэгтгэх
-                if rows[0]['lesson_level'] == 5:
-                    rows[0]['lesson_level'] = 3
-
                 # Магистрийн дипломын хичээлийг хавсралтанд мэргэжлийн хичээлд хамт харуулах хэсэг
                 if rows[0]['lesson_level'] == LearningPlan.MAG_DIPLOM:
                     rows[0]['lesson_level'] = LearningPlan.MAG_PROFESSION
