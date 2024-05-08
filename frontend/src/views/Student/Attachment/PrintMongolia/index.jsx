@@ -372,7 +372,7 @@ export default function PrintAttachmentMongolia()
                 <div className='d-flex flex-column text-center fw-bolder'>
                     <p className='text-uppercase' style={{ marginBottom: '0px' }} >{themeConfig.school.name}</p>
                     <p className='text-uppercase' style={{ marginBottom: '0px' }} >{printDatas?.student?.department?.school}</p>
-                    <p className='m-0' style={{ fontSize: '12px', fontWeight: '500' }} >{printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.graduation_work?.diplom_num} дугаартай <span className='text-lowercase'>{printDatas?.student?.group?.degree?.degree_name && `${printDatas?.student?.group?.degree?.degree_name}ын`}</span> дипломын хавсралт</p>
+                    <p className='m-0' style={{ fontSize: '12px', fontWeight: '500' }} >{printDatas?.student?.graduation_work?.diplom_num} дугаартай <span className='text-lowercase'>{printDatas?.student?.group?.degree?.degree_name && `${printDatas?.student?.group?.degree?.degree_name}ын`}</span> дипломын хавсралт</p>
                     <p className='' style={{ fontSize: 12, fontWeight: 500 }}>Бүртгэлийн дугаар:</p>
                 </div>
 
@@ -384,8 +384,7 @@ export default function PrintAttachmentMongolia()
                         <span className='fw-normal w-50'>Хөтөлбөрийн нэр:</span> <span className='text-uppercase'>{printDatas?.student?.group?.profession?.name}</span>
                     </div>
                     <div className='d-flex px-2' style={{ width: '33.3%' }} >
-                        <span className='fw-normal w-50' style={{ width: '200px'}}>Элссэн он:</span> <span></span>
-                        {/* <span className='fw-normal w-50' style={{ width: '200px'}}>Элссэн он:</span> <span>{printDatas?.student?.graduation_work?.lesson_year?.substring(5, 9)}</span> */}
+                        <span className='fw-normal w-50' style={{ width: '200px'}}>Элссэн он:</span><span>{printDatas?.student?.group?.join_year?.substring(0, 4)}</span>
                     </div>
                     {/* <div className='d-flex px-2' style={{ width: '33.3%' }} >
                         <span className='fw-normal w-50'>Олгосон огноо:</span> <span>{printDatas?.registration_num?.replaceAll('.', '-')}</span>
@@ -396,7 +395,7 @@ export default function PrintAttachmentMongolia()
                         <span className='fw-normal w-50'>Нэр:</span> <span>{printDatas?.student?.first_name}</span>
                     </div>
                     <div className='d-flex px-1' style={{ width: '33.3%' }} >
-                        <span className='fw-normal w-50'>Төрөлжсөн чиглэл: </span><span></span>
+                        <span className='fw-normal w-50'>Төрөлжсөн чиглэл: </span><span>{printDatas?.student?.group?.profession?.dep_name}</span>
                         {/* <span className='fw-normal w-50'>Мэргэжлийн индекс: </span><span>{printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.group?.profession?.code}</span> */}
                     </div>
                     <div className='d-flex px-2' style={{ width: '33.3%' }} >
@@ -411,11 +410,10 @@ export default function PrintAttachmentMongolia()
                         <span className='fw-normal w-50'>Регистрийн дугаар:</span> <span>{printDatas?.student?.register_num}</span>
                     </div>
                     <div className='d-flex px-1' style={{ width: '33.3%' }} >
-                        <span className='fw-normal w-50'>Өмнөх зэргийн дипломын дугаар:</span> <span className='text-uppercase'>9922003300</span>
-                        {/* <span className='fw-normal w-50'>Өмнөх зэргийн дипломын дугаар:</span> <span className='text-uppercase'>{printDatas?.student?.group?.profession?.name}</span> */}
+                        <span className='fw-normal w-50'>Өмнөх зэргийн дипломын дугаар:</span> <span className='text-uppercase'>{printDatas?.student?.graduation_work?.back_diplom_num}</span>
                     </div>
                     <div className='d-flex px-2' style={{ width: '33.3%' }} >
-                        <span className='fw-normal w-50'>Тушаалын дугаар:</span> <span className='text-uppercase'></span>
+                        <span className='fw-normal w-50'>Тушаалын дугаар:</span> <span className='text-uppercase'>{printDatas?.student?.graduation_work?.graduation_number}</span>
                     </div>
                 </div>
             </header>
@@ -466,7 +464,7 @@ export default function PrintAttachmentMongolia()
             <footer ref={footerSectionRef} className='w-100 font-dark' style={{ fontSize: '10px', backgroundColor: 'white', color: 'black' }} >
 
                 <div className='px-1 mb-25' style={{ paddingTop: '2px' }} >
-                    <span className=''>Магистрын төгсөлтийн ажил/диссертацийн нэр: {datas?.graduation_work?.diplom_topic}</span>
+                    <span className=''>Магистрын төгсөлтийн ажил/диссертацийн нэр: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic}</span></span>
                     {/* {
                         datas?.graduation_work?.lesson_type == 1
                         ?
@@ -482,8 +480,8 @@ export default function PrintAttachmentMongolia()
                 </div>
 
                 <div className='d-flex justify-content-center gap-5 me-1'>
-                    <div>Нийт багц цаг:</div>
-                    <div>Голч оноо:</div>
+                    <div>Нийт багц цаг: {datas?.score?.max_kredit}</div>
+                    <div>Голч оноо: {datas?.score?.average_score}</div>
                     <div>Голч дүн: {datas?.score?.assesment}</div>
                     {/* <span className='ms-5'>Нийт кредит: {datas?.score?.max_kredit}</span>
                     <span className='ms-5'>Голч дүн: {datas?.score?.assesment}</span> */}
