@@ -2473,6 +2473,100 @@ class StudentCalculateGpaDiplomaAPIView(
 
 
 @permission_classes([IsAuthenticated])
+class StudentCalculateGpaDiplomaGroupAPIView(
+    generics.GenericAPIView
+):
+    """ Хавсралтийн дүнг ангиар нь нэг загвараар хадгалах """
+
+    def post(self, request):
+        # Загварыг нь дуурайлгах оюутан
+        student_id = request.data
+        grouped_datas = {}
+        grouped_ids = []
+        all_create_datas = []
+
+        student_obj = Student.objects.get(pk=student_id)
+
+        # Тухайн загвар болгох гэж оюутны хичээлүүд
+        calculated_lesson_ids = CalculatedGpaOfDiploma.objects.filter(student_id=student_id).values_list('lesson', flat=True)
+
+        # Ангийн бүх оюутнууд
+        all_students_group = GraduationWork.objects.exclude(student=student_id).filter(student__group=student_obj.group).values_list('student', flat=True)
+
+        # Өмнө нь хадгалчихсан байж байгаад дахин загвар хадгалах дарвал өмнөх загвараар хадгалсан датаг устгах
+        if len(CalculatedGpaOfDiploma.objects.exclude(student=student_id).filter(student_id__in=all_students_group)) > 0:
+            CalculatedGpaOfDiploma.objects.exclude(student=student_id).filter(student_id__in=all_students_group).delete()
+
+        # Багцлагдсан хичээлүүдийг багцалсан хичээлүүдийг аварх
+        bagtsad_hariyalagdah = LearningPlan.objects.filter(lesson__in=calculated_lesson_ids, profession=student_obj.group.profession, group_lesson__isnull=False).values_list('group_lesson', flat=True).distinct()
+
+        # Багцалсан хичээлээр багцлуусан хичээлүүдийг авах
+        for bagtsad_hariyalagdah_id in bagtsad_hariyalagdah:
+            grouped_lessons_ids = LearningPlan.objects.filter(lesson__in=calculated_lesson_ids, profession=student_obj.group.profession, group_lesson=bagtsad_hariyalagdah_id).values_list('lesson', flat=True)
+
+            # Багц хичээлд хамаарагдах хичээлүүд
+            grouped_datas[bagtsad_hariyalagdah_id] = grouped_lessons_ids
+
+            # Багцлуулсан хичээлүүдийн ids
+            grouped_ids.extend(grouped_lessons_ids)
+
+        # Нийт хичээлээс багцлуулсан хичээлүүдийг хасч үлдсэн хичээлийг авах
+        unique_ids = list(set(calculated_lesson_ids) - set(grouped_ids))
+
+        # Ангийн бүх хүүхдүүдээр үүсгэх датаг бэлдэх
+        for one_student_id in all_students_group:
+            # Багцалсан хичээлээр
+            for grouped_data in grouped_datas:
+
+                # Багц хичээлийн нийт кредитийг олох
+                score_register_kredit_sum = ScoreRegister.objects.filter(lesson__in=grouped_datas[grouped_data], student_id=one_student_id).aggregate(Sum('lesson__kredit')).get('lesson__kredit__sum')
+
+                # Багц хичээлийн нийт дүнг олох
+                score_register_score_sum = ScoreRegister.objects.filter(lesson__in=grouped_datas[grouped_data], student_id=one_student_id).aggregate(total=Sum(Coalesce(Coalesce(F('exam_score'), 0, output_field=FloatField()) + Coalesce(F('teach_score'), 0, output_field=FloatField()), 0, output_field=FloatField()) * F('lesson__kredit'))).get('total')
+
+                # Дундаж дүн
+                score_register_score = round((score_register_score_sum / score_register_kredit_sum), 2)
+
+                # Үсгэн үнэлгээ
+                score_qs = Score.objects.filter(score_max__gte=score_register_score, score_min__lte=score_register_score).first()
+
+                # Дипломын хичээл бодуулах хэсгийг үүсгэх
+                created_cal_qs = CalculatedGpaOfDiploma(
+                    lesson_id=grouped_data,
+                    student_id=one_student_id,
+                    kredit=score_register_kredit_sum,
+                    score=score_register_score,
+                    gpa=score_qs.gpa,
+                    assesment=score_qs.assesment
+                )
+                all_create_datas.append(created_cal_qs)
+
+            for unique_id in unique_ids:
+                score_register_qs = ScoreRegister.objects.filter(student_id=one_student_id, lesson_id=unique_id).first()
+                # Дүн байхгүй бол үргэлжлүүлэх давталтыг
+                if not score_register_qs:
+                    continue
+
+                # Дипломын хичээл бодуулах хэсгийг үүсгэх
+                created_cal_qs = CalculatedGpaOfDiploma(
+                    lesson_id=unique_id,
+                    student_id=one_student_id,
+                    kredit=score_register_qs.lesson.kredit if score_register_qs else 0,
+                    score=score_register_qs.score_total,
+                    gpa=score_register_qs.assessment.gpa,
+                    assesment=score_register_qs.assessment.assesment,
+                    grade_letter=score_register_qs.grade_letter
+                )
+
+                all_create_datas.append(created_cal_qs)
+
+        # Бэлдсэн бүх өгөгдлөө нэг дор хадгалах
+        CalculatedGpaOfDiploma.objects.bulk_create(all_create_datas)
+
+        return request.send_info('INF_019')
+
+
+@permission_classes([IsAuthenticated])
 class StudentGpaDiplomaValuesAPIView(
     generics.GenericAPIView
 ):
@@ -2505,16 +2599,16 @@ class StudentGpaDiplomaValuesAPIView(
             obj_datas = {}
             lesson_datas = []
 
-            if level != LearningPlan.DIPLOM and level != LearningPlan.MAG_DIPLOM and level != LearningPlan.DOC_DIPLOM:
+            if (level != LearningPlan.DIPLOM and level != LearningPlan.MAG_DIPLOM and level != LearningPlan.DOC_DIPLOM):
                 obj_datas['name'] = all_learn_levels[level]
 
-                if level == 1:
+                if level == LearningPlan.BASIC:
                     obj_datas['eng_name'] = 'Education subject'
                     obj_datas['uig_name'] = 'ᠳᠡᢉᠡᠳᠦ ᠪᠣᠯᠪᠠᠰᠤᠷᠠᠯ ᠤ᠋ᠨ ᠰᠠᠭᠤᠷᠢ ᢈᠢᠴᠢᠶᠡᠯ'
-                if level == 2:
+                if level == LearningPlan.PROF_BASIC or level == LearningPlan.MAG_PROF_BASIC or level == LearningPlan.DOC_PROF_BASIC:
                     obj_datas['eng_name'] = 'Core'
                     obj_datas['uig_name'] = 'ᠮᠡᠷᢉᠡᠵᠢᠯ ᠦ᠋ᠨ ᠰᠠᠭᠤᠷᠢ ᢈᠢᠴᠢᠶᠡᠯ'
-                if level == 3 or level == 5:
+                if level == LearningPlan.PROFESSION or level == LearningPlan.MAG_PROFESSION or level == LearningPlan.DOC_PROFESSION or level == LearningPlan.QUALIFICATION :
                     obj_datas['eng_name'] = 'Major course'
                     obj_datas['uig_name'] = 'ᠮᠡᠷᢉᠡᠵᠢᠯ ᠦ᠋ᠨ ᢈᠢᠴᠢᠶᠡᠯ'
 
