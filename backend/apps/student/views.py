@@ -2464,8 +2464,8 @@ class StudentCalculateGpaDiplomaAPIView(
                 lesson_id=unique_id,
                 student_id=student_id, kredit=score_register_qs.lesson.kredit,
                 score=((score_register_qs.teach_score or 0) + (score_register_qs.exam_score or 0)),
-                gpa=score_register_qs.assessment.gpa,
-                assesment=score_register_qs.assessment.assesment,
+                gpa=score_register_qs.assessment.gpa if score_register_qs.assessment else None,
+                assesment=score_register_qs.assessment.assesment if score_register_qs.assessment else None,
                 grade_letter=score_register_qs.grade_letter
             )
 
@@ -2598,59 +2598,64 @@ class StudentGpaDiplomaValuesAPIView(
         for level in list(learning_plan_levels):
             obj_datas = {}
             lesson_datas = []
+            if level == LearningPlan.DIPLOM or level == LearningPlan.MAG_DIPLOM or level == LearningPlan.DOC_DIPLOM:
+                continue
 
-            if (level != LearningPlan.DIPLOM and level != LearningPlan.MAG_DIPLOM and level != LearningPlan.DOC_DIPLOM):
-                obj_datas['name'] = all_learn_levels[level]
+            obj_datas['name'] = all_learn_levels[level]
 
-                if level == LearningPlan.BASIC:
-                    obj_datas['eng_name'] = 'Education subject'
-                    obj_datas['uig_name'] = 'ᠳᠡᢉᠡᠳᠦ ᠪᠣᠯᠪᠠᠰᠤᠷᠠᠯ ᠤ᠋ᠨ ᠰᠠᠭᠤᠷᠢ ᢈᠢᠴᠢᠶᠡᠯ'
-                if level == LearningPlan.PROF_BASIC or level == LearningPlan.MAG_PROF_BASIC or level == LearningPlan.DOC_PROF_BASIC:
-                    obj_datas['eng_name'] = 'Core'
-                    obj_datas['uig_name'] = 'ᠮᠡᠷᢉᠡᠵᠢᠯ ᠦ᠋ᠨ ᠰᠠᠭᠤᠷᠢ ᢈᠢᠴᠢᠶᠡᠯ'
-                if level == LearningPlan.PROFESSION or level == LearningPlan.MAG_PROFESSION or level == LearningPlan.DOC_PROFESSION or level == LearningPlan.QUALIFICATION :
-                    obj_datas['eng_name'] = 'Major course'
-                    obj_datas['uig_name'] = 'ᠮᠡᠷᢉᠡᠵᠢᠯ ᠦ᠋ᠨ ᢈᠢᠴᠢᠶᠡᠯ'
+            if level == LearningPlan.BASIC:
+                obj_datas['eng_name'] = 'Education subject'
+                obj_datas['uig_name'] = 'ᠳᠡᢉᠡᠳᠦ ᠪᠣᠯᠪᠠᠰᠤᠷᠠᠯ ᠤ᠋ᠨ ᠰᠠᠭᠤᠷᠢ ᢈᠢᠴᠢᠶᠡᠯ'
+            if level == LearningPlan.PROF_BASIC or level == LearningPlan.MAG_PROF_BASIC or level == LearningPlan.DOC_PROF_BASIC:
+                obj_datas['eng_name'] = 'Core'
+                obj_datas['uig_name'] = 'ᠮᠡᠷᢉᠡᠵᠢᠯ ᠦ᠋ᠨ ᠰᠠᠭᠤᠷᠢ ᢈᠢᠴᠢᠶᠡᠯ'
+            if level == LearningPlan.PROFESSION or level == LearningPlan.MAG_PROFESSION or level == LearningPlan.DOC_PROFESSION or level == LearningPlan.QUALIFICATION :
+                obj_datas['eng_name'] = 'Major course'
+                obj_datas['uig_name'] = 'ᠮᠡᠷᢉᠡᠵᠢᠯ ᠦ᠋ᠨ ᢈᠢᠴᠢᠶᠡᠯ'
 
-                # Дипломын хичээлээр давталт гүйлгэх
-                for data_qs in qs:
-                    lesson_first_data = data_qs.lesson
+            # Дипломын хичээлээр давталт гүйлгэх
+            for data_qs in qs:
+                lesson_first_data = data_qs.lesson
 
-                    query = '''
-                        select lp.lesson_level, ls.name, ls.code, ls.id, ls.name_eng, ls.name_uig, ls.kredit from lms_learningplan lp
-                        inner join lms_lessonstandart ls
-                        on lp.lesson_id=ls.id
-                        where lp.profession_id = {profession_id} and lp.lesson_id = {lesson_id}
-                    '''.format(profession_id=student_prof_qs.id, lesson_id=lesson_first_data.id)
+                query = '''
+                    select lp.lesson_level, ls.name, ls.code, ls.id, ls.name_eng, ls.name_uig, ls.kredit from lms_learningplan lp
+                    inner join lms_lessonstandart ls
+                    on lp.lesson_id=ls.id
+                    where lp.profession_id = {profession_id} and lp.lesson_id = {lesson_id}
+                '''.format(profession_id=student_prof_qs.id, lesson_id=lesson_first_data.id)
 
-                    cursor = connection.cursor()
-                    cursor.execute(query)
-                    rows = list(dict_fetchall(cursor))
+                cursor = connection.cursor()
+                cursor.execute(query)
+                rows = list(dict_fetchall(cursor))
 
-                    # Мэргэших хичээлийг мэргэжлийн хичээлтэй нэгтгэх
-                    if rows[0]['lesson_level'] == 5:
-                        rows[0]['lesson_level'] = 3
+                # Мэргэших хичээлийг мэргэжлийн хичээлтэй нэгтгэх
+                if rows[0]['lesson_level'] == 5:
+                    rows[0]['lesson_level'] = 3
 
-                    if len(rows) > 0:
-                        if rows[0]['lesson_level'] == level:
-                            lesson = rows[0]
-                            lesson['score'] = data_qs.score
-                            lesson['assesment'] = data_qs.assesment
-                            lesson['grade_letter'] = data_qs.grade_letter.description if data_qs.grade_letter else ''
-                            lesson_datas.append(lesson)
+                # Магистрийн дипломын хичээлийг хавсралтанд мэргэжлийн хичээлд хамт харуулах хэсэг
+                if rows[0]['lesson_level'] == LearningPlan.MAG_DIPLOM:
+                    rows[0]['lesson_level'] = LearningPlan.MAG_PROFESSION
 
-                            max_kredit = max_kredit + lesson.get('kredit')
-                            score_qs = Score.objects.filter(score_max__gte=data_qs.score, score_min__lte=data_qs.score).first()
+                if len(rows) > 0:
+                    if rows[0]['lesson_level'] == level:
+                        lesson = rows[0]
+                        lesson['score'] = data_qs.score
+                        lesson['assesment'] = data_qs.assesment
+                        lesson['grade_letter'] = data_qs.grade_letter.description if data_qs.grade_letter else ''
+                        lesson_datas.append(lesson)
 
-                            # Үсгэн үнэлгээ буюу S тооцов дүн оруулвал кредитийг нь тооцоод дүнд нөлөөлөхгүй
-                            if not data_qs.grade_letter:
-                                all_score = all_score + (score_qs.gpa * lesson.get('kredit'))
-                                all_gpa_score = all_score + (data_qs.score * lesson.get('kredit'))
-                            else:
-                                all_s_kredit = all_s_kredit + lesson.get('kredit')
+                        max_kredit = max_kredit + lesson.get('kredit')
+                        score_qs = Score.objects.filter(score_max__gte=data_qs.score, score_min__lte=data_qs.score).first()
 
-                obj_datas['lessons'] = lesson_datas
-                all_datas.append(obj_datas)
+                        # Үсгэн үнэлгээ буюу S тооцов дүн оруулвал кредитийг нь тооцоод дүнд нөлөөлөхгүй
+                        if not data_qs.grade_letter:
+                            all_score = all_score + (score_qs.gpa * lesson.get('kredit'))
+                            all_gpa_score = all_score + (data_qs.score * lesson.get('kredit'))
+                        else:
+                            all_s_kredit = all_s_kredit + lesson.get('kredit')
+
+            obj_datas['lessons'] = lesson_datas
+            all_datas.append(obj_datas)
 
         final_gpa = 0.0
         if all_score != 0 and all_gpa_score != 0:
