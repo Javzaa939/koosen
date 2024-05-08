@@ -287,22 +287,22 @@ const Graduation = () => {
             const formData = new FormData()
             formData.append('file', file)
 
-            // const { success, data }  = await fetchData(scoreApi.postOldScore(formData))
-            // if (success) {
-            //     importModalHandler()
-            //     handleShowDetailModal()
-            //     if (data?.file_name) {
-            //         setFileName(data?.file_name)
-            //         delete data['file_name']
-            //     }
+            const { success, data }  = await fetchData(graduateApi.postFile(formData))
+            if (success) {
 
-            //     if (data?.all_error_datas) {
-            //         setErrorDatas(data?.all_error_datas)
-            //         delete data['all_error_datas']
-            //     }
-            //     setDetailDatas(data)
-            // }
-            handleShowDetailModal()
+                importModalHandler()
+                // handleShowDetailModal()
+                // if (data?.file_name) {
+                //     setFileName(data?.file_name)
+                //     delete data['file_name']
+                // }
+
+                // if (data?.all_error_datas) {
+                //     setErrorDatas(data?.all_error_datas)
+                //     delete data['all_error_datas']
+                // }
+                // setDetailDatas(data)
+            }
         }
     }
 
@@ -315,10 +315,10 @@ const Graduation = () => {
                 'Нэр',
                 '* Бүртгэлийн дугаар',
                 '* Дипломын дугаар',
-                ' ЭШ-ийн шалгалтын оноо',
-                ' Өмнөх шатны боловсролын үнэлгээний дундаж оноо',
-                ' Дипломын ажлын оноо',
-                ' Өмнөх зэргийн дипломын дугаар',
+                'ЭШ-ийн шалгалтын оноо',
+                'Өмнөх шатны боловсролын үнэлгээний дундаж оноо',
+                'Дипломын ажлын оноо',
+                'Өмнөх зэргийн дипломын дугаар',
             ],
 
             datas: [
@@ -340,7 +340,7 @@ const Graduation = () => {
                     isLoading={isLoading}
                     file={file}
                     setFile={setFile}
-                    title="Төгсөлтийн ажил оруулах"
+                    title="Төгсөлтийн ажлын загвар оруулах"
                     fileAccept='.csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
                     extension={['xlsx']}
                     onSubmit={onSubmit}
