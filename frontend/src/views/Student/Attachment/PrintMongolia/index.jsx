@@ -141,6 +141,7 @@ export default function PrintAttachmentMongolia()
                                     newCell2.innerHTML = flattenedArray[count - 1]?.name || ''
                                     newCell3.innerHTML = flattenedArray[count - 1]?.kredit || ''
 
+                                    // Тооцов дүнг харуулахдаа
                                     if (flattenedArray[count - 1]?.grade_letter) {
                                         newCell4.innerHTML = flattenedArray[count - 1]?.grade_letter ? flattenedArray[count - 1]?.grade_letter : ''
                                         newCell4.colSpan = 2
@@ -154,6 +155,7 @@ export default function PrintAttachmentMongolia()
                                         // 		: 'Default';
 
                                         newCell5.innerHTML = flattenedArray[count - 1]?.assesment || ''
+                                        newCell5.className = 'border-dark footer3-cell'
                                     }
 
 
@@ -161,7 +163,6 @@ export default function PrintAttachmentMongolia()
                                     newCell2.className = 'border-dark body-cell'
                                     newCell3.className = 'border-dark footer1-cell'
                                     newCell4.className = 'border-dark footer2-cell'
-                                    newCell5.className = 'border-dark footer3-cell'
                                 }
                                 else
                                 {
