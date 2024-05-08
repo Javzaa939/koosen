@@ -141,7 +141,7 @@ class AdmissionUserInfoSerializer(serializers.ModelSerializer):
     def get_user_score(self, obj):
 
         all_datas = []
-        user_score_qs = UserScore.objects.filter(user=obj.user)
+        user_score_qs = UserScore.objects.filter(user=obj.user.id)
 
         # ЭЕШ оноогүй хэрэглэгчид хоосон дата буцаав
         if len(user_score_qs) == 0:
