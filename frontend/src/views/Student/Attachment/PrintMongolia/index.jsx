@@ -220,9 +220,8 @@ export default function PrintAttachmentMongolia()
         <>
             {isLoading && Loader}
 
-            <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1 ${isPageBreak && 'page-break'}`} style={{ fontSize: '13px', paddingTop: height.header + 16,  backgroundColor: 'white', color: 'black', fontFamily: 'serif' }} >
+            <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1 ${isPageBreak && 'page-break'}`} style={{ fontSize: '13px', paddingTop: height.header + 24,  backgroundColor: 'white', color: 'black', fontFamily: 'serif' }} >
             {/* <div className={`position-relative d-flex justify-content-between ${isPageBreak && 'page-break'}`} style={{ fontSize: '13px', marginTop: printDatas?.student?.group?.degree?.degree_code == 'D' ? '175px' : '180px', marginTop: '135px', backgroundColor: 'white', color: 'black', fontFamily: 'serif' }} > */}
-
                 <div
                     className='d-flex flex-wrap align-content-start mt-1'
                     id='table1-1'
@@ -234,9 +233,9 @@ export default function PrintAttachmentMongolia()
                             <tr style={{ height: '25px' }}>
                                 <td className='border-dark' style={{ width: '4%' }}>№</td>
                                 <td className='border-dark' style={{ width: '70%' }}>Хичээлийн нэр</td>
-                                <td className='border-dark' style={{ width: '7%' }}  >Багц цаг</td>
-                                <td className='border-dark' style={{ width: '11%' }} >Үсгэн үнэлгээ</td>
-                                <td className='border-dark' style={{ width: '8%' }} >Тоо үнэлгээ</td>
+                                <td className='border-dark' style={{ width: '7%' }}>Багц цаг</td>
+                                <td className='border-dark' style={{ width: '11%' }}>Үсгэн үнэлгээ</td>
+                                <td className='border-dark' style={{ width: '8%' }}>Тоо үнэлгээ</td>
                             </tr>
                         </thead>
                         <tbody>
@@ -500,7 +499,7 @@ export default function PrintAttachmentMongolia()
                     </div>
                 </div> */}
 
-                <div className='d-flex justify-content-center mt-2 mb-50'>
+                <div className='d-flex justify-content-center mt-3'>
                 {/* <div className='d-flex justify-content-center' style={{ paddingInline: '100px' }} > */}
                     {
                         listArr.length != 0
@@ -511,7 +510,7 @@ export default function PrintAttachmentMongolia()
                                 <div className='text-center px-1' style={{ width: `${100/2}%` }} key={idx} >
                                     <div className='text-center d-inline-block text-center' >
                                         <div className='text-center pt-50 px-2' style={{ textTransform: 'uppercase', borderTop: '1px solid black' }}>
-                                            {val?.position_name} {val?.position_name} {val?.position_name} {val?.position_name} {val?.position_name} <span style={{ textWrap: 'nowrap' }}>{`${val?.last_name}${val?.first_name}`}</span>
+                                            {val?.position_name} <span style={{ textWrap: 'nowrap' }}>{`${val?.last_name}${val?.first_name}`}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -520,7 +519,7 @@ export default function PrintAttachmentMongolia()
                     }
                 </div>
 
-                    <div className={`text-center mt-2 me-1`} style={{ fontSize: '11px' }} >
+                    <div className={`text-center mt-1`} style={{ fontSize: '11px' }} >
                         Дүн(голч): F{'<'}60(0) 60≤D-{'<'}65(1.0) 65≤D{'<'}70(1.4) 70≤C-{'<'}75(1.9) 75≤C{'<'}80(2.3) 80≤B-{'<'}85(3.1) 85≤B{'<'}90(3.1) 90≤A-{'<'}95(3.6) 95≤A{'<'}100(4.0) S=Тооцов CR=Дүйцүүлсэн баг цаг
                     </div>
                 {/* {
