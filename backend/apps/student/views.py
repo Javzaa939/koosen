@@ -1,6 +1,7 @@
 import os
 
 from googletrans import Translator
+import openpyxl_dictreader
 
 from datetime import date
 
@@ -1812,6 +1813,8 @@ class StudentLeaveStudentsAPIView(
 
         return request.send_info("INF_002")
 
+
+@permission_classes([IsAuthenticated])
 class GraduationWorkAPIView(
     mixins.CreateModelMixin,
     mixins.UpdateModelMixin,
@@ -1941,6 +1944,68 @@ class GraduationWorkAPIView(
         self.destroy(request, pk)
         return request.send_info("INF_003")
 
+
+@permission_classes([IsAuthenticated])
+class GraduationWorkImportAPIView(
+    generics.GenericAPIView
+):
+    """ Төгсөлтийн ажил загвар файл оруулах """
+
+    queryset = GraduationWork.objects
+    def post(self, request):
+        data = request.data
+
+        file = data.get('file')
+
+        # Файл түр хадгалах
+        path = save_file(file, 1, 'tugsult')
+
+        full_path = os.path.join(settings.MEDIA_ROOT, str(path))
+
+        reader = openpyxl_dictreader.DictReader(full_path)
+        for row in reader:
+            student_code = row.get('Оюутны код')
+            registration_num = row.get('* Бүртгэлийн дугаар')
+            diplom_num = row.get('* Дипломын дугаар')
+            eysh_score = row.get('ЭШ-ийн шалгалтын оноо')
+            secondary_school = row.get('Өмнөх шатны боловсролын үнэлгээний дундаж оноо')
+            shalgalt_onoo = row.get('Дипломын ажлын оноо')
+            back_diplom_num = row.get('Өмнөх зэргийн дипломын дугаар')
+
+            student_obj = Student.objects.get(code=student_code)
+            with transaction.atomic():
+
+                # Төгсөлтийн ажлыг шинэчлэх хэсэг
+                GraduationWork.objects.filter(student=student_obj).update(
+                    shalgalt_onoo=shalgalt_onoo if shalgalt_onoo else None,
+                    back_diplom_num=back_diplom_num if back_diplom_num else None,
+                )
+
+                # Хэрвээ дипломын дугаар байвал update хийнэ
+                if registration_num:
+                    GraduationWork.objects.filter(student=student_obj).update(
+                        registration_num=registration_num,
+                    )
+
+                # Хэрвээ дипломын дугаар байвал update хийнэ
+                if diplom_num:
+                    GraduationWork.objects.filter(student=student_obj).update(
+                        diplom_num=diplom_num,
+                    )
+
+                # ЭЕШ-н оноо болон Өмнөх шатны боловсролын үнэлгээний дундаж оноо хадгалах
+                if eysh_score:
+                    student_obj.eysh_score = eysh_score
+
+                if secondary_school:
+                    student_obj.secondary_school = secondary_school
+
+                student_obj.save()
+
+        # Хадгалсны дараа файл устгах
+        remove_folder(path)
+
+        return request.send_info('INF_002')
 
 class StudentGraduateListAPIView(
     generics.GenericAPIView,
