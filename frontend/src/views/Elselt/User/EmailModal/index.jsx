@@ -1,11 +1,13 @@
 import React from 'react'
 import { validate } from '@utils';
 import { Controller, useForm } from 'react-hook-form';
-import { Button, Form, FormFeedback, Input, Label, Modal, ModalBody, ModalHeader, Popover, PopoverBody, PopoverHeader, UncontrolledPopover, UncontrolledTooltip } from 'reactstrap';
+import { Button, Col, Form, FormFeedback, Input, Label, Modal, ModalBody, ModalHeader, Popover, PopoverBody, PopoverHeader, Row, UncontrolledPopover, UncontrolledTooltip } from 'reactstrap';
 import { validateSchema } from './validateSchema';
 import { AlertTriangle } from 'react-feather';
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
+import PerfectScrollbar from 'react-perfect-scrollbar'
+import 'react-perfect-scrollbar/dist/css/styles.css';
 
 function EmailModal({ emailModalHandler, emailModal, selectedStudents, getDatas }) {
 
@@ -29,7 +31,12 @@ function EmailModal({ emailModalHandler, emailModal, selectedStudents, getDatas 
     const state3 = selectedStudents.filter(data => data?.state === 3).length
 
     return (
-        <Modal centered toggle={emailModalHandler} isOpen={emailModal}>
+        <Modal
+            centered
+            toggle={emailModalHandler}
+            isOpen={emailModal}
+            size='lg'
+        >
             {isLoading && Loader}
             <ModalHeader toggle={emailModalHandler}>
                 Элсэгчид рүү Имейл илгээх
@@ -52,36 +59,64 @@ function EmailModal({ emailModalHandler, emailModal, selectedStudents, getDatas 
                                 </div>
                         }
                     </div>
-                    <div className='rounded-3 mx-25'>
-                        <Label className='p-50' htmlFor='description'>
-                            Тайлбар
-                        </Label>
-                        <Controller
-                            control={control}
-                            defaultValue=''
-                            name="description"
-                            render={({ field: { value, onChange } }) => {
-                                return(
-                                    <Input
-                                        type='textarea'
-                                        name='description'
-                                        id='description'
-                                        invalid={errors?.description}
-                                        value={value}
-                                        onChange={(e) => {
-                                            onChange(e.target.value || '')
-                                        }}
-                                        style={{ minHeight: 100 }}
-                                    />
-                                )
-                            }}
-                        />
-                        {errors?.description && <FormFeedback className='d-block'>{errors?.description?.message}</FormFeedback>}
-                    </div>
+                    <Row>
+                        <Col lg={6} md={12}>
+                            <div className='rounded-3 mx-25'>
+                                <Label className='p-50' htmlFor='description'>
+                                    Тайлбар
+                                </Label>
+                                <Controller
+                                    control={control}
+                                    defaultValue=''
+                                    name="description"
+                                    render={({ field: { value, onChange } }) => {
+                                        return(
+                                            <Input
+                                                type='textarea'
+                                                name='description'
+                                                id='description'
+                                                invalid={errors?.description}
+                                                value={value}
+                                                onChange={(e) => {
+                                                    onChange(e.target.value || '')
+                                                }}
+                                                style={{ minHeight: 100 }}
+                                            />
+                                        )
+                                    }}
+                                />
+                                {errors?.description && <FormFeedback className='d-block'>{errors?.description?.message}</FormFeedback>}
+                            </div>
+                        </Col>
+                        <Col lg={6} md={12}>
+                            <PerfectScrollbar
+                                className='border rounded-3 p-75 my-1'
+                                style={{ height: 250, overflow: 'auto' }}
+                            >
+                                <table className='p-1'>
+                                    <tbody>
+                                    {selectedStudents.map((data, idx) => {
+                                        return(
+                                            <tr
+                                                key={idx}
+                                                className='border-bottom'
+                                            >
+                                                <td className='px-25 py-50'>{idx + 1}.</td>
+                                                <td className='px-25 py-50'>{data?.full_name}</td>
+                                                <td className='px-25 py-50'>{data?.profession}</td>
+                                                <td className='px-25 py-50'>{data?.degree_name}</td>
+                                            </tr>
+                                        )
+                                    })}
+                                    </tbody>
+                                </table>
+                            </PerfectScrollbar>
+                        </Col>
+                    </Row>
                 </div>
                 <div className='text-center my-50'>
-                    <Button className='m-50' color='primary' type='submit' disabled={isLoading}>Хадгалах</Button>
-                    <Button className='m-50 ' onClick={() => emailModalHandler()} disabled={isLoading}>Гарах</Button>
+                    <Button className='m-50' color='primary' type='submit' disabled={isLoading}> Илгээх</Button>
+                    <Button className='m-50 ' onClick={() => emailModalHandler()} disabled={isLoading}>Цуцлах</Button>
                 </div>
             </ModalBody>
         </Modal>

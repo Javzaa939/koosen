@@ -94,7 +94,7 @@ function StateModal({ stateModalHandler, stateModal, selectedStudents, stateop, 
                                     >
                                         Сонгогдсон элсэгчдийн тоо: <b>{selectedStudents.length}</b>
                                     </div>
-                                    <Popover
+                                    {/* <Popover
                                         // isOpen={true}
                                         isOpen={displayPopover}
                                         placement='auto'
@@ -102,11 +102,11 @@ function StateModal({ stateModalHandler, stateModal, selectedStudents, stateop, 
                                         toggle={popoverHandler}
                                     >
                                         <PopoverHeader>
-                                            Сонгогдсон элсэгчдийн нэрс
+                                            <h5>Сонгогдсон элсэгчдийн нэрс</h5>
                                         </PopoverHeader>
                                         <PopoverBody
                                             className='overflow-hidden'
-                                            style={{ maxHeight: 230 }}
+                                            style={{ maxHeight: 150 }}
                                         >
                                             <div className='m-25 px-1 p-25' style={{ borderLeft: `8px solid ${'#4287f5'}`, borderTop: '5px solid transparent', borderBottom: '5px solid transparent' }}>
                                                 Бүртгүүлсэн: <b>{state1}</b>
@@ -118,7 +118,7 @@ function StateModal({ stateModalHandler, stateModal, selectedStudents, stateop, 
                                                 Тэнцээгүй: <b>{state3}</b>
                                             </div>
                                         </PopoverBody>
-                                    </Popover>
+                                    </Popover> */}
                                 </>
                             }
                         </div>
