@@ -2715,7 +2715,7 @@ class StudentGpaDiplomaValuesAPIView(
                         # Үсгэн үнэлгээ буюу S тооцов дүн оруулвал кредитийг нь тооцоод дүнд нөлөөлөхгүй
                         if not data_qs.grade_letter:
                             all_score = all_score + (score_qs.gpa * lesson.get('kredit'))
-                            all_gpa_score = all_score + (data_qs.score * lesson.get('kredit'))
+                            all_gpa_score = all_gpa_score + (data_qs.score * lesson.get('kredit'))
                         else:
                             all_s_kredit = all_s_kredit + lesson.get('kredit')
 

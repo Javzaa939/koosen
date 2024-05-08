@@ -1,6 +1,9 @@
 @page {
     size: A4 landscape;
-    margin: 30px 30px 20px 30px;
+    margin: 20px 0 10px 20px;
+    /* margin: 10px; */
+    /* margin: 20px 0px 0px 10px; */
+    /* margin: 30px 30px 20px 30px; */
 }
 
 body {
