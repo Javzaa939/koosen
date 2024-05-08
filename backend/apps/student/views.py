@@ -1813,6 +1813,8 @@ class StudentLeaveStudentsAPIView(
 
         return request.send_info("INF_002")
 
+
+@permission_classes([IsAuthenticated])
 class GraduationWorkAPIView(
     mixins.CreateModelMixin,
     mixins.UpdateModelMixin,

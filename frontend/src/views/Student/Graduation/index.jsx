@@ -306,6 +306,7 @@ const Graduation = () => {
         }
     }
 
+    /* Excel файл үүсгэх function*/
     function excelHandler() {
         const rowInfo = {
             headers: [
@@ -326,6 +327,12 @@ const Graduation = () => {
                 'student.code',
                 'student.last_name',
                 'student.first_name',
+                'registration_num',
+                'diplom_num',
+                'student.eysh_score',
+                'student.secondary_school',
+                'shalgalt_onoo',
+                'back_diplom_num'
             ],
         }
         excelDownload(datas, rowInfo, `tugsult_zagvar`)
