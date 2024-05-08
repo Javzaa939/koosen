@@ -2553,8 +2553,8 @@ class StudentCalculateGpaDiplomaGroupAPIView(
                     student_id=one_student_id,
                     kredit=score_register_qs.lesson.kredit if score_register_qs else 0,
                     score=score_register_qs.score_total,
-                    gpa=score_register_qs.assessment.gpa,
-                    assesment=score_register_qs.assessment.assesment,
+                    gpa=score_register_qs.assessment.gpa if score_register_qs.assessment else None,
+                    assesment=score_register_qs.assessment.assesment if score_register_qs.assessment else None,
                     grade_letter=score_register_qs.grade_letter
                 )
 
