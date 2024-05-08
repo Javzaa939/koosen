@@ -41,19 +41,43 @@ export default function excelDownload(datas, rowInfo, fileName, booleanField) {
     }
 
     /**
+     * Өгөгдсөн мэдээллийн урт таарч байгаа эсэхийг шалгах хэсэг
+        ================================================================
+            ! ! ! ! ! ! !
+            Анхаарах зүйл
+
+            1.  rowInfo-д өгч байгаа datas хэсэг дутуу байж болно. Хэрэглэгч өөрөө утга өгөх үүднээс.
+                Харин Headers яасан ч хоосон байх боломжгүй. Хэрэв тийм тохиолдол илэрвэл функцыг
+                зогсоож анхааруулга өгнө. Энэ талаар санал ирүүлвэл үүн дээр сайжруулалт хийж болно.
+
+            ! ! ! ! ! ! !
+        ================================================================
+     */
+    let rowEqual = true
+
+    let rowDifference = 0
+
+    if(rowInfo?.headers.length !== rowInfo?.datas.length  ){
+        rowEqual = false
+        if(rowInfo?.headers.length > rowInfo?.datas?.length) {
+            rowDifference = rowInfo?.headers.length - rowInfo?.datas?.length
+        } else {
+            window.alert('Толгойгүй дата шивих боломжгүй. Кодоо шалгана уу')
+        }
+    }
+
+    /**
      * Функцыг дуудах үед оноох датаг экселийн сан унших хувилбарт оруулж байна.
      */
-    const mainData = datas.map((data, idx) => ({
-        ...rowInfo.datas.reduce((acc, val) => {
-
+    const mainData = datas.map((data, idx) => {
+        const newData = rowInfo.datas.reduce((acc, val) => {
             const newVal = val === 'index' ? idx + 1 : nestedProperty(data, val) || '';
-
-            acc[val === 'index' ? 'index' : val] =
 
             /**
              * Хэрэв дата байхгүй бол хоосон String буцааснаар Excel ийн стайл алдагдахгүй
              */
-                newVal !== undefined ?
+            acc[val === 'index' ? 'index' : val] = newVal !== undefined ?
+
                 /**
 
                 * Хэрэв дата Boolean утгатай бол Тийм үгүй гэсэн текст шивих ба үүнийг доорхи байдлаар Customize хийж болно.
@@ -65,15 +89,24 @@ export default function excelDownload(datas, rowInfo, fileName, booleanField) {
 
                 */
                 typeof newVal === 'boolean' ?
-                    `${newVal === true ?  `${booleanField ? booleanField?.true || 'Тийм' : 'Тийм'}` : `${booleanField ? booleanField?.false || 'Үгүй' : 'Үгүй'}`}`
-                        :
-                            newVal
-                :
-                    '';
-            return acc;
+                    `${newVal === true ? (booleanField ? booleanField.true || 'Тийм' : 'Тийм') : (booleanField ? booleanField.false || 'Үгүй' : 'Үгүй')}` :
+                    newVal :
+                '';
 
-        }, {})
-    }));
+            return acc;
+        }, {});
+
+        /**
+         * Хэрэв шивигдэх дата болон толгойн мэдээлэл ялгаатай бол хоосон мөр оруулж ирснээр стайлын алдаа гарахгүй
+         */
+        if (!rowEqual) {
+            for (let vidx = 0; vidx < rowDifference; vidx++) {
+                newData[`blank_data_${vidx}`] = '';
+            }
+        }
+
+        return newData;
+    });
 
     const combo = [...mainData]
 
@@ -176,7 +209,15 @@ export default function excelDownload(datas, rowInfo, fileName, booleanField) {
         ...tableRow
     ];
 
-    const tableWidth = Array.from({length: rowInfo?.datas.length - 1},(_, vidx) => {
+    function aliUndurToogoorNiGusna(num1, num2) {
+        if (typeof num1 !== 'number' || typeof num2 !== 'number') {
+            window.alert('Өгөгдсөн дата алдаатай байна');
+            return null
+        }
+        return num1 > num2 ? num1 : num2;
+    }
+
+    const tableWidth = Array.from({length: aliUndurToogoorNiGusna(rowInfo?.datas.length, rowInfo?.headers.length) - 1},(_, vidx) => {
         return(
             { wch: rowInfo?.width ? rowInfo?.width || DEFAULT_BODY_WIDTH : DEFAULT_BODY_WIDTH }
         )

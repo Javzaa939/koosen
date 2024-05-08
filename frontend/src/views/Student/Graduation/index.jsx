@@ -2,7 +2,7 @@
 import { Fragment, useState, useEffect, useContext} from 'react'
 
 import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, ListGroupItem, Spinner } from 'reactstrap'
-import { ChevronDown, Search, Plus, Menu, Edit, Trash2 } from 'react-feather'
+import { ChevronDown, Search, Plus, Menu, Edit, Trash2, FileText, Download } from 'react-feather'
 import DataTable from 'react-data-table-component'
 import { useTranslation } from 'react-i18next'
 import { useForm, Controller } from "react-hook-form";
@@ -27,9 +27,12 @@ import useLoader from '@hooks/useLoader';
 import useModal from '@hooks/useModal'
 import useUpdateEffect from '@hooks/useUpdateEffect'
 import GraduationCommand from './Command'
+import FileModal from '@lms_components/FileModal'
 
 // drag-and-drop.scss
 import '@styles/react/libs/drag-and-drop/drag-and-drop.scss'
+import DetailModal from './DetailModal'
+import excelDownload from '@src/utility/excelDownload'
 
 const Graduation = () => {
 
@@ -64,10 +67,15 @@ const Graduation = () => {
     const [createModal, setCreateModal] = useState(false);
     const [commandModal, setCommandModal] = useState(false);
 
-
     const [ listArr, setListArr ] = useState([])
     const [ formModal, setFormModal ] = useState(false)
     const [ updateData, setUpdateData ] = useState({})
+    const [ importModal, setImportModal ] = useState(false)
+    const [ showModal, setShowModal ] = useState(false)
+    const [file, setFile] = useState(false)
+    const [file_name, setFileName] = useState('')
+    const [detailDatas, setDetailDatas] = useState({})
+    const [errorDatas, setErrorDatas] = useState({})
 
     //Api
     const depApi = useApi().hrms.department
@@ -265,13 +273,103 @@ const Graduation = () => {
         setCommandModal(!commandModal)
     }
 
+    function importModalHandler() {
+        setImportModal(!importModal)
+    }
+
+    // Оруулах датаны жагсаалт харуулах модал
+    const handleShowDetailModal = () => {
+        setShowModal(!showModal)
+    }
+
+    async function onSubmit() {
+        if (file) {
+            const formData = new FormData()
+            formData.append('file', file)
+
+            const { success, data }  = await fetchData(graduateApi.postFile(formData))
+            if (success) {
+
+                importModalHandler()
+                // handleShowDetailModal()
+                // if (data?.file_name) {
+                //     setFileName(data?.file_name)
+                //     delete data['file_name']
+                // }
+
+                // if (data?.all_error_datas) {
+                //     setErrorDatas(data?.all_error_datas)
+                //     delete data['all_error_datas']
+                // }
+                // setDetailDatas(data)
+            }
+        }
+    }
+
+    /* Excel файл үүсгэх function*/
+    function excelHandler() {
+        const rowInfo = {
+            headers: [
+                '№',
+                'Оюутны код',
+                'Овог',
+                'Нэр',
+                '* Бүртгэлийн дугаар',
+                '* Дипломын дугаар',
+                'ЭШ-ийн шалгалтын оноо',
+                'Өмнөх шатны боловсролын үнэлгээний дундаж оноо',
+                'Дипломын ажлын оноо',
+                'Өмнөх зэргийн дипломын дугаар',
+            ],
+
+            datas: [
+                'index',
+                'student.code',
+                'student.last_name',
+                'student.first_name',
+                'registration_num',
+                'diplom_num',
+                'student.eysh_score',
+                'student.secondary_school',
+                'shalgalt_onoo',
+                'back_diplom_num'
+            ],
+        }
+        excelDownload(datas, rowInfo, `tugsult_zagvar`)
+    }
+
 	return (
 		<Fragment>
+            {importModal &&
+                <FileModal
+                    isOpen={importModal}
+                    handleModal={importModalHandler}
+                    isLoading={isLoading}
+                    file={file}
+                    setFile={setFile}
+                    title="Төгсөлтийн ажлын загвар оруулах"
+                    fileAccept='.csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
+                    extension={['xlsx']}
+                    onSubmit={onSubmit}
+                />
+            }
+
+            {
+                showModal &&
+                    <DetailModal
+                        isOpen={showModal}
+                        handleModal={handleShowDetailModal}
+                        datas={detailDatas}
+                        file_name={file_name}
+                        errorDatas={errorDatas}
+                    />
+
+            }
             <Card>
                 {isLoading && Loader}
                 <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom align-items-center py-1">
                     <CardTitle tag="h4">{t('Гарын үсэг зурах хүмүүс')}</CardTitle>
-                    <div className='d-flex flex-wrap mt-md-0 mt-1'>
+                    <div className='d-flex flex-wrap mt-md-0 mt-1 gap-1'>
                         <Button
                             color='primary'
                             onClick={() => handleModalSig()}
@@ -340,7 +438,25 @@ const Graduation = () => {
 			<Card>
                 <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
                     <CardTitle tag="h4">{t('Төгсөлтийн ажил')}</CardTitle>
-                    <div className='d-flex flex-wrap mt-md-0 mt-1'>
+                    <div className='d-flex flex-wrap mt-md-0 mt-1 gap-1'>
+                        <Button
+                            color='primary'
+                            onClick={() => {
+                                    // window.open('/publicfiles/jishig_file.xlsx')
+                                    excelHandler()
+                                }
+                            }
+                        >
+                            <Download size={15}/>
+                            <span className='align-middle ms-50'>Загвар</span>
+                        </Button>
+                        <Button
+                            color='primary'
+                            onClick={() => importModalHandler()}
+                        >
+                            <FileText size={15}/>
+                            <span className='align-middle ms-50'>Import</span>
+                        </Button>
                         <Button
                             color='primary'
                             onClick={() => handleModal()}

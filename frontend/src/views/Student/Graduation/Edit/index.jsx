@@ -277,7 +277,7 @@ const EditModal = ({ open, handleModal, graduate_id, refreshDatas }) => {
                         </Col>
                         <Col lg={6} md={12}>
                             <Label className="form-label" for="shalgalt_onoo">
-                                {t('Шалгалтын оноо')}
+                                {t('Дипломын ажлын оноо')}
                             </Label>
                                 <Controller
                                     defaultValue=''
@@ -288,7 +288,7 @@ const EditModal = ({ open, handleModal, graduate_id, refreshDatas }) => {
                                         <Input
                                             id ="shalgalt_onoo"
                                             bsSize="sm"
-                                            placeholder={t('Төгсөлтийн ажлын сэдэв оруулах')}
+                                            placeholder={t('Дипломын ажлын оноо')}
                                             {...field}
                                             type="text"
                                             disabled={is_disabled}

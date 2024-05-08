@@ -774,6 +774,7 @@ function useApi(isDisplay=false) {
 				getOne: (pk) => instance.get(`/student/graduation/${pk}/`),
 				put: (data, pk) => instance.put(`/student/graduation/${pk}/`, data),
 				delete: (pk) => instance.delete(`/student/graduation/${pk}/`),
+				postFile: (data) => instance.post('/student/graduation/import/', data),
 			},
 
 			/** Боловсролын зээлийн сан */

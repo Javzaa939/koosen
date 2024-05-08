@@ -70,6 +70,9 @@ urlpatterns = [
     # Төгсөлтийн ажил
     path('graduation/', GraduationWorkAPIView.as_view()),
     path('graduation/group/', SignatureGroupAPIView.as_view()),
+
+    # Төгсөлтийн ажлын загвар файл оруулах
+    path('graduation/import/', GraduationWorkImportAPIView.as_view()),
     path('graduation/<int:pk>/', GraduationWorkAPIView.as_view()),
 
     # Боловсролын зээлийн сан

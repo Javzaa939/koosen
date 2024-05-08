@@ -131,27 +131,6 @@ class UserInfo(models.Model):
     info_description = models.TextField(null=True, verbose_name='Мэдээллийг шалгаад үлдээх тайлбар')
 
 
-class UserScore(models.Model):
-    """ Хэрэглэгчийн ЭЕШ онооны мэдээлэл """
-
-    class Meta:
-        db_table = 'elselt_userscore'
-        managed = False
-
-    user = models.ForeignKey(ElseltUser, on_delete=models.CASCADE, verbose_name='Элсэгч')
-    exam_loc = models.CharField(max_length=200, verbose_name="Шалгалт өгсөн газар", default="")
-    exam_loc_code = models.IntegerField(verbose_name="Шалгалт өгсөн газар", default=0)
-    year = models.IntegerField(verbose_name="Шалгалт өгсөн он")
-    semester = models.CharField(max_length=30, verbose_name="Улирал", default="")
-    school_code = models.IntegerField(verbose_name="Сургуулийн код", null=True)
-    school_name = models.CharField(verbose_name="Сургуулийн нэр", max_length=500)
-    lesson_name = models.CharField(verbose_name="Хичээлийн нэр", max_length=500)
-    scaledScore = models.IntegerField(verbose_name="ЭЕШ оноо", null=True)
-    raw_score = models.IntegerField(verbose_name="Анхны оноо", null=True)
-    percentage_score = models.IntegerField(verbose_name="Хувь", null=True)
-    word_score = models.CharField(verbose_name="Үсгэн үнэлгээ", max_length=255, null=True)
-
-
 class AdmissionUserProfession(models.Model):
 
     class Meta:
