@@ -74,3 +74,15 @@ table td {
     font-family: serif;
     rotate: 360deg;
 }
+
+.not-center-table {
+    position: relative;
+    margin-left: 218px;
+}
+
+.center-table {
+    position: absolute;
+    top: 50%;
+    left: 30%;
+    transform: translate(-50%, -50%);
+}

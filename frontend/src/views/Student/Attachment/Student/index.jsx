@@ -12,7 +12,7 @@ import  useUpdateEffect  from '@hooks/useUpdateEffect'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
-
+import useModal from '@src/utility/hooks/useModal';
 import { getColumns } from '@views/Student/Attachment/Student/helpers/index.jsx'
 
 // ** Styles Imports
@@ -29,6 +29,8 @@ export default function AttachmentStudent()
     const [ printValue, setPrintValue ] = useState("")
     const [ picker, setPicker ] = useState(new Date())
     const [ is_loading, setLoading ] = useState(true)
+    const [ isThink, setIsThink ] = useState(false)
+    const { showWarning } = useModal()
 
     const [ checkedTableRowCount, setCheckedTableRowCount ] = useState([])
     const [ errorMessage, setErrorMessage ] = useState('')
@@ -117,6 +119,7 @@ export default function AttachmentStudent()
         await Promise.all([
             fetchData(studentApi.calculateGpaDimplomaAdd(studentId, checkedValues.current)),
         ]).then((values) => {
+            setIsThink(true)
             setCalculatedDatas(values[0].data)
         })
 
@@ -289,6 +292,7 @@ export default function AttachmentStudent()
         return ('0' + n).slice(-2);
     }
 
+    /** Хэвлэх товч дарах үед*/
     function clickPrint(event)
     {
         event.preventDefault()
@@ -331,6 +335,13 @@ export default function AttachmentStudent()
 
     const handleNavigate = () => {
         navigate(`/student/attachment/`)
+    }
+
+    /** Дипломын голч бодуулах тухайн хүүхдийн загварын дагуу ангиар нь хадгалах*/
+    async function handleTemplateSubmit() {
+        const { success } = await fetchData(studentApi.calculateGpaGroupGraduation(datas?.student?.id))
+        if (success) {
+        }
     }
 
     return (
@@ -549,7 +560,23 @@ export default function AttachmentStudent()
                     }
 
                     <p className='ms-1'>Дипломын голч бодуулах</p>
-                    <Button onClick={toThink} >Бодуулах</Button>
+                    <div className='d-flex justify-content-between'>
+                        <Button onClick={toThink}>Бодуулах</Button>
+                        <Button
+                            disabled={!isThink}
+                            onClick={() => showWarning({
+                                header: {
+                                    title: `${('Хавсралтын дүн бодуулах загвар хадгалах')}`,
+                                },
+                                question: `Та "${datas?.student?.group?.profession?.name}" хөтөлбөрийн "${datas?.student?.group?.name}"-н дипломын хавсралт дүн энэ хүснэгт дээр хадгалагдсан загвараар хадгалагдахыг анхаарна уу?`,
+                                onClick: () => handleTemplateSubmit(),
+                                btnText: 'Хадгалах',
+                            })}
+                            color={"primary"}
+                         >
+                            Загвар хадгалах
+                        </Button>
+                    </div>
 
                 </CardBody>
             </Card>

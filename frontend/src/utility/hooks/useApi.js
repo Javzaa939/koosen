@@ -676,6 +676,9 @@ function useApi(isDisplay=false) {
 			// дата оруулах
 			postStudentImportData: data => instance.post(`/student/postData/`, data),
 
+			// Голч бодуулах загвараар ангийн хүүхдүүдийн загварыг хадгалах
+			calculateGpaGroupGraduation: data => instance.post(`/student/calculate-gpa-diploma/group/`, data),
+
 			/* Анги бүлгийн бүртгэл */
 			group:{
 				getList: (departId, degree, profession, joined_year) => {

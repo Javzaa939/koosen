@@ -102,14 +102,22 @@ export default function PrintAttachmentMongolia()
                                     newCell1.innerHTML = `<span style="font-family: CMSUB; font-size: 12px;">${perCount}</span>`
                                     newCell2.innerHTML = flattenedArray[count - 1]?.name_uig || ''
                                     newCell3.innerHTML = flattenedArray[count - 1]?.kredit ? `<span style="font-family: CMSUB; font-size: 12px;">${flattenedArray[count - 1]?.kredit}</span>` : ''
-                                    newCell4.innerHTML = flattenedArray[count - 1]?.score ? `<span style="font-family: CMSUB; font-size: 12px;">${flattenedArray[count - 1]?.score}</span>` : ''
-                                    newCell5.innerHTML = flattenedArray[count - 1]?.assesment || ''
 
-                                    newCell1.className = 'border-dark mini-cell'
-                                    newCell2.className = 'border-dark body-cell'
-                                    newCell3.className = 'border-dark footer1-cell'
-                                    newCell4.className = 'border-dark footer2-cell'
-                                    newCell5.className = 'border-dark footer3-cell'
+                                    // Тооцов дүнг харуулахдаа
+                                    if (flattenedArray[count - 1]?.grade_letter) {
+                                        newCell4.innerHTML = flattenedArray[count - 1]?.grade_letter ? `<span style="font-family: CMSUB; font-size: 12px;">ᠲᠣᠭᠠᠴᠠᠪᠠ</span>` : ''
+                                        newCell4.colSpan = 2
+                                    } else {
+                                        newCell4.innerHTML = flattenedArray[count - 1]?.score ? `<span style="font-family: CMSUB; font-size: 12px;">${flattenedArray[count - 1]?.score}</span>` : ''
+                                        newCell5.innerHTML = flattenedArray[count - 1]?.assesment || ''
+                                        newCell5.className = `border-dark ${printDatas.isCenter && 'px-75'} footer3-cell`
+                                    }
+
+
+                                    newCell1.className = `border-dark ${printDatas.isCenter && 'px-75'} mini-cell`
+                                    newCell2.className = `border-dark ${printDatas.isCenter && 'px-75'} body-cell`
+                                    newCell3.className = `border-dark ${printDatas.isCenter && 'px-75'} footer1-cell`
+                                    newCell4.className = `border-dark ${printDatas.isCenter && 'px-75'} footer2-cell`
                                 }
                                 else
                                 {
@@ -218,7 +226,7 @@ export default function PrintAttachmentMongolia()
 
             <div className={`vh-100 p-0 d-flex flex-column justify-content-between align-items-start position-relative ${isPageBreak && 'page-break'}`} style={{ fontFamily: 'mongolianScript'}} >
 
-                <div style={{ height: '49.5%', marginLeft: '178px' }} >
+                <div style={{ height: '49.5%', marginLeft: '178px' }}  className={`${printDatas.isCenter ? 'center-table' : 'not-center-table' }`} >
                     <table id='table1' className='text-center w-100 d-none' style={{ writingMode: 'vertical-lr', marginBottom: '1px', height: '100%' }} >
                         <thead>
                             <tr style={{ fontSize: '9px' }} >
@@ -234,7 +242,7 @@ export default function PrintAttachmentMongolia()
                     </table>
                 </div>
 
-                <div style={{ height: '49.5%', marginLeft: '178px' }} >
+                <div style={{ height: '49.5%', marginLeft: '178px' }} className={`${printDatas.isCenter ? 'center-table' : 'not-center-table' }`} >
                     <table id='table2' className='text-center w-100 d-none' style={{ writingMode: 'vertical-lr', marginBottom: '1px', height: '100%' }} >
                         <thead>
                             <tr style={{ fontSize: '9px' }} >
@@ -252,10 +260,10 @@ export default function PrintAttachmentMongolia()
             </div>
 
 
-            <div className={`${!isPageBreak && 'd-none'}`} >
+            <div className={`${!isPageBreak && 'd-none'}`}  >
                 <div className='vh-100 p-0 d-flex flex-column justify-content-between align-items-start position-relative' style={{ fontFamily: 'mongolianScript' }} >
 
-                    <div style={{ height: '373px', marginLeft: '178px' }} >
+                    <div style={{ height: '373px', marginLeft: '178px' }} className={`${printDatas.isCenter ? 'center-table' : 'not-center-table' }`}>
 
                         <table id='table3' className='text-center w-100 d-none' style={{ writingMode: 'vertical-lr', marginBottom: '1px' }}  >
                             <thead>
@@ -276,7 +284,7 @@ export default function PrintAttachmentMongolia()
 
                     </div>
 
-                    <div style={{ height: '376px', marginLeft: '178px' }} >
+                    <div style={{ height: '376px', marginLeft: '178px' }} className={`${printDatas.isCenter ? 'center-table' : 'not-center-table' }`}>
 
                         <table id='table4' className='text-center w-100 d-none' style={{ writingMode: 'vertical-lr', marginBottom: '1px' }}  >
 
