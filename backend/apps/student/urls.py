@@ -83,6 +83,11 @@ urlpatterns = [
     # Оюутны дүнгийн мэдээлэл авах
     path('score-register/', StudentScoreRegisterAPIView.as_view()),
     path('calculate-gpa-diploma/', StudentCalculateGpaDiplomaAPIView.as_view()),
+
+    # Ангиар нь хавсралтын дүн хадгалах
+    path('calculate-gpa-diploma/group/', StudentCalculateGpaDiplomaGroupAPIView.as_view()),
+
+    # Хавсралт хэвлэх үед голч бодох
     path('gpa-diploma-values/', StudentGpaDiplomaValuesAPIView.as_view()),
 
     # Гадаад оюутны визний мэдээлэл

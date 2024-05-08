@@ -139,22 +139,27 @@ export default function PrintAttachmentEnglish()
                                     newCell2.innerHTML = flattenedArray[count - 1]?.name_eng || ''
                                     newCell3.innerHTML = flattenedArray[count - 1]?.kredit || ''
 
-                                    // NaN буцаагаад байхаар нь шалгах функц бичсэн.
-                                    // ер нь бол шаардлагагүй гэхдээ яахав
+                                    // Тооцов дүнг харуулахдаа
+                                    if (flattenedArray[count - 1]?.grade_letter) {
+                                        newCell4.innerHTML = flattenedArray[count - 1]?.grade_letter ? 'Allow' : ''
+                                        newCell4.colSpan = 2
+                                    } else {
+                                        newCell4.innerHTML = flattenedArray[count - 1]?.score ? flattenedArray[count - 1]?.score : ''
+                                        // NaN буцаагаад байхаар нь шалгах функц бичсэн.
+                                        // ер нь бол шаардлагагүй гэхдээ яахав
 
-                                    // newCell4.innerHTML = !isNaN(flattenedArray[count - 1]?.score)
-                                    // 	? flattenedArray[count - 1]?.score
-                                    // 		: 'Default';
- 
-                                    newCell4.innerHTML = flattenedArray[count - 1]?.score ? flattenedArray[count - 1]?.score : ''
+                                        // newCell4.innerHTML = !isNaN(flattenedArray[count - 1]?.score)
+                                        // 	? flattenedArray[count - 1]?.score
+                                        // 		: 'Default';
 
-                                    newCell5.innerHTML = flattenedArray[count - 1]?.assesment || ''
+                                        newCell5.innerHTML = flattenedArray[count - 1]?.assesment || ''
+                                        newCell5.className = 'border-dark footer3-cell'
+                                    }
 
                                     newCell1.className = 'border-dark mini-cell'
                                     newCell2.className = 'border-dark body-cell'
                                     newCell3.className = 'border-dark footer1-cell'
                                     newCell4.className = 'border-dark footer2-cell'
-                                    newCell5.className = 'border-dark footer3-cell'
                                 }
                                 else
                                 {

@@ -10,6 +10,7 @@ class ElseltUser(models.Model):
 
     class Meta:
         db_table = 'elselt_user'
+        managed = False
 
     first_name = models.CharField(max_length=150, blank=True, verbose_name='Нэр')
     last_name = models.CharField(max_length=150, blank=True, verbose_name='Овог')
@@ -22,6 +23,7 @@ class ElseltUser(models.Model):
     image = models.ImageField(upload_to='elselt', null=True, verbose_name='Хэрэглэгчийн зураг')
     aimag = models.ForeignKey(AimagHot, on_delete=models.CASCADE, null=True, verbose_name='Үндсэн захиргаа - Аймаг/хот')
     is_payment = models.BooleanField(default=False, verbose_name="Бүртгэлийн хураамж төлсөн эсэх")
+    justice_file = models.FileField(upload_to='justice/', null=True, verbose_name='Ял шийтгэлийн сервис файл Emongolia')
 
     created = models.DateTimeField(auto_now_add=True, null=True, verbose_name='Огноо')
 
@@ -127,6 +129,27 @@ class UserInfo(models.Model):
     other_file = models.FileField(upload_to='other/', null=True, verbose_name='Бусад файл')
     invention_file = models.FileField(upload_to='invention/', null=True, verbose_name='Бүтээлийн жагсаалт файл')
     info_description = models.TextField(null=True, verbose_name='Мэдээллийг шалгаад үлдээх тайлбар')
+
+
+class UserScore(models.Model):
+    """ Хэрэглэгчийн ЭЕШ онооны мэдээлэл """
+
+    class Meta:
+        db_table = 'elselt_userscore'
+        managed = False
+
+    user = models.ForeignKey(ElseltUser, on_delete=models.CASCADE, verbose_name='Элсэгч')
+    exam_loc = models.CharField(max_length=200, verbose_name="Шалгалт өгсөн газар", default="")
+    exam_loc_code = models.IntegerField(verbose_name="Шалгалт өгсөн газар", default=0)
+    year = models.IntegerField(verbose_name="Шалгалт өгсөн он")
+    semester = models.CharField(max_length=30, verbose_name="Улирал", default="")
+    school_code = models.IntegerField(verbose_name="Сургуулийн код", null=True)
+    school_name = models.CharField(verbose_name="Сургуулийн нэр", max_length=500)
+    lesson_name = models.CharField(verbose_name="Хичээлийн нэр", max_length=500)
+    scaledScore = models.IntegerField(verbose_name="ЭЕШ оноо", null=True)
+    raw_score = models.IntegerField(verbose_name="Анхны оноо", null=True)
+    percentage_score = models.IntegerField(verbose_name="Хувь", null=True)
+    word_score = models.CharField(verbose_name="Үсгэн үнэлгээ", max_length=255, null=True)
 
 
 class AdmissionUserProfession(models.Model):
