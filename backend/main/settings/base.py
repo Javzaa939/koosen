@@ -71,7 +71,8 @@ INSTALLED_APPS = [
     "apps.user",
     'apps.permissions.apps.PermissionsConfig',
     'django_cleanup.apps.CleanupConfig',
-    'elselt'
+    'elselt',
+    'django_user_agents',
 ]
 
 MIDDLEWARE = [
@@ -82,12 +83,13 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django_user_agents.middleware.UserAgentMiddleware',
 
     "corsheaders.middleware.CorsMiddleware",
 
     'main.middleware.success_rp.success_rp',
     'main.middleware.error_handler.ErrorHandlerMiddleware',
-
+    'main.middleware.requestLog.RequestLogMiddleware',
 ]
 
 ROOT_URLCONF = 'main.urls'

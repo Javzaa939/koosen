@@ -4003,6 +4003,52 @@ class PrintSettings(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+class AccessHistoryLms(models.Model):
+    """Хандалтын түүхүүд"""
+
+    LMS = 1
+    TEACHER = 2
+    STUDENT = 3
+    FINANCE = 4
+    MONITORING = 5
+    INITIATION = 6
+    LIBRARY = 7
+
+    SYSTEM_TYPE = (
+        (LMS, "Сургалтын удирдлагийн систем"),
+        (TEACHER, "Багшийн систем"),
+        (STUDENT, "Oюутны систем"),
+        (FINANCE, "Санхүүгийн систем"),
+        (MONITORING, "Хяналтын систем"),
+        (INITIATION, "Элсэлтийн систем"),
+        (LIBRARY, "Номын сангийн систем"),
+    )
+
+    MOBILE = 1
+    TABLET = 2
+    PC = 3
+
+    DEVICE_TYPE = (
+        (MOBILE, "Утас"),
+        (TABLET, "Таблет"),
+        (PC, "Компютер"),
+    )
+
+    user = models.ForeignKey(User,on_delete=models.CASCADE, null=True, blank=True, verbose_name="Хэрэглэгч")
+    system_type = models.PositiveIntegerField(choices=SYSTEM_TYPE, db_index=True, null=False, verbose_name="Нэвтэрсэн системийн нэр")
+    device_type = models.PositiveIntegerField(choices=DEVICE_TYPE, db_index=True, null=False, verbose_name="Нэвтэрсэн төхөөрөмжийн төрөл")
+    device_name = models.CharField(max_length=50, null=True, blank=True, verbose_name="Нэвтэрсэн төхөөрөмжийн нэр")
+    browser = models.CharField(max_length=50, null=True, blank=True, verbose_name="Нэвтэрсэн хэрэглэгчийн вэб хөтөч")
+    os_type = models.CharField(max_length=50, null=True, blank=True, verbose_name="Нэвтэрсэн төхөөрөмжийн үйлдлийн систем")
+    ip = models.CharField(max_length=16, null=True, blank=True, verbose_name="Нэвтэрсэн хэрэглэгчийн IP хаяг")
+    is_logged = models.BooleanField(default=False, verbose_name="Нэвтрэлт амжилттай болсон эсэх")
+
+    in_time = models.DateTimeField(auto_now_add=True)
+    out_time = models.DateTimeField(null=True, blank=True)
+
+
 class StudentGrade(models.Model):
     """ Хичээлийн улирлын үндсэн дүн """
 
@@ -4015,3 +4061,94 @@ class StudentGrade(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+class Errors(models.Model):
+    """ error хадгалах
+    """
+
+    system_type = models.PositiveIntegerField(choices=AccessHistoryLms.SYSTEM_TYPE, db_index=True, null=False, verbose_name="Нэвтэрсэн системийн нэр")
+    url = models.CharField(null=False, db_index=True, max_length=254, verbose_name='URL')
+    method = models.CharField(max_length=20, null=False, db_index=True, verbose_name='Method')
+    code = models.CharField(max_length=50, null=False, db_index=True, verbose_name='Алдааны дугаар')
+    description = models.TextField(null=True, verbose_name='Алдааны мэдэгдэл')
+    headers = models.TextField(null=True, verbose_name='Request headers')
+    scheme = models.TextField(null=True, verbose_name='Request scheme')
+    datetime = models.DateTimeField(auto_now_add=True, verbose_name='Хүсэлт илгээсэн огноо')
+    data = models.TextField(null=True, verbose_name='Request data')
+
+
+class Error500(models.Model):
+    """ error 500 хадгалах
+    """
+
+    system_type = models.PositiveIntegerField(choices=AccessHistoryLms.SYSTEM_TYPE, db_index=True, null=False, verbose_name="Нэвтэрсэн системийн нэр")
+    url = models.CharField(null=False, db_index=True, max_length=254, verbose_name='URL')
+    method = models.CharField(max_length=20, null=False, db_index=True, verbose_name='Method')
+    description = models.TextField(null=True, verbose_name='Алдааны мэдэгдэл')
+    headers = models.TextField(null=True, verbose_name='Request headers')
+    scheme = models.TextField(null=True, verbose_name='Request scheme')
+    datetime = models.DateTimeField(auto_now_add=True, verbose_name='Хүсэлт илгээсэн огноо')
+    data = models.TextField(null=True, verbose_name='Request data')
+
+
+class RequestLogGet(models.Model):
+    """ Request-ийн GET method-үүдийн түүхийг хадгалах
+    """
+
+    system_type = models.PositiveIntegerField(choices=AccessHistoryLms.SYSTEM_TYPE, db_index=True, null=False, verbose_name="Нэвтэрсэн системийн нэр")
+    url = models.CharField(null=False, db_index=True, max_length=254, verbose_name='URL')
+    query_string = models.TextField(null=True, verbose_name='Query string')
+    remote_ip = models.CharField(max_length=50, null=True, db_index=True, verbose_name='Remote IP')
+    datetime = models.DateTimeField(auto_now_add=True, verbose_name='Хүсэлт илгээсэн огноо')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True,
+                                on_delete=models.SET_NULL, db_constraint=False,
+                                verbose_name='Хэрэглэгчийн ID')
+    status_code = models.SmallIntegerField(null=True, verbose_name='request status code')
+
+
+class RequestLogPost(models.Model):
+    """ Request-ийн POST method-үүдийн түүхийг хадгалах
+    """
+
+    system_type = models.PositiveIntegerField(choices=AccessHistoryLms.SYSTEM_TYPE, db_index=True, null=False, verbose_name="Нэвтэрсэн системийн нэр")
+    url = models.CharField(null=False, db_index=True, max_length=254, verbose_name='URL')
+    query_string = models.TextField(null=True, verbose_name='Query string')
+    remote_ip = models.CharField(max_length=50, null=True, db_index=True, verbose_name='Remote IP')
+    datetime = models.DateTimeField(auto_now_add=True, verbose_name='Хүсэлт илгээсэн огноо')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True,
+                                on_delete=models.SET_NULL, db_constraint=False,
+                                verbose_name='Хэрэглэгчийн ID')
+    data = models.TextField(null=False, verbose_name='Post data буюу body')
+    status_code = models.SmallIntegerField(null=True, verbose_name='request status code')
+
+
+class RequestLogPut(models.Model):
+    """ Request-ийн PUT method-үүдийн түүхийг хадгалах
+    """
+
+    system_type = models.PositiveIntegerField(choices=AccessHistoryLms.SYSTEM_TYPE, db_index=True, null=False, verbose_name="Нэвтэрсэн системийн нэр")
+    url = models.CharField(null=False, db_index=True, max_length=254, verbose_name='URL')
+    query_string = models.TextField(null=True, verbose_name='Query string')
+    remote_ip = models.CharField(max_length=50, null=True, db_index=True, verbose_name='Remote IP')
+    datetime = models.DateTimeField(auto_now_add=True, verbose_name='Хүсэлт илгээсэн огноо')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True,
+                                on_delete=models.SET_NULL, db_constraint=False,
+                                verbose_name='Хэрэглэгчийн ID')
+    data = models.TextField(null=False, verbose_name='Put data буюу body')
+    status_code = models.SmallIntegerField(null=True, verbose_name='request status code')
+
+
+class RequestLogDelete(models.Model):
+    """ Request-ийн DELETE method-үүдийн түүхийг хадгалах
+    """
+
+    system_type = models.PositiveIntegerField(choices=AccessHistoryLms.SYSTEM_TYPE, db_index=True, null=False, verbose_name="Нэвтэрсэн системийн нэр")
+    url = models.CharField(null=False, db_index=True, max_length=254, verbose_name='URL')
+    query_string = models.TextField(null=True, verbose_name='Query string')
+    remote_ip = models.CharField(max_length=50, null=True, db_index=True, verbose_name='Remote IP')
+    datetime = models.DateTimeField(auto_now_add=True, verbose_name='Хүсэлт илгээсэн огноо')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True,
+                                on_delete=models.SET_NULL, db_constraint=False,
+                                verbose_name='Хэрэглэгчийн ID')
+    status_code = models.SmallIntegerField(null=True, verbose_name='request status code')
