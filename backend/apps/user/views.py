@@ -180,10 +180,10 @@ class UserAPILogoutView(
         user_id = request.user.id
 
         # Нэвтрэлт дууссан цагийг нэвтрэлтийн хэсэгт update хэсэгт хийж хадгалах
-        access_id = AccessHistoryLms.objects.filter(user=user_id).first().id if AccessHistoryLms.objects.filter(user=user_id).exists() else None
+        access_id = self.queryset.filter(user=user_id).first().id if self.queryset.filter(user=user_id).exists() else None
 
         if access_id:
-            AccessHistoryLms.objects.filter(pk=access_id).update(out_time=datetime.now())
+            self.queryset.filter(pk=access_id).update(out_time=datetime.now())
 
         auth.logout(request)
 
