@@ -172,14 +172,18 @@ class UserAPILogoutView(
 ):
     """ Logout """
 
+    queryset = AccessHistoryLms.objects.all().order_by('-in_time')
+
     @login_required()
     def get(self, request):
 
         user_id = request.user.id
 
         # Нэвтрэлт дууссан цагийг нэвтрэлтийн хэсэгт update хэсэгт хийж хадгалах
-        access_id = AccessHistoryLms.objects.filter(user=user_id).last().id
-        AccessHistoryLms.objects.filter(pk=access_id).update(out_time=datetime.now())
+        access_id = AccessHistoryLms.objects.filter(user=user_id).first().id if AccessHistoryLms.objects.filter(user=user_id).exists() else None
+
+        if access_id:
+            AccessHistoryLms.objects.filter(pk=access_id).update(out_time=datetime.now())
 
         auth.logout(request)
 
