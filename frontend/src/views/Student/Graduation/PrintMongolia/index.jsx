@@ -22,7 +22,7 @@ export default function PrintMongolia()
     async function getAllData()
     {
         await Promise.all([
-            fetchData(signatureApi.get(2, data?.student?.group?.profession?.school)),
+            fetchData(signatureApi.get(2, data?.student?.department?.sub_orgs)),
         ]).then((values) => {
             setListArr(values[0]?.data)
         })
@@ -46,7 +46,7 @@ export default function PrintMongolia()
         {
             if (data && listArr.length != 0)
             {
-                setTimeout(() => window.print(), 1000)
+                // setTimeout(() => window.print(), 1000)
             }
         },
         [data, listArr]
@@ -112,36 +112,41 @@ export default function PrintMongolia()
 
     return (
         <div
-            className={`vh-100 position-relative d-flex flex-column justify-content-end align-items-center bg-white`}
+            className={`vh-100 position-relative d-flex flex-column justify-content-end bg-white`}
             style={{ fontFamily: 'Arial', color: 'black' }}
         >
 
             {isLoading && Loader}
 
             {/* Үндсэн хэсэг */}
-            <div className='text-center' style={{ width: '100%', lineHeight: '30px', fontSize: '19px' }} >
+            <div className='text-center' style={{ width: '100%', lineHeight: '24px', fontSize: '19px' }} >
                 <div className='m-auto' style={{ width: '700px' }}>
-                    {data?.student?.citizenship?.name} Улсын иргэн <span className='text-uppercase'>{data?.student?.last_name}</span> овогтой <span className='text-uppercase'>{data?.student?.first_name}</span> нь
-                    <br/>
+                    <div className='mb-2'>
+                        {data?.student?.citizenship?.name} Улсын иргэн <span className='text-uppercase'>{data?.student?.last_name}</span> овогтой <span className='text-uppercase'>{data?.student?.first_name}</span> нь
+                    </div>
                     {/* {data?.student?.group?.join_year?.substring(0, 4)}-{data?.lesson_year?.substring(5, 9)} онд {data?.student?.school_name}д */}
                     {data?.student?.group?.profession?.name}, {data?.student?.group?.profession?.code}
-                    <br/>
-                    хөтөлбөрөөр суралцан төгссөн тул
-                    <br/>
+                    {/* <br/> */}
+                    <div>
+                        хөтөлбөрөөр суралцан төгссөн тул
+                    </div>
+                    <div>
+                    {/* <br/> */}
                     захирлын {data?.decision_date?.substring(0, 4)} оны {data?.decision_date?.substring(5, 7)} {dugeerUg(data?.decision_date?.substring(5, 7) && data?.decision_date?.substring(5, 7).charAt(data?.decision_date?.substring(5, 7).length - 1))} сарын {data?.decision_date?.substring(8, 10)}{niiUg(data?.decision_date?.substring(8, 10) && data?.decision_date?.substring(8, 10).charAt(data?.decision_date?.substring(8, 10).length - 1))} өдрийн {data?.graduation_number} {dugeerUg(data?.graduation_number && data?.graduation_number.charAt(data?.graduation_number.length - 1))} тушаалаар
+                    </div>
                     <span style={{ whiteSpace: 'nowrap' }}><span className='text-uppercase'> {data?.student?.group?.profession?.dep_name} {data?.student?.group?.degree?.degree_name}</span>-ын зэрэг олгов.</span>
                 </div>
             </div>
 
             {/* Гарын үсгийн хэсэг */}
             <div style={{ bottom: '0', fontSize: '15px' }} >
-                <div style={{ paddingLeft: '100px', paddingRight: '100px', lineHeight: '18px', marginTop: '80px', marginBottom: '10px' }} >
-                    <div className='d-flex text-center justify-content-center' style={{width: '400px'}}>
+                <div style={{ paddingLeft: '100px', paddingRight: '100px', lineHeight: '24px', marginTop: '20px', marginBottom: '10px' }} >
+                    <div className='d-flex text-center justify-content-center'>
                         {
                             listArr.map((val, idx) =>
                             {
                                 return (
-                                    <div className='d-flex flex-column pt-2 pb-2' style={{ paddingRight: '20px', paddingLeft: '20px' }} key={idx} >
+                                    <div className='d-flex flex-column pt-2 pb-2' style={{ paddingRight: '20px', paddingLeft: '20px', width: '50%' }} key={idx} >
                                         <span className='border-top-black' style={{textWrap: 'wrap'}}>{val?.position_name}</span>
                                         <span>{val?.last_name}{val?.first_name}</span>
                                     </div>
@@ -152,9 +157,14 @@ export default function PrintMongolia()
                     </div>
                 </div>
             </div>
-            <div className='d-flex justify-content-between w-100 mb-5'>
-                <span style={{ paddingLeft: '180px' }} >Улаанбаатар хот</span>
-                <span style={{ paddingRight: '230px' }} >Бүртгэлийн дугаар {data?.registration_num}</span>
+            <div className='d-flex justify-content-between w-100 align-items-end'>
+                {/* <span style={{ paddingLeft: '180px' }} >Улаанбаатар хот</span> */}
+                <span style={{ paddingLeft: '1rem' }} >
+                {/* <span style={{ paddingLeft: '180px' }} > */}
+                    <img src='/publicfiles/student_uia (1).png' height={100}/>
+                </span>
+                {/* <span style={{ paddingRight: '1rem' }} >Бүртгэлийн дугаар {data?.registration_num}</span> */}
+            {/* <span style={{ paddingRight: '230px' }} >Бүртгэлийн дугаар {data?.registration_num}</span> */}
             </div>
         </div>
     )
