@@ -22,7 +22,7 @@ export default function PrintMongolia()
     async function getAllData()
     {
         await Promise.all([
-            fetchData(signatureApi.get(2, data?.student?.group?.profession?.school)),
+            fetchData(signatureApi.get(2, data?.student?.department?.sub_orgs)),
         ]).then((values) => {
             setListArr(values[0]?.data)
         })
@@ -46,7 +46,7 @@ export default function PrintMongolia()
         {
             if (data && listArr.length != 0)
             {
-                setTimeout(() => window.print(), 1000)
+                // setTimeout(() => window.print(), 1000)
             }
         },
         [data, listArr]
@@ -118,13 +118,13 @@ export default function PrintMongolia()
     return (
         //<div className='vh-100 position-relative  d-flex flex-column  bg-white' style={{ fontFamily: 'Arial', color: 'black' }} >
         <div
-            className={`vh-100 position-relative d-flex flex-column justify-content-end align-items-center bg-white`}
+            className={`vh-100 position-relative d-flex flex-column justify-content-end bg-white`}
             style={{ fontFamily: 'Arial', color: 'black' }}
         >
             {isLoading && Loader}
 
             {/* Үндсэн хэсэг */}
-            <div className='text-center' style={{ width: '100%', fontSize: '19px', lineHeight: '30px', top: '250px', }} >
+            <div className='text-center' style={{ width: '100%', fontSize: '19px', lineHeight: '24px', top: '250px', }} >
                 <div className='m-auto' >
                     <span className='text-center'>This is to certify that
                         <br />
@@ -144,16 +144,15 @@ export default function PrintMongolia()
             </div>
 
             {/* Гарын үсгийн хэсэг */}
+
             <div style={{ bottom: '0', fontSize: '15px' }} >
-                <div style={{ paddingLeft: '100px', paddingRight: '100px', lineHeight: '18px', marginTop: '80px', marginBottom: '10px' }} >
-                    <div className='d-flex text-center justify-content-center' style={{width: '400px'}}>
+                <div style={{ paddingLeft: '100px', paddingRight: '100px', lineHeight: '24px', marginTop: '20px', marginBottom: '10px' }} >
+                    <div className='d-flex text-center justify-content-center'>
                         {
-                            listArr.length != 0
-                            &&
                             listArr.map((val, idx) =>
                             {
                                 return (
-                                    <div className='d-flex flex-column pt-2 pb-2' style={{ paddingRight: '20px', paddingLeft: '20px' }} key={idx} >
+                                    <div className='d-flex flex-column pt-2 pb-2' style={{ paddingRight: '20px', paddingLeft: '20px', width: '50%' }} key={idx} >
                                         <span className='border-top-black' style={{ paddingTop: '3px' }}>{val?.last_name_eng}{val?.first_name_eng}</span>
                                         <span>{val?.position_name_eng}</span>
                                     </div>
@@ -163,13 +162,12 @@ export default function PrintMongolia()
 
                     </div>
                 </div>
-
-                {/* Footer */}
             </div>
-            <div className='d-flex justify-content-between w-100 mb-5'>
+            <div style={{ height: 100 }}></div>
+            {/* <div className='d-flex justify-content-between w-100 mb-5'>
                 <span style={{ paddingLeft: '130px' }} >ULAANBAATAR CITY</span>
                 <span style={{ paddingRight: '150px' }} >REGISTER No {data?.registration_num}</span>
-            </div>
+            </div> */}
         </div>
     )
 }
