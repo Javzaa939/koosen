@@ -1036,43 +1036,27 @@ class CalculatedGpaOfDiplomaPrintSerializer(serializers.ModelSerializer):
 
         student_prof_qs = self.context['student_prof_qs']
 
-        lesson_first_data = obj.lesson.all()
+        lesson_first_data = obj.lesson
 
-        if lesson_first_data.count() == 1:
-            lesson = LessonStandartSerializer(lesson_first_data.last(), many=False).data
+        lesson = LessonStandartSerializer(lesson_first_data, many=False).data
 
-            learning_plan_qs = LearningPlan.objects.filter(lesson=lesson_first_data.last(), profession=student_prof_qs).last()
+        learning_plan_qs = LearningPlan.objects.filter(lesson=lesson_first_data, profession=student_prof_qs).first()
 
-            if learning_plan_qs:
-                learningplan_season = learning_plan_qs.season
-
-                if learningplan_season:
-                    learningplan_season = json_load(learningplan_season)
-                    if isinstance(learningplan_season, list) and len(learningplan_season) > 0:
-                        learningplan_season = learningplan_season[0]
-
-                all_data['lesson_level'] = learning_plan_qs.lesson_level
-                all_data['lesson_type'] = learning_plan_qs.lesson_type
-                all_data['season'] = int(learningplan_season) if learningplan_season else 13
-            else:
-                all_data['lesson_level'] = 9
-                all_data['lesson_type'] = 9
-                all_data['season'] = 13
-
-        else:
-            learning_plan_qs = LearningPlan.objects.filter(lesson__in=lesson_first_data, profession=student_prof_qs, group_lesson__isnull=False)
-            lesson = LessonStandartSerializer(learning_plan_qs.last().group_lesson, many=False).data
-
-            learningplan_season = learning_plan_qs.last().season
+        if learning_plan_qs:
+            learningplan_season = learning_plan_qs.season
 
             if learningplan_season:
                 learningplan_season = json_load(learningplan_season)
                 if isinstance(learningplan_season, list) and len(learningplan_season) > 0:
                     learningplan_season = learningplan_season[0]
 
-            all_data['lesson_level'] = learning_plan_qs.last().lesson_level
-            all_data['lesson_type'] = learning_plan_qs.last().lesson_type
+            all_data['lesson_level'] = learning_plan_qs.lesson_level
+            all_data['lesson_type'] = learning_plan_qs.lesson_type
             all_data['season'] = int(learningplan_season) if learningplan_season else 13
+        else:
+            all_data['lesson_level'] = 9
+            all_data['lesson_type'] = 9
+            all_data['season'] = 13
 
         all_data['lesson'] = lesson
 
