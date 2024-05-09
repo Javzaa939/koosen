@@ -226,7 +226,7 @@ export default function PrintAttachmentMongolia()
 
             <div className={`vh-100 p-0 d-flex flex-column justify-content-between align-items-start position-relative ${isPageBreak && 'page-break'}`} style={{ fontFamily: 'mongolianScript'}} >
 
-                <div style={{ height: '49.5%', marginLeft: '178px' }}  className={`${printDatas.isCenter ? 'center-table' : 'not-center-table' }`} >
+                <div style={{ height: printDatas?.isCenter ? '100%' : '49.5%', marginLeft: '178px' }}  className={`${printDatas.isCenter ? 'center-table' : 'not-center-table' }`} >
                     <table id='table1' className='text-center w-100 d-none' style={{ writingMode: 'vertical-lr', marginBottom: '1px', height: '100%' }} >
                         <thead>
                             <tr style={{ fontSize: '9px' }} >
@@ -242,7 +242,7 @@ export default function PrintAttachmentMongolia()
                     </table>
                 </div>
 
-                <div style={{ height: '49.5%', marginLeft: '178px' }} className={`${printDatas.isCenter ? 'center-table' : 'not-center-table' }`} >
+                <div style={{ height: printDatas?.isCenter ? '100%' : '49.5%', marginLeft: '178px' }} className={`${printDatas.isCenter ? 'center-table' : 'not-center-table' }`} >
                     <table id='table2' className='text-center w-100 d-none' style={{ writingMode: 'vertical-lr', marginBottom: '1px', height: '100%' }} >
                         <thead>
                             <tr style={{ fontSize: '9px' }} >
