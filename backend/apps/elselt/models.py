@@ -10,6 +10,7 @@ class ElseltUser(models.Model):
 
     class Meta:
         db_table = 'elselt_user'
+        managed = False
 
     first_name = models.CharField(max_length=150, blank=True, verbose_name='Нэр')
     last_name = models.CharField(max_length=150, blank=True, verbose_name='Овог')
@@ -22,6 +23,7 @@ class ElseltUser(models.Model):
     image = models.ImageField(upload_to='elselt', null=True, verbose_name='Хэрэглэгчийн зураг')
     aimag = models.ForeignKey(AimagHot, on_delete=models.CASCADE, null=True, verbose_name='Үндсэн захиргаа - Аймаг/хот')
     is_payment = models.BooleanField(default=False, verbose_name="Бүртгэлийн хураамж төлсөн эсэх")
+    justice_file = models.FileField(upload_to='justice/', null=True, verbose_name='Ял шийтгэлийн сервис файл Emongolia')
 
     created = models.DateTimeField(auto_now_add=True, null=True, verbose_name='Огноо')
 

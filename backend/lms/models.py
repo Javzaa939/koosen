@@ -629,7 +629,7 @@ class Student(models.Model):
     admission_before = models.CharField(max_length=100, null=True, verbose_name="Элсэхийн өмнөх байдал")
     private_score = models.FloatField(default=1000, verbose_name="Хувийн оноо")
     eysh_score = models.IntegerField(null=True, verbose_name="ЭЕШ-н оноо")
-    secondary_school = models.FloatField(null=True, verbose_name="Өмнөх шатны боловсролын үнэлгээний оноо")
+    secondary_school = models.CharField(null=True, verbose_name="Өмнөх шатны боловсролын үнэлгээний оноо", max_length=6)
 
     image = models.ImageField(upload_to=user_directory_path, max_length=255, null=True)
     department = models.ForeignKey(Salbars, on_delete=models.SET_NULL, null=True, verbose_name="Хөтөлбөрийн баг")
@@ -3368,11 +3368,12 @@ class CalculatedGpaOfDiploma(models.Model):
     """
 
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
-    lesson = models.ManyToManyField(LessonStandart, blank=True, verbose_name="Хичээл")
+    lesson = models.ForeignKey(LessonStandart, on_delete=models.PROTECT, verbose_name="Хичээл", null=True)
     kredit = models.FloatField(verbose_name="Кредит")
     score = models.FloatField(null=True, verbose_name="Нийт оноо")
-    gpa = models.FloatField(verbose_name="Голч дүн")
-    assesment = models.CharField(max_length=2, verbose_name="Үсгэн үнэлгээ")
+    gpa = models.FloatField(verbose_name="Голч дүн", null=True)
+    assesment = models.CharField(max_length=2, verbose_name="Үсгэн тэмдэглэгэ", null=True)
+    grade_letter = models.ForeignKey(GradeLetter, on_delete=models.SET_NULL, null=True, verbose_name="Үсгэн үнэлгээ")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

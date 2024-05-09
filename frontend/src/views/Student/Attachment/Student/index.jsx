@@ -8,11 +8,11 @@ import DataTable from 'react-data-table-component'
 import { Edit2, X, AlertCircle, ChevronsLeft } from 'react-feather';
 import Flatpickr from 'react-flatpickr'
 import { Mongolian } from "flatpickr/dist/l10n/mn.js"
+import  useUpdateEffect  from '@hooks/useUpdateEffect'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
-import  useUpdateEffect  from '@hooks/useUpdateEffect'
-
+import useModal from '@src/utility/hooks/useModal';
 import { getColumns } from '@views/Student/Attachment/Student/helpers/index.jsx'
 
 // ** Styles Imports
@@ -29,6 +29,8 @@ export default function AttachmentStudent()
     const [ printValue, setPrintValue ] = useState("")
     const [ picker, setPicker ] = useState(new Date())
     const [ is_loading, setLoading ] = useState(true)
+    const [ isThink, setIsThink ] = useState(false)
+    const { showWarning } = useModal()
 
     const [ checkedTableRowCount, setCheckedTableRowCount ] = useState([])
     const [ errorMessage, setErrorMessage ] = useState('')
@@ -44,7 +46,7 @@ export default function AttachmentStudent()
     const studentId = location.state
 
     // Loader
-	const { isLoading, fetchData, Loader } = useLoader({ isFullScreen: false })
+	const { isLoading, fetchData, Loader } = useLoader({ isFullScreen: true })
 
     // Api
     const studentApi = useApi().student
@@ -76,12 +78,12 @@ export default function AttachmentStudent()
                 getAllData()
             }
         },
-        []
+        [studentId]
     )
 
     function changeTableRowValues(value)
     {
-        let defaultSum = datas?.calculated_length + 3
+        let defaultSum = datas?.calculated_length  + 3
 
         let sum = 0
 
@@ -117,6 +119,7 @@ export default function AttachmentStudent()
         await Promise.all([
             fetchData(studentApi.calculateGpaDimplomaAdd(studentId, checkedValues.current)),
         ]).then((values) => {
+            setIsThink(true)
             setCalculatedDatas(values[0].data)
         })
 
@@ -189,7 +192,7 @@ export default function AttachmentStudent()
         }
     }
 
-    useUpdateEffect(
+    useEffect(
         () =>
         {
             checkedValues.current = []
@@ -210,7 +213,7 @@ export default function AttachmentStudent()
     {
         let tableRowData = []
 
-        if (tableCount * 12 < allLength)
+        if (tableCount * 13 < allLength)
         {
             let residual = allLength % tableCount
             let notResidualValue = allLength - residual
@@ -263,12 +266,12 @@ export default function AttachmentStudent()
             switch (printValue)
             {
                 case 'mongolian':
-                    var tableMax = 12
+                    var tableMax = 13
                     calculatePrintTableValue(allLength, tableMax, 6)
                     break;
 
                 case 'english':
-                    var tableMax = 12
+                    var tableMax = 13
                     calculatePrintTableValue(allLength, tableMax, 6)
                     break;
 
@@ -289,6 +292,7 @@ export default function AttachmentStudent()
         return ('0' + n).slice(-2);
     }
 
+    /** Хэвлэх товч дарах үед*/
     function clickPrint(event)
     {
         event.preventDefault()
@@ -300,6 +304,8 @@ export default function AttachmentStudent()
             tableRowCount: checkedTableRowCount,
             student: datas?.student,
             registration_num: registration_num,
+            isCenter: document.getElementById('isCenter') ? document.getElementById('isCenter').checked : null,
+            isLastNameOvog: document.getElementById('isLastNameOvog') ? document.getElementById('isLastNameOvog').checked : null,
         }
 
         localStorage.setItem('blankDatas', JSON.stringify(data))
@@ -331,9 +337,16 @@ export default function AttachmentStudent()
         navigate(`/student/attachment/`)
     }
 
+    /** Дипломын голч бодуулах тухайн хүүхдийн загварын дагуу ангиар нь хадгалах*/
+    async function handleTemplateSubmit() {
+        const { success } = await fetchData(studentApi.calculateGpaGroupGraduation(datas?.student?.id))
+        if (success) {
+        }
+    }
+
     return (
         <Fragment>
-            { (is_loading || isLoading) && Loader }
+            { isLoading && Loader }
             <Card>
                 <div className="cursor-pointer hover-shadow m-1" onClick={() => handleNavigate()}>
                     <ChevronsLeft /> Буцах
@@ -467,7 +480,7 @@ export default function AttachmentStudent()
                                 </Col>
                                 {
                                     (printValue == 'mongolian' || printValue == 'english')
-                                    &&
+                                    ?
                                     <>
                                         <Col md={3}>
                                             <Label className="form-label" for="table5">
@@ -502,7 +515,29 @@ export default function AttachmentStudent()
                                             />
                                         </Col>
                                     </>
+                                    :
+                                        <Col md={3} className='mt-1'>
+                                            <Input
+                                                type='checkbox'
+                                                name='isCenter'
+                                                id='isCenter'
+                                            />
+                                            <Label className="form-label ms-50" for="isCenter">
+                                                {t('Голлуулах эсэх')}
+                                            </Label>
+                                        </Col>
                                 }
+                                <Col md={3} className='mt-1'>
+                                    <Input
+                                        type='checkbox'
+                                        name='isLastNameOvog'
+                                        id='isLastNameOvog'
+                                        defaultChecked={true}
+                                    />
+                                    <Label className="form-label ms-50" for="isLastNameOvog">
+                                        {t('Овог харуулах')}
+                                    </Label>
+                                </Col>
                             </Row>
                             <p className='text-danger fs-6'>{errorMessage}</p>
                             <p className='mt-1 ms-1'>Олгосон огноо</p>
@@ -525,7 +560,23 @@ export default function AttachmentStudent()
                     }
 
                     <p className='ms-1'>Дипломын голч бодуулах</p>
-                    <Button onClick={toThink} >Бодуулах</Button>
+                    <div className='d-flex justify-content-between'>
+                        <Button onClick={toThink}>Бодуулах</Button>
+                        <Button
+                            disabled={!isThink}
+                            onClick={() => showWarning({
+                                header: {
+                                    title: `${('Хавсралтын дүн бодуулах загвар хадгалах')}`,
+                                },
+                                question: `Та "${datas?.student?.group?.profession?.name}" хөтөлбөрийн "${datas?.student?.group?.name}"-н дипломын хавсралт дүн энэ хүснэгт дээр хадгалагдсан загвараар хадгалагдахыг анхаарна уу?`,
+                                onClick: () => handleTemplateSubmit(),
+                                btnText: 'Хадгалах',
+                            })}
+                            color={"primary"}
+                         >
+                            Загвар хадгалах
+                        </Button>
+                    </div>
 
                 </CardBody>
             </Card>
@@ -549,7 +600,6 @@ export default function AttachmentStudent()
                         <DataTable
                             noHeader
                             className='react-dataTable'
-                            progressPending={is_loading}
                             noDataComponent={(
                                 <div className="my-2">
                                     <h5>{t('Өгөгдөл байхгүй байна')}</h5>

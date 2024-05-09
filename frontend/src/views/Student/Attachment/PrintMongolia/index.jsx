@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
@@ -34,6 +33,39 @@ export default function PrintAttachmentMongolia()
             setDatas(values[1]?.data)
         })
     }
+
+    const [height, setHeight] = useState(
+        {
+            header: 0,
+            footer: 0,
+            body1: 0,
+            body2: 0
+        }
+    )
+
+    const headerSectionRef = useRef(null)
+    const footerSectionRef = useRef(null)
+    const body1SectionRef = useRef(null)
+    const body2SectionRef = useRef(null)
+
+    useEffect(() => {
+        setHeight(
+            {
+                header:headerSectionRef.current.clientHeight,
+                footer:footerSectionRef.current.clientHeight,
+                body1:body1SectionRef.current.clientHeight,
+                body2:body2SectionRef.current.clientHeight,
+
+            }
+        )
+    }, [])
+
+    // const FULL_PAGE_HEIGHT = 793
+
+    // console.log(document.getElementById('root').clientHeight,'client');
+
+    console.log(height?.header + height?.body1 + height?.body2 + height?.footer,'ref')
+    console.log(height,'height')
 
     useEffect(
         () =>
@@ -99,17 +131,17 @@ export default function PrintAttachmentMongolia()
                                 }
                             }
 
-                            if (printDatas.tableRowCount[2] == 0 && printDatas.tableRowCount[1] !== 0)
-                            {
-                                if (idx == 0)
-                                {
-                                    parentTableDoc.style.padding = '0px 0px 0px 70px'
-                                }
-                                else
-                                {
-                                    parentTableDoc.style.padding = '0px 76px 0px 0px'
-                                }
-                            }
+                            // if (printDatas.tableRowCount[2] == 0 && printDatas.tableRowCount[1] !== 0)
+                            // {
+                            //     if (idx == 0)
+                            //     {
+                            //         parentTableDoc.style.padding = '0px 7px 0px 14px'
+                            //     }
+                            //     else
+                            //     {
+                            //         parentTableDoc.style.padding = '0px 14px 0px 7px'
+                            //     }
+                            // }
 
                             if (half <= idx)
                             {
@@ -141,22 +173,28 @@ export default function PrintAttachmentMongolia()
                                     newCell2.innerHTML = flattenedArray[count - 1]?.name || ''
                                     newCell3.innerHTML = flattenedArray[count - 1]?.kredit || ''
 
-                                    // NaN буцаагаад байхаар нь шалгах функц бичсэн.
-                                    // ер нь бол шаардлагагүй гэхдээ яахав
+                                    // Тооцов дүнг харуулахдаа
+                                    if (flattenedArray[count - 1]?.grade_letter) {
+                                        newCell4.innerHTML = flattenedArray[count - 1]?.grade_letter ? flattenedArray[count - 1]?.grade_letter : ''
+                                        newCell4.colSpan = 2
+                                    } else {
+                                        newCell4.innerHTML = flattenedArray[count - 1]?.score ? flattenedArray[count - 1]?.score : ''
+                                        // NaN буцаагаад байхаар нь шалгах функц бичсэн.
+                                        // ер нь бол шаардлагагүй гэхдээ яахав
 
-                                    // newCell4.innerHTML = !isNaN(flattenedArray[count - 1]?.score)
-                                    // 	? flattenedArray[count - 1]?.score
-                                    // 		: 'Default';
+                                        // newCell4.innerHTML = !isNaN(flattenedArray[count - 1]?.score)
+                                        // 	? flattenedArray[count - 1]?.score
+                                        // 		: 'Default';
 
-                                    newCell4.innerHTML = flattenedArray[count - 1]?.score ? flattenedArray[count - 1]?.score : ''
+                                        newCell5.innerHTML = flattenedArray[count - 1]?.assesment || ''
+                                        newCell5.className = 'border-dark footer3-cell'
+                                    }
 
-                                    newCell5.innerHTML = flattenedArray[count - 1]?.assesment || ''
 
                                     newCell1.className = 'border-dark mini-cell'
                                     newCell2.className = 'border-dark body-cell'
                                     newCell3.className = 'border-dark footer1-cell'
                                     newCell4.className = 'border-dark footer2-cell'
-                                    newCell5.className = 'border-dark footer3-cell'
                                 }
                                 else
                                 {
@@ -182,18 +220,22 @@ export default function PrintAttachmentMongolia()
         <>
             {isLoading && Loader}
 
-            <div className={`position-relative d-flex justify-content-between ${isPageBreak && 'page-break'}`} style={{ fontSize: '13px', marginTop: printDatas?.student?.group?.degree?.degree_code == 'D' ? '175px' : '180px', marginTop: '135px', backgroundColor: 'white', color: 'black', fontFamily: 'serif' }} >
+            <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1 ${isPageBreak && 'page-break'}`} style={{ fontSize: '13px', paddingTop: height.header + 24,  backgroundColor: 'white', color: 'black', fontFamily: 'serif' }} >
+            {/* <div className={`position-relative d-flex justify-content-between ${isPageBreak && 'page-break'}`} style={{ fontSize: '13px', marginTop: printDatas?.student?.group?.degree?.degree_code == 'D' ? '175px' : '180px', marginTop: '135px', backgroundColor: 'white', color: 'black', fontFamily: 'serif' }} > */}
+                <div
+                    className='d-flex flex-wrap align-content-start mt-1'
+                    id='table1-1'
+                    // style={{ marginTop: height }}
+                >
 
-                <div className='d-flex flex-wrap align-content-start mt-1' id='table1-1' >
-
-                    <table className='w-100 text-center d-none' id='table1' >
+                    <table className='font-dark w-100 text-center d-none' id='table1' >
                         <thead className='fw-bolder'>
                             <tr style={{ height: '25px' }}>
-                                <td className='border-dark' style={{ width: '6.25%' }}>№</td>
-                                <td className='border-dark' style={{ width: '63,75%' }}>Хичээлийн нэрс</td>
-                                <td className='border-dark' style={{ width: '12%' }}  >Кр</td>
-                                <td className='border-dark' style={{ width: '10%' }} >Оноо</td>
-                                <td className='border-dark' style={{ width: '8%' }} >Дүн</td>
+                                <td className='border-dark' style={{ width: '4%' }}>№</td>
+                                <td className='border-dark' style={{ width: '70%' }}>Хичээлийн нэр</td>
+                                <td className='border-dark' style={{ width: '7%' }}>Багц цаг</td>
+                                <td className='border-dark' style={{ width: '11%' }}>Үсгэн үнэлгээ</td>
+                                <td className='border-dark' style={{ width: '8%' }}>Тоо үнэлгээ</td>
                             </tr>
                         </thead>
                         <tbody>
@@ -202,16 +244,16 @@ export default function PrintAttachmentMongolia()
                     </table>
                 </div>
 
-                <div className='d-flex flex-wrap align-content-start' id='table2-2' >
+                <div className='d-flex flex-wrap align-content-start mt-1' id='table2-2' >
 
-                    <table className='w-100 text-center d-none' id='table2' >
+                    <table className='font-dark w-100 text-center d-none' id='table2' >
                         <thead className='fw-bolder'>
                             <tr style={{ height: '25px' }}>
-                                <td className='border-dark' style={{ width: '6.25%' }}>№</td>
-                                <td className='border-dark' style={{ width: '63,75%' }}>Хичээлийн нэрс</td>
-                                <td className='border-dark' style={{ width: '12%' }}  >Кр</td>
-                                <td className='border-dark' style={{ width: '10%' }} >Оноо</td>
-                                <td className='border-dark' style={{ width: '8%' }} >Дүн</td>
+                                <td className='border-dark' style={{ width: '4%' }}>№</td>
+                                <td className='border-dark' style={{ width: '70%' }}>Хичээлийн нэр</td>
+                                <td className='border-dark' style={{ width: '7%' }}  >Багц цаг</td>
+                                <td className='border-dark' style={{ width: '11%' }} >Үсгэн үнэлгээ</td>
+                                <td className='border-dark' style={{ width: '8%' }} >Тоо үнэлгээ</td>
                             </tr>
                         </thead>
                         <tbody>
@@ -220,16 +262,16 @@ export default function PrintAttachmentMongolia()
                     </table>
                 </div>
 
-                <div className='d-flex flex-wrap align-content-start' id='table3-3' >
+                <div className='d-flex flex-wrap align-content-start mt-1' id='table3-3' >
 
-                    <table className='w-100 text-center d-none' id='table3' >
+                    <table className='font-dark w-100 text-center d-none' id='table3' >
                         <thead className='fw-bolder'>
                             <tr style={{ height: '25px' }}>
-                                <td className='border-dark' style={{ width: '6.25%' }}>№</td>
-                                <td className='border-dark' style={{ width: '63,75%' }}>Хичээлийн нэрс</td>
-                                <td className='border-dark' style={{ width: '12%' }}  >Кр</td>
-                                <td className='border-dark' style={{ width: '10%' }} >Оноо</td>
-                                <td className='border-dark' style={{ width: '8%' }} >Дүн</td>
+                                <td className='border-dark' style={{ width: '4%' }}>№</td>
+                                <td className='border-dark' style={{ width: '70%' }}>Хичээлийн нэр</td>
+                                <td className='border-dark' style={{ width: '7%' }}  >Багц цаг</td>
+                                <td className='border-dark' style={{ width: '11%' }} >Үсгэн үнэлгээ</td>
+                                <td className='border-dark' style={{ width: '8%' }} >Тоо үнэлгээ</td>
                             </tr>
                         </thead>
                         <tbody>
@@ -243,12 +285,12 @@ export default function PrintAttachmentMongolia()
                     ?
                     (
                         <>
-                            <div className='position-absolute' style={{ right: '12px', fontSize: '11px', top: '533px' }} >
+                            {/* <div className='position-absolute' style={{ right: '12px', fontSize: '11px', top: '533px' }} >
                                 Энэхүү хавсралт-1 {new Date().getFullYear()} оны {printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.graduation_work?.diplom_num} дугаартай дипломын хамт хүчинтэй.
                             </div>
                             <div className='position-absolute' style={{ right: '12px', fontSize: '11px', top: '1242px' }} >
                                 Энэхүү хавсралт-2 {new Date().getFullYear()} оны {printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.graduation_work?.diplom_num} дугаартай дипломын хамт хүчинтэй.
-                            </div>
+                            </div> */}
                         </>
                     )
                     :
@@ -257,17 +299,17 @@ export default function PrintAttachmentMongolia()
 
             </div>
 
-            <div className={`${!isPageBreak && 'd-none'}`} style={{ marginTop: '175px', breakInside: 'avoid', backgroundColor: 'white', color: 'black' }} >
-                <div className={`position-relative d-flex justify-content-between`} style={{ fontSize: '13px' }} >
-                    <div className='d-flex flex-wrap align-content-start' id='table4-4' >
-                        <table className='w-100 text-center d-none' id='table4' >
+            <div ref={body2SectionRef} className={`${!isPageBreak && 'd-none'}`} style={{ marginTop: '175px', breakInside: 'avoid', backgroundColor: 'white', color: 'black', fontFamily: 'serif' }} >
+                <div className={`position-relative px-1 gap-1 d-flex justify-content-between`} style={{ fontSize: '13px' }} >
+                    <div className='d-flex flex-wrap align-content-start mt-1' id='table4-4' >
+                        <table className='font-dark w-100 text-center d-none' id='table4' >
                             <thead className='fw-bolder'>
                                 <tr style={{ height: '25px' }}>
-                                    <td className='border-dark' style={{ width: '6.25%' }}>№</td>
-                                    <td className='border-dark' style={{ width: '63,75%' }}>Хичээлийн нэрс</td>
-                                    <td className='border-dark' style={{ width: '12%' }}  >Кр</td>
-                                    <td className='border-dark' style={{ width: '10%' }} >Оноо</td>
-                                    <td className='border-dark' style={{ width: '8%' }} >Дүн</td>
+                                    <td className='border-dark' style={{ width: '4%' }}>№</td>
+                                    <td className='border-dark' style={{ width: '70%' }}>Хичээлийн нэр</td>
+                                    <td className='border-dark' style={{ width: '7%' }}  >Багц цаг</td>
+                                    <td className='border-dark' style={{ width: '11%' }} >Үсгэн үнэлгээ</td>
+                                    <td className='border-dark' style={{ width: '8%' }} >Тоо үнэлгээ</td>
                                 </tr>
                             </thead>
                             <tbody>
@@ -276,16 +318,16 @@ export default function PrintAttachmentMongolia()
                         </table>
                     </div>
 
-                    <div className='d-flex flex-wrap align-content-start' id='table5-5' >
+                    <div className='d-flex flex-wrap align-content-start mt-1' id='table5-5' >
 
-                        <table className='w-100 text-center d-none' id='table5' >
+                        <table className='font-dark w-100 text-center d-none' id='table5' >
                             <thead className='fw-bolder'>
                                 <tr style={{ height: '25px' }}>
-                                    <td className='border-dark' style={{ width: '6.25%' }}>№</td>
-                                    <td className='border-dark' style={{ width: '63,75%' }}>Хичээлийн нэрс</td>
-                                    <td className='border-dark' style={{ width: '12%' }}  >Кр</td>
-                                    <td className='border-dark' style={{ width: '10%' }} >Оноо</td>
-                                    <td className='border-dark' style={{ width: '8%' }} >Дүн</td>
+                                    <td className='border-dark' style={{ width: '4%' }}>№</td>
+                                    <td className='border-dark' style={{ width: '70%' }}>Хичээлийн нэр</td>
+                                    <td className='border-dark' style={{ width: '7%' }}  >Багц цаг</td>
+                                    <td className='border-dark' style={{ width: '11%' }} >Үсгэн үнэлгээ</td>
+                                    <td className='border-dark' style={{ width: '8%' }} >Тоо үнэлгээ</td>
                                 </tr>
                             </thead>
                             <tbody>
@@ -294,16 +336,16 @@ export default function PrintAttachmentMongolia()
                         </table>
                     </div>
 
-                    <div className='d-flex flex-wrap align-content-start' id='table6-6' >
+                    <div className='d-flex flex-wrap align-content-start mt-1' id='table6-6' >
 
-                        <table className='w-100 text-center d-none' id='table6' >
+                        <table className='font-dark w-100 text-center d-none' id='table6' >
                             <thead className='fw-bolder'>
                                 <tr style={{ height: '25px' }}>
-                                    <td className='border-dark' style={{ width: '6.25%' }}>№</td>
-                                    <td className='border-dark' style={{ width: '63,75%' }}>Хичээлийн нэрс</td>
-                                    <td className='border-dark' style={{ width: '12%' }}  >Кр</td>
-                                    <td className='border-dark' style={{ width: '10%' }} >Оноо</td>
-                                    <td className='border-dark' style={{ width: '8%' }} >Дүн</td>
+                                    <td className='border-dark' style={{ width: '4%' }}>№</td>
+                                    <td className='border-dark' style={{ width: '70%' }}>Хичээлийн нэр</td>
+                                    <td className='border-dark' style={{ width: '7%' }}  >Багц цаг</td>
+                                    <td className='border-dark' style={{ width: '11%' }} >Үсгэн үнэлгээ</td>
+                                    <td className='border-dark' style={{ width: '8%' }} >Тоо үнэлгээ</td>
                                 </tr>
                             </thead>
                             <tbody>
@@ -315,7 +357,69 @@ export default function PrintAttachmentMongolia()
                 </div>
             </div>
 
-            <header className='w-100 px-1' style={{ backgroundColor: 'white', color: 'black' }} >
+            {/*
+
+                Магистрийн толгой хэсэг
+
+                Доор нь хуучин байсныг нь комментлосон байгаа
+
+             */}
+            <header
+                className='w-100 px-1 font-dark'
+                style={{ backgroundColor: 'white', color: 'black' }}
+                ref={headerSectionRef}
+            >
+                <div className='d-flex flex-column text-center fw-bolder'>
+                    <p className='text-uppercase' style={{ marginBottom: '0px' }} >{themeConfig.school.name}</p>
+                    <p className='text-uppercase' style={{ marginBottom: '0px' }} >{printDatas?.student?.department?.school}</p>
+                    <p className='m-0' style={{ fontSize: '12px', fontWeight: '500' }} >{printDatas?.student?.graduation_work?.diplom_num} дугаартай <span className='text-lowercase'>{printDatas?.student?.group?.degree?.degree_name && `${printDatas?.student?.group?.degree?.degree_name}ын`}</span> дипломын хавсралт</p>
+                    <p className='' style={{ fontSize: 12, fontWeight: 500 }}>Бүртгэлийн дугаар:</p>
+                </div>
+
+                <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
+                    <div className='d-flex' style={{ width: '33.3%' }} >
+                        <span className='fw-normal w-50'>Эцэг /Эх/-ийн нэр:</span> <span>{printDatas?.student?.last_name}</span>
+                    </div>
+                    <div className='d-flex px-1' style={{ width: '33.3%' }} >
+                        <span className='fw-normal w-50'>Хөтөлбөрийн нэр:</span> <span className='text-uppercase'>{printDatas?.student?.group?.profession?.name}</span>
+                    </div>
+                    <div className='d-flex px-2' style={{ width: '33.3%' }} >
+                        <span className='fw-normal w-50' style={{ width: '200px'}}>Элссэн он:</span><span>{printDatas?.student?.group?.join_year?.substring(0, 4)}</span>
+                    </div>
+                    {/* <div className='d-flex px-2' style={{ width: '33.3%' }} >
+                        <span className='fw-normal w-50'>Олгосон огноо:</span> <span>{printDatas?.registration_num?.replaceAll('.', '-')}</span>
+                    </div> */}
+                </div>
+                <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
+                    <div className='d-flex' style={{ width: '33.3%' }} >
+                        <span className='fw-normal w-50'>Нэр:</span> <span>{printDatas?.student?.first_name}</span>
+                    </div>
+                    <div className='d-flex px-1' style={{ width: '33.3%' }} >
+                        <span className='fw-normal w-50'>Төрөлжсөн чиглэл: </span><span>{printDatas?.student?.group?.profession?.dep_name}</span>
+                        {/* <span className='fw-normal w-50'>Мэргэжлийн индекс: </span><span>{printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.group?.profession?.code}</span> */}
+                    </div>
+                    <div className='d-flex px-2' style={{ width: '33.3%' }} >
+                        <span className='fw-normal w-50' style={{ width: '200px'}}>Төгссөн он:</span> <span>{printDatas?.student?.graduation_work?.lesson_year?.substring(5, 9)}</span>
+                    </div>
+                    {/* <div className='d-flex px-2' style={{ width: '33.3%' }} >
+                        <span className='fw-normal w-50'>Бүртгэлийн дугаар:</span> <span>{printDatas?.student?.graduation_work?.registration_num}</span>
+                    </div> */}
+                </div>
+                <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
+                    <div className='d-flex' style={{ width: '33.3%' }} >
+                        <span className='fw-normal w-50'>Регистрийн дугаар:</span> <span>{printDatas?.student?.register_num}</span>
+                    </div>
+                    <div className='d-flex px-1' style={{ width: '33.3%' }} >
+                        <span className='fw-normal w-50'>Өмнөх зэргийн дипломын дугаар:</span> <span className='text-uppercase'>{printDatas?.student?.graduation_work?.back_diplom_num}</span>
+                    </div>
+                    <div className='d-flex px-2' style={{ width: '33.3%' }} >
+                        <span className='fw-normal w-50'>Тушаалын дугаар:</span> <span className='text-uppercase'>{printDatas?.student?.graduation_work?.graduation_number}</span>
+                    </div>
+                </div>
+            </header>
+
+
+            {/* <header className='w-100 px-1' style={{ backgroundColor: 'white', color: 'black' }} >
                 <div className='d-flex flex-column text-center fw-bolder'>
                     <p className='text-uppercase' style={{ marginBottom: '0px' }} >{themeConfig.school.name}</p>
                     <p className='text-uppercase' style={{ marginBottom: '0px' }} >{printDatas?.student?.department?.school}</p>
@@ -352,41 +456,69 @@ export default function PrintAttachmentMongolia()
                         <span className='fw-normal w-50'>Мэргэжил:</span> <span className='text-uppercase'>{printDatas?.student?.group?.profession?.name}</span>
                     </div>
                 </div>
-            </header>
+            </header> */}
 
-            <footer className='w-100' style={{ fontSize: '10px', backgroundColor: 'white', color: 'black' }} >
+            {/* <div className='mt-2'>
+                { datas?.graduation_work?.lesson_type == 1 ? printDatas?.student?.group?.degree?.degree_code !== 'D' ? 'Магистрын төгсөлтийн ажил/диссертацийн нэр:' : 'Дипломын ажлын нэр' : 'Төгсөлтийн шалгалт:' }
+            </div> */}
+            <footer ref={footerSectionRef} className='w-100 font-dark' style={{ fontSize: '10px', backgroundColor: 'white', color: 'black' }} >
 
-                <div className='text-end  me-1'>
-                    <span className='ms-5'>Нийт кредит: {datas?.score?.max_kredit}</span>
-                    <span className='ms-5'>Голч дүн: {datas?.score?.assesment}</span>
-                </div>
-
-                <div className='px-1 mb-5' style={{ paddingTop: '2px', paddingBottom: '15px' }} >
-                    { datas?.graduation_work?.lesson_type == 1 ? 'Төгсөлтийн ажил:' : 'Төгсөлтийн шалгалт:' }
-                    {
-                        datas?.graduation_work?.lesson_type == 1
+                <div className='px-1 mb-25' style={{ paddingTop: '2px' }} >
+                {
+                    datas?.graduation_work?.lesson_type == 1
+                    ?
+                        printDatas?.student?.group?.degree?.degree_code !== 'D'
                         ?
-                            <span className='ms-5'>{datas?.graduation_work?.diplom_topic}</span>
+                            <span className=''>Магистрын төгсөлтийн ажил/диссертацийн нэр: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic}</span></span>
                         :
-                            datas?.graduation_work?.lesson?.map((val, idx) =>
-                            {
-                                return (
-                                    <span className='ms-5' key={idx} >{idx + 1}. {val?.name} / {(val?.score_register?.teach_score || 0) + (val?.score_register?.exam_score || 0)} {val?.score_register?.assessment} /</span>
-                                )
-                            })
-                    }
+                            <span className=''>Дипломын ажлын нэр: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic}</span></span>
+
+                    :
+                        <>
+                            <span className=''>
+                                Төгсөлтийн шалгалт:
+                            </span>
+                                {
+                                    datas?.graduation_work?.lesson?.map((val, idx) =>
+                                    {
+                                        return (
+                                            <span className='ms-5' key={idx} >{idx + 1}. {val?.name} / {(val?.score_register?.teach_score || 0) + (val?.score_register?.exam_score || 0)} {val?.score_register?.assessment} /</span>
+                                        )
+                                    })
+                                }
+                        </>
+                }
                 </div>
 
-                <div className='d-flex justify-content-center' style={{ paddingInline: '100px' }} >
+                <div className='d-flex justify-content-center gap-5 me-1'>
+                    <div>Нийт багц цаг: {datas?.score?.max_kredit}</div>
+                    <div>Голч оноо: {datas?.score?.average_score}</div>
+                    <div>Голч дүн: {datas?.score?.assesment}</div>
+                    {/* <span className='ms-5'>Нийт кредит: {datas?.score?.max_kredit}</span>
+                    <span className='ms-5'>Голч дүн: {datas?.score?.assesment}</span> */}
+                </div>
+
+                {/* <div className='d-flex justify-content-center mt-3 mb-1' style={{ paddingInline: '100px' }} >
+                    <div className='px-1 text-center' style={{ width: `${100/2}%` }}>
+                        <div className='d-inline-block text-center' >
+                            <div className='pt-50 px-2' style={{ textTransform: 'uppercase', borderTop: '1px solid black' }}>
+                                Тест Хурандаа <span style={{ textWrap: 'nowrap' }}>{`Энхбатын Наранмандах`}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div> */}
+
+                <div className='d-flex justify-content-center mt-3'>
+                {/* <div className='d-flex justify-content-center' style={{ paddingInline: '100px' }} > */}
                     {
                         listArr.length != 0
                         &&
                         listArr.map((val, idx) =>
                         {
                             return (
-                                <div className='px-1' style={{ width: `${100/listArr.length}%` }} key={idx} >
-                                    <div className='d-inline-block text-center' >
-                                        <div className='pt-50 px-2' style={{ textTransform: 'uppercase', borderTop: '1px solid black' }}>
+                                <div className='text-center px-1' style={{ width: `${100/2}%` }} key={idx} >
+                                    <div className='text-center d-inline-block text-center' >
+                                        <div className='text-center pt-50 px-2' style={{ textTransform: 'uppercase', borderTop: '1px solid black' }}>
                                             {val?.position_name} <span style={{ textWrap: 'nowrap' }}>{`${val?.last_name}${val?.first_name}`}</span>
                                         </div>
                                     </div>
@@ -396,17 +528,21 @@ export default function PrintAttachmentMongolia()
                     }
                 </div>
 
-                {
+                    <div className={`text-center mt-1`} style={{ fontSize: '11px' }} >
+                        Дүн(голч): F{'<'}60(0) 60≤D-{'<'}65(1.0) 65≤D{'<'}70(1.4) 70≤C-{'<'}75(1.9) 75≤C{'<'}80(2.3) 80≤B-{'<'}85(3.1) 85≤B{'<'}90(3.1) 90≤A-{'<'}95(3.6) 95≤A{'<'}100(4.0) S=Тооцов CR=Дүйцүүлсэн баг цаг
+                    </div>
+                {/* {
                     isPageBreak === false
                     ?
                     (
-                        <div className={`text-end mt-2 me-1`} style={{ fontSize: '11px' }} >
-                            Энэхүү хавсралт нь {new Date().getFullYear()} оны {printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.graduation_work?.diplom_num} дугаартай дипломын хамт хүчинтэй.
+                        <div className={`text-center mt-2 me-1`} style={{ fontSize: '11px' }} >
+                            Дүн(голч): F{'<'}60(0) 60≤D-{'<'}65(1.0) 65≤D{'<'}70(1.4) 70≤C-{'<'}75(1.9) 75≤C{'<'}80(2.3) 80≤B-{'<'}85(3.1) 85≤B{'<'}90(3.1) 90≤A-{'<'}95(3.6) 95≤A{'<'}100(4.0) S=Тооцов CR=Дүйцүүлсэн баг цаг
                         </div>
                     )
                     :
                         null
-                }
+                } */}
+                {/* Энэхүү хавсралт нь {new Date().getFullYear()} оны {printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.graduation_work?.diplom_num} дугаартай дипломын хамт хүчинтэй. */}
 
             </footer>
 

@@ -676,6 +676,9 @@ function useApi(isDisplay=false) {
 			// дата оруулах
 			postStudentImportData: data => instance.post(`/student/postData/`, data),
 
+			// Голч бодуулах загвараар ангийн хүүхдүүдийн загварыг хадгалах
+			calculateGpaGroupGraduation: data => instance.post(`/student/calculate-gpa-diploma/group/`, data),
+
 			/* Анги бүлгийн бүртгэл */
 			group:{
 				getList: (departId, degree, profession, joined_year) => {
@@ -771,6 +774,7 @@ function useApi(isDisplay=false) {
 				getOne: (pk) => instance.get(`/student/graduation/${pk}/`),
 				put: (data, pk) => instance.put(`/student/graduation/${pk}/`, data),
 				delete: (pk) => instance.delete(`/student/graduation/${pk}/`),
+				postFile: (data) => instance.post('/student/graduation/import/', data),
 			},
 
 			/** Боловсролын зээлийн сан */

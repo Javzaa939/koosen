@@ -1,6 +1,9 @@
 @page {
     size: A4 landscape;
-    margin: 30px 30px 20px 30px;
+    margin: 20px 0 10px 20px;
+    /* margin: 10px; */
+    /* margin: 20px 0px 0px 10px; */
+    /* margin: 30px 30px 20px 30px; */
 }
 
 body {
@@ -28,24 +31,24 @@ footer {
 }
 
 .mini-cell {
-    width: 6.25%;
+    width: 4%;
 }
 
 .body-cell {
-    width: 63.25%;
+    width: 70%;
     line-height: 1;
     padding: 5px 4px;
     text-align: start;
 }
 
 .footer1-cell {
-    width: 12%;
+    width: 7%;
 }
 
 .footer2-cell {
-    width: 10%;
+    width: 11%;
 }
 
 .footer3-cell {
-    width: 18%;
+    width: 8%;
 }

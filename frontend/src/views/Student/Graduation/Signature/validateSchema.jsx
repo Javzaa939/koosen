@@ -32,23 +32,19 @@ export const validateSchema = Yup.object().shape(
 		.trim()
 		.required('Хоосон байна'),
 
-	last_name_uig: Yup
-		.string()
-		.trim()
-		.required('Хоосон байна'),
+	// last_name_uig: Yup
+	// 	.string()
+	// 	.trim()
+	// 	.required('Хоосон байна'),
 
-    first_name_uig: Yup
-		.string()
-		.trim()
-		.required('Хоосон байна'),
+    // first_name_uig: Yup
+	// 	.string()
+	// 	.trim()
+	// 	.required('Хоосон байна'),
 
-    position_name_uig: Yup
-		.string()
-		.trim()
-		.required('Хоосон байна'),
-	school_id: Yup
-		.string()
-		.trim()
-		.required('Хоосон байна'),
+    // position_name_uig: Yup
+	// 	.string()
+	// 	.trim()
+	// 	.required('Хоосон байна'),
 
 });

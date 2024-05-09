@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from django.db.models import Q, Func,F, IntegerField, CharField
+from django.db.models.functions import Cast
 
 from lms.models import  (
     AdmissionRegister,
@@ -16,7 +18,8 @@ from elselt.models import (
     EmailInfo,
     HealthUser,
     HealthUpUser,
-    PhysqueUser
+    PhysqueUser,
+    UserScore
 )
 
 class AdmissionSerializer(serializers.ModelSerializer):
@@ -102,9 +105,18 @@ class ElseltUserSerializer(serializers.ModelSerializer):
         exclude = ['password']
 
 
+class UserScoreSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = UserScore
+        fields = "__all__"
+
+
 class AdmissionUserInfoSerializer(serializers.ModelSerializer):
-    user = ElseltUserSerializer(many=False, read_only=True)
+    # user = ElseltUserSerializer(many=False, read_only=True)
+    user = serializers.SerializerMethodField()
     userinfo = serializers.SerializerMethodField()
+    user_score = serializers.SerializerMethodField()
     full_name = serializers.CharField(source='user.full_name', default='', read_only=True)
     profession = serializers.CharField(source='profession.profession.name', default='')
     degree_code = serializers.CharField(source='profession.profession.degree.degree_code', default='')
@@ -112,11 +124,52 @@ class AdmissionUserInfoSerializer(serializers.ModelSerializer):
     gender_name = serializers.SerializerMethodField()
     state_name = serializers.SerializerMethodField()
     admission = serializers.IntegerField(source='profession.admission.id', default='')
+    # Элсэлтийн мэргэжлийн төрөл
+    profession_state = serializers.IntegerField(source='profession.state', default='')
 
     class Meta:
         model = AdmissionUserProfession
         fields = '__all__'
 
+    def get_user(self, obj):
+
+        data = ElseltUser.objects.filter(id=obj.user.id).first()
+        userinfo_data = ElseltUserSerializer(data).data
+
+        return userinfo_data
+
+    def get_user_score(self, obj):
+
+        all_datas = []
+        user_score_qs = UserScore.objects.filter(user=obj.user.id)
+
+        # ЭЕШ оноогүй хэрэглэгчид хоосон дата буцаав
+        if len(user_score_qs) == 0:
+            return all_datas
+
+        # Элсэгчийн ЭЕШ-н оноог он улирлаар нь груп хийв
+        user_scores_year = user_score_qs.annotate(
+            cyear=Func(
+                Cast(F('year'), output_field=CharField()),
+                function='LEFT',
+                template="%(function)s(%(expressions)s, 4)"
+            )
+        ).distinct('cyear', 'semester').order_by('cyear', 'semester').values('cyear', 'semester')
+
+        # Элсэгчийн ЭЕШ-н он оноор нь хичээлүүдийн оноог авах
+        for score_year in list(user_scores_year):
+            year = score_year.get('cyear')      # ЭЕШ өгсөн он
+            season = score_year.get('semester') # ЭЕШ өгсөн улирал
+            lessons = user_score_qs.filter(year__contains=year, semester=season).values('lesson_name', 'scaledScore', 'raw_score').order_by('-scaledScore')
+            all_datas.append(
+                {
+                    'year': year,
+                    'season_name': season,
+                    'scores': list(lessons)
+                }
+            )
+
+        return all_datas
 
     def get_userinfo(self, obj):
 
@@ -124,7 +177,6 @@ class AdmissionUserInfoSerializer(serializers.ModelSerializer):
         userinfo_data = UserinfoSerializer(data).data
 
         return userinfo_data
-
 
     def get_gender_name(self, obj):
 
