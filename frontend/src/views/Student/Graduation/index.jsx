@@ -291,6 +291,7 @@ const Graduation = () => {
             if (success) {
 
                 importModalHandler()
+                getDatas()
                 // handleShowDetailModal()
                 // if (data?.file_name) {
                 //     setFileName(data?.file_name)
