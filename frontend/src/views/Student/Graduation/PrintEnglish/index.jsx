@@ -46,7 +46,11 @@ export default function PrintMongolia()
         {
             if (data && listArr.length != 0)
             {
-                // setTimeout(() => window.print(), 1000)
+                // setTimeout(() =>
+                //     window.print(),
+                //     document.title = `${data?.student?.full_name}-хавсралт-англи`,
+                //     1000
+                // )
             }
         },
         [data, listArr]
@@ -118,13 +122,13 @@ export default function PrintMongolia()
     return (
         //<div className='vh-100 position-relative  d-flex flex-column  bg-white' style={{ fontFamily: 'Arial', color: 'black' }} >
         <div
-            className={`vh-100 position-relative d-flex flex-column justify-content-end bg-white`}
+            className={`vh-100 position-relative d-flex flex-column justify-content-end bg-white `}
             style={{ fontFamily: 'Arial', color: 'black' }}
         >
             {isLoading && Loader}
 
             {/* Үндсэн хэсэг */}
-            <div className='text-center' style={{ width: '100%', fontSize: '19px', lineHeight: '24px', top: '250px', }} >
+            <div className='text-center' style={{ width: '100%',fontSize: '19px', lineHeight: '24px', marginBottom: "100px" }} >
                 <div className='m-auto' >
                     <span className='text-center'>This is to certify that
                         <br />
@@ -144,9 +148,8 @@ export default function PrintMongolia()
             </div>
 
             {/* Гарын үсгийн хэсэг */}
-
             <div style={{ bottom: '0', fontSize: '15px' }} >
-                <div style={{ paddingLeft: '100px', paddingRight: '100px', lineHeight: '24px', marginTop: '20px', marginBottom: '10px' }} >
+                <div style={{ paddingLeft: '100px', paddingRight: '100px', lineHeight: '24px', marginTop: '20px', marginBottom: '0px' }} >
                     <div className='d-flex text-center justify-content-center'>
                         {
                             listArr.map((val, idx) =>
@@ -163,11 +166,10 @@ export default function PrintMongolia()
                     </div>
                 </div>
             </div>
-            <div style={{ height: 100 }}></div>
-            {/* <div className='d-flex justify-content-between w-100 mb-5'>
+            <div className='d-flex justify-content-between w-100 mb-5 pb-1'>
                 <span style={{ paddingLeft: '130px' }} >ULAANBAATAR CITY</span>
                 <span style={{ paddingRight: '150px' }} >REGISTER No {data?.registration_num}</span>
-            </div> */}
+            </div>
         </div>
     )
 }

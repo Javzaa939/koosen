@@ -46,7 +46,11 @@ export default function PrintMongolia()
         {
             if (data && listArr.length != 0)
             {
-                // setTimeout(() => window.print(), 1000)
+                // setTimeout(() =>
+                //     window.print(),
+                //     document.title = `${data?.student?.full_name}-хавсралт-монгол`,
+                //     1000
+                // )
             }
         },
         [data, listArr]
