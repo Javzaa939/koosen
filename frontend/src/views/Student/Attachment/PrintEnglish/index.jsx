@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
@@ -8,6 +8,11 @@ import './style.css'
 
 export default function PrintAttachmentEnglish()
 {
+    const headerSectionRef = useRef(null)
+    const footerSectionRef = useRef(null)
+    const body1SectionRef = useRef(null)
+    const body2SectionRef = useRef(null)
+
     // Loader
 	const { fetchData, Loader, Loading } = useLoader({})
 
@@ -21,6 +26,15 @@ export default function PrintAttachmentEnglish()
     const [ printDatas, setPrintDatas ] = useState(JSON.parse(localStorage.getItem('blankDatas')))
     const [ datas, setDatas ] = useState([])
 
+    const [height, setHeight] = useState(
+        {
+            header: 0,
+            footer: 0,
+            body1: 0,
+            body2: 0
+        }
+    )
+
     async function getAllData(studentId)
     {
         await Promise.all([
@@ -31,6 +45,34 @@ export default function PrintAttachmentEnglish()
             setDatas(values[1]?.data)
         })
     }
+
+
+    useEffect(() => {
+        setHeight(
+            {
+                header:headerSectionRef.current.clientHeight,
+                footer:footerSectionRef.current.clientHeight,
+                body1:body1SectionRef.current.clientHeight,
+                body2:body2SectionRef.current.clientHeight,
+
+            }
+        )
+    }, [])
+
+    useEffect(
+        () =>
+        {
+            if (datas, listArr.length != 0)
+            {
+                setTimeout(() =>
+                    window.print(),
+                    document.title = `${printDatas?.student?.full_name}-хавсралт-англи`,
+                    1000
+                )
+            }
+        },
+        [datas, listArr]
+    )
 
     useEffect(
         () =>
@@ -180,6 +222,7 @@ export default function PrintAttachmentEnglish()
         [datas]
     )
 
+    /* Монгол үсгийг англи үсэг болгох хэсэг*/
     function engVseg(vseg)
     {
         switch (vseg)
@@ -258,18 +301,19 @@ export default function PrintAttachmentEnglish()
     return (
         <>
             {Loading && Loader}
+            <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1 ${isPageBreak && 'page-break'}`} style={{ fontSize: '13px', paddingTop: height.header + (printDatas?.student?.group?.degree?.degree_code === 'D' ? 20 : 24),  backgroundColor: 'white', color: 'black', fontFamily: 'serif' }} >
 
-            <div className={`position-relative d-flex justify-content-between ${isPageBreak && 'page-break'}`} style={{ fontSize: '9px', marginTop: '135px' }} >
+            {/* <div ref={body1SectionRef} className={`position-relative d-flex justify-content-between ${isPageBreak && 'page-break'}`} style={{ fontSize: '9px', marginTop: '135px', paddingTop: height.header + 24, }} > */}
 
                 <div className='d-flex flex-wrap align-content-start mt-1' id='table1-1' >
 
                     <table className='w-100 text-center d-none' id='table1' >
                         <thead className='fw-bolder'>
-                            <tr style={{ height: '25px' }}>
-                                <td className='border-dark' style={{ width: '6.25%' }}  >№</td>
-                                <td className='border-dark' style={{ width: '63.75%' }}  >Name of subject</td>
-                                <td className='border-dark' style={{ width: '12%' }}  >Cr</td>
-                                <td className='border-dark' style={{ width: '10%' }} >Point</td>
+                            <tr style={{ height: '20px' }}>
+                                <td className='border-dark' style={{ width: '4%' }}  >№</td>
+                                <td className='border-dark' style={{ width: '70%' }}  >Name of subject</td>
+                                <td className='border-dark' style={{ width: '7%' }}  >Cr</td>
+                                <td className='border-dark' style={{ width: '11%' }} >Point</td>
                                 <td className='border-dark' style={{ width: '8%' }} >Grade</td>
                             </tr>
                         </thead>
@@ -284,10 +328,10 @@ export default function PrintAttachmentEnglish()
                     <table className='w-100 text-center d-none' id='table2' >
                         <thead className='fw-bolder'>
                             <tr style={{ height: '25px' }}>
-                                <td className='border-dark' style={{ width: '6.25%' }}>№</td>
-                                <td className='border-dark' style={{ width: '63.75%' }}>Name of subject</td>
-                                <td className='border-dark' style={{ width: '12%' }} >Cr</td>
-                                <td className='border-dark' style={{ width: '10%' }} >Point</td>
+                                <td className='border-dark' style={{ width: '4%' }}>№</td>
+                                <td className='border-dark' style={{ width: '70%' }}>Name of subject</td>
+                                <td className='border-dark' style={{ width: '7%' }} >Cr</td>
+                                <td className='border-dark' style={{ width: '11%' }} >Point</td>
                                 <td className='border-dark' style={{ width: '8%' }} >Grade</td>
                             </tr>
                         </thead>
@@ -301,10 +345,10 @@ export default function PrintAttachmentEnglish()
                     <table className='w-100 text-center d-none' id='table3' >
                         <thead className='fw-bolder'>
                             <tr style={{ height: '25px' }}>
-                                <td className='border-dark' style={{ width: '6.25%' }}  >№</td>
-                                <td className='border-dark' style={{ width: '63.75%' }}  >Name of subject</td>
-                                <td className='border-dark' style={{ width: '12%' }}  >Cr</td>
-                                <td className='border-dark' style={{ width: '10%' }} >Point</td>
+                                <td className='border-dark' style={{ width: '4%' }}  >№</td>
+                                <td className='border-dark' style={{ width: '70%' }}  >Name of subject</td>
+                                <td className='border-dark' style={{ width: '7%' }}  >Cr</td>
+                                <td className='border-dark' style={{ width: '11%' }} >Point</td>
                                 <td className='border-dark' style={{ width: '8%' }} >Grade</td>
                             </tr>
                         </thead>
@@ -314,7 +358,7 @@ export default function PrintAttachmentEnglish()
                     </table>
                 </div>
 
-                {
+                {/* {
                     isPageBreak
                     ?
                     (
@@ -329,20 +373,22 @@ export default function PrintAttachmentEnglish()
                     )
                     :
                         null
-                }
+                } */}
 
             </div>
 
-            <div className={`${!isPageBreak && 'd-none'}`} style={{ marginTop: '135px', breakInside: 'avoid' }} >
+            {/* <div ref={body2SectionRef} className={`${!isPageBreak && 'd-none'}`} style={{ marginTop: '135px', breakInside: 'avoid' }} > */}
+            <div ref={body2SectionRef} className={`${!isPageBreak && 'd-none'}`} style={{ marginTop: '175px', breakInside: 'avoid', backgroundColor: 'white', color: 'black', fontFamily: 'serif' }} >
+
                 <div className={`position-relative d-flex justify-content-between`} >
                     <div className='d-flex flex-wrap align-content-start p-1' style={{ width: '33.1%' }} id='table4-4'>
                         <table className='w-100 text-center d-none' id='table4' >
                             <thead className='fw-bolder'>
                                  <tr style={{ height: '25px' }}>
-                                    <td className='border-dark' style={{ width: '6.25%' }}  >№</td>
-                                    <td className='border-dark' style={{ width: '63.75%' }}  >Name of subject</td>
-                                    <td className='border-dark' style={{ width: '12%' }}  >Cr</td>
-                                    <td className='border-dark' style={{ width: '10%' }} >Point</td>
+                                    <td className='border-dark' style={{ width: '4%' }} >№</td>
+                                    <td className='border-dark' style={{ width: '70%' }} >Name of subject</td>
+                                    <td className='border-dark' style={{ width: '7%' }}  >Cr</td>
+                                    <td className='border-dark' style={{ width: '11%' }} >Point</td>
                                     <td className='border-dark' style={{ width: '8%' }} >Grade</td>
                                 </tr>
                             </thead>
@@ -357,10 +403,10 @@ export default function PrintAttachmentEnglish()
                         <table className='w-100 text-center d-none' id='table5' >
                             <thead className='fw-bolder'>
                                  <tr style={{ height: '25px' }}>
-                                    <td className='border-dark' style={{ width: '6.25%' }}  >№</td>
-                                    <td className='border-dark' style={{ width: '63.75%' }}  >Name of subject</td>
-                                    <td className='border-dark' style={{ width: '12%' }}  >Cr</td>
-                                    <td className='border-dark' style={{ width: '10%' }} >Point</td>
+                                    <td className='border-dark' style={{ width: '4%' }}  >№</td>
+                                    <td className='border-dark' style={{ width: '70%' }}  >Name of subject</td>
+                                    <td className='border-dark' style={{ width: '7%' }}  >Cr</td>
+                                    <td className='border-dark' style={{ width: '11%' }} >Point</td>
                                     <td className='border-dark' style={{ width: '8%' }} >Grade</td>
                                 </tr>
                             </thead>
@@ -375,10 +421,10 @@ export default function PrintAttachmentEnglish()
                         <table className='w-100 text-center d-none' id='table6' >
                             <thead className='fw-bolder'>
                                  <tr style={{ height: '25px' }}>
-                                    <td className='border-dark' style={{ width: '6.25%' }}  >№</td>
-                                    <td className='border-dark' style={{ width: '63.75%' }}  >Name of subject</td>
-                                    <td className='border-dark' style={{ width: '12%' }}  >Cr</td>
-                                    <td className='border-dark' style={{ width: '10%' }} >Point</td>
+                                    <td className='border-dark' style={{ width: '4%' }}  >№</td>
+                                    <td className='border-dark' style={{ width: '70%' }}  >Name of subject</td>
+                                    <td className='border-dark' style={{ width: '7%' }}  >Cr</td>
+                                    <td className='border-dark' style={{ width: '11%' }} >Point</td>
                                     <td className='border-dark' style={{ width: '8%' }} >Grade</td>
                                 </tr>
                             </thead>
@@ -390,14 +436,72 @@ export default function PrintAttachmentEnglish()
                 </div>
             </div>
 
-            <header className='w-100 px-1' style={{ backgroundColor: 'white', color: 'black' }} >
+            <header
+                className='w-100 px-1'
+                style={{ backgroundColor: 'white', color: 'black' }}
+                ref={headerSectionRef}
+            >
+
                 <div className='d-flex flex-column text-center fw-bolder'>
                     <p className='text-uppercase' style={{ marginBottom: '0px' }} >UNIVERSITY OF INTERNAL AFFAIRS, MONGOLIA</p>
                     <p className='text-uppercase' style={{ marginBottom: '0px' }} >{printDatas?.student?.department?.school_eng}</p>
-                    <p style={{ fontSize: '12px', fontWeight: '500' }} >{printDatas?.student?.graduation_work?.diplom_num} <span className='text-lowercase'>{printDatas?.student?.group?.degree?.degree_eng_name}</span> degree diploma</p>
+                    <p style={{ fontSize: '12px', fontWeight: '500' }} className='mb-0' >{printDatas?.student?.graduation_work?.diplom_num} <span className='text-lowercase'>{printDatas?.student?.group?.degree?.degree_eng_name}</span> degree diploma</p>
+                    <p className='' style={{ fontSize: 12, fontWeight: 500 }}>REGISTER No: {printDatas?.student?.graduation_work?.registration_num}</p>
                 </div>
 
                 <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
+                    <div className='d-flex' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
+                        <span className='fw-normal w-50'>Last name::</span> <span>{printDatas?.student?.last_name_eng}</span>
+                    </div>
+                    <div className='d-flex px-1' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
+                        <span className='fw-normal w-50'>Profession:</span> <span className='text-uppercase'>{printDatas?.student?.group?.profession?.name_eng}</span>
+                    </div>
+                    <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
+                        <span className='fw-normal w-50' style={{ width: '200px'}}>Join year:</span><span>{printDatas?.student?.group?.join_year?.substring(0, 4)}</span>
+                    </div>
+                    {
+                        printDatas?.student?.group?.degree?.degree_code === 'D'
+                        &&
+                        <div className='d-flex px-2' style={{ width: '25%'}} >
+                            <span className='fw-normal w-50' style={{ width: '200px'}}>Entrance exams core:</span><span>{printDatas?.student?.eysh_score}</span>
+                        </div>
+                    }
+                </div>
+                <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
+                    <div className='d-flex' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
+                        <span className='fw-normal w-50'>First name:</span> <span>{printDatas?.student?.first_name_eng}</span>
+                    </div>
+                    <div className='d-flex px-1' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
+                        <span className='fw-normal w-50'>Specialized: </span><span>{printDatas?.student?.group?.profession?.dep_name_eng}</span>
+                    </div>
+                    <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
+                        <span className='fw-normal w-50' style={{ width: '200px'}}>Graduation year:</span> <span>{printDatas?.student?.graduation_work?.lesson_year?.substring(5, 9)}</span>
+                    </div>
+                </div>
+                <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
+                    <div className='d-flex' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
+                        <span className='fw-normal w-50'>Registration number:</span> <span>{engVseg(printDatas?.student?.register_num[0])}{engVseg(printDatas?.student?.register_num[1])}{printDatas?.student?.register_num.slice(-8)}</span>
+                    </div>
+                    {
+                        printDatas?.student?.group?.degree?.degree_code !== 'D'
+                        &&
+                            <div className='d-flex px-1' style={{ width: '33.3%' }} >
+                                <span className='fw-normal w-50'>Diploma Number of Bachelor's Degree:</span> <span className='text-uppercase'>{printDatas?.student?.graduation_work?.back_diplom_num}</span>
+                            </div>
+                    }
+                    <div className={`d-flex ${printDatas?.student?.group?.degree?.degree_code === 'D' ? 'px-1' : 'px-2'}`} style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
+                        <span className='fw-normal w-50'>Order no:</span> <span className='text-uppercase'>{printDatas?.student?.graduation_work?.graduation_number}</span>
+                    </div>
+                    {
+                        printDatas?.student?.group?.degree?.degree_code === 'D'
+                        &&
+                        <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '50%' : '33.3%' }} >
+                            <span className='fw-normal w-50' style={{ width: '200px'}}>Average scores of previous education: </span><span>{printDatas?.student?.secondary_school}</span>
+                        </div>
+                    }
+                </div>
+
+                {/* <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
                     <div className='d-flex' style={{ width: '33.3%' }} >
                         <span className='fw-normal w-50'>Last name:</span> <span>{printDatas?.student?.last_name_eng}</span>
                     </div>
@@ -407,8 +511,8 @@ export default function PrintAttachmentEnglish()
                     <div className='d-flex px-2' style={{ width: '33.3%' }} >
                         <span className='fw-normal w-50'>Date:</span> <span>{printDatas?.registration_num?.replaceAll('.', '-')}</span>
                     </div>
-                </div>
-                <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
+                </div> */}
+                {/* <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
                     <div className='d-flex' style={{ width: '33.3%' }} >
                         <span className='fw-normal w-50'>First name:</span> <span>{printDatas?.student?.first_name_eng}</span>
                     </div>
@@ -418,20 +522,68 @@ export default function PrintAttachmentEnglish()
                     <div className='d-flex px-2' style={{ width: '33.3%' }} >
                     <span className='fw-normal w-50'>Registration No:</span> <span>{printDatas?.student?.graduation_work?.registration_num}</span>
                     </div>
-                </div>
-                <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
+                </div> */}
+                {/* <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
                     <div className='d-flex' style={{ width: '33.3%' }} >
                         <span className='fw-normal w-50'>Registration number:</span> <span>{engVseg(printDatas?.student?.register_num[0])}{engVseg(printDatas?.student?.register_num[1])}{printDatas?.student?.register_num.slice(-8)}</span>
                     </div>
                     <div className='d-flex px-1' style={{ width: '33.3%' }} >
                         <span className='fw-normal w-50'>Profession:</span> <span>{printDatas?.student?.group?.profession?.name_eng}</span>
                     </div>
-                </div>
+                </div> */}
             </header>
 
-            <footer className='w-100' style={{ fontSize: '10px', backgroundColor: 'white', color: 'black' }} >
+            <footer
+                ref={footerSectionRef}
+                className='w-100'
+                style={{ fontSize: '10px', backgroundColor: 'white', color: 'black', bottom: printDatas?.student?.group?.degree?.degree_code == 'D' ? '4px': '10px'  }}
+            >
+                {
+                    (datas?.graduation_work?.lesson_type != 1 && datas?.graduation_work?.diplom_topic)
+                    &&
+                    <div className='px-1 mb-25' style={{ paddingTop: '2px' }} >
+                        <span className=''>Diploma thesis: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic_eng}</span></span>
+                    </div>
+                }
+                <div className='px-1 mb-25' style={{ paddingTop: '2px' }} >
+                {
+                    datas?.graduation_work?.lesson_type == 1
+                    ?
+                        printDatas?.student?.group?.degree?.degree_code !== 'D'
+                        ?
+                            <span className=''>Master's thesis/dissertation title: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic_eng}</span></span>
+                        :
+                            <span className=''>Diploma thesis: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic_eng}</span></span>
 
-                <div className='text-end me-1'>
+                    :
+                        <>
+                            <span className=''>
+                                Graduation Exams:
+                            </span>
+                                {
+                                    datas?.graduation_work?.lesson?.map((val, idx) =>
+                                    {
+                                        return (
+                                            <span className='ms-5' key={idx} >{idx + 1}. {val?.name_eng} / {(val?.score_register?.teach_score || 0) + (val?.score_register?.exam_score || 0)} {val?.score_register?.assessment} /</span>
+                                        )
+                                    })
+                                }
+                        </>
+                }
+                </div>
+
+                <div className='d-flex justify-content-center gap-5 me-1'>
+                    <div>Total Credits: <span className='fw-bolder'>{datas?.score?.max_kredit}</span></div>
+                    <div>GPA score: <span className='fw-bolder'>{datas?.score?.average_score}</span></div>
+                    <div>GPA: <span className='fw-bolder'>{datas?.score?.assesment}</span></div>
+                    {
+                        printDatas?.student?.group?.degree?.degree_code == 'D'
+                        &&
+                        <div>Average GPA of graduates of the same major in the same semester: <span className='fw-bolder'>{datas?.score?.assesment}</span></div>
+                    }
+                </div>
+
+                {/* <div className='text-end me-1'>
                     <span className='ms-5'>Total Credits: {datas?.score?.max_kredit}</span>
                     <span className='ms-5'>GPA: {datas?.score?.assesment}</span>
                 </div>
@@ -450,9 +602,9 @@ export default function PrintAttachmentEnglish()
                                 )
                             })
                     }
-                </div>
+                </div> */}
 
-                <div className='d-flex justify-content-center' style={{ paddingInline: '100px' }} >
+                {/* <div className='d-flex justify-content-center' style={{ paddingInline: '100px' }} >
                     {
                         listArr.length != 0
                         &&
@@ -469,19 +621,44 @@ export default function PrintAttachmentEnglish()
                             )
                         })
                     }
+                </div> */}
+
+                <div className='d-flex justify-content-center mt-5'>
+                {/* <div className='d-flex justify-content-center' style={{ paddingInline: '100px' }} > */}
+                    {
+                        listArr.length != 0
+                        &&
+                        listArr.map((val, idx) =>
+                        {
+                            return (
+                                <div className='text-center px-1' style={{width: '470px'}} key={idx} >
+                                    <div className='text-center d-inline-block text-center' >
+                                        <div className='text-center pt-50 px-2' style={{ textTransform: 'uppercase', borderTop: '1px solid black' }}>
+                                            <span >{val?.last_name_eng}{val?.first_name_eng}</span>
+                                            <br/>
+                                            <span>{`${val?.position_name_eng}`}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            )
+                        })
+                    }
+                </div>
+                <div className={`text-center mt-1`} style={{ fontSize: '11px' }} >
+                    Score(GPA): F{'<'}60(0) 60≤D-{'<'}65(1.0) 65≤D{'<'}70(1.4) 70≤C-{'<'}75(1.9) 75≤C{'<'}80(2.3) 80≤B-{'<'}85(3.1) 85≤B{'<'}90(3.1) 90≤A-{'<'}95(3.6) 95≤A{'<'}100(4.0) S=Allow CR=Correspond Credit
                 </div>
 
-                {
+                {/* {
                     isPageBreak === false
                     ?
                     (
                         <div className={`text-end mt-2`} style={{ fontSize: '11px', marginRight: '12px' }} >
-                            {printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.graduation_work?.diplom_num} Invalid without diploma.
+                            {printDatas?.student?.graduation_work?.diplom_num} Invalid without diploma.
                         </div>
                     )
                     :
                         null
-                }
+                } */}
 
             </footer>
 

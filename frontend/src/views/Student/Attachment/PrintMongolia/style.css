@@ -1,7 +1,8 @@
 @page {
     size: A4 landscape;
-    margin: 20px 0 10px 20px;
-    /* margin: 10px; */
+    margin: 15px 10px 12px 20px;
+
+    /* margin: 10px;  top, right, bottom, left. */
     /* margin: 20px 0px 0px 10px; */
     /* margin: 30px 30px 20px 30px; */
 }
@@ -13,7 +14,7 @@ body {
 }
 
 table {
-    font-size: 13px;
+    font-size: 11px;
 }
 
 .page-break {
@@ -27,7 +28,6 @@ header {
 
 footer {
     position: fixed;
-    bottom: 10px;
 }
 
 .mini-cell {

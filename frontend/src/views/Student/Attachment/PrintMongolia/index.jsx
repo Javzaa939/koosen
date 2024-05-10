@@ -64,15 +64,27 @@ export default function PrintAttachmentMongolia()
 
     // console.log(document.getElementById('root').clientHeight,'client');
 
-    console.log(height?.header + height?.body1 + height?.body2 + height?.footer,'ref')
-    console.log(height,'height')
-
     useEffect(
         () =>
         {
             getAllData(printDatas.student.id)
         },
         [printDatas]
+    )
+
+    useEffect(
+        () =>
+        {
+            if (datas, listArr.length != 0)
+            {
+                setTimeout(() =>
+                    window.print(),
+                    document.title = `${printDatas?.student?.full_name}-хавсралт-монгол`,
+                    1000
+                )
+            }
+        },
+        [datas, listArr]
     )
 
     const lessonData = datas?.lessons || []
@@ -220,8 +232,7 @@ export default function PrintAttachmentMongolia()
         <>
             {isLoading && Loader}
 
-            <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1 ${isPageBreak && 'page-break'}`} style={{ fontSize: '13px', paddingTop: height.header + 24,  backgroundColor: 'white', color: 'black', fontFamily: 'serif' }} >
-            {/* <div className={`position-relative d-flex justify-content-between ${isPageBreak && 'page-break'}`} style={{ fontSize: '13px', marginTop: printDatas?.student?.group?.degree?.degree_code == 'D' ? '175px' : '180px', marginTop: '135px', backgroundColor: 'white', color: 'black', fontFamily: 'serif' }} > */}
+            <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1 ${isPageBreak && 'page-break'}`} style={{ fontSize: '11px', paddingTop: height.header + (printDatas?.student?.group?.degree?.degree_code === 'D' ? 20 : 24),  backgroundColor: 'white', color: 'black', fontFamily: 'serif' }} >
                 <div
                     className='d-flex flex-wrap align-content-start mt-1'
                     id='table1-1'
@@ -234,8 +245,8 @@ export default function PrintAttachmentMongolia()
                                 <td className='border-dark' style={{ width: '4%' }}>№</td>
                                 <td className='border-dark' style={{ width: '70%' }}>Хичээлийн нэр</td>
                                 <td className='border-dark' style={{ width: '7%' }}>Багц цаг</td>
-                                <td className='border-dark' style={{ width: '11%' }}>Үсгэн үнэлгээ</td>
-                                <td className='border-dark' style={{ width: '8%' }}>Тоо үнэлгээ</td>
+                                <td className='border-dark' style={{ width: '11%' }}>Тоо үнэлгээ</td>
+                                <td className='border-dark' style={{ width: '8%' }}>Үсгэн үнэлгээ</td>
                             </tr>
                         </thead>
                         <tbody>
@@ -252,8 +263,8 @@ export default function PrintAttachmentMongolia()
                                 <td className='border-dark' style={{ width: '4%' }}>№</td>
                                 <td className='border-dark' style={{ width: '70%' }}>Хичээлийн нэр</td>
                                 <td className='border-dark' style={{ width: '7%' }}  >Багц цаг</td>
-                                <td className='border-dark' style={{ width: '11%' }} >Үсгэн үнэлгээ</td>
-                                <td className='border-dark' style={{ width: '8%' }} >Тоо үнэлгээ</td>
+                                <td className='border-dark' style={{ width: '11%' }} >Тоо үнэлгээ</td>
+                                <td className='border-dark' style={{ width: '8%' }} >Үсгэн үнэлгээ</td>
                             </tr>
                         </thead>
                         <tbody>
@@ -270,8 +281,8 @@ export default function PrintAttachmentMongolia()
                                 <td className='border-dark' style={{ width: '4%' }}>№</td>
                                 <td className='border-dark' style={{ width: '70%' }}>Хичээлийн нэр</td>
                                 <td className='border-dark' style={{ width: '7%' }}  >Багц цаг</td>
-                                <td className='border-dark' style={{ width: '11%' }} >Үсгэн үнэлгээ</td>
-                                <td className='border-dark' style={{ width: '8%' }} >Тоо үнэлгээ</td>
+                                <td className='border-dark' style={{ width: '11%' }} >Тоо үнэлгээ</td>
+                                <td className='border-dark' style={{ width: '8%' }} >Үсгэн үнэлгээ</td>
                             </tr>
                         </thead>
                         <tbody>
@@ -308,8 +319,8 @@ export default function PrintAttachmentMongolia()
                                     <td className='border-dark' style={{ width: '4%' }}>№</td>
                                     <td className='border-dark' style={{ width: '70%' }}>Хичээлийн нэр</td>
                                     <td className='border-dark' style={{ width: '7%' }}  >Багц цаг</td>
-                                    <td className='border-dark' style={{ width: '11%' }} >Үсгэн үнэлгээ</td>
-                                    <td className='border-dark' style={{ width: '8%' }} >Тоо үнэлгээ</td>
+                                    <td className='border-dark' style={{ width: '11%' }} >Тоо үнэлгээ</td>
+                                    <td className='border-dark' style={{ width: '8%' }} >Үсгэн үнэлгээ</td>
                                 </tr>
                             </thead>
                             <tbody>
@@ -326,8 +337,8 @@ export default function PrintAttachmentMongolia()
                                     <td className='border-dark' style={{ width: '4%' }}>№</td>
                                     <td className='border-dark' style={{ width: '70%' }}>Хичээлийн нэр</td>
                                     <td className='border-dark' style={{ width: '7%' }}  >Багц цаг</td>
-                                    <td className='border-dark' style={{ width: '11%' }} >Үсгэн үнэлгээ</td>
-                                    <td className='border-dark' style={{ width: '8%' }} >Тоо үнэлгээ</td>
+                                    <td className='border-dark' style={{ width: '11%' }} >Тоо үнэлгээ</td>
+                                    <td className='border-dark' style={{ width: '8%' }} >Үсгэн үнэлгээ</td>
                                 </tr>
                             </thead>
                             <tbody>
@@ -344,8 +355,8 @@ export default function PrintAttachmentMongolia()
                                     <td className='border-dark' style={{ width: '4%' }}>№</td>
                                     <td className='border-dark' style={{ width: '70%' }}>Хичээлийн нэр</td>
                                     <td className='border-dark' style={{ width: '7%' }}  >Багц цаг</td>
-                                    <td className='border-dark' style={{ width: '11%' }} >Үсгэн үнэлгээ</td>
-                                    <td className='border-dark' style={{ width: '8%' }} >Тоо үнэлгээ</td>
+                                    <td className='border-dark' style={{ width: '11%' }} >Тоо үнэлгээ</td>
+                                    <td className='border-dark' style={{ width: '8%' }} >Үсгэн үнэлгээ</td>
                                 </tr>
                             </thead>
                             <tbody>
@@ -373,48 +384,59 @@ export default function PrintAttachmentMongolia()
                     <p className='text-uppercase' style={{ marginBottom: '0px' }} >{themeConfig.school.name}</p>
                     <p className='text-uppercase' style={{ marginBottom: '0px' }} >{printDatas?.student?.department?.school}</p>
                     <p className='m-0' style={{ fontSize: '12px', fontWeight: '500' }} >{printDatas?.student?.graduation_work?.diplom_num} дугаартай <span className='text-lowercase'>{printDatas?.student?.group?.degree?.degree_name && `${printDatas?.student?.group?.degree?.degree_name}ын`}</span> дипломын хавсралт</p>
-                    <p className='' style={{ fontSize: 12, fontWeight: 500 }}>Бүртгэлийн дугаар:</p>
+                    <p className='' style={{ fontSize: 12, fontWeight: 500 }}>Бүртгэлийн дугаар: {printDatas?.student?.graduation_work?.registration_num}</p>
                 </div>
 
                 <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
-                    <div className='d-flex' style={{ width: '33.3%' }} >
+                    <div className='d-flex' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
                         <span className='fw-normal w-50'>Эцэг /Эх/-ийн нэр:</span> <span>{printDatas?.student?.last_name}</span>
                     </div>
-                    <div className='d-flex px-1' style={{ width: '33.3%' }} >
+                    <div className='d-flex px-1' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
                         <span className='fw-normal w-50'>Хөтөлбөрийн нэр:</span> <span className='text-uppercase'>{printDatas?.student?.group?.profession?.name}</span>
                     </div>
-                    <div className='d-flex px-2' style={{ width: '33.3%' }} >
+                    <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
                         <span className='fw-normal w-50' style={{ width: '200px'}}>Элссэн он:</span><span>{printDatas?.student?.group?.join_year?.substring(0, 4)}</span>
                     </div>
-                    {/* <div className='d-flex px-2' style={{ width: '33.3%' }} >
-                        <span className='fw-normal w-50'>Олгосон огноо:</span> <span>{printDatas?.registration_num?.replaceAll('.', '-')}</span>
-                    </div> */}
+                    {
+                        printDatas?.student?.group?.degree?.degree_code === 'D'
+                        &&
+                        <div className='d-flex px-2' style={{ width: '25%'}} >
+                            <span className='fw-normal w-50' style={{ width: '200px'}}>Элсэлтийн шалгалтын оноо:</span><span>{printDatas?.student?.eysh_score}</span>
+                        </div>
+                    }
                 </div>
                 <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
-                    <div className='d-flex' style={{ width: '33.3%' }} >
+                    <div className='d-flex' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
                         <span className='fw-normal w-50'>Нэр:</span> <span>{printDatas?.student?.first_name}</span>
                     </div>
-                    <div className='d-flex px-1' style={{ width: '33.3%' }} >
+                    <div className='d-flex px-1' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
                         <span className='fw-normal w-50'>Төрөлжсөн чиглэл: </span><span>{printDatas?.student?.group?.profession?.dep_name}</span>
-                        {/* <span className='fw-normal w-50'>Мэргэжлийн индекс: </span><span>{printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.group?.profession?.code}</span> */}
                     </div>
-                    <div className='d-flex px-2' style={{ width: '33.3%' }} >
+                    <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
                         <span className='fw-normal w-50' style={{ width: '200px'}}>Төгссөн он:</span> <span>{printDatas?.student?.graduation_work?.lesson_year?.substring(5, 9)}</span>
                     </div>
-                    {/* <div className='d-flex px-2' style={{ width: '33.3%' }} >
-                        <span className='fw-normal w-50'>Бүртгэлийн дугаар:</span> <span>{printDatas?.student?.graduation_work?.registration_num}</span>
-                    </div> */}
                 </div>
-                <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
-                    <div className='d-flex' style={{ width: '33.3%' }} >
+                <div className='fw-bolder d-flex' style={{ fontSize: '11px' }}>
+                    <div className='d-flex' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
                         <span className='fw-normal w-50'>Регистрийн дугаар:</span> <span>{printDatas?.student?.register_num}</span>
                     </div>
-                    <div className='d-flex px-1' style={{ width: '33.3%' }} >
-                        <span className='fw-normal w-50'>Өмнөх зэргийн дипломын дугаар:</span> <span className='text-uppercase'>{printDatas?.student?.graduation_work?.back_diplom_num}</span>
-                    </div>
-                    <div className='d-flex px-2' style={{ width: '33.3%' }} >
+                    {
+                        printDatas?.student?.group?.degree?.degree_code !== 'D'
+                        &&
+                        <div className='d-flex px-1' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }}>
+                            <span className='fw-normal w-50'>Өмнөх зэргийн дипломын дугаар:</span> <span className='text-uppercase'>{printDatas?.student?.graduation_work?.back_diplom_num}</span>
+                        </div>
+                    }
+                    <div className={`d-flex ${printDatas?.student?.group?.degree?.degree_code === 'D' ? 'px-1' : 'px-2'}`} style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
                         <span className='fw-normal w-50'>Тушаалын дугаар:</span> <span className='text-uppercase'>{printDatas?.student?.graduation_work?.graduation_number}</span>
                     </div>
+                    {
+                        printDatas?.student?.group?.degree?.degree_code === 'D'
+                        &&
+                        <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '50%' : '33.3%' }} >
+                            <span className='fw-normal w-50' style={{ width: '200px'}}>Өмнөх шатны боловсролын үнэлгээний дундаж оноо: </span><span>{printDatas?.student?.secondary_school}</span>
+                        </div>
+                    }
                 </div>
             </header>
 
@@ -461,7 +483,17 @@ export default function PrintAttachmentMongolia()
             {/* <div className='mt-2'>
                 { datas?.graduation_work?.lesson_type == 1 ? printDatas?.student?.group?.degree?.degree_code !== 'D' ? 'Магистрын төгсөлтийн ажил/диссертацийн нэр:' : 'Дипломын ажлын нэр' : 'Төгсөлтийн шалгалт:' }
             </div> */}
-            <footer ref={footerSectionRef} className='w-100 font-dark' style={{ fontSize: '10px', backgroundColor: 'white', color: 'black' }} >
+            <footer
+                ref={footerSectionRef}
+                className='w-100 font-dark'
+                style={{ fontSize: '10px', backgroundColor: 'white', color: 'black', bottom: printDatas?.student?.group?.degree?.degree_code == 'D' ? '4px': '10px' }} >
+                {
+                    (datas?.graduation_work?.lesson_type != 1 && datas?.graduation_work?.diplom_topic)
+                    &&
+                    <div className='px-1 mb-25' style={{ paddingTop: '2px' }} >
+                        <span className=''>Дипломын ажлын нэр: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic}</span></span>
+                    </div>
+                }
 
                 <div className='px-1 mb-25' style={{ paddingTop: '2px' }} >
                 {
@@ -491,35 +523,28 @@ export default function PrintAttachmentMongolia()
                 </div>
 
                 <div className='d-flex justify-content-center gap-5 me-1'>
-                    <div>Нийт багц цаг: {datas?.score?.max_kredit}</div>
-                    <div>Голч оноо: {datas?.score?.average_score}</div>
-                    <div>Голч дүн: {datas?.score?.assesment}</div>
-                    {/* <span className='ms-5'>Нийт кредит: {datas?.score?.max_kredit}</span>
-                    <span className='ms-5'>Голч дүн: {datas?.score?.assesment}</span> */}
+                    <div>Нийт багц цаг: <span className='fw-bolder'>{datas?.score?.max_kredit}</span></div>
+                    <div>Голч оноо: <span className='fw-bolder'>{datas?.score?.average_score}</span></div>
+                    <div>Голч дүн: <span className='fw-bolder'>{datas?.score?.assesment}</span></div>
+                    {
+                        printDatas?.student?.group?.degree?.degree_code == 'D'
+                        &&
+                        <div>Тухайн улирлын ижил мэргэжлийн төгсөгчдийн голч дүнгийн дундаж: <span className='fw-bolder'>{datas?.score?.assesment}</span></div>
+                    }
                 </div>
 
-                {/* <div className='d-flex justify-content-center mt-3 mb-1' style={{ paddingInline: '100px' }} >
-                    <div className='px-1 text-center' style={{ width: `${100/2}%` }}>
-                        <div className='d-inline-block text-center' >
-                            <div className='pt-50 px-2' style={{ textTransform: 'uppercase', borderTop: '1px solid black' }}>
-                                Тест Хурандаа <span style={{ textWrap: 'nowrap' }}>{`Энхбатын Наранмандах`}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div> */}
 
-                <div className='d-flex justify-content-center mt-3'>
-                {/* <div className='d-flex justify-content-center' style={{ paddingInline: '100px' }} > */}
+                <div className='d-flex justify-content-center mt-5'>
                     {
                         listArr.length != 0
                         &&
                         listArr.map((val, idx) =>
                         {
                             return (
-                                <div className='text-center px-1' style={{ width: `${100/2}%` }} key={idx} >
-                                    <div className='text-center d-inline-block text-center' >
+                                <div className='text-center px-1' style={{width: '400px'}} key={idx} >
+                                    <div className='text-center d-inline-block text-center'>
                                         <div className='text-center pt-50 px-2' style={{ textTransform: 'uppercase', borderTop: '1px solid black' }}>
-                                            {val?.position_name} <span style={{ textWrap: 'nowrap' }}>{`${val?.last_name}${val?.first_name}`}</span>
+                                            <span style={{textWrap: 'wrap'}}></span>{val?.position_name} <span>{`${val?.last_name}${val?.first_name}`}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -528,9 +553,9 @@ export default function PrintAttachmentMongolia()
                     }
                 </div>
 
-                    <div className={`text-center mt-1`} style={{ fontSize: '11px' }} >
-                        Дүн(голч): F{'<'}60(0) 60≤D-{'<'}65(1.0) 65≤D{'<'}70(1.4) 70≤C-{'<'}75(1.9) 75≤C{'<'}80(2.3) 80≤B-{'<'}85(3.1) 85≤B{'<'}90(3.1) 90≤A-{'<'}95(3.6) 95≤A{'<'}100(4.0) S=Тооцов CR=Дүйцүүлсэн баг цаг
-                    </div>
+                <div className={`text-center mt-1`} style={{ fontSize: '11px' }} >
+                    Дүн(голч): F{'<'}60(0) 60≤D-{'<'}65(1.0) 65≤D{'<'}70(1.4) 70≤C-{'<'}75(1.9) 75≤C{'<'}80(2.3) 80≤B-{'<'}85(3.1) 85≤B{'<'}90(3.1) 90≤A-{'<'}95(3.6) 95≤A{'<'}100(4.0) S=Тооцов CR=Дүйцүүлсэн багц цаг
+                </div>
                 {/* {
                     isPageBreak === false
                     ?

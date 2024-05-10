@@ -10,7 +10,7 @@ body {
 }
 
 table {
-    font-size: 13px;
+    font-size: 11px;
 }
 
 .page-break {
@@ -24,7 +24,6 @@ header {
 
 footer {
     position: fixed;
-    bottom: 10px;
 }
 
 .mini-cell {
