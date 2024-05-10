@@ -389,6 +389,22 @@ class ProfessionDefinition(models.Model):
     # def code_name(self):
     #     return f"{self.code} {self.name}"
 
+class ProfessionAverageScore(models.Model):
+    """ Хөтөлбөрийн хичээлийн жилийн дундаж оноо голч дүн """
+
+    profession = models.ForeignKey(ProfessionDefinition, on_delete=models.PROTECT, verbose_name="Мэргэжил")
+    lesson_year = models.CharField( max_length=20, verbose_name='Хичээлийн жил')
+    lesson_season = models.ForeignKey(Season, verbose_name='Идэвхтэй улирал', on_delete=models.PROTECT)
+    level = models.IntegerField(verbose_name='Курс')
+    gpa_score = models.FloatField(verbose_name='Голч оноо')
+    gpa = models.FloatField(verbose_name='Дүн')
+    is_graduate = models.BooleanField(verbose_name='Төгсөж байгаа оюутнуудынх', default=False)
+    student_count = models.IntegerField(verbose_name='Оюутны тоо')
+
+    class Meta:
+        unique_together = ('profession', 'lesson_year', 'lesson_season')
+
+
 class AdmissionBottomScore(models.Model):
     """Элсэлтийн шалгалтын хичээл ба босго оноо мэргэжлээр"""
 
