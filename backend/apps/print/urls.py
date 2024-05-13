@@ -13,6 +13,9 @@ urlpatterns = [
     # Голч дүн
     path('gpa/', GpaAPIView.as_view()),
 
+    # Голч дүн хөтөлбөрөөр
+    path('gpa-profession/', GpaProfessionAPIView.as_view()),
+
     # анги дүн
     path('group/', GroupListAPIView.as_view()),
 

@@ -4,8 +4,6 @@ import { t } from 'i18next'
 
 export function getColumns (currentPage, rowsPerPage, total_count) {
 
-	const { showWarning } = useModal()
-
     const page_count = Math.ceil(total_count / rowsPerPage)
 
     if (currentPage > page_count) {
