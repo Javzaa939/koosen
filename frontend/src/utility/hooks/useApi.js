@@ -192,7 +192,7 @@ function useApi(isDisplay=false) {
 		},
 		signature: {
 			get: (typeNumber, school_id='') => instance.get(`/student/signature/?type=${typeNumber}&school_id=${school_id}`),
-			getGraduate: (typeNumber, school_id) => instance.get(`/student/signature/?type=${typeNumber}&school_id=${school_id}`),
+			getGraduate: (typeNumber, school_id='') => instance.get(`/student/signature/?type=${typeNumber}&school_id=${school_id}`),
 			post: (data) => instance.post(`/student/signature/`, data),
 			put: (data, pk) => instance.put(`/student/signature/${pk}/`, data),
 			delete: (pk) => instance.delete(`/student/signature/${pk}/`),

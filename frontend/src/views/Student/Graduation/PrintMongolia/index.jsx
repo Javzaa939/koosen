@@ -22,7 +22,8 @@ export default function PrintMongolia()
     async function getAllData()
     {
         await Promise.all([
-            fetchData(signatureApi.get(2, data?.student?.group?.profession?.school)),
+            // Нэгдсэн нэг сургуулийн захирал гарын үсэг хэвлэж байгаа болохоор data?.student?.group?.profession?.school
+            fetchData(signatureApi.get(2)),
         ]).then((values) => {
             setListArr(values[0]?.data)
         })
@@ -46,11 +47,7 @@ export default function PrintMongolia()
         {
             if (data && listArr.length != 0)
             {
-                // setTimeout(() =>
-                //     window.print(),
-                //     document.title = `${data?.student?.full_name}-хавсралт-монгол`,
-                //     1000
-                // )
+                document.title = `${data?.student?.full_name}-хавсралт-монгол`
             }
         },
         [data, listArr]
@@ -146,9 +143,14 @@ export default function PrintMongolia()
                         {
                             listArr.map((val, idx) =>
                             {
+                                var splitted = val?.position_name?.split(',')
                                 return (
                                     <div className='d-flex flex-column pt-2 pb-2' style={{ paddingRight: '20px', paddingLeft: '20px' }} key={idx} >
-                                        <span className='border-top-black' style={{textWrap: 'wrap'}}>{val?.position_name}</span>
+                                        <div className='border-top-black' style={{width: '400px'}}>
+                                            <span className='' style={{textWrap: 'wrap'}}>{`${splitted[0]},`}</span>
+                                            <br/>
+                                            <span className='' style={{textWrap: 'wrap'}}>{splitted.slice(1).join(',')}</span>
+                                        </div>
                                         <span>{val?.last_name}{val?.first_name}</span>
                                     </div>
                                 )

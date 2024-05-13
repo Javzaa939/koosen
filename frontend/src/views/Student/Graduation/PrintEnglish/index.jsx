@@ -22,7 +22,8 @@ export default function PrintMongolia()
     async function getAllData()
     {
         await Promise.all([
-            fetchData(signatureApi.get(2, data?.student?.department?.sub_orgs)),
+            // Нэгдсэн нэг сургуулийн захирал гарын үсэг хэвлэж байгаа болохоор, data?.student?.group?.profession?.school
+            fetchData(signatureApi.get(2)),
         ]).then((values) => {
             setListArr(values[0]?.data)
         })

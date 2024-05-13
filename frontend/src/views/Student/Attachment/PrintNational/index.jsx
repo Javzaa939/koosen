@@ -37,8 +37,10 @@ export default function PrintAttachmentMongolia()
 
     async function getAllData(studentId)
     {
+        // Нэгдсэн нэг сургуулийн захирал гарын үсэг хэвлэж байгаа болохоор, data?.student?.group?.profession?.school
+        // , printDatas.student?.department?.sub_orgs
         await Promise.all([
-            fetchData(signatureApi.get(3, printDatas.student?.department?.sub_orgs)),
+            fetchData(signatureApi.get(3)),
             fetchData(studentApi.calculateGpaDimplomaGet(studentId))
         ]).then((values) => {
             setListArr(values[0]?.data)
@@ -70,11 +72,7 @@ export default function PrintAttachmentMongolia()
         {
             if (datas, listArr.length != 0)
             {
-                setTimeout(() =>
-                    window.print(),
-                    document.title = `${printDatas?.student?.full_name}-хавсралт-уйгаржин`,
-                    1000
-                )
+                document.title = `${printDatas?.student?.full_name}-хавсралт-уйгаржин`
             }
         },
         [datas, listArr]
@@ -271,7 +269,7 @@ export default function PrintAttachmentMongolia()
                 style={{ fontFamily: 'mongolianScript'}}
             >
 
-                <div style={{ height: printDatas?.isCenter ? '98%' : '49.5%', marginLeft: '178px' }}  className={`${printDatas.isCenter ? 'center-table' : 'not-center-table' }`} >
+                <div style={{ height: printDatas?.isCenter ? '98%' : '49.5%', marginLeft: '210px' }}  className={`${printDatas.isCenter ? 'center-table' : 'not-center-table' }`} >
                     <table id='table1' className='text-center w-100 d-none' style={{ writingMode: 'vertical-lr', marginBottom: '1px', height: '100%' }} >
                         <thead>
                             <tr style={{ fontSize: '9px' }} >
@@ -287,7 +285,7 @@ export default function PrintAttachmentMongolia()
                     </table>
                 </div>
 
-                <div style={{ height: printDatas?.isCenter ? '98%' : '49.5%', marginLeft: '178px' }} className={`${printDatas.isCenter ? 'center-table' : 'not-center-table' }`} >
+                <div style={{ height: printDatas?.isCenter ? '98%' : '49.5%', marginLeft: '210px' }} className={`${printDatas.isCenter ? 'center-table' : 'not-center-table' }`} >
                     <table id='table2' className='text-center w-100 d-none' style={{ writingMode: 'vertical-lr', marginBottom: '1px', height: '100%' }} >
                         <thead>
                             <tr style={{ fontSize: '9px' }} >
@@ -365,6 +363,9 @@ export default function PrintAttachmentMongolia()
                     <span style={{ fontSize: '11px', marginLeft: '10px' }}>
                         {tooBichih(printDatas?.student?.graduation_work?.diplom_num)} ᠳᠤᠭᠠᠷᠲᠠᠢ {printDatas?.student?.group?.degree?.degree_uig_name} ᠤ᠋ᠨ ᠳ᠋ᠢᠫᠯᠣᠮ ᠤ᠋ᠨ ᠬᠠᠪᠰᠤᠷᠤᠯᠲᠠ
                     </span>
+                    <span style={{ fontSize: '11px', marginLeft: '10px' }}>
+                        ᠪᠦᠷᠢᠳᢈᠡᠯ ᠦ᠋ᠨ ᠳ᠋ᠤᠭᠠᠷ {tooBichih(printDatas?.student?.graduation_work?.registration_num)}
+                    </span>
                 </div>
 
                 <div className='d-flex flex-column lh-sm' style={{ fontSize: '11px', marginLeft: '10px' }} >
@@ -393,7 +394,7 @@ export default function PrintAttachmentMongolia()
                     </div>
                     <div style={{ height: '22%', writingMode: 'vertical-lr', display: 'flex' }}>
                         <span className='h-50'>ᠲᠡᢉᠦᠰᠦᢉᠰᠡᠨ ᠣᠨ:</span>
-                        {tooBichih(printDatas?.student?.graduation_work?.registration_num)}
+                        {tooBichih(printDatas?.student?.group?.graduation_date?.substring(0, 4))}
                     </div>
                 </div>
 
@@ -422,7 +423,7 @@ export default function PrintAttachmentMongolia()
                     &&
                     <div className='d-flex flex-column lh-sm' style={{ fontSize: '11px', marginLeft: '10px' }} >
                         <div style={{ height:'40%', writingMode: 'vertical-lr', display: 'flex' }}>
-                            <span className='h-50'>ᠡᠯᠰᠡᠯᠲᠡ ᠶ᠋ᠢᠨ ᠰᠢᠯᠭᠠᠯᠲᠠ ᠶ᠋ᠢᠨ ᠣᠨᠤᠭ᠎ᠠ</span>
+                            <span className='h-50'>ᠡᠯᠰᠡᠯᠲᠡ ᠶ᠋ᠢᠨ ᠰᠢᠯᠭᠠᠯᠲᠠ ᠶ᠋ᠢᠨ ᠣᠨᠤᠭ᠎ᠠ:</span>
                             <span style={{ fontFamily: 'cmdashitseden', fontSize: '14px' }}>{tooBichih(printDatas?.student?.eysh_score)}</span>
                         </div>
                         <div style={{ height: '60%', writingMode: 'vertical-lr', display: 'flex' }}>
@@ -441,7 +442,15 @@ export default function PrintAttachmentMongolia()
             >
                 <div className='d-flex'>
 
-                    <div style={{ writingMode: 'vertical-lr', display: 'flex', marginRight: '20px' }} >
+                    {
+                        (datas?.graduation_work?.lesson_type != 1 && datas?.graduation_work?.diplom_topic)
+                        &&
+                        <div style={{ writingMode: 'vertical-lr', display: 'flex', marginRight: '10px' }} >
+                            <span className=''>ᠳ᠋ᠢᠫᠯᠣᠮ ᠤ᠋ᠨ ᠠᠵᠢᠯ ᠤ᠋ᠨ ᠨᠡᠷ᠎ᠡ: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic_uig}</span></span>
+                        </div>
+                    }
+
+                    <div style={{ writingMode: 'vertical-lr', display: 'flex', marginRight: '10px' }} >
                         {
                             datas?.graduation_work?.lesson_type == 1
                             ?
@@ -486,26 +495,28 @@ export default function PrintAttachmentMongolia()
                         &&
                             <div className='d-flex' style={{ writingMode: 'vertical-lr', marginRight: '20px', height: '100%' }}>
                                 <div className='' style={{height: '33.3%'}}>ᠭᠣᠣᠯᠴᠢ ᠳᠦᠩ:   <span style={{ fontFamily: 'CMSUB', fontSize: '12px' }}>{datas?.score?.assesment.split('.')[0]}<span style={{ fontFamily: 'serif', fontWeight: 'bolder' }}>.</span>{datas?.score?.assesment.split('.')[1]}</span></div>
-                                <div className='mt-2' style={{height: '66.7%'}}>ᠡᠮᠦᠨᠡᢈᠢ ᠱᠠᠲᠤᠨ ᠤ᠋ ᠪᠣᠯᠪᠠᠰᠤᠷᠠᠯ ᠤ᠋ᠨ ᠦᠨᠡᠯᠡᢉᠡᠨ ᠦ᠋ ᠳᠤᠨᠳᠠᠵᠢ ᠣᠨᠤᠭ᠎ᠠ::   <span style={{ fontFamily: 'CMSUB', fontSize: '12px' }}>{datas?.score?.assesment.split('.')[0]}<span style={{ fontFamily: 'serif', fontWeight: 'bolder' }}>.</span>{datas?.score?.assesment.split('.')[1]}</span></div>
+                                <div className='mt-2' style={{height: '66.7%'}}>ᠲᠤᠬᠠᠢ ᠶ᠋ᠢᠨ ᠤᠯᠠᠷᠢᠯ ᠤ᠋ᠨ ᠢᠵᠢᠯ ᠮᠡᠷᢉᠡᠵᠢᠯ ᠦ᠋ᠨ ᠲᠡᢉᠦᠰᠦᢉᠴᠢᠳ ᠦ᠋ᠨ ᠭᠣᠣᠯᠴᠢ ᠳ᠋ᠦᠩ ᠦ᠋ᠨ ᠳᠤᠨᠳᠠᠵᠢ:   <span style={{ fontFamily: 'CMSUB', fontSize: '12px' }}>{datas?.score?.assesment.split('.')[0]}<span style={{ fontFamily: 'serif', fontWeight: 'bolder' }}>.</span>{datas?.score?.assesment.split('.')[1]}</span></div>
                             </div>
                     }
+
 
                     {
                         listArr.map(
                             (val, idx) =>
                             {
                                 return (
-                                    <div style={{ writingMode: 'vertical-lr', height: '60%', fontSize: '12px', marginRight: '30px', lineHeight: '26px' }} key={idx} >
-                                        <span>{val?.position_name_uig}</span> <span>{val?.last_name_uig} {val?.first_name_uig}</span>
+                                    <div className='h-100 d-flex justify-content-between' style={{ writingMode: 'vertical-lr', height: '60%', fontSize: '12px', marginRight: '10px', lineHeight: '26px' }} key={idx} >
+                                        <span>{val?.position_name_uig}</span>
+                                        <span>{val?.last_name_uig} {val?.first_name_uig}</span>
                                     </div>
                                 )
                             }
                         )
                     }
 
-                    <div style={{ writingMode: 'vertical-lr', marginLeft: '11px', fontSize: '11px' }} >
+                    {/* <div style={{ writingMode: 'vertical-lr', marginLeft: '11px', fontSize: '11px' }} >
                         <span>ᠡᠨᠡᢈᠦ ᠬᠠᠪᠰᠤᠷᠤᠯᠲᠠ {tooBichih(new Date().getFullYear())} ᠣᠨ ᠤ᠋ <span style={{ fontFamily: 'cmdashitseden', fontSize: '12px' }}></span>{tooBichih(printDatas?.student?.graduation_work?.diplom_num)} ᠳ᠋ᠤᠭᠠᠷ ᠲᠠᠢ ᠳ᠋ᠢᠫᠯᠣᠮ ᠤ᠋ᠨ ᠬᠠᠮᠲᠤ ᢈᠦᠴᠦᠨ ᠲᠡᠢ</span>
-                    </div>
+                    </div> */}
                 </div>
             </footer>
         </>

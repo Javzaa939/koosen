@@ -25,8 +25,10 @@ export default function PrintAttachmentMongolia()
 
     function getAllData(studentId)
     {
+        // Нэгдсэн нэг сургуулийн захирал гарын үсэг хэвлэж байгаа болохоор, data?.student?.group?.profession?.school
+        // , printDatas.student?.department?.sub_orgs
         Promise.all([
-            fetchData(signatureApi.get(3, printDatas.student?.department?.sub_orgs)),
+            fetchData(signatureApi.get(3)),
             fetchData(studentApi.calculateGpaDimplomaGet(studentId))
         ]).then((values) => {
             setListArr(values[0]?.data)
@@ -205,6 +207,7 @@ export default function PrintAttachmentMongolia()
 
                                     newCell1.className = 'border-dark mini-cell'
                                     newCell2.className = 'border-dark body-cell'
+                                    newCell2.style = 'border-dark body-cell'
                                     newCell3.className = 'border-dark footer1-cell'
                                     newCell4.className = 'border-dark footer2-cell'
                                 }
@@ -232,7 +235,7 @@ export default function PrintAttachmentMongolia()
         <>
             {isLoading && Loader}
 
-            <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1 ${isPageBreak && 'page-break'}`} style={{ fontSize: '11px', paddingTop: height.header + (printDatas?.student?.group?.degree?.degree_code === 'D' ? 20 : 24),  backgroundColor: 'white', color: 'black', fontFamily: 'serif' }} >
+            <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1 ${isPageBreak && 'page-break'}`} style={{ fontSize: '11px', paddingTop: height.header + (printDatas?.student?.group?.degree?.degree_code === 'D' ? 24 : 24),  backgroundColor: 'white', color: 'black', fontFamily: 'Arial' }} >
                 <div
                     className='d-flex flex-wrap align-content-start mt-1'
                     id='table1-1'
@@ -310,7 +313,7 @@ export default function PrintAttachmentMongolia()
 
             </div>
 
-            <div ref={body2SectionRef} className={`${!isPageBreak && 'd-none'}`} style={{ marginTop: '175px', breakInside: 'avoid', backgroundColor: 'white', color: 'black', fontFamily: 'serif' }} >
+            <div ref={body2SectionRef} className={`${!isPageBreak && 'd-none'}`} style={{ marginTop: '175px', breakInside: 'avoid', backgroundColor: 'white', color: 'black', fontFamily: 'Arial' }} >
                 <div className={`position-relative px-1 gap-1 d-flex justify-content-between`} style={{ fontSize: '13px' }} >
                     <div className='d-flex flex-wrap align-content-start mt-1' id='table4-4' >
                         <table className='font-dark w-100 text-center d-none' id='table4' >
@@ -377,7 +380,7 @@ export default function PrintAttachmentMongolia()
              */}
             <header
                 className='w-100 px-1 font-dark'
-                style={{ backgroundColor: 'white', color: 'black' }}
+                style={{ backgroundColor: 'white', color: 'black', fontFamily: 'Arial' }}
                 ref={headerSectionRef}
             >
                 <div className='d-flex flex-column text-center fw-bolder'>
@@ -401,7 +404,7 @@ export default function PrintAttachmentMongolia()
                         printDatas?.student?.group?.degree?.degree_code === 'D'
                         &&
                         <div className='d-flex px-2' style={{ width: '25%'}} >
-                            <span className='fw-normal w-50' style={{ width: '200px'}}>Элсэлтийн шалгалтын оноо:</span><span>{printDatas?.student?.eysh_score}</span>
+                            <span className='fw-normal w-50' style={{ width: '200px'}}>Элсэлтийн шалгалтын оноо:</span><span className='ms-5'>{printDatas?.student?.eysh_score}</span>
                         </div>
                     }
                 </div>
@@ -434,7 +437,7 @@ export default function PrintAttachmentMongolia()
                         printDatas?.student?.group?.degree?.degree_code === 'D'
                         &&
                         <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '50%' : '33.3%' }} >
-                            <span className='fw-normal w-50' style={{ width: '200px'}}>Өмнөх шатны боловсролын үнэлгээний дундаж оноо: </span><span>{printDatas?.student?.secondary_school}</span>
+                            <span className='fw-normal w-50' style={{ width: '200px'}}>Өмнөх шатны боловсролын үнэлгээний дундаж оноо: </span><span className='ms-5'>{printDatas?.student?.secondary_school}</span>
                         </div>
                     }
                 </div>
@@ -486,7 +489,7 @@ export default function PrintAttachmentMongolia()
             <footer
                 ref={footerSectionRef}
                 className='w-100 font-dark'
-                style={{ fontSize: '10px', backgroundColor: 'white', color: 'black', bottom: printDatas?.student?.group?.degree?.degree_code == 'D' ? '4px': '10px' }} >
+                style={{ fontSize: '10px', backgroundColor: 'white', color: 'black', bottom: printDatas?.student?.group?.degree?.degree_code == 'D' ? '4px': '10px', fontFamily: 'Arial' }} >
                 {
                     (datas?.graduation_work?.lesson_type != 1 && datas?.graduation_work?.diplom_topic)
                     &&

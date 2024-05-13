@@ -76,14 +76,14 @@ export default function Attachment()
     const signatureApi = useApi().signature
 
     /** Бүх датаг нэгэн зэрэг авах */
-    function getAllData()
-    {
-        Promise.all([
-            fetchData(signatureApi.getGraduate(3, school_id)),
-        ]).then((values) => {
-            setSignatureList(values[0]?.data)
-        })
-    }
+    // function getAllData()
+    // {
+    //     Promise.all([
+    //         fetchData(signatureApi.getGraduate(3, school_id)),
+    //     ]).then((values) => {
+    //         setSignatureList(values[0]?.data)
+    //     })
+    // }
 
     async function getDatas()
     {
@@ -165,17 +165,18 @@ export default function Attachment()
     /** Гарын үсэг зурах дата-г авах */
     async function getSignatureDatas()
     {
-        console.log('hello');
-        if (school_id){
-            const { success, data } = await fetchData(signatureApi.getGraduate(3, school_id))
-            if (success)
-            {
-                setSignatureList(data)
-            }
+        // Нэгдсэн нэг сургуулийн захирал гарын үсэг хэвлэж байгаа болохоор, data?.student?.group?.profession?.school
+        // school_id
+        const { success, data } = await fetchData(signatureApi.getGraduate(3))
+        if (success)
+        {
+            setSignatureList(data)
         }
-        else{
-            setSignatureList([])
-        }
+        // if (school_id) {
+        // }
+        // else{
+        //     setSignatureList([])
+        // }
     }
 
     /** Гарын үсэг зурах засах функц */
@@ -234,7 +235,7 @@ export default function Attachment()
     useEffect(
         () =>
         {
-            getAllData()
+            getSignatureDatas()
         },
         []
     )

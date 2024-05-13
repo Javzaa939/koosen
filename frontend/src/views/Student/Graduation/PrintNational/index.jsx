@@ -21,8 +21,9 @@ export default function PrintMongolia()
 
     async function getAllData()
     {
+        // Сургуулийн нэгдсэн нэг захирал гарын үсэг зурах учраас data?.student?.group?.profession?.school
         await Promise.all([
-            fetchData(signatureApi.get(2, data?.student?.group?.profession?.school)),
+            fetchData(signatureApi.get(2)),
         ]).then((values) => {
             setListArr(values[0]?.data)
         })
@@ -46,11 +47,7 @@ export default function PrintMongolia()
         {
             if (data && listArr.length != 0)
             {
-                // setTimeout(() =>
-                //     window.print(),
-                //     document.title = `${data?.student?.full_name}-хавсралт-монгол`,
-                //     1000
-                // )
+                document.title = `${data?.student?.full_name}-нүүр-уйгаржин`
             }
         },
         [data, listArr]
@@ -61,7 +58,6 @@ export default function PrintMongolia()
         {
             if (data && listArr.length != 0)
             {
-                // setTimeout(() => window.print(), 1000)
 
                 let highest = 0
 
@@ -125,7 +121,7 @@ export default function PrintMongolia()
     // <span style={{ fontFamily: 'CMSUB', fontSize: '25px' }}>{data?.student?.group?.join_year?.substring(0, 4)} - {data?.lesson_year?.substring(5, 9)}</span> ᠣᠨ ᠳ᠋ᠤ
 
     return (
-        <div className='vh-100 position-relative' style={{ fontFamily: 'mongolianScript', fontSize: '16px', padding: '117px 160px 95px 260px' }}>
+        <div className='vh-100 position-relative' style={{ fontFamily: 'mongolianScript', fontSize: '16px', padding: '120px 120px 95px 260px' }}>
             {isLoading && Loader}
 
             <div className='d-flex justify-content-between h-100' >
@@ -133,12 +129,11 @@ export default function PrintMongolia()
                     <div className='text-center' style={{ writingMode: 'vertical-lr', marginLeft: '2px' }} >
                         ᠳ᠋ᠤᠭᠠᠷ {tooBichih(data?.diplom_num)}
                     </div>
-                    <div style={{ writingMode: 'vertical-lr', marginLeft: '36px', lineHeight: '46px' }} >
+                    <div style={{ writingMode: 'vertical-lr', marginLeft: '40px', lineHeight: '46px' }} >
                         ᠮᠣᠩᠭᠣᠯ ᠤᠯᠤᠰ ᠤ᠋ᠨ ᠢᠷᢉᠡᠨ {data?.student?.last_name_uig} ᠶ᠋ᠢᠨ / ᠤ᠋ᠨ {data?.student?.first_name_uig} ᠨᠢ
                         <br/>
-                        <span style={{ textWrap: 'nowrap' }}>{data?.student?.school_name_uig}</span> ᠳ᠋ᠤ {data?.student?.group?.profession?.name_uig} ᠮᠡᠷᢉᠡᠵᠢᠯ <span style={{ fontFamily: 'cmdashitseden', fontSize: '24px' }}>
-                        </span>{tooBichih(data?.student?.group?.profession?.code)} ᠢ᠋ᠶᠡᠷ ᠰᠤᠷᠤᠯᠴᠠᠵᠤ ᠲᠡᢉᠦᠰᠦᢉᠰᠡᠨ ᠲᠤᠯᠠ ᠶᠡᢈᠡ ᠰᠤᠷᠭᠠᠭᠤᠯᠢ ᠶ᠋ᠢᠨ ᠵᠠᢈᠢᠷᠤᠯ ᠤ᠋ᠨ {tooBichih(data?.decision_date?.substring(0, 4))} ᠣᠨ ᠤ᠋ {tooBichih(data?.decision_date?.substring(5, 7))} {dugeerUg(data?.decision_date?.substring(5, 7) && data?.decision_date?.substring(5, 7).charAt(data?.decision_date?.substring(5, 7).length - 1))} ᠰᠠᠷ᠎ᠠ ᠶ᠋ᠢᠨ {tooBichih(data?.decision_date?.substring(8, 10))}{tooBichih('-')} ᠪ
-                        ᠡᠳᠦᠷ ᠦ᠋ᠨ {tushaal(data?.graduation_number)} {dugeerUg(data?.graduation_number && data?.graduation_number.charAt(data?.graduation_number.length - 1))} ᠲᠤᠰᠢᠶᠠᠯ ᠢ᠋ᠶᠠᠷ {data?.student?.group?.profession?.dep_name_uig} ᠶ᠋ᠢᠨ <span className='fs-3'>{data?.student?.group?.degree?.degree_uig_name}</span> ᠤ᠋ᠨ ᠵᠡᠷᢉᠡ ᠣᠯᠭᠤᠪᠠ
+                        {data?.student?.group?.profession?.name_uig} {tooBichih(data?.student?.group?.profession?.code)} ᢈᠥᠲᠦᠯᠪᠦᠷᠢ ᠪᠡᠷ ᠰᠤᠷᠤᠯᠴᠠᠨ ᠲᠡᢉᠦᠰᠦᢉᠰᠡᠨ ᠲᠤᠯᠠ ᠶᠡᢈᠡ ᠰᠤᠷᠭᠠᠭᠤᠯᠢ ᠶ᠋ᠢᠨ ᠵᠠᢈᠢᠷᠤᠯ ᠤ᠋ᠨ {tooBichih(data?.decision_date?.substring(0, 4))} ᠣᠨ ᠤ᠋ {tooBichih(data?.decision_date?.substring(5, 7))} {dugeerUg(data?.decision_date?.substring(5, 7) && data?.decision_date?.substring(5, 7).charAt(data?.decision_date?.substring(5, 7).length - 1))} ᠰᠠᠷ᠎ᠠ ᠶ᠋ᠢᠨ {tooBichih(data?.decision_date?.substring(8, 10))}{tooBichih('-')} ᠪ
+                        ᠡᠳᠦᠷ ᠦ᠋ᠨ {tushaal(data?.graduation_number)} {dugeerUg(data?.graduation_number && data?.graduation_number.charAt(data?.graduation_number.length - 1))} ᠲᠤᠰᠢᠶᠠᠯ ᠢ᠋ᠶᠠᠷ {data?.student?.group?.profession?.dep_name_uig} ᠶ᠋ᠢᠨ <span className='fs-3'>{data?.student?.group?.degree?.degree_uig_name}</span> ᠤ᠋ᠨ ᠵᠡᠷᢉᠡ ᠣᠯᠭᠤᠪᠠ᠃
                     </div>
                 </div>
                 <div className='d-flex' style={{ fontSize: '14px', lineHeight: '42px' }}>
@@ -153,10 +148,10 @@ export default function PrintMongolia()
                         )
                     })
                 }
-                    <div className='d-flex justify-content-between' style={{ writingMode: 'vertical-rl', paddingTop: '30px', paddingBottom: '30px', paddingLeft: '30px' }} >
-                        <span>ᠤᠯᠠᠭᠠᠨᠪᠠᠭᠠᠲᠤᠷ ᠬᠣᠲᠠ</span>
-                        <span>ᠪᠦᠷᠢᠳᢈᠡᠯ ᠦ᠋ᠨ ᠳ᠋ᠤᠭᠠᠷ <span style={{ fontFamily: 'CMSUB', fontSize: '20px' }}>{data?.registration_num}</span></span>
-                    </div>
+                <div className='d-flex justify-content-between' style={{ writingMode: 'vertical-rl', paddingTop: '30px', paddingBottom: '30px', paddingLeft: '30px' }} >
+                    <span>ᠤᠯᠠᠭᠠᠨᠪᠠᠭᠠᠲᠤᠷ ᠬᠣᠲᠠ</span>
+                    <span>ᠪᠦᠷᠢᠳᢈᠡᠯ ᠦ᠋ᠨ ᠳ᠋ᠤᠭᠠᠷ <span style={{ fontFamily: 'CMSUB', fontSize: '20px' }}>{data?.registration_num}</span></span>
+                </div>
                 </div>
             </div>
         </div>

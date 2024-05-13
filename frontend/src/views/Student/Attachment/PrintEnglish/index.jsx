@@ -38,7 +38,9 @@ export default function PrintAttachmentEnglish()
     async function getAllData(studentId)
     {
         await Promise.all([
-            fetchData(signatureApi.get(3, printDatas.student?.department?.sub_orgs)),
+            // Нэгдсэн нэг сургуулийн захирал гарын үсэг хэвлэж байгаа болохоор, data?.student?.group?.profession?.school
+            // , printDatas.student?.department?.sub_orgs
+            fetchData(signatureApi.get(3)),
             fetchData(studentApi.calculateGpaDimplomaGet(studentId))
         ]).then((values) => {
             setListArr(values[0]?.data)
@@ -64,11 +66,7 @@ export default function PrintAttachmentEnglish()
         {
             if (datas, listArr.length != 0)
             {
-                setTimeout(() =>
-                    window.print(),
-                    document.title = `${printDatas?.student?.full_name}-хавсралт-англи`,
-                    1000
-                )
+                document.title = `${printDatas?.student?.full_name}-хавсралт-англи`
             }
         },
         [datas, listArr]
@@ -301,7 +299,7 @@ export default function PrintAttachmentEnglish()
     return (
         <>
             {Loading && Loader}
-            <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1 ${isPageBreak && 'page-break'}`} style={{ fontSize: '13px', paddingTop: height.header + (printDatas?.student?.group?.degree?.degree_code === 'D' ? 20 : 24),  backgroundColor: 'white', color: 'black', fontFamily: 'serif' }} >
+            <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1 ${isPageBreak && 'page-break'}`} style={{ fontSize: '13px', paddingTop: height.header + (printDatas?.student?.group?.degree?.degree_code === 'D' ? 20 : 24),  backgroundColor: 'white', color: 'black', fontFamily: 'Arial' }} >
 
             {/* <div ref={body1SectionRef} className={`position-relative d-flex justify-content-between ${isPageBreak && 'page-break'}`} style={{ fontSize: '9px', marginTop: '135px', paddingTop: height.header + 24, }} > */}
 
@@ -438,7 +436,7 @@ export default function PrintAttachmentEnglish()
 
             <header
                 className='w-100 px-1'
-                style={{ backgroundColor: 'white', color: 'black' }}
+                style={{ backgroundColor: 'white', color: 'black', fontFamily: 'Arial' }}
                 ref={headerSectionRef}
             >
 
@@ -457,13 +455,13 @@ export default function PrintAttachmentEnglish()
                         <span className='fw-normal w-50'>Profession:</span> <span className='text-uppercase'>{printDatas?.student?.group?.profession?.name_eng}</span>
                     </div>
                     <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
-                        <span className='fw-normal w-50' style={{ width: '200px'}}>Join year:</span><span>{printDatas?.student?.group?.join_year?.substring(0, 4)}</span>
+                        <span className='fw-normal w-50' style={{ width: '200px'}}>Commenced:</span><span>{printDatas?.student?.group?.join_year?.substring(0, 4)}</span>
                     </div>
                     {
                         printDatas?.student?.group?.degree?.degree_code === 'D'
                         &&
                         <div className='d-flex px-2' style={{ width: '25%'}} >
-                            <span className='fw-normal w-50' style={{ width: '200px'}}>Entrance exams core:</span><span>{printDatas?.student?.eysh_score}</span>
+                            <span className='fw-normal w-50' style={{ width: '200px'}}>Entrance exam point:</span><span className='ms-5'>{printDatas?.student?.eysh_score}</span>
                         </div>
                     }
                 </div>
@@ -472,10 +470,10 @@ export default function PrintAttachmentEnglish()
                         <span className='fw-normal w-50'>First name:</span> <span>{printDatas?.student?.first_name_eng}</span>
                     </div>
                     <div className='d-flex px-1' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
-                        <span className='fw-normal w-50'>Specialized: </span><span>{printDatas?.student?.group?.profession?.dep_name_eng}</span>
+                        <span className='fw-normal w-50'>Major specified: </span><span>{printDatas?.student?.group?.profession?.dep_name_eng}</span>
                     </div>
                     <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
-                        <span className='fw-normal w-50' style={{ width: '200px'}}>Graduation year:</span> <span>{printDatas?.student?.graduation_work?.lesson_year?.substring(5, 9)}</span>
+                        <span className='fw-normal w-50' style={{ width: '200px'}}>Completed:</span> <span>{printDatas?.student?.graduation_work?.lesson_year?.substring(5, 9)}</span>
                     </div>
                 </div>
                 <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
@@ -490,13 +488,13 @@ export default function PrintAttachmentEnglish()
                             </div>
                     }
                     <div className={`d-flex ${printDatas?.student?.group?.degree?.degree_code === 'D' ? 'px-1' : 'px-2'}`} style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
-                        <span className='fw-normal w-50'>Order no:</span> <span className='text-uppercase'>{printDatas?.student?.graduation_work?.graduation_number}</span>
+                        <span className='fw-normal w-50'>Order number:</span> <span className='text-uppercase'>{printDatas?.student?.graduation_work?.graduation_number}</span>
                     </div>
                     {
                         printDatas?.student?.group?.degree?.degree_code === 'D'
                         &&
                         <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '50%' : '33.3%' }} >
-                            <span className='fw-normal w-50' style={{ width: '200px'}}>Average scores of previous education: </span><span>{printDatas?.student?.secondary_school}</span>
+                            <span className='fw-normal w-50' style={{ width: '200px'}}>GPA of previous level of education: </span><span className='ms-5'>{printDatas?.student?.secondary_school}</span>
                         </div>
                     }
                 </div>
@@ -536,7 +534,7 @@ export default function PrintAttachmentEnglish()
             <footer
                 ref={footerSectionRef}
                 className='w-100'
-                style={{ fontSize: '10px', backgroundColor: 'white', color: 'black', bottom: printDatas?.student?.group?.degree?.degree_code == 'D' ? '4px': '10px'  }}
+                style={{ fontSize: '10px', backgroundColor: 'white', color: 'black', bottom: printDatas?.student?.group?.degree?.degree_code == 'D' ? '4px': '10px', fontFamily: 'Arial'  }}
             >
                 {
                     (datas?.graduation_work?.lesson_type != 1 && datas?.graduation_work?.diplom_topic)
@@ -574,12 +572,12 @@ export default function PrintAttachmentEnglish()
 
                 <div className='d-flex justify-content-center gap-5 me-1'>
                     <div>Total Credits: <span className='fw-bolder'>{datas?.score?.max_kredit}</span></div>
-                    <div>GPA score: <span className='fw-bolder'>{datas?.score?.average_score}</span></div>
-                    <div>GPA: <span className='fw-bolder'>{datas?.score?.assesment}</span></div>
+                    <div>GPA: <span className='fw-bolder'>{datas?.score?.average_score}</span></div>
+                    <div>Cumulative (GPA): <span className='fw-bolder'>{datas?.score?.assesment}</span></div>
                     {
                         printDatas?.student?.group?.degree?.degree_code == 'D'
                         &&
-                        <div>Average GPA of graduates of the same major in the same semester: <span className='fw-bolder'>{datas?.score?.assesment}</span></div>
+                        <div>GPA OF graduates from same major of the current semester: <span className='fw-bolder'>{datas?.score?.assesment}</span></div>
                     }
                 </div>
 
