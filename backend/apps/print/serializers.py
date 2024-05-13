@@ -3,7 +3,7 @@ from lms.models import ScoreRegister
 from lms.models import Score, Student
 from lms.models import LessonStandart
 from lms.models import GraduationWork
-from lms.models import Group
+from lms.models import Group, ProfessionAverageScore
 
 
 from student.serializers import StudentListSerializer
@@ -102,3 +102,12 @@ class GroupListFilterSubSchoolSerializer(serializers.ModelSerializer):
         model = Group
         fields = '__all__'
 
+
+class ProfessionAverageScoreSerializer(serializers.ModelSerializer):
+    profession_name = serializers.CharField(source='profession.name', default='', read_only=True)
+    profession_code = serializers.CharField(source='profession.code', default='', read_only=True)
+    lesson_season_name = serializers.CharField(source='lesson_season.season_name', default='', read_only=True)
+
+    class Meta:
+        model = ProfessionAverageScore
+        fields = '__all__'

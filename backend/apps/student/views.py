@@ -55,7 +55,7 @@ from lms.models import LessonStandart
 from lms.models import StudentViz
 from lms.models import SystemSettings
 from lms.models import PaymentBeginBalance
-from lms.models import Country
+from lms.models import Country, ProfessionAverageScore
 
 
 from core.models import SubOrgs, AimagHot, SumDuureg, User, Salbars
@@ -2729,7 +2729,8 @@ class StudentGpaDiplomaValuesAPIView(
             # Нийт голч оноог бутархай руу шилжүүлэх
             final_score = format(final_score, ".2f")
 
-        all_data['score'] = { 'assesment': final_gpa, 'max_kredit': max_kredit, 'average_score': final_score }
+        average_score_prof = ProfessionAverageScore.objects.filter(profession=student_prof_qs, is_graduate=True, lesson_year__isnull=True, lesson_season__isnull=True).first()
+        all_data['score'] = { 'assesment': final_gpa, 'max_kredit': max_kredit, 'average_score': final_score, 'average_score_prof': format(average_score_prof.gpa, ".2f") if average_score_prof else 0 }
         all_data['lessons'] = all_datas
 
         # GraduationWork

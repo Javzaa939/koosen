@@ -577,7 +577,7 @@ export default function PrintAttachmentEnglish()
                     {
                         printDatas?.student?.group?.degree?.degree_code == 'D'
                         &&
-                        <div>GPA OF graduates from same major of the current semester: <span className='fw-bolder'>{datas?.score?.assesment}</span></div>
+                        <div>GPA OF graduates from same major of the current semester: <span className='fw-bolder'>{datas?.score?.average_score_prof}</span></div>
                     }
                 </div>
 

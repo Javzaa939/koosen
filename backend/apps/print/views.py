@@ -8,9 +8,9 @@ from lms.models import Student, TimeTable_to_group, TimeTable_to_student
 from lms.models import TimeTable
 from lms.models import GraduationWork
 from lms.models import ScoreRegister
-from lms.models import LessonStandart
-from lms.models import Group
-from lms.models import AdmissionRegister, AdmissionIndicator
+from lms.models import LessonStandart, Season
+from lms.models import Group, Score, ProfessionDefinition, CalculatedGpaOfDiploma
+from lms.models import ProfessionAverageScore, AdmissionIndicator
 
 from elselt.models import AdmissionUserProfession, UserInfo
 from elselt.serializer import AdmissionUserInfoSerializer
@@ -29,7 +29,7 @@ from apps.timetable.serializers import ScoreGpaListSerializer
 
 from .serializers import ScoreRegisterSerializer
 from .serializers import GraduationWorkListSerializer
-from .serializers import AdmissionListSerializer
+from .serializers import ProfessionAverageScoreSerializer
 from .serializers import GroupListFilterSubSchoolSerializer
 
 from main.utils.function.utils import get_lesson_choice_student, student__full_name, score_register__score_total, lesson_standart__code_name
@@ -833,3 +833,189 @@ class GroupsListFilterWithSubSchoolApiView(
         teach_info = self.list(request).data
 
         return request.send_data(teach_info)
+
+
+class GpaProfessionAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin
+):
+    """ Хөтөлбөрөөр голч дүн """
+
+    queryset = ProfessionAverageScore.objects.all()
+    serializer_class = ProfessionAverageScoreSerializer
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['profession__code', 'profession__name']
+
+    def get_queryset(self):
+        queryset = self.queryset
+        status = self.request.query_params.get('status')
+        degree = self.request.query_params.get('degree')
+        lesson_year = self.request.query_params.get('lesson_year')
+        lesson_season = self.request.query_params.get('lesson_season')
+        department = self.request.query_params.get('department')
+        sorting = self.request.query_params.get('sorting')
+
+        # Тэнхимээр хайх
+        if department:
+            queryset = queryset.filter(profession__department=department)
+
+        # Ангиар хайх
+        # if status:
+        #     queryset = queryset.filter(is_graduate=status)
+
+        # Боловсролын зэргээр хайлт хийх
+        if degree:
+            queryset = queryset.filter(profession__degree=degree)
+
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
+
+        return queryset
+
+    def get(self, request):
+
+        data = self.list(request).data
+        return request.send_data(data)
+
+    def post(self, request):
+        student_queryset = Student.objects.all()
+        score_queryset = ScoreRegister.objects.all()
+        gradution_queryset = GraduationWork.objects.all()
+
+        lesson_year = self.request.query_params.get('lesson_year')
+        lesson_season = self.request.query_params.get('lesson_season')
+
+        # Төгсөлтийн ажлаас бодох эсэх
+        status = str2bool(self.request.query_params.get('status'))
+
+        department = self.request.query_params.get('department')
+        profession = self.request.query_params.get('profession')
+
+        # Хичээлийн жил хайх
+        if lesson_year:
+            gradution_queryset = gradution_queryset.filter(lesson_year=lesson_year)
+            score_queryset = score_queryset.filter(lesson_year=lesson_year)
+
+        # Хичээлийн улирал хайх
+        if lesson_season:
+            gradution_queryset = gradution_queryset.filter(lesson_season=lesson_season)
+            score_queryset = score_queryset.filter(lesson_season=lesson_season)
+
+        # Хөтөлбөрөөр хайх
+        if department:
+            student_queryset = student_queryset.filter(department=department)
+
+        # Мэргэжлээр хайх
+        if profession:
+            gradution_queryset = gradution_queryset.filter(student__group__profession=profession)
+            student_queryset = student_queryset.filter(group__profession=profession)
+
+        # Төгсөх гэж байгаа төлөвтэй оюутнууд
+        if status:
+            student_ids = gradution_queryset.values_list('student', flat=True)
+            student_queryset = student_queryset.filter(id__in=student_ids)
+
+        all_student = 0
+        all_student_gpa = 0
+        all_student_score = 0
+
+        # Нийт оюутнаар дүн бодох
+        for student in student_queryset:
+
+            if status:
+                all_lessons_score = CalculatedGpaOfDiploma.objects.filter(student=student)
+            else:
+                all_lessons_score = score_queryset.filter(student=student)
+
+            all_gpa = 0
+            all_kredit = 0
+            all_score = 0
+            all_s_kredit = 0
+            if len(all_lessons_score) > 0:
+
+                all_student += 1
+
+                # Оюутны дүнгүүдээр давталт гүйлгэх
+                for lesson_score in all_lessons_score:
+                    if status:
+                        score_obj = Score.objects.filter(score_max__gte=lesson_score.score, score_min__lte=lesson_score.score).first()
+                    else:
+                        score_obj = Score.objects.filter(score_max__gte=lesson_score.score_total, score_min__lte=lesson_score.score_total).first()
+
+                    # Нийт дүн
+                    if status:
+                        if not lesson_score.grade_letter:
+                            all_score = all_score + (lesson_score.score * lesson_score.kredit)
+                    else:
+                        if not lesson_score.grade_letter:
+                            all_score = all_score + (lesson_score.score_total * lesson_score.lesson.kredit)
+
+                    # Бүх голч нэмэх
+                    if status:
+                        if not lesson_score.grade_letter:
+                            all_gpa = all_gpa + (lesson_score.gpa * lesson_score.kredit)
+                    else:
+                        if not lesson_score.grade_letter:
+                            all_gpa = all_gpa + (score_obj.gpa * lesson_score.lesson.kredit)
+
+                    # Бүх нийт кредит нэмэх
+                    if status:
+                        all_kredit = all_kredit + lesson_score.kredit
+                        if lesson_score.grade_letter:
+                            all_s_kredit = all_s_kredit + lesson_score.kredit
+                    else:
+                        all_kredit = all_kredit + lesson_score.lesson.kredit
+                        if lesson_score.grade_letter:
+                            all_s_kredit = all_s_kredit + lesson_score.lesson.kredit
+
+                # Дундаж оноо
+                # Нийт кредитээс S үнэлгээ буюу тооцов үнэлгээг хасаж голч бодогдоно
+                estimate_kredit = all_kredit - all_s_kredit
+
+                final_gpa = all_gpa / estimate_kredit
+
+                # Нийт голч оноо
+                final_score = all_score / estimate_kredit
+
+                # Оюутны нийт голчийг нэмэх
+                all_student_gpa = all_student_gpa + final_gpa
+
+                # Оюутны нийт оноо нэмэх
+                all_student_score = all_student_score + final_score
+
+        # Нийт голч дундаж оноо
+        if all_student_gpa == 0 and all_student == 0:
+            final_student_gpa = 0
+        else:
+            final_student_gpa = round((all_student_gpa / all_student), 2)
+
+        # Нийт дундаж оноо
+        if all_student_score == 0 and all_student == 0:
+            final_student_score = 0
+        else:
+            final_student_score = round((all_student_score / all_student), 2)
+
+        with transaction.atomic():
+            try:
+                self.queryset.update_or_create(
+                    profession=ProfessionDefinition.objects.get(pk=profession),
+                    lesson_year=lesson_year if lesson_year else None,
+                    lesson_season=Season.objects.get(pk=lesson_season) if lesson_season else None,
+                    defaults={
+                        'is_graduate': True if status else False,
+                        'student_count': all_student,
+                        'gpa_score': final_student_score,
+                        'gpa': final_student_gpa,
+                        'level': 0
+                    }
+                )
+            except Exception as e:
+                print(e)
+                return request.send_error('ERR_001', 'Алдаа гарлаа')
+
+        return request.send_data([])

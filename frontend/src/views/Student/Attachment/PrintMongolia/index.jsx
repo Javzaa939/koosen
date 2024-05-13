@@ -532,7 +532,7 @@ export default function PrintAttachmentMongolia()
                     {
                         printDatas?.student?.group?.degree?.degree_code == 'D'
                         &&
-                        <div>Тухайн улирлын ижил мэргэжлийн төгсөгчдийн голч дүнгийн дундаж: <span className='fw-bolder'>{datas?.score?.assesment}</span></div>
+                        <div>Тухайн улирлын ижил мэргэжлийн төгсөгчдийн голч дүнгийн дундаж: <span className='fw-bolder'>{datas?.score?.average_score_prof}</span></div>
                     }
                 </div>
 
