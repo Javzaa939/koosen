@@ -2715,8 +2715,10 @@ class StudentGpaDiplomaValuesAPIView(
                         else:
                             all_s_kredit = all_s_kredit + lesson.get('kredit')
 
-            obj_datas['lessons'] = lesson_datas
-            all_datas.append(obj_datas)
+            # Хичээлтэй хэсгийн датаг л нэмнэ
+            if len(lesson_datas) > 0:
+                obj_datas['lessons'] = lesson_datas
+                all_datas.append(obj_datas)
 
         final_gpa = 0.0
         if all_score != 0 and all_gpa_score != 0:
@@ -2729,7 +2731,7 @@ class StudentGpaDiplomaValuesAPIView(
             # Нийт голч оноог бутархай руу шилжүүлэх
             final_score = format(final_score, ".2f")
 
-        average_score_prof = ProfessionAverageScore.objects.filter(profession=student_prof_qs, is_graduate=True, lesson_year__isnull=True, lesson_season__isnull=True).first()
+        average_score_prof = ProfessionAverageScore.objects.filter(profession=student_prof_qs, is_graduate=True, level=0).first()
         all_data['score'] = { 'assesment': final_gpa, 'max_kredit': max_kredit, 'average_score': final_score, 'average_score_prof': format(average_score_prof.gpa, ".2f") if average_score_prof else 0 }
         all_data['lessons'] = all_datas
 

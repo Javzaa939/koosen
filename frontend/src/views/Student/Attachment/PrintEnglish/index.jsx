@@ -25,6 +25,7 @@ export default function PrintAttachmentEnglish()
     const [ isPageBreak, setIsPageBreak ] = useState(false)
     const [ printDatas, setPrintDatas ] = useState(JSON.parse(localStorage.getItem('blankDatas')))
     const [ datas, setDatas ] = useState([])
+    const rowSum = printDatas.tableRowCount?.reduce((partialSum, a) => partialSum + a, 0);
 
     const [height, setHeight] = useState(
         {
@@ -299,7 +300,7 @@ export default function PrintAttachmentEnglish()
     return (
         <>
             {Loading && Loader}
-            <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1 ${isPageBreak && 'page-break'}`} style={{ fontSize: '13px', paddingTop: height.header + (printDatas?.student?.group?.degree?.degree_code === 'D' ? 20 : 24),  backgroundColor: 'white', color: 'black', fontFamily: 'Arial' }} >
+            <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1 ${isPageBreak && 'page-break'}`} style={{ fontSize: '13px', paddingTop: height.header + (printDatas?.student?.group?.degree?.degree_code === 'D' ? 18 : 24),  backgroundColor: 'white', color: 'black', fontFamily: 'Arial' }} >
 
             {/* <div ref={body1SectionRef} className={`position-relative d-flex justify-content-between ${isPageBreak && 'page-break'}`} style={{ fontSize: '9px', marginTop: '135px', paddingTop: height.header + 24, }} > */}
 
@@ -470,7 +471,17 @@ export default function PrintAttachmentEnglish()
                         <span className='fw-normal w-50'>First name:</span> <span>{printDatas?.student?.first_name_eng}</span>
                     </div>
                     <div className='d-flex px-1' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
-                        <span className='fw-normal w-50'>Major specified: </span><span>{printDatas?.student?.group?.profession?.dep_name_eng}</span>
+                        {
+                            printDatas?.student?.group?.degree?.degree_code === 'D'
+                            ?
+                                <>
+                                    <span className='fw-normal w-50'>Index: </span><span>{printDatas?.student?.group?.profession?.code}</span>
+                                </>
+                            :
+                                <>
+                                    <span className='fw-normal w-50'>Major specified: </span><span>{printDatas?.student?.group?.profession?.dep_name_eng}</span>
+                                </>
+                        }
                     </div>
                     <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
                         <span className='fw-normal w-50' style={{ width: '200px'}}>Completed:</span> <span>{printDatas?.student?.graduation_work?.lesson_year?.substring(5, 9)}</span>
@@ -536,6 +547,18 @@ export default function PrintAttachmentEnglish()
                 className='w-100'
                 style={{ fontSize: '10px', backgroundColor: 'white', color: 'black', bottom: printDatas?.student?.group?.degree?.degree_code == 'D' ? '4px': '10px', fontFamily: 'Arial'  }}
             >
+
+                <div className={`d-flex justify-content-center gap-5 me-1 ${rowSum > 51 ? 'mb-0': 'mb-2'}`}>
+                    <div>Total Credits: <span className='fw-bolder'>{datas?.score?.max_kredit}</span></div>
+                    <div>GPA: <span className='fw-bolder'>{datas?.score?.average_score}</span></div>
+                    <div>Cumulative (GPA): <span className='fw-bolder'>{datas?.score?.assesment}</span></div>
+                    {
+                        printDatas?.student?.group?.degree?.degree_code == 'D'
+                        &&
+                        <div>GPA OF graduates from same major of the current semester: <span className='fw-bolder'>{datas?.score?.average_score_prof}</span></div>
+                    }
+                </div>
+
                 {
                     (datas?.graduation_work?.lesson_type != 1 && datas?.graduation_work?.diplom_topic)
                     &&
@@ -543,7 +566,8 @@ export default function PrintAttachmentEnglish()
                         <span className=''>Diploma thesis: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic_eng}</span></span>
                     </div>
                 }
-                <div className='px-1 mb-25' style={{ paddingTop: '2px' }} >
+
+                <div className='px-1' style={{ paddingTop: '2px' }} >
                 {
                     datas?.graduation_work?.lesson_type == 1
                     ?
@@ -568,17 +592,6 @@ export default function PrintAttachmentEnglish()
                                 }
                         </>
                 }
-                </div>
-
-                <div className='d-flex justify-content-center gap-5 me-1'>
-                    <div>Total Credits: <span className='fw-bolder'>{datas?.score?.max_kredit}</span></div>
-                    <div>GPA: <span className='fw-bolder'>{datas?.score?.average_score}</span></div>
-                    <div>Cumulative (GPA): <span className='fw-bolder'>{datas?.score?.assesment}</span></div>
-                    {
-                        printDatas?.student?.group?.degree?.degree_code == 'D'
-                        &&
-                        <div>GPA OF graduates from same major of the current semester: <span className='fw-bolder'>{datas?.score?.average_score_prof}</span></div>
-                    }
                 </div>
 
                 {/* <div className='text-end me-1'>

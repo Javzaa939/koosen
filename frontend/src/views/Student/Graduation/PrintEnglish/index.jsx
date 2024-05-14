@@ -150,7 +150,7 @@ export default function PrintMongolia()
 
             {/* Гарын үсгийн хэсэг */}
             <div style={{ bottom: '0', fontSize: '15px' }} >
-                <div style={{ paddingLeft: '100px', paddingRight: '100px', lineHeight: '24px', marginTop: '20px', marginBottom: '0px' }} >
+                <div style={{ paddingLeft: '100px', paddingRight: '100px', lineHeight: '18px', marginTop: '20px', marginBottom: '0px' }} >
                     <div className='d-flex text-center justify-content-center'>
                         {
                             listArr.map((val, idx) =>

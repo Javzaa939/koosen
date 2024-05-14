@@ -22,6 +22,7 @@ export default function PrintAttachmentMongolia()
     const [ isPageBreak, setIsPageBreak ] = useState(false)
 
     const [ printDatas, setPrintDatas ] = useState(JSON.parse(localStorage.getItem('blankDatas')))
+    const rowSum = printDatas.tableRowCount?.reduce((partialSum, a) => partialSum + a, 0);
 
     function getAllData(studentId)
     {
@@ -79,11 +80,7 @@ export default function PrintAttachmentMongolia()
         {
             if (datas, listArr.length != 0)
             {
-                setTimeout(() =>
-                    window.print(),
-                    document.title = `${printDatas?.student?.full_name}-хавсралт-монгол`,
-                    1000
-                )
+                document.title = `${printDatas?.student?.full_name}-хавсралт-монгол`
             }
         },
         [datas, listArr]
@@ -413,7 +410,17 @@ export default function PrintAttachmentMongolia()
                         <span className='fw-normal w-50'>Нэр:</span> <span>{printDatas?.student?.first_name}</span>
                     </div>
                     <div className='d-flex px-1' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
-                        <span className='fw-normal w-50'>Төрөлжсөн чиглэл: </span><span>{printDatas?.student?.group?.profession?.dep_name}</span>
+                        {
+                            printDatas?.student?.group?.degree?.degree_code === 'D'
+                            ?
+                                <>
+                                    <span className='fw-normal w-50'>Индекс: </span><span>{printDatas?.student?.group?.profession?.code}</span>
+                                </>
+                            :
+                                <>
+                                    <span className='fw-normal w-50'>Төрөлжсөн чиглэл: </span><span>{printDatas?.student?.group?.profession?.dep_name}</span>
+                                </>
+                        }
                     </div>
                     <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
                         <span className='fw-normal w-50' style={{ width: '200px'}}>Төгссөн он:</span> <span>{printDatas?.student?.graduation_work?.lesson_year?.substring(5, 9)}</span>
@@ -490,6 +497,17 @@ export default function PrintAttachmentMongolia()
                 ref={footerSectionRef}
                 className='w-100 font-dark'
                 style={{ fontSize: '10px', backgroundColor: 'white', color: 'black', bottom: printDatas?.student?.group?.degree?.degree_code == 'D' ? '4px': '10px', fontFamily: 'Arial' }} >
+
+                <div className={`d-flex justify-content-center gap-5 me-1 ${rowSum > 51 ? '': 'mb-2'}`}>
+                    <div>Нийт багц цаг: <span className='fw-bolder'>{datas?.score?.max_kredit}</span></div>
+                    <div>Голч оноо: <span className='fw-bolder'>{datas?.score?.average_score}</span></div>
+                    <div>Голч дүн: <span className='fw-bolder'>{datas?.score?.assesment}</span></div>
+                    {
+                        printDatas?.student?.group?.degree?.degree_code == 'D'
+                        &&
+                        <div>Тухайн улирлын ижил мэргэжлийн төгсөгчдийн голч дүнгийн дундаж: <span className='fw-bolder'>{datas?.score?.average_score_prof}</span></div>
+                    }
+                </div>
                 {
                     (datas?.graduation_work?.lesson_type != 1 && datas?.graduation_work?.diplom_topic)
                     &&
@@ -524,18 +542,6 @@ export default function PrintAttachmentMongolia()
                         </>
                 }
                 </div>
-
-                <div className='d-flex justify-content-center gap-5 me-1'>
-                    <div>Нийт багц цаг: <span className='fw-bolder'>{datas?.score?.max_kredit}</span></div>
-                    <div>Голч оноо: <span className='fw-bolder'>{datas?.score?.average_score}</span></div>
-                    <div>Голч дүн: <span className='fw-bolder'>{datas?.score?.assesment}</span></div>
-                    {
-                        printDatas?.student?.group?.degree?.degree_code == 'D'
-                        &&
-                        <div>Тухайн улирлын ижил мэргэжлийн төгсөгчдийн голч дүнгийн дундаж: <span className='fw-bolder'>{datas?.score?.average_score_prof}</span></div>
-                    }
-                </div>
-
 
                 <div className='d-flex justify-content-center mt-5'>
                     {
