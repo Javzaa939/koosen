@@ -169,11 +169,23 @@ export default function PrintMongolia()
             </div> */}
 
             <div className='d-flex justify-content-between w-100 align-items-center' style={{ paddingBottom: PADDING_QR, paddingLeft: PADDING_QR, paddingRight: PADDING_QR }}>
-                {/* <span style={{ paddingLeft: '180px' }} >Улаанбаатар хот</span> */}
                 <span className='d-flex align-items-center' style={{ paddingLeft: '1rem' }} >
-                {/* <span style={{ paddingLeft: '180px' }} > */}
-                    <img src='/publicfiles/student_uia (1).png' height={100}/>
-                    <div className='pb-50'>Улаанбаатар</div>
+                    {
+                        data?.diplom_qr
+                        &&
+                        <img
+                            src={`data:image/jpeg;base64,${data?.diplom_qr}`}
+                            alt="img"
+                            width={100}
+                            height={110}
+                            style={{ objectFit: 'cover' }}
+                            onError={({ currentTarget }) =>
+                            {
+                                currentTarget.onerror = null;
+                            }}
+                        />
+                    }
+                    <div className='pb-50 ms-25'>Улаанбаатар</div>
                 </span>
                 <span className='pb-50 pe-5 me-1'>Бүртгэлийн дугаар: {data?.registration_num}</span>
             </div>

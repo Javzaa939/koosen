@@ -75,6 +75,9 @@ urlpatterns = [
     path('graduation/import/', GraduationWorkImportAPIView.as_view()),
     path('graduation/<int:pk>/', GraduationWorkAPIView.as_view()),
 
+    # Төгсөлтийн ажлын qr татах
+    path('graduation/qr/', GraduationWorkQrAPIView.as_view()),
+
     # Боловсролын зээлийн сан
     path('edu_loan_fund/', EducationalLoanFundAPIView.as_view()),
 

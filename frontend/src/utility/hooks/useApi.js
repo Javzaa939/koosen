@@ -775,6 +775,9 @@ function useApi(isDisplay=false) {
 				put: (data, pk) => instance.put(`/student/graduation/${pk}/`, data),
 				delete: (pk) => instance.delete(`/student/graduation/${pk}/`),
 				postFile: (data) => instance.post('/student/graduation/import/', data),
+
+				/** Дипломын QR татах */
+				qr: (group) => instance.get(`/student/graduation/qr/?group=${group}`),
 			},
 
 			/** Боловсролын зээлийн сан */

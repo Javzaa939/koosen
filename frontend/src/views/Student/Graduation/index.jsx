@@ -73,8 +73,6 @@ const Graduation = () => {
     const [ importModal, setImportModal ] = useState(false)
     const [ showModal, setShowModal ] = useState(false)
     const [file, setFile] = useState(false)
-    const [file_name, setFileName] = useState('')
-    const [detailDatas, setDetailDatas] = useState({})
     const [errorDatas, setErrorDatas] = useState({})
 
     //Api
@@ -289,20 +287,8 @@ const Graduation = () => {
 
             const { success, data }  = await fetchData(graduateApi.postFile(formData))
             if (success) {
-
                 importModalHandler()
                 getDatas()
-                // handleShowDetailModal()
-                // if (data?.file_name) {
-                //     setFileName(data?.file_name)
-                //     delete data['file_name']
-                // }
-
-                // if (data?.all_error_datas) {
-                //     setErrorDatas(data?.all_error_datas)
-                //     delete data['all_error_datas']
-                // }
-                // setDetailDatas(data)
             }
         }
     }
@@ -339,6 +325,15 @@ const Graduation = () => {
         excelDownload(datas, rowInfo, `tugsult_zagvar`)
     }
 
+    /** QR татах */
+    async function handleQr() {
+        const { success, data } = await fetchData(graduateApi.qr(select_value.group))
+        if (success) {
+            handleShowDetailModal()
+            setErrorDatas(data)
+        }
+    }
+
 	return (
 		<Fragment>
             {importModal &&
@@ -360,8 +355,6 @@ const Graduation = () => {
                     <DetailModal
                         isOpen={showModal}
                         handleModal={handleShowDetailModal}
-                        datas={detailDatas}
-                        file_name={file_name}
                         errorDatas={errorDatas}
                     />
 
@@ -442,8 +435,15 @@ const Graduation = () => {
                     <div className='d-flex flex-wrap mt-md-0 mt-1 gap-1'>
                         <Button
                             color='primary'
+                            disabled={select_value.group ? false : true}
+                            onClick={() => {handleQr()}}
+                        >
+                            <Download size={15}/>
+                            <span className='align-middle ms-50'>QR татах</span>
+                        </Button>
+                        <Button
+                            color='primary'
                             onClick={() => {
-                                    // window.open('/publicfiles/jishig_file.xlsx')
                                     excelHandler()
                                 }
                             }

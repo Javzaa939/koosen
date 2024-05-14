@@ -1,5 +1,6 @@
 import os
-
+import requests
+from requests.exceptions import JSONDecodeError
 from googletrans import Translator
 import openpyxl_dictreader
 
@@ -3516,3 +3517,66 @@ class StudentPostDataAPIView(
         return request.send_info("INF_001")
 
 
+class GraduationWorkQrAPIView(
+    generics.GenericAPIView
+):
+    """ Дипломын QR cerify-аас татах """
+
+    queryset = GraduationWork.objects.all()
+
+    def get(self, request):
+
+        not_found_student = []
+        group = request.query_params.get('group')
+
+        # Тухайн идэвхтэй жилийн QR татна
+        lesson_year, lesson_season = get_active_year_season()
+
+        # Төгсөгчдийн мэдээллийг авах
+        students = self.queryset.filter(lesson_year=lesson_year, lesson_season=lesson_season, student__group=group, diplom_num__isnull=False) \
+                    .annotate(
+                        first_name=F('student__first_name'),
+                        last_name=F('student__last_name'),
+                        code=F('student__code'),
+                        register=F('student__register_num')
+                    ).values(
+                        'id',
+                        'first_name',
+                        'last_name',
+                        'code',
+                        'register',
+                        'diplom_num'
+                    )
+
+        with transaction.atomic():
+            for student in students:
+                diplom_num = student.get('diplom_num')
+                graduation_id = student.get('id')
+
+                data = {
+                    'cert_number': diplom_num
+                }
+
+                url = 'https://certify.mn/service/api/v2/certification/qr/generate'
+                headers = {
+                    'x-api-key': 'qfSuwUY2.H8FYeLmZzXp2VUG4wVNWwVRo4xQZ5XOc',
+                    'Content-Type': 'application/json'
+                }
+
+                res = requests.post(url, headers=headers, json=data)
+
+                # 404 Not Found: Дипломын дугаар буруу эсвэл уг дипломын дугаар үүсээгүй үед
+                if res.status_code == 404:
+                    not_found_student.append(
+                        **student
+                    )
+
+                if res.status_code == 200:
+
+                    # base64 өөр зураг илгээж байгаа
+                    image_data = res.content
+
+                    # QR ийг хадгалах
+                    self.queryset.filter(id=graduation_id).update(diplom_qr=image_data)
+
+        return request.send_data(not_found_student)

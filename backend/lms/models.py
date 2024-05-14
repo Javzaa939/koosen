@@ -762,7 +762,7 @@ class GraduationWork(models.Model):
     )
 
     student = models.ForeignKey(Student, on_delete=models.PROTECT, verbose_name='Оюутан')
-    diplom_qr = models.ImageField(verbose_name='Дипломын QR', upload_to='student_qr/', null=True)
+    diplom_qr = models.BinaryField(verbose_name='Дипломын QR', editable=True, null=True)
     lesson_year = models.CharField(max_length=20, verbose_name='Хичээлийн жил')
     lesson_season = models.ForeignKey(Season, on_delete=models.SET_NULL, null=True, verbose_name='Улирал')
     lesson_type = models.PositiveIntegerField(choices=ATTACHMENT_TYPE, db_index=True, default=ATTACHMENT_DIPLOMA, verbose_name="Боловсролын түвшин", null=True)
