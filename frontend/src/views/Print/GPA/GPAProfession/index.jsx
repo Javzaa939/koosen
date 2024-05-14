@@ -18,7 +18,7 @@ import useLoader from '@hooks/useLoader';
 
 import { getColumns } from './helpers';
 
-import { getPagination, ReactSelectStyles, generateLessonYear } from '@utils';
+import { getPagination, ReactSelectStyles, generateLessonYear, level_option } from '@utils';
 
 const GPAProfession = () => {
 
@@ -27,8 +27,7 @@ const GPAProfession = () => {
         degree: '',
         profession: '',
         status: false,
-        lesson_year: '',
-        lesson_season: '',
+        level: '',
     }
 
     const [sortField, setSort] = useState('')
@@ -58,10 +57,8 @@ const GPAProfession = () => {
         const department = select_value.department
         const degree = select_value.degree
         const profession = select_value.profession
-        const lesson_year = select_value.lesson_year
-        const lesson_season = select_value.lesson_season
         const status = select_value.status
-        const { success, data } = await fetchData(gpaApi.getProp(rowsPerPage, currentPage, sortField, searchValue, degree, department, profession, lesson_year, lesson_season, status))
+        const { success, data } = await fetchData(gpaApi.getProp(rowsPerPage, currentPage, sortField, searchValue, degree, department, profession, status, select_value.level))
         if(success) {
             setDatas(data?.results)
             setTotalCount(data?.count)
@@ -95,13 +92,10 @@ const GPAProfession = () => {
     }
 
     const [degreeOption, setDegreeOption] = useState([])
-    const [seasonOption, setSeasonOption] = useState([])
-    const [lesson_yearOption, setLesson_yearOption] = useState([])
     const [departmentOption, setDepartmentOption] = useState([])
     const [professionOption, setProfessionOption] = useState([])
 
     const degreeApi = useApi().settings.professionaldegree
-    const seasonApi = useApi().settings.season
     const departmentApi = useApi().hrms.department
     const professionApi = useApi().study.professionDefinition
 
@@ -109,13 +103,6 @@ const GPAProfession = () => {
         const { success, data } = await fetchData(degreeApi.get())
         if(success) {
             setDegreeOption(data)
-        }
-    }
-
-    async function getSeasonOption() {
-        const { success, data } = await fetchData(seasonApi.get())
-        if(success) {
-            setSeasonOption(data)
         }
     }
 
@@ -137,7 +124,7 @@ const GPAProfession = () => {
 
     // Мэргэжлээр нь голч бодох
     async function handleEstimate() {
-        const { success } = await fetchData(gpaApi.post(select_value.lesson_year, select_value.lesson_season, select_value.profession, select_value.status))
+        const { success } = await fetchData(gpaApi.post( select_value.profession, select_value.status, select_value.level))
         if(success) {
             getDatas()
         }
@@ -145,8 +132,6 @@ const GPAProfession = () => {
 
     useEffect(() => {
         getDegreeOption()
-        getSeasonOption()
-        setLesson_yearOption(generateLessonYear(5))
         getDepartmentOption()
         getProfessionOption()
     },[])
@@ -181,57 +166,30 @@ const GPAProfession = () => {
                 </div>
                 <Row className="justify-content-start mx-0 mb-1 mt-1">
                     <Col md={4}>
-                        <Label className="form-label" for="lesson_year">
-                            {t('Хичээлийн жил')}
+                        <Label className="form-label" for="department">
+                            {t('Хөтөлбөрийн баг')}
                         </Label>
                         <Select
-                            name="lesson_year"
-                            id="lesson_year"
+                            name="department"
+                            id="department"
                             classNamePrefix='select'
                             isClearable
                             className='react-select'
                             placeholder={t('-- Сонгоно уу --')}
-                            options={lesson_yearOption || []}
-                            value={lesson_yearOption.find((c) => c.id === select_value.lesson_year)}
+                            options={departmentOption || []}
+                            value={departmentOption.find((c) => c.id === select_value.department)}
                             noOptionsMessage={() => t('Хоосон байна.')}
                             onChange={(val) => {
                                 setSelectValue(current => {
                                     return {
                                         ...current,
-                                        lesson_year: val?.id || '',
+                                        department: val?.id || '',
                                     }
                                 })
                             }}
                             styles={ReactSelectStyles}
                             getOptionValue={(option) => option.id}
                             getOptionLabel={(option) => option.name}
-                        />
-                    </Col>
-                    <Col md={4}>
-                        <Label className="form-label" for="lesson_season">
-                            {t('Хичээлийн улирал')}
-                        </Label>
-                        <Select
-                            name="lesson_season"
-                            id="lesson_season"
-                            classNamePrefix='select'
-                            isClearable
-                            className='react-select'
-                            placeholder={t('-- Сонгоно уу --')}
-                            options={seasonOption || []}
-                            value={seasonOption.find((c) => c.id === select_value.lesson_season)}
-                            noOptionsMessage={() => t('Хоосон байна.')}
-                            onChange={(val) => {
-                                setSelectValue(current => {
-                                    return {
-                                        ...current,
-                                        lesson_season: val?.id || '',
-                                    }
-                                })
-                            }}
-                            styles={ReactSelectStyles}
-                            getOptionValue={(option) => option.id}
-                            getOptionLabel={(option) => option.season_name}
                         />
                     </Col>
                     <Col md={4}>
@@ -262,33 +220,6 @@ const GPAProfession = () => {
                         />
                     </Col>
                     <Col md={4}>
-                        <Label className="form-label" for="department">
-                            {t('Хөтөлбөрийн баг')}
-                        </Label>
-                        <Select
-                            name="department"
-                            id="department"
-                            classNamePrefix='select'
-                            isClearable
-                            className='react-select'
-                            placeholder={t('-- Сонгоно уу --')}
-                            options={departmentOption || []}
-                            value={departmentOption.find((c) => c.id === select_value.department)}
-                            noOptionsMessage={() => t('Хоосон байна.')}
-                            onChange={(val) => {
-                                setSelectValue(current => {
-                                    return {
-                                        ...current,
-                                        department: val?.id || '',
-                                    }
-                                })
-                            }}
-                            styles={ReactSelectStyles}
-                            getOptionValue={(option) => option.id}
-                            getOptionLabel={(option) => option.name}
-                        />
-                    </Col>
-                    <Col md={4}>
                         <Label className="form-label" for="profession">
                             {t('Мэргэжил')}
                         </Label>
@@ -313,6 +244,33 @@ const GPAProfession = () => {
                             styles={ReactSelectStyles}
                             getOptionValue={(option) => option.id}
                             getOptionLabel={(option) => option.code + ' ' + option.name}
+                        />
+                    </Col>
+                    <Col md={4} className='mt-1'>
+                        <Label className="form-label" for="level">
+                            {t("Түвшин")}
+                        </Label>
+                        <Select
+                            name="level"
+                            id="level"
+                            classNamePrefix='select'
+                            isClearable
+                            isLoading={isLoading}
+                            placeholder={`-- Сонгоно уу --`}
+                            options={level_option() || []}
+                            value={level_option().find((c) => c.id === select_value.level)}
+                            noOptionsMessage={() => 'Хоосон байна'}
+                            onChange={(val) => {
+                                setSelectValue(current => {
+                                    return {
+                                        ...current,
+                                        level: val?.id || '',
+                                    }
+                                })
+                            }}
+                            styles={ReactSelectStyles}
+                            getOptionValue={(option) => option.id}
+                            getOptionLabel={(option) => option.name}
                         />
                     </Col>
                     <Col sm={4} md={4} className='d-flex align-items-center mt-1'>
