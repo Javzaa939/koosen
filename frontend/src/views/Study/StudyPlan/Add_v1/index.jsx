@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 
-import { Card, Row, Col, Form, Modal, ModalBody, ModalHeader } from 'reactstrap';
+import { Card, Row, Col, Form, Modal, ModalBody, ModalHeader, Button } from 'reactstrap';
 
 import { useTranslation } from 'react-i18next';
 
@@ -15,6 +15,7 @@ import BasicLesson from './BasicLesson';
 import ProfBasicLesson from './ProfBasicLesson';
 import ProfessionLesson from './ProfessionLesson';
 import Qualification from './Qualification';
+import { Printer } from 'react-feather';
 
 const StudyPlanAdd = ({ open, handleModal, mergejil_id }) => {
 
@@ -69,6 +70,13 @@ const StudyPlanAdd = ({ open, handleModal, mergejil_id }) => {
         })
     }
 
+    function handlePrint() {
+        sessionStorage.setItem('professionDefination', JSON.stringify(datas));
+        sessionStorage.setItem('professionDefinationID', JSON.stringify(mergejil_id));
+        sessionStorage.setItem('professionDefinationDegree', JSON.stringify(degree));
+        window.open(`/study/studyplan/printprofession/`, '_blank');
+    }
+
     return (
         <Modal
             isOpen={open}
@@ -81,6 +89,15 @@ const StudyPlanAdd = ({ open, handleModal, mergejil_id }) => {
             <ModalHeader className='bg-transparent pb-0' toggle={exitModal}></ModalHeader>
             <ModalBody className="flex-grow-1">
                 <Card body>
+                    <div className='d-flex flex-wrap mt-md-0 mt-1 justify-content-end'>
+                        <Button
+                            color='primary'
+                            onClick={handlePrint}
+                        >
+                            <Printer size={15} />
+                            <span className='align-middle ms-50'>{t('Хэвлэх')}</span>
+                        </Button>
+                    </div>
                     <h4 className='text-center mb-3'>Сургалтын төлөвлөгөө</h4>
                     <Row tag={Form} md={12} className="gy-1">
                         <Col md={6}>
