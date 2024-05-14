@@ -406,7 +406,7 @@ export default function PrintAttachmentMongolia()
                     </div>
                     <div style={{ height: '22%', writingMode: 'vertical-lr', display: 'flex' }}>
                         <span className='h-50'>ᠲᠡᢉᠦᠰᠦᢉᠰᠡᠨ ᠣᠨ:</span>
-                        {tooBichih(printDatas?.student?.group?.graduation_date?.substring(0, 4))}
+                        {tooBichih(printDatas?.student?.graduation_work?.graduation_date?.substring(0, 4))}
                     </div>
                 </div>
 
@@ -458,6 +458,25 @@ export default function PrintAttachmentMongolia()
             >
                 <div className={`d-flex ${rowSum > 50 ? 'ms-5' : ''}`}>
 
+                    <div className='d-flex' style={{ writingMode: 'vertical-lr', marginRight: '20px', height: '100%' }}>
+                        <div className='' style={{height: '33.3%'}}>ᠨᠡᠶᠢᠲᠡ ᠪᠠᠭᠴᠡ ᠴᠠᠭ: {tooBichih(datas?.score?.max_kredit)}</div>
+                        <div className={'mt-2'} style={{height: '33.3%'}}>ᠭᠣᠣᠯᠴᠢ ᠣᠨᠤᠭ᠎ᠠ:  <span style={{ fontFamily: 'CMSUB', fontSize: '12px' }}>{datas?.score?.average_score.split('.')[0]}<span style={{ fontFamily: 'serif', fontWeight: 'bolder' }}>.</span>{datas?.score?.average_score.split('.')[1]}</span></div>
+                        {
+                            printDatas?.student?.group?.degree?.degree_code !== 'D'
+                            &&
+                            <div className='mt-2' style={{height: '33.3%'}}>ᠭᠣᠣᠯᠴᠢ ᠳᠦᠩ:   <span style={{ fontFamily: 'CMSUB', fontSize: '12px' }}>{datas?.score?.assesment.split('.')[0]}<span style={{ fontFamily: 'serif', fontWeight: 'bolder' }}>.</span>{datas?.score?.assesment.split('.')[1]}</span></div>
+                        }
+                    </div>
+
+                    {
+                        printDatas?.student?.group?.degree?.degree_code === 'D'
+                        &&
+                            <div className='d-flex' style={{ writingMode: 'vertical-lr', marginRight: '20px', height: '100%' }}>
+                                <div className='' style={{height: '33.3%'}}>ᠭᠣᠣᠯᠴᠢ ᠳᠦᠩ:   <span style={{ fontFamily: 'CMSUB', fontSize: '12px' }}>{datas?.score?.assesment.split('.')[0]}<span style={{ fontFamily: 'serif', fontWeight: 'bolder' }}>.</span>{datas?.score?.assesment.split('.')[1]}</span></div>
+                                <div className='mt-2' style={{height: '66.7%'}}>ᠲᠤᠬᠠᠢ ᠶ᠋ᠢᠨ ᠤᠯᠠᠷᠢᠯ ᠤ᠋ᠨ ᠢᠵᠢᠯ ᠮᠡᠷᢉᠡᠵᠢᠯ ᠦ᠋ᠨ ᠲᠡᢉᠦᠰᠦᢉᠴᠢᠳ ᠦ᠋ᠨ ᠭᠣᠣᠯᠴᠢ ᠳ᠋ᠦᠩ ᠦ᠋ᠨ ᠳᠤᠨᠳᠠᠵᠢ:   <span style={{ fontFamily: 'CMSUB', fontSize: '12px' }}>{datas?.score?.average_score_prof && datas?.score?.average_score_prof?.split('.')[0]}<span style={{ fontFamily: 'serif', fontWeight: 'bolder' }}>.</span>{datas?.score?.average_score_prof && datas?.score?.average_score_prof?.split('.')[1]}</span></div>
+                            </div>
+                    }
+
                     {
                         (datas?.graduation_work?.lesson_type != 1 && datas?.graduation_work?.diplom_topic)
                         &&
@@ -486,7 +505,7 @@ export default function PrintAttachmentMongolia()
                                             {
                                                 return (
                                                     <div key={idx} style={{ height: `${100/datas?.graduation_work?.lesson.length}%`, display: 'flex' }}>
-                                                        <span style={{ height: '80%' }}>{val?.name_uig}</span>
+                                                        <span style={{ height: '65%' }}>{val?.name_uig}</span>
                                                         {tooBichih((val?.score_register?.teach_score || 0) + (val?.score_register?.exam_score || 0))} <span style={{ fontFamily: 'serif' }}>.{val?.score_register?.assessment}</span>
                                                     </div>
                                                 )
@@ -495,25 +514,6 @@ export default function PrintAttachmentMongolia()
                                 </>
                         }
                     </div>
-
-                    <div className='d-flex' style={{ writingMode: 'vertical-lr', marginRight: '20px', height: '100%' }}>
-                        <div className='' style={{height: '33.3%'}}>ᠨᠡᠶᠢᠲᠡ ᠪᠠᠭᠴᠡ ᠴᠠᠭ: {tooBichih(datas?.score?.max_kredit)}</div>
-                        <div className={'mt-2'} style={{height: '33.3%'}}>ᠭᠣᠣᠯᠴᠢ ᠣᠨᠤᠭ᠎ᠠ:  <span style={{ fontFamily: 'CMSUB', fontSize: '12px' }}>{datas?.score?.average_score.split('.')[0]}<span style={{ fontFamily: 'serif', fontWeight: 'bolder' }}>.</span>{datas?.score?.average_score.split('.')[1]}</span></div>
-                        {
-                            printDatas?.student?.group?.degree?.degree_code !== 'D'
-                            &&
-                            <div className='mt-2' style={{height: '33.3%'}}>ᠭᠣᠣᠯᠴᠢ ᠳᠦᠩ:   <span style={{ fontFamily: 'CMSUB', fontSize: '12px' }}>{datas?.score?.assesment.split('.')[0]}<span style={{ fontFamily: 'serif', fontWeight: 'bolder' }}>.</span>{datas?.score?.assesment.split('.')[1]}</span></div>
-                        }
-                    </div>
-
-                    {
-                        printDatas?.student?.group?.degree?.degree_code === 'D'
-                        &&
-                            <div className='d-flex' style={{ writingMode: 'vertical-lr', marginRight: '20px', height: '100%' }}>
-                                <div className='' style={{height: '33.3%'}}>ᠭᠣᠣᠯᠴᠢ ᠳᠦᠩ:   <span style={{ fontFamily: 'CMSUB', fontSize: '12px' }}>{datas?.score?.assesment.split('.')[0]}<span style={{ fontFamily: 'serif', fontWeight: 'bolder' }}>.</span>{datas?.score?.assesment.split('.')[1]}</span></div>
-                                <div className='mt-2' style={{height: '66.7%'}}>ᠲᠤᠬᠠᠢ ᠶ᠋ᠢᠨ ᠤᠯᠠᠷᠢᠯ ᠤ᠋ᠨ ᠢᠵᠢᠯ ᠮᠡᠷᢉᠡᠵᠢᠯ ᠦ᠋ᠨ ᠲᠡᢉᠦᠰᠦᢉᠴᠢᠳ ᠦ᠋ᠨ ᠭᠣᠣᠯᠴᠢ ᠳ᠋ᠦᠩ ᠦ᠋ᠨ ᠳᠤᠨᠳᠠᠵᠢ:   <span style={{ fontFamily: 'CMSUB', fontSize: '12px' }}>{datas?.score?.average_score_prof && datas?.score?.average_score_prof?.split('.')[0]}<span style={{ fontFamily: 'serif', fontWeight: 'bolder' }}>.</span>{datas?.score?.average_score_prof && datas?.score?.average_score_prof?.split('.')[1]}</span></div>
-                            </div>
-                    }
 
                     {
                         listArr.map(
