@@ -987,10 +987,10 @@ function useApi(isDisplay=false) {
 			gpa:{
 				get:(limit, page, sort, search, degree, department, group, profession, year, season) =>
 				instance.get(`/print/gpa/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&degree=${degree}&group=${group}&department=${department}&profession=${profession}&lesson_year=${year}&lesson_season=${season}&school=${school_id}`),
-				getProp: (limit, page, sort, search, degree, department, profession, year, season, status) =>
-					instance.get(`/print/gpa-profession/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&degree=${degree}&status=${status}&department=${department}&profession=${profession}&lesson_year=${year}&lesson_season=${season}&school=${school_id}`),
+				getProp: (limit, page, sort, search, degree, department, profession, status, level) =>
+					instance.get(`/print/gpa-profession/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&degree=${degree}&status=${status}&department=${department}&profession=${profession}&level=${level}&school=${school_id}`),
 
-				post: (year, season, profession, status) => instance.post(`/print/gpa-profession/?profession=${profession}&lesson_year=${year}&lesson_season=${season}&status=${status}`)
+				post: ( profession, status, level) => instance.post(`/print/gpa-profession/?profession=${profession}&status=${status}&level=${level}`)
 			},
 			/* Дүнгийн жагсаалт*/
 			score:{

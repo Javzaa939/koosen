@@ -850,20 +850,23 @@ class GpaProfessionAPIView(
 
     def get_queryset(self):
         queryset = self.queryset
-        status = self.request.query_params.get('status')
         degree = self.request.query_params.get('degree')
-        lesson_year = self.request.query_params.get('lesson_year')
-        lesson_season = self.request.query_params.get('lesson_season')
         department = self.request.query_params.get('department')
+        level = self.request.query_params.get('level')
+        status = self.request.query_params.get('status')
         sorting = self.request.query_params.get('sorting')
 
         # Тэнхимээр хайх
         if department:
             queryset = queryset.filter(profession__department=department)
 
-        # Ангиар хайх
-        # if status:
-        #     queryset = queryset.filter(is_graduate=status)
+        # Түвшингээр хайх
+        if level:
+            queryset = queryset.filter(level=level)
+
+        # Түвшингээр хайх
+        if str2bool(status):
+            queryset = queryset.filter(is_graduate=True)
 
         # Боловсролын зэргээр хайлт хийх
         if degree:
@@ -887,8 +890,7 @@ class GpaProfessionAPIView(
         score_queryset = ScoreRegister.objects.all()
         gradution_queryset = GraduationWork.objects.all()
 
-        lesson_year = self.request.query_params.get('lesson_year')
-        lesson_season = self.request.query_params.get('lesson_season')
+        level = self.request.query_params.get('level')
 
         # Төгсөлтийн ажлаас бодох эсэх
         status = str2bool(self.request.query_params.get('status'))
@@ -897,14 +899,10 @@ class GpaProfessionAPIView(
         profession = self.request.query_params.get('profession')
 
         # Хичээлийн жил хайх
-        if lesson_year:
-            gradution_queryset = gradution_queryset.filter(lesson_year=lesson_year)
-            score_queryset = score_queryset.filter(lesson_year=lesson_year)
-
-        # Хичээлийн улирал хайх
-        if lesson_season:
-            gradution_queryset = gradution_queryset.filter(lesson_season=lesson_season)
-            score_queryset = score_queryset.filter(lesson_season=lesson_season)
+        if level and level != 0:
+            gradution_queryset = gradution_queryset.filter(student__group__level=level)
+            score_queryset = score_queryset.filter(student__group__level=level)
+            student_queryset = student_queryset.filter(group__level=level)
 
         # Хөтөлбөрөөр хайх
         if department:
@@ -917,6 +915,7 @@ class GpaProfessionAPIView(
 
         # Төгсөх гэж байгаа төлөвтэй оюутнууд
         if status:
+            level = 0
             student_ids = gradution_queryset.values_list('student', flat=True)
             student_queryset = student_queryset.filter(id__in=student_ids)
 
@@ -1004,14 +1003,12 @@ class GpaProfessionAPIView(
             try:
                 self.queryset.update_or_create(
                     profession=ProfessionDefinition.objects.get(pk=profession),
-                    lesson_year=lesson_year if lesson_year else None,
-                    lesson_season=Season.objects.get(pk=lesson_season) if lesson_season else None,
+                    level=level,
                     defaults={
                         'is_graduate': True if status else False,
                         'student_count': all_student,
                         'gpa_score': final_student_score,
                         'gpa': final_student_gpa,
-                        'level': 0
                     }
                 )
             except Exception as e:
