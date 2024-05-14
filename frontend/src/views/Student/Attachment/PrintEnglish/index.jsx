@@ -449,17 +449,17 @@ export default function PrintAttachmentEnglish()
                 </div>
 
                 <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
-                    <div className='d-flex' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
+                    <div className='d-flex' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
                         <span className='fw-normal w-50'>Last name::</span> <span>{printDatas?.student?.last_name_eng}</span>
                     </div>
-                    <div className='d-flex px-1' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
+                    <div className='d-flex px-1' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
                         <span className='fw-normal w-50'>Profession:</span> <span className='text-uppercase'>{printDatas?.student?.group?.profession?.name_eng}</span>
                     </div>
-                    <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
+                    <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
                         <span className='fw-normal w-50' style={{ width: '200px'}}>Commenced:</span><span>{printDatas?.student?.group?.join_year?.substring(0, 4)}</span>
                     </div>
                     {
-                        printDatas?.student?.group?.degree?.degree_code === 'D'
+                        printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score
                         &&
                         <div className='d-flex px-2' style={{ width: '25%'}} >
                             <span className='fw-normal w-50' style={{ width: '200px'}}>Entrance exam point:</span><span className='ms-5'>{printDatas?.student?.eysh_score}</span>
@@ -467,10 +467,10 @@ export default function PrintAttachmentEnglish()
                     }
                 </div>
                 <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
-                    <div className='d-flex' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
+                    <div className='d-flex' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
                         <span className='fw-normal w-50'>First name:</span> <span>{printDatas?.student?.first_name_eng}</span>
                     </div>
-                    <div className='d-flex px-1' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
+                    <div className='d-flex px-1' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
                         {
                             printDatas?.student?.group?.degree?.degree_code === 'D'
                             ?
@@ -483,12 +483,12 @@ export default function PrintAttachmentEnglish()
                                 </>
                         }
                     </div>
-                    <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
+                    <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
                         <span className='fw-normal w-50' style={{ width: '200px'}}>Completed:</span> <span>{printDatas?.student?.graduation_work?.lesson_year?.substring(5, 9)}</span>
                     </div>
                 </div>
                 <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
-                    <div className='d-flex' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
+                    <div className='d-flex' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
                         <span className='fw-normal w-50'>Registration number:</span> <span>{engVseg(printDatas?.student?.register_num[0])}{engVseg(printDatas?.student?.register_num[1])}{printDatas?.student?.register_num.slice(-8)}</span>
                     </div>
                     {
@@ -498,13 +498,13 @@ export default function PrintAttachmentEnglish()
                                 <span className='fw-normal w-50'>Diploma Number of Bachelor's Degree:</span> <span className='text-uppercase'>{printDatas?.student?.graduation_work?.back_diplom_num}</span>
                             </div>
                     }
-                    <div className={`d-flex ${printDatas?.student?.group?.degree?.degree_code === 'D' ? 'px-1' : 'px-2'}`} style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
+                    <div className={`d-flex ${printDatas?.student?.group?.degree?.degree_code === 'D' ? 'px-1' : 'px-2'}`} style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
                         <span className='fw-normal w-50'>Order number:</span> <span className='text-uppercase'>{printDatas?.student?.graduation_work?.graduation_number}</span>
                     </div>
                     {
                         printDatas?.student?.group?.degree?.degree_code === 'D'
                         &&
-                        <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '50%' : '33.3%' }} >
+                        <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '50%' : '33.3%' }} >
                             <span className='fw-normal w-50' style={{ width: '200px'}}>GPA of previous level of education: </span><span className='ms-5'>{printDatas?.student?.secondary_school}</span>
                         </div>
                     }

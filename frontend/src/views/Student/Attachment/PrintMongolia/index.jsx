@@ -388,17 +388,17 @@ export default function PrintAttachmentMongolia()
                 </div>
 
                 <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
-                    <div className='d-flex' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
+                    <div className='d-flex' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
                         <span className='fw-normal w-50'>Эцэг /Эх/-ийн нэр:</span> <span>{printDatas?.student?.last_name}</span>
                     </div>
-                    <div className='d-flex px-1' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
+                    <div className='d-flex px-1' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
                         <span className='fw-normal w-50'>Хөтөлбөрийн нэр:</span> <span className='text-uppercase'>{printDatas?.student?.group?.profession?.name}</span>
                     </div>
-                    <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
+                    <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score === 'D' ? '25%' : '33.3%' }} >
                         <span className='fw-normal w-50' style={{ width: '200px'}}>Элссэн он:</span><span>{printDatas?.student?.group?.join_year?.substring(0, 4)}</span>
                     </div>
                     {
-                        printDatas?.student?.group?.degree?.degree_code === 'D'
+                        (printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score)
                         &&
                         <div className='d-flex px-2' style={{ width: '25%'}} >
                             <span className='fw-normal w-50' style={{ width: '200px'}}>Элсэлтийн шалгалтын оноо:</span><span className='ms-5'>{printDatas?.student?.eysh_score}</span>
@@ -406,10 +406,10 @@ export default function PrintAttachmentMongolia()
                     }
                 </div>
                 <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
-                    <div className='d-flex' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
+                    <div className='d-flex' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
                         <span className='fw-normal w-50'>Нэр:</span> <span>{printDatas?.student?.first_name}</span>
                     </div>
-                    <div className='d-flex px-1' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
+                    <div className='d-flex px-1' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
                         {
                             printDatas?.student?.group?.degree?.degree_code === 'D'
                             ?
@@ -422,28 +422,28 @@ export default function PrintAttachmentMongolia()
                                 </>
                         }
                     </div>
-                    <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
+                    <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
                         <span className='fw-normal w-50' style={{ width: '200px'}}>Төгссөн он:</span> <span>{printDatas?.student?.graduation_work?.lesson_year?.substring(5, 9)}</span>
                     </div>
                 </div>
                 <div className='fw-bolder d-flex' style={{ fontSize: '11px' }}>
-                    <div className='d-flex' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
+                    <div className='d-flex' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
                         <span className='fw-normal w-50'>Регистрийн дугаар:</span> <span>{printDatas?.student?.register_num}</span>
                     </div>
                     {
                         printDatas?.student?.group?.degree?.degree_code !== 'D'
                         &&
-                        <div className='d-flex px-1' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }}>
+                        <div className='d-flex px-1' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }}>
                             <span className='fw-normal w-50'>Өмнөх зэргийн дипломын дугаар:</span> <span className='text-uppercase'>{printDatas?.student?.graduation_work?.back_diplom_num}</span>
                         </div>
                     }
-                    <div className={`d-flex ${printDatas?.student?.group?.degree?.degree_code === 'D' ? 'px-1' : 'px-2'}`} style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '25%' : '33.3%' }} >
+                    <div className={`d-flex ${printDatas?.student?.group?.degree?.degree_code === 'D' ? 'px-1' : 'px-2'}`} style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
                         <span className='fw-normal w-50'>Тушаалын дугаар:</span> <span className='text-uppercase'>{printDatas?.student?.graduation_work?.graduation_number}</span>
                     </div>
                     {
                         printDatas?.student?.group?.degree?.degree_code === 'D'
                         &&
-                        <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' ? '50%' : '33.3%' }} >
+                        <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '50%' : '33.3%' }} >
                             <span className='fw-normal w-50' style={{ width: '200px'}}>Өмнөх шатны боловсролын үнэлгээний дундаж оноо: </span><span className='ms-5'>{printDatas?.student?.secondary_school}</span>
                         </div>
                     }

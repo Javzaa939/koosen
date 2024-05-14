@@ -434,10 +434,14 @@ export default function PrintAttachmentMongolia()
                     printDatas?.student?.group?.degree?.degree_code === 'D'
                     &&
                     <div className='d-flex flex-column lh-sm' style={{ fontSize: '11px', marginLeft: '10px' }} >
-                        <div style={{ height:'40%', writingMode: 'vertical-lr', display: 'flex' }}>
-                            <span className='h-50'>ᠡᠯᠰᠡᠯᠲᠡ ᠶ᠋ᠢᠨ ᠰᠢᠯᠭᠠᠯᠲᠠ ᠶ᠋ᠢᠨ ᠣᠨᠤᠭ᠎ᠠ:</span>
-                            <span style={{ fontFamily: 'cmdashitseden', fontSize: '14px' }}>{tooBichih(printDatas?.student?.eysh_score)}</span>
-                        </div>
+                        {
+                            printDatas?.student?.eysh_score
+                            &&
+                            <div style={{ height:'40%', writingMode: 'vertical-lr', display: 'flex' }}>
+                                <span className='h-50'>ᠡᠯᠰᠡᠯᠲᠡ ᠶ᠋ᠢᠨ ᠰᠢᠯᠭᠠᠯᠲᠠ ᠶ᠋ᠢᠨ ᠣᠨᠤᠭ᠎ᠠ:</span>
+                                <span style={{ fontFamily: 'cmdashitseden', fontSize: '14px' }}>{tooBichih(printDatas?.student?.eysh_score)}</span>
+                            </div>
+                        }
                         <div style={{ height: '60%', writingMode: 'vertical-lr', display: 'flex' }}>
                             <span className='h-50'>ᠡᠮᠦᠨᠡᢈᠢ ᠱᠠᠲᠤᠨ ᠤ᠋ ᠪᠣᠯᠪᠠᠰᠤᠷᠠᠯ ᠤ᠋ᠨ ᠦᠨᠡᠯᠡᢉᠡᠨ ᠦ᠋ ᠳᠤᠨᠳᠠᠵᠢ ᠣᠨᠤᠭ᠎ᠠ:</span>
                             {tooBichih(printDatas?.student?.secondary_school)}
