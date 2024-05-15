@@ -1,7 +1,4 @@
 from django.urls import path
-from .views import StudentListByLessonTeacherAPIView
-from .views import ScheduleAPIView
-from .views import GpaAPIView
 from .views import *
 
 urlpatterns = [
