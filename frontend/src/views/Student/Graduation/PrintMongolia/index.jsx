@@ -185,7 +185,7 @@ export default function PrintMongolia()
                             }}
                         />
                     }
-                    <div className='pb-50 ms-25'>Улаанбаатар</div>
+                    <div className='pb-50 ms-25'>Улаанбаатар хот</div>
                 </span>
                 <span className='pb-50 pe-5 me-1'>Бүртгэлийн дугаар: {data?.registration_num}</span>
             </div>
