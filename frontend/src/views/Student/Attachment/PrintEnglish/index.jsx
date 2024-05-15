@@ -450,7 +450,7 @@ export default function PrintAttachmentEnglish()
 
                 <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
                     <div className='d-flex' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
-                        <span className='fw-normal w-50'>Last name::</span> <span>{printDatas?.student?.last_name_eng}</span>
+                        <span className='fw-normal w-50'>Last name:</span> <span className='text-uppercase'>{printDatas?.student?.last_name_eng}</span>
                     </div>
                     <div className='d-flex px-1' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
                         <span className='fw-normal w-50'>Profession:</span> <span className=''>{printDatas?.student?.group?.profession?.name_eng}</span>
@@ -468,7 +468,7 @@ export default function PrintAttachmentEnglish()
                 </div>
                 <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
                     <div className='d-flex' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
-                        <span className='fw-normal w-50'>First name:</span> <span>{printDatas?.student?.first_name_eng}</span>
+                        <span className='fw-normal w-50'>First name:</span> <span className='text-uppercase'>{printDatas?.student?.first_name_eng}</span>
                     </div>
                     <div className='d-flex px-1' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
                         {
