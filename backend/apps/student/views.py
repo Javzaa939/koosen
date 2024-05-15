@@ -3547,7 +3547,6 @@ class GraduationWorkQrAPIView(
                         'register',
                         'diplom_num'
                     )
-
         with transaction.atomic():
             for student in students:
                 diplom_num = student.get('diplom_num')
@@ -3568,7 +3567,7 @@ class GraduationWorkQrAPIView(
                 # 404 Not Found: Дипломын дугаар буруу эсвэл уг дипломын дугаар үүсээгүй үед
                 if res.status_code == 404:
                     not_found_student.append(
-                        **student
+                        student
                     )
 
                 if res.status_code == 200:
