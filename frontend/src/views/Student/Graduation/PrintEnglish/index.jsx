@@ -129,9 +129,9 @@ export default function PrintMongolia()
             {isLoading && Loader}
 
             {/* Үндсэн хэсэг */}
-            <div className='text-center' style={{ width: '100%',fontSize: '19px', lineHeight: '24px', marginBottom: "100px" }} >
+            <div className='text-center' style={{ width: '100%',fontSize: '19px', lineHeight: '22px', marginBottom: "100px" }} >
                 <div className='m-auto' >
-                    <span className='text-center'>This is to certify that <span className='fw-bolder text-uppercase'>{data?.student?.first_name_eng}</span> <span className='fw-bolder'>{data?.student?.last_name_eng}</span> citizen of {data?.student?.citizenship?.name_eng}, 
+                    <span className='text-center'>This is to certify that <span className='fw-bolder text-uppercase'>{data?.student?.first_name_eng}</span> <span className='fw-bolder'>{data?.student?.last_name_eng}</span> citizen of {data?.student?.citizenship?.name_eng},
                         <br />
                         has completed requirements of the programme {data?.student?.group?.profession?.name_eng} ({data?.student?.group?.profession?.code})
                         <br />
