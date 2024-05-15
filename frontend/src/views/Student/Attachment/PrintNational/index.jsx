@@ -485,7 +485,7 @@ export default function PrintAttachmentMongolia()
                         </div>
                     }
 
-                    <div style={{ writingMode: 'vertical-lr', display: 'flex', marginRight: '10px' }} >
+                    <div style={{ writingMode: 'vertical-lr', display: 'flex', marginRight: '50px' }} >
                         {
                             datas?.graduation_work?.lesson_type == 1
                             ?
