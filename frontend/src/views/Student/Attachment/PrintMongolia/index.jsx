@@ -392,7 +392,7 @@ export default function PrintAttachmentMongolia()
                         <span className='fw-normal w-50'>Эцэг /Эх/-ийн нэр:</span> <span>{printDatas?.student?.last_name}</span>
                     </div>
                     <div className='d-flex px-1' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
-                        <span className='fw-normal w-50'>Хөтөлбөрийн нэр:</span> <span className='text-uppercase'>{printDatas?.student?.group?.profession?.name}</span>
+                        <span className='fw-normal w-50'>Хөтөлбөрийн нэр:</span> <span className=''>{printDatas?.student?.group?.profession?.name}</span>
                     </div>
                     <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score === 'D' ? '25%' : '33.3%' }} >
                         <span className='fw-normal w-50' style={{ width: '200px'}}>Элссэн он:</span><span>{printDatas?.student?.group?.join_year?.substring(0, 4)}</span>
@@ -512,7 +512,7 @@ export default function PrintAttachmentMongolia()
                     (datas?.graduation_work?.lesson_type != 1 && datas?.graduation_work?.diplom_topic)
                     &&
                     <div className='px-1 mb-25' style={{ paddingTop: '2px' }} >
-                        <span className=''>Дипломын ажлын нэр: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic}</span></span>
+                        <span className=''>Дипломын ажлын сэдэв: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic}</span></span>
                     </div>
                 }
 
