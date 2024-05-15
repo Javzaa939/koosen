@@ -445,7 +445,7 @@ export default function PrintAttachmentEnglish()
                     <p className='text-uppercase' style={{ marginBottom: '0px' }} >UNIVERSITY OF INTERNAL AFFAIRS, MONGOLIA</p>
                     <p className='text-uppercase' style={{ marginBottom: '0px' }} >{printDatas?.student?.department?.school_eng}</p>
                     <p style={{ fontSize: '12px', fontWeight: '500' }} className='mb-0' >{printDatas?.student?.graduation_work?.diplom_num} <span className='text-lowercase'>{printDatas?.student?.group?.degree?.degree_eng_name}</span> degree diploma</p>
-                    <p className='' style={{ fontSize: 12, fontWeight: 500 }}>REGISTER No: {printDatas?.student?.graduation_work?.registration_num}</p>
+                    <p className='' style={{ fontSize: 12, fontWeight: 500 }}>Register No: {printDatas?.student?.graduation_work?.registration_num}</p>
                 </div>
 
                 <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
