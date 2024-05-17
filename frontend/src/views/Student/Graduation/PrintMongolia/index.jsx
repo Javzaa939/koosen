@@ -6,13 +6,13 @@ import useLoader from '@hooks/useLoader';
 
 import './style.css'
 
-export default function PrintMongolia({ nestingData })
+export default function PrintMongolia({ printOnce })
 {
     const data = JSON.parse(localStorage.getItem('blankDatas'))
 
-    if (nestingData) {
-        Object.assign(data, nestingData);
-    }
+    // if (nestingData) {
+    //     Object.assign(data, nestingData);
+    // }
     // Loader
 	const { fetchData, Loader, isLoading } = useLoader({ isFullScreen: false })
 
