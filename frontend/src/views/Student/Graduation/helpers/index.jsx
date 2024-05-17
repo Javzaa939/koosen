@@ -130,7 +130,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 
 	function printAll(data, printValue)
 	{
-		data['lastNameChecked'] = document.getElementById(`graduationLastNameChecked${data.id}`).checked
+		// data['lastNameChecked'] = document.getElementById(`graduationLastNameChecked${data.id}`).checked
 		localStorage.setItem('blankDatas', JSON.stringify(data))
 
 		let button = document.getElementById('clickBtn')
