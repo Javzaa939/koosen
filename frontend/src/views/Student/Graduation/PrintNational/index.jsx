@@ -6,7 +6,7 @@ import useLoader from '@hooks/useLoader';
 
 import './style.css'
 
-export default function PrintMongolia()
+export default function PrintNational()
 {
     const data = JSON.parse(localStorage.getItem('blankDatas'))
 

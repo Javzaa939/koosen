@@ -1,6 +1,6 @@
 import { useContext, useRef } from 'react';
 
-import { X, Edit, Printer, AlertOctagon} from "react-feather";
+import { X, Edit, Printer, AlertOctagon, Target} from "react-feather";
 import { Badge, UncontrolledTooltip, Input, Label } from 'reactstrap';
 
 import useModal from '@hooks/useModal'
@@ -124,6 +124,18 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
             default:
                 break;
         }
+
+        button.click()
+	}
+
+	function printAll(data, printValue)
+	{
+		data['lastNameChecked'] = document.getElementById(`graduationLastNameChecked${data.id}`).checked
+		localStorage.setItem('blankDatas', JSON.stringify(data))
+
+		let button = document.getElementById('clickBtn')
+
+		button.href = `/student/graduation/printmain/`
 
         button.click()
 	}
@@ -298,38 +310,54 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 						}
 						{
 							<>
-								<Label>
+								{/* <Label>
 									Овог
-								</Label>
-								<Input
+								</Label> */}
+								{/* <Input
 									type='checkbox'
 									defaultChecked
 									style={{ marginRight: '10px' }}
 									id={`graduationLastNameChecked${row?.id}`}
-								/>
-								<a role="button"
-									style={{ marginRight: '10px' }}
-									onClick={() => printMongolianGra(row, 'mongolian')}
-									id={`complaintListDatatablePrintMnt${row?.id}`}
-								>
-									<img width={18} src="/publicfiles/mongolia.png" alt="mongolia" />
-								</a>
-								<UncontrolledTooltip placement='top' target={`complaintListDatatablePrintMnt${row.id}`} ><Printer width={"16px"} style={{ marginRight: '3px' }} />Хэвлэх-MNT</UncontrolledTooltip>
-								<a role="button"
-									style={{ marginRight: '10px' }}
-									onClick={() => printMongolianGra(row, 'english')}
-									id={`complaintListDatatablePrintEng${row?.id}`}
-								>
-									<img width={18} src="/publicfiles/english.png" alt="english" />
-								</a>
-								<UncontrolledTooltip placement='top' target={`complaintListDatatablePrintEng${row.id}`} ><Printer width={"16px"} style={{ marginRight: '3px' }} />Хэвлэх-ENG</UncontrolledTooltip>
-								<a role="button"
-									onClick={() => printMongolianGra(row, 'uigarjin')}
-									id={`complaintListDatatablePrintNat${row?.id}`}
-								>
-									<img width={18} src="/publicfiles/uigarjin.png" alt="uigarjin" />
-								</a>
-								<UncontrolledTooltip placement='top' target={`complaintListDatatablePrintNat${row.id}`} ><Printer width={"16px"} style={{ marginRight: '3px' }} />Хэвлэх-UIG</UncontrolledTooltip>
+								/> */}
+								<span title='Бүх нүүр хэвлэх'>
+									<a role="button"
+										onClick={() => printAll(row)}
+										id={`complaintListDatatablePrintNat${row?.id}`}
+									>
+										<Target
+											size={16}
+										/>
+									</a>
+								</span>
+								<span title={'Хэвлэх-MNT'}>
+									<a role="button"
+										style={{ marginRight: '10px', marginLeft: '10px' }}
+										onClick={() => printMongolianGra(row, 'mongolian')}
+										id={`complaintListDatatablePrintMnt${row?.id}`}
+									>
+										<img width={18} src="/publicfiles/mongolia.png" alt="mongolia" />
+									</a>
+								</span>
+								{/* <UncontrolledTooltip placement='top' target={`complaintListDatatablePrintMnt${row.id}`} ><Printer width={"16px"} style={{ marginRight: '3px' }} />Хэвлэх-MNT</UncontrolledTooltip> */}
+								<span title='Хэвлэх-ENG'>
+									<a role="button"
+										style={{ marginRight: '10px' }}
+										onClick={() => printMongolianGra(row, 'english')}
+										id={`complaintListDatatablePrintEng${row?.id}`}
+									>
+										<img width={18} src="/publicfiles/english.png" alt="english" />
+									</a>
+								</span>
+								{/* <UncontrolledTooltip placement='top' target={`complaintListDatatablePrintEng${row.id}`} ><Printer width={"16px"} style={{ marginRight: '3px' }} />Хэвлэх-ENG</UncontrolledTooltip> */}
+								<span title='Хэвлэх-UIG'>
+									<a role="button"
+										onClick={() => printMongolianGra(row, 'uigarjin')}
+										id={`complaintListDatatablePrintNat${row?.id}`}
+									>
+										<img width={18} src="/publicfiles/uigarjin.png" alt="uigarjin" />
+									</a>
+								</span>
+								{/* <UncontrolledTooltip placement='top' target={`complaintListDatatablePrintNat${row.id}`} ><Printer width={"16px"} style={{ marginRight: '3px' }} />Хэвлэх-UIG</UncontrolledTooltip> */}
 							</>
 						}
 					</div>
