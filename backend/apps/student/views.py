@@ -1916,8 +1916,10 @@ class GraduationWorkAPIView(
         student = data.get("student")
         instance = self.get_object()
 
-        student_qs = self.queryset.filter(student_id=student).exclude(id=pk)
+        if 'diplom_qr' in data:
+            del data['diplom_qr']
 
+        student_qs = self.queryset.filter(student_id=student).exclude(id=pk)
         if student_qs:
             return request.send_error('ERR_002', 'Оюутан бүртгэгдсэн байна')
 
