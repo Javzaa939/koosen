@@ -2,7 +2,7 @@
 import { Fragment, useState, useEffect, useContext} from 'react'
 
 import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, ListGroupItem, Spinner } from 'reactstrap'
-import { ChevronDown, Search, Plus, Menu, Edit, Trash2, FileText, Download } from 'react-feather'
+import { ChevronDown, Search, Plus, Menu, Edit, Trash2, FileText, Download, Printer } from 'react-feather'
 import DataTable from 'react-data-table-component'
 import { useTranslation } from 'react-i18next'
 import { useForm, Controller } from "react-hook-form";
@@ -33,6 +33,7 @@ import FileModal from '@lms_components/FileModal'
 import '@styles/react/libs/drag-and-drop/drag-and-drop.scss'
 import DetailModal from './DetailModal'
 import excelDownload from '@src/utility/excelDownload'
+import PrintModal from './PrintModal'
 
 const Graduation = () => {
 
@@ -334,8 +335,49 @@ const Graduation = () => {
         }
     }
 
+    const [ selectedRows, setSelectedRows ] = useState([])
+    const [ printModal, setPrintModal ] = useState(false)
+
+    function rowSelectHandler(state){
+        var selectedRows = state.selectedRows
+
+		setSelectedRows(selectedRows);
+    }
+
+    function modalHandler() {
+        setPrintModal(!printModal)
+    }
+
+    // function multiplePrintHandler() {
+
+    //     selectedRows.map((val, i) => {
+	// 	    val['lastNameChecked'] = document.getElementById(`graduationLastNameChecked${val.id}`).checked
+    //     })
+
+	// 	// data['lastNameChecked'] = document.getElementById(`graduationLastNameChecked${data.id}`).checked
+	// 	// localStorage.setItem('blankDatas', JSON.stringify(data))
+
+	// 	// let button = document.getElementById('clickBtn')
+
+	// 	// button.href = `/student/graduation/printmain/`
+
+    //     // button.click()
+    //     console.log(selectedRows,'rsss')
+
+    //     modalHandler()
+
+	// }
+
 	return (
 		<Fragment>
+            {
+                printModal &&
+                <PrintModal
+                    printModal={printModal}
+                    multiplePrintHandler={multiplePrintHandler}
+                    selectedRows={selectedRows}
+                />
+            }
             {importModal &&
                 <FileModal
                     isOpen={importModal}
@@ -349,7 +391,6 @@ const Graduation = () => {
                     onSubmit={onSubmit}
                 />
             }
-
             {
                 showModal &&
                     <DetailModal
@@ -433,6 +474,14 @@ const Graduation = () => {
                 <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
                     <CardTitle tag="h4">{t('Төгсөлтийн ажил')}</CardTitle>
                     <div className='d-flex flex-wrap mt-md-0 mt-1 gap-1'>
+                        {/* <Button
+                            color='primary'
+                            disabled={selectedRows.length === 0}
+                            onClick={() => {multiplePrintHandler()}}
+                        >
+                            <Printer size={15}/>
+                            <span className='align-middle ms-50'>Хэвлэлт</span>
+                        </Button> */}
                         <Button
                             color='primary'
                             disabled={select_value.group ? false : true}
@@ -662,6 +711,8 @@ const Graduation = () => {
                         paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
                         fixedHeader
                         fixedHeaderScrollHeight='62vh'
+                        // selectableRows
+                        // onSelectedRowsChange={(state) => rowSelectHandler(state)}
                     />
                 </div>
         	</Card>
