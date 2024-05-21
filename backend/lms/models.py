@@ -4169,3 +4169,25 @@ class RequestLogDelete(models.Model):
                                 on_delete=models.SET_NULL, db_constraint=False,
                                 verbose_name='Хэрэглэгчийн ID')
     status_code = models.SmallIntegerField(null=True, verbose_name='request status code')
+
+
+class AttachmentConfig(models.Model):
+    """ Хавсралтын тохиргоо ангиар нь тохируулах
+    """
+
+    MONGOLIAN = 1
+    ENGLISH = 2
+    UIGARJIN = 3
+
+    ATTACHMENT_TYPE = (
+        (MONGOLIAN, "Монгол"),
+        (ENGLISH, "Англи"),
+        (UIGARJIN, "Уйгаржин"),
+    )
+
+    profession = models.ForeignKey(ProfessionDefinition, on_delete=models.CASCADE, verbose_name="Мэргэжил")
+    row_count = ArrayField(models.IntegerField(null=True), blank=True,null=True,verbose_name='Туслах багш')
+    atype = models.IntegerField(choices=ATTACHMENT_TYPE, default=MONGOLIAN, verbose_name="Хавсралтын төрөл")
+    is_lastname = models.BooleanField(default=False, verbose_name='Овог харуулах эсэх')
+    is_center = models.BooleanField(default=False, verbose_name='Голлуулах эсэх')
+    give_date = models.DateField(verbose_name='Олгосон огноо', null=True)

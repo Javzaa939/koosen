@@ -2634,6 +2634,20 @@ class StudentCalculateGpaDiplomaGroupAPIView(
         return request.send_info('INF_019')
 
 
+
+@permission_classes([IsAuthenticated])
+class StudentAttachmentConfigAPIView(
+    generics.GenericAPIView
+):
+    """ Хавсрлатын тохиргоо """
+
+    def post(self, request):
+        data = request.data
+        row_count = json_load(data.get('row_count'))
+        stype = data.get('type')
+
+        return request.send_data([])
+
 @permission_classes([IsAuthenticated])
 class StudentGpaDiplomaValuesAPIView(
     generics.GenericAPIView

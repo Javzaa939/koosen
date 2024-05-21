@@ -93,6 +93,9 @@ urlpatterns = [
     # Ангиар нь хавсралтын дүн хадгалах
     path('calculate-gpa-diploma/group/', StudentCalculateGpaDiplomaGroupAPIView.as_view()),
 
+    # Мэргэжлээр нь хавсралтын тохиргоо хадгалах
+    path('calculate-gpa-diploma/config/', StudentAttachmentConfigAPIView.as_view()),
+
     # Хавсралт хэвлэх үед голч бодох
     path('gpa-diploma-values/', StudentGpaDiplomaValuesAPIView.as_view()),
 
