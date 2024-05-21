@@ -812,6 +812,23 @@ class DashboardAPIView(
 
 
 @permission_classes([IsAuthenticated])
+class DashboardExcelAPIView(
+    generics.GenericAPIView
+):
+    """ Дашбоард тайлан """
+
+    queryset = AdmissionUserProfession.objects.all()
+    def get(self, request):
+
+        datas = [
+            {
+                'name': 'hi'
+            }
+        ]
+
+        return request.send_data(datas)
+
+@permission_classes([IsAuthenticated])
 class ElseltDescApiView(
     generics.GenericAPIView
 ):
