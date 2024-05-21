@@ -361,7 +361,7 @@ function useApi(isDisplay=false) {
 					return instance.get(`/learning/lessonstandart/timetable-list/?school=${school_id}&lesson_year=${cyear_name}&lesson_season=${cseason_id}`)
 				},
 
-				getListAll: () => instance.get(`/learning/lessonstandart/list/`),
+				getListAll: (profession='', search='') => instance.get(`/learning/lessonstandart/list/?profession=${profession}&search=${search}`),
 				getOneProfessionList: (profession) => instance.get(`/learning/lessonstandart/list/profession/${profession}/`),
 				get: (limit, page, sort, search, dep_id, category_id) => instance.get(`/learning/lessonstandart/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&department=${dep_id}&category=${category_id}&schoolId=${school_id}`),
 				post: data => instance.post('/learning/lessonstandart/', data),
@@ -678,6 +678,8 @@ function useApi(isDisplay=false) {
 
 			// Голч бодуулах загвараар ангийн хүүхдүүдийн загварыг хадгалах
 			calculateGpaGroupGraduation: data => instance.post(`/student/calculate-gpa-diploma/group/`, data),
+
+			postConfig: data => instance.post(`/student/calculate-gpa-diploma/config/`, data),
 
 			/* Анги бүлгийн бүртгэл */
 			group:{

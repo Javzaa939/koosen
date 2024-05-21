@@ -18,6 +18,7 @@ import { getColumns } from '@views/Student/Attachment/Student/helpers/index.jsx'
 // ** Styles Imports
 import '@styles/react/libs/flatpickr/flatpickr.scss'
 import './style.css'
+import { formatDate } from '@src/utility/Utils';
 
 export default function AttachmentStudent()
 {
@@ -344,6 +345,19 @@ export default function AttachmentStudent()
         }
     }
 
+    /** Дипломын хавсралтын тохиргоо хадгалах*/
+    async function handleConfig() {
+        var cdata = {
+            'type': printValue,
+            'profession': datas?.student?.group?.profession?.id,
+            'row_count': JSON.stringify(checkedTableRowCount),
+            'give_date': formatDate(picker)
+        }
+        const { success } = await fetchData(studentApi.postConfig(cdata))
+        if (success) {
+        }
+    }
+
     return (
         <Fragment>
             { isLoading && Loader }
@@ -355,9 +369,26 @@ export default function AttachmentStudent()
                     <CardTitle tag="h4">{t('Хавсралт')}&nbsp;<small>(&nbsp;{datas?.student?.code} {datas?.student?.last_name} {datas?.student?.first_name}&nbsp;)</small></CardTitle>
                 </CardHeader>
                 <CardBody>
-                    <p className='mt-1 ms-1'>Хэвлэх</p>
+                    <div className='d-flex justify-content-between'>
+                        <p className='mt-1'>Хэвлэх</p>
+                        {/* <Button
+                            size='sm'
+                            color='primary'
+                            className='m-1'
+                            disabled={printValue ? false : true}
+                            onClick={() => showWarning({
+                                header: {
+                                    title: `${(`Хавсралтын  тохиргоо хадгалах`)}`,
+                                },
+                                question: `Та "${datas?.student?.group?.profession?.name}" хөтөлбөрийн ${printValue === 'mongolian' ? 'Монгол' : printValue === 'english' ? 'Англи' : 'Уйгаржин'} хавсралтын тохиргоо хадгалах гэж байна?`,
+                                onClick: () => handleConfig(),
+                                btnText: 'Хадгалах',
+                            })}
+                        >
+                            Тохиргоо хадгалах
+                        </Button> */}
+                    </div>
                     <Row>
-
                         <Col md={12}>
                             <Label className="form-label" for="print_mongolian">
                                 <Input

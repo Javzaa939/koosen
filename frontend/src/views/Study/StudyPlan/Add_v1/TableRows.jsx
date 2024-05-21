@@ -28,8 +28,10 @@ function TableRows({ rows, tableRowRemove, onValUpdate, profession }) {
     const { user } = useContext(AuthContext)
 
     const [standart_option, setStandartOption] = useState([])
+    const [searchStandartOption, setSearchOption] = useState([])
     const [standart_bagts_option, setStandartBagtsOption] = useState([])
     const [season_option, setSeasonOption] = useState(get_learningplan_season())
+    const [student_search_value, setStudentSearchValue] = useState('');
 
     // Loader
 	const { fetchData } = useLoader({});
@@ -39,11 +41,24 @@ function TableRows({ rows, tableRowRemove, onValUpdate, profession }) {
 
     // Хичээлийн жагсаалт
     async function getLessonStandart() {
-        const { success, data } = await fetchData(lessonStandartApi.getListAll())
+        const { success, data } = await fetchData(lessonStandartApi.getListAll(profession))
         if(success) {
             setStandartOption(data)
         }
     }
+
+    // Хичээлийн жагсаалт
+    async function getSearchOption(search) {
+        const { success, data } = await fetchData(lessonStandartApi.getListAll('', search))
+        if(success) {
+            var cstandart_option = [...standart_option]
+            if (data.length > 0) {
+                data.map((e) => cstandart_option.push(e))
+            }
+            setStandartOption(cstandart_option)
+        }
+    }
+
 
     // Хичээлийн жагсаалт
     async function getLessonBagtsStandart() {
@@ -76,6 +91,11 @@ function TableRows({ rows, tableRowRemove, onValUpdate, profession }) {
         return cseason_ids
     }
 
+    /** Хайлт хийх үед ажиллана*/
+    function handleStudentSelect(value){
+        getSearchOption(value)
+    }
+
     return rows.map((rowsData, index) => {
         const { lesson, previous_lesson, group_lesson, season, is_check_score, errors } = rowsData;
 
@@ -96,12 +116,33 @@ function TableRows({ rows, tableRowRemove, onValUpdate, profession }) {
                                     isClearable
                                     className={classnames('react-select', { 'is-invalid': !lesson }) }
                                     placeholder={t('-- Сонгоно уу --')}
-                                    options={standart_option || []}
-                                    value={lesson && standart_option.find((c) => c.id === lesson)}
-                                    noOptionsMessage={() => t('Хоосон байна.')}
+                                    options={ standart_option || []
+                                        // student_search_value.length === 0
+                                        //     ? standart_option || []
+                                        //     : searchStandartOption|| []
+                                    }
                                     onChange={(val) => {
                                         onChange(val?.id || '')
                                         onValUpdate('lesson', index, val?.id || '')
+                                    }}
+                                    value={
+                                        standart_option.find((c) => c.id === lesson)
+                                        // student_search_value.length === 0
+                                        //     ? standart_option.find((c) => c.id === lesson)
+                                        //     : searchStandartOption.find((c) => c.id === lesson)
+                                    }
+                                    noOptionsMessage={() =>
+                                        student_search_value.length > 1
+                                            ? t('Хоосон байна')
+                                            : null
+                                    }
+                                    onInputChange={(e) => {
+                                        setStudentSearchValue(e);
+                                        if(e.length > 2 && e !== student_search_value){
+                                            handleStudentSelect(e);
+                                        } else if (e.length === 0){
+                                            setSearchOption([]);
+                                        }
                                     }}
                                     menuPlacement="auto"
                                     // menuPosition='absolute'
