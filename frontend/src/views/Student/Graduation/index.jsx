@@ -723,7 +723,7 @@ const Graduation = () => {
             { formModal && <SignatureModal open={formModal} handleModal={handleModalSig} refreshDatas={getSignatureDatas} defaultDatas={updateData} /> }
 
             {/* Тушаал гаргах */}
-            {commandModal && <GraduationCommand open={commandModal} handleModal={handleCommandCreateModal} refreshDatas={getDatas}/>}
+            {commandModal && <GraduationCommand open={commandModal} handleModal={handleCommandCreateModal} refreshDatas={getDatas} studentOption={datas}/>}
 
             {/* Шинэ хуудас руу үсэргэх товч */}
             <Link className='d-none' to='/' id='clickBtn' target='_blank' ></Link>

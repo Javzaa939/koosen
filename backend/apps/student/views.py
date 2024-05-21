@@ -2704,6 +2704,7 @@ class StudentGpaDiplomaValuesAPIView(
                     inner join lms_lessonstandart ls
                     on lp.lesson_id=ls.id
                     where lp.profession_id = {profession_id} and lp.lesson_id = {lesson_id}
+                    order by lp.season, ls.name
                 '''.format(profession_id=student_prof_qs.id, lesson_id=lesson_first_data.id)
 
                 cursor = connection.cursor()
@@ -3183,6 +3184,10 @@ class StudentCommandListAPIView(
 
         year = self.request.query_params.get('year')
         season = self.request.query_params.get('season')
+        school = self.request.query_params.get('school')
+
+        if school:
+            self.queryset = self.queryset.filter(student__group__school=school)
 
         stud_qs = self.queryset.filter(lesson_year=year, lesson_season=season).values_list('student', flat=True)
         student_data = Student.objects.filter(id__in=stud_qs).values("id", "code", "last_name", "first_name")
