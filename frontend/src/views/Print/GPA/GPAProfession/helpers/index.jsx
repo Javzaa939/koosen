@@ -46,14 +46,8 @@ export function getColumns (currentPage, rowsPerPage, total_count) {
 			sortable: true,
         },
         {
-			name: t("Хичээлийн жил"),
-			selector: (row) => row?.lesson_year,
-            center: true,
-			sortable: true,
-        },
-		{
-			name: t("Хичээлийн жил"),
-			selector: (row) => row?.lesson_season_name,
+			name: t("Түвшин"),
+			selector: (row) => row?.level === 0 ? 'Бүх түвшин' : row?.level,
             center: true,
 			sortable: true,
         },

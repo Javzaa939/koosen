@@ -19,8 +19,8 @@ from django.db.models.functions import Concat
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 
-from functools import reduce
-from operator import or_
+# from functools import reduce
+# from operator import or_
 
 from lms.models import (
     Group,
@@ -357,17 +357,33 @@ class LessonStandartListAPIView(
     queryset = LessonStandart.objects.all()
     serializer_class = LessonStandartSerialzier
 
+    filter_backends = [SearchFilter]
+    search_fields = [
+        'code',
+        'name',
+        'name_eng',
+        'name_uig',
+        'kredit',
+        'category__category_name',
+        'definition',
+        'department__name'
+    ]
+
     def get(self, request):
 
         school = request.query_params.get('school')
+        department = request.query_params.get('department')
+        profession = request.query_params.get('profession')
 
         if school:
             self.queryset = self.queryset.filter(school=school)
 
-        department = request.query_params.get('department')
-
         if department:
             self.queryset = self.queryset.filter(department=department)
+
+        if profession:
+            lesson_ids = LearningPlan.objects.filter(profession=profession).values_list('lesson', flat=True)
+            self.queryset = self.queryset.filter(id__in=lesson_ids)
 
         less_standart_list = self.list(request).data
 

@@ -6,7 +6,7 @@ import useLoader from '@hooks/useLoader';
 
 import './style.css'
 
-export default function PrintMongolia()
+export default function PrintEnglish()
 {
     const data = JSON.parse(localStorage.getItem('blankDatas'))
 
@@ -129,17 +129,13 @@ export default function PrintMongolia()
             {isLoading && Loader}
 
             {/* Үндсэн хэсэг */}
-            <div className='text-center' style={{ width: '100%',fontSize: '19px', lineHeight: '24px', marginBottom: "100px" }} >
+            <div className='text-center' style={{ width: '100%', lineHeight: '30px', fontSize: '19px', marginBottom: "100px" }} >
                 <div className='m-auto' >
-                    <span className='text-center'>This is to certify that
-                        <br />
-                        <span className='fw-bolder text-uppercase'>{data?.student?.first_name_eng}</span> <span className='fw-bolder'>{data?.student?.last_name_eng}</span>
-                        <br />
-                        citizen of {data?.student?.citizenship?.name_eng},
+                    <span className='text-center'>This is to certify that <span className='fw-bolder'>{data?.student?.first_name_eng}</span> <span className='fw-bolder'>{data?.student?.last_name_eng}</span> citizen of {data?.student?.citizenship?.name_eng},
                         <br />
                         has completed requirements of the programme {data?.student?.group?.profession?.name_eng} ({data?.student?.group?.profession?.code})
                         <br />
-                        was awarded the degree of <span className='text-uppercase'>{data?.student?.group?.degree?.degree_eng_name} OF {data?.student?.group?.profession?.dep_name_eng}</span>
+                        was awarded the degree of <span className='text-uppercase'>{data?.student?.group?.degree?.degree_eng_name} of {data?.student?.group?.profession?.dep_name_eng}</span>
                         <br />
                         by the President's order {data?.graduation_number} dated {data?.graduation_date?.substring(8, 10)} {monthToText(data?.graduation_date?.substring(5, 7))} {data?.graduation_date?.substring(0, 4)}, based on the decision of the
                         <br />
@@ -150,7 +146,7 @@ export default function PrintMongolia()
 
             {/* Гарын үсгийн хэсэг */}
             <div style={{ bottom: '0', fontSize: '15px' }} >
-                <div style={{ paddingLeft: '100px', paddingRight: '100px', lineHeight: '24px', marginTop: '20px', marginBottom: '0px' }} >
+                <div style={{ paddingLeft: '100px', paddingRight: '100px', lineHeight: '18px', marginTop: '30px', marginBottom: '0px' }} >
                     <div className='d-flex text-center justify-content-center'>
                         {
                             listArr.map((val, idx) =>
@@ -168,8 +164,8 @@ export default function PrintMongolia()
                 </div>
             </div>
             <div className='d-flex justify-content-between w-100 mb-5 pb-1'>
-                <span style={{ paddingLeft: '130px' }} >ULAANBAATAR CITY</span>
-                <span style={{ paddingRight: '150px' }} >REGISTER No {data?.registration_num}</span>
+                <span style={{ paddingLeft: '130px' }} >Ulaanbaatar city</span>
+                <span style={{ paddingRight: '150px' }} >Register No {data?.registration_num}</span>
             </div>
         </div>
     )

@@ -6,7 +6,7 @@ import useLoader from '@hooks/useLoader';
 
 import './style.css'
 
-export default function PrintMongolia()
+export default function PrintNational()
 {
     const data = JSON.parse(localStorage.getItem('blankDatas'))
 
@@ -124,7 +124,7 @@ export default function PrintMongolia()
         <div className='vh-100 position-relative' style={{ fontFamily: 'mongolianScript', fontSize: '16px', padding: '120px 120px 95px 260px' }}>
             {isLoading && Loader}
 
-            <div className='d-flex justify-content-between h-100' >
+            <div className='d-flex justify-content-between h-100 ms-3' >
                 <div className='d-flex'>
                     <div className='text-center' style={{ writingMode: 'vertical-lr', marginLeft: '2px' }} >
                         ᠳ᠋ᠤᠭᠠᠷ {tooBichih(data?.diplom_num)}

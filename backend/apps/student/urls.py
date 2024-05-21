@@ -75,6 +75,9 @@ urlpatterns = [
     path('graduation/import/', GraduationWorkImportAPIView.as_view()),
     path('graduation/<int:pk>/', GraduationWorkAPIView.as_view()),
 
+    # Төгсөлтийн ажлын qr татах
+    path('graduation/qr/', GraduationWorkQrAPIView.as_view()),
+
     # Боловсролын зээлийн сан
     path('edu_loan_fund/', EducationalLoanFundAPIView.as_view()),
 
@@ -89,6 +92,9 @@ urlpatterns = [
 
     # Ангиар нь хавсралтын дүн хадгалах
     path('calculate-gpa-diploma/group/', StudentCalculateGpaDiplomaGroupAPIView.as_view()),
+
+    # Мэргэжлээр нь хавсралтын тохиргоо хадгалах
+    path('calculate-gpa-diploma/config/', StudentAttachmentConfigAPIView.as_view()),
 
     # Хавсралт хэвлэх үед голч бодох
     path('gpa-diploma-values/', StudentGpaDiplomaValuesAPIView.as_view()),

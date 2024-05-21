@@ -35,7 +35,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, editId }) => {
 	const scoreApi = useApi().settings.score
 
 	async function onSubmit(cdata) {
-        cdata = convertDefaultValue(cdata)
+        // cdata = convertDefaultValue(cdata)
         if(editId) {
             const { success, errors } = await fetchData(scoreApi.put(cdata, editId))
             if(success) {
@@ -207,7 +207,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, editId }) => {
                                         bsSize="sm"
                                         placeholder={t('Үсгэн үнэлгээ')}
                                         type="text"
-                                        maxLength={1}
+                                        maxLength={2}
                                         invalid={errors.assesment && true}
                                     />
                                 )}

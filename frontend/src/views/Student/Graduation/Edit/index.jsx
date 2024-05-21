@@ -56,6 +56,7 @@ const EditModal = ({ open, handleModal, graduate_id, refreshDatas }) => {
     const [ radio, setRadio ] = useState('')
     const [ selectLessonIds, setSelectLessonIds ] = useState([])
     const [ studentInfo, setStudentInfo] = useState({})
+    const [ qr, setQr ] = useState(null)
 
     // Loader
 	const { Loader, isLoading, fetchData } = useLoader({});
@@ -112,9 +113,16 @@ const EditModal = ({ open, handleModal, graduate_id, refreshDatas }) => {
                 if(data === null) return
                 for(let key in data)
                 {
-                    if(data[key] !== null)
+                    if(data[key] !== null) {
+                        // Дипломын QR
+                        if (key == 'diplom_qr') {
+                            setQr(data[key])
+                            delete data[key]
+                        }
                         setValue(key, data[key])
+                    }
                     else setValue(key, '')
+
 
                     if (key === 'student' || key === 'lesson') {
                         setValue(key, data[key]?.id)
@@ -502,6 +510,24 @@ const EditModal = ({ open, handleModal, graduate_id, refreshDatas }) => {
                                 )}
                             />
                         </Col>
+                        {
+                            qr
+                            &&
+                            <Col lg={6} md={12}>
+                                <img
+                                    src={`data:image/jpeg;base64,${qr}`}
+                                    alt="img"
+                                    width={100}
+                                    height={110}
+                                    style={{ objectFit: 'cover' }}
+                                    onError={({ currentTarget }) =>
+                                    {
+                                        currentTarget.onerror = null; // prevents looping
+                                        currentTarget.src="/images/empty-image.jpg";
+                                    }}
+                                />
+                            </Col>
+                        }
                         <Col md={12} className="text-center mt-2">
                             <Button className="me-2" color="primary" type="submit" disabled={is_disabled}>
                                 {t('Хадгалах')}

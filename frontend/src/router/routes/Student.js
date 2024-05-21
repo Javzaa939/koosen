@@ -20,6 +20,8 @@ const PrintMongolia = lazy(() => import("@views/Student/Graduation/PrintMongolia
 const PrintEnglish = lazy(() => import("@views/Student/Graduation/PrintEnglish"))
 const PrintNational = lazy(() => import("@views/Student/Graduation/PrintNational"))
 
+const PrintMain = lazy(() => import("@views/Student/Graduation/PrintMain"))
+
 const PrintAttachmentMongolia = lazy(() => import("@views/Student/Attachment/PrintMongolia"))
 const PrintAttachmentEnglish = lazy(() => import("@views/Student/Attachment/PrintEnglish"))
 const PrintAttachmentNational = lazy(() => import("@views/Student/Attachment/PrintNational"))
@@ -146,6 +148,13 @@ const StudentRoutes = [
     {
         path: 'student/graduation/print-national/',
         element: <PrintNational />,
+        meta: {
+            layout: 'blank'
+        }
+    },
+    {
+        path: 'student/graduation/printmain/',
+        element: <PrintMain />,
         meta: {
             layout: 'blank'
         }

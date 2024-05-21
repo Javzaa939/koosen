@@ -2,7 +2,7 @@
 import { Fragment, useState, useEffect, useContext} from 'react'
 
 import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, ListGroupItem, Spinner } from 'reactstrap'
-import { ChevronDown, Search, Plus, Menu, Edit, Trash2, FileText, Download } from 'react-feather'
+import { ChevronDown, Search, Plus, Menu, Edit, Trash2, FileText, Download, Printer } from 'react-feather'
 import DataTable from 'react-data-table-component'
 import { useTranslation } from 'react-i18next'
 import { useForm, Controller } from "react-hook-form";
@@ -33,6 +33,7 @@ import FileModal from '@lms_components/FileModal'
 import '@styles/react/libs/drag-and-drop/drag-and-drop.scss'
 import DetailModal from './DetailModal'
 import excelDownload from '@src/utility/excelDownload'
+import PrintModal from './PrintModal'
 
 const Graduation = () => {
 
@@ -73,8 +74,6 @@ const Graduation = () => {
     const [ importModal, setImportModal ] = useState(false)
     const [ showModal, setShowModal ] = useState(false)
     const [file, setFile] = useState(false)
-    const [file_name, setFileName] = useState('')
-    const [detailDatas, setDetailDatas] = useState({})
     const [errorDatas, setErrorDatas] = useState({})
 
     //Api
@@ -289,20 +288,8 @@ const Graduation = () => {
 
             const { success, data }  = await fetchData(graduateApi.postFile(formData))
             if (success) {
-
                 importModalHandler()
                 getDatas()
-                // handleShowDetailModal()
-                // if (data?.file_name) {
-                //     setFileName(data?.file_name)
-                //     delete data['file_name']
-                // }
-
-                // if (data?.all_error_datas) {
-                //     setErrorDatas(data?.all_error_datas)
-                //     delete data['all_error_datas']
-                // }
-                // setDetailDatas(data)
             }
         }
     }
@@ -339,8 +326,58 @@ const Graduation = () => {
         excelDownload(datas, rowInfo, `tugsult_zagvar`)
     }
 
+    /** QR татах */
+    async function handleQr() {
+        const { success, data } = await fetchData(graduateApi.qr(select_value.group))
+        if (success) {
+            handleShowDetailModal()
+            setErrorDatas(data)
+        }
+    }
+
+    const [ selectedRows, setSelectedRows ] = useState([])
+    const [ printModal, setPrintModal ] = useState(false)
+
+    function rowSelectHandler(state){
+        var selectedRows = state.selectedRows
+
+		setSelectedRows(selectedRows);
+    }
+
+    function modalHandler() {
+        setPrintModal(!printModal)
+    }
+
+    // function multiplePrintHandler() {
+
+    //     selectedRows.map((val, i) => {
+	// 	    val['lastNameChecked'] = document.getElementById(`graduationLastNameChecked${val.id}`).checked
+    //     })
+
+	// 	// data['lastNameChecked'] = document.getElementById(`graduationLastNameChecked${data.id}`).checked
+	// 	// localStorage.setItem('blankDatas', JSON.stringify(data))
+
+	// 	// let button = document.getElementById('clickBtn')
+
+	// 	// button.href = `/student/graduation/printmain/`
+
+    //     // button.click()
+    //     console.log(selectedRows,'rsss')
+
+    //     modalHandler()
+
+	// }
+
 	return (
 		<Fragment>
+            {
+                printModal &&
+                <PrintModal
+                    printModal={printModal}
+                    multiplePrintHandler={multiplePrintHandler}
+                    selectedRows={selectedRows}
+                />
+            }
             {importModal &&
                 <FileModal
                     isOpen={importModal}
@@ -354,14 +391,11 @@ const Graduation = () => {
                     onSubmit={onSubmit}
                 />
             }
-
             {
                 showModal &&
                     <DetailModal
                         isOpen={showModal}
                         handleModal={handleShowDetailModal}
-                        datas={detailDatas}
-                        file_name={file_name}
                         errorDatas={errorDatas}
                     />
 
@@ -440,10 +474,25 @@ const Graduation = () => {
                 <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
                     <CardTitle tag="h4">{t('Төгсөлтийн ажил')}</CardTitle>
                     <div className='d-flex flex-wrap mt-md-0 mt-1 gap-1'>
+                        {/* <Button
+                            color='primary'
+                            disabled={selectedRows.length === 0}
+                            onClick={() => {multiplePrintHandler()}}
+                        >
+                            <Printer size={15}/>
+                            <span className='align-middle ms-50'>Хэвлэлт</span>
+                        </Button> */}
+                        <Button
+                            color='primary'
+                            disabled={select_value.group ? false : true}
+                            onClick={() => {handleQr()}}
+                        >
+                            <Download size={15}/>
+                            <span className='align-middle ms-50'>QR татах</span>
+                        </Button>
                         <Button
                             color='primary'
                             onClick={() => {
-                                    // window.open('/publicfiles/jishig_file.xlsx')
                                     excelHandler()
                                 }
                             }
@@ -662,6 +711,8 @@ const Graduation = () => {
                         paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
                         fixedHeader
                         fixedHeaderScrollHeight='62vh'
+                        // selectableRows
+                        // onSelectedRowsChange={(state) => rowSelectHandler(state)}
                     />
                 </div>
         	</Card>
@@ -672,7 +723,7 @@ const Graduation = () => {
             { formModal && <SignatureModal open={formModal} handleModal={handleModalSig} refreshDatas={getSignatureDatas} defaultDatas={updateData} /> }
 
             {/* Тушаал гаргах */}
-            {commandModal && <GraduationCommand open={commandModal} handleModal={handleCommandCreateModal} refreshDatas={getDatas}/>}
+            {commandModal && <GraduationCommand open={commandModal} handleModal={handleCommandCreateModal} refreshDatas={getDatas} studentOption={datas}/>}
 
             {/* Шинэ хуудас руу үсэргэх товч */}
             <Link className='d-none' to='/' id='clickBtn' target='_blank' ></Link>

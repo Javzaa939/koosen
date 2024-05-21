@@ -1,5 +1,6 @@
 import os
-
+import requests
+from requests.exceptions import JSONDecodeError
 from googletrans import Translator
 import openpyxl_dictreader
 
@@ -1915,8 +1916,10 @@ class GraduationWorkAPIView(
         student = data.get("student")
         instance = self.get_object()
 
-        student_qs = self.queryset.filter(student_id=student).exclude(id=pk)
+        if 'diplom_qr' in data:
+            del data['diplom_qr']
 
+        student_qs = self.queryset.filter(student_id=student).exclude(id=pk)
         if student_qs:
             return request.send_error('ERR_002', 'Оюутан бүртгэгдсэн байна')
 
@@ -2631,6 +2634,20 @@ class StudentCalculateGpaDiplomaGroupAPIView(
         return request.send_info('INF_019')
 
 
+
+@permission_classes([IsAuthenticated])
+class StudentAttachmentConfigAPIView(
+    generics.GenericAPIView
+):
+    """ Хавсрлатын тохиргоо """
+
+    def post(self, request):
+        data = request.data
+        row_count = json_load(data.get('row_count'))
+        stype = data.get('type')
+
+        return request.send_data([])
+
 @permission_classes([IsAuthenticated])
 class StudentGpaDiplomaValuesAPIView(
     generics.GenericAPIView
@@ -2687,6 +2704,7 @@ class StudentGpaDiplomaValuesAPIView(
                     inner join lms_lessonstandart ls
                     on lp.lesson_id=ls.id
                     where lp.profession_id = {profession_id} and lp.lesson_id = {lesson_id}
+                    order by lp.season, ls.name
                 '''.format(profession_id=student_prof_qs.id, lesson_id=lesson_first_data.id)
 
                 cursor = connection.cursor()
@@ -2715,8 +2733,10 @@ class StudentGpaDiplomaValuesAPIView(
                         else:
                             all_s_kredit = all_s_kredit + lesson.get('kredit')
 
-            obj_datas['lessons'] = lesson_datas
-            all_datas.append(obj_datas)
+            # Хичээлтэй хэсгийн датаг л нэмнэ
+            if len(lesson_datas) > 0:
+                obj_datas['lessons'] = lesson_datas
+                all_datas.append(obj_datas)
 
         final_gpa = 0.0
         if all_score != 0 and all_gpa_score != 0:
@@ -2729,7 +2749,7 @@ class StudentGpaDiplomaValuesAPIView(
             # Нийт голч оноог бутархай руу шилжүүлэх
             final_score = format(final_score, ".2f")
 
-        average_score_prof = ProfessionAverageScore.objects.filter(profession=student_prof_qs, is_graduate=True, lesson_year__isnull=True, lesson_season__isnull=True).first()
+        average_score_prof = ProfessionAverageScore.objects.filter(profession=student_prof_qs, is_graduate=True, level=0).first()
         all_data['score'] = { 'assesment': final_gpa, 'max_kredit': max_kredit, 'average_score': final_score, 'average_score_prof': format(average_score_prof.gpa, ".2f") if average_score_prof else 0 }
         all_data['lessons'] = all_datas
 
@@ -3164,6 +3184,10 @@ class StudentCommandListAPIView(
 
         year = self.request.query_params.get('year')
         season = self.request.query_params.get('season')
+        school = self.request.query_params.get('school')
+
+        if school:
+            self.queryset = self.queryset.filter(student__group__school=school)
 
         stud_qs = self.queryset.filter(lesson_year=year, lesson_season=season).values_list('student', flat=True)
         student_data = Student.objects.filter(id__in=stud_qs).values("id", "code", "last_name", "first_name")
@@ -3514,3 +3538,65 @@ class StudentPostDataAPIView(
         return request.send_info("INF_001")
 
 
+class GraduationWorkQrAPIView(
+    generics.GenericAPIView
+):
+    """ Дипломын QR cerify-аас татах """
+
+    queryset = GraduationWork.objects.all()
+
+    def get(self, request):
+
+        not_found_student = []
+        group = request.query_params.get('group')
+
+        # Тухайн идэвхтэй жилийн QR татна
+        lesson_year, lesson_season = get_active_year_season()
+
+        # Төгсөгчдийн мэдээллийг авах
+        students = self.queryset.filter(lesson_year=lesson_year, lesson_season=lesson_season, student__group=group, diplom_num__isnull=False) \
+                    .annotate(
+                        first_name=F('student__first_name'),
+                        last_name=F('student__last_name'),
+                        code=F('student__code'),
+                        register=F('student__register_num')
+                    ).values(
+                        'id',
+                        'first_name',
+                        'last_name',
+                        'code',
+                        'register',
+                        'diplom_num'
+                    )
+        with transaction.atomic():
+            for student in students:
+                diplom_num = student.get('diplom_num')
+                graduation_id = student.get('id')
+
+                data = {
+                    'cert_number': diplom_num
+                }
+
+                url = 'https://certify.mn/service/api/v2/certification/qr/generate'
+                headers = {
+                    'x-api-key': 'qfSuwUY2.H8FYeLmZzXp2VUG4wVNWwVRo4xQZ5XOc',
+                    'Content-Type': 'application/json'
+                }
+
+                res = requests.post(url, headers=headers, json=data)
+
+                # 404 Not Found: Дипломын дугаар буруу эсвэл уг дипломын дугаар үүсээгүй үед
+                if res.status_code == 404:
+                    not_found_student.append(
+                        student
+                    )
+
+                if res.status_code == 200:
+
+                    # base64 өөр зураг илгээж байгаа
+                    image_data = res.content
+
+                    # QR ийг хадгалах
+                    self.queryset.filter(id=graduation_id).update(diplom_qr=image_data)
+
+        return request.send_data(not_found_student)

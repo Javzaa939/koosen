@@ -361,7 +361,7 @@ function useApi(isDisplay=false) {
 					return instance.get(`/learning/lessonstandart/timetable-list/?school=${school_id}&lesson_year=${cyear_name}&lesson_season=${cseason_id}`)
 				},
 
-				getListAll: () => instance.get(`/learning/lessonstandart/list/`),
+				getListAll: (profession='', search='') => instance.get(`/learning/lessonstandart/list/?profession=${profession}&search=${search}`),
 				getOneProfessionList: (profession) => instance.get(`/learning/lessonstandart/list/profession/${profession}/`),
 				get: (limit, page, sort, search, dep_id, category_id) => instance.get(`/learning/lessonstandart/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&department=${dep_id}&category=${category_id}&schoolId=${school_id}`),
 				post: data => instance.post('/learning/lessonstandart/', data),
@@ -658,7 +658,7 @@ function useApi(isDisplay=false) {
 				}
 				return instance.get(`/student/info/group/?${group_ids}&type=${type}`)
 			},
-			getStudentCommandList: () =>instance.get(`/student/graduate/list/?year=${cyear_name}&season=${cseason_id}`),
+			getStudentCommandList: () =>instance.get(`/student/graduate/list/?year=${cyear_name}&season=${cseason_id}&school=${school_id}`),
 			post: data => instance.post('/student/info/', data),
 			getOne: (pk, type) => instance.get(`/student/info/detail/${pk}/?type=${type}`),
 			put: (data, pk, type) => instance.put(`/student/info/detail/${pk}/?type=${type}`, data),
@@ -678,6 +678,8 @@ function useApi(isDisplay=false) {
 
 			// Голч бодуулах загвараар ангийн хүүхдүүдийн загварыг хадгалах
 			calculateGpaGroupGraduation: data => instance.post(`/student/calculate-gpa-diploma/group/`, data),
+
+			postConfig: data => instance.post(`/student/calculate-gpa-diploma/config/`, data),
 
 			/* Анги бүлгийн бүртгэл */
 			group:{
@@ -775,6 +777,9 @@ function useApi(isDisplay=false) {
 				put: (data, pk) => instance.put(`/student/graduation/${pk}/`, data),
 				delete: (pk) => instance.delete(`/student/graduation/${pk}/`),
 				postFile: (data) => instance.post('/student/graduation/import/', data),
+
+				/** Дипломын QR татах */
+				qr: (group) => instance.get(`/student/graduation/qr/?group=${group}`),
 			},
 
 			/** Боловсролын зээлийн сан */
@@ -987,10 +992,10 @@ function useApi(isDisplay=false) {
 			gpa:{
 				get:(limit, page, sort, search, degree, department, group, profession, year, season) =>
 				instance.get(`/print/gpa/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&degree=${degree}&group=${group}&department=${department}&profession=${profession}&lesson_year=${year}&lesson_season=${season}&school=${school_id}`),
-				getProp: (limit, page, sort, search, degree, department, profession, year, season, status) =>
-					instance.get(`/print/gpa-profession/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&degree=${degree}&status=${status}&department=${department}&profession=${profession}&lesson_year=${year}&lesson_season=${season}&school=${school_id}`),
+				getProp: (limit, page, sort, search, degree, department, profession, status, level) =>
+					instance.get(`/print/gpa-profession/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&degree=${degree}&status=${status}&department=${department}&profession=${profession}&level=${level}&school=${school_id}`),
 
-				post: (year, season, profession, status) => instance.post(`/print/gpa-profession/?profession=${profession}&lesson_year=${year}&lesson_season=${season}&status=${status}`)
+				post: ( profession, status, level) => instance.post(`/print/gpa-profession/?profession=${profession}&status=${status}&level=${level}`)
 			},
 			/* Дүнгийн жагсаалт*/
 			score:{

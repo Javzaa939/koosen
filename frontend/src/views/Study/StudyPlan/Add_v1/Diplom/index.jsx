@@ -15,7 +15,7 @@ import classnames from "classnames";
 
 import TableRows from "../TableRows"
 
-const Diplom = ({ datas, isOpen, profession, degree }) => {
+const Diplom = ({ datas, isOpen, mergejil_id, degree }) => {
 
     const { t } = useTranslation()
     const { user } = useContext(AuthContext)
@@ -158,7 +158,7 @@ const Diplom = ({ datas, isOpen, profession, degree }) => {
                                     rows={zaaval}
                                     tableRowRemove={removeZaavalField}
                                     onValUpdate={onZaavalValUpdate}
-                                    profession={profession}
+                                    profession={mergejil_id}
                                 />
                             </tbody>
                         </Table>
