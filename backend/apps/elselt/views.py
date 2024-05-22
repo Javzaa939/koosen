@@ -1209,8 +1209,7 @@ class ElseltHealthPhysicalCreateAPIView(
 
     @transaction.atomic
     def post(self, request):
-
-        api_key = self.request.query_params.get('apiKey')
+        api_key = request.META.get('HTTP_X_API_KEY')
 
         # Манай гаргасан sha256
         data_to_verify = 'utility_solution'
@@ -1222,11 +1221,14 @@ class ElseltHealthPhysicalCreateAPIView(
                 user_register = data.get('user')
 
                 try:
-                    user_id = ElseltUser.objects.filter(register=user_register).values_list('id', flat=True).first()
+                    if not ElseltUser.objects.filter(register__iexact=user_register).exists():
+                        return Response({'status': '404 Not Found', 'message': f'{user_register} регистрийн дугаартай тохирох хэрэглэгч олдсонгүй'}, status=status.HTTP_404_NOT_FOUND)
+                    else:
+                        user = ElseltUser.objects.filter(register__iexact=user_register).first()
                 except ElseltUser.DoesNotExist:
                     return Response({'status': '404 Not Found', 'message': f'{user_register} регистрийн дугаартай тохирох хэрэглэгч олдсонгүй'}, status=status.HTTP_404_NOT_FOUND)
 
-                data['user'] = user_id
+                data['user'] = user.id
 
                 sid = transaction.savepoint()
 
@@ -1235,12 +1237,12 @@ class ElseltHealthPhysicalCreateAPIView(
                     transaction.savepoint_rollback(sid)
                     return Response({'status': '400 Bad Request', 'message': 'Оруулсан өгөгдөл буруу байна'}, status=status.HTTP_400_BAD_REQUEST)
 
-                new_serializer = serializer.save()
+                serializer.save()
                 transaction.savepoint_commit(sid)
 
             except Exception as e:
                 print(e)
-                return Response({'status': '500 Internal Server Error', 'message': 'Хадгалахад алдаа гарлаа'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                return Response({'status': '500 Internal Server Error', 'message': 'Өгөгдлийн төрлөө шалгана уу'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
             return Response({'status': '200 OK', 'message': 'Хүсэлт амжиллтай'}, status=status.HTTP_200_OK)
         else:
