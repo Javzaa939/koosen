@@ -1,6 +1,6 @@
 @page {
     size: A4 landscape;
-    margin: 15px 10px 12px 20px;
+    margin: 15px 20px 15px 20px;
 
     /* margin: 10px;  top, right, bottom, left. */
     /* margin: 20px 0px 0px 10px; */
@@ -37,6 +37,13 @@ footer {
 .body-cell {
     width: 70%;
     line-height: 0.75;
+    padding: 5px 4px 5px 4px;
+    text-align: start;
+}
+
+.body-cell1 {
+    width: 70%;
+    line-height: 1;
     padding: 5px 4px 5px 4px;
     text-align: start;
 }
