@@ -25,7 +25,10 @@ export default function PrintAttachmentEnglish()
     const [ isPageBreak, setIsPageBreak ] = useState(false)
     const [ printDatas, setPrintDatas ] = useState(JSON.parse(localStorage.getItem('blankDatas')))
     const [ datas, setDatas ] = useState([])
-    const rowSum = printDatas.tableRowCount?.reduce((partialSum, a) => partialSum + a, 0);
+    const [ tableRowCount, setTableRowCount ] = useState([])
+    const [ rowSum, setRowSum ] = useState(0)
+
+    // const rowSum = printDatas.tableRowCount?.reduce((partialSum, a) => partialSum + a, 0);
 
     const [height, setHeight] = useState(
         {
@@ -42,10 +45,14 @@ export default function PrintAttachmentEnglish()
             // Нэгдсэн нэг сургуулийн захирал гарын үсэг хэвлэж байгаа болохоор, data?.student?.group?.profession?.school
             // , printDatas.student?.department?.sub_orgs
             fetchData(signatureApi.get(3)),
-            fetchData(studentApi.calculateGpaDimplomaGet(studentId))
+            fetchData(studentApi.calculateGpaDimplomaGet(studentId)),
+            fetchData(studentApi.getConfig(printDatas?.student?.group?.profession?.id, 'english'))
         ]).then((values) => {
             setListArr(values[0]?.data)
             setDatas(values[1]?.data)
+            setTableRowCount(values[2]?.data?.row_count ? values[2]?.data?.row_count : [])
+            var sum_count = values[2]?.data?.row_count?.reduce((partialSum, a) => partialSum + a, 0);
+            setRowSum(sum_count)
         })
     }
 
@@ -106,13 +113,13 @@ export default function PrintAttachmentEnglish()
                 {
                     let count = 0
                     let perCount = 0
-                    let half = printDatas.tableRowCount.length / 2
+                    let half = tableRowCount.length / 2
 
-                    let divide = printDatas.tableRowCount.filter(element => element !== 0).length
+                    let divide = tableRowCount.filter(element => element !== 0).length
                     let dividePage1 = divide > 3 ? 3 : divide
                     let dividePage2 = divide - 3 > 0 ? divide - 3 : 0
 
-                    for (let [idx, val] of printDatas.tableRowCount.entries())
+                    for (let [idx, val] of tableRowCount.entries())
                     {
                         if (idx == half)
                         {
@@ -130,7 +137,7 @@ export default function PrintAttachmentEnglish()
 
                             var tbodyRef = tableDoc.getElementsByTagName('tbody')[0];
 
-                            if (printDatas.tableRowCount[2] == 0 && printDatas.tableRowCount[1] == 0)
+                            if (tableRowCount[2] == 0 && tableRowCount[1] == 0)
                             {
                                 if (idx == 0)
                                 {
@@ -138,7 +145,7 @@ export default function PrintAttachmentEnglish()
                                 }
                             }
 
-                            if (printDatas.tableRowCount[2] == 0 && printDatas.tableRowCount[1] !== 0)
+                            if (tableRowCount[2] == 0 && tableRowCount[1] !== 0)
                             {
                                 if (idx == 0)
                                 {

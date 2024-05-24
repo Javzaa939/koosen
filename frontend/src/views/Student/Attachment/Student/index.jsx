@@ -8,17 +8,15 @@ import DataTable from 'react-data-table-component'
 import { Edit2, X, AlertCircle, ChevronsLeft } from 'react-feather';
 import Flatpickr from 'react-flatpickr'
 import { Mongolian } from "flatpickr/dist/l10n/mn.js"
-import  useUpdateEffect  from '@hooks/useUpdateEffect'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import useModal from '@src/utility/hooks/useModal';
 import { getColumns } from '@views/Student/Attachment/Student/helpers/index.jsx'
-
+import ConfigModal from './ConfigModal';
 // ** Styles Imports
 import '@styles/react/libs/flatpickr/flatpickr.scss'
 import './style.css'
-import { formatDate } from '@src/utility/Utils';
 
 export default function AttachmentStudent()
 {
@@ -26,15 +24,16 @@ export default function AttachmentStudent()
     // State
     const [ datas, setDatas ] = useState([])
     const [ calculatedDatas, setCalculatedDatas ] = useState([])
+    const [ config, setConfig ] = useState({})
     const [ editDatatable, setEditDatatable ] = useState(false)
     const [ printValue, setPrintValue ] = useState("")
     const [ picker, setPicker ] = useState(new Date())
     const [ is_loading, setLoading ] = useState(true)
+    const [ configModal, setConfigModal ] = useState(false)
     const [ isThink, setIsThink ] = useState(false)
     const { showWarning } = useModal()
 
     const [ checkedTableRowCount, setCheckedTableRowCount ] = useState([])
-    const [ errorMessage, setErrorMessage ] = useState('')
 
     // Ref
     const checkedValues = useRef([]);
@@ -57,7 +56,7 @@ export default function AttachmentStudent()
     {
         await Promise.all([
             fetchData(studentApi.scoreRegister(studentId)),
-            fetchData(studentApi.calculateGpaDimploma(studentId)),
+            fetchData(studentApi.calculateGpaDimploma(studentId))
         ]).then((values) => {
             if (values[0]?.success) {
                 setLoading(false)
@@ -66,6 +65,37 @@ export default function AttachmentStudent()
             setCalculatedDatas(values[1]?.data)
         })
     }
+
+    /** Мөрийн тохиргоо хадгалах */
+    async function getConfig() {
+        const { success, data } = await fetchData(studentApi.getConfig(datas?.student?.group?.profession?.id, printValue))
+        if (success) {
+            setConfig(data)
+            if (data?.give_date) {
+                var give_date = new Date(data?.give_date);
+                setPicker(give_date)
+            }
+
+            if (data?.is_center && document.getElementById(`isCenter`)) {
+                document.getElementById(`isCenter`).checked = true
+            }
+            if (data?.is_lastname && document.getElementById(`isLastNameOvog`)) {
+                document.getElementById(`isLastNameOvog`).checked = true
+            }
+            calculatePrintTableValue(data?.row_count ? data?.row_count : [])
+            setCheckedTableRowCount(data?.row_count ? data?.row_count : [])
+        }
+    }
+
+    useEffect(
+        () =>
+        {
+            if (Object.keys(datas).length > 0 && printValue) {
+                getConfig()
+            }
+        },
+        [datas, printValue]
+    )
 
     useEffect(
         () =>
@@ -81,39 +111,6 @@ export default function AttachmentStudent()
         },
         [studentId]
     )
-
-    function changeTableRowValues(value)
-    {
-        let defaultSum = datas?.calculated_length  + 3
-
-        let sum = 0
-
-        let customValue = value
-        for (let idx in value)
-        {
-            sum += value[idx]
-
-            if (sum == defaultSum)
-            {
-                for (let idxK = parseInt(idx) + 1; idxK < value.length; idxK++)
-                {
-                    document.getElementById(`table${idxK + 1}`).value = 0
-                    customValue[idxK] = 0
-                }
-                break
-            }
-        }
-
-        if (defaultSum == sum)
-        {
-            setErrorMessage('')
-        }
-        else
-        {
-            setErrorMessage('Нийт мөрийн тоо алдаатай байна!')
-        }
-        setCheckedTableRowCount(customValue)
-    }
 
     async function toThink()
     {
@@ -131,6 +128,7 @@ export default function AttachmentStudent()
         })
     }
 
+    // Дипломын хичээл хи нь check хийх
     function checkScore(id)
     {
         id = parseInt(id)
@@ -154,6 +152,7 @@ export default function AttachmentStudent()
         }
     }
 
+    // Дипломын хичээл бүгдийг нь check хийх
     function allCheck(e)
     {
         let allInputs = document.querySelectorAll('input[name=lesson]')
@@ -210,83 +209,16 @@ export default function AttachmentStudent()
         setPrintValue(e.target.value)
     }
 
-    function calculatePrintTableValue(allLength, tableMax, tableCount)
+    function calculatePrintTableValue(row_count)
     {
-        let tableRowData = []
-
-        if (tableCount * 13 < allLength)
+        for (let i = 0; i <= 5; i++)
         {
-            let residual = allLength % tableCount
-            let notResidualValue = allLength - residual
-
-            for (let i = 1; i <= tableCount; i++)
-            {
-                let data = (notResidualValue / tableCount)
-
-                if (residual > 0)
-                {
-                    data++
-                    residual--
-                }
-                tableRowData.push(data)
-
-                document.getElementById(`table${i}`).value = data
+            let data = row_count[i] ? row_count[i] : 0
+            if (document.getElementById(`table${i+1}`)) {
+                document.getElementById(`table${i+1}`).value = data
             }
         }
-        else
-        {
-
-            for (let i = 1; i <= tableCount; i++)
-            {
-                let data = tableMax
-
-                if (allLength > 0 && allLength < tableMax)
-                {
-                    data = allLength
-                }
-                else if (allLength <= 0)
-                {
-                    allLength = 0
-                    data = 0
-                }
-
-                allLength = allLength - tableMax
-
-                tableRowData.push(data)
-
-                document.getElementById(`table${i}`).value = data
-            }
-        }
-        setCheckedTableRowCount(tableRowData)
     }
-
-    useUpdateEffect(
-        () =>
-        {
-            let allLength = datas?.calculated_length + 3
-            switch (printValue)
-            {
-                case 'mongolian':
-                    var tableMax = 13
-                    calculatePrintTableValue(allLength, tableMax, 6)
-                    break;
-
-                case 'english':
-                    var tableMax = 13
-                    calculatePrintTableValue(allLength, tableMax, 6)
-                    break;
-
-                case 'uigarjin':
-                    var tableMax = 21
-                    calculatePrintTableValue(allLength, tableMax, 4)
-                    break;
-
-                default:
-                    break;
-            }
-        },
-        [printValue, calculatedDatas]
-    )
 
     /** 1 => 01 болгох Format */
     const zeroFill = n => {
@@ -345,48 +277,61 @@ export default function AttachmentStudent()
         }
     }
 
-    /** Дипломын хавсралтын тохиргоо хадгалах*/
-    async function handleConfig() {
-        var cdata = {
-            'type': printValue,
-            'profession': datas?.student?.group?.profession?.id,
-            'row_count': JSON.stringify(checkedTableRowCount),
-            'give_date': formatDate(picker)
-        }
-        const { success } = await fetchData(studentApi.postConfig(cdata))
-        if (success) {
-        }
+    /*Тохиргоо хадгалах модал*/
+    const handleConfigModal = () => {
+        setConfigModal(!configModal)
     }
+
+    /* Хавсралт бүгдийг хэвлэх */
+    function printAll()
+	{
+        let registration_num = `${picker.getFullYear()}.${zeroFill(picker.getMonth() + 1)}.${zeroFill(picker.getDate())}`
+
+        let data = {
+            lessons: datas?.score_register,
+            student: datas?.student,
+            registration_num: registration_num,
+            isCenter: document.getElementById('isCenter') ? document.getElementById('isCenter').checked : null,
+            isLastNameOvog: document.getElementById('isLastNameOvog') ? document.getElementById('isLastNameOvog').checked : null,
+        }
+
+        localStorage.setItem('blankDatas', JSON.stringify(data))
+
+        let button = document.getElementById('clickAll')
+
+		button.href = `/student/attachment/print-all/`
+        button.click()
+	}
 
     return (
         <Fragment>
             { isLoading && Loader }
             <Card>
-                <div className="cursor-pointer hover-shadow m-1" onClick={() => handleNavigate()}>
-                    <ChevronsLeft /> Буцах
+                <div className="cursor-pointer hover-shadow m-1 d-flex justify-content-between">
+                    <div onClick={() => handleNavigate()}><ChevronsLeft /> Буцах</div>
+                    <Button
+                        color='primary'
+                        size='sm'
+                        onClick={printAll}
+                    >
+                        Бүгдийг хэвлэх
+                    </Button>
                 </div>
+                <Link className='d-none' to='/' id='clickAll' target='_blank' style={{pointerEvents: Object.keys(config).length === 0 ? 'none' : ''}}>Хэвлэх</Link>
                 <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom align-items-center py-1">
                     <CardTitle tag="h4">{t('Хавсралт')}&nbsp;<small>(&nbsp;{datas?.student?.code} {datas?.student?.last_name} {datas?.student?.first_name}&nbsp;)</small></CardTitle>
                 </CardHeader>
                 <CardBody>
                     <div className='d-flex justify-content-between'>
                         <p className='mt-1'>Хэвлэх</p>
-                        {/* <Button
+                        <Button
                             size='sm'
                             color='primary'
                             className='m-1'
-                            disabled={printValue ? false : true}
-                            onClick={() => showWarning({
-                                header: {
-                                    title: `${(`Хавсралтын  тохиргоо хадгалах`)}`,
-                                },
-                                question: `Та "${datas?.student?.group?.profession?.name}" хөтөлбөрийн ${printValue === 'mongolian' ? 'Монгол' : printValue === 'english' ? 'Англи' : 'Уйгаржин'} хавсралтын тохиргоо хадгалах гэж байна?`,
-                                onClick: () => handleConfig(),
-                                btnText: 'Хадгалах',
-                            })}
+                            onClick={handleConfigModal}
                         >
                             Тохиргоо хадгалах
-                        </Button> */}
+                        </Button>
                     </div>
                     <Row>
                         <Col md={12}>
@@ -453,12 +398,8 @@ export default function AttachmentStudent()
                                         type='text'
                                         name='table1'
                                         bsSize='sm'
+                                        disabled={true}
                                         id='table1'
-                                        onChange={(e) => {
-                                            let data = checkedTableRowCount
-                                            data[0] = e.target.value == '' ? 0 : parseInt(e.target.value)
-                                            changeTableRowValues(data)
-                                        }}
                                     />
                                 </Col>
                                 <Col md={3}>
@@ -468,13 +409,9 @@ export default function AttachmentStudent()
                                     <Input
                                         type='text'
                                         name='table2'
+                                        disabled={true}
                                         bsSize='sm'
                                         id='table2'
-                                        onChange={(e) => {
-                                            let data = checkedTableRowCount
-                                            data[1] = e.target.value == '' ? 0 : parseInt(e.target.value)
-                                            changeTableRowValues(data)
-                                        }}
                                     />
                                 </Col>
                                 <Col md={3}>
@@ -486,11 +423,7 @@ export default function AttachmentStudent()
                                         name='table3'
                                         bsSize='sm'
                                         id='table3'
-                                        onChange={(e) => {
-                                            let data = checkedTableRowCount
-                                            data[2] = e.target.value == '' ? 0 : parseInt(e.target.value)
-                                            changeTableRowValues(data)
-                                        }}
+                                        disabled={true}
                                     />
                                 </Col>
                                 <Col md={3}>
@@ -502,11 +435,12 @@ export default function AttachmentStudent()
                                         name='table4'
                                         bsSize='sm'
                                         id='table4'
-                                        onChange={(e) => {
-                                            let data = checkedTableRowCount
-                                            data[3] = e.target.value == '' ? 0 : parseInt(e.target.value)
-                                            changeTableRowValues(data)
-                                        }}
+                                        disabled={true}
+                                        // onChange={(e) => {
+                                        //     let data = checkedTableRowCount
+                                        //     data[3] = e.target.value == '' ? 0 : parseInt(e.target.value)
+                                        //     changeTableRowValues(data)
+                                        // }}
                                     />
                                 </Col>
                                 {
@@ -522,11 +456,12 @@ export default function AttachmentStudent()
                                                 name='table5'
                                                 bsSize='sm'
                                                 id='table5'
-                                                onChange={(e) => {
-                                                    let data = checkedTableRowCount
-                                                    data[4] = e.target.value == '' ? 0 : parseInt(e.target.value)
-                                                    changeTableRowValues(data)
-                                                }}
+                                                disabled={true}
+                                                // onChange={(e) => {
+                                                //     let data = checkedTableRowCount
+                                                //     data[4] = e.target.value == '' ? 0 : parseInt(e.target.value)
+                                                //     changeTableRowValues(data)
+                                                // }}
                                             />
                                         </Col>
                                         <Col md={3}>
@@ -538,11 +473,12 @@ export default function AttachmentStudent()
                                                 name='table6'
                                                 bsSize='sm'
                                                 id='table6'
-                                                onChange={(e) => {
-                                                    let data = checkedTableRowCount
-                                                    data[5] = e.target.value == '' ? 0 : parseInt(e.target.value)
-                                                    changeTableRowValues(data)
-                                                }}
+                                                disabled={true}
+                                                // onChange={(e) => {
+                                                //     let data = checkedTableRowCount
+                                                //     data[5] = e.target.value == '' ? 0 : parseInt(e.target.value)
+                                                //     changeTableRowValues(data)
+                                                // }}
                                             />
                                         </Col>
                                     </>
@@ -552,6 +488,7 @@ export default function AttachmentStudent()
                                                 type='checkbox'
                                                 name='isCenter'
                                                 id='isCenter'
+                                                disabled={true}
                                             />
                                             <Label className="form-label ms-50" for="isCenter">
                                                 {t('Голлуулах эсэх')}
@@ -563,6 +500,7 @@ export default function AttachmentStudent()
                                         type='checkbox'
                                         name='isLastNameOvog'
                                         id='isLastNameOvog'
+                                        disabled={true}
                                         defaultChecked={true}
                                     />
                                     <Label className="form-label ms-50" for="isLastNameOvog">
@@ -570,11 +508,11 @@ export default function AttachmentStudent()
                                     </Label>
                                 </Col>
                             </Row>
-                            <p className='text-danger fs-6'>{errorMessage}</p>
                             <p className='mt-1 ms-1'>Олгосон огноо</p>
                             <Flatpickr
                                 required
                                 id='start'
+                                disabled={true}
                                 name='start'
                                 className='form-control'
                                 value={picker}
@@ -584,8 +522,8 @@ export default function AttachmentStudent()
                                     dateFormat: 'Y-m-d',
                                 }}
                             />
-                            <Button className={`mt-1 ${errorMessage && 'disabled'}`} onClick={clickPrint} >Хэвлэх</Button>
-                            <Link className='d-none' to='/' id='clickBtn' target='_blank' >Хэвлэх</Link>
+                            <Button className={`mt-1`} onClick={clickPrint}  disabled={Object.keys(config).length === 0 ? true : false}>Хэвлэх</Button>
+                            <Link className='d-none' to='/' id='clickBtn' target='_blank' style={{pointerEvents: Object.keys(config).length === 0 ? 'none' : ''}}>Хэвлэх</Link>
                             <hr />
                         </>
                     }
@@ -642,7 +580,11 @@ export default function AttachmentStudent()
                     </div>
                 </div>
             </Card>
-
+            {
+                configModal
+                &&
+                <ConfigModal openModal={configModal} handleModal={handleConfigModal} datas={datas} printValue={printValue} calculatedDatas={calculatedDatas} getConfig={getConfig} config={config}/>
+            }
         </Fragment>
     )
 }

@@ -6,7 +6,7 @@ import useLoader from '@hooks/useLoader';
 
 import './style.css'
 
-export default function PrintAttachmentMongolia()
+export default function PrintNationalAttachment()
 {
     const headerSectionRef = useRef(null)
     const footerSectionRef = useRef(null)
@@ -25,7 +25,9 @@ export default function PrintAttachmentMongolia()
     const [ isPageBreak, setIsPageBreak ] = useState(false)
     const [ printDatas, setPrintDatas ] = useState(JSON.parse(localStorage.getItem('blankDatas')))
     const [ datas, setDatas ] = useState([])
-    const rowSum = printDatas.tableRowCount?.reduce((partialSum, a) => partialSum + a, 0);
+    // const rowSum = tableRowCount?.reduce((partialSum, a) => partialSum + a, 0);
+    const [ tableRowCount, setTableRowCount ] = useState([])
+    const [ rowSum, setRowSum ] = useState(0)
 
     const [width, setWidth] = useState(
         {
@@ -42,10 +44,14 @@ export default function PrintAttachmentMongolia()
         // , printDatas.student?.department?.sub_orgs
         await Promise.all([
             fetchData(signatureApi.get(3)),
-            fetchData(studentApi.calculateGpaDimplomaGet(studentId))
+            fetchData(studentApi.calculateGpaDimplomaGet(studentId)),
+            fetchData(studentApi.getConfig(printDatas?.student?.group?.profession?.id, 'uigarjin'))
         ]).then((values) => {
             setListArr(values[0]?.data)
             setDatas(values[1]?.data)
+            setTableRowCount(values[2]?.data?.row_count ? values[2]?.data?.row_count : [])
+            var sum_count = values[2]?.data?.row_count?.reduce((partialSum, a) => partialSum + a, 0);
+            setRowSum(sum_count)
         })
     }
 
@@ -103,9 +109,9 @@ export default function PrintAttachmentMongolia()
                 {
                     let count = 0
                     let perCount = 0
-                    let half = printDatas.tableRowCount.length / 2
+                    let half = tableRowCount.length / 2
 
-                    for (let [idx, val] of printDatas.tableRowCount.entries())
+                    for (let [idx, val] of tableRowCount.entries())
                     {
                         if (idx == half)
                         {

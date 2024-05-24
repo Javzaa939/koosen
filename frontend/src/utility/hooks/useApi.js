@@ -680,6 +680,7 @@ function useApi(isDisplay=false) {
 			calculateGpaGroupGraduation: data => instance.post(`/student/calculate-gpa-diploma/group/`, data),
 
 			postConfig: data => instance.post(`/student/calculate-gpa-diploma/config/`, data),
+			getConfig: (profession, type) => instance.get(`/student/calculate-gpa-diploma/config/?profession=${profession}&type=${type}`),
 
 			/* Анги бүлгийн бүртгэл */
 			group:{

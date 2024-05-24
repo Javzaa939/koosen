@@ -18,11 +18,11 @@ export default function PrintAttachmentMongolia()
 
     // State
     const [ listArr, setListArr ] = useState([])
+    const [ tableRowCount, setTableRowCount ] = useState([])
+    const [ rowSum, setRowSum ] = useState(0)
     const [ datas, setDatas ] = useState({})
     const [ isPageBreak, setIsPageBreak ] = useState(false)
-
     const [ printDatas, setPrintDatas ] = useState(JSON.parse(localStorage.getItem('blankDatas')))
-    const rowSum = printDatas.tableRowCount?.reduce((partialSum, a) => partialSum + a, 0);
 
     function getAllData(studentId)
     {
@@ -30,10 +30,14 @@ export default function PrintAttachmentMongolia()
         // , printDatas.student?.department?.sub_orgs
         Promise.all([
             fetchData(signatureApi.get(3)),
-            fetchData(studentApi.calculateGpaDimplomaGet(studentId))
+            fetchData(studentApi.calculateGpaDimplomaGet(studentId)),
+            fetchData(studentApi.getConfig(printDatas?.student?.group?.profession?.id, 'mongolian'))
         ]).then((values) => {
             setListArr(values[0]?.data)
             setDatas(values[1]?.data)
+            setTableRowCount(values[2]?.data?.row_count ? values[2]?.data?.row_count : [])
+            var sum_count = values[2]?.data?.row_count?.reduce((partialSum, a) => partialSum + a, 0);
+            setRowSum(sum_count)
         })
     }
 
@@ -62,10 +66,6 @@ export default function PrintAttachmentMongolia()
             }
         )
     }, [])
-
-    // const FULL_PAGE_HEIGHT = 793
-
-    // console.log(document.getElementById('root').clientHeight,'client');
 
     useEffect(
         () =>
@@ -104,19 +104,19 @@ export default function PrintAttachmentMongolia()
     useEffect(
         () =>
         {
-            if (datas?.lessons)
+            if (datas?.lessons && tableRowCount.length > 0)
                 {
                 if (datas?.lessons?.length != 0)
                 {
                     let count = 0
                     let perCount = 0
-                    let half = printDatas.tableRowCount.length / 2
+                    let half = tableRowCount.length / 2
 
-                    let divide = printDatas.tableRowCount.filter(element => element !== 0).length
+                    let divide = tableRowCount.filter(element => element !== 0).length
                     let dividePage1 = divide > 3 ? 3 : divide
                     let dividePage2 = divide - 3 > 0 ? divide - 3 : 0
 
-                    for (let [idx, val] of printDatas.tableRowCount.entries())
+                    for (let [idx, val] of tableRowCount.entries())
                     {
                         if (idx == half)
                         {
@@ -134,7 +134,7 @@ export default function PrintAttachmentMongolia()
 
                             var tbodyRef = tableDoc.getElementsByTagName('tbody')[0];
 
-                            if (printDatas.tableRowCount[2] == 0 && printDatas.tableRowCount[1] == 0)
+                            if (tableRowCount[2] == 0 && tableRowCount[1] == 0)
                             {
                                 if (idx == 0)
                                 {
@@ -142,17 +142,6 @@ export default function PrintAttachmentMongolia()
                                 }
                             }
 
-                            // if (printDatas.tableRowCount[2] == 0 && printDatas.tableRowCount[1] !== 0)
-                            // {
-                            //     if (idx == 0)
-                            //     {
-                            //         parentTableDoc.style.padding = '0px 7px 0px 14px'
-                            //     }
-                            //     else
-                            //     {
-                            //         parentTableDoc.style.padding = '0px 14px 0px 7px'
-                            //     }
-                            // }
 
                             if (half <= idx)
                             {
@@ -225,7 +214,7 @@ export default function PrintAttachmentMongolia()
                 }
             }
         },
-        [datas]
+        [datas, tableRowCount]
     )
 
     return (
@@ -233,6 +222,7 @@ export default function PrintAttachmentMongolia()
             {isLoading && Loader}
 
             <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1 ${isPageBreak && 'page-break'}`} style={{ fontSize: '11px', paddingTop: height.header + (printDatas?.student?.group?.degree?.degree_code === 'D' ? 24 : 24),  backgroundColor: 'white', color: 'black', fontFamily: 'Arial' }} >
+            {/* <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1 ${isPageBreak && 'page-break'}`} style={{ fontSize: '11px', paddingTop: height.header + (printDatas?.student?.group?.degree?.degree_code === 'D' ? 24 : 30),  backgroundColor: 'white', color: 'black', fontFamily: 'Arial' }} > */}
                 <div
                     className='d-flex flex-wrap align-content-start mt-1'
                     id='table1-1'

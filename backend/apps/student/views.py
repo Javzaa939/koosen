@@ -1,6 +1,5 @@
 import os
 import requests
-from requests.exceptions import JSONDecodeError
 from googletrans import Translator
 import openpyxl_dictreader
 
@@ -56,8 +55,7 @@ from lms.models import LessonStandart
 from lms.models import StudentViz
 from lms.models import SystemSettings
 from lms.models import PaymentBeginBalance
-from lms.models import Country, ProfessionAverageScore
-
+from lms.models import Country, ProfessionAverageScore, AttachmentConfig, ProfessionDefinition
 
 from core.models import SubOrgs, AimagHot, SumDuureg, User, Salbars
 
@@ -2641,12 +2639,50 @@ class StudentAttachmentConfigAPIView(
 ):
     """ Хавсрлатын тохиргоо """
 
+    queryset = AttachmentConfig.objects.all()
+
+    def get(self, request):
+
+        profession = request.query_params.get('profession')
+        type_name = request.query_params.get('type')
+        if type_name == 'mongolian':
+            stype = AttachmentConfig.MONGOLIAN
+        elif type_name == 'english':
+            stype = AttachmentConfig.ENGLISH
+        else:
+            stype = AttachmentConfig.UIGARJIN
+
+        self.queryset = self.queryset.filter(profession=profession, atype=stype)
+
+        datas = self.queryset.values().first()
+
+        return request.send_data(datas if datas else {})
+
     def post(self, request):
         data = request.data
         row_count = json_load(data.get('row_count'))
-        stype = data.get('type')
+        type_name = data.get('type')
 
-        return request.send_data([])
+        if type_name == 'mongolian':
+            stype = AttachmentConfig.MONGOLIAN
+        elif type_name == 'english':
+            stype = AttachmentConfig.ENGLISH
+        else:
+            stype = AttachmentConfig.UIGARJIN
+
+        with transaction.atomic():
+            self.queryset.update_or_create(
+                profession=ProfessionDefinition.objects.get(pk=data.get('profession')),
+                atype=stype,
+                defaults={
+                    'row_count': row_count,
+                    'is_lastname': data.get('is_lastname'),
+                    'is_center': data.get('is_center'),
+                    'give_date': data.get('give_date'),
+                }
+            )
+
+        return request.send_info('INF_001')
 
 @permission_classes([IsAuthenticated])
 class StudentGpaDiplomaValuesAPIView(
