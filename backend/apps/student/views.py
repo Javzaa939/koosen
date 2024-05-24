@@ -3615,7 +3615,7 @@ class GraduationWorkQrAPIView(
 
                 url = 'https://certify.mn/service/api/v2/certification/qr/generate'
                 headers = {
-                    'x-api-key': 'qfSuwUY2.H8FYeLmZzXp2VUG4wVNWwVRo4xQZ5XOc',
+                    'x-api-key': '8DUeSVwW.KD31Xiq6cRSPsS45UMzolU6wftmzf3YO',
                     'Content-Type': 'application/json'
                 }
 
