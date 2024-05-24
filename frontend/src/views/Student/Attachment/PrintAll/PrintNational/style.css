@@ -1,6 +1,7 @@
 @page {
     size: A4 landscape;
-    margin: 40px 30px 40px 45px;
+    margin: 15px 10px 12px 20px;
+    /* margin: 40px 30px 40px 45px; */
 }
 
 body {
@@ -13,12 +14,12 @@ body {
 }
 
 header {
-    position: fixed;
+    /* position: fixed; */
     top: 0px;
 }
 
 footer {
-    position: fixed;
+    /* position: fixed; */
     top: 0px;
     right: 0px;
 }

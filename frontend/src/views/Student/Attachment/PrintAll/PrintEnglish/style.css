@@ -22,12 +22,10 @@ table {
 }
 
 header {
-    position: fixed;
     top: 0px;
 }
 
 footer {
-    position: fixed;
 }
 
 .mini-cell {

@@ -53,7 +53,6 @@ export default function PrintAttachmentMongolia()
     const headerSectionRef = useRef(null)
     const footerSectionRef = useRef(null)
     const body1SectionRef = useRef(null)
-    const body2SectionRef = useRef(null)
 
     useEffect(() => {
         setHeight(
@@ -61,7 +60,6 @@ export default function PrintAttachmentMongolia()
                 header:headerSectionRef.current.clientHeight,
                 footer:footerSectionRef.current.clientHeight,
                 body1:body1SectionRef.current.clientHeight,
-                body2:body2SectionRef.current.clientHeight,
 
             }
         )
@@ -218,68 +216,8 @@ export default function PrintAttachmentMongolia()
     )
 
     return (
-        <>
+        <div className='d-flex flex-column justify-content-between' style={{ height: '100vh' }}>
             {isLoading && Loader}
-
-
-            {/* <div ref={body2SectionRef} className={`${!isPageBreak && 'd-none'}`} style={{ marginTop: '175px', breakInside: 'avoid', backgroundColor: 'white', color: 'black', fontFamily: 'Arial' }} >
-                <div className={`position-relative px-1 gap-1 d-flex justify-content-between`} style={{ fontSize: '13px' }} >
-                    <div className='d-flex flex-wrap align-content-start mt-1' id='table4-4' >
-                        <table className='font-dark w-100 text-center d-none' id='table4' >
-                            <thead className='fw-bolder'>
-                                <tr style={{ height: '25px' }}>
-                                    <td className='border-dark' style={{ width: '4%' }}>№</td>
-                                    <td className='border-dark' style={{ width: '70%' }}>Хичээлийн нэр</td>
-                                    <td className='border-dark' style={{ width: '7%' }}  >Багц цаг</td>
-                                    <td className='border-dark' style={{ width: '11%' }} >Тоо үнэлгээ</td>
-                                    <td className='border-dark' style={{ width: '8%' }} >Үсгэн үнэлгээ</td>
-                                </tr>
-                            </thead>
-                            <tbody>
-
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div className='d-flex flex-wrap align-content-start mt-1' id='table5-5' >
-
-                        <table className='font-dark w-100 text-center d-none' id='table5' >
-                            <thead className='fw-bolder'>
-                                <tr style={{ height: '25px' }}>
-                                    <td className='border-dark' style={{ width: '4%' }}>№</td>
-                                    <td className='border-dark' style={{ width: '70%' }}>Хичээлийн нэр</td>
-                                    <td className='border-dark' style={{ width: '7%' }}  >Багц цаг</td>
-                                    <td className='border-dark' style={{ width: '11%' }} >Тоо үнэлгээ</td>
-                                    <td className='border-dark' style={{ width: '8%' }} >Үсгэн үнэлгээ</td>
-                                </tr>
-                            </thead>
-                            <tbody>
-
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div className='d-flex flex-wrap align-content-start mt-1' id='table6-6' >
-
-                        <table className='font-dark w-100 text-center d-none' id='table6' >
-                            <thead className='fw-bolder'>
-                                <tr style={{ height: '25px' }}>
-                                    <td className='border-dark' style={{ width: '4%' }}>№</td>
-                                    <td className='border-dark' style={{ width: '70%' }}>Хичээлийн нэр</td>
-                                    <td className='border-dark' style={{ width: '7%' }}  >Багц цаг</td>
-                                    <td className='border-dark' style={{ width: '11%' }} >Тоо үнэлгээ</td>
-                                    <td className='border-dark' style={{ width: '8%' }} >Үсгэн үнэлгээ</td>
-                                </tr>
-                            </thead>
-                            <tbody>
-
-                            </tbody>
-                        </table>
-                    </div>
-
-                </div>
-            </div> */}
-
             {/*
 
                 Магистрийн толгой хэсэг
@@ -287,159 +225,162 @@ export default function PrintAttachmentMongolia()
                 Доор нь хуучин байсныг нь комментлосон байгаа
 
              */}
-            <header
-                className='w-100 px-1 font-dark'
-                style={{ backgroundColor: 'white', color: 'black', fontFamily: 'Arial' }}
-                ref={headerSectionRef}
-            >
-                <div className='d-flex flex-column text-center fw-bolder'>
-                    <p className='text-uppercase' style={{ marginBottom: '0px' }} >{themeConfig.school.name}</p>
-                    <p className='text-uppercase' style={{ marginBottom: '0px' }} >{printDatas?.student?.department?.school}</p>
-                    <p className='m-0' style={{ fontSize: '12px', fontWeight: '500' }} >{printDatas?.student?.graduation_work?.diplom_num} дугаартай <span className='text-lowercase'>{printDatas?.student?.group?.degree?.degree_name && `${printDatas?.student?.group?.degree?.degree_name}ын`}</span> дипломын хавсралт</p>
-                    <p className='' style={{ fontSize: 12, fontWeight: 500 }}>Бүртгэлийн дугаар: {printDatas?.student?.graduation_work?.registration_num}</p>
-                </div>
+            <div className='' style={{ flex: 1 }}>
+                <header
+                    className='w-100 px-1 font-dark'
+                    style={{ backgroundColor: 'white', color: 'black', fontFamily: 'Arial' }}
+                    ref={headerSectionRef}
+                >
+                    <div className='d-flex flex-column text-center fw-bolder'>
+                        <p className='text-uppercase' style={{ marginBottom: '0px' }} >{themeConfig.school.name}</p>
+                        <p className='text-uppercase' style={{ marginBottom: '0px' }} >{printDatas?.student?.department?.school}</p>
+                        <p className='m-0' style={{ fontSize: '12px', fontWeight: '500' }} >{printDatas?.student?.graduation_work?.diplom_num} дугаартай <span className='text-lowercase'>{printDatas?.student?.group?.degree?.degree_name && `${printDatas?.student?.group?.degree?.degree_name}ын`}</span> дипломын хавсралт</p>
+                        <p className='' style={{ fontSize: 12, fontWeight: 500 }}>Бүртгэлийн дугаар: {printDatas?.student?.graduation_work?.registration_num}</p>
+                    </div>
 
-                <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
-                    <div className='d-flex' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
-                        <span className='fw-normal w-50'>Эцэг /Эх/-ийн нэр:</span> <span>{printDatas?.student?.last_name}</span>
-                    </div>
-                    <div className='d-flex px-1' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
-                        <span className='fw-normal w-50'>Хөтөлбөрийн нэр:</span> <span className=''>{printDatas?.student?.group?.profession?.name}</span>
-                    </div>
-                    <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score === 'D' ? '25%' : '33.3%' }} >
-                        <span className='fw-normal w-50' style={{ width: '200px'}}>Элссэн он:</span><span>{printDatas?.student?.group?.join_year?.substring(0, 4)}</span>
-                    </div>
-                    {
-                        (printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score)
-                        &&
-                        <div className='d-flex px-2' style={{ width: '25%'}} >
-                            <span className='fw-normal w-50' style={{ width: '200px'}}>Элсэлтийн шалгалтын оноо:</span><span className='ms-5'>{printDatas?.student?.eysh_score}</span>
+                    <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
+                        <div className='d-flex' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
+                            <span className='fw-normal w-50'>Эцэг /Эх/-ийн нэр:</span> <span>{printDatas?.student?.last_name}</span>
                         </div>
-                    }
-                </div>
-                <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
-                    <div className='d-flex' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
-                        <span className='fw-normal w-50'>Нэр:</span> <span>{printDatas?.student?.first_name}</span>
-                    </div>
-                    <div className='d-flex px-1' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
+                        <div className='d-flex px-1' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
+                            <span className='fw-normal w-50'>Хөтөлбөрийн нэр:</span> <span className=''>{printDatas?.student?.group?.profession?.name}</span>
+                        </div>
+                        <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score === 'D' ? '25%' : '33.3%' }} >
+                            <span className='fw-normal w-50' style={{ width: '200px'}}>Элссэн он:</span><span>{printDatas?.student?.group?.join_year?.substring(0, 4)}</span>
+                        </div>
                         {
-                            printDatas?.student?.group?.degree?.degree_code === 'D'
-                            ?
-                                <>
-                                    <span className='fw-normal w-50'>Индекс: </span><span>{printDatas?.student?.group?.profession?.code}</span>
-                                </>
-                            :
-                                <>
-                                    <span className='fw-normal w-50'>Төрөлжсөн чиглэл: </span><span>{printDatas?.student?.group?.profession?.dep_name}</span>
-                                </>
+                            (printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score)
+                            &&
+                            <div className='d-flex px-2' style={{ width: '25%'}} >
+                                <span className='fw-normal w-50' style={{ width: '200px'}}>Элсэлтийн шалгалтын оноо:</span><span className='ms-5'>{printDatas?.student?.eysh_score}</span>
+                            </div>
                         }
                     </div>
-                    <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
-                        <span className='fw-normal w-50' style={{ width: '200px'}}>Төгссөн он:</span> <span>{printDatas?.student?.graduation_work?.lesson_year?.substring(5, 9)}</span>
-                    </div>
-                </div>
-                <div className='fw-bolder d-flex' style={{ fontSize: '11px' }}>
-                    <div className='d-flex' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
-                        <span className='fw-normal w-50'>Регистрийн дугаар:</span> <span>{printDatas?.student?.register_num}</span>
-                    </div>
-                    {
-                        printDatas?.student?.group?.degree?.degree_code !== 'D'
-                        &&
-                        <div className='d-flex px-1' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }}>
-                            <span className='fw-normal w-50'>Өмнөх зэргийн дипломын дугаар:</span> <span className='text-uppercase'>{printDatas?.student?.graduation_work?.back_diplom_num}</span>
+                    <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
+                        <div className='d-flex' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
+                            <span className='fw-normal w-50'>Нэр:</span> <span>{printDatas?.student?.first_name}</span>
                         </div>
-                    }
-                    <div className={`d-flex ${printDatas?.student?.group?.degree?.degree_code === 'D' ? 'px-1' : 'px-2'}`} style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
-                        <span className='fw-normal w-50'>Тушаалын дугаар:</span> <span className='text-uppercase'>{printDatas?.student?.graduation_work?.graduation_number}</span>
-                    </div>
-                    {
-                        printDatas?.student?.group?.degree?.degree_code === 'D'
-                        &&
-                        <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '50%' : '33.3%' }} >
-                            <span className='fw-normal w-50' style={{ width: '200px'}}>Өмнөх шатны боловсролын үнэлгээний дундаж оноо: </span><span className='ms-5'>{printDatas?.student?.secondary_school}</span>
+                        <div className='d-flex px-1' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
+                            {
+                                printDatas?.student?.group?.degree?.degree_code === 'D'
+                                ?
+                                    <>
+                                        <span className='fw-normal w-50'>Индекс: </span><span>{printDatas?.student?.group?.profession?.code}</span>
+                                    </>
+                                :
+                                    <>
+                                        <span className='fw-normal w-50'>Төрөлжсөн чиглэл: </span><span>{printDatas?.student?.group?.profession?.dep_name}</span>
+                                    </>
+                            }
                         </div>
-                    }
-                </div>
-            </header>
-
-            <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1 ${isPageBreak && ''}`} style={{ fontSize: '11px',  backgroundColor: 'white', color: 'black', fontFamily: 'Arial' }} >
-            {/* <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1 ${isPageBreak && 'page-break'}`} style={{ fontSize: '11px', paddingTop: height.header + (printDatas?.student?.group?.degree?.degree_code === 'D' ? 24 : 30),  backgroundColor: 'white', color: 'black', fontFamily: 'Arial' }} > */}
-                <div
-                    className='d-flex flex-wrap align-content-start mt-1'
-                    id='table1-1'
-                    // style={{ marginTop: height }}
-                >
-
-                    <table className='font-dark w-100 text-center d-none' id='table1' >
-                        <thead className='fw-bolder'>
-                            <tr style={{ height: '25px' }}>
-                                <td className='border-dark' style={{ width: '4%' }}>№</td>
-                                <td className='border-dark' style={{ width: '70%' }}>Хичээлийн нэр</td>
-                                <td className='border-dark' style={{ width: '7%' }}>Багц цаг</td>
-                                <td className='border-dark' style={{ width: '11%' }}>Тоо үнэлгээ</td>
-                                <td className='border-dark' style={{ width: '8%' }}>Үсгэн үнэлгээ</td>
-                            </tr>
-                        </thead>
-                        <tbody>
-
-                        </tbody>
-                    </table>
-                </div>
-
-                <div className='d-flex flex-wrap align-content-start mt-1' id='table2-2' >
-
-                    <table className='font-dark w-100 text-center d-none' id='table2' >
-                        <thead className='fw-bolder'>
-                            <tr style={{ height: '25px' }}>
-                                <td className='border-dark' style={{ width: '4%' }}>№</td>
-                                <td className='border-dark' style={{ width: '70%' }}>Хичээлийн нэр</td>
-                                <td className='border-dark' style={{ width: '7%' }}  >Багц цаг</td>
-                                <td className='border-dark' style={{ width: '11%' }} >Тоо үнэлгээ</td>
-                                <td className='border-dark' style={{ width: '8%' }} >Үсгэн үнэлгээ</td>
-                            </tr>
-                        </thead>
-                        <tbody>
-
-                        </tbody>
-                    </table>
-                </div>
-
-                <div className='d-flex flex-wrap align-content-start mt-1' id='table3-3' >
-
-                    <table className='font-dark w-100 text-center d-none' id='table3' >
-                        <thead className='fw-bolder'>
-                            <tr style={{ height: '25px' }}>
-                                <td className='border-dark' style={{ width: '4%' }}>№</td>
-                                <td className='border-dark' style={{ width: '70%' }}>Хичээлийн нэр</td>
-                                <td className='border-dark' style={{ width: '7%' }}  >Багц цаг</td>
-                                <td className='border-dark' style={{ width: '11%' }} >Тоо үнэлгээ</td>
-                                <td className='border-dark' style={{ width: '8%' }} >Үсгэн үнэлгээ</td>
-                            </tr>
-                        </thead>
-                        <tbody>
-
-                        </tbody>
-                    </table>
-                </div>
-
-                {
-                    isPageBreak
-                    ?
-                    (
-                        <>
-                            {/* <div className='position-absolute' style={{ right: '12px', fontSize: '11px', top: '533px' }} >
-                                Энэхүү хавсралт-1 {new Date().getFullYear()} оны {printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.graduation_work?.diplom_num} дугаартай дипломын хамт хүчинтэй.
+                        <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
+                            <span className='fw-normal w-50' style={{ width: '200px'}}>Төгссөн он:</span> <span>{printDatas?.student?.graduation_work?.lesson_year?.substring(5, 9)}</span>
+                        </div>
+                    </div>
+                    <div className='fw-bolder d-flex' style={{ fontSize: '11px' }}>
+                        <div className='d-flex' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
+                            <span className='fw-normal w-50'>Регистрийн дугаар:</span> <span>{printDatas?.student?.register_num}</span>
+                        </div>
+                        {
+                            printDatas?.student?.group?.degree?.degree_code !== 'D'
+                            &&
+                            <div className='d-flex px-1' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }}>
+                                <span className='fw-normal w-50'>Өмнөх зэргийн дипломын дугаар:</span> <span className='text-uppercase'>{printDatas?.student?.graduation_work?.back_diplom_num}</span>
                             </div>
-                            <div className='position-absolute' style={{ right: '12px', fontSize: '11px', top: '1242px' }} >
-                                Энэхүү хавсралт-2 {new Date().getFullYear()} оны {printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.graduation_work?.diplom_num} дугаартай дипломын хамт хүчинтэй.
-                            </div> */}
-                        </>
-                    )
-                    :
-                        null
-                }
+                        }
+                        <div className={`d-flex ${printDatas?.student?.group?.degree?.degree_code === 'D' ? 'px-1' : 'px-2'}`} style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
+                            <span className='fw-normal w-50'>Тушаалын дугаар:</span> <span className='text-uppercase'>{printDatas?.student?.graduation_work?.graduation_number}</span>
+                        </div>
+                        {
+                            printDatas?.student?.group?.degree?.degree_code === 'D'
+                            &&
+                            <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '50%' : '33.3%' }} >
+                                <span className='fw-normal w-50' style={{ width: '200px'}}>Өмнөх шатны боловсролын үнэлгээний дундаж оноо: </span><span className='ms-5'>{printDatas?.student?.secondary_school}</span>
+                            </div>
+                        }
+                    </div>
+                </header>
 
+                <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1 ${isPageBreak && 'page-break'}`} style={{ fontSize: '11px', paddingTop: '1rem', color: 'black', fontFamily: 'Arial' }} >
+                {/* <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1 ${isPageBreak && 'page-break'}`} style={{ fontSize: '11px', paddingTop: height.header + (printDatas?.student?.group?.degree?.degree_code === 'D' ? 24 : 30),  backgroundColor: 'white', color: 'black', fontFamily: 'Arial' }} > */}
+                    <div
+                        className='d-flex flex-wrap align-content-start mt-1'
+                        id='table1-1'
+                        // style={{ marginTop: height }}
+                    >
+
+                        <table className='font-dark w-100 text-center d-none' id='table1' >
+                            <thead className='fw-bolder'>
+                                <tr style={{ height: '25px' }}>
+                                    <td className='border-dark' style={{ width: '4%' }}>№</td>
+                                    <td className='border-dark' style={{ width: '70%' }}>Хичээлийн нэр</td>
+                                    <td className='border-dark' style={{ width: '7%' }}>Багц цаг</td>
+                                    <td className='border-dark' style={{ width: '11%' }}>Тоо үнэлгээ</td>
+                                    <td className='border-dark' style={{ width: '8%' }}>Үсгэн үнэлгээ</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div className='d-flex flex-wrap align-content-start mt-1' id='table2-2' >
+
+                        <table className='font-dark w-100 text-center d-none' id='table2' >
+                            <thead className='fw-bolder'>
+                                <tr style={{ height: '25px' }}>
+                                    <td className='border-dark' style={{ width: '4%' }}>№</td>
+                                    <td className='border-dark' style={{ width: '70%' }}>Хичээлийн нэр</td>
+                                    <td className='border-dark' style={{ width: '7%' }}  >Багц цаг</td>
+                                    <td className='border-dark' style={{ width: '11%' }} >Тоо үнэлгээ</td>
+                                    <td className='border-dark' style={{ width: '8%' }} >Үсгэн үнэлгээ</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div className='d-flex flex-wrap align-content-start mt-1' id='table3-3' >
+
+                        <table className='font-dark w-100 text-center d-none' id='table3' >
+                            <thead className='fw-bolder'>
+                                <tr style={{ height: '25px' }}>
+                                    <td className='border-dark' style={{ width: '4%' }}>№</td>
+                                    <td className='border-dark' style={{ width: '70%' }}>Хичээлийн нэр</td>
+                                    <td className='border-dark' style={{ width: '7%' }}  >Багц цаг</td>
+                                    <td className='border-dark' style={{ width: '11%' }} >Тоо үнэлгээ</td>
+                                    <td className='border-dark' style={{ width: '8%' }} >Үсгэн үнэлгээ</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+                        </table>
+                    </div>
+
+                    {
+                        isPageBreak
+                        ?
+                        (
+                            <>
+                                {/* <div className='position-absolute' style={{ right: '12px', fontSize: '11px', top: '533px' }} >
+                                    Энэхүү хавсралт-1 {new Date().getFullYear()} оны {printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.graduation_work?.diplom_num} дугаартай дипломын хамт хүчинтэй.
+                                </div>
+                                <div className='position-absolute' style={{ right: '12px', fontSize: '11px', top: '1242px' }} >
+                                    Энэхүү хавсралт-2 {new Date().getFullYear()} оны {printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.graduation_work?.diplom_num} дугаартай дипломын хамт хүчинтэй.
+                                </div> */}
+                            </>
+                        )
+                        :
+                            null
+                    }
+
+                </div>
             </div>
+
 
             {/* <header className='w-100 px-1' style={{ backgroundColor: 'white', color: 'black' }} >
                 <div className='d-flex flex-column text-center fw-bolder'>
@@ -570,6 +511,6 @@ export default function PrintAttachmentMongolia()
 
             </footer>
 
-        </>
+        </div>
     )
 }
