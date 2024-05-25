@@ -1503,7 +1503,6 @@ export const pay_type = () => {
 }
 
 // Асуултын төрлийн жагсаалт
-
 export const get_questionype = () => {
 
 	const datas = []
@@ -1527,6 +1526,26 @@ export const get_questionype = () => {
 	return datas
 }
 
+export const get_leveltype = () => {
+
+	const datas = []
+	const list = [
+		'Хөнгөн',
+		'Дунд',
+		'Хүнд',
+	]
+
+	list.map((list, idx) => {
+		var data = {
+			id: idx + 1,
+			name: list,
+		}
+
+		datas.push(data)
+	})
+
+	return datas
+}
 
 export function fixDatetimeFormat(datetime, isTime=true) {
 

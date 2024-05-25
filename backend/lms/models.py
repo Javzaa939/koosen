@@ -3194,6 +3194,69 @@ def get_choice_image_path(instance, filename):
     return os.path.join('challenge', 'questions', "answer_%s" % str(instance.id), filename)
 
 
+class PsychologicalQuestionTitle(models.Model):
+    """ Асуултын сэдэв """
+
+    name = models.CharField(max_length=255, null=True, verbose_name='Сэдвийн нэр')
+    created_at = models.DateTimeField(auto_now=True)
+
+
+class PsychologicalQuestionChoices(models.Model):
+    """ Асуултын сонголтууд """
+
+    value = models.CharField(verbose_name="Сонголт", max_length=250, null=False, blank=False)
+    image = models.ImageField(upload_to=get_choice_image_path, null=True, blank=True, verbose_name='зураг')
+    is_correct = models.BooleanField(null=False, default=False, verbose_name="Энэ сонголт зөв эсэх")
+
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class PsychologicalTestQuestions(models.Model):
+    """ Сэтгэлзүйн  асуултууд """
+
+    KIND_ONE_CHOICE = 1
+    KIND_MULTI_CHOICE = 2
+    KIND_BOOLEAN = 3
+    KIND_RATING = 4
+    KIND_TEXT = 5
+
+    KIND_CHOICES = (
+        (KIND_ONE_CHOICE, 'Нэг сонголт'),
+        (KIND_MULTI_CHOICE, 'Олон сонголт'),
+        (KIND_BOOLEAN, 'Тийм, Үгүй сонголт'),
+        (KIND_RATING, 'Үнэлгээ'),
+        (KIND_TEXT, 'Бичвэр'),
+    )
+
+    kind = models.IntegerField(choices=KIND_CHOICES, null=False, blank=False, verbose_name='Асуултын төрөл')
+    question = models.CharField(max_length=1000, null=False, blank=False, verbose_name="Асуулт")
+    image = models.ImageField(upload_to=get_image_path, null=True, blank=True, verbose_name='зураг')
+
+    title = models.ManyToManyField(PsychologicalQuestionTitle, verbose_name='Асуултын ерөнхий сэдэв')
+    has_score = models.BooleanField(null=True, default=False, verbose_name="Энэ асуулт оноотой юу гэдгийг шалгана")
+    score = models.FloatField(null=True, verbose_name="Асуултын оноо")
+
+    # KIND_BOOLEAN үед
+    yes_or_no = models.PositiveIntegerField(null=True, verbose_name='Тийм үгүй асуултны хариулт хадгалах хэсэг') # 1 0 хадгалах
+
+    # KIND_RATING үед
+    rating_max_count = models.IntegerField(default=0, verbose_name="Үнэлгээний дээд тоо", null=True, blank=True)
+    low_rating_word = models.CharField(max_length=100, verbose_name="Доод үнэлгээг илэрхийлэх үг")
+    high_rating_word = models.CharField(max_length=100, verbose_name="Дээд үнэлгээг илэрхийлэх үг")
+
+    # KIND_MULTI_CHOICE үед
+    max_choice_count = models.IntegerField(default=0, verbose_name="Сонголтын хязгаар", null=True, blank=True)
+
+    # KIND_ONE_CHOICE болон KIND_MULTI_CHOICE үед
+    choices = models.ManyToManyField(PsychologicalQuestionChoices)
+
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
 class QuestionChoices(models.Model):
     """ Өөрийгөө сорих шалгалтын сонголттой асуултын сонголтууд """
 

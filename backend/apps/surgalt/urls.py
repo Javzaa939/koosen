@@ -66,6 +66,14 @@ urlpatterns = [
     path('questions/list/', QuestionsListAPIView.as_view()),
     path('questions/<int:pk>/', QuestionsAPIView.as_view()),
 
+    path('psychological_test/title/', PsychologicalQuestionTitleAPIView.as_view()),
+    path('psychological_test/title/list', PsychologicalQuestionTitleListAPIView.as_view()),
+    path('psychological_test/title/<int:pk>/', PsychologicalQuestionTitleAPIView.as_view()),
+
+    path('psychological_test/', PsychologicalTestQuestionsAPIView.as_view()),
+    # path('psychological_test/list/', PsychologicalTestQuestionsAPIView.as_view()),
+    path('psychological_test/<int:pk>/', PsychologicalTestQuestionsAPIView.as_view()),
+
     path('lesson/list/', LessonsTeacher.as_view()),
     path('lesson/studentlist/', HomeworkStudentsListAPIView.as_view()),
 
