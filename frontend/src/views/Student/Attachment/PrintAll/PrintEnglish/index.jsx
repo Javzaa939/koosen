@@ -11,7 +11,6 @@ export default function PrintAttachmentEnglish()
     const headerSectionRef = useRef(null)
     const footerSectionRef = useRef(null)
     const body1SectionRef = useRef(null)
-    const body2SectionRef = useRef(null)
 
     // Loader
 	const { fetchData, Loader, Loading } = useLoader({})
@@ -24,6 +23,7 @@ export default function PrintAttachmentEnglish()
     const [ listArr, setListArr ] = useState([])
     const [ isPageBreak, setIsPageBreak ] = useState(false)
     const [ printDatas, setPrintDatas ] = useState(JSON.parse(localStorage.getItem('blankDatas')))
+    console.log('datas', printDatas)
     const [ datas, setDatas ] = useState([])
     const [ tableRowCount, setTableRowCount ] = useState([])
     const [ rowSum, setRowSum ] = useState(0)
@@ -63,7 +63,6 @@ export default function PrintAttachmentEnglish()
                 header:headerSectionRef.current.clientHeight,
                 footer:footerSectionRef.current.clientHeight,
                 body1:body1SectionRef.current.clientHeight,
-                body2:body2SectionRef.current.clientHeight,
 
             }
         )
@@ -131,8 +130,8 @@ export default function PrintAttachmentEnglish()
 
                         if (val > 0)
                         {
-                            let tableDoc = document.getElementById(`table${idx + 1}`)
-                            let parentTableDoc = document.getElementById(`table${idx + 1}-${idx + 1}`)
+                            let tableDoc = document.getElementById(`tableEnglish${idx + 1}`)
+                            let parentTableDoc = document.getElementById(`tableEnglish${idx + 1}-${idx + 1}`)
                             tableDoc.classList.toggle('d-none')
 
                             var tbodyRef = tableDoc.getElementsByTagName('tbody')[0];
@@ -305,250 +304,198 @@ export default function PrintAttachmentEnglish()
     }
 
     return (
-        <>
+        <div className='d-flex flex-column justify-content-between' style={{ height: '100vh' }}>
             {Loading && Loader}
-            <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1 ${isPageBreak && 'page-break'}`} style={{ fontSize: '13px', paddingTop: height.header + (printDatas?.student?.group?.degree?.degree_code === 'D' ? 18 : 24),  backgroundColor: 'white', color: 'black', fontFamily: 'Arial' }} >
+            {/*
 
-            {/* <div ref={body1SectionRef} className={`position-relative d-flex justify-content-between ${isPageBreak && 'page-break'}`} style={{ fontSize: '9px', marginTop: '135px', paddingTop: height.header + 24, }} > */}
+                Магистрийн толгой хэсэг
 
-                <div className='d-flex flex-wrap align-content-start mt-1' id='table1-1' >
+                Доор нь хуучин байсныг нь комментлосон байгаа
 
-                    <table className='w-100 text-center d-none' id='table1' >
-                        <thead className='fw-bolder'>
-                            <tr style={{ height: '20px' }}>
-                                <td className='border-dark' style={{ width: '4%' }}  >№</td>
-                                <td className='border-dark' style={{ width: '70%' }}  >Name of subject</td>
-                                <td className='border-dark' style={{ width: '7%' }}  >Cr</td>
-                                <td className='border-dark' style={{ width: '11%' }} >Point</td>
-                                <td className='border-dark' style={{ width: '8%' }} >Grade</td>
-                            </tr>
-                        </thead>
-                        <tbody>
+             */}
+            <div className='' style={{ flex: 1 }}>
+                <header
+                    className='w-100 px-1'
+                    style={{ backgroundColor: 'white', color: 'black', fontFamily: 'Arial' }}
+                    ref={headerSectionRef}
+                >
 
-                        </tbody>
-                    </table>
-                </div>
-
-                <div className='d-flex flex-wrap align-content-start mt-1' id='table2-2' >
-
-                    <table className='w-100 text-center d-none' id='table2' >
-                        <thead className='fw-bolder'>
-                            <tr style={{ height: '25px' }}>
-                                <td className='border-dark' style={{ width: '4%' }}>№</td>
-                                <td className='border-dark' style={{ width: '70%' }}>Name of subject</td>
-                                <td className='border-dark' style={{ width: '7%' }} >Cr</td>
-                                <td className='border-dark' style={{ width: '11%' }} >Point</td>
-                                <td className='border-dark' style={{ width: '8%' }} >Grade</td>
-                            </tr>
-                        </thead>
-                        <tbody>
-
-                        </tbody>
-                    </table>
-                </div>
-
-                <div className='d-flex flex-wrap align-content-start mt-1' id='table3-3' >
-                    <table className='w-100 text-center d-none' id='table3' >
-                        <thead className='fw-bolder'>
-                            <tr style={{ height: '25px' }}>
-                                <td className='border-dark' style={{ width: '4%' }}  >№</td>
-                                <td className='border-dark' style={{ width: '70%' }}  >Name of subject</td>
-                                <td className='border-dark' style={{ width: '7%' }}  >Cr</td>
-                                <td className='border-dark' style={{ width: '11%' }} >Point</td>
-                                <td className='border-dark' style={{ width: '8%' }} >Grade</td>
-                            </tr>
-                        </thead>
-                        <tbody>
-
-                        </tbody>
-                    </table>
-                </div>
-
-                {/* {
-                    isPageBreak
-                    ?
-                    (
-                        <>
-                            <div className='position-absolute' style={{ right: '12px', fontSize: '11px', top: '533px' }} >
-                                This annex-1 is valid with Diploma No. {printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.graduation_work?.diplom_num} in {new Date().getFullYear()}
-                            </div>
-                            <div className='position-absolute' style={{ right: '12px', fontSize: '11px', top: '1242px' }} >
-                                This annex-2 is valid with Diploma No. {printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.graduation_work?.diplom_num} in {new Date().getFullYear()}
-                            </div>
-                        </>
-                    )
-                    :
-                        null
-                } */}
-
-            </div>
-
-            {/* <div ref={body2SectionRef} className={`${!isPageBreak && 'd-none'}`} style={{ marginTop: '135px', breakInside: 'avoid' }} > */}
-            <div ref={body2SectionRef} className={`${!isPageBreak && 'd-none'}`} style={{ marginTop: '175px', breakInside: 'avoid', backgroundColor: 'white', color: 'black', fontFamily: 'serif' }} >
-
-                <div className={`position-relative d-flex justify-content-between`} >
-                    <div className='d-flex flex-wrap align-content-start p-1' style={{ width: '33.1%' }} id='table4-4'>
-                        <table className='w-100 text-center d-none' id='table4' >
-                            <thead className='fw-bolder'>
-                                 <tr style={{ height: '25px' }}>
-                                    <td className='border-dark' style={{ width: '4%' }} >№</td>
-                                    <td className='border-dark' style={{ width: '70%' }} >Name of subject</td>
-                                    <td className='border-dark' style={{ width: '7%' }}  >Cr</td>
-                                    <td className='border-dark' style={{ width: '11%' }} >Point</td>
-                                    <td className='border-dark' style={{ width: '8%' }} >Grade</td>
-                                </tr>
-                            </thead>
-                            <tbody>
-
-                            </tbody>
-                        </table>
+                    <div className='d-flex flex-column text-center fw-bolder'>
+                        <p className='text-uppercase' style={{ marginBottom: '0px' }} >UNIVERSITY OF INTERNAL AFFAIRS, MONGOLIA</p>
+                        <p className='text-uppercase' style={{ marginBottom: '0px' }} >{printDatas?.student?.department?.school_eng}</p>
+                        <p style={{ fontSize: '12px', fontWeight: '500' }} className='mb-0' >{printDatas?.student?.graduation_work?.diplom_num} <span className='text-lowercase'>{printDatas?.student?.group?.degree?.degree_eng_name}</span> degree diploma</p>
+                        <p className='' style={{ fontSize: 12, fontWeight: 500 }}>Register No: {printDatas?.student?.graduation_work?.registration_num}</p>
                     </div>
 
-                    <div className='d-flex flex-wrap align-content-start p-1' style={{ width: '33.1%' }} id='table5-5'>
-
-                        <table className='w-100 text-center d-none' id='table5' >
-                            <thead className='fw-bolder'>
-                                 <tr style={{ height: '25px' }}>
-                                    <td className='border-dark' style={{ width: '4%' }}  >№</td>
-                                    <td className='border-dark' style={{ width: '70%' }}  >Name of subject</td>
-                                    <td className='border-dark' style={{ width: '7%' }}  >Cr</td>
-                                    <td className='border-dark' style={{ width: '11%' }} >Point</td>
-                                    <td className='border-dark' style={{ width: '8%' }} >Grade</td>
-                                </tr>
-                            </thead>
-                            <tbody>
-
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div className='d-flex flex-wrap align-content-start p-1' style={{ width: '33.1%' }} id='table6-6'>
-
-                        <table className='w-100 text-center d-none' id='table6' >
-                            <thead className='fw-bolder'>
-                                 <tr style={{ height: '25px' }}>
-                                    <td className='border-dark' style={{ width: '4%' }}  >№</td>
-                                    <td className='border-dark' style={{ width: '70%' }}  >Name of subject</td>
-                                    <td className='border-dark' style={{ width: '7%' }}  >Cr</td>
-                                    <td className='border-dark' style={{ width: '11%' }} >Point</td>
-                                    <td className='border-dark' style={{ width: '8%' }} >Grade</td>
-                                </tr>
-                            </thead>
-                            <tbody>
-
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-            <header
-                className='w-100 px-1'
-                style={{ backgroundColor: 'white', color: 'black', fontFamily: 'Arial' }}
-                ref={headerSectionRef}
-            >
-
-                <div className='d-flex flex-column text-center fw-bolder'>
-                    <p className='text-uppercase' style={{ marginBottom: '0px' }} >UNIVERSITY OF INTERNAL AFFAIRS, MONGOLIA</p>
-                    <p className='text-uppercase' style={{ marginBottom: '0px' }} >{printDatas?.student?.department?.school_eng}</p>
-                    <p style={{ fontSize: '12px', fontWeight: '500' }} className='mb-0' >{printDatas?.student?.graduation_work?.diplom_num} <span className='text-lowercase'>{printDatas?.student?.group?.degree?.degree_eng_name}</span> degree diploma</p>
-                    <p className='' style={{ fontSize: 12, fontWeight: 500 }}>Register No: {printDatas?.student?.graduation_work?.registration_num}</p>
-                </div>
-
-                <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
-                    <div className='d-flex' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
-                        <span className='fw-normal w-50'>Last name:</span> <span className='text-uppercase'>{printDatas?.student?.last_name_eng}</span>
-                    </div>
-                    <div className='d-flex px-1' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
-                        <span className='fw-normal w-50'>Profession:</span> <span className=''>{printDatas?.student?.group?.profession?.name_eng}</span>
-                    </div>
-                    <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
-                        <span className='fw-normal w-50' style={{ width: '200px'}}>Commenced:</span><span>{printDatas?.student?.group?.join_year?.substring(0, 4)}</span>
-                    </div>
-                    {
-                        printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score
-                        &&
-                        <div className='d-flex px-2' style={{ width: '25%'}} >
-                            <span className='fw-normal w-50' style={{ width: '200px'}}>Entrance exam point:</span><span className='ms-5'>{printDatas?.student?.eysh_score}</span>
+                    <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
+                        <div className='d-flex' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
+                            <span className='fw-normal w-50'>Last name:</span> <span className='text-uppercase'>{printDatas?.student?.last_name_eng}</span>
                         </div>
-                    }
-                </div>
-                <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
-                    <div className='d-flex' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
-                        <span className='fw-normal w-50'>First name:</span> <span className='text-uppercase'>{printDatas?.student?.first_name_eng}</span>
-                    </div>
-                    <div className='d-flex px-1' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
+                        <div className='d-flex px-1' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
+                            <span className='fw-normal w-50'>Profession:</span> <span className=''>{printDatas?.student?.group?.profession?.name_eng}</span>
+                        </div>
+                        <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
+                            <span className='fw-normal w-50' style={{ width: '200px'}}>Commenced:</span><span>{printDatas?.student?.group?.join_year?.substring(0, 4)}</span>
+                        </div>
                         {
-                            printDatas?.student?.group?.degree?.degree_code === 'D'
-                            ?
-                                <>
-                                    <span className='fw-normal w-50'>Index: </span><span>{printDatas?.student?.group?.profession?.code}</span>
-                                </>
-                            :
-                                <>
-                                    <span className='fw-normal w-50'>Major specified: </span><span>{printDatas?.student?.group?.profession?.dep_name_eng}</span>
-                                </>
+                            printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score
+                            &&
+                            <div className='d-flex px-2' style={{ width: '25%'}} >
+                                <span className='fw-normal w-50' style={{ width: '200px'}}>Entrance exam point:</span><span className='ms-5'>{printDatas?.student?.eysh_score}</span>
+                            </div>
                         }
                     </div>
-                    <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
-                        <span className='fw-normal w-50' style={{ width: '200px'}}>Completed:</span> <span>{printDatas?.student?.graduation_work?.lesson_year?.substring(5, 9)}</span>
-                    </div>
-                </div>
-                <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
-                    <div className='d-flex' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
-                        <span className='fw-normal w-50'>Registration number:</span> <span>{engVseg(printDatas?.student?.register_num[0])}{engVseg(printDatas?.student?.register_num[1])}{printDatas?.student?.register_num.slice(-8)}</span>
-                    </div>
-                    {
-                        printDatas?.student?.group?.degree?.degree_code !== 'D'
-                        &&
-                            <div className='d-flex px-1' style={{ width: '33.3%' }} >
-                                <span className='fw-normal w-50'>Diploma Number of Bachelor's Degree:</span> <span className='text-uppercase'>{printDatas?.student?.graduation_work?.back_diplom_num}</span>
-                            </div>
-                    }
-                    <div className={`d-flex ${printDatas?.student?.group?.degree?.degree_code === 'D' ? 'px-1' : 'px-2'}`} style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
-                        <span className='fw-normal w-50'>Order number:</span> <span className='text-uppercase'>{printDatas?.student?.graduation_work?.graduation_number}</span>
-                    </div>
-                    {
-                        printDatas?.student?.group?.degree?.degree_code === 'D'
-                        &&
-                        <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '50%' : '33.3%' }} >
-                            <span className='fw-normal w-50' style={{ width: '200px'}}>GPA of previous level of education: </span><span className='ms-5'>{printDatas?.student?.secondary_school}</span>
+                    <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
+                        <div className='d-flex' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
+                            <span className='fw-normal w-50'>First name:</span> <span className='text-uppercase'>{printDatas?.student?.first_name_eng}</span>
                         </div>
-                    }
+                        <div className='d-flex px-1' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
+                            {
+                                printDatas?.student?.group?.degree?.degree_code === 'D'
+                                ?
+                                    <>
+                                        <span className='fw-normal w-50'>Index: </span><span>{printDatas?.student?.group?.profession?.code}</span>
+                                    </>
+                                :
+                                    <>
+                                        <span className='fw-normal w-50'>Major specified: </span><span>{printDatas?.student?.group?.profession?.dep_name_eng}</span>
+                                    </>
+                            }
+                        </div>
+                        <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
+                            <span className='fw-normal w-50' style={{ width: '200px'}}>Completed:</span> <span>{printDatas?.student?.graduation_work?.lesson_year?.substring(5, 9)}</span>
+                        </div>
+                    </div>
+                    <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
+                        <div className='d-flex' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
+                            <span className='fw-normal w-50'>Registration number:</span> <span>{engVseg(printDatas?.student?.register_num[0])}{engVseg(printDatas?.student?.register_num[1])}{printDatas?.student?.register_num.slice(-8)}</span>
+                        </div>
+                        {
+                            printDatas?.student?.group?.degree?.degree_code !== 'D'
+                            &&
+                                <div className='d-flex px-1' style={{ width: '33.3%' }} >
+                                    <span className='fw-normal w-50'>Diploma Number of Bachelor's Degree:</span> <span className='text-uppercase'>{printDatas?.student?.graduation_work?.back_diplom_num}</span>
+                                </div>
+                        }
+                        <div className={`d-flex ${printDatas?.student?.group?.degree?.degree_code === 'D' ? 'px-1' : 'px-2'}`} style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
+                            <span className='fw-normal w-50'>Order number:</span> <span className='text-uppercase'>{printDatas?.student?.graduation_work?.graduation_number}</span>
+                        </div>
+                        {
+                            printDatas?.student?.group?.degree?.degree_code === 'D'
+                            &&
+                            <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '50%' : '33.3%' }} >
+                                <span className='fw-normal w-50' style={{ width: '200px'}}>GPA of previous level of education: </span><span className='ms-5'>{printDatas?.student?.secondary_school}</span>
+                            </div>
+                        }
+                    </div>
+
+                    {/* <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
+                        <div className='d-flex' style={{ width: '33.3%' }} >
+                            <span className='fw-normal w-50'>Last name:</span> <span>{printDatas?.student?.last_name_eng}</span>
+                        </div>
+                        <div className='d-flex px-1' style={{ width: '33.3%' }} >
+                            <span className='fw-normal w-50' style={{ width: '200px'}}>Graduated year:</span> <span>{printDatas?.student?.graduation_work?.lesson_year?.substring(5, 9)}</span>
+                        </div>
+                        <div className='d-flex px-2' style={{ width: '33.3%' }} >
+                            <span className='fw-normal w-50'>Date:</span> <span>{printDatas?.registration_num?.replaceAll('.', '-')}</span>
+                        </div>
+                    </div> */}
+                    {/* <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
+                        <div className='d-flex' style={{ width: '33.3%' }} >
+                            <span className='fw-normal w-50'>First name:</span> <span>{printDatas?.student?.first_name_eng}</span>
+                        </div>
+                        <div className='d-flex px-1' style={{ width: '33.3%' }} >
+                            <span className='fw-normal w-50'>Professional Index: </span><span>{printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.group?.profession?.code}</span>
+                        </div>
+                        <div className='d-flex px-2' style={{ width: '33.3%' }} >
+                        <span className='fw-normal w-50'>Registration No:</span> <span>{printDatas?.student?.graduation_work?.registration_num}</span>
+                        </div>
+                    </div> */}
+                    {/* <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
+                        <div className='d-flex' style={{ width: '33.3%' }} >
+                            <span className='fw-normal w-50'>Registration number:</span> <span>{engVseg(printDatas?.student?.register_num[0])}{engVseg(printDatas?.student?.register_num[1])}{printDatas?.student?.register_num.slice(-8)}</span>
+                        </div>
+                        <div className='d-flex px-1' style={{ width: '33.3%' }} >
+                            <span className='fw-normal w-50'>Profession:</span> <span>{printDatas?.student?.group?.profession?.name_eng}</span>
+                        </div>
+                    </div> */}
+                </header>
+
+                <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1`} style={{ fontSize: '13px', paddingTop: '1rem',  backgroundColor: 'white', color: 'black', fontFamily: 'Arial' }} >
+                {/* <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1 ${isPageBreak && 'page-break'}`} style={{ fontSize: '13px', paddingTop: '1rem',  backgroundColor: 'white', color: 'black', fontFamily: 'Arial' }} > */}
+
+                {/* <div ref={body1SectionRef} className={`position-relative d-flex justify-content-between ${isPageBreak && 'page-break'}`} style={{ fontSize: '9px', marginTop: '135px', paddingTop: height.header + 24, }} > */}
+                    <div className='d-flex flex-wrap align-content-start mt-1' id='tableEnglish1-1' >
+
+                        <table className='w-100 text-center d-none' id='tableEnglish1' >
+                            <thead className='fw-bolder'>
+                                <tr style={{ height: '20px' }}>
+                                    <td className='border-dark' style={{ width: '4%' }}  >№</td>
+                                    <td className='border-dark' style={{ width: '70%' }}  >Name of subject</td>
+                                    <td className='border-dark' style={{ width: '7%' }}  >Cr</td>
+                                    <td className='border-dark' style={{ width: '11%' }} >Point</td>
+                                    <td className='border-dark' style={{ width: '8%' }} >Grade</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div className='d-flex flex-wrap align-content-start mt-1' id='tableEnglish2-2' >
+
+                        <table className='w-100 text-center d-none' id='tableEnglish2' >
+                            <thead className='fw-bolder'>
+                                <tr style={{ height: '25px' }}>
+                                    <td className='border-dark' style={{ width: '4%' }}>№</td>
+                                    <td className='border-dark' style={{ width: '70%' }}>Name of subject</td>
+                                    <td className='border-dark' style={{ width: '7%' }} >Cr</td>
+                                    <td className='border-dark' style={{ width: '11%' }} >Point</td>
+                                    <td className='border-dark' style={{ width: '8%' }} >Grade</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div className='d-flex flex-wrap align-content-start mt-1' id='tableEnglish3-3' >
+                        <table className='w-100 text-center d-none' id='tableEnglish3' >
+                            <thead className='fw-bolder'>
+                                <tr style={{ height: '25px' }}>
+                                    <td className='border-dark' style={{ width: '4%' }}  >№</td>
+                                    <td className='border-dark' style={{ width: '70%' }}  >Name of subject</td>
+                                    <td className='border-dark' style={{ width: '7%' }}  >Cr</td>
+                                    <td className='border-dark' style={{ width: '11%' }} >Point</td>
+                                    <td className='border-dark' style={{ width: '8%' }} >Grade</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+                        </table>
+                    </div>
+                    {/* {
+                        isPageBreak
+                        ?
+                        (
+                            <>
+                                <div className='position-absolute' style={{ right: '12px', fontSize: '11px', top: '533px' }} >
+                                    This annex-1 is valid with Diploma No. {printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.graduation_work?.diplom_num} in {new Date().getFullYear()}
+                                </div>
+                                <div className='position-absolute' style={{ right: '12px', fontSize: '11px', top: '1242px' }} >
+                                    This annex-2 is valid with Diploma No. {printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.graduation_work?.diplom_num} in {new Date().getFullYear()}
+                                </div>
+                            </>
+                        )
+                        :
+                            null
+                    } */}
+
                 </div>
-
-                {/* <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
-                    <div className='d-flex' style={{ width: '33.3%' }} >
-                        <span className='fw-normal w-50'>Last name:</span> <span>{printDatas?.student?.last_name_eng}</span>
-                    </div>
-                    <div className='d-flex px-1' style={{ width: '33.3%' }} >
-                        <span className='fw-normal w-50' style={{ width: '200px'}}>Graduated year:</span> <span>{printDatas?.student?.graduation_work?.lesson_year?.substring(5, 9)}</span>
-                    </div>
-                    <div className='d-flex px-2' style={{ width: '33.3%' }} >
-                        <span className='fw-normal w-50'>Date:</span> <span>{printDatas?.registration_num?.replaceAll('.', '-')}</span>
-                    </div>
-                </div> */}
-                {/* <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
-                    <div className='d-flex' style={{ width: '33.3%' }} >
-                        <span className='fw-normal w-50'>First name:</span> <span>{printDatas?.student?.first_name_eng}</span>
-                    </div>
-                    <div className='d-flex px-1' style={{ width: '33.3%' }} >
-                        <span className='fw-normal w-50'>Professional Index: </span><span>{printDatas?.student?.group?.degree?.degree_code}{printDatas?.student?.group?.profession?.code}</span>
-                    </div>
-                    <div className='d-flex px-2' style={{ width: '33.3%' }} >
-                    <span className='fw-normal w-50'>Registration No:</span> <span>{printDatas?.student?.graduation_work?.registration_num}</span>
-                    </div>
-                </div> */}
-                {/* <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
-                    <div className='d-flex' style={{ width: '33.3%' }} >
-                        <span className='fw-normal w-50'>Registration number:</span> <span>{engVseg(printDatas?.student?.register_num[0])}{engVseg(printDatas?.student?.register_num[1])}{printDatas?.student?.register_num.slice(-8)}</span>
-                    </div>
-                    <div className='d-flex px-1' style={{ width: '33.3%' }} >
-                        <span className='fw-normal w-50'>Profession:</span> <span>{printDatas?.student?.group?.profession?.name_eng}</span>
-                    </div>
-                </div> */}
-            </header>
-
+            </div>
             <footer
                 ref={footerSectionRef}
                 className='w-100'
@@ -680,6 +627,6 @@ export default function PrintAttachmentEnglish()
 
             </footer>
 
-        </>
+        </div>
     )
 }
