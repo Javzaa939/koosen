@@ -345,6 +345,19 @@ const Register = () => {
         }
     }
 
+    function staticExcelHandler() {
+
+        var excelUrl = '/assets/burtgel_zagvar.xlsx'
+
+        const link = document.createElement('a');
+        link.href = excelUrl;
+
+        document.body.appendChild(link);
+        link.click();
+
+        document.body.removeChild(link);
+    }
+
     return (
         <Fragment>
             <Card>
@@ -389,7 +402,11 @@ const Register = () => {
                                     Эксэл файлаар оюутан бүртгэх хэсэг
                                 </DropdownItem>
                                 <DropdownItem divider />
-                                <DropdownItem className='w-100' onClick={() => downloadTemplate(department_option, groupOption)}>
+                                <DropdownItem
+                                    className='w-100'
+                                    onClick={() => staticExcelHandler()}
+                                    // onClick={() => downloadTemplate(department_option, groupOption)}
+                                >
                                     <Download size={15} />
                                     <span className='align-middle ms-50'>Татах</span>
                                 </DropdownItem>
