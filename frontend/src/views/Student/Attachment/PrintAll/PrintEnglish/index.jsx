@@ -303,7 +303,7 @@ export default function PrintAttachmentEnglish()
     }
 
     return (
-        <div className='d-flex flex-column justify-content-between' style={{ height: '100vh' }}>
+        <div className='d-flex flex-column justify-content-between pb-50' style={{ height: '100vh' }}>
             {Loading && Loader}
             {/*
 
