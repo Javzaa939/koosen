@@ -1234,6 +1234,9 @@ class StudentDetailAPIView(
 
         data = remove_key_from_dict(data, 'image')
 
+        if data.get('pay_type') == '0':
+            data['pay_type'] = Student.OTHER
+
         if change_image and old_image:
             remove_image = os.path.join(settings.STUDENTS, str(instance.id))
             remove_folder(remove_image)
@@ -2747,11 +2750,12 @@ class StudentGpaDiplomaValuesAPIView(
                 cursor.execute(query)
                 rows = list(dict_fetchall(cursor))
 
-                # Магистрийн дипломын хичээлийг хавсралтанд мэргэжлийн хичээлд хамт харуулах хэсэг
-                if rows[0]['lesson_level'] == LearningPlan.MAG_DIPLOM:
-                    rows[0]['lesson_level'] = LearningPlan.MAG_PROFESSION
 
                 if len(rows) > 0:
+                    # Магистрийн дипломын хичээлийг хавсралтанд мэргэжлийн хичээлд хамт харуулах хэсэг
+                    if rows[0]['lesson_level'] == LearningPlan.MAG_DIPLOM:
+                        rows[0]['lesson_level'] = LearningPlan.MAG_PROFESSION
+
                     if rows[0]['lesson_level'] == level:
                         lesson = rows[0]
                         lesson['score'] = data_qs.score

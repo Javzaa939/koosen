@@ -384,7 +384,6 @@ class LessonStandartListAPIView(
         if profession:
             lesson_ids = LearningPlan.objects.filter(profession=profession).values_list('lesson', flat=True)
             self.queryset = self.queryset.filter(id__in=lesson_ids)
-
         less_standart_list = self.list(request).data
 
         return request.send_data(less_standart_list)
@@ -842,8 +841,8 @@ class ProfessionPlanListAPIView(
         if school:
             queryset = queryset.filter(school=school)
 
-        if department:
-            queryset = queryset.filter(department=department)
+        # if department:
+        #     queryset = queryset.filter(department=department)
 
         if profession:
             queryset = queryset.filter(profession=profession)
