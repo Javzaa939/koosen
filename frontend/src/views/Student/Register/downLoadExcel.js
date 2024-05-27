@@ -2,7 +2,7 @@ import * as excelJs from 'exceljs';
 
 import { saveAs } from 'file-saver'
 
-const GENDER_LIST=['Эрэгтэй', 'Эмэгтэй']
+const GENDER_LIST=['Эр', 'Эм']
 
 export const downloadTemplate = async (department_option, groupOption) => {
 
@@ -150,6 +150,20 @@ export const downloadTemplate = async (department_option, groupOption) => {
             };
         });
     });
+
+    const tenhim = ws.getColumn('X')
+    const angi = ws.getColumn('Y')
+    const hvis = ws.getColumn('Z')
+
+    tenhim.values = options_dep
+    // tenhim.hidden = true
+
+    angi.values = options_group
+    // angi.hidden = true
+
+    hvis.values = genderOpts
+    // hvis.hidden = true
+
 
     // const excelBlob = await workbook.xlsx.writeBuffer();
     // const excelUrl = URL.createObjectURL(
