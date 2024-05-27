@@ -139,7 +139,8 @@ export default function PrintMongolia({ printOnce })
                         ' '
                     }
                     захирлын {data?.graduation_date?.substring(0, 4)} оны {data?.graduation_date?.substring(5, 7)} {dugeerUg(data?.graduation_date?.substring(5, 7) && data?.graduation_date?.substring(5, 7).charAt(data?.graduation_date?.substring(5, 7).length - 1))} сарын {data?.graduation_date?.substring(8, 10)}{niiUg(data?.graduation_date?.substring(8, 10) && data?.graduation_date?.substring(8, 10).charAt(data?.graduation_date?.substring(8, 10).length - 1))} өдрийн {data?.graduation_number} {dugeerUg(data?.graduation_number && data?.graduation_number.charAt(data?.graduation_number.length - 1))} тушаалаар
-                    <span style={{ whiteSpace: 'nowrap' }}><span className='text-uppercase'> {data?.student?.group?.profession?.dep_name} {data?.student?.group?.degree?.degree_name}</span>-ын зэрэг олгов.</span>
+                    <br/>
+                    <span style={{ whiteSpace: 'nowrap' }}><span className='text-uppercase ' style={{ whiteSpace: 'nowrap' }}> {data?.student?.group?.profession?.dep_name} {data?.student?.group?.degree?.degree_name}</span>-ын зэрэг олгов.</span>
                 </div>
             </div>
 
