@@ -1,5 +1,7 @@
 import * as excelJs from 'exceljs';
 
+import { saveAs } from 'file-saver'
+
 const GENDER_LIST=['Эрэгтэй', 'Эмэгтэй']
 
 export const downloadTemplate = async (department_option, groupOption) => {
