@@ -31,7 +31,7 @@ export default function PrintAttachmentMongolia()
         Promise.all([
             fetchData(signatureApi.get(3)),
             fetchData(studentApi.calculateGpaDimplomaGet(studentId)),
-            fetchData(studentApi.getConfig(printDatas?.student?.group?.profession?.id, 'mongolian'))
+            fetchData(studentApi.getConfig(printDatas?.student?.group?.id, 'mongolian'))
         ]).then((values) => {
             setListArr(values[0]?.data)
             setDatas(values[1]?.data)
@@ -228,7 +228,7 @@ export default function PrintAttachmentMongolia()
         <>
             {isLoading && Loader}
 
-            <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1 ${isPageBreak && 'page-break'}`} style={{ fontSize: '11px', paddingTop: height.header + (printDatas?.student?.group?.degree?.degree_code === 'D' ? 24 : 37),  backgroundColor: 'white', color: 'black', fontFamily: 'Arial' }} >
+            <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1 ${isPageBreak && 'page-break'}`} style={{ fontSize: '11px', paddingTop: height.header + (printDatas?.student?.group?.degree?.degree_code === 'D' ? 20 : 37),  backgroundColor: 'white', color: 'black', fontFamily: 'Arial' }} >
                 <div
                     className='d-flex flex-wrap align-content-start mt-1'
                     id='table1-1'
@@ -575,7 +575,7 @@ export default function PrintAttachmentMongolia()
                 }
 
 
-                <div className='d-flex justify-content-center mt-5'>
+                <div className={`d-flex justify-content-center ${rowSum > 51 ? 'mt-3' : 'mt-5'}`}>
                     {
                         listArr.length != 0
                         &&

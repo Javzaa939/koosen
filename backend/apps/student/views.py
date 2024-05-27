@@ -2643,7 +2643,7 @@ class StudentAttachmentConfigAPIView(
 
     def get(self, request):
 
-        profession = request.query_params.get('profession')
+        group = request.query_params.get('group')
         type_name = request.query_params.get('type')
         if type_name == 'mongolian':
             stype = AttachmentConfig.MONGOLIAN
@@ -2652,7 +2652,7 @@ class StudentAttachmentConfigAPIView(
         else:
             stype = AttachmentConfig.UIGARJIN
 
-        self.queryset = self.queryset.filter(profession=profession, atype=stype)
+        self.queryset = self.queryset.filter(group=group, atype=stype)
 
         datas = self.queryset.values().first()
 
@@ -2672,7 +2672,7 @@ class StudentAttachmentConfigAPIView(
 
         with transaction.atomic():
             self.queryset.update_or_create(
-                profession=ProfessionDefinition.objects.get(pk=data.get('profession')),
+                group=Group.objects.get(pk=data.get('group')),
                 atype=stype,
                 defaults={
                     'row_count': row_count,

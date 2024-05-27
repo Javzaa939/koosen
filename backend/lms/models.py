@@ -4185,7 +4185,8 @@ class AttachmentConfig(models.Model):
         (UIGARJIN, "Уйгаржин"),
     )
 
-    profession = models.ForeignKey(ProfessionDefinition, on_delete=models.CASCADE, verbose_name="Мэргэжил")
+    # profession = models.ForeignKey(ProfessionDefinition, on_delete=models.CASCADE, verbose_name="Мэргэжил")
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, verbose_name="Мэргэжил", null=True)
     row_count = ArrayField(models.IntegerField(null=True), blank=True,null=True,verbose_name='Туслах багш')
     atype = models.IntegerField(choices=ATTACHMENT_TYPE, default=MONGOLIAN, verbose_name="Хавсралтын төрөл")
     is_lastname = models.BooleanField(default=False, verbose_name='Овог харуулах эсэх')
