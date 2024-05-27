@@ -141,14 +141,14 @@ export default function PrintAttachmentMongolia()
                             }
 
 
-                            if (half <= idx)
-                            {
-                                parentTableDoc.style.width = `${99.1 / dividePage2}%`
-                            }
-                            else
-                            {
-                                parentTableDoc.style.width = `${99.1 / dividePage1}%`
-                            }
+                            parentTableDoc.style.width = `${99.1 / dividePage1}%`
+                            // if (half <= idx)
+                            // {
+                            //     parentTableDoc.style.width = `${99.1 / dividePage2}%`
+                            // }
+                            // else
+                            // {
+                            // }
 
                             for (let bodyIdx = 0; bodyIdx < val; bodyIdx++)
                             {
@@ -301,7 +301,7 @@ export default function PrintAttachmentMongolia()
                     </div>
                 </header>
 
-                <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1 ${isPageBreak && 'page-break'}`} style={{ fontSize: '11px', paddingTop: '1rem', color: 'black', fontFamily: 'Arial' }} >
+                <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1 ${isPageBreak && 'page-break'}`} style={{ fontSize: '11px', paddingTop: '3px', color: 'black', fontFamily: 'Arial' }} >
                 {/* <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1 ${isPageBreak && 'page-break'}`} style={{ fontSize: '11px', paddingTop: height.header + (printDatas?.student?.group?.degree?.degree_code === 'D' ? 24 : 30),  backgroundColor: 'white', color: 'black', fontFamily: 'Arial' }} > */}
                     <div
                         className='d-flex flex-wrap align-content-start mt-1'

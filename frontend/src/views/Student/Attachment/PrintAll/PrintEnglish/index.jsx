@@ -23,7 +23,6 @@ export default function PrintAttachmentEnglish()
     const [ listArr, setListArr ] = useState([])
     const [ isPageBreak, setIsPageBreak ] = useState(false)
     const [ printDatas, setPrintDatas ] = useState(JSON.parse(localStorage.getItem('blankDatas')))
-    console.log('datas', printDatas)
     const [ datas, setDatas ] = useState([])
     const [ tableRowCount, setTableRowCount ] = useState([])
     const [ rowSum, setRowSum ] = useState(0)
@@ -156,14 +155,14 @@ export default function PrintAttachmentEnglish()
                                 }
                             }
 
-                            if (half <= idx)
-                            {
-                                parentTableDoc.style.width = `${99.1 / dividePage2}%`
-                            }
-                            else
-                            {
-                                parentTableDoc.style.width = `${99.1 / dividePage1}%`
-                            }
+                            parentTableDoc.style.width = `${99.1 / dividePage1}%`
+                            // if (half <= idx)
+                            // {
+                            //     parentTableDoc.style.width = `${99.1 / dividePage2}%`
+                            // }
+                            // else
+                            // {
+                            // }
 
                             for (let bodyIdx = 0; bodyIdx < val; bodyIdx++)
                             {

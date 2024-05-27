@@ -142,15 +142,16 @@ export default function PrintAttachmentMongolia()
                                 }
                             }
 
+                            parentTableDoc.style.width = `${99.1 / dividePage1}%`
 
-                            if (half <= idx)
-                            {
-                                parentTableDoc.style.width = `${99.1 / dividePage2}%`
-                            }
-                            else
-                            {
-                                parentTableDoc.style.width = `${99.1 / dividePage1}%`
-                            }
+                            // if (half <= idx)
+                            // {
+                            //     parentTableDoc.style.width = `${99.1 / dividePage2}%`
+                            // }
+                            // else
+                            // {
+                            //     parentTableDoc.style.width = `${99.1 / dividePage1}%`
+                            // }
 
                             for (let bodyIdx = 0; bodyIdx < val; bodyIdx++)
                             {
@@ -234,7 +235,7 @@ export default function PrintAttachmentMongolia()
                     // style={{ marginTop: height }}
                 >
 
-                    <table className='font-dark w-100 text-center d-none' id='table1' >
+                    <table className='font-dark w-100 text-center d-none' id='table1' style={{fontSize: printDatas?.student?.group?.degree?.degree_code === 'D' ? '9px' : '10px'}}>
                         <thead className='fw-bolder'>
                             <tr style={{ height: '25px' }}>
                                 <td className='border-dark' style={{ width: '4%' }}>№</td>
@@ -252,7 +253,7 @@ export default function PrintAttachmentMongolia()
 
                 <div className='d-flex flex-wrap align-content-start mt-1' id='table2-2' >
 
-                    <table className='font-dark w-100 text-center d-none' id='table2' >
+                    <table className='font-dark w-100 text-center d-none' id='table2' style={{fontSize: printDatas?.student?.group?.degree?.degree_code === 'D' ? '9px' : '10px'}}>
                         <thead className='fw-bolder'>
                             <tr style={{ height: '25px' }}>
                                 <td className='border-dark' style={{ width: '4%' }}>№</td>
@@ -270,7 +271,7 @@ export default function PrintAttachmentMongolia()
 
                 <div className='d-flex flex-wrap align-content-start mt-1' id='table3-3' >
 
-                    <table className='font-dark w-100 text-center d-none' id='table3' >
+                    <table className='font-dark w-100 text-center d-none' id='table3' style={{fontSize: printDatas?.student?.group?.degree?.degree_code === 'D' ? '9px' : '10px'}}>
                         <thead className='fw-bolder'>
                             <tr style={{ height: '25px' }}>
                                 <td className='border-dark' style={{ width: '4%' }}>№</td>
@@ -491,7 +492,7 @@ export default function PrintAttachmentMongolia()
             <footer
                 ref={footerSectionRef}
                 className='w-100 font-dark'
-                style={{ fontSize: '10px', backgroundColor: 'white', color: 'black', bottom: printDatas?.student?.group?.degree?.degree_code == 'D' ? '4px': '10px', fontFamily: 'Arial' }} >
+                style={{ fontSize: printDatas?.student?.group?.degree?.degree_code == 'D' ? '10px': '11px', backgroundColor: 'white', color: 'black', bottom: printDatas?.student?.group?.degree?.degree_code == 'D' ? '4px': '10px', fontFamily: 'Arial' }} >
 
                 {
                     printDatas?.student?.group?.degree?.degree_code == 'E'
