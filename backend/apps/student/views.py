@@ -1234,6 +1234,9 @@ class StudentDetailAPIView(
 
         data = remove_key_from_dict(data, 'image')
 
+        if data.get('pay_type') == '0':
+            data['pay_type'] = Student.OTHER
+
         if change_image and old_image:
             remove_image = os.path.join(settings.STUDENTS, str(instance.id))
             remove_folder(remove_image)
