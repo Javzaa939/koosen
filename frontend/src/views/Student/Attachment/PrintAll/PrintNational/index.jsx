@@ -371,10 +371,10 @@ export default function PrintNationalAttachment()
             <div
                 ref={body1SectionRef}
                 className={`vh-100 p-0 d-flex flex-column justify-content-between align-items-start position-relative ${isPageBreak && 'page-break'} ms-1`}
-                style={{ fontFamily: 'mongolianScript'}}
+                style={{ fontFamily: 'mongolianScript', flex: 1 }}
             >
 
-                <div style={{ height: printDatas?.isCenter ? '98%' : '49.5%', marginLeft: '210px' }}  className={`${printDatas.isCenter ? 'center-table' : 'not-center-table' }`} >
+                <div style={{ height: printDatas?.isCenter ? '98%' : '49.5%' }}  className={`${printDatas.isCenter ? 'center-table' : 'not-center-table' }`} >
                     <table id='tableNational1' className='text-center w-100 d-none parent_table' style={{ writingMode: 'vertical-lr', marginBottom: '1px', height: '100%' }} >
                         <thead>
                             <tr style={{ fontSize: '9px' }} >
@@ -390,7 +390,7 @@ export default function PrintNationalAttachment()
                     </table>
                 </div>
 
-                <div style={{ height: printDatas?.isCenter ? '98%' : '49.5%', marginLeft: '210px' }} className={`${printDatas.isCenter ? 'center-table' : 'not-center-table' }`} >
+                <div style={{ height: printDatas?.isCenter ? '98%' : '49.5%' }} className={`${printDatas.isCenter ? 'center-table' : 'not-center-table' }`} >
                     <table id='tableNational2' className='text-center w-100 d-none parent_table' style={{ writingMode: 'vertical-lr', marginBottom: '1px', height: '100%' }} >
                         <thead>
                             <tr style={{ fontSize: '9px' }} >

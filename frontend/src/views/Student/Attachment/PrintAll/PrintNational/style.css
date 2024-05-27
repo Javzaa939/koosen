@@ -77,13 +77,15 @@ table td {
 }
 
 .not-center-table {
+    /* margin-left: 218px; */
     position: relative;
-    margin-left: 218px;
+    text-align: center;
 }
 
 .center-table {
-    position: absolute;
+    /* position: absolute;
     top: 50%;
     left: 30%;
-    transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%); */
+    margin:auto
 }
