@@ -2747,11 +2747,12 @@ class StudentGpaDiplomaValuesAPIView(
                 cursor.execute(query)
                 rows = list(dict_fetchall(cursor))
 
-                # Магистрийн дипломын хичээлийг хавсралтанд мэргэжлийн хичээлд хамт харуулах хэсэг
-                if rows[0]['lesson_level'] == LearningPlan.MAG_DIPLOM:
-                    rows[0]['lesson_level'] = LearningPlan.MAG_PROFESSION
 
                 if len(rows) > 0:
+                    # Магистрийн дипломын хичээлийг хавсралтанд мэргэжлийн хичээлд хамт харуулах хэсэг
+                    if rows[0]['lesson_level'] == LearningPlan.MAG_DIPLOM:
+                        rows[0]['lesson_level'] = LearningPlan.MAG_PROFESSION
+
                     if rows[0]['lesson_level'] == level:
                         lesson = rows[0]
                         lesson['score'] = data_qs.score
