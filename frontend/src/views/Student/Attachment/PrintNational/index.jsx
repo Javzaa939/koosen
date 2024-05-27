@@ -45,7 +45,7 @@ export default function PrintNationalAttachment()
         await Promise.all([
             fetchData(signatureApi.get(3)),
             fetchData(studentApi.calculateGpaDimplomaGet(studentId)),
-            fetchData(studentApi.getConfig(printDatas?.student?.group?.profession?.id, 'uigarjin'))
+            fetchData(studentApi.getConfig(printDatas?.student?.group?.id, 'uigarjin'))
         ]).then((values) => {
             setListArr(values[0]?.data)
             setDatas(values[1]?.data)
@@ -117,7 +117,7 @@ export default function PrintNationalAttachment()
                         {
                             if (val > 0)
                             {
-                                setIsPageBreak(true)
+                                // setIsPageBreak(true)
                             }
                         }
 

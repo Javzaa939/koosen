@@ -68,7 +68,7 @@ export default function AttachmentStudent()
 
     /** Мөрийн тохиргоо хадгалах */
     async function getConfig() {
-        const { success, data } = await fetchData(studentApi.getConfig(datas?.student?.group?.profession?.id, printValue))
+        const { success, data } = await fetchData(studentApi.getConfig(datas?.student?.group?.id, printValue))
         if (success) {
             setConfig(data)
             if (data?.give_date) {

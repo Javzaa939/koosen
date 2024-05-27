@@ -102,7 +102,7 @@ export default function ConfigModal({ openModal, handleModal, datas, calculatedD
      async function handleConfig() {
         var cdata = {
             'type': printValue,
-            'profession': datas?.student?.group?.profession?.id,
+            'group': datas?.student?.group?.id,
             'row_count': JSON.stringify(configRowcount),
             'give_date': formatDate(picker),
             'is_lastname': document.getElementById('isLastNameOvog') ? document.getElementById('isLastNameOvog')?.checked : false,

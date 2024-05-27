@@ -46,7 +46,7 @@ export default function PrintAttachmentEnglish()
             // , printDatas.student?.department?.sub_orgs
             fetchData(signatureApi.get(3)),
             fetchData(studentApi.calculateGpaDimplomaGet(studentId)),
-            fetchData(studentApi.getConfig(printDatas?.student?.group?.profession?.id, 'english'))
+            fetchData(studentApi.getConfig(printDatas?.student?.group?.id, 'english'))
         ]).then((values) => {
             setListArr(values[0]?.data)
             setDatas(values[1]?.data)
