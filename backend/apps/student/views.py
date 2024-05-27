@@ -2695,7 +2695,7 @@ class StudentGpaDiplomaValuesAPIView(
         max_kredit = 0
         all_score = 0
         all_gpa_score = 0
-        final_score = 0.0
+        final_score = '0.0'
 
         student_id = self.request.query_params.get('id')
 
@@ -2774,7 +2774,7 @@ class StudentGpaDiplomaValuesAPIView(
                 obj_datas['lessons'] = lesson_datas
                 all_datas.append(obj_datas)
 
-        final_gpa = 0.0
+        final_gpa = '0.0'
         if all_score != 0 and all_gpa_score != 0:
             # Нийт кредитээс S үнэлгээ буюу тооцов үнэлгээг хасаж голч бодогдоно
             estimate_kredit = max_kredit - all_s_kredit
@@ -2786,7 +2786,7 @@ class StudentGpaDiplomaValuesAPIView(
             final_score = format(final_score, ".1f")
 
         average_score_prof = ProfessionAverageScore.objects.filter(profession=student_prof_qs, is_graduate=True, level=0).first()
-        all_data['score'] = { 'assesment': final_gpa, 'max_kredit': max_kredit, 'average_score': final_score, 'average_score_prof': format(average_score_prof.gpa, ".1f") if average_score_prof else 0 }
+        all_data['score'] = { 'assesment': final_gpa, 'max_kredit': max_kredit, 'average_score': final_score, 'average_score_prof': format(average_score_prof.gpa, ".1f") if average_score_prof else '0.0' }
         all_data['lessons'] = all_datas
 
         # GraduationWork
