@@ -2781,12 +2781,12 @@ class StudentGpaDiplomaValuesAPIView(
             final_gpa = all_score / estimate_kredit
             # Нийт голч оноо
             final_score = all_gpa_score / estimate_kredit
-            final_gpa = format(final_gpa, ".2f")
+            final_gpa = format(final_gpa, ".1f")
             # Нийт голч оноог бутархай руу шилжүүлэх
-            final_score = format(final_score, ".2f")
+            final_score = format(final_score, ".1f")
 
         average_score_prof = ProfessionAverageScore.objects.filter(profession=student_prof_qs, is_graduate=True, level=0).first()
-        all_data['score'] = { 'assesment': final_gpa, 'max_kredit': max_kredit, 'average_score': final_score, 'average_score_prof': format(average_score_prof.gpa, ".2f") if average_score_prof else 0 }
+        all_data['score'] = { 'assesment': final_gpa, 'max_kredit': max_kredit, 'average_score': final_score, 'average_score_prof': format(average_score_prof.gpa, ".1f") if average_score_prof else 0 }
         all_data['lessons'] = all_datas
 
         # GraduationWork
