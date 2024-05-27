@@ -45,7 +45,7 @@ export default function PrintAttachmentEnglish()
             // , printDatas.student?.department?.sub_orgs
             fetchData(signatureApi.get(3)),
             fetchData(studentApi.calculateGpaDimplomaGet(studentId)),
-            fetchData(studentApi.getConfig(printDatas?.student?.group?.profession?.id, 'english'))
+            fetchData(studentApi.getConfig(printDatas?.student?.group?.id, 'english'))
         ]).then((values) => {
             setListArr(values[0]?.data)
             setDatas(values[1]?.data)
@@ -420,7 +420,7 @@ export default function PrintAttachmentEnglish()
                     </div> */}
                 </header>
 
-                <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1`} style={{ fontSize: '13px', paddingTop: '1rem',  backgroundColor: 'white', color: 'black', fontFamily: 'Arial' }} >
+                <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1`} style={{ fontSize: '13px', backgroundColor: 'white', color: 'black', fontFamily: 'Arial' }} >
                 {/* <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1 ${isPageBreak && 'page-break'}`} style={{ fontSize: '13px', paddingTop: '1rem',  backgroundColor: 'white', color: 'black', fontFamily: 'Arial' }} > */}
 
                 {/* <div ref={body1SectionRef} className={`position-relative d-flex justify-content-between ${isPageBreak && 'page-break'}`} style={{ fontSize: '9px', marginTop: '135px', paddingTop: height.header + 24, }} > */}
