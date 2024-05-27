@@ -3420,12 +3420,12 @@ class StudentImportAPIView(
                 status_id = None
 
                 # суралцах хэлбэр
-                if status:
-                    status_id = StudentRegister.objects.filter(name__icontains=status).first()
+                status_id = StudentRegister.objects.filter(name__icontains='Суралцаж буй').first()
+                # if status:
 
-                    if not status_id:
-                        count = StudentRegister.objects.count()
-                        status_id = StudentRegister.objects.create(name=status, code=count+1)
+                    # if not status_id:
+                    #     count = StudentRegister.objects.count()
+                    #     status_id = StudentRegister.objects.create(name=status, code=count+1)
 
                 dep_obj = Salbars.objects.filter(name__icontains=department).first()
                 group_obj = Group.objects.filter(name__icontains=group).first()
