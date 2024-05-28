@@ -4216,6 +4216,8 @@ class OnlineLesson(models.Model):
     exam_count = models.IntegerField(verbose_name='Шалгалтын тоо')
     is_end_exam = models.BooleanField(default=True, verbose_name='Төгсөлтийн шалгалттай эсэх')
 
+    created_user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Үүсгэсэн хэрэглэгч', null=True)
+
 
 
 class LessonMaterial(models.Model):
