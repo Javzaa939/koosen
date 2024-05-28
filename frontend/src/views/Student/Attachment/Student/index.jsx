@@ -312,7 +312,7 @@ export default function AttachmentStudent()
                     <Button
                         color='primary'
                         size='sm'
-                        disabled={true}
+                        // disabled={true}
                         onClick={printAll}
                     >
                         Бүгдийг хэвлэх
