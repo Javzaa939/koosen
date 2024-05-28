@@ -45,7 +45,7 @@ export default function PrintNationalAttachment()
         await Promise.all([
             fetchData(signatureApi.get(3)),
             fetchData(studentApi.calculateGpaDimplomaGet(studentId)),
-            fetchData(studentApi.getConfig(printDatas?.student?.group?.profession?.id, 'uigarjin'))
+            fetchData(studentApi.getConfig(printDatas?.student?.group?.id, 'uigarjin'))
         ]).then((values) => {
             setListArr(values[0]?.data)
             setDatas(values[1]?.data)
@@ -61,7 +61,7 @@ export default function PrintNationalAttachment()
                 header:headerSectionRef.current.offsetWidth,
                 footer:footerSectionRef.current.offsetWidth,
                 body1:body1SectionRef.current.offsetWidth,
-                // body2:body2SectionRef.current.offsetWidth,
+                body2:body2SectionRef.current.offsetWidth,
             }
         )
     }, [])
@@ -99,8 +99,6 @@ export default function PrintNationalAttachment()
             };
         })
     ]);
-
-    console.log(tableRowCount,'rowcount')
 
     useEffect(
         () =>
@@ -269,14 +267,11 @@ export default function PrintNationalAttachment()
 
     return (
 
-        <div className='d-flex justify-content-between p-2 overflow-hidden' style={{ height: '100vh' }}>
-        {/* <div className='d-flex justify-content-between' style={{ padding: '25px 20px 28px 25px', height: '100vh' }}> */}
-        {/* <div className='d-flex justify-content-between' style={{ margin: '25px 20px 28px 25px' }}> */}
+        <div className='d-flex' style={{ height: '100vh', overflow: 'hidden' }}>
             {Loading && Loader}
 
-
             <header
-                className='d-flex'
+                className='d-flex py-1'
                 style={{ fontFamily: 'mongolianScript', fontSize: '14px' }}
                 ref={headerSectionRef}
             >
@@ -372,14 +367,14 @@ export default function PrintNationalAttachment()
                 }
 
             </header>
+
             <div
                 ref={body1SectionRef}
-                className={`h-100 p-0 d-flex flex-column align-items-start position-relative ${isPageBreak && 'page-break'} ms-1 `}
-                style={{ fontFamily: 'mongolianScript', flex: 1}}
+                className={`h-100 p-0 d-flex py-1 flex-column justify-content-between align-items-start position-relative ${isPageBreak && 'page-break'} ms-1`}
+                style={{ fontFamily: 'mongolianScript', flex: 1 }}
             >
-
                 <div style={{ height: printDatas?.isCenter ? '98%' : '49.5%' }}  className={`${printDatas.isCenter ? 'center-table' : 'not-center-table' }`} >
-                    <table id='tableNational1' className='text-center d-none h-100' style={{ writingMode: 'vertical-lr', marginBottom: '1px', height: '100%' }} >
+                    <table id='tableNational1' className='text-center w-100 d-none parent_table' style={{ writingMode: 'vertical-lr', marginBottom: '1px', height: '100%' }} >
                         <thead>
                             <tr style={{ fontSize: '9px' }} >
                                 <td rowSpan={2} className='border-dark' style={{ rotate: '90deg', height: '8%', fontFamily: 'sans-serif', fontSize: '12px'  }} >№</td>
@@ -395,7 +390,7 @@ export default function PrintNationalAttachment()
                 </div>
 
                 <div style={{ height: printDatas?.isCenter ? '98%' : '49.5%' }} className={`${printDatas.isCenter ? 'center-table' : 'not-center-table' }`} >
-                    <table id='tableNational2' className='text-center d-none h-100' style={{ writingMode: 'vertical-lr', marginBottom: '1px', height: '100%' }} >
+                    <table id='tableNational2' className='text-center w-100 d-none parent_table' style={{ writingMode: 'vertical-lr', marginBottom: '1px', height: '100%' }} >
                         <thead>
                             <tr style={{ fontSize: '9px' }} >
                                 <td rowSpan={2} className='border-dark' style={{ rotate: '90deg', height: '8%', fontFamily: 'sans-serif', fontSize: '12px'  }} >№</td>
@@ -410,9 +405,59 @@ export default function PrintNationalAttachment()
                     </table>
                 </div>
             </div>
+
+            <div
+                className={`${!isPageBreak && 'd-none'}`}
+                ref={body2SectionRef}
+            >
+                <div className='h-100 p-0 d-flex py-1 flex-column justify-content-between align-items-start position-relative' style={{ fontFamily: 'mongolianScript' }} >
+
+                    <div style={{ height: '373px', marginLeft: '178px' }} className={`${printDatas.isCenter ? 'center-table' : 'not-center-table' }`}>
+
+                        <table id='tableNational3' className='text-center w-100 d-none parent_table' style={{ writingMode: 'vertical-lr', marginBottom: '1px' }}  >
+                            <thead>
+
+                                <tr style={{ fontSize: '6px' }} >
+                                    <td rowSpan={2} className='border-dark' style={{ rotate: '90deg', height: '8%', fontFamily: 'sans-serif', fontSize: '12px'  }} >№</td>
+                                    <td className='border-dark' style={{ height: '69%' }} >ᢈᠢᠴᠢᠶᠡᠯ ᠦ᠋ᠨ ᠨᠡᠷ᠎ᠡ</td>
+                                    <td className='border-dark' style={{ height: '5%' }} >ᠻᠷ</td>
+                                    <td className='border-dark' style={{ height: '9%' }}>ᠣᠨᠤᠭ᠎ᠠ</td>
+                                    <td className='border-dark' style={{ height: '9%' }} >ᠳ᠋ᠦᠩ</td>
+                                </tr>
+
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+                        </table>
+
+                    </div>
+
+                    <div style={{ height: '376px', marginLeft: '178px' }} className={`${printDatas.isCenter ? 'center-table' : 'not-center-table' }`}>
+
+                        <table id='tableNational4' className='text-center w-100 d-none parent_table' style={{ writingMode: 'vertical-lr', marginBottom: '1px' }}  >
+
+                            <thead>
+
+                                <tr style={{ fontSize: '6px' }} >
+                                    <td rowSpan={2} className='border-dark' style={{ rotate: '90deg', height: '8%', fontFamily: 'sans-serif', fontSize: '12px'  }} >№</td>
+                                    <td className='border-dark' style={{ height: '69%' }} >ᢈᠢᠴᠢᠶᠡᠯ ᠦ᠋ᠨ ᠨᠡᠷ᠎ᠡ</td>
+                                    <td className='border-dark' style={{ height: '5%' }} >ᠻᠷ</td>
+                                    <td className='border-dark' style={{ height: '9%' }}>ᠣᠨᠤᠭ᠎ᠠ</td>
+                                    <td className='border-dark' style={{ height: '9%' }} >ᠳ᠋ᠦᠩ</td>
+                                </tr>
+
+                            </thead>
+                            <tbody>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
             <footer
                 ref={footerSectionRef}
-                className={`${isPageBreak && 'footer-margin'}`}
+                className={`py-2 ${isPageBreak && 'footer-margin'}`}
                 style={{ fontFamily: 'mongolianScript', fontSize: '11px' }}
             >
                 <div className={`d-flex ${rowSum > 50 ? 'ms-5' : ''}`}>

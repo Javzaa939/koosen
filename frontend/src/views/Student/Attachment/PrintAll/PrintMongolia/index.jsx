@@ -31,7 +31,7 @@ export default function PrintAttachmentMongolia()
         Promise.all([
             fetchData(signatureApi.get(3)),
             fetchData(studentApi.calculateGpaDimplomaGet(studentId)),
-            fetchData(studentApi.getConfig(printDatas?.student?.group?.profession?.id, 'mongolian'))
+            fetchData(studentApi.getConfig(printDatas?.student?.group?.id, 'mongolian'))
         ]).then((values) => {
             setListArr(values[0]?.data)
             setDatas(values[1]?.data)
@@ -216,7 +216,7 @@ export default function PrintAttachmentMongolia()
     )
 
     return (
-        <div className='d-flex flex-column justify-content-between' style={{ height: '100vh' }}>
+        <div className='d-flex flex-column justify-content-between pb-50' style={{ height: '100vh', overfow: 'hidden' }}>
             {isLoading && Loader}
             {/*
 
@@ -301,7 +301,7 @@ export default function PrintAttachmentMongolia()
                     </div>
                 </header>
 
-                <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1 ${isPageBreak && 'page-break'}`} style={{ fontSize: '11px', paddingTop: '3px', color: 'black', fontFamily: 'Arial' }} >
+                <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1 ${isPageBreak && 'page-break'}`} style={{ fontSize: '11px', color: 'black', fontFamily: 'Arial' }} >
                 {/* <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1 ${isPageBreak && 'page-break'}`} style={{ fontSize: '11px', paddingTop: height.header + (printDatas?.student?.group?.degree?.degree_code === 'D' ? 24 : 30),  backgroundColor: 'white', color: 'black', fontFamily: 'Arial' }} > */}
                     <div
                         className='d-flex flex-wrap align-content-start mt-1'

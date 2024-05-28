@@ -372,14 +372,14 @@ class LessonStandartListAPIView(
     def get(self, request):
 
         school = request.query_params.get('school')
-        department = request.query_params.get('department')
+        # department = request.query_params.get('department')
         profession = request.query_params.get('profession')
 
         if school:
             self.queryset = self.queryset.filter(school=school)
 
-        if department:
-            self.queryset = self.queryset.filter(department=department)
+        # if department:
+        #     self.queryset = self.queryset.filter(department=department)
 
         if profession:
             lesson_ids = LearningPlan.objects.filter(profession=profession).values_list('lesson', flat=True)
@@ -832,14 +832,14 @@ class ProfessionPlanListAPIView(
 
     def get_queryset(self):
         queryset = self.queryset
-        department = self.request.query_params.get('department')
+        # department = self.request.query_params.get('department')
         school = self.request.query_params.get('school')
         profession = self.request.query_params.get('profession')
         lesson_level = self.request.query_params.get('level')
         lesson_type = self.request.query_params.get('type')
 
-        if school:
-            queryset = queryset.filter(school=school)
+        # if school:
+        #     queryset = queryset.filter(school=school)
 
         # if department:
         #     queryset = queryset.filter(department=department)

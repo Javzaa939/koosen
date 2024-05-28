@@ -198,6 +198,17 @@ export default function PrintProfession({ }) {
                                                 <td colSpan={5} className="text-center border-end border-dark" style={{paddingRight:'300px', width: '100%' }}>А.1 Заавал судлах</td>
                                             </tr>
                                             <TableShow rows={zaaval_data?.filter((zaaval_data) => zaaval_data?.lesson_level === 1)} profession={mergejil_id} standart_bagts_option={standart_bagts_option}/>
+                                            <tr>
+                                                <td colSpan={5} className="text-center border-end border-dark" style={{paddingRight:'300px', width: '100%' }}>A.2 Сонгон судлах хичээл</td>
+                                            </tr>
+                                            <TableShow rows=
+                                                {
+                                                    songon_data?.filter((data) =>
+                                                        data?.lesson_level === (datas?.degree?.degree_code === 'D' ? 1 : datas?.degree?.degree_code === 'E' ? 11 : 21)
+                                                )}
+                                                profession={mergejil_id}
+                                                standart_bagts_option={standart_bagts_option}
+                                            />
                                         </tbody>
                                     </>
                                 }
@@ -226,7 +237,7 @@ export default function PrintProfession({ }) {
                                 )?.length > 0 && (
                                         <tbody>
                                             <tr>
-                                                <td colSpan={5} className="text-center border-end border-dark" style={{paddingRight:'300px', width: '100%' }}>{datas?.degree?.degree_code === 'E' ? '2.2. Сонгон судлах хичээл' : '1.2. Онолын суурь хичээл'}</td>
+                                                <td colSpan={5} className="text-center border-end border-dark" style={{paddingRight:'300px', width: '100%' }}>{datas?.degree?.degree_code === 'D' ? '2.2. Сонгон судлах хичээл' : '1.2. Онолын суурь хичээл'}</td>
                                             </tr>
                                             <TableShow
                                                 rows=
@@ -243,7 +254,7 @@ export default function PrintProfession({ }) {
                                 {zaaval_data?.filter((data) => data?.lesson_level === (datas?.degree?.degree_code === 'D' ? 3 : datas?.degree?.degree_code === 'E' ? 12 : 22)) ?.length > 0 && (
                                     <tbody>
                                         <tr>
-                                            <td colSpan={5} className="text-center border-end border-dark" style={{paddingRight:'0', width: '100%' }}>2.Мэргэшүүлэх хичээл</td>
+                                            <td colSpan={5} className="text-center border-end border-dark" style={{paddingRight:'0', width: '100%' }}>3.Мэргэшүүлэх хичээл</td>
                                         </tr>
                                         <tr>
                                             <td colSpan={5} className="text-center border-end border-dark" style={{paddingRight:'300px', width: '100%' }}>В.1 Заавал судлах хичээл</td>
