@@ -1378,8 +1378,10 @@ class ScoreOldV2APIView(
 
                 # Lesson obj-ийг lesson_id ашиглан филтер хийж авна
                 lesson_obj = LessonStandart.objects.get(id=lesson.get('lesson__id'))
-                # learning plan-ийг оюутны мэргэжил болон хичээлийн id-г ашиглан олж авна
+                # Оюутны мэргэжил болон хичээлийн id-г ашиглан сургалтын төлөвлөгөөний мэдээллийг авна
                 learningplan = LearningPlan.objects.filter(profession=student_profession, lesson=lesson_obj.id).first()
+
+                # Сургалтын төлөвлөгөөнөөс үзэх улирлуудыг листээр авах
                 learningplan_season = json_load(learningplan.season) if learningplan else []
 
                 if learningplan_season:
