@@ -11,6 +11,7 @@ urlpatterns = [
     path('register/list/', ScoreRegisterListAPIView.as_view()),
     path('register/download/', ScoreTeacherDownloadAPIView.as_view()),
     path('register/old/', ScoreOldAPIView.as_view()),
+    path('register/old/v2/', ScoreOldV2APIView.as_view()),
     path('register/old/<int:pk>/', ScoreOldAPIView.as_view()),
     path('register/import/', ScoreImportAPIView.as_view()),
 

@@ -961,6 +961,7 @@ function useApi(isDisplay=false) {
 				download: (lesson, teacher, group) => instance.get(`/score/register/download/?teacher=${teacher}&lesson=${lesson}&group=${group}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&school=${school_id}`),
 
 				postOldScore: (data) => instance.post(`/score/register/old/`, data),
+				postOldScoreV2: (data) => instance.post(`/score/register/old/v2/`, data),
 				postImportData: (data) => instance.post(`/score/register/import/`, data),
 
 				putScore: (id, data) => instance.put(`score/register/old/${id}/`, data)
