@@ -1,6 +1,7 @@
 import json
 import math
 import time
+import cyrtranslit
 
 from datetime import date
 
@@ -14,6 +15,7 @@ from django.apps import apps
 from django.conf import settings
 from django.core.mail import get_connection
 from django.db import connections
+from django.db import transaction
 
 from django.db.models import PositiveIntegerField
 from django.db.models.functions import Cast
@@ -1014,3 +1016,61 @@ def get_domain_url():
         domain_url = 'http://localhost:8000'
 
     return domain_url
+
+
+def cyrillic_name_to_latin(first_name, last_name):
+    """ Cyrill нэрийг Latin болгон хөрвүүлнэ """
+
+    # Ямар хэлээс хөрвүүлэхээ заана
+    convert_language = "mn"
+
+    # Сан ашиглаж кириллээс латин руу хөрвүүлнэ
+    latin_first_name = cyrtranslit.to_latin(first_name, convert_language)
+    latin_last_name = cyrtranslit.to_latin(last_name, convert_language)
+
+    # Шаардлаггүй тэмдэгтүүд
+    replacements = {
+        'ü': 'u',
+        'ö': 'o',
+        'Ü': 'U',
+        'Ö': 'O',
+        'Yuu': 'Yu',
+        'Yaa': 'Ya',
+        'yuu': 'yu',
+        'yaa': 'ya'
+    }
+
+    # Хөрвүүлсэн нэрнүүдэд шаардлагагүй тэмдэгтүүд байвал replace хийнэ
+    for cyr, lat in replacements.items():
+        latin_first_name = latin_first_name.replace(cyr, lat)
+        latin_last_name = latin_last_name.replace(cyr, lat)
+
+    # capitalize() нь зөвхөн эхний үсгийг томоор бусдын lowercase болгоно
+    latin_first_name = latin_first_name.capitalize()
+    latin_last_name = latin_last_name.capitalize()
+
+    return latin_first_name, latin_last_name
+
+
+def add_student_eng_name():
+    """ Суралцагчдийн англи нэрийг хадгалана """
+
+    # Ашиглах модел
+    Student = apps.get_model('lms', 'Student')
+
+    # Бүх суралцагчдаа орж авна
+    students = Student.objects.all()
+
+    # Нийт bulk_create хийх өөрчлөлтүүдийг хадгалах list
+    updated_students = []
+
+    for student in students:
+        # Кирилл нэрнүүдээ хөрвүүлээд нэмнэ
+        eng_first_name, eng_last_name = cyrillic_name_to_latin(student.first_name, student.last_name)
+        student.first_name_eng = eng_first_name
+        student.last_name_eng = eng_last_name
+        updated_students.append(student)
+
+    # Бүх өөрчлөлтүүдээ ганц query-гээр бааздаа хадгална
+    with transaction.atomic():
+        Student.objects.bulk_update(updated_students, ['first_name_eng', 'last_name_eng'])
