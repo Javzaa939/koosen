@@ -15,9 +15,9 @@ import {
 } from 'reactstrap'
 
 import { Printer, FileText, Download, RefreshCcw } from 'react-feather'
+import { AlertCircle } from 'react-feather'
 
 import FileModal from '@lms_components/FileModal'
-
 import Select from 'react-select'
 import useLoader from '@hooks/useLoader';
 import useApi from '@hooks/useApi';
@@ -42,13 +42,32 @@ const KIND_ANGI = 1
 const KIND_HICHEEL = 2
 const KIND_OYUTAN = 3
 
+const AlertComponent = () => {
+    return(
+        <div className='mt-50'>
+            <AlertCircle color="#28bcf7" size={15}/>
+            <Label className="ms-1">{`Файл зөвхөн хичээлүүдийн кодыг агуулна.`}</Label>
+        </div>
+    )
+}
+
+const AlertGroupComponent = () => {
+    return(
+        <div>
+            <AlertCircle color="#28bcf7" size={15}/>
+            <Label className="ms-1">{`Та заавал ангиа сонгоно уу.`}</Label>
+        </div>
+    )
+}
+
 const AdditionalComponent = (props) => {
 
     const {
         setChosenGroup,
         select_value,
         setSelectValue,
-        groupOption
+        groupOption,
+        AlertGroupComponent
     } = props
 
     const { t } = useTranslation()
@@ -69,18 +88,23 @@ const AdditionalComponent = (props) => {
                 value={select_value && groupOption.find((c) => c.id === select_value)}
                 noOptionsMessage={() => t('Хоосон байна.')}
                 onChange={(val) => {
-                    setSelectValue(current => {
-                        return {
-                            ...current,
-                            group: val?.id || '',
-                        }
-                    });
-                    setChosenGroup(val?.id)
+                    if(!val){
+                        setSelectValue([])
+                    } else {
+                        setSelectValue(current => {
+                            return {
+                                ...current,
+                                group: val?.id || '',
+                            }
+                        });
+                        setChosenGroup(val?.id)
+                    }
                 }}
                 styles={ReactSelectStyles}
                 getOptionValue={(option) => option.id}
                 getOptionLabel={(option) => option.name}
             />
+            <AlertGroupComponent/>
         </Col>
     )
 }
@@ -574,6 +598,9 @@ const GradeList = () => {
                     setSelectValue={setSelectValue}
                     groupOption={groupOption}
                     Component={AdditionalComponent}
+                    CustomComponent={AlertComponent}
+                    AlertGroupComponent={AlertGroupComponent}
+                    disabled={!select_value || Object.keys(select_value).length === 0}
                 />
             }
 
