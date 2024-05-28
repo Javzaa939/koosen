@@ -25,7 +25,7 @@ import ScienceRoutes from "./Science"
 import StatisticRoutes from "./Statistic"
 import Test from "./Test"
 import ElseltRoutes from "./Elselt"
-
+import OnlineLessonRoutes from "./OnlineLesson";
 // ** Layouts
 import BlankLayout from "@layouts/BlankLayout"
 import VerticalLayout from "@src/layouts/VerticalLayout"
@@ -49,31 +49,32 @@ const DefaultRoute = "/login"
 
 // ** Merge Routes
 const Routes = [
-    ...CalendarRoutes,
-    ...UserRoutes,
-    ...SettingsRoutes,
-    ...StudyPlan,
-    ...LessonStandartRoutes,
-    ...ProfessionDefinitionRoutes,
-    ...StudentRoutes,
-    ...ReferenceRoutes,
-    ...TimetableRoutes,
-    ...CreditEstimation,
-    ...PaymentSettingsRoutes,
-    ...Score,
-    ...StatisticRoutes,
-    ...PrintRoutes,
-    ...StipendRoutes,
-    ...Dormitory,
-    ...RequestRoutes,
-    ...OrderRoutes,
-    ...ServiceRoutes,
-    ...SurveyRoutes,
-    ...RoleRoutes,
-    ...ScienceRoutes,
-    ...Test,
-    ...ElseltRoutes
-]
+  ...CalendarRoutes,
+  ...UserRoutes,
+  ...SettingsRoutes,
+  ...StudyPlan,
+  ...LessonStandartRoutes,
+  ...ProfessionDefinitionRoutes,
+  ...StudentRoutes,
+  ...ReferenceRoutes,
+  ...TimetableRoutes,
+  ...CreditEstimation,
+  ...PaymentSettingsRoutes,
+  ...Score,
+  ...StatisticRoutes,
+  ...PrintRoutes,
+  ...StipendRoutes,
+  ...Dormitory,
+  ...RequestRoutes,
+  ...OrderRoutes,
+  ...ServiceRoutes,
+  ...SurveyRoutes,
+  ...RoleRoutes,
+  ...ScienceRoutes,
+  ...Test,
+  ...ElseltRoutes,
+  ...OnlineLessonRoutes,
+];
 
 const getRouteMeta = (route) => {
   if (isObjEmpty(route.element.props)) {

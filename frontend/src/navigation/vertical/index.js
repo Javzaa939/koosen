@@ -23,11 +23,13 @@ import Statistic from './Statistic'
 // import Test from './Test'
 import Elselt from './Elselt'
 
+import OnlineLesson from "./OnlineLesson";
 export default [
   ...Calendar,
   ...Elselt,
   ...Reference,
   ...Study,
+  ...OnlineLesson,
   ...Student,
   ...Credit,
   ...TimeTable,
@@ -47,4 +49,4 @@ export default [
   // ...Role,
   // ...Science
   // ...Test,
-]
+];
