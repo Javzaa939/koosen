@@ -2735,6 +2735,7 @@ class StudentGpaDiplomaValuesAPIView(
                 obj_datas['uig_name'] = 'ᠮᠡᠷᢉᠡᠵᠢᠯ ᠦ᠋ᠨ ᢈᠢᠴᠢᠶᠡᠯ'
 
             # Дипломын хичээлээр давталт гүйлгэх
+            master_lessons = []
             for data_qs in qs:
                 lesson_first_data = data_qs.lesson
 
@@ -2743,7 +2744,6 @@ class StudentGpaDiplomaValuesAPIView(
                     inner join lms_lessonstandart ls
                     on lp.lesson_id=ls.id
                     where lp.profession_id = {profession_id} and lp.lesson_id = {lesson_id}
-                    order by lp.lesson_level, lp.season
                 '''.format(profession_id=student_prof_qs.id, lesson_id=lesson_first_data.id)
 
                 cursor = connection.cursor()
@@ -2751,8 +2751,10 @@ class StudentGpaDiplomaValuesAPIView(
                 rows = list(dict_fetchall(cursor))
 
                 if len(rows) > 0:
+                    is_master = False
                     # Магистрийн дипломын хичээлийг хавсралтанд мэргэжлийн хичээлд хамт харуулах хэсэг
                     if rows[0]['lesson_level'] == LearningPlan.MAG_DIPLOM:
+                        is_master = True
                         rows[0]['lesson_level'] = LearningPlan.MAG_PROFESSION
 
                     if rows[0]['lesson_level'] == level:
@@ -2760,7 +2762,12 @@ class StudentGpaDiplomaValuesAPIView(
                         lesson['score'] = data_qs.score
                         lesson['assesment'] = data_qs.assesment
                         lesson['grade_letter'] = data_qs.grade_letter.description if data_qs.grade_letter else ''
-                        lesson_datas.append(lesson)
+
+                        # Магистрийн 2 хичээлийг хамгийн сүүлд нь оруулах
+                        if is_master:
+                            master_lessons.append(lesson)
+                        else:
+                            lesson_datas.append(lesson)
 
                         max_kredit = max_kredit + lesson.get('kredit')
                         score_qs = Score.objects.filter(score_max__gte=data_qs.score, score_min__lte=data_qs.score).first()
@@ -2774,6 +2781,12 @@ class StudentGpaDiplomaValuesAPIView(
 
             # Хичээлтэй хэсгийн датаг л нэмнэ
             if len(lesson_datas) > 0:
+                # Магистрийн ажил
+                sorted_lessons = []
+                if len(master_lessons):
+                    sorted_lessons = sorted(master_lessons, key=lambda x: x["grade_letter"])
+
+                lesson_datas.extend(sorted_lessons)
                 obj_datas['lessons'] = lesson_datas
                 all_datas.append(obj_datas)
 

@@ -130,7 +130,7 @@ export default function PrintNational()
                         ᠳ᠋ᠤᠭᠠᠷ {tooBichih(data?.diplom_num)}
                     </div>
                     <div style={{ writingMode: 'vertical-lr', marginLeft: '40px', lineHeight: '46px' }} >
-                        ᠮᠣᠩᠭᠣᠯ ᠤᠯᠤᠰ ᠤ᠋ᠨ ᠢᠷᢉᠡᠨ {data?.student?.last_name_uig} ᠶ᠋ᠢᠨ / ᠤ᠋ᠨ {data?.student?.first_name_uig} ᠨᠢ
+                        ᠮᠣᠩᠭᠣᠯ ᠤᠯᠤᠰ ᠤ᠋ᠨ ᠢᠷᢉᠡᠨ {data?.student?.last_name_uig} ᠣᠪᠤᠭᠲᠠᠢ {data?.student?.first_name_uig} ᠨᠢ
                         <br/>
                         {data?.student?.group?.profession?.name_uig} {tooBichih(data?.student?.group?.profession?.code)} ᢈᠥᠲᠦᠯᠪᠦᠷᠢ ᠪᠡᠷ ᠰᠤᠷᠤᠯᠴᠠᠨ ᠲᠡᢉᠦᠰᠦᢉᠰᠡᠨ ᠲᠤᠯᠠ ᠶᠡᢈᠡ ᠰᠤᠷᠭᠠᠭᠤᠯᠢ ᠶ᠋ᠢᠨ ᠵᠠᢈᠢᠷᠤᠯ ᠤ᠋ᠨ {tooBichih(data?.decision_date?.substring(0, 4))} ᠣᠨ ᠤ᠋ {tooBichih(data?.decision_date?.substring(5, 7))} {dugeerUg(data?.decision_date?.substring(5, 7) && data?.decision_date?.substring(5, 7).charAt(data?.decision_date?.substring(5, 7).length - 1))} ᠰᠠᠷ᠎ᠠ ᠶ᠋ᠢᠨ {tooBichih(data?.decision_date?.substring(8, 10))}{tooBichih('-')} ᠪ
                         ᠡᠳᠦᠷ ᠦ᠋ᠨ {tushaal(data?.graduation_number)} {dugeerUg(data?.graduation_number && data?.graduation_number.charAt(data?.graduation_number.length - 1))} ᠲᠤᠰᠢᠶᠠᠯ ᠢ᠋ᠶᠠᠷ {data?.student?.group?.profession?.dep_name_uig} <span className='fs-3'>{data?.student?.group?.degree?.degree_uig_name}</span> ᠤ᠋ᠨ ᠵᠡᠷᢉᠡ ᠣᠯᠭᠤᠪᠠ᠃
