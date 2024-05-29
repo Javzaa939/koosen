@@ -691,7 +691,7 @@ export default function PrintAttachmentEnglish()
                                 <div className='text-center px-1' style={{width: '470px'}} key={idx} >
                                     <div className='text-center d-inline-block text-center' >
                                         <div className='text-center pt-50 px-2' style={{ textTransform: 'uppercase', borderTop: '1px solid black' }}>
-                                            <span >{val?.last_name_eng}{val?.first_name_eng}</span>
+                                            <span >{val?.first_name_eng} {val?.last_name_eng}</span>
                                             <br/>
                                             <span>{`${val?.position_name_eng}`}</span>
                                         </div>
