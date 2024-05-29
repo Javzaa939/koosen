@@ -1330,6 +1330,7 @@ class ScoreOldV2APIView(
 
             # Оюутан гэсэн модел дотроос нэр болон кодын ашиглан тухайн оюутныг олно
             student = Student.objects.filter(Q(code=student_code) | Q(first_name=student_first_name, last_name=student_last_name)).first()
+            print(row)
 
             # Хэрвээ оюутан олдохгүй бол
             if student is None:
@@ -1365,7 +1366,15 @@ class ScoreOldV2APIView(
 
             for lesson in lessons:
                 # Хэрвээ тус мэргэжилтэй холбоотой хичээлүүд файл доторх хичээлийн кодтой тохирсон үед файл доторх хичээлийн оноог авна
-                score = row.get(f'{lesson.get("lesson__code")}')
+                score = row.get('{}'.format(lesson.get("lesson__code")))
+                if not score:
+                    score = row.get(' {}'.format(lesson.get("lesson__code")))
+
+                if score:
+                    check_score = str(score)
+                    if  check_score.isalpha():
+                        continue
+
                 if score is None and score != 0:
                     # Хэрвээ хичээлийн оноо олдоогүй үед бас тэр оноо нь 0-ээс ялгаатай үед хичээл олдсонгүй гэсэн list-д нэмнэ
                     not_found_lesson.append({
