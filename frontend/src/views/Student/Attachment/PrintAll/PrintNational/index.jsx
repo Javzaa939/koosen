@@ -460,7 +460,8 @@ export default function PrintNationalAttachment()
                 className={`py-2 ${isPageBreak && 'footer-margin'}`}
                 style={{ fontFamily: 'mongolianScript', fontSize: '11px' }}
             >
-                <div className={`d-flex ${rowSum > 50 ? 'ms-5' : ''}`}>
+                <div className={`d-flex ${rowSum > 50 ? '' : ''}`}>
+                {/* <div className={`d-flex ${rowSum > 50 ? 'ms-5' : ''}`}> */}
 
                     <div className='d-flex' style={{ writingMode: 'vertical-lr', marginRight: '20px', height: '100%' }}>
                         <div className='' style={{height: '33.3%'}}>ᠨᠡᠶᠢᠲᠡ ᠪᠠᠭᠴᠡ ᠴᠠᠭ: {tooBichih(datas?.score?.max_kredit)}</div>
@@ -524,7 +525,7 @@ export default function PrintNationalAttachment()
                             (val, idx) =>
                             {
                                 return (
-                                    <div className='h-100 d-flex justify-content-between' style={{ writingMode: 'vertical-lr', height: '60%', fontSize: '12px', marginRight: '10px', lineHeight: '26px' }} key={idx} >
+                                    <div className='h-100 pb-3 d-flex justify-content-between' style={{ writingMode: 'vertical-lr', fontSize: '12px', marginRight: '10px', lineHeight: '26px' }} key={idx} >
                                         <span>{val?.position_name_uig}</span>
                                         <span>{val?.last_name_uig} {val?.first_name_uig}</span>
                                     </div>

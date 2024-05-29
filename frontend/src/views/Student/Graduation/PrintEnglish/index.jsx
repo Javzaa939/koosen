@@ -131,16 +131,33 @@ export default function PrintEnglish()
             {/* Үндсэн хэсэг */}
             <div className='text-center' style={{ width: '100%', lineHeight: '30px', fontSize: '19px', marginBottom: "100px" }} >
                 <div className='m-auto' >
-                    <span className='text-center'>This is to certify that <span className='fw-bolder'>{data?.student?.first_name_eng}</span> <span className='fw-bolder'>{data?.student?.last_name_eng}</span> citizen of {data?.student?.citizenship?.name_eng},
-                        <br />
-                        has completed requirements of the programme {data?.student?.group?.profession?.name_eng} ({data?.student?.group?.profession?.code})
-                        <br />
-                        was awarded the degree of <span className='text-uppercase'>{data?.student?.group?.degree?.degree_eng_name} of {data?.student?.group?.profession?.dep_name_eng}</span>
-                        <br />
-                        by the President's order {data?.graduation_number} dated {data?.graduation_date?.substring(8, 10)} {monthToText(data?.graduation_date?.substring(5, 7))} {data?.graduation_date?.substring(0, 4)}, based on the decision of the
-                        <br />
-                        Graduation Examination Committee
-                    </span>
+                    {
+                        data?.student?.group?.profession?.degree?.degree_code === 'D'
+                        ?
+                            <span className='text-center'>This is to certify that <span className='fw-bolder'>{data?.student?.first_name_eng}</span> <span className='fw-bolder'>{data?.student?.last_name_eng}</span> citizen of {data?.student?.citizenship?.name_eng},
+                                <br />
+                                has completed requirements of the programme {data?.student?.group?.profession?.name_eng} ({data?.student?.group?.profession?.code})
+                                <br />
+                                was awarded the degree of <span className='text-uppercase'>{data?.student?.group?.degree?.degree_eng_name} of {data?.student?.group?.profession?.dep_name_eng}</span>
+                                <br />
+                                by the President's order {data?.graduation_number} dated {data?.graduation_date?.substring(8, 10)} {monthToText(data?.graduation_date?.substring(5, 7))} {data?.graduation_date?.substring(0, 4)}, based on the decision of the
+                                <br />
+                                Graduation Examination Committee
+                            </span>
+                        :
+                            <span className='text-center'>Has been conferred to a citizen of {data?.student?.citizenship?.name_eng}
+                            <br />
+                            <span className='text-uppercase'>{data?.student?.first_name_eng}</span> <span className='text-uppercase'>{data?.student?.last_name_eng}</span>
+                            <br />
+                            Upon the order number {data?.graduation_number} of the President of University of Affairs,
+                            <br/>
+                            dated {data?.graduation_date?.substring(8, 10)} {monthToText(data?.graduation_date?.substring(5, 7))} {data?.graduation_date?.substring(0, 4)},
+                            <br />
+                            <span className='fw-bolder'>The Degree of <span className='text-uppercase'>{data?.student?.group?.degree?.degree_eng_name} IN {data?.student?.group?.profession?.dep_name_eng}</span></span> in the recognition of the
+                            <br />
+                            completion of the prescribed curriculum of {data?.student?.group?.profession?.dep_name_eng} ({data?.student?.group?.profession?.code}).
+                        </span>
+                    }
                 </div>
             </div>
 

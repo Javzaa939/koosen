@@ -191,7 +191,7 @@ export default function PrintAttachmentEnglish()
 
                                     // Тооцов дүнг харуулахдаа
                                     if (flattenedArray[count - 1]?.grade_letter) {
-                                        newCell4.innerHTML = flattenedArray[count - 1]?.grade_letter ? 'Allow' : ''
+                                        newCell4.innerHTML = flattenedArray[count - 1]?.grade_letter ? 'passed' : ''
                                         newCell4.colSpan = 2
                                     } else {
                                         newCell4.innerHTML = flattenedArray[count - 1]?.score ? flattenedArray[count - 1]?.score : ''
@@ -455,7 +455,7 @@ export default function PrintAttachmentEnglish()
                 <div className='d-flex flex-column text-center fw-bolder'>
                     <p className='text-uppercase' style={{ marginBottom: '0px' }} >UNIVERSITY OF INTERNAL AFFAIRS, MONGOLIA</p>
                     <p className='text-uppercase' style={{ marginBottom: '0px' }} >{printDatas?.student?.department?.school_eng}</p>
-                    <p style={{ fontSize: '12px', fontWeight: '500' }} className='mb-0' >{printDatas?.student?.graduation_work?.diplom_num} <span className='text-lowercase'>{printDatas?.student?.group?.degree?.degree_eng_name}</span> degree diploma</p>
+                    <p style={{ fontSize: '12px', fontWeight: '500' }} className='mb-0' >{printDatas?.student?.graduation_work?.diplom_num} appendix to <span className='text-lowercase'>{printDatas?.student?.group?.degree?.degree_eng_name}</span> degree diploma</p>
                     <p className='' style={{ fontSize: 12, fontWeight: 500 }}>Register No: {printDatas?.student?.graduation_work?.registration_num}</p>
                 </div>
 
@@ -467,7 +467,7 @@ export default function PrintAttachmentEnglish()
                         <span className='fw-normal w-50'>Profession:</span> <span className=''>{printDatas?.student?.group?.profession?.name_eng}</span>
                     </div>
                     <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
-                        <span className='fw-normal w-50' style={{ width: '200px'}}>Commenced:</span><span>{printDatas?.student?.group?.join_year?.substring(0, 4)}</span>
+                        <span className='fw-normal w-50' style={{ width: '200px'}}>Enrolment year:</span><span>{printDatas?.student?.group?.join_year?.substring(0, 4)}</span>
                     </div>
                     {
                         printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score
@@ -495,7 +495,7 @@ export default function PrintAttachmentEnglish()
                         }
                     </div>
                     <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
-                        <span className='fw-normal w-50' style={{ width: '200px'}}>Completed:</span> <span>{printDatas?.student?.graduation_work?.lesson_year?.substring(5, 9)}</span>
+                        <span className='fw-normal w-50' style={{ width: '200px'}}>Graduated:</span> <span>{printDatas?.student?.graduation_work?.lesson_year?.substring(5, 9)}</span>
                     </div>
                 </div>
                 <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
@@ -702,7 +702,7 @@ export default function PrintAttachmentEnglish()
                     }
                 </div>
                 <div className={`text-center mt-1`} style={{ fontSize: '11px' }} >
-                    Score(GPA): F{'<'}60(0) 60≤D-{'<'}65(1.0) 65≤D{'<'}70(1.4) 70≤C-{'<'}75(1.9) 75≤C{'<'}80(2.3) 80≤B-{'<'}85(3.1) 85≤B{'<'}90(3.1) 90≤A-{'<'}95(3.6) 95≤A{'<'}100(4.0) S=Allow CR=Correspond Credit
+                    Score(GPA): F{'<'}60(0) 60≤D-{'<'}65(1.0) 65≤D{'<'}70(1.4) 70≤C-{'<'}75(1.9) 75≤C{'<'}80(2.3) 80≤B-{'<'}85(3.1) 85≤B{'<'}90(3.1) 90≤A-{'<'}95(3.6) 95≤A{'<'}100(4.0) S=Passed CR=Correspond Credit
                 </div>
 
                 {/* {
