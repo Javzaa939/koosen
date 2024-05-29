@@ -24,7 +24,7 @@ from lms.models import Lesson_to_teacher
 from lms.models import TeacherScore
 from lms.models import Lesson_teacher_scoretype
 from lms.models import LearningPlan
-from lms.models import Season, Group, GradeLetter
+from lms.models import Season, Group, GradeLetter, Country
 from core.models import User
 
 from .serializers import CorrespondSerailizer
@@ -1344,7 +1344,8 @@ class ScoreOldV2APIView(
                     group_id=group_id,
                     status_id=1,
                     department=group_obj.department,
-                    school=group_obj.school
+                    school=group_obj.school,
+                    citizenship=Country.objects.get(code='496')
                 )
             else:
                 # Хэрвээ тэр оюутан нь олдвол тэр оюутан тэр ангидаа байна уу гэдгийг шалгана
