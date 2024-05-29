@@ -287,6 +287,8 @@ export default function PrintAttachmentEnglish()
                 return 'Ch'
             case 'Ш':
                 return 'Sh'
+            case 'Щ':
+                return 'Sh'
             case 'Ы':
                 return 'I'
             case 'Ь':
