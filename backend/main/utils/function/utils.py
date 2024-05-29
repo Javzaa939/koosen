@@ -1059,12 +1059,13 @@ def add_student_eng_name():
     Student = apps.get_model('lms', 'Student')
 
     # Бүх суралцагчдаа орж авна
-    students = Student.objects.all()
+    students = Student.objects.exclude(first_name_eng__isnull=False, last_name_eng__isnull=False)
 
     # Нийт bulk_create хийх өөрчлөлтүүдийг хадгалах list
     updated_students = []
 
     for student in students:
+        print('---Ok------')
         # Кирилл нэрнүүдээ хөрвүүлээд нэмнэ
         eng_first_name, eng_last_name = cyrillic_name_to_latin(student.first_name, student.last_name)
         student.first_name_eng = eng_first_name

@@ -132,7 +132,7 @@ export default function PrintEnglish()
             <div className='text-center' style={{ width: '100%', lineHeight: '30px', fontSize: '19px', marginBottom: "100px" }} >
                 <div className='m-auto' >
                     {
-                        data?.student?.group?.profession?.degree?.degree_code === 'D'
+                        data?.student?.group?.degree?.degree_code === 'D'
                         ?
                             <span className='text-center'>This is to certify that <span className='fw-bolder'>{data?.student?.first_name_eng}</span> <span className='fw-bolder'>{data?.student?.last_name_eng}</span> citizen of {data?.student?.citizenship?.name_eng},
                                 <br />
