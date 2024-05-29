@@ -229,7 +229,7 @@ export default function PrintAttachmentEnglish()
     /* Монгол үсгийг англи үсэг болгох хэсэг*/
     function engVseg(vseg)
     {
-        switch (vseg.toUpperCase())
+        switch (vseg?.toUpperCase())
         {
             case 'А':
                 return 'A'

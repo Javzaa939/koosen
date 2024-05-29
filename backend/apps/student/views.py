@@ -2743,13 +2743,12 @@ class StudentGpaDiplomaValuesAPIView(
                     inner join lms_lessonstandart ls
                     on lp.lesson_id=ls.id
                     where lp.profession_id = {profession_id} and lp.lesson_id = {lesson_id}
-                    order by lp.season, ls.name
+                    order by lp.lesson_level, lp.season
                 '''.format(profession_id=student_prof_qs.id, lesson_id=lesson_first_data.id)
 
                 cursor = connection.cursor()
                 cursor.execute(query)
                 rows = list(dict_fetchall(cursor))
-
 
                 if len(rows) > 0:
                     # Магистрийн дипломын хичээлийг хавсралтанд мэргэжлийн хичээлд хамт харуулах хэсэг

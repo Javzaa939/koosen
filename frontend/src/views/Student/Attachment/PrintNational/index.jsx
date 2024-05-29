@@ -192,7 +192,7 @@ export default function PrintNationalAttachment()
     /* Крилл үсгийг уйгаржин руу хөрвүүлэх */
     function uigVseg(vseg)
     {
-        switch (vseg)
+        switch (vseg?.toUpperCase())
         {
             case 'А':
                 return 'ᠠ'
@@ -249,6 +249,8 @@ export default function PrintNationalAttachment()
             case 'Ч':
                 return 'ᠴ'
             case 'Ш':
+                return 'ᠰ'
+            case 'Щ':
                 return 'ᠰ'
             case 'Ы':
                 return 'ᠢ'
