@@ -1330,7 +1330,6 @@ class ScoreOldV2APIView(
 
             # Оюутан гэсэн модел дотроос нэр болон кодын ашиглан тухайн оюутныг олно
             student = Student.objects.filter(Q(code=student_code) | Q(first_name=student_first_name, last_name=student_last_name)).first()
-            print(row)
 
             # Хэрвээ оюутан олдохгүй бол
             if student is None:
@@ -1343,7 +1342,9 @@ class ScoreOldV2APIView(
                     gender=gender,
                     birth_date=birth_date,
                     group_id=group_id,
-                    status_id=1
+                    status_id=1,
+                    department=group_obj.department,
+                    school=group_obj.school
                 )
             else:
                 # Хэрвээ тэр оюутан нь олдвол тэр оюутан тэр ангидаа байна уу гэдгийг шалгана
