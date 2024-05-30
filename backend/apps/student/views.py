@@ -1832,7 +1832,7 @@ class GraduationWorkAPIView(
 
     filter_backends = [SearchFilter]
 
-    search_fields = ['student__code', 'student__first_name', 'diplom_num', 'lesson__code', 'lesson__name', 'diplom_topic', 'leader', 'student__register_num', 'student__last_name']
+    search_fields = ['student__code', 'student__first_name', 'diplom_num', 'lesson__code', 'lesson__name', 'diplom_topic', 'leader', 'student__register_num', 'student__last_name', 'registration_num']
 
     @has_permission(must_permissions=['lms-student-graduate-read'])
     def get(self, request, pk=None):
