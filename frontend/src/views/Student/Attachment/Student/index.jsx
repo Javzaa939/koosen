@@ -285,14 +285,8 @@ export default function AttachmentStudent()
     /* Хавсралт бүгдийг хэвлэх */
     function printAll()
 	{
-        let registration_num = `${picker.getFullYear()}.${zeroFill(picker.getMonth() + 1)}.${zeroFill(picker.getDate())}`
-
         let data = {
-            lessons: datas?.score_register,
             student: datas?.student,
-            registration_num: registration_num,
-            isCenter: document.getElementById('isCenter') ? document.getElementById('isCenter').checked : null,
-            isLastNameOvog: document.getElementById('isLastNameOvog') ? document.getElementById('isLastNameOvog').checked : null,
         }
 
         localStorage.setItem('blankDatas', JSON.stringify(data))

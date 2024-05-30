@@ -1,7 +1,8 @@
 
 import { t } from 'i18next'
+import { Button } from 'reactstrap';
 
-export function getColumns (currentPage, rowsPerPage, total_count, user)
+export function getColumns (currentPage, rowsPerPage, total_count, printAll)
 {
     const page_count = Math.ceil(total_count / rowsPerPage)
 
@@ -76,6 +77,30 @@ export function getColumns (currentPage, rowsPerPage, total_count, user)
 			sortable: true,
             center: true,
 		},
+		{
+			name: t("Үйлдэл"),
+			width: "250px",
+			minWidth: "250px",
+			maxWidth: "250px",
+			center: true,
+			selector: (row) => (
+				<div className="text-center" style={{ width: "auto" }}>
+					{
+						<>
+							<span title='Бүх хавсралт хэвлэх'>
+								<Button
+									size='sm'
+									color='primary'
+									onClick={() => printAll(row)}
+								>
+								Хэвлэх
+								</Button>
+							</span>
+						</>
+					}
+				</div>
+			)
+		}
 	]
 
     return columns
