@@ -1,14 +1,19 @@
+// OnlineLessonRoutes.js
+
 import { lazy } from "react";
 
-const OnlineLesson = lazy(() => import("@views/OnlineLesson/index"));
-const OnlineLessonPage = lazy(() =>
-  import("@views/OnlineLesson/OnlineLessonPage/index")
-);
+const LessonMaterial = lazy(() => import("@views/OnlineLesson/LessonMaterial"));
+const DetailPage = lazy(() => import("@views/OnlineLesson/DetailPage"));
+
 const OnlineLessonRoutes = [
   {
-    path: "online_lesson/",
-    element: <OnlineLesson />,
+    path: "/online_lesson",
+    element: <LessonMaterial />,
   },
+  {
+    path: "online_lesson/detail/:index",
+    element: <DetailPage />,
+  }
 ];
 
 export default OnlineLessonRoutes;
