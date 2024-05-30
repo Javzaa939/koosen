@@ -110,15 +110,15 @@ export default function SumEn()
                                     ?
                                         datas?.student?.status?.code == 1
                                         ?
-                                            `${datas?.student?.last_name} овогтой ${datas?.student?.first_name} /${datas?.student?.first_name}/ нь ${datas?.school?.name}-д ${datas?.student?.group?.profession?.name} мэргэжлээр ${datas?.student?.group?.level}-р курст сурдаг нь үнэн бөгөөд ${datas?.score?.score_obj?.gpa} голч дүнтэй суралцсан нь үнэн болно.`
+                                            `${datas?.student?.last_name} овогтой ${datas?.student?.first_name} /${datas?.student?.first_name}/ нь ${datas?.school?.name}-д ${datas?.student?.group?.profession?.name} мэргэжлээр ${datas?.student?.group?.level}-р курст сурдаг нь үнэн бөгөөд ${Math.round(parseFloat(datas?.score?.score_obj?.gpa || 0) * 10) / 10} голч дүнтэй суралцсан нь үнэн болно.`
                                         :
                                             datas?.student?.status?.code == 5
                                             ?
-                                                `${datas?.student?.last_name} овогтой ${datas?.student?.first_name} /${datas?.student?.first_name}/ нь ${datas?.school?.name}-д ${datas?.student?.group?.profession?.name} мэргэжлээр ${datas?.student?.group?.level}-р курст сурдаг нь үнэн бөгөөд ${datas?.student?.group?.join_year?.substring(0, 4)}-${datas?.graduation_work?.substring(datas?.graduation_work?.length - 4)} оны хичээлийн жил ${datas?.score?.score_obj?.gpa} голч дүнтэй суралцсан нь үнэн болно.`
+                                                `${datas?.student?.last_name} овогтой ${datas?.student?.first_name} /${datas?.student?.first_name}/ нь ${datas?.school?.name}-д ${datas?.student?.group?.profession?.name} мэргэжлээр ${datas?.student?.group?.level}-р курст сурдаг нь үнэн бөгөөд ${datas?.student?.group?.join_year?.substring(0, 4)}-${datas?.graduation_work?.substring(datas?.graduation_work?.length - 4)} оны хичээлийн жил ${Math.round(parseFloat(datas?.score?.score_obj?.gpa || 0) * 10) / 10} голч дүнтэй суралцсан нь үнэн болно.`
                                             :
-                                                `${datas?.student?.last_name} овогтой ${datas?.student?.first_name} /${datas?.student?.first_name}/ нь ${datas?.school?.name}-д ${datas?.student?.group?.profession?.name} мэргэжлээр ${datas?.score?.score_obj?.gpa} голч дүнтэй нь үнэн болно.`
+                                                `${datas?.student?.last_name} овогтой ${datas?.student?.first_name} /${datas?.student?.first_name}/ нь ${datas?.school?.name}-д ${datas?.student?.group?.profession?.name} мэргэжлээр ${Math.round(parseFloat(datas?.score?.score_obj?.gpa || 0) * 10) / 10} голч дүнтэй нь үнэн болно.`
                                     :
-                                        `${datas?.student?.last_name} овогтой ${datas?.student?.first_name} /${datas?.student?.first_name}/ нь ${datas?.school?.name}-д ${datas?.student?.group?.profession?.name} мэргэжлээр ${datas?.student?.group?.level}-р курст сурдаг нь үнэн бөгөөд ${data?.year_value} хичээлийн жилийн ${datas?.season_name} ${datas?.score?.score_obj?.gpa} голч дүнтэй суралцсан нь үнэн болно.`
+                                        `${datas?.student?.last_name} овогтой ${datas?.student?.first_name} /${datas?.student?.first_name}/ нь ${datas?.school?.name}-д ${datas?.student?.group?.profession?.name} мэргэжлээр ${datas?.student?.group?.level}-р курст сурдаг нь үнэн бөгөөд ${data?.year_value} хичээлийн жилийн ${datas?.season_name} ${Math.round(parseFloat(datas?.score?.score_obj?.gpa || 0) * 10) / 10} голч дүнтэй суралцсан нь үнэн болно.`
                                 }
                             </div>
                         </div>
