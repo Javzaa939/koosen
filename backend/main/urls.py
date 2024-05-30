@@ -87,6 +87,8 @@ urlpatterns = [
     # элсэлт
     path('elselt/', include("apps.elselt.urls")),
 
+    # Онлайн хичээл
+     path('online_lesson/', include('apps.online_lesson.urls')),
 ]
 
 if settings.DEBUG is False:
