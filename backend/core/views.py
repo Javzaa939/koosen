@@ -4,9 +4,19 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 from rest_framework.filters import SearchFilter
 
+import json
+
+from django.db import transaction
+
+from .serializers import (
+    generate_model_serializer
+)
+
 from main.utils.function.utils import filter_queries
 from main.utils.function.pagination import CustomPagination
-from main.utils.function.utils import get_teacher_queryset, remove_key_from_dict, null_to_none, override_get_queryset, calculate_birthday
+from main.utils.function.utils import get_teacher_queryset, null_to_none, calculate_birthday
+
+from django.apps import apps
 from django.db import transaction
 from django.db.models import Q
 
@@ -1036,3 +1046,162 @@ class EmployeeApiView(
             employee_serializer.save()
 
         return request.send_info("INF_001")
+
+
+
+class CRUDAPIView(
+    generics.GenericAPIView,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+):
+
+    '''
+        Динамик API
+
+        Энэ API-р дурын моделийн crud үйлдлийг хийх боломжтой.
+        params-р моделийн нэрийг явуулсанаар ажиллана.
+
+        Variables
+
+        app_name - Модел байгаа app-н нэр.
+        model_name - Моделийн нэр.
+        fields - Авах field-н нэр
+        custom_search - GET хүсэлтийг filter-лэх эсэх
+        filter_data = Хайх field болон утгийн хэсэг
+        generate_model_serializer() - Тухайн моделийн serializer-г үүсгэх функц.
+    '''
+
+    filter_backends = [SearchFilter]
+    pagination_class = CustomPagination
+
+    def get(self, request, pk=None):
+
+        app_name = request.query_params.get('app_name')
+        model_name = request.query_params.get('model_name')
+        fields = request.query_params.get('fields')
+
+        data = {}
+
+        if app_name:
+            data['app_name'] = app_name
+
+        if model_name:
+            data['model_name'] = model_name
+
+        if fields:
+            data['fields'] = fields
+
+        # Модел байгаа эсэхийг шалгах
+        try:
+            model = apps.get_model(data['app_name'], data['model_name'])
+            self.queryset = model.objects.all()
+
+        except:
+            return request.send_error('ERR_013')
+
+        custom_search = request.query_params.get('custom_search')
+
+        if custom_search:
+
+            filter_data = request.query_params.get('filter_data')
+            filter_data = json.loads(filter_data)
+
+            self.queryset = self.queryset.filter(**filter_data)
+
+        # Field байгаа эсэхийг шалгах
+        try:
+            self.serializer_class = generate_model_serializer(model, data['fields'])
+
+        except:
+            self.serializer_class = generate_model_serializer(model)
+
+        # pk байгаа үед тухайн pk-тай объектыг авах
+        if pk:
+            try:
+                all_data = self.retrieve(request, pk).data
+
+            except:
+                return request.send_error('ERR_014')
+
+            return request.send_data(all_data)
+
+        try:
+            all_data = self.list(request, pk).data
+
+        except:
+            return request.send_error('ERR_014')
+
+        return request.send_data(all_data)
+
+
+    @transaction.atomic()
+    def post(self, request):
+
+        data = request.data
+
+        # Модел байгаа эсэхийг шалгах
+        try:
+            model = apps.get_model(data['app_name'], data['model_name'])
+            self.queryset = model.objects.all()
+
+        except:
+            return request.send_error('ERR_013')
+
+        self.serializer_class = generate_model_serializer(model)
+        serializer = self.serializer_class(data=data)
+
+        if not serializer.is_valid():
+
+            return request.send_error('ERR_002', serializer.errors)
+
+        serializer.save()
+
+        return request.send_info('INF_001')
+
+
+    @transaction.atomic()
+    def put(self, request, pk=None):
+
+        data = request.data
+
+        # Модел байгаа эсэхийг шалгах
+        try:
+            model = apps.get_model(data['app_name'], data['model_name'])
+            self.queryset = model.objects.all()
+
+        except:
+            return request.send_error('ERR_013')
+
+        self.serializer_class = generate_model_serializer(model)
+        instance = self.get_object()
+
+        serializer = self.serializer_class(instance, data=data)
+
+        if not serializer.is_valid():
+
+            return request.send_error('ERR_002', serializer.errors)
+
+        serializer.save()
+
+        return request.send_info('INF_002')
+
+
+    def delete(self, request, pk=None):
+
+        data = request.data
+
+        # Модел байгаа эсэхийг шалгах
+        try:
+            model = apps.get_model(data['app_name'], data['model_name'])
+            self.queryset = model.objects.all()
+
+        except:
+            return request.send_error('ERR_013')
+
+        self.destroy(request, pk)
+
+        return request.send_info('INF_003')
+

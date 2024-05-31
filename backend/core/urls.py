@@ -59,4 +59,8 @@ urlpatterns = [
 
     # Хуанли доторх картнуудын жагсаалт
     path('calendarCard/', CalendarCountAPIView().as_view()),
+
+    # Dynamic api
+    path('crud/', CRUDAPIView.as_view()),
+    path('crud/<int:pk>/', CRUDAPIView.as_view())
 ]
