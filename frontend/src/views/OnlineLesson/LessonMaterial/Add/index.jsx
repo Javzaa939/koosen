@@ -43,12 +43,11 @@ const Addmodal = ({ open, handleModal }) => {
       <Modal
         isOpen={open}
         toggle={handleModal}
-        className="sidebar-xl hr-register"
-        modalClassName="modal-slide-in"
+        className="modal-dialog-centered modal-sm"
         contentClassName="pt-0"
       >
         <ModalHeader
-          className="mb-1"
+          className="mb-1 d-flex justify-content-between"
           toggle={handleModal}
           close={closeBtn}
           tag="div"

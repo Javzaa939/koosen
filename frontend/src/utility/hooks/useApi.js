@@ -2468,7 +2468,13 @@ function useApi(isDisplay=false) {
         post: (data) => instance.post(`/online_lesson/`),
         put: (pk, data) => instance.put(`online_lesson/${pk}`),
         delete_lesson: (pk) => instance.delete('delete')
-    }
+    },
+    material : {
+      get: ()=> instance.get('/online_lesson/material/'),
+      getOne: (pk)=> instance.get(`/online_lesson/material/${pk}`),
+      post: (data)=> instance.get(`/online_lesson/material/` , data),
+      delete: (pk)=> instance.get(`/online_lesson/material/${pk}`)
+  }
   };
 }
 
