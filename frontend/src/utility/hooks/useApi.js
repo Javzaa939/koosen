@@ -579,6 +579,8 @@ function useApi(isDisplay=false) {
 					return instance.get(`/core/teacher/lessonteach/?lesson=${lesson}`)
 				},
 				getTeacherOne: (pk) => instance.get(`/core/reference/teachers/info/${pk}/`),
+
+				delete: (pk) => instance.delete(`/core/teacher/${pk}/`)
 			},
 			/** Улс */
 			country: {
