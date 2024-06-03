@@ -673,9 +673,10 @@ class ScoreGpaListSerializer(serializers.ModelSerializer):
                 total_lesson_kr += lesson_kr
 
         if all_score > 0:
-            final_gpa = round((all_score / total_lesson_kr), 1)
+            final_gpa = all_score / total_lesson_kr
+            final_score = format(final_gpa, ".1f")
 
-        return final_gpa
+        return final_score
 
     def get_total_avg(self, obj):
         # Дүнгийн онооны дундаж
