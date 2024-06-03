@@ -1,7 +1,7 @@
 import { Fragment, useState, useEffect, useContext } from 'react'
 
 import { Controller, useForm } from 'react-hook-form'
-
+import { useNavigate } from 'react-router'
 import { Row, Col, Card, Input, Label, CardTitle, CardHeader, Spinner, Button } from 'reactstrap'
 
 import { ChevronDown , Printer, Search} from 'react-feather'
@@ -32,6 +32,8 @@ const GPAStudent = () => {
         lesson_year: '',
         lesson_season: '',
     }
+
+    const navigate = useNavigate()
 
     const [sortField, setSort] = useState('')
 
@@ -168,16 +170,11 @@ const GPAStudent = () => {
             <Card>
             {isLoading && Loader}
                 <div className="d-flex mx-1 justify-content-end">
-                    <div className='me-1'>
-                        <Button
-                            color='primary'
-                        >
-                            <span className='align-middle ms-50'>{t('Тооцох')}</span>
-                        </Button>
-                    </div>
                     <div>
                         <Button
                             color='primary'
+                            onClick={() => {navigate(`/print/gpa/print`, { state: datas })}}
+                            disabled={datas?.length === 0 && isLoading}
                         >
                         <Printer size={15} />
                             <span className='align-middle ms-50'>{t('Хэвлэх')}</span>

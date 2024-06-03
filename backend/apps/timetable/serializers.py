@@ -622,7 +622,7 @@ class ScoreGpaListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Student
-        fields = "code", "total_gpa", "total_kr", "full_name", "total_avg"
+        fields = "code", "total_gpa", "total_kr", "full_name", "total_avg", 'register_num', 'first_name', 'last_name'
 
     def get_full_name(self, obj):
 
@@ -673,7 +673,7 @@ class ScoreGpaListSerializer(serializers.ModelSerializer):
                 total_lesson_kr += lesson_kr
 
         if all_score > 0:
-            final_gpa = round((all_score / total_lesson_kr), 2)
+            final_gpa = round((all_score / total_lesson_kr), 1)
 
         return final_gpa
 
