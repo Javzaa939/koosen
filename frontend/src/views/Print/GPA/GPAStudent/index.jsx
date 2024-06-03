@@ -45,13 +45,13 @@ const GPAStudent = () => {
 
     const { t } = useTranslation()
     const { control, formState: { errors } } = useForm({});
-    const [rowsPerPage, setRowsPerPage] = useState(10)
+    const [rowsPerPage, setRowsPerPage] = useState(50)
     const [searchValue, setSearchValue] = useState("");
     const [select_value, setSelectValue] = useState(values);
     const [datas, setDatas] = useState([])
 
     const [total_count, setTotalCount] = useState(1)
-    const default_page = [10, 15, 50, 75, 100]
+    const default_page = [ 10, 20, 50, 75, 100, 'Бүгд' ]
 
     // Api
     const gpaApi = useApi().print.gpa
@@ -161,8 +161,9 @@ const GPAStudent = () => {
     },[])
 
     // ** Function to handle per page
-    function handlePerPage(e) {
-        setRowsPerPage(parseInt(e.target.value))
+    function handlePerPage(e)
+    {
+        setRowsPerPage(e.target.value === 'Бүгд' ? e.target.value : parseInt(e.target.value))
     }
 
     return(
