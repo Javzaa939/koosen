@@ -156,6 +156,7 @@ class GpaAPIView(
         sorting = self.request.query_params.get('sorting')
         department = self.request.query_params.get('department')
         profession = self.request.query_params.get('profession')
+        status = self.request.query_params.get('status')
 
         # Сургуулиар хайлт хийх
         if schoolId:
@@ -176,6 +177,10 @@ class GpaAPIView(
         # Мэргэжлээр хайх
         if profession:
             queryset = queryset.filter(group__profession=profession)
+
+        # Төгсөж буй оюутны голч эсэх хайх
+        if str2bool(status):
+            queryset = queryset.filter(sc=profession)
 
         if sorting:
             if not isinstance(sorting, str):

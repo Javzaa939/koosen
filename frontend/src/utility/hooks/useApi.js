@@ -994,8 +994,8 @@ function useApi(isDisplay=false) {
 			},
 			/** Голч дүн */
 			gpa:{
-				get:(limit, page, sort, search, degree, department, group, profession, year, season) =>
-				instance.get(`/print/gpa/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&degree=${degree}&group=${group}&department=${department}&profession=${profession}&lesson_year=${year}&lesson_season=${season}&school=${school_id}`),
+				get:(limit, page, sort, search, degree, department, group, profession, year, season, status) =>
+				instance.get(`/print/gpa/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&degree=${degree}&group=${group}&department=${department}&profession=${profession}&lesson_year=${year}&lesson_season=${season}&school=${school_id}&status=${status}`),
 				getProp: (limit, page, sort, search, degree, department, profession, status, level) =>
 					instance.get(`/print/gpa-profession/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&degree=${degree}&status=${status}&department=${department}&profession=${profession}&level=${level}&school=${school_id}`),
 

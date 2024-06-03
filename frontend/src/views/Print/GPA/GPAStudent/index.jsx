@@ -31,6 +31,7 @@ const GPAStudent = () => {
         group: '',
         lesson_year: '',
         lesson_season: '',
+        status: ''
     }
 
     const navigate = useNavigate()
@@ -68,7 +69,7 @@ const GPAStudent = () => {
         const group = select_value.group
         const lesson_year = select_value.lesson_year
         const lesson_season = select_value.lesson_season
-        const { success, data } = await fetchData(gpaApi.get(rowsPerPage, currentPage, sortField, searchValue, degree, department, group, profession, lesson_year, lesson_season))
+        const { success, data } = await fetchData(gpaApi.get(rowsPerPage, currentPage, sortField, searchValue, degree, department, group, profession, lesson_year, lesson_season, select_value?.status))
         if(success) {
             setDatas(data?.results)
             setTotalCount(data?.count)
@@ -403,6 +404,22 @@ const GPAStudent = () => {
                                     />
                                 )
                             }}
+                        />
+                    </Col>
+                    <Col sm={4} md={4} className='d-flex align-items-center mt-1'>
+                        <Label className="form-label" for="status">
+                            {t("Төгсөлтийн голч эсэх")}
+                        </Label>
+                        <Input
+                            className='ms-1'
+                            type='checkbox'
+                            defaultChecked={select_value.status}
+                            onChange={(e) => setSelectValue(current => {
+                                return {
+                                    ...current,
+                                    status: e.target.checked,
+                                }
+                            })}
                         />
                     </Col>
                 </Row>

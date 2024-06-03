@@ -2758,9 +2758,12 @@ class StudentGpaDiplomaValuesAPIView(
                 if len(rows) > 0:
                     is_master = False
                     # Магистрийн дипломын хичээлийг хавсралтанд мэргэжлийн хичээлд хамт харуулах хэсэг
-                    if rows[0]['lesson_level'] == LearningPlan.MAG_DIPLOM:
+                    if rows[0]['lesson_level'] == LearningPlan.MAG_DIPLOM or rows[0]['lesson_level'] == LearningPlan.DOC_DIPLOM:
                         is_master = True
-                        rows[0]['lesson_level'] = LearningPlan.MAG_PROFESSION
+                        if rows[0]['lesson_level'] == LearningPlan.DOC_DIPLOM:
+                            rows[0]['lesson_level'] = LearningPlan.DOC_PROFESSION
+                        else:
+                            rows[0]['lesson_level'] = LearningPlan.MAG_PROFESSION
 
                     if rows[0]['lesson_level'] == level:
                         lesson = rows[0]
@@ -2783,7 +2786,8 @@ class StudentGpaDiplomaValuesAPIView(
                             all_gpa_score = all_gpa_score + (data_qs.score * lesson.get('kredit'))
                         else:
                             all_s_kredit = all_s_kredit + lesson.get('kredit')
-
+            
+            print(master_lessons)
             # Хичээлтэй хэсгийн датаг л нэмнэ
             if len(lesson_datas) > 0:
                 # Магистрийн ажил
