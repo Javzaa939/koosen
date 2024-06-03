@@ -178,10 +178,6 @@ class GpaAPIView(
         if profession:
             queryset = queryset.filter(group__profession=profession)
 
-        # Төгсөж буй оюутны голч эсэх хайх
-        if str2bool(status):
-            queryset = queryset.filter(sc=profession)
-
         if sorting:
             if not isinstance(sorting, str):
                 sorting = str(sorting)

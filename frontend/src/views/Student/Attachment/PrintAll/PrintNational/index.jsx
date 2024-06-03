@@ -470,7 +470,7 @@ export default function PrintNationalAttachment()
             >
                 <div className={`d-flex ${rowSum > 50 ? '' : ''}`}>
                 {
-                        printDatas?.student?.group?.degree?.degree_code == 'E'
+                        printDatas?.student?.group?.degree?.degree_code != 'D'
                         &&
                         <div style={{ writingMode: 'vertical-lr', display: 'flex', marginRight: '20px' }} >
                         {

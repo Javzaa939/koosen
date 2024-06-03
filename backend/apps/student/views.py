@@ -2786,8 +2786,7 @@ class StudentGpaDiplomaValuesAPIView(
                             all_gpa_score = all_gpa_score + (data_qs.score * lesson.get('kredit'))
                         else:
                             all_s_kredit = all_s_kredit + lesson.get('kredit')
-            
-            print(master_lessons)
+
             # Хичээлтэй хэсгийн датаг л нэмнэ
             if len(lesson_datas) > 0:
                 # Магистрийн ажил

@@ -435,6 +435,37 @@ export default function PrintAttachmentMongolia()
                 className='w-100 font-dark'
                 style={{ fontSize: '10px', backgroundColor: 'white', color: 'black', bottom: printDatas?.student?.group?.degree?.degree_code == 'D' ? '4px': '10px', fontFamily: 'Arial' }} >
 
+{
+                    printDatas?.student?.group?.degree?.degree_code != 'D'
+                    &&
+                        <div className='px-1 mb-1' style={{ paddingBottom: '2px' }} >
+                        {
+                            datas?.graduation_work?.lesson_type == 1
+                            ?
+                                printDatas?.student?.group?.degree?.degree_code !== 'D'
+                                ?
+                                    <span className=''>Магистрын төгсөлтийн ажил/диссертацийн нэр: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic}</span></span>
+                                :
+                                    <span className=''>Дипломын ажлын нэр: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic}</span></span>
+
+                            :
+                                <>
+                                    <span className=''>
+                                        Төгсөлтийн шалгалт:
+                                    </span>
+                                        {
+                                            datas?.graduation_work?.lesson?.map((val, idx) =>
+                                            {
+                                                return (
+                                                    <span className='ms-5' key={idx} >{idx + 1}. {val?.name} / {(val?.score_register?.teach_score || 0) + (val?.score_register?.exam_score || 0)} {val?.score_register?.assessment} /</span>
+                                                )
+                                            })
+                                        }
+                                </>
+                        }
+                        </div>
+                }
+
                 <div className={`d-flex justify-content-center gap-5 me-1 ${rowSum > 51 ? '': 'mb-2'}`}>
                     <div>Нийт багц цаг: <span className='fw-bolder'>{datas?.score?.max_kredit}</span></div>
                     <div>Голч оноо: <span className='fw-bolder'>{datas?.score?.average_score}</span></div>
@@ -445,6 +476,7 @@ export default function PrintAttachmentMongolia()
                         <div>Тухайн улирлын ижил мэргэжлийн төгсөгчдийн голч дүнгийн дундаж: <span className='fw-bolder'>{datas?.score?.average_score_prof}</span></div>
                     }
                 </div>
+
                 {
                     (datas?.graduation_work?.lesson_type != 1 && datas?.graduation_work?.diplom_topic)
                     &&
@@ -452,33 +484,36 @@ export default function PrintAttachmentMongolia()
                         <span className=''>Дипломын ажлын сэдэв: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic}</span></span>
                     </div>
                 }
-
-                <div className='px-1 mb-25' style={{ paddingTop: '2px' }} >
                 {
-                    datas?.graduation_work?.lesson_type == 1
-                    ?
-                        printDatas?.student?.group?.degree?.degree_code !== 'D'
+                    printDatas?.student?.group?.degree?.degree_code == 'D'
+                    &&
+                    <div className='px-1 mb-25' style={{ paddingTop: '2px' }} >
+                    {
+                        datas?.graduation_work?.lesson_type == 1
                         ?
-                            <span className=''>Магистрын төгсөлтийн ажил/диссертацийн нэр: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic}</span></span>
-                        :
-                            <span className=''>Дипломын ажлын нэр: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic}</span></span>
+                            printDatas?.student?.group?.degree?.degree_code !== 'D'
+                            ?
+                                <span className=''>Магистрын төгсөлтийн ажил/диссертацийн нэр: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic}</span></span>
+                            :
+                                <span className=''>Дипломын ажлын нэр: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic}</span></span>
 
-                    :
-                        <>
-                            <span className=''>
-                                Төгсөлтийн шалгалт:
-                            </span>
-                                {
-                                    datas?.graduation_work?.lesson?.map((val, idx) =>
+                        :
+                            <>
+                                <span className=''>
+                                    Төгсөлтийн шалгалт:
+                                </span>
                                     {
-                                        return (
-                                            <span className='ms-5' key={idx} >{idx + 1}. {val?.name} / {(val?.score_register?.teach_score || 0) + (val?.score_register?.exam_score || 0)} {val?.score_register?.assessment} /</span>
-                                        )
-                                    })
-                                }
-                        </>
+                                        datas?.graduation_work?.lesson?.map((val, idx) =>
+                                        {
+                                            return (
+                                                <span className='ms-5' key={idx} >{idx + 1}. {val?.name} / {(val?.score_register?.teach_score || 0) + (val?.score_register?.exam_score || 0)} {val?.score_register?.assessment} /</span>
+                                            )
+                                        })
+                                    }
+                            </>
+                    }
+                    </div>
                 }
-                </div>
 
                 <div className='d-flex justify-content-center mt-5'>
                     {

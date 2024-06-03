@@ -495,7 +495,7 @@ export default function PrintAttachmentMongolia()
                 style={{ fontSize: printDatas?.student?.group?.degree?.degree_code == 'D' ? '10px': '11px', backgroundColor: 'white', color: 'black', bottom: printDatas?.student?.group?.degree?.degree_code == 'D' ? '4px': '10px', fontFamily: 'Arial' }} >
 
                 {
-                    printDatas?.student?.group?.degree?.degree_code == 'E'
+                    printDatas?.student?.group?.degree?.degree_code != 'D'
                     &&
                         <div className='px-1 mb-1' style={{ paddingBottom: '2px' }} >
                         {

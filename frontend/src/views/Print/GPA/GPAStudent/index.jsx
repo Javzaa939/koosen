@@ -39,6 +39,7 @@ const GPAStudent = () => {
     const [sortField, setSort] = useState('')
 
     const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
+    const { Loader: TableLoader, isLoading: tableLoading, fetchData: tableFetchData } = useLoader({})
 
     const [currentPage, setCurrentPage] = useState(1)
 
@@ -69,7 +70,7 @@ const GPAStudent = () => {
         const group = select_value.group
         const lesson_year = select_value.lesson_year
         const lesson_season = select_value.lesson_season
-        const { success, data } = await fetchData(gpaApi.get(rowsPerPage, currentPage, sortField, searchValue, degree, department, group, profession, lesson_year, lesson_season, select_value?.status))
+        const { success, data } = await tableFetchData(gpaApi.get(rowsPerPage, currentPage, sortField, searchValue, degree, department, group, profession, lesson_year, lesson_season, select_value?.status))
         if(success) {
             setDatas(data?.results)
             setTotalCount(data?.count)
@@ -476,7 +477,7 @@ const GPAStudent = () => {
                         pagination
                         paginationServer
                         className='react-dataTable'
-                        progressPending={isLoading}
+                        progressPending={tableLoading}
                         progressComponent={<h5>{t('Түр хүлээнэ үү...')}</h5>}
                         noDataComponent={(
                             <div className="my-2">

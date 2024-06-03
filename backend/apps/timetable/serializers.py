@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from django.db.models import F
+from django.db.models import F, Sum
 from lms.models import Room
 from lms.models import Building
 from lms.models import TimeTable
@@ -8,14 +8,14 @@ from lms.models import Group
 from lms.models import Student
 from lms.models import Exam_to_group
 from lms.models import ExamTimeTable
-from lms.models import LessonStandart, ScoreRegister, Score, StudentRegister
-from lms.models import Exam_repeat, TeacherCreditVolumePlan, TeacherCreditVolumePlan_group, Lesson_to_teacher, Teachers
+from lms.models import LessonStandart, ScoreRegister, Score, CalculatedGpaOfDiploma, StudentRegister
+from lms.models import Exam_repeat, TeacherCreditVolumePlan, TeacherCreditVolumePlan_group, Teachers
 
 from student.serializers import StudentListSerializer
 from surgalt.serializers import LessonStandartSerialzier
 from core.serializers import SubSchoolListSerailizer
 
-from main.utils.function.utils import get_fullName, start_time, end_time
+from main.utils.function.utils import get_fullName, start_time, end_time, str2bool
 
 from ..surgalt.serializers import LessonStandartListSerializer
 from core.serializers import TeacherListSerializer
@@ -635,45 +635,67 @@ class ScoreGpaListSerializer(serializers.ModelSerializer):
     def get_total_kr(self, obj):
         # Нийт багц цаг
 
-        score_register = ScoreRegister.objects
+        request = self.context.get('request')
+        status = request.query_params.get('status')
 
         stud_id = obj.id
-        max_kredit = 0
 
-        scoreRegister = score_register.filter(student=stud_id) \
-                                    .values(
-                                        "id",
-                                        "teach_score",
-                                        "exam_score",
-                                        "lesson__kredit"
-                                    )
-        if scoreRegister:
-            for scoreData in scoreRegister:
-                max_kredit = max_kredit + scoreData['lesson__kredit']
+        # Төгсөлтийн ажлын голч оноог татах гэж байгаа бол
+        if str2bool(status):
+            scoreRegister  = CalculatedGpaOfDiploma.objects.filter(student=stud_id).aggregate(max_kredit=Sum('kredit'))
+        else: # Үзсэн бүх хичээлийн кредит
+            scoreRegister = ScoreRegister.objects.filter(student=stud_id).aggregate(max_kredit=Sum('lesson__kredit'))
 
-        return max_kredit
+        return scoreRegister.get('max_kredit')
 
     def get_total_gpa(self, obj):
 
+        request = self.context.get('request')
+        status = request.query_params.get('status')
+
         final_gpa = 0
-        stud_id = obj.id
 
-        score_register = ScoreRegister.objects
+        all_kredit = 0
+        all_s_kredit = 0
+        all_gpa = 0
+        final_score = '0.0'
 
-        scoreRegister = score_register.filter(student=stud_id).annotate(kredit=F('lesson__kredit'))
-        total_lesson_kr = 0
-        all_score = 0
-        for scoreData in scoreRegister:
-            total_score = scoreData.score_total
-            lesson_kr = scoreData.kredit
-            if lesson_kr:
-                score_qs = Score.objects.filter(score_max__gte=total_score, score_min__lte=total_score).first()
-                all_score = all_score + (score_qs.gpa * lesson_kr)
+        # Оюутны дүнгүүдээр давталт гүйлгэх
+        if str2bool(status):
+            scoreRegister = CalculatedGpaOfDiploma.objects.filter(student=obj)
+        else:
+            scoreRegister = ScoreRegister.objects.filter(student=obj)
 
-                total_lesson_kr += lesson_kr
+        for lesson_score in scoreRegister:
+            if str2bool(status):
+                score_obj = Score.objects.filter(score_max__gte=lesson_score.score, score_min__lte=lesson_score.score).first()
+            else:
+                score_obj = Score.objects.filter(score_max__gte=lesson_score.score_total, score_min__lte=lesson_score.score_total).first()
 
-        if all_score > 0:
-            final_gpa = all_score / total_lesson_kr
+            # Бүх голч нэмэх
+            if str2bool(status):
+                if not lesson_score.grade_letter:
+                    all_gpa = all_gpa + (lesson_score.gpa * lesson_score.kredit)
+            else:
+                if not lesson_score.grade_letter:
+                    all_gpa = all_gpa + (score_obj.gpa * lesson_score.lesson.kredit)
+
+            # Бүх нийт кредит нэмэх
+            if str2bool(status):
+                all_kredit = all_kredit + lesson_score.kredit
+                if lesson_score.grade_letter:
+                    all_s_kredit = all_s_kredit + lesson_score.kredit
+            else:
+                all_kredit = all_kredit + lesson_score.lesson.kredit
+                if lesson_score.grade_letter:
+                    all_s_kredit = all_s_kredit + lesson_score.lesson.kredit
+
+            # Дундаж оноо
+            # Нийт кредитээс S үнэлгээ буюу тооцов үнэлгээг хасаж голч бодогдоно
+            estimate_kredit = all_kredit - all_s_kredit
+
+            final_gpa = all_gpa / estimate_kredit
+
             final_score = format(final_gpa, ".1f")
 
         return final_score
@@ -682,39 +704,48 @@ class ScoreGpaListSerializer(serializers.ModelSerializer):
         # Дүнгийн онооны дундаж
 
         score_avg = 0
-        stud_id = obj.id
+        request = self.context.get('request')
+        status = request.query_params.get('status')
 
-        score_register = ScoreRegister.objects
-
-        scoreRegister = score_register.filter(student=stud_id) \
-                                    .values(
-                                        "id",
-                                        "teach_score",
-                                        "exam_score",
-                                        "lesson__kredit",
-                                    )
+        all_kredit = 0
+        all_s_kredit = 0
         all_score = 0
-        score_avg = 0
-        total_lesson_kr = 0
 
-        if scoreRegister:
-            for scoreData in scoreRegister:
-                teach_score = scoreData['teach_score']
-                exam_score = scoreData['exam_score']
+        # Оюутны дүнгүүдээр давталт гүйлгэх
+        if str2bool(status):
+            scoreRegister = CalculatedGpaOfDiploma.objects.filter(student=obj)
+        else:
+            scoreRegister = ScoreRegister.objects.filter(student=obj)
 
-                lesson_kr = scoreData['lesson__kredit']
-                if lesson_kr:
-                    if teach_score:
-                        all_score = all_score + teach_score * lesson_kr
-                    if exam_score:
-                        all_score = all_score + exam_score * lesson_kr
+        for lesson_score in scoreRegister:
 
-                    total_lesson_kr += lesson_kr
+            # Нийт дүн
+            if str2bool(status):
+                if not lesson_score.grade_letter:
+                    all_score = all_score + (lesson_score.score * lesson_score.kredit)
+            else:
+                if not lesson_score.grade_letter:
+                    all_score = all_score + (lesson_score.score_total * lesson_score.lesson.kredit)
 
-            if all_score > 0:
-                score_avg = round(all_score / total_lesson_kr,2)
+            # Бүх нийт кредит нэмэх
+            if str2bool(status):
+                all_kredit = all_kredit + lesson_score.kredit
+                if lesson_score.grade_letter:
+                    all_s_kredit = all_s_kredit + lesson_score.kredit
+            else:
+                all_kredit = all_kredit + lesson_score.lesson.kredit
+                if lesson_score.grade_letter:
+                    all_s_kredit = all_s_kredit + lesson_score.lesson.kredit
 
-        return score_avg
+            # Дундаж оноо
+            # Нийт кредитээс S үнэлгээ буюу тооцов үнэлгээг хасаж голч бодогдоно
+            estimate_kredit = all_kredit - all_s_kredit
+
+            final_gpa = all_score / estimate_kredit
+
+            final_score = format(final_gpa, ".1f")
+
+        return final_score
 
 
 # ---------------- Дахин шалгалт ----------------
