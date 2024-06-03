@@ -1253,6 +1253,11 @@ class StudentDetailAPIView(
                 return request.send_error_valid(serializer.errors)
 
             serializer.save()
+
+            # Оюутны мэдээллээ засахад нэвтрэх нэрийг засах
+            StudentLogin.objects.filter(student=pk).update(
+                username=data.get('code')
+            )
             return request.send_info("INF_002", serializer.data)
 
         except Exception as e:
