@@ -11,7 +11,7 @@ from django.db import transaction
 from django.db.models import F, Subquery, OuterRef, Count
 from django.db.models.functions import Substr
 
-from main.utils.function.utils import json_load, make_connection, get_domain_url_link, get_domain_url
+from main.utils.function.utils import json_load, make_connection, get_domain_url_link, get_domain_url, null_to_none
 from main.utils.function.pagination import CustomPagination
 from main.decorators import login_required
 from rest_framework.response import Response
@@ -902,6 +902,7 @@ class ElseltHealthAnhanShat(
 
         data = request.data
         serializer = HealthUserSerializer(data=data)
+        data = null_to_none(data)
 
         if serializer.is_valid():
 

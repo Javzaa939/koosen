@@ -212,7 +212,7 @@ class HealthUser(models.Model):
     is_chalk = models.BooleanField(default=False, verbose_name='Шарх сорвитой эсэх')
     is_tattoo = models.BooleanField(default=False, verbose_name='Шивээстэй эсэх')
     is_drug = models.BooleanField(default=False, verbose_name='Мансууруулах эм, сэтгэцэд нөлөөт бодисын хамаарлын шинжилгээ')
-    description = models.TextField(verbose_name='Тайлбар')
+    description = models.TextField(verbose_name='Тайлбар', null=True)
     state = models.IntegerField(choices=AdmissionUserProfession.STATE, default=AdmissionUserProfession.STATE_SEND, verbose_name="Эрүүл мэндийн анхан шатны үзлэгт тэнцсэн эсэх төлөв")
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
