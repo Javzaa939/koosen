@@ -190,8 +190,14 @@ export default function PrintAttachmentMongolia()
 
 
                                     newCell1.className = 'border-dark mini-cell'
-                                    newCell2.className = 'border-dark body-cell'
-                                    newCell2.style = 'border-dark body-cell'
+                                    {
+                                        printDatas?.student?.group?.degree?.degree_code === 'D'
+                                        ?
+                                            newCell2.className = 'border-dark body-cell'
+                                        :
+                                            newCell2.className = 'border-dark body-cell1'
+
+                                    }
                                     newCell3.className = 'border-dark footer1-cell'
                                     newCell4.className = 'border-dark footer2-cell'
                                 }
@@ -301,7 +307,7 @@ export default function PrintAttachmentMongolia()
                     </div>
                 </header>
 
-                <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1 ${isPageBreak && 'page-break'}`} style={{ fontSize: '11px', color: 'black', fontFamily: 'Arial' }} >
+                <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1 ${isPageBreak && 'page-break'}`} style={{ fontSize: '11px', color: 'black', fontFamily: 'Arial', marginTop: printDatas?.student?.group?.degree?.degree_code !== 'D' ? '15px' : '' }} >
                 {/* <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1 ${isPageBreak && 'page-break'}`} style={{ fontSize: '11px', paddingTop: height.header + (printDatas?.student?.group?.degree?.degree_code === 'D' ? 24 : 30),  backgroundColor: 'white', color: 'black', fontFamily: 'Arial' }} > */}
                     <div
                         className='d-flex flex-wrap align-content-start mt-1'

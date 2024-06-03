@@ -203,7 +203,14 @@ export default function PrintAttachmentEnglish()
                                     }
 
                                     newCell1.className = 'border-dark mini-cell'
-                                    newCell2.className = 'border-dark body-cell'
+                                    {
+                                        printDatas?.student?.group?.degree?.degree_code === 'D'
+                                        ?
+                                            newCell2.className = 'border-dark body-cell'
+                                        :
+                                            newCell2.className = 'border-dark body-cell1'
+
+                                    }
                                     newCell3.className = 'border-dark footer1-cell'
                                     newCell4.className = 'border-dark footer2-cell'
                                 }
@@ -422,7 +429,7 @@ export default function PrintAttachmentEnglish()
                     </div> */}
                 </header>
 
-                <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1`} style={{ fontSize: '13px', backgroundColor: 'white', color: 'black', fontFamily: 'Arial' }} >
+                <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1`} style={{ fontSize: '13px', backgroundColor: 'white', color: 'black', fontFamily: 'Arial', marginTop: printDatas?.student?.group?.degree?.degree_code !== 'D' ? '15px' : ''  }} >
                 {/* <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1 ${isPageBreak && 'page-break'}`} style={{ fontSize: '13px', paddingTop: '1rem',  backgroundColor: 'white', color: 'black', fontFamily: 'Arial' }} > */}
 
                 {/* <div ref={body1SectionRef} className={`position-relative d-flex justify-content-between ${isPageBreak && 'page-break'}`} style={{ fontSize: '9px', marginTop: '135px', paddingTop: height.header + 24, }} > */}

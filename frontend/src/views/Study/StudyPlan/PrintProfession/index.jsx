@@ -116,6 +116,14 @@ export default function PrintProfession({ }) {
         getLessonBagtsStandart();
     }, [mergejil_id]);
 
+    useEffect(
+        () =>
+        {
+            document.title = `${datas?.name}-сургалтын-төлөвлөгөө`
+        },
+        []
+    )
+
     return (
         <div className='fontchange ps-1'>
              <div className={`invoice-print `}>
@@ -168,7 +176,7 @@ export default function PrintProfession({ }) {
                             </div>
                             <div className="row">
                                 <div className="col-6 fw-bolder mt-1 d-flex justify-content-between">
-                                    Хөтөлбөрийн нэр: <span className="fw-normal text-end">{datas?.department?.name}</span>
+                                    Хөтөлбөрийн нэр: <span className="fw-normal text-end">{datas?.name}</span>
                                 </div>
                                 <div className="col-6 fw-bolder mt-1 d-flex justify-content-between">
                                     Боловсролын зэрэг: <span className="fw-normal text-end">{datas?.degree?.degree_name}</span>
@@ -262,7 +270,7 @@ export default function PrintProfession({ }) {
                                         <TableShow rows=
                                             {
                                                 zaaval_data?.filter((data) =>
-                                                    data?.lesson_level === (datas?.degree?.degree_code === 'D' ? 3 : datas?.degree?.degree_code === 'E' ? 12 : 22)
+                                                    data?.lesson_level === (datas?.degree?.degree_code === 'D' ? 5 : datas?.degree?.degree_code === 'E' ? 12 : 22)
                                                 )
                                             }
                                             profession={mergejil_id}
@@ -270,7 +278,7 @@ export default function PrintProfession({ }) {
                                         />
                                     </tbody>
                                 )}
-                                {songon_data?.filter((data) => data?.lesson_level === (datas?.degree?.degree_code === 'D' ? 3 : datas?.degree?.degree_code === 'E' ? 12 : 22)) ?.length > 0 && (
+                                {songon_data?.filter((data) => data?.lesson_level === (datas?.degree?.degree_code === 'D' ? 5 : datas?.degree?.degree_code === 'E' ? 12 : 22)) ?.length > 0 && (
                                 <tbody>
                                     <tr>
                                         <td colSpan={5} className="text-center border-end border-dark" style={{paddingRight:'300px', width: '100%' }}>В.2 Сонгон судлах хичээл</td>

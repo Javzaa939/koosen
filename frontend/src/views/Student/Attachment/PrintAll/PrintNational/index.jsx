@@ -379,7 +379,7 @@ export default function PrintNationalAttachment()
             <div
                 ref={body1SectionRef}
                 className={`h-100 p-0 d-flex py-1 flex-column justify-content-between align-items-start position-relative ${isPageBreak && 'page-break'} ms-1`}
-                style={{ fontFamily: 'mongolianScript', flex: 1 }}
+                style={{ fontFamily: 'mongolianScript', flex: 1, left: printDatas?.student?.group?.degree?.degree_code !== 'D' ? '15px' : '' }}
             >
                 <div style={{ height: printDatas?.isCenter ? '98%' : '49.5%' }}  className={`${printDatas.isCenter ? 'center-table' : 'not-center-table' }`} >
                     <table id='tableNational1' className='text-center w-100 d-none parent_table' style={{ writingMode: 'vertical-lr', marginBottom: '1px', height: '100%' }} >

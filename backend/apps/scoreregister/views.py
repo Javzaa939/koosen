@@ -1372,6 +1372,9 @@ class ScoreOldV2APIView(
                 if not score:
                     score = row.get(' {}'.format(lesson.get("lesson__code")))
 
+                if not score:
+                    score = row.get('{} '.format(lesson.get("lesson__code")))
+
                 if score:
                     check_score = str(score)
                     if  check_score.isalpha():
