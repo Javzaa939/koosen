@@ -522,7 +522,13 @@ export default function PrintAttachmentMongolia()
                 }
 
                 <div className={`d-flex justify-content-center gap-5 me-1 ${rowSum > 51 ? '': 'mb-2'}`}>
-                    <div>Нийт багц цаг: <span className='fw-bolder'>{printDatas?.student?.group?.degree?.degree_code == 'F' ? datas?.score?.max_kredit + 24 : datas?.score?.max_kredit + 5}</span></div>
+                    {
+                        printDatas?.student?.group?.degree?.degree_code != 'D'
+                        ?
+                        <div>Нийт багц цаг: <span className='fw-bolder'>{printDatas?.student?.group?.degree?.degree_code == 'F' ? datas?.score?.max_kredit + 24 : datas?.score?.max_kredit + 5}</span></div>
+                        :
+                        <div>Нийт багц цаг: <span className='fw-bolder'>{datas?.score?.max_kredit}</span></div>
+                    }
                     <div>Голч оноо: <span className='fw-bolder'>{datas?.score?.average_score}</span></div>
                     <div>Голч дүн: <span className='fw-bolder'>{datas?.score?.assesment}</span></div>
                     {
