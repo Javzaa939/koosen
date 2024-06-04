@@ -2507,7 +2507,7 @@ class StudentCalculateGpaDiplomaAPIView(
             grouped_ids.extend(grouped_lessons_ids)
 
         # Нийт хичээлээс багцлуулсан хичээлүүдийг хасч үлдсэн хичээлийг авах
-        unique_ids = list(set(lesson_ids) - set(grouped_ids))
+        unique_ids = list(set(lesson_ids) - set(grouped_ids)  - set(bagtsad_hariyalagdah))
 
         # Багцалсан хичээлээр
         for grouped_data in grouped_datas:
@@ -2518,21 +2518,22 @@ class StudentCalculateGpaDiplomaAPIView(
             # Багц хичээлийн нийт дүнг олох
             score_register_score_sum = ScoreRegister.objects.filter(lesson__in=grouped_datas[grouped_data], student_id=student_id).aggregate(total=Sum(Coalesce(Coalesce(F('exam_score'), 0, output_field=FloatField()) + Coalesce(F('teach_score'), 0, output_field=FloatField()), 0, output_field=FloatField()) * F('lesson__kredit'))).get('total')
 
-            # Дундаж дүн
-            score_register_score = round((score_register_score_sum / score_register_kredit_sum), 2)
+            if score_register_score_sum != 0:
+                # Дундаж дүн
+                score_register_score = round((score_register_score_sum / score_register_kredit_sum), 2)
 
-            # Үсгэн үнэлгээ
-            score_qs = Score.objects.filter(score_max__gte=score_register_score, score_min__lte=score_register_score).first()
+                # Үсгэн үнэлгээ
+                score_qs = Score.objects.filter(score_max__gte=score_register_score, score_min__lte=score_register_score).first()
 
-            # Дипломын хичээл бодуулах хэсгийг үүсгэх
-            created_cal_qs = CalculatedGpaOfDiploma.objects.create(
-                lesson_id=grouped_data,
-                student_id=student_id,
-                kredit=score_register_kredit_sum,
-                score=score_register_score,
-                gpa=score_qs.gpa,
-                assesment=score_qs.assesment
-            )
+                # Дипломын хичээл бодуулах хэсгийг үүсгэх
+                created_cal_qs = CalculatedGpaOfDiploma.objects.create(
+                    lesson_id=grouped_data,
+                    student_id=student_id,
+                    kredit=score_register_kredit_sum,
+                    score=score_register_score,
+                    gpa=score_qs.gpa,
+                    assesment=score_qs.assesment
+                )
 
         for unique_id in unique_ids:
             score_register_qs = ScoreRegister.objects.filter(student_id=student_id, lesson_id=unique_id).first()

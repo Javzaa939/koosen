@@ -444,6 +444,17 @@ export default function PrintAttachmentMongolia()
                         </div>
                     }
                 </div>
+                {
+                    (printDatas?.student?.graduation_work?.back_diplom_num && printDatas?.student?.group?.degree?.degree_code === 'D')
+                    &&
+                    <div className='fw-bolder d-flex' style={{ fontSize: '11px' }}>
+                        <div className='d-flex' style={{ width:  '33.3%' }} >
+                        </div>
+                        <div className='d-flex px-1' style={{ width:  '50%' }}>
+                            <span className='fw-normal w-50'>Өмнөх зэргийн дипломын дугаар:</span> <span className='text-uppercase'>{printDatas?.student?.graduation_work?.back_diplom_num}</span>
+                        </div>
+                    </div>
+                }
             </header>
 
 
@@ -520,7 +531,13 @@ export default function PrintAttachmentMongolia()
                         }
                         </div>
                 }
-
+                {
+                    printDatas?.student?.graduation_work?.back_diplom_num && printDatas?.student?.group?.degree?.degree_code === 'D'
+                    &&
+                    <div className={` d-flex justify-content-center `} style={{marginLeft: '300px'}}>
+                            Өмнөх боловсролын дипломоос 30 багц цагийг тооцов.
+                    </div>
+                }
                 <div className={`d-flex justify-content-center gap-5 me-1 ${rowSum > 51 ? '': 'mb-2'}`}>
                     <div>Нийт багц цаг: <span className='fw-bolder'>{datas?.score?.max_kredit}</span></div>
                     <div>Голч оноо: <span className='fw-bolder'>{datas?.score?.average_score}</span></div>

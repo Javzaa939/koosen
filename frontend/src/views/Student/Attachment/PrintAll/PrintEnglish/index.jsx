@@ -396,6 +396,17 @@ export default function PrintAttachmentEnglish()
                             </div>
                         }
                     </div>
+                    {
+                    (printDatas?.student?.graduation_work?.back_diplom_num && printDatas?.student?.group?.degree?.degree_code === 'D')
+                        &&
+                        <div className='fw-bolder d-flex' style={{ fontSize: '11px' }}>
+                            <div className='d-flex' style={{ width:  '33.3%' }} >
+                            </div>
+                            <div className='d-flex px-1' style={{ width:  '50%' }}>
+                                <span className='fw-normal w-50'>Diploma Number of Bachelor's Degree:</span> <span className='text-uppercase'>{printDatas?.student?.graduation_work?.back_diplom_num}</span>
+                            </div>
+                        </div>
+                    }
 
                     {/* <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
                         <div className='d-flex' style={{ width: '33.3%' }} >
@@ -537,10 +548,16 @@ export default function PrintAttachmentEnglish()
                         </div>
                 }
 
+                {
+                    printDatas?.student?.graduation_work?.back_diplom_num && printDatas?.student?.group?.degree?.degree_code === 'D'
+                    &&
+                    <div className={` d-flex justify-content-center `} style={{marginLeft: '345px'}}>
+                        30 credit hours are calculated from the  previous diploma.
+                    </div>
+                }
+
                 <div className={`d-flex justify-content-center gap-5 me-1 ${rowSum > 51 ? 'mb-0': 'mb-2'}`}>
-                    {
-                        <div>Total Credits: <span className='fw-bolder'>{datas?.score?.max_kredit}</span></div>
-                    }
+                    <div>Total Credits: <span className='fw-bolder'>{datas?.score?.max_kredit}</span></div>
                     <div>GPA: <span className='fw-bolder'>{datas?.score?.average_score}</span></div>
                     <div>Cumulative (GPA): <span className='fw-bolder'>{datas?.score?.assesment}</span></div>
                     {

@@ -373,6 +373,13 @@ export default function PrintNationalAttachment()
                             <span className='h-50'>ᠡᠮᠦᠨᠡᢈᠢ ᠱᠠᠲᠤᠨ ᠤ᠋ ᠪᠣᠯᠪᠠᠰᠤᠷᠠᠯ ᠤ᠋ᠨ ᠦᠨᠡᠯᠡᢉᠡᠨ ᠦ᠋ ᠳᠤᠨᠳᠠᠵᠢ ᠣᠨᠤᠭ᠎ᠠ:</span>
                             {tooBichih(printDatas?.student?.secondary_school)}
                         </div>
+                        {printDatas?.student?.graduation_work?.back_diplom_num && printDatas?.student?.group?.degree?.degree_code === 'D'
+                        &&
+                        <div style={{ height: '40%', writingMode: 'vertical-lr', display: 'flex' }}>
+                            <span className='h-50'>ᠪᠠᠻᠠᠯᠠᠸᠷ ᠤ᠋ᠨ ᠳ᠋ᠤᠭᠠᠷ:</span>
+                            {tooBichih(printDatas?.student?.graduation_work?.back_diplom_num)}
+                        </div>
+                        }
                     </div>
                 }
 
@@ -497,6 +504,14 @@ export default function PrintNationalAttachment()
                                         }
                                 </>
                         }
+                    </div>
+                    }
+
+                    {
+                    printDatas?.student?.graduation_work?.back_diplom_num && printDatas?.student?.group?.degree?.degree_code === 'D'
+                    &&
+                    <div className='d-flex' style={{ writingMode: 'vertical-lr', marginRight: '20px', height: '100%' }}>
+                        ᠡᠮᠦᠨᠡᢈᠢ ᠪᠣᠯᠪᠠᠰᠤᠷᠠᠯ ᠤ᠋ᠨ ᠳ᠋ᠢᠫᠯᠣᠮ ᠠ᠋ᠴᠠ ᠓᠐ ᠪᠠᠭᠴᠠ ᠴᠠᠭ ᠢ᠋ ᠲᠣᠭᠠᠴᠠᠪᠠ᠃
                     </div>
                     }
                     {
