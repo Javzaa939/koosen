@@ -258,11 +258,12 @@ export default function PrintProfession({ }) {
                                                 standart_bagts_option={standart_bagts_option}
                                             />
                                         </tbody>
-                                    )}
+                                )}
+
                                 {zaaval_data?.filter((data) => data?.lesson_level === (datas?.degree?.degree_code === 'D' ? 3 : datas?.degree?.degree_code === 'E' ? 12 : 22)) ?.length > 0 && (
                                     <tbody>
                                         <tr>
-                                            <td colSpan={5} className="text-center border-end border-dark" style={{paddingRight:'0', width: '100%' }}>3.Мэргэшүүлэх хичээл</td>
+                                            <td colSpan={5} className="text-center border-end border-dark" style={{paddingRight:'0', width: '100%' }}>3.Мэргэжлийн хичээл</td>
                                         </tr>
                                         <tr>
                                             <td colSpan={5} className="text-center border-end border-dark" style={{paddingRight:'300px', width: '100%' }}>В.1 Заавал судлах хичээл</td>
@@ -270,7 +271,7 @@ export default function PrintProfession({ }) {
                                         <TableShow rows=
                                             {
                                                 zaaval_data?.filter((data) =>
-                                                    data?.lesson_level === (datas?.degree?.degree_code === 'D' ? 5 : datas?.degree?.degree_code === 'E' ? 12 : 22)
+                                                    data?.lesson_level === (datas?.degree?.degree_code === 'D' ? 3 : datas?.degree?.degree_code === 'E' ? 12 : 22)
                                                 )
                                             }
                                             profession={mergejil_id}
@@ -278,7 +279,7 @@ export default function PrintProfession({ }) {
                                         />
                                     </tbody>
                                 )}
-                                {songon_data?.filter((data) => data?.lesson_level === (datas?.degree?.degree_code === 'D' ? 5 : datas?.degree?.degree_code === 'E' ? 12 : 22)) ?.length > 0 && (
+                                {songon_data?.filter((data) => data?.lesson_level === (datas?.degree?.degree_code === 'D' ? 3 : datas?.degree?.degree_code === 'E' ? 12 : 22)) ?.length > 0 && (
                                 <tbody>
                                     <tr>
                                         <td colSpan={5} className="text-center border-end border-dark" style={{paddingRight:'300px', width: '100%' }}>В.2 Сонгон судлах хичээл</td>
@@ -301,6 +302,51 @@ export default function PrintProfession({ }) {
                                         <TableShow rows={dadlaga_data?.filter((data) => data?.lesson_level === 3)} profession={mergejil_id} standart_bagts_option={standart_bagts_option}/>
                                     </tbody>
                                 )}
+
+
+                                {zaaval_data?.filter((data) => data?.lesson_level === 5 ) ?.length > 0 && (
+                                    <tbody>
+                                        <tr>
+                                            <td colSpan={5} className="text-center border-end border-dark" style={{paddingRight:'0', width: '100%' }}>4.Мэргэшүүлэх хичээл</td>
+                                        </tr>
+                                        <tr>
+                                            <td colSpan={5} className="text-center border-end border-dark" style={{paddingRight:'300px', width: '100%' }}>В.1 Заавал судлах хичээл</td>
+                                        </tr>
+                                        <TableShow rows=
+                                            {
+                                                zaaval_data?.filter((data) =>
+                                                    data?.lesson_level === 5
+                                                )
+                                            }
+                                            profession={mergejil_id}
+                                            standart_bagts_option={standart_bagts_option}
+                                        />
+                                    </tbody>
+                                )}
+                                {songon_data?.filter((data) => data?.lesson_level === 5)?.length > 0 && (
+                                <tbody>
+                                    <tr>
+                                        <td colSpan={5} className="text-center border-end border-dark" style={{paddingRight:'300px', width: '100%' }}>В.2 Сонгон судлах хичээл</td>
+                                    </tr>
+                                    <TableShow rows=
+                                        {
+                                            songon_data?.filter((data) =>
+                                                data?.lesson_level === (datas?.degree?.degree_code === 'D' ? 3 : datas?.degree?.degree_code === 'E' ? 12 : 22)
+                                        )}
+                                        profession={mergejil_id}
+                                        standart_bagts_option={standart_bagts_option}
+                                    />
+                                </tbody>
+                                )}
+                                {dadlaga_data?.filter((data) => data?.lesson_level === 5)?.length > 0 && (
+                                    <tbody>
+                                        <tr>
+                                            <td colSpan={5} className="text-center border-end border-dark" style={{paddingRight:'300px', width: '100%' }}>В.3 Дадлага</td>
+                                        </tr>
+                                        <TableShow rows={dadlaga_data?.filter((data) => data?.lesson_level === 3)} profession={mergejil_id} standart_bagts_option={standart_bagts_option}/>
+                                    </tbody>
+                                )}
+
                                 {zaaval_data?.filter((data) => data?.lesson_level === (datas?.degree?.degree_code === 'D' ? 4 : datas?.degree?.degree_code === 'E' ? 13 : 23))?.length > 0 && (
                                     <tbody>
                                         <tr>

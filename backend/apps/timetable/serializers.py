@@ -694,9 +694,10 @@ class ScoreGpaListSerializer(serializers.ModelSerializer):
             # Нийт кредитээс S үнэлгээ буюу тооцов үнэлгээг хасаж голч бодогдоно
             estimate_kredit = all_kredit - all_s_kredit
 
-            final_gpa = all_gpa / estimate_kredit
+            if all_gpa != 0:
+                final_gpa = all_gpa / estimate_kredit
 
-            final_score = format(final_gpa, ".1f")
+                final_score = format(final_gpa, ".1f")
 
         return final_score
 
