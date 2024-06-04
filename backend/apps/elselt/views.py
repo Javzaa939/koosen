@@ -1211,7 +1211,6 @@ class ElseltHealthPhysicalCreateAPIView(
     @transaction.atomic
     def post(self, request):
         api_key = request.META.get('HTTP_X_API_KEY')
-
         # Манай гаргасан sha256
         data_to_verify = 'utility_solution'
         verification_hash = hashlib.sha256(data_to_verify.encode('utf-8')).hexdigest()

@@ -501,11 +501,7 @@ export default function PrintAttachmentMongolia()
                         {
                             datas?.graduation_work?.lesson_type == 1
                             ?
-                                printDatas?.student?.group?.degree?.degree_code !== 'D'
-                                ?
-                                    <span className=''>Магистрын төгсөлтийн ажил/диссертацийн нэр: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic}</span></span>
-                                :
-                                    <span className=''>Дипломын ажлын нэр: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic}</span></span>
+                                <span className=''>{`Магистрын төгсөлтийн ажил/диссертацийн нэр ${printDatas?.student?.group?.degree?.degree_code == 'F' ? '(24 багц цаг)' : '(5 багц цаг)'}:`}&nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic}</span></span>
 
                             :
                                 <>
@@ -526,7 +522,7 @@ export default function PrintAttachmentMongolia()
                 }
 
                 <div className={`d-flex justify-content-center gap-5 me-1 ${rowSum > 51 ? '': 'mb-2'}`}>
-                    <div>Нийт багц цаг: <span className='fw-bolder'>{datas?.score?.max_kredit}</span></div>
+                    <div>Нийт багц цаг: <span className='fw-bolder'>{printDatas?.student?.group?.degree?.degree_code == 'F' ? datas?.score?.max_kredit + 24 : datas?.score?.max_kredit + 5}</span></div>
                     <div>Голч оноо: <span className='fw-bolder'>{datas?.score?.average_score}</span></div>
                     <div>Голч дүн: <span className='fw-bolder'>{datas?.score?.assesment}</span></div>
                     {
@@ -550,11 +546,7 @@ export default function PrintAttachmentMongolia()
                     {
                         datas?.graduation_work?.lesson_type == 1
                         ?
-                            printDatas?.student?.group?.degree?.degree_code !== 'D'
-                            ?
-                                <span className=''>Магистрын төгсөлтийн ажил/диссертацийн нэр: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic}</span></span>
-                            :
-                                <span className=''>Дипломын ажлын нэр: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic}</span></span>
+                            <span className=''>Дипломын ажлын нэр: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic}</span></span>
 
                         :
                             <>

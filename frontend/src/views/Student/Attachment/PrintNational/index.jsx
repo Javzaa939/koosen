@@ -508,7 +508,7 @@ export default function PrintNationalAttachment()
                         printDatas?.student?.group?.degree?.degree_code !== 'D'
                         &&
                             <div className='d-flex' style={{ writingMode: 'vertical-lr', marginRight: '20px', height: '100%' }}>
-                                <div className='' style={{height: '33.3%'}}>ᠨᠡᠶᠢᠲᠡ ᠪᠠᠭᠴᠡ ᠴᠠᠭ: {tooBichih(datas?.score?.max_kredit)}</div>
+                                <div className='' style={{height: '33.3%'}}>ᠨᠡᠶᠢᠲᠡ ᠪᠠᠭᠴᠡ ᠴᠠᠭ: {tooBichih(printDatas?.student?.group?.degree?.degree_code == 'F' ? datas?.score?.max_kredit + 24 : datas?.score?.max_kredit + 5)}</div>
                                 <div className={'mt-2'} style={{height: '33.3%'}}>ᠭᠣᠣᠯᠴᠢ ᠣᠨᠤᠭ᠎ᠠ:  <span style={{ fontFamily: 'CMSUB', fontSize: '12px' }}>{datas?.score?.average_score.split('.')[0]}<span style={{ fontFamily: 'serif', fontWeight: 'bolder' }}>.</span>{datas?.score?.average_score.split('.')[1]}</span></div>
                                 {
                                     printDatas?.student?.group?.degree?.degree_code !== 'D'
@@ -542,12 +542,7 @@ export default function PrintNationalAttachment()
                             {
                                 datas?.graduation_work?.lesson_type == 1
                                 ?
-                                    printDatas?.student?.group?.degree?.degree_code !== 'D'
-                                    ?
-                                        <span className=''>ᠮᠠᢉᠢᠰᠲ᠋ᠷ ᠤ᠋ᠨ ᠲᠡᢉᠦᠰᠦᠯᠲᠡ ᠶ᠋ᠢᠨ ᠠᠵᠢᠯ/ᠳᠢᠰᠰᠧᠷᠲ᠋ᠠᠼᠢ ᠶ᠋ᠢᠨ ᠨᠡᠷ᠎ᠡ: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic_uig}</span></span>
-                                    :
-                                        <span className=''>ᠳ᠋ᠢᠫᠯᠣᠮ ᠤ᠋ᠨ ᠠᠵᠢᠯ ᠤ᠋ᠨ ᠨᠡᠷ᠎ᠡ: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic_uig}</span></span>
-
+                                    <span className=''>{`ᠮᠠᢉᠢᠰᠲ᠋ᠷ ᠤ᠋ᠨ ᠲᠡᢉᠦᠰᠦᠯᠲᠡ ᠶ᠋ᠢᠨ ᠠᠵᠢᠯ/ᠳᠢᠰᠰᠧᠷᠲ᠋ᠠᠼᠢ ᠶ᠋ᠢᠨ ᠨᠡᠷ᠎ᠡ ${printDatas?.student?.group?.degree?.degree_code == 'F' ? `(${tooBichih(24)} ᠪᠠᠭᠴᠡ ᠴᠠᠭ)` : `(${tooBichih(5)} ᠪᠠᠭᠴᠡ ᠴᠠᠭ`}):`} &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic_uig}</span></span>
                                 :
                                     <>
                                         <span className=''>

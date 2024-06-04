@@ -565,11 +565,7 @@ export default function PrintAttachmentEnglish()
                         {
                             datas?.graduation_work?.lesson_type == 1
                             ?
-                                printDatas?.student?.group?.degree?.degree_code !== 'D'
-                                ?
-                                    <span className=''>Master's thesis/dissertation title: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic_eng}</span></span>
-                                :
-                                    <span className=''>Diploma thesis: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic_eng}</span></span>
+                                <span className=''>{`Master's thesis/dissertation title ${printDatas?.student?.group?.degree?.degree_code == 'F' ? '(24 credits)' : '(5 credits)'}:`}&nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic_eng}</span></span>
 
                             :
                                 <>
@@ -590,7 +586,7 @@ export default function PrintAttachmentEnglish()
                 }
 
                 <div className={`d-flex justify-content-center gap-5 me-1 ${rowSum > 51 ? 'mb-0': 'mb-2'}`}>
-                    <div>Total Credits: <span className='fw-bolder'>{datas?.score?.max_kredit}</span></div>
+                    <div>Total Credits: <span className='fw-bolder'>{printDatas?.student?.group?.degree?.degree_code == 'F' ? datas?.score?.max_kredit + 24 : datas?.score?.max_kredit + 5}</span></div>
                     <div>GPA: <span className='fw-bolder'>{datas?.score?.average_score}</span></div>
                     <div>Cumulative (GPA): <span className='fw-bolder'>{datas?.score?.assesment}</span></div>
                     {
@@ -615,11 +611,7 @@ export default function PrintAttachmentEnglish()
                     {
                         datas?.graduation_work?.lesson_type == 1
                         ?
-                            printDatas?.student?.group?.degree?.degree_code !== 'D'
-                            ?
-                                <span className=''>Master's thesis/dissertation title: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic_eng}</span></span>
-                            :
-                                <span className=''>Diploma thesis: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic_eng}</span></span>
+                            <span className=''>Diploma thesis: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic_eng}</span></span>
 
                         :
                             <>
