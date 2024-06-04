@@ -436,19 +436,14 @@ export default function PrintAttachmentMongolia()
                 className='w-100 font-dark'
                 style={{ fontSize: '10px', backgroundColor: 'white', color: 'black', bottom: printDatas?.student?.group?.degree?.degree_code == 'D' ? '4px': '10px', fontFamily: 'Arial' }} >
 
-{
+                {
                     printDatas?.student?.group?.degree?.degree_code != 'D'
                     &&
                         <div className='px-1 mb-1' style={{ paddingBottom: '2px' }} >
                         {
                             datas?.graduation_work?.lesson_type == 1
                             ?
-                                printDatas?.student?.group?.degree?.degree_code !== 'D'
-                                ?
-                                    <span className=''>Магистрын төгсөлтийн ажил/диссертацийн нэр: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic}</span></span>
-                                :
-                                    <span className=''>Дипломын ажлын нэр: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic}</span></span>
-
+                                <span className=''>{`Магистрын төгсөлтийн ажил/диссертацийн нэр:`}&nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic}</span></span>
                             :
                                 <>
                                     <span className=''>

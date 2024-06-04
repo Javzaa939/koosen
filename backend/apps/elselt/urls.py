@@ -42,6 +42,6 @@ urlpatterns = [
     path('health/physical/<int:pk>/', ElseltHealthPhysical.as_view()),
 
     # Эрүүл мэндийн нарийвчилсан мэдээллийг хадгалах with POSTMAN
-    path('healt-up/create/', ElseltHealthPhysicalCreateAPIView.as_view()),
+    path('health-up/create', ElseltHealthPhysicalCreateAPIView.as_view()),
 ]
 
