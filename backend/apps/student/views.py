@@ -1950,6 +1950,10 @@ class GraduationWorkAPIView(
     def delete(self, request, pk=None):
         " Төгсөлтийн ажил устгах "
 
+        obj = self.get_object()
+
+        # Хавсралтын хичээлүүдийг устгах
+        CalculatedGpaOfDiploma.objects.filter(student=obj.student).delete()
         self.destroy(request, pk)
         return request.send_info("INF_003")
 
