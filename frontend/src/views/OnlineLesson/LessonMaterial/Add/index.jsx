@@ -61,8 +61,6 @@ const Addmodal = ({ open, handleModal, refreshDatas, type, userId }) => {
         return ".mp3,.wav,.mpc,.msv,.nmf";
       case 3:
         return ".mp4,.avi,.mov,.WebM";
-      default:
-        return ""; // Default, accept all file types
     }
   }
   // Handle form submission

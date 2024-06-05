@@ -38,6 +38,7 @@ const DetailPage = () => {
   const handleNavigate = () => {
     navigate(`/online_lesson`)
 }
+
   const getOneDatas = async () => {
     const { success, data } = await fetchData(materialApi.getOne(index));
     if (success) {
@@ -48,9 +49,7 @@ const DetailPage = () => {
   useEffect(() => {
     getOneDatas();
   }, []);
-
   const handleDelete = async(id)=>{
-    console.log(id)
     const {success} = await fetchData(materialApi.delete(id))
     if(success){
       getOneDatas()
@@ -85,12 +84,11 @@ const DetailPage = () => {
               <div className="d-flex gap-2">
                 <p>{index + 1}.</p>
                 <a href={file.path} download>
-                  {file.path}
+                {file.path}
                 </a>
-                <img width={200} height={100} src={file.path}></img>
               </div>
               <div className="d-flex gap-4">
-                <p>{file.created_at}</p>
+                <p>{new Date(file.created_at).toLocaleString()}</p>
                 <a
                   className="ms-1"
                   role="button"
@@ -222,7 +220,7 @@ const DetailPage = () => {
           </Row>
           {selectedContent && renderTable(selectedContent, item)}
         </CardBody>
-        {modal && <Addmodal open={modal} handleModal={handleModal} type={MaterialType} userId={index}/>}
+        {modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getOneDatas} type={MaterialType} userId={index}/>}
       </Card>
     </Fragment>
   );

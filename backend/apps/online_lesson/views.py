@@ -1,9 +1,17 @@
+import os
 from rest_framework import generics, mixins
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 from lms.models import OnlineLesson, LessonMaterial
 from .serializers import OnlineLessonSerializer, LessonMaterialSerializer, LessonMaterialPostSerializer
 from django.shortcuts import get_object_or_404
+from django.conf import settings
+from main.utils.function.utils import get_domain_url
+from main.utils.file import save_file
+from django.utils import timezone
+
+from rest_framework.response import Response
+from rest_framework.status import HTTP_201_CREATED
 
 # OnlineLesson List and Create View
 @permission_classes([IsAuthenticated])
@@ -69,8 +77,17 @@ class LessonMaterialDetailAPIView(
         return request.send_data(serializer)
 
     def post(self, request):
-        self.serializer_class = LessonMaterialPostSerializer
-        self.create(request)
+     serializer = self.get_serializer(data=request.data)
+     if serializer.is_valid():
+        file = request.data.get('path')
+        path = save_file(file, 'online_lesson', settings.EFILE)
+        domain = get_domain_url()
+        file_path = os.path.join(settings.MEDIA_URL, path)
+        return_url = '{}{}'.format(domain, file_path)
+        serializer.validated_data['material_type'] = request.data.get('material_type')
+        serializer.validated_data['path'] = return_url
+        serializer.validated_data['created_at'] = timezone.now()
+        self.perform_create(serializer)
         return request.send_info("INF_001")
 
     def delete(self, request, pk=None):

@@ -36,6 +36,7 @@ STUDENTS = "students/"
 STIPEND = "stipend/"
 DORMITORY = "dormitory/"
 NEWS = "news/"
+EFILE ="efile/"
 CHAT = "chat/"
 CLUB = "club/"
 PROFESSION = 'profession/'
