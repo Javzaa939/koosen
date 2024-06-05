@@ -4237,5 +4237,5 @@ class LessonMaterial(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Материал оруулсан хэрэглэгч')
     material_type = models.IntegerField(choices=MATERIAL_TYPE, default=FILE, verbose_name='Материалын төрөл')
-    path = models.FileField(verbose_name='Файлуудын замыг хадгалах хэсэг')
+    path = models.FileField(verbose_name='Файлуудын замыг хадгалах хэсэг', upload_to='efile')
     created_at = models.DateTimeField(auto_created=True, verbose_name='Үүсгэсэн огноо')

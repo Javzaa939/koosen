@@ -116,6 +116,9 @@ export default function PrintMongolia({ printOnce })
 
     const PADDING_QR = 50
 
+    console.log(data?.student?.group?.degree?.degree_code)
+    console.log(data?.student?.group?.degree?.degree_code == 'F')
+
     return (
         <div
             className={`vh-100 position-relative d-flex flex-column justify-content-end align-items-center bg-white`}
