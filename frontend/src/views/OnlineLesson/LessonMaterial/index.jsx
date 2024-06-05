@@ -51,7 +51,6 @@ function LessonMaterial() {
     const { success, data } = await fetchData(departmentApi.get());
     if (success) {
       setDepOption(data);
-      console.log(data);
     }
   }
 

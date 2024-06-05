@@ -2,6 +2,7 @@ import json
 import math
 import time
 import cyrtranslit
+import requests
 
 from datetime import date
 
@@ -1031,9 +1032,9 @@ def cyrillic_name_to_latin(first_name, last_name):
     # Шаардлаггүй тэмдэгтүүд
     replacements = {
         'ü': 'u',
-        'ö': 'o',
+        'ö': 'u',
         'Ü': 'U',
-        'Ö': 'O',
+        'Ö': 'U',
         'Yuu': 'Yu',
         'Yaa': 'Ya',
         'yuu': 'yu',
@@ -1059,12 +1060,13 @@ def add_student_eng_name():
     Student = apps.get_model('lms', 'Student')
 
     # Бүх суралцагчдаа орж авна
-    students = Student.objects.all()
+    students = Student.objects.exclude(first_name_eng__isnull=False, last_name_eng__isnull=False)
 
     # Нийт bulk_create хийх өөрчлөлтүүдийг хадгалах list
     updated_students = []
 
     for student in students:
+        print('---Ok------')
         # Кирилл нэрнүүдээ хөрвүүлээд нэмнэ
         eng_first_name, eng_last_name = cyrillic_name_to_latin(student.first_name, student.last_name)
         student.first_name_eng = eng_first_name
@@ -1074,3 +1076,38 @@ def add_student_eng_name():
     # Бүх өөрчлөлтүүдээ ганц query-гээр бааздаа хадгална
     with transaction.atomic():
         Student.objects.bulk_update(updated_students, ['first_name_eng', 'last_name_eng'])
+
+
+def send_message_skytel(phone_numbers, message):
+    """ phone_numbers: Илгээх утасны дугаарууд
+        message: Илгээх мессеж
+        Скайтелийн дугаартай элсэгчид рүү мессеж илгээх
+    """
+
+    success_count = 0
+    not_found_numbers = []
+
+    # Утасны дугаараар гүйлгэх
+    for phone_number in phone_numbers:
+        send_url = 'https://smsgw.skytel.mn/SMSGW-war/unicode?id=1000132&src=135038&dest={phone_number}&text={text}'.format(phone_number=phone_number, text=message)
+
+        rsp = requests.get(send_url)
+
+        # Хүсэлт амжилттай илгээгдсэн байвал
+        if rsp.json() == 200:
+            success_count += 1
+
+        # хүлээн авагчийн дугаар буруу
+        if rsp.json() == 103:
+            not_found_numbers.append(phone_number)
+
+        if rsp.json() == 202:
+            return False, 'IP хаяг эсвэл id буруу', success_count, not_found_numbers
+
+        if rsp.json() == 203:
+            return False, 'Бүртгэл хаагдсан байна. Скайтел ХХК холбогдоно уу', success_count, not_found_numbers
+
+        if rsp.json() == 206:
+            return False, 'Бусад оператор руу sms явуулах эрх алга', success_count, not_found_numbers
+
+    return True, 'Амжилттай илгээлээ', success_count, not_found_numbers

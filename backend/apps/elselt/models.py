@@ -212,7 +212,7 @@ class HealthUser(models.Model):
     is_chalk = models.BooleanField(default=False, verbose_name='Шарх сорвитой эсэх')
     is_tattoo = models.BooleanField(default=False, verbose_name='Шивээстэй эсэх')
     is_drug = models.BooleanField(default=False, verbose_name='Мансууруулах эм, сэтгэцэд нөлөөт бодисын хамаарлын шинжилгээ')
-    description = models.TextField(verbose_name='Тайлбар')
+    description = models.TextField(verbose_name='Тайлбар', null=True)
     state = models.IntegerField(choices=AdmissionUserProfession.STATE, default=AdmissionUserProfession.STATE_SEND, verbose_name="Эрүүл мэндийн анхан шатны үзлэгт тэнцсэн эсэх төлөв")
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -238,7 +238,7 @@ class HealthUpUser(models.Model):
     injury = models.CharField(max_length=255, verbose_name='гэмтэл')
     bzdx = models.CharField(max_length=255, verbose_name='БЗДХ')
 
-    description = models.TextField(verbose_name='Тайлбар')
+    description = models.TextField(verbose_name='Тайлбар', null=True)
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -248,7 +248,7 @@ class PhysqueUser(models.Model):
 
     user = models.ForeignKey(ElseltUser, on_delete=models.CASCADE, verbose_name='Элсэгч')
     state = models.IntegerField(choices=AdmissionUserProfession.STATE, default=AdmissionUserProfession.STATE_SEND, verbose_name="Эрүүл мэндийн анхан шатны үзлэгт тэнцсэн эсэх төлөв")
-    description = models.TextField(verbose_name='Тайлбар')
+    description = models.TextField(verbose_name='Тайлбар', null=True)
 
     turnik = models.FloatField(verbose_name='Савлуурт суниах')
     belly_draught = models.FloatField(verbose_name='Гэдэсний таталт')
@@ -280,7 +280,7 @@ class MentalUser(models.Model):
     user = models.ForeignKey(ElseltUser, on_delete=models.CASCADE, verbose_name='Элсэгч')
     challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE, verbose_name='Сэтгэлзүйн сорил')
 
-    description = models.TextField(verbose_name='Тайлбар')
+    description = models.TextField(verbose_name='Тайлбар', null=True)
     answer = models.TextField(null=True, verbose_name='Хариулт')
     score = models.FloatField(null=True, verbose_name='Элсэгчийн нийт оноо')
 
@@ -303,7 +303,7 @@ class ConversationUser(models.Model):
 
     user = models.ForeignKey(ElseltUser, on_delete=models.CASCADE, verbose_name='Элсэгч')
     state = models.IntegerField(choices=STATE, default=STATE_CONDIITON, null=True, verbose_name="тэнцсэн эсэх төлөв")
-    description = models.TextField(verbose_name='Тайлбар')
+    description = models.TextField(verbose_name='Тайлбар', null=True)
 
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -314,7 +314,7 @@ class ArmyUser(models.Model):
 
     user = models.ForeignKey(ElseltUser, on_delete=models.CASCADE, verbose_name='Элсэгч')
     state = models.IntegerField(choices=AdmissionUserProfession.STATE, default=AdmissionUserProfession.STATE_SEND, verbose_name="тэнцсэн эсэх төлөв")
-    description = models.TextField(verbose_name='Тайлбар')
+    description = models.TextField(verbose_name='Тайлбар', null=True)
 
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)

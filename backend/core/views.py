@@ -384,6 +384,7 @@ class SubSchoolAPIView(
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin
 ):
     """" Дэд сургууль """
 
@@ -456,6 +457,11 @@ class SubSchoolAPIView(
                 return request.send_error("ERR_003", errors)
 
         return request.send_info("INF_002")
+
+
+    def delete(self, request, pk=None):
+        self.destroy(request)
+        return request.send_info('INF_003')
 
 
 @permission_classes([IsAuthenticated])
@@ -631,7 +637,8 @@ class TeacherApiView(
 class TeacherListApiView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
-    mixins.RetrieveModelMixin
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin
 ):
     """ Багшийн урт жагсаалт """
 
@@ -653,6 +660,21 @@ class TeacherListApiView(
         teach_info = self.list(request).data
 
         return request.send_data(teach_info)
+
+    def delete(self, request, pk=None):
+
+        with transaction.atomic():
+            teacher = self.get_object()
+
+            user = User.objects.filter(id=teacher.user.id).first()
+
+            # Ажилтны мэдээлэл устгах
+            Employee.objects.filter(user=user).delete()
+
+            # User мэдээлэл устгах
+            user.delete()
+            # self.destroy(request)
+        return request.send_info('INF_003')
 
 
 @permission_classes([IsAuthenticated])

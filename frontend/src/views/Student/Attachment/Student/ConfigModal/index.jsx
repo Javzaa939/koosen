@@ -36,7 +36,8 @@ export default function ConfigModal({ openModal, handleModal, datas, calculatedD
 
     /** Мөрийн тохиргоо хадгалах */
     async function getConfig() {
-        const { success, data } = await fetchData(studentApi.getConfig(datas?.student?.group?.profession?.id, printValue))
+        const { success, data } = await fetchData(studentApi.getConfig(datas?.student?.group?.id, printValue))
+        // const { success, data } = await fetchData(studentApi.getConfig(datas?.student?.group?.profession?.id, printValue))
         if (success) {
             if (data?.give_date) {
                 var give_date = new Date(data?.give_date);

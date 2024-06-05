@@ -288,26 +288,23 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 							<UncontrolledTooltip placement='top' target={`complaintListDatatableEdit${row.id}`} >Засах</UncontrolledTooltip>
 						</>
 						}
-						{
-							user.permissions.includes('lms-student-graduate-delete') && school_id &&
-							<>
-								<a role="button"
-									style={{ marginRight: '10px' }}
-									onClick={() => showWarning({
-										header: {
-											title: t(`Төгсөлтийн ажил`),
-										},
-										question: t(`Та энэ мэдээллийг устгахдаа итгэлтэй байна уу?`),
-										onClick: () => handleDelete(row.id),
-										btnText: t('Устгах'),
-									})}
-									id={`complaintListDatatableCancel${row?.id}`}
-								>
-									<Badge color="light-danger" pill><X width={"100px"} /></Badge>
-								</a>
-								<UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${row.id}`} >Устгах</UncontrolledTooltip>
-							</>
-						}
+						<>
+							<a role="button"
+								style={{ marginRight: '10px' }}
+								onClick={() => showWarning({
+									header: {
+										title: t(`Төгсөлтийн ажил`),
+									},
+									question: t(`Та энэ мэдээллийг устгахдаа итгэлтэй байна уу?`),
+									onClick: () => handleDelete(row.id),
+									btnText: t('Устгах'),
+								})}
+								id={`complaintListDatatableCancel${row?.id}`}
+							>
+								<Badge color="light-danger" pill><X width={"100px"} /></Badge>
+							</a>
+							<UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${row.id}`} >Устгах</UncontrolledTooltip>
+						</>
 						{
 							<>
 								{/* <Label>

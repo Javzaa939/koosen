@@ -1253,6 +1253,11 @@ class StudentDetailAPIView(
                 return request.send_error_valid(serializer.errors)
 
             serializer.save()
+
+            # Оюутны мэдээллээ засахад нэвтрэх нэрийг засах
+            StudentLogin.objects.filter(student=pk).update(
+                username=data.get('code')
+            )
             return request.send_info("INF_002", serializer.data)
 
         except Exception as e:
@@ -1832,7 +1837,7 @@ class GraduationWorkAPIView(
 
     filter_backends = [SearchFilter]
 
-    search_fields = ['student__code', 'student__first_name', 'diplom_num', 'lesson__code', 'lesson__name', 'diplom_topic', 'leader', 'student__register_num', 'student__last_name']
+    search_fields = ['student__code', 'student__first_name', 'diplom_num', 'lesson__code', 'lesson__name', 'diplom_topic', 'leader', 'student__register_num', 'student__last_name', 'registration_num']
 
     @has_permission(must_permissions=['lms-student-graduate-read'])
     def get(self, request, pk=None):
@@ -1945,6 +1950,10 @@ class GraduationWorkAPIView(
     def delete(self, request, pk=None):
         " Төгсөлтийн ажил устгах "
 
+        obj = self.get_object()
+
+        # Хавсралтын хичээлүүдийг устгах
+        CalculatedGpaOfDiploma.objects.filter(student=obj.student).delete()
         self.destroy(request, pk)
         return request.send_info("INF_003")
 
@@ -2498,7 +2507,7 @@ class StudentCalculateGpaDiplomaAPIView(
             grouped_ids.extend(grouped_lessons_ids)
 
         # Нийт хичээлээс багцлуулсан хичээлүүдийг хасч үлдсэн хичээлийг авах
-        unique_ids = list(set(lesson_ids) - set(grouped_ids))
+        unique_ids = list(set(lesson_ids) - set(grouped_ids)  - set(bagtsad_hariyalagdah))
 
         # Багцалсан хичээлээр
         for grouped_data in grouped_datas:
@@ -2509,21 +2518,22 @@ class StudentCalculateGpaDiplomaAPIView(
             # Багц хичээлийн нийт дүнг олох
             score_register_score_sum = ScoreRegister.objects.filter(lesson__in=grouped_datas[grouped_data], student_id=student_id).aggregate(total=Sum(Coalesce(Coalesce(F('exam_score'), 0, output_field=FloatField()) + Coalesce(F('teach_score'), 0, output_field=FloatField()), 0, output_field=FloatField()) * F('lesson__kredit'))).get('total')
 
-            # Дундаж дүн
-            score_register_score = round((score_register_score_sum / score_register_kredit_sum), 2)
+            if score_register_score_sum != 0:
+                # Дундаж дүн
+                score_register_score = round((score_register_score_sum / score_register_kredit_sum), 2)
 
-            # Үсгэн үнэлгээ
-            score_qs = Score.objects.filter(score_max__gte=score_register_score, score_min__lte=score_register_score).first()
+                # Үсгэн үнэлгээ
+                score_qs = Score.objects.filter(score_max__gte=score_register_score, score_min__lte=score_register_score).first()
 
-            # Дипломын хичээл бодуулах хэсгийг үүсгэх
-            created_cal_qs = CalculatedGpaOfDiploma.objects.create(
-                lesson_id=grouped_data,
-                student_id=student_id,
-                kredit=score_register_kredit_sum,
-                score=score_register_score,
-                gpa=score_qs.gpa,
-                assesment=score_qs.assesment
-            )
+                # Дипломын хичээл бодуулах хэсгийг үүсгэх
+                created_cal_qs = CalculatedGpaOfDiploma.objects.create(
+                    lesson_id=grouped_data,
+                    student_id=student_id,
+                    kredit=score_register_kredit_sum,
+                    score=score_register_score,
+                    gpa=score_qs.gpa,
+                    assesment=score_qs.assesment
+                )
 
         for unique_id in unique_ids:
             score_register_qs = ScoreRegister.objects.filter(student_id=student_id, lesson_id=unique_id).first()
@@ -2735,6 +2745,7 @@ class StudentGpaDiplomaValuesAPIView(
                 obj_datas['uig_name'] = 'ᠮᠡᠷᢉᠡᠵᠢᠯ ᠦ᠋ᠨ ᢈᠢᠴᠢᠶᠡᠯ'
 
             # Дипломын хичээлээр давталт гүйлгэх
+            master_lessons = []
             for data_qs in qs:
                 lesson_first_data = data_qs.lesson
 
@@ -2743,25 +2754,33 @@ class StudentGpaDiplomaValuesAPIView(
                     inner join lms_lessonstandart ls
                     on lp.lesson_id=ls.id
                     where lp.profession_id = {profession_id} and lp.lesson_id = {lesson_id}
-                    order by lp.season, ls.name
                 '''.format(profession_id=student_prof_qs.id, lesson_id=lesson_first_data.id)
 
                 cursor = connection.cursor()
                 cursor.execute(query)
                 rows = list(dict_fetchall(cursor))
 
-
                 if len(rows) > 0:
+                    is_master = False
                     # Магистрийн дипломын хичээлийг хавсралтанд мэргэжлийн хичээлд хамт харуулах хэсэг
-                    if rows[0]['lesson_level'] == LearningPlan.MAG_DIPLOM:
-                        rows[0]['lesson_level'] = LearningPlan.MAG_PROFESSION
+                    if rows[0]['lesson_level'] == LearningPlan.MAG_DIPLOM or rows[0]['lesson_level'] == LearningPlan.DOC_DIPLOM:
+                        is_master = True
+                        if rows[0]['lesson_level'] == LearningPlan.DOC_DIPLOM:
+                            rows[0]['lesson_level'] = LearningPlan.DOC_PROFESSION
+                        else:
+                            rows[0]['lesson_level'] = LearningPlan.MAG_PROFESSION
 
                     if rows[0]['lesson_level'] == level:
                         lesson = rows[0]
                         lesson['score'] = data_qs.score
                         lesson['assesment'] = data_qs.assesment
                         lesson['grade_letter'] = data_qs.grade_letter.description if data_qs.grade_letter else ''
-                        lesson_datas.append(lesson)
+
+                        # Магистрийн 2 хичээлийг хамгийн сүүлд нь оруулах
+                        if is_master:
+                            master_lessons.append(lesson)
+                        else:
+                            lesson_datas.append(lesson)
 
                         max_kredit = max_kredit + lesson.get('kredit')
                         score_qs = Score.objects.filter(score_max__gte=data_qs.score, score_min__lte=data_qs.score).first()
@@ -2775,6 +2794,12 @@ class StudentGpaDiplomaValuesAPIView(
 
             # Хичээлтэй хэсгийн датаг л нэмнэ
             if len(lesson_datas) > 0:
+                # Магистрийн ажил
+                sorted_lessons = []
+                if len(master_lessons):
+                    sorted_lessons = sorted(master_lessons, key=lambda x: x["grade_letter"])
+
+                lesson_datas.extend(sorted_lessons)
                 obj_datas['lessons'] = lesson_datas
                 all_datas.append(obj_datas)
 

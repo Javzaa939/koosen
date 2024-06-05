@@ -396,10 +396,11 @@ class StudentListSerializer(serializers.ModelSerializer):
     school_name = serializers.CharField(source='group.school.name', default='')
     school_name_uig = serializers.CharField(source='group.school.name_uig', default='')
     school_name_eng = serializers.CharField(source='group.school.name_eng', default='')
+    graduation_work = serializers.SerializerMethodField()
 
     class Meta:
         model = Student
-        fields = ["id", 'code', 'first_name', 'last_name', 'register_num', 'full_name', 'group', 'citizenship', 'last_name_eng', 'first_name_eng', 'last_name_uig', 'first_name_uig', 'school_name', 'school_name_uig', 'school_name_eng', 'eysh_score', 'secondary_school' ]
+        fields = ["id", 'code', 'first_name', 'last_name', 'register_num', 'full_name', 'group', 'citizenship', 'last_name_eng', 'first_name_eng', 'last_name_uig', 'first_name_uig', 'school_name', 'school_name_uig', 'school_name_eng', 'eysh_score', 'secondary_school', 'graduation_work' ]
 
     def get_full_name(self, obj):
         first_name = obj.first_name
@@ -410,6 +411,12 @@ class StudentListSerializer(serializers.ModelSerializer):
 
         return full_name
 
+    def get_graduation_work(self, obj):
+
+        data = dict()
+        if GraduationWork.objects.filter(student=obj).exists():
+            data = GraduationWorkSerializer(GraduationWork.objects.get(student=obj)).data
+        return data
 
 class StudentSimpleListSerializer(serializers.ModelSerializer):
 

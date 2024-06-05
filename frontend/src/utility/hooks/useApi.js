@@ -640,79 +640,67 @@ function useApi(isDisplay=false) {
         leaderList: () =>
           instance.get(`/core/leader/list/?school=${school_id}`),
 
-        getOne: (pk) => instance.get(`/core/department/${pk}/`),
-        getTeachers: (pk) => instance.get(`/core/department/teacher/${pk}/`),
-      },
-      /** Багш */
-      teacher: {
-        get: (dep_id) => {
-          var depId = "";
-          if (dep_id) depId = dep_id;
-          return instance.get(
-            `/core/teacher/?department=${depId}&school=${school_id}`
-          );
-        },
-        getAll: (dep_id) => {
-          var depId = "";
-          if (dep_id) depId = dep_id;
-          return instance.get(
-            `/core/teacher/all/?department=${depId}&school=${school_id}`
-          );
-        },
-        getPartTeacher: () => {
-          return instance.get(`/core/teacher/part/?school=${school_id}`);
-        },
-        getSelectSchool: (school) =>
-          instance.get(`/core/teacher/?school=${school}`),
-        postRegister: (data) => instance.post(`/core/teacher/create/`, data),
-        getList: (limit, page, sort, search, sub_org, salbar, position = "") =>
-          instance.get(
-            `/core/teacher/list/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&sub_org=${sub_org}&salbar=${salbar}&position=${position}`
-          ),
-        getOne: (pk) => instance.get(`/core/teacher/${pk}/`),
-        getLongList: () => instance.get(`/core/teacher/longlist/`),
-        getSchoolFilter: (school_id) =>
-          instance.get(`/core/teacher/listschoolfilter/?school=${school_id}`),
-        /** Хичээлээс хамаарах багшийн жагсаалт */
-        getTeacher: (lesson_id) => {
-          var lesson = "";
-          if (lesson_id) {
-            lesson = lesson_id;
-          }
-          return instance.get(
-            `/core/teacher/lesson/?lesson=${lesson}&school=${school_id}`
-          );
-        },
-        getLessonToTeacher: (lesson_id) => {
-          var lesson = "";
-          if (lesson_id) {
-            lesson = lesson_id;
-          }
-          return instance.get(`/core/teacher/lessonteach/?lesson=${lesson}`);
-        },
-        getTeacherOne: (pk) =>
-          instance.get(`/core/reference/teachers/info/${pk}/`),
-      },
-      /** Улс */
-      country: {
-        get: () => instance.get(`/core/country/`),
-        getOne: (pk) => instance.get(`/core/country/${pk}/`),
-      },
-      /** Аймаг */
-      unit1: {
-        get: () => instance.get(`/core/aimaghot/`),
-        getOne: (pk) => instance.get(`/core/aimaghot/${pk}/`),
-      },
-      /** Сум */
-      unit2: {
-        get: (unit1) => instance.get(`/core/sumduureg/${unit1}/`),
-        getOne: (pk) => instance.get(`/core/sumduureg/${pk}/`),
-      },
-      /** Баг */
-      unit3: {
-        get: (unit2) => instance.get(`/core/baghoroo/${unit2}/`),
-        getOne: (pk) => instance.get(`/core/baghoroo/${pk}/`),
-      },
+				getOne: (pk) => instance.get(`/core/department/${pk}/`),
+				getTeachers: (pk) => instance.get(`/core/department/teacher/${pk}/`),
+			},
+			/** Багш */
+			teacher: {
+				get: (dep_id) => {
+					var depId = ''
+					if (dep_id) depId = dep_id
+					return instance.get(`/core/teacher/?department=${depId}&school=${school_id}`)
+				},
+				getAll: (dep_id) => {
+					var depId = ''
+					if (dep_id) depId = dep_id
+					return instance.get(`/core/teacher/all/?department=${depId}&school=${school_id}`)
+				},
+				getPartTeacher: () => { return instance.get(`/core/teacher/part/?school=${school_id}`) },
+				getSelectSchool: (school) => instance.get(`/core/teacher/?school=${school}`),
+				postRegister: (data) => instance.post(`/core/teacher/create/`, data),
+				getList: (limit, page, sort, search, sub_org, salbar, position="") => instance.get(`/core/teacher/list/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&sub_org=${sub_org}&salbar=${salbar}&position=${position}`),
+				getOne: (pk) => instance.get(`/core/teacher/${pk}/`),
+				getLongList: () => instance.get(`/core/teacher/longlist/`),
+				getSchoolFilter: (school_id) => instance.get(`/core/teacher/listschoolfilter/?school=${school_id}`),
+				/** Хичээлээс хамаарах багшийн жагсаалт */
+				getTeacher: (lesson_id) => {
+					var lesson = ''
+					if (lesson_id) {
+						lesson = lesson_id
+					}
+					return instance.get(`/core/teacher/lesson/?lesson=${lesson}&school=${school_id}`)
+				},
+				getLessonToTeacher: (lesson_id) => {
+					var lesson = ''
+					if (lesson_id) {
+						lesson = lesson_id
+					}
+					return instance.get(`/core/teacher/lessonteach/?lesson=${lesson}`)
+				},
+				getTeacherOne: (pk) => instance.get(`/core/reference/teachers/info/${pk}/`),
+
+				delete: (pk) => instance.delete(`/core/teacher/${pk}/`)
+			},
+			/** Улс */
+			country: {
+				get: () => instance.get(`/core/country/`),
+				getOne: (pk) => instance.get(`/core/country/${pk}/`),
+			},
+			/** Аймаг */
+			unit1: {
+				get: () => instance.get(`/core/aimaghot/`),
+				getOne: (pk) => instance.get(`/core/aimaghot/${pk}/`),
+			},
+			/** Сум */
+			unit2: {
+				get: (unit1) => instance.get(`/core/sumduureg/${unit1}/`),
+				getOne: (pk) => instance.get(`/core/sumduureg/${pk}/`),
+			},
+			/** Баг */
+			unit3: {
+				get: (unit2) => instance.get(`/core/baghoroo/${unit2}/`),
+				getOne: (pk) => instance.get(`/core/baghoroo/${pk}/`),
+			},
 
       /** Албан тушаал */
       position: {
@@ -1264,9 +1252,9 @@ function useApi(isDisplay=false) {
             `/score/register/download/?teacher=${teacher}&lesson=${lesson}&group=${group}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&school=${school_id}`
           ),
 
-        postOldScore: (data) => instance.post(`/score/register/old/`, data),
-        postImportData: (data) =>
-          instance.post(`/score/register/import/`, data),
+				postOldScore: (data) => instance.post(`/score/register/old/`, data),
+				postOldScoreV2: (data) => instance.post(`/score/register/old/v2/`, data),
+				postImportData: (data) => instance.post(`/score/register/import/`, data),
 
         putScore: (id, data) => instance.put(`score/register/old/${id}/`, data),
         // student: (search, group, lesson, teacher) =>
@@ -1282,58 +1270,26 @@ function useApi(isDisplay=false) {
         getOne: (pk) => instance.get(`/score/rescore/${pk}/`),
         put: (data, pk) => instance.put(`/score/rescore/${pk}/`, data),
 
-        // Тухайн оюутаны хичээлийн дүнг харуулах
-        student: (search, status, lesson_id) =>
-          instance.get(
-            `/score/rescore/student/?search=${search}&status=${status}&lesson=${lesson_id}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&school=${school_id}`
-          ),
-      },
-    },
-    /*Хэвлэх*/
-    print: {
-      choice: {
-        get: (limit, page, sort, search, lesson, teacher, group) =>
-          instance.get(
-            `/print/choice/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson=${lesson}&teacher=${teacher}&group=${group}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&school=${school_id}`
-          ),
-      },
-      schedule: {
-        get: (limit, page, sort, search, teacher, group, room, student) =>
-          instance.get(
-            `/print/schedule/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&teacher=${teacher}&group=${group}&student=${student}&room=${room}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&school=${school_id}`
-          ),
-      },
-      /** Голч дүн */
-      gpa: {
-        get: (
-          limit,
-          page,
-          sort,
-          search,
-          degree,
-          department,
-          group,
-          profession,
-          year,
-          season
-        ) =>
-          instance.get(
-            `/print/gpa/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&degree=${degree}&group=${group}&department=${department}&profession=${profession}&lesson_year=${year}&lesson_season=${season}&school=${school_id}`
-          ),
-        getProp: (
-          limit,
-          page,
-          sort,
-          search,
-          degree,
-          department,
-          profession,
-          status,
-          level
-        ) =>
-          instance.get(
-            `/print/gpa-profession/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&degree=${degree}&status=${status}&department=${department}&profession=${profession}&level=${level}&school=${school_id}`
-          ),
+				// Тухайн оюутаны хичээлийн дүнг харуулах
+				student:(search, status, lesson_id) => instance.get(`/score/rescore/student/?search=${search}&status=${status}&lesson=${lesson_id}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&school=${school_id}`),
+			}
+		},
+		/*Хэвлэх*/
+		print:{
+			choice:{
+				get:(limit, page, sort, search,lesson,teacher,group) =>
+				instance.get(`/print/choice/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson=${lesson}&teacher=${teacher}&group=${group}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&school=${school_id}`),
+			},
+			schedule:{
+				get:(limit, page, sort, search, teacher, group, room, student) =>
+				instance.get(`/print/schedule/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&teacher=${teacher}&group=${group}&student=${student}&room=${room}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&school=${school_id}`),
+			},
+			/** Голч дүн */
+			gpa:{
+				get:(limit, page, sort, search, degree, department, group, profession, year, season, status) =>
+				instance.get(`/print/gpa/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&degree=${degree}&group=${group}&department=${department}&profession=${profession}&lesson_year=${year}&lesson_season=${season}&school=${school_id}&status=${status}`),
+				getProp: (limit, page, sort, search, degree, department, profession, status, level) =>
+					instance.get(`/print/gpa-profession/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&degree=${degree}&status=${status}&department=${department}&profession=${profession}&level=${level}&school=${school_id}`),
 
         post: (profession, status, level) =>
           instance.post(

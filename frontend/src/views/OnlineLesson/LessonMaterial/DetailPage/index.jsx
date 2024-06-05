@@ -87,6 +87,7 @@ const DetailPage = () => {
                 <a href={file.path} download>
                   {file.path}
                 </a>
+                <img width={200} height={100} src={file.path}></img>
               </div>
               <div className="d-flex gap-4">
                 <p>{file.created_at}</p>

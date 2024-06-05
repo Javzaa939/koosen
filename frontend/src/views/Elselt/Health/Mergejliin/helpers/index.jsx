@@ -56,7 +56,6 @@ export function getColumns (currentPage, rowsPerPage, page_count, STATE_LIST, de
 			maxWidth: '140px',
 		},
 
-		// SORT ERROR
         {
 			maxWidth: "200px",
 			minWidth: "200px",
@@ -80,137 +79,60 @@ export function getColumns (currentPage, rowsPerPage, page_count, STATE_LIST, de
 		},
 
 		{
-			header: 'height',
-			name: <div className="px-1">Өндөр / см</div>,
-			selector: (row) => row?.height || '',
-            // sortable: true,
-			minWidth: '140px',
-			maxWidth: '140px',
+			name: <div className="px-1">Дотор</div>,
+			selector: (row) => row?.health_up_user_data?.belly || '',
 		},
 		{
-			header: 'weight',
-			name: <div className="px-1">Жин / кг</div>,
-			selector: (row) => row?.weight || '',
-            // sortable: true,
-			minWidth: '140px',
-			maxWidth: '140px',
+			name: <div className="px-1">Мэдрэл</div>,
+			selector: (row) => row?.health_up_user_data?.nerve || '',
 		},
 		{
-			header: 'is_chalk',
-			name: <div className="px-1">Шарх сорвитой эсэх</div>,
-			selector: (row) => (
-				row &&
-				<div className="p-25 px-50 rounded-4 bg-light-secondary">
-					{row?.is_chalk ? 'Тийм' : 'Үгүй'}
-				</div>
-			),
-			minWidth: '200px',
-			maxWidth: '200px',
+			name: <div className="px-1">Чих хамар хоолой</div>,
+			selector: (row) => row?.health_up_user_data?.ear_nose || '',
 		},
 		{
-			header: 'is_tattoo',
-			name: <div className="px-1">Шивээстэй эсэх</div>,
-			selector: (row) => (
-				row &&
-				<div className="p-25 px-50 rounded-4 bg-light-secondary">
-					{row?.is_tattoo ? 'Тийм' : 'Үгүй'}
-				</div>
-			),
-			minWidth: '140px',
-			maxWidth: '140px',
+			name: <div className="px-1">Нүд</div>,
+			selector: (row) => row?.health_up_user_data?.eye || '',
 		},
 		{
-			header: 'is_drug',
-			name: <div className="px-1">Сэтгэцэд нөлөөт бодисын хамаарал</div>,
-			selector: (row) => (
-				row &&
-				<div className="p-25 px-50 rounded-4 bg-light-secondary">
-					{row?.is_drug ? 'Тийм' : 'Үгүй'}
-				</div>
-			),
-			minWidth: '220px',
-			maxWidth: '220px',
-		},		{
-			header: 'weight',
-			name: <div className="px-1">Жин / кг</div>,
-			selector: (row) => row?.weight || '',
-            // sortable: true,
-			minWidth: '140px',
-			maxWidth: '140px',
+			name: <div className="px-1">Шүд</div>,
+			selector: (row) => row?.health_up_user_data?.teeth || '',
 		},
 		{
-			header: 'is_chalk',
-			name: <div className="px-1">Шарх сорвитой эсэх</div>,
-			selector: (row) => (
-				row &&
-				<div className="p-25 px-50 rounded-4 bg-light-secondary">
-					{row?.is_chalk ? 'Тийм' : 'Үгүй'}
-				</div>
-			),
-			minWidth: '200px',
-			maxWidth: '200px',
+			name: <div className="px-1">Мэс засал</div>,
+			selector: (row) => row?.health_up_user_data?.surgery || '',
 		},
 		{
-			header: 'is_tattoo',
-			name: <div className="px-1">Шивээстэй эсэх</div>,
-			selector: (row) => (
-				row &&
-				<div className="p-25 px-50 rounded-4 bg-light-secondary">
-					{row?.is_tattoo ? 'Тийм' : 'Үгүй'}
-				</div>
-			),
-			minWidth: '140px',
-			maxWidth: '140px',
+			name: <div className="px-1">Эмэгтэйчүүд</div>,
+			selector: (row) => row?.health_up_user_data?.femini || '',
 		},
 		{
-			header: 'is_drug',
-			name: <div className="px-1">Сэтгэцэд нөлөөт бодисын хамаарал</div>,
-			selector: (row) => (
-				row &&
-				<div className="p-25 px-50 rounded-4 bg-light-secondary">
-					{row?.is_drug ? 'Тийм' : 'Үгүй'}
-				</div>
-			),
-			minWidth: '220px',
-			maxWidth: '220px',
+			name: <div className="px-1">Зүрх судас</div>,
+			selector: (row) => row?.health_up_user_data?.heart || '',
 		},
 		{
-			name: "Үйлдэл",
-			center: true,
-			maxWidth: "120px",
-			minWidth: "120px",
-			selector: (row) => (
-				<div className="text-center d-flex" style={{ width: "auto" }}>
-					{row?.health_up_user_data ?
-
-							<a
-								id={`requestLeaveDatatableDetails${row.id}`}
-								title="Дэлгэрэнгүй"
-								onClick={() => detailHandler(row?.id, row)}
-								className="me-50"
-							>
-								<Badge color="light-info" pill><Book width={"15px"} /></Badge>
-							</a>
-						:
-							<div
-								title="Тухайн оюутны мэдээлэл ирээгүй байна."
-								className="me-50"
-								style={{ cursor: 'not-allowed' }}
-							>
-								<Badge color="light-secondary" pill><Book width={"15px"} /></Badge>
-							</div>
-
-					}
-
-					{/* <a role="button" onClick={(e) => { addModalHandler(e, row)} }
-						id={`description${row?.id}`}
-						className="me-1"
-					>
-						<Badge color="light-success" pill><CheckCircle  width={"15px"} /></Badge>
-					</a>
-					<UncontrolledTooltip placement='top' target={`description${row.id}`}>Мэдээлэл оруулах</UncontrolledTooltip> */}
-				</div>
-			),
+			name: <div className="px-1">Сүрьеэ</div>,
+			selector: (row) => row?.health_up_user_data?.phthisis || '',
+		},
+		{
+			name: <div className="px-1">Арьс харшил</div>,
+			selector: (row) => row?.health_up_user_data?.allergies || '',
+		},
+		{
+			name: <div className="px-1">Халдварт өвчин</div>,
+			selector: (row) => row?.contagious || '',
+		},
+		{
+			name: <div className="px-1">Сэтгэц мэдрэл</div>,
+			selector: (row) => row?.health_up_user_data?.neuro_phychic || '',
+		},
+		{
+			name: <div className="px-1">Гэмтэл</div>,
+			selector: (row) => row?.health_up_user_data?.injury || '',
+		},
+		{
+			name: <div className="px-1">БЗДХ</div>,
+			selector: (row) => row?.health_up_user_data?.bzdx || '',
 		},
 	]
     return columns
