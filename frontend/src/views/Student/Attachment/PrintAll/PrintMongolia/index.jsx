@@ -411,7 +411,7 @@ export default function PrintAttachmentMongolia()
                         {
                             datas?.graduation_work?.lesson_type == 1
                             ?
-                                <span className=''>{`Магистрын төгсөлтийн ажил/диссертацийн нэр:`}&nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic}</span></span>
+                                <span className=''>{`${printDatas?.student?.group?.degree?.degree_code == 'E' ? 'Магистрын' : 'Докторын'} төгсөлтийн ажил/диссертацийн нэр:`}&nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic}</span></span>
                             :
                                 <>
                                     <span className=''>
