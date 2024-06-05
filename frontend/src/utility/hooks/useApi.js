@@ -1477,34 +1477,47 @@ function useApi(isDisplay=false) {
 			}
 		},
 
-		psychologicalTest:{
+		psychologicalTestQuestion:{
+			getOneTitle: (id) => instance.get(`learning/psychological_test_question/title/${id}/`),
+			getByTitle: (page, limit, search, titleId) => instance.get(`learning/psychological_test_question/title/?page=${page}&limit=${limit}&search=${search}&titleId=${titleId}`),
+			getTitle: () => instance.get(`learning/psychological_test_question/title/list/`),
+			postTitle: (datas) => instance.post(`learning/psychological_test_question/title/`, datas),
+			putTitle: (id, datas) => instance.put(`learning/psychological_test_question/title/${id}/`, datas),
+			deleteTitle: (id) => instance.delete(`learning/psychological_test_question/title/${id}/`),
 
-			getOneTitle: (id) => instance.get(`learning/psychological_test/title/${id}/`),
-			getByTitle: (page, limit, search, titleId) => instance.get(`learning/psychological_test/title/?page=${page}&limit=${limit}&search=${search}&titleId=${titleId}`),
-			getTitle: () => instance.get(`learning/psychological_test/title/list`),
-			postTitle: (datas) => instance.post(`learning/psychological_test/title/`, datas),
-			putTitle: (id, datas) => instance.put(`learning/psychological_test/title/${id}/`, datas),
-			deleteTitle: (id) => instance.delete(`learning/psychological_test/title/${id}/`),
+			getList: () => instance.get(`learning/psychological_test_question/list/`),
 
-			get: (page, limit, lessonId, subjectId, search) =>
-				instance.get(`learning/psychological_test/?page=${page}&limit=${limit}&lesson=${lessonId}&subject=${subjectId}&search=${search}`),
-
+			get: (page, limit, userId, search) =>
+				instance.get(`learning/psychological_test_question/?page=${page}&limit=${limit}&lesson=${userId}&search=${search}`),
 			post: (data) =>
-				instance.post(`learning/psychological_test/?year=${cyear_name}&season=${cseason_id}`, data),
-
+				instance.post(`learning/psychological_test_question/?year=${cyear_name}&season=${cseason_id}`, data),
 			put: (data, pk) =>
-				instance.put(`learning/psychological_test/${pk}/?year=${cyear_name}&season=${cseason_id}`, data),
-
+				instance.put(`learning/psychological_test_question/${pk}/?year=${cyear_name}&season=${cseason_id}`, data),
 			delete: (delete_ids) =>
 			{
 				var remove_ids = ''
 				for(var i of delete_ids) {
 					remove_ids += `&delete=${i}`
 				}
-				return instance.delete(`learning/psychological_test/?year=${cyear_name}&season=${cseason_id}${remove_ids}`)
+				return instance.delete(`learning/psychological_test_question/?year=${cyear_name}&season=${cseason_id}${remove_ids}`)
 			}
-		}
+		},
 
+		psychologicalTest:{
+			get: (limit, page, sort, search, user) => instance.get(`learning/psychological_test/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&user=${user}`),
+			getOne: (pk) => instance.get(`learning/psychological_test/${pk}/`),
+			post: (cdatas) => instance.post('learning/psychological_test/', cdatas),
+			put: (data, pk) => instance.put(`learning/psychological_test/${pk}/`, data),
+			delete: (pk) => instance.delete(`learning/psychological_test/${pk}/`),
+
+			getOptions: () => instance.get(`learning/psychological_test/options/`)
+		},
+
+		psychologicalTestOne:{
+			get: (limit, page, test_id) => instance.get(`learning/psychological_test_one/?page=${page}&limit=${limit}&test_id=${test_id}`),
+			post: (data, pk) => instance.post(`learning/psychological_test_one/${pk}/`, data),
+			delete: (pk, test_id) => instance.delete(`learning/psychological_test_one/${pk}/?test_id=${test_id}`)
+		}
 
 	},
 

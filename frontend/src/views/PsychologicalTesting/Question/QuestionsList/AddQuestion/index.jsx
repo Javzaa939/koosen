@@ -28,7 +28,6 @@ const validateSchema = Yup.object().shape({
                 Yup.object().shape({
                     kind: Yup.number().typeError("Сонгоно уу").required('Хоосон байна'),
                     level: Yup.number().typeError("Сонгоно уу").required('Хоосон байна'),
-                    score: Yup.string().typeError("Сонгоно уу").required('Хоосон байна'),
                     question: Yup.string().typeError("Сонгоно уу").required('Хоосон байна'),
                 })
             ),
@@ -43,7 +42,7 @@ export default function AddQuestion(props) {
     const { control, handleSubmit, formState: { errors } } = methods
 
     const { isLoading, Loader, fetchData } = useLoader({})
-    const questionApi = useApi().challenge.psychologicalTest
+    const questionApi = useApi().challenge.psychologicalTestQuestion
 
     const { fields: fieldsQuestions, append: appendQuestions, remove: removeQuestions } = useFieldArray({
         control,

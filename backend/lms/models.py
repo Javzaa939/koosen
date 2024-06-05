@@ -3257,6 +3257,40 @@ class PsychologicalTestQuestions(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
+class PsychologicalTest(models.Model):
+    """ Сэтгэлзүйн сорил """
+
+    SCOPE_EMPLOYEES = 1
+    SCOPE_ELSEGCH = 2
+    SCOPE_STUDENTS = 3
+
+    SCOPE_CHOICES = (
+        (SCOPE_EMPLOYEES, 'Багш ажилчид'),
+        (SCOPE_ELSEGCH, 'Элсэгч'),
+        (SCOPE_STUDENTS, 'Оюутан'),
+    )
+
+    participants = ArrayField(
+        models.IntegerField(null=True),
+        blank=True,
+        null=True,
+        verbose_name='Сорилд оролцогчдыг хадгална'
+    )
+
+    scope_kind = models.IntegerField(choices=SCOPE_CHOICES, null=True, blank=False)
+    title = models.CharField(max_length=250, null=False, blank=False, verbose_name="Гарчиг")
+    description = models.TextField(null=True, blank=False, verbose_name="Тайлбар")
+    duration = models.PositiveIntegerField(verbose_name='Үргэлжлэх хугацаа', null=True)
+    questions = models.ManyToManyField(PsychologicalTestQuestions)
+
+    start_date = models.DateTimeField(null=False, blank=False, verbose_name="Эхлэх хугацаа")
+    end_date = models.DateTimeField(null=False, blank=False, verbose_name="Дуусах хугацаа")
+
+    created_by = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
 class QuestionChoices(models.Model):
     """ Өөрийгөө сорих шалгалтын сонголттой асуултын сонголтууд """
 

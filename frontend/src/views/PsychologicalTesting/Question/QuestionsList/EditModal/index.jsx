@@ -1,6 +1,6 @@
 import React, { Fragment, useState, useEffect, useReducer, useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { getPagination, get_leveltype, get_questionype, ReactSelectStyles } from "@utils";
+import { getPagination, get_boolean_list, get_questionype, ReactSelectStyles } from "@utils";
 import Select from 'react-select'
 import classnames from "classnames";
 import {
@@ -29,7 +29,7 @@ import useLoader from "@hooks/useLoader";
 
 export default function EditModal({ open, handleModal, questionDetail, getDatas }) {
     const [data, setData] = useState(questionDetail)
-    const [levelType, setLevelType] = useState(get_leveltype())
+    const [levelType, setLevelType] = useState(get_boolean_list())
     const [questionKind, setQuestionType] = useState(get_questionype())
 
     const [editQuestion, setEditQuestion] = useState({ id: null, isEdit: false })
@@ -83,7 +83,7 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
 
 
     const { isLoading, Loader, fetchData } = useLoader({})
-    const questionAPI = useApi().challenge.psychologicalTest
+    const questionAPI = useApi().challenge.psychologicalTestQuestion
 
 
     function handleQuestionEdit(questoinData) {
@@ -145,6 +145,8 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
     // function addAnswer(){
         // console.log('run')
     // }
+
+    console.log(data)
 
     return (
         <Modal
@@ -239,7 +241,7 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
                                 }
                             </Col>
                             <Col md={12} className="d-flex align-items-center">
-                                <label className="me-50">Асуултын түвшин:</label>
+                                <label className="me-50">Оноотой эсэх:</label>
                                 {
                                     editQuestion.isEdit && editQuestion.id == data.id ?
                                         <Select

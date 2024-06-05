@@ -42,7 +42,7 @@ const QuestionsList = ({filterId}) => {
 	const handleEditModal = () => { setEditModal(!editModal); };
 
 	// API
-	const questionAPI = useApi().challenge.psychologicalTest
+	const questionAPI = useApi().challenge.psychologicalTestQuestion
 
 	async function getDatas() {
 		const { success, data } = await fetchData(questionAPI.getByTitle(currentPage, rowsPerPage, searchValue, filterId));

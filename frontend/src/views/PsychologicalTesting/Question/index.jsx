@@ -30,7 +30,7 @@ const Question = () => {
     const { isLoading, fetchData } = useLoader({})
     const { showWarning } = useModal()
 
-    const questionAPI = useApi().challenge.psychologicalTest
+    const questionAPI = useApi().challenge.psychologicalTestQuestion
 
     async function getAllTitle() {
         const { success, data } = await fetchData(questionAPI.getTitle())
@@ -75,11 +75,11 @@ const Question = () => {
                         <CardBody className="p-0 ">
                             <div className="p-1  d-flex ">
                                 <ul className="m-0 p-0 w-100" style={{ listStyle: "none", }}>
-                                    <li style={{ textDecoration: "underline" }} className={`p-0 my-25 cursor-pointer ${activeTitle == 0 ? "text-primary fw-bolder" : ""}`}
+                                    <li className={`p-0 my-25 cursor-pointer fw-bolder ${activeTitle == 0 ? "text-primary " : ""}`}
                                         onClick={() => setActiveTitle(0)}
                                     >
                                         <span>
-                                            Бүх
+                                            Бүх асуултууд
                                         </span>
                                         {
                                             activeTitle == 0 ?
@@ -88,44 +88,7 @@ const Question = () => {
                                                 ''
                                         }
                                     </li>
-                                    {
-                                        datas.map((title, idx) => {
-                                            return (
-                                                <li
-                                                    className={`p-0 my-25  d-flex justify-content-between ${activeTitle == title.id ? "text-primary fw-bolder" : ""}`}
-                                                    key={idx}
-                                                    style={{ textDecoration: "underline" }}
-                                                >
-                                                    <div className="cursor-pointer" onClick={() => setActiveTitle(title.id)}>
-                                                        <span>
-                                                            {title.name}
-                                                        </span>
-                                                        {
-                                                            activeTitle == title.id ?
-                                                                <ChevronsRight size={16} />
-                                                                :
-                                                                ''
-                                                        }
-                                                    </div>
-                                                    <div className="">
-                                                        <Edit className="text-info cursor-pointer me-50" size={13} onClick={() => {setTitleModal({type: true, editId: title.id})}}/>
-                                                        <Trash className="text-danger cursor-pointer" size={14} onClick={() => {
-                                                            showWarning({
-                                                                header: {
-                                                                    title: `Та энэ асуултыг устгахдаа итгэлтэй байна уу ?`,
-                                                                },
-                                                                question: title.name,
-                                                                onClick: () => deleteTitle(title.id),
-                                                                btnText: 'Устгах',
-                                                            })
-                                                        }} />
-                                                    </div>
-                                                </li>
-                                            )
-                                        })
-                                    }
-
-                                    <li style={{ textDecoration: "underline" }} className={`p-0 my-25 cursor-pointer ${activeTitle == -1 ? "text-primary fw-bolder" : ""}`}
+                                    <li className={`p-0 my-25 cursor-pointer fw-bolder ${activeTitle == -1 ? "text-primary " : ""}`}
                                         onClick={() => setActiveTitle(-1)}
                                     >
                                         <span>
@@ -138,7 +101,53 @@ const Question = () => {
                                                 ''
                                         }
                                     </li>
-
+                                    {
+                                        datas && datas.length > 0 ? (
+                                            <div>
+                                                <span className="fw-bolder">
+                                                    Багц асуултууд :
+                                                </span>
+                                                {
+                                                    datas.map((title, idx) => {
+                                                        return (
+                                                            <li
+                                                                className={`p-0 my-25 ms-3 d-flex justify-content-between ${activeTitle == title.id ? "text-primary fw-bolder" : ""}`}
+                                                                key={idx}
+                                                                style={{ textDecoration: "underline" }}
+                                                            >
+                                                                <div className="cursor-pointer" onClick={() => setActiveTitle(title.id)}>
+                                                                    <span>
+                                                                        {title.name}
+                                                                    </span>
+                                                                    {
+                                                                        activeTitle == title.id ?
+                                                                            <ChevronsRight size={16} />
+                                                                            :
+                                                                            ''
+                                                                    }
+                                                                </div>
+                                                                <div className="">
+                                                                    <Edit className="text-info cursor-pointer me-50" size={13} onClick={() => {setTitleModal({type: true, editId: title.id})}}/>
+                                                                    <Trash className="text-danger cursor-pointer" size={14} onClick={() => {
+                                                                        showWarning({
+                                                                            header: {
+                                                                                title: `Та энэ асуултыг устгахдаа итгэлтэй байна уу ?`,
+                                                                            },
+                                                                            question: title.name,
+                                                                            onClick: () => deleteTitle(title.id),
+                                                                            btnText: 'Устгах',
+                                                                        })
+                                                                    }} />
+                                                                </div>
+                                                            </li>
+                                                        )
+                                                    })
+                                                }
+                                            </div>
+                                        ) : (
+                                            <></>
+                                        )
+                                    }
                                 </ul>
                             </div>
                         </CardBody>

@@ -12,7 +12,7 @@ import {
     UncontrolledTooltip
 } from 'reactstrap'
 
-import { ReactSelectStyles, get_questionype, get_leveltype } from "@utils"
+import { ReactSelectStyles, get_questionype, get_boolean_list } from "@utils"
 import { useTranslation } from 'react-i18next';
 
 import empty from "@src/assets/images/empty-image.jpg"
@@ -22,13 +22,12 @@ export default function SingleQuestion(props) {
     const { fieldIndex, fieldName, fieldAppend, fieldRemove, } = props
 
     const [qtypeOption, setTypeOption] = useState(get_questionype())
-    const [levelTypeOption, setLevelOption] = useState(get_leveltype())
+    const [levelTypeOption, setLevelOption] = useState(get_boolean_list())
 
-
-    const { control, formState: { errors }, getValues, setError, clearErrors, setValue } = useFormContext()
+    const { control, formState: { errors }, getValues, setError, clearErrors, setValue, watch } = useFormContext()
     const { t } = useTranslation()
 
-
+    const data = watch()
 
     const { fields: fieldsAnswer, remove: removeAnswer, append: appendAnswer } = useFieldArray({
         control,
@@ -184,7 +183,7 @@ export default function SingleQuestion(props) {
                         </Col>
                         <Col md={3} className=''>
                             <Label className="form-label" for="level">
-                                {'Асуултын түвшин'}
+                                {'Оноотой эсэх'}
                             </Label>
                             <Controller
                                 defaultValue=''
@@ -257,28 +256,42 @@ export default function SingleQuestion(props) {
                                 )}
                             />
                         </Col>
-                        <Col md={3} className=''>
-                            <Label className="form-label" for="score">
-                                {'Асуултын оноо'}
-                            </Label>
-                            <Controller
-                                defaultValue=''
-                                control={control}
-                                id={`${fieldName}[${fieldIndex}].score`}
-                                name={`${fieldName}[${fieldIndex}].score`}
-                                render={({ field }) => (
-                                    <Input
-                                        {...field}
-                                        id={`${fieldName}[${fieldIndex}].score`}
-                                        name={`${fieldName}[${fieldIndex}].score`}
-                                        bsSize="sm"
-                                        placeholder="Асуултын оноо"
-                                        type="number"
-                                        invalid={errors?.[fieldName]?.[fieldIndex]?.['score'] && true}
-                                    />
-                                )}
-                            />
-                        </Col>
+                        {
+                            data?.questions ? (
+                                data.questions.map((question, index) => (
+                                    question?.level != "" && question?.level == 1
+                                    ?
+                                        <>
+                                            <Col md={3} className=''>
+                                                <Label className="form-label" for="score">
+                                                    {'Асуултын оноо'}
+                                                </Label>
+                                                <Controller
+                                                    defaultValue=''
+                                                    control={control}
+                                                    id={`${fieldName}[${fieldIndex}].score`}
+                                                    name={`${fieldName}[${fieldIndex}].score`}
+                                                    render={({ field }) => (
+                                                        <Input
+                                                            {...field}
+                                                            id={`${fieldName}[${fieldIndex}].score`}
+                                                            name={`${fieldName}[${fieldIndex}].score`}
+                                                            bsSize="sm"
+                                                            placeholder="Асуултын оноо"
+                                                            type="number"
+                                                            invalid={errors?.[fieldName]?.[fieldIndex]?.['score'] && true}
+                                                        />
+                                                    )}
+                                                />
+                                            </Col>
+                                        </>
+                                    :
+                                        <></>
+                                ))
+                            ) : (
+                                <></>
+                            )
+                        }
                     </Row>
                 </Col>
                 <Col md={12} className={' '}>

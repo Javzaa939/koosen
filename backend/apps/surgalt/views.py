@@ -55,7 +55,8 @@ from lms.models import (
     AdmissionLesson,
     PsychologicalTestQuestions,
     PsychologicalQuestionChoices,
-    PsychologicalQuestionTitle
+    PsychologicalQuestionTitle,
+    PsychologicalTest
 )
 
 from core.models import (
@@ -89,6 +90,8 @@ from .serializers import LessonMaterialSerializer
 from .serializers import LessonMaterialListSerializer
 from .serializers import LessonTeacherSerializer
 from .serializers import ProfessionDefinitionJustProfessionSerializer
+from .serializers import PsychologicalTestSerializer
+from .serializers import PsychologicalTestQuestionsSerializer
 
 from main.utils.function.utils import remove_key_from_dict, fix_format_date, get_domain_url
 from main.utils.function.utils import null_to_none, get_lesson_choice_student, get_active_year_season, json_load
@@ -2113,6 +2116,14 @@ class PsychologicalTestQuestionsAPIView(
                             question_img = img
                             break
 
+                    if question['level'] == 0:
+                        question['score'] = None
+                        question['has_score'] = False
+                    elif question['score'] == '':
+                        return request.send_error('ERR_002', 'Та асуултын оноогоо оруулна уу!')
+                    else:
+                        question['has_score'] = True
+
                     question = remove_key_from_dict(question, ['image', 'answers', 'level'])
 
                     if 'imageName' in question:
@@ -2156,9 +2167,6 @@ class PsychologicalTestQuestionsAPIView(
                                 score = 0
 
                         for choice in choices:
-                            print(choice)
-                            print(choice)
-                            print(choice)
                             choice['created_by'] = user
 
                             img_name = choice.get('imageName')
@@ -2205,13 +2213,12 @@ class PsychologicalQuestionTitleListAPIView(
     """ Шалгалтын Гарчиг
     """
     queryset = PsychologicalQuestionTitle.objects.all()
-    serializer_class = dynamic_serializer(PsychologicalQuestionTitle, "__all__")
 
     @login_required()
     def get(self, request):
         user = request.user.id
-        question_titles = PsychologicalTestQuestions.objects.filter(created_by=user).values_list("title__id", flat=True)
-        data = self.queryset.filter(id__in=list(question_titles)).values("id", "name")
+        question_titles = PsychologicalTestQuestions.objects.filter(created_by=user).values_list("id", flat=True)
+        data = self.queryset.filter(id__in=question_titles).values("id", "name")
         return request.send_data(list(data))
 
 
@@ -2305,6 +2312,173 @@ class PsychologicalQuestionTitleAPIView(
     @login_required()
     def delete(self, request, pk=None):
         self.destroy(request, pk)
+        return request.send_info("INF_003")
+
+
+class PsychologicalTestOptionsAPIView(
+    mixins.ListModelMixin,
+    generics.GenericAPIView
+):
+    def get(self, request):
+
+        # PsychologicalTest model-ийн scope_kind-ийн val-ийг авна
+        set_of_scope = PsychologicalTest.SCOPE_CHOICES
+        # Ирсэн set data-г [{}] болгон хөрвүүлнэ
+        scope_options = [{'id':id, 'name':name} for id, name in set_of_scope]
+
+        # type_option-ийг гараараа бичээд явуулчихлаа
+        type_options = [{'id':1, 'name':'Оноогүй'},{'id':2, 'name':'Асуултаас шалтгаалах'}]
+
+        return_datas ={
+            'scope_options':scope_options,
+            'type_options':type_options
+        }
+        return request.send_data(return_datas)
+
+
+@permission_classes([IsAuthenticated])
+class PsychologicalTestAPIView(
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    generics.GenericAPIView
+):
+
+    """ Сэтгэл зүйн шалгалт сорил """
+
+    queryset = PsychologicalTest.objects.all().order_by('id')
+    serializer_class = PsychologicalTestSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['title', 'description']
+
+    @has_permission(must_permissions=['lms-psychologicaltesting-exam-read'])
+    def get(self, request, pk=None):
+
+        if pk:
+            data = self.retrieve(request, pk).data
+            return request.send_data(data)
+
+        datas = self.list(request).data
+        return request.send_data(datas)
+
+    def post(self, request):
+        with transaction.atomic():
+            sid = transaction.savepoint()
+            try:
+                # Бүх датагаа serializer-даад хадгална
+                serializer = self.get_serializer(data=request.data)
+                if serializer.is_valid(raise_exception=True):
+                    serializer.save()
+                transaction.savepoint_commit(sid)
+                return request.send_info("INF_001")
+            except Exception as e:
+                transaction.savepoint_rollback(sid)
+                print(e)
+                return request.send_error('ERR_002')
+
+    def put(self, request, pk=None):
+        # Өөрчлөлт хийх сорилын instance
+        instance = self.queryset.filter(id=pk).first()
+
+        with transaction.atomic():
+            sid = transaction.savepoint()
+            try:
+                data = request.data.copy()
+                # description болон duration 2 null ирж болно
+                data = {key: (None if value == 'null' else value) for key, value in data.items() if key in ['duration', 'description']}
+
+                serializer = self.get_serializer(instance, data=data)
+                # Тэгээд шууд serializer ашигланаа
+                if serializer.is_valid(raise_exception=True):
+                    serializer.save()
+                transaction.savepoint_commit(sid)
+                return request.send_info("INF_002")
+            except Exception as e:
+                transaction.savepoint_rollback(sid)
+                print(e)
+                return request.send_error('ERR_002')
+
+    def delete(self, request, pk):
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
+
+
+class PsychologicalTestOneAPIView(
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    generics.GenericAPIView
+):
+    """ Сэтгэл зүйн сорилд хамаарагдах багц асуултууд """
+
+    queryset = PsychologicalTestQuestions.objects.all().order_by('id')
+    serializer_class = PsychologicalTestQuestionsSerializer
+
+    pagination_class = CustomPagination
+
+    def get(self, request):
+        # Асуулт нь ямар сорилд хамааралтайг мэдэхийн тулд сорилын id-г авна
+        test_id = self.request.query_params.get('test_id')
+
+        # Тухайн сорилын асуултуудын id
+        question_ids = PsychologicalTest.objects.filter(id=test_id).values_list('questions', flat=True)
+
+        # Асуултуудынхаа id-г ашиглан асуултуудаа аваад дараа нь serializer ашиглан буцаана
+        if question_ids:
+            self.queryset = self.queryset.filter(id__in=question_ids)
+
+        datas = self.list(request).data
+        return request.send_data(datas)
+
+    def post(self, request, pk):
+        data = request.data
+
+        # Тухайн сорилд нэмэх асуултын багцуудын  id-г хадгална
+        question_title_ids = list()
+        queryset = PsychologicalTest.objects.filter(id=pk).first()
+
+        # Хэрэглэгчийн сонгосон асуултын багцуудын id-г авна
+        for value in data:
+            question_title_ids.append(value['id'])
+
+        # Тус багцад хамаарах асуултуудыг, багцын id-г ашиглан хадгална
+        question_ids = self.queryser.filter(title__in=question_title_ids).values_list('id', flat=True)
+
+        with transaction.atomic():
+            try:
+                if queryset:
+                    # Тухайн сорилдоо асуултуудаа нэмээд хадгална
+                    queryset.questions.add(*question_ids)
+                    queryset.save()
+                    return request.send_info("INF_001")
+                else:
+                    return request.send_error('ERR_002', "Тухайн багцад хамаарах асуултууд олдсонгүй")
+            except Exception as e:
+                print(e)
+                return request.send_error('ERR_002')
+
+    def delete(self, request, pk):
+        # Сорилын id
+        test_id = self.request.query_params.get('test_id')
+        try:
+            # Сорилын id-гаар сорилын qs-ийг аваад
+            test = PsychologicalTest.objects.filter(id=test_id).first()
+            if test:
+                # Тухайн сорилын pk-р илэрхийлэгдэх асуултыг хасаад хадгална
+                test.questions.remove(pk)
+                test.save()
+            else:
+                return request.send_error('ERR_002', "Сорил олдсонгүй")
+        except Exception as e:
+            print(e)
+            return request.send_error('ERR_002')
         return request.send_info("INF_003")
 
 

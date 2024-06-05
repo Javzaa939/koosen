@@ -1108,6 +1108,20 @@ export const get_complain_menus = () => {
   return datas
 }
 
+// Тийм үгүй төрлийн жагсаалт//
+export const get_boolean_list = () => {
+  const datas = []
+  const list = [
+    'Тийм',
+    'Үгүй',
+  ]
+  list.map((list, idx) => {
+    var data ={id: idx+1, name:list}
+    datas.push(data)
+  })
+  return datas
+}
+
 // Мөнгөний формат
 export function getFormatedCurrency(currency) {
   var total_amount = 0

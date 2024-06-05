@@ -29,7 +29,7 @@ export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle })
     const [questionList, setQuestionList] = useState([])
     const { control, handleSubmit, formState: { errors }, setValue } = useForm(validate(validateSchema))
 
-    const questionAPI = useApi().challenge.psychologicalTest
+    const questionAPI = useApi().challenge.psychologicalTestQuestion
     const { fetchData, Loader, isLoading } = useLoader({})
 
     const { t } = useTranslation()
