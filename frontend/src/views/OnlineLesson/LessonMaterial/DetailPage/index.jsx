@@ -1,6 +1,6 @@
 import React, { Fragment, useState, useEffect } from "react";
-import { useParams ,useNavigate} from "react-router-dom";
-import useModal from '@hooks/useModal'
+import { useParams, useNavigate } from "react-router-dom";
+import useModal from "@hooks/useModal";
 import {
   Row,
   Col,
@@ -14,31 +14,55 @@ import {
   Badge,
   UncontrolledTooltip,
 } from "reactstrap";
-import { Search, Plus, File, Camera, Film, Headphones, X ,ChevronsLeft} from "react-feather";
+import {
+  Search,
+  Plus,
+  File,
+  Camera,
+  Film,
+  Headphones,
+  X,
+  ChevronsLeft,
+} from "react-feather";
 import Addmodal from "../Add";
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
-import { t } from 'i18next'
+import { t } from "i18next";
 
 const DetailPage = () => {
-  const { showWarning } = useModal()
+
+  const { showWarning } = useModal();
   const { index } = useParams();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+
+  //State
   const [modal, setModal] = useState(false);
-  const [MaterialType , setMaterialType] = useState("");
+  const [MaterialType, setMaterialType] = useState("");
   const [datas, setDatas] = useState([]);
   const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: false });
-  const materialApi = useApi().material;
   const [selectedContent, setSelectedContent] = useState(null);
 
+  //API
+  const materialApi = useApi().material;
+
+  //Modal function
   const handleModal = (type) => {
     setModal(!modal);
     setMaterialType(type);
   };
-  const handleNavigate = () => {
-    navigate(`/online_lesson`)
-}
 
+  //Navigate function
+  const handleNavigate = () => {
+    navigate(`/online_lesson`);
+  };
+
+  // irj bui path iig ynzalj urd taliih gni ustgaj bui function
+  const handleUrl = (url) => {
+    const lastIndexOfUrl = url.lastIndexOf('/') + 1;
+    return url.substring(lastIndexOfUrl,url.length);
+  }
+
+  // API
   const getOneDatas = async () => {
     const { success, data } = await fetchData(materialApi.getOne(index));
     if (success) {
@@ -49,14 +73,17 @@ const DetailPage = () => {
   useEffect(() => {
     getOneDatas();
   }, []);
-  const handleDelete = async(id)=>{
-    const {success} = await fetchData(materialApi.delete(id))
-    if(success){
-      getOneDatas()
+
+  //delete api
+  const handleDelete = async (id) => {
+    const { success } = await fetchData(materialApi.delete(id));
+    if (success) {
+      getOneDatas();
     }
-  }
+  };
   const item = datas.length > 0 ? datas[0] : null;
 
+  //listgroup render
   const renderTable = (content, item) => {
     if (!item || !item.file) return null;
 
@@ -84,7 +111,7 @@ const DetailPage = () => {
               <div className="d-flex gap-2">
                 <p>{index + 1}.</p>
                 <a href={file.path} download>
-                {file.path}
+                  {handleUrl(file.path)}
                 </a>
               </div>
               <div className="d-flex gap-4">
@@ -129,7 +156,9 @@ const DetailPage = () => {
       {isLoading && Loader}
       <Card>
         <CardHeader>
-        <div className="cursor-pointer" onClick={() => handleNavigate()}><ChevronsLeft /> Буцах</div>
+          <div className="cursor-pointer" onClick={() => handleNavigate()}>
+            <ChevronsLeft /> Буцах
+          </div>
           <div className="d-flex gap-1 align-items-center">
             <h5>{item && item.school_name}</h5>
             <h4>{item && item.full_name}</h4>
@@ -167,7 +196,7 @@ const DetailPage = () => {
                       <Button
                         size="sm"
                         color="primary"
-                        onClick={()=>handleModal(idx+1)}
+                        onClick={() => handleModal(idx + 1)}
                         className=""
                       >
                         <Plus size={15} />
@@ -220,7 +249,15 @@ const DetailPage = () => {
           </Row>
           {selectedContent && renderTable(selectedContent, item)}
         </CardBody>
-        {modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getOneDatas} type={MaterialType} userId={index}/>}
+        {modal && (
+          <Addmodal
+            open={modal}
+            handleModal={handleModal}
+            refreshDatas={getOneDatas}
+            type={MaterialType}
+            userId={index}
+          />
+        )}
       </Card>
     </Fragment>
   );

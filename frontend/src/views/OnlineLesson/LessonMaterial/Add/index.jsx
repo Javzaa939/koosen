@@ -36,22 +36,21 @@ const Addmodal = ({ open, handleModal, refreshDatas, type, userId }) => {
   const [is_new_upload_file, setUploadNewFile] = useState(false);
 
   //Label
-  const LabelType = (type)=>
-  {
-    switch (type){
-      case 1 :
-      return "файл"
-      case 2 :
-      return "зураг"
-      case 3 :
-      return "бичлэг"
-      case 4 :
-      return "дуу авиа"
+  const LabelType = (type) => {
+    switch (type) {
+      case 1:
+        return "файл";
+      case 2:
+        return "зураг";
+      case 3:
+        return "бичлэг";
+      case 4:
+        return "дуу авиа";
     }
-  }
+  };
 
   //
-  const getAcceptableTypes = (type)=>{
+  const getAcceptableTypes = (type) => {
     switch (type) {
       case 1:
         return ".docx,.pdf,.html,.ppt,.xls,.txt,.notes";
@@ -62,7 +61,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, type, userId }) => {
       case 3:
         return ".mp4,.avi,.mov,.WebM";
     }
-  }
+  };
   // Handle form submission
   const onSubmit = async (cdata) => {
     cdata["user"] = userId;
@@ -112,7 +111,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, type, userId }) => {
             const files = Array.prototype.slice.call(e.target.files);
             const hereFiles = [...featurefile];
             files.map((file) => {
-              if (file) hereFiles.push({ file: file});
+              if (file) hereFiles.push({ file: file });
             });
             setFeaturedImg(hereFiles);
           }
@@ -165,6 +164,22 @@ const Addmodal = ({ open, handleModal, refreshDatas, type, userId }) => {
                     );
                   }}
                 />
+                <Col md={12} className="mt-50">
+                  {featurefile.map((image, index) => {
+                    return (
+                      <div key={index}>
+                        {image.description || image?.file?.name}
+                        <X
+                          className="ms-50"
+                          role="button"
+                          color="red"
+                          size={15}
+                          onClick={(e) => onChangeFile(e, index)}
+                        ></X>
+                      </div>
+                    );
+                  })}
+                </Col>
               </Col>
               <Col md={12} className="mt-2">
                 <Button className="me-2" color="primary" type="submit">

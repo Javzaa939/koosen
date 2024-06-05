@@ -73,8 +73,10 @@ function LessonMaterial() {
           (lesson) => lesson.school_name === schoolName
         );
       }
-      if(searchValue){
-        sortedData = sortedData.filter(lesson=> lesson.full_name.toLowerCase().includes(searchValue.toLowerCase()))
+      if (searchValue) {
+        sortedData = sortedData.filter((lesson) =>
+          lesson.full_name.toLowerCase().includes(searchValue.toLowerCase())
+        );
       }
       setDatas(sortedData);
       setTotalCount(sortedData.length);
