@@ -1,7 +1,7 @@
 import React, { Fragment, useState } from "react";
-import { X } from "react-feather";
-import "quill/dist/quill.snow.css";
+import { Loader, X } from "react-feather";
 import { Controller, useForm } from "react-hook-form";
+import useApi from "@hooks/useApi";
 import {
   Modal,
   Row,
@@ -11,35 +11,125 @@ import {
   ModalBody,
   Form,
   Input,
-  Button
+  Button,
 } from "reactstrap";
 import useLoader from "@hooks/useLoader";
 import { t } from "i18next";
+import { convertDefaultValue } from "@utils";
 
-const Addmodal = ({ open, handleModal }) => {
+const Addmodal = ({ open, handleModal, refreshDatas, type, userId }) => {
   const closeBtn = (
     <X className="cursor-pointer" size={15} onClick={handleModal} />
   );
 
-  // Loader
-  const { Loader, isLoading } = useLoader({ isFullScreen: false });
+  // Api
+  const materialApi = useApi().material;
 
-  // ** Hook
-  const { control, handleSubmit, formState: { errors }, reset, setError } = useForm();
+  // Loader
+  const { isLoading } = useLoader({ isFullScreen: false });
+
+  // Form
+  const { control, handleSubmit, reset, setError } = useForm();
 
   // State
-  const [is_new_upload_file, setUploadNewFile] = useState(false);
   const [featurefile, setFeaturedImg] = useState([]);
+  const [is_new_upload_file, setUploadNewFile] = useState(false);
 
+  //Label
+  const LabelType = (type)=>
+  {
+    switch (type){
+      case 1 :
+      return "файл"
+      case 2 :
+      return "зураг"
+      case 3 :
+      return "бичлэг"
+      case 4 :
+      return "дуу авиа"
+    }
+  }
+
+  //
+  const getAcceptableTypes = (type)=>{
+    switch (type) {
+      case 1:
+        return ".docx,.pdf,.html,.ppt,.xls,.txt,.notes";
+      case 2:
+        return ".png,.jpg,.jpeg";
+      case 4:
+        return ".mp3,.wav,.mpc,.msv,.nmf";
+      case 3:
+        return ".mp4,.avi,.mov,.WebM";
+      default:
+        return ""; // Default, accept all file types
+    }
+  }
   // Handle form submission
-  const onSubmit = data => {
-    // Handle form data here
-    console.log(data);
+  const onSubmit = async (cdata) => {
+    cdata["user"] = userId;
+    cdata["material_type"] = type;
+    cdata = convertDefaultValue(cdata);
+
+    const formData = new FormData();
+
+    if (featurefile && featurefile.length > 0) {
+      featurefile.forEach((file) => {
+        if (is_new_upload_file) {
+          formData.append("path", file.file);
+        }
+      });
+    }
+
+    // Append other form data
+    for (const key in cdata) {
+      formData.append(key, cdata[key]);
+    }
+    const { success, errors } = await materialApi.post(formData);
+    if (success) {
+      reset();
+      refreshDatas();
+      handleModal();
+    } else {
+      for (let key in errors) {
+        setError(key, { type: "custom", message: errors[key][0] });
+      }
+    }
+  };
+
+  const onChangeFile = (e, action) => {
+    setUploadNewFile(true);
+
+    //action 0 үед файлыг устгана.
+    if (action === 0) {
+      setFeaturedImg([]);
+    } else {
+      const selectedFile = e.target.files[0];
+
+      //Хэрвээ оруулсан файлын төрөл image гэж эхэлсэн үед тус файлыг авна бусад үед алерт илгээнэ.
+      if (selectedFile) {
+        //Анхны удаа файл оруулхад ажилна.
+        if (featurefile.length === 0) {
+          if (action == "Get_File") {
+            const files = Array.prototype.slice.call(e.target.files);
+            const hereFiles = [...featurefile];
+            files.map((file) => {
+              if (file) hereFiles.push({ file: file});
+            });
+            setFeaturedImg(hereFiles);
+          }
+        }
+      } else {
+        //алерт илгээгээд input-ээ хоосон утгатай болгоно.
+        alert("Зөв оруулна уу .");
+        e.target.value = "";
+      }
+    }
   };
 
   return (
     <Fragment>
-      {Loader && isLoading}
+      {isLoading && Loader}
       <Modal
         isOpen={open}
         toggle={handleModal}
@@ -58,39 +148,24 @@ const Addmodal = ({ open, handleModal }) => {
           <Form onSubmit={handleSubmit(onSubmit)}>
             <Row className="gy-1">
               <Col md={12}>
-                <Label className="form-label" for="title">
-                  {t("Нэр")}
-                </Label>
+                <Label for="path">Хичээлийн {LabelType(type)} оруулах</Label>
                 <Controller
+                  name="path"
                   control={control}
                   defaultValue=""
-                  name="title"
-                  render={({ field }) => (
-                    <Input
-                      {...field}
-                      type="text"
-                      id="title"
-                      placeholder={t("Нэр")}
-                      bsSize="sm"
-                    />
-                  )}
-                />
-              </Col>
-              <Col md={12}>
-                <Label for="image">Хичээлийн файл оруулах</Label>
-                <Controller
-                  control={control}
-                  name="image"
-                  defaultValue=""
-                  render={({ field }) => (
-                    <Input
-                      {...field}
-                      id="image"
-                      type="file"
-                      bsSize="sm"
-                      accept="image/*"
-                    />
-                  )}
+                  render={({ field }) => {
+                    field.value = field.value ? field.value : "";
+                    return (
+                      <Input
+                        {...field}
+                        id="path"
+                        type="file"
+                        bsSize="sm"
+                        accept={getAcceptableTypes(type)}
+                        onChange={(e) => onChangeFile(e, "Get_File")}
+                      />
+                    );
+                  }}
                 />
               </Col>
               <Col md={12} className="mt-2">

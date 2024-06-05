@@ -2471,9 +2471,9 @@ function useApi(isDisplay=false) {
     },
     material : {
       get: ()=> instance.get('/online_lesson/material/'),
-      getOne: (pk)=> instance.get(`/online_lesson/material/${pk}`),
-      post: (data)=> instance.get(`/online_lesson/material/` , data),
-      delete: (pk)=> instance.get(`/online_lesson/material/${pk}`)
+      getOne: (pk)=> instance.get(`/online_lesson/material/${pk}/`),
+      post: (cdata)=> instance.post(`/online_lesson/material/`,cdata),
+      delete: (pk)=> instance.delete(`/online_lesson/material/${pk}/`)
   }
   };
 }

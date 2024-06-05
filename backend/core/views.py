@@ -1107,6 +1107,7 @@ class CRUDAPIView(
         if custom_search:
 
             filter_data = request.query_params.get('filter_data')
+            print(filter_data)
             filter_data = json.loads(filter_data)
 
             self.queryset = self.queryset.filter(**filter_data)

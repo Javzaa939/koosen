@@ -2,7 +2,10 @@ from rest_framework import serializers
 from lms.models import OnlineLesson, LessonMaterial
 from core.models import Teachers
 from django.db.models import Count
-
+from rest_framework.response import Response
+from itertools import groupby
+from operator import itemgetter
+from collections import defaultdict
 class OnlineLessonSerializer(serializers.ModelSerializer):
     class Meta:
         model = OnlineLesson
@@ -11,11 +14,12 @@ class OnlineLessonSerializer(serializers.ModelSerializer):
 class LessonMaterialSerializer(serializers.ModelSerializer):
     school_name = serializers.SerializerMethodField()
     full_name = serializers.SerializerMethodField()
-    file_count = serializers.SerializerMethodField()
+    file = serializers.SerializerMethodField()
+    salbar = serializers.SerializerMethodField()
 
     class Meta:
         model = LessonMaterial
-        fields = ["user", "created_at", "school_name", "material_type", "path", "full_name", "file_count"]
+        fields = ["id","user","school_name","salbar","full_name","file"]
 
     def get_school_name(self, obj):
         if obj.user:
@@ -24,21 +28,36 @@ class LessonMaterialSerializer(serializers.ModelSerializer):
                 return school_name.sub_org.name
         return None
 
-    def get_full_name(self, obj):
+    def get_salbar(self,obj):
         if obj.user:
+            salbar = Teachers.objects.filter(user=obj.user.id).first()
+            if salbar and salbar.salbar:
+                return salbar.salbar.name
+        return None
+
+    def get_full_name(self, obj):
+        if obj.user.full_name:
             return obj.user.full_name
         return None
+    def get_file(self, obj):
+        data = []
+        for material_type in range(1, 5):
+            queryset = LessonMaterial.objects.filter(user=obj.user, material_type=material_type).values('id','path', 'created_at').annotate(count=Count('id'))
+            file_count = sum(item['count'] for item in queryset)
+            data.append({
+            'material_type': material_type,
+            'count': file_count,
+            'files': [{
+                'id':item['id'],
+                'path': item['path'],
+                'created_at': item['created_at'],
+            } for item in queryset]
+        })
 
-    def get_file_count(self, obj):
-        if obj.user:
-            counts = LessonMaterial.objects.filter(user=obj.user).count()
-            # count_dict = {count['material_type']: count['count'] for count in counts}
+        return data
 
-            # return {
-            #     'File': count_dict.get(1, 0),
-            #     'Picture': count_dict.get(2, 0),
-            #     'Video': count_dict.get(3, 0),
-            #     'Audio': count_dict.get(4, 0),
-            # }
-            return counts
-        return None
+
+class LessonMaterialPostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LessonMaterial
+        fields = '__all__'

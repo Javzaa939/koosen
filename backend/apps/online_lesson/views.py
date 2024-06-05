@@ -2,8 +2,8 @@ from rest_framework import generics, mixins
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 from lms.models import OnlineLesson, LessonMaterial
-from .serializers import OnlineLessonSerializer, LessonMaterialSerializer
-from django.db.models import Count
+from .serializers import OnlineLessonSerializer, LessonMaterialSerializer, LessonMaterialPostSerializer
+from django.shortcuts import get_object_or_404
 
 # OnlineLesson List and Create View
 @permission_classes([IsAuthenticated])
@@ -60,26 +60,22 @@ class LessonMaterialDetailAPIView(
 
     def get(self,request,pk=None):
         if pk:
-            instance = LessonMaterial.objects.filter(user=pk)
+            instance = LessonMaterial.objects.filter(user=pk).distinct('user')
             return_datas = self.get_serializer(instance,many=True).data
             return request.send_data(return_datas)
 
-        counts = LessonMaterial.objects.values('user').annotate(count=Count('id'))
-        
-        # Creating a dictionary for a more user-friendly response
-        result = {item['user']: item['count'] for item in counts}
-        
-        return request.send_data(result)
+        self.queryset = self.queryset.distinct('user')
+        serializer = self.list(request).data
+        return request.send_data(serializer)
 
-    def post(self,request):
-
-       return self.create(request)
+    def post(self, request):
+        self.serializer_class = LessonMaterialPostSerializer
+        self.create(request)
+        return request.send_info("INF_001")
 
     def delete(self, request, pk=None):
         if pk:
-            self.destroy(request, pk)
+            file = get_object_or_404(LessonMaterial,id=pk)
+            file.delete()
             return request.send_info("INF_003")
         return request.send_info("No pk")
-
-    # def get(self, request, *args, **kwargs):
-    #     return self.retrieve(request, *args, **kwargs)
