@@ -4282,9 +4282,57 @@ class AttachmentConfig(models.Model):
         (UIGARJIN, "Уйгаржин"),
     )
 
-    profession = models.ForeignKey(ProfessionDefinition, on_delete=models.CASCADE, verbose_name="Мэргэжил")
+    # profession = models.ForeignKey(ProfessionDefinition, on_delete=models.CASCADE, verbose_name="Мэргэжил")
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, verbose_name="Мэргэжил", null=True)
     row_count = ArrayField(models.IntegerField(null=True), blank=True,null=True,verbose_name='Туслах багш')
     atype = models.IntegerField(choices=ATTACHMENT_TYPE, default=MONGOLIAN, verbose_name="Хавсралтын төрөл")
     is_lastname = models.BooleanField(default=False, verbose_name='Овог харуулах эсэх')
     is_center = models.BooleanField(default=False, verbose_name='Голлуулах эсэх')
     give_date = models.DateField(verbose_name='Олгосон огноо', null=True)
+
+
+class OnlineLesson(models.Model):
+    """ Цахим хичээл """
+
+    WEEK = 1
+    DATE = 2
+
+    CREATE_TYPE = (
+        (WEEK, "16 долоо хоног"),
+        (DATE, "Хугацаагаар"),
+    )
+
+    lesson = models.ForeignKey(LessonStandart, on_delete=models.CASCADE, verbose_name='Хичээл')
+    create_type = models.IntegerField(choices=CREATE_TYPE, default=WEEK, verbose_name='Үүсгэх төрөл')
+    students = models.ManyToManyField(Student, verbose_name='Хичээл үзэх оюутнууд')
+    total_score = models.FloatField(verbose_name='Нийт үнэлэх оноо')
+    start_date = models.DateTimeField(null=True, verbose_name='Эхлэх хугацаа')
+    end_date = models.DateTimeField(null=True, verbose_name='Дуусах хугацаа')
+    lekts_count = models.IntegerField(verbose_name='Лекцийн тоо')
+    seminar_count = models.IntegerField(verbose_name='Семинар лабораторын тоо')
+    exam_count = models.IntegerField(verbose_name='Шалгалтын тоо')
+    is_end_exam = models.BooleanField(default=True, verbose_name='Төгсөлтийн шалгалттай эсэх')
+
+    created_user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Үүсгэсэн хэрэглэгч', null=True)
+
+
+
+class LessonMaterial(models.Model):
+    """ Хичээлийн материал """
+
+    FILE = 1
+    VIDEO = 2
+    IMAGE = 3
+    AUDIO = 4
+
+    MATERIAL_TYPE = (
+        (FILE, "Файл"),
+        (VIDEO, "Video хичээл"),
+        (IMAGE, "Зураг"),
+        (AUDIO, "Audio"),
+    )
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Материал оруулсан хэрэглэгч')
+    material_type = models.IntegerField(choices=MATERIAL_TYPE, default=FILE, verbose_name='Материалын төрөл')
+    path = models.FileField(verbose_name='Файлуудын замыг хадгалах хэсэг', upload_to='efile')
+    created_at = models.DateTimeField(auto_created=True, verbose_name='Үүсгэсэн огноо')

@@ -579,6 +579,8 @@ function useApi(isDisplay=false) {
 					return instance.get(`/core/teacher/lessonteach/?lesson=${lesson}`)
 				},
 				getTeacherOne: (pk) => instance.get(`/core/reference/teachers/info/${pk}/`),
+
+				delete: (pk) => instance.delete(`/core/teacher/${pk}/`)
 			},
 			/** Улс */
 			country: {
@@ -680,6 +682,7 @@ function useApi(isDisplay=false) {
 			calculateGpaGroupGraduation: data => instance.post(`/student/calculate-gpa-diploma/group/`, data),
 
 			postConfig: data => instance.post(`/student/calculate-gpa-diploma/config/`, data),
+			getConfig: (group, type) => instance.get(`/student/calculate-gpa-diploma/config/?group=${group}&type=${type}`),
 
 			/* Анги бүлгийн бүртгэл */
 			group:{
@@ -960,6 +963,7 @@ function useApi(isDisplay=false) {
 				download: (lesson, teacher, group) => instance.get(`/score/register/download/?teacher=${teacher}&lesson=${lesson}&group=${group}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&school=${school_id}`),
 
 				postOldScore: (data) => instance.post(`/score/register/old/`, data),
+				postOldScoreV2: (data) => instance.post(`/score/register/old/v2/`, data),
 				postImportData: (data) => instance.post(`/score/register/import/`, data),
 
 				putScore: (id, data) => instance.put(`score/register/old/${id}/`, data)
@@ -990,8 +994,8 @@ function useApi(isDisplay=false) {
 			},
 			/** Голч дүн */
 			gpa:{
-				get:(limit, page, sort, search, degree, department, group, profession, year, season) =>
-				instance.get(`/print/gpa/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&degree=${degree}&group=${group}&department=${department}&profession=${profession}&lesson_year=${year}&lesson_season=${season}&school=${school_id}`),
+				get:(limit, page, sort, search, degree, department, group, profession, year, season, status) =>
+				instance.get(`/print/gpa/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&degree=${degree}&group=${group}&department=${department}&profession=${profession}&lesson_year=${year}&lesson_season=${season}&school=${school_id}&status=${status}`),
 				getProp: (limit, page, sort, search, degree, department, profession, status, level) =>
 					instance.get(`/print/gpa-profession/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&degree=${degree}&status=${status}&department=${department}&profession=${profession}&level=${level}&school=${school_id}`),
 

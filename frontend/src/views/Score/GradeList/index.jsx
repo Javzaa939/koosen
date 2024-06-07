@@ -9,21 +9,25 @@ import {
     NavLink,
     CardHeader,
     CardTitle,
-    Button
+    Button,
+    Label,
+    Col
 } from 'reactstrap'
 
 import { Printer, FileText, Download, RefreshCcw } from 'react-feather'
+import { AlertCircle } from 'react-feather'
 
 import FileModal from '@lms_components/FileModal'
-
+import Select from 'react-select'
 import useLoader from '@hooks/useLoader';
 import useApi from '@hooks/useApi';
 import useModal from "@hooks/useModal";
+import classnames from "classnames";
 
 import { useNavigate } from "react-router-dom"
 import  useUpdateEffect  from '@hooks/useUpdateEffect'
 import { useTranslation } from "react-i18next";
-
+import { ReactSelectStyles } from '@utils'
 import { utils, writeFile } from 'xlsx-js-style';
 
 import Class from './Class'
@@ -37,6 +41,73 @@ import PrintModal from './PrintModal';
 const KIND_ANGI = 1
 const KIND_HICHEEL = 2
 const KIND_OYUTAN = 3
+
+const AlertComponent = () => {
+    return(
+        <div className='mt-50'>
+            <AlertCircle color="#28bcf7" size={15}/>
+            <Label className="ms-1">{`Файл зөвхөн хичээлүүдийн кодыг агуулна.`}</Label>
+        </div>
+    )
+}
+
+const AlertGroupComponent = () => {
+    return(
+        <div>
+            <AlertCircle color="#28bcf7" size={15}/>
+            <Label className="ms-1">{`Та заавал ангиа сонгоно уу.`}</Label>
+        </div>
+    )
+}
+
+const AdditionalComponent = (props) => {
+
+    const {
+        setChosenGroup,
+        select_value,
+        setSelectValue,
+        groupOption,
+        AlertGroupComponent
+    } = props
+
+    const { t } = useTranslation()
+
+    return(
+        <Col>
+            <Label className="form-label" for="group">
+                {t('Анги')}
+            </Label>
+            <Select
+                name="group"
+                id="group"
+                classNamePrefix='select'
+                isClearable
+                className={classnames('react-select')}
+                placeholder={t('-- Сонгоно уу --')}
+                options={groupOption || []}
+                value={select_value && groupOption.find((c) => c.id === select_value)}
+                noOptionsMessage={() => t('Хоосон байна.')}
+                onChange={(val) => {
+                    if(!val){
+                        setSelectValue([])
+                    } else {
+                        setSelectValue(current => {
+                            return {
+                                ...current,
+                                group: val?.id || '',
+                            }
+                        });
+                        setChosenGroup(val?.id)
+                    }
+                }}
+                styles={ReactSelectStyles}
+                getOptionValue={(option) => option.id}
+                getOptionLabel={(option) => option.name}
+            />
+            <AlertGroupComponent/>
+        </Col>
+    )
+}
 
 const GradeList = () => {
     const navigate = useNavigate()
@@ -56,7 +127,9 @@ const GradeList = () => {
     const [component, setComponent] = useState('')
 
     const [open_file, setFileModal] = useState(false)
+    const [open_filev2, setFileModalV2] = useState(false)
     const [file, setFile] = useState(false)
+    const [fileV2, setFileV2] = useState(false)
     const [ mainData, setMainData ] = useState([])
     const [ chosenGroup, setChosenGroup ] = useState('')
     const [ lessonOption, setLessonOption ] = useState([])
@@ -74,12 +147,17 @@ const GradeList = () => {
     const [showModal, setShowModal] = useState(false)
     const [ yearAndSeason, setYearAndSeason ] = useState(null)
 
+    const [groupOption, setGroup] = useState([])
+    const [chosenClass, setChosenClass] = useState()
+    const [select_value, setSelectValue] = useState([])
+
     const { Loader, isLoading, fetchData } = useLoader({})
     const { showWarning } = useModal()
 
     const scoreApi = useApi().score.register
     const lessonApi = useApi().study.lessonStandart
     const settingsApi = useApi().activeYearAndSeason
+    const groupApi = useApi().student.group
 
     const nav_menus = [
         {
@@ -108,6 +186,17 @@ const GradeList = () => {
         }
     }
 
+    async function getGroup(){
+        const { success, data } = await fetchData(groupApi.getList())
+        if(success) {
+            setGroup(data)
+        }
+    }
+
+    useEffect(() => {
+        getGroup()
+    },[])
+
     useEffect(
         () =>
         {
@@ -132,6 +221,12 @@ const GradeList = () => {
     function handleFileModal() {
         setFileModal(!open_file)
         setFile('')
+    }
+
+    // Хуучин дүн файл нээх version 2
+    function handleFileModalV2() {
+        setFileModalV2(!open_filev2)
+        setFileV2('')
     }
 
     // Оруулах датаны жагсаалт харуулах модал
@@ -167,6 +262,31 @@ const GradeList = () => {
                 }
                 setDetailDatas(data)
             }
+        }
+    }
+
+    async function onSubmitV2() {
+        if (fileV2) {
+            const formData = new FormData()
+            formData.append('file', fileV2)
+            formData.append('group_id', chosenClass)
+
+            const { success, data }  = await fetchData(scoreApi.postOldScoreV2(formData))
+            if (success) {
+                handleFileModalV2()
+                handleShowDetailModal()
+                if (data?.file_name) {
+                    setFileName(data?.file_name)
+                    delete data['file_name']
+                }
+
+                if (data?.all_error_datas) {
+                    setErrorDatas(data?.all_error_datas)
+                    delete data['all_error_datas']
+                }
+                setDetailDatas(data)
+            }
+
         }
     }
 
@@ -361,6 +481,14 @@ const GradeList = () => {
                             <Button
                                 color='primary'
                                 className='m-50'
+                                onClick={handleFileModalV2}
+                            >
+                                <FileText size={15} />
+                                <span className='align-middle ms-1'>{t('Өмнөх програм дүн')}</span>
+                            </Button>
+                            <Button
+                                color='primary'
+                                className='m-50'
                                 onClick={() => showWarning({
                                     header: {
                                         title: `${t('Дүнгийн үнэлгээ дахин унших')}`,
@@ -454,6 +582,28 @@ const GradeList = () => {
                 />
             }
 
+            {open_filev2 &&
+                <FileModal
+                    isOpen={open_filev2}
+                    handleModal={handleFileModalV2}
+                    isLoading={isLoading}
+                    file={fileV2}
+                    setFile={setFileV2}
+                    title="Хичээлийн дүн оруулах"
+                    fileAccept='.csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
+                    extension={['xlsx']}
+                    onSubmit={onSubmitV2}
+                    setChosenGroup={setChosenClass}
+                    select_value={select_value}
+                    setSelectValue={setSelectValue}
+                    groupOption={groupOption}
+                    Component={AdditionalComponent}
+                    CustomComponent={AlertComponent}
+                    AlertGroupComponent={AlertGroupComponent}
+                    disabled={!select_value || Object.keys(select_value).length === 0}
+                />
+            }
+
             {
                 showModal &&
                     <DetailModal
@@ -463,7 +613,6 @@ const GradeList = () => {
                         file_name={file_name}
                         errorDatas={errorDatas}
                     />
-
             }
         </Fragment>
     )

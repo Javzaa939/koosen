@@ -11,10 +11,12 @@ from django.db import transaction
 from django.db.models import F, Subquery, OuterRef, Count
 from django.db.models.functions import Substr
 
-from main.utils.function.utils import json_load, make_connection, get_domain_url_link, get_domain_url
+from main.utils.function.utils import json_load, make_connection, get_domain_url_link, get_domain_url, null_to_none
 from main.utils.function.pagination import CustomPagination
 from main.decorators import login_required
-
+from rest_framework.response import Response
+from rest_framework import status
+import hashlib
 import datetime as dt
 
 
@@ -900,6 +902,7 @@ class ElseltHealthAnhanShat(
 
         data = request.data
         serializer = HealthUserSerializer(data=data)
+        data = null_to_none(data)
 
         if serializer.is_valid():
 
@@ -1196,3 +1199,51 @@ class ElseltHealthPhysical(
 
         return request.send_info('INF_003')
 
+
+ # -------------------Элсэгчдийн нарийн мэргэжилийн шатны эрүүл мэндийн үзлэг-------------------------#
+class ElseltHealthPhysicalCreateAPIView(
+    generics.GenericAPIView,
+):
+
+    queryset = HealthUpUser.objects.all()
+    serializer_class = HealthUpUserSerializer
+
+    @transaction.atomic
+    def post(self, request):
+        api_key = request.META.get('HTTP_X_API_KEY')
+        # Манай гаргасан sha256
+        data_to_verify = 'utility_solution'
+        verification_hash = hashlib.sha256(data_to_verify.encode('utf-8')).hexdigest()
+
+        if api_key and api_key == verification_hash:
+            try:
+                data = request.data
+                user_register = data.get('user')
+
+                try:
+                    if not ElseltUser.objects.filter(register__iexact=user_register).exists():
+                        return Response({'status': '404 Not Found', 'message': f'{user_register} регистрийн дугаартай тохирох хэрэглэгч олдсонгүй'}, status=status.HTTP_404_NOT_FOUND)
+                    else:
+                        user = ElseltUser.objects.filter(register__iexact=user_register).first()
+                except ElseltUser.DoesNotExist:
+                    return Response({'status': '404 Not Found', 'message': f'{user_register} регистрийн дугаартай тохирох хэрэглэгч олдсонгүй'}, status=status.HTTP_404_NOT_FOUND)
+
+                data['user'] = user.id
+
+                sid = transaction.savepoint()
+
+                serializer = self.serializer_class(data=data)
+                if not serializer.is_valid():
+                    transaction.savepoint_rollback(sid)
+                    return Response({'status': '400 Bad Request', 'message': 'Оруулсан өгөгдөл буруу байна'}, status=status.HTTP_400_BAD_REQUEST)
+
+                serializer.save()
+                transaction.savepoint_commit(sid)
+
+            except Exception as e:
+                print(e)
+                return Response({'status': '500 Internal Server Error', 'message': 'Өгөгдлийн төрлөө шалгана уу'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            return Response({'status': '200 OK', 'message': 'Хүсэлт амжиллтай'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'status': '403 Forbidden', 'message': 'API key буруу '}, status=status.HTTP_403_FORBIDDEN)

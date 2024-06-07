@@ -2278,7 +2278,7 @@ class StatisticDB18APIView(
 
             if grade_cr_sum != 0 and cr_sum != 0:
                 total_average = grade_cr_sum / cr_sum
-                total_average = format(total_average, '.2f')
+                total_average = format(total_average, '.1f')
 
             total_average = round(total_average, 2)
             gpa = Score.objects.filter(score_max__gte=total_average, score_min__lte=total_average).first().gpa if Score.objects.filter(score_max__gte=total_average, score_min__lte=total_average) else 300

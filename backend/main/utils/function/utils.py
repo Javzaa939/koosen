@@ -1,6 +1,8 @@
 import json
 import math
 import time
+import cyrtranslit
+import requests
 
 from datetime import date
 
@@ -14,6 +16,7 @@ from django.apps import apps
 from django.conf import settings
 from django.core.mail import get_connection
 from django.db import connections
+from django.db import transaction
 
 from django.db.models import PositiveIntegerField
 from django.db.models.functions import Cast
@@ -1014,3 +1017,97 @@ def get_domain_url():
         domain_url = 'http://localhost:8000'
 
     return domain_url
+
+
+def cyrillic_name_to_latin(first_name, last_name):
+    """ Cyrill нэрийг Latin болгон хөрвүүлнэ """
+
+    # Ямар хэлээс хөрвүүлэхээ заана
+    convert_language = "mn"
+
+    # Сан ашиглаж кириллээс латин руу хөрвүүлнэ
+    latin_first_name = cyrtranslit.to_latin(first_name, convert_language)
+    latin_last_name = cyrtranslit.to_latin(last_name, convert_language)
+
+    # Шаардлаггүй тэмдэгтүүд
+    replacements = {
+        'ü': 'u',
+        'ö': 'u',
+        'Ü': 'U',
+        'Ö': 'U',
+        'Yuu': 'Yu',
+        'Yaa': 'Ya',
+        'yuu': 'yu',
+        'yaa': 'ya'
+    }
+
+    # Хөрвүүлсэн нэрнүүдэд шаардлагагүй тэмдэгтүүд байвал replace хийнэ
+    for cyr, lat in replacements.items():
+        latin_first_name = latin_first_name.replace(cyr, lat)
+        latin_last_name = latin_last_name.replace(cyr, lat)
+
+    # capitalize() нь зөвхөн эхний үсгийг томоор бусдын lowercase болгоно
+    latin_first_name = latin_first_name.capitalize()
+    latin_last_name = latin_last_name.capitalize()
+
+    return latin_first_name, latin_last_name
+
+
+def add_student_eng_name():
+    """ Суралцагчдийн англи нэрийг хадгалана """
+
+    # Ашиглах модел
+    Student = apps.get_model('lms', 'Student')
+
+    # Бүх суралцагчдаа орж авна
+    students = Student.objects.exclude(first_name_eng__isnull=False, last_name_eng__isnull=False)
+
+    # Нийт bulk_create хийх өөрчлөлтүүдийг хадгалах list
+    updated_students = []
+
+    for student in students:
+        print('---Ok------')
+        # Кирилл нэрнүүдээ хөрвүүлээд нэмнэ
+        eng_first_name, eng_last_name = cyrillic_name_to_latin(student.first_name, student.last_name)
+        student.first_name_eng = eng_first_name
+        student.last_name_eng = eng_last_name
+        updated_students.append(student)
+
+    # Бүх өөрчлөлтүүдээ ганц query-гээр бааздаа хадгална
+    with transaction.atomic():
+        Student.objects.bulk_update(updated_students, ['first_name_eng', 'last_name_eng'])
+
+
+def send_message_skytel(phone_numbers, message):
+    """ phone_numbers: Илгээх утасны дугаарууд
+        message: Илгээх мессеж
+        Скайтелийн дугаартай элсэгчид рүү мессеж илгээх
+    """
+
+    success_count = 0
+    not_found_numbers = []
+
+    # Утасны дугаараар гүйлгэх
+    for phone_number in phone_numbers:
+        send_url = 'https://smsgw.skytel.mn/SMSGW-war/unicode?id=1000132&src=135038&dest={phone_number}&text={text}'.format(phone_number=phone_number, text=message)
+
+        rsp = requests.get(send_url)
+
+        # Хүсэлт амжилттай илгээгдсэн байвал
+        if rsp.json() == 200:
+            success_count += 1
+
+        # хүлээн авагчийн дугаар буруу
+        if rsp.json() == 103:
+            not_found_numbers.append(phone_number)
+
+        if rsp.json() == 202:
+            return False, 'IP хаяг эсвэл id буруу', success_count, not_found_numbers
+
+        if rsp.json() == 203:
+            return False, 'Бүртгэл хаагдсан байна. Скайтел ХХК холбогдоно уу', success_count, not_found_numbers
+
+        if rsp.json() == 206:
+            return False, 'Бусад оператор руу sms явуулах эрх алга', success_count, not_found_numbers
+
+    return True, 'Амжилттай илгээлээ', success_count, not_found_numbers

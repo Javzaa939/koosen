@@ -145,6 +145,13 @@ const Teacher = () => {
         }
     }
 
+	async function handleDelete(pk) {
+		const { success } = await fetchData(teacherApi.delete(pk))
+		if (success) {
+			getDatas()
+		}
+	}
+
 	return (
 		<Fragment>
 			<Card>
@@ -254,7 +261,7 @@ const Teacher = () => {
                                     <h5>Өгөгдөл байхгүй байна.</h5>
                                 </div>
                             )}
-                            columns={getColumns(currentPage, rowsPerPage, handleEdit)}
+                            columns={getColumns(currentPage, rowsPerPage, handleEdit, handleDelete)}
 							onSort={handleSort}
                             sortIcon={<ChevronDown size={10} />}
                             paginationPerPage={rowsPerPage}

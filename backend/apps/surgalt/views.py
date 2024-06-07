@@ -383,19 +383,18 @@ class LessonStandartListAPIView(
     def get(self, request):
 
         school = request.query_params.get('school')
-        department = request.query_params.get('department')
+        # department = request.query_params.get('department')
         profession = request.query_params.get('profession')
 
         if school:
             self.queryset = self.queryset.filter(school=school)
 
-        if department:
-            self.queryset = self.queryset.filter(department=department)
+        # if department:
+        #     self.queryset = self.queryset.filter(department=department)
 
         if profession:
             lesson_ids = LearningPlan.objects.filter(profession=profession).values_list('lesson', flat=True)
             self.queryset = self.queryset.filter(id__in=lesson_ids)
-
         less_standart_list = self.list(request).data
 
         return request.send_data(less_standart_list)
@@ -844,17 +843,17 @@ class ProfessionPlanListAPIView(
 
     def get_queryset(self):
         queryset = self.queryset
-        department = self.request.query_params.get('department')
+        # department = self.request.query_params.get('department')
         school = self.request.query_params.get('school')
         profession = self.request.query_params.get('profession')
         lesson_level = self.request.query_params.get('level')
         lesson_type = self.request.query_params.get('type')
 
-        if school:
-            queryset = queryset.filter(school=school)
+        # if school:
+        #     queryset = queryset.filter(school=school)
 
-        if department:
-            queryset = queryset.filter(department=department)
+        # if department:
+        #     queryset = queryset.filter(department=department)
 
         if profession:
             queryset = queryset.filter(profession=profession)
@@ -1328,7 +1327,7 @@ class LessonStandartDiplomaListAPIView(
             if qs_student:
                 qs_group = Group.objects.filter(id=qs_student.group.id).last()
                 if qs_group:
-                    lesson_ids = LearningPlan.objects.filter(profession=qs_group.profession, lesson_level=LearningPlan.DIPLOM).values_list('lesson', flat=True)
+                    lesson_ids = LearningPlan.objects.filter(Q(Q(profession=qs_group.profession) & Q(Q(lesson_level=LearningPlan.DIPLOM) | Q(lesson_level=LearningPlan.MAG_DIPLOM))), lesson_level=LearningPlan.DIPLOM).values_list('lesson', flat=True)
                     queryset = queryset.filter(id__in=lesson_ids)
 
         return queryset

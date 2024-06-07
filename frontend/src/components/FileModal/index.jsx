@@ -29,7 +29,8 @@ const FileModal = (props) => {
         fileAccept,
         setFileExt,
         Component,
-        onSubmit
+        onSubmit,
+        CustomComponent
     } = props
 
     const [error, setFileError] = useState('')
@@ -85,6 +86,9 @@ const FileModal = (props) => {
                     <FormFeedback className='d-block'>{t(error)}</FormFeedback>
                 :
                     <Col className="ps-0">
+                        {CustomComponent &&
+                            <CustomComponent/>
+                        }
                         <AlertCircle color="#28bcf7" size={15}/>
                         <Label className="ms-1">{`Зөвхөн ${extension.join(', ')} өргөтгөлтэй файл оруулна уу.`}</Label>
                     </Col>
@@ -100,7 +104,7 @@ const FileModal = (props) => {
                     }
                 </Col>
                 <Col md={12} sm={12} className="mt-2 d-flex justify-content-start mb-0">
-                    <Button color="primary" type="submit" onClick={onSubmit} disabled={!file || isLoading}>
+                    <Button color="primary" type="submit" onClick={onSubmit} disabled={!file || isLoading || props?.disabled}>
                         {isLoading ?  <i className={`fas fa-spinner-third fa-spin me-2`}></i> : <></>}
                         {t('Хадгалах')}
                     </Button>

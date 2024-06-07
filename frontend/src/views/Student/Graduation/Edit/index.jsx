@@ -74,7 +74,7 @@ const EditModal = ({ open, handleModal, graduate_id, refreshDatas }) => {
 
     // Дипломын хичээл жагсаалт
     async function getLessonOption() {
-        const { success, data } = await fetchData(lessonApi.getStudentLesson(student_id))
+        const { success, data } = await fetchData(lessonApi.getStudentDiplomaLessons(student_id))
         if(success) {
             setLessonOption(data)
         }

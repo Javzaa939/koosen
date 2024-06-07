@@ -1,7 +1,7 @@
 import { Fragment, useState, useEffect, useContext } from 'react'
 
 import { Controller, useForm } from 'react-hook-form'
-
+import { useNavigate } from 'react-router'
 import { Row, Col, Card, Input, Label, CardTitle, CardHeader, Spinner, Button } from 'reactstrap'
 
 import { ChevronDown , Printer, Search} from 'react-feather'
@@ -31,11 +31,15 @@ const GPAStudent = () => {
         group: '',
         lesson_year: '',
         lesson_season: '',
+        status: ''
     }
+
+    const navigate = useNavigate()
 
     const [sortField, setSort] = useState('')
 
     const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
+    const { Loader: TableLoader, isLoading: tableLoading, fetchData: tableFetchData } = useLoader({})
 
     const [currentPage, setCurrentPage] = useState(1)
 
@@ -43,13 +47,13 @@ const GPAStudent = () => {
 
     const { t } = useTranslation()
     const { control, formState: { errors } } = useForm({});
-    const [rowsPerPage, setRowsPerPage] = useState(10)
+    const [rowsPerPage, setRowsPerPage] = useState(50)
     const [searchValue, setSearchValue] = useState("");
     const [select_value, setSelectValue] = useState(values);
     const [datas, setDatas] = useState([])
 
     const [total_count, setTotalCount] = useState(1)
-    const default_page = [10, 15, 50, 75, 100]
+    const default_page = [ 10, 20, 50, 75, 100, 'Бүгд' ]
 
     // Api
     const gpaApi = useApi().print.gpa
@@ -66,7 +70,7 @@ const GPAStudent = () => {
         const group = select_value.group
         const lesson_year = select_value.lesson_year
         const lesson_season = select_value.lesson_season
-        const { success, data } = await fetchData(gpaApi.get(rowsPerPage, currentPage, sortField, searchValue, degree, department, group, profession, lesson_year, lesson_season))
+        const { success, data } = await tableFetchData(gpaApi.get(rowsPerPage, currentPage, sortField, searchValue, degree, department, group, profession, lesson_year, lesson_season, select_value?.status))
         if(success) {
             setDatas(data?.results)
             setTotalCount(data?.count)
@@ -159,8 +163,9 @@ const GPAStudent = () => {
     },[])
 
     // ** Function to handle per page
-    function handlePerPage(e) {
-        setRowsPerPage(parseInt(e.target.value))
+    function handlePerPage(e)
+    {
+        setRowsPerPage(e.target.value === 'Бүгд' ? e.target.value : parseInt(e.target.value))
     }
 
     return(
@@ -168,16 +173,11 @@ const GPAStudent = () => {
             <Card>
             {isLoading && Loader}
                 <div className="d-flex mx-1 justify-content-end">
-                    <div className='me-1'>
-                        <Button
-                            color='primary'
-                        >
-                            <span className='align-middle ms-50'>{t('Тооцох')}</span>
-                        </Button>
-                    </div>
                     <div>
                         <Button
                             color='primary'
+                            onClick={() => {navigate(`/print/gpa/print`, { state: datas })}}
+                            disabled={datas?.length === 0 && isLoading}
                         >
                         <Printer size={15} />
                             <span className='align-middle ms-50'>{t('Хэвлэх')}</span>
@@ -407,6 +407,22 @@ const GPAStudent = () => {
                             }}
                         />
                     </Col>
+                    <Col sm={4} md={4} className='d-flex align-items-center mt-1'>
+                        <Label className="form-label" for="status">
+                            {t("Төгсөлтийн голч эсэх")}
+                        </Label>
+                        <Input
+                            className='ms-1'
+                            type='checkbox'
+                            defaultChecked={select_value.status}
+                            onChange={(e) => setSelectValue(current => {
+                                return {
+                                    ...current,
+                                    status: e.target.checked,
+                                }
+                            })}
+                        />
+                    </Col>
                 </Row>
                 <Row className='justify-content-between mx-0 mb-1'>
                     <Col className='d-flex align-items-center justify-content-start' md={6} sm={12}>
@@ -461,7 +477,7 @@ const GPAStudent = () => {
                         pagination
                         paginationServer
                         className='react-dataTable'
-                        progressPending={isLoading}
+                        progressPending={tableLoading}
                         progressComponent={<h5>{t('Түр хүлээнэ үү...')}</h5>}
                         noDataComponent={(
                             <div className="my-2">

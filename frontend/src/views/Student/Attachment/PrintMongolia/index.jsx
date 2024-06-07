@@ -18,11 +18,11 @@ export default function PrintAttachmentMongolia()
 
     // State
     const [ listArr, setListArr ] = useState([])
+    const [ tableRowCount, setTableRowCount ] = useState([])
+    const [ rowSum, setRowSum ] = useState(0)
     const [ datas, setDatas ] = useState({})
     const [ isPageBreak, setIsPageBreak ] = useState(false)
-
     const [ printDatas, setPrintDatas ] = useState(JSON.parse(localStorage.getItem('blankDatas')))
-    const rowSum = printDatas.tableRowCount?.reduce((partialSum, a) => partialSum + a, 0);
 
     function getAllData(studentId)
     {
@@ -30,10 +30,14 @@ export default function PrintAttachmentMongolia()
         // , printDatas.student?.department?.sub_orgs
         Promise.all([
             fetchData(signatureApi.get(3)),
-            fetchData(studentApi.calculateGpaDimplomaGet(studentId))
+            fetchData(studentApi.calculateGpaDimplomaGet(studentId)),
+            fetchData(studentApi.getConfig(printDatas?.student?.group?.id, 'mongolian'))
         ]).then((values) => {
             setListArr(values[0]?.data)
             setDatas(values[1]?.data)
+            setTableRowCount(values[2]?.data?.row_count ? values[2]?.data?.row_count : [])
+            var sum_count = values[2]?.data?.row_count?.reduce((partialSum, a) => partialSum + a, 0);
+            setRowSum(sum_count)
         })
     }
 
@@ -62,10 +66,6 @@ export default function PrintAttachmentMongolia()
             }
         )
     }, [])
-
-    // const FULL_PAGE_HEIGHT = 793
-
-    // console.log(document.getElementById('root').clientHeight,'client');
 
     useEffect(
         () =>
@@ -104,19 +104,19 @@ export default function PrintAttachmentMongolia()
     useEffect(
         () =>
         {
-            if (datas?.lessons)
+            if (datas?.lessons && tableRowCount.length > 0)
                 {
                 if (datas?.lessons?.length != 0)
                 {
                     let count = 0
                     let perCount = 0
-                    let half = printDatas.tableRowCount.length / 2
+                    let half = tableRowCount.length / 2
 
-                    let divide = printDatas.tableRowCount.filter(element => element !== 0).length
+                    let divide = tableRowCount.filter(element => element !== 0).length
                     let dividePage1 = divide > 3 ? 3 : divide
                     let dividePage2 = divide - 3 > 0 ? divide - 3 : 0
 
-                    for (let [idx, val] of printDatas.tableRowCount.entries())
+                    for (let [idx, val] of tableRowCount.entries())
                     {
                         if (idx == half)
                         {
@@ -134,7 +134,7 @@ export default function PrintAttachmentMongolia()
 
                             var tbodyRef = tableDoc.getElementsByTagName('tbody')[0];
 
-                            if (printDatas.tableRowCount[2] == 0 && printDatas.tableRowCount[1] == 0)
+                            if (tableRowCount[2] == 0 && tableRowCount[1] == 0)
                             {
                                 if (idx == 0)
                                 {
@@ -142,26 +142,16 @@ export default function PrintAttachmentMongolia()
                                 }
                             }
 
-                            // if (printDatas.tableRowCount[2] == 0 && printDatas.tableRowCount[1] !== 0)
-                            // {
-                            //     if (idx == 0)
-                            //     {
-                            //         parentTableDoc.style.padding = '0px 7px 0px 14px'
-                            //     }
-                            //     else
-                            //     {
-                            //         parentTableDoc.style.padding = '0px 14px 0px 7px'
-                            //     }
-                            // }
+                            parentTableDoc.style.width = `${99.1 / dividePage1}%`
 
-                            if (half <= idx)
-                            {
-                                parentTableDoc.style.width = `${99.1 / dividePage2}%`
-                            }
-                            else
-                            {
-                                parentTableDoc.style.width = `${99.1 / dividePage1}%`
-                            }
+                            // if (half <= idx)
+                            // {
+                            //     parentTableDoc.style.width = `${99.1 / dividePage2}%`
+                            // }
+                            // else
+                            // {
+                            //     parentTableDoc.style.width = `${99.1 / dividePage1}%`
+                            // }
 
                             for (let bodyIdx = 0; bodyIdx < val; bodyIdx++)
                             {
@@ -203,8 +193,14 @@ export default function PrintAttachmentMongolia()
 
 
                                     newCell1.className = 'border-dark mini-cell'
-                                    newCell2.className = 'border-dark body-cell'
-                                    newCell2.style = 'border-dark body-cell'
+                                    {
+                                        printDatas?.student?.group?.degree?.degree_code === 'D'
+                                        ?
+                                            newCell2.className = 'border-dark body-cell'
+                                        :
+                                            newCell2.className = 'border-dark body-cell1'
+
+                                    }
                                     newCell3.className = 'border-dark footer1-cell'
                                     newCell4.className = 'border-dark footer2-cell'
                                 }
@@ -225,21 +221,21 @@ export default function PrintAttachmentMongolia()
                 }
             }
         },
-        [datas]
+        [datas, tableRowCount]
     )
 
     return (
         <>
             {isLoading && Loader}
 
-            <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1 ${isPageBreak && 'page-break'}`} style={{ fontSize: '11px', paddingTop: height.header + (printDatas?.student?.group?.degree?.degree_code === 'D' ? 24 : 24),  backgroundColor: 'white', color: 'black', fontFamily: 'Arial' }} >
+            <div ref={body1SectionRef} className={`position-relative px-1 d-flex justify-content-between d-flex gap-1 ${isPageBreak && 'page-break'}`} style={{ fontSize: '11px', paddingTop: height.header + (printDatas?.student?.group?.degree?.degree_code === 'D' ? 20 : 37),  backgroundColor: 'white', color: 'black', fontFamily: 'Arial' }} >
                 <div
                     className='d-flex flex-wrap align-content-start mt-1'
                     id='table1-1'
                     // style={{ marginTop: height }}
                 >
 
-                    <table className='font-dark w-100 text-center d-none' id='table1' >
+                    <table className='font-dark w-100 text-center d-none' id='table1' style={{fontSize: printDatas?.student?.group?.degree?.degree_code === 'D' ? '9px' : '10px'}}>
                         <thead className='fw-bolder'>
                             <tr style={{ height: '25px' }}>
                                 <td className='border-dark' style={{ width: '4%' }}>№</td>
@@ -257,7 +253,7 @@ export default function PrintAttachmentMongolia()
 
                 <div className='d-flex flex-wrap align-content-start mt-1' id='table2-2' >
 
-                    <table className='font-dark w-100 text-center d-none' id='table2' >
+                    <table className='font-dark w-100 text-center d-none' id='table2' style={{fontSize: printDatas?.student?.group?.degree?.degree_code === 'D' ? '9px' : '10px'}}>
                         <thead className='fw-bolder'>
                             <tr style={{ height: '25px' }}>
                                 <td className='border-dark' style={{ width: '4%' }}>№</td>
@@ -275,7 +271,7 @@ export default function PrintAttachmentMongolia()
 
                 <div className='d-flex flex-wrap align-content-start mt-1' id='table3-3' >
 
-                    <table className='font-dark w-100 text-center d-none' id='table3' >
+                    <table className='font-dark w-100 text-center d-none' id='table3' style={{fontSize: printDatas?.student?.group?.degree?.degree_code === 'D' ? '9px' : '10px'}}>
                         <thead className='fw-bolder'>
                             <tr style={{ height: '25px' }}>
                                 <td className='border-dark' style={{ width: '4%' }}>№</td>
@@ -448,6 +444,17 @@ export default function PrintAttachmentMongolia()
                         </div>
                     }
                 </div>
+                {
+                    (printDatas?.student?.graduation_work?.back_diplom_num && printDatas?.student?.group?.degree?.degree_code === 'D')
+                    &&
+                    <div className='fw-bolder d-flex' style={{ fontSize: '11px' }}>
+                        <div className='d-flex' style={{ width:  '33.3%' }} >
+                        </div>
+                        <div className='d-flex px-1' style={{ width:  '50%' }}>
+                            <span className='fw-normal w-50'>Өмнөх зэргийн дипломын дугаар:</span> <span className='text-uppercase'>{printDatas?.student?.graduation_work?.back_diplom_num}</span>
+                        </div>
+                    </div>
+                }
             </header>
 
 
@@ -496,8 +503,41 @@ export default function PrintAttachmentMongolia()
             <footer
                 ref={footerSectionRef}
                 className='w-100 font-dark'
-                style={{ fontSize: '10px', backgroundColor: 'white', color: 'black', bottom: printDatas?.student?.group?.degree?.degree_code == 'D' ? '4px': '10px', fontFamily: 'Arial' }} >
+                style={{ fontSize: printDatas?.student?.group?.degree?.degree_code == 'D' ? '10px': '11px', backgroundColor: 'white', color: 'black', bottom: printDatas?.student?.group?.degree?.degree_code == 'D' ? '4px': '10px', fontFamily: 'Arial' }} >
 
+                {
+                    printDatas?.student?.group?.degree?.degree_code != 'D'
+                    &&
+                        <div className='px-1 mb-1' style={{ paddingBottom: '2px' }} >
+                        {
+                            datas?.graduation_work?.lesson_type == 1
+                            ?
+                                <span className=''>{`${printDatas?.student?.group?.degree?.degree_code == 'E' ? 'Магистрын' : 'Докторын'} төгсөлтийн ажил/диссертацийн:`}&nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic}</span></span>
+
+                            :
+                                <>
+                                    <span className=''>
+                                        Төгсөлтийн шалгалт:
+                                    </span>
+                                        {
+                                            datas?.graduation_work?.lesson?.map((val, idx) =>
+                                            {
+                                                return (
+                                                    <span className='ms-5' key={idx} >{idx + 1}. {val?.name} / {(val?.score_register?.teach_score || 0) + (val?.score_register?.exam_score || 0)} {val?.score_register?.assessment} /</span>
+                                                )
+                                            })
+                                        }
+                                </>
+                        }
+                        </div>
+                }
+                {
+                    printDatas?.student?.graduation_work?.back_diplom_num && printDatas?.student?.group?.degree?.degree_code === 'D'
+                    &&
+                    <div className={` d-flex justify-content-center `} style={{marginLeft: '300px'}}>
+                            Өмнөх боловсролын дипломоос 30 багц цагийг тооцов.
+                    </div>
+                }
                 <div className={`d-flex justify-content-center gap-5 me-1 ${rowSum > 51 ? '': 'mb-2'}`}>
                     <div>Нийт багц цаг: <span className='fw-bolder'>{datas?.score?.max_kredit}</span></div>
                     <div>Голч оноо: <span className='fw-bolder'>{datas?.score?.average_score}</span></div>
@@ -508,6 +548,7 @@ export default function PrintAttachmentMongolia()
                         <div>Тухайн улирлын ижил мэргэжлийн төгсөгчдийн голч дүнгийн дундаж: <span className='fw-bolder'>{datas?.score?.average_score_prof}</span></div>
                     }
                 </div>
+
                 {
                     (datas?.graduation_work?.lesson_type != 1 && datas?.graduation_work?.diplom_topic)
                     &&
@@ -515,35 +556,35 @@ export default function PrintAttachmentMongolia()
                         <span className=''>Дипломын ажлын сэдэв: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic}</span></span>
                     </div>
                 }
-
-                <div className='px-1 mb-25' style={{ paddingTop: '2px' }} >
                 {
-                    datas?.graduation_work?.lesson_type == 1
-                    ?
-                        printDatas?.student?.group?.degree?.degree_code !== 'D'
+                    printDatas?.student?.group?.degree?.degree_code == 'D'
+                    &&
+                    <div className='px-1 mb-25' style={{ paddingTop: '2px' }} >
+                    {
+                        datas?.graduation_work?.lesson_type == 1
                         ?
-                            <span className=''>Магистрын төгсөлтийн ажил/диссертацийн нэр: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic}</span></span>
-                        :
                             <span className=''>Дипломын ажлын нэр: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic}</span></span>
 
-                    :
-                        <>
-                            <span className=''>
-                                Төгсөлтийн шалгалт:
-                            </span>
-                                {
-                                    datas?.graduation_work?.lesson?.map((val, idx) =>
+                        :
+                            <>
+                                <span className=''>
+                                    Төгсөлтийн шалгалт:
+                                </span>
                                     {
-                                        return (
-                                            <span className='ms-5' key={idx} >{idx + 1}. {val?.name} / {(val?.score_register?.teach_score || 0) + (val?.score_register?.exam_score || 0)} {val?.score_register?.assessment} /</span>
-                                        )
-                                    })
-                                }
-                        </>
+                                        datas?.graduation_work?.lesson?.map((val, idx) =>
+                                        {
+                                            return (
+                                                <span className='ms-5' key={idx} >{idx + 1}. {val?.name} / {(val?.score_register?.teach_score || 0) + (val?.score_register?.exam_score || 0)} {val?.score_register?.assessment} /</span>
+                                            )
+                                        })
+                                    }
+                            </>
+                    }
+                    </div>
                 }
-                </div>
 
-                <div className='d-flex justify-content-center mt-5'>
+
+                <div className={`d-flex justify-content-center ${rowSum > 51 ? 'mt-3' : 'mt-5'}`}>
                     {
                         listArr.length != 0
                         &&

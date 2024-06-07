@@ -40,5 +40,8 @@ urlpatterns = [
     # Эрүүл мэнд бие бялдарын үзлэг
     path('health/physical/', ElseltHealthPhysical.as_view()),
     path('health/physical/<int:pk>/', ElseltHealthPhysical.as_view()),
+
+    # Эрүүл мэндийн нарийвчилсан мэдээллийг хадгалах with POSTMAN
+    path('health-up/create', ElseltHealthPhysicalCreateAPIView.as_view()),
 ]
 

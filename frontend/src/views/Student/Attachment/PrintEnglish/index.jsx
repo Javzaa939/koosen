@@ -25,7 +25,10 @@ export default function PrintAttachmentEnglish()
     const [ isPageBreak, setIsPageBreak ] = useState(false)
     const [ printDatas, setPrintDatas ] = useState(JSON.parse(localStorage.getItem('blankDatas')))
     const [ datas, setDatas ] = useState([])
-    const rowSum = printDatas.tableRowCount?.reduce((partialSum, a) => partialSum + a, 0);
+    const [ tableRowCount, setTableRowCount ] = useState([])
+    const [ rowSum, setRowSum ] = useState(0)
+
+    // const rowSum = printDatas.tableRowCount?.reduce((partialSum, a) => partialSum + a, 0);
 
     const [height, setHeight] = useState(
         {
@@ -42,10 +45,14 @@ export default function PrintAttachmentEnglish()
             // Нэгдсэн нэг сургуулийн захирал гарын үсэг хэвлэж байгаа болохоор, data?.student?.group?.profession?.school
             // , printDatas.student?.department?.sub_orgs
             fetchData(signatureApi.get(3)),
-            fetchData(studentApi.calculateGpaDimplomaGet(studentId))
+            fetchData(studentApi.calculateGpaDimplomaGet(studentId)),
+            fetchData(studentApi.getConfig(printDatas?.student?.group?.id, 'english'))
         ]).then((values) => {
             setListArr(values[0]?.data)
             setDatas(values[1]?.data)
+            setTableRowCount(values[2]?.data?.row_count ? values[2]?.data?.row_count : [])
+            var sum_count = values[2]?.data?.row_count?.reduce((partialSum, a) => partialSum + a, 0);
+            setRowSum(sum_count)
         })
     }
 
@@ -106,13 +113,13 @@ export default function PrintAttachmentEnglish()
                 {
                     let count = 0
                     let perCount = 0
-                    let half = printDatas.tableRowCount.length / 2
+                    let half = tableRowCount.length / 2
 
-                    let divide = printDatas.tableRowCount.filter(element => element !== 0).length
+                    let divide = tableRowCount.filter(element => element !== 0).length
                     let dividePage1 = divide > 3 ? 3 : divide
                     let dividePage2 = divide - 3 > 0 ? divide - 3 : 0
 
-                    for (let [idx, val] of printDatas.tableRowCount.entries())
+                    for (let [idx, val] of tableRowCount.entries())
                     {
                         if (idx == half)
                         {
@@ -130,7 +137,7 @@ export default function PrintAttachmentEnglish()
 
                             var tbodyRef = tableDoc.getElementsByTagName('tbody')[0];
 
-                            if (printDatas.tableRowCount[2] == 0 && printDatas.tableRowCount[1] == 0)
+                            if (tableRowCount[2] == 0 && tableRowCount[1] == 0)
                             {
                                 if (idx == 0)
                                 {
@@ -138,26 +145,28 @@ export default function PrintAttachmentEnglish()
                                 }
                             }
 
-                            if (printDatas.tableRowCount[2] == 0 && printDatas.tableRowCount[1] !== 0)
-                            {
-                                if (idx == 0)
-                                {
-                                    parentTableDoc.style.padding = '0px 0px 0px 70px'
-                                }
-                                else
-                                {
-                                    parentTableDoc.style.padding = '0px 76px 0px 0px'
-                                }
-                            }
+                            // if (tableRowCount[2] == 0 && tableRowCount[1] !== 0)
+                            // {
+                            //     if (idx == 0)
+                            //     {
+                            //         parentTableDoc.style.padding = '0px 0px 0px 70px'
+                            //     }
+                            //     else
+                            //     {
+                            //         parentTableDoc.style.padding = '0px 76px 0px 0px'
+                            //     }
+                            // }
 
-                            if (half <= idx)
-                            {
-                                parentTableDoc.style.width = `${99.1 / dividePage2}%`
-                            }
-                            else
-                            {
-                                parentTableDoc.style.width = `${99.1 / dividePage1}%`
-                            }
+                            parentTableDoc.style.width = `${99.1 / dividePage1}%`
+
+                            // if (half <= idx)
+                            // {
+                            //     parentTableDoc.style.width = `${99.1 / dividePage2}%`
+                            // }
+                            // else
+                            // {
+                            //     parentTableDoc.style.width = `${99.1 / dividePage1}%`
+                            // }
 
                             for (let bodyIdx = 0; bodyIdx < val; bodyIdx++)
                             {
@@ -182,7 +191,7 @@ export default function PrintAttachmentEnglish()
 
                                     // Тооцов дүнг харуулахдаа
                                     if (flattenedArray[count - 1]?.grade_letter) {
-                                        newCell4.innerHTML = flattenedArray[count - 1]?.grade_letter ? 'Allow' : ''
+                                        newCell4.innerHTML = flattenedArray[count - 1]?.grade_letter ? 'passed' : ''
                                         newCell4.colSpan = 2
                                     } else {
                                         newCell4.innerHTML = flattenedArray[count - 1]?.score ? flattenedArray[count - 1]?.score : ''
@@ -224,7 +233,7 @@ export default function PrintAttachmentEnglish()
     /* Монгол үсгийг англи үсэг болгох хэсэг*/
     function engVseg(vseg)
     {
-        switch (vseg)
+        switch (vseg?.toUpperCase())
         {
             case 'А':
                 return 'A'
@@ -282,6 +291,8 @@ export default function PrintAttachmentEnglish()
                 return 'Ch'
             case 'Ш':
                 return 'Sh'
+            case 'Щ':
+                return 'Sh'
             case 'Ы':
                 return 'I'
             case 'Ь':
@@ -306,7 +317,7 @@ export default function PrintAttachmentEnglish()
 
                 <div className='d-flex flex-wrap align-content-start mt-1' id='table1-1' >
 
-                    <table className='w-100 text-center d-none' id='table1' >
+                    <table className='w-100 text-center d-none' id='table1' style={{fontSize: printDatas?.student?.group?.degree?.degree_code === 'D' ? '9px' : '10px'}}>
                         <thead className='fw-bolder'>
                             <tr style={{ height: '20px' }}>
                                 <td className='border-dark' style={{ width: '4%' }}  >№</td>
@@ -324,7 +335,7 @@ export default function PrintAttachmentEnglish()
 
                 <div className='d-flex flex-wrap align-content-start mt-1' id='table2-2' >
 
-                    <table className='w-100 text-center d-none' id='table2' >
+                    <table className='w-100 text-center d-none' id='table2' style={{fontSize: printDatas?.student?.group?.degree?.degree_code === 'D' ? '9px' : '10px'}}>
                         <thead className='fw-bolder'>
                             <tr style={{ height: '25px' }}>
                                 <td className='border-dark' style={{ width: '4%' }}>№</td>
@@ -341,7 +352,7 @@ export default function PrintAttachmentEnglish()
                 </div>
 
                 <div className='d-flex flex-wrap align-content-start mt-1' id='table3-3' >
-                    <table className='w-100 text-center d-none' id='table3' >
+                    <table className='w-100 text-center d-none' id='table3' style={{fontSize: printDatas?.student?.group?.degree?.degree_code === 'D' ? '9px' : '10px'}}>
                         <thead className='fw-bolder'>
                             <tr style={{ height: '25px' }}>
                                 <td className='border-dark' style={{ width: '4%' }}  >№</td>
@@ -444,7 +455,7 @@ export default function PrintAttachmentEnglish()
                 <div className='d-flex flex-column text-center fw-bolder'>
                     <p className='text-uppercase' style={{ marginBottom: '0px' }} >UNIVERSITY OF INTERNAL AFFAIRS, MONGOLIA</p>
                     <p className='text-uppercase' style={{ marginBottom: '0px' }} >{printDatas?.student?.department?.school_eng}</p>
-                    <p style={{ fontSize: '12px', fontWeight: '500' }} className='mb-0' >{printDatas?.student?.graduation_work?.diplom_num} <span className='text-lowercase'>{printDatas?.student?.group?.degree?.degree_eng_name}</span> degree diploma</p>
+                    <p style={{ fontSize: '12px', fontWeight: '500' }} className='mb-0' >{printDatas?.student?.graduation_work?.diplom_num} appendix to <span className='text-lowercase'>{printDatas?.student?.group?.degree?.degree_eng_name}</span> degree diploma</p>
                     <p className='' style={{ fontSize: 12, fontWeight: 500 }}>Register No: {printDatas?.student?.graduation_work?.registration_num}</p>
                 </div>
 
@@ -456,7 +467,7 @@ export default function PrintAttachmentEnglish()
                         <span className='fw-normal w-50'>Profession:</span> <span className=''>{printDatas?.student?.group?.profession?.name_eng}</span>
                     </div>
                     <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
-                        <span className='fw-normal w-50' style={{ width: '200px'}}>Commenced:</span><span>{printDatas?.student?.group?.join_year?.substring(0, 4)}</span>
+                        <span className='fw-normal w-50' style={{ width: '200px'}}>Enrolment year:</span><span>{printDatas?.student?.group?.join_year?.substring(0, 4)}</span>
                     </div>
                     {
                         printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score
@@ -484,7 +495,7 @@ export default function PrintAttachmentEnglish()
                         }
                     </div>
                     <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
-                        <span className='fw-normal w-50' style={{ width: '200px'}}>Completed:</span> <span>{printDatas?.student?.graduation_work?.lesson_year?.substring(5, 9)}</span>
+                        <span className='fw-normal w-50' style={{ width: '200px'}}>Graduated:</span> <span>{printDatas?.student?.graduation_work?.lesson_year?.substring(5, 9)}</span>
                     </div>
                 </div>
                 <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
@@ -509,6 +520,18 @@ export default function PrintAttachmentEnglish()
                         </div>
                     }
                 </div>
+
+                {
+                    (printDatas?.student?.graduation_work?.back_diplom_num && printDatas?.student?.group?.degree?.degree_code === 'D')
+                    &&
+                    <div className='fw-bolder d-flex' style={{ fontSize: '11px' }}>
+                        <div className='d-flex' style={{ width:  '33.3%' }} >
+                        </div>
+                        <div className='d-flex px-1' style={{ width:  '50%' }}>
+                            <span className='fw-normal w-50'>Diploma Number of Bachelor's Degree:</span> <span className='text-uppercase'>{printDatas?.student?.graduation_work?.back_diplom_num}</span>
+                        </div>
+                    </div>
+                }
 
                 {/* <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
                     <div className='d-flex' style={{ width: '33.3%' }} >
@@ -545,8 +568,42 @@ export default function PrintAttachmentEnglish()
             <footer
                 ref={footerSectionRef}
                 className='w-100'
-                style={{ fontSize: '10px', backgroundColor: 'white', color: 'black', bottom: printDatas?.student?.group?.degree?.degree_code == 'D' ? '4px': '10px', fontFamily: 'Arial'  }}
+                style={{ fontSize: printDatas?.student?.group?.degree?.degree_code == 'D' ? '10px': '11px', backgroundColor: 'white', color: 'black', bottom: printDatas?.student?.group?.degree?.degree_code == 'D' ? '4px': '10px', fontFamily: 'Arial'  }}
             >
+                {
+                    printDatas?.student?.group?.degree?.degree_code != 'D'
+                    &&
+                        <div className='px-1 mb-1' style={{ paddingTop: '2px' }} >
+                        {
+                            datas?.graduation_work?.lesson_type == 1
+                            ?
+                                <span className=''>{`${printDatas?.student?.group?.degree?.degree_code == 'E' ? "Master's" : "Doctoral"} thesis/dissertation title:`}&nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic_eng}</span></span>
+
+                            :
+                                <>
+                                    <span className=''>
+                                        Graduation Exams:
+                                    </span>
+                                        {
+                                            datas?.graduation_work?.lesson?.map((val, idx) =>
+                                            {
+                                                return (
+                                                    <span className='ms-5' key={idx} >{idx + 1}. {val?.name_eng} / {(val?.score_register?.teach_score || 0) + (val?.score_register?.exam_score || 0)} {val?.score_register?.assessment} /</span>
+                                                )
+                                            })
+                                        }
+                                </>
+                        }
+                        </div>
+                }
+
+                {
+                    printDatas?.student?.graduation_work?.back_diplom_num && printDatas?.student?.group?.degree?.degree_code === 'D'
+                    &&
+                    <div className={` d-flex justify-content-center `} style={{marginLeft: '350px'}}>
+                        30 credit hours are calculated from the  previous diploma.
+                    </div>
+                }
 
                 <div className={`d-flex justify-content-center gap-5 me-1 ${rowSum > 51 ? 'mb-0': 'mb-2'}`}>
                     <div>Total Credits: <span className='fw-bolder'>{datas?.score?.max_kredit}</span></div>
@@ -567,32 +624,33 @@ export default function PrintAttachmentEnglish()
                     </div>
                 }
 
-                <div className='px-1' style={{ paddingTop: '2px' }} >
                 {
-                    datas?.graduation_work?.lesson_type == 1
-                    ?
-                        printDatas?.student?.group?.degree?.degree_code !== 'D'
+                    printDatas?.student?.group?.degree?.degree_code == 'D'
+                    &&
+                    <div className='px-1 mb-25' style={{ paddingTop: '2px' }} >
+                    {
+                        datas?.graduation_work?.lesson_type == 1
                         ?
-                            <span className=''>Master's thesis/dissertation title: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic_eng}</span></span>
-                        :
                             <span className=''>Diploma thesis: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic_eng}</span></span>
 
-                    :
-                        <>
-                            <span className=''>
-                                Graduation Exams:
-                            </span>
-                                {
-                                    datas?.graduation_work?.lesson?.map((val, idx) =>
+                        :
+                            <>
+                                <span className=''>
+                                    Graduation Exams:
+                                </span>
                                     {
-                                        return (
-                                            <span className='ms-5' key={idx} >{idx + 1}. {val?.name_eng} / {(val?.score_register?.teach_score || 0) + (val?.score_register?.exam_score || 0)} {val?.score_register?.assessment} /</span>
-                                        )
-                                    })
-                                }
-                        </>
+                                        datas?.graduation_work?.lesson?.map((val, idx) =>
+                                        {
+                                            return (
+                                                <span className='ms-5' key={idx} >{idx + 1}. {val?.name_eng} / {(val?.score_register?.teach_score || 0) + (val?.score_register?.exam_score || 0)} {val?.score_register?.assessment} /</span>
+                                            )
+                                        })
+                                    }
+                            </>
+                    }
+                    </div>
                 }
-                </div>
+
 
                 {/* <div className='text-end me-1'>
                     <span className='ms-5'>Total Credits: {datas?.score?.max_kredit}</span>
@@ -645,7 +703,7 @@ export default function PrintAttachmentEnglish()
                                 <div className='text-center px-1' style={{width: '470px'}} key={idx} >
                                     <div className='text-center d-inline-block text-center' >
                                         <div className='text-center pt-50 px-2' style={{ textTransform: 'uppercase', borderTop: '1px solid black' }}>
-                                            <span >{val?.last_name_eng}{val?.first_name_eng}</span>
+                                            <span >{val?.first_name_eng} {val?.last_name_eng}</span>
                                             <br/>
                                             <span>{`${val?.position_name_eng}`}</span>
                                         </div>
@@ -656,7 +714,7 @@ export default function PrintAttachmentEnglish()
                     }
                 </div>
                 <div className={`text-center mt-1`} style={{ fontSize: '11px' }} >
-                    Score(GPA): F{'<'}60(0) 60≤D-{'<'}65(1.0) 65≤D{'<'}70(1.4) 70≤C-{'<'}75(1.9) 75≤C{'<'}80(2.3) 80≤B-{'<'}85(3.1) 85≤B{'<'}90(3.1) 90≤A-{'<'}95(3.6) 95≤A{'<'}100(4.0) S=Allow CR=Correspond Credit
+                    Score(GPA): F{'<'}60(0) 60≤D-{'<'}65(1.0) 65≤D{'<'}70(1.4) 70≤C-{'<'}75(1.9) 75≤C{'<'}80(2.3) 80≤B-{'<'}85(3.1) 85≤B{'<'}90(3.1) 90≤A-{'<'}95(3.6) 95≤A{'<'}100(4.0) S=Passed CR=Correspond Credit
                 </div>
 
                 {/* {
