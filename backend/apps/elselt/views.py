@@ -435,6 +435,7 @@ class AdmissionUserInfoAPIView(
         profession_id = self.request.query_params.get('profession_id')
         unit1_id = self.request.query_params.get('unit1_id')
         state = self.request.query_params.get('state')
+        age_state = self.request.query_params.get('age_state')
         gpa_state = self.request.query_params.get('gpa_state')
         gender = self.request.query_params.get('gender')
         sorting = self.request.query_params.get('sorting')
@@ -450,6 +451,9 @@ class AdmissionUserInfoAPIView(
 
         if state:
             queryset = queryset.filter(state=state)
+        
+        if age_state:
+            queryset = queryset.filter(age_state = age_state)
 
         if gpa_state:
             user_ids = UserInfo.objects.filter(gpa_state=gpa_state).values_list('user', flat=True)
