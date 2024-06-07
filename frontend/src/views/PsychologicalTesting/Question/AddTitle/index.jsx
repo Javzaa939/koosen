@@ -47,7 +47,6 @@ export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle })
     async function getOneTitle() {
         const { success, data } = await fetchData(questionAPI.getOneTitle(open.editId))
         if (success) {
-            console.log(data)
             setValue("questions", data.questions)
             setValue("name", data.title.name)
             setQuestionList(data.other_questions)
@@ -71,8 +70,6 @@ export default function AddTitle({ open, setOpen, getAllTitle, setActiveTitle })
             setOpen({ type: false, editId: null })
         }
     }
-
-    console.log(questionList)
 
     return (
         <>

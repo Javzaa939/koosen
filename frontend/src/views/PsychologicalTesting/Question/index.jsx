@@ -152,7 +152,6 @@ const Question = () => {
                             </div>
                         </CardBody>
                     </Card>
-                    {/* <Topic lessonId={lessonInfo?.id} lessonName={lessonInfo?.name} /> */}
                 </Col>
 
                 <Col lg={8} xxl={9}>

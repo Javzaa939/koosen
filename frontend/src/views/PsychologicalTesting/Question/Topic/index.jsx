@@ -82,9 +82,6 @@ function Topic(props) {
     };
 
     function handleEdit(row) {
-
-        console.log(row)
-
     }
 
     return (
