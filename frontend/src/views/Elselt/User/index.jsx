@@ -182,7 +182,7 @@ const ElseltUser = () => {
         if(success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
-
+            console.log(data)
             // Нийт хуудасны тоо
             var cpage_count = Math.ceil(data?.count / rowsPerPage === 'Бүгд' ? 1 : rowsPerPage)
             setPageCount(cpage_count)
@@ -260,6 +260,7 @@ const ElseltUser = () => {
                     'Нэр': data?.user?.first_name || '',
                     'РД': data?.user?.register || '',
                     'Хүйс': data?.gender_name || '',
+                    'Насны шалгуур':data?.age_state || '',
                     'Имейл': data?.user?.email || '',
                     'Утасны дугаар': data?.user?.mobile || '',
                     'Яаралтай холбогдох': data?.user?.parent_mobile || '',
@@ -305,7 +306,8 @@ const ElseltUser = () => {
             'Ажиллаж байгаа байгууллагын нэр',
             'Албан тушаал',
             'Цол',
-            'Мэдээлэл шалгасан тайлбар'
+            'Мэдээлэл шалгасан тайлбар',
+            'Насны шалгуур'
         ];
 
         utils.sheet_add_aoa(worksheet, [staticCells], { origin: "A1" });
