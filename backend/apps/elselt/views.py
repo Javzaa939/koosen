@@ -42,6 +42,7 @@ from .serializer import (
     AdmissionUserInfoSerializer,
     AdmissionUserProfessionSerializer,
     EmailInfoSerializer,
+    MessageInfoSerializer,
     HealthUserSerializer,
     HealthUserDataSerializer,
     HealthUpUserInfoSerializer,
@@ -56,6 +57,7 @@ from elselt.models import (
     ElseltUser,
     ContactInfo,
     EmailInfo,
+    MessageInfo,
     HealthUser,
     PhysqueUser,
     HealthUpUser
@@ -502,6 +504,103 @@ class AdmissionUserInfoAPIView(
         return request.send_info('INF_002')
 
 
+@permission_classes([IsAuthenticated])
+class AdmissionUserProfessionInfoApiView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+):
+
+    queryset = AdmissionUserProfession.objects.all().order_by('created_at')
+
+    serializer_class = AdmissionUserInfoSerializer
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['user__first_name', 'user__register', 'user__email', 'gpa', 'org']
+
+    def get_queryset(self):
+        queryset = self.queryset
+
+        userinfo_qs = UserInfo.objects.filter(user=OuterRef('user')).values('gpa')[:1]
+        userinfo_org = UserInfo.objects.filter(user=OuterRef('user')).values('work_organization')[:1]
+
+        queryset = (
+            queryset
+            .annotate(
+                gpa=Subquery(userinfo_qs),
+                org=Subquery(userinfo_org),
+            )
+        )
+
+        lesson_year_id = self.request.query_params.get('lesson_year_id')
+        profession_id = self.request.query_params.get('profession_id')
+        unit1_id = self.request.query_params.get('unit1_id')
+        state = self.request.query_params.get('state')
+        gpa_state = self.request.query_params.get('gpa_state')
+        sorting = self.request.query_params.get('sorting')
+
+        if lesson_year_id:
+            queryset = queryset.filter(profession__admission=lesson_year_id)
+
+        if profession_id:
+            queryset = queryset.filter(profession__profession__id=profession_id)
+
+        if unit1_id:
+            queryset = queryset.filter(user__aimag__id=unit1_id)
+
+        if state:
+            queryset = queryset.filter(state=state)
+
+        if gpa_state:
+            user_ids = UserInfo.objects.filter(gpa_state=gpa_state).values_list('user', flat=True)
+            queryset = queryset.filter(user__in=user_ids)
+
+
+        # Sort хийх үед ажиллана
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
+
+        return queryset
+
+    def get(self, request, pk=None):
+
+        if pk:
+
+            all_data = self.retrieve(request, pk).data
+
+            return request.send_data(all_data)
+
+        all_data = self.list(request).data
+
+        return request.send_data(all_data)
+
+    @transaction.atomic()
+    def put(self, request, pk=None):
+        data = request.data.copy()
+        instance = self.get_object()
+
+        try:
+            # Элсэгчийн хөтөлбөр засах
+            serializer = AdmissionUserProfessionSerializer(instance, data=data, partial=True)
+
+            if not serializer.is_valid(raise_exception=False):
+                return request.send_error_valid(serializer.errors)
+
+            serializer.save()
+
+        except Exception as e:
+            return request.send_error('ERR_002', e.__str__())
+
+        return request.send_info('INF_002')
+
+
+
+
+
 class AdmissionUserAllChange(
     generics.GenericAPIView,
     mixins.UpdateModelMixin
@@ -520,7 +619,18 @@ class AdmissionUserAllChange(
         try:
             with transaction.atomic():
                 now = dt.datetime.now()
-                self.queryset.filter(pk__in=data["students"]).update(state=data["state"], updated_at=now, state_description=data["state_description"])
+                if data.get("state") :
+                    self.queryset.filter(pk__in=data["students"]).update(
+                    state=data.get("state"),
+                    updated_at=now,
+                    state_description=data.get("state_description")
+                )
+                else:
+                    self.queryset.filter(pk__in=data["students"]).update(
+                    updated_at=now,
+                    justice_state=data.get("justice_state"),
+                    justice_description=data.get("justice_description")
+                )
         except Exception as e:
             transaction.savepoint_rollback(sid)
             return request.send_error("ERR_002", e.__str__)
@@ -666,7 +776,47 @@ class AdmissionUserEmailAPIView(
         return request.send_info('INF_001')
 
 
-@permission_classes([IsAuthenticated])
+class AdmissionUserMessageAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin
+):
+    queryset = MessageInfo.objects.all().order_by('-send_date')
+    serializer_class = MessageInfoSerializer
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['user__first_name', 'user__register', 'user__email', 'message']
+
+    def get_queryset(self):
+        queryset = self.queryset
+        user_id = self.request.query_params.get('user_id')
+        if user_id:
+            queryset = queryset.filter(user_id=user_id)
+        return queryset
+
+    def get(self, request):
+        send_data = self.list(request).data
+        return Response(send_data)
+
+    @login_required()
+    @transaction.atomic()
+    def post(self, request):
+        user = request.user
+        data = request.data
+        try:
+            with transaction.atomic():
+                message_info = MessageInfo(
+                    user_id=data['user_id'],
+                    message=data['message_list'],
+                    send_user_id=user.id
+                )
+                message_info.save()
+                return Response({'message': 'Message sent successfully'})
+        except Exception as e:
+            transaction.savepoint_rollback(sid)
+            return Response({'error': str(e)}, status=400)
+
+
 class AdmissionYearAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
