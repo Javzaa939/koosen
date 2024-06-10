@@ -36,6 +36,8 @@ from lms.models import Lesson_assignment_student_file
 from lms.models import Lesson_materials
 from lms.models import Lesson_material_file
 from lms.models import Lesson_assignment, AdmissionRegisterProfession
+from lms.models import PsychologicalTest
+from lms.models import PsychologicalTestQuestions
 
 from main.utils.file import split_root_path
 
@@ -89,6 +91,21 @@ def fix_format_date(input_date, format='%Y-%m-%d %H:%M:%S'):
         date_data = input_date.strftime(format)
 
     return date_data
+
+# fix_format_date функцтай адил гэхдээ serializer дотроо нэмэлт функц бичих шаардлагагүй
+class DateOnlyField(serializers.Field):
+    def to_representation(self, value):
+        # postgre datetime-ийг date-рүү хөрвүүлнэ
+        if isinstance(value, datetime):
+            return value.date().isoformat()
+        return value
+
+    def to_internal_value(self, data):
+        # оролтын data-г date болгоно
+        try:
+            return datetime.strptime(data, '%Y-%m-%d %H:%M:%S').date()
+        except ValueError:
+            raise serializers.ValidationError('Оролтын дата нь %Y-%m-%d %H:%M:%S хэлбэртэй байх шаардлагатай.')
 
 # Хичээлийн ангилал
 class LessonCategorySerializer(serializers.ModelSerializer):
@@ -830,3 +847,19 @@ class ProfessionDefinitionJustProfessionSerializer(serializers.ModelSerializer):
             full_name = full_name + '({ognoo})'.format(ognoo=ognoo)
 
         return full_name
+
+
+class PsychologicalTestSerializer(serializers.ModelSerializer):
+    start_date = DateOnlyField()
+    end_date = DateOnlyField()
+
+    class Meta:
+        model = PsychologicalTest
+        exclude = ['questions']
+
+
+class PsychologicalTestQuestionsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = PsychologicalTestQuestions
+        fields = '__all__'

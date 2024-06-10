@@ -118,6 +118,16 @@ const ElseltUser = () => {
             'name': 'ТЭНЦЭЭГҮЙ'
         }
     ]
+    const ageop = [
+        {
+            'id': 2,
+            'name': 'ТЭНЦСЭН'
+        },
+        {
+            'id': 3,
+            'name': 'ТЭНЦЭЭГҮЙ'
+        }
+    ]
 
     const infop = [
         {
@@ -131,7 +141,7 @@ const ElseltUser = () => {
     ]
     const [state, setState] = useState('')
     const [gpa_state, setGpaState] = useState('')
-
+    const [age_state, setAge_state] = useState('')
     const [gender, setGender] = useState('')
 
 	const elseltApi = useApi().elselt.admissionuserdata
@@ -178,11 +188,11 @@ const ElseltUser = () => {
 	/* Жагсаалтын дата авах функц */
 	async function getDatas() {
 
-        const {success, data} = await allFetch(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, adm, profession_id, unit1, gender, state, gpa_state))
+        const {success, data} = await allFetch(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, adm, profession_id, unit1, gender, state, gpa_state,age_state))
         if(success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
-
+            console.log(data)
             // Нийт хуудасны тоо
             var cpage_count = Math.ceil(data?.count / rowsPerPage === 'Бүгд' ? 1 : rowsPerPage)
             setPageCount(cpage_count)
@@ -229,7 +239,7 @@ const ElseltUser = () => {
 
 			return () => clearTimeout(timeoutId);
 		}
-    }, [sortField, currentPage, rowsPerPage, searchValue, adm, profession_id, unit1, gender, state, gpa_state])
+    }, [sortField, currentPage, rowsPerPage, searchValue, adm, profession_id, unit1, gender, state, gpa_state,age_state])
 
     useEffect(() => {
         getAdmissionYear()
@@ -260,6 +270,7 @@ const ElseltUser = () => {
                     'Нэр': data?.user?.first_name || '',
                     'РД': data?.user?.register || '',
                     'Хүйс': data?.gender_name || '',
+                    'Насны шалгуур':data?.age_state || '',
                     'Имейл': data?.user?.email || '',
                     'Утасны дугаар': data?.user?.mobile || '',
                     'Яаралтай холбогдох': data?.user?.parent_mobile || '',
@@ -305,7 +316,8 @@ const ElseltUser = () => {
             'Ажиллаж байгаа байгууллагын нэр',
             'Албан тушаал',
             'Цол',
-            'Мэдээлэл шалгасан тайлбар'
+            'Мэдээлэл шалгасан тайлбар',
+            'Насны шалгуур'
         ];
 
         utils.sheet_add_aoa(worksheet, [staticCells], { origin: "A1" });
@@ -586,6 +598,29 @@ const ElseltUser = () => {
                                 noOptionsMessage={() => t('Хоосон байна.')}
                                 onChange={(val) => {
                                     setGpaState(val?.id || '')
+                                }}
+                                styles={ReactSelectStyles}
+                                getOptionValue={(option) => option.id}
+                                getOptionLabel={(option) => option.name}
+                            />
+                    </Col>
+                    <Col md={3} sm={6} xs={12} >
+                        <Label className="form-label" for="state">
+                            {t('Насны шалгуур')}
+                        </Label>
+                            <Select
+                                name="age_state"
+                                id="age_state"
+                                classNamePrefix='select'
+                                isClearable
+                                className={classnames('react-select')}
+                                isLoading={isLoading}
+                                placeholder={t('-- Сонгоно уу --')}
+                                options={ageop || []}
+                                value={ageop.find((c) => c.id === age_state)}
+                                noOptionsMessage={() => t('Хоосон байна.')}
+                                onChange={(val) => {
+                                    setAge_state(val?.id || '')
                                 }}
                                 styles={ReactSelectStyles}
                                 getOptionValue={(option) => option.id}
