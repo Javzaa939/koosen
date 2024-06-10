@@ -1267,7 +1267,7 @@ class ElseltStateApprove(
 
     queryset = AdmissionUserProfession
     serializer_class = ElseltApproveSerializer
-    # asdasdsa
+
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
@@ -1284,7 +1284,7 @@ class ElseltStateApprove(
             queryset = queryset.filter(profession__admission=admission)
 
         if profession:
-            queryset = queryset.filter(profession__profession=profession)
+            queryset = queryset.filter(profession__profession__id=profession)
 
         # Sort хийх үед ажиллана
         if sorting:

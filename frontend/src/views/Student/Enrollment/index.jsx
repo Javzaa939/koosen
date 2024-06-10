@@ -60,6 +60,7 @@ const Enrollment = () => {
     const admissionYearApi = useApi().elselt
     const elseltApproveApi = useApi().elselt.approve
 
+    // элсэлт
     async function getAdmissionYear() {
         const { success, data } = await fetchData(admissionYearApi.getAll())
         if (success) {
@@ -80,8 +81,6 @@ const Enrollment = () => {
     async function getDatas() {
         var profession = select_value?.profession
         var admission = select_value?.admission
-        console.log("profession", profession);
-        console.log("admission", admission);
 
         const page_count = Math.ceil(total_count / rowsPerPage)
         if (page_count < currentPage && page_count != 0) {
