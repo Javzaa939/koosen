@@ -14,6 +14,7 @@ urlpatterns = [
     path('admissionuserdata/<int:pk>/', AdmissionUserInfoAPIView.as_view()),
     path('admissionuserdata/all/', AdmissionUserAllChange.as_view()),
     path('admissionuserdata/gpa_check/',GpaCheckUserInfoAPIView.as_view()),
+    path('admissionuserdata/eyesh_check/',EyeshCheckUserInfoAPIView.as_view()),
 
     path('profession/', ElseltProfession.as_view()),
     path('profession/<int:pk>/', ElseltProfession.as_view()),

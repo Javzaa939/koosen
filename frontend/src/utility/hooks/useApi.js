@@ -1675,6 +1675,9 @@ function useApi(isDisplay=false) {
 			},
 			gpa:{
 				get: (limit, lesson_year_id, profession_id,gpa) => instance.get(`/elselt/admissionuserdata/gpa_check/?limit=${limit}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}$gpa=${gpa}`)
+			},
+			eyesh:{
+				get: (limit,lesson_year_id,profession_id) => instance.get(`/elselt/admissionuserdata/eyesh_check/?limit=${limit}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}`)
 			}
 		},
 		gpa: {

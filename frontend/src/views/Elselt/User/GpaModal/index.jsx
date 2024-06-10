@@ -16,9 +16,9 @@ import {
 import { MdMailOutline } from "react-icons/md";
 import { BiMessageRoundedError } from "react-icons/bi";
 import useLoader from "@hooks/useLoader";
-import "./GpaModal.css";
+import { auto } from "@popperjs/core";
 
-function GpaModal({ gpaModalHandler, gpaModal, getDatas }) {
+function GpaModal({ gpaModalHandler, gpaModal, lesson_year , prof_id }) {
   const [selectedOption, setSelectedOption] = useState("gpa");
   const {
     formState: { errors },
@@ -32,13 +32,10 @@ function GpaModal({ gpaModalHandler, gpaModal, getDatas }) {
   });
 
   async function onSubmit(cdata) {
+    if (selectedOption !== "gpa") {
+      cdata.gpa = ""; // or whatever default value you want to assign
+    }
     console.log(cdata);
-    // const { success } = await fetchData(admissionStateChangeApi.post(cdata));
-    // if (success) {
-    //     reset();
-    //     gpaModalHandler();
-    //     getDatas();
-    // }
   }
 
   return (
@@ -83,6 +80,7 @@ function GpaModal({ gpaModalHandler, gpaModal, getDatas }) {
                   control={control}
                   defaultValue=""
                   name="gpa"
+                  disabled={selectedOption !== "gpa"}
                   rules={{
                     validate: (value) => {
                       const number = parseFloat(value);
@@ -101,6 +99,7 @@ function GpaModal({ gpaModalHandler, gpaModal, getDatas }) {
                       value={value}
                       onChange={(e) => onChange(e.target.value || "")}
                       className="gpa-input"
+                      style={{ maxHeight: 25, overflow: "hidden" }}
                       disabled={selectedOption !== "gpa"}
                     />
                   )}
@@ -132,6 +131,7 @@ function GpaModal({ gpaModalHandler, gpaModal, getDatas }) {
                       value={value}
                       onChange={(e) => onChange(e.target.value || "")}
                       className="count-input"
+                      style={{ maxHeight: 25, overflow: "hidden" }}
                     />
                   )}
                 />
@@ -185,7 +185,8 @@ function GpaModal({ gpaModalHandler, gpaModal, getDatas }) {
             </div>
           </div>
         </Col>
-        <Table responsive>
+        <p className="d-flex justify-content-end mt-2">Тэнцээгүй элсэгч : <strong>100</strong></p>
+        <Table responsive className="overflow-hidden" >
           <thead>
             <tr>
               <th>#</th>
@@ -218,6 +219,24 @@ function GpaModal({ gpaModalHandler, gpaModal, getDatas }) {
             </tr>
             <tr>
               <th scope="row">3</th>
+              <td>Table cell</td>
+              <td>Table cell</td>
+              <td>Table cell</td>
+              <td>Table cell</td>
+              <td>Table cell</td>
+              <td>Table cell</td>
+            </tr>
+            <tr>
+              <th scope="row">4</th>
+              <td>Table cell</td>
+              <td>Table cell</td>
+              <td>Table cell</td>
+              <td>Table cell</td>
+              <td>Table cell</td>
+              <td>Table cell</td>
+            </tr>
+            <tr>
+              <th scope="row">5</th>
               <td>Table cell</td>
               <td>Table cell</td>
               <td>Table cell</td>

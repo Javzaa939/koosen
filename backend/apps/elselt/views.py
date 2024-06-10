@@ -48,7 +48,8 @@ from .serializer import (
     HealthUpUserSerializer,
     PhysqueUserSerializer,
     HealthPhysicalUserInfoSerializer,
-    GpaCheckUserInfoSerializer
+    GpaCheckUserInfoSerializer,
+    EyeshCheckUserInfoSerializer
 )
 
 from elselt.models import (
@@ -1251,7 +1252,7 @@ class ElseltHealthPhysicalCreateAPIView(
             return Response({'status': '200 OK', 'message': 'Хүсэлт амжиллтай'}, status=status.HTTP_200_OK)
         else:
             return Response({'status': '403 Forbidden', 'message': 'API key буруу '}, status=status.HTTP_403_FORBIDDEN)
-        
+
 class GpaCheckUserInfoAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -1292,6 +1293,63 @@ class GpaCheckUserInfoAPIView(
 
         if gpa:
             queryset = queryset.filter(gpa__lte = gpa)
+
+        if limit:
+            queryset = queryset[:int(limit)]
+
+        return queryset
+
+    def get(self, request, pk=None):
+
+        if pk:
+
+            all_data = self.retrieve(request, pk).data
+
+            return request.send_data(all_data)
+
+        all_data = self.list(request).data
+
+        return request.send_data(all_data)
+
+class EyeshCheckUserInfoAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+):
+
+    queryset = AdmissionUserProfession.objects.all().order_by('created_at')
+
+    serializer_class = EyeshCheckUserInfoSerializer
+
+    filter_backends = [SearchFilter]
+    search_fields = ['user__first_name', 'user__register', 'user__email', 'gpa', 'org']
+
+    def get_queryset(self):
+        queryset = self.queryset
+        queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
+
+        userinfo_qs = UserInfo.objects.filter(user=OuterRef('user')).values('gpa')[:1]
+        userinfo_org = UserInfo.objects.filter(user=OuterRef('user')).values('work_organization')[:1]
+
+        queryset = (
+            queryset
+            .annotate(
+                gpa=Subquery(userinfo_qs),
+                org=Subquery(userinfo_org),
+            )
+        )
+        limit = self.request.query_params.get('limit')
+        lesson_year_id = self.request.query_params.get('lesson_year_id')
+        profession_id = self.request.query_params.get('profession_id')
+
+        if lesson_year_id:
+            queryset = queryset.filter(profession__admission=lesson_year_id)
+
+        if profession_id:
+            queryset = queryset.filter(profession__profession__id=profession_id)
+
+        if limit:
+            queryset = queryset[:int(limit)]
 
         return queryset
 

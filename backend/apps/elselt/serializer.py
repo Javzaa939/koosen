@@ -384,6 +384,40 @@ class HealthPhysicalUserInfoSerializer(serializers.ModelSerializer):
 class GpaCheckUserInfoSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
     userinfo = serializers.SerializerMethodField()
+    full_name = serializers.CharField(source='user.full_name', default='', read_only=True)
+    profession = serializers.CharField(source='profession.profession.name', default='')
+    admission = serializers.IntegerField(source='profession.admission.id', default='')
+    gpa_definition = serializers.SerializerMethodField()
+    # Элсэлтийн мэргэжлийн төрөл
+    profession_state = serializers.IntegerField(source='profession.state', default='')
+
+    class Meta:
+        model = AdmissionUserProfession
+        fields = '__all__'
+
+    def get_user(self, obj):
+
+        data = ElseltUser.objects.filter(id=obj.user.id).first()
+        userinfo_data = ElseltUserSerializer(data).data
+
+        return userinfo_data
+
+    def get_userinfo(self, obj):
+
+        data = UserInfo.objects.filter(user=obj.user.id).first()
+        userinfo_data = UserinfoSerializer(data).data
+
+        return userinfo_data
+
+    def get_gpa_definition(self,obj):
+        data = UserInfo.objects.filter(user = obj.user.id).first()
+
+        return data.gpa
+
+class EyeshCheckUserInfoSerializer(serializers.ModelSerializer):
+
+    user = serializers.SerializerMethodField()
+    userinfo = serializers.SerializerMethodField()
     user_score = serializers.SerializerMethodField()
     full_name = serializers.CharField(source='user.full_name', default='', read_only=True)
     profession = serializers.CharField(source='profession.profession.name', default='')
@@ -400,6 +434,7 @@ class GpaCheckUserInfoSerializer(serializers.ModelSerializer):
 
         data = ElseltUser.objects.filter(id=obj.user.id).first()
         userinfo_data = ElseltUserSerializer(data).data
+
         return userinfo_data
 
     def get_user_score(self, obj):
@@ -441,6 +476,8 @@ class GpaCheckUserInfoSerializer(serializers.ModelSerializer):
         userinfo_data = UserinfoSerializer(data).data
 
         return userinfo_data
+
     def get_gpa_definition(self,obj):
         data = UserInfo.objects.filter(user = obj.user.id).first()
+
         return data.gpa

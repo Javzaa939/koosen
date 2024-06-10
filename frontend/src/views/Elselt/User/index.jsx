@@ -462,8 +462,8 @@ const ElseltUser = () => {
             <GpaModal
             gpaModalHandler = {gpaModalHandler}
             gpaModal = {gpaModal}
-            data = {datas}
-            getDatas = {getDatas}
+            lesson_year = {adm}
+            prof_id = {profession_id}
             />
             {isLoading && Loader}
 			<Card>
