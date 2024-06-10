@@ -20,26 +20,32 @@ export function getColumns (currentPage, rowsPerPage, total_count) {
 			center: true
 		},
         {
-			header: 'first_name',
+			header: 'user__first_name',
 			name: t("Овог"),
 			selector: (row) => row?.user?.first_name,
             center: true,
 			minWidth: "200px",
+            sortable: true,
+
 
         },
 		{
-			header: 'last_name',
+			header: 'user__last_name',
 			name: t("Нэр"),
 			selector: (row) => row?.user?.last_name,
 			minWidth: "200px",
             center: true,
+            sortable: true,
+
         },
 		{
-			header: 'register_num',
+			header: 'user__register',
 			name: t("Регистр"),
 			selector: (row) => row?.user?.register,
 			minWidth: "200px",
             center: true,
+            sortable: true,
+
         },
 		{
 			header: 'admission_number',
