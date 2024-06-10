@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.db.models import Q, Func,F, IntegerField, CharField
 from django.db.models.functions import Cast
+from datetime import datetime
 
 from lms.models import  (
     AdmissionRegister,
@@ -126,6 +127,7 @@ class AdmissionUserInfoSerializer(serializers.ModelSerializer):
     admission = serializers.IntegerField(source='profession.admission.id', default='')
     # Элсэлтийн мэргэжлийн төрөл
     profession_state = serializers.IntegerField(source='profession.state', default='')
+    user_age = serializers.SerializerMethodField()
 
     class Meta:
         model = AdmissionUserProfession
@@ -199,6 +201,32 @@ class AdmissionUserInfoSerializer(serializers.ModelSerializer):
                 return state_name
         return state_name
 
+    # Насыг олж насны шалгуурт тэнцсэн эсэх
+    def get_user_age(self, obj):
+        register = obj.user.register
+        birth_year = int(register[2:4])
+        current_year = datetime.now().year
+
+        # насыг тухайн жилээс төрсөн оныг нь хасаж тооцсон
+        user_age = current_year - (1900 + birth_year if birth_year > current_year % 100 else 2000 + birth_year)
+
+        # Тухайн сургуулийн насны шалгуурыг олох
+        indicator = AdmissionIndicator.objects.filter(admission_prof=obj.profession, value=AdmissionIndicator.NAS).first()
+        if indicator:
+            if indicator.limit_min < user_age < indicator.limit_mах:
+                obj.age_state = 2
+                obj.state = 2
+                obj.age_description = None
+            else:
+                obj.age_state = 3
+                obj.state = 3
+                obj.age_description = "НАС шалгуурын болзолыг хангаагүй улмаас тэнцсэнгүй"
+        else:
+            obj.age_state = 2
+            obj.age_description = None
+        obj.save()
+
+        return user_age
 
 class AdmissionUserProfessionSerializer(serializers.ModelSerializer):
 
