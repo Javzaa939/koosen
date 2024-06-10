@@ -201,12 +201,16 @@ class AdmissionUserInfoSerializer(serializers.ModelSerializer):
                 return state_name
         return state_name
 
-    # Nasiin olj nasnii shalguurt tentssen guig shalgah
+    # Насыг олж насны шалгуурт тэнцсэн эсэх
     def get_user_age(self, obj):
         register = obj.user.register
         birth_year = int(register[2:4])
         current_year = datetime.now().year
+
+        # Нас олох
         user_age = current_year - (1900 + birth_year if birth_year > current_year % 100 else 2000 + birth_year)
+
+        #Тухайн сургуулийн насны шалгуурыг олох
         indicator = AdmissionIndicator.objects.filter(admission_prof=obj.profession, value=AdmissionIndicator.NAS).first()
         if indicator:
             if indicator.limit_min < user_age < indicator.limit_mах:
@@ -221,6 +225,7 @@ class AdmissionUserInfoSerializer(serializers.ModelSerializer):
             obj.age_state = 2
             obj.age_description = None
         obj.save()
+
         return user_age
 
 class AdmissionUserProfessionSerializer(serializers.ModelSerializer):
