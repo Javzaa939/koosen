@@ -1271,7 +1271,7 @@ class ElseltStateApprove(
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['user__first_name', 'user__last_name', 'user__register', 'profession__profession__name']
+    search_fields = ['user__first_name', 'user__last_name', 'user__register', 'profession__profession__name', 'admission_number', 'admission_date']
 
 
     def get_queryset(self):
