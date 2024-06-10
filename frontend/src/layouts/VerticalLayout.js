@@ -110,6 +110,11 @@ const VerticalLayout = (props) =>
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-psychologicaltesting-question-read', 'psychologicaltesting0')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-psychologicaltesting-exam-read', 'psychologicaltesting1')
 
+                        /** ----------------------------Сэтгэлзүйн сорил------------------------------- */
+
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-psychologicaltesting-question-read', 'psychologicaltesting0')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-psychologicaltesting-exam-read', 'psychologicaltesting1')
+
                         /** ----------------------------Оюутан ------------------------------- */
 
                         /** Анги бүлгийн бүртгэл */
