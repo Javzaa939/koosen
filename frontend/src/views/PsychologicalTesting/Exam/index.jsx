@@ -87,7 +87,6 @@ const Exam = () => {
     async function getOptionDatas(){
         const {success, data} = await fetchData(examApi.getOptions())
         if(success){
-            console.log(data)
             setScope(data?.scope_options)
             setType(data?.type_options)
         }

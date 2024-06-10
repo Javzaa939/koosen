@@ -142,11 +142,6 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
             }
         }
     }
-    // function addAnswer(){
-        // console.log('run')
-    // }
-
-    console.log(data)
 
     return (
         <Modal
@@ -190,28 +185,12 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
                                 <label className="me-50">Асуулт:</label>
                                 {
                                     editQuestion.isEdit && editQuestion.id == data.id ?
-                                        // useMemo(() => {
-                                        // 	return (<Input
-                                        // 		id={"question" + data.id}
-                                        // 		name={"question" + data.id}
-                                        // 		value={questionState.question || ''}
-                                        // 		type="textarea"
-                                        // 		bsSize={'sm'}
-                                        // 		// onClick={(e) => e.stopPropagation()}
-                                        // 		// onMouseDown={(e) => e.stopPropagation()}
-                                        // 		onChange={(e) => {
-                                        // 			dispatchQuestion({ type: 'SET_QUESTION', payload: e.target.value })
-                                        // 		}}
-                                        // 	/>)
-                                        // }, [dispatchQuestion, questionState])
                                         <Input
                                             id={"question" + data.id}
                                             name={"question" + data.id}
                                             value={questionState.question || ''}
                                             type="textarea"
                                             bsSize={'sm'}
-                                            // onClick={(e) => e.stopPropagation()}
-                                            // onMouseDown={(e) => e.stopPropagation()}
                                             onChange={(e) => {
                                                 dispatchQuestion({ type: 'SET_QUESTION', payload: e.target.value })
                                             }}
@@ -269,22 +248,6 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
                             <Col md={12} className="d-flex align-items-center">
                                 <label className="me-50">Асуултын төрөл:</label>
                                 {
-                                    // editQuestion.isEdit && editQuestion.id == data.id ?
-                                    // 	<Select
-                                    // 		classNamePrefix='select'
-                                    // 		className={classnames('react-select',)}
-                                    // 		options={questionKind}
-                                    // 		value={questionKind.find(v => v.id == questionState.kind) || ''}
-                                    // 		placeholder={'-- Сонгоно уу --'}
-                                    // 		noOptionsMessage={() => 'Хоосон байна.'}
-                                    // 		onChange={(val) => {
-                                    // 			dispatchQuestion({ type: 'SET_KIND', payload: val?.id || '' })
-                                    // 		}}
-                                    // 		styles={ReactSelectStyles}
-                                    // 		getOptionValue={(option) => option.id}
-                                    // 		getOptionLabel={(option) => option.name}
-                                    // 	/>
-                                    // 	:
                                     <span className="">
                                         {questionKind.find(v => v.id == data.kind)?.name}
                                     </span>

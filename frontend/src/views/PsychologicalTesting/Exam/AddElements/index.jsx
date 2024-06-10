@@ -155,7 +155,6 @@ function AddStudent(){
 	};
 
     const handlePaginationQuestion = (page) => {
-        console.log(page)
 		setCurrentPageQuestion(page.selected + 1);
 	};
 
@@ -369,37 +368,6 @@ function AddStudent(){
                         </CardHeader>
                         <div className="react-dataTable react-dataTable-selectable-rows mx-50 rounded border my-50">
                             <DataTable
-                                // noHeader
-                                // pagination
-                                // className="react-dataTable"
-                                // progressPending={isLoading}
-                                // progressComponent={
-                                //     <div className="my-2">
-                                //         <h5>{t("Түр хүлээнэ үү...")}</h5>
-                                //     </div>
-                                // }
-                                // noDataComponent={
-                                //     <div className="mb-2" style={{ marginTop: '27px'}}>
-                                //         <h5>{t("Асуулт байхгүй байна")}</h5>
-                                //     </div>
-                                // }
-                                // columns={getQuestionColumns(
-                                //     currentPageQuestion,
-                                //     rowsPerPageQuestion,
-                                //     totalCountQuestion,
-                                //     handleDeleteQuestion,
-                                // )}
-                                // paginationPerPage={rowsPerPageQuestion}
-                                // paginationDefaultPage={currentPageQuestion}
-                                // data={question_datas}
-                                // paginationComponent={getPagination(
-                                //     handlePaginationQuestion,
-                                //     currentPageQuestion,
-                                //     rowsPerPageQuestion,
-                                //     totalCountQuestion,
-                                // )}
-                                // fixedHeader
-                                // fixedHeaderScrollHeight="62vh"
                                 noHeader
                                 pagination
                                 className="react-dataTable"

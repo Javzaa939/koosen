@@ -22,12 +22,6 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleDelete, 
 			width: "30px",
 
 		},
-		// {
-		//     name: <div className='' style={{textWrap: "wrap", textAlign: "center"}}>{`${'Багц асуултын нэр'}`}</div>,
-		//     selector: (row) => row?.name,
-		//     wrap:true,
-		//     center: true,
-		// },
 		{
 			name: <div className='' style={{ textWrap: "wrap", textAlign: "center" }}>{`${'Асуулт'}`}</div>,
 			selector: (row) => row?.question,

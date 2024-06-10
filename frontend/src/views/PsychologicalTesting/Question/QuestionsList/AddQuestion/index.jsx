@@ -20,7 +20,6 @@ import useLoader from '@hooks/useLoader';
 import useApi from '@hooks/useApi';
 
 const validateSchema = Yup.object().shape({
-    // name: Yup.string().trim().required("Хоосон байна"),
     questions:
         Yup.array()
             .min(1, 'Та асуултаа нэмнэ үү')
