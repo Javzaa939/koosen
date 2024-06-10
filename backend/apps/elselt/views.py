@@ -8,7 +8,7 @@ from django.core.mail import send_mail
 from django.core.mail import send_mass_mail
 from django.template.loader import render_to_string
 from django.db import transaction
-from django.db.models import F, Subquery, OuterRef, Count
+from django.db.models import F, Subquery, OuterRef, Count, Q
 from django.db.models.functions import Substr
 
 from main.utils.function.utils import json_load, make_connection, get_domain_url_link, get_domain_url, null_to_none
@@ -1004,8 +1004,12 @@ class ElseltHealthProfessional(
             queryset = queryset.order_by(sorting)
 
         if state:
-            user_id = HealthUser.objects.filter(state=state).values_list('user', flat=True)
-            queryset = queryset.filter(user__in=user_id)
+            if state == '1':
+                user_id = HealthUpUser.objects.filter(Q(Q(state=2) | Q(state=3))).values_list('user', flat=True)
+                queryset = queryset.filter(state=2).exclude(user_id__in=user_id)
+            else:
+                user_id = HealthUpUser.objects.filter(state=state).values_list('user', flat=True)
+                queryset = queryset.filter(user__in=user_id)
 
         return queryset
 
