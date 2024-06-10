@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('lms', '0236_alter_attechmentconfig'),
+        ('lms', '0240_remove_studentordersport_teacher_payment_and_more'),
     ]
 
     operations = [
