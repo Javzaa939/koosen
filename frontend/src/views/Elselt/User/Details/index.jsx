@@ -25,6 +25,7 @@ function Details() {
         const {success, data} = await fetchData(elseltApi.getOne(id))
         if(success) {
             setDatas(data)
+            console.log(data)
         }
 	}
 

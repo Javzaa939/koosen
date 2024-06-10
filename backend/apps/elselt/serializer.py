@@ -7,6 +7,7 @@ from lms.models import  (
     AdmissionRegisterProfession,
     AdmissionIndicator,
     AdmissionXyanaltToo,
+    AdmissionBottomScore,
     ProfessionalDegree
 )
 
@@ -422,9 +423,9 @@ class EyeshCheckUserInfoSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(source='user.full_name', default='', read_only=True)
     profession = serializers.CharField(source='profession.profession.name', default='')
     admission = serializers.IntegerField(source='profession.admission.id', default='')
-    gpa_definition = serializers.SerializerMethodField()
     # Элсэлтийн мэргэжлийн төрөл
     profession_state = serializers.IntegerField(source='profession.state', default='')
+    eesh_check = serializers.SerializerMethodField()
 
     class Meta:
         model = AdmissionUserProfession
@@ -477,7 +478,32 @@ class EyeshCheckUserInfoSerializer(serializers.ModelSerializer):
 
         return userinfo_data
 
-    def get_gpa_definition(self,obj):
-        data = UserInfo.objects.filter(user = obj.user.id).first()
+    def get_eesh_check(self,obj):
+        check_score_query = AdmissionBottomScore.objects.filter(profession = obj.profession_id).values('bottom_score')
 
-        return data.gpa
+        if check_score_query.exists():
+            check_score = check_score_query[0]['bottom_score']
+        else:
+            # Босго оноо байхгүй тохиолдолд
+            check_score = 400
+
+        eesh_check=[]
+        user_scores = self.get_user_score(obj)
+        sum_scaled_scores = 0
+        count_scores = 0
+        for scores in user_scores:
+            for score in scores['scores']:
+            # Бүх авсан онооны нийлбэр
+                sum_scaled_scores += score['scaledScore']
+            # Хичээлийн тоо
+                count_scores += 1
+
+    # Дундаж оноог бодох
+        if count_scores > 0:
+            avg_scaled_score = sum_scaled_scores / count_scores
+        else:
+            avg_scaled_score = 0
+        if avg_scaled_score > check_score:
+            eesh_check = 'tentssen'
+
+        return eesh_check
