@@ -56,7 +56,7 @@ from .serializers import RolesSerializer
 from .serializers import RolesListSerializer
 from .serializers import PrintSettingsListSerializer
 from .serializers import PrintSettingsSerializer
-from .serializers import StudentGradeSerializer
+from .serializers import OrgPosition
 
 
 from django.db import transaction
@@ -1800,6 +1800,11 @@ class RolesAPIView(
     def put(self, request, pk=None):
         """ Role засах
         """
+
+        oobj = self.get_object()
+        querysets = OrgPosition.objects.filter(id__in=request.data.get('orgpositions'))
+        for queryset in querysets:
+            queryset.roles.add(oobj)
 
         return post_put_action(self, request, 'put', request.data, pk)
 
