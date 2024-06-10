@@ -189,6 +189,22 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 			wrap:true
 		},
 		{
+			maxWidth: "150px",
+			minWidth: "150px",
+			header: 'state',
+			reorder: true,
+			sortable: true,
+			name: t("Насны шалгуур"),
+			selector: (row) => (
+				<Badge
+					color={`${row?.age_state == 1 ? 'primary' : row?.age_state == 2 ? 'success' : row?.age_state == 3 ? 'danger' : 'primary'}`}
+					pill
+				>
+					{row?.age_state == 2 ? 'Тэнцсэн':'Тэнцээгүй'}
+				</Badge>),
+			center: true,
+		},
+		{
 			name: t("Хүйс"),
 			selector: (row) => row?.gender_name,
 			center: true,
