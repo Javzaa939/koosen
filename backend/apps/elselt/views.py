@@ -47,7 +47,8 @@ from .serializer import (
     HealthUpUserInfoSerializer,
     HealthUpUserSerializer,
     PhysqueUserSerializer,
-    HealthPhysicalUserInfoSerializer
+    HealthPhysicalUserInfoSerializer,
+    GpaCheckUserInfoSerializer
 )
 
 from elselt.models import (
@@ -438,6 +439,7 @@ class AdmissionUserInfoAPIView(
         gpa_state = self.request.query_params.get('gpa_state')
         gender = self.request.query_params.get('gender')
         sorting = self.request.query_params.get('sorting')
+        gpa = self.request.query_params.get('gpa')
 
         if lesson_year_id:
             queryset = queryset.filter(profession__admission=lesson_year_id)
@@ -460,7 +462,9 @@ class AdmissionUserInfoAPIView(
                 queryset = queryset.filter(gender__in=['1', '3', '5', '7', '9'])
             else:
                 queryset = queryset.filter(gender__in=['0', '2', '4', '6', '8'])
-
+        if gpa:
+            gpa_value = float(gpa)
+            queryset = queryset.filter(gpa__lte = gpa_value)
         # Sort хийх үед ажиллана
         if sorting:
             if not isinstance(sorting, str):
@@ -1247,3 +1251,58 @@ class ElseltHealthPhysicalCreateAPIView(
             return Response({'status': '200 OK', 'message': 'Хүсэлт амжиллтай'}, status=status.HTTP_200_OK)
         else:
             return Response({'status': '403 Forbidden', 'message': 'API key буруу '}, status=status.HTTP_403_FORBIDDEN)
+        
+class GpaCheckUserInfoAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+):
+
+    queryset = AdmissionUserProfession.objects.all().order_by('created_at')
+
+    serializer_class = GpaCheckUserInfoSerializer
+
+    filter_backends = [SearchFilter]
+    search_fields = ['user__first_name', 'user__register', 'user__email', 'gpa', 'org']
+
+    def get_queryset(self):
+        queryset = self.queryset
+        queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
+
+        userinfo_qs = UserInfo.objects.filter(user=OuterRef('user')).values('gpa')[:1]
+        userinfo_org = UserInfo.objects.filter(user=OuterRef('user')).values('work_organization')[:1]
+
+        queryset = (
+            queryset
+            .annotate(
+                gpa=Subquery(userinfo_qs),
+                org=Subquery(userinfo_org),
+            )
+        )
+        limit = self.request.query_params.get('limit')
+        lesson_year_id = self.request.query_params.get('lesson_year_id')
+        profession_id = self.request.query_params.get('profession_id')
+        gpa = self.request.query_params.get('gpa')
+
+        if lesson_year_id:
+            queryset = queryset.filter(profession__admission=lesson_year_id)
+
+        if profession_id:
+            queryset = queryset.filter(profession__profession__id=profession_id)
+
+        if gpa:
+            queryset = queryset.filter(gpa__lte = gpa)
+
+        return queryset
+
+    def get(self, request, pk=None):
+
+        if pk:
+
+            all_data = self.retrieve(request, pk).data
+
+            return request.send_data(all_data)
+
+        all_data = self.list(request).data
+
+        return request.send_data(all_data)

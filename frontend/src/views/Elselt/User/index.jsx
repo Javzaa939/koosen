@@ -1,7 +1,7 @@
 // ** React Imports
 import { Fragment, useState, useEffect, useContext } from 'react'
 
-import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, Spinner, UncontrolledTooltip } from 'reactstrap'
+import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, Spinner, UncontrolledTooltip,Alert } from 'reactstrap'
 
 import { ChevronDown, Search } from 'react-feather'
 
@@ -37,7 +37,8 @@ import StateModal from './StateModal';
 import DescModal from './DescModal';
 import EmailModal from './EmailModal';
 import MessageModal from './MessageModal';
-import useUpdateEffect from '@hooks/useUpdateEffect'
+import useUpdateEffect from '@hooks/useUpdateEffect';
+import GpaModal from './GpaModal';
 
 // import Addmodal from './Add'
 
@@ -52,6 +53,9 @@ const ElseltUser = () => {
 
     // Эрэмбэлэлт
     const [sortField, setSort] = useState('')
+
+    //errror
+    const [showError, setShowError] = useState(false);
 
     // Translate
     const { t } = useTranslation()
@@ -92,6 +96,7 @@ const ElseltUser = () => {
 
     const [emailModal, setEmailModal] = useState(false)
     const [messageModal, setMessageModal] = useState(false)
+    const [gpaModal , setGpaModal] = useState(false)
 
     const genderOp = [
         {
@@ -182,7 +187,7 @@ const ElseltUser = () => {
         if(success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
-
+            console.log(data)
             // Нийт хуудасны тоо
             var cpage_count = Math.ceil(data?.count / rowsPerPage === 'Бүгд' ? 1 : rowsPerPage)
             setPageCount(cpage_count)
@@ -426,6 +431,14 @@ const ElseltUser = () => {
     function messageModalHandler() {
         setMessageModal(!messageModal)
     }
+    function gpaModalHandler(){
+        if (profession_id.length === 0) {
+            setShowError(true);
+          } else {
+            setShowError(false);
+            setGpaModal(!gpaModal);
+          }
+    }
 
 	return (
 		<Fragment>
@@ -445,6 +458,12 @@ const ElseltUser = () => {
             <MessageModal
                 messageModalHandler={messageModalHandler}
                 messageModal={messageModal}
+            />
+            <GpaModal
+            gpaModalHandler = {gpaModalHandler}
+            gpaModal = {gpaModal}
+            data = {datas}
+            getDatas = {getDatas}
             />
             {isLoading && Loader}
 			<Card>
@@ -621,6 +640,19 @@ const ElseltUser = () => {
                             </Button>
                             <UncontrolledTooltip target='message_button'>
                                 Сонгосон элсэгчид руу мессеж илгээх
+                            </UncontrolledTooltip>
+                        </div>
+
+                        <div className='px-1'>
+                            <Button color='primary' disabled={adm.length === 0 } className='d-flex align-items-center px-75' id='message_button' onClick={() => gpaModalHandler()}>
+                            {showError ? (<Alert color='danger' size='sm'>{t('Хөтөлбөрийг сонгоно уу.')}</Alert>):(
+                                <>
+                                <BiMessageRoundedError className='me-25'/>
+                                Голч Шалгах
+                              </>)}
+                            </Button>
+                            <UncontrolledTooltip target='message_button'>
+                            Сонгосон элсэгчидын Голч Дүн Шалгах
                             </UncontrolledTooltip>
                         </div>
                     </div>
