@@ -83,7 +83,7 @@ const ElseltUser = () => {
 
     const [admop, setAdmop] = useState([])
     const [adm, setAdm] = useState('')
-
+    console.log("adm ",adm);
     const [unit1op, setUnit1op] = useState([])
     const [unit1, setUnit1] = useState('')
 

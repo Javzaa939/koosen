@@ -51,11 +51,14 @@ const Enrollment = () => {
     const [admissionOption, setAdmisionOption] = useState([])
     const [professionOption, setProfessionOption] = useState([])
     const [selectedRows, setSelectedRows] = useState([])
+    const [profId, setProfessionId] = useState('')
+
 
     // API
     const professionApi = useApi().elselt.profession
     const admissionApi = useApi().print.admission
     const admissionYearApi = useApi().elselt
+    const elseltApproveApi = useApi().elselt.approve
 
     async function getAdmissionYear() {
         const { success, data } = await fetchData(admissionYearApi.getAll())
@@ -67,6 +70,7 @@ const Enrollment = () => {
     // Хөтөлбөрийн жагсаалт авах
     async function getProfession() {
         const { success, data } = await fetchData(professionApi.getList(select_value?.admission))
+
         if (success) {
             setProfessionOption(data)
         }
@@ -76,12 +80,15 @@ const Enrollment = () => {
     async function getDatas() {
         var profession = select_value?.profession
         var admission = select_value?.admission
+        console.log("profession", profession);
+        console.log("admission", admission);
+
         const page_count = Math.ceil(total_count / rowsPerPage)
         if (page_count < currentPage && page_count != 0) {
             setCurrentPage(page_count)
         }
 
-        const { success, data } = await allFetch(admissionApi.get(rowsPerPage, currentPage, sortField, searchValue, admission, profession))
+        const { success, data } = await allFetch(elseltApproveApi.get(rowsPerPage, currentPage, sortField, searchValue, admission, profession))
         if(success)
         {
             setTotalCount(data?.count)
@@ -157,7 +164,7 @@ const Enrollment = () => {
             <Card>
             {isLoading && Loader}
                 <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom pt-0'">
-					<CardTitle tag="h4">{t('Элсэлтийн тушаал')}</CardTitle>
+					<CardTitle tag="h4">{t('Тэнцсэн элсэгчидийн элсэлтийн тушаал')}</CardTitle>
 					    <div className='d-flex flex-wrap mt-md-0 mt-1'>
 
                             <Button
@@ -233,8 +240,9 @@ const Enrollment = () => {
                                 })
                             }}
                             styles={ReactSelectStyles}
-                            getOptionValue={(option) => option.id}
-                            getOptionLabel={(option) => option.name}
+                            getOptionValue={(option) => option.prof_id}
+                            getOptionLabel={(option) => option.name
+                            }
                         />
                     </Col>
                 </Row>

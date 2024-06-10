@@ -1651,7 +1651,6 @@ function useApi(isDisplay=false) {
 			getList: (elselt) => instance.get(`/elselt/profession/list/?elselt=${elselt}`),
 			putPropState: (datas) => instance.put(`/elselt/profession/`, datas)
 		},
-
 		sysinfo: {
 			get: () => instance.get(`/elselt/sysinfo/`),
 			put: (id, data) =>
@@ -1696,7 +1695,11 @@ function useApi(isDisplay=false) {
 				post: (cdata) => instance.post(`/elselt/health/physical/`, cdata),
 				put: (id, cdata) => instance.put(`/elselt/health/physical/${id}/`, cdata)
 			},
-		}
+		},
+		// тэнцсэн элсэгчид
+		approve: {
+			get: (limit, page, sort, search,admission, profession) => instance.get(`/elselt/approve/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&admission=${admission}&profession=${profession}`),
+		},
 	},
 	able: {
 		getWorker: () => able_instance.get(`/?a=ableApi&tsk=getWorkers&key=uia`),
