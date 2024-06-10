@@ -207,10 +207,10 @@ class AdmissionUserInfoSerializer(serializers.ModelSerializer):
         birth_year = int(register[2:4])
         current_year = datetime.now().year
 
-        # Нас олох
+        # насыг тухайн жилээс төрсөн оныг нь хасаж тооцсон
         user_age = current_year - (1900 + birth_year if birth_year > current_year % 100 else 2000 + birth_year)
 
-        #Тухайн сургуулийн насны шалгуурыг олох
+        # Тухайн сургуулийн насны шалгуурыг олох
         indicator = AdmissionIndicator.objects.filter(admission_prof=obj.profession, value=AdmissionIndicator.NAS).first()
         if indicator:
             if indicator.limit_min < user_age < indicator.limit_mах:
