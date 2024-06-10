@@ -38,7 +38,6 @@ export function getColumns (currentPage, rowsPerPage, total_count) {
 			header: 'register_num',
 			name: t("Регистр"),
 			selector: (row) => row?.user?.register,
-            sortable: true,
 			minWidth: "200px",
             center: true,
         },
