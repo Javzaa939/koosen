@@ -163,7 +163,7 @@ export default function PrintNationalAttachment()
                                     {
                                         printDatas?.student?.group?.degree?.degree_code !== 'D'
                                         ?
-                                        newCell2.className = `border-dark ${printDatas.isCenter && 'px-75'} body-cell1`
+                                        newCell2.className = `border-dark ${printDatas.isCenter && 'px-75'} body-cell2`
                                         :
                                         newCell2.className = `border-dark ${printDatas.isCenter && 'px-75'} body-cell`
                                     }
@@ -273,6 +273,8 @@ export default function PrintNationalAttachment()
         }
     }
 
+    console.log(printDatas)
+
     return (
 
         <div className='d-flex' style={{ height: '100vh', overflow: 'hidden' }}>
@@ -371,6 +373,13 @@ export default function PrintNationalAttachment()
                             <span className='h-50'>ᠡᠮᠦᠨᠡᢈᠢ ᠱᠠᠲᠤᠨ ᠤ᠋ ᠪᠣᠯᠪᠠᠰᠤᠷᠠᠯ ᠤ᠋ᠨ ᠦᠨᠡᠯᠡᢉᠡᠨ ᠦ᠋ ᠳᠤᠨᠳᠠᠵᠢ ᠣᠨᠤᠭ᠎ᠠ:</span>
                             {tooBichih(printDatas?.student?.secondary_school)}
                         </div>
+                        {printDatas?.student?.graduation_work?.back_diplom_num && printDatas?.student?.group?.degree?.degree_code === 'D'
+                        &&
+                        <div style={{ height: '40%', writingMode: 'vertical-lr', display: 'flex' }}>
+                            <span className='h-50'>ᠪᠠᠻᠠᠯᠠᠸᠷ ᠤ᠋ᠨ ᠳ᠋ᠤᠭᠠᠷ:</span>
+                            {tooBichih(printDatas?.student?.graduation_work?.back_diplom_num)}
+                        </div>
+                        }
                     </div>
                 }
 
@@ -379,7 +388,7 @@ export default function PrintNationalAttachment()
             <div
                 ref={body1SectionRef}
                 className={`h-100 p-0 d-flex py-1 flex-column justify-content-between align-items-start position-relative ${isPageBreak && 'page-break'} ms-1`}
-                style={{ fontFamily: 'mongolianScript', flex: 1, left: printDatas?.student?.group?.degree?.degree_code !== 'D' ? '15px' : '' }}
+                style={{ fontFamily: 'mongolianScript', flex: 1, left: printDatas?.student?.group?.degree?.degree_code !== 'D' ? '25px' : '' }}
             >
                 <div style={{ height: printDatas?.isCenter ? '98%' : '49.5%' }}  className={`${printDatas.isCenter ? 'center-table' : 'not-center-table' }`} >
                     <table id='tableNational1' className='text-center w-100 d-none parent_table' style={{ writingMode: 'vertical-lr', marginBottom: '1px', height: '100%' }} >
@@ -476,12 +485,7 @@ export default function PrintNationalAttachment()
                         {
                             datas?.graduation_work?.lesson_type == 1
                             ?
-                                printDatas?.student?.group?.degree?.degree_code !== 'D'
-                                ?
-                                    <span className=''>ᠮᠠᢉᠢᠰᠲ᠋ᠷ ᠤ᠋ᠨ ᠲᠡᢉᠦᠰᠦᠯᠲᠡ ᠶ᠋ᠢᠨ ᠠᠵᠢᠯ/ᠳᠢᠰᠰᠧᠷᠲ᠋ᠠᠼᠢ ᠶ᠋ᠢᠨ ᠨᠡᠷ᠎ᠡ: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic_uig}</span></span>
-                                :
-                                    <span className=''>ᠳ᠋ᠢᠫᠯᠣᠮ ᠤ᠋ᠨ ᠠᠵᠢᠯ ᠤ᠋ᠨ ᠨᠡᠷ᠎ᠡ: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic_uig}</span></span>
-
+                                <span className=''>{`${printDatas?.student?.group?.degree?.degree_code == 'E' ? "ᠮᠠᢉᠢᠰᠲ᠋ᠷ" : "ᠳ᠋ᠣᠻᠲ᠋ᠣᠷ"} ᠤ᠋ᠨ ᠲᠡᢉᠦᠰᠦᠯᠲᠡ ᠶ᠋ᠢᠨ ᠠᠵᠢᠯ/ᠳᠢᠰᠰᠧᠷᠲ᠋ᠠᠼᠢ ᠶ᠋ᠢᠨ ᠨᠡᠷ᠎ᠡ:`} &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic_uig}</span></span>
                             :
                                 <>
                                     <span className=''>
@@ -502,6 +506,14 @@ export default function PrintNationalAttachment()
                         }
                     </div>
                     }
+
+                    {
+                    printDatas?.student?.graduation_work?.back_diplom_num && printDatas?.student?.group?.degree?.degree_code === 'D'
+                    &&
+                    <div className='d-flex' style={{ writingMode: 'vertical-lr', marginRight: '20px', height: '100%' }}>
+                        ᠡᠮᠦᠨᠡᢈᠢ ᠪᠣᠯᠪᠠᠰᠤᠷᠠᠯ ᠤ᠋ᠨ ᠳ᠋ᠢᠫᠯᠣᠮ ᠠ᠋ᠴᠠ ᠓᠐ ᠪᠠᠭᠴᠠ ᠴᠠᠭ ᠢ᠋ ᠲᠣᠭᠠᠴᠠᠪᠠ᠃
+                    </div>
+                    }
                     {
                         printDatas?.student?.group?.degree?.degree_code !== 'D'
                         &&
@@ -520,6 +532,8 @@ export default function PrintNationalAttachment()
                         printDatas?.student?.group?.degree?.degree_code === 'D'
                         &&
                             <div className='d-flex' style={{ writingMode: 'vertical-lr', marginRight: '20px', height: '100%' }}>
+                                <div className='' style={{height: '33.3%'}}>ᠨᠡᠶᠢᠲᠡ ᠪᠠᠭᠴᠡ ᠴᠠᠭ: {tooBichih(datas?.score?.max_kredit)}</div>
+
                                 <div className='' style={{height: '33.3%'}}>ᠭᠣᠣᠯᠴᠢ ᠳᠦᠩ:   <span style={{ fontFamily: 'CMSUB', fontSize: '12px' }}>{datas?.score?.assesment.split('.')[0]}<span style={{ fontFamily: 'serif', fontWeight: 'bolder' }}>.</span>{datas?.score?.assesment.split('.')[1]}</span></div>
                                 <div className='mt-2' style={{height: '66.7%'}}>ᠲᠤᠬᠠᠢ ᠶ᠋ᠢᠨ ᠤᠯᠠᠷᠢᠯ ᠤ᠋ᠨ ᠢᠵᠢᠯ ᠮᠡᠷᢉᠡᠵᠢᠯ ᠦ᠋ᠨ ᠲᠡᢉᠦᠰᠦᢉᠴᠢᠳ ᠦ᠋ᠨ ᠭᠣᠣᠯᠴᠢ ᠳ᠋ᠦᠩ ᠦ᠋ᠨ ᠳᠤᠨᠳᠠᠵᠢ:   <span style={{ fontFamily: 'CMSUB', fontSize: '12px' }}>{datas?.score?.average_score_prof && datas?.score?.average_score_prof?.split('.')[0]}<span style={{ fontFamily: 'serif', fontWeight: 'bolder' }}>.</span>{datas?.score?.average_score_prof && datas?.score?.average_score_prof?.split('.')[1]}</span></div>
                             </div>

@@ -1166,4 +1166,41 @@ permissions = [
         'name' : 'lms-exam-delete',
         'description' : 'Шалгалт устгах эрх'
     },
+    # ----------------------Сэтгэлзүйн сорил цэс------------------------
+
+    # Сорилын асуулт
+    {
+        'name' : 'lms-psychologicaltesting-question-read',
+        'description' : 'Сорилын асуулт унших эрх'
+    },
+    {
+        'name' : 'lms-psychologicaltesting-question-create',
+        'description' : 'Сорилын асуулт шинээр үүсгэх эрх'
+    },
+    {
+        'name' : 'lms-psychologicaltesting-question-update',
+        'description' : 'Сорилын асуулт засах эрх'
+    },
+    {
+        'name' : 'lms-psychologicaltesting-question-delete',
+        'description' : 'Сорилын асуулт устгах эрх'
+    },
+
+    # Сэтгэлзүйн сорил
+    {
+        'name' : 'lms-psychologicaltesting-exam-read',
+        'description' : 'Сэтгэлзүйн сорил унших эрх'
+    },
+    {
+        'name' : 'lms-psychologicaltesting-exam-create',
+        'description' : 'Сэтгэлзүйн сорил шинээр үүсгэх эрх'
+    },
+    {
+        'name' : 'lms-psychologicaltesting-exam-update',
+        'description' : 'Сэтгэлзүйн сорил засах эрх'
+    },
+    {
+        'name' : 'lms-psychologicaltesting-exam-delete',
+        'description' : 'Сэтгэлзүйн сорил устгах эрх'
+    },
 ]

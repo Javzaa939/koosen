@@ -27,6 +27,11 @@ const VerticalLayout = (props) =>
      */
     function checkPerm(saveData, menus=[], checkPerm, idName='')
     {
+        if(checkPerm == "lms-student-graduate-read"){
+            // console.log(checkPerm)
+            // console.log(idName)
+            // console.log(menus)
+        }
         // is_superuser гэж шалгаж байгаа бол
         if (typeof checkPerm == 'boolean' && checkPerm)
         {
@@ -53,14 +58,14 @@ const VerticalLayout = (props) =>
         () =>
         {
             if(Object.keys(user).length > 0) {
-
-                navigation.map((menus) =>
+                let newMenu = []
+                navigation.forEach((menus) =>
                 {
                     if (menus && menus.navChildren && menus.navChildren.length > 0 && user && Object.keys(user).length > 0)
                     {
+                        console.log(menus)
 
                         let childrenDatas = []
-
                         /** ----------------------------- Сургалт ---------------------------- */
 
                         /** Хичээлийн стандарт */
@@ -100,6 +105,11 @@ const VerticalLayout = (props) =>
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-read', 'elselt8')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-read', 'elselt9')
 
+                        /** ----------------------------Сэтгэлзүйн сорил------------------------------- */
+
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-psychologicaltesting-question-read', 'psychologicaltesting0')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-psychologicaltesting-exam-read', 'psychologicaltesting1')
+
                         /** ----------------------------Оюутан ------------------------------- */
 
                         /** Анги бүлгийн бүртгэл */
@@ -122,6 +132,9 @@ const VerticalLayout = (props) =>
 
                         /** Оюутаны хавсралт, төгсөлтийн ажил */
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-graduate-read', 'student10')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-graduate-read', 'student17')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-graduate-read', 'student16')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-graduation-read', 'graduation')
 
                         /** Оюутан тодорхойлолт */
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-definition-read', 'student11')
@@ -139,12 +152,15 @@ const VerticalLayout = (props) =>
 
                         /** Эрх */
                         childrenDatas = checkPerm(childrenDatas, menus, user.is_superuser, 'settingsLevel15')
+                        childrenDatas = checkPerm(childrenDatas, menus, user.is_superuser, 'settingsLevel16')
+                        childrenDatas = checkPerm(childrenDatas, menus, user.is_superuser, 'settingsLevel17')
+                        childrenDatas = checkPerm(childrenDatas, menus, user.is_superuser, 'settings')
 
                         /** Role */
-                        childrenDatas = checkPerm(childrenDatas, menus, 'role-read', 'settingsLevel16')
+                        // childrenDatas = checkPerm(childrenDatas, menus, 'role-read', 'settingsLevel16')
 
                         /** Able */
-                        childrenDatas = checkPerm(childrenDatas, menus, true, 'settingsLevel17')
+                        // childrenDatas = checkPerm(childrenDatas, menus, true, 'settingsLevel17')
 
                         /** ----------------------------- Хичээлийн хуваарь ---------------------------- */
 
@@ -331,39 +347,51 @@ const VerticalLayout = (props) =>
                         /** Шалгалт */
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-exam-read', 'create')
 
-                        menus.children = childrenDatas
+
+                        let men = {
+                            ...menus,
+                            children: childrenDatas
+                        }
+                        newMenu.push(men)
+                    }else{
+                        newMenu.push(menus)
                     }
                 })
-
-                cNavigation.map((menus, idx) =>
+                newMenu.map((menus, idx) =>
                 {
                     /** navChildren-тай menu-д нэгч хүүхэд эрх нь таарахгүй бол тэрийг устгана */
                     if (menus.navChildren && (menus && menus.children && menus.children.length < 1))
                     {
-                        delete cNavigation[idx];
+                        delete newMenu[idx];
+                        // return null
+                        // delete_ids.push(idx)
                     }
                     /** Дан ганцаар байдаг бол permission шалгана */
                     else
                     {
                         /** Хуанли */
-                        if (menus.id === 'calendar' && !user.permissions?.includes('lms-calendar-read')) delete cNavigation[idx];
+                        if (menus.id === 'calendar' && !user.permissions?.includes('lms-calendar-read'))  delete newMenu[idx];
 
                         /** Зар мэдээ */
-                        if (menus.id === 'service' && !user.permissions?.includes('lms-service-news-read')) delete cNavigation[idx];
+                        if (menus.id === 'service' && !user.permissions?.includes('lms-service-news-read'))  delete newMenu[idx];
 
                         /** Статистик */
-                        if (menus.id === 'statistic' && !user.permissions?.includes('lms-statistic-read')) delete cNavigation[idx];
+                        if (menus.id === 'statistic' && !user.permissions?.includes('lms-statistic-read'))  delete newMenu[idx];
 
                         /** Хандах эрх */
-                        if (menus.id === 'role' && !user.permissions?.includes('role-read')) delete cNavigation[idx];
+                        if (menus.id === 'role' && !user.permissions?.includes('role-read'))  delete newMenu[idx];
                     }
                 })
+                setCNavigation(newMenu)
 
                 setIsEnd(true)
             }
         },
         [user]
     )
+    // console.log(user)
+        // console.log(navigation)
+    // console.log(cNavigation)
 
     return (
         <>

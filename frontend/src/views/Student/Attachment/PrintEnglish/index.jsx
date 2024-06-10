@@ -145,17 +145,17 @@ export default function PrintAttachmentEnglish()
                                 }
                             }
 
-                            if (tableRowCount[2] == 0 && tableRowCount[1] !== 0)
-                            {
-                                if (idx == 0)
-                                {
-                                    parentTableDoc.style.padding = '0px 0px 0px 70px'
-                                }
-                                else
-                                {
-                                    parentTableDoc.style.padding = '0px 76px 0px 0px'
-                                }
-                            }
+                            // if (tableRowCount[2] == 0 && tableRowCount[1] !== 0)
+                            // {
+                            //     if (idx == 0)
+                            //     {
+                            //         parentTableDoc.style.padding = '0px 0px 0px 70px'
+                            //     }
+                            //     else
+                            //     {
+                            //         parentTableDoc.style.padding = '0px 76px 0px 0px'
+                            //     }
+                            // }
 
                             parentTableDoc.style.width = `${99.1 / dividePage1}%`
 
@@ -521,6 +521,18 @@ export default function PrintAttachmentEnglish()
                     }
                 </div>
 
+                {
+                    (printDatas?.student?.graduation_work?.back_diplom_num && printDatas?.student?.group?.degree?.degree_code === 'D')
+                    &&
+                    <div className='fw-bolder d-flex' style={{ fontSize: '11px' }}>
+                        <div className='d-flex' style={{ width:  '33.3%' }} >
+                        </div>
+                        <div className='d-flex px-1' style={{ width:  '50%' }}>
+                            <span className='fw-normal w-50'>Diploma Number of Bachelor's Degree:</span> <span className='text-uppercase'>{printDatas?.student?.graduation_work?.back_diplom_num}</span>
+                        </div>
+                    </div>
+                }
+
                 {/* <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
                     <div className='d-flex' style={{ width: '33.3%' }} >
                         <span className='fw-normal w-50'>Last name:</span> <span>{printDatas?.student?.last_name_eng}</span>
@@ -565,11 +577,7 @@ export default function PrintAttachmentEnglish()
                         {
                             datas?.graduation_work?.lesson_type == 1
                             ?
-                                printDatas?.student?.group?.degree?.degree_code !== 'D'
-                                ?
-                                    <span className=''>Master's thesis/dissertation title: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic_eng}</span></span>
-                                :
-                                    <span className=''>Diploma thesis: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic_eng}</span></span>
+                                <span className=''>{`${printDatas?.student?.group?.degree?.degree_code == 'E' ? "Master's" : "Doctoral"} thesis/dissertation title:`}&nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic_eng}</span></span>
 
                             :
                                 <>
@@ -587,6 +595,14 @@ export default function PrintAttachmentEnglish()
                                 </>
                         }
                         </div>
+                }
+
+                {
+                    printDatas?.student?.graduation_work?.back_diplom_num && printDatas?.student?.group?.degree?.degree_code === 'D'
+                    &&
+                    <div className={` d-flex justify-content-center `} style={{marginLeft: '350px'}}>
+                        30 credit hours are calculated from the  previous diploma.
+                    </div>
                 }
 
                 <div className={`d-flex justify-content-center gap-5 me-1 ${rowSum > 51 ? 'mb-0': 'mb-2'}`}>
@@ -615,11 +631,7 @@ export default function PrintAttachmentEnglish()
                     {
                         datas?.graduation_work?.lesson_type == 1
                         ?
-                            printDatas?.student?.group?.degree?.degree_code !== 'D'
-                            ?
-                                <span className=''>Master's thesis/dissertation title: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic_eng}</span></span>
-                            :
-                                <span className=''>Diploma thesis: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic_eng}</span></span>
+                            <span className=''>Diploma thesis: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic_eng}</span></span>
 
                         :
                             <>

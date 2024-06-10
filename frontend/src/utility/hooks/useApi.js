@@ -1455,6 +1455,8 @@ function useApi(isDisplay=false) {
 			get: (page, limit, lessonId, subjectId, search) =>
 				instance.get(`learning/questions/?page=${page}&limit=${limit}&lesson=${lessonId}&subject=${subjectId}&search=${search}`),
 
+			getOne: (page, limit, search, question_id) => instance.get(`learning/questions/subject/?page=${page}&limit=${limit}&search=${search}&question_id=${question_id}`),
+
 			getList: (checked_ids, count, type) => {
 				var check_ids = ''
 				for(var i of checked_ids) {
@@ -1477,8 +1479,50 @@ function useApi(isDisplay=false) {
 				}
 				return instance.delete(`learning/questions/?year=${cyear_name}&season=${cseason_id}${remove_ids}`)
 			}
+		},
 
+		psychologicalTestQuestion:{
+			getOneTitle: (id) => instance.get(`learning/psychological_test_question/title/${id}/`),
+			getByTitle: (page, limit, search, titleId) => instance.get(`learning/psychological_test_question/title/?page=${page}&limit=${limit}&search=${search}&titleId=${titleId}`),
+			getTitle: () => instance.get(`learning/psychological_test_question/title/list/`),
+			postTitle: (datas) => instance.post(`learning/psychological_test_question/title/`, datas),
+			putTitle: (id, datas) => instance.put(`learning/psychological_test_question/title/${id}/`, datas),
+			deleteTitle: (id) => instance.delete(`learning/psychological_test_question/title/${id}/`),
+
+			getList: () => instance.get(`learning/psychological_test_question/list/`),
+
+			get: (page, limit, userId, search) =>
+				instance.get(`learning/psychological_test_question/?page=${page}&limit=${limit}&lesson=${userId}&search=${search}`),
+			post: (data) =>
+				instance.post(`learning/psychological_test_question/?year=${cyear_name}&season=${cseason_id}`, data),
+			put: (data, pk) =>
+				instance.put(`learning/psychological_test_question/${pk}/?year=${cyear_name}&season=${cseason_id}`, data),
+			delete: (delete_ids) =>
+			{
+				var remove_ids = ''
+				for(var i of delete_ids) {
+					remove_ids += `&delete=${i}`
+				}
+				return instance.delete(`learning/psychological_test_question/?year=${cyear_name}&season=${cseason_id}${remove_ids}`)
+			}
+		},
+
+		psychologicalTest:{
+			get: (limit, page, sort, search, user) => instance.get(`learning/psychological_test/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&user=${user}`),
+			getOne: (pk) => instance.get(`learning/psychological_test/${pk}/`),
+			post: (cdatas) => instance.post('learning/psychological_test/', cdatas),
+			put: (data, pk) => instance.put(`learning/psychological_test/${pk}/`, data),
+			delete: (pk) => instance.delete(`learning/psychological_test/${pk}/`),
+
+			getOptions: () => instance.get(`learning/psychological_test/options/`)
+		},
+
+		psychologicalTestOne:{
+			get: (limit, page, test_id) => instance.get(`learning/psychological_test_one/?page=${page}&limit=${limit}&test_id=${test_id}`),
+			post: (data, pk) => instance.post(`learning/psychological_test_one/${pk}/`, data),
+			delete: (pk, test_id) => instance.delete(`learning/psychological_test_one/${pk}/?test_id=${test_id}`)
 		}
+
 	},
 
 	// Судалгаа
@@ -1662,7 +1706,7 @@ function useApi(isDisplay=false) {
 					instance.post(`/elselt/sysinfo/`, data),
 		},
 		admissionuserdata: {
-			get: (limit, page, sort, search, lesson_year_id, profession_id, unit1_id, gender, state, gpa_state) => instance.get(`/elselt/admissionuserdata/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}&unit1_id=${unit1_id}&gender=${gender}&state=${state}&gpa_state=${gpa_state}`),
+			get: (limit, page, sort, search, lesson_year_id, profession_id, unit1_id, gender, state, gpa_state,age_state) => instance.get(`/elselt/admissionuserdata/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}&unit1_id=${unit1_id}&gender=${gender}&state=${state}&gpa_state=${gpa_state}&age_state=${age_state}`),
 			getOne: (pk) => instance.get(`/elselt/admissionuserdata/${pk}/`),
 			put: (data, id) => instance.put(`/elselt/admissionuserdata/${id}/`, data),
 			putDesc: (data, id) => instance.put(`/elselt/desc/${id}/`, data),

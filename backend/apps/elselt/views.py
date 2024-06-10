@@ -8,7 +8,7 @@ from django.core.mail import send_mail
 from django.core.mail import send_mass_mail
 from django.template.loader import render_to_string
 from django.db import transaction
-from django.db.models import F, Subquery, OuterRef, Count
+from django.db.models import F, Subquery, OuterRef, Count, Q
 from django.db.models.functions import Substr
 
 from main.utils.function.utils import json_load, make_connection, get_domain_url_link, get_domain_url, null_to_none
@@ -437,6 +437,7 @@ class AdmissionUserInfoAPIView(
         profession_id = self.request.query_params.get('profession_id')
         unit1_id = self.request.query_params.get('unit1_id')
         state = self.request.query_params.get('state')
+        age_state = self.request.query_params.get('age_state')
         gpa_state = self.request.query_params.get('gpa_state')
         gender = self.request.query_params.get('gender')
         sorting = self.request.query_params.get('sorting')
@@ -452,6 +453,9 @@ class AdmissionUserInfoAPIView(
 
         if state:
             queryset = queryset.filter(state=state)
+        
+        if age_state:
+            queryset = queryset.filter(age_state = age_state)
 
         if gpa_state:
             user_ids = UserInfo.objects.filter(gpa_state=gpa_state).values_list('user', flat=True)
@@ -1154,8 +1158,12 @@ class ElseltHealthProfessional(
             queryset = queryset.order_by(sorting)
 
         if state:
-            user_id = HealthUser.objects.filter(state=state).values_list('user', flat=True)
-            queryset = queryset.filter(user__in=user_id)
+            if state == '1':
+                user_id = HealthUpUser.objects.filter(Q(Q(state=2) | Q(state=3))).values_list('user', flat=True)
+                queryset = queryset.filter(state=2).exclude(user_id__in=user_id)
+            else:
+                user_id = HealthUpUser.objects.filter(state=state).values_list('user', flat=True)
+                queryset = queryset.filter(user__in=user_id)
 
         return queryset
 
@@ -1361,7 +1369,6 @@ class ElseltHealthPhysicalCreateAPIView(
     @transaction.atomic
     def post(self, request):
         api_key = request.META.get('HTTP_X_API_KEY')
-
         # Манай гаргасан sha256
         data_to_verify = 'utility_solution'
         verification_hash = hashlib.sha256(data_to_verify.encode('utf-8')).hexdigest()
