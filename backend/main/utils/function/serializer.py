@@ -1,5 +1,6 @@
 
 from googletrans import Translator
+from rest_framework import serializers
 
 translator = Translator()
 
@@ -48,3 +49,18 @@ def post_put_action(self, request, crud, data, pk=None, get_res=False):
                 }
                 error_fields.append(return_error)
             return request.send_error_valid(error_fields)
+
+
+def dynamic_serializer(c_model, c_fields, c_depth=0):
+
+    c_depth = int(c_depth)
+    assert c_depth >= 0
+
+    class CustomSerializer(serializers.ModelSerializer):
+
+        class Meta:
+            model = c_model
+            fields = c_fields
+            depth= c_depth
+
+    return CustomSerializer
