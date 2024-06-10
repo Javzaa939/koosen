@@ -1302,29 +1302,24 @@ class ElseltStateApprove(
         return request.send_data(all_data)
 
     def post(self, request):
-        " Тушаал шинээр үүсгэх нь "
+        " Тэнцсэн элсэгчдын тушаал шинээр үүсгэх нь "
 
-        user = request.user
         datas = request.data
-        print("datas", datas)
-        users = datas.get('user')
-        admission_date = datas.get('admission_date')
-        admission_number = datas.get('admission_number')
-
-        # datas['created_user'] = user
+        users = datas.get('id')                             # Элсэгч
+        admission_date = datas.get('admission_date')        # Элсэлтийн тушаалын огноо
+        admission_number = datas.get('admission_number')    # Элсэлтийн тушаалын дугаар
 
         with transaction.atomic():
             try:
                 for user in users:
                     AdmissionUserProfession.objects.update_or_create(
-                        user_id = user.get('id'),
+                        id=user,
                         defaults={
-                            "admission_number":admission_number,
-                            "admission_date":admission_date
+                            "admission_number": admission_number,
+                            "admission_date": admission_date
                         }
                     )
 
             except Exception as e:
                 return request.send_error('ERR_002')
-
-        return request.send_info('INF_001')
+        return request.send_info('INF_001', "Амжилттай тушаал үүслээ")

@@ -42,7 +42,9 @@ function EditModal({ editModal, toggleEditModal, selectedRows, getDatas }) {
 
     const [admissionNumber, setAdmissionNumber] = useState(number_value ? number_value : '')
 
-    const admissionApi = useApi().print.admission
+    // const admissionApi = useApi().print.admission
+    const admissionApi = useApi().elselt.approve
+
 
     async function onSubmit(cdata) {
         let datax = []
@@ -56,7 +58,7 @@ function EditModal({ editModal, toggleEditModal, selectedRows, getDatas }) {
             "admission_number": admissionNumber
         }
 
-        const { success } = await fetchData(admissionApi.put(all_data))
+        const { success } = await fetchData(admissionApi.post(all_data))
         if (success) {
             reset()
             toggleEditModal()
