@@ -51,7 +51,6 @@ const Enrollment = () => {
     const [admissionOption, setAdmisionOption] = useState([])
     const [professionOption, setProfessionOption] = useState([])
     const [selectedRows, setSelectedRows] = useState([])
-    const [profId, setProfessionId] = useState('')
 
 
     // API
@@ -179,7 +178,7 @@ const Enrollment = () => {
                             <Button
                                 color='primary'
                                 className='m-50'
-                                disabled={datas?.length < 1}
+                                disabled={!select_value?.profession}
                                 onClick={() => {navigate(`printlist`,  { state: { 'selectedRows': selectedRows, 'select_value': select_value }, })}}
                             >
                                 <Printer size={15} />
