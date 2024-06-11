@@ -47,7 +47,8 @@ from .serializer import (
     HealthUpUserInfoSerializer,
     HealthUpUserSerializer,
     PhysqueUserSerializer,
-    HealthPhysicalUserInfoSerializer
+    HealthPhysicalUserInfoSerializer,
+    ElseltApproveSerializer,
 )
 
 from elselt.models import (
@@ -58,7 +59,8 @@ from elselt.models import (
     EmailInfo,
     HealthUser,
     PhysqueUser,
-    HealthUpUser
+    HealthUpUser,
+    AdmissionUserProfession
 )
 
 from core.models import (
@@ -252,7 +254,6 @@ class ElseltActiveListProfession(
     def get(self, request):
 
         elselt = request.query_params.get('elselt')
-
         if elselt:
             self.queryset = self.queryset.filter(admission=elselt)
 
@@ -1255,3 +1256,70 @@ class ElseltHealthPhysicalCreateAPIView(
             return Response({'status': '200 OK', 'message': 'Хүсэлт амжиллтай'}, status=status.HTTP_200_OK)
         else:
             return Response({'status': '403 Forbidden', 'message': 'API key буруу '}, status=status.HTTP_403_FORBIDDEN)
+
+
+class ElseltStateApprove(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.UpdateModelMixin,
+):
+    """ Элсэгч бүх шалгуурыг даваад тэнцсэн """
+
+    queryset = AdmissionUserProfession
+    serializer_class = ElseltApproveSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['user__first_name', 'user__last_name', 'user__register', 'profession__profession__name', 'admission_number', 'admission_date']
+
+    def get_queryset(self):
+        profession = self.request.query_params.get('profession')
+        admission = self.request.query_params.get('admission')
+        sorting = self.request.query_params.get('sorting')
+        queryset = self.queryset.objects.filter(state=AdmissionUserProfession.STATE_APPROVE)
+
+        if admission:
+            queryset = queryset.filter(profession__admission=admission)
+
+        if profession:
+            queryset = queryset.filter(profession__profession__id=profession)
+
+        # Sort хийх үед ажиллана
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
+
+        return queryset
+
+    def get(self, request):
+        " тэнцсэн элсэгчидын жагсаалт "
+
+        all_data = self.list(request).data
+        return request.send_data(all_data)
+
+    def post(self, request):
+        " Тэнцсэн элсэгчдын тушаал шинээр үүсгэх нь "
+
+        datas = request.data
+        users = datas.get('id')                             # Элсэгч
+        admission_date = datas.get('admission_date')        # Элсэлтийн тушаалын огноо
+        admission_number = datas.get('admission_number')    # Элсэлтийн тушаалын дугаар
+
+        with transaction.atomic():
+            try:
+                for user in users:
+                    AdmissionUserProfession.objects.update_or_create(
+                        id=user,
+                        defaults={
+                            "admission_number": admission_number,
+                            "admission_date": admission_date
+                        }
+                    )
+
+            except Exception as e:
+                return request.send_error('ERR_002')
+
+        return request.send_info('INF_001', "Амжилттай тушаал үүслээ")

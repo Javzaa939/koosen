@@ -8,8 +8,6 @@ import DataTable from 'react-data-table-component'
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 
-// import SchoolContext from '@context/SchoolContext'
-
 import { getColumns } from './helpers';
 
 import { useNavigate } from 'react-router-dom'
@@ -33,8 +31,6 @@ const Enrollment = () => {
 
     const [currentPage, setCurrentPage] = useState(1)
 
-    // const { school_id } = useContext(SchoolContext)
-
     const { t } = useTranslation()
 
     const { control, formState: { errors } } = useForm({});
@@ -54,9 +50,10 @@ const Enrollment = () => {
 
     // API
     const professionApi = useApi().elselt.profession
-    const admissionApi = useApi().print.admission
     const admissionYearApi = useApi().elselt
+    const elseltApproveApi = useApi().elselt.approve
 
+    // элсэлт
     async function getAdmissionYear() {
         const { success, data } = await fetchData(admissionYearApi.getAll())
         if (success) {
@@ -67,6 +64,7 @@ const Enrollment = () => {
     // Хөтөлбөрийн жагсаалт авах
     async function getProfession() {
         const { success, data } = await fetchData(professionApi.getList(select_value?.admission))
+
         if (success) {
             setProfessionOption(data)
         }
@@ -76,12 +74,13 @@ const Enrollment = () => {
     async function getDatas() {
         var profession = select_value?.profession
         var admission = select_value?.admission
+
         const page_count = Math.ceil(total_count / rowsPerPage)
         if (page_count < currentPage && page_count != 0) {
             setCurrentPage(page_count)
         }
 
-        const { success, data } = await allFetch(admissionApi.get(rowsPerPage, currentPage, sortField, searchValue, admission, profession))
+        const { success, data } = await allFetch(elseltApproveApi.get(rowsPerPage, currentPage, sortField, searchValue, admission, profession))
         if(success)
         {
             setTotalCount(data?.count)
@@ -157,7 +156,7 @@ const Enrollment = () => {
             <Card>
             {isLoading && Loader}
                 <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom pt-0'">
-					<CardTitle tag="h4">{t('Элсэлтийн тушаал')}</CardTitle>
+					<CardTitle tag="h4">{t('Тэнцсэн элсэгчидийн элсэлтийн тушаал')}</CardTitle>
 					    <div className='d-flex flex-wrap mt-md-0 mt-1'>
 
                             <Button
@@ -173,7 +172,7 @@ const Enrollment = () => {
                             <Button
                                 color='primary'
                                 className='m-50'
-                                disabled={datas?.length < 1}
+                                disabled={!select_value?.profession}
                                 onClick={() => {navigate(`printlist`,  { state: { 'selectedRows': selectedRows, 'select_value': select_value }, })}}
                             >
                                 <Printer size={15} />
@@ -233,8 +232,9 @@ const Enrollment = () => {
                                 })
                             }}
                             styles={ReactSelectStyles}
-                            getOptionValue={(option) => option.id}
-                            getOptionLabel={(option) => option.name}
+                            getOptionValue={(option) => option.prof_id}
+                            getOptionLabel={(option) => option.name
+                            }
                         />
                     </Col>
                 </Row>

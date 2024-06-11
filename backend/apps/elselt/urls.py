@@ -43,5 +43,8 @@ urlpatterns = [
 
     # Эрүүл мэндийн нарийвчилсан мэдээллийг хадгалах with POSTMAN
     path('health-up/create', ElseltHealthPhysicalCreateAPIView.as_view()),
+
+    #  Бүх шалгуурыг даваад тэнцсэн
+    path('approve/', ElseltStateApprove.as_view()),
 ]
 
