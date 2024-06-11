@@ -2764,11 +2764,13 @@ class StudentGpaDiplomaValuesAPIView(
                     is_master = False
                     # Магистрийн дипломын хичээлийг хавсралтанд мэргэжлийн хичээлд хамт харуулах хэсэг
                     if rows[0]['lesson_level'] == LearningPlan.MAG_DIPLOM or rows[0]['lesson_level'] == LearningPlan.DOC_DIPLOM:
-                        is_master = True
                         if rows[0]['lesson_level'] == LearningPlan.DOC_DIPLOM:
                             rows[0]['lesson_level'] = LearningPlan.DOC_PROFESSION
-                        else:
+
+                        if rows[0]['lesson_level'] == LearningPlan.MAG_DIPLOM:
                             rows[0]['lesson_level'] = LearningPlan.MAG_PROFESSION
+
+                        is_master = True
 
                     if rows[0]['lesson_level'] == level:
                         lesson = rows[0]
@@ -2793,15 +2795,15 @@ class StudentGpaDiplomaValuesAPIView(
                             all_s_kredit = all_s_kredit + lesson.get('kredit')
 
             # Хичээлтэй хэсгийн датаг л нэмнэ
-            if len(lesson_datas) > 0:
-                # Магистрийн ажил
-                sorted_lessons = []
-                if len(master_lessons):
-                    sorted_lessons = sorted(master_lessons, key=lambda x: x["grade_letter"])
+            # if len(lesson_datas) > 0:
+            #     # Магистрийн ажил
+            sorted_lessons = []
+            if len(master_lessons) > 0:
+                sorted_lessons = sorted(master_lessons, key=lambda x: x["grade_letter"])
 
-                lesson_datas.extend(sorted_lessons)
-                obj_datas['lessons'] = lesson_datas
-                all_datas.append(obj_datas)
+            lesson_datas.extend(sorted_lessons)
+            obj_datas['lessons'] = lesson_datas
+            all_datas.append(obj_datas)
 
         final_gpa = '0.0'
         if all_score != 0 and all_gpa_score != 0:

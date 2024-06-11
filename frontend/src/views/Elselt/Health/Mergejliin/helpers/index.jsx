@@ -120,7 +120,7 @@ export function getColumns (currentPage, rowsPerPage, page_count, STATE_LIST, de
 		},
 		{
 			name: <div className="px-1">Халдварт өвчин</div>,
-			selector: (row) => row?.contagious || '',
+			selector: (row) => row?.health_up_user_data?.contagious || '',
 		},
 		{
 			name: <div className="px-1">Сэтгэц мэдрэл</div>,

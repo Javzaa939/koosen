@@ -121,8 +121,10 @@ class UserInfo(models.Model):
     work_organization = models.CharField(max_length=1000, null=True, verbose_name='Ажиллаж байгаа байгууллагын нэр')
     work_heltes = models.CharField(max_length=1000, null=True, verbose_name='Хэлтэс газар')
     position_name = models.CharField(max_length=1000, null=True, verbose_name='Албан тушаал')
+
     gpa = models.FloatField(null=True, verbose_name='Голч дүн')
-    gpa_state = models.PositiveIntegerField(choices=STATE, db_index=True, null=False, default=STATE_CORRECT, verbose_name="Тэнцсэн элсэгчийн төлөв")
+    gpa_state = models.PositiveIntegerField(choices=STATE, db_index=True, null=False, default=STATE_CORRECT, verbose_name="Голчийн мэдээлэл зассан төлөв")
+
     graduate_pdf = models.FileField(upload_to='diplom/', null=True, verbose_name='Төгссөн тушаал/ архивын лавлагаа хавсаргах')
     esse_pdf = models.FileField(upload_to='diplom/', null=True, verbose_name='Эссэ бичсэн файлаа хавсаргах')
     ndsh_file = models.FileField(upload_to='ndsh/', null=True, verbose_name='НД-ын шимтгэл төлөлтийн лавлагаа файл')
@@ -135,7 +137,7 @@ class AdmissionUserProfession(models.Model):
 
     class Meta:
         db_table = 'elselt_admissionuserprofession'
-        managed = False
+        # managed = False
 
     STATE_SEND = 1
     STATE_APPROVE = 2
@@ -152,16 +154,24 @@ class AdmissionUserProfession(models.Model):
     description = models.CharField(max_length=5000, null=True, verbose_name='Хөтөлбөр сольсон тайлбар')
 
     # Элсэгч бүх шалгуурыг даваад тэнцсэн төлөв тайлбар
-    state = models.PositiveIntegerField(choices=STATE, db_index=True, null=False, default=STATE_SEND, verbose_name="Тэнцсэн элсэгчийн төлөв")
+    state = models.PositiveIntegerField(choices=STATE, db_index=True, null=True, default=STATE_SEND, verbose_name="Тэнцсэн элсэгчийн төлөв")
     state_description = models.CharField(max_length=5000, null=True, verbose_name='Тэнцсэн төлөвийн тайлбар')
 
     # Элсэгч ял шийтгэлтэй эсэх тайлбар
-    justice_state = models.PositiveIntegerField(choices=STATE, db_index=True, null=False, default=STATE_SEND, verbose_name="Ял шийтгэлтэй эсэх")
+    justice_state = models.PositiveIntegerField(choices=STATE, db_index=True, null=True, default=STATE_SEND, verbose_name="Ял шийтгэлтэй эсэх")
     justice_description = models.CharField(max_length=5000, null=True, verbose_name='Ял шийтгэлтэй бол тайлбар')
 
     # Тухайн элсэлтэд нас гэсэн шалгуур үзүүлэлттэй бол элсэгчийн насыг шалгаж тэнцсэн эсэх төлөв
-    age_state = models.PositiveIntegerField(choices=STATE, db_index=True, null=False, default=STATE_SEND, verbose_name="Нас шалгуурт тэнцсэн эсэх")
+    age_state = models.PositiveIntegerField(choices=STATE,  null=True, default=STATE_SEND, verbose_name="Нас шалгуурт тэнцсэн эсэх")
     age_description = models.CharField(max_length=5000, null=True, verbose_name='Нас шалгуурт тэнцээгүй тайлбар')
+
+    # Тухайн элсэлтэд голч онооны шалгуур үзүүлэлттэй бол элсэгчийн голчыг шалгаж тэнцсэн эсэх төлөв
+    gpa_state = models.PositiveIntegerField(choices=STATE,  null=True, default=STATE_SEND, verbose_name="Голч шалгуурт тэнцсэн эсэх")
+    gpa_description = models.CharField(max_length=5000, null=True, verbose_name='Голч шалгуурт тэнцээгүй тайлбар')
+
+    # Элсэгчийн элсэлтийн тушаалын дугаар огноо
+    admission_date = models.DateField(null=True, verbose_name="Элсэлтийн тушаалын огноо")
+    admission_number = models.CharField(null=True, max_length=50, verbose_name="Элсэлтийн тушаалын дугаар")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
