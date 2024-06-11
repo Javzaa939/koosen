@@ -8,6 +8,8 @@ from django.conf import settings
 
 from datetime import datetime
 
+from elselt.models import ElseltUser
+
 from lms.models import LessonStandart
 from lms.models import Lesson_title_plan
 from lms.models import LessonCategory
@@ -806,7 +808,7 @@ class LessonMaterialListSerializer(serializers.ModelSerializer):
             )
 
         return ass_student_qs
-    
+
 class LessonTeacherSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -863,3 +865,30 @@ class PsychologicalTestQuestionsSerializer(serializers.ModelSerializer):
     class Meta:
         model = PsychologicalTestQuestions
         fields = '__all__'
+
+
+class PsychologicalTestScopeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = PsychologicalTest
+        fields = ['id']
+
+
+class TeachersSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Teachers
+        fields = ["id", "register", "last_name", "first_name"]
+
+class StudentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Student
+        fields = ["id", "code", "last_name", "first_name"]
+
+
+class ElsegchSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ElseltUser
+        fields = ["id", "code", "last_name", "first_name"]

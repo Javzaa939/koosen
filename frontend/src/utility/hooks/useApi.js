@@ -1493,14 +1493,7 @@ function useApi(isDisplay=false) {
 				instance.post(`learning/psychological_test_question/?year=${cyear_name}&season=${cseason_id}`, data),
 			put: (data, pk) =>
 				instance.put(`learning/psychological_test_question/${pk}/?year=${cyear_name}&season=${cseason_id}`, data),
-			delete: (delete_ids) =>
-			{
-				var remove_ids = ''
-				for(var i of delete_ids) {
-					remove_ids += `&delete=${i}`
-				}
-				return instance.delete(`learning/psychological_test_question/?year=${cyear_name}&season=${cseason_id}${remove_ids}`)
-			}
+			delete: (delete_id) => instance.delete(`learning/psychological_test_question/?year=${cyear_name}&season=${cseason_id}&delete=${delete_id}`)
 		},
 
 		psychologicalTest:{
@@ -1510,7 +1503,11 @@ function useApi(isDisplay=false) {
 			put: (data, pk) => instance.put(`learning/psychological_test/${pk}/`, data),
 			delete: (pk) => instance.delete(`learning/psychological_test/${pk}/`),
 
-			getOptions: () => instance.get(`learning/psychological_test/options/`)
+			getOptions: () => instance.get(`learning/psychological_test/options/`),
+			getScope: (limit, page, search, test_id) => instance.get(`learning/psychological_test/scope_list/?page=${page}&limit=${limit}&search=${search}&test_id=${test_id}`),
+			getSelect: (scope, test_id) => instance.get(`learning/psychological_test/scope_option/?scope=${scope}&test_id=${test_id}`),
+			putAddScope: (data, pk) => instance.put(`learning/psychological_test/add_scope/${pk}/`, data),
+			deleteParticitant: (pk, test_id) => instance.delete(`learning/psychological_test/add_scope/${pk}/?test_id=${test_id}`)
 		},
 
 		psychologicalTestOne:{

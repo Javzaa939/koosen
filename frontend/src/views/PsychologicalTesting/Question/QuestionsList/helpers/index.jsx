@@ -38,17 +38,9 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleDelete, 
 
 		},
 		{
-			name: <div className='' style={{ textWrap: "wrap", textAlign: "center" }}>{`${'Түвшин'}`}</div>,
-			selector: (row) => <div>
-				{questionLevel?.find(v=> v.id = row.level)?.name}
-			</div>,
-			wrap: true,
-			center: true,
-		},
-		{
 			name: <div className='' style={{ textWrap: "wrap", textAlign: "center" }}>{`${'Төрөл'}`}</div>,
 			selector: (row) => <div>
-				{questionType?.find(v=> v.id = row.kind)?.name}
+				{questionType?.find(v=> v.id == row.kind)?.name}
 			</div>,
 			wrap: true,
 			center: true,
