@@ -416,7 +416,6 @@ class GpaCheckUserInfoSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(source='user.full_name', default='', read_only=True)
     profession = serializers.CharField(source='profession.profession.name', default='')
     admission = serializers.IntegerField(source='profession.admission.id', default='')
-    gpa_definition = serializers.SerializerMethodField()
     # Элсэлтийн мэргэжлийн төрөл
     profession_state = serializers.IntegerField(source='profession.state', default='')
 
@@ -438,10 +437,33 @@ class GpaCheckUserInfoSerializer(serializers.ModelSerializer):
 
         return userinfo_data
 
-    def get_gpa_definition(self,obj):
-        data = UserInfo.objects.filter(user = obj.user.id).first()
+class GpaCheckConfirmUserInfoSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
+    userinfo = serializers.SerializerMethodField()
+    full_name = serializers.CharField(source='user.full_name', default='', read_only=True)
+    profession = serializers.CharField(source='profession.profession.name', default='')
+    admission = serializers.IntegerField(source='profession.admission.id', default='')
+    # Элсэлтийн мэргэжлийн төрөл
+    profession_state = serializers.IntegerField(source='profession.state', default='')
 
-        return data.gpa
+    class Meta:
+        model = AdmissionUserProfession
+        fields = '__all__'
+
+    def get_user(self, obj):
+
+        data = ElseltUser.objects.filter(id=obj.user.id).first()
+        userinfo_data = ElseltUserSerializer(data).data
+
+        return userinfo_data
+
+    def get_userinfo(self, obj):
+
+        data = UserInfo.objects.filter(user=obj.user.id).first()
+        userinfo_data = UserinfoSerializer(data).data
+
+        return userinfo_data
+
 
 class EyeshCheckUserInfoSerializer(serializers.ModelSerializer):
 
@@ -505,33 +527,36 @@ class EyeshCheckUserInfoSerializer(serializers.ModelSerializer):
         userinfo_data = UserinfoSerializer(data).data
 
         return userinfo_data
+    # ЭЕШ ийн оноо босго оноо давсанг шалгах
+    def get_eesh_check(self, obj):
+        check_score_query = AdmissionBottomScore.objects.filter(profession=obj.profession_id).values('bottom_score')
 
-    def get_eesh_check(self,obj):
-        check_score_query = AdmissionBottomScore.objects.filter(profession = obj.profession_id).values('bottom_score')
+        # Тухайн сургуулийн босго оноо
+        check_score = check_score_query[0]['bottom_score'] if check_score_query.exists() else 400
 
-        if check_score_query.exists():
-            check_score = check_score_query[0]['bottom_score']
-        else:
-            # Босго оноо байхгүй тохиолдолд
-            check_score = 400
-
-        eesh_check=[]
+        # Бүртгүүлэгчийн ЭЕШ ийн оноо
         user_scores = self.get_user_score(obj)
-        sum_scaled_scores = 0
-        count_scores = 0
-        for scores in user_scores:
-            for score in scores['scores']:
-            # Бүх авсан онооны нийлбэр
-                sum_scaled_scores += score['scaledScore']
-            # Хичээлийн тоо
-                count_scores += 1
+        avg_scaled_score = []
 
-    # Дундаж оноог бодох
-        if count_scores > 0:
-            avg_scaled_score = sum_scaled_scores / count_scores
-        else:
-            avg_scaled_score = 0
-        if avg_scaled_score > check_score:
-            eesh_check = 'tentssen'
+        if user_scores:
+            sum_scaled_scores = 0
+            count_scores = 0
+            for scores in user_scores:
+                for score in scores['scores']:
+                    sum_scaled_scores += score['scaledScore']
+                    count_scores += 1
 
-        return eesh_check
+            # Дундаж оноо
+            avg_scaled_score = sum_scaled_scores / count_scores if count_scores > 0 else 0
+
+            # Төлөв өөрчлөх
+            if avg_scaled_score <= check_score:
+                    obj.gpa_state = 3
+                    obj.gpa_definition = 'ЭЕШ ийн оноо босго оноонд хүрэхгүй байна'
+                    obj.state = 3
+            else:
+                    obj.gpa_state = 2
+                    obj.gpa_definition = None
+            obj.save()
+
+        return avg_scaled_score or 0

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   Button,
@@ -16,9 +16,20 @@ import {
 import { MdMailOutline } from "react-icons/md";
 import { BiMessageRoundedError } from "react-icons/bi";
 import useLoader from "@hooks/useLoader";
-import { auto } from "@popperjs/core";
+import useApi from "@hooks/useApi";
+import "./style.scss";
+import { ChevronDown, Search } from "react-feather";
+import { t } from "i18next";
+import useModal from "@hooks/useModal";
 
-function GpaModal({ gpaModalHandler, gpaModal, lesson_year , prof_id }) {
+function GpaModal({
+  gpaModalHandler,
+  gpaModal,
+  lesson_year,
+  prof_id,
+  gplesson_year,
+  profession_name,
+}) {
   const [selectedOption, setSelectedOption] = useState("gpa");
   const {
     formState: { errors },
@@ -27,26 +38,93 @@ function GpaModal({ gpaModalHandler, gpaModal, lesson_year , prof_id }) {
     reset,
   } = useForm();
   const { Loader, isLoading, fetchData } = useLoader({
-    isFullScreen: true,
+    isFullScreen: false,
     bg: 2,
   });
+  const { showWarning } = useModal();
 
+  //State
+  const [datas, setDatas] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredData, setFilteredData] = useState([]);
+  const [cdata, setCData] = useState([]);
+
+  //API
+  const gpaApi = useApi().elselt.admissionuserdata.gpa;
+  const eyeshApi = useApi().elselt.admissionuserdata.eyesh;
+  const saveApi = useApi().elselt.admissionuserdata.gpaconfirm;
+  const admissionStateChangeApi = useApi().elselt.admissionuserdata.email;
+
+  //Шалгах функц
   async function onSubmit(cdata) {
-    if (selectedOption !== "gpa") {
-      cdata.gpa = ""; // or whatever default value you want to assign
+    setCData(cdata);
+    const apiCall =
+      selectedOption === "gpa"
+        ? gpaApi.get(cdata.count, lesson_year, prof_id, cdata.gpa)
+        : eyeshApi.get(cdata.count, lesson_year, prof_id);
+
+    const { success, data } = await fetchData(apiCall);
+    if (success) {
+      setDatas(data);
+      setFilteredData(data);
     }
-    console.log(cdata);
   }
+  //Mail илгээх функц
+  async function sendMail() {
+    const edata = {
+      students: filteredData.map((val) => val?.user?.id) || [],
+      email_list: filteredData.map((val) => val?.user?.email) || [],
+      description: filteredData.map((val) => val?.gpa_description) || []
+  };
+    if (edata.students.length > 0) {
+      const { success } = await fetchData(admissionStateChangeApi.post(edata));
+      if (success) {
+        reset();
+        edata = {};
+      }
+    }
+  }
+  //Төлөв өөрчлөх
+  async function saveData(cdata) {
+    if (cdata) {
+      const { success, data } = await fetchData(
+        saveApi.get(cdata.count, lesson_year, prof_id, cdata.gpa)
+      );
+      if (success) {
+        reset();
+      }
+    }
+  }
+
+  useEffect(() => {
+    const filtered = datas.filter((data) =>
+      Object.values(data.user).some(
+        (value) =>
+          value &&
+          value.toString().toLowerCase().includes(searchTerm.toLowerCase())
+      )
+    );
+    setFilteredData(filtered);
+  }, [searchTerm, datas]);
 
   return (
     <Modal centered toggle={gpaModalHandler} isOpen={gpaModal} size="lg">
       {isLoading && Loader}
-      <ModalHeader toggle={gpaModalHandler}>Элсэгчидын голч шалгах</ModalHeader>
+      <ModalHeader toggle={gpaModalHandler}>
+        <div>
+          <h5>Элсэгчидын голч шалгах</h5>
+        </div>
+      </ModalHeader>
       <ModalBody
         className="d-flex flex-column "
         tag={Form}
         onSubmit={handleSubmit(onSubmit)}
       >
+        <div className="d-flex justify-content-end gap-4">
+          {" "}
+          <p>{gplesson_year}</p>
+          <p>{profession_name}</p>
+        </div>
         <Col md={12}>
           <div className="modal-content-container">
             <Form className="d-flex">
@@ -65,6 +143,7 @@ function GpaModal({ gpaModalHandler, gpaModal, lesson_year , prof_id }) {
                   type="radio"
                   name="checkOption"
                   value="eyesh"
+                  disabled={true}
                   checked={selectedOption === "eyesh"}
                   onChange={() => setSelectedOption("eyesh")}
                 />
@@ -92,6 +171,7 @@ function GpaModal({ gpaModalHandler, gpaModal, lesson_year , prof_id }) {
                   }}
                   render={({ field: { value, onChange } }) => (
                     <Input
+                      size="sm"
                       type="textarea"
                       name="gpa"
                       id="gpa"
@@ -124,6 +204,7 @@ function GpaModal({ gpaModalHandler, gpaModal, lesson_year , prof_id }) {
                   }}
                   render={({ field: { value, onChange } }) => (
                     <Input
+                      size="sm"
                       type="textarea"
                       name="count"
                       id="count"
@@ -159,7 +240,7 @@ function GpaModal({ gpaModalHandler, gpaModal, lesson_year , prof_id }) {
                   color="primary"
                   className="d-flex align-items-center px-75"
                   id="email_button"
-                  disabled
+                  onClick={sendMail}
                 >
                   <MdMailOutline className="me-25" />
                   Email илгээх
@@ -185,68 +266,80 @@ function GpaModal({ gpaModalHandler, gpaModal, lesson_year , prof_id }) {
             </div>
           </div>
         </Col>
-        <p className="d-flex justify-content-end mt-2">Тэнцээгүй элсэгч : <strong>100</strong></p>
-        <Table responsive className="overflow-hidden" >
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Table heading</th>
-              <th>Table heading</th>
-              <th>Table heading</th>
-              <th>Table heading</th>
-              <th>Table heading</th>
-              <th>Table heading</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <th scope="row">1</th>
-              <td>Table cell</td>
-              <td>Table cell</td>
-              <td>Table cell</td>
-              <td>Table cell</td>
-              <td>Table cell</td>
-              <td>Table cell</td>
-            </tr>
-            <tr>
-              <th scope="row">2</th>
-              <td>Table cell</td>
-              <td>Table cell</td>
-              <td>Table cell</td>
-              <td>Table cell</td>
-              <td>Table cell</td>
-              <td>Table cell</td>
-            </tr>
-            <tr>
-              <th scope="row">3</th>
-              <td>Table cell</td>
-              <td>Table cell</td>
-              <td>Table cell</td>
-              <td>Table cell</td>
-              <td>Table cell</td>
-              <td>Table cell</td>
-            </tr>
-            <tr>
-              <th scope="row">4</th>
-              <td>Table cell</td>
-              <td>Table cell</td>
-              <td>Table cell</td>
-              <td>Table cell</td>
-              <td>Table cell</td>
-              <td>Table cell</td>
-            </tr>
-            <tr>
-              <th scope="row">5</th>
-              <td>Table cell</td>
-              <td>Table cell</td>
-              <td>Table cell</td>
-              <td>Table cell</td>
-              <td>Table cell</td>
-              <td>Table cell</td>
-            </tr>
-          </tbody>
-        </Table>
-        <div className="d-flex justify-content-end">
+        <div className="d-flex justify-content-between mt-3 align-items-center">
+          <Col
+            className="d-flex align-items-center mobile-datatable-search"
+            md={4}
+            sm={12}
+          >
+            <Input
+              className="dataTable-filter mb-50"
+              type="text"
+              bsSize="sm"
+              id="search-input"
+              placeholder={"Хайх үг...."}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <Button size="sm" className="ms-50 mb-50" color="primary">
+              <Search size={15} />
+              <span className="align-middle ms-50"></span>
+            </Button>
+          </Col>
+          <p className="d-flex">
+            Тэнцээгүй элсэгч : <strong>{filteredData.length}</strong>
+          </p>
+        </div>
+        <div className="table-container">
+          <Table responsive className="small-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Овог</th>
+                <th>Нэр</th>
+                <th>РД</th>
+                <th>Утас</th>
+                <th>Email</th>
+                <th>Тайлбар</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredData.map((data, index) => (
+                <tr key={index}>
+                  <th scope="row">{index + 1}</th>
+                  <td>{data.user.last_name}</td>
+                  <td>{data.user.first_name}</td>
+                  <td>{data.user.register}</td>
+                  <td>{data.user.mobile}</td>
+                  <td>{data.user.email}</td>
+                  <td>{data.gpa_description}</td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        </div>
+        <div className="d-flex justify-content-between">
+          <div className="text-center my-50">
+            <Button
+              color="primary"
+              className="m-50"
+              disabled={isLoading}
+              onClick={() =>
+                showWarning({
+                  header: {
+                    title: `${t(
+                      "Бүртгүүлэгчийн онооны мэдээлэл , төлөв өөрчлөх"
+                    )}`,
+                  },
+                  question: `Та хадгалахдаа итгэлтэй байна уу?`,
+                  onClick: () => saveData(cdata),
+                  btnText: "Хадгалах",
+                })
+              }
+            >
+              Хадгалах
+            </Button>
+          </div>
           <div className="text-center my-50">
             <Button
               className="m-50"

@@ -49,6 +49,7 @@ from .serializer import (
     PhysqueUserSerializer,
     HealthPhysicalUserInfoSerializer,
     GpaCheckUserInfoSerializer,
+    GpaCheckConfirmUserInfoSerializer,
     EyeshCheckUserInfoSerializer
 )
 
@@ -1262,11 +1263,13 @@ class ElseltHealthPhysicalCreateAPIView(
             return Response({'status': '403 Forbidden', 'message': 'API key буруу '}, status=status.HTTP_403_FORBIDDEN)
 
 class GpaCheckUserInfoAPIView(
-    generics.GenericAPIView,
-    mixins.ListModelMixin,
+ generics.GenericAPIView,
     mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin
 ):
-
+# Голч шалгах API
     queryset = AdmissionUserProfession.objects.all().order_by('created_at')
 
     serializer_class = GpaCheckUserInfoSerializer
@@ -1288,10 +1291,9 @@ class GpaCheckUserInfoAPIView(
                 org=Subquery(userinfo_org),
             )
         )
-        limit = self.request.query_params.get('limit')
+
         lesson_year_id = self.request.query_params.get('lesson_year_id')
         profession_id = self.request.query_params.get('profession_id')
-        gpa = self.request.query_params.get('gpa')
 
         if lesson_year_id:
             queryset = queryset.filter(profession__admission=lesson_year_id)
@@ -1299,25 +1301,121 @@ class GpaCheckUserInfoAPIView(
         if profession_id:
             queryset = queryset.filter(profession__profession__id=profession_id)
 
-        if gpa:
-            queryset = queryset.filter(gpa__lte = gpa)
-
-        if limit:
-            queryset = queryset[:int(limit)]
 
         return queryset
 
     def get(self, request, pk=None):
-
+        limit = self.request.query_params.get('limit')
         if pk:
-
             all_data = self.retrieve(request, pk).data
-
             return request.send_data(all_data)
 
-        all_data = self.list(request).data
+        # Бүртгүүлэгчийн голч created_at аар эрэмбэлэх
+        queryset = self.get_queryset().order_by('-gpa','created_at')
+        serializer = GpaCheckUserInfoSerializer(queryset, many=True)
+        data = serializer.data
+        if limit:
+            limit = int(limit)
 
-        return request.send_data(all_data)
+            # орж ирсэн тоогоор датаг ангилах
+            data= data[limit:]
+            for entry in data:
+                gpa = entry.get('userinfo', {}).get('gpa')
+
+                # Бүртгүүлэгчийн голч  оруулсан голчоос бага эсэхийг шалгаж төлөвийн өөрчилж харуулах
+                if gpa is not None and float(gpa) < float(self.request.query_params.get('gpa', 0)):
+                    entry['gpa_description'] = "Голч оноо хүрээгүй"
+                else:
+                    entry['gpa_description'] = "Хяналтын тоонд багтаагүй"
+
+        return request.send_data(data)
+
+#Төлөв хадгалах API
+class GpaCheckConfirmUserInfoAPIView(
+    generics.GenericAPIView,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin
+):
+
+    queryset = AdmissionUserProfession.objects.all().order_by('created_at')
+
+    serializer_class = GpaCheckConfirmUserInfoSerializer
+
+    filter_backends = [SearchFilter]
+    search_fields = ['user__first_name', 'user__register', 'user__email', 'gpa', 'org']
+
+    def get_queryset(self):
+        queryset = self.queryset
+        queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
+
+        userinfo_qs = UserInfo.objects.filter(user=OuterRef('user')).values('gpa')[:1]
+        userinfo_org = UserInfo.objects.filter(user=OuterRef('user')).values('work_organization')[:1]
+
+        queryset = (
+            queryset
+            .annotate(
+                gpa=Subquery(userinfo_qs),
+                org=Subquery(userinfo_org),
+            )
+        )
+        lesson_year_id = self.request.query_params.get('lesson_year_id')
+        profession_id = self.request.query_params.get('profession_id')
+
+        if lesson_year_id:
+            queryset = queryset.filter(profession__admission=lesson_year_id)
+
+        if profession_id:
+            queryset = queryset.filter(profession__profession__id=profession_id)
+
+        return queryset
+
+    def get(self, request, pk=None):
+        limit = self.request.query_params.get('limit')
+        if pk:
+            all_data = self.retrieve(request, pk).data
+            return request.send_data(all_data)
+
+        queryset = self.get_queryset().order_by('-gpa', 'created_at')
+        serializer = GpaCheckUserInfoSerializer(queryset, many=True)
+        data = serializer.data
+        if limit:
+            limit = int(limit)
+
+            #Тоонд багтсан дата
+            confirmed_data = data[:limit]
+
+            #Тоонд багтаагүй дата
+            unconfirmed_data = data[limit:]
+            with transaction.atomic():
+                for entry in unconfirmed_data:
+                    gpa = entry.get('userinfo', {}).get('gpa', 0)
+                    if float(gpa) < float(self.request.query_params.get('gpa', 0)):
+                        entry['gpa_state'] = AdmissionUserProfession.STATE_REJECT
+                        entry['gpa_description'] = "Голч оноо хүрээгүй"
+                        entry['state'] = AdmissionUserProfession.STATE_REJECT
+                    else :
+                        entry['gpa_state'] = AdmissionUserProfession.STATE_REJECT
+                        entry['gpa_description'] = "Хяналтын тоонд багтаагүй"
+                        entry['state'] = AdmissionUserProfession.STATE_REJECT
+
+                # Өөрчилсөн төлөвийг хадгалах
+                    obj = AdmissionUserProfession.objects.get(pk=entry['id'])
+                    obj.gpa_state = entry['gpa_state']
+                    obj.definition = entry['gpa_description']
+                    obj.state = entry['state']
+                    obj.save()
+                for entry in confirmed_data:
+                    obj = AdmissionUserProfession.objects.get(pk=entry['id'])
+                    obj.gpa_state = AdmissionUserProfession.STATE_APPROVE
+                    obj.save()
+
+            return request.send_info('INF_002')
+        else:
+            return request.send_error('ERR_001')
+
+
 
 class EyeshCheckUserInfoAPIView(
     generics.GenericAPIView,
@@ -1346,7 +1444,6 @@ class EyeshCheckUserInfoAPIView(
                 org=Subquery(userinfo_org),
             )
         )
-        limit = self.request.query_params.get('limit')
         lesson_year_id = self.request.query_params.get('lesson_year_id')
         profession_id = self.request.query_params.get('profession_id')
 
@@ -1356,13 +1453,11 @@ class EyeshCheckUserInfoAPIView(
         if profession_id:
             queryset = queryset.filter(profession__profession__id=profession_id)
 
-        if limit:
-            queryset = queryset[:int(limit)]
 
         return queryset
 
     def get(self, request, pk=None):
-
+        limit = self.request.query_params.get('limit')
         if pk:
 
             all_data = self.retrieve(request, pk).data
@@ -1370,5 +1465,9 @@ class EyeshCheckUserInfoAPIView(
             return request.send_data(all_data)
 
         all_data = self.list(request).data
+        all_data.sort(key=lambda x: x.get('eesh_check', 0),reverse=True)
+        if limit:
+            limit = int(limit)
+            all_data = all_data[limit:]
 
         return request.send_data(all_data)

@@ -85,6 +85,9 @@ const ElseltUser = () => {
     const [profOption, setProfession] = useState([])
     const [profession_id, setProfession_id] = useState('')
 
+    const [selectedLesson, setSelectedLesson] = useState(null);
+    const [selectedProfession, setSelectedProfession] = useState(null);
+
     const [admop, setAdmop] = useState([])
     const [adm, setAdm] = useState('')
 
@@ -197,7 +200,7 @@ const ElseltUser = () => {
         if(success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
-            console.log(data)
+
             // Нийт хуудасны тоо
             var cpage_count = Math.ceil(data?.count / rowsPerPage === 'Бүгд' ? 1 : rowsPerPage)
             setPageCount(cpage_count)
@@ -451,7 +454,6 @@ const ElseltUser = () => {
             setGpaModal(!gpaModal);
           }
     }
-
 	return (
 		<Fragment>
             <StateModal
@@ -476,6 +478,8 @@ const ElseltUser = () => {
             gpaModal = {gpaModal}
             lesson_year = {adm}
             prof_id = {profession_id}
+            gplesson_year={selectedLesson?.name || ''}
+            profession_name={selectedProfession?.name || ''}
             />
             {isLoading && Loader}
 			<Card>
@@ -500,6 +504,7 @@ const ElseltUser = () => {
                                 noOptionsMessage={() => t('Хоосон байна.')}
                                 onChange={(val) => {
                                     setAdm(val?.id || '')
+                                    setSelectedLesson(val);
                                 }}
                                 styles={ReactSelectStyles}
                                 getOptionValue={(option) => option.id}
@@ -546,6 +551,7 @@ const ElseltUser = () => {
                                 noOptionsMessage={() => t('Хоосон байна.')}
                                 onChange={(val) => {
                                     setProfession_id(val?.prof_id || '')
+                                    setSelectedProfession(val)
                                 }}
                                 styles={ReactSelectStyles}
                                 getOptionValue={(option) => option?.prof_id}
@@ -679,15 +685,14 @@ const ElseltUser = () => {
                         </div>
 
                         <div className='px-1'>
-                            <Button color='primary' disabled={adm.length === 0 } className='d-flex align-items-center px-75' id='message_button' onClick={() => gpaModalHandler()}>
-                            {showError ? (<Alert color='danger' size='sm'>{t('Хөтөлбөрийг сонгоно уу.')}</Alert>):(
+                            <Button color='primary' disabled={adm.length === 0 && profession_id.length === 0 } className='d-flex align-items-center px-75' id='message_button' onClick={() => gpaModalHandler()}>
                                 <>
                                 <BiMessageRoundedError className='me-25'/>
                                 Голч Шалгах
-                              </>)}
+                              </>
                             </Button>
                             <UncontrolledTooltip target='message_button'>
-                            Сонгосон элсэгчидын Голч Дүн Шалгах
+                            Элсэлт Хөтөлбөр хоёуланг нь сонгоно уу
                             </UncontrolledTooltip>
                         </div>
                     </div>
