@@ -867,6 +867,8 @@ class ElseltHealthAnhanShat(
         gender = self.request.query_params.get('gender')
         sorting = self.request.query_params.get('sorting')
         state  = self.request.query_params.get('state')
+        elselt = self.request.query_params.get('elselt')
+        profession = self.request.query_params.get('profession')
 
         # Ял шийтгэл, Насны үзүүлэлтүүдэд ТЭНЦЭЭГҮЙ элсэгчдийг хасах
         queryset = queryset.exclude(justice_state=AdmissionUserProfession.STATE_REJECT, age_state=AdmissionUserProfession.STATE_REJECT)
@@ -876,6 +878,14 @@ class ElseltHealthAnhanShat(
                 queryset = queryset.filter(gender__in=['1', '3', '5', '7', '9'])
             else:
                 queryset = queryset.filter(gender__in=['0', '2', '4', '6', '8'])
+
+        # элсэлт
+        if elselt:
+            queryset = queryset.filter(profession__admission=elselt)
+
+        # хөтөлбөр
+        if profession:
+            queryset = queryset.filter(profession__profession__id=profession)
 
         # Sort хийх үед ажиллана
         if sorting:
