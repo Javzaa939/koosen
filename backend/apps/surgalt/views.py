@@ -2523,13 +2523,17 @@ class PsychologicalTestScopesAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
 ):
+    queryset = PsychologicalTest.objects.all()
+
     def get(self, request):
+        datas = []
+
         # Parametr-үүд
         test_id = request.query_params.get('test_id')
         search_value = request.query_params.get('search')
 
         # Тухайн ёорилоо авна
-        test_instance = PsychologicalTest.objects.get(id=test_id)
+        test_instance = self.queryset.get(id=test_id)
 
         # Cорилын хамрах хүрээний төрлөөс шалтгаалан хамрах хүрээг хаанаас авхаа тодорхойлно
         scope = test_instance.scope_kind
@@ -2559,7 +2563,7 @@ class PsychologicalTestScopesAPIView(
             if search_value:
                 self.queryset = _filter_queries(self.queryset, search_value, search_fields)
 
-        datas = self.list(request).data
+            datas = self.list(request).data
         return request.send_data(datas)
 
 
