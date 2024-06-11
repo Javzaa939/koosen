@@ -8,8 +8,6 @@ import DataTable from 'react-data-table-component'
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 
-// import SchoolContext from '@context/SchoolContext'
-
 import { getColumns } from './helpers';
 
 import { useNavigate } from 'react-router-dom'
@@ -33,8 +31,6 @@ const Enrollment = () => {
 
     const [currentPage, setCurrentPage] = useState(1)
 
-    // const { school_id } = useContext(SchoolContext)
-
     const { t } = useTranslation()
 
     const { control, formState: { errors } } = useForm({});
@@ -52,10 +48,8 @@ const Enrollment = () => {
     const [professionOption, setProfessionOption] = useState([])
     const [selectedRows, setSelectedRows] = useState([])
 
-
     // API
     const professionApi = useApi().elselt.profession
-    const admissionApi = useApi().print.admission
     const admissionYearApi = useApi().elselt
     const elseltApproveApi = useApi().elselt.approve
 

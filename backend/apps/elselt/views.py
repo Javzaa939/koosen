@@ -1273,7 +1273,6 @@ class ElseltStateApprove(
     filter_backends = [SearchFilter]
     search_fields = ['user__first_name', 'user__last_name', 'user__register', 'profession__profession__name', 'admission_number', 'admission_date']
 
-
     def get_queryset(self):
         profession = self.request.query_params.get('profession')
         admission = self.request.query_params.get('admission')
@@ -1322,4 +1321,5 @@ class ElseltStateApprove(
 
             except Exception as e:
                 return request.send_error('ERR_002')
+
         return request.send_info('INF_001', "Амжилттай тушаал үүслээ")

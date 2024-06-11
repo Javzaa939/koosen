@@ -22,9 +22,11 @@ from elselt.models import (
     PhysqueUser,
     UserScore
 )
+
 from surgalt.serializers import (
     ProfessionDefinitionSerializer
 )
+
 class AdmissionSerializer(serializers.ModelSerializer):
     degree_name = serializers.SerializerMethodField()
 
