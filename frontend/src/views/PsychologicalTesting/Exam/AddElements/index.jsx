@@ -37,14 +37,13 @@ function AddStudent(){
     const { isLoading, Loader, fetchData } = useLoader({});
     const { fetchData: fetchSelectData} = useLoader({});
     const { fetchData: fetchQuestion } = useLoader({});
-    const { fetchData: fetchStudents } = useLoader({});
     const { control, handleSubmit, setError, formState: { errors }, } = useForm({});
     const { challenge_id } = useParams();
 
     const [scope, setScope] = useState('');
 
     const [currentPage, setCurrentPage] = useState(1);
-	const [rowsPerPage, setRowsPerPage] = useState(100);
+	const [rowsPerPage, setRowsPerPage] = useState(10);
     const [total_count, setTotalCount] = useState(1);
     const [searchValue, setSearchValue] = useState('');
 
@@ -52,23 +51,18 @@ function AddStudent(){
     const [rowsPerPageQuestion, setRowsPerPageQuestion] = useState(5);
     const [totalCountQuestion, setTotalCountQuestion] = useState();
 
-    const [selectedGroups, setSelectedGroups] = useState([]);
     const [selectOption, setSelectOption] = useState([]);
 
     const [datas, setDatas] = useState([]);
-    const [students, setStudents] = useState([]);
     const [question_datas, setQuestionData] = useState([]);
 
     const [modal, setModal] = useState(false);
 
-    const [student_search_value, setStudentSearchValue] = useState([]);
-
-    const challengeAPI = useApi().challenge;
+    const challengeAPI = useApi().challenge.psychologicalTest;
     const psychologicalTestQuestionsAPi = useApi().challenge.psychologicalTestOne
 
     async function getDatas(){
-
-        const { success, data } = await fetchData(challengeAPI.getAddStudent(currentPage, rowsPerPage, searchValue, challenge_id));
+        const { success, data } = await fetchData(challengeAPI.getScope(rowsPerPage, currentPage, searchValue, challenge_id));
         if (success) {
             setDatas(data?.results);
             setTotalCount(data?.count);
@@ -76,19 +70,11 @@ function AddStudent(){
     };
 
     async function getSelects(){
-		const { success, data } = await fetchSelectData(challengeAPI.getSelect(scope))
-		if(success)
-		{
+		const { success, data } = await fetchSelectData(challengeAPI.getSelect(scope, challenge_id))
+		if(success){
 			setSelectOption(data)
 		}
 	}
-
-    async function getStudents(){
-        const { success, data } = await fetchStudents(challengeAPI.getStudents(student_search_value));
-        if(success) {
-            setStudents(data)
-        }
-    }
 
     async function getQuestionTableData(){
         const { success, data } = await fetchQuestion(psychologicalTestQuestionsAPi.get(rowsPerPageQuestion, currentPageQuestion, challenge_id))
@@ -99,7 +85,7 @@ function AddStudent(){
     }
 
     async function handleDelete(id) {
-		const { success } = await fetchData(challengeAPI.deleteStudent(id, challenge_id));
+		const { success } = await fetchData(challengeAPI.deleteParticitant(id, challenge_id));
 		if (success) {
 			getDatas();
 		}
@@ -121,11 +107,7 @@ function AddStudent(){
     },[currentPageQuestion, rowsPerPageQuestion])
 
     useEffect(() => {
-        if (scope != 'all' && scope) {
-            getSelects()
-        } else {
-            setSelectedGroups([])
-        }
+        getSelects()
     },[scope])
 
     function handleFilter(e){
@@ -137,17 +119,8 @@ function AddStudent(){
 		getDatas()
 	}
 
-    function handleStudentSelect(){
-        getStudents()
-    }
-
-    function groupSelect(data) {
-        setSelectedGroups(data);
-    }
-
-    const handleScope = (e, name) => {
-        var id = e.target.id
-        setScope(id)
+    const handleScope = (name) => {
+        setScope(name)
     };
 
     const handlePagination = (page) => {
@@ -163,25 +136,9 @@ function AddStudent(){
 	};
 
     async function onSubmit(cdata) {
-        cdata['groups'] = selectedGroups
         cdata['scope'] = scope
         cdata = convertDefaultValue(cdata)
-        const { success, error } = await fetchData(challengeAPI.putTestKind(cdata, challenge_id))
-        if(success) {
-            getDatas()
-        }
-        else {
-            /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in error) {
-                setError(error[key].field, { type: 'custom', message:  error[key].msg});
-            }
-        }
-	}
-
-    async function onSubmitStudent(cdata) {
-        cdata["challenge"] = challenge_id
-        cdata = convertDefaultValue(cdata)
-        const { success, error } = await fetchData(challengeAPI.putTest(cdata))
+        const { success, error } = await fetchData(challengeAPI.putAddScope(cdata, challenge_id))
         if(success) {
             getDatas()
         }
@@ -222,7 +179,7 @@ function AddStudent(){
                             </CardTitle>
                         </CardHeader>
                         <Row className="m-0">
-                            <Col md={7} className="mx-0 p-0">
+                            <Col md={12} className="mx-0 p-0">
                                 <Form onSubmit={handleSubmit(onSubmit)}>
                                     <div className='added-cards mb-0 text-center'>
                                         <div className={classnames('cardMaster p-1 rounded border')}>
@@ -230,49 +187,56 @@ function AddStudent(){
                                                 <h4 className='content-header'>Хамрах хүрээгээ сонгоно уу</h4>
                                             </div>
                                             <Row className='custom-options-checkable gx-1'>
-                                                <Col md={6}>
-                                                    <Input type='radio' id='all' name='plans' className='custom-option-item-check' onChange={(e) => handleScope(e, 'Хичээлийн хүрээнд')} checked={scope == 'all'}/>
-                                                    <Label for='all' className='custom-option-item text-center p-1'>
-                                                        <span className='fw-bolder'>Хичээлийн хүрээнд</span>
+                                                <Col md={4}>
+                                                    <Input type='radio' id='teacher' name='plans' className='custom-option-item-check' onChange={() => handleScope(1)} checked={scope == 1}/>
+                                                    <Label for='teacher' className='custom-option-item text-center p-1'>
+                                                        <span className='fw-bolder'>Ажилчид</span>
                                                     </Label>
                                                 </Col>
-                                                <Col md={6}>
-                                                    <Input type='radio' id='group' name='plans' className='custom-option-item-check ' onChange={(e) => handleScope(e, 'Ангийн хүрээнд')} checked={scope == 'group'}/>
-                                                    <Label for='group' className='custom-option-item text-center p-1'>
-                                                        <span className='fw-bolder'>Ангийн хүрээнд</span>
+                                                <Col md={4}>
+                                                    <Input type='radio' id='student' name='plans' className='custom-option-item-check ' onChange={() => handleScope(3)} checked={scope == 3}/>
+                                                    <Label for='student' className='custom-option-item text-center p-1'>
+                                                        <span className='fw-bolder'>Оюутан</span>
+                                                    </Label>
+                                                </Col>
+                                                <Col md={4}>
+                                                    <Input type='radio' id='elsegch' name='plans' className='custom-option-item-check ' onChange={() => handleScope(2)} checked={scope == 2}/>
+                                                    <Label for='elsegch' className='custom-option-item text-center p-1'>
+                                                        <span className='fw-bolder'>Элсэгч</span>
                                                     </Label>
                                                 </Col>
                                             </Row>
                                             {
-                                                scope === 'group' &&
+                                                scope === 3 &&
                                                     <Row className='mt-1'>
                                                         <Col md={12}>
-                                                            <Label className="form-label" for="select">
+                                                            <Label className="form-label" for="participants">
                                                                 {'Анги сонгох'}
                                                             </Label>
                                                             <Controller
                                                                 control={control}
                                                                 defaultValue=''
-                                                                name="select"
+                                                                name="participants"
                                                                 render={({ field: { value, onChange} }) => {
                                                                     return (
                                                                         <Select
-                                                                            name="select"
-                                                                            id="select"
+                                                                            name="participants"
+                                                                            id="participants"
                                                                             classNamePrefix='select'
                                                                             isClearable
                                                                             isMulti
+                                                                            value={value}
                                                                             className={'react-select'}
                                                                             isLoading={isLoading}
-                                                                            options={selectOption || []}
+                                                                            options={selectOption?.select_student_data || []}
                                                                             placeholder={t('-- Сонгоно уу --')}
                                                                             noOptionsMessage={() => t('Хоосон байна.')}
                                                                             onChange={(val) => {
-                                                                                groupSelect(val)
+                                                                                onChange(val)
                                                                             }}
                                                                             styles={ReactSelectStyles}
                                                                             getOptionValue={(option) => option.id}
-                                                                            getOptionLabel={(option) => option.full_name}
+                                                                            getOptionLabel={(option) => option.name}
                                                                         />
                                                                     )
                                                                 }}
@@ -288,61 +252,6 @@ function AddStudent(){
                                             >
                                                 {t("Хадгалах")}
                                             </Button>
-                                        </div>
-                                    </div>
-                                </Form>
-                            </Col>
-                            <Col md={5} className="p-0">
-                                <Form onSubmit={handleSubmit(onSubmitStudent)}>
-                                    <div className='added-cards mb-0'>
-                                        <div className={classnames('cardMaster p-1 rounded border')}>
-                                            <div className='content-header mb-2 mt-1 text-center'>
-                                                <h4 className='content-header'>Оюутныг кодоор сонгох</h4>
-                                            </div>
-                                            <Col md={12} className="my-2">
-                                                <Controller
-                                                    defaultValue=''
-                                                    control={control}
-                                                    name="student"
-                                                    render={({ field: { value, onChange } }) => {
-                                                        return (
-                                                            <Select
-                                                                id="student"
-                                                                name="student"
-                                                                classNamePrefix='select'
-                                                                className='react-select'
-                                                                placeholder={`Хайх`}
-                                                                options={students || []}
-                                                                value={students.find((c) => c.id === value)}
-                                                                noOptionsMessage={() => 'Хоосон байна'}
-                                                                onChange={(val) => {
-                                                                    onChange(val?.code)
-                                                                }}
-                                                                onInputChange={(e) => {
-                                                                    setStudentSearchValue(e);
-                                                                    if(student_search_value.length > 1){
-                                                                        handleStudentSelect();
-                                                                    } else if (student_search_value.length === 0){
-                                                                        setStudents([]);
-                                                                    }
-                                                                }}
-                                                                styles={ReactSelectStyles}
-                                                                getOptionValue={(option) => option.id}
-                                                                getOptionLabel={(option) => option.name_and_code}
-                                                            />
-                                                        );
-                                                    }}
-                                                />
-                                            </Col>
-                                            <div className="text-center">
-                                                <Button
-                                                    className="me-0 mt-1 text-end"
-                                                    color="primary"
-                                                    type="submit"
-                                                >
-                                                    {t("Хадгалах")}
-                                                </Button>
-                                            </div>
                                         </div>
                                     </div>
                                 </Form>

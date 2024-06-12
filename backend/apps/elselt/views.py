@@ -48,6 +48,8 @@ from .serializer import (
     HealthUpUserSerializer,
     PhysqueUserSerializer,
     HealthPhysicalUserInfoSerializer,
+    ElseltApproveSerializer,
+    HealthPhysicalUserInfoSerializer,
     GpaCheckUserInfoSerializer,
     GpaCheckConfirmUserInfoSerializer,
     EyeshCheckUserInfoSerializer
@@ -61,7 +63,8 @@ from elselt.models import (
     EmailInfo,
     HealthUser,
     PhysqueUser,
-    HealthUpUser
+    HealthUpUser,
+    AdmissionUserProfession
 )
 
 from core.models import (
@@ -255,7 +258,6 @@ class ElseltActiveListProfession(
     def get(self, request):
 
         elselt = request.query_params.get('elselt')
-
         if elselt:
             self.queryset = self.queryset.filter(admission=elselt)
 
@@ -872,15 +874,24 @@ class ElseltHealthAnhanShat(
         gender = self.request.query_params.get('gender')
         sorting = self.request.query_params.get('sorting')
         state  = self.request.query_params.get('state')
+        elselt = self.request.query_params.get('elselt')
+        profession = self.request.query_params.get('profession')
 
         # Ял шийтгэл, Насны үзүүлэлтүүдэд ТЭНЦЭЭГҮЙ элсэгчдийг хасах
-        queryset = queryset.exclude(justice_state=AdmissionUserProfession.STATE_REJECT, age_state=AdmissionUserProfession.STATE_REJECT)
-
+        queryset = queryset.exclude(age_state=AdmissionUserProfession.STATE_REJECT, gpa_state=AdmissionUserProfession.STATE_REJECT, state__in=[AdmissionUserProfession.STATE_REJECT, AdmissionUserProfession.STATE_APPROVE])
         if gender:
             if gender == 'Эрэгтэй':
                 queryset = queryset.filter(gender__in=['1', '3', '5', '7', '9'])
             else:
                 queryset = queryset.filter(gender__in=['0', '2', '4', '6', '8'])
+
+        # элсэлт
+        if elselt:
+            queryset = queryset.filter(profession__admission=elselt)
+
+        # хөтөлбөр
+        if profession:
+            queryset = queryset.filter(profession=profession)
 
         # Sort хийх үед ажиллана
         if sorting:
@@ -890,7 +901,11 @@ class ElseltHealthAnhanShat(
             queryset = queryset.order_by(sorting)
 
         if state:
-            user_id = HealthUser.objects.filter(state=state).values_list('user', flat=True)
+            if state == '1':
+                exclude_ids = HealthUser.objects.filter(Q(Q(state=AdmissionUserProfession.STATE_APPROVE) | Q(state=AdmissionUserProfession.STATE_REJECT))).values_list('user', flat=True)
+                user_id = AdmissionUserProfession.objects.filter(state=state).exclude(user__in=exclude_ids).values_list('user', flat=True)
+            else:
+                user_id = HealthUser.objects.filter(state=state).values_list('user', flat=True)
             queryset = queryset.filter(user__in=user_id)
 
         return queryset
@@ -1261,6 +1276,74 @@ class ElseltHealthPhysicalCreateAPIView(
             return Response({'status': '200 OK', 'message': 'Хүсэлт амжиллтай'}, status=status.HTTP_200_OK)
         else:
             return Response({'status': '403 Forbidden', 'message': 'API key буруу '}, status=status.HTTP_403_FORBIDDEN)
+
+
+class ElseltStateApprove(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.UpdateModelMixin,
+):
+    """ Элсэгч бүх шалгуурыг даваад тэнцсэн """
+
+    queryset = AdmissionUserProfession
+    serializer_class = ElseltApproveSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['user__first_name', 'user__last_name', 'user__register', 'profession__profession__name', 'admission_number', 'admission_date']
+
+    def get_queryset(self):
+        profession = self.request.query_params.get('profession')
+        admission = self.request.query_params.get('admission')
+        sorting = self.request.query_params.get('sorting')
+        queryset = self.queryset.objects.filter(state=AdmissionUserProfession.STATE_APPROVE)
+
+        if admission:
+            queryset = queryset.filter(profession__admission=admission)
+
+        if profession:
+            queryset = queryset.filter(profession__profession__id=profession)
+
+        # Sort хийх үед ажиллана
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
+
+        return queryset
+
+    def get(self, request):
+        " тэнцсэн элсэгчидын жагсаалт "
+
+        all_data = self.list(request).data
+        return request.send_data(all_data)
+
+    def post(self, request):
+        " Тэнцсэн элсэгчдын тушаал шинээр үүсгэх нь "
+
+        datas = request.data
+        users = datas.get('id')                             # Элсэгч
+        admission_date = datas.get('admission_date')        # Элсэлтийн тушаалын огноо
+        admission_number = datas.get('admission_number')    # Элсэлтийн тушаалын дугаар
+
+        with transaction.atomic():
+            try:
+                for user in users:
+                    AdmissionUserProfession.objects.update_or_create(
+                        id=user,
+                        defaults={
+                            "admission_number": admission_number,
+                            "admission_date": admission_date
+                        }
+                    )
+
+            except Exception as e:
+                return request.send_error('ERR_002')
+
+        return request.send_info('INF_001', "Амжилттай тушаал үүслээ")
+
 
 class GpaCheckUserInfoAPIView(
  generics.GenericAPIView,

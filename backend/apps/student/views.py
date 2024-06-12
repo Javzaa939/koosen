@@ -2763,7 +2763,7 @@ class StudentGpaDiplomaValuesAPIView(
                 if len(rows) > 0:
                     is_master = False
                     # Магистрийн дипломын хичээлийг хавсралтанд мэргэжлийн хичээлд хамт харуулах хэсэг
-                    if rows[0]['lesson_level'] == LearningPlan.MAG_DIPLOM or rows[0]['lesson_level'] == LearningPlan.DOC_DIPLOM or rows[0]['lesson_level'] == LearningPlan.MAG_PROFESSION:
+                    if rows[0]['lesson_level'] == LearningPlan.MAG_DIPLOM or rows[0]['lesson_level'] == LearningPlan.DOC_DIPLOM:
                         if rows[0]['lesson_level'] == LearningPlan.DOC_DIPLOM:
                             rows[0]['lesson_level'] = LearningPlan.DOC_PROFESSION
 

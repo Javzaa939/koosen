@@ -24,6 +24,10 @@ from elselt.models import (
     UserScore
 )
 
+from surgalt.serializers import (
+    ProfessionDefinitionSerializer
+)
+
 class AdmissionSerializer(serializers.ModelSerializer):
     degree_name = serializers.SerializerMethodField()
 
@@ -409,6 +413,26 @@ class HealthPhysicalUserInfoSerializer(serializers.ModelSerializer):
             health_user_data = PhysqueUserSerializer(user_data).data
 
         return health_user_data
+
+
+class AdmissionRegisterProfessionSerializer(serializers.ModelSerializer):
+    ""
+    profession = ProfessionDefinitionSerializer(many=False)
+
+    class Meta:
+        model = AdmissionRegisterProfession
+        fields = '__all__'
+
+class ElseltApproveSerializer(serializers.ModelSerializer):
+    " тэнцсэн элсэгчид авах "
+
+    profession = AdmissionRegisterProfessionSerializer(many=False)
+    user = ElseltUserSerializer(many=False)
+
+    class Meta:
+        model = AdmissionUserProfession
+        fields = '__all__'
+
 
 class GpaCheckUserInfoSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()

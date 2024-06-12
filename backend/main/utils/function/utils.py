@@ -33,6 +33,13 @@ from django.shortcuts import reverse
 from operator import or_
 from functools import reduce
 
+import os
+
+from main.utils.file import create_folder
+
+import subprocess
+
+
 def list_to_dict(data):
     """ List датаг Dict рүү хөрвүүлэх """
 
@@ -1111,3 +1118,65 @@ def send_message_skytel(phone_numbers, message):
             return False, 'Бусад оператор руу sms явуулах эрх алга', success_count, not_found_numbers
 
     return True, 'Амжилттай илгээлээ', success_count, not_found_numbers
+
+
+def create_backup(
+    db_pass,
+    db_user_name,
+    data_base,
+    host='localhost',
+    port='5432'
+):
+    """
+        backup авах crontab
+    """
+
+    # Үндсэн прожект байгаа фолдерийн зам
+    backup_path = str(settings.BASE_DIR.parent.parent)
+
+    today = date.today()
+    now = datetime.now()
+    now_hour = str(now.time().hour)
+
+    year = str(today.year)
+    month = str(today.month)
+    today = str(today)
+
+    backup_path = os.path.join(backup_path, 'dxis_backup')
+    yearFolderYear = os.path.join(backup_path, year)
+    yearFolderMonth = os.path.join(yearFolderYear, month)
+
+    create_folder(backup_path)
+    create_folder(yearFolderYear)
+    create_folder(yearFolderMonth)
+
+    filename = "{full_path}/{today}-{now_hour}.backup".format(
+        full_path=yearFolderMonth,
+        today=today.replace('\n', ''),
+        now_hour=now_hour,
+    )
+
+    cmd = [
+        '/usr/bin/pg_dump',
+        '--host', host,
+        '--port', port,
+        '--username', db_user_name,
+        '--no-password',
+        '--format=c',
+        '--file', filename,
+        '--blobs',
+        data_base,
+    ]
+
+    try:
+        subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stdin=subprocess.PIPE,
+            env={'PGPASSWORD': str(db_pass)},
+        )
+
+        print("\x1b[6;30;42m 'backup үүсгэлээ!' \x1b[0m", )
+
+    except Exception as e:
+        print(e)

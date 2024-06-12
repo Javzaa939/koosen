@@ -1497,14 +1497,7 @@ function useApi(isDisplay=false) {
 				instance.post(`learning/psychological_test_question/?year=${cyear_name}&season=${cseason_id}`, data),
 			put: (data, pk) =>
 				instance.put(`learning/psychological_test_question/${pk}/?year=${cyear_name}&season=${cseason_id}`, data),
-			delete: (delete_ids) =>
-			{
-				var remove_ids = ''
-				for(var i of delete_ids) {
-					remove_ids += `&delete=${i}`
-				}
-				return instance.delete(`learning/psychological_test_question/?year=${cyear_name}&season=${cseason_id}${remove_ids}`)
-			}
+			delete: (delete_id) => instance.delete(`learning/psychological_test_question/?year=${cyear_name}&season=${cseason_id}&delete=${delete_id}`)
 		},
 
 		psychologicalTest:{
@@ -1514,7 +1507,11 @@ function useApi(isDisplay=false) {
 			put: (data, pk) => instance.put(`learning/psychological_test/${pk}/`, data),
 			delete: (pk) => instance.delete(`learning/psychological_test/${pk}/`),
 
-			getOptions: () => instance.get(`learning/psychological_test/options/`)
+			getOptions: () => instance.get(`learning/psychological_test/options/`),
+			getScope: (limit, page, search, test_id) => instance.get(`learning/psychological_test/scope_list/?page=${page}&limit=${limit}&search=${search}&test_id=${test_id}`),
+			getSelect: (scope, test_id) => instance.get(`learning/psychological_test/scope_option/?scope=${scope}&test_id=${test_id}`),
+			putAddScope: (data, pk) => instance.put(`learning/psychological_test/add_scope/${pk}/`, data),
+			deleteParticitant: (pk, test_id) => instance.delete(`learning/psychological_test/add_scope/${pk}/?test_id=${test_id}`)
 		},
 
 		psychologicalTestOne:{
@@ -1695,7 +1692,6 @@ function useApi(isDisplay=false) {
 			getList: (elselt) => instance.get(`/elselt/profession/list/?elselt=${elselt}`),
 			putPropState: (datas) => instance.put(`/elselt/profession/`, datas)
 		},
-
 		sysinfo: {
 			get: () => instance.get(`/elselt/sysinfo/`),
 			put: (id, data) =>
@@ -1735,7 +1731,7 @@ function useApi(isDisplay=false) {
 		},
 		health: {
 			anhan:{
-				get: (limit, page, sort, search, state) => instance.get(`/elselt/health/anhan/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}`),
+				get: (limit, page, sort, search, state, elselt, profession) => instance.get(`/elselt/health/anhan/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}&elselt=${elselt}&profession=${profession}`),
 				post: (cdata) => instance.post(`/elselt/health/anhan/`, cdata),
 				put: (id, cdata) => instance.put(`/elselt/health/anhan/${id}/`, cdata)
 			},
@@ -1749,7 +1745,13 @@ function useApi(isDisplay=false) {
 				post: (cdata) => instance.post(`/elselt/health/physical/`, cdata),
 				put: (id, cdata) => instance.put(`/elselt/health/physical/${id}/`, cdata)
 			},
-		}
+		},
+		// тэнцсэн элсэгчид
+		approve: {
+			get: (limit, page, sort, search,admission, profession) => instance.get(`/elselt/approve/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&admission=${admission}&profession=${profession}`),
+			post: (cdata) => instance.post(`/elselt/approve/`, cdata),
+
+		},
 	},
 	able: {
 		getWorker: () => able_instance.get(`/?a=ableApi&tsk=getWorkers&key=uia`),
