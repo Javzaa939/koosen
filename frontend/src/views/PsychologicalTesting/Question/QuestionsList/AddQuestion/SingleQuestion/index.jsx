@@ -258,39 +258,33 @@ export default function SingleQuestion(props) {
                         </Col>
                         {
                             data?.questions ? (
-                                data.questions.map((question, index) => (
-                                    question?.level != "" && question?.level == 1
-                                    ?
-                                        <>
-                                            <Col md={3} className=''>
-                                                <Label className="form-label" for="score">
-                                                    {'Асуултын оноо'}
-                                                </Label>
-                                                <Controller
-                                                    defaultValue=''
-                                                    control={control}
+                                data?.questions[fieldIndex]?.level === 1 ?
+                                (
+                                    <Col md={3} className=''>
+                                        <Label className="form-label" for="score">
+                                            {'Асуултын оноо'}
+                                        </Label>
+                                        <Controller
+                                            defaultValue=''
+                                            control={control}
+                                            id={`${fieldName}[${fieldIndex}].score`}
+                                            name={`${fieldName}[${fieldIndex}].score`}
+                                            render={({ field }) => (
+                                                <Input
+                                                    {...field}
                                                     id={`${fieldName}[${fieldIndex}].score`}
                                                     name={`${fieldName}[${fieldIndex}].score`}
-                                                    render={({ field }) => (
-                                                        <Input
-                                                            {...field}
-                                                            id={`${fieldName}[${fieldIndex}].score`}
-                                                            name={`${fieldName}[${fieldIndex}].score`}
-                                                            bsSize="sm"
-                                                            placeholder="Асуултын оноо"
-                                                            type="number"
-                                                            invalid={errors?.[fieldName]?.[fieldIndex]?.['score'] && true}
-                                                        />
-                                                    )}
+                                                    bsSize="sm"
+                                                    placeholder="Асуултын оноо"
+                                                    type="number"
+                                                    invalid={errors?.[fieldName]?.[fieldIndex]?.['score'] && true}
+                                                    value={console.log(errors)}
                                                 />
-                                            </Col>
-                                        </>
-                                    :
-                                        <></>
-                                ))
-                            ) : (
-                                <></>
-                            )
+                                            )}
+                                        />
+                                    </Col>
+                                ) : null
+                            ) : null
                         }
                     </Row>
                 </Col>

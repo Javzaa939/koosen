@@ -63,6 +63,7 @@ from lms.models import (
 
 from core.models import (
     User,
+    Employee,
 )
 
 from lms.models import get_image_path
@@ -2106,6 +2107,9 @@ class PsychologicalTestQuestionsAPIView(
 
                     question['created_by'] = user
 
+                    if 'score' in question:
+                        question['score'] = int(question['score'])
+
                     if not yes_or_no:
                         question['yes_or_no'] = None
 
@@ -2197,7 +2201,6 @@ class PsychologicalTestQuestionsAPIView(
                                 choice_obj.save()
 
                             choice_ids.append(choice_obj.id)
-
                     question_obj.choices.set(choice_ids)
                 return request.send_info('INF_001')
             except Exception as e:
@@ -2254,7 +2257,7 @@ class PsychologicalQuestionTitleListAPIView(
     @login_required()
     def get(self, request):
         user = request.user.id
-        question_titles = PsychologicalTestQuestions.objects.filter(created_by=user).values_list("id", flat=True)
+        question_titles = PsychologicalTestQuestions.objects.filter(created_by=user).values_list("title", flat=True)
         data = self.queryset.filter(id__in=question_titles).values("id", "name")
         return request.send_data(list(data))
 
@@ -2312,7 +2315,6 @@ class PsychologicalQuestionTitleAPIView(
     @login_required()
     def post(self, request):
         request_data = request.data
-
         question_ids = request.data.pop("questions")
         serializer = self.get_serializer(data=request_data)
         if serializer.is_valid(raise_exception=False):
@@ -2407,8 +2409,12 @@ class PsychologicalTestAPIView(
         with transaction.atomic():
             sid = transaction.savepoint()
             try:
+                # Үүсгэсэн хэрэглэгч нь employee байна
+                datas = request.data.copy()
+                datas['created_by'] = Employee.objects.get(user=request.user.id).id
+
                 # Бүх датагаа serializer-даад хадгална
-                serializer = self.get_serializer(data=request.data)
+                serializer = self.get_serializer(data=datas)
                 if serializer.is_valid(raise_exception=True):
                     serializer.save()
                 transaction.savepoint_commit(sid)
@@ -2426,8 +2432,13 @@ class PsychologicalTestAPIView(
             sid = transaction.savepoint()
             try:
                 data = request.data.copy()
+                data['created_by'] = Employee.objects.get(user=request.user.id).id
+
                 # description болон duration 2 null ирж болно
-                data = {key: (None if value == 'null' else value) for key, value in data.items() if key in ['duration', 'description']}
+                if data['duration'] == 'null':
+                    data['duration'] = None
+                if data['description'] == 'null':
+                    data['description'] = None
 
                 serializer = self.get_serializer(instance, data=data)
                 # Тэгээд шууд serializer ашигланаа
