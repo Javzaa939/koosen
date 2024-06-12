@@ -1180,3 +1180,43 @@ def create_backup(
 
     except Exception as e:
         print(e)
+
+def check_phone_number(phone_numbers):
+    """Утасны дугаарын үүрэн телефон шалгах
+       phone_numbers: Шалгаж буй утасны дугаарууд (list)
+    """
+
+    #үүрэн телефон
+    categorized_numbers = {
+        'mobicom': [],
+        'skytel': [],
+        'unitel': [],
+        'gmobile': [],
+        'other': []
+    }
+
+    for phone_number in phone_numbers:
+
+        # Эхний 2 орон
+        two_digits = phone_number[:2]
+
+        if two_digits in ["99", "85", "95", "94"]:
+            categorized_numbers['mobicom'].append(phone_number)
+        elif two_digits in ["90", "91", "96"]:
+            categorized_numbers['skytel'].append(phone_number)
+        elif two_digits in ["80", "86", "88", "89"]:
+            categorized_numbers['unitel'].append(phone_number)
+        elif two_digits in ["93", "97", "98"]:
+            categorized_numbers['gmobile'].append(phone_number)
+        else:
+            categorized_numbers['other'].append(phone_number)
+
+    # Хоосон массив хаях
+    categorized_numbers = {k: v for k, v in categorized_numbers.items() if v}
+
+    return categorized_numbers
+
+
+
+
+
