@@ -675,6 +675,7 @@ class AdmissionUserEmailAPIView(
             print(e)
             transaction.savepoint_rollback(sid)
             return request.send_error("ERR_002", e.__str__)
+
         return request.send_info('INF_001')
 
 
@@ -1045,7 +1046,7 @@ class ElseltHealthProfessional(
 
         if profession:
             queryset = queryset.filter(
-                user__admissionuserprofession__profession=profession
+                user__admissionuserprofession__profession__profession=profession
             )
 
 

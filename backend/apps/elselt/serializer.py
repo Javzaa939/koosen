@@ -343,6 +343,7 @@ class HealthUpUserSerializer(serializers.ModelSerializer):
 
 class HealthUpUserInfoSerializer(serializers.ModelSerializer):
     user_register = serializers.CharField(source='user.register', default='', read_only=True)
+    user = serializers.SerializerMethodField()
     full_name = serializers.CharField(source='user.full_name', default='', read_only=True)
     gender_name = serializers.SerializerMethodField()
     health_up_user_data = serializers.SerializerMethodField()
@@ -351,6 +352,12 @@ class HealthUpUserInfoSerializer(serializers.ModelSerializer):
         model = HealthUser
         fields = '__all__'
 
+    def get_user(self, obj):
+
+        data = ElseltUser.objects.filter(id=obj.user.id).first()
+        userinfo_data = ElseltUserSerializer(data).data
+
+        return userinfo_data
 
     def get_gender_name(self, obj):
 
