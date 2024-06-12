@@ -52,6 +52,15 @@ function AnhanShat() {
 	const [datas, setDatas] = useState([]);
     const [chosenState, setChosenState] = useState('')
 
+    var values = {
+        admission: '',
+        profession: '',
+    }
+
+    const [elseltOption, setElseltOption] = useState([])     // элсэлт авах нь
+    const [profOption, setProfessionOption] = useState([])   // хөтөлбөр авах нь
+    const [select_value, setSelectValue] = useState(values);
+
     const [descModal, setDescModal] = useState(false)
     const [descModalData ,setDescModalData] = useState(null)
 
@@ -65,13 +74,48 @@ function AnhanShat() {
     const [pageCount, setPageCount] = useState(1)
 
 	const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false});
+
 	const elseltApi = useApi().elselt.health.anhan
     const [selectedStudents, setSelectedStudents] = useState([])
+    const professionApi = useApi().elselt.profession
+    const admissionYearApi = useApi().elselt
+
+    useEffect(() => {
+        getAdmissionYear()
+    },[])
+
+    useEffect(
+        () =>
+        {
+            getProfession()
+        },
+        [select_value.admission]
+    )
+
+
+    // Элсэлтийн жагсаалт авах
+    async function getAdmissionYear() {
+        const { success, data } = await fetchData(admissionYearApi.getAll())
+        if (success) {
+            setElseltOption(data)
+        }
+	}
+
+    // Хөтөлбөрийн жагсаалт авах
+    async function getProfession() {
+        const { success, data } = await fetchData(professionApi.getList(select_value?.admission))
+
+        if (success) {
+            setProfessionOption(data)
+        }
+	}
 
 	/* Жагсаалтын дата авах функц */
 	async function getDatas() {
+        var elselt = select_value?.admission
+        var profession = select_value?.profession
 
-        const {success, data} = await fetchData(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, chosenState))
+        const {success, data} = await fetchData(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, chosenState, elselt, profession))
         if(success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
@@ -93,7 +137,7 @@ function AnhanShat() {
 
 			return () => clearTimeout(timeoutId);
 		}
-    }, [sortField, currentPage, rowsPerPage, searchValue, chosenState])
+    }, [sortField, currentPage, rowsPerPage, searchValue, chosenState, select_value.admission, select_value.profession])
 
 
     // ** Function to handle filter
@@ -174,7 +218,8 @@ function AnhanShat() {
                 </Col>
             </CardHeader>
             <CardBody>
-                <Col md={6} lg={3}>
+            <Row className="justify-content-start mt-1">
+                <Col md={3}>
                     <Label for='sort-select'>{t('Үзлэгийн төлөвөөр шүүх')}</Label>
                     <Select
                         classNamePrefix='select'
@@ -191,6 +236,55 @@ function AnhanShat() {
                         getOptionLabel={(option) => option.name}
                     />
                 </Col>
+                <Col md={3}>
+                    <Label for='form-label'>{t('Элсэлт')}</Label>
+                    <Select
+                        name="lesson_year"
+                        id="lesson_year"
+                        classNamePrefix='select'
+                        isClearable
+                        placeholder={`-- Сонгоно уу --`}
+                        options={elseltOption || []}
+                        value={elseltOption.find((c) => c.id === select_value.admission)}
+                        noOptionsMessage={() => 'Хоосон байна'}
+                        onChange={(val) => {
+                            setSelectValue(current => {
+                                return {
+                                    ...current,
+                                    admission: val?.id || '',
+                                }
+                            })
+                        }}
+                        styles={ReactSelectStyles}
+                        getOptionValue={(option) => option.id}
+                        getOptionLabel={(option) => option.lesson_year + ' ' + option.name}
+                    />
+                </Col>
+                <Col md={3}>
+                    <Label for='form-label'>{t('Хөтөлбөр')}</Label>
+                    <Select
+                        id="profession"
+                        name="profession"
+                        classNamePrefix='select'
+                        isClearable
+                        placeholder={`-- Сонгоно уу --`}
+                        options={profOption || []}
+                        value={profOption.find((c) => c.id === select_value.profession)}
+                        noOptionsMessage={() => 'Хоосон байна'}
+                        onChange={(val) => {
+                            setSelectValue(current => {
+                                return {
+                                    ...current,
+                                    profession: val?.id || '',
+                                }
+                            })
+                        }}
+                        styles={ReactSelectStyles}
+                        getOptionValue={(option) => option.prof_id}
+                        getOptionLabel={(option) => option.name}
+                    />
+                </Col>
+            </Row>
                 <Row className="justify-content-between">
                     <Col className='d-flex align-items-center justify-content-start' md={4}>
                         <Col md={3} sm={2} className='pe-1'>

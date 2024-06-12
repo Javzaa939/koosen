@@ -116,3 +116,10 @@ def get_name_from_path(path):
     """ Замнаас файлын нэрийг авах нь """
     return os.path.basename(path)
 
+
+def create_folder(path):
+    """ Фолдер үүсгэх
+    """
+
+    if not os.path.exists(path):
+        os.makedirs(path)

@@ -8,7 +8,7 @@ from rest_framework.decorators import permission_classes
 
 from main.utils.function.pagination import CustomPagination
 from main.utils.function.utils import override_get_queryset
-from main.utils.function.utils import has_permission, get_domain_url
+from main.utils.function.utils import has_permission, get_domain_url, _filter_queries
 from main.utils.file import save_file
 from main.utils.file import remove_folder
 from main.decorators import login_required
@@ -22,6 +22,8 @@ from django.conf import settings
 
 # from functools import reduce
 # from operator import or_
+
+from elselt.models import ElseltUser
 
 from lms.models import (
     Group,
@@ -61,6 +63,7 @@ from lms.models import (
 
 from core.models import (
     User,
+    Employee,
 )
 
 from lms.models import get_image_path
@@ -92,6 +95,10 @@ from .serializers import LessonTeacherSerializer
 from .serializers import ProfessionDefinitionJustProfessionSerializer
 from .serializers import PsychologicalTestSerializer
 from .serializers import PsychologicalTestQuestionsSerializer
+from .serializers import PsychologicalTestScopeSerializer
+from .serializers import TeachersSerializer
+from .serializers import StudentSerializer
+from .serializers import ElsegchSerializer
 
 from main.utils.function.utils import remove_key_from_dict, fix_format_date, get_domain_url
 from main.utils.function.utils import null_to_none, get_lesson_choice_student, get_active_year_season, json_load
@@ -1325,9 +1332,9 @@ class LessonStandartDiplomaListAPIView(
         if student:
             qs_student = Student.objects.filter(pk=student).first()
             if qs_student:
-                qs_group = Group.objects.filter(id=qs_student.group.id).last()
+                qs_group = Group.objects.filter(pk=qs_student.group.id).first()
                 if qs_group:
-                    lesson_ids = LearningPlan.objects.filter(Q(Q(profession=qs_group.profession) & Q(Q(lesson_level=LearningPlan.DIPLOM) | Q(lesson_level=LearningPlan.MAG_DIPLOM))), lesson_level=LearningPlan.DIPLOM).values_list('lesson', flat=True)
+                    lesson_ids = LearningPlan.objects.filter(Q(Q(profession=qs_group.profession) & Q(Q(lesson_level=LearningPlan.DIPLOM) | Q(lesson_level=LearningPlan.MAG_DIPLOM)))).values_list('lesson', flat=True)
                     queryset = queryset.filter(id__in=lesson_ids)
 
         return queryset
@@ -2072,7 +2079,7 @@ class PsychologicalTestQuestionsAPIView(
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin
 ):
-    queryset = PsychologicalTestQuestions.objects.all()
+    queryset = PsychologicalTestQuestions.objects.all().order_by('created_at')
     serializer_class = dynamic_serializer(PsychologicalTestQuestions, "__all__")
 
     @login_required()
@@ -2080,7 +2087,6 @@ class PsychologicalTestQuestionsAPIView(
         datas = self.list(request).data
         return request.send_data(datas)
 
-    # @has_permission(must_permissions=['lms-exam-question-create'])
     def post(self, request):
         quesion_imgs = request.FILES.getlist('questionImg')
         choice_imgs = request.FILES.getlist('choiceImg')
@@ -2101,6 +2107,9 @@ class PsychologicalTestQuestionsAPIView(
 
                     question['created_by'] = user
 
+                    if 'score' in question:
+                        question['score'] = int(question['score'])
+
                     if not yes_or_no:
                         question['yes_or_no'] = None
 
@@ -2115,12 +2124,7 @@ class PsychologicalTestQuestionsAPIView(
                             question_img = img
                             break
 
-                    if question['level'] == 0:
-                        question['score'] = None
-                        question['has_score'] = False
-                    elif question['score'] == '':
-                        return request.send_error('ERR_002', 'Та асуултын оноогоо оруулна уу!')
-                    else:
+                    if question['level'] != 0:
                         question['has_score'] = True
 
                     question = remove_key_from_dict(question, ['image', 'answers', 'level'])
@@ -2197,12 +2201,49 @@ class PsychologicalTestQuestionsAPIView(
                                 choice_obj.save()
 
                             choice_ids.append(choice_obj.id)
-
                     question_obj.choices.set(choice_ids)
                 return request.send_info('INF_001')
             except Exception as e:
                 print(e)
                 return request.send_error('ERR_002')
+
+    def delete(self, request):
+
+        delete_ids = request.query_params.getlist('delete')
+        questions = self.queryset.filter(id__in=delete_ids)
+
+        with transaction.atomic():
+            try:
+                for question in questions:
+
+                    # Хэрвээ асуултанд зураг байвал устгана
+                    question_img = question.image
+
+                    if question_img:
+                        remove_folder(str(question_img))
+
+                        if question:
+                            choices = question.choices.all()
+
+                            for choice in choices:
+                                img = choice.image
+
+                                # Хэрвээ хариултын хэсэгт зураг байвал устгана
+                                if img:
+                                    remove_folder(str(img))
+
+                                choice.delete()
+
+                            # Хариултын хэсгийг устгах хэсэг
+                            question.choices.clear()
+
+                    question.delete()
+
+            except Exception as e:
+                print(e)
+                return request.send_error("ERR_002")
+
+        return request.send_info("INF_003")
 
 
 class PsychologicalQuestionTitleListAPIView(
@@ -2216,7 +2257,7 @@ class PsychologicalQuestionTitleListAPIView(
     @login_required()
     def get(self, request):
         user = request.user.id
-        question_titles = PsychologicalTestQuestions.objects.filter(created_by=user).values_list("id", flat=True)
+        question_titles = PsychologicalTestQuestions.objects.filter(created_by=user).values_list("title", flat=True)
         data = self.queryset.filter(id__in=question_titles).values("id", "name")
         return request.send_data(list(data))
 
@@ -2274,7 +2315,6 @@ class PsychologicalQuestionTitleAPIView(
     @login_required()
     def post(self, request):
         request_data = request.data
-
         question_ids = request.data.pop("questions")
         serializer = self.get_serializer(data=request_data)
         if serializer.is_valid(raise_exception=False):
@@ -2369,8 +2409,12 @@ class PsychologicalTestAPIView(
         with transaction.atomic():
             sid = transaction.savepoint()
             try:
+                # Үүсгэсэн хэрэглэгч нь employee байна
+                datas = request.data.copy()
+                datas['created_by'] = Employee.objects.get(user=request.user.id).id
+
                 # Бүх датагаа serializer-даад хадгална
-                serializer = self.get_serializer(data=request.data)
+                serializer = self.get_serializer(data=datas)
                 if serializer.is_valid(raise_exception=True):
                     serializer.save()
                 transaction.savepoint_commit(sid)
@@ -2388,8 +2432,13 @@ class PsychologicalTestAPIView(
             sid = transaction.savepoint()
             try:
                 data = request.data.copy()
+                data['created_by'] = Employee.objects.get(user=request.user.id).id
+
                 # description болон duration 2 null ирж болно
-                data = {key: (None if value == 'null' else value) for key, value in data.items() if key in ['duration', 'description']}
+                if data['duration'] == 'null':
+                    data['duration'] = None
+                if data['description'] == 'null':
+                    data['description'] = None
 
                 serializer = self.get_serializer(instance, data=data)
                 # Тэгээд шууд serializer ашигланаа
@@ -2448,7 +2497,7 @@ class PsychologicalTestOneAPIView(
             question_title_ids.append(value['id'])
 
         # Тус багцад хамаарах асуултуудыг, багцын id-г ашиглан хадгална
-        question_ids = self.queryser.filter(title__in=question_title_ids).values_list('id', flat=True)
+        question_ids = self.queryset.filter(title__in=question_title_ids).values_list('id', flat=True)
 
         with transaction.atomic():
             try:
@@ -2475,6 +2524,123 @@ class PsychologicalTestOneAPIView(
                 test.save()
             else:
                 return request.send_error('ERR_002', "Сорил олдсонгүй")
+        except Exception as e:
+            print(e)
+            return request.send_error('ERR_002')
+        return request.send_info("INF_003")
+
+
+class PsychologicalTestScopesAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+):
+    queryset = PsychologicalTest.objects.all()
+
+    def get(self, request):
+        datas = []
+
+        # Parametr-үүд
+        test_id = request.query_params.get('test_id')
+        search_value = request.query_params.get('search')
+
+        # Тухайн ёорилоо авна
+        test_instance = self.queryset.get(id=test_id)
+
+        # Cорилын хамрах хүрээний төрлөөс шалтгаалан хамрах хүрээг хаанаас авхаа тодорхойлно
+        scope = test_instance.scope_kind
+        participants = test_instance.participants
+
+        # Хуудаслалт
+        self.pagination_class = CustomPagination
+
+        # Хамрах хүрээний боломжит утгууд
+        scope_to_model_serializer = {
+            1: (Teachers, TeachersSerializer, ['first_name', 'last_name', 'register']),
+            2: (ElseltUser, ElsegchSerializer, ['first_name', 'last_name', 'code']),
+            3: (Student, StudentSerializer, ['first_name', 'last_name', 'code'])
+        }
+
+        # scope-өөс шалтгаалан ашиглах model, serializer өөр, өөр байна
+        # None, none гэсэн нь шууд байгаа утгыг нь авна
+        model_class, serializer_class, search_fields = scope_to_model_serializer.get(scope, (None, None, None))
+
+        # scope-д тохирсон model байвал
+        if model_class is not None:
+            # Оролцогчдоороо filter-ээд
+            self.queryset = model_class.objects.filter(id__in=participants)
+            # Serializer-г нь заагаад
+            self.serializer_class = serializer_class
+            # Хайх утгуудын өгнө
+            if search_value:
+                self.queryset = _filter_queries(self.queryset, search_value, search_fields)
+
+            datas = self.list(request).data
+        return request.send_data(datas)
+
+
+class PsychologicalTestScopeOptionsAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+):
+    """ Сэтгэл зүйн сорилын хамрах хүрээг сонгох """
+
+    def get(self, request):
+        scope = self.request.query_params.get('scope')
+
+        # Хамрах хүрээг оюутан гэж сонговол
+        group_options = list()
+        if scope == '3':
+            # Бүх ангиудийг id, name-ээр авчирна
+            group_options = list(Group.objects.values('id', 'name'))
+
+        # Тэгээд  select-д харуулхын тулд буцаана
+        return_data = {
+            'scope_kind': scope,
+            'select_student_data': group_options,
+        }
+        return request.send_data(return_data)
+
+    def put(self, request, pk):
+        # Data болон scope, оролцогчдоо авна
+        datas = request.data
+        scope = datas.get('scope')
+        participants = datas.get('participants', [])
+
+        # pk болон scope 2-ийн утга 2-уулаа байх үед
+        if pk and scope is not None:
+            # Оролцогчдын төрлөө өөрчлөөд
+            PsychologicalTest.objects.filter(id=pk).update(scope_kind=scope)
+            participant_ids = []
+            # Хэрвээ оюутанаас сорил авах бол
+            if scope == 3 and participants:
+                # Ангийн id-уудаа ирсэн датан дотроосоо аваад
+                group_ids = [participant['id'] for participant in participants]
+                # Тус ангид харьялагдах бүх оюутнуудын id-г хадгална
+                participant_ids = Student.objects.filter(group__in=group_ids).values_list('id', flat=True)
+
+            # Бусад үед бүх элсэгч болон багшаа авна
+            elif scope == 1:
+                participant_ids = Teachers.objects.values_list('id', flat=True)
+            elif scope == 2:
+                participant_ids = ElseltUser.objects.values_list('id', flat=True)
+
+            # Тэгээд эцэст нь бааздаа хадгална
+            PsychologicalTest.objects.filter(id=pk).update(participants=list(participant_ids))
+
+        return request.send_info("INF_002")
+
+    def delete(self, request, pk):
+        # Сорилын id
+        test_id = self.request.query_params.get('test_id')
+        try:
+            # Сорилын id-гаар сорилын qs-ийг аваад
+            test = PsychologicalTest.objects.filter(id=test_id).first()
+            if test:
+                # Тухайн сорилын pk-р илэрхийлэгдэх залууг хасаад хадгална
+                test.participants.remove(pk)
+                test.save()
+            else:
+                return request.send_error('ERR_002', "Хэрэглэгч олдсонгүй")
         except Exception as e:
             print(e)
             return request.send_error('ERR_002')

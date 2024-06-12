@@ -51,7 +51,7 @@ export default [
             },
             {
                 id: 'elselt7',
-                title: 'Элсэлтийн тушаал',
+                title: 'Тэнцсэн элсэгчид',
                 icon: <Circle size={8} />,
                 navLink: "student/enrollment"
             },

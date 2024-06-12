@@ -320,7 +320,7 @@ class ConversationUser(models.Model):
 
 
 class ArmyUser(models.Model):
-    """ Элсэгчдийн ярилцлага """
+    """ Цэргийн хээрийн бэлтгэл ярилцлага """
 
     user = models.ForeignKey(ElseltUser, on_delete=models.CASCADE, verbose_name='Элсэгч')
     state = models.IntegerField(choices=AdmissionUserProfession.STATE, default=AdmissionUserProfession.STATE_SEND, verbose_name="тэнцсэн эсэх төлөв")

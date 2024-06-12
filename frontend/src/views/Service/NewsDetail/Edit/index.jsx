@@ -142,8 +142,6 @@ const EditModal = ({ open, handleEdit, refreshDatas, edit_id }) => {
                     handleEdit()
                 }
                 else {
-                    console.log(error)
-                    console.log(errors)
                     /** Алдааны мессеж */
                     for (let key in error) {
                         setError(error[key].field, { type: 'custom', message: error[key].msg});

@@ -13,6 +13,9 @@ urlpatterns = [
     path('admissionuserdata/', AdmissionUserInfoAPIView.as_view()),
     path('admissionuserdata/<int:pk>/', AdmissionUserInfoAPIView.as_view()),
     path('admissionuserdata/all/', AdmissionUserAllChange.as_view()),
+    path('admissionuserdata/gpa_check/',GpaCheckUserInfoAPIView.as_view()),
+    path('admissionuserdata/gpa_check/confirm/',GpaCheckConfirmUserInfoAPIView.as_view()),
+    path('admissionuserdata/eyesh_check/',EyeshCheckUserInfoAPIView.as_view()),
 
     path('profession/', ElseltProfession.as_view()),
     path('profession/<int:pk>/', ElseltProfession.as_view()),
@@ -44,5 +47,9 @@ urlpatterns = [
 
     # Эрүүл мэндийн нарийвчилсан мэдээллийг хадгалах with POSTMAN
     path('health-up/create', ElseltHealthPhysicalCreateAPIView.as_view()),
+
+    #  Бүх шалгуурыг даваад тэнцсэн
+    path('approve/', ElseltStateApprove.as_view()),
+
 ]
 

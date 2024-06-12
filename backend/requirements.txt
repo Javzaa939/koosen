@@ -64,3 +64,4 @@ cyrtranslit==1.1.1
 
 # Нэвтрэлтийн мэдээлэл авахтай холбоотой package
 django-user-agents==0.4.0
+django-crontab==0.7.1

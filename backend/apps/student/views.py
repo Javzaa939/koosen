@@ -2763,7 +2763,7 @@ class StudentGpaDiplomaValuesAPIView(
                 if len(rows) > 0:
                     is_master = False
                     # Магистрийн дипломын хичээлийг хавсралтанд мэргэжлийн хичээлд хамт харуулах хэсэг
-                    if rows[0]['lesson_level'] == LearningPlan.MAG_DIPLOM or rows[0]['lesson_level'] == LearningPlan.DOC_DIPLOM or rows[0]['lesson_level'] == LearningPlan.MAG_PROFESSION:
+                    if rows[0]['lesson_level'] == LearningPlan.MAG_DIPLOM or rows[0]['lesson_level'] == LearningPlan.DOC_DIPLOM:
                         if rows[0]['lesson_level'] == LearningPlan.DOC_DIPLOM:
                             rows[0]['lesson_level'] = LearningPlan.DOC_PROFESSION
 
@@ -2949,15 +2949,15 @@ class StudentDownloadAPIView(
     search_fields = ['department__name', 'code', 'first_name', 'register_num']
 
     def get_queryset(self):
-        queryset = self.queryset
+        queryset = self.queryset.all()
         department = self.request.query_params.get('department')
         degree = self.request.query_params.get('degree')
         profession = self.request.query_params.get('profession')
         join_year = self.request.query_params.get('join_year')
         group = self.request.query_params.get('group')
         schoolId = self.request.query_params.get('schoolId')
-        status = self.request.query_params.get('status')
-        level = self.request.query_params.get('level')
+        # status = self.request.query_params.get('status')
+        # level = self.request.query_params.get('level')
 
         # сургуулиар хайлт хийх
         if schoolId:
@@ -2983,11 +2983,11 @@ class StudentDownloadAPIView(
         if group:
             queryset = queryset.filter(group_id=group)
 
-        if status:
-            queryset = queryset.filter(status=status)
+        # if status:
+        #     queryset = queryset.filter(status=status)
 
-        if level:
-            queryset = queryset.filter(group__level=level)
+        # if level:
+        #     queryset = queryset.filter(group__level=level)
 
         return queryset
 
