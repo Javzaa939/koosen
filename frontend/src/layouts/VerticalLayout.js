@@ -63,8 +63,6 @@ const VerticalLayout = (props) =>
                 {
                     if (menus && menus.navChildren && menus.navChildren.length > 0 && user && Object.keys(user).length > 0)
                     {
-                        console.log(menus)
-
                         let childrenDatas = []
                         /** ----------------------------- Сургалт ---------------------------- */
 

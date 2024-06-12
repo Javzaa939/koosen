@@ -1331,9 +1331,9 @@ class LessonStandartDiplomaListAPIView(
         if student:
             qs_student = Student.objects.filter(pk=student).first()
             if qs_student:
-                qs_group = Group.objects.filter(id=qs_student.group.id).last()
+                qs_group = Group.objects.filter(pk=qs_student.group.id).first()
                 if qs_group:
-                    lesson_ids = LearningPlan.objects.filter(Q(Q(profession=qs_group.profession) & Q(Q(lesson_level=LearningPlan.DIPLOM) | Q(lesson_level=LearningPlan.MAG_DIPLOM))), lesson_level=LearningPlan.DIPLOM).values_list('lesson', flat=True)
+                    lesson_ids = LearningPlan.objects.filter(Q(Q(profession=qs_group.profession) & Q(Q(lesson_level=LearningPlan.DIPLOM) | Q(lesson_level=LearningPlan.MAG_DIPLOM)))).values_list('lesson', flat=True)
                     queryset = queryset.filter(id__in=lesson_ids)
 
         return queryset
