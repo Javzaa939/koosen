@@ -983,7 +983,7 @@ class ElseltHealthAnhanShat(
         return request.send_info('INF_003')
 
 
-# @permission_classes([IsAuthenticated])
+@permission_classes([IsAuthenticated])
 class ElseltHealthProfessional(
     generics.GenericAPIView,
     mixins.ListModelMixin,
