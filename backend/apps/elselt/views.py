@@ -1012,7 +1012,7 @@ class ElseltHealthProfessional(
         gender = self.request.query_params.get('gender')
         sorting = self.request.query_params.get('sorting')
         state  = self.request.query_params.get('state')
-        lesson_year = self.request.query_params.get("lesson_year_id")
+        admission = self.request.query_params.get("lesson_year_id")
         profession = self.request.query_params.get('profession_id')
 
         queryset = queryset.filter(state=AdmissionUserProfession.STATE_APPROVE)
@@ -1038,9 +1038,9 @@ class ElseltHealthProfessional(
                 user_id = HealthUpUser.objects.filter(state=state).values_list('user', flat=True)
                 queryset = queryset.filter(user__in=user_id)
 
-        if lesson_year:
+        if admission:
             queryset = queryset.filter(
-                user__admissionuserprofession__profession__admission__id=lesson_year
+                user__admissionuserprofession__profession__admission__id=admission
             )
 
         if profession:

@@ -11,11 +11,10 @@ import {
   Input,
   Label,
   Button,
-  CardTitle,
   CardHeader,
   Spinner,
   CardBody,
-  UncontrolledTooltip
+  UncontrolledTooltip,
 } from "reactstrap";
 
 import { ChevronDown, Search, Zap } from "react-feather";
@@ -79,8 +78,8 @@ function Mergejliin() {
 
   const [selectedStudents, setSelectedStudents] = useState([]);
 
-  const [emailModal, setEmailModal] = useState(false)
-  const [messageModal, setMessageModal] = useState(false)
+  const [emailModal, setEmailModal] = useState(false);
+  const [messageModal, setMessageModal] = useState(false);
 
   // Нийт датаны тоо
   const [total_count, setTotalCount] = useState(datas.length || 1);
@@ -219,15 +218,15 @@ function Mergejliin() {
         detailData={detailData}
       />
       <EmailModal
-                emailModalHandler={emailModalHandler}
-                emailModal={emailModal}
-                selectedStudents={selectedStudents}
-                getDatas={getDatas}
-            />
-            <MessageModal
-                messageModalHandler={messageModalHandler}
-                messageModal={messageModal}
-            />
+        emailModalHandler={emailModalHandler}
+        emailModal={emailModal}
+        selectedStudents={selectedStudents}
+        getDatas={getDatas}
+      />
+      <MessageModal
+        messageModalHandler={messageModalHandler}
+        messageModal={messageModal}
+      />
       <CardHeader>
         <h5>Нарийн мэргэжлийн шатны эрүүл мэндийн үзлэг</h5>
         <Col className="d-flex justify-content-end">
@@ -309,37 +308,37 @@ function Mergejliin() {
             />
           </Col>
           <Col md={9} className="d-flex mt-2 mb-1 justify-content-start">
-          <div className="px-1">
-            <Button
-              color="primary"
-              disabled={selectedStudents.length == 0}
-              className="d-flex align-items-center px-75"
-              id="email_button"
-              onClick={() => emailModalHandler()}
-            >
-              <MdMailOutline className="me-25" />
-              Email илгээх
-            </Button>
-            <UncontrolledTooltip target="email_button">
-              Сонгосон элсэгчид руу имейл илгээх
-            </UncontrolledTooltip>
-          </div>
-          <div className="px-1">
-            <Button
-              color="primary"
-              disabled
-              className="d-flex align-items-center px-75"
-              id="message_button"
-              onClick={() => messageModalHandler()}
-            >
-              {/* <Button color='primary' disabled={selectedStudents.length == 0} className='d-flex align-items-center px-75' id='message_button' onClick={() => messageModalHandler()}> */}
-              <BiMessageRoundedError className="me-25" />
-              Мессеж илгээх
-            </Button>
-            <UncontrolledTooltip target="message_button">
-              Сонгосон элсэгчид руу мессеж илгээх
-            </UncontrolledTooltip>
-          </div>
+            <div className="px-1">
+              <Button
+                color="primary"
+                disabled={selectedStudents.length == 0}
+                className="d-flex align-items-center px-75"
+                id="email_button"
+                onClick={() => emailModalHandler()}
+              >
+                <MdMailOutline className="me-25" />
+                Email илгээх
+              </Button>
+              <UncontrolledTooltip target="email_button">
+                Сонгосон элсэгчид руу имейл илгээх
+              </UncontrolledTooltip>
+            </div>
+            <div className="px-1">
+              <Button
+                color="primary"
+                disabled
+                className="d-flex align-items-center px-75"
+                id="message_button"
+                onClick={() => messageModalHandler()}
+              >
+                {/* <Button color='primary' disabled={selectedStudents.length == 0} className='d-flex align-items-center px-75' id='message_button' onClick={() => messageModalHandler()}> */}
+                <BiMessageRoundedError className="me-25" />
+                Мессеж илгээх
+              </Button>
+              <UncontrolledTooltip target="message_button">
+                Сонгосон элсэгчид руу мессеж илгээх
+              </UncontrolledTooltip>
+            </div>
           </Col>
         </Row>
         <Row className="justify-content-between">
