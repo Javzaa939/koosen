@@ -2956,8 +2956,8 @@ class StudentDownloadAPIView(
         join_year = self.request.query_params.get('join_year')
         group = self.request.query_params.get('group')
         schoolId = self.request.query_params.get('schoolId')
-        status = self.request.query_params.get('status')
-        level = self.request.query_params.get('level')
+        # status = self.request.query_params.get('status')
+        # level = self.request.query_params.get('level')
 
         # сургуулиар хайлт хийх
         if schoolId:
@@ -2983,11 +2983,11 @@ class StudentDownloadAPIView(
         if group:
             queryset = queryset.filter(group_id=group)
 
-        if status:
-            queryset = queryset.filter(status=status)
+        # if status:
+        #     queryset = queryset.filter(status=status)
 
-        if level:
-            queryset = queryset.filter(group__level=level)
+        # if level:
+        #     queryset = queryset.filter(group__level=level)
 
         return queryset
 
