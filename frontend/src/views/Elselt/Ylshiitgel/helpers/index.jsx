@@ -181,10 +181,10 @@ export function getColumns (currentPage, rowsPerPage, page_count, user) {
 			name: t("Төлөв"),
 			selector: (row) => (
 				<Badge
-					color={`${row?.justice_state == 1 ? 'primary' : row?.state == 2 ? 'success' : row?.state == 3 ? 'danger' : 'primary'}`}
+					color={`${row?.justice_state == 1 ? 'primary' : row?.justice_state == 2 ? 'success' : row?.justice_state == 3 ? 'danger' : 'primary'}`}
 					pill
 				>
-					{row?.state_name}
+					{row?.justice_state_name}
 				</Badge>),
 			center: true,
 		},

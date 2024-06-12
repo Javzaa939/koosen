@@ -63,12 +63,11 @@ const ElseltYlshiitgel = () => {
     const [gender, setGender] = useState('')
 	const elseltApi = useApi().elselt.admissionuserdata
 
-
-    //email modal
+    // email modal
     const [emailModal, setEmailModal] = useState(false)
-    //message modal
+    // message modal
     const [messageModal, setMessageModal] = useState(false)
-    //state modal
+    // state modal
     const [stateModal,setStateModel] = useState(false);
 
     // Эрэмбэлэлт
@@ -89,7 +88,6 @@ const ElseltYlshiitgel = () => {
 	const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false});
     const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
 
-
     const stateop = [
         {
             'id': 1,
@@ -105,12 +103,9 @@ const ElseltYlshiitgel = () => {
         }
     ]
 
-
-
 	/* Жагсаалтын дата авах функц */
 	async function getDatas() {
-
-        const {success, data} = await allFetch(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, adm, profession_id, unit1, gender, state, gpa_state,age_state))
+        const {success, data} = await allFetch(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, adm, profession_id, unit1, gender, '', gpa_state, age_state, state, 'yes'))
         if(success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
@@ -120,6 +115,7 @@ const ElseltYlshiitgel = () => {
             setPageCount(cpage_count)
         }
 	}
+
     // ** Function to handle filter
 	const handleFilter = e => {
         const value = e.target.value.trimStart();
@@ -163,168 +159,21 @@ const ElseltYlshiitgel = () => {
         setRowsPerPage(e.target.value === 'Бүгд' ? e.target.value : parseInt(e.target.value))
     }
 
-
-
-
-    //excel
-    function convert(){
-        const mainData = datas.map((data, idx) => {
-            return(
-                {
-                    '№': idx + 1,
-                    'Овог': data?.user?.last_name || '',
-                    'Нэр': data?.user?.first_name || '',
-                    'РД': data?.user?.register || '',
-                    'Хүйс': data?.gender_name || '',
-                    'Имейл': data?.user?.email || '',
-                    'Яаралтай холбогдох': data?.user?.parent_mobile || '',
-                    'Хөтөлбөр': data?.profession || '',
-                    'Бүртгүүлсэн огноо': moment(data?.created_at).format('YYYY-MM-DD HH:SS:MM') || '',
-                    'Голч': data?.userinfo?.gpa || '',
-                    'Элсэгч ял шийтгэлийн эсэх тайлбар': data?.justice_description || '',
-                }
-            )
-        })
-
-        const combo = [
-            // ...header,
-            ...mainData
-        ]
-
-        const worksheet = utils.json_to_sheet(combo);
-
-        const workbook = utils.book_new();
-        utils.book_append_sheet(workbook, worksheet, "Элсэгчдийн мэдээлэл");
-
-        const staticCells = [
-            '№',
-            'Овог',
-            'Нэр',
-            'РД',
-            'Хүйс',
-            'Имейл',
-            'Яаралтай холбогдох',
-            'Бүртгүүлсэн огноо',
-            'Голч',
-            'Элсэгчийн ял шийтгэлтэй эсэх тайлбар'
-        ];
-
-        utils.sheet_add_aoa(worksheet, [staticCells], { origin: "A1" });
-
-
-        const headerCell = {
-            border: {
-                top: { style: "thin", color: { rgb: "000000" } },
-                bottom: { style: "thin", color: { rgb: "000000" } },
-                left: { style: "thin", color: { rgb: "000000" } },
-                right: { style: "thin", color: { rgb: "000000" } }
-            },
-            alignment: {
-                horizontal: 'center',
-                vertical: 'center',
-                wrapText: true
-            },
-            font:{
-                sz:10,
-                bold:true
-            }
-        };
-
-        const defaultCell = {
-            border: {
-                top: { style: "thin", color: { rgb: "000000" } },
-                bottom: { style: "thin", color: { rgb: "000000" } },
-                left: { style: "thin", color: { rgb: "000000" } },
-                right: { style: "thin", color: { rgb: "000000" } }
-            },
-            alignment: {
-                horizontal: 'left',
-                vertical: 'center',
-                wrapText: true
-            },
-            font:{
-                sz:10
-            }
-        };
-
-        const defaultCenteredCell = {
-            border: {
-                top: { style: "thin", color: { rgb: "000000" } },
-                bottom: { style: "thin", color: { rgb: "000000" } },
-                left: { style: "thin", color: { rgb: "000000" } },
-                right: { style: "thin", color: { rgb: "000000" } }
-            },
-            alignment: {
-                horizontal: 'center',
-                vertical: 'center',
-                wrapText: true
-            },
-            font:{
-                sz:10
-            }
-        };
-
-        const styleRow = 0;
-        const sendRow = datas?.length + 1;
-        const styleCol = 0;
-        const sendCol = 10;
-
-        for (let row = styleRow; row <= sendRow; row++) {
-            for (let col = styleCol; col <= sendCol; col++) {
-            const cellNum = utils.encode_cell({ r: row, c: col });
-
-                if (!worksheet[cellNum]) {
-                    worksheet[cellNum] = {};
-                }
-
-                worksheet[cellNum].s = row === 0 ? headerCell : col === 0 ? defaultCenteredCell : defaultCell
-
-            }
-        }
-
-        const phaseZeroCells = Array.from({length: 4}, (_) => {return({wch: 10})})
-
-        worksheet["!cols"] = [
-            { wch: 3 },
-            ...phaseZeroCells,
-            { wch: 25 },
-            { wch: 10 },
-            { wch: 10 },
-            { wch: 25 },
-            { wch: 10 },
-            { wch: 25 },
-            { wch: 25 },
-            { wch: 10 },
-            { wch: 5 },
-            { wch: 25 },
-            { wch: 25 },
-            { wch: 25 },
-            { wch: 15 },
-        ];
-
-        const phaseOneRow = Array.from({length: datas.length}, (_) => {return({hpx: 30})})
-
-        worksheet["!rows"] = [
-            { hpx: 40 },
-            ...phaseOneRow
-        ]
-
-        writeFile(workbook, "Элсэгчдийн шийтгэлтэй эсэхийн мэдээлэл.xlsx", { compression: true });
-    }
-
-
     function onSelectedRowsChange(state) {
         setSelectedStudents(state?.selectedRows)
     }
-    //имэйл илгээх функц
+
+    // имэйл илгээх функц
     function emailModalHandler() {
         setEmailModal(!emailModal)
     }
-    //Мессеж бичих функц
+
+    // Мессеж бичих функц
     function messageModalHandler() {
         setMessageModal(!messageModal)
     }
-    //justice_state -ийн төлөв солих
+
+    // Эрүүгийн хариуцлага хүлээж байсан эсэх төлөв солих
     function stateModalHandler() {
         setStateModel(!stateModal)
     }
@@ -353,7 +202,7 @@ const ElseltYlshiitgel = () => {
             {isLoading && Loader}
 			<Card>
 				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom ">
-					<CardTitle tag="h4">{t('Элсэгчдийн шийтгэлтэй эсэхийн бүртгэл')}</CardTitle>
+					<CardTitle tag="h4">{t('Эрүүгийн хариуцлага хүлээж байсан эсэхийн бүртгэл')}</CardTitle>
                 </CardHeader>
                 <Row className='justify-content-start mx-0 mt-1'>
                     <Col md={3} sm={6} xs={12} >
@@ -410,15 +259,6 @@ const ElseltYlshiitgel = () => {
                                 Сонгосон элсэгчид руу мессеж илгээх
                             </UncontrolledTooltip>
                         </div>
-                    </div>
-                    <div className='px-1'>
-                        <Button color='primary' className='d-flex align-items-center px-75' id='excel_button' onClick={() => convert()}>
-                            <HiOutlineDocumentReport className='me-25'/>
-                            Excel
-                        </Button>
-                        <UncontrolledTooltip target='excel_button'>
-                            Доорхи хүснэгтэнд харагдаж байгаа мэдээллийн жагсаалтаар эксел файл үүсгэнэ
-                        </UncontrolledTooltip>
                     </div>
                 </div>
                 <Row className="justify-content-between mx-0" >

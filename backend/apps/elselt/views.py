@@ -446,6 +446,12 @@ class AdmissionUserInfoAPIView(
         gender = self.request.query_params.get('gender')
         sorting = self.request.query_params.get('sorting')
         gpa = self.request.query_params.get('gpa')
+        justice_state = self.request.query_params.get('justice_state')
+        is_justice = self.request.query_params.get('is_justice')
+
+        if is_justice:
+            justice_profession_ids = AdmissionIndicator.objects.filter(admission_prof__admission__is_active=True, value__in=[AdmissionIndicator.YAL_SHIITGEL]).values_list('admission_prof', flat=True)
+            queryset = queryset.filter(profession__in=justice_profession_ids)
 
         if lesson_year_id:
             queryset = queryset.filter(profession__admission=lesson_year_id)
@@ -460,11 +466,14 @@ class AdmissionUserInfoAPIView(
             queryset = queryset.filter(state=state)
 
         if age_state:
-            queryset = queryset.filter(age_state = age_state)
+            queryset = queryset.filter(age_state=age_state)
 
         if gpa_state:
             user_ids = UserInfo.objects.filter(gpa_state=gpa_state).values_list('user', flat=True)
             queryset = queryset.filter(user__in=user_ids)
+
+        if justice_state:
+            queryset = queryset.filter(justice_state=justice_state)
 
         if gender:
             if gender == 'Эрэгтэй':

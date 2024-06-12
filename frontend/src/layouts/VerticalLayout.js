@@ -96,12 +96,12 @@ const VerticalLayout = (props) =>
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-read', 'elselt1')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-read', 'elselt2')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-read', 'elselt3')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-read', 'elselt3_1')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-read', 'elselt4')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-read', 'elselt5')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-read', 'elselt6')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-read', 'elselt7')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-read', 'elselt8')
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-read', 'elselt9')
 
                         /** ----------------------------Сэтгэлзүйн сорил------------------------------- */
 
