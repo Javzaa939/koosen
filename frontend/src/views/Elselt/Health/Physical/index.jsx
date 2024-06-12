@@ -49,6 +49,11 @@ function Physical() {
 	const [searchValue, setSearchValue] = useState("");
 	const [datas, setDatas] = useState([]);
     const [chosenState, setChosenState] = useState('')
+    const [elseltOption, setElseltOption] = useState([])     // элсэлт авах нь
+    const [profOption, setProfessionOption] = useState([])   // хөтөлбөр авах нь
+    const [admId, setAdmId] = useState('');                  // элсэлт id
+    const [profId, setProfId] = useState('')                 // хөтөлбөр id
+
 
     const [addModal, setAddModal] = useState(false)
     const [addModalData, setAddModalData] = useState(null)
@@ -61,11 +66,43 @@ function Physical() {
 
 	const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false});
 	const elseltApi = useApi().elselt.health.physical
+    const professionApi = useApi().elselt.profession
+    const admissionYearApi = useApi().elselt
+
+    useEffect(() => {
+        getAdmissionYear()
+    },[])
+
+    useEffect(
+        () =>
+        {
+            getProfession()
+        },
+        [admId]
+    )
+
+
+    // Элсэлтийн жагсаалт авах
+    async function getAdmissionYear() {
+        const { success, data } = await fetchData(admissionYearApi.getAll())
+        if (success) {
+            setElseltOption(data)
+        }
+	}
+
+    // Хөтөлбөрийн жагсаалт авах
+    async function getProfession() {
+        const { success, data } = await fetchData(professionApi.getList(admId))
+
+        if (success) {
+            setProfessionOption(data)
+        }
+	}
 
 	/* Жагсаалтын дата авах функц */
 	async function getDatas() {
 
-        const {success, data} = await fetchData(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, chosenState))
+        const {success, data} = await fetchData(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, chosenState, admId, profId))
         if(success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
@@ -87,7 +124,7 @@ function Physical() {
 
 			return () => clearTimeout(timeoutId);
 		}
-    }, [sortField, currentPage, rowsPerPage, searchValue, chosenState])
+    }, [sortField, currentPage, rowsPerPage, searchValue, chosenState, admId, profId])
 
 
     // ** Function to handle filter
@@ -154,26 +191,63 @@ function Physical() {
                         </Button>
                     </Col>
                 </Row> */}
-                <Row>
-                    <div className=''>
-                        <Col md={6} lg={3}>
-                            <Label for='sort-select'>{t('Үзлэгийн төлөвөөр шүүх')}</Label>
-                            <Select
-                                classNamePrefix='select'
-                                isClearable
-                                placeholder={`-- Сонгоно уу --`}
-                                options={STATE_LIST || []}
-                                value={STATE_LIST.find((c) => c.id === chosenState)}
-                                noOptionsMessage={() => 'Хоосон байна'}
-                                onChange={(val) => {
-                                    setChosenState(val?.id || '')
-                                }}
-                                styles={ReactSelectStyles}
-                                getOptionValue={(option) => option.id}
-                                getOptionLabel={(option) => option.name}
-                            />
-                        </Col>
-                    </div>
+                <Row className='justify-content-start mt-1'>
+                    <Col md={3}>
+                        <Label for='sort-select'>{t('Үзлэгийн төлөвөөр шүүх')}</Label>
+                        <Select
+                            classNamePrefix='select'
+                            isClearable
+                            placeholder={`-- Сонгоно уу --`}
+                            options={STATE_LIST || []}
+                            value={STATE_LIST.find((c) => c.id === chosenState)}
+                            noOptionsMessage={() => 'Хоосон байна'}
+                            onChange={(val) => {
+                                setChosenState(val?.id || '')
+                            }}
+                            styles={ReactSelectStyles}
+                            getOptionValue={(option) => option.id}
+                            getOptionLabel={(option) => option.name}
+                        />
+                    </Col>
+                    <Col md={3}>
+                        <Label for='form-label'>{t('Элсэлт')}</Label>
+                        <Select
+                            name="lesson_year"
+                            id="lesson_year"
+                            classNamePrefix='select'
+                            isClearable
+                            placeholder={`-- Сонгоно уу --`}
+                            options={elseltOption || []}
+                            value={elseltOption.find((c) => c.id === admId)}
+                            noOptionsMessage={() => 'Хоосон байна'}
+                            onChange={(val) => {
+                                setAdmId(val?.id || '')
+                            }}
+                            styles={ReactSelectStyles}
+                            getOptionValue={(option) => option.id}
+                            getOptionLabel={(option) => option.lesson_year + ' ' + option.name}
+                        />
+                    </Col>
+                    <Col md={3}>
+                        <Label for='form-label'>{t('Хөтөлбөр')}</Label>
+                        <Select
+                            id="profession"
+                            name="profession"
+                            classNamePrefix='select'
+                            isClearable
+                            placeholder={`-- Сонгоно уу --`}
+                            options={profOption || []}
+                            value={profOption.find((c) => c.id === profId)}
+                            noOptionsMessage={() => 'Хоосон байна'}
+                            onChange={(val) => {
+                                setProfId(val?.id || '')
+
+                            }}
+                            styles={ReactSelectStyles}
+                            getOptionValue={(option) => option.prof_id}
+                            getOptionLabel={(option) => option.name}
+                        />
+                    </Col>
                 </Row>
                 <Row className="justify-content-between " >
                     <Col className='d-flex align-items-center justify-content-start' md={4}>

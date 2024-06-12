@@ -1732,7 +1732,7 @@ function useApi(isDisplay=false) {
 				put: (id, cdata) => instance.put(`/elselt/health/professional/${id}/`, cdata)
 			},
 			physical:{
-				get: (limit, page, sort, search, state) => instance.get(`/elselt/health/physical/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}`),
+				get: (limit, page, sort, search, state, elselt, profession) => instance.get(`/elselt/health/physical/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}&elselt=${elselt}&profession=${profession}`),
 				post: (cdata) => instance.post(`/elselt/health/physical/`, cdata),
 				put: (id, cdata) => instance.put(`/elselt/health/physical/${id}/`, cdata)
 			},
