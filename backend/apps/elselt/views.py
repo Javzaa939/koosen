@@ -871,8 +871,7 @@ class ElseltHealthAnhanShat(
         profession = self.request.query_params.get('profession')
 
         # Ял шийтгэл, Насны үзүүлэлтүүдэд ТЭНЦЭЭГҮЙ элсэгчдийг хасах
-        queryset = queryset.exclude(justice_state=AdmissionUserProfession.STATE_REJECT, age_state=AdmissionUserProfession.STATE_REJECT)
-
+        queryset = queryset.exclude(age_state=AdmissionUserProfession.STATE_REJECT, gpa_state=AdmissionUserProfession.STATE_REJECT, state__in=[AdmissionUserProfession.STATE_REJECT, AdmissionUserProfession.STATE_APPROVE])
         if gender:
             if gender == 'Эрэгтэй':
                 queryset = queryset.filter(gender__in=['1', '3', '5', '7', '9'])
@@ -885,7 +884,7 @@ class ElseltHealthAnhanShat(
 
         # хөтөлбөр
         if profession:
-            queryset = queryset.filter(profession__profession__id=profession)
+            queryset = queryset.filter(profession=profession)
 
         # Sort хийх үед ажиллана
         if sorting:
@@ -895,7 +894,11 @@ class ElseltHealthAnhanShat(
             queryset = queryset.order_by(sorting)
 
         if state:
-            user_id = HealthUser.objects.filter(state=state).values_list('user', flat=True)
+            if state == '1':
+                exclude_ids = HealthUser.objects.filter(Q(Q(state=AdmissionUserProfession.STATE_APPROVE) | Q(state=AdmissionUserProfession.STATE_REJECT))).values_list('user', flat=True)
+                user_id = AdmissionUserProfession.objects.filter(state=state).exclude(user__in=exclude_ids).values_list('user', flat=True)
+            else:
+                user_id = HealthUser.objects.filter(state=state).values_list('user', flat=True)
             queryset = queryset.filter(user__in=user_id)
 
         return queryset
