@@ -8,6 +8,7 @@ from lms.models import  (
     AdmissionRegisterProfession,
     AdmissionIndicator,
     AdmissionXyanaltToo,
+    AdmissionBottomScore,
     ProfessionalDegree
 )
 
@@ -431,3 +432,160 @@ class ElseltApproveSerializer(serializers.ModelSerializer):
     class Meta:
         model = AdmissionUserProfession
         fields = '__all__'
+
+
+class GpaCheckUserInfoSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
+    userinfo = serializers.SerializerMethodField()
+    full_name = serializers.CharField(source='user.full_name', default='', read_only=True)
+    profession = serializers.CharField(source='profession.profession.name', default='')
+    admission = serializers.IntegerField(source='profession.admission.id', default='')
+    # Элсэлтийн мэргэжлийн төрөл
+    profession_state = serializers.IntegerField(source='profession.state', default='')
+
+    class Meta:
+        model = AdmissionUserProfession
+        fields = '__all__'
+
+    def get_user(self, obj):
+
+        data = ElseltUser.objects.filter(id=obj.user.id).first()
+        userinfo_data = ElseltUserSerializer(data).data
+
+        return userinfo_data
+
+    def get_userinfo(self, obj):
+
+        data = UserInfo.objects.filter(user=obj.user.id).first()
+        userinfo_data = UserinfoSerializer(data).data
+
+        return userinfo_data
+
+class GpaCheckConfirmUserInfoSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
+    userinfo = serializers.SerializerMethodField()
+    full_name = serializers.CharField(source='user.full_name', default='', read_only=True)
+    profession = serializers.CharField(source='profession.profession.name', default='')
+    admission = serializers.IntegerField(source='profession.admission.id', default='')
+    # Элсэлтийн мэргэжлийн төрөл
+    profession_state = serializers.IntegerField(source='profession.state', default='')
+
+    class Meta:
+        model = AdmissionUserProfession
+        fields = '__all__'
+
+    def get_user(self, obj):
+
+        data = ElseltUser.objects.filter(id=obj.user.id).first()
+        userinfo_data = ElseltUserSerializer(data).data
+
+        return userinfo_data
+
+    def get_userinfo(self, obj):
+
+        data = UserInfo.objects.filter(user=obj.user.id).first()
+        userinfo_data = UserinfoSerializer(data).data
+
+        return userinfo_data
+
+
+class EyeshCheckUserInfoSerializer(serializers.ModelSerializer):
+
+    user = serializers.SerializerMethodField()
+    userinfo = serializers.SerializerMethodField()
+    user_score = serializers.SerializerMethodField()
+    full_name = serializers.CharField(source='user.full_name', default='', read_only=True)
+    profession = serializers.CharField(source='profession.profession.name', default='')
+    admission = serializers.IntegerField(source='profession.admission.id', default='')
+    # Элсэлтийн мэргэжлийн төрөл
+    profession_state = serializers.IntegerField(source='profession.state', default='')
+    eesh_check = serializers.SerializerMethodField()
+
+    class Meta:
+        model = AdmissionUserProfession
+        fields = '__all__'
+
+    def get_user(self, obj):
+
+        data = ElseltUser.objects.filter(id=obj.user.id).first()
+        userinfo_data = ElseltUserSerializer(data).data
+
+        return userinfo_data
+
+    def get_user_score(self, obj):
+
+        all_datas = []
+        user_score_qs = UserScore.objects.filter(user=obj.user.id)
+
+        # ЭЕШ оноогүй хэрэглэгчид хоосон дата буцаав
+        if len(user_score_qs) == 0:
+            return all_datas
+
+        # Элсэгчийн ЭЕШ-н оноог он улирлаар нь груп хийв
+        user_scores_year = user_score_qs.annotate(
+            cyear=Func(
+                Cast(F('year'), output_field=CharField()),
+                function='LEFT',
+                template="%(function)s(%(expressions)s, 4)"
+            )
+        ).distinct('cyear', 'semester').order_by('cyear', 'semester').values('cyear', 'semester')
+
+        # Элсэгчийн ЭЕШ-н он оноор нь хичээлүүдийн оноог авах
+        for score_year in list(user_scores_year):
+            year = score_year.get('cyear')      # ЭЕШ өгсөн он
+            season = score_year.get('semester') # ЭЕШ өгсөн улирал
+            lessons = user_score_qs.filter(year__contains=year, semester=season).values('lesson_name', 'scaledScore', 'raw_score').order_by('-scaledScore')
+            all_datas.append(
+                {
+                    'year': year,
+                    'season_name': season,
+                    'scores': list(lessons)
+                }
+            )
+
+        return all_datas
+
+    def get_userinfo(self, obj):
+
+        data = UserInfo.objects.filter(user=obj.user.id).first()
+        userinfo_data = UserinfoSerializer(data).data
+
+        return userinfo_data
+
+    # ЭЕШ ийн оноо босго оноо давсанг шалгах
+    # NOTE ЭЕШ оноо хадгалж байгаа модел өөрчлөгдөх үел дахин сайжруулах
+    def get_eesh_check(self, obj):
+        check_score_query = AdmissionBottomScore.objects.filter(profession=obj.profession_id).values('bottom_score')
+
+        # Тухайн сургуулийн босго оноо
+        check_score = check_score_query[0]['bottom_score'] if check_score_query.exists() else 400
+
+        # Бүртгүүлэгчийн ЭЕШ ийн оноо
+        user_scores = self.get_user_score(obj)
+        avg_scaled_score = []
+
+        # NOTE Тухайн элсэгч нэг хичээлээр олон ЭШ өгсөн бол Хамгийн өндөр оноогоор шалгах
+        # Одоогийн бодолт нь буруу
+        # Тухайн мэргэжлийн суурь шалгалтын хичээлээр нь оноог нь шалгах
+        if user_scores:
+            sum_scaled_scores = 0
+            count_scores = 0
+            for scores in user_scores:
+                for score in scores['scores']:
+                    sum_scaled_scores += score['scaledScore']
+                    count_scores += 1
+
+            # Дундаж оноо
+            avg_scaled_score = sum_scaled_scores / count_scores if count_scores > 0 else 0
+
+            # Төлөв өөрчлөх
+            if avg_scaled_score <= check_score:
+                    obj.gpa_state = 3
+                    obj.gpa_definition = 'ЭЕШ ийн оноо босго оноонд хүрэхгүй байна'
+                    obj.state = 3
+            else:
+                    obj.gpa_state = 2
+                    obj.gpa_definition = None
+            obj.save()
+
+        return avg_scaled_score or 0
