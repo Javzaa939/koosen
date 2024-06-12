@@ -217,11 +217,9 @@ class AdmissionUserInfoSerializer(serializers.ModelSerializer):
         if indicator:
             if indicator.limit_min < user_age < indicator.limit_mах:
                 obj.age_state = 2
-                obj.state = 2
                 obj.age_description = None
             else:
                 obj.age_state = 3
-                obj.state = 3
                 obj.age_description = "НАС шалгуурын болзолыг хангаагүй улмаас тэнцсэнгүй"
         else:
             obj.age_state = 2
