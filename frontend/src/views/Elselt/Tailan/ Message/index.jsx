@@ -9,8 +9,6 @@ function Message() {
         setDatas()
     }
 
-    console.log(datas,'datas')
-
     return (
         <div>
             test

@@ -1,11 +1,12 @@
+import { getPagination, convertDefaultValue, ReactSelectStyles, validate} from "@utils";
 import React, { Fragment, useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useForm, Controller } from "react-hook-form";
-import { getPagination, convertDefaultValue, ReactSelectStyles} from "@utils";
 import { Plus, Search } from "react-feather";
 import { getQuestionColumns } from "./QuestionHelpers";
 import { getColumns } from "./helpers";
+import * as Yup from 'yup';
 
 import {
 	Row,
@@ -28,6 +29,15 @@ import DataTable from "react-data-table-component";
 
 import AddQuestion from "./AddQuestion";
 
+export const validateSchema = Yup.object().shape({
+	student: Yup.string()
+		.trim()
+		.required('Хоосон байна'),
+    participants: Yup.string()
+		.trim()
+		.required('Хоосон байна'),
+});
+
 
 function AddStudent(){
 
@@ -37,7 +47,7 @@ function AddStudent(){
     const { isLoading, Loader, fetchData } = useLoader({});
     const { fetchData: fetchSelectData} = useLoader({});
     const { fetchData: fetchQuestion } = useLoader({});
-    const { control, handleSubmit, setError, formState: { errors }, } = useForm({});
+    const { control, handleSubmit, setError, formState: { errors }, } = useForm(validate(validateSchema));
     const { challenge_id } = useParams();
 
     const [scope, setScope] = useState('');
@@ -160,6 +170,46 @@ function AddStudent(){
         }
     }
 
+
+
+
+    // Api
+    const permissionStudentApi = useApi().role.student
+
+    // States
+    const [student_id , setStudentId] = useState('')
+    const [bottom_check, setBottomCheck] = useState(3)
+    const [select_student, setStudentOption] = useState([])
+    const [student_search_value, setStudentSearchValue] = useState([]);
+    const [scroll_bottom_datas, setScrollBottomDatas] = useState([]);
+
+    const { isLoading:StudentLoading, Loader:StudentLoader, fetchData: fetchSelectStudents } = useLoader({});
+
+    //  Оюутны жагсаалт хайлтаар
+    async function getStudentOption(searchValue) {
+        const { success, data } = await fetchSelectStudents(permissionStudentApi.getStudent(searchValue))
+        if(success) {
+            setStudentOption(data)
+        }
+    }
+
+    //  Оюутны жагсаалт select ашигласан
+    async function getSelectBottomDatas(state){
+        const { success, data } = await fetchSelectStudents(permissionStudentApi.getSelectStudents(state))
+        if(success){
+            setScrollBottomDatas((prev) => [...prev, ...data])
+        }
+    }
+
+    function handleStudentSelect(value){
+        getStudentOption(value)
+    }
+
+    useEffect(() => {
+        getSelectBottomDatas(2)
+    }, []);
+
+
     return(
         <Fragment>
             <Row className="mt-2">
@@ -209,9 +259,9 @@ function AddStudent(){
                                             {
                                                 scope === 3 &&
                                                     <Row className='mt-1'>
-                                                        <Col md={12}>
+                                                        <Col md={6}>
                                                             <Label className="form-label" for="participants">
-                                                                {'Анги сонгох'}
+                                                                {'Ангиар сонгох'}
                                                             </Label>
                                                             <Controller
                                                                 control={control}
@@ -226,7 +276,7 @@ function AddStudent(){
                                                                             isClearable
                                                                             isMulti
                                                                             value={value}
-                                                                            className={'react-select'}
+                                                                            className={classnames('react-select', {'is-invalid': errors.participants && errors.student})}
                                                                             isLoading={isLoading}
                                                                             options={selectOption?.select_student_data || []}
                                                                             placeholder={t('-- Сонгоно уу --')}
@@ -241,7 +291,68 @@ function AddStudent(){
                                                                     )
                                                                 }}
                                                             />
-                                                            {errors.select && <FormFeedback className='d-block'>{t(errors.select.message)}</FormFeedback>}
+                                                            {errors.participants && errors.student && <FormFeedback className='d-block'>{t(errors.participants.message)}</FormFeedback>}
+                                                        </Col>
+                                                        <Col sm={6}>
+                                                            <Label className='form-label' for='student'>
+                                                                {t('Оюутан')}
+                                                            </Label>
+                                                            <Controller
+                                                                control={control}
+                                                                defaultValue=''
+                                                                name="student"
+                                                                render={({ field: {value, onChange } }) => {
+                                                                    return (
+                                                                        <Select
+                                                                            name="student"
+                                                                            id="student"
+                                                                            classNamePrefix='select'
+                                                                            isClearable
+                                                                            className={classnames('react-select', {'is-invalid': errors.participants && errors.student})}
+                                                                            placeholder={`Хайх`}
+                                                                            isLoading={StudentLoading}
+                                                                            loadingMessage={() => "Түр хүлээнэ үү..."}
+                                                                            options={
+                                                                                student_search_value.length === 0
+                                                                                    ? scroll_bottom_datas || []
+                                                                                    : select_student || []
+                                                                            }
+                                                                            value={
+                                                                                student_search_value.length === 0
+                                                                                    ? scroll_bottom_datas.find((c) => c.id === value)
+                                                                                    : select_student.find((c) => c.id === value)
+                                                                            }
+                                                                            noOptionsMessage={() =>
+                                                                                student_search_value.length > 1
+                                                                                    ? t('Хоосон байна')
+                                                                                    : null
+                                                                            }
+                                                                            onMenuScrollToBottom={() => {
+                                                                                if(student_search_value.length === 0){
+                                                                                    setBottomCheck(bottom_check + 1)
+                                                                                    getSelectBottomDatas(bottom_check)
+                                                                                }
+                                                                            }}
+                                                                            onChange={(val) => {
+                                                                                onChange(val?.id || '')
+                                                                                setStudentId(val?.id || '')
+                                                                            }}
+                                                                            onInputChange={(e) => {
+                                                                                setStudentSearchValue(e);
+                                                                                if(e.length > 1 && e !== student_search_value){
+                                                                                    handleStudentSelect(e);
+                                                                                } else if (e.length === 0){
+                                                                                    setStudentOption([]);
+                                                                                }
+                                                                            }}
+                                                                            styles={ReactSelectStyles}
+                                                                            getOptionValue={(option) => option.id}
+                                                                            getOptionLabel={(option) => option.full_name}
+                                                                        />
+                                                                    )
+                                                                }}
+                                                            />
+                                                            {errors.participants && errors.student && <FormFeedback className='d-block'>{t(errors.student.message)}</FormFeedback>}
                                                         </Col>
                                                     </Row>
                                             }
