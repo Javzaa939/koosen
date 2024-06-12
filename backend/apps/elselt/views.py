@@ -452,7 +452,7 @@ class AdmissionUserInfoAPIView(
 
         if state:
             queryset = queryset.filter(state=state)
-        
+
         if age_state:
             queryset = queryset.filter(age_state = age_state)
 
@@ -1005,8 +1005,16 @@ class ElseltHealthProfessional(
         gender = self.request.query_params.get('gender')
         sorting = self.request.query_params.get('sorting')
         state  = self.request.query_params.get('state')
+        lesson_year_id = self.request.query_params.get('lesson_year_id')
+        profession_id = self.request.query_params.get('profession_id')
 
         queryset = queryset.filter(state=AdmissionUserProfession.STATE_APPROVE)
+
+        if lesson_year_id:
+            queryset = queryset.filter(user__profession__admission=lesson_year_id)
+
+        if profession_id:
+            queryset = queryset.filter(user__profession__profession__id=profession_id)
 
         if gender:
             if gender == 'Эрэгтэй':
