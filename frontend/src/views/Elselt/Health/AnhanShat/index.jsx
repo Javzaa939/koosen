@@ -76,7 +76,6 @@ function AnhanShat() {
 	const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false});
 
 	const elseltApi = useApi().elselt.health.anhan
-    const [selectedStudents, setSelectedStudents] = useState([])
     const professionApi = useApi().elselt.profession
     const admissionYearApi = useApi().elselt
 
@@ -180,19 +179,11 @@ function AnhanShat() {
     }
 
     function excelHandler() {
-        excelDownLoad(datas,    )
+        excelDownLoad(datas, STATE_LIST)
     }
-    function onSelectedRowsChange(state) {
-        setSelectedStudents(state?.selectedRows)
-    }
-
-
-
 
     return (
         <Card>
-
-
             {
                 addModal &&
                 <AddModal
@@ -202,7 +193,6 @@ function AnhanShat() {
                     getDatas={getDatas}
                     STATE_LIST={STATE_LIST}
                 />
-
             }
             <CardHeader>
                 <h5>
