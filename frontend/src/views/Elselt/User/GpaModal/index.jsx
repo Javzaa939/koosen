@@ -71,18 +71,18 @@ function GpaModal({
   }
   //Mail илгээх функц
   async function sendMail() {
-    const edata = {
-      students: filteredData.map((val) => val?.user?.id) || [],
-      email_list: filteredData.map((val) => val?.user?.email) || [],
-      description: filteredData.map((val) => val?.gpa_description) || []
-  };
-    if (edata.students.length > 0) {
-      const { success } = await fetchData(admissionStateChangeApi.post(edata));
-      if (success) {
-        reset();
-        edata = {};
-      }
-    }
+  //   const edata = {
+  //     students: filteredData.map((val) => val?.user?.id) || [],
+  //     email_list: filteredData.map((val) => val?.user?.email) || [],
+  //     description: filteredData.map((val) => val?.gpa_description) || []
+  // };
+  //   if (edata.students.length > 0) {
+  //     const { success } = await fetchData(admissionStateChangeApi.post(edata));
+  //     if (success) {
+  //       reset();
+  //       edata = {};
+  //     }
+  //   }
   }
   //Төлөв өөрчлөх
   async function saveData(cdata) {
