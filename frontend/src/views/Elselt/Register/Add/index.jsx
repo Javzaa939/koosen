@@ -91,7 +91,6 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
 
         cdata = convertDefaultValue(cdata)
 
-        console.log(cdata)
         const formData = new FormData()
 
         for (let key in cdata) {

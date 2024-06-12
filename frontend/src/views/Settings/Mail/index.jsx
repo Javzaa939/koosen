@@ -54,9 +54,7 @@ export default function Mail() {
     const { fetchData } = useLoader({})
 
     async function onSubmit(cdata) {
-        console.log(cdata)
         const datas = convertDefaultValue(cdata)
-        console.log(datas)
         const { success } = await fetchData(configApi.put(datas))
         if (success) {
             setEdit(false)
