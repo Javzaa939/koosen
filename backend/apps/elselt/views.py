@@ -885,9 +885,16 @@ class ElseltHealthAnhanShat(
     filter_backends = [SearchFilter]
     search_fields = ['user__first_name', 'user__first_name', 'user__register']
 
+
+
     def get_queryset(self):
         queryset = self.queryset
-        queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
+        queryset = queryset.annotate(
+            gender=(Substr('user__register', 9, 1)),
+            user_email=F("user__email"),
+            degree_name=F("profession__profession__degree__degree_name")
+
+        )
 
         # Эрүүл мэндийн шалгуур үзүүлэлттэй мэргэжлүүд
         # TODO Одоогоор идэвхтэй байгаа элсэлтээс л харуулж байгаа гэсэн үг
@@ -899,6 +906,8 @@ class ElseltHealthAnhanShat(
         state  = self.request.query_params.get('state')
         elselt = self.request.query_params.get('elselt')
         profession = self.request.query_params.get('profession')
+
+
 
         # Ял шийтгэл, Насны үзүүлэлтүүдэд ТЭНЦЭЭГҮЙ элсэгчдийг хасах
         queryset = queryset.exclude(age_state=AdmissionUserProfession.STATE_REJECT, gpa_state=AdmissionUserProfession.STATE_REJECT, state__in=[AdmissionUserProfession.STATE_REJECT, AdmissionUserProfession.STATE_APPROVE])

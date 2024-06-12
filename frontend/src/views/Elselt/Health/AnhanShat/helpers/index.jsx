@@ -34,7 +34,7 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 			header: 'user__first_name',
 			name: <div className="px-1">Нэр</div>,
 			minWidth: '160px',
-			maxWidth: '160px',
+			maxWidth: '260px',
 			sortable: true,
 			selector: (row) => row?.full_name || ''
 		},
