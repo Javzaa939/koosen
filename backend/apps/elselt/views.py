@@ -61,6 +61,7 @@ from elselt.models import (
     ElseltUser,
     ContactInfo,
     EmailInfo,
+    MessageInfo,
     HealthUser,
     PhysqueUser,
     HealthUpUser,
@@ -445,6 +446,12 @@ class AdmissionUserInfoAPIView(
         gender = self.request.query_params.get('gender')
         sorting = self.request.query_params.get('sorting')
         gpa = self.request.query_params.get('gpa')
+        justice_state = self.request.query_params.get('justice_state')
+        is_justice = self.request.query_params.get('is_justice')
+
+        if is_justice:
+            justice_profession_ids = AdmissionIndicator.objects.filter(admission_prof__admission__is_active=True, value__in=[AdmissionIndicator.YAL_SHIITGEL]).values_list('admission_prof', flat=True)
+            queryset = queryset.filter(profession__in=justice_profession_ids)
 
         if lesson_year_id:
             queryset = queryset.filter(profession__admission=lesson_year_id)
@@ -457,13 +464,16 @@ class AdmissionUserInfoAPIView(
 
         if state:
             queryset = queryset.filter(state=state)
-        
+
         if age_state:
-            queryset = queryset.filter(age_state = age_state)
+            queryset = queryset.filter(age_state=age_state)
 
         if gpa_state:
             user_ids = UserInfo.objects.filter(gpa_state=gpa_state).values_list('user', flat=True)
             queryset = queryset.filter(user__in=user_ids)
+
+        if justice_state:
+            queryset = queryset.filter(justice_state=justice_state)
 
         if gender:
             if gender == 'Эрэгтэй':
@@ -514,6 +524,7 @@ class AdmissionUserInfoAPIView(
         return request.send_info('INF_002')
 
 
+
 class AdmissionUserAllChange(
     generics.GenericAPIView,
     mixins.UpdateModelMixin
@@ -532,7 +543,18 @@ class AdmissionUserAllChange(
         try:
             with transaction.atomic():
                 now = dt.datetime.now()
-                self.queryset.filter(pk__in=data["students"]).update(state=data["state"], updated_at=now, state_description=data["state_description"])
+                if data.get("state") :
+                    self.queryset.filter(pk__in=data["students"]).update(
+                    state=data.get("state"),
+                    updated_at=now,
+                    state_description=data.get("state_description")
+                )
+                else:
+                    self.queryset.filter(pk__in=data["students"]).update(
+                    updated_at=now,
+                    justice_state=data.get("justice_state"),
+                    justice_description=data.get("justice_description")
+                )
         except Exception as e:
             transaction.savepoint_rollback(sid)
             return request.send_error("ERR_002", e.__str__)
@@ -675,10 +697,11 @@ class AdmissionUserEmailAPIView(
             print(e)
             transaction.savepoint_rollback(sid)
             return request.send_error("ERR_002", e.__str__)
+
         return request.send_info('INF_001')
 
 
-@permission_classes([IsAuthenticated])
+
 class AdmissionYearAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -1012,6 +1035,8 @@ class ElseltHealthProfessional(
         gender = self.request.query_params.get('gender')
         sorting = self.request.query_params.get('sorting')
         state  = self.request.query_params.get('state')
+        admission = self.request.query_params.get("lesson_year_id")
+        profession = self.request.query_params.get('profession_id')
 
         queryset = queryset.filter(state=AdmissionUserProfession.STATE_APPROVE)
 
@@ -1035,6 +1060,17 @@ class ElseltHealthProfessional(
             else:
                 user_id = HealthUpUser.objects.filter(state=state).values_list('user', flat=True)
                 queryset = queryset.filter(user__in=user_id)
+
+        if admission:
+            queryset = queryset.filter(
+                user__admissionuserprofession__profession__admission__id=admission
+            )
+
+        if profession:
+            queryset = queryset.filter(
+                user__admissionuserprofession__profession__profession=profession
+            )
+
 
         return queryset
 

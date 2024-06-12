@@ -1702,7 +1702,8 @@ function useApi(isDisplay=false) {
 					instance.post(`/elselt/sysinfo/`, data),
 		},
 		admissionuserdata: {
-			get: (limit, page, sort, search, lesson_year_id, profession_id, unit1_id, gender, state, gpa_state,age_state) => instance.get(`/elselt/admissionuserdata/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}&unit1_id=${unit1_id}&gender=${gender}&state=${state}&gpa_state=${gpa_state}&age_state=${age_state}`),
+			get: (limit, page, sort, search, lesson_year_id, profession_id, unit1_id, gender, state, gpa_state, age_state, justice_state='', is_justice='') =>
+				instance.get(`/elselt/admissionuserdata/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}&unit1_id=${unit1_id}&gender=${gender}&state=${state}&gpa_state=${gpa_state}&age_state=${age_state}&justice_state=${justice_state}&is_justice=${is_justice}`),
 			getOne: (pk) => instance.get(`/elselt/admissionuserdata/${pk}/`),
 			put: (data, id) => instance.put(`/elselt/admissionuserdata/${id}/`, data),
 			putDesc: (data, id) => instance.put(`/elselt/desc/${id}/`, data),
@@ -1736,7 +1737,7 @@ function useApi(isDisplay=false) {
 				put: (id, cdata) => instance.put(`/elselt/health/anhan/${id}/`, cdata)
 			},
 			professional:{
-				get: (limit, page, sort, search, state) => instance.get(`/elselt/health/professional/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}`),
+				get: (limit, page, sort, search,lesson_year_id, profession_id, state) => instance.get(`/elselt/health/professional/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}&state=${state}`),
 				post: (cdata) => instance.post(`/elselt/health/professional/`, cdata),
 				put: (id, cdata) => instance.put(`/elselt/health/professional/${id}/`, cdata)
 			},
