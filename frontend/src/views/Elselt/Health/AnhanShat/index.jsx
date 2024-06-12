@@ -8,6 +8,8 @@ import { ChevronDown, File, FileText, Printer, Search } from 'react-feather'
 
 import DataTable from 'react-data-table-component'
 
+import { MdMailOutline } from "react-icons/md";
+import { BiMessageRoundedError } from "react-icons/bi";
 import { useTranslation } from 'react-i18next'
 import Select from 'react-select'
 
@@ -19,7 +21,8 @@ import { getPagination, ReactSelectStyles } from '@utils'
 import { getColumns } from './helpers';
 import AddModal from './AddModal'
 import { excelDownLoad } from './downloadExcel'
-
+import MessageModal from './MessageModal'
+import EmailModal from './EmailModal'
 const STATE_LIST = [
     {
         name: 'Хүлээгдэж буй',
@@ -67,6 +70,13 @@ function AnhanShat() {
 	const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false});
 	const elseltApi = useApi().elselt.health.anhan
 
+    //email Modal
+    const [emailModal, setEmailModal] = useState(false)
+    //message Modal
+    const [messageModal, setMessageModal] = useState(false)
+
+    const [selectedStudents, setSelectedStudents] = useState([])
+
 	/* Жагсаалтын дата авах функц */
 	async function getDatas() {
 
@@ -74,6 +84,7 @@ function AnhanShat() {
         if(success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
+            console.log("-------------->",data)
 
             // Нийт хуудасны тоо
             var cpage_count = Math.ceil(data?.count / rowsPerPage === 'Бүгд' ? 1 : rowsPerPage)
@@ -95,7 +106,7 @@ function AnhanShat() {
     }, [sortField, currentPage, rowsPerPage, searchValue, chosenState])
 
 
-    // ** Function to handle filter
+    // ** Шүүж хайх хэсэг
 	const handleFilter = e => {
         const value = e.target.value.trimStart();
         setSearchValue(value)
@@ -113,7 +124,7 @@ function AnhanShat() {
         getDatas()
     }
 
-    // ** Function to handle per page
+    // Хуудаслалт
     function handlePerPage(e)
     {
         setRowsPerPage(e.target.value === 'Бүгд' ? e.target.value : parseInt(e.target.value))
@@ -138,8 +149,32 @@ function AnhanShat() {
         excelDownLoad(datas, STATE_LIST)
     }
 
+    function onSelectedRowsChange(state) {
+        setSelectedStudents(state?.selectedRows)
+    }
+      //имэйл илгээх функц
+    function emailModalHandler() {
+        setEmailModal(!emailModal)
+    }
+      //Мессеж илгээх функц
+    function messageModalHandler() {
+        setMessageModal(!messageModal)
+    }
+
     return (
         <Card>
+             <EmailModal
+                emailModalHandler={emailModalHandler}
+                emailModal={emailModal}
+                selectedStudents={selectedStudents}
+                getDatas={getDatas}
+            />
+            <MessageModal
+                messageModalHandler={messageModalHandler}
+                messageModal={messageModal}
+                selectedStudents={selectedStudents}
+                getDatas = {getDatas}
+            />
             {
                 addModal &&
                 <AddModal
@@ -149,6 +184,7 @@ function AnhanShat() {
                     getDatas={getDatas}
                     STATE_LIST={STATE_LIST}
                 />
+
             }
             <CardHeader>
                 <h5>
@@ -181,6 +217,32 @@ function AnhanShat() {
                         getOptionLabel={(option) => option.name}
                     />
                 </Col>
+
+
+                <div className='d-flex justify-content-between my-50 mt-1   '>
+                    <div className='d-flex'>
+                        <div className='px-0'>
+                            <Button color='primary' disabled={selectedStudents.length == 0}  className='d-flex align-items-center px-75' id='email_button' onClick={()=> emailModalHandler()} >
+                                <MdMailOutline className='me-25'/>
+                                Email илгээх
+                            </Button>
+                            <UncontrolledTooltip target='email_button'>
+                                Сонгосон элсэгчид руу имейл илгээх
+                            </UncontrolledTooltip>
+                        </div>
+                        <div className='px-1'>
+                            <Button color='primary' disabled={selectedStudents.length == 0}  className='d-flex align-items-center px-75' id='message_button' onClick={()=>messageModalHandler()}>
+                            {/* <Button color='primary' disabled={selectedStudents.length == 0} className='d-flex align-items-center px-75' id='message_button' onClick={() => messageModalHandler()}> */}
+                                <BiMessageRoundedError className='me-25'/>
+                                Мессеж илгээх
+                            </Button>
+                            <UncontrolledTooltip target='message_button'>
+                                Сонгосон элсэгчид руу мессеж илгээх
+                            </UncontrolledTooltip>
+                        </div>
+                    </div>
+
+                </div>
                 <Row className="justify-content-between">
                     <Col className='d-flex align-items-center justify-content-start' md={4}>
                         <Col md={3} sm={2} className='pe-1'>
@@ -256,9 +318,9 @@ function AnhanShat() {
                         paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
                         fixedHeader
                         fixedHeaderScrollHeight='62vh'
-                        // selectableRows
-                        // onSelectedRowsChange={(state) => onSelectedRowsChange(state)}
-                        // direction="auto"
+                        selectableRows
+                        onSelectedRowsChange={(state) => onSelectedRowsChange(state)}
+                        direction="auto"
                         // style={{ border: '1px solid red' }}
                         defaultSortFieldId={'created_at'}
                     />
