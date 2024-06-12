@@ -246,47 +246,47 @@ function Mergejliin() {
 						{t("Элсэлт")}
 						</Label>
 						<Select
-						name="lesson_year"
-						id="lesson_year"
-						classNamePrefix="select"
-						isClearable
-						className={classnames("react-select")}
-						isLoading={isLoading}
-						placeholder={t("-- Сонгоно уу --")}
-						options={admop || []}
-						value={admop.find((c) => c.id === adm)}
-						noOptionsMessage={() => t("Хоосон байна.")}
-						onChange={(val) => {
-							setAdm(val?.id || "");
-						}}
-						styles={ReactSelectStyles}
-						getOptionValue={(option) => option.id}
-						getOptionLabel={(option) =>
-							option.lesson_year + " " + option.name
-						}
+							name="lesson_year"
+							id="lesson_year"
+							classNamePrefix="select"
+							isClearable
+							className={classnames("react-select")}
+							isLoading={isLoading}
+							placeholder={t("-- Сонгоно уу --")}
+							options={admop || []}
+							value={admop.find((c) => c.id === adm)}
+							noOptionsMessage={() => t("Хоосон байна.")}
+							onChange={(val) => {
+								setAdm(val?.id || "");
+							}}
+							styles={ReactSelectStyles}
+							getOptionValue={(option) => option.id}
+							getOptionLabel={(option) =>
+								option.lesson_year + " " + option.name
+							}
 						/>
 					</Col>
 					<Col sm={6} lg={3}>
 						<Label className="form-label" for="profession">
-						{t("Хөтөлбөр")}
+							{t("Хөтөлбөр")}
 						</Label>
 						<Select
-						name="profession"
-						id="profession"
-						classNamePrefix="select"
-						isClearable
-						className={classnames("react-select")}
-						isLoading={isLoading}
-						placeholder={t("-- Сонгоно уу --")}
-						options={profOption || []}
-						value={profOption.find((c) => c?.prof_id === profession_id)}
-						noOptionsMessage={() => t("Хоосон байна.")}
-						onChange={(val) => {
-							setProfession_id(val?.prof_id || "");
-						}}
-						styles={ReactSelectStyles}
-						getOptionValue={(option) => option?.prof_id}
-						getOptionLabel={(option) => option.name}
+							name="profession"
+							id="profession"
+							classNamePrefix="select"
+							isClearable
+							className={classnames("react-select")}
+							isLoading={isLoading}
+							placeholder={t("-- Сонгоно уу --")}
+							options={profOption || []}
+							value={profOption.find((c) => c?.prof_id === profession_id)}
+							noOptionsMessage={() => t("Хоосон байна.")}
+							onChange={(val) => {
+								setProfession_id(val?.prof_id || "");
+							}}
+							styles={ReactSelectStyles}
+							getOptionValue={(option) => option?.prof_id}
+							getOptionLabel={(option) => option.name}
 						/>
 					</Col>
 					<Col md={6} lg={3}>
@@ -370,22 +370,22 @@ function Mergejliin() {
 						sm={12}
 					>
 						<Input
-						className="dataTable-filter mb-50"
-						type="text"
-						bsSize="sm"
-						id="search-input"
-						placeholder={t("Хайх үг....")}
-						value={searchValue}
-						onChange={(e) => {
-							handleFilter(e);
-						}}
-						onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+							className="dataTable-filter mb-50"
+							type="text"
+							bsSize="sm"
+							id="search-input"
+							placeholder={t("Хайх үг....")}
+							value={searchValue}
+							onChange={(e) => {
+								handleFilter(e);
+							}}
+							onKeyPress={(e) => e.key === "Enter" && handleSearch()}
 						/>
 						<Button
-						size="sm"
-						className="ms-50 mb-50"
-						color="primary"
-						onClick={handleSearch}
+							size="sm"
+							className="ms-50 mb-50"
+							color="primary"
+							onClick={handleSearch}
 						>
 							<Search size={15} />
 							<span className="align-middle ms-50"></span>
