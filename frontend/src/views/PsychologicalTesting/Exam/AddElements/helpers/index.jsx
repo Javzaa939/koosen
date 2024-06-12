@@ -21,8 +21,8 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleDelete)
 			center: true,
         },
         {
-            name: `${'Оюутны код'}`,
-            selector: (row) => row?.code,
+            name: `${' Код'}`,
+            selector: (row) => row?.code || row?.register,
             minWidth: "100px",
             center: true,
         },
@@ -49,9 +49,9 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleDelete)
                         className='ms-1'
                         onClick={() => showWarning({
                             header: {
-                                title: `Оюутныг шалгалтнаас хасах`,
+                                title: `Сэтгэл зүйн сорилоос хасах`,
                             },
-                            question: `Та энэ оюутныг тухайн шалгалтнаас хасахдаа итгэлтэй байна уу?`,
+                            question: `Та ${row?.first_name} хэрэглэгчийг сорилоос хасахдаа итгэлтэй байна уу?`,
                             onClick: () => handleDelete(row?.id),
                             btnText: 'Устгах',
                         })}
