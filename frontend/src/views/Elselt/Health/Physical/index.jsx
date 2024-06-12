@@ -81,7 +81,6 @@ function Physical() {
         [admId]
     )
 
-
     // Элсэлтийн жагсаалт авах
     async function getAdmissionYear() {
         const { success, data } = await fetchData(admissionYearApi.getAll())

@@ -1129,7 +1129,6 @@ class ElseltHealthPhysical(
     def get_queryset(self):
         queryset = self.queryset
         queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
-        queryset = queryset.filter(state=AdmissionUserProfession.STATE_APPROVE)
 
         # Бие бялдар шалгуур үзүүлэлттэй мэргэжлүүд
         # TODO Одоогоор идэвхтэй байгаа элсэлтээс л харуулж байгаа гэсэн үг Дараа жил яахыг үл мэднэ
@@ -1145,15 +1144,15 @@ class ElseltHealthPhysical(
 
         # Нарийн мэргэжлийн үзлэгт тэнцсэн хүүхдүүд бие бялдарын шалгалтад орно
         healt_user_ids = HealthUpUser.objects.filter(state=AdmissionUserProfession.STATE_APPROVE).values_list('user', flat=True)
-        queryset = queryset.filter(age_state=AdmissionUserProfession.STATE_APPROVE, justice_state=AdmissionUserProfession.STATE_APPROVE, user__in=healt_user_ids)
+        queryset = queryset.filter(user__in=healt_user_ids)
 
         # элсэлт
         if elselt:
-            queryset = queryset.filter(profession__admission=elselt)
+            queryset = queryset.filter(state__profession__admission=elselt)
 
         # хөтөлбөр
         if profession:
-            queryset = queryset.filter(profession__profession__id=profession)
+            queryset = queryset.filter(state__profession__profession__id=profession)
 
         # Sort хийх үед ажиллана
         if sorting:
