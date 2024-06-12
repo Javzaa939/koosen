@@ -457,7 +457,7 @@ class AdmissionUserInfoAPIView(
 
         if state:
             queryset = queryset.filter(state=state)
-        
+
         if age_state:
             queryset = queryset.filter(age_state = age_state)
 
@@ -675,6 +675,7 @@ class AdmissionUserEmailAPIView(
             print(e)
             transaction.savepoint_rollback(sid)
             return request.send_error("ERR_002", e.__str__)
+
         return request.send_info('INF_001')
 
 
@@ -1012,6 +1013,8 @@ class ElseltHealthProfessional(
         gender = self.request.query_params.get('gender')
         sorting = self.request.query_params.get('sorting')
         state  = self.request.query_params.get('state')
+        admission = self.request.query_params.get("lesson_year_id")
+        profession = self.request.query_params.get('profession_id')
 
         queryset = queryset.filter(state=AdmissionUserProfession.STATE_APPROVE)
 
@@ -1035,6 +1038,17 @@ class ElseltHealthProfessional(
             else:
                 user_id = HealthUpUser.objects.filter(state=state).values_list('user', flat=True)
                 queryset = queryset.filter(user__in=user_id)
+
+        if admission:
+            queryset = queryset.filter(
+                user__admissionuserprofession__profession__admission__id=admission
+            )
+
+        if profession:
+            queryset = queryset.filter(
+                user__admissionuserprofession__profession__profession=profession
+            )
+
 
         return queryset
 
