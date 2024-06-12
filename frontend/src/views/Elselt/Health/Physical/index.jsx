@@ -268,7 +268,7 @@ function Physical() {
                             value={profOption.find((c) => c.id === profId)}
                             noOptionsMessage={() => 'Хоосон байна'}
                             onChange={(val) => {
-                                setProfId(val?.id || '')
+                                setProfId(val?.prof_id || '')
 
                             }}
                             styles={ReactSelectStyles}
