@@ -23,7 +23,6 @@ import AuthContext from "@context/AuthContext"
 import { getPagination, ReactSelectStyles } from '@utils'
 
 import { getColumns } from './helpers';
-import { useNavigate } from 'react-router-dom';
 
 import { utils, writeFile } from 'xlsx-js-style';
 
@@ -33,22 +32,19 @@ import { BiMessageRoundedError } from "react-icons/bi";
 import { MdMailOutline } from "react-icons/md";
 import { RiEditFill } from "react-icons/ri";
 
-import PunishModal from './PunishModal';
+import StateModal from './StateModal';
 import EmailModal from './EmailModal';
 import MessageModal from './MessageModal';
-import useUpdateEffect from '@hooks/useUpdateEffect'
+import useUpdateEffect from '@hooks/useUpdateEffect';
 
-// import Addmodal from './Add'
+
 
 const ElseltYlshiitgel = () => {
 
 	const { user } = useContext(AuthContext)
 
-
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(20)
-
-    const navigate = useNavigate()
 
     // Эрэмбэлэлт
     const [sortField, setSort] = useState('')
@@ -60,7 +56,6 @@ const ElseltYlshiitgel = () => {
 
 	const [searchValue, setSearchValue] = useState("");
 	const [datas, setDatas] = useState([]);
-    const [modalDesc, setDescModal] = useState(false)
 
     // Нийт датаны тоо
     const [total_count, setTotalCount] = useState(datas.length || 1)
@@ -72,24 +67,22 @@ const ElseltYlshiitgel = () => {
 	const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false});
     const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
 
-	// Modal
-	const [modal, setModal] = useState(false);
-
     const [profOption, setProfession] = useState([])
     const [profession_id, setProfession_id] = useState('')
-
-    const [admop, setAdmop] = useState([])
     const [adm, setAdm] = useState('')
+    const [age_state, setAge_state] = useState('')
 
 
     const [unit1, setUnit1] = useState('')
 
     const [selectedStudents, setSelectedStudents] = useState([])
 
-
+    //email modal
     const [emailModal, setEmailModal] = useState(false)
+    //message modal
     const [messageModal, setMessageModal] = useState(false)
-    const [punishModal,setPunishModel] = useState(false);
+    //state modal
+    const [stateModal,setPunishModel] = useState(false);
 
     const stateop = [
         {
@@ -111,8 +104,6 @@ const ElseltYlshiitgel = () => {
 
     const [gender, setGender] = useState('')
 	const elseltApi = useApi().elselt.admissionuserdata
-    const admissionYearApi = useApi().elselt
-    const unit1Api = useApi().hrms.unit1
     const professionApi = useApi().elselt.profession
 
     // Хөтөлбөрийн жагсаалт авах
@@ -122,46 +113,19 @@ const ElseltYlshiitgel = () => {
             setProfession(data)
         }
 	}
-
-    async function getAdmissionYear() {
-        const { success, data } = await fetchData(admissionYearApi.getAll())
-        if (success) {
-            setAdmop(data)
-        }stateop
-	}
-	/* Модал setState функц */
-	const handleDescModal = (row) => {
-		setDescModal(!modal)
-        setEditData(row)
-	}
-
-	/* Устгах функц */
-	const handleDelete = async(id) => {
-        const {success} = await fetchData(elseltApi.delete(id))
-		if(success) {
-
-            getDatas()
-		}
-	};
-
 	/* Жагсаалтын дата авах функц */
 	async function getDatas() {
 
-        const {success, data} = await allFetch(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, adm, profession_id, unit1, gender, state, gpa_state,))
+        const {success, data} = await allFetch(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, adm, profession_id, unit1, gender, state, gpa_state,age_state))
         if(success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
-
 
             // Нийт хуудасны тоо
             var cpage_count = Math.ceil(data?.count / rowsPerPage === 'Бүгд' ? 1 : rowsPerPage)
             setPageCount(cpage_count)
         }
 	}
-
-
-
-
     // ** Function to handle filter
 	const handleFilter = e => {
         const value = e.target.value.trimStart();
@@ -199,7 +163,6 @@ const ElseltYlshiitgel = () => {
     }, [sortField, currentPage, rowsPerPage, searchValue, adm, profession_id, unit1, gender, state, gpa_state])
 
     useEffect(() => {
-        getAdmissionYear()
         getProfession()
     }, [])
 
@@ -213,12 +176,10 @@ const ElseltYlshiitgel = () => {
         setRowsPerPage(e.target.value === 'Бүгд' ? e.target.value : parseInt(e.target.value))
     }
 
-    function handleRowClicked(row) {
-        window.open(`elselt/user/${row.id}`)
-    }
 
 
 
+    //excel
     function convert(){
         const mainData = datas.map((data, idx) => {
             return(
@@ -373,8 +334,8 @@ const ElseltYlshiitgel = () => {
     function messageModalHandler() {
         setMessageModal(!messageModal)
     }
-    function punishModalHandler() {
-        setPunishModel(!punishModal)
+    function stateModalHandler() {
+        setPunishModel(!stateModal)
     }
 
 	return (
@@ -391,9 +352,9 @@ const ElseltYlshiitgel = () => {
                 selectedStudents={selectedStudents}
                 getDatas={getDatas}
             />
-            <PunishModal
-                punishModalHandler={punishModalHandler}
-                punishModal={punishModal}
+            <StateModal
+                stateModalHandler={stateModalHandler}
+                stateModal={stateModal}
                 selectedStudents={selectedStudents}
                 stateop={stateop}
                 getDatas={getDatas}
@@ -431,7 +392,7 @@ const ElseltYlshiitgel = () => {
                 <div className='d-flex justify-content-between my-50 mt-1'>
                     <div className='d-flex'>
                         <div className='px-1'>
-                            <Button color='primary' disabled={selectedStudents.length == 0} className='d-flex align-items-center px-75' id='state_button' onClick={() => punishModalHandler()}>
+                            <Button color='primary' disabled={selectedStudents.length == 0} className='d-flex align-items-center px-75' id='state_button' onClick={() => stateModalHandler()}>
                                 <RiEditFill className='me-25'/>
                                 Төлөв солих
                             </Button>
@@ -536,7 +497,7 @@ const ElseltYlshiitgel = () => {
                         print='true'
                         theme="solarized"
                         onSort={handleSort}
-                        columns={getColumns(currentPage, rowsPerPage === 'Бүгд' ? 1 : rowsPerPage, total_count, handleDelete, user, handleRowClicked, handleDescModal)}
+                        columns={getColumns(currentPage, rowsPerPage === 'Бүгд' ? 1 : rowsPerPage, total_count, user)}
                         sortIcon={<ChevronDown size={10} />}
                         paginationPerPage={rowsPerPage === 'Бүгд' ? 1 : rowsPerPage}
                         paginationDefaultPage={currentPage}

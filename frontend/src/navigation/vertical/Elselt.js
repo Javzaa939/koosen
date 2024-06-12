@@ -62,12 +62,11 @@ export default [
                 navLink: "student/enrollment"
             },
             {
-                id: 'elselt8',
+                id: 'elselt9',
                 title: 'Мэйл тайлан',
                 icon: <Circle size={8} />,
                 navLink: "elselt/tailan"
             },
-            
         ]
     }
 ]

@@ -11,7 +11,7 @@ import useLoader from '@hooks/useLoader';
 import 'react-perfect-scrollbar/dist/css/styles.css'
 
 function MessageModal({ messageModalHandler, messageModal, selectedStudents, getDatas }) {
-    const { formState: { errors },control, handleSubmit,reset ,watch} = useForm();
+    const { formState: { errors },control, handleSubmit,reset } = useForm();
     const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: true, bg: 2 });
     const admissionStateChangeApi = useApi().elselt.admissionuserdata.message;
 
@@ -19,11 +19,11 @@ function MessageModal({ messageModalHandler, messageModal, selectedStudents, get
 
         console.log("cdata",cdata)
         cdata['students'] = selectedStudents.map(val => val?.user?.id) || [];
-        cdata['message_list'] = selectedStudents.map(val => val?.user?.email) || [];
+        cdata['message_list'] = selectedStudents.map(val => val?.user?.message) || [];
         const { success } = await fetchData(admissionStateChangeApi.post(cdata));
         if (success) {
             reset();
-            emailModalHandler();
+            messageModalHandler();
             getDatas();
         };
     }

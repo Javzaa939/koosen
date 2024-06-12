@@ -7,10 +7,10 @@ import useLoader from '@hooks/useLoader';
 import { Controller, useForm } from 'react-hook-form'
 import { validateSchema } from './validateSchema';
 
-function PunishModal({ punishModalHandler ,punishModal,selectedStudents, stateop, getDatas}) {
+function StateModal({ stateModalHandler ,stateModal,selectedStudents, stateop, getDatas}) {
 
     const { formState: { errors }, handleSubmit, control, reset, watch, setValue} = useForm(validate(validateSchema));
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true});
+    const { fetchData } = useLoader({isFullScreen: true});
 
     const [displayPopover, setDisplayPopover] = useState(false)
     const admissionStateChangeApi = useApi().elselt.admissionuserdata.all;
@@ -20,7 +20,7 @@ function PunishModal({ punishModalHandler ,punishModal,selectedStudents, stateop
         const { success } = await fetchData(admissionStateChangeApi.put(cdata));
         if (success) {
             reset();
-            punishModalHandler();
+            stateModalHandler();
             getDatas();
         };
     };
@@ -29,9 +29,9 @@ function PunishModal({ punishModalHandler ,punishModal,selectedStudents, stateop
         setDisplayPopover(!displayPopover)
     }
     return (
-        <Modal centered toggle={punishModalHandler} isOpen={punishModal}>
-            <ModalHeader toggle={punishModalHandler}>
-                Шийтгэлийн бүртгэл
+        <Modal centered toggle={stateModalHandler} isOpen={stateModal}>
+            <ModalHeader toggle={stateModalHandler}>
+                Төлөв
             </ModalHeader>
             <ModalBody>
                 <Form className='' onSubmit={handleSubmit(onSubmit)}>
@@ -135,7 +135,7 @@ function PunishModal({ punishModalHandler ,punishModal,selectedStudents, stateop
 
                     <div className='text-center my-50'>
                         <Button className='m-50' color='primary' type='submit'>Хадгалах</Button>
-                        <Button className='m-50 ' onClick={() => punishModalHandler()}>Гарах</Button>
+                        <Button className='m-50 ' onClick={() => stateModalHandler()}>Гарах</Button>
                     </div>
                 </Form>
             </ModalBody>
@@ -143,4 +143,4 @@ function PunishModal({ punishModalHandler ,punishModal,selectedStudents, stateop
     )
 }
 
-export default PunishModal
+export default StateModal
