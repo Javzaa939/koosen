@@ -1,3 +1,4 @@
+
 // ** React imports
 import React, { Fragment, useState, useEffect, useContext } from 'react'
 
@@ -121,7 +122,6 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
         const { success, data } = await fetchData(studentRegisterStatusApi.get())
         if(success) {
             setStatusOption(data)
-
         }
     }
 
