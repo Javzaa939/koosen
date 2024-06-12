@@ -306,8 +306,8 @@ class HealthUserDataSerializer(serializers.ModelSerializer):
     user_email = serializers.CharField(read_only=True)
     gender_name = serializers.SerializerMethodField()
     health_user_data = serializers.SerializerMethodField()
-    Professions=serializers.CharField(read_only=True)
     degree_name=serializers.CharField(read_only=True)
+    user = ElseltUserSerializer(many=False, read_only=True)
 
     class Meta:
         model = AdmissionUserProfession

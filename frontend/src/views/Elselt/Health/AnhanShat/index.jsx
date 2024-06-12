@@ -21,8 +21,8 @@ import { getPagination, ReactSelectStyles } from '@utils'
 import { getColumns } from './helpers';
 import AddModal from './AddModal'
 import { excelDownLoad } from './downloadExcel'
-import MessageModal from './MessageModal'
-import EmailModal from './EmailModal'
+import MessageModal from '../../User/MessageModal'
+import EmailModal from '../../User/EmailModal'
 const STATE_LIST = [
     {
         name: 'Хүлээгдэж буй',
@@ -128,7 +128,6 @@ function AnhanShat() {
         if(success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
-            console.log("-------------->",data)
 
             // Нийт хуудасны тоо
             var cpage_count = Math.ceil(data?.count / rowsPerPage === 'Бүгд' ? 1 : rowsPerPage)
@@ -384,7 +383,7 @@ function AnhanShat() {
                         </Button>
                     </Col>
                 </Row>
-                <div className="react-dataTable react-dataTable-selectable-rows" id='datatableLeftTwoRightOne'>
+                <div className="react-dataTable react-dataTable-selectable-rows" >
                     <DataTable
                         noHeader
                         paginationServer
