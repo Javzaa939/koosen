@@ -262,30 +262,6 @@ function AnhanShat() {
                         getOptionLabel={(option) => option.name}
                     />
                 </Col>
-                <div className='d-flex justify-content-between my-50 mt-1   '>
-                    <div className='d-flex'>
-                        <div className='px-0'>
-                            <Button color='primary' disabled={selectedStudents.length == 0}  className='d-flex align-items-center px-75' id='email_button' onClick={()=> emailModalHandler()} >
-                                <MdMailOutline className='me-25'/>
-                                Email илгээх
-                            </Button>
-                            <UncontrolledTooltip target='email_button'>
-                                Сонгосон элсэгчид руу имейл илгээх
-                            </UncontrolledTooltip>
-                        </div>
-                        <div className='px-1'>
-                            <Button color='primary' disabled={selectedStudents.length == 0}  className='d-flex align-items-center px-75' id='message_button' onClick={()=>messageModalHandler()}>
-                            {/* <Button color='primary' disabled={selectedStudents.length == 0} className='d-flex align-items-center px-75' id='message_button' onClick={() => messageModalHandler()}> */}
-                                <BiMessageRoundedError className='me-25'/>
-                                Мессеж илгээх
-                            </Button>
-                            <UncontrolledTooltip target='message_button'>
-                                Сонгосон элсэгчид руу мессеж илгээх
-                            </UncontrolledTooltip>
-                        </div>
-                    </div>
-
-                </div>
                 <Col md={3}>
                     <Label for='form-label'>{t('Элсэлт')}</Label>
                     <Select
@@ -334,6 +310,32 @@ function AnhanShat() {
                         getOptionLabel={(option) => option.name}
                     />
                 </Col>
+            </Row>
+            <Row>
+                <div className='d-flex justify-content-between my-50 mt-1   '>
+                    <div className='d-flex'>
+                        <div className='px-0'>
+                            <Button color='primary' disabled={selectedStudents.length == 0}  className='d-flex align-items-center px-75' id='email_button' onClick={()=> emailModalHandler()} >
+                                <MdMailOutline className='me-25'/>
+                                Email илгээх
+                            </Button>
+                            <UncontrolledTooltip target='email_button'>
+                                Сонгосон элсэгчид руу имейл илгээх
+                            </UncontrolledTooltip>
+                        </div>
+                        <div className='px-1'>
+                            <Button color='primary' disabled={selectedStudents.length == 0}  className='d-flex align-items-center px-75' id='message_button' onClick={()=>messageModalHandler()}>
+                            {/* <Button color='primary' disabled={selectedStudents.length == 0} className='d-flex align-items-center px-75' id='message_button' onClick={() => messageModalHandler()}> */}
+                                <BiMessageRoundedError className='me-25'/>
+                                Мессеж илгээх
+                            </Button>
+                            <UncontrolledTooltip target='message_button'>
+                                Сонгосон элсэгчид руу мессеж илгээх
+                            </UncontrolledTooltip>
+                        </div>
+                    </div>
+
+                </div>
             </Row>
                 <Row className="justify-content-between">
                     <Col className='d-flex align-items-center justify-content-start' md={4}>
