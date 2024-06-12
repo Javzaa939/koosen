@@ -2949,7 +2949,7 @@ class StudentDownloadAPIView(
     search_fields = ['department__name', 'code', 'first_name', 'register_num']
 
     def get_queryset(self):
-        queryset = self.queryset
+        queryset = self.queryset.all()
         department = self.request.query_params.get('department')
         degree = self.request.query_params.get('degree')
         profession = self.request.query_params.get('profession')
