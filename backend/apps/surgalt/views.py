@@ -2497,7 +2497,7 @@ class PsychologicalTestOneAPIView(
             question_title_ids.append(value['id'])
 
         # Тус багцад хамаарах асуултуудыг, багцын id-г ашиглан хадгална
-        question_ids = self.queryser.filter(title__in=question_title_ids).values_list('id', flat=True)
+        question_ids = self.queryset.filter(title__in=question_title_ids).values_list('id', flat=True)
 
         with transaction.atomic():
             try:
