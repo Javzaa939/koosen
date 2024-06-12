@@ -1038,7 +1038,7 @@ class ElseltHealthProfessional(
         admission = self.request.query_params.get("lesson_year_id")
         profession = self.request.query_params.get('profession_id')
 
-        queryset = queryset.filter(state=AdmissionUserProfession.STATE_APPROVE)
+        # queryset = queryset.filter(state=AdmissionUserProfession.STATE_APPROVE)
 
         if gender:
             if gender == 'Эрэгтэй':
@@ -1129,7 +1129,6 @@ class ElseltHealthProfessional(
 
         else:
             error_obj = []
-            print(serializer.errors)
             for key in serializer.errors:
                 msg = "Хоосон байна"
 
@@ -1208,6 +1207,14 @@ class ElseltHealthPhysical(
         if state:
             user_ids = HealthUpUser.objects.filter(state=state).values_list('user', flat=True)
             queryset = queryset.filter(user__in=user_ids)
+
+        if state:
+            if state == '1':
+                user_id = HealthUpUser.objects.filter(Q(Q(state=2) | Q(state=3))).values_list('user', flat=True)
+                queryset = queryset.filter(state=AdmissionUserProfession.STATE_APPROVE).exclude(user_id__in=user_id)
+            else:
+                user_id = PhysqueUser.objects.filter(state=state).values_list('user', flat=True)
+                queryset = queryset.filter(user__in=user_id)
 
         return queryset
 

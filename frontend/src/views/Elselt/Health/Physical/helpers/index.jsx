@@ -1,4 +1,3 @@
-import { log } from "@craco/craco/lib/logger"
 import { CheckCircle} from "react-feather"
 import { Badge, UncontrolledTooltip } from "reactstrap"
 
