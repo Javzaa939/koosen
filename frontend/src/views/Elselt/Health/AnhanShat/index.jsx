@@ -23,6 +23,7 @@ import AddModal from './AddModal'
 import { excelDownLoad } from './downloadExcel'
 import MessageModal from '../../User/MessageModal'
 import EmailModal from '../../User/EmailModal'
+
 const STATE_LIST = [
     {
         name: 'Хүлээгдэж буй',
@@ -63,12 +64,12 @@ function AnhanShat() {
     const [elseltOption, setElseltOption] = useState([])     // элсэлт авах нь
     const [profOption, setProfessionOption] = useState([])   // хөтөлбөр авах нь
     const [select_value, setSelectValue] = useState(values);
-
-    const [descModal, setDescModal] = useState(false)
-    const [descModalData ,setDescModalData] = useState(null)
-
     const [addModal, setAddModal] = useState(false)
     const [addModalData, setAddModalData] = useState(null)
+    const [emailModal, setEmailModal] = useState(false)
+    const [messageModal, setMessageModal] = useState(false)
+
+    const [selectedStudents, setSelectedStudents] = useState([])
 
     // Нийт датаны тоо
     const [total_count, setTotalCount] = useState(datas.length || 1)
@@ -94,7 +95,6 @@ function AnhanShat() {
         [select_value.admission]
     )
 
-
     // Элсэлтийн жагсаалт авах
     async function getAdmissionYear() {
         const { success, data } = await fetchData(admissionYearApi.getAll())
@@ -111,13 +111,6 @@ function AnhanShat() {
             setProfessionOption(data)
         }
 	}
-
-    //email Modal
-    const [emailModal, setEmailModal] = useState(false)
-    //message Modal
-    const [messageModal, setMessageModal] = useState(false)
-
-    const [selectedStudents, setSelectedStudents] = useState([])
 
 	/* Жагсаалтын дата авах функц */
 	async function getDatas() {
@@ -178,11 +171,6 @@ function AnhanShat() {
 		setCurrentPage(page.selected + 1);
 	};
 
-    function descModalHandler(e, data) {
-        setDescModal(!descModal)
-        setDescModalData(data || null)
-    }
-
     function addModalHandler(e, data) {
         setAddModal(!addModal)
         setAddModalData(data || null)
@@ -195,11 +183,13 @@ function AnhanShat() {
     function onSelectedRowsChange(state) {
         setSelectedStudents(state?.selectedRows)
     }
-      //имэйл илгээх функц
+
+    // имэйл илгээх функц
     function emailModalHandler() {
         setEmailModal(!emailModal)
     }
-      //Мессеж илгээх функц
+
+    // Мессеж илгээх функц
     function messageModalHandler() {
         setMessageModal(!messageModal)
     }
