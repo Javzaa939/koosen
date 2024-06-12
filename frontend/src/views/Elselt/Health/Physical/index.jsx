@@ -13,6 +13,8 @@ import Select from 'react-select'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
+import { MdMailOutline } from "react-icons/md";
+import { BiMessageRoundedError } from "react-icons/bi";
 
 import { getPagination, ReactSelectStyles } from '@utils'
 
@@ -248,6 +250,26 @@ function Physical() {
                         />
                     </Col>
                 </Row>
+                <div className='d-flex justify-content-start my-50 mt-1'>
+                    <div className='px-1'>
+                        <Button color='primary' disabled className='d-flex align-items-center px-75' id='email_button' >
+                            <MdMailOutline className='me-25'/>
+                            Email илгээх
+                        </Button>
+                        <UncontrolledTooltip target='email_button'>
+                            Сонгосон элсэгчид руу имейл илгээх
+                        </UncontrolledTooltip>
+                    </div>
+                    <div className='px-1'>
+                            <Button color='primary' disabled className='d-flex align-items-center px-75' id='message_button' onClick={() => messageModalHandler()}>
+                                <BiMessageRoundedError className='me-25'/>
+                                Мессеж илгээх
+                            </Button>
+                            <UncontrolledTooltip target='message_button'>
+                                Сонгосон элсэгчид руу мессеж илгээх
+                            </UncontrolledTooltip>
+                        </div>
+                </div>
                 <Row className="justify-content-between " >
                     <Col className='d-flex align-items-center justify-content-start' md={4}>
                         <Col md={3} sm={2} className='pe-1'>
