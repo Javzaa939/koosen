@@ -273,8 +273,6 @@ export default function PrintNationalAttachment()
         }
     }
 
-    console.log(printDatas)
-
     return (
 
         <div className='d-flex' style={{ height: '100vh', overflow: 'hidden' }}>

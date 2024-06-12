@@ -22,7 +22,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleDelete)
         },
         {
             name: `${' Код'}`,
-            selector: (row) => row?.code,
+            selector: (row) => row?.code || row?.register,
             minWidth: "100px",
             center: true,
         },

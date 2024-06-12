@@ -95,7 +95,6 @@ const AddModal = ({ open, handleModal, refreshDatas, editData}) =>{
 
     useEffect(
         () => {
-            console.log(editData)
             if(editData === null) return
             for(let key in editData) {
                 if(editData[key] !== null)

@@ -19,18 +19,40 @@ import * as Yup from "yup";
 import useLoader from '@hooks/useLoader';
 import useApi from '@hooks/useApi';
 
+// const validateSchema = Yup.object().shape({
+//     questions:
+//         Yup.array()
+//             .min(1, 'Та асуултаа нэмнэ үү')
+//             .of(
+//                 Yup.object().shape({
+//                     kind: Yup.number().typeError("Сонгоно уу").required('Хоосон байна'),
+//                     level: Yup.number().typeError("Сонгоно уу").required('Хоосон байна'),
+//                     question: Yup.string().typeError("Сонгоно уу").required('Хоосон байна'),
+//                     score: Yup.string().typeError("Оноогоо оруулна уу").required('Хоосон байна'),
+//                 })
+//             ),
+// });
+
 const validateSchema = Yup.object().shape({
-    questions:
-        Yup.array()
-            .min(1, 'Та асуултаа нэмнэ үү')
-            .of(
-                Yup.object().shape({
-                    kind: Yup.number().typeError("Сонгоно уу").required('Хоосон байна'),
-                    level: Yup.number().typeError("Сонгоно уу").required('Хоосон байна'),
-                    question: Yup.string().typeError("Сонгоно уу").required('Хоосон байна'),
-                })
-            ),
+    questions: Yup.array()
+        .min(1, 'Та асуултаа нэмнэ үү')
+        .of(
+            Yup.object().shape({
+                kind: Yup.number().typeError("Сонгоно уу").required('Хоосон байна'),
+                level: Yup.number().typeError("Сонгоно уу").required('Хоосон байна'),
+                question: Yup.string().typeError("Сонгоно уу").required('Хоосон байна'),
+                score: Yup.string().when('level', {
+                    is: (level) => Condition(level),
+                    then: Yup.string().typeError("Оноогоо оруулна уу").required('Хоосон байна'),
+                    otherwise: Yup.string()
+                }),
+            })
+        ),
 });
+
+function Condition(level) {
+    return level === 1;
+}
 
 export default function AddQuestion(props) {
     const { open, handleModal, getDatas } = props
