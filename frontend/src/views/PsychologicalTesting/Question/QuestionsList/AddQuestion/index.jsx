@@ -51,7 +51,6 @@ const validateSchema = Yup.object().shape({
 });
 
 function Condition(level) {
-    console.log(level)
     return level === 1;
 }
 

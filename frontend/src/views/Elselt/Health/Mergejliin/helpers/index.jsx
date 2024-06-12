@@ -25,7 +25,6 @@ export function getColumns (currentPage, rowsPerPage, page_count, STATE_LIST, de
 					tableRow.style.borderLeft = `${border}`
 				}
 
-				// console.log((currentPage-1) * rowsPerPage + index + 1)
 				return (currentPage-1) * rowsPerPage + index + 1
 			},
 			minWidth: '100px',

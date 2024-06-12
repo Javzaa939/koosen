@@ -192,7 +192,6 @@ const ElseltUser = () => {
         if(success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
-            console.log(data)
             // Нийт хуудасны тоо
             var cpage_count = Math.ceil(data?.count / rowsPerPage === 'Бүгд' ? 1 : rowsPerPage)
             setPageCount(cpage_count)

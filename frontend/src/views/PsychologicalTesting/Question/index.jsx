@@ -35,7 +35,6 @@ const Question = () => {
     async function getAllTitle() {
         const { success, data } = await fetchData(questionAPI.getTitle())
         if (success) {
-            console.log(data)
             setDatas(data)
         }
     }

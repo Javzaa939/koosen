@@ -15,8 +15,6 @@ export default function Able()
     const { Loader, isLoading, fetchData } = useLoader({})
     const ableApi = useApi().able
 
-    console.log('isLoading', isLoading)
-
     async function getWorker()
     {
         let response = await fetchData(ableApi.getWorker())

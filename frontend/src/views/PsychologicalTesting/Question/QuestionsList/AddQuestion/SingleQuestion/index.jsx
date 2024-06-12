@@ -278,7 +278,6 @@ export default function SingleQuestion(props) {
                                                     placeholder="Асуултын оноо"
                                                     type="number"
                                                     invalid={errors?.[fieldName]?.[fieldIndex]?.['score'] && true}
-                                                    value={console.log(errors)}
                                                 />
                                             )}
                                         />
