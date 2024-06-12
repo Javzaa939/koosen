@@ -31,8 +31,6 @@ export default function PrintProfession({ }) {
     const mergejil_id = sessionStorage.getItem("professionDefinationID") ? JSON.parse(sessionStorage.getItem("professionDefinationID")) : null;
     const listArr = sessionStorage.getItem("signature_data") ? JSON.parse(sessionStorage.getItem("signature_data")) : null;
 
-    console.log(datas)
-
     async function getDatas(clesson_type = '') {
 
         if (datas && Object.keys(datas).length > 0) {
