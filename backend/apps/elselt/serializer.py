@@ -551,7 +551,9 @@ class EyeshCheckUserInfoSerializer(serializers.ModelSerializer):
         userinfo_data = UserinfoSerializer(data).data
 
         return userinfo_data
+
     # ЭЕШ ийн оноо босго оноо давсанг шалгах
+    # NOTE ЭЕШ оноо хадгалж байгаа модел өөрчлөгдөх үел дахин сайжруулах
     def get_eesh_check(self, obj):
         check_score_query = AdmissionBottomScore.objects.filter(profession=obj.profession_id).values('bottom_score')
 
@@ -562,6 +564,9 @@ class EyeshCheckUserInfoSerializer(serializers.ModelSerializer):
         user_scores = self.get_user_score(obj)
         avg_scaled_score = []
 
+        # NOTE Тухайн элсэгч нэг хичээлээр олон ЭШ өгсөн бол Хамгийн өндөр оноогоор шалгах
+        # Одоогийн бодолт нь буруу
+        # Тухайн мэргэжлийн суурь шалгалтын хичээлээр нь оноог нь шалгах
         if user_scores:
             sum_scaled_scores = 0
             count_scores = 0

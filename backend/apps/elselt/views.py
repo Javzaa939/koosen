@@ -1352,9 +1352,9 @@ class GpaCheckUserInfoAPIView(
     mixins.CreateModelMixin,
     mixins.UpdateModelMixin
 ):
-# Голч шалгах API
-    queryset = AdmissionUserProfession.objects.all().order_by('created_at')
+    ''' Голч шалгах API '''
 
+    queryset = AdmissionUserProfession.objects.all().order_by('created_at')
     serializer_class = GpaCheckUserInfoSerializer
 
     filter_backends = [SearchFilter]
@@ -1413,7 +1413,7 @@ class GpaCheckUserInfoAPIView(
 
         return request.send_data(data)
 
-#Төлөв хадгалах API
+
 class GpaCheckConfirmUserInfoAPIView(
     generics.GenericAPIView,
     mixins.RetrieveModelMixin,
@@ -1421,6 +1421,7 @@ class GpaCheckConfirmUserInfoAPIView(
     mixins.CreateModelMixin,
     mixins.UpdateModelMixin
 ):
+    """ Төлөв хадгалах API """
 
     queryset = AdmissionUserProfession.objects.all().order_by('created_at')
 
@@ -1466,12 +1467,14 @@ class GpaCheckConfirmUserInfoAPIView(
         if limit:
             limit = int(limit)
 
-            #Тоонд багтсан дата
+            # Тоонд багтсан дата
             confirmed_data = data[:limit]
 
-            #Тоонд багтаагүй дата
+            # Тоонд багтаагүй дата
             unconfirmed_data = data[limit:]
             with transaction.atomic():
+
+                # Тэнцээгүй элсэгчдийг төлөв өөрчлөх loop
                 for entry in unconfirmed_data:
                     gpa = entry.get('userinfo', {}).get('gpa', 0)
                     if float(gpa) < float(self.request.query_params.get('gpa', 0)):
@@ -1483,12 +1486,14 @@ class GpaCheckConfirmUserInfoAPIView(
                         entry['gpa_description'] = "Хяналтын тоонд багтаагүй"
                         entry['state'] = AdmissionUserProfession.STATE_REJECT
 
-                # Өөрчилсөн төлөвийг хадгалах
+                    # Өөрчилсөн төлөвийг хадгалах
                     obj = AdmissionUserProfession.objects.get(pk=entry['id'])
                     obj.gpa_state = entry['gpa_state']
                     obj.definition = entry['gpa_description']
                     obj.state = entry['state']
                     obj.save()
+
+                # Тэнцсэн элсэгчдийг төлөв өөрчлөх loop
                 for entry in confirmed_data:
                     obj = AdmissionUserProfession.objects.get(pk=entry['id'])
                     obj.gpa_state = AdmissionUserProfession.STATE_APPROVE

@@ -54,9 +54,6 @@ const ElseltUser = () => {
     // Эрэмбэлэлт
     const [sortField, setSort] = useState('')
 
-    //errror
-    const [showError, setShowError] = useState(false);
-
     // Translate
     const { t } = useTranslation()
 
@@ -85,7 +82,7 @@ const ElseltUser = () => {
     const [profOption, setProfession] = useState([])
     const [profession_id, setProfession_id] = useState('')
 
-    const [selectedLesson, setSelectedLesson] = useState(null);
+    const [selectedAdmission, setSelectedAdmission] = useState(null);
     const [selectedProfession, setSelectedProfession] = useState(null);
 
     const [admop, setAdmop] = useState([])
@@ -446,14 +443,11 @@ const ElseltUser = () => {
     function messageModalHandler() {
         setMessageModal(!messageModal)
     }
+
     function gpaModalHandler(){
-        if (profession_id.length === 0) {
-            setShowError(true);
-          } else {
-            setShowError(false);
-            setGpaModal(!gpaModal);
-          }
+        setGpaModal(!gpaModal);
     }
+
 	return (
 		<Fragment>
             <StateModal
@@ -474,12 +468,12 @@ const ElseltUser = () => {
                 messageModal={messageModal}
             />
             <GpaModal
-            gpaModalHandler = {gpaModalHandler}
-            gpaModal = {gpaModal}
-            lesson_year = {adm}
-            prof_id = {profession_id}
-            gplesson_year={selectedLesson?.name || ''}
-            profession_name={selectedProfession?.name || ''}
+                gpaModalHandler = {gpaModalHandler}
+                gpaModal = {gpaModal}
+                lesson_year = {adm}
+                prof_id = {profession_id}
+                gplesson_year={selectedAdmission?.name || ''}
+                profession_name={selectedProfession?.name || ''}
             />
             {isLoading && Loader}
 			<Card>
@@ -504,7 +498,7 @@ const ElseltUser = () => {
                                 noOptionsMessage={() => t('Хоосон байна.')}
                                 onChange={(val) => {
                                     setAdm(val?.id || '')
-                                    setSelectedLesson(val);
+                                    setSelectedAdmission(val);
                                 }}
                                 styles={ReactSelectStyles}
                                 getOptionValue={(option) => option.id}
@@ -685,14 +679,12 @@ const ElseltUser = () => {
                         </div>
 
                         <div className='px-1'>
-                            <Button color='primary' disabled={adm.length === 0 && profession_id.length === 0 } className='d-flex align-items-center px-75' id='message_button' onClick={() => gpaModalHandler()}>
-                                <>
+                            <Button color='primary' disabled={(adm && profession_id) ? false : true } className='d-flex align-items-center px-75' id='message_button' onClick={() => gpaModalHandler()}>
                                 <BiMessageRoundedError className='me-25'/>
                                 Голч Шалгах
-                              </>
                             </Button>
                             <UncontrolledTooltip target='message_button'>
-                            Элсэлт Хөтөлбөр хоёуланг нь сонгоно уу
+                                Элсэлт, Хөтөлбөр хоёуланг нь сонгоно уу
                             </UncontrolledTooltip>
                         </div>
                     </div>
