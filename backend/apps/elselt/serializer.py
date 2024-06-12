@@ -386,11 +386,11 @@ class HealthPhysicalUserInfoSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(source='user.full_name', default='', read_only=True)
     gender_name = serializers.SerializerMethodField()
     health_up_user_data = serializers.SerializerMethodField()
+    user = ElseltUserSerializer(many=False, read_only=True)
 
     class Meta:
         model = AdmissionUserProfession
         fields = '__all__'
-
 
     def get_gender_name(self, obj):
 

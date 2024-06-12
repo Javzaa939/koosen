@@ -20,6 +20,8 @@ import { getPagination, ReactSelectStyles } from '@utils'
 
 import { getColumns } from './helpers';
 import AddModal from './AddModal'
+import EmailModal from '../../User/EmailModal'
+import MessageModal from '../../User/MessageModal'
 
 const STATE_LIST = [
     {
@@ -56,9 +58,12 @@ function Physical() {
     const [admId, setAdmId] = useState('');                  // элсэлт id
     const [profId, setProfId] = useState('')                 // хөтөлбөр id
 
-
     const [addModal, setAddModal] = useState(false)
     const [addModalData, setAddModalData] = useState(null)
+
+    const [emailModal, setEmailModal] = useState(false)      // email modal
+    const [messageModal, setMessageModal] = useState(false)  // message modal
+    const [selectedStudents, setSelectedStudents] = useState([])
 
     // Нийт датаны тоо
     const [total_count, setTotalCount] = useState(datas.length || 1)
@@ -127,7 +132,9 @@ function Physical() {
 		}
     }, [sortField, currentPage, rowsPerPage, searchValue, chosenState, admId, profId])
 
-
+    function onSelectedRowsChange(state) {
+        setSelectedStudents(state?.selectedRows)
+    }
     // ** Function to handle filter
 	const handleFilter = e => {
         const value = e.target.value.trimStart();
@@ -162,7 +169,27 @@ function Physical() {
         setAddModalData(data || null)
     }
 
+
+    function emailModalHandler() {
+        setEmailModal(!emailModal)
+    }
+
+    function messageModalHandler() {
+        setMessageModal(!messageModal)
+    }
+
     return (
+        <Fragment>
+            <EmailModal
+                emailModalHandler={emailModalHandler}
+                emailModal={emailModal}
+                selectedStudents={selectedStudents}
+                getDatas={getDatas}
+            />
+            <MessageModal
+                messageModalHandler={messageModalHandler}
+                messageModal={messageModal}
+            />
         <Card>
             {
                 addModal &&
@@ -252,7 +279,7 @@ function Physical() {
                 </Row>
                 <div className='d-flex justify-content-start my-50 mt-1'>
                     <div className='px-1'>
-                        <Button color='primary' disabled className='d-flex align-items-center px-75' id='email_button' >
+                        <Button color='primary' disabled={selectedStudents.length == 0} className='d-flex align-items-center px-75' id='email_button' onClick={() => emailModalHandler()}>
                             <MdMailOutline className='me-25'/>
                             Email илгээх
                         </Button>
@@ -261,7 +288,7 @@ function Physical() {
                         </UncontrolledTooltip>
                     </div>
                     <div className='px-1'>
-                            <Button color='primary' disabled className='d-flex align-items-center px-75' id='message_button' onClick={() => messageModalHandler()}>
+                            <Button color='primary' disabled={selectedStudents.length == 0} className='d-flex align-items-center px-75' id='message_button' onClick={() => messageModalHandler()}>
                                 <BiMessageRoundedError className='me-25'/>
                                 Мессеж илгээх
                             </Button>
@@ -345,15 +372,16 @@ function Physical() {
                         paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
                         fixedHeader
                         fixedHeaderScrollHeight='62vh'
-                        // selectableRows
-                        // onSelectedRowsChange={(state) => onSelectedRowsChange(state)}
-                        // direction="auto"
-                        // style={{ border: '1px solid red' }}
+                        selectableRows
+                        onSelectedRowsChange={(state) => onSelectedRowsChange(state)}
+                        direction="auto"
+                        style={{ border: '1px solid red' }}
                         defaultSortFieldId={'created_at'}
                     />
                 </div>
             </CardBody>
         </Card>
+    </Fragment>
     )
 }
 
