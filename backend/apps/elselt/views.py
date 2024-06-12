@@ -1148,11 +1148,11 @@ class ElseltHealthPhysical(
 
         # элсэлт
         if elselt:
-            queryset = queryset.filter(state__profession__admission=elselt)
+            queryset = queryset.filter(profession__admission=elselt)
 
         # хөтөлбөр
         if profession:
-            queryset = queryset.filter(state__profession__profession__id=profession)
+            queryset = queryset.filter(profession__profession__id=profession)
 
         # Sort хийх үед ажиллана
         if sorting:

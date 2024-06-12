@@ -62,12 +62,12 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 			name: "Үзлэгийн төлөв",
 			selector: (row) => (
 				<Badge
-					color={`${row?.state == 1 ? 'primary' : row?.state == 2 ? 'success' : row?.state == 3 ? 'danger' : 'primary'}`}
+					color={`${row?.health_up_user_data?.state == 1 ? 'primary' : row?.health_up_user_data?.state == 2 ? 'success' : row?.health_up_user_data?.state == 3 ? 'danger' : 'primary'}`}
 					pill
 				>
-					{row ?
+					{row.health_up_user_data ?
 
-						STATE_LIST.find(val => val.id === row?.state).name
+						STATE_LIST.find(val => val.id === row?.health_up_user_data?.state).name
 
 					:
 						''
