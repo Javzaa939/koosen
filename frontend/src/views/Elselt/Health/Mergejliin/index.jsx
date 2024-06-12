@@ -364,80 +364,80 @@ function Mergejliin() {
 							<Label for="sort-select">{t("Хуудсанд харуулах тоо")}</Label>
 						</Col>
 					</Col>
-				<Col
-					className="d-flex align-items-center mobile-datatable-search mt-1 justify-content-end"
-					md={4}
-					sm={12}
-				>
-					<Input
-					className="dataTable-filter mb-50"
-					type="text"
-					bsSize="sm"
-					id="search-input"
-					placeholder={t("Хайх үг....")}
-					value={searchValue}
-					onChange={(e) => {
-						handleFilter(e);
-					}}
-					onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-					/>
-					<Button
-					size="sm"
-					className="ms-50 mb-50"
-					color="primary"
-					onClick={handleSearch}
+					<Col
+						className="d-flex align-items-center mobile-datatable-search mt-1 justify-content-end"
+						md={4}
+						sm={12}
 					>
-					<Search size={15} />
-					<span className="align-middle ms-50"></span>
-					</Button>
-				</Col>
+						<Input
+						className="dataTable-filter mb-50"
+						type="text"
+						bsSize="sm"
+						id="search-input"
+						placeholder={t("Хайх үг....")}
+						value={searchValue}
+						onChange={(e) => {
+							handleFilter(e);
+						}}
+						onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+						/>
+						<Button
+						size="sm"
+						className="ms-50 mb-50"
+						color="primary"
+						onClick={handleSearch}
+						>
+							<Search size={15} />
+							<span className="align-middle ms-50"></span>
+						</Button>
+					</Col>
 				</Row>
 				<div className="react-dataTable react-dataTable-selectable-rows">
-				<DataTable
-					noHeader
-					paginationServer
-					pagination
-					className="react-dataTable-header-md"
-					progressPending={isLoading}
-					progressComponent={
-					<div className="my-2 d-flex align-items-center justify-content-center">
-						<Spinner className="me-1" color="" size="sm" />
-						<h5>Түр хүлээнэ үү...</h5>
-					</div>
-					}
-					noDataComponent={
-					<div className="my-2">
-						<h5>{t("Өгөгдөл байхгүй байна")}</h5>
-					</div>
-					}
-					print="true"
-					theme="solarized"
-					onSort={handleSort}
-					columns={getColumns(
-					currentPage,
-					rowsPerPage,
-					total_count,
-					STATE_LIST,
-					detailHandler
-					)}
-					sortIcon={<ChevronDown size={10} />}
-					paginationPerPage={rowsPerPage}
-					paginationDefaultPage={currentPage}
-					data={datas}
-					paginationComponent={getPagination(
-					handlePagination,
-					currentPage,
-					rowsPerPage,
-					total_count
-					)}
-					fixedHeader
-					fixedHeaderScrollHeight="62vh"
-					selectableRows
-					onSelectedRowsChange={(state) => onSelectedRowsChange(state)}
-					// direction="auto"
-					// style={{ border: '1px solid red' }}
-					defaultSortFieldId={"created_at"}
-				/>
+					<DataTable
+						noHeader
+						paginationServer
+						pagination
+						className="react-dataTable-header-md"
+						progressPending={isLoading}
+						progressComponent={
+						<div className="my-2 d-flex align-items-center justify-content-center">
+							<Spinner className="me-1" color="" size="sm" />
+							<h5>Түр хүлээнэ үү...</h5>
+						</div>
+						}
+						noDataComponent={
+						<div className="my-2">
+							<h5>{t("Өгөгдөл байхгүй байна")}</h5>
+						</div>
+						}
+						print="true"
+						theme="solarized"
+						onSort={handleSort}
+						columns={getColumns(
+						currentPage,
+						rowsPerPage,
+						total_count,
+						STATE_LIST,
+						detailHandler
+						)}
+						sortIcon={<ChevronDown size={10} />}
+						paginationPerPage={rowsPerPage}
+						paginationDefaultPage={currentPage}
+						data={datas}
+						paginationComponent={getPagination(
+						handlePagination,
+						currentPage,
+						rowsPerPage,
+						total_count
+						)}
+						fixedHeader
+						fixedHeaderScrollHeight="62vh"
+						selectableRows
+						onSelectedRowsChange={(state) => onSelectedRowsChange(state)}
+						// direction="auto"
+						// style={{ border: '1px solid red' }}
+						defaultSortFieldId={"created_at"}
+					/>
 				</div>
 			</CardBody>
 		</Card>
