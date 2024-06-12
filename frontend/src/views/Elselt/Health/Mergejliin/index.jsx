@@ -1,6 +1,8 @@
 import React from "react";
 // ** React Imports
 import { useState, useEffect } from "react";
+import { BiMessageRoundedError } from "react-icons/bi";
+import { MdMailOutline } from "react-icons/md";
 
 import {
   Row,
@@ -13,6 +15,7 @@ import {
   CardHeader,
   Spinner,
   CardBody,
+  UncontrolledTooltip
 } from "reactstrap";
 
 import { ChevronDown, Search, Zap } from "react-feather";
@@ -31,6 +34,8 @@ import { getPagination, ReactSelectStyles } from "@utils";
 import { getColumns } from "./helpers";
 import Detail from "./Detail";
 import useUpdateEffect from "@hooks/useUpdateEffect";
+import EmailModal from "../../User/EmailModal";
+import MessageModal from "../../User/MessageModal";
 
 const STATE_LIST = [
   {
@@ -72,6 +77,11 @@ function Mergejliin() {
   const [admop, setAdmop] = useState([]);
   const [adm, setAdm] = useState("");
 
+  const [selectedStudents, setSelectedStudents] = useState([]);
+
+  const [emailModal, setEmailModal] = useState(false)
+  const [messageModal, setMessageModal] = useState(false)
+
   // Нийт датаны тоо
   const [total_count, setTotalCount] = useState(datas.length || 1);
 
@@ -99,6 +109,7 @@ function Mergejliin() {
     if (success) {
       setTotalCount(data?.count);
       setDatas(data?.results);
+      console.log(data);
 
       // Нийт хуудасны тоо
       var cpage_count = Math.ceil(
@@ -188,17 +199,35 @@ function Mergejliin() {
     setDetailData(data);
   }
 
+  function onSelectedRowsChange(state) {
+    setSelectedStudents(state?.selectedRows);
+  }
+
+  function emailModalHandler() {
+    setEmailModal(!emailModal);
+  }
+
+  function messageModalHandler() {
+    setMessageModal(!messageModal);
+  }
+
   return (
     <Card>
-      {/* {
-                detail &&
-                <Detail detail={detail} detailHandler={detailHandler} />
-            } */}
       <Detail
         detail={detail}
         detailHandler={detailHandler}
         detailData={detailData}
       />
+      <EmailModal
+                emailModalHandler={emailModalHandler}
+                emailModal={emailModal}
+                selectedStudents={selectedStudents}
+                getDatas={getDatas}
+            />
+            <MessageModal
+                messageModalHandler={messageModalHandler}
+                messageModal={messageModal}
+            />
       <CardHeader>
         <h5>Нарийн мэргэжлийн шатны эрүүл мэндийн үзлэг</h5>
         <Col className="d-flex justify-content-end">
@@ -279,6 +308,39 @@ function Mergejliin() {
               getOptionLabel={(option) => option.name}
             />
           </Col>
+          <Col md={9} className="d-flex mt-2 mb-1 justify-content-start">
+          <div className="px-1">
+            <Button
+              color="primary"
+              disabled={selectedStudents.length == 0}
+              className="d-flex align-items-center px-75"
+              id="email_button"
+              onClick={() => emailModalHandler()}
+            >
+              <MdMailOutline className="me-25" />
+              Email илгээх
+            </Button>
+            <UncontrolledTooltip target="email_button">
+              Сонгосон элсэгчид руу имейл илгээх
+            </UncontrolledTooltip>
+          </div>
+          <div className="px-1">
+            <Button
+              color="primary"
+              disabled
+              className="d-flex align-items-center px-75"
+              id="message_button"
+              onClick={() => messageModalHandler()}
+            >
+              {/* <Button color='primary' disabled={selectedStudents.length == 0} className='d-flex align-items-center px-75' id='message_button' onClick={() => messageModalHandler()}> */}
+              <BiMessageRoundedError className="me-25" />
+              Мессеж илгээх
+            </Button>
+            <UncontrolledTooltip target="message_button">
+              Сонгосон элсэгчид руу мессеж илгээх
+            </UncontrolledTooltip>
+          </div>
+          </Col>
         </Row>
         <Row className="justify-content-between">
           <Col
@@ -305,7 +367,7 @@ function Mergejliin() {
             </Col>
           </Col>
           <Col
-            className="d-flex align-items-center mobile-datatable-search mt-1"
+            className="d-flex align-items-center mobile-datatable-search mt-1 justify-content-end"
             md={4}
             sm={12}
           >
@@ -372,8 +434,8 @@ function Mergejliin() {
             )}
             fixedHeader
             fixedHeaderScrollHeight="62vh"
-            // selectableRows
-            // onSelectedRowsChange={(state) => onSelectedRowsChange(state)}
+            selectableRows
+            onSelectedRowsChange={(state) => onSelectedRowsChange(state)}
             // direction="auto"
             // style={{ border: '1px solid red' }}
             defaultSortFieldId={"created_at"}

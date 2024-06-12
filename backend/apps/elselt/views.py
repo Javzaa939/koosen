@@ -983,7 +983,7 @@ class ElseltHealthAnhanShat(
         return request.send_info('INF_003')
 
 
-@permission_classes([IsAuthenticated])
+# @permission_classes([IsAuthenticated])
 class ElseltHealthProfessional(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -1005,16 +1005,10 @@ class ElseltHealthProfessional(
         gender = self.request.query_params.get('gender')
         sorting = self.request.query_params.get('sorting')
         state  = self.request.query_params.get('state')
-        lesson_year_id = self.request.query_params.get('lesson_year_id')
-        profession_id = self.request.query_params.get('profession_id')
+        lesson_year = self.request.query_params.get("lesson_year_id")
+        profession = self.request.query_params.get('profession_id')
 
         queryset = queryset.filter(state=AdmissionUserProfession.STATE_APPROVE)
-
-        if lesson_year_id:
-            queryset = queryset.filter(user__profession__admission=lesson_year_id)
-
-        if profession_id:
-            queryset = queryset.filter(user__profession__profession__id=profession_id)
 
         if gender:
             if gender == 'Эрэгтэй':
@@ -1036,6 +1030,17 @@ class ElseltHealthProfessional(
             else:
                 user_id = HealthUpUser.objects.filter(state=state).values_list('user', flat=True)
                 queryset = queryset.filter(user__in=user_id)
+
+        if lesson_year:
+            queryset = queryset.filter(
+                user__admissionuserprofession__profession__admission__id=lesson_year
+            )
+
+        if profession:
+            queryset = queryset.filter(
+                user__admissionuserprofession__profession=profession
+            )
+
 
         return queryset
 
