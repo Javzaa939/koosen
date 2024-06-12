@@ -17,6 +17,7 @@ from elselt.models import (
     AdmissionUserProfession,
     ElseltUser,
     UserInfo,
+    MessageInfo,
     EmailInfo,
     HealthUser,
     HealthUpUser,
@@ -129,6 +130,7 @@ class AdmissionUserInfoSerializer(serializers.ModelSerializer):
     degree_name = serializers.CharField(source='profession.profession.degree.degree_name', default='')
     gender_name = serializers.SerializerMethodField()
     state_name = serializers.SerializerMethodField()
+    justice_state_name = serializers.SerializerMethodField()
     admission = serializers.IntegerField(source='profession.admission.id', default='')
     # Элсэлтийн мэргэжлийн төрөл
     profession_state = serializers.IntegerField(source='profession.state', default='')
@@ -195,16 +197,11 @@ class AdmissionUserInfoSerializer(serializers.ModelSerializer):
             return 'Эмэгтэй'
         return ''
 
-
     def get_state_name(self, obj):
+        return obj.get_state_display()
 
-        state_name = ''
-        state_op = [*AdmissionUserProfession.STATE]
-        for state in state_op:
-            if state[0] == obj.state:
-                state_name = state[1]
-                return state_name
-        return state_name
+    def get_justice_state_name(self, obj):
+        return obj.get_justice_state_display()
 
     # Насыг олж насны шалгуурт тэнцсэн эсэх
     def get_user_age(self, obj):
