@@ -13,8 +13,6 @@ import {
 	UncontrolledTooltip,
 	Table,
 } from "reactstrap";
-import { MdMailOutline } from "react-icons/md";
-import { BiMessageRoundedError } from "react-icons/bi";
 import useLoader from "@hooks/useLoader";
 import useApi from "@hooks/useApi";
 import "./style.scss";
@@ -55,7 +53,6 @@ function GpaModal({
 	const gpaApi = useApi().elselt.admissionuserdata.gpa;
 	const eyeshApi = useApi().elselt.admissionuserdata.eyesh;
 	const saveApi = useApi().elselt.admissionuserdata.gpaconfirm;
-	const admissionStateChangeApi = useApi().elselt.admissionuserdata.email;
 
 	// Шалгах функц
 	async function onSubmit(cdata) {
@@ -70,22 +67,6 @@ function GpaModal({
 			setDatas(data);
 			setFilteredData(data);
 		}
-	}
-
-	// Mail илгээх функц
-	async function sendMail() {
-	  	// var edata = {
-		// 	students: filteredData.map((val) => val?.user?.id) || [],
-		// 	email_list: filteredData.map((val) => val?.user?.email) || [],
-		// 	description: filteredData.map((val) => val?.gpa_description) || []
-		// };
-
-		// if (edata.students.length > 0) {
-		// 	const { success } = await fetchData(admissionStateChangeApi.post(edata));
-		// 	if (success) {
-		// 		reset();
-		// 	}
-		// }
 	}
 
 	// Төлөв өөрчлөх
@@ -234,36 +215,6 @@ function GpaModal({
 								</UncontrolledTooltip>
 								</div>
 							</Col>
-						</div>
-						<div className="d-flex">
-						<div>
-							<Button
-								color="primary"
-								className="d-flex align-items-center px-75"
-								id="email_button"
-								onClick={sendMail}
-							>
-							<MdMailOutline className="me-25" />
-								Email илгээх
-							</Button>
-							<UncontrolledTooltip target="email_button">
-								Сонгосон элсэгчид руу имейл илгээх
-							</UncontrolledTooltip>
-						</div>
-						<div className="px-1">
-							<Button
-								color="primary"
-								disabled
-								className="d-flex px-75"
-								id="message_button"
-							>
-							<BiMessageRoundedError className="me-25" />
-								Мессеж илгээх
-							</Button>
-							<UncontrolledTooltip target="message_button">
-								Сонгосон элсэгчид руу мессеж илгээх
-							</UncontrolledTooltip>
-						</div>
 						</div>
 					</div>
 				</Col>
