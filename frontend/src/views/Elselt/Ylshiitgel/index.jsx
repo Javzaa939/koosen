@@ -39,9 +39,8 @@ import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import AuthContext from "@context/AuthContext"
 
-import EmailModal from '@src/components/EmailModal';
-import MessageModal from '@src/components/MessageModal';
-
+import EmailModal from '../User/EmailModal';
+import MessageModal from '../User/MessageModal';
 import StateModal from './StateModal';
 
 const ElseltYlshiitgel = () => {
@@ -52,7 +51,7 @@ const ElseltYlshiitgel = () => {
     const [rowsPerPage, setRowsPerPage] = useState(20)
     const [searchValue, setSearchValue] = useState("");
 	const [datas, setDatas] = useState([]);
-    const [profOption, setProfession] = useState([])
+
     const [profession_id, setProfession_id] = useState('')
     const [adm, setAdm] = useState('')
     const [age_state, setAge_state] = useState('')
@@ -63,7 +62,7 @@ const ElseltYlshiitgel = () => {
 
     const [gender, setGender] = useState('')
 	const elseltApi = useApi().elselt.admissionuserdata
-    const professionApi = useApi().elselt.profession
+
 
     //email modal
     const [emailModal, setEmailModal] = useState(false)
