@@ -1,43 +1,48 @@
 // ** React Imports
-import { Fragment, useState, useEffect, useContext } from 'react'
+import {
+        Row,
+        Col,
+        Card,
+        Input,
+        Label,
+        Button,
+        CardTitle,
+        CardHeader,
+        Spinner,
+        UncontrolledTooltip } from 'reactstrap'
 
-import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, Spinner, UncontrolledTooltip } from 'reactstrap'
+import {
+        Fragment,
+        useState,
+        useEffect,
+         useContext } from 'react'
 
+import {
+        getPagination,
+        ReactSelectStyles } from '@utils'
+
+import { HiOutlineDocumentReport } from "react-icons/hi";
+import { BiMessageRoundedError } from "react-icons/bi";
 import { ChevronDown, Search } from 'react-feather'
+import { utils, writeFile } from 'xlsx-js-style';
+import { MdMailOutline } from "react-icons/md";
+import { useTranslation } from 'react-i18next'
+import { RiEditFill } from "react-icons/ri";
+import { getColumns } from './helpers';
 
 import DataTable from 'react-data-table-component'
-
 import moment from 'moment';
-
 import classnames from "classnames";
-
-import { useTranslation } from 'react-i18next'
-
 import Select from 'react-select'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
-
 import AuthContext from "@context/AuthContext"
 
-import { getPagination, ReactSelectStyles } from '@utils'
-
-import { getColumns } from './helpers';
-
-import { utils, writeFile } from 'xlsx-js-style';
-
-import { HiOutlineDocumentReport } from "react-icons/hi";
-import { BiMessageRoundedError } from "react-icons/bi";
-
-import { MdMailOutline } from "react-icons/md";
-import { RiEditFill } from "react-icons/ri";
+import EmailModal from '@src/components/EmailModal';
+import MessageModal from '@src/components/MessageModal';
 
 import StateModal from './StateModal';
-import EmailModal from './EmailModal';
-import MessageModal from './MessageModal';
-import useUpdateEffect from '@hooks/useUpdateEffect';
-
-
 
 const ElseltYlshiitgel = () => {
 
@@ -45,6 +50,27 @@ const ElseltYlshiitgel = () => {
 
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(20)
+    const [searchValue, setSearchValue] = useState("");
+	const [datas, setDatas] = useState([]);
+    const [profOption, setProfession] = useState([])
+    const [profession_id, setProfession_id] = useState('')
+    const [adm, setAdm] = useState('')
+    const [age_state, setAge_state] = useState('')
+    const [unit1, setUnit1] = useState('')
+    const [selectedStudents, setSelectedStudents] = useState([])
+    const [state, setState] = useState('')
+    const [gpa_state, setGpaState] = useState('')
+
+    const [gender, setGender] = useState('')
+	const elseltApi = useApi().elselt.admissionuserdata
+    const professionApi = useApi().elselt.profession
+
+    //email modal
+    const [emailModal, setEmailModal] = useState(false)
+    //message modal
+    const [messageModal, setMessageModal] = useState(false)
+    //state modal
+    const [stateModal,setStateModel] = useState(false);
 
     // Эрэмбэлэлт
     const [sortField, setSort] = useState('')
@@ -53,9 +79,6 @@ const ElseltYlshiitgel = () => {
     const { t } = useTranslation()
 
     const default_page = ['Бүгд', 10, 20, 50, 75, 100]
-
-	const [searchValue, setSearchValue] = useState("");
-	const [datas, setDatas] = useState([]);
 
     // Нийт датаны тоо
     const [total_count, setTotalCount] = useState(datas.length || 1)
@@ -67,22 +90,6 @@ const ElseltYlshiitgel = () => {
 	const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false});
     const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: false})
 
-    const [profOption, setProfession] = useState([])
-    const [profession_id, setProfession_id] = useState('')
-    const [adm, setAdm] = useState('')
-    const [age_state, setAge_state] = useState('')
-
-
-    const [unit1, setUnit1] = useState('')
-
-    const [selectedStudents, setSelectedStudents] = useState([])
-
-    //email modal
-    const [emailModal, setEmailModal] = useState(false)
-    //message modal
-    const [messageModal, setMessageModal] = useState(false)
-    //state modal
-    const [stateModal,setPunishModel] = useState(false);
 
     const stateop = [
         {
@@ -99,20 +106,8 @@ const ElseltYlshiitgel = () => {
         }
     ]
 
-    const [state, setState] = useState('')
-    const [gpa_state, setGpaState] = useState('')
 
-    const [gender, setGender] = useState('')
-	const elseltApi = useApi().elselt.admissionuserdata
-    const professionApi = useApi().elselt.profession
 
-    // Хөтөлбөрийн жагсаалт авах
-    async function getProfession() {
-        const { success, data } = await fetchData(professionApi.getList(adm))
-        if (success) {
-            setProfession(data)
-        }
-	}
 	/* Жагсаалтын дата авах функц */
 	async function getDatas() {
 
@@ -162,13 +157,6 @@ const ElseltYlshiitgel = () => {
 		}
     }, [sortField, currentPage, rowsPerPage, searchValue, adm, profession_id, unit1, gender, state, gpa_state])
 
-    useEffect(() => {
-        getProfession()
-    }, [])
-
-    useUpdateEffect(() => {
-        getProfession()
-    }, [adm])
 
     // ** Function to handle per page
     function handlePerPage(e)
@@ -325,17 +313,21 @@ const ElseltYlshiitgel = () => {
         writeFile(workbook, "Элсэгчдийн шийтгэлтэй эсэхийн мэдээлэл.xlsx", { compression: true });
     }
 
+
     function onSelectedRowsChange(state) {
         setSelectedStudents(state?.selectedRows)
     }
+    //имэйл илгээх функц
     function emailModalHandler() {
         setEmailModal(!emailModal)
     }
+    //Мессеж бичих функц
     function messageModalHandler() {
         setMessageModal(!messageModal)
     }
+    //justice_state -ийн төлөв солих
     function stateModalHandler() {
-        setPunishModel(!stateModal)
+        setStateModel(!stateModal)
     }
 
 	return (

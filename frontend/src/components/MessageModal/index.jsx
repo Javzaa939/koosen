@@ -1,25 +1,20 @@
-import React from 'react';
 
+import { Button, Col, Form, FormFeedback, Input, Label, Modal, ModalBody, ModalHeader, Row } from 'reactstrap';
 import { Controller, useForm } from 'react-hook-form';
 import { AlertTriangle } from 'react-feather';
+
+import React from 'react';
 import PerfectScrollbar from 'react-perfect-scrollbar'
-import { Button, Col,ModalFooter, Form, FormFeedback, Input, Label, Modal, ModalBody, ModalHeader, Popover, PopoverBody, PopoverHeader, Row, UncontrolledPopover, UncontrolledTooltip } from 'reactstrap';
-
-import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
-
 import 'react-perfect-scrollbar/dist/css/styles.css'
 
 function MessageModal({ messageModalHandler, messageModal, selectedStudents, getDatas }) {
     const { formState: { errors },control, handleSubmit,reset } = useForm();
     const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: true, bg: 2 });
-    const admissionStateChangeApi = useApi().elselt.admissionuserdata.message;
 
     async function onSubmit(cdata) {
 
-        console.log("cdata",cdata)
-        cdata['students'] = selectedStudents.map(val => val?.user?.id) || [];
-        cdata['message_list'] = selectedStudents.map(val => val?.user?.message) || [];
+        cdata['students'] = selectedStudents.map(val => val?.user?.id) || []
         const { success } = await fetchData(admissionStateChangeApi.post(cdata));
         if (success) {
             reset();

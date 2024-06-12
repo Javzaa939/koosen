@@ -1,9 +1,8 @@
-import React from 'react'
-import { validate } from '@utils';
 import { Controller, useForm } from 'react-hook-form';
 import { Button, Col, Form, FormFeedback, Input, Label, Modal, ModalBody, ModalHeader, Popover, PopoverBody, PopoverHeader, Row, UncontrolledPopover, UncontrolledTooltip } from 'reactstrap';
-import { validateSchema } from './validateSchema';
 import { AlertTriangle } from 'react-feather';
+
+import React from 'react'
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import PerfectScrollbar from 'react-perfect-scrollbar'
@@ -11,7 +10,7 @@ import 'react-perfect-scrollbar/dist/css/styles.css';
 
 function EmailModal({ emailModalHandler, emailModal, selectedStudents, getDatas }) {
 
-    const { formState: { errors }, handleSubmit, control, reset } = useForm(validate(validateSchema));
+    const { formState: { errors }, handleSubmit, control, reset } = useForm({});
     const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: true, bg: 2 });
     const admissionStateChangeApi = useApi().elselt.admissionuserdata.email;
 
