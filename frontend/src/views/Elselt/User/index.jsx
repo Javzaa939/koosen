@@ -1,7 +1,7 @@
 // ** React Imports
 import { Fragment, useState, useEffect, useContext } from 'react'
 
-import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, Spinner, UncontrolledTooltip } from 'reactstrap'
+import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, Spinner, UncontrolledTooltip,Alert } from 'reactstrap'
 
 import { ChevronDown, Search } from 'react-feather'
 
@@ -37,7 +37,8 @@ import StateModal from './StateModal';
 import DescModal from './DescModal';
 import EmailModal from './EmailModal';
 import MessageModal from './MessageModal';
-import useUpdateEffect from '@hooks/useUpdateEffect'
+import useUpdateEffect from '@hooks/useUpdateEffect';
+import GpaModal from './GpaModal';
 
 // import Addmodal from './Add'
 
@@ -81,6 +82,9 @@ const ElseltUser = () => {
     const [profOption, setProfession] = useState([])
     const [profession_id, setProfession_id] = useState('')
 
+    const [selectedAdmission, setSelectedAdmission] = useState(null);
+    const [selectedProfession, setSelectedProfession] = useState(null);
+
     const [admop, setAdmop] = useState([])
     const [adm, setAdm] = useState('')
 
@@ -92,6 +96,7 @@ const ElseltUser = () => {
 
     const [emailModal, setEmailModal] = useState(false)
     const [messageModal, setMessageModal] = useState(false)
+    const [gpaModal , setGpaModal] = useState(false)
 
     const genderOp = [
         {
@@ -438,6 +443,10 @@ const ElseltUser = () => {
         setMessageModal(!messageModal)
     }
 
+    function gpaModalHandler(){
+        setGpaModal(!gpaModal);
+    }
+
 	return (
 		<Fragment>
             <StateModal
@@ -456,6 +465,14 @@ const ElseltUser = () => {
             <MessageModal
                 messageModalHandler={messageModalHandler}
                 messageModal={messageModal}
+            />
+            <GpaModal
+                gpaModalHandler = {gpaModalHandler}
+                gpaModal = {gpaModal}
+                lesson_year = {adm}
+                prof_id = {profession_id}
+                gplesson_year={selectedAdmission?.name || ''}
+                profession_name={selectedProfession?.name || ''}
             />
             {isLoading && Loader}
 			<Card>
@@ -480,6 +497,7 @@ const ElseltUser = () => {
                                 noOptionsMessage={() => t('Хоосон байна.')}
                                 onChange={(val) => {
                                     setAdm(val?.id || '')
+                                    setSelectedAdmission(val);
                                 }}
                                 styles={ReactSelectStyles}
                                 getOptionValue={(option) => option.id}
@@ -526,6 +544,7 @@ const ElseltUser = () => {
                                 noOptionsMessage={() => t('Хоосон байна.')}
                                 onChange={(val) => {
                                     setProfession_id(val?.prof_id || '')
+                                    setSelectedProfession(val)
                                 }}
                                 styles={ReactSelectStyles}
                                 getOptionValue={(option) => option?.prof_id}
@@ -655,6 +674,16 @@ const ElseltUser = () => {
                             </Button>
                             <UncontrolledTooltip target='message_button'>
                                 Сонгосон элсэгчид руу мессеж илгээх
+                            </UncontrolledTooltip>
+                        </div>
+
+                        <div className='px-1'>
+                            <Button color='primary' disabled={(adm && profession_id) ? false : true } className='d-flex align-items-center px-75' id='message_button' onClick={() => gpaModalHandler()}>
+                                <BiMessageRoundedError className='me-25'/>
+                                Голч Шалгах
+                            </Button>
+                            <UncontrolledTooltip target='message_button'>
+                                Элсэлт, Хөтөлбөр хоёуланг нь сонгоно уу
                             </UncontrolledTooltip>
                         </div>
                     </div>
