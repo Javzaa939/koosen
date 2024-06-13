@@ -1237,3 +1237,47 @@ def send_message_unitel(phone_numbers, message):
             success_count += 1
 
     return True, 'Амжилттай илгээлээ', success_count, not_found_numbers
+
+
+def send_message_gmobile(phone_numbers, message):
+    """ phone_numbers: Илгээх утасны дугаарууд
+        message: Илгээх мессеж
+        GMobile дугаартай элсэгчид рүү мессеж илгээх
+    """
+
+    success_count = 0
+    not_found_numbers = []
+
+    # Утасны дугаараар гүйлгэх
+    for phone_number in phone_numbers:
+        send_url = 'http://sms-special.gmobile.mn/cgi-bin/sendsms?username=dt_school38&password=dtdi*0319&from=135038&to={phone_number}&text={text}'.format(phone_number=phone_number, text=message)
+
+        rsp = requests.get(send_url)
+
+        # Хүсэлт амжилттай илгээгдсэн байвал
+        if rsp.status_code == 200:
+            success_count += 1
+
+    return True, 'Амжилттай илгээлээ', success_count, not_found_numbers
+
+
+def send_message_mobicom(phone_numbers, message):
+    """ phone_numbers: Илгээх утасны дугаарууд
+        message: Илгээх мессеж
+        Mobicom дугаартай элсэгчид рүү мессеж илгээх
+    """
+
+    success_count = 0
+    not_found_numbers = []
+
+    # Утасны дугаараар гүйлгэх
+    for phone_number in phone_numbers:
+        send_url = 'http://sms-special.gmobile.mn/cgi-bin/sendsms?username=dt_school38&password=dtdi*0319&from=135038&to={phone_number}&text={text}'.format(phone_number=phone_number, text=message)
+
+        rsp = requests.get(send_url)
+
+        # Хүсэлт амжилттай илгээгдсэн байвал
+        if rsp.status_code == 200:
+            success_count += 1
+
+    return True, 'Амжилттай илгээлээ', success_count, not_found_numbers
