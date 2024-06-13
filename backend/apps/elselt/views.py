@@ -712,8 +712,13 @@ class AdmissionYearAPIView(
 
     def get(self, request):
 
-        all_data = self.list(request).data
+        is_active = self.request.query_params.get('is_active')
+        if (is_active==is_active):
+            self.queryset = self.queryset.filter(is_active=True)
+            active_data = self.list(request).data
+            return request.send_data(active_data)
 
+        all_data = self.list(request).data
         return request.send_data(all_data)
 
 

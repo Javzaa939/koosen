@@ -28,6 +28,10 @@ const validateSchema = Yup.object().shape(
     description: Yup.string()
         .trim()
         .required('Хоосон байна'),
+
+    admission: Yup.string()
+        .trim()
+        .required('Хоосон байна'),
 });
 
 const EditModal = ({ open, handleModal, refreshDatas, rowData }) => {
@@ -41,15 +45,32 @@ const EditModal = ({ open, handleModal, refreshDatas, rowData }) => {
 	const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
 
     // State
-    const [profOption, setProfession] = useState([])
+    const [profOption, setProfession] = useState([])         // хөтөлбөр авах нь
+    const [elseltOption, setElseltOption] = useState([])     // элсэлт авах нь
+    const [is_active, setIsActive] = useState(false)         // идэвхтэй элсэлт авах нь
+    const [elseltId, setElseltId] = useState('')             // идэвхтэй элсэлт id авах нь
+
 
     // Api
     const professionApi = useApi().elselt.profession
     const elseltApi = useApi().elselt.admissionuserdata
+    const admissionYearApi = useApi().elselt
+
+    // Идэвхитэй элсэлтийн жагсаалт авах
+    async function getAdmissionYear() {
+        const { success, data } = await fetchData(admissionYearApi.getAll(is_active))
+        if (success) {
+            setElseltOption(data)
+        }
+	}
+    useEffect(() => {
+        getAdmissionYear()
+        setIsActive(true)
+    },[is_active])
 
     // Хөтөлбөрийн жагсаалт авах
     async function getProfession() {
-        const { success, data } = await fetchData(professionApi.getList(rowData?.admission))
+        const { success, data } = await fetchData(professionApi.getList(elseltId))
         if (success) {
             setProfession(data)
         }
@@ -57,9 +78,10 @@ const EditModal = ({ open, handleModal, refreshDatas, rowData }) => {
 
     useEffect(() => {
         getProfession()
-    }, [])
+    }, [elseltId])
 
     async function onSubmit(cdatas) {
+        cdatas['user']= rowData?.user?.id
 		cdatas = convertDefaultValue(cdatas)
 
         if(rowData?.id) {
@@ -126,8 +148,42 @@ const EditModal = ({ open, handleModal, refreshDatas, rowData }) => {
                                 <Col md={12} sm={12}>
                                    <b className='text-dark'>Шинэ хөтөлбөр сонгох</b>
                                    <Alert color="primary" className="p-50" style={{ fontSize: '13px' }}>
-                                        Элсэгчийн хөтөлбөрийг солихдоо хөтөлбөр сонгоод, тайлбар бичээд хадгалах дарж солино уу
+                                        Элсэгчийн хөтөлбөрийг солихдоо зарлагдсан элсэлт, хөтөлбөр сонгоод, тайлбар бичээд хадгалах дарж солино уу
                                     </Alert>
+                                </Col>
+                                <Col md={12} sm={12} className='mt-0'>
+                                    <Label for="admission">{t('Элсэлт')}</Label>
+                                    <Controller
+                                        control={control}
+                                        defaultValue=''
+                                        name="admission"
+                                        render={({ field: { value, onChange }}) => {
+                                            return (
+                                                <Select
+                                                    name="admission"
+                                                    id="admission"
+                                                    classNamePrefix='select'
+                                                    isClearable
+                                                    className={classnames('react-select', { 'is-invalid': errors.admission })}
+                                                    isLoading={isLoading}
+                                                    placeholder={t('-- Сонгоно уу --')}
+                                                    options={elseltOption || []}
+                                                    value={value && elseltOption.find((c) => c?.id === value)}
+                                                    noOptionsMessage={() => t('Хоосон байна.')}
+                                                    onChange={(val) => {
+                                                        setElseltId(val?.id || '')
+                                                        if(val?.id){
+                                                            onChange(val?.id || '')
+                                                        }
+                                                    }}
+                                                    styles={ReactSelectStyles}
+                                                    getOptionValue={(option) => option?.id}
+                                                    getOptionLabel={(option) => option.lesson_year + ' ' +option.name}
+                                                />
+                                            )
+                                        }}
+                                    />
+                                    {errors.profession && <FormFeedback className='d-block'>{errors.profession.message}</FormFeedback>}
                                 </Col>
                                 <Col md={12} sm={12} className='mt-0'>
                                     <Label for="profession">{t('Хөтөлбөр')}</Label>
@@ -149,7 +205,9 @@ const EditModal = ({ open, handleModal, refreshDatas, rowData }) => {
                                                     value={profOption.find((c) => c?.id === value)}
                                                     noOptionsMessage={() => t('Хоосон байна.')}
                                                     onChange={(val) => {
-                                                        onChange(val?.id || '')
+                                                        if(val?.prof_id){
+                                                        onChange(val?.prof_id || '')
+                                                        }
                                                     }}
                                                     styles={ReactSelectStyles}
                                                     getOptionValue={(option) => option?.id}
