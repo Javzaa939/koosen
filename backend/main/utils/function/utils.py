@@ -1217,6 +1217,23 @@ def check_phone_number(phone_numbers):
     return categorized_numbers
 
 
+def send_message_unitel(phone_numbers, message):
+    """ phone_numbers: Илгээх утасны дугаарууд
+        message: Илгээх мессеж
+        Unitel дугаартай элсэгчид рүү мессеж илгээх
+    """
 
+    success_count = 0
+    not_found_numbers = []
 
+    # Утасны дугаараар гүйлгэх
+    for phone_number in phone_numbers:
+        send_url = 'http://sms.unitel.mn/sendSMS.php?uname=uia&upass=Lxx0upJSZe&sms={text}&from=135038&mobile={phone_number}'.format(phone_number=phone_number, text=message)
 
+        rsp = requests.get(send_url)
+
+        # Хүсэлт амжилттай илгээгдсэн байвал
+        if rsp.status_code == 200:
+            success_count += 1
+
+    return True, 'Амжилттай илгээлээ', success_count, not_found_numbers
