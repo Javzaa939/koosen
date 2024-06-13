@@ -1023,7 +1023,6 @@ class EmployeeApiView(
 
                 if not user_serializer.is_valid():
                     transaction.savepoint_rollback(sid)
-                    print('user алдаа', user_serializer.errors)
                     return request.send_error_valid(user_serializer.errors)
 
                 #  UserInfo үүсгэхэд хэрэгтэй датануудыг цуглуулах нь
@@ -1031,8 +1030,7 @@ class EmployeeApiView(
                 request.data['user'] = str(user.id)
                 request.data['birthday'], request.data['gender'] = calculate_birthday(request.data['register'])
                 if not request.data['birthday']:
-                    transaction.savepoint_rollback(sid)
-                    return request.send_error_valid({ "register": ["Регистрийн дугаар алдаатай байна."] })
+                    request.data['birthday'] = '1985-01-01'
 
                 request.data['action_status'] = Teachers.APPROVED
                 request.data['action_status_type'] = Teachers.ACTION_TYPE_ALL
@@ -1058,3 +1056,11 @@ class EmployeeApiView(
             employee_serializer.save()
 
         return request.send_info("INF_001")
+
+
+# obj = OrgPosition.objects.create(
+#     name = 'Элсэлтийн систем хариуцсан админ',
+#     org_id = 1
+# )
+
+# print(obj)

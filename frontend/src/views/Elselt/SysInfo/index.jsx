@@ -6,6 +6,7 @@ import classnames from "classnames";
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
+import AuthContext from "@context/AuthContext"
 import { validateSchema } from './validateSchema';
 import { validate, convertDefaultValue } from '@utils'
 import empty from "@src/assets/images/empty-image.jpg"
@@ -19,9 +20,12 @@ function SysInfo() {
 
     const { Loader, isLoading, fetchData } = useLoader({ })
     const [datas, setDatas] = useState()
+    const [is_valid, setValid] = useState(true)
     const [admissionAdvice, setAdmissionAdvice] = useState('')
     const [featurefile, setFeaturedImg] = useState('')
     const [image_old, setImageOld] = useState('')
+
+    const { user } = useContext(AuthContext)
 
     async function getDatas() {
         const { success, data } = await fetchData(sysinfoApi.get())
@@ -40,6 +44,12 @@ function SysInfo() {
             }
         }
     }
+
+    useEffect(() => {
+        if(Object.keys(user).length > 0 && user.permissions.includes('lms-study-profession-update') &&school_id) {
+            setValid(false)
+        }
+    },[user])
 
     useEffect(() => {
         getDatas()

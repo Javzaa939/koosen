@@ -92,16 +92,16 @@ const VerticalLayout = (props) =>
                         /** ---------------------------- Элсэлт------------------------------- */
 
                         /** Элсэлт */
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-read', 'elselt0')
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-read', 'elselt1')
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-read', 'elselt2')
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-read', 'elselt3')
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-read', 'elselt3_1')
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-read', 'elselt4')
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-read', 'elselt5')
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-read', 'elselt6')
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-read', 'elselt7')
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-read', 'elselt8')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-dashboard-read', 'elselt0')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-main-read', 'elselt1')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-admission-read', 'elselt2')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-justice-read', 'elselt3')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-health-read', 'elselt3_1')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-healthup-read', 'elselt4')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-physical-read', 'elselt5')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-approve-read', 'elselt6')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-mail-read', 'elselt7')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-message-read', 'elselt8')
 
                         /** ----------------------------Сэтгэлзүйн сорил------------------------------- */
 

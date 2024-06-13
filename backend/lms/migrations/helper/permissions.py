@@ -628,6 +628,48 @@ permissions = [
         'name' : 'lms-print-admission-read',
         'description' : 'Элсэлтийн тушаал унших эрх'
     },
+
+    {
+        'name' : 'lms-elselt-dashboard-read',
+        'description' : 'Элсэлтийн систем дашбоард'
+    },
+    {
+        'name' : 'lms-elselt-main-read',
+        'description' : 'Элсэлтийн систем үндсэн цэс'
+    },
+    {
+        'name' : 'lms-elselt-admission-read',
+        'description' : 'Элсэлтийн систем элсэлт цэс'
+    },
+    {
+        'name' : 'lms-elselt-justice-read',
+        'description' : 'Элсэлтийн систем ял шийтгэл цэс'
+    },
+    {
+        'name' : 'lms-elselt-health-read',
+        'description' : 'Элсэлтийн систем эрүүл мэндийн анхан шат цэс'
+    },
+    {
+        'name' : 'lms-elselt-healthup-read',
+        'description' : 'Элсэлтийн систем эрүүл мэнд нарийн мэргэжил цэс'
+    },
+    {
+        'name' : 'lms-elselt-physical-read',
+        'description' : 'Элсэлтийн систем бие бялдар цэс'
+    },
+    {
+        'name' : 'lms-elselt-approve-read',
+        'description' : 'Элсэлтийн систем тэнцсэн элсэгч цэс'
+    },
+    {
+        'name' : 'lms-elselt-mail-read',
+        'description' : 'Элсэлтийн систем мэйл тайлан цэс'
+    },
+    {
+        'name' : 'lms-elselt-admission-update',
+        'description' : 'Элсэлтийн систем хөтөлбөр солих'
+    },
+
 #------------------------------------"Дотуур байр"----------------------------
     # Өрөөний төрөл
     {
