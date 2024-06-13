@@ -408,9 +408,17 @@ class ProfessionAverageScore(models.Model):
 class AdmissionBottomScore(models.Model):
     """Элсэлтийн шалгалтын хичээл ба босго оноо мэргэжлээр"""
 
+    GENERAL = 1
+    SUPPORT = 2
+    SCORE_TYPE = (
+        (GENERAL, 'Суурь шалгалт'),
+        (SUPPORT, 'Дагалдах шалгалт')
+    )
+
     profession = models.ForeignKey(ProfessionDefinition, on_delete=models.PROTECT, verbose_name="Мэргэжил")
     admission_lesson = models.ForeignKey(AdmissionLesson, on_delete=models.PROTECT, verbose_name="ЭЕШ өгсөн хичээл")
     bottom_score = models.PositiveIntegerField(default=400, verbose_name="Босго оноо")
+    score_type = models.PositiveIntegerField(choices=SCORE_TYPE, db_index=True, default=GENERAL, verbose_name="Шалгалтын хичээлийн төрөл")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

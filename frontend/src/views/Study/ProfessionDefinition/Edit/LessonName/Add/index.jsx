@@ -7,7 +7,7 @@ import useLoader from "@hooks/useLoader";
 import AuthContext from "@context/AuthContext";
 import classnames from "classnames";
 
-import { ReactSelectStyles } from "@utils"
+import { ReactSelectStyles, score_type } from "@utils"
 import { useTranslation } from "react-i18next";
 import { useForm, Controller } from "react-hook-form";
 import { validate, convertDefaultValue } from "@utils";
@@ -33,13 +33,15 @@ const Addmodal = ({ open, handleModal, refreshDatas, admission_lessons }) => {
 
     const { control, handleSubmit, reset, setValue, setError, formState: { errors } } = useForm(validate(validateSchema));
     const { definition_Id } = useParams()
-
     const { t } = useTranslation()
     const { user } = useContext(AuthContext)
     const [lesson_option, setLessonOption] = useState([])
     const [is_disabled, setDisabled] = useState(true)
 	const { isLoading, fetchData } = useLoader({});
     const [change_lesson, setChangeLesson] = useState([])
+    const [score_type_option, setScoreType] = useState(score_type())
+
+
 
     const AdmissionlessonApi = useApi().settings.admissionlesson
     const definationApi = useApi().study.professionDefinition
@@ -124,6 +126,41 @@ const Addmodal = ({ open, handleModal, refreshDatas, admission_lessons }) => {
                             ></Controller>
                             {errors.admission_lesson && <FormFeedback className='d-block'>{t(errors.admission_lesson.message)}</FormFeedback>}
                         </Col>
+                        <Col lg={12}>
+                                <Label className="form-label" for="score_type">
+                                    {t('Элсэлтийн шалгалтын хичээл')}
+                                </Label>
+                                <Controller
+                                    defaultValue=''
+                                    control={control}
+                                    id="score_type"
+                                    name="score_type"
+                                    render={({ field: { value, onChange} }) => {
+                                        return (
+                                            <Select
+                                                name="score_type"
+                                                id="score_type"
+                                                classNamePrefix='select'
+                                                isClearable
+                                                className={classnames('react-select', { 'is-invalid': errors.score_type })}
+                                                isLoading={isLoading}
+                                                placeholder={t(`-- Сонгоно уу --`)}
+                                                options={score_type_option || []}
+                                                value={score_type_option.find((c) => c.id === value)}
+                                                noOptionsMessage={() => t('Хоосон байна')}
+                                                onChange={(val) => {
+                                                    onChange(val?.id || '')
+                                                }}
+                                                // isDisabled={disabled}
+                                                styles={ReactSelectStyles}
+                                                getOptionValue={(option) => option.id}
+                                                getOptionLabel={(option) => option.name}
+                                            />
+                                        )
+                                    }}
+                                />
+                                {errors.score_type && <FormFeedback className='d-block'>{errors.score_type.message}</FormFeedback>}
+                            </Col>
                         <Col md={12}>
                             <Label className="form-label" for="exam_score">
                                 {t("Босго оноо")}
