@@ -2586,17 +2586,27 @@ class PsychologicalTestScopeOptionsAPIView(
 
     def get(self, request):
         scope = self.request.query_params.get('scope')
+        department = self.request.query_params.get('department')
+        group_options = list()
+
+        if department:
+            department_list = [int(item) for item in department.split(',')]
+        else:
+            department_list = list()
 
         # Хамрах хүрээг оюутан гэж сонговол
-        group_options = list()
         if scope == '3':
-            # Бүх ангиудийг id, name-ээр авчирна
-            group_options = list(Group.objects.values('id', 'name'))
+            if len(department_list) > 0:
+                # Бүх ангиудийг id, name-ээр авчирна
+                group_options = list(Group.objects.filter(department__in=department_list).values('id', 'name'))
+
+        deparment_options = list(Salbars.objects.values('id', 'name'))
 
         # Тэгээд  select-д харуулхын тулд буцаана
         return_data = {
             'scope_kind': scope,
             'select_student_data': group_options,
+            'deparment_options': deparment_options,
         }
         return request.send_data(return_data)
 
