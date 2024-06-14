@@ -41,8 +41,6 @@ const Addmodal = ({ open, handleModal, refreshDatas, admission_lessons }) => {
     const [change_lesson, setChangeLesson] = useState([])
     const [score_type_option, setScoreType] = useState(score_type())
 
-
-
     const AdmissionlessonApi = useApi().settings.admissionlesson
     const definationApi = useApi().study.professionDefinition
 
@@ -128,7 +126,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, admission_lessons }) => {
                         </Col>
                         <Col lg={12}>
                                 <Label className="form-label" for="score_type">
-                                    {t('Элсэлтийн шалгалтын хичээл')}
+                                    {t('Элсэлтийн шалгалтын төрөл')}
                                 </Label>
                                 <Controller
                                     defaultValue=''
@@ -151,7 +149,6 @@ const Addmodal = ({ open, handleModal, refreshDatas, admission_lessons }) => {
                                                 onChange={(val) => {
                                                     onChange(val?.id || '')
                                                 }}
-                                                // isDisabled={disabled}
                                                 styles={ReactSelectStyles}
                                                 getOptionValue={(option) => option.id}
                                                 getOptionLabel={(option) => option.name}
