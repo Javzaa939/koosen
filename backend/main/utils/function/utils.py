@@ -1272,7 +1272,7 @@ def send_message_mobicom(phone_numbers, message):
 
     # Утасны дугаараар гүйлгэх
     for phone_number in phone_numbers:
-        send_url = 'http://sms-special.gmobile.mn/cgi-bin/sendsms?username=dt_school38&password=dtdi*0319&from=135038&to={phone_number}&text={text}'.format(phone_number=phone_number, text=message)
+        send_url = 'http://27.123.214.168/smsmt/mt?servicename=Dotood&username=Hereg&from=135038&to=976{phone_number}&msg={text}'.format(phone_number=phone_number, text=message)
 
         rsp = requests.get(send_url)
 
