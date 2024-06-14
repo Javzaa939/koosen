@@ -649,7 +649,13 @@ const ElseltUser = () => {
                 <div className='d-flex justify-content-between my-50 mt-1'>
                     <div className='d-flex'>
                         <div className='px-1'>
-                            <Button color='primary' disabled={selectedStudents.length == 0} className='d-flex align-items-center px-75' id='state_button' onClick={() => stateModalHandler()}>
+                            <Button
+                                color='primary'
+                                disabled={(selectedStudents.length != 0 && user.permissions.includes('lms-elselt-admission-approve')) ? false : true}
+                                className='d-flex align-items-center px-75'
+                                id='state_button'
+                                onClick={() => stateModalHandler()}
+                            >
                                 <RiEditFill className='me-25'/>
                                 Төлөв солих
                             </Button>
@@ -658,7 +664,13 @@ const ElseltUser = () => {
                             </UncontrolledTooltip>
                         </div>
                         <div className='px-1'>
-                            <Button color='primary' disabled={selectedStudents.length == 0} className='d-flex align-items-center px-75' id='email_button' onClick={() => emailModalHandler()}>
+                            <Button
+                                color='primary'
+                                disabled={(selectedStudents.length != 0 && user.permissions.includes('lms-elselt-mail-create')) ? false : true}
+                                className='d-flex align-items-center px-75'
+                                id='email_button'
+                                onClick={() => emailModalHandler()}
+                            >
                                 <MdMailOutline className='me-25'/>
                                 Email илгээх
                             </Button>
@@ -667,8 +679,13 @@ const ElseltUser = () => {
                             </UncontrolledTooltip>
                         </div>
                         <div className='px-1'>
-                            <Button color='primary' disabled className='d-flex align-items-center px-75' id='message_button' onClick={() => messageModalHandler()}>
-                            {/* <Button color='primary' disabled={selectedStudents.length == 0} className='d-flex align-items-center px-75' id='message_button' onClick={() => messageModalHandler()}> */}
+                            <Button
+                                color='primary'
+                                disabled={(selectedStudents.length != 0 && user?.permissions?.includes('lms-elselt-message-create')) ? false : true}
+                                className='d-flex align-items-center px-75'
+                                id='message_button'
+                                onClick={() => messageModalHandler()}
+                            >
                                 <BiMessageRoundedError className='me-25'/>
                                 Мессеж илгээх
                             </Button>
@@ -676,9 +693,14 @@ const ElseltUser = () => {
                                 Сонгосон элсэгчид руу мессеж илгээх
                             </UncontrolledTooltip>
                         </div>
-
                         <div className='px-1'>
-                            <Button color='primary' disabled={(adm && profession_id) ? false : true } className='d-flex align-items-center px-75' id='message_button' onClick={() => gpaModalHandler()}>
+                            <Button
+                                color='primary'
+                                disabled={(adm && profession_id && user?.permissions?.includes('lms-elselt-gpa-approve')) ? false : true }
+                                className='d-flex align-items-center px-75'
+                                id='message_button'
+                                onClick={() => gpaModalHandler()}
+                            >
                                 <BiMessageRoundedError className='me-25'/>
                                 Голч Шалгах
                             </Button>

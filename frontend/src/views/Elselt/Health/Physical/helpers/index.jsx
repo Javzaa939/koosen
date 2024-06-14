@@ -2,7 +2,7 @@ import { CheckCircle} from "react-feather"
 import { Badge, UncontrolledTooltip } from "reactstrap"
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, page_count, addModalHandler, STATE_LIST) {
+export function getColumns (currentPage, rowsPerPage, page_count, addModalHandler, STATE_LIST, user) {
 
     // /** Сонгосон хуудасны тоо датаны тооноос их болсон үед хуудаслалт 1-ээс эхлэнэ */
     if (currentPage > page_count) {
@@ -148,10 +148,12 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 					</a>
 
 					<UncontrolledTooltip placement='top' target={`requestLeaveDatatableDetails${row.id}`}>Дэлгэрэнгүй</UncontrolledTooltip> */}
-
-					<a role="button" onClick={(e) => { addModalHandler(e, row)} }
+					<a
+						role="button"
+						onClick={(e) => { addModalHandler(e, row)} }
 						id={`description${row?.id}`}
 						className="me-1"
+						style={{pointerEvents: user?.permissions?.includes('lms-elselt-health-create') ? '' : 'none'}}
 					>
 						<Badge color="light-success" pill><CheckCircle  width={"15px"} /></Badge>
 					</a>

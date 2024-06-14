@@ -1214,8 +1214,9 @@ class ElseltHealthPhysical(
 
         if state:
             if state == '1':
-                user_id = HealthUpUser.objects.filter(Q(Q(state=2) | Q(state=3))).values_list('user', flat=True)
-                queryset = queryset.filter(state=AdmissionUserProfession.STATE_APPROVE).exclude(user_id__in=user_id)
+                user_id = HealthUpUser.objects.filter(state=2).values_list('user', flat=True)
+                exclude_ids = PhysqueUser.objects.filter(state__in=[AdmissionUserProfession.STATE_APPROVE, AdmissionUserProfession.STATE_REJECT]).values_list('user', flat=True)
+                queryset = queryset.filter(user_id__in=user_id).exclude(user__in=exclude_ids)
             else:
                 user_id = PhysqueUser.objects.filter(state=state).values_list('user', flat=True)
                 queryset = queryset.filter(user__in=user_id)

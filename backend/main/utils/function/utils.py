@@ -239,7 +239,7 @@ def get_user_permissions(user):
     permissions = []
 
     if user.is_superuser:
-        permissions = list(Permissions.objects.all().filter(name__startswith='lms').values_list('name', flat=True))
+        permissions = list(Permissions.objects.all().exclude(name__contains='elselt').filter(name__startswith='lms').values_list('name', flat=True))
 
     elif emp_list and not user.is_superuser:
         permissions = list(emp_list.org_position.roles.values_list("permissions__name", flat=True))
