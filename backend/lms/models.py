@@ -3182,16 +3182,16 @@ class UserRightCert(models.Model):
 
 # -------------------------------------------------------- Өөрийгөө сорих тест ------------------------------------------------------------------------------------------
 
-def get_image_path(instance, filename):
+def get_image_path(instance):
     """ Өөрийгөө сорих шалгалтын файлын замыг зааж байна """
 
-    return os.path.join('challenge', 'questions', "asuult_%s" % str(instance.id), filename)
+    return os.path.join('challenge', 'questions', "asuult_%s" % str(instance.id))
 
 
-def get_choice_image_path(instance, filename):
-    """ Өөрийгөө сорих шалгалтын файлын замыг зааж байна """
+def get_choice_image_path(instance):
+    """ Өөрийгөө сорих шалгалтын сонголтын файлын замыг зааж байна """
 
-    return os.path.join('challenge', 'questions', "answer_%s" % str(instance.id), filename)
+    return os.path.join('challenge', 'questions', "answer_%s" % str(instance.id))
 
 
 class PsychologicalQuestionTitle(models.Model):

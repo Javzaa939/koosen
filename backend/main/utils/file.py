@@ -18,7 +18,7 @@ def file_exist(path):
     return is_exist
 
 
-def save_file(file, id, folder):
+def save_file(file, folder, id=''):
     """ Файл хадгалах
         path: Файл хадгалсан зам
         return path
