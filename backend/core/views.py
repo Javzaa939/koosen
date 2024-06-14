@@ -1022,6 +1022,7 @@ class EmployeeApiView(
                 )
 
                 if not user_serializer.is_valid():
+                    print(user_serializer.errors)
                     transaction.savepoint_rollback(sid)
                     return request.send_error_valid(user_serializer.errors)
 
