@@ -1,13 +1,8 @@
 import React from 'react'
-// ** React Imports
-import { Fragment, useState, useEffect, useContext } from 'react'
-
+import { useState, useEffect, useContext } from 'react'
 import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, Spinner, UncontrolledTooltip, CardBody } from 'reactstrap'
-
-import { ChevronDown, File, FileText, Printer, Search } from 'react-feather'
-
+import { ChevronDown,  FileText, Search } from 'react-feather'
 import DataTable from 'react-data-table-component'
-
 import { MdMailOutline } from "react-icons/md";
 import { BiMessageRoundedError } from "react-icons/bi";
 import { useTranslation } from 'react-i18next'
@@ -15,9 +10,9 @@ import Select from 'react-select'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
+import AuthContext from "@context/AuthContext"
 
 import { getPagination, ReactSelectStyles } from '@utils'
-
 import { getColumns } from './helpers';
 import AddModal from './AddModal'
 import { excelDownLoad } from './downloadExcel'
@@ -46,6 +41,7 @@ function AnhanShat() {
 
     // Эрэмбэлэлт
     const [sortField, setSort] = useState('')
+    const { user } = useContext(AuthContext)
 
     // Translate
     const { t } = useTranslation()
@@ -304,7 +300,13 @@ function AnhanShat() {
                 <div className='d-flex justify-content-between my-50 mt-1   '>
                     <div className='d-flex'>
                         <div className='px-0'>
-                            <Button color='primary' disabled={selectedStudents.length == 0}  className='d-flex align-items-center px-75' id='email_button' onClick={()=> emailModalHandler()} >
+                            <Button
+                                color='primary'
+                                disabled={(selectedStudents.length != 0 && user?.permissions?.includes('lms-elselt-mail-create')) ? false : true}
+                                className='d-flex align-items-center px-75'
+                                id='email_button'
+                                onClick={() => emailModalHandler()}
+                            >
                                 <MdMailOutline className='me-25'/>
                                 Email илгээх
                             </Button>
@@ -313,8 +315,13 @@ function AnhanShat() {
                             </UncontrolledTooltip>
                         </div>
                         <div className='px-1'>
-                            <Button color='primary' disabled={selectedStudents.length == 0}  className='d-flex align-items-center px-75' id='message_button' onClick={()=>messageModalHandler()}>
-                            {/* <Button color='primary' disabled={selectedStudents.length == 0} className='d-flex align-items-center px-75' id='message_button' onClick={() => messageModalHandler()}> */}
+                            <Button
+                                color='primary'
+                                disabled={(selectedStudents.length != 0 && user?.permissions?.includes('lms-elselt-message-create')) ? false : true}
+                                className='d-flex align-items-center px-75'
+                                id='message_button'
+                                onClick={() => messageModalHandler()}
+                            >
                                 <BiMessageRoundedError className='me-25'/>
                                 Мессеж илгээх
                             </Button>
@@ -393,7 +400,7 @@ function AnhanShat() {
                         print='true'
                         theme="solarized"
                         onSort={handleSort}
-                        columns={getColumns(currentPage, rowsPerPage, total_count, addModalHandler, STATE_LIST)}
+                        columns={getColumns(currentPage, rowsPerPage, total_count, addModalHandler, STATE_LIST, user)}
                         sortIcon={<ChevronDown size={10} />}
                         paginationPerPage={rowsPerPage}
                         paginationDefaultPage={currentPage}

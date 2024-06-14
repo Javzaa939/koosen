@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
 import { Edit3, Mail, MapPin, PhoneCall, Smartphone, UploadCloud, X } from 'react-feather'
 import { Controller, useForm } from 'react-hook-form'
 import { Button, Card, CardBody, CardTitle, Col, Form, FormFeedback, Input, InputGroup, InputGroupText, Label, Row } from 'reactstrap'
@@ -6,6 +6,7 @@ import classnames from "classnames";
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
+import AuthContext from "@context/AuthContext"
 import { validateSchema } from './validateSchema';
 import { validate, convertDefaultValue } from '@utils'
 import empty from "@src/assets/images/empty-image.jpg"
@@ -19,9 +20,12 @@ function SysInfo() {
 
     const { Loader, isLoading, fetchData } = useLoader({ })
     const [datas, setDatas] = useState()
+    const [is_valid, setValid] = useState(true)
     const [admissionAdvice, setAdmissionAdvice] = useState('')
     const [featurefile, setFeaturedImg] = useState('')
     const [image_old, setImageOld] = useState('')
+
+    const { user } = useContext(AuthContext)
 
     async function getDatas() {
         const { success, data } = await fetchData(sysinfoApi.get())
@@ -40,6 +44,12 @@ function SysInfo() {
             }
         }
     }
+
+    useEffect(() => {
+        if(Object.keys(user).length > 0 && user.permissions?.includes('lms-elselt-admission-update')) {
+            setValid(false)
+        }
+    },[user])
 
     useEffect(() => {
         getDatas()
@@ -140,6 +150,7 @@ function SysInfo() {
                                             </InputGroupText>
                                             <Input
                                                 name='email'
+                                                disabled={is_valid}
                                                 value={value}
                                                 id='email'
                                                 type='email'
@@ -171,6 +182,7 @@ function SysInfo() {
                                                 value={value}
                                                 id='address'
                                                 type='address'
+                                                disabled={is_valid}
                                                 invalid={errors.address && true}
                                                 className={classnames({ 'is-invalid': errors.address })}
                                                 onChange={(e) => {onChange(e.target.value|| '')}}
@@ -199,6 +211,7 @@ function SysInfo() {
                                                 value={value}
                                                 id='jijvvr_mobile'
                                                 type='number'
+                                                disabled={is_valid}
                                                 onChange={(e) => {onChange(e.target.value|| '')}}
                                                 invalid={errors.jijvvr_mobile && true}
                                                 className={classnames({ 'is-invalid': errors.jijvvr_mobile })}
@@ -227,6 +240,7 @@ function SysInfo() {
                                                 value={value}
                                                 id='mobile'
                                                 type='number'
+                                                disabled={is_valid}
                                                 onChange={(e) => {onChange(e.target.value|| '')}}
                                                 invalid={errors.mobile && true}
                                                 className={classnames({ 'is-invalid': errors.mobile })}
@@ -255,6 +269,7 @@ function SysInfo() {
                                                 value={value}
                                                 id='contact_mobile'
                                                 type='number'
+                                                disabled={is_valid}
                                                 onChange={(e) => {onChange(e.target.value|| '')}}
                                                 invalid={errors.contact_mobile && true}
                                                 className={classnames({ 'is-invalid': errors.contact_mobile })}
@@ -289,6 +304,7 @@ function SysInfo() {
                                                     className='d-none'
                                                     accept="application/pdf"
                                                     placeholder='test'
+                                                    disabled={is_valid}
                                                     onChange={(e) => {
                                                         setAdmissionAdvice(e.target.files?.[0] ?? null)
                                                         onChange(e.target.files?.[0] ?? null)
@@ -359,6 +375,7 @@ function SysInfo() {
                                             <input
                                                 accept="image/*"
                                                 type="file"
+                                                disabled={is_valid}
                                                 id={`logoInput1`}
                                                 name="image_old"
                                                 className="form-control d-none image-responsive"

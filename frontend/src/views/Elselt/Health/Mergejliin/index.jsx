@@ -1,6 +1,6 @@
 import React from "react";
 // ** React Imports
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { BiMessageRoundedError } from "react-icons/bi";
 import { MdMailOutline } from "react-icons/md";
 
@@ -27,6 +27,7 @@ import Select from "react-select";
 
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
+import AuthContext from "@context/AuthContext"
 
 import { getPagination, ReactSelectStyles } from "@utils";
 
@@ -52,6 +53,7 @@ const STATE_LIST = [
 ];
 
 function Mergejliin() {
+	const { user } = useContext(AuthContext)
 	const [currentPage, setCurrentPage] = useState(1);
 	const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -310,7 +312,7 @@ function Mergejliin() {
 						<div className="">
 							<Button
 								color="primary"
-								disabled={selectedStudents.length == 0}
+								disabled={(selectedStudents.length != 0 && user.permissions.includes('lms-elselt-mail-create')) ? false : true}
 								className="d-flex align-items-center px-75"
 								id="email_button"
 								onClick={() => emailModalHandler()}
@@ -325,12 +327,11 @@ function Mergejliin() {
 						<div className="px-1">
 							<Button
 								color="primary"
-								disabled
+								disabled={(selectedStudents.length != 0 && user?.permissions?.includes('lms-elselt-message-create')) ? false : true}
 								className="d-flex align-items-center px-75"
 								id="message_button"
 								onClick={() => messageModalHandler()}
 							>
-								{/* <Button color='primary' disabled={selectedStudents.length == 0} className='d-flex align-items-center px-75' id='message_button' onClick={() => messageModalHandler()}> */}
 								<BiMessageRoundedError className="me-25" />
 								Мессеж илгээх
 							</Button>
