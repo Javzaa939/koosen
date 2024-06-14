@@ -78,7 +78,6 @@ const ElseltUser = () => {
     const [edit_modal, setEditModal] = useState(false)
 
     const [editData, setEditData] = useState({})
-
     const [profOption, setProfession] = useState([])
     const [profession_id, setProfession_id] = useState('')
 

@@ -1679,6 +1679,7 @@ function useApi(isDisplay=false) {
 	elselt: {
 		get: (limit, page, sort, search, lesson_year) => instance.get(`/elselt/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year=${lesson_year}`),
 		getAll: () => instance.get(`/elselt/all/`),
+		getActiveAll: () => instance.get(`/elselt/all/active/`),
 		post: (data) => instance.post('/elselt/', data),
 		put: (data, id) => instance.put(`/elselt/${id}/`, data),
 		delete: (id) => instance.delete(`/elselt/${id}/`),
