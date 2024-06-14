@@ -38,6 +38,7 @@ import Select from 'react-select'
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import AuthContext from "@context/AuthContext"
+import useUpdateEffect from '@hooks/useUpdateEffect';
 
 import EmailModal from '../User/EmailModal';
 import MessageModal from '../User/MessageModal';
@@ -52,7 +53,9 @@ const ElseltYlshiitgel = () => {
     const [searchValue, setSearchValue] = useState("");
 	const [datas, setDatas] = useState([]);
 
+    const [profOption, setProfession] = useState([])
     const [profession_id, setProfession_id] = useState('')
+    const [admop, setAdmop] = useState([])
     const [adm, setAdm] = useState('')
     const [age_state, setAge_state] = useState('')
     const [unit1, setUnit1] = useState('')
@@ -62,6 +65,8 @@ const ElseltYlshiitgel = () => {
 
     const [gender, setGender] = useState('')
 	const elseltApi = useApi().elselt.admissionuserdata
+    const admissionYearApi = useApi().elselt
+    const professionApi = useApi().elselt.profession
 
     // email modal
     const [emailModal, setEmailModal] = useState(false)
@@ -109,12 +114,30 @@ const ElseltYlshiitgel = () => {
         if(success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
+            console.log("profession_data",data)
 
             // Нийт хуудасны тоо
             var cpage_count = Math.ceil(data?.count / rowsPerPage === 'Бүгд' ? 1 : rowsPerPage)
             setPageCount(cpage_count)
         }
 	}
+
+    // Хөтөлбөрийн жагсаалт авах
+    async function getProfession() {
+        const { success, data } = await fetchData(professionApi.getList(adm))
+        if (success) {
+            setProfession(data)
+        }
+    }
+
+    // Элсэлтийн жагсаалт авах
+    async function getAdmissionYear() {
+        const { success, data } = await fetchData(admissionYearApi.getAll())
+        if (success) {
+            setAdmop(data)
+        }
+	}
+
 
     // ** Function to handle filter
 	const handleFilter = e => {
@@ -151,6 +174,16 @@ const ElseltYlshiitgel = () => {
 			return () => clearTimeout(timeoutId);
 		}
     }, [sortField, currentPage, rowsPerPage, searchValue, adm, profession_id, unit1, gender, state, gpa_state])
+
+    useEffect(() => {
+        getAdmissionYear()
+        getProfession()
+    }, [])
+
+    useUpdateEffect(() => {
+        getProfession()
+    }, [adm])
+
 
 
     // ** Function to handle per page
@@ -218,13 +251,59 @@ const ElseltYlshiitgel = () => {
                                 isLoading={isLoading}
                                 placeholder={t('-- Сонгоно уу --')}
                                 options={stateop || []}
-                                value={stateop.find((c) => c.id === state)}
+                                value={stateop.find((c) => c?.id === state)}
                                 noOptionsMessage={() => t('Хоосон байна.')}
                                 onChange={(val) => {
                                     setState(val?.id || '')
                                 }}
                                 styles={ReactSelectStyles}
                                 getOptionValue={(option) => option.id}
+                                getOptionLabel={(option) => option.name}
+                            />
+                    </Col>
+                    <Col sm={6} lg={3} >
+                        <Label className="form-label" for="lesson_year">
+                            {t('Элсэлт')}
+                        </Label>
+                            <Select
+                                name="lesson_year"
+                                id="lesson_year"
+                                classNamePrefix='select'
+                                isClearable
+                                className={classnames('react-select')}
+                                isLoading={isLoading}
+                                placeholder={t('-- Сонгоно уу --')}
+                                options={admop || []}
+                                value={admop.find((c) => c.id === adm)}
+                                noOptionsMessage={() => t('Хоосон байна.')}
+                                onChange={(val) => {
+                                    setAdm(val?.id || '')
+                                }}
+                                styles={ReactSelectStyles}
+                                getOptionValue={(option) => option.id}
+                                getOptionLabel={(option) => option.lesson_year + ' ' + option.name}
+                            />
+                    </Col>
+                    <Col sm={6} lg={3} >
+                        <Label className="form-label" for="profession">
+                            {t('Хөтөлбөр')}
+                        </Label>
+                            <Select
+                                name="profession"
+                                id="profession"
+                                classNamePrefix='select'
+                                isClearable
+                                className={classnames('react-select')}
+                                isLoading={isLoading}
+                                placeholder={t('-- Сонгоно уу --')}
+                                options={profOption || []}
+                                value={profOption.find((c) => c?.prof_id === profession_id)}
+                                noOptionsMessage={() => t('Хоосон байна.')}
+                                onChange={(val) => {
+                                    setProfession_id(val?.prof_id || '')
+                                }}
+                                styles={ReactSelectStyles}
+                                getOptionValue={(option) => option?.prof_id}
                                 getOptionLabel={(option) => option.name}
                             />
                     </Col>
