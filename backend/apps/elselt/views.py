@@ -452,7 +452,7 @@ class AdmissionUserInfoAPIView(
 
         if state:
             queryset = queryset.filter(state=state)
-        
+
         if age_state:
             queryset = queryset.filter(age_state = age_state)
 

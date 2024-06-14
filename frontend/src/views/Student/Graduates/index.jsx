@@ -43,11 +43,24 @@ const Graduates = () => {
     const { t } = useTranslation()
 
     const excelColumns = {
-        'code': 'Оюутны код',
-        'last_name': 'Овог',
-        'first_name': 'Нэр',
-        'register_num': 'Регистрийн дугаар',
-        'profession_name': 'Хөтөлбөр',
+
+        'full_name': 'Овог, Нэр',
+        'department_name': 'Салбар нэр',
+        'school_name': "Сургуулийн нэр",
+        'dep_name':'Мэргэжлийн чиглэл',
+        'profession_code':'Мэргэжлийн чиглэлийн индекс',
+        'learning_status':'Сургалтын хэлбэр',
+        'degree_name':'Боловсролын зэрэг',
+        'deplom_num':'Дипломын дугаар',
+        'registration_num':'Бүртгэлийн дугаар',
+        'total_gpa':'Голч дүн',
+        'total_kr':'Цуглуулсан нийт багц цаг',
+        'join_year':'Элссэн хичээлийн жил',
+        'profession_name': 'Сургалтын хөтөлбөр',
+        'give_date':'Олгосон огноо',
+        'graduate_year':'Төгссөн огноо',
+        'graduation_number':'Тушаалын дугаар',
+
     }
 
     // ** Hook
