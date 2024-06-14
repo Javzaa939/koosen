@@ -728,7 +728,6 @@ class AdmissionYearActiveAPIView(
 
         self.queryset = self.queryset.filter(is_active=True)
         active_data = self.list(request).data
-        print("a", active_data)
         return request.send_data(active_data)
 
 
