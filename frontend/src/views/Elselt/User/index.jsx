@@ -464,6 +464,8 @@ const ElseltUser = () => {
             <MessageModal
                 messageModalHandler={messageModalHandler}
                 messageModal={messageModal}
+                selectedStudents={selectedStudents}
+                getDatas={getDatas}
             />
             <GpaModal
                 gpaModalHandler = {gpaModalHandler}
