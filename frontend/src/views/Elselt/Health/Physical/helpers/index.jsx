@@ -153,7 +153,7 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 						onClick={(e) => { addModalHandler(e, row)} }
 						id={`description${row?.id}`}
 						className="me-1"
-						style={{pointerEvents: user?.permissions?.includes('lms-elselt-health-create') ? '' : 'none'}}
+						style={{pointerEvents: user?.permissions?.includes('lms-elselt-physque-create') ? '' : 'none'}}
 					>
 						<Badge color="light-success" pill><CheckCircle  width={"15px"} /></Badge>
 					</a>
