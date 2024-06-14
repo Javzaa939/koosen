@@ -47,7 +47,6 @@ const EditModal = ({ open, handleModal, refreshDatas, rowData }) => {
     // State
     const [profOption, setProfession] = useState([])         // хөтөлбөр авах нь
     const [elseltOption, setElseltOption] = useState([])     // элсэлт авах нь
-    const [is_active, setIsActive] = useState(false)         // идэвхтэй элсэлт авах нь
     const [elseltId, setElseltId] = useState('')             // идэвхтэй элсэлт id авах нь
 
 
@@ -58,15 +57,14 @@ const EditModal = ({ open, handleModal, refreshDatas, rowData }) => {
 
     // Идэвхитэй элсэлтийн жагсаалт авах
     async function getAdmissionYear() {
-        const { success, data } = await fetchData(admissionYearApi.getAll(is_active))
+        const { success, data } = await fetchData(admissionYearApi.getActiveAll())
         if (success) {
             setElseltOption(data)
         }
 	}
     useEffect(() => {
         getAdmissionYear()
-        setIsActive(true)
-    },[is_active])
+    },[])
 
     // Хөтөлбөрийн жагсаалт авах
     async function getProfession() {
@@ -98,7 +96,6 @@ const EditModal = ({ open, handleModal, refreshDatas, rowData }) => {
             }
         }
     }
-
     return (
         <Fragment>
             {
@@ -205,8 +202,8 @@ const EditModal = ({ open, handleModal, refreshDatas, rowData }) => {
                                                     value={profOption.find((c) => c?.id === value)}
                                                     noOptionsMessage={() => t('Хоосон байна.')}
                                                     onChange={(val) => {
-                                                        if(val?.prof_id){
-                                                        onChange(val?.prof_id || '')
+                                                        if(val?.id){
+                                                        onChange(val?.id || '')
                                                         }
                                                     }}
                                                     styles={ReactSelectStyles}
