@@ -669,6 +669,34 @@ permissions = [
         'name' : 'lms-elselt-admission-update',
         'description' : 'Элсэлтийн систем хөтөлбөр солих'
     },
+    {
+        'name' : 'lms-elselt-admission-create',
+        'description' : 'Элсэлтийн систем элсэлт үүсгэх'
+    },
+    {
+        'name' : 'lms-elselt-admission-approve',
+        'description' : 'Элсэлтийн систем хөтөлбөр үүсгэх'
+    },
+    {
+        'name' : 'lms-elselt-mail-create',
+        'description' : 'Элсэлтийн систем мэйл илгээх'
+    },
+    {
+        'name' : 'lms-elselt-gpa-approve',
+        'description' : 'Элсэлтийн систем голч шалгах'
+    },
+    {
+        'name' : 'lms-elselt-message-create',
+        'description' : 'Элсэлтийн систем мессеж илгээх'
+    },
+    {
+        'name' : 'lms-elselt-physque-create',
+        'description' : 'Элсэлтийн систем бие бялдар мэдээлэл оруулах'
+    },
+    {
+        'name' : 'lms-elselt-health-create',
+        'description' : 'Элсэлтийн систем эрүүл мэнд анхан шат мэдээлэл оруулах'
+    },
 
 #------------------------------------"Дотуур байр"----------------------------
     # Өрөөний төрөл

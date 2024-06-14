@@ -2,7 +2,7 @@ import { Book, CheckCircle, Type } from "react-feather"
 import { Badge, UncontrolledTooltip } from "reactstrap"
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, page_count, addModalHandler, STATE_LIST) {
+export function getColumns (currentPage, rowsPerPage, page_count, addModalHandler, STATE_LIST, user) {
 
     // /** Сонгосон хуудасны тоо датаны тооноос их болсон үед хуудаслалт 1-ээс эхлэнэ */
     if (currentPage > page_count) {
@@ -138,17 +138,10 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 			minWidth: "120px",
 			selector: (row) => (
 				<div className="text-center" style={{ width: "auto" }}>
-					{/* <a
-						id={`requestLeaveDatatableDetails${row.id}`}
-						onClick={() => console.log(row?.id, row)}
-						className="me-50"
-					>
-						<Badge color="light-info" pill><Book width={"15px"} /></Badge>
-					</a>
-
-					<UncontrolledTooltip placement='top' target={`requestLeaveDatatableDetails${row.id}`}>Дэлгэрэнгүй</UncontrolledTooltip> */}
-
-					<a role="button" onClick={(e) => { addModalHandler(e, row)} }
+					<a
+						role="button"
+						style={{pointerEvents: user?.permissions?.includes('lms-elselt-health-create') ? '' : 'none'}}
+						onClick={(e) => { addModalHandler(e, row)} }
 						id={`description${row?.id}`}
 						className="me-1"
 					>

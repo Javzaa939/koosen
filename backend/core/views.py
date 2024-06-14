@@ -1059,7 +1059,7 @@ class EmployeeApiView(
 
 
 # obj = OrgPosition.objects.create(
-#     name = 'Элсэлтийн систем хариуцсан админ',
+#     name = 'Систем хариуцсан админ',
 #     org_id = 1
 # )
 

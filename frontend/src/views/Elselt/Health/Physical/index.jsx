@@ -2,17 +2,17 @@ import React from 'react'
 // ** React Imports
 import { Fragment, useState, useEffect, useContext } from 'react'
 
-import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, Spinner, UncontrolledTooltip, CardBody } from 'reactstrap'
+import { Row, Col, Card, Input, Label, Button, CardHeader, Spinner, UncontrolledTooltip, CardBody } from 'reactstrap'
 
-import { ChevronDown, File, FileText, Printer, Search } from 'react-feather'
+import { ChevronDown, Search } from 'react-feather'
 
 import DataTable from 'react-data-table-component'
 
 import { useTranslation } from 'react-i18next'
 import Select from 'react-select'
-
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
+import AuthContext from "@context/AuthContext"
 import { MdMailOutline } from "react-icons/md";
 import { BiMessageRoundedError } from "react-icons/bi";
 
@@ -39,6 +39,7 @@ const STATE_LIST = [
 ]
 
 function Physical() {
+    const { user } = useContext(AuthContext)
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10)
 
@@ -278,24 +279,36 @@ function Physical() {
                     </Col>
                 </Row>
                 <div className='d-flex justify-content-start my-50 mt-1'>
-                    <div className='px-1'>
-                        <Button color='primary' disabled={selectedStudents.length == 0} className='d-flex align-items-center px-75' id='email_button' onClick={() => emailModalHandler()}>
-                            <MdMailOutline className='me-25'/>
+                    <div className=''>
+                        <Button
+                            color="primary"
+                            disabled={(selectedStudents.length != 0 && user?.permissions.includes('lms-elselt-mail-create')) ? false : true}
+                            className="d-flex align-items-center px-75"
+                            id="email_button"
+                            onClick={() => emailModalHandler()}
+                        >
+                        <MdMailOutline className="me-25" />
                             Email илгээх
                         </Button>
-                        <UncontrolledTooltip target='email_button'>
+                        <UncontrolledTooltip target="email_button">
                             Сонгосон элсэгчид руу имейл илгээх
                         </UncontrolledTooltip>
                     </div>
                     <div className='px-1'>
-                            <Button color='primary' disabled={selectedStudents.length == 0} className='d-flex align-items-center px-75' id='message_button' onClick={() => messageModalHandler()}>
-                                <BiMessageRoundedError className='me-25'/>
-                                Мессеж илгээх
-                            </Button>
-                            <UncontrolledTooltip target='message_button'>
-                                Сонгосон элсэгчид руу мессеж илгээх
-                            </UncontrolledTooltip>
-                        </div>
+                        <Button
+                            color='primary'
+                            disabled={(selectedStudents.length != 0 && user?.permissions?.includes('lms-elselt-message-create')) ? false : true}
+                            className='d-flex align-items-center px-75'
+                            id='message_button'
+                            onClick={() => messageModalHandler()}
+                        >
+                            <BiMessageRoundedError className='me-25'/>
+                            Мессеж илгээх
+                        </Button>
+                        <UncontrolledTooltip target='message_button'>
+                            Сонгосон элсэгчид руу мессеж илгээх
+                        </UncontrolledTooltip>
+                    </div>
                 </div>
                 <Row className="justify-content-between " >
                     <Col className='d-flex align-items-center justify-content-start' md={4}>
@@ -364,7 +377,7 @@ function Physical() {
                         print='true'
                         theme="solarized"
                         onSort={handleSort}
-                        columns={getColumns(currentPage, rowsPerPage, total_count, addModalHandler, STATE_LIST)}
+                        columns={getColumns(currentPage, rowsPerPage, total_count, addModalHandler, STATE_LIST, user)}
                         sortIcon={<ChevronDown size={10} />}
                         paginationPerPage={rowsPerPage}
                         paginationDefaultPage={currentPage}

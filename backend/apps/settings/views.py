@@ -1793,7 +1793,12 @@ class RolesAPIView(
         """ Role үүсгэх
         """
 
-        return post_put_action(self, request, 'post', request.data)
+        saved_data = post_put_action(self, request, 'post', request.data, get_res=True)
+        querysets = OrgPosition.objects.filter(id__in=request.data.get('orgpositions'))
+        for queryset in querysets:
+            queryset.roles.add(saved_data)
+
+        return request.send_info("INF_001")
 
     @login_required()
     @transaction.atomic
