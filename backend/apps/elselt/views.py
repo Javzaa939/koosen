@@ -713,8 +713,22 @@ class AdmissionYearAPIView(
     def get(self, request):
 
         all_data = self.list(request).data
-
         return request.send_data(all_data)
+
+class AdmissionYearActiveAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+):
+
+    queryset = AdmissionRegister.objects.all()
+    serializer_class = AdmissionSerializer
+
+    def get(self, request):
+        "идэвхитэй элсэлт"
+
+        self.queryset = self.queryset.filter(is_active=True)
+        active_data = self.list(request).data
+        return request.send_data(active_data)
 
 
 @permission_classes([IsAuthenticated])
