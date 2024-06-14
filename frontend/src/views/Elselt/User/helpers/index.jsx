@@ -139,6 +139,13 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 			center: true
 		},
 		{
+			header: 'user_age',
+			name: t("Нас"),
+			reorder: true,
+			selector: (row) => row?.user_age,
+			center: true
+		},
+		{
 			maxWidth: "250px",
 			minWidth: "250px",
 			header: 'profession__profession__name',

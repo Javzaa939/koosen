@@ -1281,3 +1281,8 @@ def send_message_mobicom(phone_numbers, message):
             success_count += 1
 
     return True, 'Амжилттай илгээлээ', success_count, not_found_numbers
+
+def calculate_age(birthdate):
+    today = datetime.today()
+    age = today.year - birthdate.year
+    return age
