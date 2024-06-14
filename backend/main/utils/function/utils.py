@@ -239,7 +239,7 @@ def get_user_permissions(user):
     permissions = []
 
     if user.is_superuser:
-        permissions = list(Permissions.objects.all().filter(name__startswith='lms').values_list('name', flat=True))
+        permissions = list(Permissions.objects.all().exclude(name__contains='elselt').filter(name__startswith='lms').values_list('name', flat=True))
 
     elif emp_list and not user.is_superuser:
         permissions = list(emp_list.org_position.roles.values_list("permissions__name", flat=True))
@@ -1180,3 +1180,104 @@ def create_backup(
 
     except Exception as e:
         print(e)
+
+def check_phone_number(phone_numbers):
+    """Утасны дугаарын үүрэн телефон шалгах
+       phone_numbers: Шалгаж буй утасны дугаарууд (list)
+    """
+
+    #үүрэн телефон
+    categorized_numbers = {
+        'mobicom': [],
+        'skytel': [],
+        'unitel': [],
+        'gmobile': [],
+        'other': []
+    }
+
+    for phone_number in phone_numbers:
+
+        # Эхний 2 орон
+        two_digits = phone_number[:2]
+
+        if two_digits in ["99", "85", "95", "94"]:
+            categorized_numbers['mobicom'].append(phone_number)
+        elif two_digits in ["90", "91", "96"]:
+            categorized_numbers['skytel'].append(phone_number)
+        elif two_digits in ["80", "86", "88", "89"]:
+            categorized_numbers['unitel'].append(phone_number)
+        elif two_digits in ["93", "97", "98"]:
+            categorized_numbers['gmobile'].append(phone_number)
+        else:
+            categorized_numbers['other'].append(phone_number)
+
+    # Хоосон массив хаях
+    categorized_numbers = {k: v for k, v in categorized_numbers.items() if v}
+
+    return categorized_numbers
+
+
+def send_message_unitel(phone_numbers, message):
+    """ phone_numbers: Илгээх утасны дугаарууд
+        message: Илгээх мессеж
+        Unitel дугаартай элсэгчид рүү мессеж илгээх
+    """
+
+    success_count = 0
+    not_found_numbers = []
+
+    # Утасны дугаараар гүйлгэх
+    for phone_number in phone_numbers:
+        send_url = 'http://sms.unitel.mn/sendSMS.php?uname=uia&upass=Lxx0upJSZe&sms={text}&from=135038&mobile={phone_number}'.format(phone_number=phone_number, text=message)
+
+        rsp = requests.get(send_url)
+
+        # Хүсэлт амжилттай илгээгдсэн байвал
+        if rsp.status_code == 200:
+            success_count += 1
+
+    return True, 'Амжилттай илгээлээ', success_count, not_found_numbers
+
+
+def send_message_gmobile(phone_numbers, message):
+    """ phone_numbers: Илгээх утасны дугаарууд
+        message: Илгээх мессеж
+        GMobile дугаартай элсэгчид рүү мессеж илгээх
+    """
+
+    success_count = 0
+    not_found_numbers = []
+
+    # Утасны дугаараар гүйлгэх
+    for phone_number in phone_numbers:
+        send_url = 'http://sms-special.gmobile.mn/cgi-bin/sendsms?username=dt_school38&password=dtdi*0319&from=135038&to={phone_number}&text={text}'.format(phone_number=phone_number, text=message)
+
+        rsp = requests.get(send_url)
+
+        # Хүсэлт амжилттай илгээгдсэн байвал
+        if rsp.status_code == 200:
+            success_count += 1
+
+    return True, 'Амжилттай илгээлээ', success_count, not_found_numbers
+
+
+def send_message_mobicom(phone_numbers, message):
+    """ phone_numbers: Илгээх утасны дугаарууд
+        message: Илгээх мессеж
+        Mobicom дугаартай элсэгчид рүү мессеж илгээх
+    """
+
+    success_count = 0
+    not_found_numbers = []
+
+    # Утасны дугаараар гүйлгэх
+    for phone_number in phone_numbers:
+        send_url = 'http://27.123.214.168/smsmt/mt?servicename=Dotood&username=Hereg&from=135038&to=976{phone_number}&msg={text}'.format(phone_number=phone_number, text=message)
+
+        rsp = requests.get(send_url)
+
+        # Хүсэлт амжилттай илгээгдсэн байвал
+        if rsp.status_code == 200:
+            success_count += 1
+
+    return True, 'Амжилттай илгээлээ', success_count, not_found_numbers

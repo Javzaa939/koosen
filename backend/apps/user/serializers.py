@@ -91,7 +91,10 @@ class UserInfoSerializer(serializers.ModelSerializer):
         permissions = []
 
         if obj.is_superuser:
-            permissions = list(Permissions.objects.all().filter(Q(name__startswith='lms') | (Q(name='role-read'))).values_list('name', flat=True))
+            if not obj.is_staff:
+                permissions = list(Permissions.objects.all().filter(Q(name__startswith='lms') | (Q(name='role-read'))).exclude(name__icontains='lms-elselt').values_list('name', flat=True))
+            else:
+                permissions = list(Permissions.objects.all().filter(Q(name__startswith='lms') | (Q(name='role-read'))).values_list('name', flat=True))
 
         elif emp_list and not obj.is_superuser:
             permissions = list(emp_list.org_position.roles.values_list("permissions__name", flat=True))

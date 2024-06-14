@@ -582,7 +582,7 @@ export default function PrintAttachmentEnglish()
                             :
                                 <>
                                     <span className=''>
-                                        Graduation Exams:
+                                        Graduation Exams: <span>{datas?.graduation_work?.shalgalt_onoo && `${datas?.graduation_work?.shalgalt_onoo}`}</span>
                                     </span>
                                         {
                                             datas?.graduation_work?.lesson?.map((val, idx) =>

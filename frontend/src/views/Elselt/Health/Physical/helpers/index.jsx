@@ -1,8 +1,8 @@
-import { Book, CheckCircle, Type } from "react-feather"
+import { CheckCircle} from "react-feather"
 import { Badge, UncontrolledTooltip } from "reactstrap"
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, page_count, addModalHandler, STATE_LIST) {
+export function getColumns (currentPage, rowsPerPage, page_count, addModalHandler, STATE_LIST, user) {
 
     // /** Сонгосон хуудасны тоо датаны тооноос их болсон үед хуудаслалт 1-ээс эхлэнэ */
     if (currentPage > page_count) {
@@ -31,6 +31,14 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 			maxWidth: '100px',
 		},
 		{
+			header: 'gender',
+			name: <div className="px-1">Хүйс</div>,
+			selector: (row) => row?.gender_name || '',
+            sortable: true,
+			minWidth: '140px',
+			maxWidth: '140px',
+		},
+		{
 			header: 'user__first_name',
 			name: <div className="px-1">Нэр</div>,
 			minWidth: '160px',
@@ -46,16 +54,6 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 			minWidth: '140px',
 			maxWidth: '140px',
 		},
-		{
-			header: 'gender',
-			name: <div className="px-1">Хүйс</div>,
-			selector: (row) => row?.gender_name || '',
-            sortable: true,
-			minWidth: '140px',
-			maxWidth: '140px',
-		},
-
-		// SORT ERROR
         {
 			maxWidth: "200px",
 			minWidth: "200px",
@@ -66,24 +64,22 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 					color={`${row?.health_up_user_data?.state == 1 ? 'primary' : row?.health_up_user_data?.state == 2 ? 'success' : row?.health_up_user_data?.state == 3 ? 'danger' : 'primary'}`}
 					pill
 				>
-					{row?.health_up_user_data ?
+					{row.health_up_user_data ?
 
 						STATE_LIST.find(val => val.id === row?.health_up_user_data?.state).name
 
 					:
 						''
 						// STATE_LIST.find(val => val.id === 1)?.name
-						}
+					}
 				</Badge>),
 			center: true,
 		},
 
-		// TODO: SORT ALDAA ZASAH
 		{
 			header: 'description',
 			name: <div className="px-1">Тайлбар</div>,
 			selector: (row) => row?.health_up_user_data?.description || '',
-            // sortable: true,
 			minWidth: '140px',
 			maxWidth: '140px',
 		},
@@ -91,7 +87,6 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 			header: 'turnik',
 			name: <div className="px-1">Савлуурт суниах</div>,
 			selector: (row) => row?.health_up_user_data?.turnik || '',
-            // sortable: true,
 			minWidth: '140px',
 			maxWidth: '140px',
 		},
@@ -99,7 +94,6 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 			header: 'belly_draught',
 			name: <div className="px-1">Гэдэсний даралт</div>,
 			selector: (row) => row?.health_up_user_data?.belly_draught || '',
-            // sortable: true,
 			minWidth: '140px',
 			maxWidth: '140px',
 		},
@@ -107,7 +101,6 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 			header: 'patience_1000m',
 			name: <div className="px-1">Тэсвэр 1000м</div>,
 			selector: (row) => row?.health_up_user_data?.patience_1000m || '',
-            // sortable: true,
 			minWidth: '140px',
 			maxWidth: '140px',
 		},
@@ -115,7 +108,6 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 			header: 'speed_100m',
 			name: <div className="px-1">Хурд 100м</div>,
 			selector: (row) => row?.health_up_user_data?.speed_100m || '',
-            // sortable: true,
 			minWidth: '140px',
 			maxWidth: '140px',
 		},
@@ -123,7 +115,6 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 			header: 'quickness',
 			name: <div className="px-1">Авхаалж самбаа</div>,
 			selector: (row) => row?.health_up_user_data?.quickness || '',
-            // sortable: true,
 			minWidth: '140px',
 			maxWidth: '140px',
 		},
@@ -131,7 +122,6 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 			header: 'flexible',
 			name: <div className="px-1">Уян хатан</div>,
 			selector: (row) => row?.health_up_user_data?.flexible || '',
-            // sortable: true,
 			minWidth: '140px',
 			maxWidth: '140px',
 		},
@@ -139,7 +129,6 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 			header: 'total_score',
 			name: <div className="px-1">Нийт оноо</div>,
 			selector: (row) => row?.health_up_user_data?.total_score || '',
-            // sortable: true,
 			minWidth: '140px',
 			maxWidth: '140px',
 		},
@@ -159,10 +148,12 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 					</a>
 
 					<UncontrolledTooltip placement='top' target={`requestLeaveDatatableDetails${row.id}`}>Дэлгэрэнгүй</UncontrolledTooltip> */}
-
-					<a role="button" onClick={(e) => { addModalHandler(e, row)} }
+					<a
+						role="button"
+						onClick={(e) => { addModalHandler(e, row)} }
 						id={`description${row?.id}`}
 						className="me-1"
+						style={{pointerEvents: user?.permissions?.includes('lms-elselt-physque-create') ? '' : 'none'}}
 					>
 						<Badge color="light-success" pill><CheckCircle  width={"15px"} /></Badge>
 					</a>

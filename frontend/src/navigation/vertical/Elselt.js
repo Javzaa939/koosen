@@ -32,6 +32,12 @@ export default [
                 navLink: "elselt/user"
             },
             {
+                id: 'elselt3_1',
+                title: 'Ял шийтгэл',
+                icon: <Circle size={8} />,
+                navLink: "elselt/ylshiitgel"
+            },
+            {
                 id: 'elselt4',
                 title: 'Эрүүл мэнд анхан шатны үзлэг',
                 icon: <Circle size={8} />,

@@ -1332,9 +1332,9 @@ class LessonStandartDiplomaListAPIView(
         if student:
             qs_student = Student.objects.filter(pk=student).first()
             if qs_student:
-                qs_group = Group.objects.filter(id=qs_student.group.id).last()
+                qs_group = Group.objects.filter(pk=qs_student.group.id).first()
                 if qs_group:
-                    lesson_ids = LearningPlan.objects.filter(Q(Q(profession=qs_group.profession) & Q(Q(lesson_level=LearningPlan.DIPLOM) | Q(lesson_level=LearningPlan.MAG_DIPLOM))), lesson_level=LearningPlan.DIPLOM).values_list('lesson', flat=True)
+                    lesson_ids = LearningPlan.objects.filter(Q(Q(profession=qs_group.profession) & Q(Q(lesson_level=LearningPlan.DIPLOM) | Q(lesson_level=LearningPlan.MAG_DIPLOM)))).values_list('lesson', flat=True)
                     queryset = queryset.filter(id__in=lesson_ids)
 
         return queryset
@@ -2088,8 +2088,7 @@ class PsychologicalTestQuestionsAPIView(
         return request.send_data(datas)
 
     def post(self, request):
-        quesion_imgs = request.FILES.getlist('questionImg')
-        choice_imgs = request.FILES.getlist('choiceImg')
+        files = request.FILES.getlist('files')
         questions = request.POST.getlist('questions')
 
         user_id = request.user.id
@@ -2108,7 +2107,10 @@ class PsychologicalTestQuestionsAPIView(
                     question['created_by'] = user
 
                     if 'score' in question:
-                        question['score'] = int(question['score'])
+                        if question.get('score'):
+                            question['score'] = int(question['score'])
+                        else:
+                            del question['score']
 
                     if not yes_or_no:
                         question['yes_or_no'] = None
@@ -2119,10 +2121,9 @@ class PsychologicalTestQuestionsAPIView(
                     choices = question.get('answers')
 
                     # Асуултын зураг хадгалах хэсэг
-                    for img in quesion_imgs:
-                        if image_name == img.name:
-                            question_img = img
-                            break
+                    for image in files:
+                        if hasattr(image, "name") and question['image'] == image.name:
+                            question_img = image
 
                     if question['level'] != 0:
                         question['has_score'] = True
@@ -2172,14 +2173,12 @@ class PsychologicalTestQuestionsAPIView(
                         for choice in choices:
                             choice['created_by'] = user
 
-                            img_name = choice.get('imageName')
                             choice_img = None
 
                             # Хариултын зураг хадгалах хэсэг
-                            for cimg in choice_imgs:
-                                if img_name == cimg.name:
-                                    choice_img = cimg
-                                    break
+                            for image in files:
+                                if hasattr(image, "name") and choice['image'] == image.name:
+                                    choice_img = image
 
                             choice = remove_key_from_dict(choice, ['image'])
 

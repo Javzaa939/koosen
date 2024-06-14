@@ -487,7 +487,7 @@ export default function PrintNationalAttachment()
                             :
                                 <>
                                     <span className=''>
-                                        ᠲᠡᢉᠦᠰᠦᠯᠲᠡ ᠶ᠋ᠢᠨ ᠰᠢᠯᠭᠠᠯᠲᠠ:
+                                        ᠲᠡᢉᠦᠰᠦᠯᠲᠡ ᠶ᠋ᠢᠨ ᠰᠢᠯᠭᠠᠯᠲᠠ: <span>{datas?.graduation_work?.shalgalt_onoo && <span>{tooBichih(datas?.graduation_work?.shalgalt_onoo)}</span>}</span>
                                     </span>
                                         {
                                             datas?.graduation_work?.lesson?.map((val, idx) =>

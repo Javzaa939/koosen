@@ -517,7 +517,7 @@ export default function PrintAttachmentMongolia()
                             :
                                 <>
                                     <span className=''>
-                                        Төгсөлтийн шалгалт:
+                                    Төгсөлтийн шалгалт: <span>{datas?.graduation_work?.shalgalt_onoo && `${datas?.graduation_work?.shalgalt_onoo}`}</span>
                                     </span>
                                         {
                                             datas?.graduation_work?.lesson?.map((val, idx) =>

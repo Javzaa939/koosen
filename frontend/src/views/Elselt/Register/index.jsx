@@ -162,7 +162,7 @@ const ElseltRegister = () => {
                     <div className='d-flex flex-wrap mt-md-0 mt-1'>
                         <Button
                             color='primary'
-                            // disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-elselt-create'))? false : true}
+                            disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-elselt-admission-create')) ? false : true}
                             onClick={() => handleModal()}
                         >
                             <Plus size={15} />
