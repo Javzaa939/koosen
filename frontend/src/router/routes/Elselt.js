@@ -11,6 +11,8 @@ const Details = lazy(() => import("@views/Elselt/User/Details"))
 const AnhanShat = lazy(() => import("@views/Elselt/Health/AnhanShat"))
 const Mergejliin = lazy(() => import("@views/Elselt/Health/Mergejliin"))
 const Physical = lazy(() => import("@src/views/Elselt/Health/Physical"))
+const MessageTailan = lazy(() => import("@views/Elselt/Tailan/Message"))
+
 
 const ElseltRoutes = [
     {
@@ -44,6 +46,10 @@ const ElseltRoutes = [
     {
         path: 'elselt/tailan/',
         element: <Tailan />
+    },
+    {
+        path: 'elselt/message',
+        element: <MessageTailan />
     },
     {
         path: 'elselt/health/anhan',

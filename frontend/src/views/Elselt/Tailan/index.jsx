@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Card, CardBody, CardHeader, Nav, NavItem, NavLink, TabContent } from 'reactstrap'
 import Email from './Email'
-import Message from './ Message'
 
 function Tailan() {
 
@@ -11,11 +10,6 @@ function Tailan() {
             name: 'Имейл',
             component: <Email/>
         },
-        // {
-        //     active_id: 2,
-        //     name: 'Мессеж',
-        //     component: <Message/>
-        // }
     ]
     const [component, setComponent] = useState('')
     const [active, setActive] = useState(1)

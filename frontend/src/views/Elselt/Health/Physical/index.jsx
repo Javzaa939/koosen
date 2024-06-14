@@ -190,6 +190,8 @@ function Physical() {
             <MessageModal
                 messageModalHandler={messageModalHandler}
                 messageModal={messageModal}
+                selectedStudents={selectedStudents}
+                getDatas={getDatas}
             />
         <Card>
             {

@@ -67,6 +67,12 @@ export default [
                 icon: <Circle size={8} />,
                 navLink: "elselt/tailan"
             },
+            {
+                id: 'elselt9',
+                title: 'Мессеж тайлан',
+                icon: <Circle size={8} />,
+                navLink: "elselt/message"
+            },
         ]
     }
 ]
