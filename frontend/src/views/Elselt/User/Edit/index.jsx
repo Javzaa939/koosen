@@ -28,10 +28,6 @@ const validateSchema = Yup.object().shape(
     description: Yup.string()
         .trim()
         .required('Хоосон байна'),
-
-    admission: Yup.string()
-        .trim()
-        .required('Хоосон байна'),
 });
 
 const EditModal = ({ open, handleModal, refreshDatas, rowData }) => {
@@ -42,6 +38,7 @@ const EditModal = ({ open, handleModal, refreshDatas, rowData }) => {
 
 	// Loader
 	const { isLoading, fetchData } = useLoader({});
+	const { isLoading: optionLoading, fetchData: optionFetchData } = useLoader({});
 	const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
 
     // State
@@ -57,7 +54,7 @@ const EditModal = ({ open, handleModal, refreshDatas, rowData }) => {
 
     // Идэвхитэй элсэлтийн жагсаалт авах
     async function getAdmissionYear() {
-        const { success, data } = await fetchData(admissionYearApi.getActiveAll())
+        const { success, data } = await optionFetchData(admissionYearApi.getActiveAll())
         if (success) {
             setElseltOption(data)
         }
@@ -68,7 +65,7 @@ const EditModal = ({ open, handleModal, refreshDatas, rowData }) => {
 
     // Хөтөлбөрийн жагсаалт авах
     async function getProfession() {
-        const { success, data } = await fetchData(professionApi.getList(elseltId))
+        const { success, data } = await optionFetchData(professionApi.getList(elseltId))
         if (success) {
             setProfession(data)
         }
@@ -150,37 +147,24 @@ const EditModal = ({ open, handleModal, refreshDatas, rowData }) => {
                                 </Col>
                                 <Col md={12} sm={12} className='mt-0'>
                                     <Label for="admission">{t('Элсэлт')}</Label>
-                                    <Controller
-                                        control={control}
-                                        defaultValue=''
+                                    <Select
                                         name="admission"
-                                        render={({ field: { value, onChange }}) => {
-                                            return (
-                                                <Select
-                                                    name="admission"
-                                                    id="admission"
-                                                    classNamePrefix='select'
-                                                    isClearable
-                                                    className={classnames('react-select', { 'is-invalid': errors.admission })}
-                                                    isLoading={isLoading}
-                                                    placeholder={t('-- Сонгоно уу --')}
-                                                    options={elseltOption || []}
-                                                    value={value && elseltOption.find((c) => c?.id === value)}
-                                                    noOptionsMessage={() => t('Хоосон байна.')}
-                                                    onChange={(val) => {
-                                                        setElseltId(val?.id || '')
-                                                        if(val?.id){
-                                                            onChange(val?.id || '')
-                                                        }
-                                                    }}
-                                                    styles={ReactSelectStyles}
-                                                    getOptionValue={(option) => option?.id}
-                                                    getOptionLabel={(option) => option.lesson_year + ' ' +option.name}
-                                                />
-                                            )
+                                        id="admission"
+                                        classNamePrefix='select'
+                                        isClearable
+                                        className={classnames('react-select', { 'is-invalid': errors.admission })}
+                                        isLoading={optionLoading}
+                                        placeholder={t('-- Сонгоно уу --')}
+                                        options={elseltOption || []}
+                                        value={elseltOption.find((c) => c?.id === elseltId)}
+                                        noOptionsMessage={() => t('Хоосон байна.')}
+                                        onChange={(val) => {
+                                            setElseltId(val?.id || '')
                                         }}
+                                        styles={ReactSelectStyles}
+                                        getOptionValue={(option) => option?.id}
+                                        getOptionLabel={(option) => option.lesson_year + ' ' +option.name}
                                     />
-                                    {errors.profession && <FormFeedback className='d-block'>{errors.profession.message}</FormFeedback>}
                                 </Col>
                                 <Col md={12} sm={12} className='mt-0'>
                                     <Label for="profession">{t('Хөтөлбөр')}</Label>
@@ -196,15 +180,13 @@ const EditModal = ({ open, handleModal, refreshDatas, rowData }) => {
                                                     classNamePrefix='select'
                                                     isClearable
                                                     className={classnames('react-select', { 'is-invalid': errors.profession })}
-                                                    isLoading={isLoading}
+                                                    isLoading={optionLoading}
                                                     placeholder={t('-- Сонгоно уу --')}
                                                     options={profOption || []}
                                                     value={profOption.find((c) => c?.id === value)}
                                                     noOptionsMessage={() => t('Хоосон байна.')}
                                                     onChange={(val) => {
-                                                        if(val?.id){
                                                         onChange(val?.id || '')
-                                                        }
                                                     }}
                                                     styles={ReactSelectStyles}
                                                     getOptionValue={(option) => option?.id}
