@@ -83,6 +83,7 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 						<>
 							<a role="button"
 								onClick={() => editModal(row)}
+								style={{pointerEvents: user?.permissions?.includes('lms-elselt-admission-update') ? '' : 'none'}}
 								id={`edit${row?.id}`}
 								className={`me-1`}
 							>
