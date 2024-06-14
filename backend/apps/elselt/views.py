@@ -1762,7 +1762,7 @@ class AdmissionUserMessageAPIView(
             except Exception as e:
                 print(e)
                 transaction.savepoint_rollback(sid)
-                return request.send_error("ERR_002", e.__str__)
+                return request.send_error("ERR_002")
 
         return request.send_info('INF_001')
 
