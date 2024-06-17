@@ -9,6 +9,7 @@ export function excelDownLoad(datas, STATE_LIST) {
                     'Овог': data?.last_name,
                     'Нэр': data?.first_name || '',
                     'РД': data?.user_register || '',
+                    'Нас': data?.user_age || '',
                     'Утасны дугаар': data?.user?.mobile || '',
                     'Яаралтай үед холбогдох дугаар': data?.user?.parent_mobile || '',
                     'Имейл': data?.user?.email || '',
@@ -47,6 +48,7 @@ export function excelDownLoad(datas, STATE_LIST) {
                 'Овог',
                 'Нэр',
                 'РД',
+                'Нас',
                 'Утасны дугаар',
                 'Яаралтай үед холбогдох дугаар',
                 'Имейл',
@@ -109,7 +111,7 @@ export function excelDownLoad(datas, STATE_LIST) {
         const styleRow = 0;
         const sendRow = mainData.length;
         const styleCol = 0;
-        const sendCol = 21;
+        const sendCol = 22;
 
         for (let row = styleRow; row <= sendRow; row++) {
             for (let col = styleCol; col <= sendCol; col++) {

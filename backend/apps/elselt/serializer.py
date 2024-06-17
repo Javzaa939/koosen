@@ -374,10 +374,23 @@ class HealthUserDataSerializer(serializers.ModelSerializer):
     work_organization =serializers.SerializerMethodField()
     daatgal = serializers.SerializerMethodField()
     aimag_name = serializers.SerializerMethodField()
+    user_age = serializers.SerializerMethodField()
 
     class Meta:
         model = AdmissionUserProfession
         fields = '__all__'
+
+    # Насыг олж насны шалгуурт тэнцсэн эсэх
+    def get_user_age(self, obj):
+        user_age = ''
+        register = obj.user.register
+        birthdate = calculate_birthday(register)[0]
+
+        if birthdate:
+            # насыг тухайн жилээс төрсөн оныг нь хасаж тооцсон
+            user_age = calculate_age(birthdate)
+
+        return user_age
 
     def get_userinfo(self, obj):
 
