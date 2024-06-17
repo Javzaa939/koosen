@@ -397,6 +397,12 @@ class HealthUpUserSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class HealthUpUserStateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = HealthUpUser
+        fields = 'id', 'user', 'created_at', 'updated_at', 'state'
+
 class HealthUpUserInfoSerializer(serializers.ModelSerializer):
     user_register = serializers.CharField(source='user.register', default='', read_only=True)
     user = serializers.SerializerMethodField()
