@@ -12,7 +12,7 @@ from lms.models import  (
     AdmissionBottomScore,
     ProfessionalDegree,
     Student,
-    BagHoroo,
+    AimagHot,
     SumDuureg
 )
 
@@ -368,12 +368,11 @@ class HealthUserDataSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(source='user.first_name', default='', read_only=True)
     degree_name=serializers.CharField(source='profession.profession.degree.degree_name', default='', read_only=True)
     family_name = serializers.SerializerMethodField()
-    Horoo = serializers.SerializerMethodField()
-    sumDuureg = serializers.SerializerMethodField()
     tsol_name = serializers.SerializerMethodField()
     position_name = serializers.SerializerMethodField()
     work_organization =serializers.SerializerMethodField()
-    daatgal =serializers.SerializerMethodField()
+    daatgal = serializers.SerializerMethodField()
+    aimag_name = serializers.SerializerMethodField()
 
     class Meta:
         model = AdmissionUserProfession
@@ -406,13 +405,20 @@ class HealthUserDataSerializer(serializers.ModelSerializer):
         student = Student.objects.filter(id=obj.id).first()
         return student.family_name if student else ''
 
-    def get_sumDuureg(self,obj):
-        sumDuureg = SumDuureg.objects.filter(id=obj.id).first()
-        return sumDuureg.name if sumDuureg else ''
+    def get_aimag_name(self,obj):
+        aimag = ''
+        if obj.user.aimag:
+            sumDuureg = AimagHot.objects.filter(id=obj.user.aimag.id).first()
+            aimag = sumDuureg.name
+        return aimag
 
-    def get_Horoo(self ,obj):
-        horoo = BagHoroo.objects.filter(id=obj.id).first()
-        return horoo.name if horoo else ''
+    # def get_sumDuureg(self,obj):
+    #     sumDuureg = SumDuureg.objects.filter(id=obj.id).first()
+    #     return sumDuureg.name if sumDuureg else ''
+
+    # def get_Horoo(self ,obj):
+    #     horoo = BagHoroo.objects.filter(id=obj.id).first()
+    #     return horoo.name if horoo else ''
 
     def get_tsol_name(self, obj):
         tsergiinTsol =UserInfo.objects.filter(user=obj.id).first()

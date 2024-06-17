@@ -156,7 +156,7 @@ function AnhanShat() {
                     'Нэр':data?.first_name || '',
                     'РД': data?.user_register || '',
                     'ЭМД дугаар':'',
-                    'Аймаг/хот':data?.user?.aimag || '',
+                    'Аймаг/хот':data?.aimag_name || '',
                     'Сум/Дүүрэг':data?.sumDuureg || '',
                     'Хороо':data?.Horoo  || '',
                     'Гудамж': '',
