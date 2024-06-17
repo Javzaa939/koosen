@@ -10,7 +10,10 @@ from lms.models import  (
     AdmissionIndicator,
     AdmissionXyanaltToo,
     AdmissionBottomScore,
-    ProfessionalDegree
+    ProfessionalDegree,
+    Student,
+    AimagHot,
+    SumDuureg
 )
 
 from elselt.models import (
@@ -359,13 +362,42 @@ class HealthUserDataSerializer(serializers.ModelSerializer):
     user_email = serializers.CharField(read_only=True)
     gender_name = serializers.SerializerMethodField()
     health_user_data = serializers.SerializerMethodField()
-    degree_name=serializers.CharField(read_only=True)
+    profession_name=serializers.CharField(read_only=True)
     user = ElseltUserSerializer(many=False, read_only=True)
+    userinfo = serializers.SerializerMethodField()
+    last_name = serializers.CharField(source='user.last_name', default='', read_only=True)
+    first_name = serializers.CharField(source='user.first_name', default='', read_only=True)
+    degree_name=serializers.CharField(source='profession.profession.degree.degree_name', default='', read_only=True)
+    family_name = serializers.SerializerMethodField()
+    tsol_name = serializers.SerializerMethodField()
+    position_name = serializers.SerializerMethodField()
+    work_organization =serializers.SerializerMethodField()
+    daatgal = serializers.SerializerMethodField()
+    aimag_name = serializers.SerializerMethodField()
+    user_age = serializers.SerializerMethodField()
 
     class Meta:
         model = AdmissionUserProfession
         fields = '__all__'
 
+    # Насыг олж насны шалгуурт тэнцсэн эсэх
+    def get_user_age(self, obj):
+        user_age = ''
+        register = obj.user.register
+        birthdate = calculate_birthday(register)[0]
+
+        if birthdate:
+            # насыг тухайн жилээс төрсөн оныг нь хасаж тооцсон
+            user_age = calculate_age(birthdate)
+
+        return user_age
+
+    def get_userinfo(self, obj):
+
+        data = UserInfo.objects.filter(user=obj.user.id).first()
+        userinfo_data = UserinfoSerializer(data).data
+
+        return userinfo_data
 
     def get_gender_name(self, obj):
 
@@ -388,6 +420,43 @@ class HealthUserDataSerializer(serializers.ModelSerializer):
             health_user_data = HealthUserSerializer(user_data).data
 
         return health_user_data
+
+    def get_family_name(self,obj):
+        student = Student.objects.filter(id=obj.id).first()
+        return student.family_name if student else ''
+
+    def get_aimag_name(self,obj):
+        aimag = ''
+        if obj.user.aimag:
+            sumDuureg = AimagHot.objects.filter(id=obj.user.aimag.id).first()
+            aimag = sumDuureg.name
+        return aimag
+
+    # def get_sumDuureg(self,obj):
+    #     sumDuureg = SumDuureg.objects.filter(id=obj.id).first()
+    #     return sumDuureg.name if sumDuureg else ''
+
+    # def get_Horoo(self ,obj):
+    #     horoo = BagHoroo.objects.filter(id=obj.id).first()
+    #     return horoo.name if horoo else ''
+
+    def get_tsol_name(self, obj):
+        tsergiinTsol =UserInfo.objects.filter(user=obj.id).first()
+        return  tsergiinTsol.tsol_name if tsergiinTsol else ''
+
+    def get_position_name(self, obj):
+        albanTushaal =UserInfo.objects.filter(user=obj.id).first()
+        return  albanTushaal.position_name if albanTushaal else ''
+
+    def get_work_organization(self, obj):
+
+        ajliinGazar = UserInfo.objects.filter(user=obj.id).first()
+        return ajliinGazar.work_organization if  ajliinGazar else ''
+
+    def get_daatgal(self, obj):
+
+        ajliinGazar = UserInfo.objects.filter(user=obj.id).first()
+        return "Тийм" if ajliinGazar and ajliinGazar.work_organization else "Үгүй"
 
 
 class HealthUpUserSerializer(serializers.ModelSerializer):

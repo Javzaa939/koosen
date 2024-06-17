@@ -899,15 +899,13 @@ class ElseltHealthAnhanShat(
     filter_backends = [SearchFilter]
     search_fields = ['user__first_name', 'user__first_name', 'user__register']
 
-
-
     def get_queryset(self):
         queryset = self.queryset
         queryset = queryset.annotate(
             gender=(Substr('user__register', 9, 1)),
             user_email=F("user__email"),
-            degree_name=F("profession__profession__degree__degree_name")
-
+            degree_name=F("profession__profession__degree__degree_name"),
+            profession_name=F("profession__profession__name"),
         )
 
         # Эрүүл мэндийн шалгуур үзүүлэлттэй мэргэжлүүд
