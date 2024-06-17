@@ -47,8 +47,6 @@ const MainInformation = ({ }) => {
     const { Loader, isLoading, fetchData } = useLoader({});
     const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
 
-    // ** Hook
-    const { control, handleSubmit, reset, setValue, setError, formState: { errors } } = useForm(validate(validateSchema));
 
     // Api
     const definationApi = useApi().study.professionDefinition
@@ -80,16 +78,7 @@ const MainInformation = ({ }) => {
                 setTotalCount(data.admission_lesson.length)
                 setTest(data.admission_lesson)
 
-                setValue('profession', data?.name)
-                setValue('bottom_score', data?.admission_lesson[0]?.bottom_score)
-                var admission_lesson_id = []
-                data?.admission_lesson?.map((lesson, idx) => {
-                    var admission_ids = lesson_option.find((e) => e.id === parseInt(lesson?.admission_lesson_id))
-                    if (admission_ids != undefined){
-                        admission_lesson_id.push(admission_ids)
-                    }
-                })
-                setAdmissionLesson(admission_lesson_id)
+                setAdmissionLesson(data?.admission_lesson)
             }
         }
     }
@@ -110,28 +99,6 @@ const MainInformation = ({ }) => {
         getDatas()
         getLessonOption()
     },[])
-
-
-    useEffect(() => {
-        if (Object.keys(datas).length > 0) {
-            var admission_ids = []
-            datas['admission_lesson'].map((lesson, idx) => {
-                var selected = lesson_option.find((e) => e.id === lesson?.admission_lesson_id)
-                if (selected != undefined) {
-                    admission_ids.push(selected)
-                }
-                setAdmissionLesson(admission_ids)
-            })
-        }
-    },[lesson_option,datas])
-
-    const lesson_datas = admission_lessons.map(data => {
-        const newDatas = test.find(test => test.admission_lesson_id === data.id);
-        return {
-            ...data,
-            bottom_score: newDatas ? newDatas.bottom_score : null
-        };
-    });
 
 	return (
         <Fragment>
@@ -172,7 +139,7 @@ const MainInformation = ({ }) => {
                                 </div>
                             )}
                             columns={getColumns(currentPage, rowsPerPage, handleDelete, user)}
-                            data={lesson_datas}
+                            data={admission_lessons}
                             fixedHeader
                             fixedHeaderScrollHeight='62vh'
                         />

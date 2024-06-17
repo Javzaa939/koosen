@@ -1250,7 +1250,10 @@ class AdmissionBottomScoreAPIView(
     def delete(self, request, pk=None):
 
         try:
-            obj = AdmissionBottomScore.objects.filter(admission_lesson__id=pk).delete()
+            # obj = AdmissionBottomScore.objects.filter(admission_lesson__id=pk).delete()
+            obj = AdmissionBottomScore.objects.filter(id=pk)
+            if obj:
+                obj.delete()
         except:
             return request.send_error("ERR_002", "Амжилтгүй")
 

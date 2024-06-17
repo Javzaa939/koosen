@@ -15,6 +15,18 @@ export function getColumns (currentPage, rowsPerPage, handleDelete, user) {
 			center: true
 		},
 		{
+			name: "Шалгалтын төрөл",
+			selector: (row) => console.log(row,"t"),
+			center: true
+		},
+		{
+			name: "Шалгалтын төрөл",
+			// selector: (row) => row?.score_type ===1 ? "Суурь шалгалт" : "Дагалдах шалгалт",
+			selector: (row) => row?.type_name,
+
+			center: true
+		},
+		{
 			name: `${t('ЭЕШ хичээл')}`,
 			selector: (row) => row?.lesson_name,
 			maxWidth: "500px",
@@ -45,15 +57,15 @@ export function getColumns (currentPage, rowsPerPage, handleDelete, user) {
 									header: {
 										title: `${t('ЭЕШ хичээл устгах')}`,
 									},
-									question: `Та "${row.lesson_name}" хичээлийг ЭЕШ-н хичээл цэснээс устгахдаа итгэлтэй байна уу?`,
-									onClick: () => handleDelete(row.id),
+									question: `Та "${row?.lesson_name}" ЭЕШ-н хичээлийг устгахдаа итгэлтэй байна уу?`,
+									onClick: () => handleDelete(row?.id),
 									btnText: 'Устгах',
 								})}
 								id={`complaintListDatatableCancel${row?.id}`}
 							>
 								<Badge color="light-danger" pill><X width={"100px"} /></Badge>
 							</a>
-							<UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${row.id}`} >Устгах</UncontrolledTooltip>
+							<UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${row?.id}`} >Устгах</UncontrolledTooltip>
 						</>
 					}
 				</div>

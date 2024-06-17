@@ -65,6 +65,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, admission_lessons }) => {
     async function onSubmit(cdata) {
         cdata['profession'] = definition_Id
         cdata['lesson'] = change_lesson
+        console.log("cdata", cdata);
         cdata = convertDefaultValue(cdata)
 
         const { success, error } = await fetchData(definationApi.putScore(cdata, definition_Id))
@@ -144,7 +145,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, admission_lessons }) => {
                                                 isLoading={isLoading}
                                                 placeholder={t(`-- Сонгоно уу --`)}
                                                 options={score_type_option || []}
-                                                value={score_type_option.find((c) => c.id === value)}
+                                                value={ score_type_option.find((c) => c.id === value)}
                                                 noOptionsMessage={() => t('Хоосон байна')}
                                                 onChange={(val) => {
                                                     onChange(val?.id || '')
