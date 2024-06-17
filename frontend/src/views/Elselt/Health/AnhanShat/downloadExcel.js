@@ -2,13 +2,16 @@
 import { utils, writeFile } from 'xlsx-js-style';
 
 export function excelDownLoad(datas, STATE_LIST) {
+    console.log(datas)
 
         const mainData = datas.map((data, idx) => {
             return(
                 {
                     '№': idx + 1,
-                    'Нэр': data?.full_name || '',
+                    'Овог': data?.last_name,
+                    'Нэр': data?.first_name || '',
                     'РД': data?.user_register || '',
+                    'Утасны дугаар': data?.user?.mobile || '',
                     'Хүйс': data?.gender_name || '',
                     'Үзлэгийн төлөв': data?.health_user_data ?
                             STATE_LIST.find(val => val.id === data?.health_user_data?.state).name
@@ -33,8 +36,10 @@ export function excelDownLoad(datas, STATE_LIST) {
         utils.book_append_sheet(workbook, worksheet, "A-DB-8-Report")
         const staticCells = [
                 '№',
+                'Овог',
                 'Нэр',
                 'РД',
+                'Утасны дугаар',
                 'Хүйс',
                 'Үзлэгийн төлөв',
                 'Өндөр (см)',
