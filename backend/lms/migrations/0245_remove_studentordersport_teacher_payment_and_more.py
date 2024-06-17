@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('lms', '0242_remove_psychologicaltest_is_all_and_more'),
+        ('lms', '0244_auto_20240614_1011'),
     ]
 
     operations = [
