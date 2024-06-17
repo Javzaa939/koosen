@@ -4,7 +4,7 @@ from lms.models import (
     AimagHot,
     AdmissionRegisterProfession,
     User,
-    Challenge
+    PsychologicalTest
 )
 class ElseltUser(models.Model):
 
@@ -137,7 +137,7 @@ class AdmissionUserProfession(models.Model):
 
     class Meta:
         db_table = 'elselt_admissionuserprofession'
-        # managed = False
+        managed = False
 
     STATE_SEND = 1
     STATE_APPROVE = 2
@@ -288,7 +288,7 @@ class MentalUser(models.Model):
     """ Элсэгчдийн сэтгэлзүйн сорил """
 
     user = models.ForeignKey(ElseltUser, on_delete=models.CASCADE, verbose_name='Элсэгч')
-    challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE, verbose_name='Сэтгэлзүйн сорил')
+    challenge = models.ForeignKey(PsychologicalTest, on_delete=models.CASCADE, verbose_name='Сэтгэлзүйн сорил', null=True)
 
     description = models.TextField(verbose_name='Тайлбар', null=True)
     answer = models.TextField(null=True, verbose_name='Хариулт')
