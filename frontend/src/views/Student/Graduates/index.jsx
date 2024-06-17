@@ -33,6 +33,7 @@ import { useForm, Controller } from "react-hook-form";
 import { getPagination, ReactSelectStyles } from '@utils'
 
 import { getColumns } from './helpers'
+import excelDownload from '@src/utility/excelDownload'
 
 import { useTranslation } from 'react-i18next'
 import { downloadCSV, downloadExcel } from '@utils'
@@ -43,11 +44,23 @@ const Graduates = () => {
     const { t } = useTranslation()
 
     const excelColumns = {
-        'code': 'Оюутны код',
-        'last_name': 'Овог',
-        'first_name': 'Нэр',
-        'register_num': 'Регистрийн дугаар',
-        'profession_name': 'Хөтөлбөр',
+        'full_name': 'Овог, Нэр',
+        'department_name': 'Салбар нэр',
+        'school_name': "Сургуулийн нэр",
+        'dep_name':'Мэргэжлийн чиглэл',
+        'profession_code':'Мэргэжлийн чиглэлийн индекс',
+        'learning_status':'Сургалтын хэлбэр',
+        'degree_name':'Боловсролын зэрэг',
+        'deplom_num':'Дипломын дугаар',
+        'registration_num':'Бүртгэлийн дугаар',
+        'total_gpa':'Голч дүн',
+        'total_kr':'Цуглуулсан нийт багц цаг',
+        'join_year':'Элссэн хичээлийн жил',
+        'profession_name': 'Сургалтын хөтөлбөр',
+        'give_date':'Олгосон огноо',
+        'graduate_year':'Төгссөн огноо',
+        'graduation_number':'Тушаалын дугаар',
+
     }
 
     // ** Hook
@@ -192,8 +205,52 @@ const Graduates = () => {
 		}
 	}, [searchValue]);
 
+    function excelHandler(cdatas) {
+        console.log(cdatas)
+        const rowInfo = {
+            headers: [
+                '№',
+                'Овог, Нэр',
+                'Салбар cургуулийн нэр',
+                'Мэргэжлийн чиглэл',
+                'Мэргэжлийн чиглэлийн индекс',
+                'Сургалтын хэлбэр',
+                'Боловсролын зэрэг',
+                'Сургалтын хөтөлбөр',
+                'Дипломын дугаар',
+                'Бүртгэлийн дугаар',
+                'Голч дүн',
+                'Цуглуулсан нийт багц цаг',
+                'Элссэн хичээлийн жил',
+                'Төгссөн хичээлийн жил',
+                'Олгосон огноо',
+                'Тушаалын дугаар',
+            ],
+
+            datas: [
+                'index',
+                'full_name',
+                'school_name',
+                'dep_name',
+                'profession_code',
+                'learning_status',
+                'degree_name',
+                'profession_name',
+                'deplom_num',
+                'registration_num',
+                'total_gpa',
+                'total_kr',
+                'join_year',
+                'graduate_year',
+                'give_date',
+                'graduation_number',
+            ],
+        }
+        excelDownload(cdatas, rowInfo, `tugsult`)
+    }
+
     /** excel file аар татуулах датаг backend-ээс авах */
-    async function excelDownload(type) {
+    async function excelAllDownload(type) {
         var keys = Object.keys(excelColumns)
 
         const { success, data } = await fetchData(studentApi.download(searchValue, select_value.department, select_value.degree, select_value.profession, select_value.group, select_value.join_year, select_value?.status))
@@ -206,7 +263,7 @@ const Graduates = () => {
                 }
             })
             if (type === 'excel') {
-                downloadExcel(data, excelColumns, 'Оюутны жагсаалт')
+                excelHandler(data)
             } else if (type === 'csv') {
                 downloadCSV(data, excelColumns, 'Оюутны жагсаалт')
             }
@@ -231,11 +288,11 @@ const Graduates = () => {
                                 <span className='align-middle ms-50'>Export</span>
                             </DropdownToggle>
                             <DropdownMenu>
-                                <DropdownItem className='w-100' onClick={() => excelDownload('csv')}>
+                                <DropdownItem className='w-100' onClick={() => excelAllDownload('csv')}>
                                     <FileText size={15} />
                                     <span className='align-middle ms-50'>CSV</span>
                                 </DropdownItem>
-                                <DropdownItem className='w-100' onClick={() => excelDownload('excel')}>
+                                <DropdownItem className='w-100' onClick={() => excelAllDownload('excel')}>
                                     <Grid size={15} />
                                     <span className='align-middle ms-50' >Excel</span>
                                 </DropdownItem>
