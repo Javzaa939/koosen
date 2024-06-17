@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 from django.conf import settings
 from django.db.models.fields.files import ImageFieldFile
-from django.db.models.functions import Cast
+from django.db.models.functions import Cast, ExtractYear
 from django.db.models import Avg, PositiveIntegerField
 from django.db.models import F, Sum
 
@@ -312,8 +312,8 @@ class StudentDownloadSerializer(serializers.ModelSerializer):
 
     def get_graduate_year(self,obj):
 
-        graduate_year = GraduationWork.objects.filter(student=obj).first()
-        return graduate_year.decision_date if  graduate_year else ''
+        graduate_year = GraduationWork.objects.filter(student=obj).annotate(grad_year=ExtractYear('decision_date')).first()
+        return graduate_year.grad_year if  graduate_year else ''
 
 # ----------------Оюутны шилжилт хөдөлгөөн -------------------
 
