@@ -206,7 +206,6 @@ const Graduates = () => {
 	}, [searchValue]);
 
     function excelHandler(cdatas) {
-        console.log(cdatas)
         const rowInfo = {
             headers: [
                 '№',
