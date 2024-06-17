@@ -227,6 +227,8 @@ function Mergejliin() {
 			<MessageModal
 				messageModalHandler={messageModalHandler}
 				messageModal={messageModal}
+				selectedStudents={selectedStudents}
+                getDatas={getDatas}
 			/>
 			<CardHeader>
 				<h5>Нарийн мэргэжлийн шатны эрүүл мэндийн үзлэг</h5>

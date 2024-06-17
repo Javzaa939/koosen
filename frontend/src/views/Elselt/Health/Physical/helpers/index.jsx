@@ -31,6 +31,14 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 			maxWidth: '100px',
 		},
 		{
+			header: 'gender',
+			name: <div className="px-1">Хүйс</div>,
+			selector: (row) => row?.gender_name || '',
+            sortable: true,
+			minWidth: '140px',
+			maxWidth: '140px',
+		},
+		{
 			header: 'user__first_name',
 			name: <div className="px-1">Нэр</div>,
 			minWidth: '160px',
@@ -42,14 +50,6 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 			header: 'user__register',
 			name: <div className="px-1">РД</div>,
 			selector: (row) => row?.user_register || '',
-            sortable: true,
-			minWidth: '140px',
-			maxWidth: '140px',
-		},
-        {
-			header: 'gender',
-			name: <div className="px-1">Хүйс</div>,
-			selector: (row) => row?.gender_name || '',
             sortable: true,
 			minWidth: '140px',
 			maxWidth: '140px',
@@ -153,7 +153,7 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 						onClick={(e) => { addModalHandler(e, row)} }
 						id={`description${row?.id}`}
 						className="me-1"
-						style={{pointerEvents: user?.permissions?.includes('lms-elselt-health-create') ? '' : 'none'}}
+						style={{pointerEvents: user?.permissions?.includes('lms-elselt-physque-create') ? '' : 'none'}}
 					>
 						<Badge color="light-success" pill><CheckCircle  width={"15px"} /></Badge>
 					</a>

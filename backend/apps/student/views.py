@@ -72,7 +72,7 @@ from .serializers import StudentEducationSerializer
 from .serializers import StudentEducationListSerializer
 from .serializers import SignaturePeoplesSerializer
 from .serializers import StudentAddressListSerializer
-from .serializers import StudentAddressSerializer
+from .serializers import StudentDownloadSerializer
 from .serializers import StudentAdmissionScoreSerializer
 from .serializers import StudentAdmissionScoreListSerializer
 from .serializers import GroupListSerializer
@@ -2994,7 +2994,7 @@ class StudentDownloadAPIView(
     def get( self, request, pk=None):
         "Оюутны бүртгэл жагсаалт"
 
-        self.serializer_class = StudentRegisterListSerializer
+        self.serializer_class = StudentDownloadSerializer
 
         student_list = self.list(request, pk).data
         return request.send_data(student_list)

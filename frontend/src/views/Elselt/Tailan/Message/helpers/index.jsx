@@ -1,9 +1,7 @@
 import { Badge, UncontrolledTooltip }  from 'reactstrap';
 import { Edit, Eye, Mail, Type } from "react-feather";
 import { t } from 'i18next'
-
 import moment from 'moment'
-
 import './style.css'
 
 export function getColumns ( currentPage, rowsPerPage, page_count, emailModalHandler ) {
@@ -33,7 +31,7 @@ export function getColumns ( currentPage, rowsPerPage, page_count, emailModalHan
 			minWidth: "80px",
 		},
 		{
-			name: t("Илгээсэн имейл"),
+			name: t("И / мессеж"),
 			center: true,
 			maxWidth: "150px",
 			minWidth: "150px",
@@ -50,14 +48,14 @@ export function getColumns ( currentPage, rowsPerPage, page_count, emailModalHan
 			),
 		},
 		{
-			sortField: 'send_date',
-			header: 'send_date',
-			maxWidth: "300px",
-			minWidth: "300px",
+			minWidth: "150px",
+			header: 'user__last_name',
+			name: t("И / хугацаа"),
+			cell: (row) => (row?.send_date? moment(row?.send_date).format("YYYY-MM-DD hh:mm") : ''),
+			sortable: true,
 			reorder: true,
-			name: t("Илгээсэн огноо"),
-			selector: (row) => row?.send_date? moment(row?.send_date).format("YYYY-MM-DD h:mm") : '',
 			center: true,
+			wrap: true,
 		},
 		{
 			minWidth: "150px",

@@ -1101,20 +1101,20 @@ def send_message_skytel(phone_numbers, message):
         rsp = requests.get(send_url)
 
         # Хүсэлт амжилттай илгээгдсэн байвал
-        if rsp.json() == 200:
+        if rsp.status_code == 200:
             success_count += 1
 
         # хүлээн авагчийн дугаар буруу
-        if rsp.json() == 103:
+        if rsp.status_code == 103:
             not_found_numbers.append(phone_number)
 
-        if rsp.json() == 202:
+        if rsp.status_code == 202:
             return False, 'IP хаяг эсвэл id буруу', success_count, not_found_numbers
 
-        if rsp.json() == 203:
+        if rsp.status_code == 203:
             return False, 'Бүртгэл хаагдсан байна. Скайтел ХХК холбогдоно уу', success_count, not_found_numbers
 
-        if rsp.json() == 206:
+        if rsp.status_code == 206:
             return False, 'Бусад оператор руу sms явуулах эрх алга', success_count, not_found_numbers
 
     return True, 'Амжилттай илгээлээ', success_count, not_found_numbers
@@ -1272,7 +1272,7 @@ def send_message_mobicom(phone_numbers, message):
 
     # Утасны дугаараар гүйлгэх
     for phone_number in phone_numbers:
-        send_url = 'http://sms-special.gmobile.mn/cgi-bin/sendsms?username=dt_school38&password=dtdi*0319&from=135038&to={phone_number}&text={text}'.format(phone_number=phone_number, text=message)
+        send_url = 'http://27.123.214.168/smsmt/mt?servicename=Dotood&username=Hereg&from=135038&to=976{phone_number}&msg={text}'.format(phone_number=phone_number, text=message)
 
         rsp = requests.get(send_url)
 
@@ -1281,3 +1281,8 @@ def send_message_mobicom(phone_numbers, message):
             success_count += 1
 
     return True, 'Амжилттай илгээлээ', success_count, not_found_numbers
+
+def calculate_age(birthdate):
+    today = datetime.today()
+    age = today.year - birthdate.year
+    return age

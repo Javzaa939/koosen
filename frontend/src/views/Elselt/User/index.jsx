@@ -272,6 +272,7 @@ const ElseltUser = () => {
                     'Овог': data?.user?.last_name || '',
                     'Нэр': data?.user?.first_name || '',
                     'РД': data?.user?.register || '',
+                    'Нас': data?.user_age || '',
                     'Хүйс': data?.gender_name || '',
                     'Насны шалгуур':data?.age_state || '',
                     'Имейл': data?.user?.email || '',
@@ -306,6 +307,7 @@ const ElseltUser = () => {
             'Овог',
             'Нэр',
             'РД',
+            'Нас',
             'Хүйс',
             'Имейл',
             'Утасны дугаар',
@@ -464,6 +466,8 @@ const ElseltUser = () => {
             <MessageModal
                 messageModalHandler={messageModalHandler}
                 messageModal={messageModal}
+                selectedStudents={selectedStudents}
+                getDatas={getDatas}
             />
             <GpaModal
                 gpaModalHandler = {gpaModalHandler}

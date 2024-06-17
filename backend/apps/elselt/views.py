@@ -1,23 +1,22 @@
+import hashlib
+import datetime as dt
+
 from rest_framework import mixins
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 from rest_framework.filters import SearchFilter
-
 from django.core.mail import send_mail
-from django.core.mail import send_mass_mail
 from django.template.loader import render_to_string
 from django.db import transaction
 from django.db.models import F, Subquery, OuterRef, Count, Q
 from django.db.models.functions import Substr
 
-from main.utils.function.utils import json_load, make_connection, get_domain_url_link, get_domain_url, null_to_none
+from main.utils.function.utils import json_load, make_connection, get_domain_url_link, get_domain_url, null_to_none, check_phone_number, send_message_gmobile, send_message_mobicom, send_message_skytel, send_message_unitel
 from main.utils.function.pagination import CustomPagination
 from main.decorators import login_required
 from rest_framework.response import Response
 from rest_framework import status
-import hashlib
-import datetime as dt
 
 
 from lms.models import (
@@ -52,7 +51,8 @@ from .serializer import (
     HealthPhysicalUserInfoSerializer,
     GpaCheckUserInfoSerializer,
     GpaCheckConfirmUserInfoSerializer,
-    EyeshCheckUserInfoSerializer
+    EyeshCheckUserInfoSerializer,
+    MessageInfoSerializer
 )
 
 from elselt.models import (
@@ -974,6 +974,12 @@ class ElseltHealthAnhanShat(
         data = request.data
         serializer = HealthUserSerializer(data=data)
         data = null_to_none(data)
+        user = data.get('user').get('id')
+
+        if 'user' in data:
+            del data['user']
+
+        data['user'] = user
 
         if serializer.is_valid():
 
@@ -1002,6 +1008,13 @@ class ElseltHealthAnhanShat(
     def put(self, request, pk=None):
 
         data = request.data
+        user = data.get('user').get('id')
+
+        if 'user' in data:
+            del data['user']
+
+        data['user'] = user
+
         health_user = HealthUser.objects.filter(id=pk).first()
         serializer = HealthUserSerializer(health_user, data)
 
@@ -1631,3 +1644,138 @@ class EyeshCheckUserInfoAPIView(
             all_data = all_data[limit:]
 
         return request.send_data(all_data)
+
+
+class AdmissionUserMessageAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin
+):
+
+    queryset = MessageInfo.objects.all().order_by('send_date')
+    serializer_class = MessageInfoSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['user__first_name', 'user__register', 'user__email', 'gpa']
+
+    def get_queryset(self):
+
+        queryset = self.queryset
+        userinfo_qs = UserInfo.objects.filter(user=OuterRef('user')).values('gpa')[:1]
+
+        queryset = (
+            queryset
+            .annotate(
+                gpa=Subquery(userinfo_qs),
+            )
+        )
+
+        queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
+
+        lesson_year_id = self.request.query_params.get('lesson_year_id')
+        profession_id = self.request.query_params.get('profession_id')
+        unit1_id = self.request.query_params.get('unit1_id')
+        state = self.request.query_params.get('state')
+        gpa_state = self.request.query_params.get('gpa_state')
+        gender = self.request.query_params.get('gender')
+        sorting = self.request.query_params.get('sorting')
+
+        if lesson_year_id:
+            admission_id = AdmissionRegisterProfession.objects.filter(admission=lesson_year_id).values_list('id', flat=True)
+            user_ids = AdmissionUserProfession.objects.filter(profession__in=admission_id).values_list('user', flat=True)
+            queryset = queryset.filter(user__in=user_ids)
+
+        if profession_id:
+            profession_ids = AdmissionRegisterProfession.objects.filter(profession=profession_id).values_list('id', flat=True)
+            user_ids = AdmissionUserProfession.objects.filter(profession__in=profession_ids).values_list('user', flat=True)
+            queryset = queryset.filter(user__in=user_ids)
+
+        if unit1_id:
+            queryset = queryset.filter(user__aimag__id=unit1_id)
+
+        if state:
+            user_ids = AdmissionUserProfession.objects.filter(state=state).values_list('user', flat=True)
+            queryset = queryset.filter(user__in=user_ids)
+
+        if gpa_state:
+            user_ids = UserInfo.objects.filter(gpa_state=gpa_state).values_list('user', flat=True)
+            queryset = queryset.filter(user__in=user_ids)
+
+        if gender:
+            if gender == 'Эрэгтэй':
+                queryset = queryset.filter(gender__in=['1', '3', '5', '7', '9'])
+            else:
+                queryset = queryset.filter(gender__in=['0', '2', '4', '6', '8'])
+
+        # Sort хийх үед ажиллана
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
+
+        return queryset
+
+
+    def get(self, request):
+
+        send_data = self.list(request).data
+
+        return request.send_data(send_data)
+
+    @login_required()
+    @transaction.atomic()
+    def post(self, request):
+
+        user = request.user
+        data = request.data
+
+        sid = transaction.savepoint()
+        with transaction.atomic():
+            try:
+                create_email_info = []
+                # Элсэгчдийн утасны дугаар
+                phone_numbers = data.get('phone_numbers')
+                # Үүрэн холбоогоор нь ангилсан дугаарнууд
+                typed_phonenumbers = check_phone_number(phone_numbers)
+
+                all_success_count = 0
+
+                # Нийт дугаарыг үүрэн холбоогоор нь ялгаж мессеж илгээх
+                for key, value in typed_phonenumbers.items():
+                    if key == 'mobicom':
+                        success_mobi, msg, success_count, not_found_numbers = send_message_mobicom(value, data.get('description'))
+                        all_success_count = all_success_count + success_count
+
+                    if key == 'skytel':
+                        success_sky, msg, success_count_s, not_found_numbers = send_message_skytel(value, data.get('description'))
+                        all_success_count = all_success_count + success_count_s
+
+                    if key == 'unitel':
+                        success_uni, msg, success_count_u, not_found_numbers = send_message_unitel(value, data.get('description'))
+                        all_success_count = all_success_count + success_count_u
+
+                    if key == 'gmobile':
+                        success_g, msg, success_count_g, not_found_numbers = send_message_gmobile(value, data.get('description'))
+                        all_success_count = all_success_count + success_count_g
+
+                # Мессеж үүсгэх элсэгч бүр дээр
+                for value in data["students"]:
+                    create_email_info.append(
+                        MessageInfo(
+                            user_id = value,
+                            message = data.get('description'),
+                            send_user_id = user.id,
+                        )
+                    )
+
+                self.queryset.bulk_create(create_email_info)
+
+            except Exception as e:
+                print(e)
+                transaction.savepoint_rollback(sid)
+                return request.send_error("ERR_002")
+
+        return request.send_info('INF_001')
+
