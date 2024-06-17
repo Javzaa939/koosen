@@ -2,8 +2,6 @@
 import { utils, writeFile } from 'xlsx-js-style';
 
 export function excelDownLoad(datas, STATE_LIST) {
-    console.log(datas)
-
         const mainData = datas.map((data, idx) => {
             return(
                 {
@@ -12,6 +10,7 @@ export function excelDownLoad(datas, STATE_LIST) {
                     'Нэр': data?.first_name || '',
                     'РД': data?.user_register || '',
                     'Утасны дугаар': data?.user?.mobile || '',
+                    'Яаралтай үед холбогдох дугаар': data?.user?.parent_mobile || '',
                     'Хүйс': data?.gender_name || '',
                     'Үзлэгийн төлөв': data?.health_user_data ?
                             STATE_LIST.find(val => val.id === data?.health_user_data?.state).name
@@ -22,6 +21,10 @@ export function excelDownLoad(datas, STATE_LIST) {
                     'Шарх сорви': data?.health_user_data?.is_chalk ? 'Байгаа' : 'Байхгүй',
                     'Шивээс': data?.health_user_data?.is_tattoo ? 'Байгаа' : 'Байхгүй',
                     'Сэтгэцэд нөлөөт бодисын хамаарал': data?.health_user_data?.is_drug ? 'Байгаа' : 'Байхгүй',
+                    'Мэргэжил': data?.profession_name || '',
+                    'Ажиллаж байгаа байгууллага': data?.work_organization || '',
+                    'Албан тушаал': data?.position_name || '',
+                    'Цол':  data?.tsol_name || ''
                 }
             )}
         )
@@ -40,6 +43,7 @@ export function excelDownLoad(datas, STATE_LIST) {
                 'Нэр',
                 'РД',
                 'Утасны дугаар',
+                'Яаралтай үед холбогдох дугаар',
                 'Хүйс',
                 'Үзлэгийн төлөв',
                 'Өндөр (см)',
@@ -47,6 +51,11 @@ export function excelDownLoad(datas, STATE_LIST) {
                 'Шарх сорви',
                 'Шивээс',
                 'Сэтгэцэд нөлөөт бодисын хамаарал',
+                'Мэргэжил',
+                'Ажиллаж байгаа байгууллага',
+                'Албан тушаал',
+                'Цол'
+
             ];
 
         utils.sheet_add_aoa(worksheet, [staticCells], { origin: "A1" });

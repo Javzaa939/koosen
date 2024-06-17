@@ -362,7 +362,7 @@ class HealthUserDataSerializer(serializers.ModelSerializer):
     user_email = serializers.CharField(read_only=True)
     gender_name = serializers.SerializerMethodField()
     health_user_data = serializers.SerializerMethodField()
-    degree_name=serializers.CharField(read_only=True)
+    profession_name=serializers.CharField(read_only=True)
     user = ElseltUserSerializer(many=False, read_only=True)
     last_name = serializers.CharField(source='user.last_name', default='', read_only=True)
     first_name = serializers.CharField(source='user.first_name', default='', read_only=True)
