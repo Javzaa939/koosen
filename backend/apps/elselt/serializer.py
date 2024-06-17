@@ -364,6 +364,7 @@ class HealthUserDataSerializer(serializers.ModelSerializer):
     health_user_data = serializers.SerializerMethodField()
     profession_name=serializers.CharField(read_only=True)
     user = ElseltUserSerializer(many=False, read_only=True)
+    userinfo = serializers.SerializerMethodField()
     last_name = serializers.CharField(source='user.last_name', default='', read_only=True)
     first_name = serializers.CharField(source='user.first_name', default='', read_only=True)
     degree_name=serializers.CharField(source='profession.profession.degree.degree_name', default='', read_only=True)
@@ -378,6 +379,12 @@ class HealthUserDataSerializer(serializers.ModelSerializer):
         model = AdmissionUserProfession
         fields = '__all__'
 
+    def get_userinfo(self, obj):
+
+        data = UserInfo.objects.filter(user=obj.user.id).first()
+        userinfo_data = UserinfoSerializer(data).data
+
+        return userinfo_data
 
     def get_gender_name(self, obj):
 

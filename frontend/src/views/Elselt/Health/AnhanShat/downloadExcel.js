@@ -11,6 +11,7 @@ export function excelDownLoad(datas, STATE_LIST) {
                     'РД': data?.user_register || '',
                     'Утасны дугаар': data?.user?.mobile || '',
                     'Яаралтай үед холбогдох дугаар': data?.user?.parent_mobile || '',
+                    'Имейл': data?.user?.email || '',
                     'Хүйс': data?.gender_name || '',
                     'Үзлэгийн төлөв': data?.health_user_data ?
                             STATE_LIST.find(val => val.id === data?.health_user_data?.state).name
@@ -22,10 +23,13 @@ export function excelDownLoad(datas, STATE_LIST) {
                     'Шарх сорви': data?.health_user_data?.is_chalk ? 'Байгаа' : 'Байхгүй',
                     'Шивээс': data?.health_user_data?.is_tattoo ? 'Байгаа' : 'Байхгүй',
                     'Сэтгэцэд нөлөөт бодисын хамаарал': data?.health_user_data?.is_drug ? 'Байгаа' : 'Байхгүй',
-                    'Мэргэжил': data?.profession_name || '',
-                    'Ажиллаж байгаа байгууллага': data?.work_organization || '',
-                    'Албан тушаал': data?.position_name || '',
-                    'Цол':  data?.tsol_name || ''
+                    'Төгссөн сургууль': data?.userinfo?.graduate_school || '',
+                    'Хөтөлбөр': data?.userinfo?.graduate_profession || '',
+                    'Төгссөн он': data?.userinfo?.graduate_school_year || '',
+                    'Голч': data?.userinfo?.gpa || '',
+                    'Ажиллаж байгаа байгууллагын нэр': data?.userinfo?.work_organization || '',
+                    'Албан тушаал': data?.userinfo?.position_name || '',
+                    'Цол': data?.userinfo?.tsol_name || '',
                 }
             )}
         )
@@ -45,6 +49,7 @@ export function excelDownLoad(datas, STATE_LIST) {
                 'РД',
                 'Утасны дугаар',
                 'Яаралтай үед холбогдох дугаар',
+                'Имейл',
                 'Хүйс',
                 'Үзлэгийн төлөв',
                 'Тайлбар',
@@ -53,10 +58,13 @@ export function excelDownLoad(datas, STATE_LIST) {
                 'Шарх сорви',
                 'Шивээс',
                 'Сэтгэцэд нөлөөт бодисын хамаарал',
-                'Мэргэжил',
-                'Ажиллаж байгаа байгууллага',
+                'Төгссөн сургууль',
+                'Хөтөлбөр',
+                'Төгссөн он',
+                'Голч',
+                'Ажиллаж байгаа байгууллагын нэр',
                 'Албан тушаал',
-                'Цол'
+                'Цол',
 
             ];
 
@@ -101,7 +109,7 @@ export function excelDownLoad(datas, STATE_LIST) {
         const styleRow = 0;
         const sendRow = mainData.length;
         const styleCol = 0;
-        const sendCol = 20;
+        const sendCol = 21;
 
         for (let row = styleRow; row <= sendRow; row++) {
             for (let col = styleCol; col <= sendCol; col++) {

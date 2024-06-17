@@ -309,6 +309,7 @@ const ElseltUser = () => {
             'РД',
             'Нас',
             'Хүйс',
+            'Насны шалгуур',
             'Имейл',
             'Утасны дугаар',
             'Яаралтай холбогдох',
@@ -322,7 +323,6 @@ const ElseltUser = () => {
             'Албан тушаал',
             'Цол',
             'Мэдээлэл шалгасан тайлбар',
-            'Насны шалгуур'
         ];
 
         utils.sheet_add_aoa(worksheet, [staticCells], { origin: "A1" });
@@ -383,7 +383,7 @@ const ElseltUser = () => {
         const styleRow = 0;
         const sendRow = datas?.length + 1;
         const styleCol = 0;
-        const sendCol = 17;
+        const sendCol = 20;
 
         for (let row = styleRow; row <= sendRow; row++) {
             for (let col = styleCol; col <= sendCol; col++) {
