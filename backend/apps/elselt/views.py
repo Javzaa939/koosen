@@ -975,6 +975,12 @@ class ElseltHealthAnhanShat(
         data = request.data
         serializer = HealthUserSerializer(data=data)
         data = null_to_none(data)
+        user = data.get('user').get('id')
+
+        if 'user' in data:
+            del data['user']
+
+        data['user'] = user
 
         if serializer.is_valid():
 
@@ -1003,6 +1009,13 @@ class ElseltHealthAnhanShat(
     def put(self, request, pk=None):
 
         data = request.data
+        user = data.get('user').get('id')
+
+        if 'user' in data:
+            del data['user']
+
+        data['user'] = user
+
         health_user = HealthUser.objects.filter(id=pk).first()
         serializer = HealthUserSerializer(health_user, data)
 
