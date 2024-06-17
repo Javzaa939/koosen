@@ -367,22 +367,18 @@ function AnhanShat() {
                     Эрүүл мэндийн анхан шатны үзлэг
                 </h5>
                 <div className='d-flex justify-content-end mt-1'>
-                    <Col className='d-flex justify-content-end'>
-                        <Button color='primary' className='d-flex align-items-center' onClick={() => convert()} style={{ marginRight: '5px' }}>
-                            <FileText className='me-50' size={14}/>
-                            <div>
-                                Excel
-                            </div>
-                        </Button>
-                    </Col>
-                    <Col className='d-flex justify-content-end'>
-                        <Button color='primary' className='d-flex align-items-center' onClick={() => excelHandler()}>
-                            <FileText className='me-50' size={14}/>
-                            <div>
-                                Excel татах
-                            </div>
-                        </Button>
-                    </Col>
+                    <Button color='primary' className='d-flex align-items-center' onClick={() => convert()} style={{}}>
+                        <FileText className='me-50' size={14}/>
+                        <div>
+                            Нарийн мэргэжил excel
+                        </div>
+                    </Button>
+                    <Button color='primary' className='d-flex align-items-center ms-1' onClick={() => excelHandler()}>
+                        <FileText className='me-50' size={14}/>
+                        <div>
+                            Анхан шат excel татах
+                        </div>
+                    </Button>
                 </div>
 
             </CardHeader>
