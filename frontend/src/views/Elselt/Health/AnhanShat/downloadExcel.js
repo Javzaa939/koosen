@@ -16,6 +16,7 @@ export function excelDownLoad(datas, STATE_LIST) {
                             STATE_LIST.find(val => val.id === data?.health_user_data?.state).name
                         :
                             '',
+                    'Тайлбар': data?.health_user_data?.description || '',
                     'Өндөр (см)': data?.health_user_data?.height || '',
                     'Жин (кг)': data?.health_user_data?.weight || '',
                     'Шарх сорви': data?.health_user_data?.is_chalk ? 'Байгаа' : 'Байхгүй',
@@ -46,6 +47,7 @@ export function excelDownLoad(datas, STATE_LIST) {
                 'Яаралтай үед холбогдох дугаар',
                 'Хүйс',
                 'Үзлэгийн төлөв',
+                'Тайлбар',
                 'Өндөр (см)',
                 'Жин (кг)',
                 'Шарх сорви',
