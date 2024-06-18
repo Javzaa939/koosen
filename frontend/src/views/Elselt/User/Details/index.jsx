@@ -394,7 +394,7 @@ function Details() {
                                         </div>
                                     </div>
                                 }
-								<Card style={{ borderRadius: "30px" }}>
+								<Card style={{ borderRadius: "30px" }} className='mt-1 mx-1'>
 									<CardHeader className={`mb-1 py-50 d-flex justify-content-between bg-primary align-items-center`}>
 										<div className="d-flex justify-content-between w-100 align-items-center">
 											<h4 className="text-white m-0">Шалгуур</h4>
