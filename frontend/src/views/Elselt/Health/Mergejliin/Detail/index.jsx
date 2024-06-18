@@ -33,7 +33,6 @@ function Detail({ detail, detailHandler, detailData, getDatas }) {
     const[ stateId, setStateId] = useState('')
 
     const elseltApi = useApi().elselt.health.professional
-
     async function onSubmit(cdata) {
         cdata['user'] = datas?.user
         cdata['state'] = stateId

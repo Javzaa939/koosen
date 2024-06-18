@@ -1156,6 +1156,7 @@ class ElseltHealthProfessional(
         data = request.data
         health_user = HealthUpUser.objects.filter(id=pk).first()
         serializer = HealthUpUserSerializer(health_user, data)
+        data['updated_user'] = request.user.id
 
         if health_user:
             # төлөв солих үед ажиллах serializer
