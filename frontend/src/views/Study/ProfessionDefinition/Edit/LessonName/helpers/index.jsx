@@ -16,12 +16,6 @@ export function getColumns (currentPage, rowsPerPage, handleDelete, user) {
 		},
 		{
 			name: "Шалгалтын төрөл",
-			selector: (row) => console.log(row,"t"),
-			center: true
-		},
-		{
-			name: "Шалгалтын төрөл",
-			// selector: (row) => row?.score_type ===1 ? "Суурь шалгалт" : "Дагалдах шалгалт",
 			selector: (row) => row?.type_name,
 
 			center: true

@@ -52,7 +52,6 @@ const MainInformation = ({ }) => {
     const definationApi = useApi().study.professionDefinition
     const AdmissionlessonApi = useApi().settings.admissionlesson
 
-    const [test, setTest] = useState([])
 
     // ЭЕШ хичээлийн жагсаалт
     async function getLessonOption() {
@@ -76,8 +75,6 @@ const MainInformation = ({ }) => {
 
                 setDatas(data)
                 setTotalCount(data.admission_lesson.length)
-                setTest(data.admission_lesson)
-
                 setAdmissionLesson(data?.admission_lesson)
             }
         }

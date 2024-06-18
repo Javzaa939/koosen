@@ -65,7 +65,6 @@ const Addmodal = ({ open, handleModal, refreshDatas, admission_lessons }) => {
     async function onSubmit(cdata) {
         cdata['profession'] = definition_Id
         cdata['lesson'] = change_lesson
-        console.log("cdata", cdata);
         cdata = convertDefaultValue(cdata)
 
         const { success, error } = await fetchData(definationApi.putScore(cdata, definition_Id))
