@@ -1224,33 +1224,16 @@ class AdmissionBottomScoreAPIView(
             мэргэжлийн id = pk
         """
         datas = request.data
-
-        profession = datas.get("profession")
-        bottom_score = datas.get("bottom_score")
-        lesson = datas.get('lesson')
-
-        profession = ProfessionDefinition.objects.filter(pk=pk).first()
-        admission_lesson = AdmissionBottomScore.objects.filter(profession=profession, admission_lesson=lesson).first()
-
-        if admission_lesson:
-            obj = AdmissionBottomScore.objects.filter(admission_lesson__id=lesson).update(
-                profession=profession,
-                bottom_score=bottom_score
-            )
-        else:
-            lesson_instance = AdmissionLesson.objects.filter(id=lesson).first()
-            obj = AdmissionBottomScore.objects.filter(profession=pk).create(
-                profession=profession,
-                admission_lesson=lesson_instance,
-                bottom_score=bottom_score
-            )
+        self.create(request, datas)
 
         return request.send_info("INF_002")
 
     def delete(self, request, pk=None):
 
         try:
-            obj = AdmissionBottomScore.objects.filter(admission_lesson__id=pk).delete()
+            obj = AdmissionBottomScore.objects.filter(id=pk)
+            if obj:
+                obj.delete()
         except:
             return request.send_error("ERR_002", "Амжилтгүй")
 

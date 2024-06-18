@@ -1788,3 +1788,11 @@ export const stipent_is_own_or_other = () =>
   return options
 }
 
+export const score_type = () => {
+	const options = [
+		{ id: 1, name: 'Суурь шалгалт' },
+		{ id: 2, name: 'Дагалдах шалгалт' },
+	]
+
+	return options
+}

@@ -102,7 +102,7 @@ function AddModal({ addModal, addModalHandler, addModalData, getDatas, STATE_LIS
                                         <div style={{ fontWeight: 700, fontSize: 18 }}>
                                             <span>
                                             {
-                                                addModalData?.full_name + `   `
+                                                addModalData?.last_name + `   ` + addModalData?.first_name + `   `
                                             }
                                             </span>
                                             <span>

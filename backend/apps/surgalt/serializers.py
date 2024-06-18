@@ -8,6 +8,8 @@ from django.conf import settings
 
 from datetime import datetime
 
+from core.fns import WithChoices
+
 from elselt.models import ElseltUser
 
 from lms.models import LessonStandart
@@ -216,12 +218,9 @@ class ProfessionDefinitionListSerializer(serializers.ModelSerializer):
 
     def get_admission_lesson(self, obj):
 
-        lesson_list = []
-        lesson_ids = list(AdmissionBottomScore.objects.filter(profession=obj.id).values())
-        if lesson_ids:
-            lesson_list =  lesson_ids
-
-        return lesson_list
+        profId = obj.id
+        adm_obj = AdmissionBottomScore.objects.filter(profession_id=profId).annotate(type_name=WithChoices(AdmissionBottomScore.SCORE_TYPE, 'score_type'), lesson_name=F('admission_lesson__lesson_name')).values()
+        return list(adm_obj)
 
 
 # Мэргэжлийн тодорхойлолт
