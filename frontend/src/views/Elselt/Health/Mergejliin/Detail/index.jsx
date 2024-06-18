@@ -76,7 +76,7 @@ function Detail({ detail, detailHandler, detailData, getDatas }) {
                                 Төлөв
                             </Label>
                             <Controller
-                                defaultValue=''
+                                defaultValue={datas?.state}
                                 control={control}
                                 id='state'
                                 name='state'
