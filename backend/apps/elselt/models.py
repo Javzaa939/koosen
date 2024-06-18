@@ -137,7 +137,7 @@ class AdmissionUserProfession(models.Model):
 
     class Meta:
         db_table = 'elselt_admissionuserprofession'
-        managed = False
+        # managed = False
 
     STATE_SEND = 1
     STATE_APPROVE = 2
@@ -226,6 +226,7 @@ class HealthUser(models.Model):
     state = models.IntegerField(choices=AdmissionUserProfession.STATE, default=AdmissionUserProfession.STATE_SEND, verbose_name="Эрүүл мэндийн анхан шатны үзлэгт тэнцсэн эсэх төлөв")
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
+    updated_user = models.ForeignKey(User, verbose_name='Зассан хэрэглэгч', null=True, on_delete=models.CASCADE)
 
 
 class HealthUpUser(models.Model):
@@ -251,6 +252,7 @@ class HealthUpUser(models.Model):
     description = models.TextField(verbose_name='Тайлбар', null=True)
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
+    updated_user = models.ForeignKey(User, verbose_name='Зассан хэрэглэгч', null=True, on_delete=models.CASCADE)
 
 
 class PhysqueUser(models.Model):
@@ -271,6 +273,7 @@ class PhysqueUser(models.Model):
 
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
+    updated_user = models.ForeignKey(User, verbose_name='Зассан хэрэглэгч', null=True, on_delete=models.CASCADE)
 
     @property
     def score_physque(self):
@@ -287,8 +290,12 @@ class PhysqueUser(models.Model):
 class MentalUser(models.Model):
     """ Элсэгчдийн сэтгэлзүйн сорил """
 
+    class Meta:
+        db_table = 'elselt_mentaluser'
+        managed=False
+
     user = models.ForeignKey(ElseltUser, on_delete=models.CASCADE, verbose_name='Элсэгч')
-    challenge = models.ForeignKey(PsychologicalTest, on_delete=models.CASCADE, verbose_name='Сэтгэлзүйн сорил', null=True)
+    challenge = models.ForeignKey(PsychologicalTest, on_delete=models.CASCADE, verbose_name='Сэтгэлзүйн сорил')
 
     description = models.TextField(verbose_name='Тайлбар', null=True)
     answer = models.TextField(null=True, verbose_name='Хариулт')
@@ -296,6 +303,7 @@ class MentalUser(models.Model):
 
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
+    updated_user = models.ForeignKey(User, verbose_name='Зассан хэрэглэгч', null=True, on_delete=models.CASCADE)
 
 
 class ConversationUser(models.Model):
@@ -317,6 +325,7 @@ class ConversationUser(models.Model):
 
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
+    updated_user = models.ForeignKey(User, verbose_name='Зассан хэрэглэгч', null=True, on_delete=models.CASCADE)
 
 
 class ArmyUser(models.Model):
@@ -328,3 +337,4 @@ class ArmyUser(models.Model):
 
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
+    updated_user = models.ForeignKey(User, verbose_name='Зассан хэрэглэгч', null=True, on_delete=models.CASCADE)
