@@ -26,7 +26,10 @@ from elselt.models import (
     HealthUser,
     HealthUpUser,
     PhysqueUser,
-    UserScore
+    ArmyUser,
+    ConversationUser,
+    UserScore,
+    MentalUser
 )
 
 from surgalt.serializers import (
@@ -139,6 +142,12 @@ class AdmissionUserInfoSerializer(serializers.ModelSerializer):
     # Элсэлтийн мэргэжлийн төрөл
     profession_state = serializers.IntegerField(source='profession.state', default='')
     user_age = serializers.SerializerMethodField()
+    anhan_uzleg = serializers.SerializerMethodField()
+    mergejliin_uzleg = serializers.SerializerMethodField()
+    physque = serializers.SerializerMethodField()
+    mental = serializers.SerializerMethodField()
+    army = serializers.SerializerMethodField()
+    conversation = serializers.SerializerMethodField()
 
     class Meta:
         model = AdmissionUserProfession
@@ -235,6 +244,42 @@ class AdmissionUserInfoSerializer(serializers.ModelSerializer):
         obj.save()
 
         return user_age
+
+    def get_anhan_uzleg(self,obj):
+        user = obj.user.id
+        state = HealthUser.objects.filter(user = user).values().first()
+        print(state)
+        return state
+
+    def get_mergejliin_uzleg (self,obj):
+        user = obj.user.id
+        description = HealthUpUser.objects.filter(user = user ).values().first()
+
+        return description
+
+    def get_physque(self,obj):
+        user = obj.user.id
+        description = PhysqueUser.objects.filter(user= user).values().first()
+
+        return description
+
+    def get_mental (self,obj):
+        user = obj.user.id
+        description = MentalUser.objects.filter(user=user).values('description','score').first()
+
+        return description
+
+    def get_conversation(self,obj):
+        user = obj.user.id
+        description = ConversationUser.objects.filter(user=user).values('state','description').first()
+
+        return description
+
+    def get_army(self,obj):
+        user = obj.user.id
+        description = ArmyUser.objects.filter(user=user).values('state','description').first()
+
+        return description
 
 class AdmissionUserProfessionSerializer(serializers.ModelSerializer):
 
@@ -465,6 +510,12 @@ class HealthUpUserSerializer(serializers.ModelSerializer):
         model = HealthUpUser
         fields = '__all__'
 
+
+class HealthUpUserStateSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = HealthUpUser
+        fields = 'id', 'user', 'created_at', 'updated_at', 'state', 'updated_user'
 
 class HealthUpUserInfoSerializer(serializers.ModelSerializer):
     user_register = serializers.CharField(source='user.register', default='', read_only=True)
