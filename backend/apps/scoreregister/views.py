@@ -1377,10 +1377,10 @@ class ScoreOldV2APIView(
 
                 if score:
                     check_score = str(score)
-                    if  check_score.isalpha():
+                    if  check_score.isalpha() or check_score.isspace():
                         continue
 
-                if score is None and score != 0:
+                if score is None and score != 0 :
                     # Хэрвээ хичээлийн оноо олдоогүй үед бас тэр оноо нь 0-ээс ялгаатай үед хичээл олдсонгүй гэсэн list-д нэмнэ
                     not_found_lesson.append({
                         'student_code': student_code,
