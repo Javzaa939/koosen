@@ -52,7 +52,8 @@ from .serializer import (
     GpaCheckUserInfoSerializer,
     GpaCheckConfirmUserInfoSerializer,
     EyeshCheckUserInfoSerializer,
-    MessageInfoSerializer
+    MessageInfoSerializer,
+    HealthUpUserStateSerializer
 )
 
 from elselt.models import (
@@ -1155,6 +1156,15 @@ class ElseltHealthProfessional(
         data = request.data
         health_user = HealthUpUser.objects.filter(id=pk).first()
         serializer = HealthUpUserSerializer(health_user, data)
+        data['updated_user'] = request.user.id
+
+        if health_user:
+            # төлөв солих үед ажиллах serializer
+            serializer_state = HealthUpUserStateSerializer(health_user, data)
+
+            if serializer_state.is_valid():
+                serializer_state.save()
+            return request.send_info('INF_013')
 
         if serializer.is_valid():
 

@@ -217,6 +217,8 @@ function Mergejliin() {
 				detail={detail}
 				detailHandler={detailHandler}
 				detailData={detailData}
+                getDatas={getDatas}
+
 			/>
 			<EmailModal
 				emailModalHandler={emailModalHandler}
@@ -395,7 +397,7 @@ function Mergejliin() {
 						</Button>
 					</Col>
 				</Row>
-				<div className="react-dataTable react-dataTable-selectable-rows">
+				<div className="react-dataTable react-dataTable-selectable-rows" id='datatableLeftOneRightOne'>
 					<DataTable
 						noHeader
 						paginationServer
@@ -421,7 +423,7 @@ function Mergejliin() {
 						rowsPerPage,
 						total_count,
 						STATE_LIST,
-						detailHandler
+						detailHandler,
 						)}
 						sortIcon={<ChevronDown size={10} />}
 						paginationPerPage={rowsPerPage}
