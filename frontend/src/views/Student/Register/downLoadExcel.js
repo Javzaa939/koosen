@@ -3,6 +3,7 @@ import * as excelJs from 'exceljs';
 import { saveAs } from 'file-saver'
 
 const GENDER_LIST=['Эр', 'Эм']
+const STATE_LIST=['Суралцаж буй', 'Төгссөн']
 
 export const downloadTemplate = async (department_option, groupOption) => {
 
@@ -21,6 +22,7 @@ export const downloadTemplate = async (department_option, groupOption) => {
     const options_dep = department_option.map((opt) => `${opt?.name}`)
     const options_group = groupOption.map((opt) => opt?.name)
     const genderOpts = GENDER_LIST.map((opt) => opt)
+    const stateOpts = STATE_LIST.map((opt) => opt)
 
     // var payment_type = [
     //     'Засгийн газар хоорондын тэтгэлэг',
@@ -152,17 +154,22 @@ export const downloadTemplate = async (department_option, groupOption) => {
     });
 
     const tenhim = ws.getColumn('X')
-    const angi = ws.getColumn('Y')
-    const hvis = ws.getColumn('Z')
-
     tenhim.values = options_dep
     // tenhim.hidden = true
 
+    const angi = ws.getColumn('Y')
     angi.values = options_group
     // angi.hidden = true
 
+    const hvis = ws.getColumn('Z')
     hvis.values = genderOpts
     // hvis.hidden = true
+
+    const tuluv = ws.getColumn('AA')
+    tuluv.values = stateOpts
+    // tuluv.hidden = true
+
+
 
 
     // const excelBlob = await workbook.xlsx.writeBuffer();
