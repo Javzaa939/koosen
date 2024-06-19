@@ -1285,4 +1285,9 @@ def send_message_mobicom(phone_numbers, message):
 def calculate_age(birthdate):
     today = datetime.today()
     age = today.year - birthdate.year
+
+    # Сар өдөрөөр бодож хэрэв сар өдөр нь хүрээгүй бол 1 ийг хасна
+    if (today.month,today.day) < (birthdate.month , birthdate.day):
+        age -=1
+
     return age
