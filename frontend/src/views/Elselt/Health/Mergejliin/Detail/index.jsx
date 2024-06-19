@@ -28,8 +28,9 @@ function Detail({ detail, detailHandler, detailData, getDatas }) {
         {
             name: 'Тэнцээгүй',
             id: 3
-            },
-        ]
+        },
+    ]
+
     const[ stateId, setStateId] = useState('')
 
     const elseltApi = useApi().elselt.health.professional
