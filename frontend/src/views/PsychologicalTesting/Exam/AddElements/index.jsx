@@ -43,7 +43,7 @@ function AddStudent(){
 
     const [scope, setScope] = useState('');
     const [department, setDepartment] = useState([]);
-    const [elsegchDef, setElsegchDef] = useState();
+    const [elsegchDef, setElsegchDef] = useState('');
 
     const [currentPage, setCurrentPage] = useState(1);
 	const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -139,9 +139,8 @@ function AddStudent(){
 	};
 
     async function onSubmit(cdata) {
-        console.log(cdata)
-
         cdata['scope'] = scope
+        cdata['admission'] = elsegchDef
         cdata = convertDefaultValue(cdata)
 
         const { success, error } = await fetchData(challengeAPI.putAddScope(cdata, challenge_id))
@@ -268,7 +267,7 @@ function AddStudent(){
                                                     <Row className='mt-1'>
                                                         <Col md={6}>
                                                             <Label className="form-label" for="admission">
-                                                                {'Хөтөлбөрийн баг'}
+                                                                {'Элсэлт'}
                                                             </Label>
                                                             <Controller
                                                                 control={control}

@@ -1501,7 +1501,7 @@ function useApi(isDisplay=false) {
 		},
 
 		psychologicalTest:{
-			get: (limit, page, sort, search, user) => instance.get(`learning/psychological_test/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&user=${user}`),
+			get: (limit, page, sort, search) => instance.get(`learning/psychological_test/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}`),
 			getOne: (pk) => instance.get(`learning/psychological_test/${pk}/`),
 			post: (cdatas) => instance.post('learning/psychological_test/', cdatas),
 			put: (data, pk) => instance.put(`learning/psychological_test/${pk}/`, data),

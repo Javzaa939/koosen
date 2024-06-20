@@ -63,7 +63,6 @@ from lms.models import (
     Lesson_material_file,
     Lesson_assignment_student,
     Lesson_assignment_student_file,
-    AdmissionLesson,
     PsychologicalTestQuestions,
     PsychologicalQuestionChoices,
     PsychologicalQuestionTitle,
@@ -74,6 +73,10 @@ from lms.models import (
 from core.models import (
     User,
     Employee,
+)
+
+from elselt.models import (
+    HealthUser,
 )
 
 from lms.models import get_image_path
@@ -2360,7 +2363,7 @@ class PsychologicalQuestionTitleAPIView(
         title_id = int(title_id)
 
         # 0  Бүх асуулт
-        if title_id == 0:
+        if title_id == 0 and not user_obj.is_superuser:
             challenge_qs = PsychologicalTestQuestions.objects.filter(created_by=user)
         # -1  Сэдэвгүй асуултууд
         elif title_id == -1:
@@ -2384,14 +2387,15 @@ class PsychologicalQuestionTitleAPIView(
         request_data = request.data
         question_ids = request.data.pop("questions")
         serializer = self.get_serializer(data=request_data)
-        if serializer.is_valid(raise_exception=False):
+        if serializer.is_valid(raise_exception=True):
             saved_obj =  serializer.save()
             questions_to_update = PsychologicalTestQuestions.objects.filter(id__in=question_ids)
             for question in questions_to_update:
                 question.title.add(saved_obj)
             data = self.serializer_class(saved_obj).data
             return request.send_info("INF_001", data)
-
+        else:
+            print(serializer.errors)
         return request.send_info("ERR_001")
 
 
@@ -2709,12 +2713,22 @@ class PsychologicalTestScopeOptionsAPIView(
             # Хэрвээ элсэгчдээс сорил авах бол
             if scope == 2:
                 profession = datas.get('profession')
-                prof_ids = [item['prof_id'] for item in profession]
-                if len(prof_ids) > 0:
-                    admission_register_ids = AdmissionRegisterProfession.objects.filter(profession__in=prof_ids).values_list('id', flat=True).distinct()
-                    participant_ids = ElseltUser.objects.filter(
-                        id__in=AdmissionUserProfession.objects.filter(profession__in=admission_register_ids).values_list('id', flat=True).distinct()
-                    ).values_list('id', flat=True).distinct()
+                admission = datas.get('admission')
+                queryset = AdmissionUserProfession.objects.all()
+                if admission:
+                    professions = AdmissionRegisterProfession.objects.filter(admission=admission).values_list('profession', flat=True)
+                    queryset = queryset.filter(profession__profession__in=professions)
+                if profession:
+                    prof_ids = [item.get('id') for item in profession]
+                    queryset = queryset.filter(profession__in=prof_ids)
+
+                # Анхан шат тэнцсэн хэрэглэгчид
+                anhan_shat_ids = HealthUser.objects.filter(state=AdmissionUserProfession.STATE_APPROVE).values_list('user', flat=True)
+                queryset = queryset.filter(user__in=anhan_shat_ids)
+
+                participant_ids = ElseltUser.objects.filter(
+                    id__in=queryset.values_list('user', flat=True)
+                ).values_list('id', flat=True)
 
             # Тэгээд эцэст нь бааздаа хадгална
             PsychologicalTest.objects.filter(id=pk).update(participants=list(participant_ids))
