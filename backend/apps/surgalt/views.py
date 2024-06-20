@@ -2148,7 +2148,7 @@ class PsychologicalTestQuestionsAPIView(
                                 if hasattr(image, "name") and choice['image'] == image.name:
                                     choice_img = image
 
-                            choice = remove_key_from_dict(choice, ['image', 'is_correct', 'value'])
+                            choice = remove_key_from_dict(choice, ['image'])
                             choice_obj = PsychologicalQuestionChoices.objects.create(**choice)
 
                             if choice_img:
