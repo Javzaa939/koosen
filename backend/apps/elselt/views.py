@@ -1354,7 +1354,13 @@ class ElseltHealthPhysicalCreateAPIView(
 
                 sid = transaction.savepoint()
 
-                serializer = self.serializer_class(data=data)
+                # Өмнө нь бүртгүүлсэн бол update хийнэ
+                if self.queryset.filter(user=user).exists():
+                    instance = self.queryset.filter(user=user).first()
+                    serializer = self.serializer_class(instance=instance, data=data, partial=True)
+                else:
+                    serializer = self.serializer_class(data=data)
+
                 if not serializer.is_valid():
                     transaction.savepoint_rollback(sid)
                     return Response({'status': '400 Bad Request', 'message': 'Оруулсан өгөгдөл буруу байна'}, status=status.HTTP_400_BAD_REQUEST)
