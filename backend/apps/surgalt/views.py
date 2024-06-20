@@ -2353,7 +2353,8 @@ class PsychologicalQuestionTitleAPIView(
     def get(self, request, pk=None):
 
         user = request.user.id
-        if user == 1:
+        user_obj = User.objects.filter(pk=user).first()
+        if user_obj.is_superuser:
             all_queations = PsychologicalTestQuestions.objects.all()
             ser = dynamic_serializer(PsychologicalTestQuestions, "__all__", 1)
             data = ser(all_queations, many=True)
