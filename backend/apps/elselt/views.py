@@ -1073,7 +1073,9 @@ class ElseltHealthProfessional(
         admission = self.request.query_params.get("lesson_year_id")
         profession = self.request.query_params.get('profession_id')
 
-        # queryset = queryset.filter(state=AdmissionUserProfession.STATE_APPROVE)
+        # Анхан шат тэнцсэн хэрэглэгчид
+        anhan_shat_ids = HealthUser.objects.filter(state=AdmissionUserProfession.STATE_APPROVE).values_list('user', flat=True)
+        queryset = queryset.filter(user__in=anhan_shat_ids)
 
         if gender:
             if gender == 'Эрэгтэй':
