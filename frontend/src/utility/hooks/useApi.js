@@ -1752,6 +1752,11 @@ function useApi(isDisplay=false) {
 				put: (id, cdata) => instance.put(`/elselt/health/physical/${id}/`, cdata)
 			},
 		},
+		justice: {
+			get: (limit, page, sort, search, state, elselt, profession) => instance.get(`/elselt/justice/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}&elselt=${elselt}&profession=${profession}`),
+			post: (cdata) => instance.post(`/elselt/justice/`, cdata),
+			put: (id, cdata) => instance.put(`/elselt/justice/${id}/`, cdata)
+		},
 		// тэнцсэн элсэгчид
 		approve: {
 			get: (limit, page, sort, search,admission, profession) => instance.get(`/elselt/approve/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&admission=${admission}&profession=${profession}`),

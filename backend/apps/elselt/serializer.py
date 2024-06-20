@@ -127,7 +127,6 @@ class UserScoreSerializer(serializers.ModelSerializer):
 
 
 class AdmissionUserInfoSerializer(serializers.ModelSerializer):
-    # user = ElseltUserSerializer(many=False, read_only=True)
     user = serializers.SerializerMethodField()
     userinfo = serializers.SerializerMethodField()
     user_score = serializers.SerializerMethodField()

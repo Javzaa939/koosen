@@ -1273,13 +1273,15 @@ class ElseltHealthPhysical(
 
     @transaction.atomic
     def post(self, request):
-
+        sid = transaction.savepoint()
         new_serializer = None
+        data = request.data
+        user = data.get('user').get('id')
+        if 'user' in data:
+            del data['user']
 
+        data['user'] = user
         try:
-            data = request.data
-            sid = transaction.savepoint()
-
             serializer = self.physique_serializer_class(data=data)
 
             if not serializer.is_valid():
@@ -1298,17 +1300,18 @@ class ElseltHealthPhysical(
     @transaction.atomic
     def put(self, request, pk=None):
 
-        try:
-            if not pk:
-                return request.send_error('ERR_005')
+        data = request.data
+        user = data.get('user').get('id')
+        if 'user' in data:
+            del data['user']
 
-            data = request.data
+        data['user'] = user
+        try:
             physque_user = PhysqueUser.objects.filter(id=pk).first()
             serializer = PhysqueUserSerializer(physque_user, data)
 
             if not serializer.is_valid(raise_exception=False):
                 return request.send_error_valid(serializer.errors)
-
             serializer.save()
 
         except Exception as e:
@@ -1795,3 +1798,79 @@ class AdmissionUserMessageAPIView(
 
         return request.send_info('INF_001')
 
+
+@permission_classes([IsAuthenticated])
+class AdmissionJusticeListAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+):
+
+    queryset = AdmissionUserProfession.objects.all().order_by('created_at')
+
+    serializer_class = AdmissionUserInfoSerializer
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['user__first_name', 'user__register', 'user__email', 'gpa', 'org']
+
+    def get_queryset(self):
+        queryset = self.queryset
+        queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
+
+        userinfo_qs = UserInfo.objects.filter(user=OuterRef('user')).values('gpa')[:1]
+        userinfo_org = UserInfo.objects.filter(user=OuterRef('user')).values('work_organization')[:1]
+
+        queryset = (
+            queryset
+            .annotate(
+                gpa=Subquery(userinfo_qs),
+                org=Subquery(userinfo_org),
+            )
+        )
+
+        elselt = self.request.query_params.get('elselt')
+        profession = self.request.query_params.get('profession')
+        state = self.request.query_params.get('state')
+        sorting = self.request.query_params.get('sorting')
+
+        justice_profession_ids = AdmissionIndicator.objects.filter(admission_prof__admission__is_active=True, value__in=[AdmissionIndicator.YAL_SHIITGEL]).values_list('admission_prof', flat=True)
+        # Бие бялдарт тэнцсэн элсэгчид
+        biy_byldar_ids = PhysqueUser.objects.filter(state=AdmissionUserProfession.STATE_APPROVE).values_list('user',flat=True)
+        queryset = queryset.filter(profession__in=justice_profession_ids, user__in=biy_byldar_ids)
+
+        if elselt:
+            queryset = queryset.filter(profession__admission=elselt)
+
+        if profession:
+            queryset = queryset.filter(profession__profession__id=profession)
+
+        if state:
+            if state == '1':
+                exclude_ids = PhysqueUser.objects.filter(Q(Q(state=AdmissionUserProfession.STATE_APPROVE) | Q(state=AdmissionUserProfession.STATE_REJECT))).values_list('user', flat=True)
+                user_id = AdmissionUserProfession.objects.filter(state=state).exclude(user__in=exclude_ids).values_list('user', flat=True)
+            else:
+                user_id = PhysqueUser.objects.filter(state=state).values_list('user', flat=True)
+
+            queryset = queryset.filter(user__in=user_id)
+
+        # Sort хийх үед ажиллана
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
+
+        return queryset
+
+    def get(self, request, pk=None):
+
+        if pk:
+
+            all_data = self.retrieve(request, pk).data
+
+            return request.send_data(all_data)
+
+        all_data = self.list(request).data
+
+        return request.send_data(all_data)

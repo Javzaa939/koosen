@@ -38,6 +38,10 @@ urlpatterns = [
     path('admissionuserdata/message/', AdmissionUserMessageAPIView.as_view()),
 
     # Эрүүл мэнд анхан шатны үзлэг
+    path('justice/', AdmissionJusticeListAPIView.as_view()),
+    path('justice/<int:pk>/', AdmissionJusticeListAPIView.as_view()),
+
+    # Эрүүл мэнд анхан шатны үзлэг
     path('health/anhan/', ElseltHealthAnhanShat.as_view()),
     path('health/anhan/<int:pk>/', ElseltHealthAnhanShat.as_view()),
 

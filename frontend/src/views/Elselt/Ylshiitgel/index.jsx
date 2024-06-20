@@ -57,14 +57,10 @@ const ElseltYlshiitgel = () => {
     const [profession_id, setProfession_id] = useState('')
     const [admop, setAdmop] = useState([])
     const [adm, setAdm] = useState('')
-    const [age_state, setAge_state] = useState('')
-    const [unit1, setUnit1] = useState('')
     const [selectedStudents, setSelectedStudents] = useState([])
     const [state, setState] = useState('')
-    const [gpa_state, setGpaState] = useState('')
 
-    const [gender, setGender] = useState('')
-	const elseltApi = useApi().elselt.admissionuserdata
+	const elseltApi = useApi().elselt.justice
     const admissionYearApi = useApi().elselt
     const professionApi = useApi().elselt.profession
 
@@ -110,7 +106,7 @@ const ElseltYlshiitgel = () => {
 
 	/* Жагсаалтын дата авах функц */
 	async function getDatas() {
-        const {success, data} = await allFetch(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, adm, profession_id, unit1, gender, '', gpa_state, age_state, state, 'yes'))
+        const {success, data} = await allFetch(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, state, adm, profession_id))
         if(success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
@@ -173,7 +169,7 @@ const ElseltYlshiitgel = () => {
 
 			return () => clearTimeout(timeoutId);
 		}
-    }, [sortField, currentPage, rowsPerPage, searchValue, adm, profession_id, unit1, gender, state, gpa_state])
+    }, [sortField, currentPage, rowsPerPage, searchValue, adm, profession_id, state])
 
     useEffect(() => {
         getAdmissionYear()

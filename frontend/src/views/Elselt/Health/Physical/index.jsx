@@ -359,7 +359,7 @@ function Physical() {
                         </Button>
                     </Col>
                 </Row>
-                <div className="react-dataTable react-dataTable-selectable-rows" id='datatableLeftTwoRightOne'>
+                <div className="react-dataTable react-dataTable-selectable-rows" id='datatableLeftOneRightOne'>
                     <DataTable
                         noHeader
                         paginationServer
