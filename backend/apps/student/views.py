@@ -3620,7 +3620,7 @@ class GraduationWorkQrAPIView(
         lesson_year, lesson_season = get_active_year_season()
 
         # Төгсөгчдийн мэдээллийг авах
-        students = self.queryset.filter(lesson_year=lesson_year, lesson_season=lesson_season, student__group=group, diplom_num__isnull=False) \
+        students = self.queryset.filter(lesson_year=lesson_year, lesson_season=lesson_season, student__group=group, diplom_qr__isnull=True) \
                     .annotate(
                         first_name=F('student__first_name'),
                         last_name=F('student__last_name'),
