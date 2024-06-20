@@ -61,14 +61,14 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
         }
     }
     const initialAnswerRow = {
-        choices: '',
+        value: '',
         image: '',
         score: '',
     }
     const answerReducer = (state, action) => {
         switch (action.type) {
             case 'SET_CHOICES':
-                return { ...state, choices: action.payload }
+                return { ...state, value: action.payload }
             case 'SET_SCORE':
                 return { ...state, score: action.payload }
             case 'SET_IMAGE':
@@ -350,7 +350,7 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
                                                 {
                                                     editAnswer.isEdit && editAnswer.id == answer.id ? <>
                                                         <Input
-                                                            value={answerState.choices}
+                                                            value={answerState.value}
                                                             type="textarea"
                                                             bsSize={'sm'}
                                                             onChange={(e) => {
@@ -360,7 +360,7 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
                                                     </>
                                                         :
                                                         <span>
-                                                            {answer?.choices}
+                                                            {answer?.value}
                                                         </span>
                                                 }
                                             </div>

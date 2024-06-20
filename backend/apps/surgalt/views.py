@@ -2089,7 +2089,6 @@ class PsychologicalTestQuestionsAPIView(
         user = request.user
 
         with transaction.atomic():
-            sid = transaction.savepoint()
             try:
                 for question in questions:
                     question = json.loads(question)
@@ -2163,7 +2162,6 @@ class PsychologicalTestQuestionsAPIView(
 
             except Exception as e:
                 print(e)
-                transaction.savepoint_rollback(sid)
                 return request.send_error('ERR_002')
 
         return request.send_info('INF_001')
