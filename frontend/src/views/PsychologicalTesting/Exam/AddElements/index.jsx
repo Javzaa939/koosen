@@ -29,15 +29,6 @@ import DataTable from "react-data-table-component";
 
 import AddQuestion from "./AddQuestion";
 
-export const validateSchema = Yup.object().shape({
-	student: Yup.string()
-		.trim()
-		.required('Хоосон байна'),
-    participants: Yup.string()
-		.trim()
-		.required('Хоосон байна'),
-});
-
 
 function AddStudent(){
 
@@ -47,11 +38,12 @@ function AddStudent(){
     const { isLoading, Loader, fetchData } = useLoader({});
     const { fetchData: fetchSelectData} = useLoader({});
     const { fetchData: fetchQuestion } = useLoader({});
-    const { control, handleSubmit, setError, formState: { errors }, } = useForm(validate(validateSchema));
+    const { control, handleSubmit, setError, formState: { errors }, } = useForm();
     const { challenge_id } = useParams();
 
     const [scope, setScope] = useState('');
     const [department, setDepartment] = useState([]);
+    const [elsegchDef, setElsegchDef] = useState();
 
     const [currentPage, setCurrentPage] = useState(1);
 	const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -147,8 +139,11 @@ function AddStudent(){
 	};
 
     async function onSubmit(cdata) {
+        console.log(cdata)
+
         cdata['scope'] = scope
         cdata = convertDefaultValue(cdata)
+
         const { success, error } = await fetchData(challengeAPI.putAddScope(cdata, challenge_id))
         if(success) {
             getDatas()
@@ -171,18 +166,18 @@ function AddStudent(){
         }
     }
 
-
-
-
     // Api
     const permissionStudentApi = useApi().role.student
+    const professionApi = useApi().elselt.profession
 
     // States
-    const [student_id , setStudentId] = useState('')
-    const [bottom_check, setBottomCheck] = useState(3)
-    const [select_student, setStudentOption] = useState([])
+    const [student_id , setStudentId] = useState('');
+    const [bottom_check, setBottomCheck] = useState(3);
+    const [select_student, setStudentOption] = useState([]);
     const [student_search_value, setStudentSearchValue] = useState([]);
     const [scroll_bottom_datas, setScrollBottomDatas] = useState([]);
+    const [profOption, setProfessionOption] = useState([]);
+    const [profession, setProfession] = useState([]);
 
     const { isLoading:StudentLoading, Loader:StudentLoader, fetchData: fetchSelectStudents } = useLoader({});
 
@@ -202,6 +197,14 @@ function AddStudent(){
         }
     }
 
+    // Хөтөлбөрийн жагсаалт авах
+    async function getProfession() {
+        const { success, data } = await fetchData(professionApi.getList(elsegchDef))
+        if (success) {
+            setProfessionOption(data)
+        }
+    }
+
     function handleStudentSelect(value){
         getStudentOption(value)
     }
@@ -209,6 +212,10 @@ function AddStudent(){
     useEffect(() => {
         getSelectBottomDatas(2)
     }, []);
+
+    useEffect(() => {
+        getProfession()
+    },[elsegchDef])
 
     return(
         <Fragment>
@@ -257,9 +264,80 @@ function AddStudent(){
                                                 </Col>
                                             </Row>
                                             {
+                                                scope === 2 &&
+                                                    <Row className='mt-1'>
+                                                        <Col md={6}>
+                                                            <Label className="form-label" for="admission">
+                                                                {'Хөтөлбөрийн баг'}
+                                                            </Label>
+                                                            <Controller
+                                                                control={control}
+                                                                defaultValue=''
+                                                                name="admission"
+                                                                render={({ field: { value, onChange} }) => {
+                                                                    return (
+                                                                        <Select
+                                                                            name="admission"
+                                                                            id="admission"
+                                                                            isClearable
+                                                                            classNamePrefix='select'
+                                                                            value={value}
+                                                                            className={classnames('react-select')}
+                                                                            isLoading={isLoading}
+                                                                            options={selectOption?.elsegch_admission || []}
+                                                                            placeholder={t('-- Сонгоно уу --')}
+                                                                            noOptionsMessage={() => t('Хоосон байна.')}
+                                                                            onChange={(val) => {
+                                                                                onChange(val)
+                                                                                setElsegchDef(val?.admission);
+                                                                            }}
+                                                                            styles={ReactSelectStyles}
+                                                                            getOptionValue={(option) => option.admission}
+                                                                            getOptionLabel={(option) => option.admission_name}
+                                                                        />
+                                                                    )
+                                                                }}
+                                                            />
+                                                        </Col>
+                                                        <Col md={6}>
+                                                            <Label for='form-label'>{t('Хөтөлбөр')}</Label>
+                                                            <Controller
+                                                                control={control}
+                                                                defaultValue=''
+                                                                name="profession"
+                                                                render={({ field: { value, onChange} }) => {
+                                                                    return (
+                                                                        <Select
+                                                                            name="profession"
+                                                                            id="profession"
+                                                                            classNamePrefix='select'
+                                                                            isClearable
+                                                                            isMulti
+                                                                            value={value}
+                                                                            className={classnames('react-select')}
+                                                                            isLoading={isLoading}
+                                                                            options={profOption || []}
+                                                                            placeholder={t('-- Сонгоно уу --')}
+                                                                            noOptionsMessage={() => t('Хоосон байна.')}
+                                                                            onChange={(val) => {
+                                                                                onChange(val)
+                                                                                const ids = val.map(item => item.id);
+                                                                                setProfession(ids)
+                                                                            }}
+                                                                            styles={ReactSelectStyles}
+                                                                            getOptionValue={(option) => option.prof_id}
+                                                                            getOptionLabel={(option) => option.name}
+                                                                        />
+                                                                    )
+                                                                }}
+                                                            />
+                                                        </Col>
+                                                    </Row>
+                                            }
+                                            {
                                                 scope === 3 &&
                                                     <Row className='mt-1'>
-                                                        <Col md={4}>
+                                                        <Col md={6}>
                                                             <Label className="form-label" for="department">
                                                                 {'Хөтөлбөрийн баг'}
                                                             </Label>
@@ -294,9 +372,9 @@ function AddStudent(){
                                                                 }}
                                                             />
                                                         </Col>
-                                                        <Col md={4}>
+                                                        <Col md={6}>
                                                             <Label className="form-label" for="participants">
-                                                                {'Ангиар сонгох'}
+                                                                {'Анги сонгох'}
                                                             </Label>
                                                             <Controller
                                                                 control={control}
@@ -311,7 +389,7 @@ function AddStudent(){
                                                                             isClearable
                                                                             isMulti
                                                                             value={value}
-                                                                            className={classnames('react-select', {'is-invalid': errors.participants || errors.student})}
+                                                                            className={classnames('react-select')}
                                                                             isLoading={isLoading}
                                                                             options={selectOption?.select_student_data || []}
                                                                             placeholder={t('-- Сонгоно уу --')}
@@ -326,11 +404,10 @@ function AddStudent(){
                                                                     )
                                                                 }}
                                                             />
-                                                            {errors.participants && errors.student && <FormFeedback className='d-block'>{t(errors.participants.message)}</FormFeedback>}
                                                         </Col>
-                                                        <Col sm={4}>
+                                                        {/* <Col sm={4}>
                                                             <Label className='form-label' for='student'>
-                                                                {t('Оюутан')}
+                                                                {t('Нийт оюутнууд')}
                                                             </Label>
                                                             <Controller
                                                                 control={control}
@@ -343,8 +420,8 @@ function AddStudent(){
                                                                             id="student"
                                                                             classNamePrefix='select'
                                                                             isClearable
-                                                                            className={classnames('react-select', {'is-invalid': errors.participants || errors.student})}
-                                                                            placeholder={`Хайх`}
+                                                                            className={classnames('react-select')}
+                                                                            placeholder={`-- Хайх --`}
                                                                             isLoading={StudentLoading}
                                                                             loadingMessage={() => "Түр хүлээнэ үү..."}
                                                                             options={
@@ -387,8 +464,7 @@ function AddStudent(){
                                                                     )
                                                                 }}
                                                             />
-                                                            {errors.participants && errors.student && <FormFeedback className='d-block'>{t(errors.student.message)}</FormFeedback>}
-                                                        </Col>
+                                                        </Col> */}
                                                     </Row>
                                             }
                                             <Button

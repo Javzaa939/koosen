@@ -34,6 +34,7 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
 
     const [editQuestion, setEditQuestion] = useState({ id: null, isEdit: false })
     const [editAnswer, setEditAnswer] = useState({ qId: null, id: null, isEdit: false })
+    const hasScore = data?.has_score
 
     const initialQuestionRow = {
         question: '',
@@ -200,7 +201,11 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
                                 }
                             </Col>
                             <Col md={12} className="d-flex align-items-center">
-                                <label className="me-50">Нийт оноо:</label>
+                                {
+                                    hasScore && hasScore === true
+                                    ? <label className="me-50">Нийт оноо:</label>
+                                    : <></>
+                                }
                                 {
                                     editQuestion.isEdit && editQuestion.id == data.id ? <span className="">
                                         <Input
@@ -221,6 +226,11 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
                             </Col>
                             <Col md={12} className="d-flex align-items-center">
                                 <label className="me-50">Оноотой эсэх:</label>
+                                {
+                                    hasScore && hasScore === true
+                                    ? <>Тийм</>
+                                    : <>Үгүй</>
+                                }
                                 {
                                     editQuestion.isEdit && editQuestion.id == data.id ?
                                         <Select

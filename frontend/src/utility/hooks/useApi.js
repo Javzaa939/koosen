@@ -1495,8 +1495,8 @@ function useApi(isDisplay=false) {
 				instance.get(`learning/psychological_test_question/?page=${page}&limit=${limit}&lesson=${userId}&search=${search}`),
 			post: (data) =>
 				instance.post(`learning/psychological_test_question/?year=${cyear_name}&season=${cseason_id}`, data),
-			put: (data, pk) =>
-				instance.put(`learning/psychological_test_question/${pk}/?year=${cyear_name}&season=${cseason_id}`, data),
+			put: (data, pk, type="question") =>
+				instance.put(`learning/psychological_test_question/${pk}/?year=${cyear_name}&season=${cseason_id}&type=${type}`, data),
 			delete: (delete_id) => instance.delete(`learning/psychological_test_question/?year=${cyear_name}&season=${cseason_id}&delete=${delete_id}`)
 		},
 
