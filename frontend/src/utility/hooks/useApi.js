@@ -1079,7 +1079,9 @@ function useApi(isDisplay=false) {
 
 			/** Олон нийтийн ажилд орлцох үйл ажилагаа */
 			getVolentuur: () => instance.get(`/calendar/volentuur/`),
-			getVolentuur: () => instance.getOne(`/calendar/volentuur/${pk}/`)
+			getVolentuur: () => instance.getOne(`/calendar/volentuur/${pk}/`),
+
+			getAccessHistory: () => instance.get(`/user/access-history/`)
 
 		},
 		/** Дотуур байр */
