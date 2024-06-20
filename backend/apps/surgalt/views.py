@@ -1,10 +1,18 @@
 import os
+import logging
+import json
+
 from rest_framework import mixins
 from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
+
+from django.core.files.storage import default_storage
+from django.utils.translation import gettext as _
+from django.core.files.base import ContentFile
+from django.http import Http404
 
 from main.utils.function.pagination import CustomPagination
 from main.utils.function.utils import override_get_queryset
@@ -14,7 +22,7 @@ from main.utils.file import remove_folder
 from main.decorators import login_required
 
 from django.db import transaction
-from django.db.models import Sum, Count, Q, Subquery, OuterRef,  Value, CharField
+from django.db.models import Sum, Count, Q, Subquery, OuterRef,  Value, CharField, F
 from django.db.models.functions import Concat
 
 from django.shortcuts import get_object_or_404
@@ -24,6 +32,7 @@ from django.conf import settings
 # from operator import or_
 
 from elselt.models import ElseltUser
+from elselt.models import AdmissionUserProfession
 
 from lms.models import (
     Group,
@@ -58,7 +67,8 @@ from lms.models import (
     PsychologicalTestQuestions,
     PsychologicalQuestionChoices,
     PsychologicalQuestionTitle,
-    PsychologicalTest
+    PsychologicalTest,
+    AdmissionRegisterProfession
 )
 
 from core.models import (
@@ -2061,7 +2071,7 @@ class PsychologicalTestQuestionsAPIView(
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin
 ):
-    queryset = PsychologicalTestQuestions.objects.all().order_by('created_at')
+    queryset = PsychologicalTestQuestions.objects.all().order_by('id')
     serializer_class = dynamic_serializer(PsychologicalTestQuestions, "__all__")
 
     @login_required()
@@ -2070,123 +2080,187 @@ class PsychologicalTestQuestionsAPIView(
         return request.send_data(datas)
 
     def post(self, request):
-        files = request.FILES.getlist('files')
         questions = request.POST.getlist('questions')
+        files = request.FILES.getlist('files')
 
-        user_id = request.user.id
-        user = User.objects.get(id=user_id)
+        user = request.user
 
         with transaction.atomic():
+            sid = transaction.savepoint()
             try:
-                # Асуултыг хадгалах хэсэг
                 for question in questions:
-                    question = json_load(question)
-
+                    question = json.loads(question)
                     qkind = question.get("kind")
-                    image_name = question.get('imageName')
-                    yes_or_no = question.get('yes_or_no')
-
+                    question_img = question.get('image')
+                    score = question.get('score')
+                    answers = question.get('answers')
                     question['created_by'] = user
+                    question['yes_or_no'] = None
+                    question['max_choice_count'] = 0
+                    question['rating_max_count'] = score
 
                     if 'score' in question:
-                        if question.get('score'):
-                            question['score'] = int(question['score'])
-                        else:
-                            del question['score']
+                        score = question.get('score')
+                        question['score'] = int(score) if score else None
 
-                    if not yes_or_no:
-                        question['yes_or_no'] = None
-
-                    question_img = None
-
-                    # Асуултын сонголтууд
-                    choices = question.get('answers')
-
-                    # Асуултын зураг хадгалах хэсэг
                     for image in files:
                         if hasattr(image, "name") and question['image'] == image.name:
                             question_img = image
 
-                    if question['level'] != 0:
-                        question['has_score'] = True
+                    for ans in answers:
+                        if ans['is_correct'] and ans['value'] == 'Тийм':
+                            question['yes_or_no'] = True
+                        if ans['is_correct'] and ans['value'] == 'Үгүй':
+                            question['yes_or_no'] = False
+                        if ans['is_correct']:
+                            question['max_choice_count'] += 1
 
-                    question = remove_key_from_dict(question, ['image', 'answers', 'level'])
+                    choices = answers
+                    question['has_score'] = question['level'] == 1
 
-                    if 'imageName' in question:
-                        del question['imageName']
-
-                    if 'imageUrl' in question:
-                        del question['imageUrl']
-
-                    if not question.get('max_choice_count'):
-                        question['max_choice_count'] = 0
-
-                    if not question.get('rating_max_count'):
-                        question['rating_max_count'] = 0
-                    else:
-                        question['rating_max_count'] = 5
-
+                    keys_to_remove = ['image', 'answers', 'level']
+                    question = remove_key_from_dict(question, keys_to_remove)
                     question = null_to_none(question)
 
-                    question_obj = PsychologicalTestQuestions.objects.create(
-                        **question
-                    )
+                    question_obj = PsychologicalTestQuestions.objects.create(**question)
 
-                    # Асуултанд зураг байвал хадгалах хэсэг
                     if question_img:
                         question_img_path = get_image_path(question_obj)
-                        file_path = save_file(question_img, question_img_path)[0]
+                        file_path = save_file(question_img, question_img_path)
                         question_obj.image = file_path
                         question_obj.save()
 
-                    choice_ids = list()
+                    choice_ids = []
 
-                    # Асуултын сонголтуудыг үүсгэх нь
-                    if int(qkind) in [PsychologicalTestQuestions.KIND_MULTI_CHOICE, PsychologicalTestQuestions.KIND_ONE_CHOICE]:
-
-                        # Олон сонголттой үед асуултын оноог хувааж тавина
-                        if int(qkind) == PsychologicalTestQuestions.KIND_MULTI_CHOICE:
+                    if int(qkind) in [PsychologicalTestQuestions.KIND_MULTI_CHOICE, PsychologicalTestQuestions.KIND_ONE_CHOICE, PsychologicalTestQuestions.KIND_BOOLEAN]:
+                        if int(qkind) == PsychologicalTestQuestions.KIND_MULTI_CHOICE and score:
                             max_choice_count = int(question.get('max_choice_count'))
-                            if max_choice_count:
-                                score = float(question.get('score', 0)) / max_choice_count
-                            else:
-                                score = 0
+                            score = float(score) / max_choice_count
 
                         for choice in choices:
                             choice['created_by'] = user
 
                             choice_img = None
-
-                            # Хариултын зураг хадгалах хэсэг
                             for image in files:
                                 if hasattr(image, "name") and choice['image'] == image.name:
                                     choice_img = image
 
-                            choice = remove_key_from_dict(choice, ['image'])
+                            choice = remove_key_from_dict(choice, ['image', 'is_correct', 'value'])
+                            choice_obj = PsychologicalQuestionChoices.objects.create(**choice)
 
-                            if 'imageName' in choice:
-                                del choice['imageName']
-
-                            if 'imageUrl' in choice:
-                                del choice['imageUrl']
-
-                            choice_obj = PsychologicalQuestionChoices.objects.create(
-                                **choice
-                            )
-
-                            # Асуултанд зураг байвал хадгалах хэсэг
                             if choice_img:
                                 choice_img_path = get_choice_image_path(choice_obj)
-                                file_path = save_file(choice_img, choice_img_path)[0]
+                                file_path = save_file(choice_img, choice_img_path)
                                 choice_obj.image = file_path
                                 choice_obj.save()
 
                             choice_ids.append(choice_obj.id)
+
                     question_obj.choices.set(choice_ids)
-                return request.send_info('INF_001')
+
             except Exception as e:
                 print(e)
+                transaction.savepoint_rollback(sid)
                 return request.send_error('ERR_002')
+
+        return request.send_info('INF_001')
+
+    @login_required()
+    def put(self, request, pk):
+
+        request_data = request.data.dict()
+        type = request.query_params.get('type')
+
+        if type == "question":
+            question_img = request_data['image']
+            request_data = remove_key_from_dict(request_data, [ 'image'])
+            with transaction.atomic():
+                question_obj = PsychologicalTestQuestions.objects.filter(id=pk).first()
+
+                if 'score' in request_data:
+                    score = request_data.get('score')
+                    if score and score != 'null':
+                        request_data['score'] = int(score)
+                    else:
+                        request_data['score'] = None
+
+                request_data['has_score'] = request_data['level'] == 1
+                request_data = remove_key_from_dict(request_data, [ 'level'])
+
+                updated_question_rows = PsychologicalTestQuestions.objects.filter(id=pk).update(
+                    **request_data
+                )
+
+                if isinstance(question_img, str) != True:
+                    question_img_path = get_image_path(question_obj)
+
+                    file_path = save_file(question_img, question_img_path)
+
+                    old_image = question_obj.image
+                    question_obj.image = file_path
+                    question_obj.save()
+                    if old_image:
+                        remove_folder(str(old_image))
+
+
+                if isinstance(question_img, str) == True and question_img == '':
+                    old_image = question_obj.image
+                    question_img_path = get_image_path(question_obj)
+                    # Хуучин зураг засах үедээ устгасан бол файл устгана.
+                    question_obj.image = None
+                    question_obj.save()
+                    if old_image:
+                        remove_folder(str(old_image))
+
+                data = None
+                if updated_question_rows > 0:
+                    updated_question = PsychologicalTestQuestions.objects.filter(id=pk).first()
+                    ser = dynamic_serializer(PsychologicalTestQuestions, "__all__", 1)
+                    data = ser(updated_question).data
+                return request.send_info('INF_002', data)
+
+        else:
+            answer_img = request_data["image"]
+            answer_id = request_data["id"]
+
+            request_data["value"] = request_data["choices"]
+
+            if 'score' in request_data:
+                score = request_data.get('score')
+                if score and (score != 'null' and score != 'undefined'):
+                    request_data["is_correct"] = True
+                else:
+                    request_data['score'] = None
+
+            request_data = remove_key_from_dict(request_data, ['image', 'id', 'score', 'choices'])
+            with transaction.atomic():
+                answer_obj = PsychologicalQuestionChoices.objects.filter(id=answer_id).first()
+                question_obj = PsychologicalTestQuestions.objects.filter(id=pk).first()
+                updated_rows = PsychologicalQuestionChoices.objects.filter(id=answer_id).update(**request_data)
+                if isinstance(answer_img, str) != True:
+                    answer_img_path = get_choice_image_path(answer_obj)
+                    file_path = save_file(answer_img, answer_img_path)
+                    old_image = answer_obj.image
+                    answer_obj.image = file_path
+                    answer_obj.save()
+                    if old_image:
+                        remove_folder(str(old_image))
+
+                if isinstance(answer_img, str) == True and answer_img == '':
+                    old_image = answer_obj.image
+                    answer_img_path = get_choice_image_path(answer_obj)
+                    answer_obj.image = None
+                    answer_obj.save()
+                    if old_image:
+                        remove_folder(str(old_image))
+
+                data = None
+                if updated_rows > 0:
+                    updated_answer = PsychologicalQuestionChoices.objects.filter(id=answer_id).first()
+                    ser = dynamic_serializer(PsychologicalQuestionChoices, "__all__")
+                    data = ser(updated_answer).data
+                return request.send_info('INF_002', data)
+
 
     def delete(self, request):
 
@@ -2261,6 +2335,18 @@ class PsychologicalQuestionTitleAPIView(
     def get(self, request, pk=None):
 
         user = request.user.id
+        user_obj = User.objects.filter(pk=user).first()
+        if user_obj.is_superuser:
+            all_queations = PsychologicalTestQuestions.objects.all()
+            ser = dynamic_serializer(PsychologicalTestQuestions, "__all__", 1)
+            data = ser(all_queations, many=True)
+            count = all_queations.count()
+
+            result = {
+                "count": count,
+                "results": data.data
+            }
+            return request.send_data(result)
 
         if pk:
             data = self.retrieve(request, pk).data
@@ -2401,7 +2487,6 @@ class PsychologicalTestAPIView(
                 transaction.savepoint_commit(sid)
                 return request.send_info("INF_001")
             except Exception as e:
-                transaction.savepoint_rollback(sid)
                 print(e)
                 return request.send_error('ERR_002')
 
@@ -2567,17 +2652,35 @@ class PsychologicalTestScopeOptionsAPIView(
 
     def get(self, request):
         scope = self.request.query_params.get('scope')
+        department = self.request.query_params.get('department')
+        group_options = list()
+
+        if department:
+            department_list = [int(item) for item in department.split(',')]
+        else:
+            department_list = list()
+
+        # Хамрах хүрээг элсэгч гэж сонговол
+        if scope == '2':
+            profession = AdmissionRegisterProfession.objects.annotate(
+                admission_name=F('admission__name'),
+            ).values('admission_name', 'admission').distinct('admission')
+            return_data = {'elsegch_admission': list(profession)}
+            return request.send_data(return_data)
 
         # Хамрах хүрээг оюутан гэж сонговол
-        group_options = list()
         if scope == '3':
-            # Бүх ангиудийг id, name-ээр авчирна
-            group_options = list(Group.objects.values('id', 'name'))
+            if len(department_list) > 0:
+                # Бүх ангиудийг id, name-ээр авчирна
+                group_options = list(Group.objects.filter(department__in=department_list).values('id', 'name'))
+
+        deparment_options = list(Salbars.objects.values('id', 'name'))
 
         # Тэгээд  select-д харуулхын тулд буцаана
         return_data = {
             'scope_kind': scope,
             'select_student_data': group_options,
+            'deparment_options': deparment_options,
         }
         return request.send_data(return_data)
 
@@ -2591,7 +2694,7 @@ class PsychologicalTestScopeOptionsAPIView(
         if pk and scope is not None:
             # Оролцогчдын төрлөө өөрчлөөд
             PsychologicalTest.objects.filter(id=pk).update(scope_kind=scope)
-            participant_ids = []
+            participant_ids = PsychologicalTest.objects.filter(id=pk).values_list('participants', flat=True).first()
             # Хэрвээ оюутанаас сорил авах бол
             if scope == 3 and participants:
                 # Ангийн id-уудаа ирсэн датан дотроосоо аваад
@@ -2602,8 +2705,16 @@ class PsychologicalTestScopeOptionsAPIView(
             # Бусад үед бүх элсэгч болон багшаа авна
             elif scope == 1:
                 participant_ids = Teachers.objects.values_list('id', flat=True)
-            elif scope == 2:
-                participant_ids = ElseltUser.objects.values_list('id', flat=True)
+
+            # Хэрвээ элсэгчдээс сорил авах бол
+            if scope == 2:
+                profession = datas.get('profession')
+                prof_ids = [item['prof_id'] for item in profession]
+                if len(prof_ids) > 0:
+                    admission_register_ids = AdmissionRegisterProfession.objects.filter(profession__in=prof_ids).values_list('id', flat=True).distinct()
+                    participant_ids = ElseltUser.objects.filter(
+                        id__in=AdmissionUserProfession.objects.filter(profession__in=admission_register_ids).values_list('id', flat=True).distinct()
+                    ).values_list('id', flat=True).distinct()
 
             # Тэгээд эцэст нь бааздаа хадгална
             PsychologicalTest.objects.filter(id=pk).update(participants=list(participant_ids))
