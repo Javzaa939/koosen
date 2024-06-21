@@ -292,14 +292,15 @@ class MentalUser(models.Model):
 
     class Meta:
         db_table = 'elselt_mentaluser'
-        managed=False
 
     user = models.ForeignKey(ElseltUser, on_delete=models.CASCADE, verbose_name='Элсэгч')
-    challenge = models.ForeignKey(PsychologicalTest, on_delete=models.CASCADE, verbose_name='Сэтгэлзүйн сорил')
+    challenge = models.ForeignKey(PsychologicalTest, on_delete=models.CASCADE, verbose_name='Сэтгэлзүйн сорил', null=True)
 
     description = models.TextField(verbose_name='Тайлбар', null=True)
     answer = models.TextField(null=True, verbose_name='Хариулт')
     score = models.FloatField(null=True, verbose_name='Элсэгчийн нийт оноо')
+    start_time = models.DateTimeField(null=True, verbose_name='Шалгалт өгч эхэлсэн хугацаа')
+    end_time = models.DateTimeField(null=True, verbose_name='Шалгалт өгч дууссан хугацаа')
 
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
