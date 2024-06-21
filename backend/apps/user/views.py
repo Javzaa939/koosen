@@ -17,8 +17,6 @@ from .serializers import (
     AccessHistoryLmsSerializerAll
 )
 from lms.models import AccessHistoryLms
-from rest_framework.response import Response
-from rest_framework import status
 
 from lms.models import AccessHistoryLms
 
@@ -41,9 +39,7 @@ class UserDetailAPI(
             return request.send_data({})
 
         qs = AccessHistoryLms.objects.filter(user=user)
-        print(qs)
         serializer = self.get_serializer(qs, many=True)
-        print("run")
         return request.send_data(serializer.data)
     
 class UserAPILoginView(

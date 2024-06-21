@@ -30,7 +30,6 @@ const AccessHistory = (props) => {
     );
     if (success) {
       setAccessHistories(data);
-      console.log(data);
     }
   }
 
