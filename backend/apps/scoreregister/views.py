@@ -1301,7 +1301,7 @@ class ScoreOldV2APIView(
         group_id = data.get('group_id')  # тухайн ангийн id-г авна
 
         file_name = file.name  # файлын нэр
-        path = save_file(file, 1, 'score_sheet')  # Түр хугацаанд файлыг folder дотор хадгалж ашиглана
+        path = save_file(file, 'score_sheet', 1)  # Түр хугацаанд файлыг folder дотор хадгалж ашиглана
         full_path = os.path.join(settings.MEDIA_ROOT, str(path))  # Хадгалсан файлын замыг авна
 
         reader = openpyxl_dictreader.DictReader(full_path)  # Dict reader ашиглан файлыг уншина (файлын замыг ашиглан)
