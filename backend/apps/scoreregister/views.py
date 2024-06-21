@@ -1377,7 +1377,7 @@ class ScoreOldV2APIView(
 
                 if score:
                     check_score = str(score)
-                    if  check_score.isalpha() or check_score.isspace():
+                    if  check_score.isalpha() or check_score.isspace() or not check_score.isnumeric():
                         continue
 
                 if score is None and score != 0 :
