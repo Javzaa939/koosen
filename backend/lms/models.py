@@ -558,7 +558,7 @@ class SystemSettings(models.Model):
 class Group(models.Model):
     """ Ангийн бүртгэл """
 
-    name = models.CharField(unique=True, max_length=100, verbose_name='Ангийн нэр')
+    name = models.CharField(max_length=100, verbose_name='Ангийн нэр')
     profession = models.ForeignKey(ProfessionDefinition, on_delete=models.PROTECT, verbose_name='Мэргэжил')
     degree = models.ForeignKey(ProfessionalDegree, on_delete=models.PROTECT,verbose_name='Боловсролын зэрэг')
     level = models.IntegerField(verbose_name='Курс')
