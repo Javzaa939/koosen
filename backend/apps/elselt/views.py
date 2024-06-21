@@ -53,7 +53,8 @@ from .serializer import (
     GpaCheckConfirmUserInfoSerializer,
     EyeshCheckUserInfoSerializer,
     MessageInfoSerializer,
-    HealthUpUserStateSerializer
+    HealthUpUserStateSerializer,
+    ConversationUserSerializer
 )
 
 from elselt.models import (
@@ -66,7 +67,8 @@ from elselt.models import (
     HealthUser,
     PhysqueUser,
     HealthUpUser,
-    AdmissionUserProfession
+    AdmissionUserProfession,
+    ConversationUser
 )
 
 from core.models import (
@@ -1874,3 +1876,78 @@ class AdmissionJusticeListAPIView(
         all_data = self.list(request).data
 
         return request.send_data(all_data)
+
+class ConversationUserSerializerAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin):
+
+    queryset = AdmissionUserProfession.objects.all().order_by('created_at')
+    serializer_class = ConversationUserSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['user__first_name', 'user__register', 'state','user__email']
+
+    def get_queryset(self):
+        queryset = self.queryset
+
+        sorting = self.request.query_params.get('sorting')
+        state = self.request.query_params.get('state')
+        elselt = self.request.query_params.get('elselt')
+        profession = self.request.query_params.get('profession')
+
+        # Бие бялдарт тэнцсэн элсэгчид
+        biy_byldar_ids = PhysqueUser.objects.filter(state=AdmissionUserProfession.STATE_APPROVE).values_list('user',flat=True)
+        queryset = queryset.filter(user__in=biy_byldar_ids)
+
+        # Sort хийх үед ажиллана
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
+
+        if elselt:
+            queryset = queryset.filter(user__admissionuserprofession__profession__admission=elselt)
+
+        if profession:
+            queryset = queryset.filter(
+                user__admissionuserprofession__profession__profession=profession
+            )
+
+        if state:
+            if state == '1':
+                exclude_ids = ConversationUser.objects.filter(Q(Q(state=AdmissionUserProfession.STATE_APPROVE) | Q(state=AdmissionUserProfession.STATE_REJECT))).values_list('user', flat=True)
+                user_id = AdmissionUserProfession.objects.filter(state=state).exclude(user__in=exclude_ids).values_list('user', flat=True)
+            else:
+                user_id = ConversationUser.objects.filter(state=state).values_list('user', flat=True)
+
+            queryset = queryset.filter(user__in=user_id)
+
+
+        return queryset
+
+    def get(self, request, pk=None):
+
+        if pk:
+            all_data = self.retrieve(request, pk).data
+            return request.send_data(all_data)
+
+        all_data = self.list(request).data
+        return request.send_data(all_data)
+
+    def put(self, request,pk=None):
+
+        data = request.data
+        with transaction.atomic():
+            try:
+                now = dt.datetime.now()
+                if data.get("state") :
+                    self.queryset.filter(user__in=data.get('students')).update(state=data.get("state"),updated_at=now,description=data.get("description"))
+            except Exception as e:
+                return request.send_error("ERR_002", e.__str__)
+
+        return request.send_info("INF_002")

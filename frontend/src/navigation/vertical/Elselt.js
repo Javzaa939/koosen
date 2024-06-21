@@ -33,6 +33,12 @@ export default [
             },
             {
                 id: 'elselt3_1',
+                title: 'Сэтгэлзүйн ярилцлага',
+                icon: <Circle size={8} />,
+                navLink: "elselt/interview"
+            },
+            {
+                id: 'elselt3_2',
                 title: 'Ял шийтгэл',
                 icon: <Circle size={8} />,
                 navLink: "elselt/ylshiitgel"
