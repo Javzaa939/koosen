@@ -1,47 +1,16 @@
-import { useRef } from 'react';
-import { Badge, Input }  from 'reactstrap';
+
+import { Badge, Input ,UncontrolledTooltip}  from 'reactstrap';
 import { t } from 'i18next'
 import moment from 'moment'
+import { CheckCircle} from "react-feather"
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, page_count, user,stateop) {
+export function getColumns (currentPage, rowsPerPage, page_count,stateop,stateModalHandler,user) {
 
-	const focusData = useRef(undefined)
-
-    /** Сонгосон хуудасны тоо датаны тооноос их болсон үед хуудаслалт 1-ээ эхлэнэ */
+	/** Сонгосон хуудасны тоо датаны тооноос их болсон үед хуудаслалт 1-ээ эхлэнэ */
     if (currentPage > page_count) {
         currentPage = 1
     }
-
-	const focusOut = (event) => {
-		if (focusData.current || focusData.current == '')
-		{
-			event.target.value = focusData.current
-		}
-	}
-
-	const handleSetGpaResult = async(event, id, index, key) => {
-
-		var value = event.target.value
-
-		if(event.key === 'Enter'){
-			let cdata = {
-				[key]: parseFloat(value),
-				'gpa_state': 2
-			}
-			if (id){
-				const { success } = await fetchData(gpaApi.put(cdata, id))
-				if (success){
-					focusData.current = undefined
-
-					var nextElementId = `${key}-${index + 1}-input`
-					var element = document.getElementById(`${nextElementId}`)
-
-					if (element) element.focus()
-				}
-			}
-		}
-	};
 
     const columns = [
 		{
@@ -53,9 +22,9 @@ export function getColumns (currentPage, rowsPerPage, page_count, user,stateop) 
 				if (tableRow)
 				{
 					let border =
-						row?.state == 1 ? '4px solid 	rgb(255,165,0)'
-						: row?.state == 2 ? '4px solid rgba(40, 199, 111, 1)'
-						: row?.state == 3 ? '4px solid #EA5455' : '4px solid transparent'
+						row?.conversation_data?.state == 1 ? '4px solid 	rgb(255,165,0)'
+						: row?.conversation_data?.state == 2 ? '4px solid rgba(40, 199, 111, 1)'
+						: row?.conversation_data?.state== 3 ? '4px solid #EA5455' : '4px solid transparent'
 					tableRow.style.borderLeft = `${border}`
 				}
 
@@ -65,18 +34,21 @@ export function getColumns (currentPage, rowsPerPage, page_count, user,stateop) 
 			maxWidth: '100px',
 		},
 		{
-			maxWidth: "150px",
-			minWidth: "150px",
+			maxWidth: "200px",
+			minWidth: "200px",
 			header: 'state',
-			reorder: true,
-			sortable: true,
-			name: t("Төлөв"),
+			name: "Үзлэгийн төлөв",
 			selector: (row) => (
 				<Badge
-					color={`${row?.state == 1 ? 'warning' : row?.state == 2 ? 'success' : row?.state == 3 ? 'danger' : 'primary'}`}
+					color={`${row?.conversation_data?.state == 1 ? 'warning	' : row?.conversation_data?.state == 2 ? 'success' : row?.conversation_data?.state == 3 ? 'danger' : 'primary'}`}
 					pill
 				>
-					{row?.state_name}
+					{row?.conversation_data ?
+						stateop	.find(val => val.id === row?.conversation_data?.state).name
+
+						:
+						''
+						}
 				</Badge>),
 			center: true,
 		},
@@ -85,7 +57,7 @@ export function getColumns (currentPage, rowsPerPage, page_count, user,stateop) 
 			minWidth: "150px",
 			header: 'description',
 			name: t("Тайлбар"),
-			cell: (row) => (row?.description),
+			cell: (row) => (row?.conversation_data.description),
 			sortable: true,
 			reorder: true,
 			center: true,
@@ -151,21 +123,13 @@ export function getColumns (currentPage, rowsPerPage, page_count, user,stateop) 
 					<>
 						<div className={`d-flex`}>
 							<Input
-								className={`text-center ${row?.userinfo?.gpa_state === 1 ? 'border-success' : 'border-danger'}`}
-								// id={`gpa-${row.id}-input`}
-								type="number"
+								className={'text-center'}
 								step="0.1"
 								min='0'
 								max='4'
 								bsSize='sm'
 								placeholder={(`Голч дүн`)}
 								defaultValue={row?.userinfo?.gpa}
-								onBlur={focusOut}
-								onFocus={(e) => focusData.current = (e.target.value)}
-								disabled={(Object.keys(user).length > 0 && user?.is_superuser) ? false : true}
-								onKeyPress={(e) => {
-									handleSetGpaResult(e, `${row?.userinfo?.id}`, row?.gpa, 'gpa')
-								}}
 							/>
 						</div>
 					</>
@@ -256,6 +220,26 @@ export function getColumns (currentPage, rowsPerPage, page_count, user,stateop) 
 			name: t("Бүрт/огноо"),
 			selector: (row) => row?.created_at? moment(row?.created_at).format("YYYY-MM-DD h:mm") : '',
 			center: true,
+		},
+		{
+			name: "Үйлдэл",
+			center: true,
+			maxWidth: "120px",
+			minWidth: "120px",
+			selector: (row) => (
+				<div className="text-center" style={{ width: "auto" }}>
+					<a
+						role="button"
+						onClick={() => { stateModalHandler()} }
+						id={`description${row?.id}`}
+						className="me-1"
+						// style={{pointerEvents: user?.permissions?.includes('lms-elselt-physque-create') ? '' : 'none'}}
+					>
+						<Badge color="light-success" pill><CheckCircle  width={"15px"} /></Badge>
+					</a>
+					<UncontrolledTooltip placement='top' target={`description${row.id}`}>Мэдээлэл оруулах</UncontrolledTooltip>
+				</div>
+			),
 		},
 	]
 

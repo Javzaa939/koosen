@@ -54,7 +54,7 @@ from .serializer import (
     EyeshCheckUserInfoSerializer,
     MessageInfoSerializer,
     HealthUpUserStateSerializer,
-    ConversationUserSerializer
+    ConversationUserInfoSerializer
 )
 
 from elselt.models import (
@@ -1884,7 +1884,7 @@ class ConversationUserSerializerAPIView(
     mixins.DestroyModelMixin):
 
     queryset = AdmissionUserProfession.objects.all().order_by('created_at')
-    serializer_class = ConversationUserSerializer
+    serializer_class = ConversationUserInfoSerializer
 
     pagination_class = CustomPagination
 
@@ -1943,11 +1943,9 @@ class ConversationUserSerializerAPIView(
 
         data = request.data
         with transaction.atomic():
-            try:
-                now = dt.datetime.now()
-                if data.get("state") :
-                    self.queryset.filter(user__in=data.get('students')).update(state=data.get("state"),updated_at=now,description=data.get("description"))
-            except Exception as e:
-                return request.send_error("ERR_002", e.__str__)
+            now = dt.datetime.now()
+            ConversationUser.objects.filter(
+               user__in=data.get('students')
+            ).update(state=data.get("state"),updated_at=now,description=data.get("description"))
 
-        return request.send_info("INF_002")
+        return request.send_info('INF_002')

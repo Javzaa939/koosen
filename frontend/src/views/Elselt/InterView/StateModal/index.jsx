@@ -14,20 +14,11 @@ function StateModal({ stateModalHandler, stateModal, selectedStudents, stateop, 
 
     const interview = useApi().elselt.interview;
 
-    console.log(selectedStudents, "PSDAAAA AAHAHAA")
-
-
     async function onSubmit(cdata) {
         cdata['students'] = selectedStudents.map(val => val?.user?.id) || [];
-        console.log("consoleLog",cdata)
 
         const interviewId = cdata.students;
-        console.log("Cdata--------------->",cdata)
-        // const updateData = {
-        //     state: cdata.state,
-        //     description: cdata.description,
-        //     interview: cdata.students
-        // };
+
         const { success } = await fetchData(interview.put(interviewId, cdata));
         if (success) {
             reset();
