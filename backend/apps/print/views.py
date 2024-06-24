@@ -307,6 +307,7 @@ class GroupListNoLimitAPIView(
         grade_lesson_list = []
         kredits = {}
         seasons = {}
+        grade_dict = {}
         lesson_totals = {lesson: {"total_score": 0, "student_count": 0} for lesson in group_lessons}
         id = 0
 
@@ -371,7 +372,7 @@ class GroupListNoLimitAPIView(
                     lesson_name = lesson_standart_name
 
                     # Хичээлийн дүн авах хэсэг
-                    total = '-'
+                    total = 0
 
                 else:
                     lesson_count = lesson_count + 1
