@@ -77,7 +77,7 @@ const Exam = () => {
 
     //----------Backend-тэй харьцах функцууд----------//
     async function getDatas(){
-        const {success, data} = await fetchData(examApi.get(rowsPerPage, currentPage, sortField, searchValue, user?.id))
+        const {success, data} = await fetchData(examApi.get(rowsPerPage, currentPage, sortField, searchValue))
         if(success){
             setDatas(data?.results);
             setTotalCount(data?.count)

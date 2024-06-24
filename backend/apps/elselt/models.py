@@ -234,20 +234,20 @@ class HealthUpUser(models.Model):
 
     user = models.ForeignKey(ElseltUser, on_delete=models.CASCADE, verbose_name='Элсэгч')
     state = models.IntegerField(choices=AdmissionUserProfession.STATE, default=AdmissionUserProfession.STATE_SEND, verbose_name="Эрүүл мэндийн анхан шатны үзлэгт тэнцсэн эсэх төлөв")
-    belly = models.CharField(max_length=1000, null=True, verbose_name='Дотор')
-    nerve = models.CharField(max_length=1000, null=True, verbose_name='Мэдрэл')
-    ear_nose = models.CharField(max_length=1000, null=True, verbose_name='Чих хамар хоолой')
-    eye = models.CharField(max_length=1000, null=True, verbose_name='Нүд')
-    teeth = models.CharField(max_length=1000, null=True, verbose_name='Шүд')
-    surgery = models.CharField(max_length=1000, null=True, verbose_name='Мэс засал')
-    femini = models.CharField(max_length=1000, null=True, verbose_name='Эмэгтэйчүүд')
-    heart = models.CharField(max_length=1000, null=True, verbose_name='Зүрх судас')
-    phthisis = models.CharField(max_length=1000, null=True, verbose_name='сүрьеэ')
-    allergies = models.CharField(max_length=1000, null=True, verbose_name='арьс харшил')
-    contagious = models.CharField(max_length=1000, null=True, verbose_name='халдварт өвчин')
-    neuro_phychic = models.CharField(max_length=1000, null=True, verbose_name='сэтгэц мэдрэл')
-    injury = models.CharField(max_length=1000, null=True, verbose_name='гэмтэл')
-    bzdx = models.CharField(max_length=1000, null=True, verbose_name='БЗДХ')
+    belly = models.CharField(max_length=5000, null=True, verbose_name='Дотор')
+    nerve = models.CharField(max_length=5000, null=True, verbose_name='Мэдрэл')
+    ear_nose = models.CharField(max_length=5000, null=True, verbose_name='Чих хамар хоолой')
+    eye = models.CharField(max_length=5000, null=True, verbose_name='Нүд')
+    teeth = models.CharField(max_length=5000, null=True, verbose_name='Шүд')
+    surgery = models.CharField(max_length=5000, null=True, verbose_name='Мэс засал')
+    femini = models.CharField(max_length=5000, null=True, verbose_name='Эмэгтэйчүүд')
+    heart = models.CharField(max_length=5000, null=True, verbose_name='Зүрх судас')
+    phthisis = models.CharField(max_length=5000, null=True, verbose_name='сүрьеэ')
+    allergies = models.CharField(max_length=5000, null=True, verbose_name='арьс харшил')
+    contagious = models.CharField(max_length=5000, null=True, verbose_name='халдварт өвчин')
+    neuro_phychic = models.CharField(max_length=5000, null=True, verbose_name='сэтгэц мэдрэл')
+    injury = models.CharField(max_length=5000, null=True, verbose_name='гэмтэл')
+    bzdx = models.CharField(max_length=5000, null=True, verbose_name='БЗДХ')
 
     description = models.TextField(verbose_name='Тайлбар', null=True)
     created_at = models.DateTimeField(auto_now=True)
@@ -292,14 +292,15 @@ class MentalUser(models.Model):
 
     class Meta:
         db_table = 'elselt_mentaluser'
-        managed=False
 
     user = models.ForeignKey(ElseltUser, on_delete=models.CASCADE, verbose_name='Элсэгч')
-    challenge = models.ForeignKey(PsychologicalTest, on_delete=models.CASCADE, verbose_name='Сэтгэлзүйн сорил')
+    challenge = models.ForeignKey(PsychologicalTest, on_delete=models.CASCADE, verbose_name='Сэтгэлзүйн сорил', null=True)
 
     description = models.TextField(verbose_name='Тайлбар', null=True)
     answer = models.TextField(null=True, verbose_name='Хариулт')
     score = models.FloatField(null=True, verbose_name='Элсэгчийн нийт оноо')
+    start_time = models.DateTimeField(null=True, verbose_name='Шалгалт өгч эхэлсэн хугацаа')
+    end_time = models.DateTimeField(null=True, verbose_name='Шалгалт өгч дууссан хугацаа')
 
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)

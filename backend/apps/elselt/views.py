@@ -262,7 +262,7 @@ class ElseltActiveListProfession(
     def get(self, request):
 
         elselt = request.query_params.get('elselt')
-        if elselt:
+        if elselt and elselt != 'undefined':
             self.queryset = self.queryset.filter(admission=elselt)
 
         all_data = self.list(request).data

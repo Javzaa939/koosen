@@ -3047,7 +3047,7 @@ class TimeTableFile(
             os.mkdir(file_save_folder)
 
         try:
-            file_save_path = save_file(file, '', settings.TIMETABLE)
+            file_save_path = save_file(file, settings.TIMETABLE, '')
             file_path = os.path.join(settings.MEDIA_ROOT, file_save_path)
 
             if ext == 'xlsx':

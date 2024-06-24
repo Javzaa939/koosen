@@ -34,6 +34,7 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
 
     const [editQuestion, setEditQuestion] = useState({ id: null, isEdit: false })
     const [editAnswer, setEditAnswer] = useState({ qId: null, id: null, isEdit: false })
+    const hasScore = data?.has_score
 
     const initialQuestionRow = {
         question: '',
@@ -60,14 +61,14 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
         }
     }
     const initialAnswerRow = {
-        choices: '',
+        value: '',
         image: '',
         score: '',
     }
     const answerReducer = (state, action) => {
         switch (action.type) {
             case 'SET_CHOICES':
-                return { ...state, choices: action.payload }
+                return { ...state, value: action.payload }
             case 'SET_SCORE':
                 return { ...state, score: action.payload }
             case 'SET_IMAGE':
@@ -85,6 +86,7 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
     const { isLoading, Loader, fetchData } = useLoader({})
     const questionAPI = useApi().challenge.psychologicalTestQuestion
 
+    const urlfinder = process.env.NODE_ENV === 'development' ? process.env.REACT_APP_SERVER_URL : ''
 
     function handleQuestionEdit(questoinData) {
         setEditQuestion({ id: questoinData.id, isEdit: true })
@@ -92,7 +94,7 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
         dispatchQuestion({ type: 'SET_SCORE', payload: questoinData.score })
         dispatchQuestion({ type: 'SET_LEVEL', payload: questoinData.level })
         if (questoinData.image) {
-            dispatchQuestion({ type: "SET_IMAGE", payload: { preview: process.env.REACT_APP_SERVER_URL + questoinData.image } })
+            dispatchQuestion({ type: "SET_IMAGE", payload: { preview: urlfinder + questoinData.image } })
         }
     }
 
@@ -116,7 +118,7 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
         dispatchAnswer({ type: 'SET_CHOICES', payload: answerData.choices })
         dispatchAnswer({ type: 'SET_SCORE', payload: answerData.score })
         if (answerData.image) {
-            dispatchAnswer({ type: "SET_IMAGE", payload: { preview: process.env.REACT_APP_SERVER_URL + answerData.image } })
+            dispatchAnswer({ type: "SET_IMAGE", payload: { preview: urlfinder + answerData.image } })
         }
     }
 
@@ -200,7 +202,11 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
                                 }
                             </Col>
                             <Col md={12} className="d-flex align-items-center">
-                                <label className="me-50">Нийт оноо:</label>
+                                {
+                                    hasScore && hasScore === true
+                                    ? <label className="me-50">Нийт оноо:</label>
+                                    : <></>
+                                }
                                 {
                                     editQuestion.isEdit && editQuestion.id == data.id ? <span className="">
                                         <Input
@@ -221,6 +227,11 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
                             </Col>
                             <Col md={12} className="d-flex align-items-center">
                                 <label className="me-50">Оноотой эсэх:</label>
+                                {
+                                    hasScore && hasScore === true
+                                    ? <>Тийм</>
+                                    : <>Үгүй</>
+                                }
                                 {
                                     editQuestion.isEdit && editQuestion.id == data.id ?
                                         <Select
@@ -296,7 +307,7 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
                                 <div className="d-flex ">
                                     {
                                         data.image ?
-                                            <img className="" src={process.env.REACT_APP_SERVER_URL + data.image} alt="image" style={{ maxHeight: "240px", maxWidth: "100%" }} />
+                                            <img className="" src={urlfinder + data.image} alt="image" style={{ maxHeight: "240px", maxWidth: "100%" }} />
                                             :
                                             "Зураг байхгүй байна."
                                     }
@@ -339,7 +350,7 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
                                                 {
                                                     editAnswer.isEdit && editAnswer.id == answer.id ? <>
                                                         <Input
-                                                            value={answerState.choices}
+                                                            value={answerState.value}
                                                             type="textarea"
                                                             bsSize={'sm'}
                                                             onChange={(e) => {
@@ -349,7 +360,7 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
                                                     </>
                                                         :
                                                         <span>
-                                                            {answer?.choices}
+                                                            {answer?.value}
                                                         </span>
                                                 }
                                             </div>
@@ -413,7 +424,7 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
                                                         <div className="d-flex">
                                                             {
                                                                 answer.image ?
-                                                                    <img className="w-100" src={process.env.REACT_APP_SERVER_URL + answer.image} alt="image" />
+                                                                    <img className="w-100" src={urlfinder + answer.image} alt="image" />
                                                                     :
                                                                     "Зураг байхгүй байна."
                                                             }

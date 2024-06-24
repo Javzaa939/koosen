@@ -11,10 +11,14 @@ import {
     CardTitle,
     Button,
     Label,
-    Col
+    Col,
+    Dropdown,
+    DropdownToggle,
+    DropdownMenu,
+    DropdownItem
 } from 'reactstrap'
 
-import { Printer, FileText, Download, RefreshCcw } from 'react-feather'
+import { Printer, FileText, Download, RefreshCcw, ArrowDown } from 'react-feather'
 import { AlertCircle } from 'react-feather'
 
 import FileModal from '@lms_components/FileModal'
@@ -150,6 +154,9 @@ const GradeList = () => {
     const [groupOption, setGroup] = useState([])
     const [chosenClass, setChosenClass] = useState()
     const [select_value, setSelectValue] = useState([])
+
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const togglev2 = () => setDropdownOpen((prevState) => !prevState);
 
     const { Loader, isLoading, fetchData } = useLoader({})
     const { showWarning } = useModal()
@@ -502,35 +509,37 @@ const GradeList = () => {
                                 <RefreshCcw size={15} />
                                 <span className='align-middle ms-50'>{t('Үнэлгээ шинэчлэх')}</span>
                             </Button>
-                            <Button
-                                color='primary'
-                                className='m-50'
-                                onClick={() => {
-                                    active === KIND_ANGI ? excelAngi()
-                                        :
-                                    active === KIND_HICHEEL ? console.log('hicheel')
-                                        :
-                                    active === KIND_OYUTAN && excelOyutan()
-                                }}
-                                disabled={
-                                    active === KIND_ANGI ? !chosenGroup
-                                        :
-                                    active === KIND_HICHEEL ? true
-                                        :
-                                    active === KIND_OYUTAN && false
-                                }
-                            >
-                                <Download size={15} />
-                                <span className='align-middle ms-1'>{t('Загвар татах')}</span>
-                            </Button>
-                            <Button
-                                color='primary'
-                                className='m-50'
-                                onClick={handleFileModal}
-                            >
-                                <FileText size={15} />
-                                <span className='align-middle ms-1'>{t('Хуучин дүн')}</span>
-                            </Button>
+                            <Dropdown isOpen={dropdownOpen} toggle={togglev2}>
+                                <DropdownToggle color="primary" className="m-50">
+                                    <span className="align-middle">
+                                        {t(`Хуучин дүн`)}
+                                    </span>
+                                    <ArrowDown size={15} className='ms-1'/>
+                                </DropdownToggle>
+                                <DropdownMenu>
+                                    <DropdownItem
+                                        onClick={() => {
+                                            active === KIND_ANGI ? excelAngi()
+                                                : 
+                                            active === KIND_HICHEEL ? console.log("hicheel")
+                                                : 
+                                            active === KIND_OYUTAN && excelOyutan();
+                                        }}
+                                    >
+                                        <Download size={15} />
+                                        <span className="align-middle ms-1">
+                                            {t("Загвар татах")}
+                                        </span>
+                                    </DropdownItem>
+                                    <DropdownItem divider />
+                                    <DropdownItem onClick={handleFileModal}>
+                                        <FileText size={15} />
+                                        <span className="align-middle ms-1">
+                                            {t("Загвар оруулах")}
+                                        </span>
+                                    </DropdownItem>
+                                </DropdownMenu>
+                            </Dropdown>
                             <Button
                                 color='primary'
                                 className='m-50'

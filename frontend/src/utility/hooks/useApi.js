@@ -1079,7 +1079,9 @@ function useApi(isDisplay=false) {
 
 			/** Олон нийтийн ажилд орлцох үйл ажилагаа */
 			getVolentuur: () => instance.get(`/calendar/volentuur/`),
-			getVolentuur: () => instance.getOne(`/calendar/volentuur/${pk}/`)
+			getVolentuur: () => instance.getOne(`/calendar/volentuur/${pk}/`),
+
+			getAccessHistory: () => instance.get(`/user/access-history/`)
 
 		},
 		/** Дотуур байр */
@@ -1495,13 +1497,13 @@ function useApi(isDisplay=false) {
 				instance.get(`learning/psychological_test_question/?page=${page}&limit=${limit}&lesson=${userId}&search=${search}`),
 			post: (data) =>
 				instance.post(`learning/psychological_test_question/?year=${cyear_name}&season=${cseason_id}`, data),
-			put: (data, pk) =>
-				instance.put(`learning/psychological_test_question/${pk}/?year=${cyear_name}&season=${cseason_id}`, data),
+			put: (data, pk, type="question") =>
+				instance.put(`learning/psychological_test_question/${pk}/?year=${cyear_name}&season=${cseason_id}&type=${type}`, data),
 			delete: (delete_id) => instance.delete(`learning/psychological_test_question/?year=${cyear_name}&season=${cseason_id}&delete=${delete_id}`)
 		},
 
 		psychologicalTest:{
-			get: (limit, page, sort, search, user) => instance.get(`learning/psychological_test/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&user=${user}`),
+			get: (limit, page, sort, search) => instance.get(`learning/psychological_test/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}`),
 			getOne: (pk) => instance.get(`learning/psychological_test/${pk}/`),
 			post: (cdatas) => instance.post('learning/psychological_test/', cdatas),
 			put: (data, pk) => instance.put(`learning/psychological_test/${pk}/`, data),
@@ -1509,7 +1511,7 @@ function useApi(isDisplay=false) {
 
 			getOptions: () => instance.get(`learning/psychological_test/options/`),
 			getScope: (limit, page, search, test_id) => instance.get(`learning/psychological_test/scope_list/?page=${page}&limit=${limit}&search=${search}&test_id=${test_id}`),
-			getSelect: (scope, test_id) => instance.get(`learning/psychological_test/scope_option/?scope=${scope}&test_id=${test_id}`),
+			getSelect: (scope, test_id, department) => instance.get(`learning/psychological_test/scope_option/?scope=${scope}&test_id=${test_id}&department=${department}&school=${school_id}`),
 			putAddScope: (data, pk) => instance.put(`learning/psychological_test/add_scope/${pk}/`, data),
 			deleteParticitant: (pk, test_id) => instance.delete(`learning/psychological_test/add_scope/${pk}/?test_id=${test_id}`)
 		},
