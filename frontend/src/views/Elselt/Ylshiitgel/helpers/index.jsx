@@ -100,7 +100,13 @@ export function getColumns (currentPage, rowsPerPage, page_count, user) {
 			selector: (row) => row?.user?.register,
 			center: true
 		},
-
+		{
+			header: 'user_age',
+			name: t("Нас"),
+			reorder: true,
+			selector: (row) => row?.user_age,
+			center: true
+		},
 		{
 			maxWidth: "200px",
 			minWidth: "200px",
@@ -108,31 +114,7 @@ export function getColumns (currentPage, rowsPerPage, page_count, user) {
 			sortable: true,
 			name: t("Голч дүн"),
 			reorder: true,
-			selector: (row) => {
-				return(
-					<>
-						<div className={`d-flex`}>
-							<Input
-								className={`text-center ${row?.userinfo?.gpa_state === 1 ? 'border-success' : 'border-danger'}`}
-								// id={`gpa-${row.id}-input`}
-								type="number"
-								step="0.1"
-								min='0'
-								max='4'
-								bsSize='sm'
-								placeholder={(`Голч дүн`)}
-								defaultValue={row?.userinfo?.gpa}
-								onBlur={focusOut}
-								onFocus={(e) => focusData.current = (e.target.value)}
-								disabled={(Object.keys(user).length > 0 && user?.is_superuser) ? false : true}
-								onKeyPress={(e) => {
-									handleSetGpaResult(e, `${row?.userinfo?.id}`, row?.gpa, 'gpa')
-								}}
-							/>
-						</div>
-					</>
-				)
-			},
+			selector: (row) => row?.userinfo?.gpa,
 			center: true,
 		},
 

@@ -13,7 +13,8 @@ from lms.models import  (
     ProfessionalDegree,
     Student,
     AimagHot,
-    SumDuureg
+    SumDuureg,
+    ProfessionDefinition
 )
 
 from elselt.models import (
@@ -247,7 +248,6 @@ class AdmissionUserInfoSerializer(serializers.ModelSerializer):
     def get_anhan_uzleg(self,obj):
         user = obj.user.id
         state = HealthUser.objects.filter(user = user).values().first()
-        print(state)
         return state
 
     def get_mergejliin_uzleg (self,obj):
@@ -771,3 +771,98 @@ class EyeshCheckUserInfoSerializer(serializers.ModelSerializer):
             obj.save()
 
         return avg_scaled_score or 0
+
+class ConversationUserSerializer(serializers.ModelSerializer):
+        user = serializers.SerializerMethodField()
+        justice_state = serializers.SerializerMethodField()
+        justice_description = serializers.SerializerMethodField()
+        state_name = serializers.SerializerMethodField()
+        userinfo= serializers.SerializerMethodField()
+        gender_name = serializers.SerializerMethodField()
+        gpa_state=serializers.SerializerMethodField()
+        user_age = serializers.SerializerMethodField()
+        age_state=serializers.SerializerMethodField()
+        profession=serializers.SerializerMethodField()
+
+        class Meta:
+            model = ConversationUser
+            fields = '__all__'
+
+        def get_user(self, obj):
+
+            data = ElseltUser.objects.filter(id=obj.user.id).first()
+            userinfo_data = ElseltUserSerializer(data).data
+            return userinfo_data
+
+        def get_justice_state(self, obj):
+
+            justice_state = AdmissionUserProfession.objects.filter(user=obj.user.id).first()
+            return  justice_state.justice_state if justice_state else ''
+
+        def get_justice_description(self, obj):
+
+            justice_description = AdmissionUserProfession.objects.filter(user=obj.user.id).first()
+            return  justice_description.justice_description if justice_description else ''
+
+        def get_age_state(self, obj):
+
+            age_state = AdmissionUserProfession.objects.filter(user=obj.user.id).first()
+            return  age_state.age_state if age_state else ''
+
+        def get_state_name(self, obj):
+            return obj.get_state_display()
+
+        def get_userinfo(self, obj):
+
+            data = UserInfo.objects.filter(user=obj.user.id).first()
+            userinfo_data = UserinfoSerializer(data).data
+
+            return userinfo_data
+
+        def get_profession(self, obj):
+
+            profession_name = AdmissionUserProfession.objects.filter(user=obj.user.id).first()
+            return  profession_name.profession.profession.name if profession_name else ''
+
+
+        def get_gpa_state(self , obj):
+
+            gpa_state = AdmissionUserProfession.objects.filter(user=obj.id).first()
+            return gpa_state.gpa_state if gpa_state else ''
+
+        def get_gender_name (self,obj):
+            birthday,gender = calculate_birthday(obj.user.register)
+
+            if int(gender) == 1:
+                return 'Эрэгтэй'
+            return 'Эмэгтэй'
+
+        # Насыг олж насны шалгуурт тэнцсэн эсэх
+        def get_user_age(self, obj):
+            user_age = 18
+            register = obj.user.register
+            birthdate = calculate_birthday(register)[0]
+
+            if birthdate:
+                # насыг тухайн жилээс төрсөн оныг нь хасаж тооцсон
+                user_age = calculate_age(birthdate)
+
+            # Тухайн сургуулийн насны шалгуурыг олох
+
+            indicator = AdmissionIndicator.objects.filter(admission_prof=obj.profession   , value=AdmissionIndicator.NAS).first()
+            if indicator and (indicator.limit_mах or indicator.limit_min):
+                if indicator.limit_min or 0 < user_age <= indicator.limit_mах or 100:
+                    obj.age_state = 2
+                    obj.age_description = None
+                else:
+                    obj.age_state = 3
+                    obj.state = 3
+                    obj.state_description = "НАС шалгуурын болзолыг хангаагүй улмаас тэнцсэнгүй"
+                    obj.age_description = "НАС шалгуурын болзолыг хангаагүй улмаас тэнцсэнгүй"
+            else:
+                obj.age_state = 2
+                obj.age_description = None
+
+            obj.save()
+
+            return user_age
