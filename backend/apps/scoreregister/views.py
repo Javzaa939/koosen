@@ -856,7 +856,7 @@ class ScoreOldAPIView(
         file_name = file.name
 
         # Файл түр хадгалах
-        path = save_file(file, 1, 'score_sheet')
+        path = save_file(file, 'score_sheet', 1)
 
         full_path = os.path.join(settings.MEDIA_ROOT, str(path))
 
