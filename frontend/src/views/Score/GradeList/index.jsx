@@ -18,7 +18,7 @@ import {
     DropdownItem
 } from 'reactstrap'
 
-import { Printer, FileText, Download, RefreshCcw } from 'react-feather'
+import { Printer, FileText, Download, RefreshCcw, ArrowDown } from 'react-feather'
 import { AlertCircle } from 'react-feather'
 
 import FileModal from '@lms_components/FileModal'
@@ -514,6 +514,7 @@ const GradeList = () => {
                                     <span className="align-middle">
                                         {t(`Хуучин дүн`)}
                                     </span>
+                                    <ArrowDown size={15} className='ms-1'/>
                                 </DropdownToggle>
                                 <DropdownMenu>
                                     <DropdownItem
