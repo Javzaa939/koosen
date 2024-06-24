@@ -483,7 +483,7 @@ const GPAStudent = () => {
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "flex-end",
-                            height: "100px",
+                            height: "90px",
                         }}
                     >
                         <Button
@@ -492,11 +492,12 @@ const GPAStudent = () => {
                                 width: "100px",
                                 display: "flex",
                                 alignItems: "center",
-                                justifyContent: "center"
+                                justifyContent: "space-between"
                             }}
                             onClick={handleSearchButton}
                             disabled={datas?.length === 0 && isLoading}
                         >
+                            <Search size={15} />
                             <span className="align-middle">{t("Xайх")}</span>
                         </Button>
                     </Col>
