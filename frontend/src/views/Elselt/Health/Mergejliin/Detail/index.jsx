@@ -68,8 +68,6 @@ function Detail({ detail, detailHandler, detailData, getDatas }) {
             </ModalHeader>
             <ModalBody>
                 {
-                datas
-                &&
                     <Form tag={Form} onSubmit={handleSubmit(onSubmit)}>
                         <div className='border p-1 m-1 rounded-3' style={{ minHeight: 50 }}>
                             <Label className='form-label' for='state'>
