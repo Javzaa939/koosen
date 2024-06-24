@@ -127,3 +127,9 @@ class AccessHistoryLmsSerializer(serializers.ModelSerializer):
                 return value[1]
 
         return ''
+    
+class AccessHistoryLmsSerializerAll(serializers.ModelSerializer):
+
+    class Meta:
+        model = AccessHistoryLms
+        fields = ['id', 'device_name', 'device_type', 'ip', 'in_time']
