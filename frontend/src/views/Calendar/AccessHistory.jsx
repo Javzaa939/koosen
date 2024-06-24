@@ -84,11 +84,10 @@ const AccessHistory = (props) => {
                     <Item key={index} event={event} />
                 ))}
                 {accessHistories.length > 5 && !showAll && (
-                    <ListItem>
+                    <ListItem onClick={handleSeeMore} style={{cursor: "pointer"}}>
                         <RxDotsVertical
                             size={20}
                             className="ms-50"
-                            onClick={handleSeeMore}
                         />
                         <span className="align-middle ms-50">
                             Дэлгэрэнгүй үзэх
@@ -113,7 +112,7 @@ const AccessHistory = (props) => {
                     <RxCross2
                         onClick={handleClose}
                         size={30}
-                        style={{ position: "fixed", zIndex: 1 }}
+                        style={{ position: "fixed", zIndex: 1 , cursor: "pointer"}}
                     />
                 </ModalHeader>
                 <ModalBody style={{ marginTop: "10px" }}>
