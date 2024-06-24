@@ -3401,7 +3401,7 @@ class StudentImportAPIView(
         file = datas.get("file")
 
         # Файл түр хадгалах
-        path = save_file(file, 1, 'student')
+        path = save_file(file, 'student', 1)
         full_path = os.path.join(settings.MEDIA_ROOT, str(path))
 
         error_datas = list()
