@@ -244,6 +244,13 @@ export default function Attachment()
         navigate('/student/attachment/attachment-student/', { state: row?.student?.id })
     };
 
+    function printAll(data)
+	{
+		localStorage.setItem('blankDatas', JSON.stringify(data))
+        const newWindow = window.open(`/student/attachment/print-all/`, '_blank', 'noopener,noreferrer')
+        if (newWindow) newWindow.opener = null
+	}
+
     return (
         <Fragment>
             {
@@ -475,7 +482,7 @@ export default function Attachment()
                             </div>
                         )}
                         onSort={handleSort}
-                        columns={getColumns(currentPage, rowsPerPage, total_count, user)}
+                        columns={getColumns(currentPage, rowsPerPage, total_count, printAll)}
                         sortIcon={<ChevronDown size={10} />}
                         paginationPerPage={rowsPerPage}
                         paginationDefaultPage={currentPage}

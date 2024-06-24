@@ -1,0 +1,100 @@
+@page {
+    size: A4 landscape;
+    margin: 15px 10px 12px 20px;
+    /* margin: 40px 30px 40px 45px; */
+}
+
+body {
+    background-color: white !important;
+    color: black;
+}
+
+.page-break {
+    page-break-after: always;
+}
+
+header {
+    /* position: fixed; */
+    top: 0px;
+}
+
+footer {
+    /* position: fixed; */
+    top: 0px;
+    right: 0px;
+}
+
+.table_parent {
+    font-size: 11px;
+}
+
+table td {
+    padding: 2px 0px;
+}
+
+.cell5 {
+    font-family: serif;
+    transform: rotate(90deg);
+}
+
+.font-serif {
+    font-family: serif;
+    transform: scale(1, -1);
+    rotate: 270deg;
+}
+
+.mini-cell {
+    width: 8%;
+}
+
+.body-cell {
+    width: 50%;
+    text-align: start;
+    line-height: 0.75;
+    padding: 5px 4px;
+    font-size: 10px;
+}
+
+
+.body-cell2 {
+    width: 50%;
+    text-align: start;
+    line-height: 1.8;
+    padding: 6px 6px;
+    font-size: 13px;
+}
+
+.footer-cell1 {
+    width: 13%;
+}
+
+.footer-cell2 {
+    width: 9%;
+}
+
+.footer-cell3 {
+    width: 9%;
+}
+
+.footer-margin {
+    /* margin-right: 44px; */
+}
+
+.footer3-cell {
+    font-family: serif;
+    rotate: 360deg;
+}
+
+.not-center-table {
+    /* margin-left: 218px; */
+    position: relative;
+    text-align: center;
+}
+
+.center-table {
+    /* position: absolute;
+    top: 50%;
+    left: 30%;
+    transform: translate(-50%, -50%); */
+    margin:auto
+}

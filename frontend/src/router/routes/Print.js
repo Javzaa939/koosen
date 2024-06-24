@@ -3,6 +3,7 @@ import { lazy } from "react";
 const LessonChoice = lazy(() => import("@views/Print/LessonChoice"))
 const Schedule = lazy(() => import("@views/Print/Schedule"))
 // const ExamName = lazy(() => import("@views/Print/ExamName"))
+const GpaPrint = lazy(() => import("@views/Print/GPA/GPAStudent/Print"))
 const GPA = lazy(() => import("@views/Print/GPA"))
 const Graduation = lazy(() => import("@views/Print/Graduation"))
 
@@ -18,6 +19,13 @@ const PrintRoutes = [
     {
         path: 'print/gpa/',
         element: <GPA />
+    },
+    {
+        path: 'print/gpa/print',
+        element: <GpaPrint />,
+        meta: {
+            layout: 'blank'
+        }
     },
     {
         path: 'print/graduation/',

@@ -11,7 +11,7 @@ import { Modal, Row, Col, Label, ModalHeader, ModalBody, Form, Input, Button, Fo
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import classnames from 'classnames'
-import ActiveYearContext from "@context/ActiveYearContext"
+// import ActiveYearContext from "@context/ActiveYearContext"
 
 import { validateSchema } from './validateSchema'
 
@@ -26,7 +26,7 @@ function AddModal({ addModal, addModalHandler, addModalData, getDatas, STATE_LIS
         cdata['user'] = addModalData?.user
 
         /**
-         * 
+         *
          */
         if(addModalData?.health_user_data) {
             const { success, error } = await fetchData(elseltApi.put(addModalData?.health_user_data?.id, cdata))
@@ -42,7 +42,8 @@ function AddModal({ addModal, addModalHandler, addModalData, getDatas, STATE_LIS
                 }
             }
         } else {
-            const { success, error } = await fetchData(elseltApi.post(cdata))
+            var data = convertDefaultValue(cdata)
+            const { success, error } = await fetchData(elseltApi.post(data))
             if(success) {
                 reset()
                 getDatas()
@@ -101,7 +102,7 @@ function AddModal({ addModal, addModalHandler, addModalData, getDatas, STATE_LIS
                                         <div style={{ fontWeight: 700, fontSize: 18 }}>
                                             <span>
                                             {
-                                                addModalData?.full_name + `   `
+                                                addModalData?.last_name + `   ` + addModalData?.first_name + `   `
                                             }
                                             </span>
                                             <span>

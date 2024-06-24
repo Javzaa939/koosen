@@ -22,10 +22,12 @@ import Survey from './Survey'
 import Statistic from './Statistic'
 // import Test from './Test'
 import Elselt from './Elselt'
+import PsychologicalTesting from './PsychologicalTesting'
 
 export default [
   ...Calendar,
   ...Elselt,
+  ...PsychologicalTesting,
   ...Reference,
   ...Study,
   ...Student,

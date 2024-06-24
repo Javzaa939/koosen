@@ -156,6 +156,7 @@ class GpaAPIView(
         sorting = self.request.query_params.get('sorting')
         department = self.request.query_params.get('department')
         profession = self.request.query_params.get('profession')
+        status = self.request.query_params.get('status')
 
         # Сургуулиар хайлт хийх
         if schoolId:

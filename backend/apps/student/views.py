@@ -1,6 +1,5 @@
 import os
 import requests
-from requests.exceptions import JSONDecodeError
 from googletrans import Translator
 import openpyxl_dictreader
 
@@ -56,8 +55,7 @@ from lms.models import LessonStandart
 from lms.models import StudentViz
 from lms.models import SystemSettings
 from lms.models import PaymentBeginBalance
-from lms.models import Country, ProfessionAverageScore
-
+from lms.models import Country, ProfessionAverageScore, AttachmentConfig, ProfessionDefinition
 
 from core.models import SubOrgs, AimagHot, SumDuureg, User, Salbars
 
@@ -74,7 +72,7 @@ from .serializers import StudentEducationSerializer
 from .serializers import StudentEducationListSerializer
 from .serializers import SignaturePeoplesSerializer
 from .serializers import StudentAddressListSerializer
-from .serializers import StudentAddressSerializer
+from .serializers import StudentDownloadSerializer
 from .serializers import StudentAdmissionScoreSerializer
 from .serializers import StudentAdmissionScoreListSerializer
 from .serializers import GroupListSerializer
@@ -1236,6 +1234,9 @@ class StudentDetailAPIView(
 
         data = remove_key_from_dict(data, 'image')
 
+        if data.get('pay_type') == '0':
+            data['pay_type'] = Student.OTHER
+
         if change_image and old_image:
             remove_image = os.path.join(settings.STUDENTS, str(instance.id))
             remove_folder(remove_image)
@@ -1252,6 +1253,11 @@ class StudentDetailAPIView(
                 return request.send_error_valid(serializer.errors)
 
             serializer.save()
+
+            # Оюутны мэдээллээ засахад нэвтрэх нэрийг засах
+            StudentLogin.objects.filter(student=pk).update(
+                username=data.get('code')
+            )
             return request.send_info("INF_002", serializer.data)
 
         except Exception as e:
@@ -1831,7 +1837,7 @@ class GraduationWorkAPIView(
 
     filter_backends = [SearchFilter]
 
-    search_fields = ['student__code', 'student__first_name', 'diplom_num', 'lesson__code', 'lesson__name', 'diplom_topic', 'leader', 'student__register_num', 'student__last_name']
+    search_fields = ['student__code', 'student__first_name', 'diplom_num', 'lesson__code', 'lesson__name', 'diplom_topic', 'leader', 'student__register_num', 'student__last_name', 'registration_num']
 
     @has_permission(must_permissions=['lms-student-graduate-read'])
     def get(self, request, pk=None):
@@ -1944,6 +1950,10 @@ class GraduationWorkAPIView(
     def delete(self, request, pk=None):
         " Төгсөлтийн ажил устгах "
 
+        obj = self.get_object()
+
+        # Хавсралтын хичээлүүдийг устгах
+        CalculatedGpaOfDiploma.objects.filter(student=obj.student).delete()
         self.destroy(request, pk)
         return request.send_info("INF_003")
 
@@ -2497,7 +2507,7 @@ class StudentCalculateGpaDiplomaAPIView(
             grouped_ids.extend(grouped_lessons_ids)
 
         # Нийт хичээлээс багцлуулсан хичээлүүдийг хасч үлдсэн хичээлийг авах
-        unique_ids = list(set(lesson_ids) - set(grouped_ids))
+        unique_ids = list(set(lesson_ids) - set(grouped_ids)  - set(bagtsad_hariyalagdah))
 
         # Багцалсан хичээлээр
         for grouped_data in grouped_datas:
@@ -2508,21 +2518,22 @@ class StudentCalculateGpaDiplomaAPIView(
             # Багц хичээлийн нийт дүнг олох
             score_register_score_sum = ScoreRegister.objects.filter(lesson__in=grouped_datas[grouped_data], student_id=student_id).aggregate(total=Sum(Coalesce(Coalesce(F('exam_score'), 0, output_field=FloatField()) + Coalesce(F('teach_score'), 0, output_field=FloatField()), 0, output_field=FloatField()) * F('lesson__kredit'))).get('total')
 
-            # Дундаж дүн
-            score_register_score = round((score_register_score_sum / score_register_kredit_sum), 2)
+            if score_register_score_sum != 0:
+                # Дундаж дүн
+                score_register_score = round((score_register_score_sum / score_register_kredit_sum), 2)
 
-            # Үсгэн үнэлгээ
-            score_qs = Score.objects.filter(score_max__gte=score_register_score, score_min__lte=score_register_score).first()
+                # Үсгэн үнэлгээ
+                score_qs = Score.objects.filter(score_max__gte=score_register_score, score_min__lte=score_register_score).first()
 
-            # Дипломын хичээл бодуулах хэсгийг үүсгэх
-            created_cal_qs = CalculatedGpaOfDiploma.objects.create(
-                lesson_id=grouped_data,
-                student_id=student_id,
-                kredit=score_register_kredit_sum,
-                score=score_register_score,
-                gpa=score_qs.gpa,
-                assesment=score_qs.assesment
-            )
+                # Дипломын хичээл бодуулах хэсгийг үүсгэх
+                created_cal_qs = CalculatedGpaOfDiploma.objects.create(
+                    lesson_id=grouped_data,
+                    student_id=student_id,
+                    kredit=score_register_kredit_sum,
+                    score=score_register_score,
+                    gpa=score_qs.gpa,
+                    assesment=score_qs.assesment
+                )
 
         for unique_id in unique_ids:
             score_register_qs = ScoreRegister.objects.filter(student_id=student_id, lesson_id=unique_id).first()
@@ -2641,12 +2652,50 @@ class StudentAttachmentConfigAPIView(
 ):
     """ Хавсрлатын тохиргоо """
 
+    queryset = AttachmentConfig.objects.all()
+
+    def get(self, request):
+
+        group = request.query_params.get('group')
+        type_name = request.query_params.get('type')
+        if type_name == 'mongolian':
+            stype = AttachmentConfig.MONGOLIAN
+        elif type_name == 'english':
+            stype = AttachmentConfig.ENGLISH
+        else:
+            stype = AttachmentConfig.UIGARJIN
+
+        self.queryset = self.queryset.filter(group=group, atype=stype)
+
+        datas = self.queryset.values().first()
+
+        return request.send_data(datas if datas else {})
+
     def post(self, request):
         data = request.data
         row_count = json_load(data.get('row_count'))
-        stype = data.get('type')
+        type_name = data.get('type')
 
-        return request.send_data([])
+        if type_name == 'mongolian':
+            stype = AttachmentConfig.MONGOLIAN
+        elif type_name == 'english':
+            stype = AttachmentConfig.ENGLISH
+        else:
+            stype = AttachmentConfig.UIGARJIN
+
+        with transaction.atomic():
+            self.queryset.update_or_create(
+                group=Group.objects.get(pk=data.get('group')),
+                atype=stype,
+                defaults={
+                    'row_count': row_count,
+                    'is_lastname': data.get('is_lastname'),
+                    'is_center': data.get('is_center'),
+                    'give_date': data.get('give_date'),
+                }
+            )
+
+        return request.send_info('INF_001')
 
 @permission_classes([IsAuthenticated])
 class StudentGpaDiplomaValuesAPIView(
@@ -2659,7 +2708,7 @@ class StudentGpaDiplomaValuesAPIView(
         max_kredit = 0
         all_score = 0
         all_gpa_score = 0
-        final_score = 0.0
+        final_score = '0.0'
 
         student_id = self.request.query_params.get('id')
 
@@ -2696,6 +2745,7 @@ class StudentGpaDiplomaValuesAPIView(
                 obj_datas['uig_name'] = 'ᠮᠡᠷᢉᠡᠵᠢᠯ ᠦ᠋ᠨ ᢈᠢᠴᠢᠶᠡᠯ'
 
             # Дипломын хичээлээр давталт гүйлгэх
+            master_lessons = []
             for data_qs in qs:
                 lesson_first_data = data_qs.lesson
 
@@ -2704,24 +2754,35 @@ class StudentGpaDiplomaValuesAPIView(
                     inner join lms_lessonstandart ls
                     on lp.lesson_id=ls.id
                     where lp.profession_id = {profession_id} and lp.lesson_id = {lesson_id}
-                    order by lp.season, ls.name
                 '''.format(profession_id=student_prof_qs.id, lesson_id=lesson_first_data.id)
 
                 cursor = connection.cursor()
                 cursor.execute(query)
                 rows = list(dict_fetchall(cursor))
 
-                # Магистрийн дипломын хичээлийг хавсралтанд мэргэжлийн хичээлд хамт харуулах хэсэг
-                if rows[0]['lesson_level'] == LearningPlan.MAG_DIPLOM:
-                    rows[0]['lesson_level'] = LearningPlan.MAG_PROFESSION
-
                 if len(rows) > 0:
+                    is_master = False
+                    # Магистрийн дипломын хичээлийг хавсралтанд мэргэжлийн хичээлд хамт харуулах хэсэг
+                    if rows[0]['lesson_level'] == LearningPlan.MAG_DIPLOM or rows[0]['lesson_level'] == LearningPlan.DOC_DIPLOM:
+                        if rows[0]['lesson_level'] == LearningPlan.DOC_DIPLOM:
+                            rows[0]['lesson_level'] = LearningPlan.DOC_PROFESSION
+
+                        if rows[0]['lesson_level'] == LearningPlan.MAG_DIPLOM:
+                            rows[0]['lesson_level'] = LearningPlan.MAG_PROFESSION
+
+                        is_master = True
+
                     if rows[0]['lesson_level'] == level:
                         lesson = rows[0]
                         lesson['score'] = data_qs.score
                         lesson['assesment'] = data_qs.assesment
                         lesson['grade_letter'] = data_qs.grade_letter.description if data_qs.grade_letter else ''
-                        lesson_datas.append(lesson)
+
+                        # Магистрийн 2 хичээлийг хамгийн сүүлд нь оруулах
+                        if is_master:
+                            master_lessons.append(lesson)
+                        else:
+                            lesson_datas.append(lesson)
 
                         max_kredit = max_kredit + lesson.get('kredit')
                         score_qs = Score.objects.filter(score_max__gte=data_qs.score, score_min__lte=data_qs.score).first()
@@ -2734,23 +2795,29 @@ class StudentGpaDiplomaValuesAPIView(
                             all_s_kredit = all_s_kredit + lesson.get('kredit')
 
             # Хичээлтэй хэсгийн датаг л нэмнэ
-            if len(lesson_datas) > 0:
-                obj_datas['lessons'] = lesson_datas
-                all_datas.append(obj_datas)
+            # if len(lesson_datas) > 0:
+            #     # Магистрийн ажил
+            sorted_lessons = []
+            if len(master_lessons) > 0:
+                sorted_lessons = sorted(master_lessons, key=lambda x: x["grade_letter"])
 
-        final_gpa = 0.0
+            lesson_datas.extend(sorted_lessons)
+            obj_datas['lessons'] = lesson_datas
+            all_datas.append(obj_datas)
+
+        final_gpa = '0.0'
         if all_score != 0 and all_gpa_score != 0:
             # Нийт кредитээс S үнэлгээ буюу тооцов үнэлгээг хасаж голч бодогдоно
             estimate_kredit = max_kredit - all_s_kredit
             final_gpa = all_score / estimate_kredit
             # Нийт голч оноо
             final_score = all_gpa_score / estimate_kredit
-            final_gpa = format(final_gpa, ".2f")
+            final_gpa = format(final_gpa, ".1f")
             # Нийт голч оноог бутархай руу шилжүүлэх
-            final_score = format(final_score, ".2f")
+            final_score = format(final_score, ".1f")
 
         average_score_prof = ProfessionAverageScore.objects.filter(profession=student_prof_qs, is_graduate=True, level=0).first()
-        all_data['score'] = { 'assesment': final_gpa, 'max_kredit': max_kredit, 'average_score': final_score, 'average_score_prof': format(average_score_prof.gpa, ".2f") if average_score_prof else 0 }
+        all_data['score'] = { 'assesment': final_gpa, 'max_kredit': max_kredit, 'average_score': final_score, 'average_score_prof': format(average_score_prof.gpa, ".1f") if average_score_prof else '0.0' }
         all_data['lessons'] = all_datas
 
         # GraduationWork
@@ -2882,15 +2949,15 @@ class StudentDownloadAPIView(
     search_fields = ['department__name', 'code', 'first_name', 'register_num']
 
     def get_queryset(self):
-        queryset = self.queryset
+        queryset = self.queryset.all()
         department = self.request.query_params.get('department')
         degree = self.request.query_params.get('degree')
         profession = self.request.query_params.get('profession')
         join_year = self.request.query_params.get('join_year')
         group = self.request.query_params.get('group')
         schoolId = self.request.query_params.get('schoolId')
-        status = self.request.query_params.get('status')
-        level = self.request.query_params.get('level')
+        # status = self.request.query_params.get('status')
+        # level = self.request.query_params.get('level')
 
         # сургуулиар хайлт хийх
         if schoolId:
@@ -2916,18 +2983,18 @@ class StudentDownloadAPIView(
         if group:
             queryset = queryset.filter(group_id=group)
 
-        if status:
-            queryset = queryset.filter(status=status)
+        # if status:
+        #     queryset = queryset.filter(status=status)
 
-        if level:
-            queryset = queryset.filter(group__level=level)
+        # if level:
+        #     queryset = queryset.filter(group__level=level)
 
         return queryset
 
     def get( self, request, pk=None):
         "Оюутны бүртгэл жагсаалт"
 
-        self.serializer_class = StudentRegisterListSerializer
+        self.serializer_class = StudentDownloadSerializer
 
         student_list = self.list(request, pk).data
         return request.send_data(student_list)
@@ -3347,49 +3414,49 @@ class StudentImportAPIView(
             for created_data in datas:
                 pay_type_id = 8 # төлбөр төлөлтын төрөл
 
-                department = created_data.get('Хөтөлбөрийн баг')
-                group = created_data.get('Анги')
-                register_num = created_data.get('РД')
-                family_name = created_data.get('Ургийн овог')
+                department = created_data.get('Тэнхим')
+                group = created_data.get('Анги/дамжаа')
+                register_num = created_data.get('Регистрийн дугаар')
+                # family_name = created_data.get('Ургийн овог')
                 last_name = created_data.get('Эцэг эхийн нэр')
                 first_name = created_data.get('Өөрийн нэр')
-                last_name_eng = created_data.get('Эцэг эхийн нэр англи')
-                first_name_eng = created_data.get('Өөрийн нэр англи')
+                last_name_uig = created_data.get('Эцэг эхийн нэр уйгаржин')
+                first_name_uig = created_data.get('Өөрийн нэр уйгаржин')
                 phone = created_data.get('Утасны дугаар')
-                yas_undes = created_data.get('Яс үндэс')
+                # yas_undes = created_data.get('Яс үндэс')
 
-                gender = created_data.get('Хүйс')
-                status = created_data.get('Бүртгэлийн байдал')
-                pay_type = created_data.get('Төлбөр төлөлт')
-                code = created_data.get('Оюутны код')
+                # gender = created_data.get('Хүйс')
+                birth_date, gender = calculate_birthday(register_num)
+                status = created_data.get('Төлөв')
+                code = created_data.get('Суралцагчдын код')
 
                 # төлбөр төлөлт
-                if pay_type == 'Засгийн газар хоорондын тэтгэлэг':
-                    pay_type_id = Student.IG
-                elif pay_type == 'Төрөөс үзүүлэх тэтгэлэ' :
-                    pay_type_id = Student.GG
-                elif pay_type == 'Боловсролын зээлийн сангийн хөнгөлөлттэй зээл':
-                    pay_type_id = Student.LEL
-                elif pay_type == 'Төрөөс үзүүлэх буцалтгүй тусламж':
-                    pay_type_id = Student.GRANTS
-                elif pay_type == 'Дотоод, гадаадын аж ахуйн нэгж, байгууллага, сан, хүвь хүний нэрэмжит тэтгэлэг':
-                    pay_type_id = Student.IEEOF
-                elif pay_type == 'Тухайн сургуулийн тэтгэлэг':
-                    pay_type_id = Student.SCHOLARSHIP
-                elif pay_type == 'Хувийн зардал':
-                    pay_type_id = Student.EXPENSES
-                elif pay_type == 'Бусад':
-                    pay_type_id = Student.OTHER
+                # if pay_type == 'Засгийн газар хоорондын тэтгэлэг':
+                #     pay_type_id = Student.IG
+                # elif pay_type == 'Төрөөс үзүүлэх тэтгэлэ' :
+                #     pay_type_id = Student.GG
+                # elif pay_type == 'Боловсролын зээлийн сангийн хөнгөлөлттэй зээл':
+                #     pay_type_id = Student.LEL
+                # elif pay_type == 'Төрөөс үзүүлэх буцалтгүй тусламж':
+                #     pay_type_id = Student.GRANTS
+                # elif pay_type == 'Дотоод, гадаадын аж ахуйн нэгж, байгууллага, сан, хүвь хүний нэрэмжит тэтгэлэг':
+                #     pay_type_id = Student.IEEOF
+                # elif pay_type == 'Тухайн сургуулийн тэтгэлэг':
+                #     pay_type_id = Student.SCHOLARSHIP
+                # elif pay_type == 'Хувийн зардал':
+                #     pay_type_id = Student.EXPENSES
+                # elif pay_type == 'Бусад':
+                pay_type_id = Student.EXPENSES
 
                 status_id = None
 
                 # суралцах хэлбэр
-                if status:
-                    status_id = StudentRegister.objects.filter(name__icontains=status).first()
+                status_id = StudentRegister.objects.filter(name__icontains='Суралцаж буй').first()
+                # if status:
 
-                    if not status_id:
-                        count = StudentRegister.objects.count()
-                        status_id = StudentRegister.objects.create(name=status, code=count+1)
+                    # if not status_id:
+                    #     count = StudentRegister.objects.count()
+                    #     status_id = StudentRegister.objects.create(name=status, code=count+1)
 
                 dep_obj = Salbars.objects.filter(name__icontains=department).first()
                 group_obj = Group.objects.filter(name__icontains=group).first()
@@ -3402,18 +3469,17 @@ class StudentImportAPIView(
                     'first_name': first_name,
                     'phone': phone,
                     'status': status,
-                    'last_name_eng': last_name_eng,
-                    'first_name_eng': first_name_eng,
-                    'yas_undes': yas_undes,
+                    'last_name_uig': last_name_uig,
+                    'first_name_uig': first_name_uig,
                     'gender': gender,
-                    'family_name': family_name,
-                    'pay_type': pay_type,
+                    'birth_date': birth_date,
+                    'pay_type': pay_type_id,
                     'code': code,
                 }
 
                 student_qs = Student.objects.filter(code=code)
 
-                if not (code or dep_obj or group_obj or pay_type_id or register_num or last_name or first_name or phone or status_id or last_name_eng or first_name_eng) or student_qs:
+                if not (code or dep_obj or group_obj or pay_type_id or register_num or last_name or first_name or phone or status_id) or student_qs:
                     error_datas.append(obj)
                 else:
                     correct_datas.append(obj)
@@ -3554,7 +3620,7 @@ class GraduationWorkQrAPIView(
         lesson_year, lesson_season = get_active_year_season()
 
         # Төгсөгчдийн мэдээллийг авах
-        students = self.queryset.filter(lesson_year=lesson_year, lesson_season=lesson_season, student__group=group, diplom_num__isnull=False) \
+        students = self.queryset.filter(lesson_year=lesson_year, lesson_season=lesson_season, student__group=group, diplom_qr__isnull=True) \
                     .annotate(
                         first_name=F('student__first_name'),
                         last_name=F('student__last_name'),
@@ -3579,7 +3645,7 @@ class GraduationWorkQrAPIView(
 
                 url = 'https://certify.mn/service/api/v2/certification/qr/generate'
                 headers = {
-                    'x-api-key': 'qfSuwUY2.H8FYeLmZzXp2VUG4wVNWwVRo4xQZ5XOc',
+                    'x-api-key': '8DUeSVwW.KD31Xiq6cRSPsS45UMzolU6wftmzf3YO',
                     'Content-Type': 'application/json'
                 }
 

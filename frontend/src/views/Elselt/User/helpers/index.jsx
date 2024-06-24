@@ -83,6 +83,7 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 						<>
 							<a role="button"
 								onClick={() => editModal(row)}
+								style={{pointerEvents: user?.permissions?.includes('lms-elselt-admission-update') ? '' : 'none'}}
 								id={`edit${row?.id}`}
 								className={`me-1`}
 							>
@@ -138,6 +139,13 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 			center: true
 		},
 		{
+			header: 'user_age',
+			name: t("Нас"),
+			reorder: true,
+			selector: (row) => row?.user_age,
+			center: true
+		},
+		{
 			maxWidth: "250px",
 			minWidth: "250px",
 			header: 'profession__profession__name',
@@ -187,6 +195,22 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 			reorder: true,
 			selector: (row) => <span title={row?.userinfo?.info_description} style={{fontSize:'10px'}}>{row?.userinfo?.info_description}</span>,
 			wrap:true
+		},
+		{
+			maxWidth: "150px",
+			minWidth: "150px",
+			header: 'state',
+			reorder: true,
+			sortable: true,
+			name: t("Насны шалгуур"),
+			selector: (row) => (
+				<Badge
+					color={`${row?.age_state == 1 ? 'primary' : row?.age_state == 2 ? 'success' : row?.age_state == 3 ? 'danger' : 'primary'}`}
+					pill
+				>
+					{row?.age_state == 2 ? 'Тэнцсэн':'Тэнцээгүй'}
+				</Badge>),
+			center: true,
 		},
 		{
 			name: t("Хүйс"),

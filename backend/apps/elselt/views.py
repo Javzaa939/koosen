@@ -1,21 +1,22 @@
+import hashlib
+import datetime as dt
+
 from rest_framework import mixins
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 from rest_framework.filters import SearchFilter
-
 from django.core.mail import send_mail
-from django.core.mail import send_mass_mail
 from django.template.loader import render_to_string
 from django.db import transaction
-from django.db.models import F, Subquery, OuterRef, Count
+from django.db.models import F, Subquery, OuterRef, Count, Q
 from django.db.models.functions import Substr
 
-from main.utils.function.utils import json_load, make_connection, get_domain_url_link, get_domain_url
+from main.utils.function.utils import json_load, make_connection, get_domain_url_link, get_domain_url, null_to_none, check_phone_number, send_message_gmobile, send_message_mobicom, send_message_skytel, send_message_unitel
 from main.utils.function.pagination import CustomPagination
 from main.decorators import login_required
-
-import datetime as dt
+from rest_framework.response import Response
+from rest_framework import status
 
 
 from lms.models import (
@@ -45,7 +46,14 @@ from .serializer import (
     HealthUpUserInfoSerializer,
     HealthUpUserSerializer,
     PhysqueUserSerializer,
-    HealthPhysicalUserInfoSerializer
+    HealthPhysicalUserInfoSerializer,
+    ElseltApproveSerializer,
+    HealthPhysicalUserInfoSerializer,
+    GpaCheckUserInfoSerializer,
+    GpaCheckConfirmUserInfoSerializer,
+    EyeshCheckUserInfoSerializer,
+    MessageInfoSerializer,
+    HealthUpUserStateSerializer
 )
 
 from elselt.models import (
@@ -54,9 +62,11 @@ from elselt.models import (
     ElseltUser,
     ContactInfo,
     EmailInfo,
+    MessageInfo,
     HealthUser,
     PhysqueUser,
-    HealthUpUser
+    HealthUpUser,
+    AdmissionUserProfession
 )
 
 from core.models import (
@@ -250,8 +260,7 @@ class ElseltActiveListProfession(
     def get(self, request):
 
         elselt = request.query_params.get('elselt')
-
-        if elselt:
+        if elselt and elselt != 'undefined':
             self.queryset = self.queryset.filter(admission=elselt)
 
         all_data = self.list(request).data
@@ -433,9 +442,17 @@ class AdmissionUserInfoAPIView(
         profession_id = self.request.query_params.get('profession_id')
         unit1_id = self.request.query_params.get('unit1_id')
         state = self.request.query_params.get('state')
+        age_state = self.request.query_params.get('age_state')
         gpa_state = self.request.query_params.get('gpa_state')
         gender = self.request.query_params.get('gender')
         sorting = self.request.query_params.get('sorting')
+        gpa = self.request.query_params.get('gpa')
+        justice_state = self.request.query_params.get('justice_state')
+        is_justice = self.request.query_params.get('is_justice')
+
+        if is_justice:
+            justice_profession_ids = AdmissionIndicator.objects.filter(admission_prof__admission__is_active=True, value__in=[AdmissionIndicator.YAL_SHIITGEL]).values_list('admission_prof', flat=True)
+            queryset = queryset.filter(profession__in=justice_profession_ids)
 
         if lesson_year_id:
             queryset = queryset.filter(profession__admission=lesson_year_id)
@@ -449,16 +466,24 @@ class AdmissionUserInfoAPIView(
         if state:
             queryset = queryset.filter(state=state)
 
+        if age_state:
+            queryset = queryset.filter(age_state=age_state)
+
         if gpa_state:
             user_ids = UserInfo.objects.filter(gpa_state=gpa_state).values_list('user', flat=True)
             queryset = queryset.filter(user__in=user_ids)
+
+        if justice_state:
+            queryset = queryset.filter(justice_state=justice_state)
 
         if gender:
             if gender == 'Эрэгтэй':
                 queryset = queryset.filter(gender__in=['1', '3', '5', '7', '9'])
             else:
                 queryset = queryset.filter(gender__in=['0', '2', '4', '6', '8'])
-
+        if gpa:
+            gpa_value = float(gpa)
+            queryset = queryset.filter(gpa__lte = gpa_value)
         # Sort хийх үед ажиллана
         if sorting:
             if not isinstance(sorting, str):
@@ -500,6 +525,7 @@ class AdmissionUserInfoAPIView(
         return request.send_info('INF_002')
 
 
+
 class AdmissionUserAllChange(
     generics.GenericAPIView,
     mixins.UpdateModelMixin
@@ -518,7 +544,18 @@ class AdmissionUserAllChange(
         try:
             with transaction.atomic():
                 now = dt.datetime.now()
-                self.queryset.filter(pk__in=data["students"]).update(state=data["state"], updated_at=now, state_description=data["state_description"])
+                if data.get("state") :
+                    self.queryset.filter(pk__in=data["students"]).update(
+                    state=data.get("state"),
+                    updated_at=now,
+                    state_description=data.get("state_description")
+                )
+                else:
+                    self.queryset.filter(pk__in=data["students"]).update(
+                    updated_at=now,
+                    justice_state=data.get("justice_state"),
+                    justice_description=data.get("justice_description")
+                )
         except Exception as e:
             transaction.savepoint_rollback(sid)
             return request.send_error("ERR_002", e.__str__)
@@ -661,10 +698,11 @@ class AdmissionUserEmailAPIView(
             print(e)
             transaction.savepoint_rollback(sid)
             return request.send_error("ERR_002", e.__str__)
+
         return request.send_info('INF_001')
 
 
-@permission_classes([IsAuthenticated])
+
 class AdmissionYearAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -676,8 +714,22 @@ class AdmissionYearAPIView(
     def get(self, request):
 
         all_data = self.list(request).data
-
         return request.send_data(all_data)
+
+class AdmissionYearActiveAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+):
+
+    queryset = AdmissionRegister.objects.all()
+    serializer_class = AdmissionSerializer
+
+    def get(self, request):
+        "идэвхитэй элсэлт"
+
+        self.queryset = self.queryset.filter(is_active=True)
+        active_data = self.list(request).data
+        return request.send_data(active_data)
 
 
 @permission_classes([IsAuthenticated])
@@ -867,7 +919,12 @@ class ElseltHealthAnhanShat(
 
     def get_queryset(self):
         queryset = self.queryset
-        queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
+        queryset = queryset.annotate(
+            gender=(Substr('user__register', 9, 1)),
+            user_email=F("user__email"),
+            degree_name=F("profession__profession__degree__degree_name"),
+            profession_name=F("profession__profession__name"),
+        )
 
         # Эрүүл мэндийн шалгуур үзүүлэлттэй мэргэжлүүд
         # TODO Одоогоор идэвхтэй байгаа элсэлтээс л харуулж байгаа гэсэн үг
@@ -877,15 +934,26 @@ class ElseltHealthAnhanShat(
         gender = self.request.query_params.get('gender')
         sorting = self.request.query_params.get('sorting')
         state  = self.request.query_params.get('state')
+        elselt = self.request.query_params.get('elselt')
+        profession = self.request.query_params.get('profession')
+
+
 
         # Ял шийтгэл, Насны үзүүлэлтүүдэд ТЭНЦЭЭГҮЙ элсэгчдийг хасах
-        queryset = queryset.exclude(justice_state=AdmissionUserProfession.STATE_REJECT, age_state=AdmissionUserProfession.STATE_REJECT)
-
+        queryset = queryset.exclude(age_state=AdmissionUserProfession.STATE_REJECT, gpa_state=AdmissionUserProfession.STATE_REJECT, state__in=[AdmissionUserProfession.STATE_REJECT, AdmissionUserProfession.STATE_APPROVE])
         if gender:
             if gender == 'Эрэгтэй':
                 queryset = queryset.filter(gender__in=['1', '3', '5', '7', '9'])
             else:
                 queryset = queryset.filter(gender__in=['0', '2', '4', '6', '8'])
+
+        # элсэлт
+        if elselt:
+            queryset = queryset.filter(profession__admission=elselt)
+
+        # хөтөлбөр
+        if profession:
+            queryset = queryset.filter(profession=profession)
 
         # Sort хийх үед ажиллана
         if sorting:
@@ -895,7 +963,11 @@ class ElseltHealthAnhanShat(
             queryset = queryset.order_by(sorting)
 
         if state:
-            user_id = HealthUser.objects.filter(state=state).values_list('user', flat=True)
+            if state == '1':
+                exclude_ids = HealthUser.objects.filter(Q(Q(state=AdmissionUserProfession.STATE_APPROVE) | Q(state=AdmissionUserProfession.STATE_REJECT))).values_list('user', flat=True)
+                user_id = AdmissionUserProfession.objects.filter(state=state).exclude(user__in=exclude_ids).values_list('user', flat=True)
+            else:
+                user_id = HealthUser.objects.filter(state=state).values_list('user', flat=True)
             queryset = queryset.filter(user__in=user_id)
 
         return queryset
@@ -917,6 +989,13 @@ class ElseltHealthAnhanShat(
 
         data = request.data
         serializer = HealthUserSerializer(data=data)
+        data = null_to_none(data)
+        user = data.get('user').get('id')
+
+        if 'user' in data:
+            del data['user']
+
+        data['user'] = user
 
         if serializer.is_valid():
 
@@ -945,6 +1024,13 @@ class ElseltHealthAnhanShat(
     def put(self, request, pk=None):
 
         data = request.data
+        user = data.get('user').get('id')
+
+        if 'user' in data:
+            del data['user']
+
+        data['user'] = user
+
         health_user = HealthUser.objects.filter(id=pk).first()
         serializer = HealthUserSerializer(health_user, data)
 
@@ -1001,8 +1087,12 @@ class ElseltHealthProfessional(
         gender = self.request.query_params.get('gender')
         sorting = self.request.query_params.get('sorting')
         state  = self.request.query_params.get('state')
+        admission = self.request.query_params.get("lesson_year_id")
+        profession = self.request.query_params.get('profession_id')
 
-        queryset = queryset.filter(state=AdmissionUserProfession.STATE_APPROVE)
+        # Анхан шат тэнцсэн хэрэглэгчид
+        anhan_shat_ids = HealthUser.objects.filter(state=AdmissionUserProfession.STATE_APPROVE).values_list('user', flat=True)
+        queryset = queryset.filter(user__in=anhan_shat_ids)
 
         if gender:
             if gender == 'Эрэгтэй':
@@ -1018,8 +1108,23 @@ class ElseltHealthProfessional(
             queryset = queryset.order_by(sorting)
 
         if state:
-            user_id = HealthUser.objects.filter(state=state).values_list('user', flat=True)
-            queryset = queryset.filter(user__in=user_id)
+            if state == '1':
+                user_id = HealthUpUser.objects.filter(Q(Q(state=2) | Q(state=3))).values_list('user', flat=True)
+                queryset = queryset.filter(state=2).exclude(user_id__in=user_id)
+            else:
+                user_id = HealthUpUser.objects.filter(state=state).values_list('user', flat=True)
+                queryset = queryset.filter(user__in=user_id)
+
+        if admission:
+            queryset = queryset.filter(
+                user__admissionuserprofession__profession__admission__id=admission
+            )
+
+        if profession:
+            queryset = queryset.filter(
+                user__admissionuserprofession__profession__profession=profession
+            )
+
 
         return queryset
 
@@ -1070,6 +1175,15 @@ class ElseltHealthProfessional(
         data = request.data
         health_user = HealthUpUser.objects.filter(id=pk).first()
         serializer = HealthUpUserSerializer(health_user, data)
+        data['updated_user'] = request.user.id
+
+        if health_user:
+            # төлөв солих үед ажиллах serializer
+            serializer_state = HealthUpUserStateSerializer(health_user, data)
+
+            if serializer_state.is_valid():
+                serializer_state.save()
+            return request.send_info('INF_013')
 
         if serializer.is_valid():
 
@@ -1078,7 +1192,6 @@ class ElseltHealthProfessional(
 
         else:
             error_obj = []
-            print(serializer.errors)
             for key in serializer.errors:
                 msg = "Хоосон байна"
 
@@ -1131,10 +1244,20 @@ class ElseltHealthPhysical(
 
         sorting = self.request.query_params.get('sorting')
         state  = self.request.query_params.get('state')
+        elselt = self.request.query_params.get('elselt')
+        profession = self.request.query_params.get('profession')
 
         # Нарийн мэргэжлийн үзлэгт тэнцсэн хүүхдүүд бие бялдарын шалгалтад орно
         healt_user_ids = HealthUpUser.objects.filter(state=AdmissionUserProfession.STATE_APPROVE).values_list('user', flat=True)
-        queryset = queryset.filter(age_state=AdmissionUserProfession.STATE_APPROVE, justice_state=AdmissionUserProfession.STATE_APPROVE, user__in=healt_user_ids)
+        queryset = queryset.filter(user__in=healt_user_ids)
+
+        # элсэлт
+        if elselt:
+            queryset = queryset.filter(profession__admission=elselt)
+
+        # хөтөлбөр
+        if profession:
+            queryset = queryset.filter(profession__profession__id=profession)
 
         # Sort хийх үед ажиллана
         if sorting:
@@ -1143,10 +1266,14 @@ class ElseltHealthPhysical(
 
             queryset = queryset.order_by(sorting)
 
-        # Төлөвөөр хайхаар бол тухайн мэргэжлийн эмнэлгийн үзлэгийн төлөвөөс хайна
         if state:
-            user_ids = HealthUpUser.objects.filter(state=state).values_list('user', flat=True)
-            queryset = queryset.filter(user__in=user_ids)
+            if state == '1':
+                user_id = HealthUpUser.objects.filter(state=2).values_list('user', flat=True)
+                exclude_ids = PhysqueUser.objects.filter(state__in=[AdmissionUserProfession.STATE_APPROVE, AdmissionUserProfession.STATE_REJECT]).values_list('user', flat=True)
+                queryset = queryset.filter(user_id__in=user_id).exclude(user__in=exclude_ids)
+            else:
+                user_id = PhysqueUser.objects.filter(state=state).values_list('user', flat=True)
+                queryset = queryset.filter(user__in=user_id)
 
         return queryset
 
@@ -1163,13 +1290,15 @@ class ElseltHealthPhysical(
 
     @transaction.atomic
     def post(self, request):
-
+        sid = transaction.savepoint()
         new_serializer = None
+        data = request.data
+        user = data.get('user').get('id')
+        if 'user' in data:
+            del data['user']
 
+        data['user'] = user
         try:
-            data = request.data
-            sid = transaction.savepoint()
-
             serializer = self.physique_serializer_class(data=data)
 
             if not serializer.is_valid():
@@ -1188,17 +1317,18 @@ class ElseltHealthPhysical(
     @transaction.atomic
     def put(self, request, pk=None):
 
-        try:
-            if not pk:
-                return request.send_error('ERR_005')
+        data = request.data
+        user = data.get('user').get('id')
+        if 'user' in data:
+            del data['user']
 
-            data = request.data
+        data['user'] = user
+        try:
             physque_user = PhysqueUser.objects.filter(id=pk).first()
             serializer = PhysqueUserSerializer(physque_user, data)
 
             if not serializer.is_valid(raise_exception=False):
                 return request.send_error_valid(serializer.errors)
-
             serializer.save()
 
         except Exception as e:
@@ -1213,3 +1343,551 @@ class ElseltHealthPhysical(
 
         return request.send_info('INF_003')
 
+
+ # -------------------Элсэгчдийн нарийн мэргэжилийн шатны эрүүл мэндийн үзлэг-------------------------#
+class ElseltHealthPhysicalCreateAPIView(
+    generics.GenericAPIView,
+):
+
+    queryset = HealthUpUser.objects.all()
+    serializer_class = HealthUpUserSerializer
+
+    @transaction.atomic
+    def post(self, request):
+        api_key = request.META.get('HTTP_X_API_KEY')
+        # Манай гаргасан sha256
+        data_to_verify = 'utility_solution'
+        verification_hash = hashlib.sha256(data_to_verify.encode('utf-8')).hexdigest()
+
+        if api_key and api_key == verification_hash:
+            try:
+                data = request.data
+                user_register = data.get('user')
+
+                try:
+                    if not ElseltUser.objects.filter(register__iexact=user_register).exists():
+                        return Response({'status': '404 Not Found', 'message': f'{user_register} регистрийн дугаартай тохирох хэрэглэгч олдсонгүй'}, status=status.HTTP_404_NOT_FOUND)
+                    else:
+                        user = ElseltUser.objects.filter(register__iexact=user_register).first()
+                except ElseltUser.DoesNotExist:
+                    return Response({'status': '404 Not Found', 'message': f'{user_register} регистрийн дугаартай тохирох хэрэглэгч олдсонгүй'}, status=status.HTTP_404_NOT_FOUND)
+
+                data['user'] = user.id
+
+                sid = transaction.savepoint()
+
+                # Өмнө нь бүртгүүлсэн бол update хийнэ
+                if self.queryset.filter(user=user).exists():
+                    instance = self.queryset.filter(user=user).first()
+                    serializer = self.serializer_class(instance=instance, data=data, partial=True)
+                else:
+                    serializer = self.serializer_class(data=data)
+
+                if not serializer.is_valid():
+                    transaction.savepoint_rollback(sid)
+                    return Response({'status': '400 Bad Request', 'message': 'Оруулсан өгөгдөл буруу байна'}, status=status.HTTP_400_BAD_REQUEST)
+
+                serializer.save()
+                transaction.savepoint_commit(sid)
+
+            except Exception as e:
+                print(e)
+                return Response({'status': '500 Internal Server Error', 'message': 'Өгөгдлийн төрлөө шалгана уу'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+            return Response({'status': '200 OK', 'message': 'Хүсэлт амжиллтай'}, status=status.HTTP_200_OK)
+        else:
+            return Response({'status': '403 Forbidden', 'message': 'API key буруу '}, status=status.HTTP_403_FORBIDDEN)
+
+
+class ElseltStateApprove(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.UpdateModelMixin,
+):
+    """ Элсэгч бүх шалгуурыг даваад тэнцсэн """
+
+    queryset = AdmissionUserProfession
+    serializer_class = ElseltApproveSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['user__first_name', 'user__last_name', 'user__register', 'profession__profession__name', 'admission_number', 'admission_date']
+
+    def get_queryset(self):
+        profession = self.request.query_params.get('profession')
+        admission = self.request.query_params.get('admission')
+        sorting = self.request.query_params.get('sorting')
+        queryset = self.queryset.objects.filter(state=AdmissionUserProfession.STATE_APPROVE)
+
+        if admission:
+            queryset = queryset.filter(profession__admission=admission)
+
+        if profession:
+            queryset = queryset.filter(profession__profession__id=profession)
+
+        # Sort хийх үед ажиллана
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
+
+        return queryset
+
+    def get(self, request):
+        " тэнцсэн элсэгчидын жагсаалт "
+
+        all_data = self.list(request).data
+        return request.send_data(all_data)
+
+    def post(self, request):
+        " Тэнцсэн элсэгчдын тушаал шинээр үүсгэх нь "
+
+        datas = request.data
+        users = datas.get('id')                             # Элсэгч
+        admission_date = datas.get('admission_date')        # Элсэлтийн тушаалын огноо
+        admission_number = datas.get('admission_number')    # Элсэлтийн тушаалын дугаар
+
+        with transaction.atomic():
+            try:
+                for user in users:
+                    AdmissionUserProfession.objects.update_or_create(
+                        id=user,
+                        defaults={
+                            "admission_number": admission_number,
+                            "admission_date": admission_date
+                        }
+                    )
+
+            except Exception as e:
+                return request.send_error('ERR_002')
+
+        return request.send_info('INF_001', "Амжилттай тушаал үүслээ")
+
+
+class GpaCheckUserInfoAPIView(
+ generics.GenericAPIView,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin
+):
+    ''' Голч шалгах API '''
+
+    queryset = AdmissionUserProfession.objects.all().order_by('created_at')
+    serializer_class = GpaCheckUserInfoSerializer
+
+    filter_backends = [SearchFilter]
+    search_fields = ['user__first_name', 'user__register', 'user__email', 'gpa', 'org']
+
+    def get_queryset(self):
+        queryset = self.queryset
+        queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
+
+        userinfo_qs = UserInfo.objects.filter(user=OuterRef('user')).values('gpa')[:1]
+        userinfo_org = UserInfo.objects.filter(user=OuterRef('user')).values('work_organization')[:1]
+
+        queryset = (
+            queryset
+            .annotate(
+                gpa=Subquery(userinfo_qs),
+                org=Subquery(userinfo_org),
+            )
+        )
+
+        lesson_year_id = self.request.query_params.get('lesson_year_id')
+        profession_id = self.request.query_params.get('profession_id')
+
+        if lesson_year_id:
+            queryset = queryset.filter(profession__admission=lesson_year_id)
+
+        if profession_id:
+            queryset = queryset.filter(profession__profession__id=profession_id)
+
+
+        return queryset
+
+    def get(self, request, pk=None):
+        limit = self.request.query_params.get('limit')
+        if pk:
+            all_data = self.retrieve(request, pk).data
+            return request.send_data(all_data)
+
+        # Бүртгүүлэгчийн голч created_at аар эрэмбэлэх
+        queryset = self.get_queryset().order_by('-gpa','created_at')
+        serializer = GpaCheckUserInfoSerializer(queryset, many=True)
+        data = serializer.data
+        if limit:
+            limit = int(limit)
+
+            # орж ирсэн тоогоор датаг ангилах
+            data= data[limit:]
+            for entry in data:
+                gpa = entry.get('userinfo', {}).get('gpa')
+
+                # Бүртгүүлэгчийн голч  оруулсан голчоос бага эсэхийг шалгаж төлөвийн өөрчилж харуулах
+                if gpa is not None and float(gpa) < float(self.request.query_params.get('gpa', 0)):
+                    entry['gpa_description'] = "Голч оноо хүрээгүй"
+                else:
+                    entry['gpa_description'] = "Хяналтын тоонд багтаагүй"
+
+        return request.send_data(data)
+
+
+class GpaCheckConfirmUserInfoAPIView(
+    generics.GenericAPIView,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin
+):
+    """ Төлөв хадгалах API """
+
+    queryset = AdmissionUserProfession.objects.all().order_by('created_at')
+
+    serializer_class = GpaCheckConfirmUserInfoSerializer
+
+    filter_backends = [SearchFilter]
+    search_fields = ['user__first_name', 'user__register', 'user__email', 'gpa', 'org']
+
+    def get_queryset(self):
+        queryset = self.queryset
+        queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
+
+        userinfo_qs = UserInfo.objects.filter(user=OuterRef('user')).values('gpa')[:1]
+        userinfo_org = UserInfo.objects.filter(user=OuterRef('user')).values('work_organization')[:1]
+
+        queryset = (
+            queryset
+            .annotate(
+                gpa=Subquery(userinfo_qs),
+                org=Subquery(userinfo_org),
+            )
+        )
+        lesson_year_id = self.request.query_params.get('lesson_year_id')
+        profession_id = self.request.query_params.get('profession_id')
+
+        if lesson_year_id:
+            queryset = queryset.filter(profession__admission=lesson_year_id)
+
+        if profession_id:
+            queryset = queryset.filter(profession__profession__id=profession_id)
+
+        return queryset
+
+    def get(self, request, pk=None):
+        limit = self.request.query_params.get('limit')
+        if pk:
+            all_data = self.retrieve(request, pk).data
+            return request.send_data(all_data)
+
+        queryset = self.get_queryset().order_by('-gpa', 'created_at')
+        serializer = GpaCheckUserInfoSerializer(queryset, many=True)
+        data = serializer.data
+        if limit:
+            limit = int(limit)
+
+            # Тоонд багтсан дата
+            confirmed_data = data[:limit]
+
+            # Тоонд багтаагүй дата
+            unconfirmed_data = data[limit:]
+            with transaction.atomic():
+
+                # Тэнцээгүй элсэгчдийг төлөв өөрчлөх loop
+                for entry in unconfirmed_data:
+                    gpa = entry.get('userinfo', {}).get('gpa', 0)
+                    if float(gpa) < float(self.request.query_params.get('gpa', 0)):
+                        entry['gpa_state'] = AdmissionUserProfession.STATE_REJECT
+                        entry['gpa_description'] = "Голч оноо хүрээгүй"
+                        entry['state'] = AdmissionUserProfession.STATE_REJECT
+                    else :
+                        entry['gpa_state'] = AdmissionUserProfession.STATE_REJECT
+                        entry['gpa_description'] = "Хяналтын тоонд багтаагүй"
+                        entry['state'] = AdmissionUserProfession.STATE_REJECT
+
+                    # Өөрчилсөн төлөвийг хадгалах
+                    obj = AdmissionUserProfession.objects.get(pk=entry['id'])
+                    obj.gpa_state = entry['gpa_state']
+                    obj.definition = entry['gpa_description']
+                    obj.state = entry['state']
+                    obj.save()
+
+                # Тэнцсэн элсэгчдийг төлөв өөрчлөх loop
+                for entry in confirmed_data:
+                    obj = AdmissionUserProfession.objects.get(pk=entry['id'])
+                    obj.gpa_state = AdmissionUserProfession.STATE_APPROVE
+                    obj.save()
+
+            return request.send_info('INF_002')
+        else:
+            return request.send_error('ERR_001')
+
+
+
+class EyeshCheckUserInfoAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+):
+
+    queryset = AdmissionUserProfession.objects.all().order_by('created_at')
+
+    serializer_class = EyeshCheckUserInfoSerializer
+
+    filter_backends = [SearchFilter]
+    search_fields = ['user__first_name', 'user__register', 'user__email', 'gpa', 'org']
+
+    def get_queryset(self):
+        queryset = self.queryset
+        queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
+
+        userinfo_qs = UserInfo.objects.filter(user=OuterRef('user')).values('gpa')[:1]
+        userinfo_org = UserInfo.objects.filter(user=OuterRef('user')).values('work_organization')[:1]
+
+        queryset = (
+            queryset
+            .annotate(
+                gpa=Subquery(userinfo_qs),
+                org=Subquery(userinfo_org),
+            )
+        )
+        lesson_year_id = self.request.query_params.get('lesson_year_id')
+        profession_id = self.request.query_params.get('profession_id')
+
+        if lesson_year_id:
+            queryset = queryset.filter(profession__admission=lesson_year_id)
+
+        if profession_id:
+            queryset = queryset.filter(profession__profession__id=profession_id)
+
+
+        return queryset
+
+    def get(self, request, pk=None):
+        limit = self.request.query_params.get('limit')
+        if pk:
+
+            all_data = self.retrieve(request, pk).data
+
+            return request.send_data(all_data)
+
+        all_data = self.list(request).data
+        all_data.sort(key=lambda x: x.get('eesh_check', 0),reverse=True)
+        if limit:
+            limit = int(limit)
+            all_data = all_data[limit:]
+
+        return request.send_data(all_data)
+
+
+class AdmissionUserMessageAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin
+):
+
+    queryset = MessageInfo.objects.all().order_by('send_date')
+    serializer_class = MessageInfoSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['user__first_name', 'user__register', 'user__email', 'gpa']
+
+    def get_queryset(self):
+
+        queryset = self.queryset
+        userinfo_qs = UserInfo.objects.filter(user=OuterRef('user')).values('gpa')[:1]
+
+        queryset = (
+            queryset
+            .annotate(
+                gpa=Subquery(userinfo_qs),
+            )
+        )
+
+        queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
+
+        lesson_year_id = self.request.query_params.get('lesson_year_id')
+        profession_id = self.request.query_params.get('profession_id')
+        unit1_id = self.request.query_params.get('unit1_id')
+        state = self.request.query_params.get('state')
+        gpa_state = self.request.query_params.get('gpa_state')
+        gender = self.request.query_params.get('gender')
+        sorting = self.request.query_params.get('sorting')
+
+        if lesson_year_id:
+            admission_id = AdmissionRegisterProfession.objects.filter(admission=lesson_year_id).values_list('id', flat=True)
+            user_ids = AdmissionUserProfession.objects.filter(profession__in=admission_id).values_list('user', flat=True)
+            queryset = queryset.filter(user__in=user_ids)
+
+        if profession_id:
+            profession_ids = AdmissionRegisterProfession.objects.filter(profession=profession_id).values_list('id', flat=True)
+            user_ids = AdmissionUserProfession.objects.filter(profession__in=profession_ids).values_list('user', flat=True)
+            queryset = queryset.filter(user__in=user_ids)
+
+        if unit1_id:
+            queryset = queryset.filter(user__aimag__id=unit1_id)
+
+        if state:
+            user_ids = AdmissionUserProfession.objects.filter(state=state).values_list('user', flat=True)
+            queryset = queryset.filter(user__in=user_ids)
+
+        if gpa_state:
+            user_ids = UserInfo.objects.filter(gpa_state=gpa_state).values_list('user', flat=True)
+            queryset = queryset.filter(user__in=user_ids)
+
+        if gender:
+            if gender == 'Эрэгтэй':
+                queryset = queryset.filter(gender__in=['1', '3', '5', '7', '9'])
+            else:
+                queryset = queryset.filter(gender__in=['0', '2', '4', '6', '8'])
+
+        # Sort хийх үед ажиллана
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
+
+        return queryset
+
+
+    def get(self, request):
+
+        send_data = self.list(request).data
+
+        return request.send_data(send_data)
+
+    @login_required()
+    @transaction.atomic()
+    def post(self, request):
+
+        user = request.user
+        data = request.data
+
+        sid = transaction.savepoint()
+        with transaction.atomic():
+            try:
+                create_email_info = []
+                # Элсэгчдийн утасны дугаар
+                phone_numbers = data.get('phone_numbers')
+                # Үүрэн холбоогоор нь ангилсан дугаарнууд
+                typed_phonenumbers = check_phone_number(phone_numbers)
+
+                all_success_count = 0
+
+                # Нийт дугаарыг үүрэн холбоогоор нь ялгаж мессеж илгээх
+                for key, value in typed_phonenumbers.items():
+                    if key == 'mobicom':
+                        success_mobi, msg, success_count, not_found_numbers = send_message_mobicom(value, data.get('description'))
+                        all_success_count = all_success_count + success_count
+
+                    if key == 'skytel':
+                        success_sky, msg, success_count_s, not_found_numbers = send_message_skytel(value, data.get('description'))
+                        all_success_count = all_success_count + success_count_s
+
+                    if key == 'unitel':
+                        success_uni, msg, success_count_u, not_found_numbers = send_message_unitel(value, data.get('description'))
+                        all_success_count = all_success_count + success_count_u
+
+                    if key == 'gmobile':
+                        success_g, msg, success_count_g, not_found_numbers = send_message_gmobile(value, data.get('description'))
+                        all_success_count = all_success_count + success_count_g
+
+                # Мессеж үүсгэх элсэгч бүр дээр
+                for value in data["students"]:
+                    create_email_info.append(
+                        MessageInfo(
+                            user_id = value,
+                            message = data.get('description'),
+                            send_user_id = user.id,
+                        )
+                    )
+
+                self.queryset.bulk_create(create_email_info)
+
+            except Exception as e:
+                print(e)
+                transaction.savepoint_rollback(sid)
+                return request.send_error("ERR_002")
+
+        return request.send_info('INF_001')
+
+
+@permission_classes([IsAuthenticated])
+class AdmissionJusticeListAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+):
+
+    queryset = AdmissionUserProfession.objects.all().order_by('created_at')
+
+    serializer_class = AdmissionUserInfoSerializer
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['user__first_name', 'user__register', 'user__email', 'gpa', 'org']
+
+    def get_queryset(self):
+        queryset = self.queryset
+        queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
+
+        userinfo_qs = UserInfo.objects.filter(user=OuterRef('user')).values('gpa')[:1]
+        userinfo_org = UserInfo.objects.filter(user=OuterRef('user')).values('work_organization')[:1]
+
+        queryset = (
+            queryset
+            .annotate(
+                gpa=Subquery(userinfo_qs),
+                org=Subquery(userinfo_org),
+            )
+        )
+
+        elselt = self.request.query_params.get('elselt')
+        profession = self.request.query_params.get('profession')
+        state = self.request.query_params.get('state')
+        sorting = self.request.query_params.get('sorting')
+
+        justice_profession_ids = AdmissionIndicator.objects.filter(admission_prof__admission__is_active=True, value__in=[AdmissionIndicator.YAL_SHIITGEL]).values_list('admission_prof', flat=True)
+        # Бие бялдарт тэнцсэн элсэгчид
+        biy_byldar_ids = PhysqueUser.objects.filter(state=AdmissionUserProfession.STATE_APPROVE).values_list('user',flat=True)
+        queryset = queryset.filter(profession__in=justice_profession_ids, user__in=biy_byldar_ids)
+
+        if elselt:
+            queryset = queryset.filter(profession__admission=elselt)
+
+        if profession:
+            queryset = queryset.filter(profession__profession__id=profession)
+
+        if state:
+            if state == '1':
+                exclude_ids = PhysqueUser.objects.filter(Q(Q(state=AdmissionUserProfession.STATE_APPROVE) | Q(state=AdmissionUserProfession.STATE_REJECT))).values_list('user', flat=True)
+                user_id = AdmissionUserProfession.objects.filter(state=state).exclude(user__in=exclude_ids).values_list('user', flat=True)
+            else:
+                user_id = PhysqueUser.objects.filter(state=state).values_list('user', flat=True)
+
+            queryset = queryset.filter(user__in=user_id)
+
+        # Sort хийх үед ажиллана
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
+
+        return queryset
+
+    def get(self, request, pk=None):
+
+        if pk:
+
+            all_data = self.retrieve(request, pk).data
+
+            return request.send_data(all_data)
+
+        all_data = self.list(request).data
+
+        return request.send_data(all_data)

@@ -44,7 +44,7 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 		{
 			header: 'profession',
 			name: t("Мэргэжил"),
-			selector: (row) => row?.profession?.name,
+			selector: (row) => row?.profession?.name + '(' + row?.profession?.duration + ')',
             sortable: true,
 			minWidth: "80px",
 			center: true,

@@ -7,9 +7,6 @@ export const validateSchema = Yup.object().shape({
     weight: Yup.string()
         .trim()
         .required('Хоосон байна'),
-    description: Yup.string()
-        .trim()
-        .required('Хоосон байна'),
     state: Yup.string()
         .trim()
         .required('Хоосон байна'),

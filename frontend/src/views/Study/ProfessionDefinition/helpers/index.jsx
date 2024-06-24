@@ -41,7 +41,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 		{
 			header: 'name',
 			name: `${t('Хөтөлбөр')}`,
-			selector: (row) => row?.code + ' ' + row?.name,
+			selector: (row) => row?.code + ' ' + row?.name + "(" + row?.duration + ')',
             sortable: true,
 			minWidth: "350px",
 			maxWidth: "250px",

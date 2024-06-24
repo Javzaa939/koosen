@@ -8,6 +8,10 @@ from django.conf import settings
 
 from datetime import datetime
 
+from core.fns import WithChoices
+
+from elselt.models import ElseltUser
+
 from lms.models import LessonStandart
 from lms.models import Lesson_title_plan
 from lms.models import LessonCategory
@@ -36,6 +40,8 @@ from lms.models import Lesson_assignment_student_file
 from lms.models import Lesson_materials
 from lms.models import Lesson_material_file
 from lms.models import Lesson_assignment, AdmissionRegisterProfession
+from lms.models import PsychologicalTest
+from lms.models import PsychologicalTestQuestions
 
 from main.utils.file import split_root_path
 
@@ -89,6 +95,21 @@ def fix_format_date(input_date, format='%Y-%m-%d %H:%M:%S'):
         date_data = input_date.strftime(format)
 
     return date_data
+
+# fix_format_date функцтай адил гэхдээ serializer дотроо нэмэлт функц бичих шаардлагагүй
+class DateOnlyField(serializers.Field):
+    def to_representation(self, value):
+        # postgre datetime-ийг date-рүү хөрвүүлнэ
+        if isinstance(value, datetime):
+            return value.date().isoformat()
+        return value
+
+    def to_internal_value(self, data):
+        # оролтын data-г date болгоно
+        try:
+            return datetime.strptime(data, '%Y-%m-%d %H:%M:%S').date()
+        except ValueError:
+            raise serializers.ValidationError('Оролтын дата нь %Y-%m-%d %H:%M:%S хэлбэртэй байх шаардлагатай.')
 
 # Хичээлийн ангилал
 class LessonCategorySerializer(serializers.ModelSerializer):
@@ -197,12 +218,9 @@ class ProfessionDefinitionListSerializer(serializers.ModelSerializer):
 
     def get_admission_lesson(self, obj):
 
-        lesson_list = []
-        lesson_ids = list(AdmissionBottomScore.objects.filter(profession=obj.id).values())
-        if lesson_ids:
-            lesson_list =  lesson_ids
-
-        return lesson_list
+        profId = obj.id
+        adm_obj = AdmissionBottomScore.objects.filter(profession_id=profId).annotate(type_name=WithChoices(AdmissionBottomScore.SCORE_TYPE, 'score_type'), lesson_name=F('admission_lesson__lesson_name')).values()
+        return list(adm_obj)
 
 
 # Мэргэжлийн тодорхойлолт
@@ -789,7 +807,7 @@ class LessonMaterialListSerializer(serializers.ModelSerializer):
             )
 
         return ass_student_qs
-    
+
 class LessonTeacherSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -830,3 +848,46 @@ class ProfessionDefinitionJustProfessionSerializer(serializers.ModelSerializer):
             full_name = full_name + '({ognoo})'.format(ognoo=ognoo)
 
         return full_name
+
+
+class PsychologicalTestSerializer(serializers.ModelSerializer):
+    start_date = DateOnlyField()
+    end_date = DateOnlyField()
+
+    class Meta:
+        model = PsychologicalTest
+        exclude = ['questions']
+
+
+class PsychologicalTestQuestionsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = PsychologicalTestQuestions
+        fields = '__all__'
+
+
+class PsychologicalTestScopeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = PsychologicalTest
+        fields = ['id']
+
+
+class TeachersSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Teachers
+        fields = ["id", "register", "last_name", "first_name"]
+
+class StudentSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Student
+        fields = ["id", "code", "last_name", "first_name"]
+
+
+class ElsegchSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ElseltUser
+        fields = ["id", "code", "last_name", "first_name"]

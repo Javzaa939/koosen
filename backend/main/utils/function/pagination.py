@@ -31,14 +31,14 @@ class CustomPagination(pagination.PageNumberPagination):
         else:
             limit = int(limit)
 
-        check_page = int(count / limit)
-        float_page = count % limit
+            check_page = int(count / limit)
+            float_page = count % limit
 
-        if float_page != 0:
-            check_page += 1
+            if float_page != 0:
+                check_page += 1
 
-        if check_page < page:
-            request.query_params['page'] = '1'
+            if check_page < page:
+                request.query_params['page'] = '1'
 
         self.django_paginator_class._check_object_list_is_ordered = lambda s: None
         return super().paginate_queryset(queryset, request, view=view)

@@ -628,6 +628,76 @@ permissions = [
         'name' : 'lms-print-admission-read',
         'description' : 'Элсэлтийн тушаал унших эрх'
     },
+
+    {
+        'name' : 'lms-elselt-dashboard-read',
+        'description' : 'Элсэлтийн систем дашбоард'
+    },
+    {
+        'name' : 'lms-elselt-main-read',
+        'description' : 'Элсэлтийн систем үндсэн цэс'
+    },
+    {
+        'name' : 'lms-elselt-admission-read',
+        'description' : 'Элсэлтийн систем элсэлт цэс'
+    },
+    {
+        'name' : 'lms-elselt-justice-read',
+        'description' : 'Элсэлтийн систем ял шийтгэл цэс'
+    },
+    {
+        'name' : 'lms-elselt-health-read',
+        'description' : 'Элсэлтийн систем эрүүл мэндийн анхан шат цэс'
+    },
+    {
+        'name' : 'lms-elselt-healthup-read',
+        'description' : 'Элсэлтийн систем эрүүл мэнд нарийн мэргэжил цэс'
+    },
+    {
+        'name' : 'lms-elselt-physical-read',
+        'description' : 'Элсэлтийн систем бие бялдар цэс'
+    },
+    {
+        'name' : 'lms-elselt-approve-read',
+        'description' : 'Элсэлтийн систем тэнцсэн элсэгч цэс'
+    },
+    {
+        'name' : 'lms-elselt-mail-read',
+        'description' : 'Элсэлтийн систем мэйл тайлан цэс'
+    },
+    {
+        'name' : 'lms-elselt-admission-update',
+        'description' : 'Элсэлтийн систем хөтөлбөр солих'
+    },
+    {
+        'name' : 'lms-elselt-admission-create',
+        'description' : 'Элсэлтийн систем элсэлт үүсгэх'
+    },
+    {
+        'name' : 'lms-elselt-admission-approve',
+        'description' : 'Элсэлтийн систем хөтөлбөр үүсгэх'
+    },
+    {
+        'name' : 'lms-elselt-mail-create',
+        'description' : 'Элсэлтийн систем мэйл илгээх'
+    },
+    {
+        'name' : 'lms-elselt-gpa-approve',
+        'description' : 'Элсэлтийн систем голч шалгах'
+    },
+    {
+        'name' : 'lms-elselt-message-create',
+        'description' : 'Элсэлтийн систем мессеж илгээх'
+    },
+    {
+        'name' : 'lms-elselt-physque-create',
+        'description' : 'Элсэлтийн систем бие бялдар мэдээлэл оруулах'
+    },
+    {
+        'name' : 'lms-elselt-health-create',
+        'description' : 'Элсэлтийн систем эрүүл мэнд анхан шат мэдээлэл оруулах'
+    },
+
 #------------------------------------"Дотуур байр"----------------------------
     # Өрөөний төрөл
     {
@@ -1165,5 +1235,42 @@ permissions = [
     {
         'name' : 'lms-exam-delete',
         'description' : 'Шалгалт устгах эрх'
+    },
+    # ----------------------Сэтгэлзүйн сорил цэс------------------------
+
+    # Сорилын асуулт
+    {
+        'name' : 'lms-psychologicaltesting-question-read',
+        'description' : 'Сорилын асуулт унших эрх'
+    },
+    {
+        'name' : 'lms-psychologicaltesting-question-create',
+        'description' : 'Сорилын асуулт шинээр үүсгэх эрх'
+    },
+    {
+        'name' : 'lms-psychologicaltesting-question-update',
+        'description' : 'Сорилын асуулт засах эрх'
+    },
+    {
+        'name' : 'lms-psychologicaltesting-question-delete',
+        'description' : 'Сорилын асуулт устгах эрх'
+    },
+
+    # Сэтгэлзүйн сорил
+    {
+        'name' : 'lms-psychologicaltesting-exam-read',
+        'description' : 'Сэтгэлзүйн сорил унших эрх'
+    },
+    {
+        'name' : 'lms-psychologicaltesting-exam-create',
+        'description' : 'Сэтгэлзүйн сорил шинээр үүсгэх эрх'
+    },
+    {
+        'name' : 'lms-psychologicaltesting-exam-update',
+        'description' : 'Сэтгэлзүйн сорил засах эрх'
+    },
+    {
+        'name' : 'lms-psychologicaltesting-exam-delete',
+        'description' : 'Сэтгэлзүйн сорил устгах эрх'
     },
 ]

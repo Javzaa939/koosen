@@ -253,8 +253,8 @@ export default function Role()
         {
             setValue('name', isUpdate.name)
             setValue('description', isUpdate.description)
-            setChecked(isUpdate.permissions)
-            setCheckedPos(isUpdate.positions)
+            setChecked(isUpdate?.permissions)
+            setCheckedPos(isUpdate?.positions)
 
             for (let perm of isUpdate.permissions)
             {
