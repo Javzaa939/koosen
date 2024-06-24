@@ -237,7 +237,7 @@ const Createmodal = ({ open, handleModal,refreshDatas }) => {
                         }
                         <Col md={12}>
                             <Label className="form-label" for="stipend_type">
-                                {t('Тэтгэлэгүүд')}
+                                {t('Тэтгэлгийн нэр')}
                             </Label>
                             <Controller
                                 control={control}

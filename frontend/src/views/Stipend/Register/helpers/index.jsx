@@ -35,7 +35,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleRequest
 		},
 		{
 			header: 'stipend_type',
-			name: `${t("Тэтгэлэгүүд")}`,
+			name: `${t("Тэтгэлгийн нэр")}`,
 			selector: (row) => (row?.stipend_type?.name),
             sortable: true,
 			minWidth: "150px",
@@ -45,14 +45,6 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleRequest
 			header: 'start_date',
 			name: t("Эхлэх хугацаа"),
 			selector: (row) => row?.start_date,
-			minWidth: "150px",
-			maxWidth: "300px",
-            sortable: true,
-		},
-		{
-			header: 'finish_date',
-			name: t("Дуусах хугацаа"),
-			selector: (row) => row?.finish_date,
 			minWidth: "150px",
 			maxWidth: "300px",
             sortable: true,
