@@ -25,6 +25,8 @@ import { ChevronDown, Search } from 'react-feather'
 import { useTranslation } from 'react-i18next'
 import { RiEditFill } from "react-icons/ri";
 import { getColumns } from './helpers';
+import { MdMailOutline } from "react-icons/md";
+import { BiMessageRoundedError } from "react-icons/bi";
 
 import DataTable from 'react-data-table-component'
 import moment from 'moment';
@@ -36,6 +38,8 @@ import useLoader from '@hooks/useLoader';
 import AuthContext from "@context/AuthContext"
 import useUpdateEffect from '@hooks/useUpdateEffect';
 
+import EmailModal from '../User/EmailModal'
+import MessageModal from '../User/MessageModal'
 
 import StateModal from './StateModal';
 
@@ -60,6 +64,9 @@ const InterView = () => {
     const professionApi = useApi().elselt.profession
 
     const [stateModal,setStateModel] = useState(false);
+    const [addModalData, setAddModalData] = useState(null)
+    const [emailModal, setEmailModal] = useState(false)      // email modal
+    const [messageModal, setMessageModal] = useState(false)
 
     // // Эрэмбэлэлт
     const [sortField, setSort] = useState('')
@@ -147,10 +154,6 @@ const InterView = () => {
     setCurrentPage(page.selected + 1);
     };
 
-    // useEffect(()=>{
-    //   getDatas()
-    // },[])
-
     // Хайлтийн хэсэг хоосон болох үед анхны датаг дуудна
     useEffect(() => {
       if (searchValue.length == 0) {
@@ -186,12 +189,33 @@ const InterView = () => {
     }
 
     // Элсэгчдийн ярилцлага тэнцсэн эсэх төлөв солих
-    function stateModalHandler(e) {
-      setStateModel(!stateModal)
+    function stateModalHandler(e,data) {
+      setStateModel(!stateModal),
+      setAddModalData(data || null)
     }
+
+    function emailModalHandler() {
+        setEmailModal(!emailModal)
+    }
+
+    function messageModalHandler() {
+        setMessageModal(!messageModal)
+    }
+
 
     return (
     <Fragment>
+            <EmailModal
+                emailModalHandler={emailModalHandler}
+                emailModal={emailModal}
+                selectedStudents={selectedStudents}
+                getDatas={getDatas}
+            />
+            <MessageModal
+                messageModalHandler={messageModalHandler}
+                messageModal={messageModal}
+                selectedStudents={selectedStudents}
+                getDatas={getDatas}/>
           <StateModal
               stateModalHandler={stateModalHandler}
               stateModal={stateModal}
@@ -284,6 +308,36 @@ const InterView = () => {
                                     </Button>
                                     <UncontrolledTooltip target='state_button'>
                                         Доорхи сонгосон элсэгчдийн төлөвийг нэг дор солих
+                                    </UncontrolledTooltip>
+                                </div>
+                                <div className='px-1'>
+                                    <Button
+                                        color='primary'
+                                        disabled={(selectedStudents.length != 0 && user.permissions.includes('lms-elselt-mail-create')) ? false : true}
+                                        className='d-flex align-items-center px-75'
+                                        id='email_button'
+                                        onClick={() => emailModalHandler()}
+                                    >
+                                        <MdMailOutline className='me-25'/>
+                                        Email илгээх
+                                    </Button>
+                                    <UncontrolledTooltip target='email_button'>
+                                        Сонгосон элсэгчид руу имейл илгээх
+                                    </UncontrolledTooltip>
+                                </div>
+                                <div className='px-1'>
+                                    <Button
+                                        color='primary'
+                                        disabled={(selectedStudents.length != 0 && user?.permissions?.includes('lms-elselt-message-create')) ? false : true}
+                                        className='d-flex align-items-center px-75'
+                                        id='message_button'
+                                        onClick={() => messageModalHandler()}
+                                    >
+                                        <BiMessageRoundedError className='me-25'/>
+                                        Мессеж илгээх
+                                    </Button>
+                                    <UncontrolledTooltip target='message_button'>
+                                        Сонгосон элсэгчид руу мессеж илгээх
                                     </UncontrolledTooltip>
                                 </div>
                             </div>

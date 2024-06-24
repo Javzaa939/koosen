@@ -57,7 +57,7 @@ export function getColumns (currentPage, rowsPerPage, page_count,stateop,stateMo
 			minWidth: "150px",
 			header: 'description',
 			name: t("Тайлбар"),
-			cell: (row) => (row?.conversation_data.description),
+			cell: (row) => (row?.conversation_data?.description),
 			sortable: true,
 			reorder: true,
 			center: true,
@@ -230,7 +230,8 @@ export function getColumns (currentPage, rowsPerPage, page_count,stateop,stateMo
 				<div className="text-center" style={{ width: "auto" }}>
 					<a
 						role="button"
-						onClick={() => { stateModalHandler()} }
+						onClick={(e) => { stateModalHandler(e,row)} }
+						// onClick={() => stateModalHandler()}
 						id={`description${row?.id}`}
 						className="me-1"
 						// style={{pointerEvents: user?.permissions?.includes('lms-elselt-physque-create') ? '' : 'none'}}

@@ -790,6 +790,7 @@ class ConversationUserInfoSerializer(serializers.ModelSerializer):
         age_state=serializers.SerializerMethodField()
         profession=serializers.SerializerMethodField()
         conversation_data=serializers.SerializerMethodField()
+        full_name = serializers.CharField(source='user.full_name', default='', read_only=True)
 
         class Meta:
             model = ConversationUser
