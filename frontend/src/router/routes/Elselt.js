@@ -12,7 +12,7 @@ const AnhanShat = lazy(() => import("@views/Elselt/Health/AnhanShat"))
 const Mergejliin = lazy(() => import("@views/Elselt/Health/Mergejliin"))
 const Physical = lazy(() => import("@src/views/Elselt/Health/Physical"))
 const MessageTailan = lazy(() => import("@views/Elselt/Tailan/Message"))
-
+const InterView = lazy(() => import("@views/Elselt/InterView"))
 
 const ElseltRoutes = [
     {
@@ -62,6 +62,10 @@ const ElseltRoutes = [
     {
         path: 'elselt/physical/',
         element: <Physical />
+    },
+    {
+        path: 'elselt/interview/',
+        element: <InterView />
     },
 ]
 

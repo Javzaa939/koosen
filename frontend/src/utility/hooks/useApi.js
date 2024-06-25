@@ -1765,6 +1765,11 @@ function useApi(isDisplay=false) {
 			post: (cdata) => instance.post(`/elselt/approve/`, cdata),
 
 		},
+		interview:{
+			get: (limit, page, sort, search, state, elselt, profession) => instance.get(`/elselt/interview/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}&elselt=${elselt}&profession=${profession}`),
+			post: (cdata) => instance.post(`/elselt/interview/`, cdata),
+			put: (id, cdata) => instance.put(`/elselt/interview/${id}/`, cdata)
+		}
 	},
 	able: {
 		getWorker: () => able_instance.get(`/?a=ableApi&tsk=getWorkers&key=uia`),
