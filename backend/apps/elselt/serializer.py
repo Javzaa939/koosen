@@ -569,6 +569,7 @@ class HealthPhysicalUserInfoSerializer(serializers.ModelSerializer):
     gender_name = serializers.SerializerMethodField()
     health_up_user_data = serializers.SerializerMethodField()
     user = ElseltUserSerializer(many=False, read_only=True)
+    userinfo= serializers.SerializerMethodField()
 
     class Meta:
         model = AdmissionUserProfession
@@ -595,6 +596,14 @@ class HealthPhysicalUserInfoSerializer(serializers.ModelSerializer):
             health_user_data = PhysqueUserSerializer(user_data).data
 
         return health_user_data
+
+    def get_userinfo(self, obj):
+
+        data = UserInfo.objects.filter(user=obj.user.id).first()
+        userinfo_data = UserinfoSerializer(data).data
+
+        return userinfo_data
+
 
 
 class AdmissionRegisterProfessionSerializer(serializers.ModelSerializer):

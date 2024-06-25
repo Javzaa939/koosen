@@ -152,6 +152,13 @@ function Physical() {
                     'Авхаалж самбаа ': data?.health_up_user_data?.quickness|| '',
                     'Уян хатан': data?.health_up_user_data?.flexible || '',
                     'Нийт оноо': data?.health_up_user_data?.total_score  || '',
+                    'Төгссөн сургууль': data?.userinfo?.graduate_school || '',
+                    'Хөтөлбөр': data?.userinfo?.graduate_profession || '',
+                    'Төгссөн он': data?.userinfo?.graduate_school_year || '',
+                    'Голч': data?.userinfo?.gpa || '',
+                    'Ажиллаж байгаа байгууллагын нэр': data?.userinfo?.work_organization || '',
+                    'Албан тушаал': data?.userinfo?.position_name || '',
+                    'Цол': data?.userinfo?.tsol_name || '',
 
                 }
             )
@@ -182,6 +189,13 @@ function Physical() {
             'Авхаалж самбаа',
             'Уян хатан',
             'Нийт оноо',
+            'Төгссөн сургууль',
+            'Хөтөлбөр',
+            'Төгссөн он',
+            'Голч',
+            'Ажиллаж байгаа байгууллагын нэр',
+            'Албан тушаал',
+            'Цол',
         ];
 
         utils.sheet_add_aoa(worksheet, [staticCells], { origin: "A1" });
@@ -242,7 +256,7 @@ function Physical() {
         const styleRow = 0;
         const sendRow = datas?.length + 1;
         const styleCol = 0;
-        const sendCol = 14;
+        const sendCol = 21;
 
         for (let row = styleRow; row <= sendRow; row++) {
             for (let col = styleCol; col <= sendCol; col++) {
@@ -262,19 +276,8 @@ function Physical() {
         worksheet["!cols"] = [
             { wch: 3 },
             ...phaseZeroCells,
-            { wch: 25 },
-            { wch: 10 },
-            { wch: 10 },
-            { wch: 25 },
-            { wch: 10 },
-            { wch: 25 },
-            { wch: 25 },
-            { wch: 10 },
-            { wch: 5 },
-            { wch: 25 },
-            { wch: 25 },
-            { wch: 25 },
-            { wch: 15 },
+            { wch: 20 }
+
         ];
 
         const phaseOneRow = Array.from({length: datas.length}, (_) => {return({hpx: 30})})
