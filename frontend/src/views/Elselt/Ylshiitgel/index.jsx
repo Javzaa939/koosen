@@ -234,7 +234,7 @@ const ElseltYlshiitgel = () => {
         const worksheet = utils.json_to_sheet(combo);
 
         const workbook = utils.book_new();
-        utils.book_append_sheet(workbook, worksheet, "Элсэгчдийн мэдээлэл");
+        utils.book_append_sheet(workbook, worksheet, "Эрүүгийн хариуцлага");
 
         const staticCells = [
             '№',
@@ -331,7 +331,7 @@ const ElseltYlshiitgel = () => {
             ...phaseZeroCells,
             { wch: 10 },
             { wch: 10 },
-            { wch: 10 },
+            { wch: 20 },
             { wch: 10 },
             { wch: 10 },
             { wch: 10 },
@@ -345,7 +345,7 @@ const ElseltYlshiitgel = () => {
             ...phaseOneRow
         ]
 
-        writeFile(workbook, "Элсэгчдийн мэдээлэл.xlsx", { compression: true });
+        writeFile(workbook, "Эрүүгийн хариуцлага.xlsx", { compression: true });
     }
 
 	return (
