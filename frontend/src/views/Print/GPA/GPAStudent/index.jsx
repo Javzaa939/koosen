@@ -107,11 +107,6 @@ const GPAStudent = () => {
         }
     }
 
-    useEffect(() => {
-        getProfessionOption();
-        getGroupOption();
-    }, [select_value]);
-
     const handleSearchButton = () => {
         if (select_value) {
             getDatas();
