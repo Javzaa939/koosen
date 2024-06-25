@@ -463,10 +463,10 @@ class GroupListNoLimitAPIView(
                     'C': grade_dict['C'],
                     'D': grade_dict['D'],
                     'F': grade_dict['F'],
-                    "үзсэн кредит": total_kr,
-                    "нийт хичээлийн тоо": lesson_count,
-                    "голч дүн": avg_score,
-                    "gpa": avg_gpa
+                    "Үзсэн кредит": total_kr,
+                    "Нийт хичээлийн тоо": lesson_count,
+                    "Голч оноо": avg_score,
+                    "Голч дүн": avg_gpa
                 }
             )
         id = 0
