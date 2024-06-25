@@ -59,5 +59,9 @@ urlpatterns = [
     # Бүх шалгуурыг даваад тэнцсэн жагсаалт
     path('approve/', ElseltStateApprove.as_view()),
 
+    # Элсэгчдийн ярилцлага
+    path('interview/',ConversationUserSerializerAPIView.as_view()),
+    path('interview/<int:pk>/', ConversationUserSerializerAPIView.as_view()),
+
 ]
 
