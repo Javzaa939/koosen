@@ -778,29 +778,18 @@ class EyeshCheckUserInfoSerializer(serializers.ModelSerializer):
 
         return avg_scaled_score or 0
 
-<<<<<<< HEAD
 class ConversationUserInfoSerializer(serializers.ModelSerializer):
         user = serializers.SerializerMethodField()
         justice_state = serializers.SerializerMethodField()
         justice_description = serializers.SerializerMethodField()
-=======
-class ConversationUserSerializer(serializers.ModelSerializer):
-        user = serializers.SerializerMethodField()
-        justice_state = serializers.SerializerMethodField()
-        justice_description = serializers.SerializerMethodField()
-        state_name = serializers.SerializerMethodField()
->>>>>>> f6eacb40a759e91fa6fec3135168eceb8f29f21a
         userinfo= serializers.SerializerMethodField()
         gender_name = serializers.SerializerMethodField()
         gpa_state=serializers.SerializerMethodField()
         user_age = serializers.SerializerMethodField()
         age_state=serializers.SerializerMethodField()
         profession=serializers.SerializerMethodField()
-<<<<<<< HEAD
         conversation_data=serializers.SerializerMethodField()
         full_name = serializers.CharField(source='user.full_name', default='', read_only=True)
-=======
->>>>>>> f6eacb40a759e91fa6fec3135168eceb8f29f21a
 
         class Meta:
             model = ConversationUser
@@ -827,12 +816,6 @@ class ConversationUserSerializer(serializers.ModelSerializer):
             age_state = AdmissionUserProfession.objects.filter(user=obj.user.id).first()
             return  age_state.age_state if age_state else ''
 
-<<<<<<< HEAD
-=======
-        def get_state_name(self, obj):
-            return obj.get_state_display()
-
->>>>>>> f6eacb40a759e91fa6fec3135168eceb8f29f21a
         def get_userinfo(self, obj):
 
             data = UserInfo.objects.filter(user=obj.user.id).first()
@@ -845,10 +828,6 @@ class ConversationUserSerializer(serializers.ModelSerializer):
             profession_name = AdmissionUserProfession.objects.filter(user=obj.user.id).first()
             return  profession_name.profession.profession.name if profession_name else ''
 
-<<<<<<< HEAD
-=======
-
->>>>>>> f6eacb40a759e91fa6fec3135168eceb8f29f21a
         def get_gpa_state(self , obj):
 
             gpa_state = AdmissionUserProfession.objects.filter(user=obj.id).first()
@@ -861,7 +840,6 @@ class ConversationUserSerializer(serializers.ModelSerializer):
                 return 'Эрэгтэй'
             return 'Эмэгтэй'
 
-<<<<<<< HEAD
         def get_conversation_data(self, obj):
 
             conversation_data = None
@@ -870,8 +848,6 @@ class ConversationUserSerializer(serializers.ModelSerializer):
                 conversation_data = ConversationUserSerializer(user_data).data
             return conversation_data
 
-=======
->>>>>>> f6eacb40a759e91fa6fec3135168eceb8f29f21a
         # Насыг олж насны шалгуурт тэнцсэн эсэх
         def get_user_age(self, obj):
             user_age = 18
