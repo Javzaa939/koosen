@@ -1,134 +1,191 @@
-import React, { Fragment, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
-import { Button, Form, FormFeedback, Input, Label, Modal, ModalBody, ModalHeader, Popover, PopoverBody, PopoverHeader, UncontrolledPopover, UncontrolledTooltip } from 'reactstrap';
+import React, { Fragment, useState, useEffect, useContext } from 'react'
+
+import { Controller, useForm } from 'react-hook-form'
+
+import Select from 'react-select'
+
+import { convertDefaultValue, validate, ReactSelectStyles } from '@utils'
+
+import { Modal, Row, Col, Label, ModalHeader, ModalBody, Form, Input, Button, FormFeedback, Spinner} from 'reactstrap'
+
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
+import classnames from 'classnames'
+import * as Yup from 'yup'
+
+export const validateSchema = Yup.object().shape({
+    state: Yup.string()
+        .trim()
+        .required('Хоосон байна'),
+});
 
 
-function StateModal({ stateModalHandler, stateModal, selectedStudents, stateop, getDatas }) {
+function AddModal({ addModal, addModalHandler, addModalData, getDatas, STATE_LIST }) {
 
-    const { formState: { errors }, handleSubmit, control, reset } = useForm();
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true});
+    const { control, handleSubmit, formState: { errors }, reset, resetField, setValue, setError } = useForm(validate(validateSchema));
 
-    const [displayPopover, setDisplayPopover] = useState(false)
-
-    const interview = useApi().elselt.interview;
-
+	const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: true, bg: 3 });
+	const elseltApi = useApi().elselt.interview
     async function onSubmit(cdata) {
-        cdata['students'] = selectedStudents.map(val => val?.user?.id) || [];
+        cdata['user'] = addModalData?.user?.id
 
-        const interviewId = cdata.students;
-
-        const { success } = await fetchData(interview.put(interviewId, cdata));
-        if (success) {
-            reset();
-            stateModalHandler();
-            getDatas();
-        };
+        /**
+         *
+         */
+        if(addModalData?.conversation_data) {
+            const { success, error } = await fetchData(elseltApi.put(addModalData?.conversation_data?.id, cdata))
+            if(success) {
+                reset()
+                getDatas()
+                addModalHandler()
+            }
+            else {
+                /** Алдааны мессеж */
+                for (let key in error) {
+                    setError(error[key].field, { type: 'custom', message: error[key].msg});
+                }
+            }
+        } else {
+            var data = convertDefaultValue(cdata)
+            const { success, error } = await fetchData(elseltApi.post(data))
+            if(success) {
+                reset()
+                getDatas()
+                addModalHandler()
+            }
+            else {
+                /** Алдааны мессеж */
+                for (let key in error) {
+                    setError(error[key].field, { type: 'custom', message: error[key].msg});
+                }
+            }
+        }
     }
 
-    function popoverHandler() {
-        setDisplayPopover(!displayPopover)
-    }
+    useEffect(() => {
+        /**
+         * Edit Бүртгэх хоёр нь эндээсээ хийгдчихвэл амар байх дөө.
+         */
+        var editz = addModalData?.conversation_data
+        var keyz = editz ? Object.keys(editz) : []
+
+        if(editz && keyz.length > 0) {
+            if(editz === null) return
+            for(let key in editz) {
+                if(editz[key] !== null)
+                    setValue(key, editz[key])
+                else setValue(key,'')
+            }
+        }
+    }, [])
+
 
     return (
-        <Modal centered toggle={stateModalHandler} isOpen={stateModal}>
-            <ModalHeader toggle={stateModalHandler}>
-                Төлөв солих
+        <Modal
+            isOpen={addModal}
+            toggle={addModalHandler}
+            centered
+            backdrop='static'
+        >
+            <ModalHeader toggle={addModalHandler}>
+                Үзлэгийн төлөв
             </ModalHeader>
             <ModalBody>
-                <Form className='' onSubmit={handleSubmit(onSubmit)}>
-                    <div className='d-flex justify-content-between'>
-                        <div>
-                        {
-                            stateop.map((data, idx) => {
-                                return(
-                                    <Fragment key={idx}>
-                                        <div className='d-flex align-items-center'>
-                                            <Controller
-                                                control={control}
-                                                defaultValue=''
-                                                name="state"
-                                                render={({ field: { value, onChange } }) => {
-                                                    return(
-                                                        <Input
-                                                            type='radio'
-                                                            name='state'
-                                                            id={`radio${idx}`}
-                                                            value={data?.id}
-                                                            checked={value === data?.id}
-                                                            onChange={(e) => {
-                                                                onChange(Number(data?.id) || '')
-                                                            }}
-                                                            className='m-50 p-50'
-                                                            invalid={errors?.state}
-                                                        >
-                                                        </Input>
-                                                    )
-                                                }}
-                                            />
-                                            <Label for={`radio${idx}`} className='mt-25'>
-                                                {data?.name}
-                                            </Label>
+                <div style={{ minHeight: 550 }}>
+                    {
+                        isLoading && Loader
+                    }
+                    {
+                        addModalData ?
+                            <Form className='d-flex flex-column' style={{ minHeight: 550 }} onSubmit={handleSubmit(onSubmit)}>
+                                <div style={{ flex: 1 }}>
+                                    <div className='m-50'>
+                                        <Label>
+                                            Элсэгч
+                                        </Label>
+                                        <div style={{ fontWeight: 700, fontSize: 18 }}>
+                                            <span>
+                                            {
+                                                addModalData?.user?.last_name + `   ` + addModalData?.user?.first_name + `   `
+                                            }
+                                            </span>
+                                            <span>
+                                            {
+                                                addModalData?.user?.register
+                                            }
+                                            </span>
                                         </div>
-                                    </Fragment>
-                                )
-                            })
-                        }
-                        {errors?.state && <FormFeedback className='d-block'>{errors?.state?.message}</FormFeedback>}
-                        </div>
-                        <div>
-                            {
-                                selectedStudents.length > 0 &&
-                                <>
-                                    <div
-                                        className='bg-light-info p-50 rounded-3'
-                                        id='students_tooltip'
-                                        onMouseEnter={() => setDisplayPopover(true)}
-                                        onMouseLeave={() => setDisplayPopover(false)}
-                                        onClick={() => popoverHandler()}
-                                        style={{ cursor:'help' }}
-                                    >
-                                        Сонгогдсон элсэгчдийн тоо: <b>{selectedStudents.length}</b>
                                     </div>
-                                </>
-                            }
-                        </div>
-                    </div>
-                    <div className='shadow border rounded-3 m-1 mx-25 p-1'>
-                        <Label className='p-50'>
-                            Тайлбар
-                        </Label>
-
-                        <Controller
-                            control={control}
-                            defaultValue=''
-                            name="description"
-                            render={({ field: { value, onChange } }) => {
-                                return(
-                                    <Input
-                                        type='textarea'
-                                        name='description'
-                                        invalid={errors?.state_description}
-                                        value={value}
-                                        onChange={(e) => {
-                                            onChange(e.target.value || '')
-                                        }}
-                                        style={{ minHeight: 100 }}
-                                    />
-                                )
-                            }}
-                        />
-                    {errors?.state_description && <FormFeedback className='d-block'>{errors?.state_description?.message}</FormFeedback>}
-                    </div>
-                    <div className='text-center my-50'>
-                        <Button className='m-50' color='primary' type='submit'>Хадгалах</Button>
-                        <Button className='m-50 ' onClick={() => stateModalHandler()}>Гарах</Button>
-                    </div>
-                </Form>
+                                    <div className='m-50'>
+                                        <Label className='form-label' for='state'>
+                                            Төлөв
+                                        </Label>
+                                        <Controller
+                                            defaultValue=''
+                                            control={control}
+                                            id='state'
+                                            name='state'
+                                            render={({ field: { value, onChange } }) => (
+                                                <Select
+                                                    name="state"
+                                                    id="state"
+                                                    classNamePrefix='select'
+                                                    isClearable
+                                                    className={classnames('react-select', {'is-invalid': errors.state})}
+                                                    placeholder='-- Сонгоно уу --'
+                                                    options={STATE_LIST || []}
+                                                    value={STATE_LIST.find((c) => c.id === value)}
+                                                    noOptionsMessage={() => 'Хоосон байна'}
+                                                    onChange={(val) => {
+                                                        onChange(val?.id || '')
+                                                    }}
+                                                    styles={ReactSelectStyles}
+                                                    getOptionValue={(option) => option.id}
+                                                    getOptionLabel={(option) => option.name}
+                                                />
+                                            )}
+                                            />
+                                        {errors.state && <FormFeedback className='d-block'>{errors.state.message}</FormFeedback>}
+                                    </div>
+                                    <div className='m-50'>
+                                        <Label className='form-label' for='description'>
+                                            Тайлбар
+                                        </Label>
+                                        <Controller
+                                            defaultValue=''
+                                            control={control}
+                                            id='description'
+                                            name='description'
+                                            render={({field}) => (
+                                                <Input
+                                                    {...field}
+                                                    type='textarea'
+                                                    name='description'
+                                                    id='description'
+                                                    placeholder='Тайлбар'
+                                                    style={{ minHeight: 100 }}
+                                                    bsSize='sm'
+                                                    invalid={errors.description && true}
+                                                >
+                                                </Input>
+                                            )}
+                                            />
+                                        {errors.description && <FormFeedback className='d-block'>{errors.description.message}</FormFeedback>}
+                                    </div>
+                                </div>
+                                <div className='m-50'>
+                                    <Button type='submit' color='primary' disabled={isLoading}>
+                                        Хадгалах
+                                    </Button>
+                                </div>
+                            </Form>
+                        :
+                            <div></div>
+                    }
+                </div>
             </ModalBody>
         </Modal>
     )
 }
 
-export default StateModal
+export default AddModal

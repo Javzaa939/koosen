@@ -1836,10 +1836,9 @@ class AdmissionJusticeListAPIView(
         state = self.request.query_params.get('state')
         sorting = self.request.query_params.get('sorting')
 
-        justice_profession_ids = AdmissionIndicator.objects.filter(admission_prof__admission__is_active=True, value__in=[AdmissionIndicator.YAL_SHIITGEL]).values_list('admission_prof', flat=True)
-        # Бие бялдарт тэнцсэн элсэгчид
-        biy_byldar_ids = PhysqueUser.objects.filter(state=AdmissionUserProfession.STATE_APPROVE).values_list('user',flat=True)
-        queryset = queryset.filter(profession__in=justice_profession_ids, user__in=biy_byldar_ids)
+        # Сэтгэлзүйн сорилд тэнцсэн элсэгчид
+        healt_user_ids = ConversationUser.objects.filter(Q(Q(state=ConversationUser.STATE_APPROVE) | Q(state=ConversationUser.STATE_CONDIITON))).values_list('user', flat=True)
+        queryset = queryset.filter(user__in=healt_user_ids)
 
         if elselt:
             queryset = queryset.filter(profession__admission=elselt)
@@ -1889,7 +1888,7 @@ class ConversationUserSerializerAPIView(
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['user__first_name', 'user__register', 'state','user__email']
+    search_fields = ['user__first_name', 'user__register', 'user__email', 'user__last_name', 'user__mobile']
 
     def get_queryset(self):
         queryset = self.queryset
@@ -1939,13 +1938,25 @@ class ConversationUserSerializerAPIView(
         all_data = self.list(request).data
         return request.send_data(all_data)
 
+    def post(self, request):
+
+        data = request.data
+        try:
+            data['user'] = ElseltUser.objects.get(pk=data.get('user'))
+            ConversationUser.objects.create(**data)
+        except Exception as e:
+            print(e)
+            return request.send_error('ERR_002', 'Хадгалахад алдаа гарлаа')
+
+        return request.send_info('INF_001')
+
     def put(self, request,pk=None):
 
         data = request.data
         with transaction.atomic():
             now = dt.datetime.now()
             ConversationUser.objects.filter(
-               user__in=data.get('students')
+               user=data.get('user')
             ).update(state=data.get("state"),updated_at=now,description=data.get("description"))
 
         return request.send_info('INF_002')

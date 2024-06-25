@@ -5,7 +5,7 @@ import moment from 'moment'
 import { CheckCircle} from "react-feather"
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, page_count,stateop,stateModalHandler,user) {
+export function getColumns (currentPage, rowsPerPage, page_count,stateop, stateModalHandler) {
 
 	/** Сонгосон хуудасны тоо датаны тооноос их болсон үед хуудаслалт 1-ээ эхлэнэ */
     if (currentPage > page_count) {
@@ -45,7 +45,6 @@ export function getColumns (currentPage, rowsPerPage, page_count,stateop,stateMo
 				>
 					{row?.conversation_data ?
 						stateop	.find(val => val.id === row?.conversation_data?.state).name
-
 						:
 						''
 						}
@@ -118,31 +117,8 @@ export function getColumns (currentPage, rowsPerPage, page_count,stateop,stateMo
 			sortable: true,
 			name: t("Голч дүн"),
 			reorder: true,
-			selector: (row) => {
-				return(
-					<>
-						<div className={`d-flex`}>
-							<Input
-								className={'text-center'}
-								step="0.1"
-								min='0'
-								max='4'
-								bsSize='sm'
-								placeholder={(`Голч дүн`)}
-								defaultValue={row?.userinfo?.gpa}
-							/>
-						</div>
-					</>
-				)
-			},
+			selector: (row) => row?.userinfo?.gpa,
 			center: true,
-		},
-		{
-			minWidth: "250px",
-			name: 'Мэдээллийн тайлбар',
-			reorder: true,
-			selector: (row) => <span title={row?.userinfo?.info_description} style={{fontSize:'10px'}}>{row?.userinfo?.info_description}</span>,
-			wrap:true
 		},
 		{
 			name: t("Хүйс"),
@@ -230,7 +206,7 @@ export function getColumns (currentPage, rowsPerPage, page_count,stateop,stateMo
 				<div className="text-center" style={{ width: "auto" }}>
 					<a
 						role="button"
-						onClick={(e) => { stateModalHandler(e,row)} }
+						onClick={(e) => { stateModalHandler(row)} }
 						// onClick={() => stateModalHandler()}
 						id={`description${row?.id}`}
 						className="me-1"

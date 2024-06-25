@@ -189,7 +189,7 @@ const InterView = () => {
     }
 
     // Элсэгчдийн ярилцлага тэнцсэн эсэх төлөв солих
-    function stateModalHandler(e,data) {
+    function stateModalHandler(data) {
       setStateModel(!stateModal),
       setAddModalData(data || null)
     }
@@ -215,215 +215,201 @@ const InterView = () => {
                 messageModalHandler={messageModalHandler}
                 messageModal={messageModal}
                 selectedStudents={selectedStudents}
-                getDatas={getDatas}/>
-          <StateModal
-              stateModalHandler={stateModalHandler}
-              stateModal={stateModal}
-              selectedStudents={selectedStudents}
-              stateop={stateop}
-              getDatas={getDatas}
-          />
+                getDatas={getDatas}
+            />
+            <StateModal
+                addModal={stateModal}
+                addModalHandler={stateModalHandler}
+                addModalData={addModalData}
+                getDatas={getDatas}
+                STATE_LIST={stateop}
+            />
           {isLoading && Loader}
             <Card>
                 <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom ">
                     <CardTitle tag="h4">{t('Элсэгчдийн сэтгэлзүйн ярилцлага')}</CardTitle>
                 </CardHeader>
-                        <Row className='justify-content-start mx-0 mt-1'>
-                                <Col md={3}>
-                                    <Label for='sort-select'>{t('Төлөвөөр шүүх')}</Label>
-                                    <Select
-                                        classNamePrefix='select'
-                                        isClearable
-                                        placeholder={`-- Сонгоно уу --`}
-                                        options={stateop || []}
-                                        value={stateop.find((c) => c.id === chosenState)}
-                                        noOptionsMessage={() => 'Хоосон байна'}
-                                        onChange={(val) => {
-                                            setChosenState(val?.id || '')
-                                        }}
-                                        styles={ReactSelectStyles}
-                                        getOptionValue={(option) => option.id}
-                                        getOptionLabel={(option) => option.name}
-                                    />
-                                </Col>
-                                <Col sm={6} lg={3} >
-                                    <Label className="form-label" for="lesson_year">
-                                        {t('Элсэлт')}
-                                    </Label>
-                                        <Select
-                                            name="lesson_year"
-                                            id="lesson_year"
-                                            classNamePrefix='select'
-                                            isClearable
-                                            className={classnames('react-select')}
-                                            isLoading={isLoading}
-                                            placeholder={t('-- Сонгоно уу --')}
-                                            options={admop || []}
-                                            value={admop.find((c) => c.id === adm)}
-                                            noOptionsMessage={() => t('Хоосон байна.')}
-                                            onChange={(val) => {
-                                                setAdm(val?.id || '')
-                                            }}
-                                            styles={ReactSelectStyles}
-                                            getOptionValue={(option) => option.id}
-                                            getOptionLabel={(option) => option.lesson_year + ' ' + option.name}
-                                        />
-                                </Col>
-                                <Col sm={6} lg={3} >
-                                    <Label className="form-label" for="profession">
-                                        {t('Хөтөлбөр')}
-                                    </Label>
-                                        <Select
-                                            name="profession"
-                                            id="profession"
-                                            classNamePrefix='select'
-                                            isClearable
-                                            className={classnames('react-select')}
-                                            isLoading={isLoading}
-                                            placeholder={t('-- Сонгоно уу --')}
-                                            options={profOption || []}
-                                            value={profOption.find((c) => c?.prof_id === profession_id)}
-                                            noOptionsMessage={() => t('Хоосон байна.')}
-                                            onChange={(val) => {
-                                                setProfession_id(val?.prof_id || '')
-                                            }}
-                                            styles={ReactSelectStyles}
-                                            getOptionValue={(option) => option?.prof_id}
-                                            getOptionLabel={(option) => option.name}
-                                        />
-                                </Col>
-                        </Row>
-                        <div className='d-flex justify-content-between my-50 mt-1'>
-                            <div className='d-flex'>
-                                <div className='px-1'>
-                                    <Button
-                                        color='primary'
-                                        disabled={(selectedStudents.length != 0 && user.permissions.includes('lms-elselt-admission-approve')) ? false : true}
-                                        className='d-flex align-items-center px-75'
-                                        id='state_button'
-                                        onClick={() => stateModalHandler()}
-                                    >
-                                        <RiEditFill className='me-25'/>
-                                        Төлөв солих
-                                    </Button>
-                                    <UncontrolledTooltip target='state_button'>
-                                        Доорхи сонгосон элсэгчдийн төлөвийг нэг дор солих
-                                    </UncontrolledTooltip>
-                                </div>
-                                <div className='px-1'>
-                                    <Button
-                                        color='primary'
-                                        disabled={(selectedStudents.length != 0 && user.permissions.includes('lms-elselt-mail-create')) ? false : true}
-                                        className='d-flex align-items-center px-75'
-                                        id='email_button'
-                                        onClick={() => emailModalHandler()}
-                                    >
-                                        <MdMailOutline className='me-25'/>
-                                        Email илгээх
-                                    </Button>
-                                    <UncontrolledTooltip target='email_button'>
-                                        Сонгосон элсэгчид руу имейл илгээх
-                                    </UncontrolledTooltip>
-                                </div>
-                                <div className='px-1'>
-                                    <Button
-                                        color='primary'
-                                        disabled={(selectedStudents.length != 0 && user?.permissions?.includes('lms-elselt-message-create')) ? false : true}
-                                        className='d-flex align-items-center px-75'
-                                        id='message_button'
-                                        onClick={() => messageModalHandler()}
-                                    >
-                                        <BiMessageRoundedError className='me-25'/>
-                                        Мессеж илгээх
-                                    </Button>
-                                    <UncontrolledTooltip target='message_button'>
-                                        Сонгосон элсэгчид руу мессеж илгээх
-                                    </UncontrolledTooltip>
-                                </div>
-                            </div>
-                        </div>
-                        <Row className="justify-content-between mx-0" >
-                            <Col className='d-flex align-items-center justify-content-start' md={4}>
-                                <Col md={3} sm={2} className='pe-1'>
-                                    <Input
-                                        type='select'
-                                        bsSize='sm'
-                                        style={{ height: "30px" }}
-                                        value={rowsPerPage}
-                                        onChange={e => handlePerPage(e)}
-                                    >
-                                        {
-                                            default_page.map((page, idx) => (
-                                            <option
-                                                key={idx}
-                                                value={page}
-                                            >
-                                                {page}
-                                            </option>
-                                        ))}
-                                    </Input>
-                                </Col>
-                                <Col md={9} sm={3}>
-                                    <Label for='sort-select'>{t('Хуудсанд харуулах тоо')}</Label>
-                                </Col>
-                            </Col>
-                            <Col className='d-flex align-items-center mobile-datatable-search mt-1' md={4} sm={12}>
-                                <Input
-                                    className='dataTable-filter mb-50'
-                                    type='text'
-                                    bsSize='sm'
-                                    id='search-input'
-                                    placeholder={t("Хайх үг....")}
-                                    value={searchValue}
-                                    onChange={(e) => {handleFilter(e)}}
-                                    onKeyPress={e => e.key === 'Enter' && handleSearch()}
-                                />
-                                <Button
-                                    size='sm'
-                                    className='ms-50 mb-50'
-                                    color='primary'
-                                    onClick={handleSearch}
-                                >
-                                    <Search size={15} />
-                                    <span className='align-middle ms-50'></span>
-                                </Button>
-                            </Col>
-                        </Row>
-                        <div className="react-dataTable react-dataTable-selectable-rows" id='datatableLeftOneRightOne'>
-                            <DataTable
-                                noHeader
-                                paginationServer
-                                pagination
-                                className='react-dataTable'
-                                progressPending={isTableLoading}
-                                progressComponent={
-                                    <div className='my-2 d-flex align-items-center justify-content-center' >
-                                        <Spinner className='me-1' color="" size='sm'/><h5>Түр хүлээнэ үү...</h5>
-                                    </div>
-                                }
-                                noDataComponent={(
-                                    <div className="my-2">
-                                        <h5>{t('Өгөгдөл байхгүй байна')}</h5>
-                                    </div>
-                                )}
-                                print='true'
-                                theme="solarized"
-                                onSort={handleSort}
-                                columns={getColumns(currentPage, rowsPerPage === 'Бүгд' ? 1 : rowsPerPage, total_count, stateop,user,stateModalHandler)}
-                                sortIcon={<ChevronDown size={10} />}
-                                paginationPerPage={rowsPerPage === 'Бүгд' ? 1 : rowsPerPage}
-                                paginationDefaultPage={currentPage}
-                                data={datas}
-                                paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage === 'Бүгд' ? total_count : rowsPerPage, total_count)}
-                                fixedHeader
-                                fixedHeaderScrollHeight='62vh'
-                                selectableRows
-                                onSelectedRowsChange={(state) => onSelectedRowsChange(state)}
-                                direction="auto"
-                                defaultSortFieldId={'created_at'}
-                                style={{ border: '1px solid red' }}
+                <Row className='justify-content-start mx-0 mt-1'>
+                        <Col md={3}>
+                            <Label for='sort-select'>{t('Төлөвөөр шүүх')}</Label>
+                            <Select
+                                classNamePrefix='select'
+                                isClearable
+                                placeholder={`-- Сонгоно уу --`}
+                                options={stateop || []}
+                                value={stateop.find((c) => c.id === chosenState)}
+                                noOptionsMessage={() => 'Хоосон байна'}
+                                onChange={(val) => {
+                                    setChosenState(val?.id || '')
+                                }}
+                                styles={ReactSelectStyles}
+                                getOptionValue={(option) => option.id}
+                                getOptionLabel={(option) => option.name}
                             />
+                        </Col>
+                        <Col sm={6} lg={3} >
+                            <Label className="form-label" for="lesson_year">
+                                {t('Элсэлт')}
+                            </Label>
+                                <Select
+                                    name="lesson_year"
+                                    id="lesson_year"
+                                    classNamePrefix='select'
+                                    isClearable
+                                    className={classnames('react-select')}
+                                    isLoading={isLoading}
+                                    placeholder={t('-- Сонгоно уу --')}
+                                    options={admop || []}
+                                    value={admop.find((c) => c.id === adm)}
+                                    noOptionsMessage={() => t('Хоосон байна.')}
+                                    onChange={(val) => {
+                                        setAdm(val?.id || '')
+                                    }}
+                                    styles={ReactSelectStyles}
+                                    getOptionValue={(option) => option.id}
+                                    getOptionLabel={(option) => option.lesson_year + ' ' + option.name}
+                                />
+                        </Col>
+                        <Col sm={6} lg={3} >
+                            <Label className="form-label" for="profession">
+                                {t('Хөтөлбөр')}
+                            </Label>
+                                <Select
+                                    name="profession"
+                                    id="profession"
+                                    classNamePrefix='select'
+                                    isClearable
+                                    className={classnames('react-select')}
+                                    isLoading={isLoading}
+                                    placeholder={t('-- Сонгоно уу --')}
+                                    options={profOption || []}
+                                    value={profOption.find((c) => c?.prof_id === profession_id)}
+                                    noOptionsMessage={() => t('Хоосон байна.')}
+                                    onChange={(val) => {
+                                        setProfession_id(val?.prof_id || '')
+                                    }}
+                                    styles={ReactSelectStyles}
+                                    getOptionValue={(option) => option?.prof_id}
+                                    getOptionLabel={(option) => option.name}
+                                />
+                        </Col>
+                </Row>
+                <div className='d-flex justify-content-between my-50 mt-1'>
+                    <div className='d-flex'>
+                        <div className='px-1'>
+                            <Button
+                                color='primary'
+                                disabled={(selectedStudents.length != 0 && user.permissions.includes('lms-elselt-mail-create')) ? false : true}
+                                className='d-flex align-items-center px-75'
+                                id='email_button'
+                                onClick={() => emailModalHandler()}
+                            >
+                                <MdMailOutline className='me-25'/>
+                                Email илгээх
+                            </Button>
+                            <UncontrolledTooltip target='email_button'>
+                                Сонгосон элсэгчид руу имейл илгээх
+                            </UncontrolledTooltip>
                         </div>
+                        <div className='px-1'>
+                            <Button
+                                color='primary'
+                                disabled={(selectedStudents.length != 0 && user?.permissions?.includes('lms-elselt-message-create')) ? false : true}
+                                className='d-flex align-items-center px-75'
+                                id='message_button'
+                                onClick={() => messageModalHandler()}
+                            >
+                                <BiMessageRoundedError className='me-25'/>
+                                Мессеж илгээх
+                            </Button>
+                            <UncontrolledTooltip target='message_button'>
+                                Сонгосон элсэгчид руу мессеж илгээх
+                            </UncontrolledTooltip>
+                        </div>
+                    </div>
+                </div>
+                <Row className="justify-content-between mx-0" >
+                    <Col className='d-flex align-items-center justify-content-start' md={4}>
+                        <Col md={3} sm={2} className='pe-1'>
+                            <Input
+                                type='select'
+                                bsSize='sm'
+                                style={{ height: "30px" }}
+                                value={rowsPerPage}
+                                onChange={e => handlePerPage(e)}
+                            >
+                                {
+                                    default_page.map((page, idx) => (
+                                    <option
+                                        key={idx}
+                                        value={page}
+                                    >
+                                        {page}
+                                    </option>
+                                ))}
+                            </Input>
+                        </Col>
+                        <Col md={9} sm={3}>
+                            <Label for='sort-select'>{t('Хуудсанд харуулах тоо')}</Label>
+                        </Col>
+                    </Col>
+                    <Col className='d-flex align-items-center mobile-datatable-search mt-1' md={4} sm={12}>
+                        <Input
+                            className='dataTable-filter mb-50'
+                            type='text'
+                            bsSize='sm'
+                            id='search-input'
+                            placeholder={t("Хайх үг....")}
+                            value={searchValue}
+                            onChange={(e) => {handleFilter(e)}}
+                            onKeyPress={e => e.key === 'Enter' && handleSearch()}
+                        />
+                        <Button
+                            size='sm'
+                            className='ms-50 mb-50'
+                            color='primary'
+                            onClick={handleSearch}
+                        >
+                            <Search size={15} />
+                            <span className='align-middle ms-50'></span>
+                        </Button>
+                    </Col>
+                </Row>
+                <div className="react-dataTable react-dataTable-selectable-rows" id='datatableLeftOneRightOne'>
+                    <DataTable
+                        noHeader
+                        paginationServer
+                        pagination
+                        className='react-dataTable'
+                        progressPending={isTableLoading}
+                        progressComponent={
+                            <div className='my-2 d-flex align-items-center justify-content-center' >
+                                <Spinner className='me-1' color="" size='sm'/><h5>Түр хүлээнэ үү...</h5>
+                            </div>
+                        }
+                        noDataComponent={(
+                            <div className="my-2">
+                                <h5>{t('Өгөгдөл байхгүй байна')}</h5>
+                            </div>
+                        )}
+                        print='true'
+                        theme="solarized"
+                        onSort={handleSort}
+                        columns={getColumns(currentPage, rowsPerPage === 'Бүгд' ? 1 : rowsPerPage, total_count, stateop,stateModalHandler)}
+                        sortIcon={<ChevronDown size={10} />}
+                        paginationPerPage={rowsPerPage === 'Бүгд' ? 1 : rowsPerPage}
+                        paginationDefaultPage={currentPage}
+                        data={datas}
+                        paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage === 'Бүгд' ? total_count : rowsPerPage, total_count)}
+                        fixedHeader
+                        fixedHeaderScrollHeight='62vh'
+                        selectableRows
+                        onSelectedRowsChange={(state) => onSelectedRowsChange(state)}
+                        direction="auto"
+                        defaultSortFieldId={'created_at'}
+                        style={{ border: '1px solid red' }}
+                    />
+                </div>
             </Card>
       </Fragment>
     )
