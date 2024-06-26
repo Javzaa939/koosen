@@ -831,7 +831,7 @@ class DashboardExcelAPIView(
     queryset = AdmissionUserProfession.objects.all()
 
     def get(self, request):
-        # Profession Definition-ний id-уудыг хадгална
+        # Profession Definition-ний id-г хадгална
         elselt = self.request.query_params.get('elselt')
         if elselt and elselt != 'all':
             self.queryset = self.queryset.filter(profession__admission=elselt)
@@ -848,6 +848,7 @@ class DashboardExcelAPIView(
                 When(Q(last_char__in=['0', '2', '4', '6', '8']), then=Value(2)),
                 # Бусад нөхцлүүдэд default утга нь эрэгтэй
                 default=Value(1),
+                # Буцах утга нь int төрөлтэй байна
                 output_field=IntegerField()
             )
         )
