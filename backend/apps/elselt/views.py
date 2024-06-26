@@ -887,6 +887,11 @@ class DashboardExcelAPIView(
     queryset = AdmissionUserProfession.objects.all()
 
     def get(self, request):
+        # Элсэлтээрээ filter хийнэ
+        elselt = self.request.query_params.get('elselt')
+        if elselt and elselt != 'all':
+            self.queryset = self.queryset.filter(profession__admission=elselt)
+
         # Profession Definition-ний id-уудыг хадгална
         profession_ids = self.queryset.values_list('profession__profession', flat=True).distinct()
 

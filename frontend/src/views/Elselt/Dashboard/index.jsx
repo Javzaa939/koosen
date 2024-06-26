@@ -224,7 +224,7 @@ function Dashboard() {
     }
 
     async function generalReportHandler() {
-        const {success, data} = await fetchData(dashApi.excel())
+        const {success, data} = await fetchData(dashApi.excel(chosenElselt))
         if(success) {
             downloadGeneralReport(data)
         }
