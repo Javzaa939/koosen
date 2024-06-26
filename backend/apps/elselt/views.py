@@ -9,10 +9,25 @@ from rest_framework.filters import SearchFilter
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.db import transaction
-from django.db.models import F, Subquery, OuterRef, Count, Q
+from django.db.models import F, Subquery, OuterRef, Count, Q, Func, CharField
+from django.db.models import CharField, ExpressionWrapper, F, Value, Case, When
 from django.db.models.functions import Substr
 
-from main.utils.function.utils import json_load, make_connection, get_domain_url_link, get_domain_url, null_to_none, check_phone_number, send_message_gmobile, send_message_mobicom, send_message_skytel, send_message_unitel
+from main.utils.function.utils import (
+    json_load,
+    find_gender,
+    null_to_none,
+    get_domain_url,
+    make_connection,
+    check_phone_number,
+    get_domain_url_link,
+    send_message_unitel,
+    send_message_skytel,
+    send_message_gmobile,
+    send_message_mobicom,
+    calculate_birthday,
+)
+
 from main.utils.function.pagination import CustomPagination
 from main.decorators import login_required
 from rest_framework.response import Response
@@ -870,15 +885,215 @@ class DashboardExcelAPIView(
     """ Дашбоард тайлан """
 
     queryset = AdmissionUserProfession.objects.all()
+
     def get(self, request):
+        # Profession Definition-ний id-уудыг хадгална
+        profession_ids = self.queryset.values_list('profession__profession', flat=True).distinct()
 
-        datas = [
-            {
-                'name': 'hi'
-            }
-        ]
+        # Хурдан болгохын тулд шаардлагатай field-үүдэд select_related болон prefetch_related ашигласан
+        professions = ProfessionDefinition.objects.filter(id__in=profession_ids).select_related('school')
+        admission_register_ids = AdmissionRegisterProfession.objects.filter(profession__in=profession_ids).values_list('id', flat=True)
+        user_professions = self.queryset.filter(profession__in=admission_register_ids).select_related('user').prefetch_related('user__healthuser_set')
 
-        return request.send_data(datas)
+        #-----------------------------------NOTE:ENDEES-------------------------------#
+        # NOTE -----------> GENDER-ийг л олчуул for гүйлгэж заваарах шаардлага алга
+        # Djanog чиний хүчин чадал ердөөл энэ гэжүү үгүээээ үгүй.
+        # Эсвэл би ийм мулгуу юм болов уу ¯\_(ツ)_/¯.
+
+        # songolt:1
+        # queryset = self.queryset.annotate(
+        #     gender=ExpressionWrapper(
+        #         F('user__register') % 2 == 0,
+        #         output_field=IntegerField()
+        #     )
+        # )
+        # for key in self.queryset.values():
+            # print(key)
+        # class Right(Func):
+            # function = 'RIGHT'
+
+        # songolt:2
+        # class Substr(Func):
+        #     function = 'SUBSTR'
+        #     template = "%(function)s(%(expressions)s FROM %(pos)d FOR %(length)d)"
+
+        # queryset = self.queryset.annotate(
+        #     last_char=Substr('user__register', -1, 1, output_field=CharField())  # Extract the last character of 'user__register'
+        # ).annotate(
+        #     gender=ExpressionWrapper(
+        #         Case(
+        #             When(
+        #                 Substr('user__register', -1, 1) % 2 == 0,
+        #                 then=Value('Эм')
+        #             ),
+        #             When(
+        #                 Substr('user__register', -1, 1) % 2 != 0,
+        #                 then=Value('Эр')
+        #             ),
+        #             default=Value(None),
+        #             output_field=CharField(),
+        #         ),
+        #         output_field=CharField()
+        #     )
+        # )
+        #------------------ENE HURTEL IIMERDUU MAYGAAR HIIH GESEN BARDGUEE------------#
+
+        # Буцаах датаны ерөнхий хэлбэрийг гаргасан
+        profession_data = {
+            profession.id: {
+                'profession': profession.name,
+                'suborg': profession.school.name,
+                # Нийт элсэгчдийн хүйсийн тоо
+                'total_male_users': 0,
+                'total_female_users': 0,
+                # Насны шалгуурт тэнцсэн эсэх
+                'age_state_true_male': 0,
+                'age_state_false_male': 0,
+                'age_state_true_female': 0,
+                'age_state_false_female': 0,
+                # Дипломын голч дүнгийн шаардлага хангасан эсэх
+                'gpa_state_true_male':0,
+                'gpa_state_true_female':0,
+                'gpa_state_false_male':0,
+                'gpa_state_false_female':0,
+                # Анхан шатны эрүүл мэндийн үзлэгт тэнцсэн эсэх
+                'health_user_true_male_users': 0,
+                'health_user_true_female_users': 0,
+                'health_user_false_male_users': 0,
+                'health_user_false_female_users': 0,
+                'health_user_send_male_users': 0,
+                'health_user_send_female_users': 0,
+                # Элсэгчийн нарийн мэргэжлийн шатны эрүүл мэндийн үзлэг
+                'health_up_user_true_male_users': 0,
+                'health_up_user_true_female_users': 0,
+                'health_up_user_false_male_users': 0,
+                'health_up_user_false_female_users': 0,
+                'health_up_user_out_male_users': 0,
+                'health_up_user_out_female_users': 0,
+                # Элсэгч ял шийтгэлтэй эсэх тайлбар
+                'justice_state_true_male':0,
+                'justice_state_true_female':0,
+                'justice_state_false_male':0,
+                'justice_state_false_female':0,
+                # Элсэгчдийн бие бялдарын үзүүлэлт
+                'physque_state_true_male':0,
+                'physque_state_true_female':0,
+                'physque_state_false_male':0,
+                'physque_state_false_female':0,
+                'physque_state_out_male':0,
+                'physque_state_out_female':0,
+            } for profession in professions
+        }
+
+        # Энд хамаг шаардлагатай тооцооллуудаа хийнэ
+        for user_profession in user_professions:
+            gender = find_gender(user_profession.user.register)
+            profession_id = user_profession.profession.profession.id
+            profession_info = profession_data[profession_id]
+
+            # Нийт элсэгчдийн хүйсийн тоо
+            if gender == 1:
+                profession_info['total_male_users'] += 1
+            elif gender == 2:
+                profession_info['total_female_users'] += 1
+
+            # Насны шалгуурт тэнцсэн эсэх
+            if user_profession.age_state == AdmissionUserProfession.STATE_APPROVE:
+                if gender == 1:
+                    profession_info['age_state_true_male'] += 1
+                elif gender == 2:
+                    profession_info['age_state_true_female'] += 1
+            elif user_profession.age_state == AdmissionUserProfession.STATE_REJECT:
+                if gender == 1:
+                    profession_info['age_state_false_male'] += 1
+                elif gender == 2:
+                    profession_info['age_state_false_female'] += 1
+
+            # Дипломын голч дүнгийн шаардлага хангасан эсэх
+            if user_profession.gpa_state == AdmissionUserProfession.STATE_APPROVE:
+                if gender == 1:
+                    profession_info['gpa_state_true_male'] += 1
+                elif gender == 2:
+                    profession_info['gpa_state_true_female'] += 1
+            elif user_profession.gpa_state == AdmissionUserProfession.STATE_REJECT:
+                if gender == 1:
+                    profession_info['gpa_state_false_male'] += 1
+                elif gender == 2:
+                    profession_info['gpa_state_false_female'] += 1
+
+            # Анхан шатны эрүүл мэндийн үзлэгт тэнцсэн эсэх
+            health_user = user_profession.user.healthuser_set.first()
+            if health_user:
+                if health_user.state == AdmissionUserProfession.STATE_APPROVE:
+                    if gender == 1:
+                        profession_info['health_user_true_male_users'] += 1
+                    elif gender == 2:
+                        profession_info['health_user_true_female_users'] += 1
+                elif health_user.state == AdmissionUserProfession.STATE_REJECT:
+                    if gender == 1:
+                        profession_info['health_user_false_male_users'] += 1
+                    elif gender == 2:
+                        profession_info['health_user_false_female_users'] += 1
+            else:
+                if gender == 1:
+                    profession_info['health_user_send_male_users'] += 1
+                elif gender == 2:
+                    profession_info['health_user_send_female_users'] += 1
+
+            # Элсэгчийн нарийн мэргэжлийн шатны эрүүл мэндийн үзлэг
+            health_up_user = user_profession.user.healthupuser_set.first()
+            if health_up_user:
+                if health_up_user.state == AdmissionUserProfession.STATE_APPROVE:
+                    if gender == 1:
+                        profession_info['health_up_user_true_male_users'] += 1
+                    elif gender == 2:
+                        profession_info['health_up_user_true_female_users'] += 1
+                elif health_up_user.state == AdmissionUserProfession.STATE_REJECT:
+                    if gender == 1:
+                        profession_info['health_up_user_false_male_users'] += 1
+                    elif gender == 2:
+                        profession_info['health_up_user_false_female_users'] += 1
+            else:
+                if gender == 1:
+                    profession_info['health_up_user_out_male_users'] += 1
+                elif gender == 2:
+                    profession_info['health_up_user_out_female_users'] += 1
+
+            # Элсэгч ял шийтгэлтэй эсэх тайлбар
+            if user_profession.justice_state == AdmissionUserProfession.STATE_APPROVE:
+                if gender == 1:
+                    profession_info['justice_state_true_male'] += 1
+                elif gender == 2:
+                    profession_info['justice_state_true_female'] += 1
+            elif user_profession.justice_state == AdmissionUserProfession.STATE_REJECT:
+                if gender == 1:
+                    profession_info['justice_state_false_male'] += 1
+                elif gender == 2:
+                    profession_info['justice_state_false_female'] += 1
+
+            # Элсэгчдийн бие бялдарын үзүүлэлт
+            physque_user = user_profession.user.physqueuser_set.first()
+            if physque_user:
+                if physque_user.state == AdmissionUserProfession.STATE_APPROVE:
+                    if gender == 1:
+                        profession_info['physque_state_true_male'] += 1
+                    elif gender == 2:
+                        profession_info['physque_state_true_female'] += 1
+                elif physque_user.state == AdmissionUserProfession.STATE_REJECT:
+                    if gender == 1:
+                        profession_info['physque_state_false_male'] += 1
+                    elif gender == 2:
+                        profession_info['physque_state_false_female'] += 1
+            else:
+                if gender == 1:
+                    profession_info['physque_state_out_male'] += 1
+                elif gender == 2:
+                    profession_info['physque_state_out_female'] += 1
+
+        # Буцаах датагаа бэлдэнэ
+        return_datas = list(profession_data.values())
+        return request.send_data(return_datas)
+
 
 @permission_classes([IsAuthenticated])
 class ElseltDescApiView(
