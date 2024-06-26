@@ -516,6 +516,12 @@ class ConversationUserSerializer(serializers.ModelSerializer):
         model = ConversationUser
         fields = '__all__'
 
+class ArmyUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model= ArmyUser
+        fields=  '__all__'
+
 class HealthUpUserStateSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -850,6 +856,81 @@ class ConversationUserInfoSerializer(serializers.ModelSerializer):
 
         # Насыг олж насны шалгуурт тэнцсэн эсэх
         def get_user_age(self, obj):
+            user_age = 18
+            register = obj.user.register
+            birthdate = calculate_birthday(register)[0]
+
+            if birthdate:
+                # насыг тухайн жилээс төрсөн оныг нь хасаж тооцсон
+                user_age = calculate_age(birthdate)
+
+            # Тухайн сургуулийн насны шалгуурыг олох
+
+            indicator = AdmissionIndicator.objects.filter(admission_prof=obj.profession   , value=AdmissionIndicator.NAS).first()
+            if indicator and (indicator.limit_mах or indicator.limit_min):
+                if indicator.limit_min or 0 < user_age <= indicator.limit_mах or 100:
+                    obj.age_state = 2
+                    obj.age_description = None
+                else:
+                    obj.age_state = 3
+                    obj.state = 3
+                    obj.state_description = "НАС шалгуурын болзолыг хангаагүй улмаас тэнцсэнгүй"
+                    obj.age_description = "НАС шалгуурын болзолыг хангаагүй улмаас тэнцсэнгүй"
+            else:
+                obj.age_state = 2
+                obj.age_description = None
+
+            obj.save()
+
+            return user_age
+
+class ArmyUserInfoSerializer(serializers.ModelSerializer):
+        user = serializers.SerializerMethodField()
+        userinfo=serializers.SerializerMethodField()
+        profession = serializers.SerializerMethodField()
+        user_age=serializers.SerializerMethodField()
+        gender_name=serializers.SerializerMethodField()
+        army_data=serializers.SerializerMethodField()
+        full_name=serializers.CharField(source='user.full_name', default='', read_only=True)
+
+        class Meta:
+            model= ArmyUser
+            fields='__all__'
+
+        def get_user(self,obj):
+
+            data = ElseltUser.objects.filter(id=obj.user.id).first()
+            userinfo_data = ElseltUserSerializer(data).data
+            return userinfo_data
+
+        def get_userinfo(self,obj):
+
+            data=UserInfo.objects.filter(user=obj.user.id).first()
+            userinfo=UserinfoSerializer(data).data
+            return userinfo
+
+        def get_profession(self,obj):
+
+            professions= AdmissionUserProfession.objects.filter(user=obj.user.id).first()
+            return professions.profession.profession.name if professions else ''
+
+        def get_gender_name(self,obj):
+            birthday,gender = calculate_birthday(obj.user.register)
+
+            if (int(gender)%2) != 0:
+                return 'Эрэгтэй'
+            return 'Эмэгтэй'
+
+        def get_army_data(self, obj):
+
+            army_data = None
+            user_data = ArmyUser.objects.filter(user=obj.user).first()
+            if user_data:
+                army_data = ArmyUserSerializer(user_data).data
+            return army_data
+
+        def get_user_age(self,obj):
+
             user_age = 18
             register = obj.user.register
             birthdate = calculate_birthday(register)[0]

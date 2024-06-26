@@ -62,6 +62,12 @@ export default [
                 navLink: "elselt/physical"
             },
             {
+                id: 'elselt6_1',
+                title: 'Хээрийн бэлтгэл',
+                icon: <Circle size={8} />,
+                navLink: "elselt/preparation"
+            },
+            {
                 id: 'elselt7',
                 title: 'Тэнцсэн элсэгчид',
                 icon: <Circle size={8} />,

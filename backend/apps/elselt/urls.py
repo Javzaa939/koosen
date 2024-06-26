@@ -63,5 +63,8 @@ urlpatterns = [
     path('interview/',ConversationUserSerializerAPIView.as_view()),
     path('interview/<int:pk>/', ConversationUserSerializerAPIView.as_view()),
 
+     # Цэргийн хээрийн бэлтгэлд тэнцсэн жагсаалт
+    path('preparation/', ArmyUserSerializerAPView.as_view()),
+    path('preparation/<int:pk>/',ArmyUserSerializerAPView.as_view()),
 ]
 
