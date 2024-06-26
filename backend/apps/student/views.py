@@ -1971,7 +1971,7 @@ class GraduationWorkImportAPIView(
         file = data.get('file')
 
         # Файл түр хадгалах
-        path = save_file(file, 1, 'tugsult')
+        path = save_file(file, 'tugsult', 1)
 
         full_path = os.path.join(settings.MEDIA_ROOT, str(path))
 
