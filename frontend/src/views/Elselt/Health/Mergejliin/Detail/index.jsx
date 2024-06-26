@@ -1,4 +1,4 @@
-import React, { useState} from 'react'
+import React, { useEffect, useState} from 'react'
 import { Col, Modal, ModalBody, ModalHeader, Row, Label, Button, Form, FormFeedback } from 'reactstrap'
 import { Controller, useForm } from 'react-hook-form'
 
@@ -15,6 +15,18 @@ function Detail({ detail, detailHandler, detailData, getDatas }) {
 	const { isLoading, fetchData } = useLoader({ isFullScreen: true, bg: 3 });
 
     const { control, handleSubmit, formState: { errors }, reset, resetField, setValue, setError } = useForm(validate(validateSchema));
+
+    useEffect(
+        () =>
+        {
+            for(let key in datas) {
+                if (key === 'state') {
+                    setValue('state', datas[key])
+                }
+            }
+        },
+        [datas]
+    )
 
     const STATE_LIST = [
         {
