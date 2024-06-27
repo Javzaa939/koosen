@@ -15,6 +15,7 @@ export function excelDownLoadv2(datas, STATE_LIST) {
 					'Имейл': data?.user?.email || '',
                     'Хүйс': data?.gender_name || '',
                     'Үзлэгийн төв': data ? STATE_LIST.find(val => val.id === data?.health_up_user_data?.state)?.name : '',
+                    'Тайлбар': data?.health_up_user_data?.info_description || '',
                     'Дотор':data?.health_up_user_data?.belly  || '',
                     'Мэдрэл': data?.health_up_user_data?.nerve || '',
                     'Чих хамар хоолой': data?.health_up_user_data?.ear_nose || '',
@@ -36,7 +37,6 @@ export function excelDownLoadv2(datas, STATE_LIST) {
                     'Ажиллаж байгаа байгууллагын нэр': data?.user_info?.work_organization || '',
                     'Албан тушаал': data?.user_info?.position_name || '',
                     'Цол': data?.user_info?.tsol_name || '',
-                    'Тайлбар': data?.user_info?.info_description || '',
                 }
             )}
         )
@@ -60,6 +60,7 @@ export function excelDownLoadv2(datas, STATE_LIST) {
 				'Имейл',
 				'Хүйс',
                 'Үзлэгийн төв',
+				'Тайлбар',
                 'Дотор',
                 'Мэдрэл',
                 'Чих хамар хоолой',
@@ -80,8 +81,7 @@ export function excelDownLoadv2(datas, STATE_LIST) {
 				'Голч',
 				'Ажиллаж байгаа байгууллагын нэр',
 				'Албан тушаал',
-				'Цол',
-				'Тайлбар'            
+				'Цол'
             ];
 
         utils.sheet_add_aoa(worksheet, [staticCells], { origin: "A1" });
