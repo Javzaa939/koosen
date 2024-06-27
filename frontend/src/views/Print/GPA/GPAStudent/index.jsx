@@ -191,6 +191,13 @@ const GPAStudent = () => {
         getProfessionOption();
     }, []);
 
+    useEffect(() => {
+        if (select_value.degree || select_value.department || select_value.group || select_value.profession) {
+            getProfessionOption();
+            getGroupOption();
+        }
+    }, [select_value.degree, select_value.department, select_value.group, select_value.profession]);
+
     // ** Function to handle per page
     function handlePerPage(e) {
         setRowsPerPage(
@@ -340,7 +347,7 @@ const GPAStudent = () => {
                                         }}
                                         styles={ReactSelectStyles}
                                         getOptionValue={(option) => option.id}
-                                        getOptionLabel={(option) => option.name}
+                                        getOptionLabel={(option) => option.prof_name}
                                     />
                                 );
                             }}
