@@ -221,7 +221,7 @@ const ElseltYlshiitgel = () => {
                     'Яаралтай холбогдох': data?.user?.parent_mobile || '',
                     'Бүртгүүлсэн огноо': moment(data?.created_at).format('YYYY-MM-DD HH:SS:MM') || '',
                     'Төлөв': data?.justice_state_name,
-                    'Tайлбар': data?.userinfo?.info_description || '',
+                    'Tайлбар': data?.justice_description || '',
                 }
             )
         })
