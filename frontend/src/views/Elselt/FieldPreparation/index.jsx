@@ -212,7 +212,7 @@ const FieldPreparation = () => {
         const worksheet = utils.json_to_sheet(combo);
 
         const workbook = utils.book_new();
-        utils.book_append_sheet(workbook, worksheet, "A-DB-8-Report")
+        utils.book_append_sheet(workbook, worksheet, "Хээрийн бэлтгэл")
         const staticCells = [
                 '№',
                 'Овог',
@@ -304,12 +304,9 @@ const FieldPreparation = () => {
             ...tableRow
         ];
 
-    writeFile(workbook, "Элсэгчдийн мэдээлэл.xlsx");
+        writeFile(workbook, "Элсэгчдийн мэдээлэл.xlsx");
 
-}
-
-
-
+    }
 
     // // ** Function to handle per page
     function handlePerPage(e)

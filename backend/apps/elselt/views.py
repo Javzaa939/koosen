@@ -2007,8 +2007,8 @@ class ArmyUserSerializerAPView(
 
         if state:
             if state == '1':
-                exclude_ids = AdmissionUserProfession.objects.filter(Q(Q(justice_state=AdmissionUserProfession.STATE_APPROVE) | Q(justice_state=AdmissionUserProfession.STATE_REJECT))).values_list('user', flat=True)
-                user_id = ArmyUser.objects.filter(state=state).exclude(user__in=exclude_ids).values_list('user', flat=True)
+                exclude_ids = ArmyUser.objects.filter(Q(Q(state=AdmissionUserProfession.STATE_APPROVE) | Q(state=AdmissionUserProfession.STATE_REJECT))).values_list('user', flat=True)
+                user_id = AdmissionUserProfession.objects.filter(justice_state=AdmissionUserProfession.STATE_APPROVE).exclude(user__in=exclude_ids).values_list('user', flat=True)
             else:
                 user_id = ArmyUser.objects.filter(state=state).values_list('user', flat=True)
 
