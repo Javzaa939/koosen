@@ -206,6 +206,147 @@ const ElseltYlshiitgel = () => {
     function stateModalHandler() {
         setStateModel(!stateModal)
     }
+    function convert(){
+        const mainData = datas.map((data, idx) => {
+            return(
+                {
+                    '№': idx + 1,
+                    'Овог': data?.user?.last_name || '',
+                    'Нэр': data?.user?.first_name || '',
+                    'РД': data?.user?.register || '',
+                    'Нас': data?.user_age || '',
+                    'Голч дүн': data?.userinfo?.gpa || '',
+                    'Хүйс': data?.gender_name || '',
+                    'Имейл': data?.user?.email || '',
+                    'Яаралтай холбогдох': data?.user?.parent_mobile || '',
+                    'Бүртгүүлсэн огноо': moment(data?.created_at).format('YYYY-MM-DD HH:SS:MM') || '',
+                    'Төлөв': data?.justice_state_name,
+                    'Tайлбар': data?.justice_description || '',
+                }
+            )
+        })
+
+        const combo = [
+            // ...header,
+            ...mainData
+        ]
+
+        const worksheet = utils.json_to_sheet(combo);
+
+        const workbook = utils.book_new();
+        utils.book_append_sheet(workbook, worksheet, "Эрүүгийн хариуцлага");
+
+        const staticCells = [
+            '№',
+            'Овог',
+            'Нэр',
+            'РД',
+            'Нас',
+            'Голч дүн',
+            'Хүйс',
+            'Имейл',
+            'Яаралтай холбогдох',
+            'Бүртгүүлсэн огноо',
+            'Төлөв',
+            'Tайлбар',
+        ];
+
+        utils.sheet_add_aoa(worksheet, [staticCells], { origin: "A1" });
+
+
+        const headerCell = {
+            border: {
+                top: { style: "thin", color: { rgb: "000000" } },
+                bottom: { style: "thin", color: { rgb: "000000" } },
+                left: { style: "thin", color: { rgb: "000000" } },
+                right: { style: "thin", color: { rgb: "000000" } }
+            },
+            alignment: {
+                horizontal: 'center',
+                vertical: 'center',
+                wrapText: true
+            },
+            font:{
+                sz:10,
+                bold:true
+            }
+        };
+
+        const defaultCell = {
+            border: {
+                top: { style: "thin", color: { rgb: "000000" } },
+                bottom: { style: "thin", color: { rgb: "000000" } },
+                left: { style: "thin", color: { rgb: "000000" } },
+                right: { style: "thin", color: { rgb: "000000" } }
+            },
+            alignment: {
+                horizontal: 'left',
+                vertical: 'center',
+                wrapText: true
+            },
+            font:{
+                sz:10
+            }
+        };
+
+        const defaultCenteredCell = {
+            border: {
+                top: { style: "thin", color: { rgb: "000000" } },
+                bottom: { style: "thin", color: { rgb: "000000" } },
+                left: { style: "thin", color: { rgb: "000000" } },
+                right: { style: "thin", color: { rgb: "000000" } }
+            },
+            alignment: {
+                horizontal: 'center',
+                vertical: 'center',
+                wrapText: true
+            },
+            font:{
+                sz:10
+            }
+        };
+
+        const styleRow = 0;
+        const sendRow = datas?.length + 1;
+        const styleCol = 0;
+        const sendCol = 20;
+
+        for (let row = styleRow; row <= sendRow; row++) {
+            for (let col = styleCol; col <= sendCol; col++) {
+            const cellNum = utils.encode_cell({ r: row, c: col });
+
+                if (!worksheet[cellNum]) {
+                    worksheet[cellNum] = {};
+                }
+
+                worksheet[cellNum].s = row === 0 ? headerCell : col === 0 ? defaultCenteredCell : defaultCell
+
+            }
+        }
+
+        const phaseZeroCells = Array.from({length: 4}, (_) => {return({wch: 10})})
+
+        worksheet["!cols"] = [
+            { wch: 3 },
+            ...phaseZeroCells,
+            { wch: 10 },
+            { wch: 10 },
+            { wch: 20 },
+            { wch: 10 },
+            { wch: 10 },
+            { wch: 10 },
+            { wch: 25 },
+        ];
+
+        const phaseOneRow = Array.from({length: datas.length}, (_) => {return({hpx: 30})})
+
+        worksheet["!rows"] = [
+            { hpx: 40 },
+            ...phaseOneRow
+        ]
+
+        writeFile(workbook, "Эрүүгийн хариуцлага.xlsx", { compression: true });
+    }
 
 	return (
 		<Fragment>
@@ -305,50 +446,61 @@ const ElseltYlshiitgel = () => {
                     </Col>
                 </Row>
                 <div className='d-flex justify-content-between my-50 mt-1'>
-                    <div className='d-flex'>
-                        <div className='px-1'>
-                        <Button
-                                color='primary'
-                                disabled={(selectedStudents.length != 0 && user.permissions.includes('lms-elselt-admission-approve')) ? false : true}
-                                className='d-flex align-items-center px-75'
-                                id='state_button'
-                                onClick={() => stateModalHandler()}
-                            >
-                                <RiEditFill className='me-25'/>
-                                Төлөв солих
-                            </Button>
-                            <UncontrolledTooltip target='state_button'>
-                                Доорхи сонгосон элсэгчдийн төлөвийг нэг дор солих
-                            </UncontrolledTooltip>
+                    <div className='d-flex justify-content-between' style={{ width: "100%", marginRight: "13px"}}>
+                        <div className='d-flex'>
+                            <div className='px-1'>
+                                <Button
+                                    color='primary'
+                                    disabled={(selectedStudents.length != 0 && user.permissions.includes('lms-elselt-admission-approve')) ? false : true}
+                                    className='d-flex align-items-center px-75'
+                                    id='state_button'
+                                    onClick={() => stateModalHandler()}
+                                >
+                                    <RiEditFill className='me-25'/>
+                                    Төлөв солих
+                                </Button>
+                                <UncontrolledTooltip target='state_button'>
+                                    Доорхи сонгосон элсэгчдийн төлөвийг нэг дор солих
+                                </UncontrolledTooltip>
+                            </div>
+                            <div className='px-1'>
+                                <Button
+                                    color='primary'
+                                    disabled={(selectedStudents.length != 0 && user.permissions.includes('lms-elselt-mail-create')) ? false : true}
+                                    className='d-flex align-items-center px-75'
+                                    id='email_button'
+                                    onClick={() => emailModalHandler()}
+                                >
+                                    <MdMailOutline className='me-25'/>
+                                    Email илгээх
+                                </Button>
+                                <UncontrolledTooltip target='email_button'>
+                                    Сонгосон элсэгчид руу имейл илгээх
+                                </UncontrolledTooltip>
+                            </div>
+                            <div className='px-1'>
+                                <Button
+                                    color='primary'
+                                    disabled={(selectedStudents.length != 0 && user?.permissions?.includes('lms-elselt-message-create')) ? false : true}
+                                    className='d-flex align-items-center px-75'
+                                    id='message_button'
+                                    onClick={() => messageModalHandler()}
+                                >
+                                    <BiMessageRoundedError className='me-25'/>
+                                    Мессеж илгээх
+                                </Button>
+                                <UncontrolledTooltip target='message_button'>
+                                    Сонгосон элсэгчид руу мессеж илгээх
+                                </UncontrolledTooltip>
+                            </div>
                         </div>
-                        <div className='px-1'>
-                            <Button
-                                color='primary'
-                                disabled={(selectedStudents.length != 0 && user.permissions.includes('lms-elselt-mail-create')) ? false : true}
-                                className='d-flex align-items-center px-75'
-                                id='email_button'
-                                onClick={() => emailModalHandler()}
-                            >
-                                <MdMailOutline className='me-25'/>
-                                Email илгээх
+                        <div>
+                            <Button color='primary' className='d-flex align-items-center px-75' id='excel_button' onClick={() => convert()}>
+                                <HiOutlineDocumentReport className='me-25'/>
+                                Excel
                             </Button>
-                            <UncontrolledTooltip target='email_button'>
-                                Сонгосон элсэгчид руу имейл илгээх
-                            </UncontrolledTooltip>
-                        </div>
-                        <div className='px-1'>
-                            <Button
-                                color='primary'
-                                disabled={(selectedStudents.length != 0 && user?.permissions?.includes('lms-elselt-message-create')) ? false : true}
-                                className='d-flex align-items-center px-75'
-                                id='message_button'
-                                onClick={() => messageModalHandler()}
-                            >
-                                <BiMessageRoundedError className='me-25'/>
-                                Мессеж илгээх
-                            </Button>
-                            <UncontrolledTooltip target='message_button'>
-                                Сонгосон элсэгчид руу мессеж илгээх
+                            <UncontrolledTooltip target='excel_button'>
+                                Доорхи хүснэгтэнд харагдаж байгаа мэдээллийн жагсаалтаар эксел файл үүсгэнэ
                             </UncontrolledTooltip>
                         </div>
                     </div>
