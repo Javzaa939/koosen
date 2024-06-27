@@ -889,6 +889,22 @@ def calculate_birthday(register):
         return None, gender
 
 
+def find_gender(register):
+    """ Регистрийн дугаараас хүйс тодорхойлох function
+        return gender
+    """
+    gender = ''
+    try:
+        last_number = int(register[-2])
+        if (last_number % 2) == 0:
+            gender = 2
+        else:
+            gender = 1
+        return gender
+    except Exception as e:
+        print(e)
+        return None, gender
+
 def bytes_image_encode(image):
     """ Base64 зургийг image болгох
     """

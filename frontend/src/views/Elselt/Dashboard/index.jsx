@@ -5,7 +5,15 @@ import useApi from '@hooks/useApi';
 
 import {  ReactSelectStyles } from '@utils'
 import useLoader from '@hooks/useLoader';
-import { Card, Col, Row } from 'reactstrap';
+import {
+    Dropdown,
+    DropdownToggle,
+    DropdownMenu,
+    DropdownItem,
+    Card,
+    Col,
+    Row
+} from 'reactstrap';
 import Select from 'react-select'
 
 import { useTranslation } from 'react-i18next'
@@ -25,12 +33,15 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 
 import './style.scss'
 import mapData from './mongolz.json'
+import { downloadGeneralReport } from './downloadGeneralReport';
+import excelDownload from '@src/utility/excelDownload';
 
 function Dashboard() {
     const { skin } = useSkin()
 
 	const elseltApi = useApi().elselt
 	const dashApi = useApi().elselt.dashboard
+
 	const { isLoading, fetchData } = useLoader({});
 	const {
         Loader,
@@ -44,6 +55,9 @@ function Dashboard() {
     const [datas, setDatas] = useState({})
     const [professions, setProffesions] = useState([])
     const [aimagz, setAimagz] = useState([])
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+
+    const toggle = () => setDropdownOpen((prevState) => !prevState);
 
 	/* Жагсаалтын дата авах функц */
 	async function getElselts() {
@@ -209,10 +223,28 @@ function Dashboard() {
         return null
     }
 
+    async function generalReportHandler() {
+        const {success, data} = await fetchData(dashApi.excel(chosenElselt))
+        if(success) {
+            downloadGeneralReport(data)
+        }
+    }
+
     return (
         <Card className='p-2' style={{ minHeight: '70dvh' }}>
             <div>
-                <div className='d-flex justify-content-end'>
+                <div className='d-flex justify-content-end gap-1'>
+
+                    <Dropdown isOpen={dropdownOpen} toggle={toggle}>
+                        <DropdownToggle caret color='gradient-primary'>Тайлан татах</DropdownToggle>
+                        <DropdownMenu>
+                            {/* <DropdownItem header>Ерөнхий</DropdownItem> */}
+                                <DropdownItem className='w-100' onClick={() => generalReportHandler()}>Ерөнхий тайлан татах</DropdownItem>
+                            {/* <DropdownItem divider /> */}
+                            {/* <DropdownItem header>Дэлгэрэнгүй</DropdownItem> */}
+                                {/* <DropdownItem className='w-100' disabled>Дэлгэрэнгүй тайлан татах</DropdownItem> */}
+                        </DropdownMenu>
+                    </Dropdown>
                     <Col lg={3} md={6} sm={12}>
                         <Select
                             name="type"
@@ -316,7 +348,7 @@ function Dashboard() {
                     </Col>
                 </Row>
                 {
-                    mainDataLoading && Loader
+                    // mainDataLoading && Loader
                 }
                 <>
                     <div className='my-1 shadow p-1 rounded-3'>
