@@ -112,6 +112,8 @@ from .serializers import PsychologicalTestScopeSerializer
 from .serializers import TeachersSerializer
 from .serializers import StudentSerializer
 from .serializers import ElsegchSerializer
+from .serializers import PsychologicalTestResultSerializer
+from .serializers import PsychologicalTestParticipantsSerializer
 
 from main.utils.function.utils import remove_key_from_dict, fix_format_date, get_domain_url
 from main.utils.function.utils import null_to_none, get_lesson_choice_student, get_active_year_season, json_load
@@ -2749,6 +2751,45 @@ class PsychologicalTestScopeOptionsAPIView(
             print(e)
             return request.send_error('ERR_002')
         return request.send_info("INF_003")
+
+
+class PsychologicalTestResultAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin
+):
+    """ Сэтгэлзүйн сорилын үр дүн """
+
+    queryset = PsychologicalTest.objects.all()
+    serializer_class = PsychologicalTestResultSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['title', 'start_date', 'end_date', 'description', 'duration']
+
+    def get(self, request):
+        scope = self.request.query_params.get('scope')
+
+        if scope:
+            self.queryset = self.queryset.filter(scope_kind=scope)
+
+        data = self.list(request).data
+        return request.send_data(data)
+
+
+class PsychologicalTestResultParticipantsAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin
+):
+    """ Сэтгэлзүйн сорилд оролцогчид """
+
+    queryset = PsychologicalTest.objects.all()
+    serializer_class = PsychologicalTestParticipantsSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['title', 'start_date', 'end_date', 'description', 'duration']
 
 
 @permission_classes([IsAuthenticated])

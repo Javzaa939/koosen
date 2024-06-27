@@ -44,6 +44,12 @@ export default [
                 icon: <Circle size={8} />,
                 navLink: "psychologicaltesting/exam"
             },
+            {
+                id: 'psychologicaltesting2',
+                title: 'Үр дүн',
+                icon: <Circle size={8} />,
+                navLink: "psychologicaltesting/result"
+            },
         ]
     }
 ]

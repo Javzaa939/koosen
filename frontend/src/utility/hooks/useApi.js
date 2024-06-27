@@ -1520,6 +1520,11 @@ function useApi(isDisplay=false) {
 			get: (limit, page, test_id) => instance.get(`learning/psychological_test_one/?page=${page}&limit=${limit}&test_id=${test_id}`),
 			post: (data, pk) => instance.post(`learning/psychological_test_one/${pk}/`, data),
 			delete: (pk, test_id) => instance.delete(`learning/psychological_test_one/${pk}/?test_id=${test_id}`)
+		},
+
+		psychologicalTestResult:{
+			get: (limit, page, sort, search, scope) => instance.get(`learning/psychological_test_result/?page=${page}&limit=${limit}&sort=${sort}&search=${search}&scope=${scope}`),
+			getParticipants: (limit, page, sort, search, challenge) => instance.get(`learning/psychological_test_result_participants/?page=${page}&limit=${limit}&sort=${sort}&search=${search}&challenge=${challenge}`),
 		}
 
 	},
