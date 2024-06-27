@@ -143,6 +143,7 @@ function Physical() {
                     'Нэр': data?.user?.first_name || '',
                     'Хүйс': data?.gender_name || '',
                     'РД': data?.user_register || '',
+                    'Нас': data?.user_age || 0,
                     'Үзлэгийн төлөв':STATE_LIST.find(val => val.id === data?.health_up_user_data?.state).name|| '',
                     'Тайлбар': data?.health_up_user_data?.description  || '',
                     'Савлуурт суниах':data?.health_up_user_data?.turnik || '',

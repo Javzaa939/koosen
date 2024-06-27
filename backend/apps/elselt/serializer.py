@@ -217,7 +217,7 @@ class AdmissionUserInfoSerializer(serializers.ModelSerializer):
 
     # Насыг олж насны шалгуурт тэнцсэн эсэх
     def get_user_age(self, obj):
-        user_age = 18
+        user_age = 0
         register = obj.user.register
         birthdate = calculate_birthday(register)[0]
 
@@ -570,6 +570,7 @@ class HealthPhysicalUserInfoSerializer(serializers.ModelSerializer):
     health_up_user_data = serializers.SerializerMethodField()
     user = ElseltUserSerializer(many=False, read_only=True)
     userinfo= serializers.SerializerMethodField()
+    user_age = serializers.SerializerMethodField()
 
     class Meta:
         model = AdmissionUserProfession
@@ -604,6 +605,16 @@ class HealthPhysicalUserInfoSerializer(serializers.ModelSerializer):
 
         return userinfo_data
 
+    def get_user_age(self, obj):
+        user_age = 0
+        register = obj.user.register
+        birthdate = calculate_birthday(register)[0]
+
+        if birthdate:
+            # насыг тухайн жилээс төрсөн оныг нь хасаж тооцсон
+            user_age = calculate_age(birthdate)
+
+        return user_age
 
 
 class AdmissionRegisterProfessionSerializer(serializers.ModelSerializer):
