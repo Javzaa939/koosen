@@ -508,29 +508,6 @@ const ElseltUser = () => {
                             />
                     </Col>
                     <Col sm={6} lg={3} >
-                        <Label className="form-label" for="genderOp">
-                            {t('Хүйс')}
-                        </Label>
-                            <Select
-                                name="genderOp"
-                                id="genderOp"
-                                classNamePrefix='select'
-                                isClearable
-                                className={classnames('react-select')}
-                                isLoading={isLoading}
-                                placeholder={t('-- Сонгоно уу --')}
-                                options={genderOp || []}
-                                value={genderOp.find((c) => c.name === gender)}
-                                noOptionsMessage={() => t('Хоосон байна.')}
-                                onChange={(val) => {
-                                    setGender(val?.name || '')
-                                }}
-                                styles={ReactSelectStyles}
-                                getOptionValue={(option) => option.id}
-                                getOptionLabel={(option) => option.name}
-                            />
-                    </Col>
-                    <Col sm={6} lg={3} >
                         <Label className="form-label" for="profession">
                             {t('Хөтөлбөр')}
                         </Label>
@@ -554,6 +531,30 @@ const ElseltUser = () => {
                                 getOptionLabel={(option) => option.name}
                             />
                     </Col>
+                    <Col sm={6} lg={3} >
+                        <Label className="form-label" for="genderOp">
+                            {t('Хүйс')}
+                        </Label>
+                            <Select
+                                name="genderOp"
+                                id="genderOp"
+                                classNamePrefix='select'
+                                isClearable
+                                className={classnames('react-select')}
+                                isLoading={isLoading}
+                                placeholder={t('-- Сонгоно уу --')}
+                                options={genderOp || []}
+                                value={genderOp.find((c) => c.name === gender)}
+                                noOptionsMessage={() => t('Хоосон байна.')}
+                                onChange={(val) => {
+                                    setGender(val?.name || '')
+                                }}
+                                styles={ReactSelectStyles}
+                                getOptionValue={(option) => option.id}
+                                getOptionLabel={(option) => option.name}
+                            />
+                    </Col>
+                    
                     <Col sm={6} lg={3} >
                         <Label className="form-label" for="unit1">
                             {t('Харьяалал')}

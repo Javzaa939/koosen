@@ -1009,7 +1009,7 @@ class ElseltHealthAnhanShat(
         if state:
             if state == '1':
                 exclude_ids = HealthUser.objects.filter(Q(Q(state=AdmissionUserProfession.STATE_APPROVE) | Q(state=AdmissionUserProfession.STATE_REJECT))).values_list('user', flat=True)
-                user_id = AdmissionUserProfession.objects.filter(state=state).exclude(user__in=exclude_ids).values_list('user', flat=True)
+                user_id = AdmissionUserProfession.objects.exclude(user__in=exclude_ids).values_list('user', flat=True)
             else:
                 user_id = HealthUser.objects.filter(state=state).values_list('user', flat=True)
             queryset = queryset.filter(user__in=user_id)
