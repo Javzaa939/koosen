@@ -17,7 +17,7 @@ import {
   UncontrolledTooltip,
 } from "reactstrap";
 
-import { ChevronDown, Search, Zap } from "react-feather";
+import { ChevronDown, Search, Zap, FileText } from "react-feather";
 import classnames from "classnames";
 
 import DataTable from "react-data-table-component";
@@ -36,6 +36,7 @@ import Detail from "./Detail";
 import useUpdateEffect from "@hooks/useUpdateEffect";
 import EmailModal from "../../User/EmailModal";
 import MessageModal from "../../User/MessageModal";
+import { excelDownLoadv2 } from "./downloadExcelv2";
 
 const STATE_LIST = [
 	{
@@ -210,7 +211,9 @@ function Mergejliin() {
 	function messageModalHandler() {
 		setMessageModal(!messageModal);
 	}
-
+	function excelHandler() {
+        excelDownLoadv2(datas, STATE_LIST)
+    }
 	return (
 		<Card>
 			<Detail
@@ -238,10 +241,10 @@ function Mergejliin() {
 				<Button
 					color="primary"
 					className="d-flex align-items-center"
-					onClick={() => alert("Сервисийн мэдээлэл ирээгүй байна.")}
+					onClick={() => excelHandler()}
 				>
-					<Zap className="me-50" size={14} />
-					<div>Мэдээлэл татах</div>
+					<FileText className='me-50' size={14}/>
+					<div>Нарийн мэргэжил excel татах</div>
 				</Button>
 				</Col>
 			</CardHeader>

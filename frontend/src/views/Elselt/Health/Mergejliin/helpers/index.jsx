@@ -8,7 +8,6 @@ export function getColumns (currentPage, rowsPerPage, page_count, STATE_LIST, de
     if (currentPage > page_count) {
         currentPage = 1
     }
-
     const columns = [
 		{
 			name: "№",
@@ -54,6 +53,14 @@ export function getColumns (currentPage, rowsPerPage, page_count, STATE_LIST, de
 			header: 'user__register',
 			name: <div className="px-1">РД</div>,
 			selector: (row) => row?.user_register || '',
+            sortable: true,
+			minWidth: '140px',
+			maxWidth: '140px',
+		},
+		{
+			header: 'user_age',
+			name: <div className="px-1">Hac</div>,
+			selector: (row) => row?.user_age || '',
             sortable: true,
 			minWidth: '140px',
 			maxWidth: '140px',
