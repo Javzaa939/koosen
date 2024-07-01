@@ -1524,7 +1524,7 @@ function useApi(isDisplay=false) {
 
 		psychologicalTestResult:{
 			get: (limit, page, sort, search, scope) => instance.get(`learning/psychological_test_result/?page=${page}&limit=${limit}&sort=${sort}&search=${search}&scope=${scope}`),
-			getParticipants: (limit, page, sort, search, challenge) => instance.get(`learning/psychological_test_result_participants/?page=${page}&limit=${limit}&sort=${sort}&search=${search}&challenge=${challenge}`),
+			getParticipants: (limit, page, search, test_id) => instance.get(`learning/psychological_test_result_participants/?page=${page}&limit=${limit}&search=${search}&test_id=${test_id}`),
 		}
 
 	},

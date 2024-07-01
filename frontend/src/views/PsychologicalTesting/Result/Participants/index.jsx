@@ -1,205 +1,166 @@
-import React, {useState, useEffect, Fragment} from 'react';
-import {useParams, Link} from "react-router-dom";
-import {useTranslation} from 'react-i18next';
-import {getPagination} from '@utils';
-import {getColumns} from './helpers';
-import {useForm} from 'react-hook-form';
+import React, {Fragment, useState, useEffect} from "react";
+import {useTranslation} from "react-i18next";
+import {getPagination} from "@utils";
+import {getColumns} from "./helpers";
+import {useParams} from "react-router-dom";
+import {Search} from "react-feather";
 
 import {
     Row,
-    Col,
-    Card,
+	Col,
+	Card,
+	Input,
     Label,
-    Input,
-    Button,
-    Spinner,
-    CardBody,
-    CardTitle,
-    CardHeader,
-} from 'reactstrap';
+	Button,
+	CardTitle,
+	CardHeader,
+} from "reactstrap";
 
-import {
-    Search,
-    ChevronDown,
-} from 'react-feather';
+import useApi from "@hooks/useApi";
+import useLoader from "@hooks/useLoader";
+import DataTable from "react-data-table-component";
 
-import DataTable from 'react-data-table-component';
-import useLoader from '@hooks/useLoader';
-import useApi from '@hooks/useApi';
+function Participants(){
 
+	const { t } = useTranslation();
 
-function Participants({scope}){
-
-    // Translation
-    const {t} = useTranslation();
-
-    // Params
-    const {challenge_id} = useParams();
-
-    // Hook
-    const {control, formState: {errors}, watch} = useForm({});
-    const {Loader, isLoading, fetchData} = useLoader({isFullScreen: true});
+    const { isLoading, fetchData } = useLoader({});
+    const { challenge_id } = useParams();
 
     // Pagination and Sort states
     const defaultPage = [10, 15, 50, 75, 100];
     const [currentPage, setCurrentPage] = useState(1);
-    const [rowsPerPage, setRowsPerPage] = useState(10);
-    const [totalCount, setTotalCount] = useState();
-    const [sortField, setSortField] = useState('');
-
-    // Search states
+	const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [total_count, setTotalCount] = useState(1);
     const [searchValue, setSearchValue] = useState('');
 
-    // Data States
     const [datas, setDatas] = useState([]);
 
-    // Api
-    const examApi = useApi().challenge.psychologicalTestResult
 
-    //----------Backend-тэй харьцах функцууд----------//
+    const challengeAPI = useApi().challenge.psychologicalTestResult;
+
     async function getDatas(){
-        const {success, data} = await fetchData(examApi.get(rowsPerPage, currentPage, sortField, searchValue, challenge_id))
-        if(success){
+        const { success, data } = await fetchData(challengeAPI.getParticipants(rowsPerPage, currentPage, searchValue, challenge_id));
+        if (success) {
             setDatas(data?.results);
-            setTotalCount(data?.count)
+            setTotalCount(data?.count);
         }
-    }
-    //----------END----------//
+    };
 
-    //----------Хайлтын функцууд----------//
-    function handleFilter(e){
-        const value = e.target.value.trimStart();
-        setSearchValue(value);
-    }
-
-    async function handleSearch(){
-        if(searchValue.length > 0) getDatas();
-    }
-
-    useEffect(() => { // Хайлтийн хэсэг хоосон болох үед анхны датаг дуудна
-        if (searchValue.length == 0) {
-            getDatas();
-        } else {
-            const timeoutId = setTimeout(() => {
-                getDatas();
-            }, 600);
-
-            return () => clearTimeout(timeoutId);
-        }
-    }, [searchValue]);
-    //----------END----------//
-
-    //----------Хуудаслалт болон sort-ийн функцууд----------//
-    function handleSort(column, sort){
-        if(sort === 'asc'){
-            setSortField(column.header);
-        } else {
-            setSortField('-' + column.header);
-        }
-    }
-
-    function handlePagination(page){
-        setCurrentPage(page.selected + 1);
-    }
-
-    function handlePerPage(e){
-        setRowsPerPage(parseInt(e.target.value));
-    }
-    //----------END----------//
-
-    //----------UseEffect----------//
     useEffect(() => {
         getDatas()
-    },[rowsPerPage, currentPage])
-    //----------END----------//
+    },[currentPage, rowsPerPage])
+
+
+    function handleFilter(e){
+        const value = e.target.value.trimStart();
+        setSearchValue(value)
+    };
+
+    function handleSearch(){
+		getDatas()
+	};
+
+    const handlePagination = (page) => {
+		setCurrentPage(page.selected + 1);
+	};
+
+    function handlePerPage(e) {
+        setRowsPerPage(parseInt(e.target.value))
+    };
+
+    useEffect(() => {
+        if (searchValue.length === 0) getDatas()
+    },[searchValue])
 
     return(
         <Fragment>
-            <Card>
-                {isLoading && Loader}
-                <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom align-items-center py-1">
-                    <CardTitle tag="h4">{t("Сэтгэл зүйн сорил үр дүн")}</CardTitle>
+            <Card md={12}>
+                <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
+					<CardTitle tag="h4">{t("Сорил өгсөн оролцогчдын жагсаалт")}</CardTitle>
                 </CardHeader>
-                <CardBody>
-                    <Row className='mt-1 d-flex justify-content-between mx-0'>
-                        <Col className='d-flex align-items-center justify-content-start '>
-                            <Col md={2} sm={3} className='pe-1'>
-                                <Input
-                                    className='dataTable-select me-1 mb-50'
-                                    type='select'
-                                    bsSize='sm'
-                                    style={{ height: "30px",}}
-                                    value={rowsPerPage}
-                                    onChange={e => handlePerPage(e)}
-                                >
-                                    {
-                                        defaultPage.map((page, idx) => (
-                                        <option
-                                            key={idx}
-                                            value={page}
-                                        >
-                                            {page}
-                                        </option>
-                                    ))}
-                                </Input>
-                            </Col>
-                            <Col md={10} sm={3}>
-                                <Label for='sort-select'>{t('Хуудсанд харуулах тоо')}</Label>
-                            </Col>
-                        </Col>
-                        <Col className='d-flex align-items-center mobile-datatable-search'>
+                <Row className='justify-content-between mx-0 mb-1'>
+                    <Col className='d-flex align-items-center justify-content-start '>
+                        <Col md={2} sm={3} className='pe-1'>
                             <Input
-                                className='dataTable-filter mb-50'
-                                type='text'
+                                className='dataTable-select me-1 mb-50'
+                                type='select'
                                 bsSize='sm'
-                                id='search-input'
-                                placeholder={t('Хайх')}
-                                value={searchValue}
-                                onChange={handleFilter}
-                                onKeyPress={e => e.key === 'Enter' && handleSearch()}
-                            />
-                            <Button
-                                size='sm'
-                                className='ms-50 mb-50'
-                                color='primary'
-                                onClick={handleSearch}
+                                style={{ height: "30px",}}
+                                value={rowsPerPage}
+                                onChange={e => handlePerPage(e)}
                             >
-                                <Search size={15} />
-                                <span className='align-middle ms-50'></span>
-                            </Button>
+                                {
+                                    defaultPage.map((page, idx) => (
+                                    <option
+                                        key={idx}
+                                        value={page}
+                                    >
+                                        {page}
+                                    </option>
+                                ))}
+                            </Input>
                         </Col>
-                    </Row>
-                    <div className="react-dataTable react-dataTable-selectable-rows">
-                        <DataTable
-                            noHeader
-                            paginationServer
-                            pagination
-                            className='react-dataTable'
-                            progressPending={isLoading}
-                            progressComponent={
-                                <div className='my-2 d-flex align-items-center justify-content-center'>
-                                    <Spinner className='me-1' color="" size='sm'/><h5>Түр хүлээнэ үү...</h5>
-                                </div>
-                            }
-                            noDataComponent={(
-                                <div className="my-2">
-                                    <h5>{t('Өгөгдөл байхгүй байна')}</h5>
-                                </div>
-                            )}
-                            onSort={handleSort}
-                            columns={getColumns(currentPage, rowsPerPage, totalCount)}
-                            sortIcon={<ChevronDown size={10} />}
-                            paginationPerPage={rowsPerPage}
-                            paginationDefaultPage={currentPage}
-                            data={datas}
-                            paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, totalCount)}
-                            fixedHeader
-                            fixedHeaderScrollHeight='62vh'
+                        <Col md={10} sm={3}>
+                            <Label for='sort-select'>{t('Хуудсанд харуулах тоо')}</Label>
+                        </Col>
+                    </Col>
+                    <Col className='mt-2 my-1 mx-1 d-flex align-items-center mobile-datatable-search'>
+                        <Input
+                            className='dataTable-filter mb-50'
+                            type='text'
+                            bsSize='sm'
+                            id='search-input'
+                            placeholder={t('Хайх')}
+                            onChange={handleFilter}
+                            onKeyPress={e => e.key === 'Enter' && handleSearch()}
                         />
-                    </div>
-                </CardBody>
+                        <Button
+                            size='sm'
+                            className='ms-50 mb-50'
+                            color='primary'
+                            onClick={handleSearch}
+                        >
+                            <Search size={15} />
+                            <span className='align-middle ms-50'></span>
+                        </Button>
+                    </Col>
+                </Row>
+                <div className="react-dataTable react-dataTable-selectable-rows">
+					<DataTable
+						noHeader
+						pagination
+						className="react-dataTable"
+						progressPending={isLoading}
+						progressComponent={
+							<div className="my-2">
+								<h5>{t("Түр хүлээнэ үү...")}</h5>
+							</div>
+						}
+						noDataComponent={
+							<div className="my-2">
+								<h5>{t("Өгөгдөл байхгүй байна")}</h5>
+							</div>
+						}
+						columns={getColumns(
+							currentPage,
+							rowsPerPage,
+							total_count,
+						)}
+						paginationPerPage={rowsPerPage}
+						paginationDefaultPage={currentPage}
+						data={datas}
+						paginationComponent={getPagination(
+                            handlePagination,
+							currentPage,
+							rowsPerPage,
+							total_count,
+						)}
+						fixedHeader
+						fixedHeaderScrollHeight="62vh"
+					/>
+				</div>
             </Card>
         </Fragment>
     )
-};
-export default Participants
+}export default Participants;
