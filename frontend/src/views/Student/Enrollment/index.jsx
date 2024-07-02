@@ -1,6 +1,6 @@
 import { Fragment, useState, useEffect, useContext } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { Row, Col, Card, Input, Label, CardTitle, CardHeader, Spinner, Button, UncontrolledTooltip } from 'reactstrap'
+import { Row, Col, Card, Input, Label, CardTitle, CardHeader, Spinner, Button } from 'reactstrap'
 import { ChevronDown , Edit, Edit2, Edit3, Printer, Search} from 'react-feather'
 import { useTranslation } from 'react-i18next'
 import Select from 'react-select'
@@ -13,33 +13,14 @@ import { getColumns } from './helpers';
 import { useNavigate } from 'react-router-dom'
 import { getPagination, ReactSelectStyles } from '@utils';
 import EditModal from './EditModal'
-import StateModal from './StateModal'
-import AuthContext from '@src/utility/context/AuthContext'
-import { RiEditFill } from 'react-icons/ri'
 
 const Enrollment = () => {
-
-    const stateop = [
-        {
-            'id': 1,
-            'name': 'БҮРТГҮҮЛСЭН'
-        },
-        {
-            'id': 2,
-            'name': 'ТЭНЦСЭН'
-        },
-        {
-            'id': 3,
-            'name': 'ТЭНЦЭЭГҮЙ'
-        }
-    ]
 
     var values = {
         admission: '',
         profession: '',
     }
 
-    const { user } = useContext(AuthContext)
     const [sortField, setSort] = useState('')
     const navigate = useNavigate()
 
@@ -57,7 +38,6 @@ const Enrollment = () => {
     const [searchValue, setSearchValue] = useState("");
     const [select_value, setSelectValue] = useState(values);
     const [editModal, setEditModal] = useState(false)
-    const [stateModal, setStateModal] = useState(false)
 
     const [total_count, setTotalCount] = useState(1)
 
@@ -170,19 +150,9 @@ const Enrollment = () => {
     const toggleEditModal = () => {
         setEditModal(!editModal)
     }
-    function stateModalHandler() {
-        setStateModal(!stateModal)
-    }
 
     return(
         <Fragment>
-            <StateModal
-                getDatas={getDatas}
-                stateModalHandler={stateModalHandler}
-                stateModal={stateModal}
-                selectedStudents={selectedRows}
-                stateop={stateop}
-            />
             <Card>
             {isLoading && Loader}
                 <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom pt-0'">
@@ -268,25 +238,6 @@ const Enrollment = () => {
                         />
                     </Col>
                 </Row>
-                <div className='d-flex justify-content-between my-50 mt-1'>
-                    <div className='d-flex'>
-                        <div className='px-1'>
-                            <Button
-                                color='primary'
-                                disabled={(selectedRows.length != 0 && user.permissions.includes('lms-elselt-admission-approve')) ? false : true}
-                                className='d-flex align-items-center px-75'
-                                id='state_button'
-                                onClick={() => stateModalHandler()}
-                            >
-                                <RiEditFill className='me-25'/>
-                                Төлөв солих
-                            </Button>
-                            <UncontrolledTooltip target='state_button'>
-                                Доорхи сонгосон элсэгчдийн төлөвийг нэг дор солих
-                            </UncontrolledTooltip>
-                        </div>
-                    </div>
-                </div>
                 <Row className='justify-content-between mx-0 mb-1'>
                     <Col className='d-flex align-items-center justify-content-start' md={6} sm={12}>
                         <Col md={2} sm={3} className='pe-1'>
