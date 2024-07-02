@@ -15,6 +15,17 @@ import { getPagination, ReactSelectStyles } from '@utils';
 import EditModal from './EditModal'
 
 const Enrollment = () => {
+    const genderOp = [
+        {
+            id: 1,
+            name: 'Эрэгтэй',
+        },
+        {
+            id: 2,
+            name: 'Эмэгтэй'
+        }
+    ]
+    const [gender, setGender] = useState("")
 
     var values = {
         admission: '',
@@ -34,14 +45,14 @@ const Enrollment = () => {
     const { t } = useTranslation()
 
     const { control, formState: { errors } } = useForm({});
-    const [rowsPerPage, setRowsPerPage] = useState(10)
+    const [rowsPerPage, setRowsPerPage] = useState(20)
     const [searchValue, setSearchValue] = useState("");
     const [select_value, setSelectValue] = useState(values);
     const [editModal, setEditModal] = useState(false)
 
     const [total_count, setTotalCount] = useState(1)
 
-    const default_page = [10, 15, 50, 75, 100]
+    const default_page = [10, 20, 50, 75, 100]
 
     // Const Option
     const [admissionOption, setAdmisionOption] = useState([])
@@ -80,7 +91,7 @@ const Enrollment = () => {
             setCurrentPage(page_count)
         }
 
-        const { success, data } = await allFetch(elseltApproveApi.get(rowsPerPage, currentPage, sortField, searchValue, admission, profession))
+        const { success, data } = await allFetch(elseltApproveApi.get(rowsPerPage, currentPage, sortField, searchValue, admission, profession, gender))
         if(success)
         {
             setTotalCount(data?.count)
@@ -139,7 +150,7 @@ const Enrollment = () => {
 
 			return () => clearTimeout(timeoutId);
 		}
-	}, [searchValue]);
+	}, [searchValue, gender]);
 
     function onSelectedRowsChange(state) {
         var selectedRows = state.selectedRows
@@ -235,6 +246,26 @@ const Enrollment = () => {
                             getOptionValue={(option) => option.prof_id}
                             getOptionLabel={(option) => option.name
                             }
+                        />
+                    </Col>
+                    <Col md={3}>
+                        <Label for='form-label'>{t('Хүйс')}</Label>
+                        <Select
+                            id="genderOp"
+                            name="genderOp"
+                            classNamePrefix='select'
+                            isClearable
+                            isLoading={isLoading}
+                            placeholder={`-- Сонгоно уу --`}
+                            options={genderOp || []}
+                            value={genderOp.find((c) => c.name === gender)}
+                            noOptionsMessage={() => 'Хоосон байна'}
+                            onChange={(val) => {
+                                setGender(val?.name || '')
+                            }}
+                            styles={ReactSelectStyles}
+                            getOptionValue={(option) => option.prof_id}
+                            getOptionLabel={(option) => option.name}
                         />
                     </Col>
                 </Row>

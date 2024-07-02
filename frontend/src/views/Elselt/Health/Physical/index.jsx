@@ -39,9 +39,21 @@ const STATE_LIST = [
 ]
 
 function Physical() {
+    const genderOp = [
+        {
+            id: 1,
+            name: 'Эрэгтэй',
+        },
+        {
+            id: 2,
+            name: 'Эмэгтэй'
+        }
+    ]
+    const [gender, setGender] = useState("")
+
     const { user } = useContext(AuthContext)
     const [currentPage, setCurrentPage] = useState(1);
-    const [rowsPerPage, setRowsPerPage] = useState(10)
+    const [rowsPerPage, setRowsPerPage] = useState(20)
 
     // Эрэмбэлэлт
     const [sortField, setSort] = useState('')
@@ -109,7 +121,7 @@ function Physical() {
 	/* Жагсаалтын дата авах функц */
 	async function getDatas() {
 
-        const {success, data} = await fetchData(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, chosenState, admId, profId))
+        const {success, data} = await fetchData(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, chosenState, admId, profId, gender))
         if(success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
@@ -131,7 +143,7 @@ function Physical() {
 
 			return () => clearTimeout(timeoutId);
 		}
-    }, [sortField, currentPage, rowsPerPage, searchValue, chosenState, admId, profId])
+    }, [sortField, currentPage, rowsPerPage, searchValue, chosenState, admId, profId, gender])
 
        // excel татах
        function convert(){
@@ -431,6 +443,26 @@ function Physical() {
                             onChange={(val) => {
                                 setProfId(val?.prof_id || '')
 
+                            }}
+                            styles={ReactSelectStyles}
+                            getOptionValue={(option) => option.prof_id}
+                            getOptionLabel={(option) => option.name}
+                        />
+                    </Col>
+                    <Col md={3}>
+                        <Label for='form-label'>{t('Хүйс')}</Label>
+                        <Select
+                            id="genderOp"
+                            name="genderOp"
+                            classNamePrefix='select'
+                            isClearable
+                            isLoading={isLoading}
+                            placeholder={`-- Сонгоно уу --`}
+                            options={genderOp || []}
+                            value={genderOp.find((c) => c.name === gender)}
+                            noOptionsMessage={() => 'Хоосон байна'}
+                            onChange={(val) => {
+                                setGender(val?.name || '')
                             }}
                             styles={ReactSelectStyles}
                             getOptionValue={(option) => option.prof_id}

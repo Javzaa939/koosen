@@ -44,6 +44,17 @@ import MessageModal from '../User/MessageModal'
 import StateModal from './StateModal';
 
 const InterView = () => {
+    const genderOp = [
+        {
+            id: 1,
+            name: 'Эрэгтэй',
+        },
+        {
+            id: 2,
+            name: 'Эмэгтэй'
+        }
+    ]
+    const [gender, setGender] = useState("")
 
     const { user } = useContext(AuthContext)
 
@@ -103,7 +114,7 @@ const InterView = () => {
 
     /* Жагсаалтын дата авах функц */
     async function getDatas() {
-      const {success, data} = await allFetch(interViewApi.get(rowsPerPage, currentPage, sortField, searchValue, chosenState,adm,profession_id))
+      const {success, data} = await allFetch(interViewApi.get(rowsPerPage, currentPage, sortField, searchValue, chosenState,adm,profession_id, gender))
       if(success) {
           setTotalCount(data?.count)
           setDatas(data?.results)
@@ -165,7 +176,7 @@ const InterView = () => {
 
     return () => clearTimeout(timeoutId);
     }
-    }, [sortField, currentPage, rowsPerPage, searchValue, chosenState,adm,profession_id])
+    }, [sortField, currentPage, rowsPerPage, searchValue, chosenState,adm,profession_id, gender])
 
     useEffect(() => {
         getAdmissionYear()
@@ -292,6 +303,26 @@ const InterView = () => {
                                     getOptionValue={(option) => option?.prof_id}
                                     getOptionLabel={(option) => option.name}
                                 />
+                        </Col>
+                        <Col md={3}>
+                            <Label for='form-label'>{t('Хүйс')}</Label>
+                            <Select
+                                id="genderOp"
+                                name="genderOp"
+                                classNamePrefix='select'
+                                isClearable
+                                isLoading={isLoading}
+                                placeholder={`-- Сонгоно уу --`}
+                                options={genderOp || []}
+                                value={genderOp.find((c) => c.name === gender)}
+                                noOptionsMessage={() => 'Хоосон байна'}
+                                onChange={(val) => {
+                                    setGender(val?.name || '')
+                                }}
+                                styles={ReactSelectStyles}
+                                getOptionValue={(option) => option.prof_id}
+                                getOptionLabel={(option) => option.name}
+                            />
                         </Col>
                 </Row>
                 <div className='d-flex justify-content-between my-50 mt-1'>

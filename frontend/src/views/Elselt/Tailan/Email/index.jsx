@@ -35,7 +35,7 @@ function Email() {
     const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({})
 
     const [currentPage, setCurrentPage] = useState(1);
-    const [rowsPerPage, setRowsPerPage] = useState(10)
+    const [rowsPerPage, setRowsPerPage] = useState(20)
 
     // Эрэмбэлэлт
     const [sortField, setSort] = useState('')

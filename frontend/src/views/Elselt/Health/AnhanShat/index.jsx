@@ -36,9 +36,19 @@ const STATE_LIST = [
 ]
 
 function AnhanShat() {
+    const genderOp = [
+        {
+            id: 1,
+            name: 'Эрэгтэй',
+        },
+        {
+            id: 2,
+            name: 'Эмэгтэй'
+        }
+    ]
 
     const [currentPage, setCurrentPage] = useState(1);
-    const [rowsPerPage, setRowsPerPage] = useState(10)
+    const [rowsPerPage, setRowsPerPage] = useState(20)
 
     // Эрэмбэлэлт
     const [sortField, setSort] = useState('')
@@ -60,6 +70,7 @@ function AnhanShat() {
 
     const [elseltOption, setElseltOption] = useState([])     // элсэлт авах нь
     const [profOption, setProfessionOption] = useState([])   // хөтөлбөр авах нь
+    const [gender, setGender] = useState("")
     const [select_value, setSelectValue] = useState(values);
     const [addModal, setAddModal] = useState(false)
     const [addModalData, setAddModalData] = useState(null)
@@ -114,7 +125,7 @@ function AnhanShat() {
         var elselt = select_value?.admission
         var profession = select_value?.profession
 
-        const {success, data} = await fetchData(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, chosenState, elselt, profession))
+        const {success, data} = await fetchData(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, chosenState, elselt, profession, gender))
         if(success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
@@ -136,7 +147,7 @@ function AnhanShat() {
 
 			return () => clearTimeout(timeoutId);
 		}
-    }, [sortField, currentPage, rowsPerPage, searchValue, chosenState, select_value.admission, select_value.profession])
+    }, [sortField, currentPage, rowsPerPage, searchValue, chosenState, select_value.admission, select_value.profession, gender])
 
 
     // ** Шүүж хайх хэсэг
@@ -443,6 +454,26 @@ function AnhanShat() {
                                     profession: val?.id || '',
                                 }
                             })
+                        }}
+                        styles={ReactSelectStyles}
+                        getOptionValue={(option) => option.prof_id}
+                        getOptionLabel={(option) => option.name}
+                    />
+                </Col>
+                <Col md={3}>
+                    <Label for='form-label'>{t('Хүйс')}</Label>
+                    <Select
+                        id="genderOp"
+                        name="genderOp"
+                        classNamePrefix='select'
+                        isClearable
+                        isLoading={isLoading}
+                        placeholder={`-- Сонгоно уу --`}
+                        options={genderOp || []}
+                        value={genderOp.find((c) => c.name === gender)}
+                        noOptionsMessage={() => 'Хоосон байна'}
+                        onChange={(val) => {
+                            setGender(val?.name || '')
                         }}
                         styles={ReactSelectStyles}
                         getOptionValue={(option) => option.prof_id}
