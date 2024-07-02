@@ -1762,7 +1762,7 @@ function useApi(isDisplay=false) {
 		},
 		// тэнцсэн элсэгчид
 		approve: {
-			get: (limit, page, sort, search,admission, profession) => instance.get(`/elselt/approve/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&admission=${admission}&profession=${profession}`),
+			get: (limit, page, sort, search,admission, profession, state) => instance.get(`/elselt/approve/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&admission=${admission}&profession=${profession}&state=${state}`),
 			post: (cdata) => instance.post(`/elselt/approve/`, cdata),
 
 		},
