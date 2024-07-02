@@ -8,7 +8,10 @@ import { BiMessageRoundedError } from "react-icons/bi";
 import { useTranslation } from 'react-i18next'
 import { utils, writeFile } from 'xlsx-js-style';
 import Select from 'react-select'
-
+import Flatpickr from 'react-flatpickr'
+import '@styles/react/libs/flatpickr/flatpickr.scss'
+import moment from 'moment';
+import { Mongolian } from "flatpickr/dist/l10n/mn.js"
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import AuthContext from "@context/AuthContext"
@@ -65,7 +68,7 @@ function AnhanShat() {
     const [addModalData, setAddModalData] = useState(null)
     const [emailModal, setEmailModal] = useState(false)
     const [messageModal, setMessageModal] = useState(false)
-
+    const [updated_at, setUpdated_at] = useState([])
     const [selectedStudents, setSelectedStudents] = useState([])
 
     // Нийт датаны тоо
@@ -113,9 +116,14 @@ function AnhanShat() {
 	async function getDatas() {
         var elselt = select_value?.admission
         var profession = select_value?.profession
-
-        const {success, data} = await fetchData(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, chosenState, elselt, profession))
-        if(success) {
+        var start_date = ''
+        var end_date = ''
+        if (updated_at.length !== 0) {
+            start_date = moment(updated_at[0]).format('YYYY-MM-DD HH:MM')
+            end_date = moment(updated_at[1]).format('YYYY-MM-DD HH:MM')
+        }
+        const { success, data } = await fetchData(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, chosenState, elselt, profession, start_date, end_date))
+        if (success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
 
@@ -136,8 +144,7 @@ function AnhanShat() {
 
 			return () => clearTimeout(timeoutId);
 		}
-    }, [sortField, currentPage, rowsPerPage, searchValue, chosenState, select_value.admission, select_value.profession])
-
+    }, [sortField, currentPage, rowsPerPage, searchValue, chosenState, select_value.admission, select_value.profession, updated_at])
 
     // ** Шүүж хайх хэсэг
 	const handleFilter = e => {
@@ -450,6 +457,30 @@ function AnhanShat() {
                     />
                 </Col>
             </Row>
+                <Row className='d-flex mt-1 '>
+                    <Col md={6}>
+                        <Label className="form-label" for="">
+                            {t('Огноогоор шүүх')}
+                        </Label>
+                        <Flatpickr
+                            className='form-control form-control-sm  bg-white '
+                            style={{ maxWidth: '258px' }}
+                            placeholder={`-- Сонгоно уу --`}
+                            onChange={(val) => {
+                                setUpdated_at(val || '')
+                            }
+                            }
+                            value={updated_at}
+                            options={{
+                                time_24hr: true,
+                                enableTime: true,
+                                dateFormat: "Y-m-d H:i",
+                                mode: "range",
+                                // locale: Mongolian
+                            }}
+                        />
+                    </Col>
+                </Row>
             <Row>
                 <div className='d-flex justify-content-between my-50 mt-1   '>
                     <div className='d-flex'>
