@@ -711,6 +711,7 @@ class ScoreGpaListSerializer(serializers.ModelSerializer):
         all_kredit = 0
         all_s_kredit = 0
         all_score = 0
+        final_score = 0
 
         # Оюутны дүнгүүдээр давталт гүйлгэх
         if str2bool(status):

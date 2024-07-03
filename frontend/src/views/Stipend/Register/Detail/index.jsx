@@ -54,7 +54,7 @@ export default function Detail({ isOpen, handleModal, datas })
                                                 </tr>
                                             }
                                             <tr className='border-bottom'>
-                                                <td className='pe-1' style={{ width: '33%' }}>{t('Тэтгэлэгүүд')}:</td>
+                                                <td className='pe-1' style={{ width: '33%' }}>{t('Тэтгэлгийн нэр')}:</td>
                                                 <td>
                                                     <span className='fw-bold'>{datas?.stipend_type?.name}</span>
                                                 </td>

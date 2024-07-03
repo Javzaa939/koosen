@@ -889,6 +889,22 @@ def calculate_birthday(register):
         return None, gender
 
 
+def find_gender(register):
+    """ Регистрийн дугаараас хүйс тодорхойлох function
+        return gender
+    """
+    gender = ''
+    try:
+        last_number = int(register[-2])
+        if (last_number % 2) == 0:
+            gender = 2
+        else:
+            gender = 1
+        return gender
+    except Exception as e:
+        print(e)
+        return None, gender
+
 def bytes_image_encode(image):
     """ Base64 зургийг image болгох
     """
@@ -1287,7 +1303,8 @@ def calculate_age(birthdate):
     age = today.year - birthdate.year
 
     # Сар өдөрөөр бодож хэрэв сар өдөр нь хүрээгүй бол 1 ийг хасна
-    if (today.month,today.day) < (birthdate.month , birthdate.day):
-        age -=1
+    # NOTE ДХИС элсэлтийн системдээ зөвхөн оноор нь насыг шалгах хүсэлт тавьсан
+    # if (today.month,today.day) < (birthdate.month , birthdate.day):
+    #     age -=1
 
     return age

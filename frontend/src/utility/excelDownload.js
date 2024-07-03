@@ -190,7 +190,7 @@ export default function excelDownload(datas, rowInfo, fileName, booleanField) {
              * Header болон дугаарлалтын хэсгийг таньж Body хэсэгт defaultCellStyle ийг оноож өгнө.
              * Хэрэв та өндөр өргөн өөрчлөхийг хүсвэл доош гүйлгэнэ үү.
              */
-            worksheet[cellNum].s = row === 0 ? headerStyle : col === 0 ? indexStyle : defaultCellStyle
+            worksheet[cellNum].s = row === 0 ? headerStyle : rowInfo?.datas[0] === 'index' && col === 0 ? indexStyle : defaultCellStyle
         }
     }
 
@@ -224,7 +224,7 @@ export default function excelDownload(datas, rowInfo, fileName, booleanField) {
     })
 
     worksheet["!cols"] = [
-        { wch: 5 },
+        { wch: rowInfo?.datas[0] === 'index' ? 5 : rowInfo?.width ? rowInfo?.width || DEFAULT_BODY_WIDTH : DEFAULT_BODY_WIDTH },
         ...tableWidth
     ];
 

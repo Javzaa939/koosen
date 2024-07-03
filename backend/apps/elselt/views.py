@@ -10,9 +10,24 @@ from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.db import transaction
 from django.db.models import F, Subquery, OuterRef, Count, Q
+from django.db.models import Value, Case, When, IntegerField
 from django.db.models.functions import Substr
 
-from main.utils.function.utils import json_load, make_connection, get_domain_url_link, get_domain_url, null_to_none, check_phone_number, send_message_gmobile, send_message_mobicom, send_message_skytel, send_message_unitel
+from main.utils.function.utils import (
+    json_load,
+    find_gender,
+    null_to_none,
+    get_domain_url,
+    make_connection,
+    check_phone_number,
+    get_domain_url_link,
+    send_message_unitel,
+    send_message_skytel,
+    send_message_gmobile,
+    send_message_mobicom,
+    calculate_birthday,
+)
+
 from main.utils.function.pagination import CustomPagination
 from main.decorators import login_required
 from rest_framework.response import Response
@@ -401,8 +416,8 @@ class ProfessionShalguur(
                             indicator=obj,
                             defaults={
                                 'norm_all': hynaltToo.get('norm_all'),
-                                'norm1': hynaltToo.get('norm1') if hynaltToo.get('norm1') else None,
-                                'norm2': hynaltToo.get('norm2') if hynaltToo.get('norm2') else None,
+                                'norm1': hynaltToo.get('norm1') if hynaltToo.get('norm1') else 0,
+                                'norm2': hynaltToo.get('norm2') if hynaltToo.get('norm2') else 0,
                                 'is_gender': True if hynaltToo.get('norm2') and hynaltToo.get('norm1') else False
                             }
                         )
@@ -761,97 +776,41 @@ class DashboardAPIView(
 
     queryset = AdmissionUserProfession.objects.all()
     def get(self, request):
-
         elselt = request.query_params.get('elselt')
 
         if elselt == 'all' or not elselt:
-            admission_ids = AdmissionRegister.objects.all().values_list('id', flat=True)
+            admission_ids = AdmissionRegister.objects.values_list('id', flat=True)
         else:
             admission_ids = [elselt]
 
-        queryset = self.queryset.annotate(gender=(Substr('user__register', 9, 1)))
-        queryset = queryset.filter(profession__admission__in=admission_ids)
+        queryset = self.queryset.filter(profession__admission__in=admission_ids).annotate(
+            gender=Substr('user__register', 9, 1)
+        )
+
         all_student = queryset.count()
-        male =  queryset.filter(gender__in=['1', '3', '5', '7', '9']).count()
-        female =  queryset.filter(gender__in=['0', '2', '4', '6', '8']).count()
+        male = queryset.filter(gender__in=['1', '3', '5', '7', '9']).count()
+        female = queryset.filter(gender__in=['0', '2', '4', '6', '8']).count()
         bachelor = queryset.filter(profession__profession__degree__degree_code='D').count()
         master = queryset.filter(profession__profession__degree__degree_code='E').count()
         doctor = queryset.filter(profession__profession__degree__degree_code='F').count()
 
-        # Аймгаар дотор нь хүйсээр нь ялгах
-        female_qs = (
-            queryset
-                .filter(gender__in=['0', '2', '4', '6', '8'], user__aimag=OuterRef('user__aimag'))
-                .annotate(count=Count("*"))
-                .values("count")
-        )
-        female_qs.query.set_group_by()
+        aimag_values = queryset.values('user__aimag').annotate(
+            name=Subquery(
+                AimagHot.objects.filter(id=OuterRef('user__aimag')).values('name')[:1]
+            ),
+            total=Count('id'),
+            male=Count('id', filter=Q(gender__in=['1', '3', '5', '7', '9'])),
+            female=Count('id', filter=Q(gender__in=['0', '2', '4', '6', '8']))
+        ).order_by('name').exclude(total=0).values('name', 'total', 'male', 'female')
 
-        male_qs = (
-            queryset
-                .filter(gender__in=['1', '3', '5', '7', '9'], user__aimag=OuterRef('user__aimag'))
-                .annotate(count=Count("*"))
-                .values("count")
-        )
-        male_qs.query.set_group_by()
-
-        aimag_subquery =Subquery(
-            AimagHot.objects.filter(
-                id=OuterRef('user__aimag')
-            ).values('name')[:1]
-        )
-
-        aimag_queryset = queryset.annotate(name=aimag_subquery)
-
-        aimag_values = (
-            aimag_queryset
-            .values('name')
-            .annotate(
-                total=Count("name"),
-                male=Subquery(male_qs),
-                female=Subquery(female_qs)
-            )
-            .order_by('name')
-            .exclude(total=0)
-            .values('name', 'total', 'male', 'female')
-        )
-
-        # Мэргэжлээр хүйсээр
-        prof_query =Subquery(
-            ProfessionDefinition.objects.filter(
-                id=OuterRef('profession__profession')
-            ).values('name')[:1]
-        )
-
-        prof_queryset = queryset.annotate(prof_name=prof_query)
-
-        pfemale_qs = (
-            queryset
-                .filter(gender__in=['0', '2', '4', '6', '8'], profession=OuterRef('profession'))
-                .annotate(count=Count("*"))
-                .values("count")
-        )
-        pfemale_qs.query.set_group_by()
-
-        pmale_qs = (
-            queryset
-                .filter(gender__in=['1', '3', '5', '7', '9'], profession=OuterRef('profession'))
-                .annotate(count=Count("*"))
-                .values("count")
-        )
-        pmale_qs.query.set_group_by()
-        prof_values = (
-            prof_queryset
-            .values('prof_name')
-            .annotate(
-                total=Count("prof_name"),
-                male=Subquery(pmale_qs),
-                female=Subquery(pfemale_qs)
-            )
-            .order_by('prof_name')
-            .exclude(total=0)
-            .values('prof_name', 'total', 'male', 'female')
-        )
+        prof_values = queryset.values('profession__profession').annotate(
+            prof_name=Subquery(
+                ProfessionDefinition.objects.filter(id=OuterRef('profession__profession')).values('name')[:1]
+            ),
+            total=Count('id'),
+            male=Count('id', filter=Q(gender__in=['1', '3', '5', '7', '9'])),
+            female=Count('id', filter=Q(gender__in=['0', '2', '4', '6', '8']))
+        ).order_by('prof_name').exclude(total=0).values('prof_name', 'total', 'male', 'female')
 
         datas = {
             'all_student': all_student,
@@ -865,6 +824,108 @@ class DashboardAPIView(
         }
 
         return request.send_data(datas)
+
+
+@permission_classes([IsAuthenticated])
+class DashboardExcelAPIView(
+    generics.GenericAPIView
+):
+    """ Дашбоард тайлан """
+
+    queryset = AdmissionUserProfession.objects.all()
+
+    def get(self, request):
+        # Profession Definition-ний id-г хадгална
+        elselt = self.request.query_params.get('elselt')
+        if elselt and elselt != 'all':
+            self.queryset = self.queryset.filter(profession__admission=elselt)
+
+        # Хурдан болгохын тулд шаардлагатай field-үүдэд select_related ашигласан
+        profession_ids = self.queryset.values_list('profession__profession', flat=True).distinct()
+        professions = ProfessionDefinition.objects.filter(id__in=profession_ids).select_related('school')
+
+        # Үндсэн queryset дээрээ gender-ийг нь annotate хийж өгсөн
+        queryset = self.queryset.annotate(
+            last_char=Substr('user__register', 9, 1),
+            gender=Case(
+                # Сүүлийн бичлэгүүд нь ингэж төгссөн бол эмэгтэй
+                When(Q(last_char__in=['0', '2', '4', '6', '8']), then=Value(2)),
+                # Бусад нөхцлүүдэд default утга нь эрэгтэй
+                default=Value(1),
+                # Буцах утга нь int төрөлтэй байна
+                output_field=IntegerField()
+            )
+        )
+
+        # annotate хийж өгөх dynamic field-үүдээ хэтэрхий их байгаа учир энд зарлаж өгөв
+        aggregations = {
+            'total_male_users': Count('id', filter=Q(gender=1)),
+            'total_female_users': Count('id', filter=Q(gender=2)),
+            'age_state_true_male': Count('id', filter=Q(gender=1, age_state=AdmissionUserProfession.STATE_APPROVE)),
+            'age_state_false_male': Count('id', filter=Q(gender=1, age_state=AdmissionUserProfession.STATE_REJECT)),
+            'age_state_true_female': Count('id', filter=Q(gender=2, age_state=AdmissionUserProfession.STATE_APPROVE)),
+            'age_state_false_female': Count('id', filter=Q(gender=2, age_state=AdmissionUserProfession.STATE_REJECT)),
+            'gpa_state_true_male': Count('id', filter=Q(gender=1, gpa_state=AdmissionUserProfession.STATE_APPROVE)),
+            'gpa_state_false_male': Count('id', filter=Q(gender=1, gpa_state=AdmissionUserProfession.STATE_REJECT)),
+            'gpa_state_true_female': Count('id', filter=Q(gender=2, gpa_state=AdmissionUserProfession.STATE_APPROVE)),
+            'gpa_state_false_female': Count('id', filter=Q(gender=2, gpa_state=AdmissionUserProfession.STATE_REJECT)),
+            'health_user_true_male_users': Count('id', filter=Q(gender=1, user__healthuser__state=AdmissionUserProfession.STATE_APPROVE)),
+            'health_user_true_female_users': Count('id', filter=Q(gender=2, user__healthuser__state=AdmissionUserProfession.STATE_APPROVE)),
+            'health_user_false_male_users': Count('id', filter=Q(gender=1, user__healthuser__state=AdmissionUserProfession.STATE_REJECT)),
+            'health_user_false_female_users': Count('id', filter=Q(gender=2, user__healthuser__state=AdmissionUserProfession.STATE_REJECT)),
+            'health_user_send_male_users': Count('id', filter=Q(gender=1, user__healthuser__isnull=True)),
+            'health_user_send_female_users': Count('id', filter=Q(gender=2, user__healthuser__isnull=True)),
+            'health_up_user_true_male_users': Count('id', filter=Q(gender=1, user__healthupuser__state=AdmissionUserProfession.STATE_APPROVE)),
+            'health_up_user_true_female_users': Count('id', filter=Q(gender=2, user__healthupuser__state=AdmissionUserProfession.STATE_APPROVE)),
+            'health_up_user_false_male_users': Count('id', filter=Q(gender=1, user__healthupuser__state=AdmissionUserProfession.STATE_REJECT)),
+            'health_up_user_false_female_users': Count('id', filter=Q(gender=2, user__healthupuser__state=AdmissionUserProfession.STATE_REJECT)),
+            'health_up_user_out_male_users': Count('id', filter=Q(gender=1, user__healthupuser__isnull=True)),
+            'health_up_user_out_female_users': Count('id', filter=Q(gender=2, user__healthupuser__isnull=True)),
+            'justice_state_true_male': Count('id', filter=Q(gender=1, justice_state=AdmissionUserProfession.STATE_APPROVE)),
+            'justice_state_true_female': Count('id', filter=Q(gender=2, justice_state=AdmissionUserProfession.STATE_APPROVE)),
+            'justice_state_false_male': Count('id', filter=Q(gender=1, justice_state=AdmissionUserProfession.STATE_REJECT)),
+            'justice_state_false_female': Count('id', filter=Q(gender=2, justice_state=AdmissionUserProfession.STATE_REJECT)),
+            'physque_state_true_male': Count('id', filter=Q(gender=1, user__physqueuser__state=AdmissionUserProfession.STATE_APPROVE)),
+            'physque_state_true_female': Count('id', filter=Q(gender=2, user__physqueuser__state=AdmissionUserProfession.STATE_APPROVE)),
+            'physque_state_false_male': Count('id', filter=Q(gender=1, user__physqueuser__state=AdmissionUserProfession.STATE_REJECT)),
+            'physque_state_false_female': Count('id', filter=Q(gender=2, user__physqueuser__state=AdmissionUserProfession.STATE_REJECT)),
+            'physque_state_out_male': Count('id', filter=Q(gender=1, user__physqueuser__isnull=True)),
+            'physque_state_out_female': Count('id', filter=Q(gender=2, user__physqueuser__isnull=True)),
+        }
+
+        # Бүх хөтөлбөрүүдээрээ үндсэн queryset-ээс авах датануудаас aggregate-үүдээ ашиглан авна
+        # Ингэж ашиглавал элсэгч бүрээрээ for гүйлгэх биш хэдхэн хөтөлбөрүүдээрээ for гүйлгэж хурдтай болгоно
+        profession_data = (
+            # Датагаа хуваарьлаж өгөхөд бидэнд хөтөлбөрийн id-ууд хэрэгтэй
+            queryset.values('profession__profession')
+            .annotate(**aggregations)
+            .values('profession__profession', 'total_male_users', 'total_female_users',
+                    'age_state_true_male', 'age_state_false_male', 'age_state_true_female', 'age_state_false_female',
+                    'gpa_state_true_male', 'gpa_state_false_male', 'gpa_state_true_female', 'gpa_state_false_female',
+                    'health_user_true_male_users', 'health_user_true_female_users', 'health_user_false_male_users',
+                    'health_user_false_female_users', 'health_user_send_male_users', 'health_user_send_female_users',
+                    'health_up_user_true_male_users', 'health_up_user_true_female_users', 'health_up_user_false_male_users',
+                    'health_up_user_false_female_users', 'health_up_user_out_male_users', 'health_up_user_out_female_users',
+                    'justice_state_true_male', 'justice_state_true_female', 'justice_state_false_male',
+                    'justice_state_false_female', 'physque_state_true_male', 'physque_state_true_female',
+                    'physque_state_false_male', 'physque_state_false_female', 'physque_state_out_male', 'physque_state_out_female')
+        )
+
+        # Үндсэн хөтөлбөрийн мэдээллүүддээр хөтөлбөрийн нэр болон салбар сургуулийн нэр нэмэгдэж орсон
+        profession_info = {p.id: {'profession': p.name, 'suborg': p.school.name} for p in professions}
+
+        # Буцаах өгөгдөлөө бэлдэж байна
+        result = list()
+        # annotate хийсэн дата дотроо loop гүйлгээд
+        for data in profession_data:
+            # хөтөлбөрийн id-г нь аваад
+            profession_id = data['profession__profession']
+            # Тухайн id-д нь тохирох датаг нь хадгалаад
+            profession_info[profession_id].update(data)
+            # Сүүлд нь result дотроо тус key-гийн датаг хадгална
+            result.append(profession_info[profession_id])
+
+        return request.send_data(result)
 
 
 @permission_classes([IsAuthenticated])
@@ -952,7 +1013,7 @@ class ElseltHealthAnhanShat(
         if state:
             if state == '1':
                 exclude_ids = HealthUser.objects.filter(Q(Q(state=AdmissionUserProfession.STATE_APPROVE) | Q(state=AdmissionUserProfession.STATE_REJECT))).values_list('user', flat=True)
-                user_id = AdmissionUserProfession.objects.filter(state=state).exclude(user__in=exclude_ids).values_list('user', flat=True)
+                user_id = AdmissionUserProfession.objects.exclude(user__in=exclude_ids).values_list('user', flat=True)
             else:
                 user_id = HealthUser.objects.filter(state=state).values_list('user', flat=True)
             queryset = queryset.filter(user__in=user_id)

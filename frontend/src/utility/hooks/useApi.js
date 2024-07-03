@@ -1736,6 +1736,7 @@ function useApi(isDisplay=false) {
 		},
 		dashboard: {
 			get: (elselt) => instance.get(`/elselt/dashboard/?elselt=${elselt}`),
+			excel: (elselt) => instance.get(`/elselt/dashboard/excel/?elselt=${elselt}`)
 		},
 		health: {
 			anhan:{

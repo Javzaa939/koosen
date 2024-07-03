@@ -10,6 +10,7 @@ urlpatterns = [
     path('all/active/', AdmissionYearActiveAPIView.as_view()),
 
     path('dashboard/', DashboardAPIView.as_view()),
+    path('dashboard/excel/', DashboardExcelAPIView.as_view()),
 
     # Элсэгчдийн мэдээлэл
     path('admissionuserdata/', AdmissionUserInfoAPIView.as_view()),

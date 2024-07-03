@@ -218,7 +218,7 @@ class AdmissionUserInfoSerializer(serializers.ModelSerializer):
 
     # Насыг олж насны шалгуурт тэнцсэн эсэх
     def get_user_age(self, obj):
-        user_age = 18
+        user_age = 0
         register = obj.user.register
         birthdate = calculate_birthday(register)[0]
 
@@ -534,6 +534,8 @@ class HealthUpUserInfoSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(source='user.full_name', default='', read_only=True)
     gender_name = serializers.SerializerMethodField()
     health_up_user_data = serializers.SerializerMethodField()
+    user_age = serializers.SerializerMethodField()
+    user_info = serializers.SerializerMethodField()
 
     class Meta:
         model = HealthUser
@@ -567,6 +569,24 @@ class HealthUpUserInfoSerializer(serializers.ModelSerializer):
             health_user_data = HealthUpUserSerializer(user_data).data
 
         return health_user_data
+    
+    def get_user_age(self, obj):
+        user_age = ''
+        register = obj.user.register
+        birthdate = calculate_birthday(register)[0]
+
+        if birthdate:
+            user_age = calculate_age(birthdate)
+
+        return user_age
+    
+    def get_user_info(self, obj):
+        
+        qs = UserInfo.objects.filter(user=obj.user.id).first()
+        serializer = UserinfoSerializer(qs)
+
+        return serializer.data
+
 
 class PhysqueUserSerializer(serializers.ModelSerializer):
 
@@ -581,6 +601,8 @@ class HealthPhysicalUserInfoSerializer(serializers.ModelSerializer):
     gender_name = serializers.SerializerMethodField()
     health_up_user_data = serializers.SerializerMethodField()
     user = ElseltUserSerializer(many=False, read_only=True)
+    userinfo= serializers.SerializerMethodField()
+    user_age = serializers.SerializerMethodField()
 
     class Meta:
         model = AdmissionUserProfession
@@ -607,6 +629,24 @@ class HealthPhysicalUserInfoSerializer(serializers.ModelSerializer):
             health_user_data = PhysqueUserSerializer(user_data).data
 
         return health_user_data
+
+    def get_userinfo(self, obj):
+
+        data = UserInfo.objects.filter(user=obj.user.id).first()
+        userinfo_data = UserinfoSerializer(data).data
+
+        return userinfo_data
+
+    def get_user_age(self, obj):
+        user_age = 0
+        register = obj.user.register
+        birthdate = calculate_birthday(register)[0]
+
+        if birthdate:
+            # насыг тухайн жилээс төрсөн оныг нь хасаж тооцсон
+            user_age = calculate_age(birthdate)
+
+        return user_age
 
 
 class AdmissionRegisterProfessionSerializer(serializers.ModelSerializer):

@@ -170,7 +170,6 @@ export function getColumns (currentPage, rowsPerPage, page_count, user) {
 				</Badge>),
 			center: true,
 		},
-
 		{
 			minWidth: "150px",
 			header: 'justice_description',
