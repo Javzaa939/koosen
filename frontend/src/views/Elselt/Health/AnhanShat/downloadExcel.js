@@ -42,7 +42,7 @@ export function excelDownLoad(datas, STATE_LIST) {
         const worksheet = utils.json_to_sheet(combo);
 
         const workbook = utils.book_new();
-        utils.book_append_sheet(workbook, worksheet, "A-DB-8-Report")
+        utils.book_append_sheet(workbook, worksheet, "Aнхан шатны эрүүл мэндийн үзлэг")
         const staticCells = [
                 '№',
                 'Овог',

@@ -1520,6 +1520,11 @@ function useApi(isDisplay=false) {
 			get: (limit, page, test_id) => instance.get(`learning/psychological_test_one/?page=${page}&limit=${limit}&test_id=${test_id}`),
 			post: (data, pk) => instance.post(`learning/psychological_test_one/${pk}/`, data),
 			delete: (pk, test_id) => instance.delete(`learning/psychological_test_one/${pk}/?test_id=${test_id}`)
+		},
+
+		psychologicalTestResult:{
+			get: (limit, page, sort, search, scope) => instance.get(`learning/psychological_test_result/?page=${page}&limit=${limit}&sort=${sort}&search=${search}&scope=${scope}`),
+			getParticipants: (limit, page, search, test_id) => instance.get(`learning/psychological_test_result_participants/?page=${page}&limit=${limit}&search=${search}&test_id=${test_id}`),
 		}
 
 	},
@@ -1773,7 +1778,13 @@ function useApi(isDisplay=false) {
 		},
 		eyesh:{
 			get : (limit,page,sort,search,lesson_year_id, profession_id) => instance.get(`/elselt/eyesh/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}`)
-		}
+		},
+		// цэргийн бэлтгэл тэнцсэн эсэх
+		preparation:{
+			get: (limit, page, sort, search, state, elselt, profession) => instance.get(`/elselt/preparation/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}&elselt=${elselt}&profession=${profession}`),
+			post: (cdata) => instance.post(`/elselt/preparation/`, cdata),
+			put: (id, cdata) => instance.put(`/elselt/preparation/${id}/`, cdata)
+		},
 	},
 	able: {
 		getWorker: () => able_instance.get(`/?a=ableApi&tsk=getWorkers&key=uia`),

@@ -73,7 +73,8 @@ from .serializer import (
     MessageInfoSerializer,
     HealthUpUserStateSerializer,
     ConversationUserInfoSerializer,
-    ElseltEyeshSerializer
+    ElseltEyeshSerializer,
+    ArmyUserInfoSerializer
 )
 
 from elselt.models import (
@@ -87,7 +88,8 @@ from elselt.models import (
     PhysqueUser,
     HealthUpUser,
     AdmissionUserProfession,
-    ConversationUser
+    ConversationUser,
+    ArmyUser
 )
 
 from core.models import (
@@ -418,8 +420,8 @@ class ProfessionShalguur(
                             indicator=obj,
                             defaults={
                                 'norm_all': hynaltToo.get('norm_all'),
-                                'norm1': hynaltToo.get('norm1') if hynaltToo.get('norm1') else None,
-                                'norm2': hynaltToo.get('norm2') if hynaltToo.get('norm2') else None,
+                                'norm1': hynaltToo.get('norm1') if hynaltToo.get('norm1') else 0,
+                                'norm2': hynaltToo.get('norm2') if hynaltToo.get('norm2') else 0,
                                 'is_gender': True if hynaltToo.get('norm2') and hynaltToo.get('norm1') else False
                             }
                         )
@@ -1015,7 +1017,7 @@ class ElseltHealthAnhanShat(
         if state:
             if state == '1':
                 exclude_ids = HealthUser.objects.filter(Q(Q(state=AdmissionUserProfession.STATE_APPROVE) | Q(state=AdmissionUserProfession.STATE_REJECT))).values_list('user', flat=True)
-                user_id = AdmissionUserProfession.objects.filter(state=state).exclude(user__in=exclude_ids).values_list('user', flat=True)
+                user_id = AdmissionUserProfession.objects.exclude(user__in=exclude_ids).values_list('user', flat=True)
             else:
                 user_id = HealthUser.objects.filter(state=state).values_list('user', flat=True)
             queryset = queryset.filter(user__in=user_id)
@@ -2120,3 +2122,90 @@ class ElseltEyeshAPIView(
             #         return Response(external_data, status=status.HTTP_200_OK)
 
             # return Response(status=status.HTTP_404_NOT_FOUND)
+
+
+class ArmyUserSerializerAPView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin):
+
+    queryset = AdmissionUserProfession.objects.all().order_by('created_at')
+    serializer_class = ArmyUserInfoSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['user__first_name', 'user__register', 'user__email', 'user__last_name', 'user__mobile']
+
+    def get_queryset(self):
+        queryset = self.queryset
+
+        sorting = self.request.query_params.get('sorting')
+        state = self.request.query_params.get('state')
+        elselt = self.request.query_params.get('elselt')
+        profession = self.request.query_params.get('profession')
+
+        # Ял шийтгэлд тэнцсэн элсэгчид
+        yl_shiitgel_ids = AdmissionUserProfession.objects.filter(justice_state=AdmissionUserProfession.STATE_APPROVE).values_list('user',flat=True)
+
+        queryset = queryset.filter(user__in=yl_shiitgel_ids)
+
+        # # Sort хийх үед ажиллана
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
+
+        if elselt:
+            queryset = queryset.filter(user__admissionuserprofession__profession__admission=elselt)
+
+        if profession:
+            queryset = queryset.filter(
+                user__admissionuserprofession__profession__profession=profession
+            )
+
+        if state:
+            if state == '1':
+                exclude_ids = ArmyUser.objects.filter(Q(Q(state=AdmissionUserProfession.STATE_APPROVE) | Q(state=AdmissionUserProfession.STATE_REJECT))).values_list('user', flat=True)
+                user_id = AdmissionUserProfession.objects.filter(justice_state=AdmissionUserProfession.STATE_APPROVE).exclude(user__in=exclude_ids).values_list('user', flat=True)
+            else:
+                user_id = ArmyUser.objects.filter(state=state).values_list('user', flat=True)
+
+            queryset = queryset.filter(user__in=user_id)
+
+
+        return queryset
+
+    def get(self, request, pk=None):
+
+        if pk:
+            all_data = self.retrieve(request, pk).data
+            return request.send_data(all_data)
+
+        all_data = self.list(request).data
+        return request.send_data(all_data)
+
+    def post(self, request):
+
+        data = request.data
+        try:
+            data['user'] = ElseltUser.objects.get(pk=data.get('user'))
+            ArmyUser.objects.create(**data)
+        except Exception as e:
+            print(e)
+            return request.send_error('ERR_002', 'Хадгалахад алдаа гарлаа')
+
+        return request.send_info('INF_001')
+
+    def put(self, request,pk=None):
+
+        data = request.data
+        with transaction.atomic():
+            now = dt.datetime.now()
+            ArmyUser.objects.filter(
+            user=data.get('user')
+            ).update(state=data.get("state"),updated_at=now,description=data.get("description"))
+
+        return request.send_info('INF_002')
