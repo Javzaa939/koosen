@@ -38,7 +38,7 @@ export default [
                 navLink: "elselt/interview"
             },
             {
-                id: 'elselt3_2',
+                id: 'elselt3_3',
                 title: 'Ял шийтгэл',
                 icon: <Circle size={8} />,
                 navLink: "elselt/ylshiitgel"
