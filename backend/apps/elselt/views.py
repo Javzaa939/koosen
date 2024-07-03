@@ -83,7 +83,8 @@ from elselt.models import (
     PhysqueUser,
     HealthUpUser,
     AdmissionUserProfession,
-    ConversationUser
+    ConversationUser,
+    StateChangeLog
 )
 
 from core.models import (
@@ -529,12 +530,22 @@ class AdmissionUserInfoAPIView(
 
         try:
             # Элсэгчийн хөтөлбөр засах
-            serializer = AdmissionUserProfessionSerializer(instance, data=data, partial=True)
+            logged_user = request.user
 
+            profession_change_log = StateChangeLog(
+                user=instance.user,
+                type=StateChangeLog.PROFESSION,
+                now_profession=instance.profession.profession.name,
+                change_profession=data.get('profession'),
+                updated_user=logged_user
+            )
+            profession_change_log.save()
+
+            serializer = AdmissionUserProfessionSerializer(instance, data=data, partial=True)
             if not serializer.is_valid(raise_exception=False):
                 return request.send_error_valid(serializer.errors)
 
-            serializer.save()
+            serializer.save(updated_user=logged_user)
 
         except Exception as e:
             return request.send_error('ERR_002', e.__str__())
