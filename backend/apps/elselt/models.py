@@ -4,7 +4,8 @@ from lms.models import (
     AimagHot,
     AdmissionRegisterProfession,
     User,
-    PsychologicalTest
+    PsychologicalTest,
+    AdmissionIndicator
 )
 class ElseltUser(models.Model):
 
@@ -346,3 +347,26 @@ class ArmyUser(models.Model):
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
     updated_user = models.ForeignKey(User, verbose_name='Зассан хэрэглэгч', null=True, on_delete=models.CASCADE)
+
+
+class StateChangeLog(models.Model):
+    ''' Элсэгч дээр төлөв болон хөтөлбөр сольсон лог харуулах '''
+
+    PROFESSION = 1
+    STATE = 2
+
+    TYPE = (
+        (PROFESSION, 'ХӨТӨЛБӨР'),
+        (STATE, 'ТӨЛӨВ'),
+    )
+
+    user = models.ForeignKey(ElseltUser, on_delete=models.CASCADE, verbose_name='Элсэгч')
+    type = models.IntegerField(choices=TYPE, verbose_name='Лог төрөл', default=STATE)
+    now_profession = models.CharField(verbose_name='Одоогийн төлөв', max_length=255, null=True)
+    change_profession = models.CharField(verbose_name='Одоогийн төлөв', max_length=255, null=True)
+    indicator = models.IntegerField(choices=AdmissionIndicator.INDICATOR_VALUE, default=AdmissionIndicator.ERUUL_MEND, verbose_name='шалгуурын төрөл')
+    now_state = models.IntegerField(choices=AdmissionUserProfession.STATE, default=AdmissionUserProfession.STATE_REJECT, verbose_name='ямар төлөвт шилжиж байгаан')
+    change_state = models.IntegerField(choices=AdmissionUserProfession.STATE, default=AdmissionUserProfession.STATE_REJECT, verbose_name='ямар төлөвт шилжиж байгаан')
+
+    updated_at = models.DateTimeField(auto_now=True)
+    updated_user = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name='Зассан хэрэглэгч', null=True)
