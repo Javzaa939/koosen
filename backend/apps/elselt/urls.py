@@ -64,5 +64,6 @@ urlpatterns = [
     path('interview/',ConversationUserSerializerAPIView.as_view()),
     path('interview/<int:pk>/', ConversationUserSerializerAPIView.as_view()),
 
+    path('eyesh/',ElseltEyeshAPIView.as_view())
 ]
 

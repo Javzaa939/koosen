@@ -917,3 +917,16 @@ class ConversationUserInfoSerializer(serializers.ModelSerializer):
             obj.save()
 
             return user_age
+
+class ElseltEyeshSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
+    class Meta:
+        model = AdmissionUserProfession
+        fields = ['id','user']
+
+    def get_user(self, obj):
+
+            data = ElseltUser.objects.filter(id=obj.user.id).first()
+            userinfo_data = ElseltUserSerializer(data).data
+            register = userinfo_data['register']
+            return register

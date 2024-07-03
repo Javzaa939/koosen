@@ -1770,6 +1770,9 @@ function useApi(isDisplay=false) {
 			get: (limit, page, sort, search, state, elselt, profession) => instance.get(`/elselt/interview/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}&elselt=${elselt}&profession=${profession}`),
 			post: (cdata) => instance.post(`/elselt/interview/`, cdata),
 			put: (id, cdata) => instance.put(`/elselt/interview/${id}/`, cdata)
+		},
+		eyesh:{
+			get : (limit,page,sort,search,lesson_year_id, profession_id) => instance.get(`/elselt/eyesh/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}`)
 		}
 	},
 	able: {

@@ -1,5 +1,8 @@
 import hashlib
 import datetime as dt
+import requests
+from django.conf import settings
+from urllib.parse import quote
 
 from rest_framework import mixins
 from rest_framework import generics
@@ -69,7 +72,8 @@ from .serializer import (
     EyeshCheckUserInfoSerializer,
     MessageInfoSerializer,
     HealthUpUserStateSerializer,
-    ConversationUserInfoSerializer
+    ConversationUserInfoSerializer,
+    ElseltEyeshSerializer
 )
 
 from elselt.models import (
@@ -2021,3 +2025,98 @@ class ConversationUserSerializerAPIView(
             ).update(state=data.get("state"),updated_at=now,description=data.get("description"))
 
         return request.send_info('INF_002')
+
+class ElseltEyeshAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin
+):
+    BLOCKCHAIN_API_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJibG9ja2NoYWluLmVlYy5tbiIsImF1ZCI6IlBvc3RtYW5SdW50aW1lLzcuMzkuMCIsImV4cCI6MTcyMDIzNzE0OCwiaWF0IjoxNzE5OTc3OTQ4LCJ1c2VySWQiOiJhM2Y5ZjRmOS00OGM5LTQzYTItYmVlZC01ZDYyOWYzZWRhODciLCJyb2xlQ29kZSI6IlJPTEVfVU5JVkVSU0lUWSJ9.bPdmc0YNjoNlJ8eAHiObnvjezdUQRDuJURCJBP2Maec'
+
+    queryset = AdmissionUserProfession.objects.all().order_by('created_at')
+    serializer_class = ElseltEyeshSerializer
+    pagination_class = CustomPagination
+
+
+    def get_queryset(self):
+        queryset = AdmissionUserProfession.objects.all().order_by('created_at')
+        elselt = self.request.query_params.get('lesson_year_id')
+        profession = self.request.query_params.get('profession_id')
+        sorting = self.request.query_params.get('sorting')
+
+        if elselt:
+            queryset = queryset.filter(profession__admission=elselt)
+
+        if profession:
+            queryset = queryset.filter(profession=profession)
+
+        if sorting:
+            queryset = queryset.order_by(sorting)
+
+        return queryset
+
+    def refresh_token(self):
+        token_url = 'http://blockchain.eec.mn/api/v1/auth'
+        data = {
+            "password": "a05TeVRnOUxOTUQ2",
+            "username": "info@uia.gov.mn"
+        }
+        response = requests.post(token_url, data=data)
+        response.raise_for_status()
+        new_token = response.json().get('data').get('token')
+        if new_token:
+            self.BLOCKCHAIN_API_TOKEN = new_token
+            return new_token
+
+    def get_data(self, register):
+        data_url = 'http://blockchain.eec.mn/api/v1/student'
+        params = {'registerNo': register}
+        headers = {'Authorization': f'Bearer {self.BLOCKCHAIN_API_TOKEN}'}
+
+        try:
+            response = requests.get(data_url, params=params, headers=headers)
+            response.raise_for_status()
+            data = response.json()
+            return data
+        except requests.exceptions.HTTPError as http_err:
+            if response.status_code == 401:
+                new_token = self.refresh_token()
+                if new_token:
+                    headers['Authorization'] = f'Bearer {new_token}'
+                    try:
+                        response = requests.get(data_url, params=params, headers=headers)
+                        response.raise_for_status()
+                        data = response.json()
+                        return data
+                    except requests.exceptions.RequestException as e:
+                        print(f"An error occurred while retrying the API call: {e}")
+                        return None
+                else:
+                    print("Failed to refresh token or obtain new token.")
+            else:
+                print(f"HTTP error occurred: {http_err}")
+                return None
+        except requests.exceptions.RequestException as e:
+            print(f"An error occurred while calling the external API: {e}")
+            return None
+
+    def get(self, request):
+            data = self.list(request).data
+            all_data = []
+            register = [item['user'] for item in data['results']]
+            for item in register:
+                print(item)
+                datas = self.get_data(item)
+                if datas['status']:
+                    all_data.append(datas)
+
+            return request.send_data(all_data)
+
+
+            # for item in all_data:
+            #     external_data = self.get_data(item['user'])
+            #     if external_data:
+            #         return Response(external_data, status=status.HTTP_200_OK)
+
+            # return Response(status=status.HTTP_404_NOT_FOUND)
