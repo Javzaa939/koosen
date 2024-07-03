@@ -87,7 +87,8 @@ from elselt.models import (
     PhysqueUser,
     HealthUpUser,
     AdmissionUserProfession,
-    ConversationUser
+    ConversationUser,
+    UserScore
 )
 
 from core.models import (
@@ -2034,25 +2035,17 @@ class ElseltEyeshAPIView(
 ):
     BLOCKCHAIN_API_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJibG9ja2NoYWluLmVlYy5tbiIsImF1ZCI6IlBvc3RtYW5SdW50aW1lLzcuMzkuMCIsImV4cCI6MTcyMDIzNzE0OCwiaWF0IjoxNzE5OTc3OTQ4LCJ1c2VySWQiOiJhM2Y5ZjRmOS00OGM5LTQzYTItYmVlZC01ZDYyOWYzZWRhODciLCJyb2xlQ29kZSI6IlJPTEVfVU5JVkVSU0lUWSJ9.bPdmc0YNjoNlJ8eAHiObnvjezdUQRDuJURCJBP2Maec'
 
-    queryset = AdmissionUserProfession.objects.all().order_by('created_at')
+    queryset = AdmissionUserProfession.objects.all()
     serializer_class = ElseltEyeshSerializer
-    pagination_class = CustomPagination
+
 
 
     def get_queryset(self):
-        queryset = AdmissionUserProfession.objects.all().order_by('created_at')
+        queryset = AdmissionUserProfession.objects.all()
         elselt = self.request.query_params.get('lesson_year_id')
-        profession = self.request.query_params.get('profession_id')
-        sorting = self.request.query_params.get('sorting')
 
         if elselt:
             queryset = queryset.filter(profession__admission=elselt)
-
-        if profession:
-            queryset = queryset.filter(profession=profession)
-
-        if sorting:
-            queryset = queryset.order_by(sorting)
 
         return queryset
 
@@ -2069,54 +2062,136 @@ class ElseltEyeshAPIView(
             self.BLOCKCHAIN_API_TOKEN = new_token
             return new_token
 
-    def get_data(self, register):
-        data_url = 'http://blockchain.eec.mn/api/v1/student'
-        params = {'registerNo': register}
-        headers = {'Authorization': f'Bearer {self.BLOCKCHAIN_API_TOKEN}'}
+    def get_data(self, data):
+        all_data = []
+        for item in data:
+            data_url = 'http://blockchain.eec.mn/api/v1/student'
+            params = {'registerNo': item}
+            headers = {'Authorization': f'Bearer {self.BLOCKCHAIN_API_TOKEN}'}
 
-        try:
-            response = requests.get(data_url, params=params, headers=headers)
-            response.raise_for_status()
-            data = response.json()
-            return data
-        except requests.exceptions.HTTPError as http_err:
-            if response.status_code == 401:
-                new_token = self.refresh_token()
-                if new_token:
-                    headers['Authorization'] = f'Bearer {new_token}'
-                    try:
-                        response = requests.get(data_url, params=params, headers=headers)
-                        response.raise_for_status()
-                        data = response.json()
-                        return data
-                    except requests.exceptions.RequestException as e:
-                        print(f"An error occurred while retrying the API call: {e}")
-                        return None
+            try:
+                response = requests.get(data_url, params=params, headers=headers)
+                response.raise_for_status()
+                data = response.json()
+                if data['status']:
+                    all_data.append(data)
+
+            except requests.exceptions.HTTPError as http_err:
+                if response.status_code == 401:
+                    new_token = self.refresh_token()
+                    if new_token:
+                        headers['Authorization'] = f'Bearer {new_token}'
+                        try:
+                            response = requests.get(data_url, params=params, headers=headers)
+                            response.raise_for_status()
+                            data = response.json()
+                            if data['status']:
+                                all_data.append(data)
+                        except requests.exceptions.RequestException as e:
+                            print(f"An error occurred while retrying the API call: {e}")
+                            return None
+                    else:
+                        print("Failed to refresh token or obtain new token.")
                 else:
-                    print("Failed to refresh token or obtain new token.")
-            else:
-                print(f"HTTP error occurred: {http_err}")
+                    print(f"HTTP error occurred: {http_err}")
+                    return None
+            except requests.exceptions.RequestException as e:
+                print(f"An error occurred while calling the external API: {e}")
                 return None
-        except requests.exceptions.RequestException as e:
-            print(f"An error occurred while calling the external API: {e}")
-            return None
+        return all_data
+
+    def extract_lesson(self, external_data):
+        filtered_data = []
+        register_numbers = [student['data']['registerNo'].upper() for student in external_data if any(pupil.get('pupilExam', []) for pupil in student.get('data', {}).get('pupil', []))]
+
+        for student in external_data:
+            student_data = student.get('data', {})
+            pupil_data = student_data.get('pupil', [])
+
+            if any(pupil.get('pupilExam', []) for pupil in pupil_data):
+                filtered_data.append(student)
+        data = []
+
+        for student in filtered_data:
+            student_data = student.get('data', {})
+            register_no = student_data.get('registerNo')
+            pupil_data = student_data.get('pupil', [])
+
+            student_lessons = []
+
+            for pupil in pupil_data:
+                exam_loc = pupil.get('examLoc')
+                exam_loc_code = pupil.get('examLocCode')
+                school_name = pupil.get('schoolName')
+                semester = pupil.get('semester')
+                school_code = pupil.get('schoolCode')
+                year = pupil.get('year')
+
+                # Append general pupil information to student_lessons
+                student_lessons.append({
+                    'examLoc': exam_loc,
+                    'examLocCode': exam_loc_code,
+                    'schoolName': school_name,
+                    'semester': semester,
+                    'schoolCode': school_code,
+                    'year': year
+                })
+
+                exams = pupil.get('pupilExam', [])
+                exam_data = []
+
+                for exam in exams:
+                    lesson_id = exam.get('lessonId')
+                    scaled_score = exam.get('scaledScore')
+                    percentage_score = exam.get('percentageScore')
+                    lesson_name = exam.get('lessonName')
+                    raw_score = exam.get('rawScore')
+                    word_score = exam.get('wordScore')
+
+                    if lesson_id == 11:
+                        is_success = scaled_score > 400
+                    else:
+                        is_success = True
+
+                    # Append exam details to exam_data list
+                    exam_data.append({
+                        'lessonId': lesson_id,
+                        'lessonName': lesson_name,
+                        'scaledScore': scaled_score,
+                        'percentageScore': percentage_score,
+                        'rawScore': raw_score,
+                        'wordScore': word_score,
+                        'is_success': is_success
+                    })
+
+                # Append exam_data list to student_lessons under 'exams'
+                student_lessons.append({
+                    'exams': exam_data
+                })
+
+            # Append student with their lessons to main data
+            data.append({
+                'register': register_no,
+                'lessons': student_lessons
+            })
+        user = UserScore.objects.filter(user__register__in = register_numbers)
+        with transaction.atomic():
+            if user:
+
+                UserScore.objects.bulk_update(data)
+            else :
+                # UserScore.objects.bulk_create(data)
+                print(data)
+        return data
+
+
 
     def get(self, request):
-            data = self.list(request).data
-            all_data = []
-            register = [item['user'] for item in data['results']]
-            for item in register:
-                print(item)
-                datas = self.get_data(item)
-                if datas['status']:
-                    all_data.append(datas)
+        profession = self.request.query_params.get('profession_id')
+        if profession:
+            queryset = self.queryset.filter(profession=profession)
+        datas = queryset.values_list('user__register', flat=True)
+        datas = self.get_data(datas)
+        data = self.extract_lesson(datas)
 
-            return request.send_data(all_data)
-
-
-            # for item in all_data:
-            #     external_data = self.get_data(item['user'])
-            #     if external_data:
-            #         return Response(external_data, status=status.HTTP_200_OK)
-
-            # return Response(status=status.HTTP_404_NOT_FOUND)
+        return request.send_data(data)
