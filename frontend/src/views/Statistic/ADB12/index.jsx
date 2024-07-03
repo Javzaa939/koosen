@@ -115,7 +115,7 @@ function ADB12(){
         const worksheet = utils.json_to_sheet(combo);
 
         const workbook = utils.book_new();
-        utils.book_append_sheet(workbook, worksheet, "A-DB-8-Report")
+        utils.book_append_sheet(workbook, worksheet, "A-DB-12-Report")
         const staticCells = [
                 'Байгууллагын ангилал',
                 ' ',
