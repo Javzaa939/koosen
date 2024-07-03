@@ -2101,97 +2101,69 @@ class ElseltEyeshAPIView(
         return all_data
 
     def extract_lesson(self, external_data):
-        filtered_data = []
-        register_numbers = [student['data']['registerNo'].upper() for student in external_data if any(pupil.get('pupilExam', []) for pupil in student.get('data', {}).get('pupil', []))]
+        data = []
 
         for student in external_data:
             student_data = student.get('data', {})
-            pupil_data = student_data.get('pupil', [])
-
-            if any(pupil.get('pupilExam', []) for pupil in pupil_data):
-                filtered_data.append(student)
-        data = []
-
-        for student in filtered_data:
-            student_data = student.get('data', {})
             register_no = student_data.get('registerNo')
+            register_no = register_no.upper()
+            user_instance = ElseltUser.objects.filter(register=register_no).first()
+            print(user_instance)
             pupil_data = student_data.get('pupil', [])
-
-            student_lessons = []
 
             for pupil in pupil_data:
-                exam_loc = pupil.get('examLoc')
-                exam_loc_code = pupil.get('examLocCode')
-                school_name = pupil.get('schoolName')
-                semester = pupil.get('semester')
-                school_code = pupil.get('schoolCode')
-                year = pupil.get('year')
-
-                # Append general pupil information to student_lessons
-                student_lessons.append({
-                    'examLoc': exam_loc,
-                    'examLocCode': exam_loc_code,
-                    'schoolName': school_name,
-                    'semester': semester,
-                    'schoolCode': school_code,
-                    'year': year
-                })
-
                 exams = pupil.get('pupilExam', [])
-                exam_data = []
 
                 for exam in exams:
                     lesson_id = exam.get('lessonId')
-                    scaled_score = exam.get('scaledScore')
+                    scaledScore = exam.get('scaledScore')
                     percentage_score = exam.get('percentageScore')
                     lesson_name = exam.get('lessonName')
                     raw_score = exam.get('rawScore')
                     word_score = exam.get('wordScore')
+                    exam_loc = pupil.get('examLoc')
+                    exam_loc_code = pupil.get('examLocCode')
+                    school_name = pupil.get('schoolName')
+                    semester = pupil.get('semester')
+                    school_code = pupil.get('schoolCode')
+                    year = pupil.get('year')
 
                     if lesson_id == 11:
-                        is_success = scaled_score > 400
+                        is_success = scaledScore > 400
                     else:
                         is_success = True
 
-                    # Append exam details to exam_data list
-                    exam_data.append({
-                        'lessonId': lesson_id,
-                        'lessonName': lesson_name,
-                        'scaledScore': scaled_score,
-                        'percentageScore': percentage_score,
-                        'rawScore': raw_score,
-                        'wordScore': word_score,
-                        'is_success': is_success
+                    # Append exam details to the data list
+                    data.append({
+                        'user_id':user_instance.id,
+                        'lesson_name': lesson_name,
+                        'scaledScore': scaledScore,
+                        'percentage_score': percentage_score,
+                        'raw_score': raw_score,
+                        'word_score': word_score,
+                        'exam_loc': exam_loc,
+                        'exam_loc_code': exam_loc_code,
+                        'school_name': school_name,
+                        'semester': semester,
+                        'school_code': school_code,
+                        'year': year
                     })
-
-                # Append exam_data list to student_lessons under 'exams'
-                student_lessons.append({
-                    'exams': exam_data
-                })
-
-            # Append student with their lessons to main data
-            data.append({
-                'register': register_no,
-                'lessons': student_lessons
-            })
-        user = UserScore.objects.filter(user__register__in = register_numbers)
-        with transaction.atomic():
-            if user:
-
-                UserScore.objects.bulk_update(data)
-            else :
-                # UserScore.objects.bulk_create(data)
-                print(data)
         return data
-
-
 
     def get(self, request):
         profession = self.request.query_params.get('profession_id')
         if profession:
             queryset = self.queryset.filter(profession=profession)
+        bulk_create_datas = []
         datas = queryset.values_list('user__register', flat=True)
         datas = self.get_data(datas)
-        data = self.extract_lesson(datas)
-
-        return request.send_data(data)
+        extracted_data = self.extract_lesson(datas)
+        try:
+            with transaction.atomic():
+                for data in extracted_data:
+                    bulk_create_datas.append(UserScore(**data))
+                UserScore.objects.bulk_create(bulk_create_datas)
+        except Exception as e:
+            print(f"Error occurred during bulk create: {e}")
+            return Response({'error': str(e)}, status=500)
+        return request.send_data(datas)
