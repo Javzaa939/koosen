@@ -1777,6 +1777,10 @@ function useApi(isDisplay=false) {
 			post: (cdata) => instance.post(`/elselt/preparation/`, cdata),
 			put: (id, cdata) => instance.put(`/elselt/preparation/${id}/`, cdata)
 		},
+		// Хөтөлбөр,Төлөв лог жагсаалт
+		log:{
+			get:()=>instance.get(`/elselt/log/`)
+		}
 	},
 	able: {
 		getWorker: () => able_instance.get(`/?a=ableApi&tsk=getWorkers&key=uia`),

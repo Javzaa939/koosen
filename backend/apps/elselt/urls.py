@@ -67,5 +67,8 @@ urlpatterns = [
      # Цэргийн хээрийн бэлтгэлд тэнцсэн жагсаалт
     path('preparation/', ArmyUserSerializerAPView.as_view()),
     path('preparation/<int:pk>/',ArmyUserSerializerAPView.as_view()),
+
+    # Хөтөлбөр,Төлөв лог жагсаалт
+    path('log/',LogSerializerAPView.as_view()),
 ]
 

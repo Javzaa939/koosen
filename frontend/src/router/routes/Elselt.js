@@ -14,7 +14,7 @@ const Physical = lazy(() => import("@src/views/Elselt/Health/Physical"))
 const MessageTailan = lazy(() => import("@views/Elselt/Tailan/Message"))
 const InterView = lazy(() => import("@views/Elselt/InterView"))
 const FieldPreparation = lazy(()=>import("@views/Elselt/FieldPreparation"))
-
+const Log = lazy(()=>import("@views/Elselt/Log"))
 const ElseltRoutes = [
     {
         path: 'elselt/ylshiitgel/',
@@ -71,6 +71,10 @@ const ElseltRoutes = [
     {
         path: 'elselt/preparation/',
         element: <FieldPreparation />
+    },
+    {
+        path: 'elselt/log/',
+        element: <Log />
     },
 ]
 

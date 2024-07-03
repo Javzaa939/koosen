@@ -70,6 +70,7 @@ from .serializer import (
     MessageInfoSerializer,
     HealthUpUserStateSerializer,
     ConversationUserInfoSerializer,
+    ArmyUserInfoSerializer,
     ArmyUserInfoSerializer
 )
 
@@ -85,7 +86,8 @@ from elselt.models import (
     HealthUpUser,
     AdmissionUserProfession,
     ConversationUser,
-    ArmyUser
+    ArmyUser,
+    StateChangeLog
 )
 
 from core.models import (
@@ -2109,3 +2111,51 @@ class ArmyUserSerializerAPView(
             ).update(state=data.get("state"),updated_at=now,description=data.get("description"))
 
         return request.send_info('INF_002')
+
+class LogSerializerAPView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin
+    ):
+
+    queryset = StateChangeLog.objects.all()
+    serializer_class = ArmyUserInfoSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['user__first_name', 'user__register', 'user__email', 'user__last_name', 'user__mobile']
+
+    def get_queryset(self):
+        queryset = self.queryset
+
+        sorting = self.request.query_params.get('sorting')
+        state = self.request.query_params.get('state')
+
+        # Sort хийх үед ажиллана
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
+
+        if state:
+            if state == '1':
+                exclude_ids = ArmyUser.objects.filter(Q(Q(state=AdmissionUserProfession.STATE_APPROVE) | Q(state=AdmissionUserProfession.STATE_REJECT))).values_list('user', flat=True)
+                user_id = AdmissionUserProfession.objects.filter(justice_state=AdmissionUserProfession.STATE_APPROVE).exclude(user__in=exclude_ids).values_list('user', flat=True)
+            else:
+                user_id = ArmyUser.objects.filter(state=state).values_list('user', flat=True)
+
+            queryset = queryset.filter(user__in=user_id)
+
+
+        return queryset
+
+    def get(self, request, pk=None):
+
+        if pk:
+            all_data = self.retrieve(request, pk).data
+            return request.send_data(all_data)
+
+        all_data = self.list(request).data
+        return request.send_data(all_data)
