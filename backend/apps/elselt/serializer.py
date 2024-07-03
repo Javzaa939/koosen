@@ -824,6 +824,26 @@ class EyeshCheckUserInfoSerializer(serializers.ModelSerializer):
 
         return avg_scaled_score or 0
 
+
+class MentalUserSerializer(serializers.ModelSerializer):
+    first_name = serializers.CharField(read_only=True)
+    last_name = serializers.CharField(read_only=True)
+    code = serializers.CharField(read_only=True)
+    duration = serializers.SerializerMethodField()
+
+    class Meta:
+        model = MentalUser
+        fields = '__all__'
+
+    def get_duration(self, obj):
+        difference_in_minutes = 0
+        start_time = datetime.fromisoformat(str(obj.start_time))
+        end_time = datetime.fromisoformat(str(obj.end_time))
+        time_difference = end_time - start_time
+        difference_in_minutes = time_difference.total_seconds() / 60
+        return round(difference_in_minutes, 2)
+
+
 class ConversationUserInfoSerializer(serializers.ModelSerializer):
         user = serializers.SerializerMethodField()
         justice_state = serializers.SerializerMethodField()
