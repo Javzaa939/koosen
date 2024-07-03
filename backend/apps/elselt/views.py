@@ -83,7 +83,8 @@ from elselt.models import (
     PhysqueUser,
     HealthUpUser,
     AdmissionUserProfession,
-    ConversationUser
+    ConversationUser,
+    StateChangeLog
 )
 
 from core.models import (
@@ -561,18 +562,39 @@ class AdmissionUserAllChange(
         try:
             with transaction.atomic():
                 now = dt.datetime.now()
-                if data.get("state") :
-                    self.queryset.filter(pk__in=data["students"]).update(
-                    state=data.get("state"),
-                    updated_at=now,
-                    state_description=data.get("state_description")
-                )
-                else:
-                    self.queryset.filter(pk__in=data["students"]).update(
-                    updated_at=now,
-                    justice_state=data.get("justice_state"),
-                    justice_description=data.get("justice_description")
-                )
+                students = self.queryset.filter(pk__in=data["students"])
+                for student in students:
+                    if data.get("state"):
+                        old_state = student.state
+                        student.state = data.get("state")
+                        student.updated_at = now
+                        student.state_description = data.get("state_description")
+                        student.save()
+
+                        StateChangeLog.objects.create(
+                            user=student.user,
+                            type=StateChangeLog.STATE,
+                            now_state=old_state,
+                            change_state=data.get("state"),
+                            updated_user=request.user if request.user.is_authenticated else None,
+                            updated_at=now
+                        )
+                    else:
+                        old_justice_state = student.justice_state
+                        student.updated_at = now
+                        student.justice_state = data.get("justice_state")
+                        student.justice_description = data.get("justice_description")
+                        student.save()
+
+                        StateChangeLog.objects.create(
+                            user=student.user,
+                            type=StateChangeLog.PROFESSION,
+                            now_state=old_justice_state,
+                            change_state=data.get("justice_state"),
+                            updated_user=request.user if request.user.is_authenticated else None,
+                            updated_at=now
+                        )
+                        
         except Exception as e:
             transaction.savepoint_rollback(sid)
             return request.send_error("ERR_002", e.__str__)
