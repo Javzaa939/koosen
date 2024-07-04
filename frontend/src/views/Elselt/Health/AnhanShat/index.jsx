@@ -23,6 +23,8 @@ import { excelDownLoad } from './downloadExcel'
 import MessageModal from '../../User/MessageModal'
 import EmailModal from '../../User/EmailModal'
 
+import classnames from "classnames";
+
 const STATE_LIST = [
     {
         name: 'Хүлээгдэж буй',
@@ -39,9 +41,19 @@ const STATE_LIST = [
 ]
 
 function AnhanShat() {
+    const genderOp = [
+        {
+            id: 1,
+            name: 'Эрэгтэй',
+        },
+        {
+            id: 2,
+            name: 'Эмэгтэй'
+        }
+    ]
 
     const [currentPage, setCurrentPage] = useState(1);
-    const [rowsPerPage, setRowsPerPage] = useState(10)
+    const [rowsPerPage, setRowsPerPage] = useState(20)
 
     // Эрэмбэлэлт
     const [sortField, setSort] = useState('')
@@ -63,6 +75,7 @@ function AnhanShat() {
 
     const [elseltOption, setElseltOption] = useState([])     // элсэлт авах нь
     const [profOption, setProfessionOption] = useState([])   // хөтөлбөр авах нь
+    const [gender, setGender] = useState("")
     const [select_value, setSelectValue] = useState(values);
     const [addModal, setAddModal] = useState(false)
     const [addModalData, setAddModalData] = useState(null)
@@ -117,7 +130,7 @@ function AnhanShat() {
         var elselt = select_value?.admission
         var profession = select_value?.profession
 
-        const { success, data } = await fetchData(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, chosenState, elselt, profession, start_date, end_date))
+        const { success, data } = await fetchData(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, chosenState, elselt, profession, gender, start_date, end_date))
         if (success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
@@ -139,7 +152,7 @@ function AnhanShat() {
 
             return () => clearTimeout(timeoutId);
         }
-    }, [sortField, currentPage, rowsPerPage, searchValue, chosenState, select_value.admission, select_value.profession, start_date, end_date])
+    }, [sortField, currentPage, rowsPerPage, searchValue, chosenState, select_value.admission, select_value.profession, gender, start_date, end_date])
 
     // ** Шүүж хайх хэсэг
     const handleFilter = e => {
@@ -450,6 +463,29 @@ function AnhanShat() {
                             getOptionValue={(option) => option.prof_id}
                             getOptionLabel={(option) => option.name}
                         />
+                    </Col>
+                    <Col md={3} >
+                        <Label className="form-label" for="genderOp">
+                            {t('Хүйс')}
+                        </Label>
+                            <Select
+                                name="genderOp"
+                                id="genderOp"
+                                classNamePrefix='select'
+                                isClearable
+                                className={classnames('react-select')}
+                                isLoading={isLoading}
+                                placeholder={t('-- Сонгоно уу --')}
+                                options={genderOp || []}
+                                value={genderOp.find((c) => c.name === gender)}
+                                noOptionsMessage={() => t('Хоосон байна.')}
+                                onChange={(val) => {
+                                    setGender(val?.name || '')
+                                }}
+                                styles={ReactSelectStyles}
+                                getOptionValue={(option) => option.id}
+                                getOptionLabel={(option) => option.name}
+                            />
                     </Col>
                 </Row>
                 <Row className='justify-content-start mt-1 '>

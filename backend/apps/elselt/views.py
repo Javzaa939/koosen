@@ -1340,6 +1340,7 @@ class ElseltHealthPhysical(
     def get_queryset(self):
         queryset = self.queryset
         queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
+        gender = self.request.query_params.get('gender')
 
         # Бие бялдар шалгуур үзүүлэлттэй мэргэжлүүд
         # TODO Одоогоор идэвхтэй байгаа элсэлтээс л харуулж байгаа гэсэн үг Дараа жил яахыг үл мэднэ
@@ -1372,6 +1373,11 @@ class ElseltHealthPhysical(
 
             queryset = queryset.order_by(sorting)
 
+        if gender:
+            if gender == 'Эрэгтэй':
+                queryset = queryset.filter(gender__in=['1', '3', '5', '7', '9'])
+            else:
+                queryset = queryset.filter(gender__in=['0', '2', '4', '6', '8'])
         if state:
             if state == '1':
                 user_id = HealthUpUser.objects.filter(state=2).values_list('user', flat=True)
@@ -1512,7 +1518,7 @@ class ElseltStateApprove(
 ):
     """ Элсэгч бүх шалгуурыг даваад тэнцсэн """
 
-    queryset = AdmissionUserProfession
+    queryset = AdmissionUserProfession.objects.all()
     serializer_class = ElseltApproveSerializer
 
     pagination_class = CustomPagination
@@ -1521,10 +1527,15 @@ class ElseltStateApprove(
     search_fields = ['user__first_name', 'user__last_name', 'user__register', 'profession__profession__name', 'admission_number', 'admission_date']
 
     def get_queryset(self):
+        queryset = self.queryset.annotate(
+            gender=(Substr('user__register', 9, 1))
+        )
+        gender = self.request.query_params.get('gender')
+
         profession = self.request.query_params.get('profession')
         admission = self.request.query_params.get('admission')
         sorting = self.request.query_params.get('sorting')
-        queryset = self.queryset.objects.filter(state=AdmissionUserProfession.STATE_APPROVE)
+        queryset = queryset.filter(state=AdmissionUserProfession.STATE_APPROVE)
 
         if admission:
             queryset = queryset.filter(profession__admission=admission)
@@ -1532,6 +1543,11 @@ class ElseltStateApprove(
         if profession:
             queryset = queryset.filter(profession__profession__id=profession)
 
+        if gender:
+            if gender == 'Эрэгтэй':
+                queryset = queryset.filter(gender__in=['1', '3', '5', '7', '9'])
+            else:
+                queryset = queryset.filter(gender__in=['0', '2', '4', '6', '8'])
         # Sort хийх үед ажиллана
         if sorting:
             if not isinstance(sorting, str):
@@ -1940,6 +1956,7 @@ class AdmissionJusticeListAPIView(
     def get_queryset(self):
         queryset = self.queryset
         queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
+        gender = self.request.query_params.get('gender')
 
         userinfo_qs = UserInfo.objects.filter(user=OuterRef('user')).values('gpa')[:1]
         userinfo_org = UserInfo.objects.filter(user=OuterRef('user')).values('work_organization')[:1]
@@ -1966,6 +1983,12 @@ class AdmissionJusticeListAPIView(
 
         if profession:
             queryset = queryset.filter(profession__profession__id=profession)
+
+        if gender:
+            if gender == 'Эрэгтэй':
+                queryset = queryset.filter(gender__in=['1', '3', '5', '7', '9'])
+            else:
+                queryset = queryset.filter(gender__in=['0', '2', '4', '6', '8'])
 
         if state:
             if state == '1':
@@ -2013,6 +2036,8 @@ class ConversationUserSerializerAPIView(
 
     def get_queryset(self):
         queryset = self.queryset
+        queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
+        gender = self.request.query_params.get('gender')
 
         sorting = self.request.query_params.get('sorting')
         state = self.request.query_params.get('state')
@@ -2038,6 +2063,11 @@ class ConversationUserSerializerAPIView(
                 user__admissionuserprofession__profession__profession=profession
             )
 
+        if gender:
+            if gender == 'Эрэгтэй':
+                queryset = queryset.filter(gender__in=['1', '3', '5', '7', '9'])
+            else:
+                queryset = queryset.filter(gender__in=['0', '2', '4', '6', '8'])
         if state:
             if state == '1':
                 exclude_ids = ConversationUser.objects.filter(Q(Q(state=AdmissionUserProfession.STATE_APPROVE) | Q(state=AdmissionUserProfession.STATE_REJECT))).values_list('user', flat=True)

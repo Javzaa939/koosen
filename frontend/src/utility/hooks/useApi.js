@@ -1745,34 +1745,34 @@ function useApi(isDisplay=false) {
 		},
 		health: {
 			anhan:{
-				get: (limit, page, sort, search, state, elselt, profession,start_date,end_date) => instance.get(`/elselt/health/anhan/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}&elselt=${elselt}&profession=${profession}&start_date=${start_date}&end_date=${end_date}`),
+				get: (limit, page, sort, search, state, elselt, profession, gender, start_date, end_date) => instance.get(`/elselt/health/anhan/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}&elselt=${elselt}&profession=${profession}&gender=${gender}&start_date=${start_date}&end_date=${end_date}`),
 				post: (cdata) => instance.post(`/elselt/health/anhan/`, cdata),
 				put: (id, cdata) => instance.put(`/elselt/health/anhan/${id}/`, cdata)
 			},
 			professional:{
-				get: (limit, page, sort, search,lesson_year_id, profession_id, state) => instance.get(`/elselt/health/professional/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}&state=${state}`),
+				get: (limit, page, sort, search,lesson_year_id, profession_id, state, gender) => instance.get(`/elselt/health/professional/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}&state=${state}&gender=${gender}`),
 				post: (cdata) => instance.post(`/elselt/health/professional/`, cdata),
 				put: (id, cdata) => instance.put(`/elselt/health/professional/${id}/`, cdata)
 			},
 			physical:{
-				get: (limit, page, sort, search, state, elselt, profession) => instance.get(`/elselt/health/physical/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}&elselt=${elselt}&profession=${profession}`),
+				get: (limit, page, sort, search, state, elselt, profession, gender) => instance.get(`/elselt/health/physical/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}&elselt=${elselt}&profession=${profession}&gender=${gender}`),
 				post: (cdata) => instance.post(`/elselt/health/physical/`, cdata),
 				put: (id, cdata) => instance.put(`/elselt/health/physical/${id}/`, cdata)
 			},
 		},
 		justice: {
-			get: (limit, page, sort, search, state, elselt, profession) => instance.get(`/elselt/justice/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}&elselt=${elselt}&profession=${profession}`),
+			get: (limit, page, sort, search, state, elselt, profession, gender) => instance.get(`/elselt/justice/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}&elselt=${elselt}&profession=${profession}&gender=${gender}`),
 			post: (cdata) => instance.post(`/elselt/justice/`, cdata),
 			put: (id, cdata) => instance.put(`/elselt/justice/${id}/`, cdata)
 		},
 		// тэнцсэн элсэгчид
 		approve: {
-			get: (limit, page, sort, search,admission, profession) => instance.get(`/elselt/approve/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&admission=${admission}&profession=${profession}`),
+			get: (limit, page, sort, search,admission, profession, gender) => instance.get(`/elselt/approve/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&admission=${admission}&profession=${profession}&gender=${gender}`),
 			post: (cdata) => instance.post(`/elselt/approve/`, cdata),
 
 		},
 		interview:{
-			get: (limit, page, sort, search, state, elselt, profession) => instance.get(`/elselt/interview/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}&elselt=${elselt}&profession=${profession}`),
+			get: (limit, page, sort, search, state, elselt, profession, gender) => instance.get(`/elselt/interview/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}&elselt=${elselt}&profession=${profession}&gender=${gender}`),
 			post: (cdata) => instance.post(`/elselt/interview/`, cdata),
 			put: (id, cdata) => instance.put(`/elselt/interview/${id}/`, cdata)
 		},
