@@ -13,7 +13,7 @@ import { getColumns } from './helpers';
 import { useNavigate } from 'react-router-dom'
 import { getPagination, ReactSelectStyles } from '@utils';
 import EditModal from './EditModal'
-import StateModal from './StateModal'
+import StateModal from '../../Elselt/User/StateModal'
 import AuthContext from '@src/utility/context/AuthContext'
 import { RiEditFill } from 'react-icons/ri'
 
