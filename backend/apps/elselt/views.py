@@ -88,7 +88,7 @@ from elselt.models import (
     AdmissionUserProfession,
     ConversationUser,
     ArmyUser,
-    StateChangeLog
+    StateChangeLog,
 )
 
 from core.models import (
