@@ -462,6 +462,7 @@ class AdmissionUserInfoAPIView(
         state = self.request.query_params.get('state')
         age_state = self.request.query_params.get('age_state')
         gpa_state = self.request.query_params.get('gpa_state')
+        now_state = self.request.query_params.get('now_state')
         gender = self.request.query_params.get('gender')
         sorting = self.request.query_params.get('sorting')
         gpa = self.request.query_params.get('gpa')
@@ -494,6 +495,10 @@ class AdmissionUserInfoAPIView(
         if justice_state:
             queryset = queryset.filter(justice_state=justice_state)
 
+        if now_state:
+            user_ids = StateChangeLog.objects.filter(now_state=now_state).values_list('user', flat=True)
+            queryset = queryset.filter(user__in=user_ids)
+            
         if gender:
             if gender == 'Эрэгтэй':
                 queryset = queryset.filter(gender__in=['1', '3', '5', '7', '9'])
