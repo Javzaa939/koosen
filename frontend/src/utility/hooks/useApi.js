@@ -1745,7 +1745,7 @@ function useApi(isDisplay=false) {
 		},
 		health: {
 			anhan:{
-				get: (limit, page, sort, search, state, elselt, profession) => instance.get(`/elselt/health/anhan/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}&elselt=${elselt}&profession=${profession}`),
+				get: (limit, page, sort, search, state, elselt, profession,start_date,end_date) => instance.get(`/elselt/health/anhan/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}&elselt=${elselt}&profession=${profession}&start_date=${start_date}&end_date=${end_date}`),
 				post: (cdata) => instance.post(`/elselt/health/anhan/`, cdata),
 				put: (id, cdata) => instance.put(`/elselt/health/anhan/${id}/`, cdata)
 			},

@@ -1,6 +1,6 @@
 import hashlib
 import datetime as dt
-
+from datetime import datetime, timedelta
 from rest_framework import mixins
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
@@ -1030,7 +1030,8 @@ class ElseltHealthAnhanShat(
         state  = self.request.query_params.get('state')
         elselt = self.request.query_params.get('elselt')
         profession = self.request.query_params.get('profession')
-
+        start_date=self.request.query_params.get('start_date')
+        end_date=self.request.query_params.get('end_date')
 
 
         # Ял шийтгэл, Насны үзүүлэлтүүдэд ТЭНЦЭЭГҮЙ элсэгчдийг хасах
@@ -1055,6 +1056,17 @@ class ElseltHealthAnhanShat(
                 sorting = str(sorting)
 
             queryset = queryset.order_by(sorting)
+
+        filters = {}
+        if start_date:
+            filters['updated_at__gte'] = start_date
+        if end_date:
+            filters['updated_at__lte'] = end_date
+
+        if filters:
+            dates = HealthUser.objects.filter(**filters).values_list('user', flat=True)
+            queryset = queryset.filter(user__in=dates)
+            return queryset
 
         if state:
             if state == '1':
