@@ -495,10 +495,11 @@ class AdmissionUserInfoAPIView(
         if justice_state:
             queryset = queryset.filter(justice_state=justice_state)
 
+        # Дахин тэнцүүлсэн эсэх төлөвөөр хайх үед ажиллана.
         if now_state:
-            user_ids = StateChangeLog.objects.filter(now_state=now_state).values_list('user', flat=True)
+            user_ids = StateChangeLog.objects.filter(now_state=now_state, change_state=AdmissionUserProfession.STATE_APPROVE).values_list('user', flat=True)
             queryset = queryset.filter(user__in=user_ids)
-            
+
         if gender:
             if gender == 'Эрэгтэй':
                 queryset = queryset.filter(gender__in=['1', '3', '5', '7', '9'])
@@ -507,6 +508,7 @@ class AdmissionUserInfoAPIView(
         if gpa:
             gpa_value = float(gpa)
             queryset = queryset.filter(gpa__lte = gpa_value)
+
         # Sort хийх үед ажиллана
         if sorting:
             if not isinstance(sorting, str):
