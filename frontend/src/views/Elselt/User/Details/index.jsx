@@ -136,16 +136,20 @@ function Details() {
                                                 Хувийн мэдээлэл
                                             </span>
                                         </div>
-                                        <Badge
-                                            className='d-flex align-items-center badge-glow p-0'
-                                            pill
-                                            color={`${datas?.state == 1 ? 'primary' : datas?.state == 2 ? 'success' : datas?.state == 3 ? 'danger' : 'primary'
-                                            }`}
-                                        >
-                                            <span className='mx-75 mt-25'>
-                                                {datas?.state_name}
-                                            </span>
-                                        </Badge>
+										{datas?.state == 3 ? "" : 
+											(
+												<Badge
+													className='d-flex align-items-center badge-glow p-0'
+													pill
+													color={`${datas?.state == 1 ? 'primary' : datas?.state == 2 ? 'success' : datas?.state == 3 ? 'danger' : 'primary'
+													}`}
+												>
+													<span className='mx-75 mt-25'>
+														{datas?.state_name}
+													</span>
+												</Badge>
+											)
+										}
                                     </div>
                                     <div className='mt-2'>
                                         <div className='p-50'>
@@ -402,6 +406,30 @@ function Details() {
 										</div>
 									</CardHeader>
 									<CardBody>
+										{datas?.state == 3 ? (
+											<>
+												<div className='d-flex align-items-center'>
+													<span className='text_prefixer'>Ерөнхий шалгуурын төлөв:</span>
+													<span className='ms-1'>
+														<Badge
+															className='d-flex align-items-center badge-glow p-0'
+															pill
+															color={`${datas?.state == 1 ? 'primary' : datas?.state == 2 ? 'success' : datas?.state == 3 ? 'danger' : 'primary'
+															}`}
+															style={{height: "20px"}}
+														>
+															<span className='mx-75 mt-25'>
+																{datas?.state_name}
+															</span>
+														</Badge>
+													</span>
+												</div>
+												<div className='d-flex' style={{marginTop: "10px"}}>
+													<p className='text_prefixer'>Тайлбар:</p>
+													<p className='ms-1'>{datas?.state_description}</p>
+												</div>
+											</>
+										) : ""}
 										{datas?.anhan_uzleg && (
 											<div className="border p-50 w-100 my-50 bg-secondary-subtle "  style={{ borderRadius: "30px" }}>
 												<div className="d-flex justify-content-between" onClick={() => toggleCollapse(0)}>
