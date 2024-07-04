@@ -73,7 +73,8 @@ from .serializer import (
     MessageInfoSerializer,
     HealthUpUserStateSerializer,
     ConversationUserInfoSerializer,
-    ElseltEyeshSerializer
+    ElseltEyeshSerializer,
+    UserScoreSerializer
 )
 
 from elselt.models import (
@@ -2033,7 +2034,9 @@ class ElseltEyeshAPIView(
     mixins.RetrieveModelMixin,
     mixins.DestroyModelMixin
 ):
-    BLOCKCHAIN_API_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJibG9ja2NoYWluLmVlYy5tbiIsImF1ZCI6IlBvc3RtYW5SdW50aW1lLzcuMzkuMCIsImV4cCI6MTcyMDIzNzE0OCwiaWF0IjoxNzE5OTc3OTQ4LCJ1c2VySWQiOiJhM2Y5ZjRmOS00OGM5LTQzYTItYmVlZC01ZDYyOWYzZWRhODciLCJyb2xlQ29kZSI6IlJPTEVfVU5JVkVSU0lUWSJ9.bPdmc0YNjoNlJ8eAHiObnvjezdUQRDuJURCJBP2Maec'
+    """ Элсэгчийн ЭЕШ ийн оноо татах """
+
+    BLOCKCHAIN_API_TOKEN = ''
 
     queryset = AdmissionUserProfession.objects.all()
     serializer_class = ElseltEyeshSerializer
@@ -2063,7 +2066,10 @@ class ElseltEyeshAPIView(
             return new_token
 
     def get_data(self, data):
+
         all_data = []
+
+        #сурагч бүрээр тухайн api руу явуулах
         for item in data:
             data_url = 'http://blockchain.eec.mn/api/v1/student'
             params = {'registerNo': item}
@@ -2077,6 +2083,8 @@ class ElseltEyeshAPIView(
                     all_data.append(data)
 
             except requests.exceptions.HTTPError as http_err:
+
+                # Token expired
                 if response.status_code == 401:
                     new_token = self.refresh_token()
                     if new_token:
@@ -2101,21 +2109,25 @@ class ElseltEyeshAPIView(
         return all_data
 
     def extract_lesson(self, external_data):
+
+        #external_data орж ирж буй бүх хүүхдийн эеш
         data = []
 
         for student in external_data:
+            #Хэрэгтэй датаг авах
             student_data = student.get('data', {})
+
+            #Тухайн сурагч бүрийн регистр авах
             register_no = student_data.get('registerNo')
             register_no = register_no.upper()
             user_instance = ElseltUser.objects.filter(register=register_no).first()
-            print(user_instance)
             pupil_data = student_data.get('pupil', [])
 
             for pupil in pupil_data:
                 exams = pupil.get('pupilExam', [])
 
                 for exam in exams:
-                    lesson_id = exam.get('lessonId')
+                    # lesson_id = exam.get('lessonId')
                     scaledScore = exam.get('scaledScore')
                     percentage_score = exam.get('percentageScore')
                     lesson_name = exam.get('lessonName')
@@ -2128,12 +2140,7 @@ class ElseltEyeshAPIView(
                     school_code = pupil.get('schoolCode')
                     year = pupil.get('year')
 
-                    if lesson_id == 11:
-                        is_success = scaledScore > 400
-                    else:
-                        is_success = True
-
-                    # Append exam details to the data list
+                    # exam датаг data - д хадгалах
                     data.append({
                         'user_id':user_instance.id,
                         'lesson_name': lesson_name,
@@ -2154,16 +2161,61 @@ class ElseltEyeshAPIView(
         profession = self.request.query_params.get('profession_id')
         if profession:
             queryset = self.queryset.filter(profession=profession)
-        bulk_create_datas = []
+        bulk_update_datas = []
         datas = queryset.values_list('user__register', flat=True)
         datas = self.get_data(datas)
         extracted_data = self.extract_lesson(datas)
+
         try:
             with transaction.atomic():
+                update_data_list = []
                 for data in extracted_data:
-                    bulk_create_datas.append(UserScore(**data))
-                UserScore.objects.bulk_create(bulk_create_datas)
+                    user_id = data['user_id']
+                    lesson_name = data['lesson_name']
+                    year = data['year']
+                    semester = data['semester']
+                    # UserScore instance байгаа үгүйг шалгана
+                    existing_user_score = UserScore.objects.filter(
+                        Q(user_id=user_id) & Q(lesson_name=lesson_name) & Q(year = year) & Q(semester=semester)
+                    ).first()
+
+                    if existing_user_score:
+                        # Хэрэв оноо байх үед
+                        existing_user_score.scaledScore = data['scaledScore']
+                        existing_user_score.percentage_score = data['percentage_score']
+                        existing_user_score.raw_score = data['raw_score']
+                        existing_user_score.word_score = data['word_score']
+                        existing_user_score.exam_loc = data['exam_loc']
+                        existing_user_score.exam_loc_code = data['exam_loc_code']
+                        existing_user_score.school_name = data['school_name']
+                        existing_user_score.semester = data['semester']
+                        existing_user_score.school_code = data['school_code']
+                        existing_user_score.year = data['year']
+                        update_data_list.append(existing_user_score)
+                    else:
+                    # Шинэ OBJECT үүсгэх
+                        bulk_update_datas.append(UserScore(**data))
+
+                # Bulk Шинэ OBJECT үүсгэх
+                UserScore.objects.bulk_create(bulk_update_datas)
+
+                # Bulk update existing instances
+                UserScore.objects.bulk_update(update_data_list, [
+                    'scaledScore', 'percentage_score', 'raw_score', 'word_score',
+                    'exam_loc', 'exam_loc_code', 'school_name', 'school_code'
+                ])
+
+            #UserScore бүх датаг UserScoreSerializer ашиглан датаг авна
+            all_datas = UserScore.objects.all()
+            return_datas = UserScoreSerializer(all_datas, many=True).data
+
         except Exception as e:
-            print(f"Error occurred during bulk create: {e}")
             return Response({'error': str(e)}, status=500)
-        return request.send_data(datas)
+        is_success_values = [item['is_success'] for item in return_datas]
+        if any(not success for success in is_success_values):
+            with transaction.atomic():
+                admission_user_data = AdmissionUserProfession.objects.get(user__id=user_id)
+                admission_user_data.state = AdmissionUserProfession.STATE_REJECT
+                admission_user_data.state_description = 'Монгол хэл бичигийн шалгалтанд тэнцээгүй'
+                admission_user_data.save()
+        return request.send_data(return_datas)

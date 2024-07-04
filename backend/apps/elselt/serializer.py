@@ -121,10 +121,21 @@ class ElseltUserSerializer(serializers.ModelSerializer):
 
 
 class UserScoreSerializer(serializers.ModelSerializer):
+    is_success = serializers.SerializerMethodField()
 
     class Meta:
         model = UserScore
         fields = "__all__"
+
+    #Монгол хэл бичиг шалгалтийн оноог шалгах
+    def get_is_success(self, obj):
+        is_success = True
+        if obj.lesson_name == 'Монгол хэл бичиг':
+            if obj.scaledScore < 400:
+                is_success = False
+
+        return is_success
+
 
 
 class AdmissionUserInfoSerializer(serializers.ModelSerializer):
