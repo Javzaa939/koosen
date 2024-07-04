@@ -459,7 +459,7 @@ function AnhanShat() {
                         </Label>
                         <Flatpickr
                             className='form-control form-control-sm  bg-white '
-                            style={{ maxWidth: '280px' }}
+                            style={{ maxWidth: '480px' }}
                             placeholder={`-- Сонгоно уу --`}
 
                             onChange={(selectedDates, dateStr) => {
@@ -487,7 +487,7 @@ function AnhanShat() {
                         </Label>
                         <Flatpickr
                             className='form-control form-control-sm  bg-white '
-                            style={{ maxWidth: '280px' }}
+                            style={{ maxWidth: '480px' }}
                             placeholder={`-- Сонгоно уу --`}
 
                             onChange={(selectedDates, dateStr) => {
