@@ -1710,8 +1710,8 @@ function useApi(isDisplay=false) {
 					instance.post(`/elselt/sysinfo/`, data),
 		},
 		admissionuserdata: {
-			get: (limit, page, sort, search, lesson_year_id, profession_id, unit1_id, gender, state, gpa_state, age_state, justice_state='', is_justice='') =>
-				instance.get(`/elselt/admissionuserdata/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}&unit1_id=${unit1_id}&gender=${gender}&state=${state}&gpa_state=${gpa_state}&age_state=${age_state}&justice_state=${justice_state}&is_justice=${is_justice}`),
+			get: (limit, page, sort, search, lesson_year_id, profession_id, unit1_id, gender, state, gpa_state, age_state, justice_state='', is_justice='', now_state='') =>
+				instance.get(`/elselt/admissionuserdata/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}&unit1_id=${unit1_id}&gender=${gender}&state=${state}&gpa_state=${gpa_state}&age_state=${age_state}&justice_state=${justice_state}&is_justice=${is_justice}&now_state=${now_state}`),
 			getOne: (pk) => instance.get(`/elselt/admissionuserdata/${pk}/`),
 			put: (data, id) => instance.put(`/elselt/admissionuserdata/${id}/`, data),
 			putDesc: (data, id) => instance.put(`/elselt/desc/${id}/`, data),
@@ -1745,7 +1745,7 @@ function useApi(isDisplay=false) {
 		},
 		health: {
 			anhan:{
-				get: (limit, page, sort, search, state, elselt, profession) => instance.get(`/elselt/health/anhan/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}&elselt=${elselt}&profession=${profession}`),
+				get: (limit, page, sort, search, state, elselt, profession,start_date,end_date) => instance.get(`/elselt/health/anhan/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}&elselt=${elselt}&profession=${profession}&start_date=${start_date}&end_date=${end_date}`),
 				post: (cdata) => instance.post(`/elselt/health/anhan/`, cdata),
 				put: (id, cdata) => instance.put(`/elselt/health/anhan/${id}/`, cdata)
 			},
