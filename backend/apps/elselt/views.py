@@ -1,6 +1,6 @@
 import hashlib
 import datetime as dt
-
+from datetime import datetime, timedelta
 from rest_framework import mixins
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
@@ -69,7 +69,8 @@ from .serializer import (
     EyeshCheckUserInfoSerializer,
     MessageInfoSerializer,
     HealthUpUserStateSerializer,
-    ConversationUserInfoSerializer
+    ConversationUserInfoSerializer,
+    ArmyUserInfoSerializer
 )
 
 from elselt.models import (
@@ -83,7 +84,9 @@ from elselt.models import (
     PhysqueUser,
     HealthUpUser,
     AdmissionUserProfession,
-    ConversationUser
+    ConversationUser,
+    ArmyUser,
+    StateChangeLog,
 )
 
 from core.models import (
@@ -414,8 +417,8 @@ class ProfessionShalguur(
                             indicator=obj,
                             defaults={
                                 'norm_all': hynaltToo.get('norm_all'),
-                                'norm1': hynaltToo.get('norm1') if hynaltToo.get('norm1') else None,
-                                'norm2': hynaltToo.get('norm2') if hynaltToo.get('norm2') else None,
+                                'norm1': hynaltToo.get('norm1') if hynaltToo.get('norm1') else 0,
+                                'norm2': hynaltToo.get('norm2') if hynaltToo.get('norm2') else 0,
                                 'is_gender': True if hynaltToo.get('norm2') and hynaltToo.get('norm1') else False
                             }
                         )
@@ -461,6 +464,7 @@ class AdmissionUserInfoAPIView(
         state = self.request.query_params.get('state')
         age_state = self.request.query_params.get('age_state')
         gpa_state = self.request.query_params.get('gpa_state')
+        now_state = self.request.query_params.get('now_state')
         gender = self.request.query_params.get('gender')
         sorting = self.request.query_params.get('sorting')
         gpa = self.request.query_params.get('gpa')
@@ -493,6 +497,11 @@ class AdmissionUserInfoAPIView(
         if justice_state:
             queryset = queryset.filter(justice_state=justice_state)
 
+        # Дахин тэнцүүлсэн эсэх төлөвөөр хайх үед ажиллана.
+        if now_state:
+            user_ids = StateChangeLog.objects.filter(now_state=now_state, change_state=AdmissionUserProfession.STATE_APPROVE).values_list('user', flat=True)
+            queryset = queryset.filter(user__in=user_ids)
+
         if gender:
             if gender == 'Эрэгтэй':
                 queryset = queryset.filter(gender__in=['1', '3', '5', '7', '9'])
@@ -501,6 +510,7 @@ class AdmissionUserInfoAPIView(
         if gpa:
             gpa_value = float(gpa)
             queryset = queryset.filter(gpa__lte = gpa_value)
+
         # Sort хийх үед ажиллана
         if sorting:
             if not isinstance(sorting, str):
@@ -529,12 +539,30 @@ class AdmissionUserInfoAPIView(
 
         try:
             # Элсэгчийн хөтөлбөр засах
-            serializer = AdmissionUserProfessionSerializer(instance, data=data, partial=True)
+            logged_user = request.user
+            profession_id=data.get('profession')
 
+            profession_name = ''
+
+            if profession_id:
+
+                professions= AdmissionUserProfession.objects.filter(profession=profession_id).first()
+                profession_name= professions.profession.profession.name if professions else ''
+
+            profession_change_log = StateChangeLog(
+                user=instance.user,
+                type=StateChangeLog.PROFESSION,
+                now_profession=instance.profession.profession.name,
+                change_profession= profession_name,
+                updated_user=logged_user,
+            )
+            profession_change_log.save()
+
+            serializer = AdmissionUserProfessionSerializer(instance, data=data, partial=True)
             if not serializer.is_valid(raise_exception=False):
                 return request.send_error_valid(serializer.errors)
 
-            serializer.save()
+            serializer.save(updated_user=logged_user)
 
         except Exception as e:
             return request.send_error('ERR_002', e.__str__())
@@ -561,18 +589,38 @@ class AdmissionUserAllChange(
         try:
             with transaction.atomic():
                 now = dt.datetime.now()
-                if data.get("state") :
-                    self.queryset.filter(pk__in=data["students"]).update(
-                    state=data.get("state"),
-                    updated_at=now,
-                    state_description=data.get("state_description")
-                )
-                else:
-                    self.queryset.filter(pk__in=data["students"]).update(
-                    updated_at=now,
-                    justice_state=data.get("justice_state"),
-                    justice_description=data.get("justice_description")
-                )
+                students = self.queryset.filter(pk__in=data["students"])
+                for student in students:
+                    if data.get("state"):
+                        old_state = student.state
+                        student.state = data.get("state")
+                        student.updated_at = now
+                        student.state_description = data.get("state_description")
+                        student.save()
+
+                        StateChangeLog.objects.create(
+                            user=student.user,
+                            type=StateChangeLog.STATE,
+                            now_state=old_state,
+                            change_state=data.get("state"),
+                            updated_user=request.user if request.user.is_authenticated else None,
+                            updated_at=now
+                        )
+                    else:
+                        old_justice_state = student.justice_state
+                        student.updated_at = now
+                        student.justice_state = data.get("justice_state")
+                        student.justice_description = data.get("justice_description")
+                        student.save()
+
+                        StateChangeLog.objects.create(
+                            user=student.user,
+                            type=StateChangeLog.PROFESSION,
+                            now_state=old_justice_state,
+                            change_state=data.get("justice_state"),
+                            updated_user=request.user if request.user.is_authenticated else None,
+                            updated_at=now
+                        )
         except Exception as e:
             transaction.savepoint_rollback(sid)
             return request.send_error("ERR_002", e.__str__)
@@ -982,7 +1030,8 @@ class ElseltHealthAnhanShat(
         state  = self.request.query_params.get('state')
         elselt = self.request.query_params.get('elselt')
         profession = self.request.query_params.get('profession')
-
+        start_date=self.request.query_params.get('start_date')
+        end_date=self.request.query_params.get('end_date')
 
 
         # Ял шийтгэл, Насны үзүүлэлтүүдэд ТЭНЦЭЭГҮЙ элсэгчдийг хасах
@@ -1008,10 +1057,21 @@ class ElseltHealthAnhanShat(
 
             queryset = queryset.order_by(sorting)
 
+        filters = {}
+        if start_date:
+            filters['updated_at__gte'] = start_date
+        if end_date:
+            filters['updated_at__lte'] = end_date
+
+        if filters:
+            dates = HealthUser.objects.filter(**filters).values_list('user', flat=True)
+            queryset = queryset.filter(user__in=dates)
+            return queryset
+
         if state:
             if state == '1':
                 exclude_ids = HealthUser.objects.filter(Q(Q(state=AdmissionUserProfession.STATE_APPROVE) | Q(state=AdmissionUserProfession.STATE_REJECT))).values_list('user', flat=True)
-                user_id = AdmissionUserProfession.objects.filter(state=state).exclude(user__in=exclude_ids).values_list('user', flat=True)
+                user_id = AdmissionUserProfession.objects.exclude(user__in=exclude_ids).values_list('user', flat=True)
             else:
                 user_id = HealthUser.objects.filter(state=state).values_list('user', flat=True)
             queryset = queryset.filter(user__in=user_id)
@@ -2048,6 +2108,92 @@ class ConversationUserSerializerAPIView(
             now = dt.datetime.now()
             ConversationUser.objects.filter(
                user=data.get('user')
+            ).update(state=data.get("state"),updated_at=now,description=data.get("description"))
+
+        return request.send_info('INF_002')
+
+class ArmyUserSerializerAPView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin):
+
+    queryset = AdmissionUserProfession.objects.all().order_by('created_at')
+    serializer_class = ArmyUserInfoSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['user__first_name', 'user__register', 'user__email', 'user__last_name', 'user__mobile']
+
+    def get_queryset(self):
+        queryset = self.queryset
+
+        sorting = self.request.query_params.get('sorting')
+        state = self.request.query_params.get('state')
+        elselt = self.request.query_params.get('elselt')
+        profession = self.request.query_params.get('profession')
+
+        # Ял шийтгэлд тэнцсэн элсэгчид
+        yl_shiitgel_ids = AdmissionUserProfession.objects.filter(justice_state=AdmissionUserProfession.STATE_APPROVE).values_list('user',flat=True)
+
+        queryset = queryset.filter(user__in=yl_shiitgel_ids)
+
+        # # Sort хийх үед ажиллана
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
+
+        if elselt:
+            queryset = queryset.filter(user__admissionuserprofession__profession__admission=elselt)
+
+        if profession:
+            queryset = queryset.filter(
+                user__admissionuserprofession__profession__profession=profession
+            )
+
+        if state:
+            if state == '1':
+                exclude_ids = ArmyUser.objects.filter(Q(Q(state=AdmissionUserProfession.STATE_APPROVE) | Q(state=AdmissionUserProfession.STATE_REJECT))).values_list('user', flat=True)
+                user_id = AdmissionUserProfession.objects.filter(justice_state=AdmissionUserProfession.STATE_APPROVE).exclude(user__in=exclude_ids).values_list('user', flat=True)
+            else:
+                user_id = ArmyUser.objects.filter(state=state).values_list('user', flat=True)
+
+            queryset = queryset.filter(user__in=user_id)
+
+
+        return queryset
+
+    def get(self, request, pk=None):
+
+        if pk:
+            all_data = self.retrieve(request, pk).data
+            return request.send_data(all_data)
+
+        all_data = self.list(request).data
+        return request.send_data(all_data)
+
+    def post(self, request):
+
+        data = request.data
+        try:
+            data['user'] = ElseltUser.objects.get(pk=data.get('user'))
+            ArmyUser.objects.create(**data)
+        except Exception as e:
+            print(e)
+            return request.send_error('ERR_002', 'Хадгалахад алдаа гарлаа')
+
+        return request.send_info('INF_001')
+
+    def put(self, request,pk=None):
+
+        data = request.data
+        with transaction.atomic():
+            now = dt.datetime.now()
+            ArmyUser.objects.filter(
+            user=data.get('user')
             ).update(state=data.get("state"),updated_at=now,description=data.get("description"))
 
         return request.send_info('INF_002')

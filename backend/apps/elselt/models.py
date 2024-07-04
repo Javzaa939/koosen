@@ -4,7 +4,8 @@ from lms.models import (
     AimagHot,
     AdmissionRegisterProfession,
     User,
-    PsychologicalTest
+    PsychologicalTest,
+    AdmissionIndicator
 )
 class ElseltUser(models.Model):
 
@@ -137,7 +138,6 @@ class AdmissionUserProfession(models.Model):
 
     class Meta:
         db_table = 'elselt_admissionuserprofession'
-        managed = False
 
     STATE_SEND = 1
     STATE_APPROVE = 2
@@ -149,9 +149,12 @@ class AdmissionUserProfession(models.Model):
         (STATE_REJECT, 'ТЭНЦЭЭГҮЙ'),
     )
 
-    user = models.ForeignKey(ElseltUser, verbose_name='Элсэгч', on_delete=models.CASCADE)
-    profession = models.ForeignKey(AdmissionRegisterProfession, verbose_name='Элссэн мэргэжил', on_delete=models.PROTECT)
+    user = models.ForeignKey(ElseltUser, verbose_name='Элсэгч', on_delete=models.CASCADE, null=True)
+    profession = models.ForeignKey(AdmissionRegisterProfession, verbose_name='Элссэн мэргэжил', on_delete=models.PROTECT, null=True)
     description = models.CharField(max_length=5000, null=True, verbose_name='Хөтөлбөр сольсон тайлбар')
+
+    score_avg = models.FloatField(null=True,verbose_name='ЭШ дундаж оноо')
+    order_no = models.IntegerField(null=True, verbose_name='ЭШ оноогоор эрэмбэлэх ')
 
     # Элсэгч бүх шалгуурыг даваад тэнцсэн төлөв тайлбар
     state = models.PositiveIntegerField(choices=STATE, db_index=True, null=True, default=STATE_SEND, verbose_name="Тэнцсэн элсэгчийн төлөв")
@@ -173,8 +176,13 @@ class AdmissionUserProfession(models.Model):
     admission_date = models.DateField(null=True, verbose_name="Элсэлтийн тушаалын огноо")
     admission_number = models.CharField(null=True, max_length=50, verbose_name="Элсэлтийн тушаалын дугаар")
 
+    # Элсэгч ЭШ оноогоор босго оноо даваад тэнцэх  төлөв тайлбар
+    yesh_state = models.PositiveIntegerField(choices=STATE, db_index=True, null=True, default=STATE_SEND, verbose_name="Элсэгч ЭШ оноогоор босго онооны төлөв")
+    yesh_description = models.CharField(max_length=5000, null=True, verbose_name='Элсэгч ЭШ оноогоор босго онооны төлөвийн тайлбар')
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    updated_user = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name='Зассан хэрэглэгч', null=True)
 
 
 class ContactInfo(models.Model):
@@ -339,3 +347,26 @@ class ArmyUser(models.Model):
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
     updated_user = models.ForeignKey(User, verbose_name='Зассан хэрэглэгч', null=True, on_delete=models.CASCADE)
+
+
+class StateChangeLog(models.Model):
+    ''' Элсэгч дээр төлөв болон хөтөлбөр сольсон лог харуулах '''
+
+    PROFESSION = 1
+    STATE = 2
+
+    TYPE = (
+        (PROFESSION, 'ХӨТӨЛБӨР'),
+        (STATE, 'ТӨЛӨВ'),
+    )
+
+    user = models.ForeignKey(ElseltUser, on_delete=models.CASCADE, verbose_name='Элсэгч')
+    type = models.IntegerField(choices=TYPE, verbose_name='Лог төрөл', default=STATE)
+    now_profession = models.CharField(verbose_name='Одоогийн мэргэжил', max_length=255, null=True)
+    change_profession = models.CharField(verbose_name='Өөрчлөгдөж байгаа мэргэжил', max_length=255, null=True)
+    indicator = models.IntegerField(choices=AdmissionIndicator.INDICATOR_VALUE, default=AdmissionIndicator.ERUUL_MEND, verbose_name='шалгуурын төрөл')
+    now_state = models.IntegerField(choices=AdmissionUserProfession.STATE, default=None, verbose_name='ямар төлөвт шилжиж байгаан')
+    change_state = models.IntegerField(choices=AdmissionUserProfession.STATE, default=None, verbose_name='ямар төлөвт шилжиж байгаан')
+
+    updated_at = models.DateTimeField(auto_now=True)
+    updated_user = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name='Зассан хэрэглэгч', null=True)

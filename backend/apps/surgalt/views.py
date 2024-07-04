@@ -32,6 +32,7 @@ from django.conf import settings
 # from operator import or_
 
 from elselt.models import ElseltUser
+from elselt.models import MentalUser
 from elselt.models import AdmissionUserProfession
 
 from lms.models import (
@@ -82,6 +83,9 @@ from elselt.models import (
 from lms.models import get_image_path
 from lms.models import get_choice_image_path
 
+from elselt.serializer import ElseltUserSerializer
+from elselt.serializer import MentalUserSerializer
+
 from .serializers import LessonStandartSerializer
 from .serializers import LessonTitlePlanSerializer
 from .serializers import LessonStandartListSerializer
@@ -112,6 +116,8 @@ from .serializers import PsychologicalTestScopeSerializer
 from .serializers import TeachersSerializer
 from .serializers import StudentSerializer
 from .serializers import ElsegchSerializer
+from .serializers import PsychologicalTestResultSerializer
+from .serializers import PsychologicalTestParticipantsSerializer
 
 from main.utils.function.utils import remove_key_from_dict, fix_format_date, get_domain_url
 from main.utils.function.utils import null_to_none, get_lesson_choice_student, get_active_year_season, json_load
@@ -2750,6 +2756,89 @@ class PsychologicalTestScopeOptionsAPIView(
             return request.send_error('ERR_002')
         return request.send_info("INF_003")
 
+
+class PsychologicalTestResultAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin
+):
+    """ Сэтгэлзүйн сорилын үр дүн """
+
+    queryset = PsychologicalTest.objects.all()
+    serializer_class = PsychologicalTestResultSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['title', 'start_date', 'end_date', 'description', 'duration']
+
+    def get(self, request):
+        scope = self.request.query_params.get('scope')
+
+        if scope:
+            self.queryset = self.queryset.filter(scope_kind=scope)
+
+        data = self.list(request).data
+        return request.send_data(data)
+
+
+class PsychologicalTestResultParticipantsAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin
+):
+    """ Сэтгэлзүйн сорилд оролцогчид """
+
+    queryset = PsychologicalTest.objects.all()
+
+    def get(self, request):
+        datas = []
+
+        # Parametr-үүд
+        test_id = request.query_params.get('test_id')
+        search_value = request.query_params.get('search')
+
+        # Тухайн ёорилоо авна
+        test_instance = self.queryset.get(id=test_id)
+
+        # Cорилын хамрах хүрээний төрлөөс шалтгаалан хамрах хүрээг хаанаас авхаа тодорхойлно
+        scope = test_instance.scope_kind
+        participants = test_instance.participants
+
+        if participants is None:
+            return request.send_data(datas)
+
+        # Хуудаслалт
+        self.pagination_class = CustomPagination
+
+        # Хамрах хүрээний боломжит утгууд
+        scope_to_model_serializer = {
+            1: (Teachers, TeachersSerializer, ['first_name', 'last_name', 'register']),
+            2: (MentalUser, MentalUserSerializer, ['user__first_name', 'user__last_name', 'user__code']),
+            3: (Student, StudentSerializer, ['first_name', 'last_name', 'code'])
+        }
+
+        # scope-өөс шалтгаалан ашиглах model, serializer өөр, өөр байна
+        # None, none гэсэн нь шууд байгаа утгыг нь авна
+        model_class, serializer_class, search_fields = scope_to_model_serializer.get(scope, (None, None, None))
+
+        # scope-д тохирсон model байвал
+        if model_class is not None:
+            if model_class == MentalUser:
+                self.queryset = model_class.objects.filter(user__in=participants).annotate(
+                    first_name = F('user__first_name'),
+                    last_name = F('user__last_name'),
+                    code = F('user__code'),
+                )
+            else:
+                # Оролцогчдоороо filter-ээд
+                self.queryset = model_class.objects.filter(id__in=participants)
+            # Serializer-г нь заагаад
+            self.serializer_class = serializer_class
+            # Хайх утгуудын өгнө
+            if search_value:
+                self.queryset = _filter_queries(self.queryset, search_value, search_fields)
+
+            datas = self.list(request).data
+        return request.send_data(datas)
 
 @permission_classes([IsAuthenticated])
 class QuestionsListAPIView(

@@ -38,7 +38,7 @@ export default [
                 navLink: "elselt/interview"
             },
             {
-                id: 'elselt3_2',
+                id: 'elselt3_3',
                 title: 'Ял шийтгэл',
                 icon: <Circle size={8} />,
                 navLink: "elselt/ylshiitgel"
@@ -60,6 +60,12 @@ export default [
                 title: 'Бие бялдар',
                 icon: <Circle size={8} />,
                 navLink: "elselt/physical"
+            },
+            {
+                id: 'elselt6_1',
+                title: 'Хээрийн бэлтгэл',
+                icon: <Circle size={8} />,
+                navLink: "elselt/preparation"
             },
             {
                 id: 'elselt7',

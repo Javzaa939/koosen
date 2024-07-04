@@ -1186,6 +1186,30 @@ export const request_flag_color = (request_flag) => {
         )
     }
 
+export const state_flag_color = (request_flag) => {
+  let color = ''
+      let request_flag_name = ''
+
+      if(request_flag === 1){
+          color = 'light-info'
+          request_flag_name = 'Эхлээгүй'
+      }
+      else if (request_flag === 2) {
+          color = 'light-success'
+          request_flag_name = 'Явагдаж буй'
+      }
+      else if (request_flag === 3) {
+          color = 'light-danger'
+          request_flag_name = 'Дууссан'
+      }
+
+      return (
+    <Badge color={color}>
+      {request_flag_name}
+    </Badge>
+      )
+  }
+
 export const request_flag_option = () => {
   " Хүсэлт шийдвэрлэх үед ашиглах функц"
         const options = [
