@@ -1782,15 +1782,14 @@ function useApi(isDisplay=false) {
 			post: (cdata) => instance.post(`/elselt/preparation/`, cdata),
 			put: (id, cdata) => instance.put(`/elselt/preparation/${id}/`, cdata)
 		},
-		},
 		eyesh:{
-			get : (limit,page,sort,search,lesson_year_id, profession_id) => instance.get(`/elselt/eyesh/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}`)
+			get : (sort,search,lesson_year_id, profession_id) => instance.get(`/elselt/eyesh/?&sorting=${sort}&search=${search}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}`)
+		},
+		able: {
+			getWorker: () => able_instance.get(`/?a=ableApi&tsk=getWorkers&key=uia`),
+			getStructure: () => able_instance.get(`/?a=ableApi&tsk=getDeps&key=uia`),
 		}
 	},
-	able: {
-		getWorker: () => able_instance.get(`/?a=ableApi&tsk=getWorkers&key=uia`),
-		getStructure: () => able_instance.get(`/?a=ableApi&tsk=getDeps&key=uia`),
-	}
 }
 }
 

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from django.db.models import Q, Func,F, IntegerField, CharField
+from django.db.models import Q, Func,F, IntegerField, CharField, OuterRef,Subquery
 from django.db.models.functions import Cast
 from datetime import datetime
 from main.utils.function.utils import calculate_birthday, calculate_age
@@ -130,13 +130,11 @@ class UserScoreSerializer(serializers.ModelSerializer):
     #Монгол хэл бичиг шалгалтийн оноог шалгах
     def get_is_success(self, obj):
         is_success = True
-        if obj.lesson_name == 'Монгол хэл бичиг':
-            if obj.scaledScore < 400:
-                is_success = False
+        data = UserScore.objects.filter(user_id = obj.user , lesson_name = 'Монгол хэл бичиг').values_list('scaledScore', flat=True)
+        if data and max(data) < 400:
+            is_success = False
 
         return is_success
-
-
 
 class AdmissionUserInfoSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()

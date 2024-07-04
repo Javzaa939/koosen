@@ -58,8 +58,8 @@ const ElseltEyesh = () => {
 	const { t } = useTranslation()
 	const default_page = ['Бүгд', 10, 20, 50, 75, 100]
 
-	    // Нийт хуудасны тоо
-		const [pageCount, setPageCount] = useState(1)
+	// Нийт хуудасны тоо
+	const [pageCount, setPageCount] = useState(1)
 	// Хуудас солих үед ажиллах хэсэг
 	function handlePagination(page) {
 		setCurrentPage(page.selected + 1);
@@ -84,14 +84,14 @@ const ElseltEyesh = () => {
 		}
 	}
 	async function getDatas() {
-		const { success, data } = await allFetch(elseltEyeshApi.get(rowsPerPage, currentPage, sortField, searchValue, adm, profession_id))
+		const { success, data } = await allFetch(elseltEyeshApi.get(sortField, searchValue, adm, profession_id))
 		if (success) {
 			console.log(data)
 			setTotalCount(data?.count)
 			setDatas(data)
 			// Нийт хуудасны тоо
-            var cpage_count = Math.ceil(data?.count / rowsPerPage === 'Бүгд' ? 1 : rowsPerPage)
-            setPageCount(cpage_count)
+			var cpage_count = Math.ceil(data?.count / rowsPerPage === 'Бүгд' ? 1 : rowsPerPage)
+			setPageCount(cpage_count)
 		}
 	}
 	useEffect(() => {
@@ -104,7 +104,7 @@ const ElseltEyesh = () => {
 		const value = e.target.value.trimStart();
 		setSearchValue(value)
 	}
-	function handleButton(){
+	function handleButton() {
 		getDatas()
 	}
 	function handleSort(column, sort) {
@@ -170,12 +170,14 @@ const ElseltEyesh = () => {
 							getOptionLabel={(option) => option.name}
 						/>
 					</Col>
-					<Col sm={6} lg={3}>
+					<Col sm={3} lg={3}>
 						<Button
 							color='primary'
-							className='d-flex align-items-center px-75'
+							className='d-flex align-items-center px-75 mt-2'
 							id='state_button'
-						onClick={() => handleButton()}
+							size='sm'
+							onClick={() => handleButton()
+							}
 						>
 							<RiEditFill className='me-25' />
 							Оноо татах
@@ -184,41 +186,41 @@ const ElseltEyesh = () => {
 							Сонгосон элсэгчдийн эеш оноог татах
 						</UncontrolledTooltip></Col>
 				</Row>
-				<div className="react-dataTable react-dataTable-selectable-rows">
-                    <DataTable
-                        noHeader
-                        paginationServer
-                        pagination
-                        className='react-dataTable'
-                        progressPending={isTableLoading}
-                        progressComponent={
-                            <div className='my-2 d-flex align-items-center justify-content-center'>
-                                <Spinner className='me-1' color="" size='sm'/><h5>Түр хүлээнэ үү...</h5>
-                            </div>
-                        }
-                        noDataComponent={(
-                            <div className="my-2">
-                                <h5>{t('Өгөгдөл байхгүй байна')}</h5>
-                            </div>
-                        )}
-                        print='true'
-                        theme="solarized"
-                        onSort={handleSort}
-                        columns={getColumns(currentPage, rowsPerPage === 'Бүгд' ? 1 : rowsPerPage, total_count)}
-                        sortIcon={<ChevronDown size={10} />}
-                        paginationPerPage={rowsPerPage === 'Бүгд' ? 1 : rowsPerPage}
-                        paginationDefaultPage={currentPage}
-                        data={datas}
-                        paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage === 'Бүгд' ? total_count : rowsPerPage, total_count)}
-                        fixedHeader
-                        fixedHeaderScrollHeight='62vh'
-                        // selectableRows
-                        // // onSelectedRowsChange={(state) => onSelectedRowsChange(state)}
-                        direction="auto"
-                        defaultSortFieldId={'created_at'}
-                        style={{ border: '1px solid red' }}
-                    />
-                </div>
+				<div className="react-dataTable react-dataTable-selectable-rows mt-2">
+					<DataTable
+						noHeader
+						paginationServer
+						pagination
+						className='react-dataTable'
+						progressPending={isTableLoading}
+						progressComponent={
+							<div className='my-2 d-flex align-items-center justify-content-center'>
+								<Spinner className='me-1' color="" size='sm' /><h5>Түр хүлээнэ үү...</h5>
+							</div>
+						}
+						noDataComponent={(
+							<div className="my-2">
+								<h5>{t('Өгөгдөл байхгүй байна')}</h5>
+							</div>
+						)}
+						print='true'
+						theme="solarized"
+						onSort={handleSort}
+						columns={getColumns(currentPage, rowsPerPage === 'Бүгд' ? 1 : rowsPerPage, total_count)}
+						sortIcon={<ChevronDown size={10} />}
+						paginationPerPage={rowsPerPage === 'Бүгд' ? 1 : rowsPerPage}
+						paginationDefaultPage={currentPage}
+						data={datas}
+						paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage === 'Бүгд' ? total_count : rowsPerPage, total_count)}
+						fixedHeader
+						fixedHeaderScrollHeight='62vh'
+						// selectableRows
+						// // onSelectedRowsChange={(state) => onSelectedRowsChange(state)}
+						direction="auto"
+						defaultSortFieldId={'created_at'}
+						style={{ border: '1px solid red' }}
+					/>
+				</div>
 			</Card>
 		</Fragment>
 	)

@@ -1,8 +1,7 @@
 import hashlib
 import datetime as dt
 import requests
-from django.conf import settings
-from urllib.parse import quote
+from itertools import groupby
 
 from rest_framework import mixins
 from rest_framework import generics
@@ -74,7 +73,7 @@ from .serializer import (
     HealthUpUserStateSerializer,
     ConversationUserInfoSerializer,
     ElseltEyeshSerializer,
-    UserScoreSerializer
+    UserScoreSerializer,
     ConversationUserInfoSerializer,
     ArmyUserInfoSerializer
 )
@@ -91,7 +90,7 @@ from elselt.models import (
     HealthUpUser,
     AdmissionUserProfession,
     ConversationUser,
-    UserScore
+    UserScore,
     ConversationUser,
     ArmyUser
 )
@@ -2156,43 +2155,27 @@ class ElseltEyeshAPIView(
             return new_token
 
     def get_data(self, data):
-
         all_data = []
+        data_url = 'http://blockchain.eec.mn/api/v1/student'
+        headers = {}
 
-        #сурагч бүрээр тухайн api руу явуулах
         for item in data:
-            data_url = 'http://blockchain.eec.mn/api/v1/student'
             params = {'registerNo': item}
-            headers = {'Authorization': f'Bearer {self.BLOCKCHAIN_API_TOKEN}'}
+            response = requests.get(data_url, params=params, headers=headers)
 
+            if response.status_code == 401:
+                new_token = self.refresh_token()
+                if new_token:
+                    headers['Authorization'] = f'Bearer {new_token}'
+                    response = requests.get(data_url, params=params, headers=headers)
+                else:
+                    print("Failed to refresh token or obtain new token.")
+                    return None
             try:
-                response = requests.get(data_url, params=params, headers=headers)
                 response.raise_for_status()
                 data = response.json()
                 if data['status']:
                     all_data.append(data)
-
-            except requests.exceptions.HTTPError as http_err:
-
-                # Token expired
-                if response.status_code == 401:
-                    new_token = self.refresh_token()
-                    if new_token:
-                        headers['Authorization'] = f'Bearer {new_token}'
-                        try:
-                            response = requests.get(data_url, params=params, headers=headers)
-                            response.raise_for_status()
-                            data = response.json()
-                            if data['status']:
-                                all_data.append(data)
-                        except requests.exceptions.RequestException as e:
-                            print(f"An error occurred while retrying the API call: {e}")
-                            return None
-                    else:
-                        print("Failed to refresh token or obtain new token.")
-                else:
-                    print(f"HTTP error occurred: {http_err}")
-                    return None
             except requests.exceptions.RequestException as e:
                 print(f"An error occurred while calling the external API: {e}")
                 return None
@@ -2209,8 +2192,7 @@ class ElseltEyeshAPIView(
 
             #Тухайн сурагч бүрийн регистр авах
             register_no = student_data.get('registerNo')
-            register_no = register_no.upper()
-            user_instance = ElseltUser.objects.filter(register=register_no).first()
+            user_instance = ElseltUser.objects.filter(register__iexact=register_no).first()
             pupil_data = student_data.get('pupil', [])
 
             for pupil in pupil_data:
@@ -2252,8 +2234,14 @@ class ElseltEyeshAPIView(
         if profession:
             queryset = self.queryset.filter(profession=profession)
         bulk_update_datas = []
+
+        #регистрээр нь шүүх
         datas = queryset.values_list('user__register', flat=True)
+
+        #Шүүсэн датаг http://blockchain.eec.mn/api/v1/student луу явуулах функц
         datas = self.get_data(datas)
+
+        #base -d хадгалах функц
         extracted_data = self.extract_lesson(datas)
 
         try:
@@ -2264,13 +2252,14 @@ class ElseltEyeshAPIView(
                     lesson_name = data['lesson_name']
                     year = data['year']
                     semester = data['semester']
+
                     # UserScore instance байгаа үгүйг шалгана
                     existing_user_score = UserScore.objects.filter(
                         Q(user_id=user_id) & Q(lesson_name=lesson_name) & Q(year = year) & Q(semester=semester)
                     ).first()
 
+                    # Хэрэв оноо байх үед
                     if existing_user_score:
-                        # Хэрэв оноо байх үед
                         existing_user_score.scaledScore = data['scaledScore']
                         existing_user_score.percentage_score = data['percentage_score']
                         existing_user_score.raw_score = data['raw_score']
@@ -2296,16 +2285,24 @@ class ElseltEyeshAPIView(
                 ])
 
             #UserScore бүх датаг UserScoreSerializer ашиглан датаг авна
-            all_datas = UserScore.objects.all()
+            all_datas = UserScore.objects.filter(user__admissionuserprofession__profession = profession)
+
             return_datas = UserScoreSerializer(all_datas, many=True).data
 
         except Exception as e:
             return Response({'error': str(e)}, status=500)
-        is_success_values = [item['is_success'] for item in return_datas]
-        if any(not success for success in is_success_values):
-            with transaction.atomic():
+
+        #is_success false үед тэнцээгүй сурагчдын төлөвийг өөрчилж хадгалах
+        failed_entries = [item for item in return_datas if not item['is_success']]
+
+        with transaction.atomic():
+            for item in failed_entries:
+                user_id = item['user']
                 admission_user_data = AdmissionUserProfession.objects.get(user__id=user_id)
                 admission_user_data.state = AdmissionUserProfession.STATE_REJECT
                 admission_user_data.state_description = 'Монгол хэл бичигийн шалгалтанд тэнцээгүй'
+                admission_user_data.yesh_state = AdmissionUserProfession.STATE_REJECT
+                admission_user_data.yesh_description = 'Монгол хэл бичигийн шалгалтанд тэнцээгүй'
                 admission_user_data.save()
+
         return request.send_data(return_datas)
