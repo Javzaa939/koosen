@@ -456,22 +456,25 @@ const ElseltYlshiitgel = () => {
                             />
                     </Col>
                     <Col md={3}>
-                        <Label for='form-label'>{t('Хүйс')}</Label>
+                        <Label className="form-label" for="genderOp">
+                            {t('Хүйс')}
+                        </Label>
                         <Select
-                            id="genderOp"
                             name="genderOp"
+                            id="genderOp"
                             classNamePrefix='select'
                             isClearable
+                            className={classnames('react-select')}
                             isLoading={isLoading}
-                            placeholder={`-- Сонгоно уу --`}
+                            placeholder={t('-- Сонгоно уу --')}
                             options={genderOp || []}
                             value={genderOp.find((c) => c.name === gender)}
-                            noOptionsMessage={() => 'Хоосон байна'}
+                            noOptionsMessage={() => t('Хоосон байна.')}
                             onChange={(val) => {
                                 setGender(val?.name || '')
                             }}
                             styles={ReactSelectStyles}
-                            getOptionValue={(option) => option.prof_id}
+                            getOptionValue={(option) => option.id}
                             getOptionLabel={(option) => option.name}
                         />
                     </Col>
