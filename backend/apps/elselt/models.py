@@ -365,8 +365,8 @@ class StateChangeLog(models.Model):
     now_profession = models.CharField(verbose_name='Одоогийн төлөв', max_length=255, null=True)
     change_profession = models.CharField(verbose_name='Одоогийн төлөв', max_length=255, null=True)
     indicator = models.IntegerField(choices=AdmissionIndicator.INDICATOR_VALUE, default=AdmissionIndicator.ERUUL_MEND, verbose_name='шалгуурын төрөл')
-    now_state = models.IntegerField(choices=AdmissionUserProfession.STATE, default=AdmissionUserProfession.STATE_REJECT, verbose_name='ямар төлөвт шилжиж байгаан')
-    change_state = models.IntegerField(choices=AdmissionUserProfession.STATE, default=AdmissionUserProfession.STATE_REJECT, verbose_name='ямар төлөвт шилжиж байгаан')
+    now_state = models.IntegerField(choices=AdmissionUserProfession.STATE, default=None, verbose_name='ямар төлөвт шилжиж байгаан')
+    change_state = models.IntegerField(choices=AdmissionUserProfession.STATE, default=None, verbose_name='ямар төлөвт шилжиж байгаан')
 
     updated_at = models.DateTimeField(auto_now=True)
     updated_user = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name='Зассан хэрэглэгч', null=True)
