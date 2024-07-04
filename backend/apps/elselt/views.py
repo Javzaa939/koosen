@@ -464,6 +464,7 @@ class AdmissionUserInfoAPIView(
         state = self.request.query_params.get('state')
         age_state = self.request.query_params.get('age_state')
         gpa_state = self.request.query_params.get('gpa_state')
+        now_state = self.request.query_params.get('now_state')
         gender = self.request.query_params.get('gender')
         sorting = self.request.query_params.get('sorting')
         gpa = self.request.query_params.get('gpa')
@@ -496,6 +497,11 @@ class AdmissionUserInfoAPIView(
         if justice_state:
             queryset = queryset.filter(justice_state=justice_state)
 
+        # Дахин тэнцүүлсэн эсэх төлөвөөр хайх үед ажиллана.
+        if now_state:
+            user_ids = StateChangeLog.objects.filter(now_state=now_state, change_state=AdmissionUserProfession.STATE_APPROVE).values_list('user', flat=True)
+            queryset = queryset.filter(user__in=user_ids)
+
         if gender:
             if gender == 'Эрэгтэй':
                 queryset = queryset.filter(gender__in=['1', '3', '5', '7', '9'])
@@ -504,6 +510,7 @@ class AdmissionUserInfoAPIView(
         if gpa:
             gpa_value = float(gpa)
             queryset = queryset.filter(gpa__lte = gpa_value)
+
         # Sort хийх үед ажиллана
         if sorting:
             if not isinstance(sorting, str):
@@ -582,18 +589,38 @@ class AdmissionUserAllChange(
         try:
             with transaction.atomic():
                 now = dt.datetime.now()
-                if data.get("state") :
-                    self.queryset.filter(pk__in=data["students"]).update(
-                    state=data.get("state"),
-                    updated_at=now,
-                    state_description=data.get("state_description")
-                )
-                else:
-                    self.queryset.filter(pk__in=data["students"]).update(
-                    updated_at=now,
-                    justice_state=data.get("justice_state"),
-                    justice_description=data.get("justice_description")
-                )
+                students = self.queryset.filter(pk__in=data["students"])
+                for student in students:
+                    if data.get("state"):
+                        old_state = student.state
+                        student.state = data.get("state")
+                        student.updated_at = now
+                        student.state_description = data.get("state_description")
+                        student.save()
+
+                        StateChangeLog.objects.create(
+                            user=student.user,
+                            type=StateChangeLog.STATE,
+                            now_state=old_state,
+                            change_state=data.get("state"),
+                            updated_user=request.user if request.user.is_authenticated else None,
+                            updated_at=now
+                        )
+                    else:
+                        old_justice_state = student.justice_state
+                        student.updated_at = now
+                        student.justice_state = data.get("justice_state")
+                        student.justice_description = data.get("justice_description")
+                        student.save()
+
+                        StateChangeLog.objects.create(
+                            user=student.user,
+                            type=StateChangeLog.PROFESSION,
+                            now_state=old_justice_state,
+                            change_state=data.get("justice_state"),
+                            updated_user=request.user if request.user.is_authenticated else None,
+                            updated_at=now
+                        )
         except Exception as e:
             transaction.savepoint_rollback(sid)
             return request.send_error("ERR_002", e.__str__)

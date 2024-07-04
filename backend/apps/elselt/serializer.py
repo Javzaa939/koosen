@@ -30,7 +30,8 @@ from elselt.models import (
     ArmyUser,
     ConversationUser,
     UserScore,
-    MentalUser
+    MentalUser,
+    StateChangeLog
 )
 
 from surgalt.serializers import (
@@ -126,6 +127,12 @@ class UserScoreSerializer(serializers.ModelSerializer):
         model = UserScore
         fields = "__all__"
 
+class StateChangeLogSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = StateChangeLog
+        fields = "__all__"
+
 
 class AdmissionUserInfoSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
@@ -148,6 +155,7 @@ class AdmissionUserInfoSerializer(serializers.ModelSerializer):
     mental = serializers.SerializerMethodField()
     army = serializers.SerializerMethodField()
     conversation = serializers.SerializerMethodField()
+    now_state = serializers.SerializerMethodField()
 
     class Meta:
         model = AdmissionUserProfession
@@ -159,6 +167,11 @@ class AdmissionUserInfoSerializer(serializers.ModelSerializer):
         userinfo_data = ElseltUserSerializer(data).data
 
         return userinfo_data
+    
+    def get_now_state(self, obj):
+        data = StateChangeLog.objects.filter(user=obj.user.id).first()
+        now_state = StateChangeLogSerializer(data).data
+        return now_state
 
     def get_user_score(self, obj):
 
