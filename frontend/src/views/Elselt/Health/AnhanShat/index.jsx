@@ -1,7 +1,7 @@
 import React from 'react'
 import { useState, useEffect, useContext } from 'react'
 import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, Spinner, UncontrolledTooltip, CardBody } from 'reactstrap'
-import { ChevronDown,  FileText, Search } from 'react-feather'
+import { ChevronDown, FileText, Search } from 'react-feather'
 import DataTable from 'react-data-table-component'
 import { MdMailOutline } from "react-icons/md";
 import { BiMessageRoundedError } from "react-icons/bi";
@@ -50,10 +50,10 @@ function AnhanShat() {
     // Translate
     const { t } = useTranslation()
 
-    const default_page = [ 10, 20, 50, 75, 100 ]
+    const default_page = [10, 20, 50, 75, 100]
 
-	const [searchValue, setSearchValue] = useState("");
-	const [datas, setDatas] = useState([]);
+    const [searchValue, setSearchValue] = useState("");
+    const [datas, setDatas] = useState([]);
     const [chosenState, setChosenState] = useState('')
 
     var values = {
@@ -68,8 +68,9 @@ function AnhanShat() {
     const [addModalData, setAddModalData] = useState(null)
     const [emailModal, setEmailModal] = useState(false)
     const [messageModal, setMessageModal] = useState(false)
-    const [updated_at, setUpdated_at] = useState([])
     const [selectedStudents, setSelectedStudents] = useState([])
+    const [end_date, setEnd_date] = useState('')
+    const [start_date, setStart_date] = useState('')
 
     // Нийт датаны тоо
     const [total_count, setTotalCount] = useState(datas.length || 1)
@@ -77,19 +78,18 @@ function AnhanShat() {
     // Нийт хуудасны тоо
     const [pageCount, setPageCount] = useState(1)
 
-	const { Loader, isLoading, fetchData } = useLoader({isFullScreen: false});
+    const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: false });
 
-	const elseltApi = useApi().elselt.health.anhan
+    const elseltApi = useApi().elselt.health.anhan
     const professionApi = useApi().elselt.profession
     const admissionYearApi = useApi().elselt
 
     useEffect(() => {
         getAdmissionYear()
-    },[])
+    }, [])
 
     useEffect(
-        () =>
-        {
+        () => {
             getProfession()
         },
         [select_value.admission]
@@ -101,7 +101,7 @@ function AnhanShat() {
         if (success) {
             setElseltOption(data)
         }
-	}
+    }
 
     // Хөтөлбөрийн жагсаалт авах
     async function getProfession() {
@@ -110,10 +110,10 @@ function AnhanShat() {
         if (success) {
             setProfessionOption(data)
         }
-	}
+    }
 
-	/* Жагсаалтын дата авах функц */
-	async function getDatas() {
+    /* Жагсаалтын дата авах функц */
+    async function getDatas() {
         var elselt = select_value?.admission
         var profession = select_value?.profession
 
@@ -126,16 +126,16 @@ function AnhanShat() {
             var cpage_count = Math.ceil(data?.count / rowsPerPage === 'Бүгд' ? 1 : rowsPerPage)
             setPageCount(cpage_count)
         }
-	}
+    }
 
-	// Хайлтийн хэсэг хоосон болох үед анхны датаг дуудна
-	useEffect(() => {
+    // Хайлтийн хэсэг хоосон болох үед анхны датаг дуудна
+    useEffect(() => {
         if (searchValue.length == 0) {
-			getDatas();
-		} else {
-			const timeoutId = setTimeout(() => {
-				getDatas();
-			}, 600);
+            getDatas();
+        } else {
+            const timeoutId = setTimeout(() => {
+                getDatas();
+            }, 600);
 
             return () => clearTimeout(timeoutId);
         }
@@ -147,38 +147,39 @@ function AnhanShat() {
         setSearchValue(value)
     }
 
-     function convert() {
+    function convert() {
 
         const mainData = datas.map((data, idx) => {
-            return(
+            return (
                 {
                     '№': idx + 1,
-                    'Ургийн овог':data?.family_name || '',
-                    'Овог':data?.last_name || '',
-                    'Нэр':data?.first_name || '',
+                    'Ургийн овог': data?.family_name || '',
+                    'Овог': data?.last_name || '',
+                    'Нэр': data?.first_name || '',
                     'РД': data?.user_register || '',
-                    'ЭМД дугаар':'',
-                    'Аймаг/хот':data?.aimag_name || '',
-                    'Сум/Дүүрэг':data?.sumDuureg || '',
-                    'Хороо':data?.Horoo  || '',
+                    'ЭМД дугаар': '',
+                    'Аймаг/хот': data?.aimag_name || '',
+                    'Сум/Дүүрэг': data?.sumDuureg || '',
+                    'Хороо': data?.Horoo || '',
                     'Гудамж': '',
-                    'Байр/хашаа':'',
-                    'Тоот':'',
-                    'Ажлын газар':data?.work_organization || '',
-                    'Харъяалал':'',
-                    'Боловсрол':data?.degree_name || '',
-                    'Даатгал':data?.daatgal || '',
-                    'Салбарын ангилал':'',
-                    'Мэргэжлийн ангилал':'',
-                    'Цэргийн цол':data?.tsol_name || '',
-                    'Албан тушаал':data?.position_name || '',
-                    'Утас':data?.user?.mobile ||'',
-                    'И-Мэйл':data?.user?.email || '',
-                    'Facebook':'',
-                    'Twitter':'',
+                    'Байр/хашаа': '',
+                    'Тоот': '',
+                    'Ажлын газар': data?.work_organization || '',
+                    'Харъяалал': '',
+                    'Боловсрол': data?.degree_name || '',
+                    'Даатгал': data?.daatgal || '',
+                    'Салбарын ангилал': '',
+                    'Мэргэжлийн ангилал': '',
+                    'Цэргийн цол': data?.tsol_name || '',
+                    'Албан тушаал': data?.position_name || '',
+                    'Утас': data?.user?.mobile || '',
+                    'И-Мэйл': data?.user?.email || '',
+                    'Facebook': '',
+                    'Twitter': '',
 
                 }
-            )}
+            )
+        }
         )
 
         const combo = [
@@ -190,31 +191,31 @@ function AnhanShat() {
         const workbook = utils.book_new();
         utils.book_append_sheet(workbook, worksheet, "A-DB-8-Report")
         const staticCells = [
-                '№',
-                'Ургийн овог',
-                'Овог',
-                'Нэр',
-                'Регистрийн дугаар',
-                'ЭМД дугаар',
-                'Аймаг/хот',
-                'Сум/Дүүрэг',
-                'Хороо/Баг',
-                'Гудамж',
-                'Байр/хашаа',
-                'Тоот',
-                'Ажлын газар',
-                'Харъяалал',
-                'Боловсрол',
-                'Даатгал',
-                'Салбарын ангилал',
-                'Мэргэжлийн ангилал',
-                'Цэргийн цол',
-                'Албан тушаал',
-                'Утас',
-                'И-Мэйл',
-                'Facebook',
-                'Twitter',
-            ];
+            '№',
+            'Ургийн овог',
+            'Овог',
+            'Нэр',
+            'Регистрийн дугаар',
+            'ЭМД дугаар',
+            'Аймаг/хот',
+            'Сум/Дүүрэг',
+            'Хороо/Баг',
+            'Гудамж',
+            'Байр/хашаа',
+            'Тоот',
+            'Ажлын газар',
+            'Харъяалал',
+            'Боловсрол',
+            'Даатгал',
+            'Салбарын ангилал',
+            'Мэргэжлийн ангилал',
+            'Цэргийн цол',
+            'Албан тушаал',
+            'Утас',
+            'И-Мэйл',
+            'Facebook',
+            'Twitter',
+        ];
 
         utils.sheet_add_aoa(worksheet, [staticCells], { origin: "A1" });
 
@@ -230,8 +231,8 @@ function AnhanShat() {
                 vertical: 'center',
                 wrapText: true
             },
-            font:{
-                sz:10
+            font: {
+                sz: 10
             }
         };
 
@@ -247,7 +248,7 @@ function AnhanShat() {
                 vertical: 'center',
                 wrapText: true
             },
-            font:{
+            font: {
                 sz: 12,
                 bold: true
             }
@@ -261,7 +262,7 @@ function AnhanShat() {
 
         for (let row = styleRow; row <= sendRow; row++) {
             for (let col = styleCol; col <= sendCol; col++) {
-            const cellNum = utils.encode_cell({ r: row, c: col });
+                const cellNum = utils.encode_cell({ r: row, c: col });
 
                 if (!worksheet[cellNum]) {
                     worksheet[cellNum] = {};
@@ -270,11 +271,11 @@ function AnhanShat() {
                 worksheet[cellNum].s =
                     (row === styleRow)
                         ? tableHeader
-                            : numberCellStyle;
+                        : numberCellStyle;
             }
         }
 
-        const phaseTwoCells = Array.from({length: 8}, (_) => {return({wch: 15})})
+        const phaseTwoCells = Array.from({ length: 8 }, (_) => { return ({ wch: 15 }) })
 
         worksheet["!cols"] = [
             { wch: 5 },
@@ -282,19 +283,19 @@ function AnhanShat() {
             { wch: 20 }
         ];
 
-        const tableRow = Array.from({length: mainData.length}, (_) => {return({hpx: 20})})
+        const tableRow = Array.from({ length: mainData.length }, (_) => { return ({ hpx: 20 }) })
 
         worksheet["!rows"] = [
             { hpx: 40 },
             ...tableRow
         ];
 
-    writeFile(workbook, "Нарийн шатны үзлэгийн жагсаалт.xlsx");
+        writeFile(workbook, "Нарийн шатны үзлэгийн жагсаалт.xlsx");
 
-}
+    }
 
     function handleSort(column, sort) {
-        if(sort === 'asc') {
+        if (sort === 'asc') {
             setSort(column.header)
         } else {
             setSort('-' + column.header)
@@ -306,15 +307,14 @@ function AnhanShat() {
     }
 
     // Хуудаслалт
-    function handlePerPage(e)
-    {
+    function handlePerPage(e) {
         setRowsPerPage(e.target.value === 'Бүгд' ? e.target.value : parseInt(e.target.value))
     }
 
     // Хуудас солих үед ажиллах хэсэг
-	function handlePagination(page) {
-		setCurrentPage(page.selected + 1);
-	};
+    function handlePagination(page) {
+        setCurrentPage(page.selected + 1);
+    };
 
     function addModalHandler(e, data) {
         setAddModal(!addModal)
@@ -341,7 +341,7 @@ function AnhanShat() {
 
     return (
         <Card>
-             <EmailModal
+            <EmailModal
                 emailModalHandler={emailModalHandler}
                 emailModal={emailModal}
                 selectedStudents={selectedStudents}
@@ -351,7 +351,7 @@ function AnhanShat() {
                 messageModalHandler={messageModalHandler}
                 messageModal={messageModal}
                 selectedStudents={selectedStudents}
-                getDatas = {getDatas}
+                getDatas={getDatas}
             />
             {
                 addModal &&
@@ -370,13 +370,13 @@ function AnhanShat() {
                 </h5>
                 <div className='d-flex justify-content-end mt-1'>
                     <Button color='primary' className='d-flex align-items-center' onClick={() => convert()} style={{}}>
-                        <FileText className='me-50' size={14}/>
+                        <FileText className='me-50' size={14} />
                         <div>
                             Нарийн мэргэжил excel
                         </div>
                     </Button>
                     <Button color='primary' className='d-flex align-items-center ms-1' onClick={() => excelHandler()}>
-                        <FileText className='me-50' size={14}/>
+                        <FileText className='me-50' size={14} />
                         <div>
                             Анхан шат excel татах
                         </div>
@@ -385,134 +385,167 @@ function AnhanShat() {
 
             </CardHeader>
             <CardBody>
-            <Row className="justify-content-start mt-1">
-                <Col md={3}>
-                    <Label for='sort-select'>{t('Үзлэгийн төлөвөөр шүүх')}</Label>
-                    <Select
-                        classNamePrefix='select'
-                        isClearable
-                        placeholder={`-- Сонгоно уу --`}
-                        options={STATE_LIST || []}
-                        value={STATE_LIST.find((c) => c.id === chosenState)}
-                        noOptionsMessage={() => 'Хоосон байна'}
-                        onChange={(val) => {
-                            setChosenState(val?.id || '')
-                        }}
-                        styles={ReactSelectStyles}
-                        getOptionValue={(option) => option.id}
-                        getOptionLabel={(option) => option.name}
-                    />
-                </Col>
-                <Col md={3}>
-                    <Label for='form-label'>{t('Элсэлт')}</Label>
-                    <Select
-                        name="lesson_year"
-                        id="lesson_year"
-                        classNamePrefix='select'
-                        isClearable
-                        placeholder={`-- Сонгоно уу --`}
-                        options={elseltOption || []}
-                        value={elseltOption.find((c) => c.id === select_value.admission)}
-                        noOptionsMessage={() => 'Хоосон байна'}
-                        onChange={(val) => {
-                            setSelectValue(current => {
-                                return {
-                                    ...current,
-                                    admission: val?.id || '',
-                                }
-                            })
-                        }}
-                        styles={ReactSelectStyles}
-                        getOptionValue={(option) => option.id}
-                        getOptionLabel={(option) => option.lesson_year + ' ' + option.name}
-                    />
-                </Col>
-                <Col md={3}>
-                    <Label for='form-label'>{t('Хөтөлбөр')}</Label>
-                    <Select
-                        id="profession"
-                        name="profession"
-                        classNamePrefix='select'
-                        isClearable
-                        placeholder={`-- Сонгоно уу --`}
-                        options={profOption || []}
-                        value={profOption.find((c) => c.id === select_value.profession)}
-                        noOptionsMessage={() => 'Хоосон байна'}
-                        onChange={(val) => {
-                            setSelectValue(current => {
-                                return {
-                                    ...current,
-                                    profession: val?.id || '',
-                                }
-                            })
-                        }}
-                        styles={ReactSelectStyles}
-                        getOptionValue={(option) => option.prof_id}
-                        getOptionLabel={(option) => option.name}
-                    />
-                </Col>
-            </Row>
-                <Row className='d-flex mt-1 '>
-                    <Col md={6}>
+                <Row className="justify-content-start mt-1">
+                    <Col md={3}>
+                        <Label for='sort-select'>{t('Үзлэгийн төлөвөөр шүүх')}</Label>
+                        <Select
+                            classNamePrefix='select'
+                            isClearable
+                            placeholder={`-- Сонгоно уу --`}
+                            options={STATE_LIST || []}
+                            value={STATE_LIST.find((c) => c.id === chosenState)}
+                            noOptionsMessage={() => 'Хоосон байна'}
+                            onChange={(val) => {
+                                setChosenState(val?.id || '')
+                            }}
+                            styles={ReactSelectStyles}
+                            getOptionValue={(option) => option.id}
+                            getOptionLabel={(option) => option.name}
+                        />
+                    </Col>
+                    <Col md={3}>
+                        <Label for='form-label'>{t('Элсэлт')}</Label>
+                        <Select
+                            name="lesson_year"
+                            id="lesson_year"
+                            classNamePrefix='select'
+                            isClearable
+                            placeholder={`-- Сонгоно уу --`}
+                            options={elseltOption || []}
+                            value={elseltOption.find((c) => c.id === select_value.admission)}
+                            noOptionsMessage={() => 'Хоосон байна'}
+                            onChange={(val) => {
+                                setSelectValue(current => {
+                                    return {
+                                        ...current,
+                                        admission: val?.id || '',
+                                    }
+                                })
+                            }}
+                            styles={ReactSelectStyles}
+                            getOptionValue={(option) => option.id}
+                            getOptionLabel={(option) => option.lesson_year + ' ' + option.name}
+                        />
+                    </Col>
+                    <Col md={3}>
+                        <Label for='form-label'>{t('Хөтөлбөр')}</Label>
+                        <Select
+                            id="profession"
+                            name="profession"
+                            classNamePrefix='select'
+                            isClearable
+                            placeholder={`-- Сонгоно уу --`}
+                            options={profOption || []}
+                            value={profOption.find((c) => c.id === select_value.profession)}
+                            noOptionsMessage={() => 'Хоосон байна'}
+                            onChange={(val) => {
+                                setSelectValue(current => {
+                                    return {
+                                        ...current,
+                                        profession: val?.id || '',
+                                    }
+                                })
+                            }}
+                            styles={ReactSelectStyles}
+                            getOptionValue={(option) => option.prof_id}
+                            getOptionLabel={(option) => option.name}
+                        />
+                    </Col>
+                </Row>
+                <Row className='justify-content-start mt-1 '>
+                    <Col md={3} className='my-0 py-0 '>
                         <Label className="form-label" for="">
-                            {t('Огноогоор шүүх')}
+                            {t('Эхлэх огноо')}
                         </Label>
                         <Flatpickr
                             className='form-control form-control-sm  bg-white '
-                            style={{ maxWidth: '258px' }}
+                            style={{ maxWidth: '280px' }}
                             placeholder={`-- Сонгоно уу --`}
-                            onChange={(val) => {
-                                setUpdated_at(val || '')
-                            }
-                            }
-                            value={updated_at}
+
+                            onChange={(selectedDates, dateStr) => {
+
+                                if (selectedDates.length !== 0) {
+                                    const values = {
+                                        val: moment(dateStr).format('YYYY-MM-DD HH:mm')
+                                    }
+                                    setStart_date(values.val || '')
+                                }
+                            }}
+                            value={start_date}
                             options={{
                                 time_24hr: true,
                                 enableTime: true,
                                 dateFormat: "Y-m-d H:i",
-                                mode: "range",
+                                mode: "single",
+                                // locale: Mongolian
+                            }}
+                        />
+                    </Col>
+                    <Col md={3} className='my-0 py-0 '>
+                        <Label className="form-label" for="">
+                            {t('Дуусах огноо')}
+                        </Label>
+                        <Flatpickr
+                            className='form-control form-control-sm  bg-white '
+                            style={{ maxWidth: '280px' }}
+                            placeholder={`-- Сонгоно уу --`}
+
+                            onChange={(selectedDates, dateStr) => {
+                                if (selectedDates.length !== 0) {
+                                    const values = {
+                                        val: moment(dateStr).format('YYYY-MM-DD HH:mm')
+                                    }
+                                    setEnd_date(values.val || '')
+                                }
+                            }}
+                            value={end_date}
+                            options={{
+                                time_24hr: true,
+                                enableTime: true,
+                                dateFormat: "Y-m-d H:i",
+                                mode: "single",
                                 // locale: Mongolian
                             }}
                         />
                     </Col>
                 </Row>
-            <Row>
-                <div className='d-flex justify-content-between my-50 mt-1   '>
-                    <div className='d-flex'>
-                        <div className='px-0'>
-                            <Button
-                                color='primary'
-                                disabled={(selectedStudents.length != 0 && user?.permissions?.includes('lms-elselt-mail-create')) ? false : true}
-                                className='d-flex align-items-center px-75'
-                                id='email_button'
-                                onClick={() => emailModalHandler()}
-                            >
-                                <MdMailOutline className='me-25'/>
-                                Email илгээх
-                            </Button>
-                            <UncontrolledTooltip target='email_button'>
-                                Сонгосон элсэгчид руу имейл илгээх
-                            </UncontrolledTooltip>
+                <Row>
+                    <div className='d-flex justify-content-between my-50 mt-1   '>
+                        <div className='d-flex'>
+                            <div className='px-0'>
+                                <Button
+                                    color='primary'
+                                    disabled={(selectedStudents.length != 0 && user?.permissions?.includes('lms-elselt-mail-create')) ? false : true}
+                                    className='d-flex align-items-center px-75'
+                                    id='email_button'
+                                    onClick={() => emailModalHandler()}
+                                >
+                                    <MdMailOutline className='me-25' />
+                                    Email илгээх
+                                </Button>
+                                <UncontrolledTooltip target='email_button'>
+                                    Сонгосон элсэгчид руу имейл илгээх
+                                </UncontrolledTooltip>
+                            </div>
+                            <div className='px-1'>
+                                <Button
+                                    color='primary'
+                                    disabled={(selectedStudents.length != 0 && user?.permissions?.includes('lms-elselt-message-create')) ? false : true}
+                                    className='d-flex align-items-center px-75'
+                                    id='message_button'
+                                    onClick={() => messageModalHandler()}
+                                >
+                                    <BiMessageRoundedError className='me-25' />
+                                    Мессеж илгээх
+                                </Button>
+                                <UncontrolledTooltip target='message_button'>
+                                    Сонгосон элсэгчид руу мессеж илгээх
+                                </UncontrolledTooltip>
+                            </div>
                         </div>
-                        <div className='px-1'>
-                            <Button
-                                color='primary'
-                                disabled={(selectedStudents.length != 0 && user?.permissions?.includes('lms-elselt-message-create')) ? false : true}
-                                className='d-flex align-items-center px-75'
-                                id='message_button'
-                                onClick={() => messageModalHandler()}
-                            >
-                                <BiMessageRoundedError className='me-25'/>
-                                Мессеж илгээх
-                            </Button>
-                            <UncontrolledTooltip target='message_button'>
-                                Сонгосон элсэгчид руу мессеж илгээх
-                            </UncontrolledTooltip>
-                        </div>
-                    </div>
 
-                </div>
-            </Row>
+                    </div>
+                </Row>
                 <Row className="justify-content-between">
                     <Col className='d-flex align-items-center justify-content-start' md={4}>
                         <Col md={3} sm={2} className='pe-1'>
@@ -525,13 +558,13 @@ function AnhanShat() {
                             >
                                 {
                                     default_page.map((page, idx) => (
-                                    <option
-                                        key={idx}
-                                        value={page}
-                                    >
-                                        {page}
-                                    </option>
-                                ))}
+                                        <option
+                                            key={idx}
+                                            value={page}
+                                        >
+                                            {page}
+                                        </option>
+                                    ))}
                             </Input>
                         </Col>
                         <Col md={9} sm={3}>
@@ -546,7 +579,7 @@ function AnhanShat() {
                             id='search-input'
                             placeholder={t("Хайх үг....")}
                             value={searchValue}
-                            onChange={(e) => {handleFilter(e)}}
+                            onChange={(e) => { handleFilter(e) }}
                             onKeyPress={e => e.key === 'Enter' && handleSearch()}
                         />
                         <Button
@@ -569,7 +602,7 @@ function AnhanShat() {
                         progressPending={isLoading}
                         progressComponent={
                             <div className='my-2 d-flex align-items-center justify-content-center'>
-                                <Spinner className='me-1' color="" size='sm'/><h5>Түр хүлээнэ үү...</h5>
+                                <Spinner className='me-1' color="" size='sm' /><h5>Түр хүлээнэ үү...</h5>
                             </div>
                         }
                         noDataComponent={(
