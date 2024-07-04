@@ -533,13 +533,21 @@ class AdmissionUserInfoAPIView(
         try:
             # Элсэгчийн хөтөлбөр засах
             logged_user = request.user
+            profession_id=data.get('profession')
+
+            profession_name = ''
+
+            if profession_id:
+
+                professions= AdmissionUserProfession.objects.filter(profession=profession_id).first()
+                profession_name= professions.profession.profession.name if professions else ''
 
             profession_change_log = StateChangeLog(
                 user=instance.user,
                 type=StateChangeLog.PROFESSION,
                 now_profession=instance.profession.profession.name,
-                change_profession=data.get('profession'),
-                updated_user=logged_user
+                change_profession= profession_name,
+                updated_user=logged_user,
             )
             profession_change_log.save()
 
