@@ -99,8 +99,9 @@ const VerticalLayout = (props) =>
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-health-read', 'elselt4')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-healthup-read', 'elselt5')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-physical-read', 'elselt6')
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-justice-read', 'elselt3_1')
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-justice-read', 'elselt3_2')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-psychological-read', 'elselt3_1')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-justice-read', 'elselt3_3')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-army-read', 'elselt6_1')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-main-read', 'elselt7')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-mail-read', 'elselt8')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-message-read', 'elselt9')
@@ -109,6 +110,7 @@ const VerticalLayout = (props) =>
 
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-psychologicaltesting-question-read', 'psychologicaltesting0')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-psychologicaltesting-exam-read', 'psychologicaltesting1')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-psychologicaltesting-result-read', 'psychologicaltesting2')
 
                         /** ----------------------------Оюутан ------------------------------- */
 

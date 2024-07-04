@@ -891,3 +891,28 @@ class ElsegchSerializer(serializers.ModelSerializer):
     class Meta:
         model = ElseltUser
         fields = ["id", "code", "last_name", "first_name"]
+
+
+class PsychologicalTestResultSerializer(serializers.ModelSerializer):
+    state = serializers.SerializerMethodField(read_only=True)
+    start_date = DateOnlyField()
+    end_date = DateOnlyField()
+
+    class Meta:
+        model = PsychologicalTest
+        fields = ['id', 'title', 'description', 'duration', 'start_date', 'end_date', 'state']
+
+    def get_state(self, obj):
+        state = 2
+        now = datetime.now()
+
+        if obj.start_date > now: state = 1
+        if obj.end_date < now: state = 3
+        return state
+
+
+class PsychologicalTestParticipantsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = PsychologicalTest
+        fields = ['participants']

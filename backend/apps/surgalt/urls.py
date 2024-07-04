@@ -85,6 +85,9 @@ urlpatterns = [
     path('psychological_test/scope_list/', PsychologicalTestScopesAPIView.as_view()),
     path('psychological_test/add_scope/<int:pk>/', PsychologicalTestScopeOptionsAPIView.as_view()),
 
+    path('psychological_test_result/', PsychologicalTestResultAPIView.as_view()),
+    path('psychological_test_result_participants/', PsychologicalTestResultParticipantsAPIView.as_view()),
+
     path('lesson/list/', LessonsTeacher.as_view()),
     path('lesson/studentlist/', HomeworkStudentsListAPIView.as_view()),
 
