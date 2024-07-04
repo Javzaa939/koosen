@@ -71,7 +71,8 @@ from .serializer import (
     HealthUpUserStateSerializer,
     ConversationUserInfoSerializer,
     ArmyUserInfoSerializer,
-    ArmyUserInfoSerializer
+    ArmyUserInfoSerializer,
+    StateChangeLogInfoSerializer
 )
 
 from elselt.models import (
@@ -2119,18 +2120,27 @@ class LogSerializerAPView(
     ):
 
     queryset = StateChangeLog.objects.all()
-    serializer_class = ArmyUserInfoSerializer
+    serializer_class = StateChangeLogInfoSerializer
 
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['user__first_name', 'user__register', 'user__email', 'user__last_name', 'user__mobile']
+    search_fields = [ 'user__first_name', ]
 
     def get_queryset(self):
         queryset = self.queryset
 
         sorting = self.request.query_params.get('sorting')
-        state = self.request.query_params.get('state')
+        profession = self.request.query_params.get('profession')
+        elselt = self.request.query_params.get('elselt')
+
+        if profession:
+            queryset = queryset.filter(
+                user__admissionuserprofession__profession__profession=profession
+            )
+
+        if elselt:
+            queryset = queryset.filter(user__admissionuserprofession__profession__admission=elselt)
 
         # Sort хийх үед ажиллана
         if sorting:
@@ -2138,16 +2148,6 @@ class LogSerializerAPView(
                 sorting = str(sorting)
 
             queryset = queryset.order_by(sorting)
-
-        if state:
-            if state == '1':
-                exclude_ids = ArmyUser.objects.filter(Q(Q(state=AdmissionUserProfession.STATE_APPROVE) | Q(state=AdmissionUserProfession.STATE_REJECT))).values_list('user', flat=True)
-                user_id = AdmissionUserProfession.objects.filter(justice_state=AdmissionUserProfession.STATE_APPROVE).exclude(user__in=exclude_ids).values_list('user', flat=True)
-            else:
-                user_id = ArmyUser.objects.filter(state=state).values_list('user', flat=True)
-
-            queryset = queryset.filter(user__in=user_id)
-
 
         return queryset
 

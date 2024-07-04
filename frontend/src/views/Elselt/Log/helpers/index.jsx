@@ -1,18 +1,11 @@
 import { t } from 'i18next'
-
-import css from '@mstyle/style.module.css'
-
-import useModal from '@hooks/useModal'
-
-import { X, Edit, Book } from 'react-feather'
+import moment from 'moment'
 import { Badge, UncontrolledTooltip } from 'reactstrap'
 
-
-// Хүснэгтийн баганууд
+// Profession Хүснэгтийн баганууд
 export function getColumns(currentPage, rowsPerPage, total_count, user, handleEditModal, handleDelete) {
 
     const page_count = Math.ceil(total_count / rowsPerPage)
-    const { showWarning } = useModal()
 
     /** Сонгосон хуудасны тоо датаны тооноос их болсон үед хуудаслалт 1-ээс эхлэнэ */
     if (currentPage > page_count) {
@@ -27,9 +20,18 @@ export function getColumns(currentPage, rowsPerPage, total_count, user, handleEd
             center: true,
         },
         {
-            header: 'name',
-            name: `${t('нэр')}`,
-            selector: (row) => row?.user,
+            header: 'last_name',
+            name: `${t('Овог')}`,
+            selector: (row) => row?.last_name,
+            sortable: true,
+            minWidth: "250px",
+            wrap: true,
+            center: true,
+        },
+        {
+            header: 'fist_name',
+            name: `${t('Нэр')}`,
+            selector: (row) => row?.first_name,
             sortable: true,
             minWidth: "250px",
             wrap: true,
@@ -55,67 +57,118 @@ export function getColumns(currentPage, rowsPerPage, total_count, user, handleEd
         {
             header: 'updated_user',
             name: `${t('Сольсон хэрэглэгч')}`,
-            selector: (row) => row?.updated_user,
+            selector: (row) => row?.admin_name,
             sortable: true,
             minWidth: "250px",
             wrap: true,
             center: true
-        }
+        },
+        {
+            sortField: 'updated_at',
+            header: 'updated_at',
+            maxWidth: "300px",
+            minWidth: "300px",
+            reorder: true,
+            sortable: true,
+            name: t("Бүрт/огноо"),
+            selector: (row) => row?.updated_at ? moment(row?.created_at).format("YYYY-MM-DD h:mm") : '',
+            center: true,
+        },
     ]
 
-    // if (Object.keys(user).length > 0) {
-    //     columns.push(
-    //         {
-    //             name: t("Үйлдэл"),
-    //             maxWidth: "150px",
-    //             mINWidth: "150px",
-    //             selector: (row) => (
-    //                 <div className="text-center" style={{ width: "auto" }}>
-    //                     <a role="button"
-    //                         onClick={() => handleEditModal(row.id)}
-    //                         id={`complaintListDatatableEdit${row?.id}`}>
-    //                         <Badge color="light-secondary" pill><Edit width={"15px"} /></Badge>
-    //                     </a>
-    //                     <UncontrolledTooltip placement='top' target={`complaintListDatatableEdit${row.id}`} >Засах</UncontrolledTooltip>
-    //                     {
-    //                         user.permissions.includes('lms-service-news-delete')
-    //                         &&
-    //                         <>
-    //                             <a
-    //                                 className='ms-1'
-    //                                 role="button"
-    //                                 onClick={() => showWarning({
-    //                                     header: {
-    //                                         title: t(`Зар мэдээ`),
-    //                                     },
-    //                                     question: t(`Зар мэдээг устгах уу?`),
-    //                                     onClick: () => handleDelete(row.id),
-    //                                     btnText: t('Устгах'),
-    //                                 })}
-    //                                 id={`complaintListDatatableCancel${row?.id}`}
-    //                             >
-    //                                 <Badge color="light-danger" pill><X width={"100px"} /></Badge>
-    //                             </a>
-    //                             <UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${row.id}`} >Устгах</UncontrolledTooltip>
-    //                         </>
-    //                     }
+    return columns
 
-    //                     <a
-    //                         id={`complaintListDatatableDetail${row.id}`}
-    //                         className='ms-1'
-    //                         href={`/service/show/${row.id}`}
-    //                         target={'_blank'}
-    //                     >
-    //                         <Badge color="light-info" pill><Book width={"15px"} /></Badge>
-    //                     </a>
+}
 
-    //                     <UncontrolledTooltip placement='top' target={`complaintListDatatableDetail${row.id}`} >Дэлгэрэнгүй</UncontrolledTooltip>
-    //                 </div>
-    //             ),
-    //             center: true,
-    //         }
-    //     )
-    // }
+
+// State хүснэгтийн баганууд
+export function getColumnState(currentPage, rowsPerPage, total_count, stateop) {
+
+    const page_count = Math.ceil(total_count / rowsPerPage)
+
+    /** Сонгосон хуудасны тоо датаны тооноос их болсон үед хуудаслалт 1-ээс эхлэнэ */
+    if (currentPage > page_count) {
+        currentPage = 1
+    }
+
+    const columns = [
+        {
+            name: "№",
+            selector: (row, index) => (currentPage - 1) * rowsPerPage + index + 1,
+            maxWidth: "30px",
+            center: true,
+        },
+        {
+            header: 'name',
+            name: `${t('Овог')}`,
+            selector: (row) => row?.last_name,
+            sortable: true,
+            minWidth: "250px",
+            wrap: true,
+            center: true,
+        },
+        {
+            header: 'name',
+            name: `${t('Нэр')}`,
+            selector: (row) => row?.first_name,
+            sortable: true,
+            minWidth: "250px",
+            wrap: true,
+            center: true,
+        },
+        {
+            maxWidth: "150px",
+            minWidth: "150px",
+            header: 'now_state',
+            reorder: true,
+            sortable: true,
+            name: t("Одоогийн төлөв"),
+            selector: (row) => (
+                <Badge
+                    color={`${row?.now_state == 1 ? 'primary' : row?.now_state == 2 ? 'success' : row?.now_state == 3 ? 'danger' : 'primary'}`}
+                    pill
+                >
+                    {row?.now_state_name}
+                </Badge>),
+            center: true,
+        },
+        {
+            maxWidth: "150px",
+            minWidth: "150px",
+            header: 'state',
+            reorder: true,
+            sortable: true,
+            name: t("Сольсон төлөв"),
+            selector: (row) => (
+                <Badge
+                    color={`${row?.change_state == 1 ? 'primary' : row?.change_state == 2 ? 'success' : row?.change_state == 3 ? 'danger' : 'primary'}`}
+                    pill
+                >
+                    {row?.change_state_name}
+                </Badge>),
+            center: true,
+        },
+        {
+            header: 'updated_user',
+            name: `${t('Сольсон хэрэглэгч')}`,
+            selector: (row) => row?.admin_name,
+            sortable: true,
+            minWidth: "250px",
+            wrap: true,
+            center: true
+        },
+        {
+            sortField: 'updated_at',
+            header: 'updated_at',
+            maxWidth: "300px",
+            minWidth: "300px",
+            reorder: true,
+            sortable: true,
+            name: t("Бүрт/огноо"),
+            selector: (row) => row?.updated_at ? moment(row?.created_at).format("YYYY-MM-DD h:mm") : '',
+            center: true,
+        },
+    ]
 
     return columns
 

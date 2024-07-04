@@ -1779,7 +1779,7 @@ function useApi(isDisplay=false) {
 		},
 		// Хөтөлбөр,Төлөв лог жагсаалт
 		log:{
-			get:()=>instance.get(`/elselt/log/`)
+			get:(limit,page,sort,search,state,elselt,profession)=>instance.get(`/elselt/log/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}&elselt=${elselt}&profession=${profession}`)
 		}
 	},
 	able: {
