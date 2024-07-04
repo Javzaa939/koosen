@@ -24,6 +24,7 @@ import useLoader from '@hooks/useLoader';
 
 import AuthContext from "@context/AuthContext"
 
+import { SortModal } from './SortModal'
 
 
 const ElseltEyesh = () => {
@@ -115,12 +116,42 @@ const ElseltEyesh = () => {
 		}
 	}
 
+	const [modal, setModal] = useState(false)
+	const [type, setType] = useState('')
+	const [editData, setEditData] = useState([])
+	const handleModal = () => {
+        setModal(!modal)
+    }
+
 	return (
 		<Fragment>
 			<Card>
-				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom m-auto">
-					<CardTitle tag="h4">{t('Элсэгчдийн жагсаалт')}</CardTitle>
-				</CardHeader>
+				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
+					<CardTitle tag="h4" className='mt-50'>{t('Элсэлтийн бүртгэл')}</CardTitle>
+                    <div className='d-flex flex-wrap mt-md-0 mt-1'>
+						<Button
+							color='primary'
+							className='d-flex align-items-center px-75'
+							id='state_button'
+							onClick={() => handleButton()}
+						>
+							<RiEditFill className='me-25' />
+							Оноо татах
+						</Button>
+						<UncontrolledTooltip target='state_button'>
+							Сонгосон элсэгчдийн эеш оноог татах
+						</UncontrolledTooltip>
+						<Button
+							color='primary'
+							className='d-flex align-items-center px-75 ms-1'
+							id='state_button'
+							onClick={() => handleModal()}
+						>
+							<RiEditFill className='me-25' />
+							Оноо эрэмбэлэх
+						</Button>
+                    </div>
+                </CardHeader>
 				<Row className='justify-content-start mx-0 mt-1'>
 					<Col sm={6} lg={3} >
 						<Label className="form-label" for="lesson_year">
@@ -170,19 +201,6 @@ const ElseltEyesh = () => {
 							getOptionLabel={(option) => option.name}
 						/>
 					</Col>
-					<Col sm={6} lg={3}>
-						<Button
-							color='primary'
-							className='d-flex align-items-center px-75'
-							id='state_button'
-						onClick={() => handleButton()}
-						>
-							<RiEditFill className='me-25' />
-							Оноо татах
-						</Button>
-						<UncontrolledTooltip target='state_button'>
-							Сонгосон элсэгчдийн эеш оноог татах
-						</UncontrolledTooltip></Col>
 				</Row>
 				<div className="react-dataTable react-dataTable-selectable-rows">
                     <DataTable
@@ -220,6 +238,7 @@ const ElseltEyesh = () => {
                     />
                 </div>
 			</Card>
+			{modal && <SortModal open={modal} handleModal={handleModal} refreshDatas={getDatas} type={type} editData={editData}/>}
 		</Fragment>
 	)
 }

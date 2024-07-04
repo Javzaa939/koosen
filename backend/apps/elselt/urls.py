@@ -12,6 +12,9 @@ urlpatterns = [
     path('dashboard/', DashboardAPIView.as_view()),
     path('dashboard/excel/', DashboardExcelAPIView.as_view()),
 
+    path('hynalt_number/', HynaltNumberAPIView.as_view()),
+    path('userscore/', UserScoreSortAPIView.as_view()),
+
     # Элсэгчдийн мэдээлэл
     path('admissionuserdata/', AdmissionUserInfoAPIView.as_view()),
     path('admissionuserdata/<int:pk>/', AdmissionUserInfoAPIView.as_view()),

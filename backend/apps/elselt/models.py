@@ -64,7 +64,7 @@ class UserScore(models.Model):
         db_table = 'elselt_userscore'
         managed = False
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Элсэгч')
+    user = models.ForeignKey(ElseltUser, on_delete=models.CASCADE, verbose_name='Элсэгч')
     exam_loc = models.CharField(max_length=200, verbose_name="Шалгалт өгсөн газар", default="")
     exam_loc_code = models.IntegerField(verbose_name="Шалгалт өгсөн газар", default=0)
     year = models.IntegerField(verbose_name="Шалгалт өгсөн он")

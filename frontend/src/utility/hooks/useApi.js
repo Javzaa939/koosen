@@ -1785,6 +1785,10 @@ function useApi(isDisplay=false) {
 			post: (cdata) => instance.post(`/elselt/preparation/`, cdata),
 			put: (id, cdata) => instance.put(`/elselt/preparation/${id}/`, cdata)
 		},
+		hynalt:{
+			get: (gender, profession) => instance.get(`/elselt/hynalt_number/?gender=${gender}&profession=${profession}`),
+			post:(cdata) => instance.post(`/elselt/userscore/`, cdata),
+		},
 	},
 	able: {
 		getWorker: () => able_instance.get(`/?a=ableApi&tsk=getWorkers&key=uia`),
