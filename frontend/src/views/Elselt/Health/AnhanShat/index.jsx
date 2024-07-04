@@ -116,12 +116,7 @@ function AnhanShat() {
 	async function getDatas() {
         var elselt = select_value?.admission
         var profession = select_value?.profession
-        var start_date = ''
-        var end_date = ''
-        if (updated_at.length !== 0) {
-            start_date = moment(updated_at[0]).format('YYYY-MM-DD HH:MM')
-            end_date = moment(updated_at[1]).format('YYYY-MM-DD HH:MM')
-        }
+
         const { success, data } = await fetchData(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, chosenState, elselt, profession, start_date, end_date))
         if (success) {
             setTotalCount(data?.count)
@@ -142,12 +137,12 @@ function AnhanShat() {
 				getDatas();
 			}, 600);
 
-			return () => clearTimeout(timeoutId);
-		}
-    }, [sortField, currentPage, rowsPerPage, searchValue, chosenState, select_value.admission, select_value.profession, updated_at])
+            return () => clearTimeout(timeoutId);
+        }
+    }, [sortField, currentPage, rowsPerPage, searchValue, chosenState, select_value.admission, select_value.profession, start_date, end_date])
 
     // ** Шүүж хайх хэсэг
-	const handleFilter = e => {
+    const handleFilter = e => {
         const value = e.target.value.trimStart();
         setSearchValue(value)
     }

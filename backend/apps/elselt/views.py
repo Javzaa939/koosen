@@ -948,9 +948,15 @@ class ElseltHealthAnhanShat(
 
             queryset = queryset.order_by(sorting)
 
-        if start_date and end_date:
-            dates = HealthUser.objects.filter(updated_at__lte=end_date,updated_at__gte=start_date).values_list('user', flat=True)
-            queryset=queryset.filter(user__in=dates)
+        filters = {}
+        if start_date:
+            filters['updated_at__gte'] = start_date
+        if end_date:
+            filters['updated_at__lte'] = end_date
+
+        if filters:
+            dates = HealthUser.objects.filter(**filters).values_list('user', flat=True)
+            queryset = queryset.filter(user__in=dates)
             return queryset
 
         if state:
