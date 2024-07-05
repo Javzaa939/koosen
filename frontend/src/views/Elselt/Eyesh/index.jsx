@@ -1,4 +1,3 @@
-// ** React Imports
 import { Fragment, useState, useEffect, useContext } from 'react'
 
 import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, Spinner, UncontrolledTooltip } from 'reactstrap'
@@ -180,6 +179,7 @@ const ElseltEyesh = () => {
 	function handleSearch() {
 		getDatas()
 	}
+
 	// Order modal toggle function
 	function orderModalHandler() {
 		setOrderModal(!orderModal);
@@ -408,4 +408,5 @@ const ElseltEyesh = () => {
 	)
 }
 
-export default ElseltEyesh;
+
+export default ElseltEyesh
