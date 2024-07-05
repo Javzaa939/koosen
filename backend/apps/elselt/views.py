@@ -2440,6 +2440,7 @@ class UserScoreSortAPIView(generics.GenericAPIView):
                 item['yesh_state'] = AdmissionUserProfession.STATE_REJECT
                 item['state'] = AdmissionUserProfession.STATE_REJECT
                 item['state_description'] = 'Элсэгч ЭЕШ онооны шалгуурт тэнцсэнгүй'
+                item['yesh_description'] = 'Элсэгч ЭЕШ онооны шалгуурт тэнцсэнгүй'
                 rejected.append(item)
 
         # Бүх user-ээ аваад

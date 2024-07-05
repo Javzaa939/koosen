@@ -88,7 +88,6 @@ const ElseltEyesh = () => {
 	async function getDatas() {
 		const { success, data } = await allFetch(elseltEyeshApi.get(sortField, searchValue, adm, profession_id))
 		if (success) {
-			console.log(data)
 			setTotalCount(data?.count)
 			setDatas(data)
 			// Нийт хуудасны тоо
@@ -96,6 +95,18 @@ const ElseltEyesh = () => {
 			setPageCount(cpage_count)
 		}
 	}
+
+	async function getListDatas() {
+		// const { success, data } = await allFetch(elseltEyeshApi.get(sortField, searchValue, adm, profession_id))
+		// if (success) {
+		// 	setTotalCount(data?.count)
+		// 	setDatas(data)
+		// 	// Нийт хуудасны тоо
+		// 	var cpage_count = Math.ceil(data?.count / rowsPerPage === 'Бүгд' ? 1 : rowsPerPage)
+		// 	setPageCount(cpage_count)
+		// }
+	}
+
 	useEffect(() => {
 		getAdmissionYear()
 		getProfession()
@@ -248,7 +259,7 @@ const ElseltEyesh = () => {
 					/>
 				</div>
 			</Card>
-			{modal && <SortModal open={modal} handleModal={handleModal} refreshDatas={getDatas} type={type} editData={editData}/>}
+			{modal && <SortModal open={modal} handleModal={handleModal} refreshDatas={getListDatas} type={type} editData={editData}/>}
 		</Fragment>
 	)
 }
