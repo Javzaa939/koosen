@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from django.db.models import Q, Func,F, IntegerField, CharField
+from django.db.models import Q, Func,F, IntegerField, CharField, OuterRef,Subquery
 from django.db.models.functions import Cast
 from datetime import datetime
 from main.utils.function.utils import calculate_birthday, calculate_age
@@ -122,11 +122,21 @@ class ElseltUserSerializer(serializers.ModelSerializer):
 
 
 class UserScoreSerializer(serializers.ModelSerializer):
+    is_success = serializers.SerializerMethodField()
 
     class Meta:
         model = UserScore
         fields = "__all__"
 
+    # Монгол хэл бичиг шалгалтийн оноог шалгах
+    def get_is_success(self, obj):
+        is_success = True
+        # TODO lesson_name шалгахдаа iexact ашиглана том жижиг үсэг орж ирхээс сэргийлэх
+        data = UserScore.objects.filter(user_id = obj.user , lesson_name = 'Монгол хэл бичиг').values_list('scaledScore', flat=True)
+        if data and max(data) < 400:
+            is_success = False
+
+        return is_success
 class StateChangeLogSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -1031,3 +1041,16 @@ class ArmyUserInfoSerializer(serializers.ModelSerializer):
             obj.save()
 
             return user_age
+
+class ElseltEyeshSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
+    class Meta:
+        model = AdmissionUserProfession
+        fields = ['id','user']
+
+    def get_user(self, obj):
+
+            data = ElseltUser.objects.filter(id=obj.user.id).first()
+            userinfo_data = ElseltUserSerializer(data).data
+            register = userinfo_data['register']
+            return register
