@@ -1,6 +1,10 @@
 import hashlib
 import datetime as dt
 import requests
+from django.conf import settings
+from urllib.parse import quote
+from collections import Counter
+
 from itertools import groupby
 from datetime import datetime, timedelta
 from rest_framework import mixins
@@ -42,11 +46,18 @@ from lms.models import (
     ProfessionDefinition,
     AdmissionIndicator,
     AdmissionXyanaltToo,
-    AimagHot
+    AimagHot,
+    AdmissionLesson,
+    AdmissionBottomScore
 )
 
 from surgalt.serializers import (
     ProfessionDefinitionSerializer
+)
+
+from settings.serializers import (
+    AdmissionLessonSerializer,
+    AdmissionLessonListSerializer
 )
 
 from .serializer import (
@@ -2191,7 +2202,6 @@ class ArmyUserSerializerAPView(
         except Exception as e:
             print(e)
             return request.send_error('ERR_002', 'Хадгалахад алдаа гарлаа')
-
         return request.send_info('INF_001')
 
     def put(self, request,pk=None):
@@ -2204,6 +2214,278 @@ class ArmyUserSerializerAPView(
             ).update(state=data.get("state"),updated_at=now,description=data.get("description"))
 
         return request.send_info('INF_002')
+
+
+class HynaltNumberAPIView(generics.GenericAPIView):
+    """ Хөтөлбөр болох хүйсээс хамаарсан хяналтын тоо """
+
+    def get(self, request):
+        # Хяналтын тооны анхны утга
+        hynalt_number = 0
+
+        # query parametr-үүд
+        gender = request.query_params.get('gender')
+        profession = request.query_params.get('profession')
+
+        # profession болон xүйсээр ялгах эсэхээр filter хийнэ
+        hynalt_obj = AdmissionXyanaltToo.objects.filter(
+            is_gender=True,
+            indicator__admission_prof=profession
+        ).values('norm1', 'norm2')
+
+        # hynalt_obj хоосон биш үед
+        if hynalt_obj:
+            # gender-ээс шалтгаалсан хяналтын тоог авна
+            norm_key = 'norm1' if gender == "1" else 'norm2'
+            # Тэгээд түүнийгээ хадгалаад буцаана
+            hynalt_number = hynalt_obj[0][norm_key]
+        return request.send_data(hynalt_number)
+
+
+class UserScoreSortAPIView(generics.GenericAPIView):
+    """ЭЕШ онооны эрэмбэлэлт"""
+
+    queryset = UserScore.objects.all().annotate(gender=(Substr('user__register', 9, 1)))
+
+    def post(self, request):
+        data = request.data
+        try:
+            # front-ooс ирсэн хичээлүүдээ ашиглан AdmissionLesson-д байгаа хичээлүүдийн нэрсийг авна
+            lessons = data.get('lesson')
+            profession = data.get('profession')
+            total_elsegch = data.get('totalElsegch')
+            gender = data.get('gender')
+            lesson_names = AdmissionLesson.objects.filter(lesson_code__in=lessons).values_list('lesson_name', flat=True)
+
+            # Хэрвээ тус хичээл AdmissionLesson-д байхгүй бол олдсонгүй гэсэн мэдээллийг буцаана
+            if not lesson_names:
+                return request.send_error('ERR_002', 'ЭЕШ-ийн хичээлүүдийн дотор тус хичээл олдсонгүй')
+
+            # AdmissionLesson-ээс ганц хичээл олдвол
+            if len(lesson_names) == 1:
+                # Single lesson function-ийг ажиллуулна
+                self.process_single_lesson(lesson_names, total_elsegch, gender)
+            else:
+                # Нэгээс олон хичээл байвал уг function-ийг дуудна
+                self.process_multiple_lessons(lesson_names, profession, total_elsegch, gender)
+
+        except Exception as e:
+            print(e)
+            return request.send_error('ERR_002', 'Хадгалахад алдаа гарлаа')
+        return request.send_info('INF_001')
+
+    # Нэг ЭЕШ-ийн хичээлээр оноог эрэмбэлхэд ашиглах function
+    def process_single_lesson(self, lesson_names, total_elsegch, gender):
+        # UserScore-д тус хичээлийн нэр дээр бүртгэлтэй оноотой хэрэглэгчдийн ElseltUser-ийн id-г олж авна
+        if int(gender) == 1: # Эрэгтэй хэрэглэгчид
+            user_score_users = self.queryset.filter(
+                lesson_name__in=lesson_names,
+                gender__in=['1', '3', '5', '7', '9']
+            ).values_list('user', flat=True)
+        else:
+            user_score_users = self.queryset.filter(
+                lesson_name__in=lesson_names,
+                gender__in=['0', '2', '4', '6', '8']
+            ).values_list('user', flat=True)
+
+        # Counter ашиглан тус хэрэглэгч уг шалгалтыг хэдэн удаа өгснийг тоолно
+        counts = Counter(user_score_users)
+
+        # Уг хичээлийн шалгалтыг нэг удаа өгсөн хэрэглэгчид
+        single_score_users = [item for item in user_score_users if counts[item] == 1]
+        single_users_scores = [
+            {'score': self.queryset.filter(user=user, lesson_name__in=lesson_names).values_list('scaledScore', flat=True).first(), 'user': user}
+            for user in single_score_users
+        ]
+
+        # Нэгээс олон удаа уг хичээлээр шалгалт өгсөн хэрэглэгчид
+        multi_score_users = [item for item in user_score_users if counts[item] > 1]
+        # max() ашиглан хамгийн их оноог user дээрээ хадгална
+        multi_users_scores = [
+            {'score': max(self.queryset.filter(user=user, lesson_name__in=lesson_names).values_list('scaledScore', flat=True)), 'user': user}
+            for user in multi_score_users
+        ]
+
+        # Давхардсан утгуудийг хасна multi_users_scores дотроос
+        seen = set()
+        unique_multi_users = []
+        # multi_users_scores дотроо loop гүйлгээд
+        for value in multi_users_scores:
+            # item дотор value-гийн утгуудаас бүрдэх tuple-ийг хадгална
+            item = tuple(value.items()) # tuple болгодгоно set() ашиглаж duplicated value-г арилгахад туслана
+            if item not in seen:
+                # Тэгээд seen дотор item маань байхгүй байвал үндсэн list-үүгээ value-гаа нэмнээ
+                seen.add(item)
+                unique_multi_users.append(value)
+
+        # Бүх оноонуудаа нэмээд
+        all_scores = unique_multi_users + single_users_scores
+        # Тэгээд save_scores function-ийг ашиглан нийт датагаа хадгална
+        self.save_scores(all_scores, total_elsegch)
+
+    # Нэгээс олон ЭЕШ-ийн хичээлээр оноог эрэмбэлхэд ашиглах function
+    def process_multiple_lessons(self, lesson_names, profession, total_elsegch, gender):
+        # UserScore-д тус хичээлийн нэр дээр бүртгэлтэй оноотой хэрэглэгчдийн ElseltUser-ийн id, lesson_name болон ЭЕШ оноог олж авна
+        # {'user': 806, 'lesson_name': 'Нийгэм судлал', 'scaledScore': 626} иймэрдүү датанаас бүрдсэн list ирнэ
+        if int(gender) == 1: # Эрэгтэй хэрэглэгчид
+            elsegch_users = self.queryset.filter(
+                lesson_name__in=lesson_names,
+                gender__in=['1', '3', '5', '7', '9']
+            ).values('user', 'lesson_name', 'scaledScore')
+        else:
+            elsegch_users = self.queryset.filter(
+                lesson_name__in=lesson_names,
+                gender__in=['0', '2', '4', '6', '8']
+            ).values('user', 'lesson_name', 'scaledScore')
+
+        # Тус хэрэглэгч нэг шалгалтыг олон удаа өгсөн бол зөвхөн хамгийн өндөр оноог нь авна
+        max_scores = {}
+        for item in elsegch_users:
+            # key дотор хэрэглэгийн id болон хичээлийн нэр хоёрыг аваад
+            key = (item['user'], item['lesson_name'])
+            # Хэрвээ key-нь max_scores дотор байхгүй эсвэл байгаад гэхдээ ижил key-тэй датаны scaledScore-оос их оноотой байвал
+            if key not in max_scores or item['scaledScore'] > max_scores[key]['scaledScore']:
+                # тус key-гээр илэрхийлэгдэх value-г max_score дотор хадгална
+                max_scores[key] = item
+
+        # Тэгээд max_scores-ийн value-г нь аваад тус хичээлийн шалгалтын хамгийн их оноотой датанаас бүрдэх list-ийг үүсгэнэ
+        users_with_max_score = list(max_scores.values()) # Ингэснээр нэг хичээл дээр нэг л хэрэглэгчийн дата үүснэ
+
+        # Дараа нь ижил хэрэглэгчтэй өөр хичээлийн датануудыг group-лэнэ
+        grouped_data = {}
+        # users_with_max_score дотор loop гүйлгээд
+        for item in users_with_max_score:
+            # user_id-д item-ийн user-ийн утгыг хадгалаад
+            user_id = item['user']
+            # AdmissionBottomScore-оос тус хичээлийн Суурь шалгалт-уу эсвэл Дагалдах шалгалт-уу гэдгийг тодорхойлж өгөөд
+            score_type = AdmissionBottomScore.objects.filter(
+                admission_lesson__lesson_name=item['lesson_name'],
+                profession=profession
+            ).values_list('score_type', flat=True).first()
+
+            # lesson_info дотор group-лэх датаны мэдээллийг оруулж өгнө
+            lesson_info = {
+                'lesson_name': item['lesson_name'],
+                'scaledScore': item['scaledScore'],
+                'user': item['user'],
+                'score_type': score_type
+            }
+
+            # Хэрвээ тухайн хэрэглэчийн id grouped_data дотор байвал
+            if user_id in grouped_data:
+                # Тэр дотроо хичээлийн мэдээллээ нэмж өгнө
+                grouped_data[user_id].append(lesson_info)
+            else:
+                # Байхгүй бол үүсгэж өгнө
+                grouped_data[user_id] = [lesson_info]
+            # Эцэст нь иймэрдүү дата үүснэ
+            # 4712: [
+            #   {'lesson_name': 'Математик', 'scaledScore': 599, 'user': 4712, 'score_type': 1},
+            #   {'lesson_name': 'Нийгэм судлал', 'scaledScore': 634, 'user': 4712, 'score_type': 2}
+            # ]
+
+        # Дараагаар үндсэн list дотроо зөвхөн тухайн хэрэглэгч дотор 2 хичээлийн мэдээлэл group-лэгдсэн датаг нэмнэ
+        grouped_list = [group for group in grouped_data.values() if len(group) == 2]
+
+        # Одоо 2 хичээлийн 70, 30-аар хувилсан нийт оноог олно
+        all_scores = []
+        # Үндсэн list дотроо loop гүйлгээд
+        for group in grouped_list:
+            # user_scores дотор нийт жинлэгдсэн оноог хадгална
+            user_scores = {}
+
+            for entry in group:
+                # Мэдээллүүдээ багцалж аваад
+                user = entry['user']
+                score_type = entry['score_type']
+                scaled_score = entry['scaledScore']
+
+                # Хэрвээ тус хичээлийн score_type GENERAL байвал weight-ийг 70% гэж үзнэ
+                # Бусад үед дагалдах хичээл гэж ойлгоод 30% байна
+                weight = 0.7 if score_type == AdmissionBottomScore.GENERAL else 0.3
+                weighted_score = scaled_score * weight
+
+                # Хэрвээ user_scores дотор тухайн хэрэглэгчийн id-аар илэрхийлэгдэх
+                # key-тэй оноо байвал тэр оноон дээр нь нэмнэ
+                if user in user_scores:
+                    user_scores[user] += weighted_score
+                else: # Байхгүй бол тус key-гээр оноог үүсгэнэ
+                    user_scores[user] = weighted_score
+
+            # Нийт жинлэгдсэн оноо үүссэний дараа
+            for user, score in user_scores.items():
+                # all_score дотроо датагаа user,score-оор нь цэгцлэнэ
+                all_scores.append({'score': round(score), 'user': user})
+
+        self.save_scores(all_scores, total_elsegch)
+
+    # Нийт өгөгдлөө update хийх function
+    def save_scores(self, scores, total_elsegch):
+        # Scores-оор орж ирсэн датаг score-уудийг нь ашиглан эрэмбэлэнэ
+        sorted_scores = sorted(scores, key=lambda x: x['score'], reverse=True)
+
+        # Тухайн sort хийсэн датаг index-ээс шалтгаалан order_no-уудыг нэмж өгнө
+        for idx, item in enumerate(sorted_scores):
+            item['order_no'] = idx + 1
+
+        approved = []
+        rejected = []
+        # Тэнцсэн болон тэнцээгүй хэрэглэгчидийг ялгана
+        for item in sorted_scores:
+            # Нийт авах элсэгчдийн тоон дотор эрэмбэлсэн хэрэглэгчийн эрэмбийн дугаар байвал
+            if item['order_no'] <= int(total_elsegch):
+                item['yesh_state'] = AdmissionUserProfession.STATE_APPROVE
+                approved.append(item)
+            else:
+                item['yesh_state'] = AdmissionUserProfession.STATE_REJECT
+                item['state'] = AdmissionUserProfession.STATE_REJECT
+                item['state_description'] = 'Элсэгч ЭЕШ онооны шалгуурт тэнцсэнгүй'
+                item['yesh_description'] = 'Элсэгч ЭЕШ онооны шалгуурт тэнцсэнгүй'
+                rejected.append(item)
+
+        # Бүх user-ээ аваад
+        approved_users = [item['user'] for item in approved]
+        # Бүх датагаа аваад
+        approved_data = {item['user']: item for item in approved}
+        # Bulk_update хийхэд бэлтгэнэ
+        approved_updates = []
+        # Ингэхдээ хэрэглэгчдээ шүүгээд
+        for user in AdmissionUserProfession.objects.filter(
+                        user__in=approved_users
+                    ).filter(
+                        ~Q(state=AdmissionUserProfession.STATE_REJECT)
+                    ):
+            # Үндсэн датан дотроо хэрэглэгчийнхээ хамаарах датаг оруулж өгөөд
+            data = approved_data[user.user.id]
+            user.score_avg = data['score']
+            user.order_no = data['order_no']
+            user.yesh_state = data['yesh_state']
+            # user-ийнхээ мэдээллүүдийг update хийх list-нд нэмнэ
+            approved_updates.append(user)
+
+        # Дээд талынхтай яг ижил дүрэмтэй ажилна
+        rejected_users = [item['user'] for item in rejected]
+        rejected_data = {item['user']: item for item in rejected}
+        rejected_updates = []
+        for user in AdmissionUserProfession.objects.filter(
+                        user__in=rejected_users
+                    ).filter(
+                        ~Q(state=AdmissionUserProfession.STATE_REJECT)
+                    ):
+            data = rejected_data[user.user.id]
+            user.score_avg = data['score']
+            user.order_no = data['order_no']
+            user.yesh_state = data['yesh_state']
+             # Гэхдээ өөрчлөх field-үүд нэмэгдэж ирсэн
+            user.state = data['state']
+            user.state_description = data['state_description']
+            rejected_updates.append(user)
+
+        # Бүх датаг нэг transaction хоёр query-ээр шинэчлэнэ
+        with transaction.atomic():
+            AdmissionUserProfession.objects.bulk_update(approved_updates, ['score_avg', 'order_no', 'yesh_state'])
+            AdmissionUserProfession.objects.bulk_update(rejected_updates, ['score_avg', 'order_no', 'yesh_state', 'state', 'state_description'])
+
 
 class ElseltEyeshAPIView(
     generics.GenericAPIView,

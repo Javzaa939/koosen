@@ -72,7 +72,7 @@ const ElseltRoutes = [
     },
     {
         path: 'elselt/eyesh/',
-        element:<Eyesh/>
+        element:<Eyesh/>,
     },
     {
         path: 'elselt/preparation/',
