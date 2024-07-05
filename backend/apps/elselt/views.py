@@ -2250,7 +2250,11 @@ class HynaltNumberAPIView(generics.GenericAPIView):
         profession = request.query_params.get('profession')
 
         # Норм түлхүүрийг тогтоох
-        norm_key = 'norm1' if gender == "1" else 'norm2'
+        norm_key = 'norm_all'
+        if gender == "1":
+            norm_key = 'norm1'
+        if gender == "2":
+            norm_key = 'norm2'
 
         if profession:
             # Хүйсээр ялгах эсэхээр filter хийнэ
@@ -2354,6 +2358,10 @@ class UserScoreSortAPIView(generics.GenericAPIView):
 
     # Нэгээс олон ЭЕШ-ийн хичээлээр оноог эрэмбэлхэд ашиглах function
     def process_multiple_lessons(self, lesson_names, profession, total_elsegch, gender):
+
+        # Элсэлтэд бүртгэгдсэн мэргэжил
+        profession_obj = AdmissionRegisterProfession.objects.get(pk=profession)
+
         # UserScore-д тус хичээлийн нэр дээр бүртгэлтэй оноотой хэрэглэгчдийн ElseltUser-ийн id, lesson_name болон ЭЕШ оноог олж авна
         # {'user': 806, 'lesson_name': 'Нийгэм судлал', 'scaledScore': 626} иймэрдүү датанаас бүрдсэн list ирнэ
         if int(gender) == 1: # Эрэгтэй хэрэглэгчид
@@ -2389,7 +2397,7 @@ class UserScoreSortAPIView(generics.GenericAPIView):
             # AdmissionBottomScore-оос тус хичээлийн Суурь шалгалт-уу эсвэл Дагалдах шалгалт-уу гэдгийг тодорхойлж өгөөд
             score_type = AdmissionBottomScore.objects.filter(
                 admission_lesson__lesson_name=item['lesson_name'],
-                profession=profession
+                profession=profession_obj.profession
             ).values_list('score_type', flat=True).first()
 
             # lesson_info дотор group-лэх датаны мэдээллийг оруулж өгнө
@@ -2446,10 +2454,18 @@ class UserScoreSortAPIView(generics.GenericAPIView):
                 # all_score дотроо датагаа user,score-оор нь цэгцлэнэ
                 all_scores.append({'score': round(score), 'user': user})
 
-        self.save_scores(all_scores, total_elsegch)
+        self.save_scores(all_scores, total_elsegch, profession_obj.profession.name)
 
     # Нийт өгөгдлөө update хийх function
-    def save_scores(self, scores, total_elsegch):
+    def save_scores(self, scores, total_elsegch, profession_name):
+        """ЭШ дүн хадгалах хэсэг
+            Keyword arguments:
+            scores -- нийт дүн
+            total_elsegch -- тэнцүүлэх элсэгтийн тоо
+            profession_name -- мэргэжил нэр
+            Return: return_description
+        """
+
         # Scores-оор орж ирсэн датаг score-уудийг нь ашиглан эрэмбэлэнэ
         sorted_scores = sorted(scores, key=lambda x: x['score'], reverse=True)
 
@@ -2459,10 +2475,16 @@ class UserScoreSortAPIView(generics.GenericAPIView):
 
         approved = []
         rejected = []
+
         # Тэнцсэн болон тэнцээгүй хэрэглэгчидийг ялгана
         for item in sorted_scores:
             # Нийт авах элсэгчдийн тоон дотор эрэмбэлсэн хэрэглэгчийн эрэмбийн дугаар байвал
             if item['order_no'] <= int(total_elsegch):
+
+                # Зөвхөн эрх зүй мэргэжилд шууд тэнцэнэ.
+                if profession_name.upper() == 'ЭРХ ЗҮЙ':
+                    item['state'] = AdmissionUserProfession.STATE_APPROVE
+
                 item['yesh_state'] = AdmissionUserProfession.STATE_APPROVE
                 approved.append(item)
             else:
@@ -2485,7 +2507,7 @@ class UserScoreSortAPIView(generics.GenericAPIView):
                 approve_obj.score_avg = data['score']
                 approve_obj.order_no = data['order_no']
                 approve_obj.yesh_state = data['yesh_state']
-                approve_obj.save()
+                approve_obj.state = data['state']
                 approved_objects.append(approve_obj)
 
         # Bulk_update бэлдэж өгсөн тэнцээгүй хэрэглэгчдэд
@@ -2503,7 +2525,7 @@ class UserScoreSortAPIView(generics.GenericAPIView):
                 rejected_objects.append(obj)
 
         AdmissionUserProfession.objects.bulk_update(
-            approved_objects, ['score_avg', 'order_no', 'yesh_state']
+            approved_objects, ['score_avg', 'order_no', 'yesh_state', 'state']
         )
         AdmissionUserProfession.objects.bulk_update(
             rejected_objects, ['score_avg', 'order_no', 'yesh_state', 'state', 'state_description', 'yesh_description']
