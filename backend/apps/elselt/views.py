@@ -2292,7 +2292,6 @@ class ElseltEyeshAPIView(
 
         #регистрээр нь шүүх
         datas = queryset.values_list('user__register', flat=True)
-        print(datas)
 
         #Шүүсэн датаг http://blockchain.eec.mn/api/v1/student луу явуулах функц
         datas = self.get_data(datas)
