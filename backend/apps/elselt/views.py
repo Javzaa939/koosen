@@ -2216,6 +2216,28 @@ class ArmyUserSerializerAPView(
         return request.send_info('INF_002')
 
 
+class HynaltNumberIsGenderAPIView(generics.GenericAPIView):
+    """ Мэргэжлийн хяналтын тоо хүйсээс хамаарах эсэх """
+
+    def get(self, request):
+        is_gender = True
+
+        # query parametr-үүд
+        profession = request.query_params.get('profession')
+
+        if profession:
+            # Мэргэжлийн хяналтын тооны queryset
+            hynalt_qs = AdmissionXyanaltToo.objects.filter(
+                indicator__admission_prof=profession
+            ).first()
+
+            # Хэрвээ тус мэргэжилээр тодорхойлогдсон qs байвал
+            if hynalt_qs:
+                is_gender = hynalt_qs.is_gender
+
+        return request.send_data(is_gender)
+
+
 class HynaltNumberAPIView(generics.GenericAPIView):
     """ Хөтөлбөр болох хүйсээс хамаарсан хяналтын тоо """
 
@@ -2223,23 +2245,30 @@ class HynaltNumberAPIView(generics.GenericAPIView):
         # Хяналтын тооны анхны утга
         hynalt_number = 0
 
-        # query parametr-үүд
+        # query параметрүүд
         gender = request.query_params.get('gender')
         profession = request.query_params.get('profession')
 
-        # profession болон xүйсээр ялгах эсэхээр filter хийнэ
-        hynalt_obj = AdmissionXyanaltToo.objects.filter(
-            is_gender=True,
-            indicator__admission_prof=profession
-        ).values('norm1', 'norm2')
+        # Норм түлхүүрийг тогтоох
+        norm_key = 'norm1' if gender == "1" else 'norm2'
 
-        # hynalt_obj хоосон биш үед
-        if hynalt_obj:
-            # gender-ээс шалтгаалсан хяналтын тоог авна
-            norm_key = 'norm1' if gender == "1" else 'norm2'
-            # Тэгээд түүнийгээ хадгалаад буцаана
-            hynalt_number = hynalt_obj[0][norm_key]
+        if profession:
+            # Хүйсээр ялгах эсэхээр filter хийнэ
+            filter_args = {'indicator__admission_prof': profession}
+            if gender and int(gender) == 3:
+                filter_args['is_gender'] = False
+            else:
+                filter_args['is_gender'] = True
+
+            hynalt_obj = AdmissionXyanaltToo.objects.filter(**filter_args).values(norm_key)
+
+            # hynalt_obj хоосон биш үед
+            if hynalt_obj:
+                # Хяналтын тоог буцаана
+                hynalt_number = hynalt_obj[0][norm_key]
+
         return request.send_data(hynalt_number)
+
 
 
 class UserScoreSortAPIView(generics.GenericAPIView):
@@ -2443,48 +2472,44 @@ class UserScoreSortAPIView(generics.GenericAPIView):
                 item['yesh_description'] = 'Элсэгч ЭЕШ онооны шалгуурт тэнцсэнгүй'
                 rejected.append(item)
 
-        # Бүх user-ээ аваад
-        approved_users = [item['user'] for item in approved]
-        # Бүх датагаа аваад
-        approved_data = {item['user']: item for item in approved}
-        # Bulk_update хийхэд бэлтгэнэ
-        approved_updates = []
-        # Ингэхдээ хэрэглэгчдээ шүүгээд
-        for user in AdmissionUserProfession.objects.filter(
-                        user__in=approved_users
-                    ).filter(
-                        ~Q(state=AdmissionUserProfession.STATE_REJECT)
-                    ):
-            # Үндсэн датан дотроо хэрэглэгчийнхээ хамаарах датаг оруулж өгөөд
-            data = approved_data[user.user.id]
-            user.score_avg = data['score']
-            user.order_no = data['order_no']
-            user.yesh_state = data['yesh_state']
-            # user-ийнхээ мэдээллүүдийг update хийх list-нд нэмнэ
-            approved_updates.append(user)
+        approved_objects = []
+        rejected_objects = []
 
-        # Дээд талынхтай яг ижил дүрэмтэй ажилна
-        rejected_users = [item['user'] for item in rejected]
-        rejected_data = {item['user']: item for item in rejected}
-        rejected_updates = []
-        for user in AdmissionUserProfession.objects.filter(
-                        user__in=rejected_users
-                    ).filter(
-                        ~Q(state=AdmissionUserProfession.STATE_REJECT)
-                    ):
-            data = rejected_data[user.user.id]
-            user.score_avg = data['score']
-            user.order_no = data['order_no']
-            user.yesh_state = data['yesh_state']
-             # Гэхдээ өөрчлөх field-үүд нэмэгдэж ирсэн
-            user.state = data['state']
-            user.state_description = data['state_description']
-            rejected_updates.append(user)
+        # Bulk_update бэлдэж өгсөн тэнцсэн хэрэглэгчдэд
+        for data in approved:
+            obj = AdmissionUserProfession.objects.filter(
+                user=data['user']
+            ).filter(
+                ~Q(state=AdmissionUserProfession.STATE_REJECT)
+            ).first()
+            if obj:
+                obj.score_avg = data['score']
+                obj.order_no = data['order_no']
+                obj.yesh_state = data['yesh_state']
+                approved_objects.append(obj)
 
-        # Бүх датаг нэг transaction хоёр query-ээр шинэчлэнэ
-        with transaction.atomic():
-            AdmissionUserProfession.objects.bulk_update(approved_updates, ['score_avg', 'order_no', 'yesh_state'])
-            AdmissionUserProfession.objects.bulk_update(rejected_updates, ['score_avg', 'order_no', 'yesh_state', 'state', 'state_description'])
+        # Bulk_update бэлдэж өгсөн тэнцээгүй хэрэглэгчдэд
+        for data in rejected:
+            obj = AdmissionUserProfession.objects.filter(
+                user=data['user']
+            ).filter(
+                ~Q(state=AdmissionUserProfession.STATE_REJECT)
+            ).first()
+            if obj:
+                obj.score_avg = data['score']
+                obj.order_no = data['order_no']
+                obj.yesh_state = data['yesh_state']
+                obj.state = data['state']
+                obj.state_description = data['state_description']
+                obj.yesh_description = data['yesh_description']
+                rejected_objects.append(obj)
+
+        AdmissionUserProfession.objects.bulk_update(
+            approved_objects, ['score_avg', 'order_no', 'yesh_state']
+        )
+        AdmissionUserProfession.objects.bulk_update(
+            rejected_objects, ['score_avg', 'order_no', 'yesh_state', 'state', 'state_description', 'yesh_description']
+        )
 
 
 class ElseltEyeshAPIView(

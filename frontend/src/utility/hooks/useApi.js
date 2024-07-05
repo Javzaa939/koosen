@@ -1784,6 +1784,7 @@ function useApi(isDisplay=false) {
 		},
 		hynalt:{
 			get: (gender, profession) => instance.get(`/elselt/hynalt_number/?gender=${gender}&profession=${profession}`),
+			getIsGender: (profession) => instance.get(`/elselt/hynalt_is_gender/?profession=${profession}`),
 			post:(cdata) => instance.post(`/elselt/userscore/`, cdata),
 		},
 		eyesh:{
