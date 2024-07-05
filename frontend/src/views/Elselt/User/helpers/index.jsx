@@ -139,6 +139,15 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 			center: true
 		},
 		{
+			maxWidth: "180px",
+			minWidth: "180px",
+			header: 'register',
+			name: t("Бү/Дугаар"),
+			reorder: true,
+			selector: (row) => row?.user?.code,
+			center: true
+		},
+		{
 			header: 'user_age',
 			name: t("Нас"),
 			reorder: true,

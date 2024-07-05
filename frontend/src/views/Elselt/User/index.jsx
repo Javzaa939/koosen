@@ -566,7 +566,6 @@ const ElseltUser = () => {
                                 getOptionLabel={(option) => option.name}
                             />
                     </Col>
-                    
                     <Col sm={6} lg={3} >
                         <Label className="form-label" for="unit1">
                             {t('Харьяалал')}
