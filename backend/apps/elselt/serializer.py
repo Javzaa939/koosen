@@ -128,9 +128,10 @@ class UserScoreSerializer(serializers.ModelSerializer):
         model = UserScore
         fields = "__all__"
 
-    #Монгол хэл бичиг шалгалтийн оноог шалгах
+    # Монгол хэл бичиг шалгалтийн оноог шалгах
     def get_is_success(self, obj):
         is_success = True
+        # TODO lesson_name шалгахдаа iexact ашиглана том жижиг үсэг орж ирхээс сэргийлэх
         data = UserScore.objects.filter(user_id = obj.user , lesson_name = 'Монгол хэл бичиг').values_list('scaledScore', flat=True)
         if data and max(data) < 400:
             is_success = False

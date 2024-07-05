@@ -2188,19 +2188,10 @@ class ElseltEyeshAPIView(
     queryset = AdmissionUserProfession.objects.all()
     serializer_class = ElseltEyeshSerializer
 
-
-
-    def get_queryset(self):
-        queryset = AdmissionUserProfession.objects.all()
-        elselt = self.request.query_params.get('lesson_year_id')
-
-        if elselt:
-            queryset = queryset.filter(profession__admission=elselt)
-
-        return queryset
-
     def refresh_token(self):
         token_url = 'http://blockchain.eec.mn/api/v1/auth'
+
+        # TODO elselt_setting гэдэг модел дээр хадгалаастай байгаа тэндээс уншина.
         data = {
             "password": "a05TeVRnOUxOTUQ2",
             "username": "info@uia.gov.mn"
@@ -2288,13 +2279,20 @@ class ElseltEyeshAPIView(
         return data
 
     def get(self, request):
-        profession = self.request.query_params.get('profession_id')
+        profession = request.query_params.get('profession')
+        elselt = request.query_params.get('elselt')
+        queryset = self.queryset
+
+        if elselt:
+            queryset = queryset.filter(profession__admission=elselt)
         if profession:
-            queryset = self.queryset.filter(profession=profession)
+            queryset = queryset.filter(profession=profession)
+
         bulk_update_datas = []
 
         #регистрээр нь шүүх
         datas = queryset.values_list('user__register', flat=True)
+        print(datas)
 
         #Шүүсэн датаг http://blockchain.eec.mn/api/v1/student луу явуулах функц
         datas = self.get_data(datas)

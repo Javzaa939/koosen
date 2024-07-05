@@ -23,7 +23,7 @@ import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 
 import AuthContext from "@context/AuthContext"
-
+import useUpdateEffect from '@hooks/useUpdateEffect';
 
 
 const ElseltEyesh = () => {
@@ -35,7 +35,7 @@ const ElseltEyesh = () => {
 	const [rowsPerPage, setRowsPerPage] = useState(20)
 	// Loader
 	const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: false });
-	const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({ isFullScreen: false })
+	const { Loader: TableLoader, isLoading: isTableLoading, fetchData: allFetch } = useLoader({ isFullScreen: false })
 
 	const [admop, setAdmop] = useState([])
 	const [adm, setAdm] = useState('')
@@ -99,6 +99,10 @@ const ElseltEyesh = () => {
 		getProfession()
 	}, [])
 
+	useUpdateEffect(() => {
+        getProfession()
+    }, [adm])
+
 	// ** Function to handle filter
 	const handleFilter = e => {
 		const value = e.target.value.trimStart();
@@ -118,8 +122,9 @@ const ElseltEyesh = () => {
 	return (
 		<Fragment>
 			<Card>
+				{isTableLoading && TableLoader}
 				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom m-auto">
-					<CardTitle tag="h4">{t('Элсэгчдийн жагсаалт')}</CardTitle>
+					<CardTitle tag="h4">{t('Элсэгчдийн ЭШ жагсаалт')}</CardTitle>
 				</CardHeader>
 				<Row className='justify-content-start mx-0 mt-1'>
 					<Col sm={6} lg={3} >
@@ -162,11 +167,11 @@ const ElseltEyesh = () => {
 							value={profOption.find((c) => c?.prof_id === profession_id)}
 							noOptionsMessage={() => t('Хоосон байна.')}
 							onChange={(val) => {
-								setProfession_id(val?.prof_id || '')
+								setProfession_id(val?.id || '')
 								setSelectedProfession(val)
 							}}
 							styles={ReactSelectStyles}
-							getOptionValue={(option) => option?.prof_id}
+							getOptionValue={(option) => option?.id}
 							getOptionLabel={(option) => option.name}
 						/>
 					</Col>

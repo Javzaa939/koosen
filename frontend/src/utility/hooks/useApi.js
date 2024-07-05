@@ -1783,7 +1783,7 @@ function useApi(isDisplay=false) {
 			put: (id, cdata) => instance.put(`/elselt/preparation/${id}/`, cdata)
 		},
 		eyesh:{
-			get : (sort,search,lesson_year_id, profession_id) => instance.get(`/elselt/eyesh/?&sorting=${sort}&search=${search}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}`)
+			get : (sort,search,elselt, profession_id) => instance.get(`/elselt/eyesh/?&sorting=${sort}&search=${search}&elselt=${elselt}&profession=${profession_id}`)
 		},
 		able: {
 			getWorker: () => able_instance.get(`/?a=ableApi&tsk=getWorkers&key=uia`),
