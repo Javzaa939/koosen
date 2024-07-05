@@ -572,6 +572,8 @@ class AdmissionUserInfoAPIView(
                 type=StateChangeLog.PROFESSION,
                 now_profession=instance.profession.profession.name,
                 change_profession= profession_name,
+                now_state=AdmissionUserProfession.STATE_SEND,
+                change_state=AdmissionUserProfession.STATE_SEND,
                 updated_user=logged_user,
             )
             profession_change_log.save()
