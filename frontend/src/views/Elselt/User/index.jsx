@@ -206,6 +206,7 @@ const ElseltUser = () => {
 	async function getDatas() {
         const {success, data} = await allFetch(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, adm, profession_id, unit1, gender, state, gpa_state,age_state, justice_state, is_justice, now_state))
         if(success) {
+            console.log(data)
             setTotalCount(data?.count)
             setDatas(data?.results)
             // Нийт хуудасны тоо
@@ -566,7 +567,6 @@ const ElseltUser = () => {
                                 getOptionLabel={(option) => option.name}
                             />
                     </Col>
-                    
                     <Col sm={6} lg={3} >
                         <Label className="form-label" for="unit1">
                             {t('Харьяалал')}

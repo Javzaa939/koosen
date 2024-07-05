@@ -177,7 +177,7 @@ class AdmissionUserInfoSerializer(serializers.ModelSerializer):
         userinfo_data = ElseltUserSerializer(data).data
 
         return userinfo_data
-    
+
     def get_now_state(self, obj):
         data = StateChangeLog.objects.filter(user=obj.user.id).first()
         now_state = StateChangeLogSerializer(data).data
@@ -1054,3 +1054,25 @@ class ElseltEyeshSerializer(serializers.ModelSerializer):
             userinfo_data = ElseltUserSerializer(data).data
             register = userinfo_data['register']
             return register
+
+class EyeshOrderUserInfoSerializer(serializers.ModelSerializer):
+    gender = serializers.SerializerMethodField()
+    user = serializers.SerializerMethodField()
+
+    class Meta:
+        model = AdmissionUserProfession
+        fields='__all__'
+
+    def get_gender (self,obj):
+        birthday,gender = calculate_birthday(obj.user.register)
+
+        if int(gender) == 1:
+            return 'Эрэгтэй'
+        return 'Эмэгтэй'
+
+    def get_user(self, obj):
+
+        data = ElseltUser.objects.filter(id=obj.user.id).first()
+        userinfo_data = ElseltUserSerializer(data).data
+
+        return userinfo_data

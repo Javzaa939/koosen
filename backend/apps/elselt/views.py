@@ -72,6 +72,7 @@ from .serializer import (
     MessageInfoSerializer,
     HealthUpUserStateSerializer,
     ConversationUserInfoSerializer,
+    EyeshOrderUserInfoSerializer,
     ElseltEyeshSerializer,
     UserScoreSerializer,
     ConversationUserInfoSerializer,
@@ -2273,7 +2274,6 @@ class ElseltEyeshAPIView(
             register_no = student_data.get('registerNo')
             user_instance = ElseltUser.objects.filter(register__iexact=register_no).first()
             pupil_data = student_data.get('pupil', [])
-
             for pupil in pupil_data:
                 exams = pupil.get('pupilExam', [])
 
@@ -2337,15 +2337,15 @@ class ElseltEyeshAPIView(
                     lesson_name = data['lesson_name']
                     year = data['year']
                     semester = data['semester']
+                    scaledScore = data['scaledScore']
 
                     # UserScore instance байгаа үгүйг шалгана
                     existing_user_score = UserScore.objects.filter(
-                        Q(user_id=user_id) & Q(lesson_name=lesson_name) & Q(year = year) & Q(semester=semester)
+                        Q(user_id=user_id) & Q(lesson_name=lesson_name) & Q(year = year) & Q(semester=semester) &Q(scaledScore = scaledScore)
                     ).first()
 
                     # Хэрэв оноо байх үед
                     if existing_user_score:
-                        existing_user_score.scaledScore = data['scaledScore']
                         existing_user_score.percentage_score = data['percentage_score']
                         existing_user_score.raw_score = data['raw_score']
                         existing_user_score.word_score = data['word_score']
@@ -2365,7 +2365,7 @@ class ElseltEyeshAPIView(
 
                 # Bulk update existing instances
                 UserScore.objects.bulk_update(update_data_list, [
-                    'scaledScore', 'percentage_score', 'raw_score', 'word_score',
+                     'percentage_score', 'raw_score', 'word_score',
                     'exam_loc', 'exam_loc_code', 'school_name', 'school_code'
                 ])
 
@@ -2390,4 +2390,63 @@ class ElseltEyeshAPIView(
                 admission_user_data.yesh_description = 'Монгол хэл бичигийн шалгалтанд тэнцээгүй'
                 admission_user_data.save()
 
-        return request.send_data(return_datas)
+        #AdmissionUserProfession тэнцсэн тэнцээгүй сурагч
+        failed_student = queryset.filter(yesh_state = AdmissionUserProfession.STATE_REJECT).count()
+        passed_student = queryset.filter(Q(yesh_state=AdmissionUserProfession.STATE_APPROVE) | Q(yesh_state=AdmissionUserProfession.STATE_SEND)).count()
+
+        send_data = {
+            'failed_student_count': failed_student,
+            'passed_student_count': passed_student,
+        }
+
+        return request.send_data(send_data)
+
+class EyeshOrderUserInfoAPIView(
+      generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin
+):
+    """ Элсэгчийн ЭЕШ ийн оноо жагсаалт харуулах """
+
+    queryset = AdmissionUserProfession.objects.all().order_by('order_no')
+
+    serializer_class = EyeshOrderUserInfoSerializer
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['user__first_name', 'user__register', 'user__email', 'user__last_name', 'user__mobile']
+
+    def get_queryset(self):
+        queryset = self.queryset
+        queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
+        gender = self.request.query_params.get('gender')
+
+        elselt = self.request.query_params.get('elselt')
+        profession = self.request.query_params.get('profession')
+
+        if elselt:
+            queryset = queryset.filter(profession__admission=elselt)
+
+        if profession:
+            queryset = queryset.filter(profession = profession)
+
+        if gender:
+            if gender == 'Эрэгтэй':
+                queryset = queryset.filter(gender__in=['1', '3', '5', '7', '9'])
+            else:
+                queryset = queryset.filter(gender__in=['0', '2', '4', '6', '8'])
+
+        return queryset
+
+    def get(self, request, pk = None):
+
+        if pk:
+            all_data = self.retrieve(request, pk).data
+
+            return request.send_data(all_data)
+
+        all_data = self.list(request).data
+
+        return request.send_data(all_data)
+

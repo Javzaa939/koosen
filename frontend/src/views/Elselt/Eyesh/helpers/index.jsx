@@ -42,7 +42,7 @@ export function getColumns (currentPage, rowsPerPage, page_count) {
 			minWidth: "150px",
 			header: 'user__last_name',
 			name: t("Овог"),
-			cell: (row) => (row?.data?.lastName),
+			cell: (row) => (row?.user?.last_name),
 			sortable: true,
 			reorder: true,
 			center: true,
@@ -52,7 +52,7 @@ export function getColumns (currentPage, rowsPerPage, page_count) {
 			minWidth: "150px",
 			header: 'user__first_name',
 			name: t("Нэр"),
-			cell: (row) => (row?.data?.firstName),
+			cell: (row) => (row?.user?.first_name),
 			sortable: true,
 			reorder: true,
 			center: true,
@@ -64,7 +64,34 @@ export function getColumns (currentPage, rowsPerPage, page_count) {
 			header: 'register',
 			name: t("РД"),
 			reorder: true,
-			selector: (row) => row?.data?.registerNo,
+			selector: (row) => row?.user?.register,
+			center: true
+		},
+		{
+			maxWidth: "180px",
+			minWidth: "180px",
+			header: 'register',
+			name: t("ЭЕШ"),
+			reorder: true,
+			selector: (row) => row?.score_avg,
+			center: true
+		},
+		{
+			maxWidth: "180px",
+			minWidth: "180px",
+			header: 'register',
+			name: t("Байр"),
+			reorder: true,
+			selector: (row) => row?.order_no,
+			center: true
+		},
+		{
+			maxWidth: "180px",
+			minWidth: "180px",
+			header: 'register',
+			name: t("Хүйс"),
+			reorder: true,
+			selector: (row) => row?.gender,
 			center: true
 		}
 	]

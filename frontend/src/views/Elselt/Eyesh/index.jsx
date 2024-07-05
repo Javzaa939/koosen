@@ -5,7 +5,6 @@ import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, Spinner, U
 
 import { ChevronDown, Plus, Search } from 'react-feather'
 
-import { useForm, Controller } from "react-hook-form";
 import { RiEditFill } from "react-icons/ri";
 
 import DataTable from 'react-data-table-component'
@@ -21,6 +20,7 @@ import Select from 'react-select'
 import useApi from '@hooks/useApi';
 
 import useLoader from '@hooks/useLoader';
+import OrderModal from './OrderModal';
 
 import AuthContext from "@context/AuthContext"
 import useUpdateEffect from '@hooks/useUpdateEffect';
@@ -29,27 +29,57 @@ import useUpdateEffect from '@hooks/useUpdateEffect';
 const ElseltEyesh = () => {
 	const { user } = useContext(AuthContext)
 
-	const [searchValue, setSearchValue] = useState("");
-
-	const [currentPage, setCurrentPage] = useState(1);
-	const [rowsPerPage, setRowsPerPage] = useState(20)
 	// Loader
 	const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: false });
 	const { Loader: TableLoader, isLoading: isTableLoading, fetchData: allFetch } = useLoader({ isFullScreen: false })
 
+	//Search State
+	const [searchValue, setSearchValue] = useState("");
+
+	//Page state
+	const [currentPage, setCurrentPage] = useState(1);
+	const [rowsPerPage, setRowsPerPage] = useState(20)
+
+	//Элсэлт state
 	const [admop, setAdmop] = useState([])
 	const [adm, setAdm] = useState('')
+
+	//Хөтөлбөр state
 	const [profOption, setProfession] = useState([])
 	const [profession_id, setProfession_id] = useState('')
+
+	//gender state
+	const [gender, setGender] = useState('')
+
+	//Жагсаалт дата
 	const [datas, setDatas] = useState([])
 	const [total_count, setTotalCount] = useState('')
+
+	// ЭЕШ дата
+	const [eyeshData, setEyeshData] = useState([])
 
 	const [selectedAdmission, setSelectedAdmission] = useState(null);
 	const [selectedProfession, setSelectedProfession] = useState(null);
 
+	//Modal
+	const [orderModal, setOrderModal] = useState(false)
+
+	// API
 	const professionApi = useApi().elselt.profession
 	const admissionYearApi = useApi().elselt
-	const elseltEyeshApi = useApi().elselt.eyesh
+	const elseltApi = useApi().elselt.eyesh_order
+	const elseltEyeshApi = useApi().elselt.eyesh;
+
+	const genderOp = [
+		{
+			id: 1,
+			name: 'Эрэгтэй',
+		},
+		{
+			id: 2,
+			name: 'Эмэгтэй'
+		}
+	]
 
 	// Эрэмбэлэлт
 	const [sortField, setSort] = useState('')
@@ -60,6 +90,7 @@ const ElseltEyesh = () => {
 
 	// Нийт хуудасны тоо
 	const [pageCount, setPageCount] = useState(1)
+
 	// Хуудас солих үед ажиллах хэсэг
 	function handlePagination(page) {
 		setCurrentPage(page.selected + 1);
@@ -77,40 +108,61 @@ const ElseltEyesh = () => {
 		}
 	}
 
+	// Элсэлтийн жагсаалт авах
 	async function getAdmissionYear() {
 		const { success, data } = await fetchData(admissionYearApi.getAll())
 		if (success) {
 			setAdmop(data)
 		}
 	}
-	async function getDatas() {
-		const { success, data } = await allFetch(elseltEyeshApi.get(sortField, searchValue, adm, profession_id))
+
+	// Хөтөлбөрөөр нь эеш оноо татаж авах
+	async function getEyeshData() {
+		const { success, data } = await fetchData(elseltEyeshApi.get(adm, profession_id));
 		if (success) {
-			console.log(data)
+			setEyeshData(data)
+		}
+	}
+
+	/* Жагсаалтын дата авах функц */
+	async function getDatas() {
+		const { success, data } = await allFetch(elseltApi.get(rowsPerPage, currentPage, searchValue, adm, profession_id, gender))
+		if (success) {
 			setTotalCount(data?.count)
-			setDatas(data)
+			setDatas(data?.results)
 			// Нийт хуудасны тоо
 			var cpage_count = Math.ceil(data?.count / rowsPerPage === 'Бүгд' ? 1 : rowsPerPage)
 			setPageCount(cpage_count)
 		}
 	}
+
 	useEffect(() => {
 		getAdmissionYear()
 		getProfession()
 	}, [])
 
+	useEffect(() => {
+		if (searchValue.length == 0) {
+			getDatas();
+		} else {
+			const timeoutId = setTimeout(() => {
+				getDatas();
+			}, 600);
+
+			return () => clearTimeout(timeoutId);
+		}
+	}, [sortField, currentPage, rowsPerPage, searchValue, adm, profession_id, gender])
+
 	useUpdateEffect(() => {
-        getProfession()
-    }, [adm])
+		getProfession()
+	}, [adm])
 
 	// ** Function to handle filter
 	const handleFilter = e => {
 		const value = e.target.value.trimStart();
 		setSearchValue(value)
 	}
-	function handleButton() {
-		getDatas()
-	}
+
 	function handleSort(column, sort) {
 		if (sort === 'asc') {
 			setSort(column.header)
@@ -119,12 +171,35 @@ const ElseltEyesh = () => {
 		}
 	}
 
+	function handleSearch() {
+		getDatas()
+	}
+	// Order modal toggle function
+	function OrderModalHandler() {
+		setOrderModal(!orderModal);
+	}
+
+	//Button дарагдахад ажиллах функц
+	function fetchDataAndToggleModal() {
+		getEyeshData();
+		OrderModalHandler();
+	}
+
 	return (
 		<Fragment>
+			<OrderModal
+				gpaModalHandler={OrderModalHandler}
+				gpaModal={orderModal}
+				data={eyeshData}
+				gplesson_year={selectedAdmission?.name || ''}
+				profession_name={selectedProfession?.name || ''}
+				total_count={total_count}
+			/>
+			{isLoading && Loader}
 			<Card>
 				{isTableLoading && TableLoader}
 				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom m-auto">
-					<CardTitle tag="h4">{t('Элсэгчдийн ЭШ жагсаалт')}</CardTitle>
+					<CardTitle tag="h4">{t('Элсэгчдийн ЭЕШ оноо жагсаалт')}</CardTitle>
 				</CardHeader>
 				<Row className='justify-content-start mx-0 mt-1'>
 					<Col sm={6} lg={3} >
@@ -175,13 +250,36 @@ const ElseltEyesh = () => {
 							getOptionLabel={(option) => option.name}
 						/>
 					</Col>
+					<Col sm={6} lg={3} >
+						<Label className="form-label" for="genderOp">
+							{t('Хүйс')}
+						</Label>
+						<Select
+							name="genderOp"
+							id="genderOp"
+							classNamePrefix='select'
+							isClearable
+							className={classnames('react-select')}
+							isLoading={isLoading}
+							placeholder={t('-- Сонгоно уу --')}
+							options={genderOp || []}
+							value={genderOp.find((c) => c.name === gender)}
+							noOptionsMessage={() => t('Хоосон байна.')}
+							onChange={(val) => {
+								setGender(val?.name || '')
+							}}
+							styles={ReactSelectStyles}
+							getOptionValue={(option) => option.id}
+							getOptionLabel={(option) => option.name}
+						/>
+					</Col>
 					<Col sm={3} lg={3}>
 						<Button
 							color='primary'
 							className='d-flex align-items-center px-75 mt-2'
 							id='state_button'
 							size='sm'
-							onClick={() => handleButton()
+							onClick={() => fetchDataAndToggleModal()
 							}
 						>
 							<RiEditFill className='me-25' />
@@ -191,7 +289,54 @@ const ElseltEyesh = () => {
 							Сонгосон элсэгчдийн эеш оноог татах
 						</UncontrolledTooltip></Col>
 				</Row>
-				<div className="react-dataTable react-dataTable-selectable-rows mt-2">
+				<Row className="justify-content-between mx-0 mt-1" >
+					<Col className='d-flex align-items-center justify-content-start' md={4}>
+						<Col md={3} sm={2} className='pe-1'>
+							<Input
+								type='select'
+								bsSize='sm'
+								style={{ height: "30px" }}
+								value={rowsPerPage}
+								onChange={e => handlePerPage(e)}
+							>
+								{
+									default_page.map((page, idx) => (
+										<option
+											key={idx}
+											value={page}
+										>
+											{page}
+										</option>
+									))}
+							</Input>
+						</Col>
+						<Col md={9} sm={3}>
+							<Label for='sort-select'>{t('Хуудсанд харуулах тоо')}</Label>
+						</Col>
+					</Col>
+					<Col className='d-flex align-items-center mobile-datatable-search mt-1' md={4} sm={12}>
+						<Input
+							className='dataTable-filter mb-50'
+							type='text'
+							bsSize='sm'
+							id='search-input'
+							placeholder={t("Хайх үг....")}
+							value={searchValue}
+							onChange={(e) => { handleFilter(e) }}
+							onKeyPress={e => e.key === 'Enter' && handleSearch()}
+						/>
+						<Button
+							size='sm'
+							className='ms-50 mb-50'
+							color='primary'
+							onClick={handleSearch}
+						>
+							<Search size={15} />
+							<span className='align-middle ms-50'></span>
+						</Button>
+					</Col>
+				</Row>
+				<div className="react-dataTable react-dataTable-selectable-rows ">
 					<DataTable
 						noHeader
 						paginationServer

@@ -1782,8 +1782,14 @@ function useApi(isDisplay=false) {
 			post: (cdata) => instance.post(`/elselt/preparation/`, cdata),
 			put: (id, cdata) => instance.put(`/elselt/preparation/${id}/`, cdata)
 		},
+		// ЭЕШ хэсгийн оноо татах
 		eyesh:{
-			get : (sort,search,elselt, profession_id) => instance.get(`/elselt/eyesh/?&sorting=${sort}&search=${search}&elselt=${elselt}&profession=${profession_id}`)
+			get : (elselt, profession_id) => instance.get(`/elselt/eyesh/?&elselt=${elselt}&profession=${profession_id}`)
+		},
+		// ЭЕШ хэсгийн жагсаалт татах
+		eyesh_order:{
+			get: (limit, page, search, lesson_year_id, profession_id , gender) =>
+				instance.get(`/elselt/admissionuserdata/eyesh/?page=${page}&limit=${limit}&search=${search}&elselt=${lesson_year_id}&profession=${profession_id}&gender=${gender}`),
 		},
 		able: {
 			getWorker: () => able_instance.get(`/?a=ableApi&tsk=getWorkers&key=uia`),
