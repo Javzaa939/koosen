@@ -1,4 +1,3 @@
-// ** React Imports
 import { Fragment, useState, useEffect, useContext } from 'react'
 
 import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, Spinner, UncontrolledTooltip } from 'reactstrap'
@@ -412,6 +411,6 @@ const ElseltEyesh = () => {
 			{modal && <SortModal open={modal} handleModal={handleModal} refreshDatas={getListDatas} type={type} editData={editData}/>}
 		</Fragment>
 	)
-}
+
 
 export default ElseltEyesh;
