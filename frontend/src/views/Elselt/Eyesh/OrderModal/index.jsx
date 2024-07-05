@@ -15,9 +15,7 @@ function OrderModal({
 	data,
 	gplesson_year,
 	profession_name,
-	total_count
 }) {
-
 	//Loader
 	const { Loader, isLoading } = useLoader({
 		isFullScreen: true,
@@ -39,12 +37,13 @@ function OrderModal({
 				<Col md={12}>
 					<div className="modal-content-container">
 						<div className="d-flex justify-content-between">
-							<Label className="d-flex">Нийт:&nbsp;<strong>{total_count}</strong>&nbsp;сурагч</Label>
+							<Label className="d-flex">Нийт:&nbsp;<strong>{data.total_count}</strong>&nbsp;сурагч</Label>
 						</div>
 					</div>
 				</Col>
 				<div className="d-flex justify-content-between mt-1 align-items-center">
 					<div className="d-flex flex-column">
+						<p className="d-flex mb-2">Монгол хэл бичгийн шалгалтанд </p>
 						<p className="d-flex">Тэнцсэн элсэгч:&nbsp; <strong>{data.passed_student_count}</strong></p>
 						<p className="d-flex">Тэнцээгүй элсэгч:&nbsp; <strong>{data.failed_student_count}</strong></p>
 					</div>

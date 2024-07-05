@@ -1793,8 +1793,8 @@ function useApi(isDisplay=false) {
 		},
 		// ЭЕШ хэсгийн жагсаалт татах
 		eyesh_order:{
-			get: (limit, page, search, lesson_year_id, profession_id , gender) =>
-				instance.get(`/elselt/admissionuserdata/eyesh/?page=${page}&limit=${limit}&search=${search}&elselt=${lesson_year_id}&profession=${profession_id}&gender=${gender}`),
+			get: (limit, page, search, lesson_year_id, profession_id , gender, state) =>
+				instance.get(`/elselt/admissionuserdata/eyesh/?page=${page}&limit=${limit}&search=${search}&elselt=${lesson_year_id}&profession=${profession_id}&gender=${gender}&state=${state}`),
 		},
 		able: {
 			getWorker: () => able_instance.get(`/?a=ableApi&tsk=getWorkers&key=uia`),
