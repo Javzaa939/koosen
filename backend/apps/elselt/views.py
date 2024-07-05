@@ -2747,7 +2747,8 @@ class EyeshOrderUserInfoAPIView(
     search_fields = ['user__first_name', 'user__register', 'user__email', 'user__last_name', 'user__mobile']
 
     def get_queryset(self):
-        queryset = self.queryset
+        user_ids = UserScore.objects.values_list('user', flat=True)
+        queryset = self.queryset.filter(user__in=user_ids)
         queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
         gender = self.request.query_params.get('gender')
 
