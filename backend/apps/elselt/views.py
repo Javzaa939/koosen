@@ -517,7 +517,7 @@ class AdmissionUserInfoAPIView(
 
         # Дахин тэнцүүлсэн эсэх төлөвөөр хайх үед ажиллана.
         if now_state:
-            user_ids = StateChangeLog.objects.filter(now_state=now_state, change_state=AdmissionUserProfession.STATE_APPROVE).values_list('user', flat=True)
+            user_ids = StateChangeLog.objects.filter(now_state=now_state, change_state=AdmissionUserProfession.STATE_APPROVE, type=StateChangeLog.STATE).values_list('user', flat=True)
             queryset = queryset.filter(user__in=user_ids)
 
         if gender:
