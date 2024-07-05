@@ -5,6 +5,8 @@ from django.conf import settings
 from urllib.parse import quote
 from collections import Counter
 
+from itertools import groupby
+from datetime import datetime, timedelta
 from rest_framework import mixins
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
@@ -82,6 +84,8 @@ from .serializer import (
     HealthUpUserStateSerializer,
     ConversationUserInfoSerializer,
     ElseltEyeshSerializer,
+    UserScoreSerializer,
+    ConversationUserInfoSerializer,
     ArmyUserInfoSerializer
 )
 
@@ -97,8 +101,10 @@ from elselt.models import (
     HealthUpUser,
     AdmissionUserProfession,
     ConversationUser,
+    UserScore,
+    ConversationUser,
     ArmyUser,
-    UserScore
+    StateChangeLog,
 )
 
 from core.models import (
@@ -476,6 +482,7 @@ class AdmissionUserInfoAPIView(
         state = self.request.query_params.get('state')
         age_state = self.request.query_params.get('age_state')
         gpa_state = self.request.query_params.get('gpa_state')
+        now_state = self.request.query_params.get('now_state')
         gender = self.request.query_params.get('gender')
         sorting = self.request.query_params.get('sorting')
         gpa = self.request.query_params.get('gpa')
@@ -508,6 +515,11 @@ class AdmissionUserInfoAPIView(
         if justice_state:
             queryset = queryset.filter(justice_state=justice_state)
 
+        # Дахин тэнцүүлсэн эсэх төлөвөөр хайх үед ажиллана.
+        if now_state:
+            user_ids = StateChangeLog.objects.filter(now_state=now_state, change_state=AdmissionUserProfession.STATE_APPROVE).values_list('user', flat=True)
+            queryset = queryset.filter(user__in=user_ids)
+
         if gender:
             if gender == 'Эрэгтэй':
                 queryset = queryset.filter(gender__in=['1', '3', '5', '7', '9'])
@@ -516,6 +528,7 @@ class AdmissionUserInfoAPIView(
         if gpa:
             gpa_value = float(gpa)
             queryset = queryset.filter(gpa__lte = gpa_value)
+
         # Sort хийх үед ажиллана
         if sorting:
             if not isinstance(sorting, str):
@@ -544,12 +557,30 @@ class AdmissionUserInfoAPIView(
 
         try:
             # Элсэгчийн хөтөлбөр засах
-            serializer = AdmissionUserProfessionSerializer(instance, data=data, partial=True)
+            logged_user = request.user
+            profession_id=data.get('profession')
 
+            profession_name = ''
+
+            if profession_id:
+
+                professions= AdmissionUserProfession.objects.filter(profession=profession_id).first()
+                profession_name= professions.profession.profession.name if professions else ''
+
+            profession_change_log = StateChangeLog(
+                user=instance.user,
+                type=StateChangeLog.PROFESSION,
+                now_profession=instance.profession.profession.name,
+                change_profession= profession_name,
+                updated_user=logged_user,
+            )
+            profession_change_log.save()
+
+            serializer = AdmissionUserProfessionSerializer(instance, data=data, partial=True)
             if not serializer.is_valid(raise_exception=False):
                 return request.send_error_valid(serializer.errors)
 
-            serializer.save()
+            serializer.save(updated_user=logged_user)
 
         except Exception as e:
             return request.send_error('ERR_002', e.__str__())
@@ -576,18 +607,38 @@ class AdmissionUserAllChange(
         try:
             with transaction.atomic():
                 now = dt.datetime.now()
-                if data.get("state") :
-                    self.queryset.filter(pk__in=data["students"]).update(
-                    state=data.get("state"),
-                    updated_at=now,
-                    state_description=data.get("state_description")
-                )
-                else:
-                    self.queryset.filter(pk__in=data["students"]).update(
-                    updated_at=now,
-                    justice_state=data.get("justice_state"),
-                    justice_description=data.get("justice_description")
-                )
+                students = self.queryset.filter(pk__in=data["students"])
+                for student in students:
+                    if data.get("state"):
+                        old_state = student.state
+                        student.state = data.get("state")
+                        student.updated_at = now
+                        student.state_description = data.get("state_description")
+                        student.save()
+
+                        StateChangeLog.objects.create(
+                            user=student.user,
+                            type=StateChangeLog.STATE,
+                            now_state=old_state,
+                            change_state=data.get("state"),
+                            updated_user=request.user if request.user.is_authenticated else None,
+                            updated_at=now
+                        )
+                    else:
+                        old_justice_state = student.justice_state
+                        student.updated_at = now
+                        student.justice_state = data.get("justice_state")
+                        student.justice_description = data.get("justice_description")
+                        student.save()
+
+                        StateChangeLog.objects.create(
+                            user=student.user,
+                            type=StateChangeLog.PROFESSION,
+                            now_state=old_justice_state,
+                            change_state=data.get("justice_state"),
+                            updated_user=request.user if request.user.is_authenticated else None,
+                            updated_at=now
+                        )
         except Exception as e:
             transaction.savepoint_rollback(sid)
             return request.send_error("ERR_002", e.__str__)
@@ -997,7 +1048,8 @@ class ElseltHealthAnhanShat(
         state  = self.request.query_params.get('state')
         elselt = self.request.query_params.get('elselt')
         profession = self.request.query_params.get('profession')
-
+        start_date=self.request.query_params.get('start_date')
+        end_date=self.request.query_params.get('end_date')
 
 
         # Ял шийтгэл, Насны үзүүлэлтүүдэд ТЭНЦЭЭГҮЙ элсэгчдийг хасах
@@ -1022,6 +1074,17 @@ class ElseltHealthAnhanShat(
                 sorting = str(sorting)
 
             queryset = queryset.order_by(sorting)
+
+        filters = {}
+        if start_date:
+            filters['updated_at__gte'] = start_date
+        if end_date:
+            filters['updated_at__lte'] = end_date
+
+        if filters:
+            dates = HealthUser.objects.filter(**filters).values_list('user', flat=True)
+            queryset = queryset.filter(user__in=dates)
+            return queryset
 
         if state:
             if state == '1':
@@ -1295,6 +1358,7 @@ class ElseltHealthPhysical(
     def get_queryset(self):
         queryset = self.queryset
         queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
+        gender = self.request.query_params.get('gender')
 
         # Бие бялдар шалгуур үзүүлэлттэй мэргэжлүүд
         # TODO Одоогоор идэвхтэй байгаа элсэлтээс л харуулж байгаа гэсэн үг Дараа жил яахыг үл мэднэ
@@ -1327,6 +1391,11 @@ class ElseltHealthPhysical(
 
             queryset = queryset.order_by(sorting)
 
+        if gender:
+            if gender == 'Эрэгтэй':
+                queryset = queryset.filter(gender__in=['1', '3', '5', '7', '9'])
+            else:
+                queryset = queryset.filter(gender__in=['0', '2', '4', '6', '8'])
         if state:
             if state == '1':
                 user_id = HealthUpUser.objects.filter(state=2).values_list('user', flat=True)
@@ -1467,7 +1536,7 @@ class ElseltStateApprove(
 ):
     """ Элсэгч бүх шалгуурыг даваад тэнцсэн """
 
-    queryset = AdmissionUserProfession
+    queryset = AdmissionUserProfession.objects.all()
     serializer_class = ElseltApproveSerializer
 
     pagination_class = CustomPagination
@@ -1476,10 +1545,15 @@ class ElseltStateApprove(
     search_fields = ['user__first_name', 'user__last_name', 'user__register', 'profession__profession__name', 'admission_number', 'admission_date']
 
     def get_queryset(self):
+        queryset = self.queryset.annotate(
+            gender=(Substr('user__register', 9, 1))
+        )
+        gender = self.request.query_params.get('gender')
+
         profession = self.request.query_params.get('profession')
         admission = self.request.query_params.get('admission')
         sorting = self.request.query_params.get('sorting')
-        queryset = self.queryset.objects.filter(state=AdmissionUserProfession.STATE_APPROVE)
+        queryset = queryset.filter(state=AdmissionUserProfession.STATE_APPROVE)
 
         if admission:
             queryset = queryset.filter(profession__admission=admission)
@@ -1487,6 +1561,11 @@ class ElseltStateApprove(
         if profession:
             queryset = queryset.filter(profession__profession__id=profession)
 
+        if gender:
+            if gender == 'Эрэгтэй':
+                queryset = queryset.filter(gender__in=['1', '3', '5', '7', '9'])
+            else:
+                queryset = queryset.filter(gender__in=['0', '2', '4', '6', '8'])
         # Sort хийх үед ажиллана
         if sorting:
             if not isinstance(sorting, str):
@@ -1895,6 +1974,7 @@ class AdmissionJusticeListAPIView(
     def get_queryset(self):
         queryset = self.queryset
         queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
+        gender = self.request.query_params.get('gender')
 
         userinfo_qs = UserInfo.objects.filter(user=OuterRef('user')).values('gpa')[:1]
         userinfo_org = UserInfo.objects.filter(user=OuterRef('user')).values('work_organization')[:1]
@@ -1921,6 +2001,12 @@ class AdmissionJusticeListAPIView(
 
         if profession:
             queryset = queryset.filter(profession__profession__id=profession)
+
+        if gender:
+            if gender == 'Эрэгтэй':
+                queryset = queryset.filter(gender__in=['1', '3', '5', '7', '9'])
+            else:
+                queryset = queryset.filter(gender__in=['0', '2', '4', '6', '8'])
 
         if state:
             if state == '1':
@@ -1968,6 +2054,8 @@ class ConversationUserSerializerAPIView(
 
     def get_queryset(self):
         queryset = self.queryset
+        queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
+        gender = self.request.query_params.get('gender')
 
         sorting = self.request.query_params.get('sorting')
         state = self.request.query_params.get('state')
@@ -1993,6 +2081,11 @@ class ConversationUserSerializerAPIView(
                 user__admissionuserprofession__profession__profession=profession
             )
 
+        if gender:
+            if gender == 'Эрэгтэй':
+                queryset = queryset.filter(gender__in=['1', '3', '5', '7', '9'])
+            else:
+                queryset = queryset.filter(gender__in=['0', '2', '4', '6', '8'])
         if state:
             if state == '1':
                 exclude_ids = ConversationUser.objects.filter(Q(Q(state=AdmissionUserProfession.STATE_APPROVE) | Q(state=AdmissionUserProfession.STATE_REJECT))).values_list('user', flat=True)
@@ -2109,6 +2202,7 @@ class ElseltEyeshAPIView(
                 print(f"HTTP error occurred: {http_err}")
                 return None
         except requests.exceptions.RequestException as e:
+
             print(f"An error occurred while calling the external API: {e}")
             return None
 
@@ -2486,3 +2580,189 @@ class UserScoreSortAPIView(generics.GenericAPIView):
         with transaction.atomic():
             AdmissionUserProfession.objects.bulk_update(approved_updates, ['score_avg', 'order_no', 'yesh_state'])
             AdmissionUserProfession.objects.bulk_update(rejected_updates, ['score_avg', 'order_no', 'yesh_state', 'state', 'state_description'])
+class ElseltEyeshAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin
+):
+    """ Элсэгчийн ЭЕШ ийн оноо татах """
+
+    BLOCKCHAIN_API_TOKEN = ''
+
+    queryset = AdmissionUserProfession.objects.all()
+    serializer_class = ElseltEyeshSerializer
+
+    def refresh_token(self):
+        token_url = 'http://blockchain.eec.mn/api/v1/auth'
+
+        # TODO elselt_setting гэдэг модел дээр хадгалаастай байгаа тэндээс уншина.
+        data = {
+            "password": "a05TeVRnOUxOTUQ2",
+            "username": "info@uia.gov.mn"
+        }
+        response = requests.post(token_url, data=data)
+        response.raise_for_status()
+        new_token = response.json().get('data').get('token')
+        if new_token:
+            self.BLOCKCHAIN_API_TOKEN = new_token
+            return new_token
+
+    def get_data(self, data):
+        all_data = []
+        data_url = 'http://blockchain.eec.mn/api/v1/student'
+        headers = {}
+
+        for item in data:
+            params = {'registerNo': item}
+            response = requests.get(data_url, params=params, headers=headers)
+
+            if response.status_code == 401:
+                new_token = self.refresh_token()
+                if new_token:
+                    headers['Authorization'] = f'Bearer {new_token}'
+                    response = requests.get(data_url, params=params, headers=headers)
+                else:
+                    print("Failed to refresh token or obtain new token.")
+                    return None
+            try:
+                response.raise_for_status()
+                data = response.json()
+                if data['status']:
+                    all_data.append(data)
+            except requests.exceptions.RequestException as e:
+                print(f"An error occurred while calling the external API: {e}")
+                return None
+        return all_data
+
+    def extract_lesson(self, external_data):
+
+        #external_data орж ирж буй бүх хүүхдийн эеш
+        data = []
+
+        for student in external_data:
+            #Хэрэгтэй датаг авах
+            student_data = student.get('data', {})
+
+            #Тухайн сурагч бүрийн регистр авах
+            register_no = student_data.get('registerNo')
+            user_instance = ElseltUser.objects.filter(register__iexact=register_no).first()
+            pupil_data = student_data.get('pupil', [])
+
+            for pupil in pupil_data:
+                exams = pupil.get('pupilExam', [])
+
+                for exam in exams:
+                    # lesson_id = exam.get('lessonId')
+                    scaledScore = exam.get('scaledScore')
+                    percentage_score = exam.get('percentageScore')
+                    lesson_name = exam.get('lessonName')
+                    raw_score = exam.get('rawScore')
+                    word_score = exam.get('wordScore')
+                    exam_loc = pupil.get('examLoc')
+                    exam_loc_code = pupil.get('examLocCode')
+                    school_name = pupil.get('schoolName')
+                    semester = pupil.get('semester')
+                    school_code = pupil.get('schoolCode')
+                    year = pupil.get('year')
+
+                    # exam датаг data - д хадгалах
+                    data.append({
+                        'user_id':user_instance.id,
+                        'lesson_name': lesson_name,
+                        'scaledScore': scaledScore,
+                        'percentage_score': percentage_score,
+                        'raw_score': raw_score,
+                        'word_score': word_score,
+                        'exam_loc': exam_loc,
+                        'exam_loc_code': exam_loc_code,
+                        'school_name': school_name,
+                        'semester': semester,
+                        'school_code': school_code,
+                        'year': year
+                    })
+        return data
+
+    def get(self, request):
+        profession = request.query_params.get('profession')
+        elselt = request.query_params.get('elselt')
+        queryset = self.queryset
+
+        if elselt:
+            queryset = queryset.filter(profession__admission=elselt)
+        if profession:
+            queryset = queryset.filter(profession=profession)
+
+        bulk_update_datas = []
+
+        #регистрээр нь шүүх
+        datas = queryset.values_list('user__register', flat=True)
+
+        #Шүүсэн датаг http://blockchain.eec.mn/api/v1/student луу явуулах функц
+        datas = self.get_data(datas)
+
+        #base -d хадгалах функц
+        extracted_data = self.extract_lesson(datas)
+
+        try:
+            with transaction.atomic():
+                update_data_list = []
+                for data in extracted_data:
+                    user_id = data['user_id']
+                    lesson_name = data['lesson_name']
+                    year = data['year']
+                    semester = data['semester']
+
+                    # UserScore instance байгаа үгүйг шалгана
+                    existing_user_score = UserScore.objects.filter(
+                        Q(user_id=user_id) & Q(lesson_name=lesson_name) & Q(year = year) & Q(semester=semester)
+                    ).first()
+
+                    # Хэрэв оноо байх үед
+                    if existing_user_score:
+                        existing_user_score.scaledScore = data['scaledScore']
+                        existing_user_score.percentage_score = data['percentage_score']
+                        existing_user_score.raw_score = data['raw_score']
+                        existing_user_score.word_score = data['word_score']
+                        existing_user_score.exam_loc = data['exam_loc']
+                        existing_user_score.exam_loc_code = data['exam_loc_code']
+                        existing_user_score.school_name = data['school_name']
+                        existing_user_score.semester = data['semester']
+                        existing_user_score.school_code = data['school_code']
+                        existing_user_score.year = data['year']
+                        update_data_list.append(existing_user_score)
+                    else:
+                    # Шинэ OBJECT үүсгэх
+                        bulk_update_datas.append(UserScore(**data))
+
+                # Bulk Шинэ OBJECT үүсгэх
+                UserScore.objects.bulk_create(bulk_update_datas)
+
+                # Bulk update existing instances
+                UserScore.objects.bulk_update(update_data_list, [
+                    'scaledScore', 'percentage_score', 'raw_score', 'word_score',
+                    'exam_loc', 'exam_loc_code', 'school_name', 'school_code'
+                ])
+
+            #UserScore бүх датаг UserScoreSerializer ашиглан датаг авна
+            all_datas = UserScore.objects.filter(user__admissionuserprofession__profession = profession)
+
+            return_datas = UserScoreSerializer(all_datas, many=True).data
+
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)
+
+        #is_success false үед тэнцээгүй сурагчдын төлөвийг өөрчилж хадгалах
+        failed_entries = [item for item in return_datas if not item['is_success']]
+
+        with transaction.atomic():
+            for item in failed_entries:
+                user_id = item['user']
+                admission_user_data = AdmissionUserProfession.objects.get(user__id=user_id)
+                admission_user_data.state = AdmissionUserProfession.STATE_REJECT
+                admission_user_data.state_description = 'Монгол хэл бичигийн шалгалтанд тэнцээгүй'
+                admission_user_data.yesh_state = AdmissionUserProfession.STATE_REJECT
+                admission_user_data.yesh_description = 'Монгол хэл бичигийн шалгалтанд тэнцээгүй'
+                admission_user_data.save()
+
+        return request.send_data(return_datas)

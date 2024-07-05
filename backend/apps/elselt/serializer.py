@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from django.db.models import Q, Func,F, IntegerField, CharField
+from django.db.models import Q, Func,F, IntegerField, CharField, OuterRef,Subquery
 from django.db.models.functions import Cast
 from datetime import datetime
 from main.utils.function.utils import calculate_birthday, calculate_age
@@ -30,7 +30,8 @@ from elselt.models import (
     ArmyUser,
     ConversationUser,
     UserScore,
-    MentalUser
+    MentalUser,
+    StateChangeLog
 )
 
 from surgalt.serializers import (
@@ -121,9 +122,25 @@ class ElseltUserSerializer(serializers.ModelSerializer):
 
 
 class UserScoreSerializer(serializers.ModelSerializer):
+    is_success = serializers.SerializerMethodField()
 
     class Meta:
         model = UserScore
+        fields = "__all__"
+
+    # Монгол хэл бичиг шалгалтийн оноог шалгах
+    def get_is_success(self, obj):
+        is_success = True
+        # TODO lesson_name шалгахдаа iexact ашиглана том жижиг үсэг орж ирхээс сэргийлэх
+        data = UserScore.objects.filter(user_id = obj.user , lesson_name = 'Монгол хэл бичиг').values_list('scaledScore', flat=True)
+        if data and max(data) < 400:
+            is_success = False
+
+        return is_success
+class StateChangeLogSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = StateChangeLog
         fields = "__all__"
 
 
@@ -148,6 +165,7 @@ class AdmissionUserInfoSerializer(serializers.ModelSerializer):
     mental = serializers.SerializerMethodField()
     army = serializers.SerializerMethodField()
     conversation = serializers.SerializerMethodField()
+    now_state = serializers.SerializerMethodField()
 
     class Meta:
         model = AdmissionUserProfession
@@ -159,6 +177,11 @@ class AdmissionUserInfoSerializer(serializers.ModelSerializer):
         userinfo_data = ElseltUserSerializer(data).data
 
         return userinfo_data
+    
+    def get_now_state(self, obj):
+        data = StateChangeLog.objects.filter(user=obj.user.id).first()
+        now_state = StateChangeLogSerializer(data).data
+        return now_state
 
     def get_user_score(self, obj):
 
@@ -944,19 +967,6 @@ class ConversationUserInfoSerializer(serializers.ModelSerializer):
 
             return user_age
 
-class ElseltEyeshSerializer(serializers.ModelSerializer):
-    user = serializers.SerializerMethodField()
-    class Meta:
-        model = AdmissionUserProfession
-        fields = ['id','user']
-
-    def get_user(self, obj):
-        data = ElseltUser.objects.filter(id=obj.user.id).first()
-        userinfo_data = ElseltUserSerializer(data).data
-        register = userinfo_data['register']
-        return register
-
-
 class ArmyUserInfoSerializer(serializers.ModelSerializer):
         user = serializers.SerializerMethodField()
         userinfo=serializers.SerializerMethodField()
@@ -1031,3 +1041,16 @@ class ArmyUserInfoSerializer(serializers.ModelSerializer):
             obj.save()
 
             return user_age
+
+class ElseltEyeshSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
+    class Meta:
+        model = AdmissionUserProfession
+        fields = ['id','user']
+
+    def get_user(self, obj):
+
+            data = ElseltUser.objects.filter(id=obj.user.id).first()
+            userinfo_data = ElseltUserSerializer(data).data
+            register = userinfo_data['register']
+            return register

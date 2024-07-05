@@ -23,6 +23,8 @@ import AddModal from './AddModal'
 import EmailModal from '../../User/EmailModal'
 import MessageModal from '../../User/MessageModal'
 
+import classnames from "classnames";
+
 const STATE_LIST = [
     {
         name: 'Хүлээгдэж буй',
@@ -39,9 +41,21 @@ const STATE_LIST = [
 ]
 
 function Physical() {
+    const genderOp = [
+        {
+            id: 1,
+            name: 'Эрэгтэй',
+        },
+        {
+            id: 2,
+            name: 'Эмэгтэй'
+        }
+    ]
+    const [gender, setGender] = useState("")
+
     const { user } = useContext(AuthContext)
     const [currentPage, setCurrentPage] = useState(1);
-    const [rowsPerPage, setRowsPerPage] = useState(10)
+    const [rowsPerPage, setRowsPerPage] = useState(20)
 
     // Эрэмбэлэлт
     const [sortField, setSort] = useState('')
@@ -109,7 +123,7 @@ function Physical() {
 	/* Жагсаалтын дата авах функц */
 	async function getDatas() {
 
-        const {success, data} = await fetchData(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, chosenState, admId, profId))
+        const {success, data} = await fetchData(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, chosenState, admId, profId, gender))
         if(success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
@@ -131,7 +145,7 @@ function Physical() {
 
 			return () => clearTimeout(timeoutId);
 		}
-    }, [sortField, currentPage, rowsPerPage, searchValue, chosenState, admId, profId])
+    }, [sortField, currentPage, rowsPerPage, searchValue, chosenState, admId, profId, gender])
 
        // excel татах
        function convert(){
@@ -436,6 +450,29 @@ function Physical() {
                             getOptionValue={(option) => option.prof_id}
                             getOptionLabel={(option) => option.name}
                         />
+                    </Col>
+                    <Col md={3} >
+                        <Label className="form-label" for="genderOp">
+                            {t('Хүйс')}
+                        </Label>
+                            <Select
+                                name="genderOp"
+                                id="genderOp"
+                                classNamePrefix='select'
+                                isClearable
+                                className={classnames('react-select')}
+                                isLoading={isLoading}
+                                placeholder={t('-- Сонгоно уу --')}
+                                options={genderOp || []}
+                                value={genderOp.find((c) => c.name === gender)}
+                                noOptionsMessage={() => t('Хоосон байна.')}
+                                onChange={(val) => {
+                                    setGender(val?.name || '')
+                                }}
+                                styles={ReactSelectStyles}
+                                getOptionValue={(option) => option.id}
+                                getOptionLabel={(option) => option.name}
+                            />
                     </Col>
                 </Row>
                 <div className='d-flex justify-content-between my-50 mt-1'>

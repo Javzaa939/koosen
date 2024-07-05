@@ -143,6 +143,19 @@ const ElseltUser = () => {
             'name': 'ЗАСАГДСАН'
         },
     ]
+    const restateOp = [
+        {
+            'id': 3,
+            'name': 'Тийм'
+        },
+        {
+            'id': 1,
+            'name': 'Үгүй'
+        },
+    ]
+    const [now_state, setNowState] = useState('')
+    const [justice_state, setJusticeState] = useState('')
+    const [is_justice, setIsJustice] = useState('')
     const [state, setState] = useState('')
     const [gpa_state, setGpaState] = useState('')
     const [age_state, setAge_state] = useState('')
@@ -191,8 +204,7 @@ const ElseltUser = () => {
 
 	/* Жагсаалтын дата авах функц */
 	async function getDatas() {
-
-        const {success, data} = await allFetch(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, adm, profession_id, unit1, gender, state, gpa_state,age_state))
+        const {success, data} = await allFetch(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, adm, profession_id, unit1, gender, state, gpa_state,age_state, justice_state, is_justice, now_state))
         if(success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
@@ -242,7 +254,7 @@ const ElseltUser = () => {
 
 			return () => clearTimeout(timeoutId);
 		}
-    }, [sortField, currentPage, rowsPerPage, searchValue, adm, profession_id, unit1, gender, state, gpa_state,age_state])
+    }, [sortField, currentPage, rowsPerPage, searchValue, adm, profession_id, unit1, gender, state, gpa_state,age_state, justice_state, is_justice, now_state])
 
     useEffect(() => {
         getAdmissionYear()
@@ -643,6 +655,29 @@ const ElseltUser = () => {
                                 noOptionsMessage={() => t('Хоосон байна.')}
                                 onChange={(val) => {
                                     setAge_state(val?.id || '')
+                                }}
+                                styles={ReactSelectStyles}
+                                getOptionValue={(option) => option.id}
+                                getOptionLabel={(option) => option.name}
+                            />
+                    </Col>
+                    <Col md={3} sm={6} xs={12} >
+                        <Label className="form-label" for="restateOp">
+                            {t('Дахин тэнцүүлсэн эсэх')}
+                        </Label>
+                            <Select
+                                name="restateOp"
+                                id="restateOp"
+                                classNamePrefix='select'
+                                isClearable
+                                className={classnames('react-select')}
+                                isLoading={isLoading}
+                                placeholder={t('-- Сонгоно уу --')}
+                                options={restateOp || []}
+                                value={restateOp.find((c) => c.id === now_state)}
+                                noOptionsMessage={() => t('Хоосон байна.')}
+                                onChange={(val) => {
+                                    setNowState(val?.id || '')
                                 }}
                                 styles={ReactSelectStyles}
                                 getOptionValue={(option) => option.id}

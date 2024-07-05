@@ -25,6 +25,7 @@ import useLoader from '@hooks/useLoader';
 import AuthContext from "@context/AuthContext"
 
 import { SortModal } from './SortModal'
+import useUpdateEffect from '@hooks/useUpdateEffect';
 
 
 const ElseltEyesh = () => {
@@ -36,7 +37,7 @@ const ElseltEyesh = () => {
 	const [rowsPerPage, setRowsPerPage] = useState(20)
 	// Loader
 	const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: false });
-	const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({ isFullScreen: false })
+	const { Loader: TableLoader, isLoading: isTableLoading, fetchData: allFetch } = useLoader({ isFullScreen: false })
 
 	const [admop, setAdmop] = useState([])
 	const [adm, setAdm] = useState('')
@@ -59,8 +60,8 @@ const ElseltEyesh = () => {
 	const { t } = useTranslation()
 	const default_page = ['Бүгд', 10, 20, 50, 75, 100]
 
-	    // Нийт хуудасны тоо
-		const [pageCount, setPageCount] = useState(1)
+	// Нийт хуудасны тоо
+	const [pageCount, setPageCount] = useState(1)
 	// Хуудас солих үед ажиллах хэсэг
 	function handlePagination(page) {
 		setCurrentPage(page.selected + 1);
@@ -85,14 +86,14 @@ const ElseltEyesh = () => {
 		}
 	}
 	async function getDatas() {
-		const { success, data } = await allFetch(elseltEyeshApi.get(rowsPerPage, currentPage, sortField, searchValue, adm, profession_id))
+		const { success, data } = await allFetch(elseltEyeshApi.get(sortField, searchValue, adm, profession_id))
 		if (success) {
 			console.log(data)
 			setTotalCount(data?.count)
 			setDatas(data)
 			// Нийт хуудасны тоо
-            var cpage_count = Math.ceil(data?.count / rowsPerPage === 'Бүгд' ? 1 : rowsPerPage)
-            setPageCount(cpage_count)
+			var cpage_count = Math.ceil(data?.count / rowsPerPage === 'Бүгд' ? 1 : rowsPerPage)
+			setPageCount(cpage_count)
 		}
 	}
 	useEffect(() => {
@@ -100,12 +101,16 @@ const ElseltEyesh = () => {
 		getProfession()
 	}, [])
 
+	useUpdateEffect(() => {
+        getProfession()
+    }, [adm])
+
 	// ** Function to handle filter
 	const handleFilter = e => {
 		const value = e.target.value.trimStart();
 		setSearchValue(value)
 	}
-	function handleButton(){
+	function handleButton() {
 		getDatas()
 	}
 	function handleSort(column, sort) {
@@ -133,13 +138,14 @@ const ElseltEyesh = () => {
 							color='primary'
 							className='d-flex align-items-center px-75'
 							id='state_button'
+							disabled={profession_id ? false : true}
 							onClick={() => handleButton()}
 						>
 							<RiEditFill className='me-25' />
 							Оноо татах
 						</Button>
 						<UncontrolledTooltip target='state_button'>
-							Сонгосон элсэгчдийн эеш оноог татах
+							Хөтөлбөр сонгосны дараа ЭШ оноо татах боломжтой.
 						</UncontrolledTooltip>
 						<Button
 							color='primary'
@@ -152,6 +158,10 @@ const ElseltEyesh = () => {
 						</Button>
                     </div>
                 </CardHeader>
+				{isTableLoading && TableLoader}
+				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom m-auto">
+					<CardTitle tag="h4">{t('Элсэгчдийн ЭШ жагсаалт')}</CardTitle>
+				</CardHeader>
 				<Row className='justify-content-start mx-0 mt-1'>
 					<Col sm={6} lg={3} >
 						<Label className="form-label" for="lesson_year">
@@ -193,50 +203,50 @@ const ElseltEyesh = () => {
 							value={profOption.find((c) => c?.prof_id === profession_id)}
 							noOptionsMessage={() => t('Хоосон байна.')}
 							onChange={(val) => {
-								setProfession_id(val?.prof_id || '')
+								setProfession_id(val?.id || '')
 								setSelectedProfession(val)
 							}}
 							styles={ReactSelectStyles}
-							getOptionValue={(option) => option?.prof_id}
+							getOptionValue={(option) => option?.id}
 							getOptionLabel={(option) => option.name}
 						/>
 					</Col>
 				</Row>
-				<div className="react-dataTable react-dataTable-selectable-rows">
-                    <DataTable
-                        noHeader
-                        paginationServer
-                        pagination
-                        className='react-dataTable'
-                        progressPending={isTableLoading}
-                        progressComponent={
-                            <div className='my-2 d-flex align-items-center justify-content-center'>
-                                <Spinner className='me-1' color="" size='sm'/><h5>Түр хүлээнэ үү...</h5>
-                            </div>
-                        }
-                        noDataComponent={(
-                            <div className="my-2">
-                                <h5>{t('Өгөгдөл байхгүй байна')}</h5>
-                            </div>
-                        )}
-                        print='true'
-                        theme="solarized"
-                        onSort={handleSort}
-                        columns={getColumns(currentPage, rowsPerPage === 'Бүгд' ? 1 : rowsPerPage, total_count)}
-                        sortIcon={<ChevronDown size={10} />}
-                        paginationPerPage={rowsPerPage === 'Бүгд' ? 1 : rowsPerPage}
-                        paginationDefaultPage={currentPage}
-                        data={datas}
-                        paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage === 'Бүгд' ? total_count : rowsPerPage, total_count)}
-                        fixedHeader
-                        fixedHeaderScrollHeight='62vh'
-                        // selectableRows
-                        // // onSelectedRowsChange={(state) => onSelectedRowsChange(state)}
-                        direction="auto"
-                        defaultSortFieldId={'created_at'}
-                        style={{ border: '1px solid red' }}
-                    />
-                </div>
+				<div className="react-dataTable react-dataTable-selectable-rows mt-2">
+					<DataTable
+						noHeader
+						paginationServer
+						pagination
+						className='react-dataTable'
+						progressPending={isTableLoading}
+						progressComponent={
+							<div className='my-2 d-flex align-items-center justify-content-center'>
+								<Spinner className='me-1' color="" size='sm' /><h5>Түр хүлээнэ үү...</h5>
+							</div>
+						}
+						noDataComponent={(
+							<div className="my-2">
+								<h5>{t('Өгөгдөл байхгүй байна')}</h5>
+							</div>
+						)}
+						print='true'
+						theme="solarized"
+						onSort={handleSort}
+						columns={getColumns(currentPage, rowsPerPage === 'Бүгд' ? 1 : rowsPerPage, total_count)}
+						sortIcon={<ChevronDown size={10} />}
+						paginationPerPage={rowsPerPage === 'Бүгд' ? 1 : rowsPerPage}
+						paginationDefaultPage={currentPage}
+						data={datas}
+						paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage === 'Бүгд' ? total_count : rowsPerPage, total_count)}
+						fixedHeader
+						fixedHeaderScrollHeight='62vh'
+						// selectableRows
+						// // onSelectedRowsChange={(state) => onSelectedRowsChange(state)}
+						direction="auto"
+						defaultSortFieldId={'created_at'}
+						style={{ border: '1px solid red' }}
+					/>
+				</div>
 			</Card>
 			{modal && <SortModal open={modal} handleModal={handleModal} refreshDatas={getDatas} type={type} editData={editData}/>}
 		</Fragment>

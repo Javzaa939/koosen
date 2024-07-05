@@ -698,7 +698,7 @@ permissions = [
         'description' : 'Элсэлтийн систем эрүүл мэнд анхан шат мэдээлэл оруулах'
     },
     {
-        'name' : 'lms-elselt-read',
+        'name' : 'lms-elselt-yesh-read',
         'description' : 'Элсэлтийн систем элсэлтийн ерөнхий шалгалт'
     },
 
