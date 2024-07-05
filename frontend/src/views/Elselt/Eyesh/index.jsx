@@ -143,7 +143,7 @@ const ElseltEyesh = () => {
 		<Fragment>
 			<Card>
 				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
-					<CardTitle tag="h4" className='mt-50'>{t('Элсэлтийн бүртгэл')}</CardTitle>
+					<CardTitle tag="h4" className='mt-50'>{t('Элсэлтийн ЭШ жагсаалт')}</CardTitle>
                     <div className='d-flex flex-wrap mt-md-0 mt-1'>
 						<Button
 							color='primary'
@@ -161,7 +161,7 @@ const ElseltEyesh = () => {
 						<Button
 							color='primary'
 							className='d-flex align-items-center px-75 ms-1'
-							id='state_button'
+							id='sort_button'
 							onClick={() => handleModal()}
 						>
 							<RiEditFill className='me-25' />
@@ -170,9 +170,6 @@ const ElseltEyesh = () => {
                     </div>
                 </CardHeader>
 				{isTableLoading && TableLoader}
-				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom m-auto">
-					<CardTitle tag="h4">{t('Элсэгчдийн ЭШ жагсаалт')}</CardTitle>
-				</CardHeader>
 				<Row className='justify-content-start mx-0 mt-1'>
 					<Col sm={6} lg={3} >
 						<Label className="form-label" for="lesson_year">

@@ -42,15 +42,18 @@ export const SortModal = ({ open, handleModal, refreshDatas, editData }) => {
         <X className="cursor-pointer" size={15} onClick={handleModal} />
     );
 
-    const genderOption = [
+    const genderValue = [
         { id: 1, name: 'Эрэгтэй' },
         { id: 2, name: 'Эмэгтэй' }
     ];
+
+    const genderFalseValue = [{ id: 3, name: 'Бүгд' }]
 
     const { control, handleSubmit, reset, setValue, setError, getValues, watch, formState: { errors } } = useForm({
         resolver: yupResolver(validateSchema)
     });
 
+    const [genderOption, setGenderOption] = useState(genderValue)
     const [elseltOption, setElseltOption] = useState([]);
     const [professionOption, setProfessionOption] = useState([]);
     const [lessonOption, setLessonOption] = useState([]);
@@ -58,6 +61,7 @@ export const SortModal = ({ open, handleModal, refreshDatas, editData }) => {
     const [gender, setGender] = useState('');
     const [profession, setProfession] = useState('');
     const [elselt, setElselt] = useState('');
+    const [isGender, setIsGender] = useState(true)
 
     const { Loader, isLoading, fetchData } = useLoader({});
     const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
@@ -96,6 +100,13 @@ export const SortModal = ({ open, handleModal, refreshDatas, editData }) => {
         }
     };
 
+    const getHynaltIsGender = async () => {
+        const { success, data } = await hynaltFetch(hynaltApi.getIsGender(profession));
+        if (success) {
+            setIsGender(data)
+        }
+    }
+
     useEffect(() => {
         getAdmissionYear();
         getProfessionOption();
@@ -112,15 +123,22 @@ export const SortModal = ({ open, handleModal, refreshDatas, editData }) => {
         }
     }, [gender, profession]);
 
+    useEffect(() => {
+        getHynaltIsGender();
+    },[profession])
+
+    useEffect(() => {
+        if (isGender === false) {
+            setGenderOption(genderFalseValue);
+        } else {
+            setGenderOption(genderValue);
+        }
+    }, [isGender, profession]);
+
     async function onSubmit(cdata) {
         cdata = convertDefaultValue(cdata);
 
-        const formData = new FormData();
-        for (let key in cdata){
-            formData.append(key, cdata[key])
-        }
-
-        const { success, errors } = await postFetch(hynaltApi.post(formData));
+        const { success, errors } = await postFetch(hynaltApi.post(cdata));
         if (success) {
             reset();
             refreshDatas();
@@ -245,12 +263,12 @@ export const SortModal = ({ open, handleModal, refreshDatas, editData }) => {
                                             className={classnames('react-select', { 'is-invalid': errors.gender })}
                                             isLoading={isLoading}
                                             placeholder={t(`-- Сонгоно уу --`)}
-                                            options={genderOption || []}
-                                            value={value && genderOption.find((c) => c.id === value)}
+                                            options={genderOption}
+                                            value={genderOption.find((c) => c.id === value) || null}
                                             noOptionsMessage={() => t('Хоосон байна')}
                                             onChange={(val) => {
-                                                onChange(val?.id || '')
-                                                setGender(val?.id)
+                                                onChange(val?.id || '');
+                                                setGender(val?.id);
                                             }}
                                             styles={ReactSelectStyles}
                                             getOptionValue={(option) => option.id}
