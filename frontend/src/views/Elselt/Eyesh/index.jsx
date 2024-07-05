@@ -23,6 +23,8 @@ import useLoader from '@hooks/useLoader';
 import OrderModal from './OrderModal';
 
 import AuthContext from "@context/AuthContext"
+
+import { SortModal } from './SortModal'
 import useUpdateEffect from '@hooks/useUpdateEffect';
 
 
@@ -171,6 +173,14 @@ const ElseltEyesh = () => {
 		}
 	}
 
+	const [modal, setModal] = useState(false)
+	const [type, setType] = useState('')
+	const [editData, setEditData] = useState([])
+	const handleModal = () => {
+        setModal(!modal)
+    }
+	}
+
 	function handleSearch() {
 		getDatas()
 	}
@@ -197,6 +207,33 @@ const ElseltEyesh = () => {
 			/>
 			{isLoading && Loader}
 			<Card>
+				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
+					<CardTitle tag="h4" className='mt-50'>{t('Элсэлтийн бүртгэл')}</CardTitle>
+                    <div className='d-flex flex-wrap mt-md-0 mt-1'>
+						<Button
+							color='primary'
+							className='d-flex align-items-center px-75'
+							id='state_button'
+							disabled={profession_id ? false : true}
+							onClick={() => handleButton()}
+						>
+							<RiEditFill className='me-25' />
+							Оноо татах
+						</Button>
+						<UncontrolledTooltip target='state_button'>
+							Хөтөлбөр сонгосны дараа ЭШ оноо татах боломжтой.
+						</UncontrolledTooltip>
+						<Button
+							color='primary'
+							className='d-flex align-items-center px-75 ms-1'
+							id='state_button'
+							onClick={() => handleModal()}
+						>
+							<RiEditFill className='me-25' />
+							Оноо эрэмбэлэх
+						</Button>
+                    </div>
+                </CardHeader>
 				{isTableLoading && TableLoader}
 				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom m-auto">
 					<CardTitle tag="h4">{t('Элсэгчдийн ЭЕШ оноо жагсаалт')}</CardTitle>
@@ -372,6 +409,7 @@ const ElseltEyesh = () => {
 					/>
 				</div>
 			</Card>
+			{modal && <SortModal open={modal} handleModal={handleModal} refreshDatas={getListDatas} type={type} editData={editData}/>}
 		</Fragment>
 	)
 }
