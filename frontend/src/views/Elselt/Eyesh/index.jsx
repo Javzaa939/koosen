@@ -143,7 +143,7 @@ const ElseltEyesh = () => {
 		<Fragment>
 			<Card>
 				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
-					<CardTitle tag="h4" className='mt-50'>{t('Элсэлтийн бүртгэл')}</CardTitle>
+					<CardTitle tag="h4" className='mt-50'>{t('Элсэлтийн ЭШ жагсаалт')}</CardTitle>
                     <div className='d-flex flex-wrap mt-md-0 mt-1'>
 						<Button
 							color='primary'

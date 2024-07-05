@@ -2466,10 +2466,8 @@ class UserScoreSortAPIView(generics.GenericAPIView):
                 item['yesh_state'] = AdmissionUserProfession.STATE_APPROVE
                 approved.append(item)
             else:
-                item['yesh_state'] = AdmissionUserProfession.STATE_REJECT
                 item['state'] = AdmissionUserProfession.STATE_REJECT
                 item['state_description'] = 'Элсэгч ЭЕШ онооны шалгуурт тэнцсэнгүй'
-                item['yesh_description'] = 'Элсэгч ЭЕШ онооны шалгуурт тэнцсэнгүй'
                 rejected.append(item)
 
         approved_objects = []
@@ -2477,16 +2475,18 @@ class UserScoreSortAPIView(generics.GenericAPIView):
 
         # Bulk_update бэлдэж өгсөн тэнцсэн хэрэглэгчдэд
         for data in approved:
-            obj = AdmissionUserProfession.objects.filter(
+            approve_obj = AdmissionUserProfession.objects.filter(
                 user=data['user']
             ).filter(
                 ~Q(state=AdmissionUserProfession.STATE_REJECT)
             ).first()
-            if obj:
-                obj.score_avg = data['score']
-                obj.order_no = data['order_no']
-                obj.yesh_state = data['yesh_state']
-                approved_objects.append(obj)
+
+            if approve_obj:
+                approve_obj.score_avg = data['score']
+                approve_obj.order_no = data['order_no']
+                approve_obj.yesh_state = data['yesh_state']
+                approve_obj.save()
+                approved_objects.append(approve_obj)
 
         # Bulk_update бэлдэж өгсөн тэнцээгүй хэрэглэгчдэд
         for data in rejected:
@@ -2498,10 +2498,8 @@ class UserScoreSortAPIView(generics.GenericAPIView):
             if obj:
                 obj.score_avg = data['score']
                 obj.order_no = data['order_no']
-                obj.yesh_state = data['yesh_state']
                 obj.state = data['state']
                 obj.state_description = data['state_description']
-                obj.yesh_description = data['yesh_description']
                 rejected_objects.append(obj)
 
         AdmissionUserProfession.objects.bulk_update(

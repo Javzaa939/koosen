@@ -138,12 +138,7 @@ export const SortModal = ({ open, handleModal, refreshDatas, editData }) => {
     async function onSubmit(cdata) {
         cdata = convertDefaultValue(cdata);
 
-        const formData = new FormData();
-        for (let key in cdata){
-            formData.append(key, cdata[key])
-        }
-
-        const { success, errors } = await postFetch(hynaltApi.post(formData));
+        const { success, errors } = await postFetch(hynaltApi.post(cdata));
         if (success) {
             reset();
             refreshDatas();
