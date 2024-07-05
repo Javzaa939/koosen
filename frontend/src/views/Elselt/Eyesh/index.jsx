@@ -23,6 +23,8 @@ import useLoader from '@hooks/useLoader';
 import OrderModal from './OrderModal';
 
 import AuthContext from "@context/AuthContext"
+
+import { SortModal } from './SortModal'
 import useUpdateEffect from '@hooks/useUpdateEffect';
 
 
@@ -60,6 +62,9 @@ const ElseltEyesh = () => {
 
 	const [selectedAdmission, setSelectedAdmission] = useState(null);
 	const [selectedProfession, setSelectedProfession] = useState(null);
+	const [modal, setModal] = useState(false)
+	const [type, setType] = useState('')
+	const [editData, setEditData] = useState([])
 
 	//Modal
 	const [orderModal, setOrderModal] = useState(false)
@@ -121,6 +126,7 @@ const ElseltEyesh = () => {
 		const { success, data } = await fetchData(elseltEyeshApi.get(adm, profession_id));
 		if (success) {
 			setEyeshData(data)
+			orderModalHandler()
 		}
 	}
 
@@ -175,20 +181,18 @@ const ElseltEyesh = () => {
 		getDatas()
 	}
 	// Order modal toggle function
-	function OrderModalHandler() {
+	function orderModalHandler() {
 		setOrderModal(!orderModal);
 	}
 
-	//Button дарагдахад ажиллах функц
-	function fetchDataAndToggleModal() {
-		getEyeshData();
-		OrderModalHandler();
-	}
+	const handleModal = () => {
+        setModal(!modal)
+    }
 
 	return (
 		<Fragment>
 			<OrderModal
-				gpaModalHandler={OrderModalHandler}
+				gpaModalHandler={orderModalHandler}
 				gpaModal={orderModal}
 				data={eyeshData}
 				gplesson_year={selectedAdmission?.name || ''}
@@ -197,6 +201,33 @@ const ElseltEyesh = () => {
 			/>
 			{isLoading && Loader}
 			<Card>
+				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
+					<CardTitle tag="h4" className='mt-50'>{t('Элсэлтийн ЭШ жагсаалт')}</CardTitle>
+                    <div className='d-flex flex-wrap mt-md-0 mt-1'>
+						<Button
+							color='primary'
+							className='d-flex align-items-center px-75'
+							id='state_button'
+							disabled={profession_id ? false : true}
+							onClick={() => getEyeshData()}
+						>
+							<RiEditFill className='me-25' />
+							Оноо татах
+						</Button>
+						<UncontrolledTooltip target='state_button'>
+							Хөтөлбөр сонгосны дараа ЭШ оноо татах боломжтой.
+						</UncontrolledTooltip>
+						<Button
+							color='primary'
+							className='d-flex align-items-center px-75 ms-1'
+							id='sort_button'
+							onClick={() => handleModal()}
+						>
+							<RiEditFill className='me-25' />
+							Оноо эрэмбэлэх
+						</Button>
+                    </div>
+                </CardHeader>
 				{isTableLoading && TableLoader}
 				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom m-auto">
 					<CardTitle tag="h4">{t('Элсэгчдийн ЭЕШ оноо жагсаалт')}</CardTitle>
@@ -273,21 +304,21 @@ const ElseltEyesh = () => {
 							getOptionLabel={(option) => option.name}
 						/>
 					</Col>
-					<Col sm={3} lg={3}>
+					{/* <Col sm={3} lg={3}>
 						<Button
 							color='primary'
 							className='d-flex align-items-center px-75 mt-2'
 							id='state_button'
 							size='sm'
-							onClick={() => fetchDataAndToggleModal()
-							}
+							disabled={profession_id ? false : true}
+							onClick={() => getEyeshData()}
 						>
 							<RiEditFill className='me-25' />
 							Оноо татах
 						</Button>
 						<UncontrolledTooltip target='state_button'>
 							Сонгосон элсэгчдийн эеш оноог татах
-						</UncontrolledTooltip></Col>
+						</UncontrolledTooltip></Col> */}
 				</Row>
 				<Row className="justify-content-between mx-0 mt-1" >
 					<Col className='d-flex align-items-center justify-content-start' md={4}>
@@ -372,6 +403,7 @@ const ElseltEyesh = () => {
 					/>
 				</div>
 			</Card>
+			{modal && <SortModal open={modal} handleModal={handleModal} refreshDatas={getDatas} type={type} editData={editData}/>}
 		</Fragment>
 	)
 }

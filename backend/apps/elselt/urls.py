@@ -12,6 +12,10 @@ urlpatterns = [
     path('dashboard/', DashboardAPIView.as_view()),
     path('dashboard/excel/', DashboardExcelAPIView.as_view()),
 
+    path('hynalt_number/', HynaltNumberAPIView.as_view()),
+    path('hynalt_is_gender/', HynaltNumberIsGenderAPIView.as_view()),
+    path('userscore/', UserScoreSortAPIView.as_view()),
+
     # Элсэгчдийн мэдээлэл
     path('admissionuserdata/', AdmissionUserInfoAPIView.as_view()),
     path('admissionuserdata/<int:pk>/', AdmissionUserInfoAPIView.as_view()),
@@ -66,7 +70,8 @@ urlpatterns = [
     path('interview/<int:pk>/', ConversationUserSerializerAPIView.as_view()),
 
     path('eyesh/',ElseltEyeshAPIView.as_view()),
-     # Цэргийн хээрийн бэлтгэлд тэнцсэн жагсаалт
+
+    # Цэргийн хээрийн бэлтгэлд тэнцсэн жагсаалт
     path('preparation/', ArmyUserSerializerAPView.as_view()),
     path('preparation/<int:pk>/',ArmyUserSerializerAPView.as_view()),
 ]
