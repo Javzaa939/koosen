@@ -1055,6 +1055,7 @@ class ElseltEyeshSerializer(serializers.ModelSerializer):
             register = userinfo_data['register']
             return register
 
+
 class EyeshOrderUserInfoSerializer(serializers.ModelSerializer):
     gender = serializers.SerializerMethodField()
     user = serializers.SerializerMethodField()
