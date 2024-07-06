@@ -1782,11 +1782,29 @@ function useApi(isDisplay=false) {
 			post: (cdata) => instance.post(`/elselt/preparation/`, cdata),
 			put: (id, cdata) => instance.put(`/elselt/preparation/${id}/`, cdata)
 		},
+		// Хөтөлбөр,Төлөв лог жагсаалт
+		log:{
+			get:(limit,page,sort,search,elselt,profession)=>instance.get(`/elselt/log/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&elselt=${elselt}&profession=${profession}`)
+		},
+		hynalt:{
+			get: (gender, profession) => instance.get(`/elselt/hynalt_number/?gender=${gender}&profession=${profession}`),
+			getIsGender: (profession) => instance.get(`/elselt/hynalt_is_gender/?profession=${profession}`),
+			post:(cdata) => instance.post(`/elselt/userscore/`, cdata),
+		},
+		// ЭЕШ хэсгийн оноо татах
+		eyesh:{
+			get : (elselt, profession_id) => instance.get(`/elselt/eyesh/?&elselt=${elselt}&profession=${profession_id}`)
+		},
+		// ЭЕШ хэсгийн жагсаалт татах
+		eyesh_order:{
+			get: (limit, page, search, lesson_year_id, profession_id , gender, state) =>
+				instance.get(`/elselt/admissionuserdata/eyesh/?page=${page}&limit=${limit}&search=${search}&elselt=${lesson_year_id}&profession=${profession_id}&gender=${gender}&state=${state}`),
+		},
+		able: {
+			getWorker: () => able_instance.get(`/?a=ableApi&tsk=getWorkers&key=uia`),
+			getStructure: () => able_instance.get(`/?a=ableApi&tsk=getDeps&key=uia`),
+		}
 	},
-	able: {
-		getWorker: () => able_instance.get(`/?a=ableApi&tsk=getWorkers&key=uia`),
-		getStructure: () => able_instance.get(`/?a=ableApi&tsk=getDeps&key=uia`),
-	}
 }
 }
 

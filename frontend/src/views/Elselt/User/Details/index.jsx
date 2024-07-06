@@ -161,6 +161,9 @@ function Details() {
                                         <div className='p-50'>
                                             <span className='text_prefixer'>Регистрийн дугаар</span>: {datas?.user?.register}
                                         </div>
+										<div className='p-50'>
+                                            <span className='text_prefixer'>Бүртгэлийн дугаар</span>: {datas?.user?.code}
+                                        </div>
                                         <div className='p-50'>
                                             <span className='text_prefixer'>Утасны дугаар</span>: {datas?.user?.mobile}
                                         </div>

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from django.db.models import Q, Func,F, IntegerField, CharField
+from django.db.models import Q, Func,F, IntegerField, CharField, OuterRef,Subquery
 from django.db.models.functions import Cast
 from datetime import datetime
 from main.utils.function.utils import calculate_birthday, calculate_age
@@ -122,10 +122,21 @@ class ElseltUserSerializer(serializers.ModelSerializer):
 
 
 class UserScoreSerializer(serializers.ModelSerializer):
+    is_success = serializers.SerializerMethodField()
 
     class Meta:
         model = UserScore
         fields = "__all__"
+
+    # Монгол хэл бичиг шалгалтийн оноог шалгах
+    def get_is_success(self, obj):
+        is_success = False
+        # TODO lesson_name шалгахдаа iexact ашиглана том жижиг үсэг орж ирхээс сэргийлэх
+        data = UserScore.objects.filter(user_id = obj.user , lesson_name = 'Монгол хэл бичиг').values_list('scaledScore', flat=True)
+        if data and max(data) >= 400:
+            is_success = True
+
+        return is_success
 
 class StateChangeLogSerializer(serializers.ModelSerializer):
 
@@ -167,7 +178,7 @@ class AdmissionUserInfoSerializer(serializers.ModelSerializer):
         userinfo_data = ElseltUserSerializer(data).data
 
         return userinfo_data
-    
+
     def get_now_state(self, obj):
         data = StateChangeLog.objects.filter(user=obj.user.id).first()
         now_state = StateChangeLogSerializer(data).data
@@ -1031,3 +1042,88 @@ class ArmyUserInfoSerializer(serializers.ModelSerializer):
             obj.save()
 
             return user_age
+
+class StateChangeLogInfoSerializer(serializers.ModelSerializer):
+    first_name=serializers.CharField(source='user.first_name', default='', read_only=True)
+    last_name=serializers.CharField(source='user.last_name', default='', read_only=True)
+    full_name=serializers.CharField(source='user.full_name', default='', read_only=True)
+    admin_name=serializers.CharField(source='updated_user.username')
+    now_state_name = serializers.SerializerMethodField()
+    change_state_name = serializers.SerializerMethodField()
+    indicator_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = StateChangeLog
+        fields = "__all__"
+
+    def get_now_state_name(self,obj):
+        return obj.get_now_state_display()
+
+    def get_change_state_name(self,obj):
+        return obj.get_change_state_display()
+
+    def get_indicator_name(self,obj):
+        return obj.get_indicator_display()
+
+class ElseltEyeshSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField()
+    class Meta:
+        model = AdmissionUserProfession
+        fields = ['id','user']
+
+    def get_user(self, obj):
+
+            data = ElseltUser.objects.filter(id=obj.user.id).first()
+            userinfo_data = ElseltUserSerializer(data).data
+            register = userinfo_data['register']
+            return register
+
+class EyeshOrderUserInfoSerializer(serializers.ModelSerializer):
+    gender = serializers.SerializerMethodField()
+    user = serializers.SerializerMethodField()
+    age = serializers.SerializerMethodField()
+    userinfo=serializers.SerializerMethodField()
+    profession=serializers.SerializerMethodField()
+    full_name = serializers.CharField(source='user.full_name', default='', read_only=True)
+    degree_name = serializers.CharField(source='profession.profession.degree.degree_name', default='')
+
+    class Meta:
+        model = AdmissionUserProfession
+        fields='__all__'
+
+    def get_gender (self,obj):
+        birthday,gender = calculate_birthday(obj.user.register)
+
+        if int(gender) == 1:
+            return 'Эрэгтэй'
+        return 'Эмэгтэй'
+
+    def get_user(self, obj):
+
+        data = ElseltUser.objects.filter(id=obj.user.id).first()
+        userinfo_data = ElseltUserSerializer(data).data
+
+        return userinfo_data
+
+    def get_age(self,obj):
+        register = obj.user.register
+        birthdate = calculate_birthday(register)[0]
+
+        if birthdate:
+            # насыг тухайн жилээс төрсөн оныг нь хасаж тооцсон
+            user_age = calculate_age(birthdate)
+
+        return user_age
+
+    def get_profession(self,obj):
+
+            professions= AdmissionUserProfession.objects.filter(user=obj.user.id).first()
+
+            return professions.profession.profession.name if professions else ''
+
+    def get_userinfo(self,obj):
+
+        data=UserInfo.objects.filter(user=obj.user.id).first()
+        userinfo=UserinfoSerializer(data).data
+
+        return userinfo

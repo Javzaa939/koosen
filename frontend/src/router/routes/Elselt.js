@@ -1,8 +1,10 @@
+import { element } from "prop-types";
 import { lazy } from "react";
 
 const ElseltYlshiitgel = lazy(() => import("@views/Elselt/Ylshiitgel"))
 const ElseltRegister = lazy(() => import("@views/Elselt/Register"))
 const ElseltProfession = lazy(() => import("@views/Elselt/Register/Profession"))
+const Eyesh = lazy(() => import ("@views/Elselt/Eyesh"))
 const Dashboard = lazy(() => import("@views/Elselt/Dashboard"))
 const SysInfo = lazy(() => import("@views/Elselt/SysInfo"))
 const User = lazy(() => import("@views/Elselt/User"))
@@ -14,7 +16,7 @@ const Physical = lazy(() => import("@src/views/Elselt/Health/Physical"))
 const MessageTailan = lazy(() => import("@views/Elselt/Tailan/Message"))
 const InterView = lazy(() => import("@views/Elselt/InterView"))
 const FieldPreparation = lazy(()=>import("@views/Elselt/FieldPreparation"))
-
+const Log = lazy(()=>import("@views/Elselt/Log"))
 const ElseltRoutes = [
     {
         path: 'elselt/ylshiitgel/',
@@ -69,8 +71,16 @@ const ElseltRoutes = [
         element: <InterView />
     },
     {
+        path: 'elselt/eyesh/',
+        element:<Eyesh/>,
+    },
+    {
         path: 'elselt/preparation/',
         element: <FieldPreparation />
+    },
+    {
+        path: 'elselt/log/',
+        element: <Log />
     },
 ]
 
