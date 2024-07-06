@@ -1782,6 +1782,10 @@ function useApi(isDisplay=false) {
 			post: (cdata) => instance.post(`/elselt/preparation/`, cdata),
 			put: (id, cdata) => instance.put(`/elselt/preparation/${id}/`, cdata)
 		},
+		// Хөтөлбөр,Төлөв лог жагсаалт
+		log:{
+			get:(limit,page,sort,search,elselt,profession)=>instance.get(`/elselt/log/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&elselt=${elselt}&profession=${profession}`)
+		},
 		hynalt:{
 			get: (gender, profession) => instance.get(`/elselt/hynalt_number/?gender=${gender}&profession=${profession}`),
 			getIsGender: (profession) => instance.get(`/elselt/hynalt_is_gender/?profession=${profession}`),

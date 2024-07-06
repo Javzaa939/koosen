@@ -1043,6 +1043,28 @@ class ArmyUserInfoSerializer(serializers.ModelSerializer):
 
             return user_age
 
+class StateChangeLogInfoSerializer(serializers.ModelSerializer):
+    first_name=serializers.CharField(source='user.first_name', default='', read_only=True)
+    last_name=serializers.CharField(source='user.last_name', default='', read_only=True)
+    full_name=serializers.CharField(source='user.full_name', default='', read_only=True)
+    admin_name=serializers.CharField(source='updated_user.username')
+    now_state_name = serializers.SerializerMethodField()
+    change_state_name = serializers.SerializerMethodField()
+    indicator_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = StateChangeLog
+        fields = "__all__"
+
+    def get_now_state_name(self,obj):
+        return obj.get_now_state_display()
+
+    def get_change_state_name(self,obj):
+        return obj.get_change_state_display()
+
+    def get_indicator_name(self,obj):
+        return obj.get_indicator_display()
+
 class ElseltEyeshSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
     class Meta:

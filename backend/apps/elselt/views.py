@@ -83,11 +83,11 @@ from .serializer import (
     MessageInfoSerializer,
     HealthUpUserStateSerializer,
     ConversationUserInfoSerializer,
+    ArmyUserInfoSerializer,
+    StateChangeLogInfoSerializer,
     EyeshOrderUserInfoSerializer,
     ElseltEyeshSerializer,
     UserScoreSerializer,
-    ConversationUserInfoSerializer,
-    ArmyUserInfoSerializer
 )
 
 from elselt.models import (
@@ -103,7 +103,6 @@ from elselt.models import (
     AdmissionUserProfession,
     ConversationUser,
     UserScore,
-    ConversationUser,
     ArmyUser,
     StateChangeLog,
 )
@@ -113,7 +112,6 @@ from core.models import (
     Employee,
     Schools
 )
-
 
 @permission_classes([IsAuthenticated])
 class ElseltApiView(
@@ -563,11 +561,14 @@ class AdmissionUserInfoAPIView(
 
             profession_name = ''
 
-            if profession_id:
+            professions= AdmissionUserProfession.objects.filter(profession=profession_id).first()
+            profession_name= professions.profession.profession.name if professions else ''
 
-                professions= AdmissionUserProfession.objects.filter(profession=profession_id).first()
-                profession_name= professions.profession.profession.name if professions else ''
+            serializer = AdmissionUserProfessionSerializer(instance, data=data, partial=True)
+            if not serializer.is_valid(raise_exception=False):
+                return request.send_error_valid(serializer.errors)
 
+            serializer.save(updated_user=logged_user)
             profession_change_log = StateChangeLog(
                 user=instance.user,
                 type=StateChangeLog.PROFESSION,
@@ -578,12 +579,6 @@ class AdmissionUserInfoAPIView(
                 updated_user=logged_user,
             )
             profession_change_log.save()
-
-            serializer = AdmissionUserProfessionSerializer(instance, data=data, partial=True)
-            if not serializer.is_valid(raise_exception=False):
-                return request.send_error_valid(serializer.errors)
-
-            serializer.save(updated_user=logged_user)
 
         except Exception as e:
             return request.send_error('ERR_002', e.__str__())
@@ -2218,6 +2213,52 @@ class ArmyUserSerializerAPView(
 
         return request.send_info('INF_002')
 
+class LogSerializerAPView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin
+    ):
+
+    queryset = StateChangeLog.objects.all()
+    serializer_class = StateChangeLogInfoSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = [ 'user__first_name', 'user__last_name', 'user__registeDr', 'user__mobile']
+
+    def get_queryset(self):
+        queryset = self.queryset
+
+        sorting = self.request.query_params.get('sorting')
+        profession = self.request.query_params.get('profession')
+        elselt = self.request.query_params.get('elselt')
+
+        if profession:
+            queryset = queryset.filter(
+                user__admissionuserprofession__profession__profession=profession
+            )
+
+        if elselt:
+            queryset = queryset.filter(user__admissionuserprofession__profession__admission=elselt)
+
+        # Sort хийх үед ажиллана
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
+
+        return queryset
+
+    def get(self, request, pk=None):
+
+        if pk:
+            all_data = self.retrieve(request, pk).data
+            return request.send_data(all_data)
+
+        all_data = self.list(request).data
+        return request.send_data(all_data)
 
 class HynaltNumberIsGenderAPIView(generics.GenericAPIView):
     """ Мэргэжлийн хяналтын тоо хүйсээс хамаарах эсэх """
