@@ -364,7 +364,7 @@ class StateChangeLog(models.Model):
     type = models.IntegerField(choices=TYPE, verbose_name='Лог төрөл', default=STATE)
     now_profession = models.CharField(verbose_name='Одоогийн мэргэжил', max_length=255, null=True)
     change_profession = models.CharField(verbose_name='Өөрчлөгдөж байгаа мэргэжил', max_length=255, null=True)
-    indicator = models.IntegerField(choices=AdmissionIndicator.INDICATOR_VALUE, default=AdmissionIndicator.ERUUL_MEND, verbose_name='шалгуурын төрөл')
+    indicator = models.IntegerField(choices=AdmissionIndicator.INDICATOR_VALUE, default=AdmissionIndicator.TENTSSEN_ELSEGCHID, verbose_name='шалгуурын төрөл')
     now_state = models.IntegerField(choices=AdmissionUserProfession.STATE, default=None, verbose_name='ямар төлөвт шилжиж байгаан')
     change_state = models.IntegerField(choices=AdmissionUserProfession.STATE, default=None, verbose_name='ямар төлөвт шилжиж байгаан')
 

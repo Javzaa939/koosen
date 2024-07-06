@@ -4070,11 +4070,14 @@ class AdmissionIndicator(models.Model):
     XYANALTIIN_TOO = 2
     NAS = 3
     YAL_SHIITGEL = 4
-    ERUUL_MEND = 5
-    BIE_BYALDAR = 6
-    SETGEL_ZUI = 7
-    TUGSSUN_SURGUULI = 8
-    ESSE = 9
+    ERUUL_MEND_ANHAN = 5
+    ERUUL_MEND_MERGEJLIIN = 6
+    BIE_BYALDAR = 7
+    SETGEL_ZUI = 8
+    TUGSSUN_SURGUULI = 9
+    ESSE = 10
+    HEERIIN_BELTGEL = 11
+    TENTSSEN_ELSEGCHID = 12
 
     INDICATOR_VALUE = (
 
@@ -4083,11 +4086,14 @@ class AdmissionIndicator(models.Model):
 
         (NAS, 'Нас'),
         (YAL_SHIITGEL, 'Ял шийтгэл'),
-        (ERUUL_MEND, 'Эрүүл мэнд'),
+        (ERUUL_MEND_ANHAN, 'Эрүүл мэнд анхан'),
+        (ERUUL_MEND_MERGEJLIIN, 'Эрүүл мэнд мэргэжлийн'),
         (BIE_BYALDAR, 'Ур чадвар'),
         (SETGEL_ZUI, 'Сэтгэлзүйн ярилцлага'),
         (TUGSSUN_SURGUULI, 'Төгссөн сургууль'),
         (ESSE, 'Cудалгааны ажлын агуулга чиглэл, зорилгын талаар бичсэн танилцуулга'),
+        (HEERIIN_BELTGEL, 'Хээрийн бэлтгэл'),
+        (TENTSSEN_ELSEGCHID, 'Тэнцсэн элсэгч, бүртгүүлэгчид')
     )
 
     admission_prof = models.ForeignKey(AdmissionRegisterProfession, on_delete=models.CASCADE, verbose_name="Мэргэжил")
