@@ -2292,7 +2292,7 @@ class UserScoreSortAPIView(generics.GenericAPIView):
             total_elsegch = data.get('totalElsegch')
             gender = data.get('gender')
             lesson_names = AdmissionLesson.objects.filter(lesson_code__in=lessons).values_list('lesson_name', flat=True)
-
+            user_ids = AdmissionUserProfession.objects.filter(profession=profession , age_state=AdmissionUserProfession.STATE_APPROVE, yesh_mhb_state=AdmissionUserProfession.STATE_APPROVE).values_list('user', flat=True)
             # Хэрвээ тус хичээл AdmissionLesson-д байхгүй бол олдсонгүй гэсэн мэдээллийг буцаана
             if not lesson_names:
                 return request.send_error('ERR_002', 'ЭЕШ-ийн хичээлүүдийн дотор тус хичээл олдсонгүй')
@@ -2300,10 +2300,10 @@ class UserScoreSortAPIView(generics.GenericAPIView):
             # AdmissionLesson-ээс ганц хичээл олдвол
             if len(lesson_names) == 1:
                 # Single lesson function-ийг ажиллуулна
-                self.process_single_lesson(lesson_names, total_elsegch, gender)
+                self.process_single_lesson(lesson_names, profession, total_elsegch, gender, user_ids)
             else:
                 # Нэгээс олон хичээл байвал уг function-ийг дуудна
-                self.process_multiple_lessons(lesson_names, profession, total_elsegch, gender)
+                self.process_multiple_lessons(lesson_names, profession, total_elsegch, gender, user_ids)
 
         except Exception as e:
             print(e)
@@ -2311,17 +2311,29 @@ class UserScoreSortAPIView(generics.GenericAPIView):
         return request.send_info('INF_001')
 
     # Нэг ЭЕШ-ийн хичээлээр оноог эрэмбэлхэд ашиглах function
-    def process_single_lesson(self, lesson_names, total_elsegch, gender):
+    def process_single_lesson(self, lesson_names, profession, total_elsegch, gender, user_ids):
+        # Элсэлтэд бүртгэгдсэн мэргэжил
+        profession_obj = AdmissionRegisterProfession.objects.get(pk=profession)
+
         # UserScore-д тус хичээлийн нэр дээр бүртгэлтэй оноотой хэрэглэгчдийн ElseltUser-ийн id-г олж авна
         if int(gender) == 1: # Эрэгтэй хэрэглэгчид
             user_score_users = self.queryset.filter(
+                user__in=user_ids,
                 lesson_name__in=lesson_names,
                 gender__in=['1', '3', '5', '7', '9']
             ).values_list('user', flat=True)
-        else:
+
+        if int(gender) == 2:
             user_score_users = self.queryset.filter(
+                user__in=user_ids,
                 lesson_name__in=lesson_names,
                 gender__in=['0', '2', '4', '6', '8']
+            ).values_list('user', flat=True)
+
+        if int(gender) == 3:
+            user_score_users = self.queryset.filter(
+                user__in=user_ids,
+                lesson_name__in=lesson_names,
             ).values_list('user', flat=True)
 
         # Counter ашиглан тус хэрэглэгч уг шалгалтыг хэдэн удаа өгснийг тоолно
@@ -2356,11 +2368,21 @@ class UserScoreSortAPIView(generics.GenericAPIView):
 
         # Бүх оноонуудаа нэмээд
         all_scores = unique_multi_users + single_users_scores
+
+        bottom_score_obj = AdmissionBottomScore.objects.filter(
+                admission_lesson__lesson_name__in=lesson_names,
+                profession=profession_obj.profession,
+                score_type=AdmissionBottomScore.GENERAL,
+            ).first()
+
+        # Хичээлийн өосго оноо
+        bottom_score = bottom_score_obj.bottom_score
+
         # Тэгээд save_scores function-ийг ашиглан нийт датагаа хадгална
-        self.save_scores(all_scores, total_elsegch)
+        self.save_scores(all_scores, total_elsegch, bottom_score)
 
     # Нэгээс олон ЭЕШ-ийн хичээлээр оноог эрэмбэлхэд ашиглах function
-    def process_multiple_lessons(self, lesson_names, profession, total_elsegch, gender):
+    def process_multiple_lessons(self, lesson_names, profession, total_elsegch, gender, user_ids):
 
         # Элсэлтэд бүртгэгдсэн мэргэжил
         profession_obj = AdmissionRegisterProfession.objects.get(pk=profession)
@@ -2369,11 +2391,13 @@ class UserScoreSortAPIView(generics.GenericAPIView):
         # {'user': 806, 'lesson_name': 'Нийгэм судлал', 'scaledScore': 626} иймэрдүү датанаас бүрдсэн list ирнэ
         if int(gender) == 1: # Эрэгтэй хэрэглэгчид
             elsegch_users = self.queryset.filter(
+                user__in=user_ids,
                 lesson_name__in=lesson_names,
                 gender__in=['1', '3', '5', '7', '9']
             ).values('user', 'lesson_name', 'scaledScore')
         else:
             elsegch_users = self.queryset.filter(
+                user__in=user_ids,
                 lesson_name__in=lesson_names,
                 gender__in=['0', '2', '4', '6', '8']
             ).values('user', 'lesson_name', 'scaledScore')
@@ -2397,6 +2421,7 @@ class UserScoreSortAPIView(generics.GenericAPIView):
         for item in users_with_max_score:
             # user_id-д item-ийн user-ийн утгыг хадгалаад
             user_id = item['user']
+
             # AdmissionBottomScore-оос тус хичээлийн Суурь шалгалт-уу эсвэл Дагалдах шалгалт-уу гэдгийг тодорхойлж өгөөд
             score_type = AdmissionBottomScore.objects.filter(
                 admission_lesson__lesson_name=item['lesson_name'],
@@ -2427,8 +2452,21 @@ class UserScoreSortAPIView(generics.GenericAPIView):
         # Дараагаар үндсэн list дотроо зөвхөн тухайн хэрэглэгч дотор 2 хичээлийн мэдээлэл group-лэгдсэн датаг нэмнэ
         grouped_list = [group for group in grouped_data.values() if len(group) == 2]
 
+        # 2 хичээлийн аль нэгнийхэн босго оноонд хүрээгүй тохиолдодл state солиж тэнцүүлэхгүй
+        users_to_remove = []
+
+        for item in grouped_list:
+            for sub_item in item:
+
+                # Тухайн хичээлийн босго оноо
+                bottomscore = AdmissionBottomScore.objects.filter(admission_lesson__lesson_name=sub_item['lesson_name'], profession=profession_obj.profession).values_list('bottom_score', flat=True).first()
+                if bottomscore >= sub_item['scaledScore']:
+                    users_to_remove.append(sub_item['user'])
+                    break
+
         # Одоо 2 хичээлийн 70, 30-аар хувилсан нийт оноог олно
         all_scores = []
+
         # Үндсэн list дотроо loop гүйлгээд
         for group in grouped_list:
             # user_scores дотор нийт жинлэгдсэн оноог хадгална
@@ -2457,10 +2495,85 @@ class UserScoreSortAPIView(generics.GenericAPIView):
                 # all_score дотроо датагаа user,score-оор нь цэгцлэнэ
                 all_scores.append({'score': round(score), 'user': user})
 
-        self.save_scores(all_scores, total_elsegch, profession_obj.profession.name)
+        approved_user_bottom_score = [item for item in all_scores if item['user'] not in users_to_remove]
+        rejected_user_bottom_score = [item for item in all_scores if item['user'] in users_to_remove]
+
+        # Scores-оор орж ирсэн датаг score-уудийг нь ашиглан эрэмбэлэнэ
+        sorted_approve_scores = sorted(approved_user_bottom_score, key=lambda x: x['score'], reverse=True)
+
+        sorted_rejected_scores = sorted(rejected_user_bottom_score, key=lambda x: x['score'], reverse=True)
+
+        approve_order_no = 0
+        # Тухайн sort хийсэн датаг index-ээс шалтгаалан order_no-уудыг нэмж өгнө
+        for idx, item in enumerate(sorted_approve_scores):
+            approve_order_no = idx + 1
+            item['order_no'] = approve_order_no
+            if approve_order_no <= int(total_elsegch):
+                # Зөвхөн эрх зүй мэргэжилд шууд тэнцэнэ.
+                if profession_obj.profession.name.upper() == 'ЭРХ ЗҮЙ':
+                    item['state'] = AdmissionUserProfession.STATE_APPROVE
+
+                item['yesh_state'] = AdmissionUserProfession.STATE_APPROVE
+
+                # Хэрэглэгчийн датаг хадгалах хэсэг
+                user = item['user']
+                user = AdmissionUserProfession.objects.filter(user=user)
+
+                approve_obj = AdmissionUserProfession.objects.filter(
+                    user=item['user']
+                ).first()
+
+                if approve_obj:
+                    approve_obj.score_avg = item['score']
+                    approve_obj.order_no = item['order_no']
+                    approve_obj.yesh_state = item['yesh_state']
+                    approve_obj.yesh_description = 'ЭШ босго оноонд тэнцэв'
+
+                    if item.get('state'):
+                        approve_obj.state = item['state']
+                        approve_obj.state_description = 'Эрх зүйн хөтөлбөрт тэнцэв'
+                    approve_obj.save()
+            else:
+                item['yesh_state'] = AdmissionUserProfession.STATE_REJECT
+                item['yesh_description'] = 'Хяналтын тоонд багтсангүй.'
+
+                # ЭШ оноогоор тэнцсэн ч хяналтын тоонд багтсаагүй датаг хадгалах хэсэг
+                user = item['user']
+                user = AdmissionUserProfession.objects.filter(user=user)
+
+                reject_obj = AdmissionUserProfession.objects.filter(
+                    user=item['user']
+                ).first()
+
+                if reject_obj:
+                    reject_obj.score_avg = item['score']
+                    reject_obj.order_no = item['order_no']
+                    reject_obj.save()
+
+        # ЭШ босго оноо тэнцээгүй элсэгчид
+        for idx, item in enumerate(sorted_rejected_scores):
+            approve_order_no = approve_order_no + 1
+            item['order_no'] = approve_order_no
+            item['yesh_state'] = AdmissionUserProfession.STATE_REJECT
+            item['yesh_description'] = 'ЭШ-ийн оноо босго онооны шалгуурыг хангасангүй.'
+
+            # ЭШ оноогоор тэнцсэн ч хяналтын тоонд багтсаагүй датаг хадгалах хэсэг
+            user = item['user']
+            user = AdmissionUserProfession.objects.filter(user=user)
+
+            reject_off_obj = AdmissionUserProfession.objects.filter(
+                user=item['user']
+            ).first()
+
+            if reject_off_obj:
+                reject_off_obj.score_avg = item['score']
+                reject_off_obj.order_no = item['order_no']
+                reject_off_obj.yesh_state = item['state']
+                reject_off_obj.yesh_description = item['yesh_description']
+                reject_off_obj.save()
 
     # Нийт өгөгдлөө update хийх function
-    def save_scores(self, scores, total_elsegch, profession_name=''):
+    def save_scores(self, scores, total_elsegch, bottom_score):
         """ЭШ дүн хадгалах хэсэг
             Keyword arguments:
             scores -- нийт дүн
@@ -2468,6 +2581,8 @@ class UserScoreSortAPIView(generics.GenericAPIView):
             profession_name -- мэргэжил нэр
             Return: return_description
         """
+
+        # TODO Шалгаж байгаа хөтөлбөрийн босго оноог хүүхдийн хичээлийн оноо давж байгааг шалгах
 
         # Scores-оор орж ирсэн датаг score-уудийг нь ашиглан эрэмбэлэнэ
         sorted_scores = sorted(scores, key=lambda x: x['score'], reverse=True)
@@ -2480,58 +2595,57 @@ class UserScoreSortAPIView(generics.GenericAPIView):
         rejected = []
 
         # Тэнцсэн болон тэнцээгүй хэрэглэгчидийг ялгана
-        approve_order_no = 0
         for item in sorted_scores:
-            # Нийт авах элсэгчдийн тоон дотор эрэмбэлсэн хэрэглэгчийн эрэмбийн дугаар байвал
-            if item['order_no'] <= int(total_elsegch):
-
-                # Зөвхөн эрх зүй мэргэжилд шууд тэнцэнэ.
-                if profession_name.upper() == 'ЭРХ ЗҮЙ':
-                    item['state'] = AdmissionUserProfession.STATE_APPROVE
-
-                item['yesh_state'] = AdmissionUserProfession.STATE_APPROVE
-                approved.append(item)
+            if item['score'] >= bottom_score:
+                print('success', item['score'])
+                # Нийт авах элсэгчдийн тоон дотор эрэмбэлсэн хэрэглэгчийн эрэмбийн дугаар байвал
+                if item['order_no'] <= int(total_elsegch):
+                    item['yesh_state'] = AdmissionUserProfession.STATE_APPROVE
+                    item['yesh_description'] = 'ЭШ босго оноо тэнцсэн'
+                    approved.append(item)
+                else:
+                    item['yesh_state'] = AdmissionUserProfession.STATE_REJECT
+                    item['yesh_description'] = 'ЭШ-ийн оноогоор хяналтын тоонд багтсангүй.'
+                    rejected.append(item)
             else:
-                item['state'] = AdmissionUserProfession.STATE_REJECT
-                item['state_description'] = 'Та ЭШ-ийн оноогоор хяналтын тоонд багтсангүй.'
+                item['yesh_state'] = AdmissionUserProfession.STATE_REJECT
+                item['yesh_description'] = 'ЭШ-ийн оноо босго онооны шалгуурыг хангасангүй'
                 rejected.append(item)
 
-        approved_objects = []
         rejected_objects = []
 
         # Bulk_update бэлдэж өгсөн тэнцсэн хэрэглэгчдэд
         for data in approved:
+
+            user = data['user']
+            user = AdmissionUserProfession.objects.filter(user=user)
+
             approve_obj = AdmissionUserProfession.objects.filter(
                 user=data['user']
-            ).filter(
-                ~Q(state=AdmissionUserProfession.STATE_REJECT)
             ).first()
 
             if approve_obj:
                 approve_obj.score_avg = data['score']
                 approve_obj.order_no = data['order_no']
                 approve_obj.yesh_state = data['yesh_state']
-
-                if data.get('state'):
-                    approve_obj.state = data['state']
+                approve_obj.yesh_description = data['yesh_description']
                 approve_obj.save()
 
         # Bulk_update бэлдэж өгсөн тэнцээгүй хэрэглэгчдэд
         for data in rejected:
             obj = AdmissionUserProfession.objects.filter(
                 user=data['user']
-            ).filter(
-                ~Q(state=AdmissionUserProfession.STATE_REJECT)
             ).first()
+
             if obj:
                 obj.score_avg = data['score']
                 obj.order_no = data['order_no']
-                obj.state = data['state']
-                obj.state_description = data['state_description']
+                obj.yesh_state = data['yesh_state']
+                obj.yesh_description = data['yesh_description']
                 rejected_objects.append(obj)
 
         AdmissionUserProfession.objects.bulk_update(
-            rejected_objects, ['score_avg', 'order_no', 'yesh_state', 'state', 'state_description', 'yesh_description']
+            rejected_objects, ['score_avg', 'order_no', 'yesh_state', 'yesh_description']
         )
 
 
@@ -2708,6 +2822,7 @@ class ElseltEyeshAPIView(
 
         #is_success false үед тэнцээгүй сурагчдын төлөвийг өөрчилж хадгалах
         failed_entries = [item for item in return_datas if not item['is_success']]
+        success_entries = [item for item in return_datas if item['is_success']]
 
         with transaction.atomic():
             for item in failed_entries:
@@ -2715,8 +2830,14 @@ class ElseltEyeshAPIView(
                 admission_user_data = AdmissionUserProfession.objects.get(user__id=user_id)
                 admission_user_data.state = AdmissionUserProfession.STATE_REJECT
                 admission_user_data.state_description = 'Монгол хэл бичигийн шалгалтанд тэнцээгүй'
-                admission_user_data.yesh_state = AdmissionUserProfession.STATE_REJECT
-                admission_user_data.yesh_description = 'Монгол хэл бичигийн шалгалтанд тэнцээгүй'
+                admission_user_data.yesh_mhb_state = AdmissionUserProfession.STATE_REJECT
+                admission_user_data.yesh_mhb_description = 'Монгол хэл бичигийн шалгалтанд тэнцээгүй'
+                admission_user_data.save()
+            for item in success_entries:
+                user_id = item['user']
+                admission_user_data = AdmissionUserProfession.objects.get(user__id=user_id)
+                admission_user_data.yesh_mhb_state = AdmissionUserProfession.STATE_APPROVE
+                admission_user_data.yesh_mhb_description = 'Монгол хэл бичигийн шалгалтанд тэнцсэн'
                 admission_user_data.save()
 
         #AdmissionUserProfession тэнцсэн тэнцээгүй сурагч
@@ -2739,7 +2860,7 @@ class EyeshOrderUserInfoAPIView(
 ):
     """ Элсэгчийн ЭЕШ ийн оноо жагсаалт харуулах """
 
-    queryset = AdmissionUserProfession.objects.all().order_by('score_avg')
+    queryset = AdmissionUserProfession.objects.all().order_by('order_no')
 
     serializer_class = EyeshOrderUserInfoSerializer
     pagination_class = CustomPagination

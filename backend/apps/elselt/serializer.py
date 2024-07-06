@@ -130,13 +130,14 @@ class UserScoreSerializer(serializers.ModelSerializer):
 
     # Монгол хэл бичиг шалгалтийн оноог шалгах
     def get_is_success(self, obj):
-        is_success = True
+        is_success = False
         # TODO lesson_name шалгахдаа iexact ашиглана том жижиг үсэг орж ирхээс сэргийлэх
         data = UserScore.objects.filter(user_id = obj.user , lesson_name = 'Монгол хэл бичиг').values_list('scaledScore', flat=True)
-        if data and max(data) < 400:
-            is_success = False
+        if data and max(data) >= 400:
+            is_success = True
 
         return is_success
+
 class StateChangeLogSerializer(serializers.ModelSerializer):
 
     class Meta:

@@ -1,9 +1,9 @@
-import {ReactSelectStyles, convertDefaultValue} from "@utils"
-import React, {Fragment, useState, useEffect} from 'react';
-import {useForm, Controller} from "react-hook-form";
-import {yupResolver} from '@hookform/resolvers/yup';
-import {X} from "react-feather";
-import {t} from 'i18next';
+import { ReactSelectStyles, convertDefaultValue } from "@utils"
+import React, { Fragment, useState, useEffect } from 'react';
+import { useForm, Controller } from "react-hook-form";
+import { yupResolver } from '@hookform/resolvers/yup';
+import { X } from "react-feather";
+import { t } from 'i18next';
 
 import {
     Row,
@@ -89,6 +89,7 @@ export const SortModal = ({ open, handleModal, refreshDatas, editData }) => {
     const getAdmissionLesson = async () => {
         const { success, data } = await fetchData(admissionLessionApi.get());
         if (success) {
+            console.log(data)
             setLessonOption(data);
         }
     };
@@ -115,7 +116,7 @@ export const SortModal = ({ open, handleModal, refreshDatas, editData }) => {
 
     useEffect(() => {
         getProfessionOption()
-    },[elselt])
+    }, [elselt])
 
     useEffect(() => {
         if (profession && gender) {
@@ -125,7 +126,7 @@ export const SortModal = ({ open, handleModal, refreshDatas, editData }) => {
 
     useEffect(() => {
         getHynaltIsGender();
-    },[profession])
+    }, [profession])
 
     useEffect(() => {
         if (isGender === false) {
