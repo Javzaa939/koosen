@@ -82,6 +82,7 @@ export function getColumns (currentPage, rowsPerPage, page_count) {
 			header: 'register',
 			name: t("Байр"),
 			reorder: true,
+			sortable: true,
 			selector: (row) => row?.order_no,
 			center: true
 		},

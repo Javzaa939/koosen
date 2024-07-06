@@ -398,7 +398,7 @@ const ElseltEyesh = () => {
 						// selectableRows
 						// // onSelectedRowsChange={(state) => onSelectedRowsChange(state)}
 						direction="auto"
-						defaultSortFieldId={'created_at'}
+						// defaultSortFieldId={'order_no'}
 						style={{ border: '1px solid red' }}
 					/>
 				</div>

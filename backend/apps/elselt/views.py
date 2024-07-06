@@ -2484,7 +2484,6 @@ class UserScoreSortAPIView(generics.GenericAPIView):
         for item in sorted_scores:
             # Нийт авах элсэгчдийн тоон дотор эрэмбэлсэн хэрэглэгчийн эрэмбийн дугаар байвал
             if item['order_no'] <= int(total_elsegch):
-                print(item['order_no'])
 
                 # Зөвхөн эрх зүй мэргэжилд шууд тэнцэнэ.
                 if profession_name.upper() == 'ЭРХ ЗҮЙ':
@@ -2512,8 +2511,10 @@ class UserScoreSortAPIView(generics.GenericAPIView):
                 approve_obj.score_avg = data['score']
                 approve_obj.order_no = data['order_no']
                 approve_obj.yesh_state = data['yesh_state']
-                approve_obj.state = data['state']
-                approved_objects.append(approve_obj)
+
+                if data.get('state'):
+                    approve_obj.state = data['state']
+                approve_obj.save()
 
         # Bulk_update бэлдэж өгсөн тэнцээгүй хэрэглэгчдэд
         for data in rejected:
@@ -2529,9 +2530,6 @@ class UserScoreSortAPIView(generics.GenericAPIView):
                 obj.state_description = data['state_description']
                 rejected_objects.append(obj)
 
-        AdmissionUserProfession.objects.bulk_update(
-            approved_objects, ['score_avg', 'order_no', 'yesh_state', 'state']
-        )
         AdmissionUserProfession.objects.bulk_update(
             rejected_objects, ['score_avg', 'order_no', 'yesh_state', 'state', 'state_description', 'yesh_description']
         )
@@ -2740,7 +2738,7 @@ class EyeshOrderUserInfoAPIView(
 ):
     """ Элсэгчийн ЭЕШ ийн оноо жагсаалт харуулах """
 
-    queryset = AdmissionUserProfession.objects.all()
+    queryset = AdmissionUserProfession.objects.all().order_by('score_avg')
 
     serializer_class = EyeshOrderUserInfoSerializer
     pagination_class = CustomPagination
