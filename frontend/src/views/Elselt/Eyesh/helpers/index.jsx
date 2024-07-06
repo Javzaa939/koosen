@@ -6,6 +6,7 @@ import { t } from 'i18next'
 import moment from 'moment'
 import useApi from '@hooks/useApi';
 import useLoader from "@hooks/useLoader";
+import { wrap } from 'highcharts';
 
 // Хүснэгтийн баганууд
 export function getColumns (currentPage, rowsPerPage, page_count) {
@@ -68,6 +69,16 @@ export function getColumns (currentPage, rowsPerPage, page_count) {
 			center: true
 		},
 		{
+			maxWidth: "250px",
+			minWidth: "250px",
+			header: 'profession__profession__name',
+			name: 'Хөтөлбөр',
+			reorder: true,
+			selector: (row) => <span title={row?.profession}>{row?.profession}</span>,
+            sortable: true,
+			center: true,
+		},
+		{
 			maxWidth: "180px",
 			minWidth: "180px",
 			header: 'register',
@@ -77,9 +88,25 @@ export function getColumns (currentPage, rowsPerPage, page_count) {
 			center: true
 		},
 		{
+			maxWidth: "150px",
+			minWidth: "150px",
+			header: 'state',
+			reorder: true,
+			sortable: true,
+			name: t("Төлөв"),
+			selector: (row) => (
+				<Badge
+					color={`${row?.yesh_state == 1 ? 'primary' : row?.yesh_state == 2 ? 'success' : row?.yesh_state == 3 ? 'danger' : 'primary'}`}
+					pill
+				>
+					{row?.yesh_state == 1 ? 'Бүртгүүлсэн' : row?.yesh_state == 2 ? 'Тэнцсэн' : row?.yesh_state == 3 ? 'Тэнцээгүй' : 'Бүртгүүлсэн'}
+				</Badge>),
+			center: true,
+		},
+		{
 			maxWidth: "180px",
 			minWidth: "180px",
-			header: 'register',
+			header: 'order',
 			name: t("Байр"),
 			reorder: true,
 			sortable: true,
@@ -87,14 +114,48 @@ export function getColumns (currentPage, rowsPerPage, page_count) {
 			center: true
 		},
 		{
+			minWidth: "250px",
+			name: 'Мэдээллийн тайлбар',
+			reorder: true,
+			selector: (row) => <span title={row?.yesh_description} style={{fontSize:'10px'}}>{row?.yesh_description}</span>,
+			wrap:true
+		},
+		{
 			maxWidth: "180px",
 			minWidth: "180px",
-			header: 'register',
+			header: 'age',
+			name: t("Нас"),
+			reorder: true,
+			selector: (row) => row?.age,
+			center: true
+		},
+		{
+			maxWidth: "180px",
+			minWidth: "180px",
+			header: 'gender',
 			name: t("Хүйс"),
 			reorder: true,
 			selector: (row) => row?.gender,
 			center: true
-		}
+		},
+		{
+			maxWidth: "180px",
+			minWidth: "180px",
+			header: 'phone',
+			name: t("Утас"),
+			reorder: true,
+			selector: (row) => row?.user?.mobile,
+			center: true
+		},
+		{
+			maxWidth: "180px",
+			minWidth: "180px",
+			header: 'E-Mail',
+			name: t("ИМЭЙЛ"),
+			reorder: true,
+			selector: (row) => row?.user?.email,
+			center: true
+		},
 	]
 
     return columns

@@ -1058,6 +1058,11 @@ class ElseltEyeshSerializer(serializers.ModelSerializer):
 class EyeshOrderUserInfoSerializer(serializers.ModelSerializer):
     gender = serializers.SerializerMethodField()
     user = serializers.SerializerMethodField()
+    age = serializers.SerializerMethodField()
+    userinfo=serializers.SerializerMethodField()
+    profession=serializers.SerializerMethodField()
+    full_name = serializers.CharField(source='user.full_name', default='', read_only=True)
+    degree_name = serializers.CharField(source='profession.profession.degree.degree_name', default='')
 
     class Meta:
         model = AdmissionUserProfession
@@ -1076,3 +1081,26 @@ class EyeshOrderUserInfoSerializer(serializers.ModelSerializer):
         userinfo_data = ElseltUserSerializer(data).data
 
         return userinfo_data
+
+    def get_age(self,obj):
+        register = obj.user.register
+        birthdate = calculate_birthday(register)[0]
+
+        if birthdate:
+            # насыг тухайн жилээс төрсөн оныг нь хасаж тооцсон
+            user_age = calculate_age(birthdate)
+
+        return user_age
+
+    def get_profession(self,obj):
+
+            professions= AdmissionUserProfession.objects.filter(user=obj.user.id).first()
+
+            return professions.profession.profession.name if professions else ''
+
+    def get_userinfo(self,obj):
+
+        data=UserInfo.objects.filter(user=obj.user.id).first()
+        userinfo=UserinfoSerializer(data).data
+
+        return userinfo

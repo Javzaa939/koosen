@@ -2724,6 +2724,7 @@ class ElseltEyeshAPIView(
         passed_student = queryset.filter(Q(yesh_state=AdmissionUserProfession.STATE_APPROVE) | Q(yesh_state=AdmissionUserProfession.STATE_SEND)).count()
 
         send_data = {
+            'total_count' : failed_student + passed_student,
             'failed_student_count': failed_student,
             'passed_student_count': passed_student,
         }
@@ -2754,6 +2755,7 @@ class EyeshOrderUserInfoAPIView(
 
         elselt = self.request.query_params.get('elselt')
         profession = self.request.query_params.get('profession')
+        state = self.request.query_params.get('state')
 
         if elselt:
             queryset = queryset.filter(profession__admission=elselt)
@@ -2766,6 +2768,9 @@ class EyeshOrderUserInfoAPIView(
                 queryset = queryset.filter(gender__in=['1', '3', '5', '7', '9'])
             else:
                 queryset = queryset.filter(gender__in=['0', '2', '4', '6', '8'])
+
+        if state:
+            queryset = queryset.filter(state=state)
 
         return queryset
 
