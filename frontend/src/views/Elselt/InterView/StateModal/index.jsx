@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect, useContext } from 'react'
+import React, { useEffect } from 'react'
 
 import { Controller, useForm } from 'react-hook-form'
 
@@ -6,32 +6,28 @@ import Select from 'react-select'
 
 import { convertDefaultValue, validate, ReactSelectStyles } from '@utils'
 
-import { Modal, Row, Col, Label, ModalHeader, ModalBody, Form, Input, Button, FormFeedback, Spinner} from 'reactstrap'
+import { Modal, Label, ModalHeader, ModalBody, Form, Input, Button, FormFeedback, Spinner} from 'reactstrap'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import classnames from 'classnames'
-import * as Yup from 'yup'
 
+import * as Yup from 'yup'
 export const validateSchema = Yup.object().shape({
     state: Yup.string()
         .trim()
         .required('Хоосон байна'),
 });
 
-
 function AddModal({ addModal, addModalHandler, addModalData, getDatas, STATE_LIST }) {
 
-    const { control, handleSubmit, formState: { errors }, reset, resetField, setValue, setError } = useForm(validate(validateSchema));
+    const { control, handleSubmit, formState: { errors }, reset, setValue, setError } = useForm(validate(validateSchema));
 
 	const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: true, bg: 3 });
 	const elseltApi = useApi().elselt.interview
+
     async function onSubmit(cdata) {
         cdata['user'] = addModalData?.user?.id
-
-        /**
-         *
-         */
         if(addModalData?.conversation_data) {
             const { success, error } = await fetchData(elseltApi.put(addModalData?.conversation_data?.id, cdata))
             if(success) {
@@ -63,22 +59,16 @@ function AddModal({ addModal, addModalHandler, addModalData, getDatas, STATE_LIS
     }
 
     useEffect(() => {
-        /**
-         * Edit Бүртгэх хоёр нь эндээсээ хийгдчихвэл амар байх дөө.
-         */
         var editz = addModalData?.conversation_data
-        var keyz = editz ? Object.keys(editz) : []
-
-        if(editz && keyz.length > 0) {
-            if(editz === null) return
-            for(let key in editz) {
-                if(editz[key] !== null)
-                    setValue(key, editz[key])
-                else setValue(key,'')
+        for(let key in editz) {
+            if (key === 'state') {
+                setValue('state', editz[key])
+            }
+            if (key === 'description') {
+                setValue('description', editz[key])
             }
         }
-    }, [])
-
+    }, [addModalData])
 
     return (
         <Modal

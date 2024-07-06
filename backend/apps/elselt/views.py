@@ -1,7 +1,5 @@
 import hashlib
 import datetime as dt
-from datetime import datetime, timedelta
-from venv import logger
 from rest_framework import mixins
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
@@ -1155,6 +1153,7 @@ class ElseltHealthAnhanShat(
                         student.updated_at = now
                         student.state_description = data.get("state_description")
                         student.save()
+
                         StateChangeLog.objects.create(
                             user=student.user,
                             type=StateChangeLog.STATE,
@@ -1170,6 +1169,7 @@ class ElseltHealthAnhanShat(
                         student.justice_state = data.get("justice_state")
                         student.justice_description = data.get("justice_description")
                         student.save()
+
                         StateChangeLog.objects.create(
                             user=student.user,
                             type=StateChangeLog.PROFESSION,
