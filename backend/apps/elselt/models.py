@@ -176,6 +176,10 @@ class AdmissionUserProfession(models.Model):
     admission_date = models.DateField(null=True, verbose_name="Элсэлтийн тушаалын огноо")
     admission_number = models.CharField(null=True, max_length=50, verbose_name="Элсэлтийн тушаалын дугаар")
 
+    # Элсэгч Монгол хэл бичгийн шалгалт тэнцэх  төлөв тайлбар
+    yesh_mhb_state = models.PositiveIntegerField(choices=STATE, db_index=True, null=True, default=STATE_SEND, verbose_name="Монгол хэл бичгийн шалгалт тэнцэх  төлөв тайлбар")
+    yesh_mhb_description = models.CharField(max_length=5000, null=True, verbose_name='Монгол хэл бичгийн шалгалт тэнцэх  төлөв тайлбар')
+
     # Элсэгч ЭШ оноогоор босго оноо даваад тэнцэх  төлөв тайлбар
     yesh_state = models.PositiveIntegerField(choices=STATE, db_index=True, null=True, default=STATE_SEND, verbose_name="Элсэгч ЭШ оноогоор босго онооны төлөв")
     yesh_description = models.CharField(max_length=5000, null=True, verbose_name='Элсэгч ЭШ оноогоор босго онооны төлөвийн тайлбар')
