@@ -12,6 +12,10 @@ urlpatterns = [
     path('dashboard/', DashboardAPIView.as_view()),
     path('dashboard/excel/', DashboardExcelAPIView.as_view()),
 
+    path('hynalt_number/', HynaltNumberAPIView.as_view()),
+    path('hynalt_is_gender/', HynaltNumberIsGenderAPIView.as_view()),
+    path('userscore/', UserScoreSortAPIView.as_view()),
+
     # Элсэгчдийн мэдээлэл
     path('admissionuserdata/', AdmissionUserInfoAPIView.as_view()),
     path('admissionuserdata/<int:pk>/', AdmissionUserInfoAPIView.as_view()),
@@ -19,6 +23,7 @@ urlpatterns = [
     path('admissionuserdata/gpa_check/',GpaCheckUserInfoAPIView.as_view()),
     path('admissionuserdata/gpa_check/confirm/',GpaCheckConfirmUserInfoAPIView.as_view()),
     path('admissionuserdata/eyesh_check/',EyeshCheckUserInfoAPIView.as_view()),
+    path('admissionuserdata/eyesh/',EyeshOrderUserInfoAPIView.as_view()),
 
     path('profession/', ElseltProfession.as_view()),
     path('profession/<int:pk>/', ElseltProfession.as_view()),
@@ -64,7 +69,9 @@ urlpatterns = [
     path('interview/',ConversationUserSerializerAPIView.as_view()),
     path('interview/<int:pk>/', ConversationUserSerializerAPIView.as_view()),
 
-     # Цэргийн хээрийн бэлтгэлд тэнцсэн жагсаалт
+    path('eyesh/',ElseltEyeshAPIView.as_view()),
+
+    # Цэргийн хээрийн бэлтгэлд тэнцсэн жагсаалт
     path('preparation/', ArmyUserSerializerAPView.as_view()),
     path('preparation/<int:pk>/',ArmyUserSerializerAPView.as_view()),
 

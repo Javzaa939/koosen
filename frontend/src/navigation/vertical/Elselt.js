@@ -44,6 +44,12 @@ export default [
                 navLink: "elselt/ylshiitgel"
             },
             {
+                id: 'elselt3_4',
+                title: 'ЭЕШ',
+                icon: <Circle size={8} />,
+                navLink: "elselt/eyesh"
+            },
+            {
                 id: 'elselt4',
                 title: 'Эрүүл мэнд анхан шатны үзлэг',
                 icon: <Circle size={8} />,
@@ -91,6 +97,7 @@ export default [
                 icon: <Circle size={8} />,
                 navLink: "elselt/message"
             },
+
         ]
     }
 ]

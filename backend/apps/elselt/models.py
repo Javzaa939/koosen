@@ -64,7 +64,7 @@ class UserScore(models.Model):
         db_table = 'elselt_userscore'
         managed = False
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Элсэгч')
+    user = models.ForeignKey(ElseltUser, on_delete=models.CASCADE, verbose_name='Элсэгч')
     exam_loc = models.CharField(max_length=200, verbose_name="Шалгалт өгсөн газар", default="")
     exam_loc_code = models.IntegerField(verbose_name="Шалгалт өгсөн газар", default=0)
     year = models.IntegerField(verbose_name="Шалгалт өгсөн он")
@@ -175,6 +175,10 @@ class AdmissionUserProfession(models.Model):
     # Элсэгчийн элсэлтийн тушаалын дугаар огноо
     admission_date = models.DateField(null=True, verbose_name="Элсэлтийн тушаалын огноо")
     admission_number = models.CharField(null=True, max_length=50, verbose_name="Элсэлтийн тушаалын дугаар")
+
+    # Элсэгч Монгол хэл бичгийн шалгалт тэнцэх  төлөв тайлбар
+    yesh_mhb_state = models.PositiveIntegerField(choices=STATE, db_index=True, null=True, default=STATE_SEND, verbose_name="Монгол хэл бичгийн шалгалт тэнцэх  төлөв тайлбар")
+    yesh_mhb_description = models.CharField(max_length=5000, null=True, verbose_name='Монгол хэл бичгийн шалгалт тэнцэх  төлөв тайлбар')
 
     # Элсэгч ЭШ оноогоор босго оноо даваад тэнцэх  төлөв тайлбар
     yesh_state = models.PositiveIntegerField(choices=STATE, db_index=True, null=True, default=STATE_SEND, verbose_name="Элсэгч ЭШ оноогоор босго онооны төлөв")
@@ -362,11 +366,11 @@ class StateChangeLog(models.Model):
 
     user = models.ForeignKey(ElseltUser, on_delete=models.CASCADE, verbose_name='Элсэгч')
     type = models.IntegerField(choices=TYPE, verbose_name='Лог төрөл', default=STATE)
-    now_profession = models.CharField(verbose_name='Одоогийн төлөв', max_length=255, null=True)
-    change_profession = models.CharField(verbose_name='Одоогийн төлөв', max_length=255, null=True)
+    now_profession = models.CharField(verbose_name='Одоогийн мэргэжил', max_length=255, null=True)
+    change_profession = models.CharField(verbose_name='Өөрчлөгдөж байгаа мэргэжил', max_length=255, null=True)
     indicator = models.IntegerField(choices=AdmissionIndicator.INDICATOR_VALUE, default=AdmissionIndicator.ERUUL_MEND, verbose_name='шалгуурын төрөл')
-    now_state = models.IntegerField(choices=AdmissionUserProfession.STATE, default=AdmissionUserProfession.STATE_REJECT, verbose_name='ямар төлөвт шилжиж байгаан')
-    change_state = models.IntegerField(choices=AdmissionUserProfession.STATE, default=AdmissionUserProfession.STATE_REJECT, verbose_name='ямар төлөвт шилжиж байгаан')
+    now_state = models.IntegerField(choices=AdmissionUserProfession.STATE, default=None, verbose_name='ямар төлөвт шилжиж байгаан')
+    change_state = models.IntegerField(choices=AdmissionUserProfession.STATE, default=None, verbose_name='ямар төлөвт шилжиж байгаан')
 
     updated_at = models.DateTimeField(auto_now=True)
     updated_user = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name='Зассан хэрэглэгч', null=True)

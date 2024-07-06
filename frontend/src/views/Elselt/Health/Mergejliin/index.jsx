@@ -54,9 +54,21 @@ const STATE_LIST = [
 ];
 
 function Mergejliin() {
+	const genderOp = [
+        {
+            id: 1,
+            name: 'Эрэгтэй',
+        },
+        {
+            id: 2,
+            name: 'Эмэгтэй'
+        }
+    ]
+	const [gender, setGender] = useState("")
+
 	const { user } = useContext(AuthContext)
 	const [currentPage, setCurrentPage] = useState(1);
-	const [rowsPerPage, setRowsPerPage] = useState(10);
+	const [rowsPerPage, setRowsPerPage] = useState(20);
 
 	// Эрэмбэлэлт
 	const [sortField, setSort] = useState("");
@@ -105,7 +117,8 @@ function Mergejliin() {
 				searchValue,
 				adm,
 				profession_id,
-				chosenState
+				chosenState,
+				gender
 			)
 		);
 		if (success) {
@@ -154,6 +167,7 @@ function Mergejliin() {
 		adm,
 		profession_id,
 		chosenState,
+		gender
 	]);
 
 	useEffect(() => {
@@ -315,6 +329,29 @@ function Mergejliin() {
 							getOptionLabel={(option) => option.name}
 						/>
 					</Col>
+					<Col md={3} >
+                    	<Label className="form-label" for="genderOp">
+                        	{t('Хүйс')}
+						</Label>
+							<Select
+								name="genderOp"
+								id="genderOp"
+								classNamePrefix='select'
+								isClearable
+								className={classnames('react-select')}
+								isLoading={isLoading}
+								placeholder={t('-- Сонгоно уу --')}
+								options={genderOp || []}
+								value={genderOp.find((c) => c.name === gender)}
+								noOptionsMessage={() => t('Хоосон байна.')}
+								onChange={(val) => {
+									setGender(val?.name || '')
+								}}
+								styles={ReactSelectStyles}
+								getOptionValue={(option) => option.id}
+								getOptionLabel={(option) => option.name}
+							/>
+                	</Col>
 					<Col md={9} className="d-flex mt-2 mb-1 justify-content-start">
 						<div className="">
 							<Button
