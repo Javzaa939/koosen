@@ -1,10 +1,10 @@
 import React, { Fragment, useState, useContext, useEffect } from "react";
 
-import { Col, Row, Card, CardHeader, CardTitle, Button, Input, Label, Spinner } from 'reactstrap'
+import { Col, Row, Card, Button, Input, Label, Spinner } from 'reactstrap'
 
 import { useTranslation } from 'react-i18next'
 
-import { ChevronDown, Plus, Search } from 'react-feather'
+import { ChevronDown, Search } from 'react-feather'
 
 import { getColumnState } from "../helpers";
 
@@ -19,8 +19,6 @@ import AuthContext from '@context/AuthContext'
 import useLoader from '@hooks/useLoader'
 
 import useApi from "@hooks/useApi"
-
-
 
 const States = () => {
 
@@ -45,17 +43,9 @@ const States = () => {
 
     const default_page = [10, 15, 50, 75, 100]
     const [datas, setDatas] = useState([])
-    const [edit_id, setEditId] = useState('')
     const [admop, setAdmop] = useState([])
 
-
     const [adm, setAdm] = useState('')
-
-    const [state, setState] = useState('')
-
-    // Modal
-    const [modal, setModal] = useState(false);
-    const [edit_modal, setEditModal] = useState(false)
 
     // Хуудаслалтын анхны утга
     const [currentPage, setCurrentPage] = useState(1)
@@ -98,12 +88,10 @@ const States = () => {
     const admissionYearApi = useApi().elselt
 
     async function getDatas() {
-        const { success, data } = await allFetch(newsApi.get(rowsPerPage, currentPage, sortField, searchValue, state, adm, profession_id))
+        const { success, data } = await allFetch(newsApi.get(rowsPerPage, currentPage, sortField, searchValue, adm, profession_id))
         if (success) {
             setDatas(data?.results)
             setTotalCount(data?.count)
-
-            console.log(data)
         }
     }
 
@@ -156,10 +144,6 @@ const States = () => {
 
     function handlePerPage(e) {
         setRowsPerPage(parseInt(e.target.value))
-    }
-
-    function refreshDatas() {
-        getDatas()
     }
 
     return (

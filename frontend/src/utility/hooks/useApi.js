@@ -1784,7 +1784,7 @@ function useApi(isDisplay=false) {
 		},
 		// Хөтөлбөр,Төлөв лог жагсаалт
 		log:{
-			get:(limit,page,sort,search,state,elselt,profession)=>instance.get(`/elselt/log/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}&elselt=${elselt}&profession=${profession}`)
+			get:(limit,page,sort,search,elselt,profession)=>instance.get(`/elselt/log/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&elselt=${elselt}&profession=${profession}`)
 		},
 		hynalt:{
 			get: (gender, profession) => instance.get(`/elselt/hynalt_number/?gender=${gender}&profession=${profession}`),

@@ -28,13 +28,6 @@ const Profession = () => {
 
     const default_page = [10, 15, 50, 75, 100]
     const [datas, setDatas] = useState([])
-    const [edit_id, setEditId] = useState('')
-
-    const [state, setState] = useState('')
-
-    // Modal
-    const [modal, setModal] = useState(false);
-    const [edit_modal, setEditModal] = useState(false)
 
     // Хуудаслалтын анхны утга
     const [currentPage, setCurrentPage] = useState(1)
@@ -80,7 +73,7 @@ const Profession = () => {
     const admissionYearApi = useApi().elselt
 
     async function getDatas() {
-        const { success, data } = await allFetch(newsApi.get(rowsPerPage, currentPage, sortField, searchValue, state, adm, profession_id))
+        const { success, data } = await allFetch(newsApi.get(rowsPerPage, currentPage, sortField, searchValue, adm, profession_id))
         if (success) {
             setDatas(data?.results)
             setTotalCount(data?.count)
@@ -136,10 +129,6 @@ const Profession = () => {
 
     function handlePerPage(e) {
         setRowsPerPage(parseInt(e.target.value))
-    }
-
-    function refreshDatas() {
-        getDatas()
     }
 
     return (
