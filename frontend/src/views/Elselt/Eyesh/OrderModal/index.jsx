@@ -48,8 +48,8 @@ function OrderModal({
 						<p className="d-flex">Тэнцээгүй элсэгч:&nbsp; <strong>{data.failed_student_count}</strong></p>
 					</div>
 				</div>
-				<div className="d-flex justify-content-between">
-					<div className="text-center my-50">
+				<div className="d-flex justify-content-end">
+					<div className="my-50">
 						<Button className="m-50" onClick={gpaModalHandler}>
 							Буцах
 						</Button>

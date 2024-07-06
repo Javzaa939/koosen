@@ -190,6 +190,11 @@ const ElseltEyesh = () => {
 		getProfession()
 	}, [adm])
 
+	const getStateName = (stateId) => {
+		const state = stateop.find(item => item.id === stateId);
+		return state ? state.name : '';
+	};
+
 	function convert() {
 		const mainData = datas.map((data, idx) => {
 			return (
@@ -200,17 +205,17 @@ const ElseltEyesh = () => {
 					'РД': data?.user?.register || '',
 					'Нас': data?.age || '',
 					'Хүйс': data?.gender || '',
-					'ЭЕШ шалгуур': data?.age_state || '',
+					'ЭЕШ шалгуур': getStateName(data?.yesh_state) || '',
+					'ЭЕШ оноо': data?.score_avg || '',
+					'ЭЕШ Эрэмбэ': data?.order_no || '',
+					'ЭЕШ тайлбар': data?.yesh_description || '',
+					'МХБ шалгуур': getStateName(data?.yesh_mhb_state) || '',
+					'МХБ тайлбар': data?.yesh_mhb_description || '',
 					'Имейл': data?.user?.email || '',
 					'Утасны дугаар': data?.user?.mobile || '',
 					'Яаралтай холбогдох': data?.user?.parent_mobile || '',
 					'Хөтөлбөр': data?.profession || '',
 					'Бүртгүүлсэн огноо': moment(data?.created_at).format('YYYY-MM-DD HH:SS:MM') || '',
-					'Төгссөн сургууль': data?.userinfo?.graduate_school || '',
-					'Мэргэжил': data?.userinfo?.graduate_profession || '',
-					'Төгссөн он': data?.userinfo?.graduate_school_year || '',
-					'ЭЕШ': data?.score_avg || '',
-					'тайлбар': data?.yesh_description || '',
 				}
 			)
 		})
@@ -232,16 +237,17 @@ const ElseltEyesh = () => {
 			'Нас',
 			'Хүйс',
 			'ЭЕШ шалгуур',
+			'ЭЕШ оноо',
+			'ЭЕШ Эрэмбэ',
+			'ЭЕШ тайлбар',
+			'МХБ шалгуур',
+			'МХБ тайлбар',
 			'Имейл',
 			'Утасны дугаар',
 			'Яаралтай холбогдох',
 			'Хөтөлбөр',
 			'Бүртгүүлсэн огноо',
-			'Төгссөн сургууль',
-			'Мэргэжил',
-			'Төгссөн он',
-			'ЭЕШ',
-			'тайлбар'
+
 
 		];
 
