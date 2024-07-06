@@ -561,11 +561,14 @@ class AdmissionUserInfoAPIView(
 
             profession_name = ''
 
-            if profession_id:
+            professions= AdmissionUserProfession.objects.filter(profession=profession_id).first()
+            profession_name= professions.profession.profession.name if professions else ''
 
-                professions= AdmissionUserProfession.objects.filter(profession=profession_id).first()
-                profession_name= professions.profession.profession.name if professions else ''
+            serializer = AdmissionUserProfessionSerializer(instance, data=data, partial=True)
+            if not serializer.is_valid(raise_exception=False):
+                return request.send_error_valid(serializer.errors)
 
+            serializer.save(updated_user=logged_user)
             profession_change_log = StateChangeLog(
                 user=instance.user,
                 type=StateChangeLog.PROFESSION,
@@ -576,12 +579,6 @@ class AdmissionUserInfoAPIView(
                 updated_user=logged_user,
             )
             profession_change_log.save()
-
-            serializer = AdmissionUserProfessionSerializer(instance, data=data, partial=True)
-            if not serializer.is_valid(raise_exception=False):
-                return request.send_error_valid(serializer.errors)
-
-            serializer.save(updated_user=logged_user)
 
         except Exception as e:
             return request.send_error('ERR_002', e.__str__())
@@ -2228,7 +2225,7 @@ class LogSerializerAPView(
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = [ 'user__first_name', ]
+    search_fields = [ 'user__first_name', 'user__last_name', 'user__registeDr', 'user__mobile']
 
     def get_queryset(self):
         queryset = self.queryset
@@ -2261,6 +2258,7 @@ class LogSerializerAPView(
             return request.send_data(all_data)
 
         all_data = self.list(request).data
+        return request.send_data(all_data)
 
 class HynaltNumberIsGenderAPIView(generics.GenericAPIView):
     """ Мэргэжлийн хяналтын тоо хүйсээс хамаарах эсэх """

@@ -121,10 +121,14 @@ const States = () => {
         }
     }
     useEffect(() => {
-        getDatas(),
             getProfession(),
             getAdmissionYear()
     }, [])
+
+    useEffect(() => {
+        getDatas()
+    }, [currentPage, rowsPerPage])
+
 
     useEffect(() => {
         if (searchValue.length == 0) {

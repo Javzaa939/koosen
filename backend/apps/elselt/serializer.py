@@ -1050,15 +1050,20 @@ class StateChangeLogInfoSerializer(serializers.ModelSerializer):
     admin_name=serializers.CharField(source='updated_user.username')
     now_state_name = serializers.SerializerMethodField()
     change_state_name = serializers.SerializerMethodField()
+    indicator_name = serializers.SerializerMethodField()
 
     class Meta:
         model = StateChangeLog
         fields = "__all__"
+
     def get_now_state_name(self,obj):
         return obj.get_now_state_display()
 
     def get_change_state_name(self,obj):
         return obj.get_change_state_display()
+
+    def get_indicator_name(self,obj):
+        return obj.get_indicator_display()
 
 class ElseltEyeshSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()

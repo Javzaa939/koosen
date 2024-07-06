@@ -20,8 +20,6 @@ import useLoader from '@hooks/useLoader'
 
 import useApi from "@hooks/useApi"
 
-
-
 const Profession = () => {
 
     const { user } = useContext(AuthContext)
@@ -86,8 +84,6 @@ const Profession = () => {
         if (success) {
             setDatas(data?.results)
             setTotalCount(data?.count)
-
-            console.log(data)
         }
     }
 
@@ -105,12 +101,14 @@ const Profession = () => {
         }
     }
 
+    useEffect(() => {
+        getProfession(),
+        getAdmissionYear()
+    }, [])
 
     useEffect(() => {
-        getDatas(),
-            getProfession(),
-            getAdmissionYear()
-    }, [])
+        getDatas()
+    }, [currentPage, rowsPerPage])
 
     useEffect(() => {
         if (searchValue.length == 0) {
