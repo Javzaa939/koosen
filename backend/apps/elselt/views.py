@@ -1038,7 +1038,7 @@ class ElseltHealthAnhanShat(
 
         # Эрүүл мэндийн шалгуур үзүүлэлттэй мэргэжлүүд
         # TODO Одоогоор идэвхтэй байгаа элсэлтээс л харуулж байгаа гэсэн үг
-        health_profession_ids = AdmissionIndicator.objects.filter(admission_prof__admission__is_active=True, value__in=[AdmissionIndicator.ERUUL_MEND_ANHAN]).values_list('admission_prof', flat=True)
+        health_profession_ids = AdmissionIndicator.objects.filter(admission_prof__admission__is_active=True, value__in=[AdmissionIndicator.ERUUL_MEND_ANHAN], ).values_list('admission_prof', flat=True)
         queryset = queryset.filter(profession__in=health_profession_ids)
 
         gender = self.request.query_params.get('gender')
@@ -1051,7 +1051,14 @@ class ElseltHealthAnhanShat(
 
 
         # Ял шийтгэл, Насны үзүүлэлтүүдэд ТЭНЦЭЭГҮЙ элсэгчдийг хасах
-        queryset = queryset.exclude(age_state=AdmissionUserProfession.STATE_REJECT, gpa_state=AdmissionUserProfession.STATE_REJECT, state__in=[AdmissionUserProfession.STATE_REJECT, AdmissionUserProfession.STATE_APPROVE])
+        queryset = queryset.exclude(
+            age_state=AdmissionUserProfession.STATE_REJECT,
+            gpa_state=AdmissionUserProfession.STATE_REJECT,
+            yesh_mhb_state=AdmissionUserProfession.STATE_REJECT, # МХБ шалгалтад тэнцээгүй
+            yesh_state=AdmissionUserProfession.STATE_REJECT, # ЭШ оноо шалгалтад тэнцээгүй
+            state__in=[AdmissionUserProfession.STATE_REJECT, AdmissionUserProfession.STATE_APPROVE]
+        )
+    
         if gender:
             if gender == 'Эрэгтэй':
                 queryset = queryset.filter(gender__in=['1', '3', '5', '7', '9'])
