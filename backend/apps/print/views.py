@@ -732,7 +732,7 @@ class AdmissionAPIView(
         # Эрүүл мэнд, Бие бялдар гэх мэт шат дараалсан шалгуур үзүүлэлтгүй элсэлтийн мэргэжлүүд
         # TODO цаашдаа элсэгч нь бүх үе шатыг давсны дараа элсэлтйин тушаал руу орох тул яаж шүүхийг тэр үед нь шийдий
         all_not_shalguur_profession_ids = AdmissionIndicator.objects.filter(admission_prof__admission__is_active=True) \
-                                .exclude(value__in=[AdmissionIndicator.EESH_EXAM, AdmissionIndicator.ERUUL_MEND, AdmissionIndicator.BIE_BYALDAR, AdmissionIndicator.SETGEL_ZUI]) \
+                                .exclude(value__in=[AdmissionIndicator.EESH_EXAM, AdmissionIndicator.ERUUL_MEND_ANHAN, AdmissionIndicator.BIE_BYALDAR, AdmissionIndicator.SETGEL_ZUI]) \
                                 .values_list('admission_prof', flat=True)
 
         # Тэнцсэн төлөвтэй шалгуур үзүүлэлтүүдгүй элсэгчдийг шүүх

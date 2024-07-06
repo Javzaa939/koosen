@@ -13,11 +13,11 @@ function StateModal({ stateModalHandler ,stateModal,selectedStudents, stateop, g
     const { fetchData } = useLoader({isFullScreen: true});
 
     const [displayPopover, setDisplayPopover] = useState(false)
-    const admissionStateChangeApi = useApi().elselt.admissionuserdata.all;
+    const justiceStateChangeApi = useApi().elselt.justice;
 
     async function onSubmit(cdata){
         cdata['students'] = selectedStudents.map(val => val?.id) || [];
-        const { success } = await fetchData(admissionStateChangeApi.put(cdata));
+        const { success } = await fetchData(justiceStateChangeApi.put(cdata));
         if (success) {
             reset();
             stateModalHandler();

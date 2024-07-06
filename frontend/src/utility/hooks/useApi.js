@@ -1763,7 +1763,7 @@ function useApi(isDisplay=false) {
 		justice: {
 			get: (limit, page, sort, search, state, elselt, profession, gender) => instance.get(`/elselt/justice/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}&elselt=${elselt}&profession=${profession}&gender=${gender}`),
 			post: (cdata) => instance.post(`/elselt/justice/`, cdata),
-			put: (id, cdata) => instance.put(`/elselt/justice/${id}/`, cdata)
+			put: (cdata) => instance.put(`/elselt/justice/`, cdata)
 		},
 		// тэнцсэн элсэгчид
 		approve: {
