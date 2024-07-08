@@ -2561,6 +2561,10 @@ class LogSerializerAPView(
         sorting = self.request.query_params.get('sorting')
         profession = self.request.query_params.get('profession')
         elselt = self.request.query_params.get('elselt')
+        menu_option = self.request.query_params.get('menu_option')
+
+        if menu_option:
+            queryset = queryset.filter(type=menu_option)
 
         if profession:
             queryset = queryset.filter(

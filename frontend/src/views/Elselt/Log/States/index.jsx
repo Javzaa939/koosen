@@ -87,8 +87,10 @@ const States = () => {
     const professionApi = useApi().elselt.profession
     const admissionYearApi = useApi().elselt
 
+    // Цэсний утгууд PROFESSION = 1, STATE = 2
+    const menuOptions =  [1, 2]
     async function getDatas() {
-        const { success, data } = await allFetch(newsApi.get(rowsPerPage, currentPage, sortField, searchValue, adm, profession_id))
+        const { success, data } = await allFetch(newsApi.get(rowsPerPage, currentPage, sortField, searchValue, adm, profession_id, menuOptions[1]))
         if (success) {
             setDatas(data?.results)
             setTotalCount(data?.count)
