@@ -65,6 +65,24 @@ const ElseltEyesh = () => {
 	const [messageModal, setMessageModal] = useState(false)
 	const [selectedStudents, setSelectedStudents] = useState([])
 
+	//босго оноо state
+	const tentssenEsehOp = [
+		{
+			'id': 1,
+			'name': 'БҮРТГҮҮЛСЭН'
+		},
+		{
+			'id': 2,
+			'name': 'ТЭНЦСЭН'
+		},
+		{
+			'id': 3,
+			'name': 'ТЭНЦЭЭГҮЙ'
+		}
+	]
+	const [yesh_state, setEyeshState] = useState()
+	const [yesh_mhb_state, setEyeshMhbState] = useState()
+	
 	//Жагсаалт дата
 	const [datas, setDatas] = useState([])
 	const [total_count, setTotalCount] = useState('')
@@ -159,7 +177,7 @@ const ElseltEyesh = () => {
 
 	/* Жагсаалтын дата авах функц */
 	async function getDatas() {
-		const { success, data } = await allFetch(elseltApi.get(rowsPerPage, currentPage, searchValue, adm, profession_id, gender, state))
+		const { success, data } = await allFetch(elseltApi.get(rowsPerPage, currentPage, searchValue, adm, profession_id, gender, state, yesh_state, yesh_mhb_state))
 		if (success) {
 			setTotalCount(data?.count)
 			setDatas(data?.results)
@@ -184,7 +202,7 @@ const ElseltEyesh = () => {
 
 			return () => clearTimeout(timeoutId);
 		}
-	}, [sortField, currentPage, rowsPerPage, searchValue, adm, profession_id, gender, state])
+	}, [sortField, currentPage, rowsPerPage, searchValue, adm, profession_id, gender, state, yesh_state, yesh_mhb_state])
 
 	useUpdateEffect(() => {
 		getProfession()
@@ -522,9 +540,9 @@ const ElseltEyesh = () => {
 							getOptionLabel={(option) => option.name}
 						/>
 					</Col>
-					<Col md={3} sm={6} xs={12} >
+					<Col sm={6} lg={3} >
 						<Label className="form-label" for="state">
-							{t('Төлөв')}
+							{t('МХБ шалгалт төлөв')}
 						</Label>
 						<Select
 							name="state"
@@ -535,10 +553,10 @@ const ElseltEyesh = () => {
 							isLoading={isLoading}
 							placeholder={t('-- Сонгоно уу --')}
 							options={stateop || []}
-							value={stateop.find((c) => c.id === state)}
+							value={stateop.find((c) => c.id === yesh_mhb_state)}
 							noOptionsMessage={() => t('Хоосон байна.')}
 							onChange={(val) => {
-								setState(val?.id || '')
+								setEyeshMhbState(val?.id || '')
 							}}
 							styles={ReactSelectStyles}
 							getOptionValue={(option) => option.id}
@@ -560,6 +578,29 @@ const ElseltEyesh = () => {
 						<UncontrolledTooltip target='state_button'>
 							Сонгосон элсэгчдийн эеш оноог татах
 						</UncontrolledTooltip></Col> */}
+					<Col md={3} sm={6} xs={12} >
+						<Label className="form-label" for="tentssenEsehOp">
+							{t('ЭШ босго онооны төлөв')}
+						</Label>
+						<Select
+							name="tentssenEsehOp"
+							id="tentssenEsehOp"
+							classNamePrefix='select'
+							isClearable
+							className={classnames('react-select')}
+							isLoading={isLoading}
+							placeholder={t('-- Сонгоно уу --')}
+							options={tentssenEsehOp || []}
+							value={tentssenEsehOp.find((c) => c.id === yesh_state)}
+							noOptionsMessage={() => t('Хоосон байна.')}
+							onChange={(val) => {
+								setEyeshState(val?.id || '')
+							}}
+							styles={ReactSelectStyles}
+							getOptionValue={(option) => option.id}
+							getOptionLabel={(option) => option.name}
+						/>
+					</Col>
 				</Row>
 				<div className='d-flex justify-content-between my-50 mt-1'>
 					<div className='d-flex'>
