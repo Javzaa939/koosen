@@ -1050,7 +1050,7 @@ class ElseltHealthAnhanShat(
         end_date=self.request.query_params.get('end_date')
 
 
-        # Ял шийтгэл, Насны үзүүлэлтүүдэд ТЭНЦЭЭГҮЙ элсэгчдийг хасах
+        # Насны үзүүлэлтүүдэд ТЭНЦЭЭГҮЙ элсэгчдийг хасах
         queryset = queryset.exclude(
             age_state=AdmissionUserProfession.STATE_REJECT,
             gpa_state=AdmissionUserProfession.STATE_REJECT,
@@ -1058,7 +1058,7 @@ class ElseltHealthAnhanShat(
             yesh_state=AdmissionUserProfession.STATE_REJECT, # ЭШ оноо шалгалтад тэнцээгүй
             state__in=[AdmissionUserProfession.STATE_REJECT, AdmissionUserProfession.STATE_APPROVE]
         )
-    
+
         if gender:
             if gender == 'Эрэгтэй':
                 queryset = queryset.filter(gender__in=['1', '3', '5', '7', '9'])

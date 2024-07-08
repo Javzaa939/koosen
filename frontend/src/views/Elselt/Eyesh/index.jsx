@@ -426,8 +426,9 @@ const ElseltEyesh = () => {
 							color='primary'
 							className='d-flex align-items-center px-75'
 							id='state_button'
-							disabled={profession_id ? false : true}
 							onClick={() => getEyeshData()}
+                            disabled={(profession_id && Object.keys(user).length > 0 && (user.permissions.includes('lms-elselt-admission-create'))) ? false : true}
+
 						>
 							<RiEditFill className='me-25' />
 							Оноо татах
@@ -439,6 +440,7 @@ const ElseltEyesh = () => {
 							color='primary'
 							className='d-flex align-items-center px-75 ms-1'
 							id='sort_button'
+                            disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-elselt-admission-create')) ? false : true}
 							onClick={() => handleModal()}
 						>
 							<RiEditFill className='me-25' />
