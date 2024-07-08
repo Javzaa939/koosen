@@ -455,7 +455,7 @@ class AdmissionUserInfoAPIView(
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['user__first_name', 'user__register', 'user__email', 'gpa', 'org']
+    search_fields = ['user__first_name', 'user__register', 'user__email', 'gpa', 'org', 'user__code', 'user__last_name', 'user__mobile']
 
     def get_queryset(self):
         queryset = self.queryset
@@ -2625,7 +2625,26 @@ class UserScoreSortAPIView(generics.GenericAPIView):
             total_elsegch = data.get('totalElsegch')
             gender = data.get('gender')
             lesson_names = AdmissionLesson.objects.filter(lesson_code__in=lessons).values_list('lesson_name', flat=True)
-            user_ids = AdmissionUserProfession.objects.filter(profession=profession , age_state=AdmissionUserProfession.STATE_APPROVE, yesh_mhb_state=AdmissionUserProfession.STATE_APPROVE).values_list('user', flat=True)
+
+            adm_queryset = AdmissionUserProfession.objects.annotate(gender=(Substr('user__register', 9, 1))).filter(
+                profession=profession ,
+                age_state=AdmissionUserProfession.STATE_APPROVE,
+                yesh_mhb_state=AdmissionUserProfession.STATE_APPROVE
+            )
+
+            if int(gender) == 1: # Эрэгтэй хэрэглэгчид
+                adm_queryset = adm_queryset.filter(
+                    gender__in=['1', '3', '5', '7', '9']
+                ).values_list('user', flat=True)
+
+            if int(gender) == 2:
+                adm_queryset = adm_queryset.filter(
+                    gender__in=['0', '2', '4', '6', '8']
+                ).values_list('user', flat=True)
+
+            # Элсэгчийн ids
+            user_ids = adm_queryset.values_list('user', flat=True)
+
             # Хэрвээ тус хичээл AdmissionLesson-д байхгүй бол олдсонгүй гэсэн мэдээллийг буцаана
             if not lesson_names:
                 return request.send_error('ERR_002', 'ЭШ-ийн хичээлүүдийн дотор тус хичээл олдсонгүй')
