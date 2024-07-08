@@ -108,6 +108,13 @@ export function getColumns(currentPage, rowsPerPage, page_count, addModalHandler
 		{
 			maxWidth: "180px",
 			minWidth: "180px",
+			name: t("Бүртгэлийн дугаар"),
+			selector: (row) => row?.user?.code,
+			center: true
+		},
+		{
+			maxWidth: "180px",
+			minWidth: "180px",
 			name: t("Суурь ЭШ"),
 			selector: (row) => row?.first_yesh,
 			center: true
@@ -206,13 +213,13 @@ export function getColumns(currentPage, rowsPerPage, page_count, addModalHandler
 			maxWidth: "180px",
 			minWidth: "180px",
 			header: 'gender',
-			name: t("Бүртгэлийн дугаар"),
+			name: t("Овог нэр"),
 			reorder: true,
-			selector: (row) => row?.user?.code,
+			selector: (row) => row?.full_name,
 			center: true
 		},
 		{
-			name: "Үйлдэл",
+			name: "Төлөв солих",
 			center: true,
 			maxWidth: "120px",
 			minWidth: "120px",
@@ -226,7 +233,6 @@ export function getColumns(currentPage, rowsPerPage, page_count, addModalHandler
 					>
 						<Badge color="light-success" pill><CheckCircle  width={"15px"} /></Badge>
 					</a>
-					<UncontrolledTooltip placement='top' target={`description${row.id}`}>Мэдээлэл оруулах</UncontrolledTooltip>
 				</div>
 			),
 		}
