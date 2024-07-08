@@ -36,7 +36,6 @@ const Exam = () => {
 
     // select values
     var values = {
-        type: '',
         scope: '',
     };
 
@@ -77,7 +76,7 @@ const Exam = () => {
 
     //----------Backend-тэй харьцах функцууд----------//
     async function getDatas(){
-        const {success, data} = await fetchData(examApi.get(rowsPerPage, currentPage, sortField, searchValue))
+        const {success, data} = await fetchData(examApi.get(rowsPerPage, currentPage, sortField, searchValue, selectValue?.scope))
         if(success){
             setDatas(data?.results);
             setTotalCount(data?.count)
@@ -157,6 +156,10 @@ const Exam = () => {
         getOptionDatas()
     },[rowsPerPage, currentPage])
 
+    useEffect(() => {
+        getDatas()
+    },[selectValue])
+
     return(
         <Fragment>
             <Card>
@@ -203,44 +206,6 @@ const Exam = () => {
                                                     return {
                                                         ...current,
                                                         scope: val?.id || '',
-                                                    }
-                                                })
-                                            }}
-                                            styles={ReactSelectStyles}
-                                            getOptionValue={(option) => option.id}
-                                            getOptionLabel={(option) => option.name}
-                                        />
-                                    )
-                                }}
-                            />
-                        </Col>
-                        <Col sm={6} md={6} lg={3}>
-                            <Label className="form-label" for="type">
-                                {t('Төрөл')}
-                            </Label>
-                            <Controller
-                                control={control}
-                                defaultValue=''
-                                name="type"
-                                render={({ field: { value, onChange} }) => {
-                                    return (
-                                        <Select
-                                            name="type"
-                                            id="type"
-                                            classNamePrefix='select'
-                                            isClearable
-                                            className={classnames('react-select', { 'is-invalid': errors.type })}
-                                            isLoading={isLoading}
-                                            placeholder={t('-- Сонгоно уу --')}
-                                            options={type || []}
-                                            value={type.find((c) => c.id === value)}
-                                            noOptionsMessage={() => t('Хоосон байна.')}
-                                            onChange={(val) => {
-                                                onChange(val?.id || '')
-                                                setSelectValue(current => {
-                                                    return {
-                                                        ...current,
-                                                        type: val?.id || '',
                                                     }
                                                 })
                                             }}

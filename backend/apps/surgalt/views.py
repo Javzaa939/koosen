@@ -2473,6 +2473,11 @@ class PsychologicalTestAPIView(
     @has_permission(must_permissions=['lms-psychologicaltesting-exam-read'])
     def get(self, request, pk=None):
 
+        scope = self.request.query_params.get('scope')
+
+        if scope:
+            self.queryset = self.queryset.filter(scope_kind=scope)
+
         if pk:
             data = self.retrieve(request, pk).data
             return request.send_data(data)
