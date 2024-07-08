@@ -3277,3 +3277,56 @@ class EyeshOrderUserInfoAPIView(
         all_data = self.list(request).data
 
         return request.send_data(all_data)
+
+    def put(self, request, pk=None):
+
+        data = request.data
+        user = data.get('user')
+        if 'user' in data:
+            del data['user']
+        data['user'] = user
+
+        sid = transaction.savepoint()
+        try:
+            with transaction.atomic():
+                now = dt.datetime.now()
+                student = self.queryset.filter(pk=user).first()
+                if student:
+                    indicator_value = AdmissionIndicator.EESH_EXAM
+                    if data.get("state"):
+                        old_state = student.state
+                        student.state = data.get("state")
+                        student.updated_at = now
+                        student.state_description = data.get("state_description")
+                        student.save()
+
+                        StateChangeLog.objects.create(
+                            user=student.user,
+                            type=StateChangeLog.STATE,
+                            indicator=indicator_value,
+                            now_state=old_state,
+                            change_state=data.get("state"),
+                            updated_user=request.user if request.user.is_authenticated else None,
+                            updated_at=now
+                        )
+                    else:
+                        old_justice_state = student.justice_state
+                        student.updated_at = now
+                        student.justice_state = data.get("justice_state")
+                        student.justice_description = data.get("justice_description")
+                        student.save()
+
+                        StateChangeLog.objects.create(
+                            user=student.user,
+                            type=StateChangeLog.PROFESSION,
+                            indicator=indicator_value,
+                            now_state=old_justice_state,
+                            change_state=data.get("justice_state"),
+                            updated_user=request.user if request.user.is_authenticated else None,
+                            updated_at=now
+                        )
+        except Exception as e:
+            transaction.savepoint_rollback(sid)
+            return request.send_error("ERR_004", str(e))
+
+        return request.send_info('INF_002')
