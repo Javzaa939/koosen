@@ -2917,6 +2917,8 @@ class UserScoreSortAPIView(generics.GenericAPIView):
                 if reject_obj:
                     reject_obj.score_avg = item['score']
                     reject_obj.order_no = item['order_no']
+                    reject_obj.yesh_state = item['yesh_state']
+                    reject_obj.yesh_description = item['yesh_description']
                     reject_obj.save()
 
         # ЭШ босго оноо тэнцээгүй элсэгчид
