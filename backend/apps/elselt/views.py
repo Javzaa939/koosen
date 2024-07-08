@@ -3236,7 +3236,6 @@ class ElseltEyeshAPIView(
                     # Шинэ OBJECT үүсгэх
                         bulk_update_datas.append(UserScore(**data))
 
-                print(update_data_list)
                 # Bulk Шинэ OBJECT үүсгэх
                 UserScore.objects.bulk_create(bulk_update_datas)
 

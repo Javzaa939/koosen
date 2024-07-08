@@ -133,7 +133,7 @@ class UserScoreSerializer(serializers.ModelSerializer):
     def get_is_success(self, obj):
         is_success = False
         # TODO lesson_name шалгахдаа iexact ашиглана том жижиг үсэг орж ирхээс сэргийлэх
-        data = UserScore.objects.filter(user_id = obj.user , lesson_name = 'Монгол хэл бичиг').values_list('scaledScore', flat=True)
+        data = UserScore.objects.filter(user_id = obj.user , lesson_name__iexact='Монгол хэл бичиг').values_list('scaledScore', flat=True)
         if data and max(data) >= 400:
             is_success = True
 
