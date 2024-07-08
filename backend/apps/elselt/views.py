@@ -2763,13 +2763,20 @@ class UserScoreSortAPIView(generics.GenericAPIView):
                 user__in=user_ids,
                 lesson_name__in=lesson_names,
                 gender__in=['1', '3', '5', '7', '9']
-            ).values('user', 'lesson_name', 'scaledScore')
-        else:
+            ).values_list('user', flat=True)
+
+        if int(gender) == 2:
             elsegch_users = self.queryset.filter(
                 user__in=user_ids,
                 lesson_name__in=lesson_names,
                 gender__in=['0', '2', '4', '6', '8']
-            ).values('user', 'lesson_name', 'scaledScore')
+            ).values_list('user', flat=True)
+
+        if int(gender) == 3:
+            elsegch_users = self.queryset.filter(
+                user__in=user_ids,
+                lesson_name__in=lesson_names,
+            ).values_list('user', flat=True)
 
         # Тус хэрэглэгч нэг шалгалтыг олон удаа өгсөн бол зөвхөн хамгийн өндөр оноог нь авна
         max_scores = {}

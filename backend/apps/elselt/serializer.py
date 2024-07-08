@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.db.models import Q, Func,F, IntegerField, CharField, OuterRef,Subquery
+from django.db.models import F, Max
 from django.db.models.functions import Cast
 from datetime import datetime
 from main.utils.function.utils import calculate_birthday, calculate_age
@@ -1096,10 +1097,42 @@ class EyeshOrderUserInfoSerializer(serializers.ModelSerializer):
     profession=serializers.SerializerMethodField()
     full_name = serializers.CharField(source='user.full_name', default='', read_only=True)
     degree_name = serializers.CharField(source='profession.profession.degree.degree_name', default='')
+    first_yesh = serializers.SerializerMethodField()
+    second_yesh = serializers.SerializerMethodField()
 
     class Meta:
         model = AdmissionUserProfession
         fields='__all__'
+
+    def get_first_yesh(self, obj):
+        """ Элсэгч суурь шалгалт """
+
+        # Тухайн мэргэжлийн ЭШ онооны босго оноо
+        profession = AdmissionBottomScore.objects.filter(profession=obj.profession.profession, score_type=AdmissionBottomScore.GENERAL).first()
+
+        # Мэргэжлийн Суурь шалгалт хичээлийн нэр
+        lesson_name = profession.admission_lesson.lesson_name
+
+        # Тухайн хичээлээр ЭШ өгсөн бол оноонуудын хамгийн өндрийг нь авна
+        max_score = UserScore.objects.filter(user=obj.user, lesson_name__iexact=lesson_name).aggregate(max_score=Max('scaledScore'))
+
+        return max_score.get('max_score')
+
+    def get_second_yesh(self, obj):
+        """ Элсэгч дагалдан шалгалт """
+
+        # Тухайн мэргэжлийн ЭШ онооны босго оноо
+        profession = AdmissionBottomScore.objects.filter(profession=obj.profession.profession, score_type=AdmissionBottomScore.SUPPORT).first()
+        if profession:
+
+            # Мэргэжлийн Суурь шалгалт хичээлийн нэр
+            lesson_name = profession.admission_lesson.lesson_name
+
+            # Тухайн хичээлээр ЭШ өгсөн бол оноонуудын хамгийн өндрийг нь авна
+            max_score = UserScore.objects.filter(user=obj.user, lesson_name__iexact=lesson_name).aggregate(max_score=Max('scaledScore'))
+            return max_score.get('max_score')
+        else:
+            return ''
 
     def get_gender (self,obj):
         birthday,gender = calculate_birthday(obj.user.register)

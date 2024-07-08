@@ -39,6 +39,25 @@ export function getColumns(currentPage, rowsPerPage, page_count) {
 			minWidth: "80px",
 		},
 		{
+			maxWidth: "180px",
+			minWidth: "180px",
+			header: 'register',
+			name: t("РД"),
+			reorder: true,
+			selector: (row, index) => {
+				let tableRow = document.getElementById(`row-${row.id}`)
+
+				// Тэнцсэн тэнцээгүйгээс хамаарж border-left-д улаан ногоон border өгөх
+				if (tableRow) {
+					let border = row.yesh_state == 1 ? '' : row.yesh_state == 2 ? '4px solid rgba(40, 199, 111, 1)' : '4px solid #EA5455'
+					tableRow.style.borderLeft = `${border}`
+				}
+
+				return row?.user?.register
+			},
+			center: true
+		},
+		{
 			minWidth: "150px",
 			header: 'user__last_name',
 			name: t("Овог"),
@@ -57,15 +76,6 @@ export function getColumns(currentPage, rowsPerPage, page_count) {
 			reorder: true,
 			center: true,
 			wrap: true,
-		},
-		{
-			maxWidth: "180px",
-			minWidth: "180px",
-			header: 'register',
-			name: t("РД"),
-			reorder: true,
-			selector: (row) => row?.user?.register,
-			center: true
 		},
 		{
 			maxWidth: "250px",
@@ -98,19 +108,28 @@ export function getColumns(currentPage, rowsPerPage, page_count) {
 		{
 			maxWidth: "180px",
 			minWidth: "180px",
-			header: 'gender',
-			name: t("Бүртгэлийн дугаар"),
+			header: 'register',
+			name: t("ЭЕШ"),
 			reorder: true,
-			selector: (row) => row?.user?.code,
+			selector: (row) => row?.score_avg,
 			center: true
 		},
 		{
 			maxWidth: "180px",
 			minWidth: "180px",
 			header: 'register',
-			name: t("ЭЕШ"),
+			name: t("Суурь ЭШ"),
 			reorder: true,
-			selector: (row) => row?.score_avg,
+			selector: (row) => row?.first_yesh,
+			center: true
+		},
+		{
+			maxWidth: "180px",
+			minWidth: "180px",
+			header: 'register',
+			name: t("Дагалдан ЭШ"),
+			reorder: true,
+			selector: (row) => row?.second_yesh,
 			center: true
 		},
 		{
@@ -185,6 +204,15 @@ export function getColumns(currentPage, rowsPerPage, page_count) {
 			name: t("ИМЭЙЛ"),
 			reorder: true,
 			selector: (row) => row?.user?.email,
+			center: true
+		},
+		{
+			maxWidth: "180px",
+			minWidth: "180px",
+			header: 'gender',
+			name: t("Бүртгэлийн дугаар"),
+			reorder: true,
+			selector: (row) => row?.user?.code,
 			center: true
 		},
 	]
