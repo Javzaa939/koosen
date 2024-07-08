@@ -3230,18 +3230,20 @@ class ElseltEyeshAPIView(
                         existing_user_score.semester = data['semester']
                         existing_user_score.school_code = data['school_code']
                         existing_user_score.year = data['year']
+                        existing_user_score.scaledScore = data['scaledScore']
                         update_data_list.append(existing_user_score)
                     else:
                     # Шинэ OBJECT үүсгэх
                         bulk_update_datas.append(UserScore(**data))
 
+                print(update_data_list)
                 # Bulk Шинэ OBJECT үүсгэх
                 UserScore.objects.bulk_create(bulk_update_datas)
 
                 # Bulk update existing instances
                 UserScore.objects.bulk_update(update_data_list, [
                      'percentage_score', 'raw_score', 'word_score',
-                    'exam_loc', 'exam_loc_code', 'school_name', 'school_code'
+                    'exam_loc', 'exam_loc_code', 'school_name', 'school_code', 'scaledScore'
                 ])
 
             #UserScore бүх датаг UserScoreSerializer ашиглан датаг авна
@@ -3276,8 +3278,8 @@ class ElseltEyeshAPIView(
                 admission_user_data.save()
 
         #AdmissionUserProfession тэнцсэн тэнцээгүй сурагч
-        failed_student = queryset.filter(yesh_state = AdmissionUserProfession.STATE_REJECT).count()
-        passed_student = queryset.filter(Q(yesh_state=AdmissionUserProfession.STATE_APPROVE) | Q(yesh_state=AdmissionUserProfession.STATE_SEND)).count()
+        failed_student = queryset.filter(yesh_mhb_state = AdmissionUserProfession.STATE_REJECT).count()
+        passed_student = queryset.filter(Q(yesh_mhb_state=AdmissionUserProfession.STATE_APPROVE)).count()
 
         send_data = {
             'total_count' : failed_student + passed_student,
