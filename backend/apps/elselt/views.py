@@ -1049,14 +1049,10 @@ class ElseltHealthAnhanShat(
         start_date=self.request.query_params.get('start_date')
         end_date=self.request.query_params.get('end_date')
 
-
-        # Насны үзүүлэлтүүдэд ТЭНЦЭЭГҮЙ элсэгчдийг хасах
-        queryset = queryset.exclude(
-            age_state=AdmissionUserProfession.STATE_REJECT,
-            gpa_state=AdmissionUserProfession.STATE_REJECT,
-            yesh_mhb_state=AdmissionUserProfession.STATE_REJECT, # МХБ шалгалтад тэнцээгүй
-            yesh_state=AdmissionUserProfession.STATE_REJECT, # ЭШ оноо шалгалтад тэнцээгүй
-            state__in=[AdmissionUserProfession.STATE_REJECT, AdmissionUserProfession.STATE_APPROVE]
+        queryset = queryset.filter(
+            age_state=AdmissionUserProfession.STATE_APPROVE,
+            gpa_state__in=[AdmissionUserProfession.STATE_APPROVE, AdmissionUserProfession.STATE_SEND],
+            state=AdmissionUserProfession.STATE_SEND
         )
 
         if gender:
@@ -1068,6 +1064,12 @@ class ElseltHealthAnhanShat(
         # элсэлт
         if elselt:
             queryset = queryset.filter(profession__admission=elselt)
+            # Дэд бакалавр болон бакалаврын бүртгэл
+            if elselt == '4':
+                queryset = queryset.filter(
+                    yesh_mhb_state=AdmissionUserProfession.STATE_APPROVE, # МХБ шалгалтад тэнцээгүй
+                    yesh_state=AdmissionUserProfession.STATE_APPROVE, # ЭШ оноо шалгалтад тэнцээгүй
+                )
 
         # хөтөлбөр
         if profession:
