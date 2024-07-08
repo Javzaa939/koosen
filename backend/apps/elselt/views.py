@@ -2624,7 +2624,7 @@ class UserScoreSortAPIView(generics.GenericAPIView):
             profession = data.get('profession')
             total_elsegch = data.get('totalElsegch')
             gender = data.get('gender')
-            lesson_names = AdmissionLesson.objects.filter(lesson_code__in=lessons).values_list('lesson_name', flat=True)
+            lesson_names = AdmissionLesson.objects.filter(id__in=lessons).values_list('lesson_name', flat=True)
 
             adm_queryset = AdmissionUserProfession.objects.annotate(gender=(Substr('user__register', 9, 1))).filter(
                 profession=profession ,
