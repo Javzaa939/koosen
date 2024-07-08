@@ -3345,9 +3345,6 @@ class EyeshOrderUserInfoAPIView(
 
         data = request.data
         user = data.get('user')
-        if 'user' in data:
-            del data['user']
-        data['user'] = user
 
         sid = transaction.savepoint()
         try:
@@ -3356,11 +3353,11 @@ class EyeshOrderUserInfoAPIView(
                 student = self.queryset.filter(pk=user).first()
                 if student:
                     indicator_value = AdmissionIndicator.EESH_EXAM
-                    if data.get("state"):
-                        old_state = student.state
-                        student.state = data.get("state")
+                    if data.get("yesh_state"):
+                        old_state = student.yesh_state
+                        student.yesh_state = data.get("yesh_state")
                         student.updated_at = now
-                        student.state_description = data.get("state_description")
+                        student.yesh_description = data.get("yesh_description")
                         student.save()
 
                         StateChangeLog.objects.create(
@@ -3368,15 +3365,15 @@ class EyeshOrderUserInfoAPIView(
                             type=StateChangeLog.STATE,
                             indicator=indicator_value,
                             now_state=old_state,
-                            change_state=data.get("state"),
+                            change_state=data.get("yesh_state"),
                             updated_user=request.user if request.user.is_authenticated else None,
                             updated_at=now
                         )
                     else:
-                        old_justice_state = student.justice_state
+                        old_justice_state = student.yesh_state
                         student.updated_at = now
-                        student.justice_state = data.get("justice_state")
-                        student.justice_description = data.get("justice_description")
+                        student.yesh_state = data.get("yesh_state")
+                        student.yesh_description = data.get("yesh_description")
                         student.save()
 
                         StateChangeLog.objects.create(
@@ -3384,7 +3381,7 @@ class EyeshOrderUserInfoAPIView(
                             type=StateChangeLog.PROFESSION,
                             indicator=indicator_value,
                             now_state=old_justice_state,
-                            change_state=data.get("justice_state"),
+                            change_state=data.get("yesh_state"),
                             updated_user=request.user if request.user.is_authenticated else None,
                             updated_at=now
                         )

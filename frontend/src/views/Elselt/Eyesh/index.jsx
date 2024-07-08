@@ -709,7 +709,7 @@ const ElseltEyesh = () => {
 						</Button>
 					</Col>
 				</Row>
-				<div className="react-dataTable react-dataTable-selectable-rows" id='datatableLeftTwoRightOne'>
+				<div className="react-dataTable react-dataTable-selectable-rows" id='datatableLeftTwoRightTwo'>
 					<DataTable
 						noHeader
 						paginationServer

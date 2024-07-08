@@ -24,6 +24,7 @@ urlpatterns = [
     path('admissionuserdata/gpa_check/confirm/',GpaCheckConfirmUserInfoAPIView.as_view()),
     path('admissionuserdata/eyesh_check/',EyeshCheckUserInfoAPIView.as_view()),
     path('admissionuserdata/eyesh/',EyeshOrderUserInfoAPIView.as_view()),
+    path('admissionuserdata/eyesh/<int:pk>/',EyeshOrderUserInfoAPIView.as_view()),
 
     path('profession/', ElseltProfession.as_view()),
     path('profession/<int:pk>/', ElseltProfession.as_view()),

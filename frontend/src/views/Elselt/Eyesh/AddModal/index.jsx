@@ -2,23 +2,21 @@ import React, { useEffect } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import Select from 'react-select'
 
-import { convertDefaultValue, validate, ReactSelectStyles } from '@utils'
+import { ReactSelectStyles } from '@utils'
 import { Modal, Label, ModalHeader, ModalBody, Form, Input, Button, FormFeedback } from 'reactstrap'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import classnames from 'classnames'
 
-import { validateSchema } from './validateSchema'
-
 function AddModal({ addModal, addModalHandler, addModalData, getDatas, stateop }) {
-    const { control, handleSubmit, formState: { errors }, reset, resetField, setValue, setError } = useForm(validate(validateSchema));
+    const { control, handleSubmit, formState: { errors }, reset, setValue, setError } = useForm();
 
     const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: true, bg: 3 });
     const elseltApi = useApi().elselt.eyesh_order
 
     async function onSubmit(cdata) {
-        cdata['user'] = addModalData?.user
+        cdata['user'] = addModalData?.user?.id
 
         if (addModalData?.user) {
             const { success, error } = await fetchData(elseltApi.put(addModalData?.user?.id, cdata))
@@ -36,18 +34,16 @@ function AddModal({ addModal, addModalHandler, addModalData, getDatas, stateop }
     }
 
     useEffect(() => {
-        var editz = addModalData?.user
-        var keyz = editz ? Object.keys(editz) : []
-
-        if (editz && keyz.length > 0) {
-            if (editz === null) return
-            for (let key in editz) {
-                if (editz[key] !== null)
-                    setValue(key, editz[key])
-                else setValue(key, '')
+        for(let key in addModalData) {
+            if (key === 'yesh_state') {
+                setValue('yesh_state', addModalData[key])
+            }
+            if (key === 'yesh_description') {
+                setValue('yesh_description', addModalData[key])
             }
         }
-    }, [])
+    }, [addModalData])
+
     return (
         <Modal
             isOpen={addModal}
@@ -56,7 +52,7 @@ function AddModal({ addModal, addModalHandler, addModalData, getDatas, stateop }
             backdrop='static'
         >
             <ModalHeader toggle={addModalHandler}>
-                Үзлэгийн хариу
+                ЭШ төлөв солих
             </ModalHeader>
             <ModalBody>
                 <div style={{ minHeight: 300 }}>
@@ -66,6 +62,22 @@ function AddModal({ addModal, addModalHandler, addModalData, getDatas, stateop }
                     {
                         addModalData ?
                             <Form className='d-flex flex-column' style={{ minHeight: 300 }} onSubmit={handleSubmit(onSubmit)}>
+                                <div style={{ flex: 1 }}>
+                                    <div className='m-50'>
+                                        <div style={{ fontWeight: 700, fontSize: 18 }}>
+                                            <span>
+                                            {
+                                                addModalData?.full_name + `   `
+                                            }
+                                            </span>
+                                            <span>
+                                            {
+                                                addModalData?.user?.register
+                                            }
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div style={{ flex: 1 }}>
                                     <div className='m-50'>
                                         <Label className='form-label' for='yesh_state'>
@@ -116,16 +128,15 @@ function AddModal({ addModal, addModalHandler, addModalData, getDatas, stateop }
                                                     placeholder='Тайлбар'
                                                     style={{ minHeight: 100 }}
                                                     bsSize='sm'
-                                                    // invalid={errors.yesh_description && true}
                                                 >
                                                 </Input>
                                             )}
                                         />
-                                        {errors.description && <FormFeedback className='d-block'>{errors.description.message}</FormFeedback>}   
+                                        {errors.description && <FormFeedback className='d-block'>{errors.description.message}</FormFeedback>}
                                     </div>
                                 </div>
                                 <div className='m-50'>
-                                    <Button type='submit' color='primary' disabled={isLoading} onClick={onSubmit}>
+                                    <Button type='submit' color='primary' disabled={isLoading}>
                                         Хадгалах
                                     </Button>
                                 </div>
