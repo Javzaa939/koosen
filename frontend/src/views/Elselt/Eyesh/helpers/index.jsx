@@ -108,28 +108,24 @@ export function getColumns(currentPage, rowsPerPage, page_count) {
 		{
 			maxWidth: "180px",
 			minWidth: "180px",
-			header: 'register',
-			name: t("ЭЕШ"),
-			reorder: true,
-			selector: (row) => row?.score_avg,
-			center: true
-		},
-		{
-			maxWidth: "180px",
-			minWidth: "180px",
-			header: 'register',
 			name: t("Суурь ЭШ"),
-			reorder: true,
 			selector: (row) => row?.first_yesh,
 			center: true
 		},
 		{
 			maxWidth: "180px",
 			minWidth: "180px",
-			header: 'register',
 			name: t("Дагалдан ЭШ"),
-			reorder: true,
 			selector: (row) => row?.second_yesh,
+			center: true
+		},
+		{
+			maxWidth: "180px",
+			minWidth: "180px",
+			header: 'score_avg',
+			name: t("ЭЕШ"),
+			reorder: true,
+			selector: (row) => row?.score_avg,
 			center: true
 		},
 		{

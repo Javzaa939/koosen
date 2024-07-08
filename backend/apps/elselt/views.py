@@ -2763,20 +2763,20 @@ class UserScoreSortAPIView(generics.GenericAPIView):
                 user__in=user_ids,
                 lesson_name__in=lesson_names,
                 gender__in=['1', '3', '5', '7', '9']
-            ).values_list('user', flat=True)
+            ).values('user', 'lesson_name', 'scaledScore')
 
         if int(gender) == 2:
             elsegch_users = self.queryset.filter(
                 user__in=user_ids,
                 lesson_name__in=lesson_names,
                 gender__in=['0', '2', '4', '6', '8']
-            ).values_list('user', flat=True)
+            ).values('user', 'lesson_name', 'scaledScore')
 
         if int(gender) == 3:
             elsegch_users = self.queryset.filter(
                 user__in=user_ids,
                 lesson_name__in=lesson_names,
-            ).values_list('user', flat=True)
+            ).values('user', 'lesson_name', 'scaledScore')
 
         # Тус хэрэглэгч нэг шалгалтыг олон удаа өгсөн бол зөвхөн хамгийн өндөр оноог нь авна
         max_scores = {}
@@ -2828,14 +2828,16 @@ class UserScoreSortAPIView(generics.GenericAPIView):
         # Дараагаар үндсэн list дотроо зөвхөн тухайн хэрэглэгч дотор 2 хичээлийн мэдээлэл group-лэгдсэн датаг нэмнэ
         grouped_list = [group for group in grouped_data.values() if len(group) == 2]
 
+        # 2 хичээлийн нэг хичээлээр ЭШ өгөөгүй хүүхдүүд
+        grouped_one_list = [group for group in grouped_data.values() if len(group) == 1]
+
         # 2 хичээлийн аль нэгнийхэн босго оноонд хүрээгүй тохиолдодл state солиж тэнцүүлэхгүй
         users_to_remove = []
 
         for item in grouped_list:
             for sub_item in item:
-
                 # Тухайн хичээлийн босго оноо
-                bottomscore = AdmissionBottomScore.objects.filter(admission_lesson__lesson_name=sub_item['lesson_name'], profession=profession_obj.profession).values_list('bottom_score', flat=True).first()
+                bottomscore = AdmissionBottomScore.objects.filter(admission_lesson__lesson_name=sub_item['lesson_name'], profession=profession_obj.profession, score_type=sub_item['score_type']).values_list('bottom_score', flat=True).first()
                 if bottomscore >= sub_item['scaledScore']:
                     users_to_remove.append(sub_item['user'])
                     break
@@ -2871,13 +2873,45 @@ class UserScoreSortAPIView(generics.GenericAPIView):
                 # all_score дотроо датагаа user,score-оор нь цэгцлэнэ
                 all_scores.append({'score': round(score), 'user': user})
 
+        all_one_scores = []
+        # 2 хичээлээр шалгаж байгаа үед 1 хичээлээр нь ЭШ өгсөн элсэгчид
+        for group_one in grouped_one_list:
+            # user_scores дотор нийт жинлэгдсэн оноог хадгална
+            user_scores = {}
+
+            for entry in group_one:
+                # Мэдээллүүдээ багцалж аваад
+                user = entry['user']
+                score_type = entry['score_type']
+                scaled_score = entry['scaledScore']
+
+                # Хэрвээ тус хичээлийн score_type GENERAL байвал weight-ийг 70% гэж үзнэ
+                # Бусад үед дагалдах хичээл гэж ойлгоод 30% байна
+                weighted_score = scaled_score * 1
+
+                # Хэрвээ user_scores дотор тухайн хэрэглэгчийн id-аар илэрхийлэгдэх
+                # key-тэй оноо байвал тэр оноон дээр нь нэмнэ
+                if user in user_scores:
+                    user_scores[user] += weighted_score
+                else: # Байхгүй бол тус key-гээр оноог үүсгэнэ
+                    user_scores[user] = weighted_score
+
+            # Нийт жинлэгдсэн оноо үүссэний дараа
+            for user, score in user_scores.items():
+                # all_one_scores дотроо датагаа user,score-оор нь цэгцлэнэ
+                all_one_scores.append({'score': round(score), 'user': user})
+
         approved_user_bottom_score = [item for item in all_scores if item['user'] not in users_to_remove]
         rejected_user_bottom_score = [item for item in all_scores if item['user'] in users_to_remove]
 
         # Scores-оор орж ирсэн датаг score-уудийг нь ашиглан эрэмбэлэнэ
         sorted_approve_scores = sorted(approved_user_bottom_score, key=lambda x: x['score'], reverse=True)
 
+        # Босго оноо даваагүй элсэгчид
         sorted_rejected_scores = sorted(rejected_user_bottom_score, key=lambda x: x['score'], reverse=True)
+
+        # ЭШ-ийн 2 хичээлийн 1-г л өгсөн элсэгчид
+        sorted_one_rejected_scores = sorted(all_one_scores, key=lambda x: x['score'], reverse=True)
 
         approve_order_no = 0
         # Тухайн sort хийсэн датаг index-ээс шалтгаалан order_no-уудыг нэмж өгнө
@@ -2936,9 +2970,6 @@ class UserScoreSortAPIView(generics.GenericAPIView):
             item['yesh_description'] = 'ЭШ-ийн оноо босго онооны шалгуурыг хангасангүй.'
 
             # ЭШ оноогоор тэнцсэн ч хяналтын тоонд багтсаагүй датаг хадгалах хэсэг
-            user = item['user']
-            user = AdmissionUserProfession.objects.filter(user=user)
-
             reject_off_obj = AdmissionUserProfession.objects.filter(
                 user=item['user']
             ).first()
@@ -2949,6 +2980,25 @@ class UserScoreSortAPIView(generics.GenericAPIView):
                 reject_off_obj.yesh_state = item['yesh_state']
                 reject_off_obj.yesh_description = item['yesh_description']
                 reject_off_obj.save()
+
+        # ЭШ 2 хичээлээр шалгаж байхад 1 хичээлээр л ЭШ өгсөн элсэгчид
+        for idx, item in enumerate(sorted_one_rejected_scores):
+            approve_order_no = approve_order_no + 1
+            item['order_no'] = approve_order_no
+            item['yesh_state'] = AdmissionUserProfession.STATE_REJECT
+            item['yesh_description'] = 'ЭШ-ын хичээл дутуу учраас тэнцсэнгүй.'
+
+            # ЭШ 2 хичээлээр шалгаж байхад 1 хичээлээр л ЭШ өгсөн элсэгчид датаг хадгалах хэсэг
+            reject_one_off_obj = AdmissionUserProfession.objects.filter(
+                user=item['user']
+            ).first()
+
+            if reject_one_off_obj:
+                reject_one_off_obj.score_avg = item['score']
+                reject_one_off_obj.order_no = item['order_no']
+                reject_one_off_obj.yesh_state = item['yesh_state']
+                reject_one_off_obj.yesh_description = item['yesh_description']
+                reject_one_off_obj.save()
 
     # Нийт өгөгдлөө update хийх function
     def save_scores(self, scores, total_elsegch, bottom_score):
@@ -3247,7 +3297,7 @@ class EyeshOrderUserInfoAPIView(
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['user__first_name', 'user__register', 'user__email', 'user__last_name', 'user__mobile']
+    search_fields = ['user__first_name', 'user__register', 'user__email', 'user__last_name', 'user__mobile', 'user__code']
 
     def get_queryset(self):
         user_ids = UserScore.objects.values_list('user', flat=True)
