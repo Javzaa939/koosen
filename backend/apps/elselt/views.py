@@ -2673,7 +2673,7 @@ class UserScoreSortAPIView(generics.GenericAPIView):
         yesh_score_user_ids = user_score_users.values_list('user', flat=True)
 
         # Шалгаж байгаа хичээлээр огт ЭШ өгөөгүй хүүхдүүд
-        not_yesh_score_user_ids = list(user_ids) - list(yesh_score_user_ids)
+        not_yesh_score_user_ids = list(set(user_ids) - set(yesh_score_user_ids))
 
         # ЭШ өгөөгүй хүүхдүүдийг state өөрчлөх
         AdmissionUserProfession.objects.filter(user__in=not_yesh_score_user_ids).update(
@@ -3013,7 +3013,6 @@ class UserScoreSortAPIView(generics.GenericAPIView):
         # Тэнцсэн болон тэнцээгүй хэрэглэгчидийг ялгана
         for item in sorted_scores:
             if item['score'] >= bottom_score:
-                print('success', item['score'])
                 # Нийт авах элсэгчдийн тоон дотор эрэмбэлсэн хэрэглэгчийн эрэмбийн дугаар байвал
                 if item['order_no'] <= int(total_elsegch):
                     item['yesh_state'] = AdmissionUserProfession.STATE_APPROVE
