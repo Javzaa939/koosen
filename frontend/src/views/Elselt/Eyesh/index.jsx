@@ -32,6 +32,7 @@ import AuthContext from "@context/AuthContext"
 
 import { SortModal } from './SortModal'
 import useUpdateEffect from '@hooks/useUpdateEffect';
+import AddModal from './AddModal';
 
 
 const ElseltEyesh = () => {
@@ -98,6 +99,8 @@ const ElseltEyesh = () => {
 
 	//Modal
 	const [orderModal, setOrderModal] = useState(false)
+	const [addModal, setAddModal] = useState(false)
+	const [addModalData, setAddModalData] = useState(null)
 
 	// API
 	const professionApi = useApi().elselt.profession
@@ -414,6 +417,11 @@ const ElseltEyesh = () => {
 		setModal(!modal)
 	}
 
+    function addModalHandler(e, data) {
+        setAddModal(!addModal)
+        setAddModalData(data || null)
+    }
+
 	return (
 		<Fragment>
 			<OrderModal
@@ -435,6 +443,16 @@ const ElseltEyesh = () => {
 				selectedStudents={selectedStudents}
 				getDatas={getDatas}
 			/>
+			{
+				addModal &&
+				<AddModal
+					addModal={addModal}
+					addModalHandler={addModalHandler}
+					addModalData={addModalData}
+					getDatas={getDatas}
+					stateop={stateop}
+				/>
+			}
 			{isLoading && Loader}
 			<Card>
 				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
@@ -691,7 +709,7 @@ const ElseltEyesh = () => {
 						</Button>
 					</Col>
 				</Row>
-				<div className="react-dataTable react-dataTable-selectable-rows" id='datatableLeftTwoRightOne'>
+				<div className="react-dataTable react-dataTable-selectable-rows" id='datatableLeftTwoRightTwo'>
 					<DataTable
 						noHeader
 						paginationServer
@@ -711,7 +729,7 @@ const ElseltEyesh = () => {
 						print='true'
 						theme="solarized"
 						onSort={handleSort}
-						columns={getColumns(currentPage, rowsPerPage === 'Бүгд' ? 1 : rowsPerPage, total_count)}
+						columns={getColumns(currentPage, rowsPerPage === 'Бүгд' ? 1 : rowsPerPage, total_count, addModalHandler)}
 						sortIcon={<ChevronDown size={10} />}
 						paginationPerPage={rowsPerPage === 'Бүгд' ? 1 : rowsPerPage}
 						paginationDefaultPage={currentPage}

@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { Badge, Input, UncontrolledTooltip } from 'reactstrap';
-import { Edit, Eye, Type } from "react-feather";
+import { CheckCircle, Edit, Eye, Type } from "react-feather";
 import { t } from 'i18next'
 
 import moment from 'moment'
@@ -9,7 +9,7 @@ import useLoader from "@hooks/useLoader";
 import { wrap } from 'highcharts';
 
 // Хүснэгтийн баганууд
-export function getColumns(currentPage, rowsPerPage, page_count) {
+export function getColumns(currentPage, rowsPerPage, page_count, addModalHandler) {
 
 	const { fetchData } = useLoader({ isFullScreen: false })
 	const focusData = useRef(undefined)
@@ -103,6 +103,13 @@ export function getColumns(currentPage, rowsPerPage, page_count) {
 			name: t("Хүйс"),
 			reorder: true,
 			selector: (row) => row?.gender,
+			center: true
+		},
+		{
+			maxWidth: "180px",
+			minWidth: "180px",
+			name: t("Бүртгэлийн дугаар"),
+			selector: (row) => row?.user?.code,
 			center: true
 		},
 		{
@@ -206,11 +213,29 @@ export function getColumns(currentPage, rowsPerPage, page_count) {
 			maxWidth: "180px",
 			minWidth: "180px",
 			header: 'gender',
-			name: t("Бүртгэлийн дугаар"),
+			name: t("Овог нэр"),
 			reorder: true,
-			selector: (row) => row?.user?.code,
+			selector: (row) => row?.full_name,
 			center: true
 		},
+		{
+			name: "Төлөв солих",
+			center: true,
+			maxWidth: "120px",
+			minWidth: "120px",
+			selector: (row) => (
+				<div className="text-center" style={{ width: "auto" }}>
+					<a
+						role="button"
+						onClick={(e) => { addModalHandler(e, row)} }
+						id={`description${row?.id}`}
+						className="me-1"
+					>
+						<Badge color="light-success" pill><CheckCircle  width={"15px"} /></Badge>
+					</a>
+				</div>
+			),
+		}
 	]
 
 	return columns

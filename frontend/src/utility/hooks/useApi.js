@@ -1797,6 +1797,7 @@ function useApi(isDisplay=false) {
 		},
 		// ЭЕШ хэсгийн жагсаалт татах
 		eyesh_order:{
+			put: (id, cdata) => instance.put(`/elselt/admissionuserdata/eyesh/${id}/`, cdata),
 			get: (limit, page, search, lesson_year_id, profession_id , gender, state, yesh_state, yesh_mhb_state) =>
 				instance.get(`/elselt/admissionuserdata/eyesh/?page=${page}&limit=${limit}&search=${search}&elselt=${lesson_year_id}&profession=${profession_id}&gender=${gender}&state=${state}&yesh_state=${yesh_state}&yesh_mhb_state=${yesh_mhb_state}`),
 		},
