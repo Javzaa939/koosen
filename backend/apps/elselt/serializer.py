@@ -253,22 +253,26 @@ class AdmissionUserInfoSerializer(serializers.ModelSerializer):
 
         # Тухайн сургуулийн насны шалгуурыг олох
         indicator = AdmissionIndicator.objects.filter(admission_prof=obj.profession, value=AdmissionIndicator.NAS).first()
-        if indicator and (indicator.limit_mах or indicator.limit_min):
-            if indicator.limit_min or 0 < user_age <= indicator.limit_mах or 100:
+
+        # Насны шалгуурыг сольсон тохиолдолд дахин шалгах шаардлагагүй
+        if obj.age_state == 2 or obj.age_state == 3:
+            return user_age
+        else:
+            if indicator and (indicator.limit_mах or indicator.limit_min):
+                if indicator.limit_min or 0 < user_age <= indicator.limit_mах or 100:
+                    obj.age_state = 2
+                    obj.age_description = None
+                else:
+                    obj.age_state = 3
+                    obj.state = 3
+                    obj.state_description = "НАС шалгуурын болзолыг хангаагүй улмаас тэнцсэнгүй"
+                    obj.age_description = "НАС шалгуурын болзолыг хангаагүй улмаас тэнцсэнгүй"
+            else:
                 obj.age_state = 2
                 obj.age_description = None
-            else:
-                obj.age_state = 3
-                obj.state = 3
-                obj.state_description = "НАС шалгуурын болзолыг хангаагүй улмаас тэнцсэнгүй"
-                obj.age_description = "НАС шалгуурын болзолыг хангаагүй улмаас тэнцсэнгүй"
-        else:
-            obj.age_state = 2
-            obj.age_description = None
+            obj.save()
 
-        obj.save()
-
-        return user_age
+            return user_age
 
     def get_anhan_uzleg(self,obj):
         user = obj.user.id

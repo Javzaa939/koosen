@@ -2664,7 +2664,7 @@ class UserScoreSortAPIView(generics.GenericAPIView):
             user_ids = AdmissionUserProfession.objects.filter(profession=profession , age_state=AdmissionUserProfession.STATE_APPROVE, yesh_mhb_state=AdmissionUserProfession.STATE_APPROVE).values_list('user', flat=True)
             # Хэрвээ тус хичээл AdmissionLesson-д байхгүй бол олдсонгүй гэсэн мэдээллийг буцаана
             if not lesson_names:
-                return request.send_error('ERR_002', 'ЭЕШ-ийн хичээлүүдийн дотор тус хичээл олдсонгүй')
+                return request.send_error('ERR_002', 'ЭШ-ийн хичээлүүдийн дотор тус хичээл олдсонгүй')
 
             # AdmissionLesson-ээс ганц хичээл олдвол
             if len(lesson_names) == 1:
@@ -3257,7 +3257,6 @@ class EyeshOrderUserInfoAPIView(
 
         elselt = self.request.query_params.get('elselt')
         profession = self.request.query_params.get('profession')
-        state = self.request.query_params.get('state')
         yesh_state = self.request.query_params.get('yesh_state')
         yesh_mhb_state = self.request.query_params.get('yesh_mhb_state')
 
@@ -3272,9 +3271,6 @@ class EyeshOrderUserInfoAPIView(
                 queryset = queryset.filter(gender__in=['1', '3', '5', '7', '9'])
             else:
                 queryset = queryset.filter(gender__in=['0', '2', '4', '6', '8'])
-
-        if state:
-            queryset = queryset.filter(state=state)
 
         if yesh_state and yesh_state.isdigit():
             queryset = queryset.filter(yesh_state=yesh_state)
