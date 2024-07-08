@@ -288,7 +288,7 @@ class PhysqueUser(models.Model):
     updated_user = models.ForeignKey(User, verbose_name='Зассан хэрэглэгч', null=True, on_delete=models.CASCADE)
 
     @property
-    def score_physque(self):
+    def physice_score(self):
         """ Ур чадварын шалгалтын оноог бодож гаргах """
         x = 0
         if self.total_score > 0 and self.total_score < 59:

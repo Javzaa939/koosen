@@ -691,6 +691,16 @@ class ElseltApproveSerializer(serializers.ModelSerializer):
         model = AdmissionUserProfession
         fields = '__all__'
 
+class PhysqueUserSerializer(serializers.ModelSerializer):
+    physice_score = serializers.SerializerMethodField()
+
+    class Meta:
+        model = PhysqueUser
+        fields = '__all__'
+
+    def get_physice_score(self, obj):
+        return obj.physice_score
+
 
 class GpaCheckUserInfoSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
