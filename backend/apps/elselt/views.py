@@ -2919,6 +2919,11 @@ class UserScoreSortAPIView(generics.GenericAPIView):
 
         # ЭШ-ийн 2 хичээлийн 1-г л өгсөн элсэгчид
         sorted_one_rejected_scores = sorted(all_one_scores, key=lambda x: x['score'], reverse=True)
+        
+        print(len(sorted_one_rejected_scores), 'sorted_one_rejected_scores')
+        print(len(sorted_approve_scores), 'sorted_approve_scores')
+        print(len(sorted_rejected_scores), 'sorted_rejected_scores')
+        print( profession_obj.profession.name.upper())
 
         approve_order_no = 0
         # Тухайн sort хийсэн датаг index-ээс шалтгаалан order_no-уудыг нэмж өгнө
@@ -2939,7 +2944,6 @@ class UserScoreSortAPIView(generics.GenericAPIView):
                 approve_obj = AdmissionUserProfession.objects.filter(
                     user=item['user']
                 ).first()
-
                 if approve_obj:
                     approve_obj.score_avg = item['score']
                     approve_obj.order_no = item['order_no']
@@ -3311,7 +3315,7 @@ class EyeshOrderUserInfoAPIView(
         queryset = self.queryset.filter(user__in=user_ids)
         queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
         gender = self.request.query_params.get('gender')
-        queryset = queryset.filter(state=AdmissionUserProfession.STATE_SEND)
+        queryset = queryset.filter(state__in=[AdmissionUserProfession.STATE_SEND, AdmissionUserProfession.STATE_APPROVE])
 
         elselt = self.request.query_params.get('elselt')
         profession = self.request.query_params.get('profession')
