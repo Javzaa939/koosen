@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.db.models import Q, Func,F, IntegerField, CharField, OuterRef,Subquery
+from django.db.models import F, Max
 from django.db.models.functions import Cast
 from datetime import datetime
 from main.utils.function.utils import calculate_birthday, calculate_age
@@ -252,22 +253,26 @@ class AdmissionUserInfoSerializer(serializers.ModelSerializer):
 
         # Тухайн сургуулийн насны шалгуурыг олох
         indicator = AdmissionIndicator.objects.filter(admission_prof=obj.profession, value=AdmissionIndicator.NAS).first()
-        if indicator and (indicator.limit_mах or indicator.limit_min):
-            if indicator.limit_min or 0 < user_age <= indicator.limit_mах or 100:
+
+        # Насны шалгуурыг сольсон тохиолдолд дахин шалгах шаардлагагүй
+        if obj.age_state == 2 or obj.age_state == 3:
+            return user_age
+        else:
+            if indicator and (indicator.limit_mах or indicator.limit_min):
+                if indicator.limit_min or 0 < user_age <= indicator.limit_mах or 100:
+                    obj.age_state = 2
+                    obj.age_description = None
+                else:
+                    obj.age_state = 3
+                    obj.state = 3
+                    obj.state_description = "НАС шалгуурын болзолыг хангаагүй улмаас тэнцсэнгүй"
+                    obj.age_description = "НАС шалгуурын болзолыг хангаагүй улмаас тэнцсэнгүй"
+            else:
                 obj.age_state = 2
                 obj.age_description = None
-            else:
-                obj.age_state = 3
-                obj.state = 3
-                obj.state_description = "НАС шалгуурын болзолыг хангаагүй улмаас тэнцсэнгүй"
-                obj.age_description = "НАС шалгуурын болзолыг хангаагүй улмаас тэнцсэнгүй"
-        else:
-            obj.age_state = 2
-            obj.age_description = None
+            obj.save()
 
-        obj.save()
-
-        return user_age
+            return user_age
 
     def get_anhan_uzleg(self,obj):
         user = obj.user.id
@@ -691,6 +696,16 @@ class ElseltApproveSerializer(serializers.ModelSerializer):
         model = AdmissionUserProfession
         fields = '__all__'
 
+class PhysqueUserSerializer(serializers.ModelSerializer):
+    physice_score = serializers.SerializerMethodField()
+
+    class Meta:
+        model = PhysqueUser
+        fields = '__all__'
+
+    def get_physice_score(self, obj):
+        return obj.physice_score
+
 
 class GpaCheckUserInfoSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField()
@@ -1086,10 +1101,42 @@ class EyeshOrderUserInfoSerializer(serializers.ModelSerializer):
     profession=serializers.SerializerMethodField()
     full_name = serializers.CharField(source='user.full_name', default='', read_only=True)
     degree_name = serializers.CharField(source='profession.profession.degree.degree_name', default='')
+    first_yesh = serializers.SerializerMethodField()
+    second_yesh = serializers.SerializerMethodField()
 
     class Meta:
         model = AdmissionUserProfession
         fields='__all__'
+
+    def get_first_yesh(self, obj):
+        """ Элсэгч суурь шалгалт """
+
+        # Тухайн мэргэжлийн ЭШ онооны босго оноо
+        profession = AdmissionBottomScore.objects.filter(profession=obj.profession.profession, score_type=AdmissionBottomScore.GENERAL).first()
+
+        # Мэргэжлийн Суурь шалгалт хичээлийн нэр
+        lesson_name = profession.admission_lesson.lesson_name
+
+        # Тухайн хичээлээр ЭШ өгсөн бол оноонуудын хамгийн өндрийг нь авна
+        max_score = UserScore.objects.filter(user=obj.user, lesson_name__iexact=lesson_name).aggregate(max_score=Max('scaledScore'))
+
+        return max_score.get('max_score')
+
+    def get_second_yesh(self, obj):
+        """ Элсэгч дагалдан шалгалт """
+
+        # Тухайн мэргэжлийн ЭШ онооны босго оноо
+        profession = AdmissionBottomScore.objects.filter(profession=obj.profession.profession, score_type=AdmissionBottomScore.SUPPORT).first()
+        if profession:
+
+            # Мэргэжлийн Суурь шалгалт хичээлийн нэр
+            lesson_name = profession.admission_lesson.lesson_name
+
+            # Тухайн хичээлээр ЭШ өгсөн бол оноонуудын хамгийн өндрийг нь авна
+            max_score = UserScore.objects.filter(user=obj.user, lesson_name__iexact=lesson_name).aggregate(max_score=Max('scaledScore'))
+            return max_score.get('max_score')
+        else:
+            return ''
 
     def get_gender (self,obj):
         birthday,gender = calculate_birthday(obj.user.register)

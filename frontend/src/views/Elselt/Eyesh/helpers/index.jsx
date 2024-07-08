@@ -39,6 +39,25 @@ export function getColumns(currentPage, rowsPerPage, page_count, addModalHandler
 			minWidth: "80px",
 		},
 		{
+			maxWidth: "180px",
+			minWidth: "180px",
+			header: 'register',
+			name: t("РД"),
+			reorder: true,
+			selector: (row, index) => {
+				let tableRow = document.getElementById(`row-${row.id}`)
+
+				// Тэнцсэн тэнцээгүйгээс хамаарж border-left-д улаан ногоон border өгөх
+				if (tableRow) {
+					let border = row.yesh_state == 1 ? '' : row.yesh_state == 2 ? '4px solid rgba(40, 199, 111, 1)' : '4px solid #EA5455'
+					tableRow.style.borderLeft = `${border}`
+				}
+
+				return row?.user?.register
+			},
+			center: true
+		},
+		{
 			minWidth: "150px",
 			header: 'user__last_name',
 			name: t("Овог"),
@@ -57,15 +76,6 @@ export function getColumns(currentPage, rowsPerPage, page_count, addModalHandler
 			reorder: true,
 			center: true,
 			wrap: true,
-		},
-		{
-			maxWidth: "180px",
-			minWidth: "180px",
-			header: 'register',
-			name: t("РД"),
-			reorder: true,
-			selector: (row) => row?.user?.register,
-			center: true
 		},
 		{
 			maxWidth: "250px",
@@ -98,7 +108,21 @@ export function getColumns(currentPage, rowsPerPage, page_count, addModalHandler
 		{
 			maxWidth: "180px",
 			minWidth: "180px",
-			header: 'register',
+			name: t("Суурь ЭШ"),
+			selector: (row) => row?.first_yesh,
+			center: true
+		},
+		{
+			maxWidth: "180px",
+			minWidth: "180px",
+			name: t("Дагалдан ЭШ"),
+			selector: (row) => row?.second_yesh,
+			center: true
+		},
+		{
+			maxWidth: "180px",
+			minWidth: "180px",
+			header: 'score_avg',
 			name: t("ЭЕШ"),
 			reorder: true,
 			selector: (row) => row?.score_avg,
@@ -179,6 +203,15 @@ export function getColumns(currentPage, rowsPerPage, page_count, addModalHandler
 			center: true
 		},
 		{
+			maxWidth: "180px",
+			minWidth: "180px",
+			header: 'gender',
+			name: t("Бүртгэлийн дугаар"),
+			reorder: true,
+			selector: (row) => row?.user?.code,
+			center: true
+		},
+		{
 			name: "Үйлдэл",
 			center: true,
 			maxWidth: "120px",
@@ -196,7 +229,7 @@ export function getColumns(currentPage, rowsPerPage, page_count, addModalHandler
 					<UncontrolledTooltip placement='top' target={`description${row.id}`}>Мэдээлэл оруулах</UncontrolledTooltip>
 				</div>
 			),
-		},
+		}
 	]
 
 	return columns

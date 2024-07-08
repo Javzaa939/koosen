@@ -127,7 +127,7 @@ function Physical() {
         if(success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
-
+            
             // Нийт хуудасны тоо
             var cpage_count = Math.ceil(data?.count / rowsPerPage === 'Бүгд' ? 1 : rowsPerPage)
             setPageCount(cpage_count)
@@ -160,6 +160,7 @@ function Physical() {
                     'Нас': data?.user_age || 0,
                     'Үзлэгийн төлөв':STATE_LIST.find(val => val.id === data?.health_up_user_data?.state).name|| '',
                     'Тайлбар': data?.health_up_user_data?.description  || '',
+                    'Хэмжээст оноо' : data?.health_up_user_data?.physice_score || '',
                     'Савлуурт суниах':data?.health_up_user_data?.turnik || '',
                     'Гэдэсний даралт': data?.health_up_user_data?.belly_draught || '',
                     'Тэсвэр 1000М': data?.health_up_user_data?.patience_1000m || '',
@@ -195,8 +196,10 @@ function Physical() {
             'Нэр',
             'Хүйс',
             'РД',
+            'Нас',
             'Үзлэгийн төлөв',
             'Тайлбар',
+            'Хэмжээст оноо',
             'Савлуурт суниах',
             'Гэдэсний даралт',
             'Тэсвэр 1000М',
