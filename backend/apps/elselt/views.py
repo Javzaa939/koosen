@@ -3249,6 +3249,8 @@ class EyeshOrderUserInfoAPIView(
         elselt = self.request.query_params.get('elselt')
         profession = self.request.query_params.get('profession')
         state = self.request.query_params.get('state')
+        yesh_state = self.request.query_params.get('yesh_state')
+        yesh_mhb_state = self.request.query_params.get('yesh_mhb_state')
 
         if elselt:
             queryset = queryset.filter(profession__admission=elselt)
@@ -3264,6 +3266,12 @@ class EyeshOrderUserInfoAPIView(
 
         if state:
             queryset = queryset.filter(state=state)
+
+        if yesh_state and yesh_state.isdigit():
+            queryset = queryset.filter(yesh_state=yesh_state)
+
+        if yesh_mhb_state and yesh_mhb_state.isdigit():
+            queryset = queryset.filter(yesh_mhb_state=yesh_mhb_state)
 
         return queryset
 

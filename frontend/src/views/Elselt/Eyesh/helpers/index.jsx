@@ -98,6 +98,15 @@ export function getColumns(currentPage, rowsPerPage, page_count) {
 		{
 			maxWidth: "180px",
 			minWidth: "180px",
+			header: 'gender',
+			name: t("Бүртгэлийн дугаар"),
+			reorder: true,
+			selector: (row) => row?.user?.code,
+			center: true
+		},
+		{
+			maxWidth: "180px",
+			minWidth: "180px",
 			header: 'register',
 			name: t("ЭЕШ"),
 			reorder: true,
