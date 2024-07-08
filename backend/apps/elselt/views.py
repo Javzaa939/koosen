@@ -2553,7 +2553,7 @@ class LogSerializerAPView(
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = [ 'user__first_name', 'user__last_name', 'user__registeDr', 'user__mobile']
+    search_fields = [ 'user__first_name', 'user__last_name', 'user__register', 'user__mobile']
 
     def get_queryset(self):
         queryset = self.queryset
@@ -3202,11 +3202,14 @@ class ElseltEyeshAPIView(
                 admission_user_data.yesh_mhb_state = AdmissionUserProfession.STATE_REJECT
                 admission_user_data.yesh_mhb_description = 'Монгол хэл бичигийн шалгалтанд тэнцээгүй'
                 admission_user_data.save()
+
             for item in success_entries:
                 user_id = item['user']
                 admission_user_data = AdmissionUserProfession.objects.get(user__id=user_id)
                 admission_user_data.yesh_mhb_state = AdmissionUserProfession.STATE_APPROVE
                 admission_user_data.yesh_mhb_description = 'Монгол хэл бичигийн шалгалтанд тэнцсэн'
+                admission_user_data.state_description = ''
+                admission_user_data.state = AdmissionUserProfession.STATE_SEND
                 admission_user_data.save()
 
         #AdmissionUserProfession тэнцсэн тэнцээгүй сурагч
