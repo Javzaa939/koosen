@@ -2193,11 +2193,11 @@ class AdmissionJusticeListAPIView(
                 students = self.queryset.filter(pk__in=data["students"])
                 for student in students:
                     indicator_value = AdmissionIndicator.YAL_SHIITGEL
-                    if data.get("state"):
-                        old_state = student.state
-                        student.state = data.get("state")
+                    if data.get("justice_state"):
+                        old_state = student.justice_state
+                        student.justice_state = data.get("justice_state")
                         student.updated_at = now
-                        student.state_description = data.get("state_description")
+                        student.justice_description = data.get("justice_description")
                         student.save()
 
                         StateChangeLog.objects.create(
@@ -2230,48 +2230,6 @@ class AdmissionJusticeListAPIView(
             return request.send_error("ERR_002", e.__str__)
 
         return request.send_info("INF_002")
-
-        data = request.data
-        sid = transaction.savepoint()
-        try:
-            with transaction.atomic():
-                now = dt.datetime.now()
-                students = self.queryset.filter(pk__in=data["students"])
-                for student in students:
-                    indicator_value = AdmissionIndicator.YAL_SHIITGEL
-                    if data.get("state"):
-                        old_state = student.state
-                        student.state = data.get("state")
-                        student.updated_at = now
-                        student.state_description = data.get("state_description")
-                        student.save()
-                        StateChangeLog.objects.create(
-                            user=student.user,
-                            type=StateChangeLog.STATE,
-                            indicator=indicator_value,
-                            now_state=old_state,
-                            change_state=data.get("state"),
-                            updated_user=request.user if request.user.is_authenticated else None,
-                            updated_at=now
-                        )
-                    else:
-                        old_justice_state = student.justice_state
-                        student.updated_at = now
-                        student.justice_state = data.get("justice_state")
-                        student.justice_description = data.get("justice_description")
-                        student.save()
-                        StateChangeLog.objects.create(
-                            user=student.user,
-                            type=StateChangeLog.PROFESSION,
-                            indicator=indicator_value,
-                            now_state=old_justice_state,
-                            change_state=data.get("justice_state"),
-                            updated_user=request.user if request.user.is_authenticated else None,
-                            updated_at=now
-                        )
-        except Exception as e:
-            transaction.savepoint_rollback(sid)
-            return request.send_error("ERR_004", str(e))
 
 class ConversationUserSerializerAPIView(
     generics.GenericAPIView,
@@ -2711,6 +2669,18 @@ class UserScoreSortAPIView(generics.GenericAPIView):
                 lesson_name__in=lesson_names,
             ).values_list('user', flat=True)
 
+        # ЭШ өгсөн хүүхдүүд
+        yesh_score_user_ids = user_score_users.values_list('user', flat=True)
+
+        # Шалгаж байгаа хичээлээр огт ЭШ өгөөгүй хүүхдүүд
+        not_yesh_score_user_ids = list(user_ids) - list(yesh_score_user_ids)
+
+        # ЭШ өгөөгүй хүүхдүүдийг state өөрчлөх
+        AdmissionUserProfession.objects.filter(user__in=not_yesh_score_user_ids).update(
+            yesh_state=AdmissionUserProfession.STATE_REJECT,
+            yesh_description='Шалгуур хичээлээр ЭШ өгөөгүй.'
+        )
+
         # Counter ашиглан тус хэрэглэгч уг шалгалтыг хэдэн удаа өгснийг тоолно
         counts = Counter(user_score_users)
 
@@ -2783,6 +2753,18 @@ class UserScoreSortAPIView(generics.GenericAPIView):
                 user__in=user_ids,
                 lesson_name__in=lesson_names,
             ).values('user', 'lesson_name', 'scaledScore')
+
+        # ЭШ өгсөн хүүхдүүд
+        yesh_score_user_ids = elsegch_users.values_list('user', flat=True)
+
+        # Шалгаж байгаа хичээлээр огт ЭШ өгөөгүй хүүхдүүд
+        not_yesh_score_user_ids = list(set(user_ids) - set(yesh_score_user_ids))
+
+        # ЭШ өгөөгүй хүүхдүүдийг state өөрчлөх
+        AdmissionUserProfession.objects.filter(user__in=not_yesh_score_user_ids).update(
+            yesh_state=AdmissionUserProfession.STATE_REJECT,
+            yesh_description='Шалгуур хичээлээр ЭШ өгөөгүй.'
+        )
 
         # Тус хэрэглэгч нэг шалгалтыг олон удаа өгсөн бол зөвхөн хамгийн өндөр оноог нь авна
         max_scores = {}
@@ -2992,7 +2974,7 @@ class UserScoreSortAPIView(generics.GenericAPIView):
             approve_order_no = approve_order_no + 1
             item['order_no'] = approve_order_no
             item['yesh_state'] = AdmissionUserProfession.STATE_REJECT
-            item['yesh_description'] = 'ЭШ-ын хичээл дутуу учраас тэнцсэнгүй.'
+            item['yesh_description'] = 'ЭШ-ын шалгуур хичээл дутуу учраас тэнцсэнгүй.'
 
             # ЭШ 2 хичээлээр шалгаж байхад 1 хичээлээр л ЭШ өгсөн элсэгчид датаг хадгалах хэсэг
             reject_one_off_obj = AdmissionUserProfession.objects.filter(
