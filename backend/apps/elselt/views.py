@@ -3315,7 +3315,7 @@ class EyeshOrderUserInfoAPIView(
         queryset = self.queryset.filter(user__in=user_ids)
         queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
         gender = self.request.query_params.get('gender')
-        queryset = queryset.filter(state__in=[AdmissionUserProfession.STATE_SEND, AdmissionUserProfession.STATE_APPROVE])
+        # queryset = queryset.filter(state__in=[AdmissionUserProfession.STATE_SEND, AdmissionUserProfession.STATE_APPROVE])
 
         elselt = self.request.query_params.get('elselt')
         profession = self.request.query_params.get('profession')
