@@ -1167,7 +1167,7 @@ class ElseltHealthAnhanShat(
                 old_state = student.state
 
                 StateChangeLog.objects.create(
-                    user=user,
+                    user=student.user,
                     type=StateChangeLog.STATE,
                     indicator=indicator_value,
                     now_state=old_state,
