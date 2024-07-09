@@ -1062,7 +1062,7 @@ class StateChangeLogInfoSerializer(serializers.ModelSerializer):
     first_name=serializers.CharField(source='user.first_name', default='', read_only=True)
     last_name=serializers.CharField(source='user.last_name', default='', read_only=True)
     full_name=serializers.CharField(source='user.full_name', default='', read_only=True)
-    admin_name=serializers.CharField(source='updated_user.username')
+    admin_name=serializers.CharField(source='updated_user.full_name')
     now_state_name = serializers.SerializerMethodField()
     change_state_name = serializers.SerializerMethodField()
     indicator_name = serializers.SerializerMethodField()
