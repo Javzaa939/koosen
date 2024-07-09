@@ -11,7 +11,6 @@ import Select from 'react-select'
 import Flatpickr from 'react-flatpickr'
 import '@styles/react/libs/flatpickr/flatpickr.scss'
 import moment from 'moment';
-import { Mongolian } from "flatpickr/dist/l10n/mn.js"
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import AuthContext from "@context/AuthContext"

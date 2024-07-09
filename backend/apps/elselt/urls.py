@@ -8,6 +8,7 @@ urlpatterns = [
     path('<int:pk>/', ElseltApiView.as_view()),
     path('all/', AdmissionYearAPIView.as_view()),
     path('all/active/', AdmissionYearActiveAPIView.as_view()),
+    path('first/<int:pk>/', AdmissionUserFirstAPIView.as_view()),
 
     path('dashboard/', DashboardAPIView.as_view()),
     path('dashboard/excel/', DashboardExcelAPIView.as_view()),

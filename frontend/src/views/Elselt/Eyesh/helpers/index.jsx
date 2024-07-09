@@ -1,19 +1,17 @@
 import { useRef } from 'react';
-import { Badge, Input, UncontrolledTooltip } from 'reactstrap';
-import { CheckCircle, Edit, Eye, Type } from "react-feather";
+import { Badge} from 'reactstrap';
+import { CheckCircle } from "react-feather";
 import { t } from 'i18next'
 
-import moment from 'moment'
 import useApi from '@hooks/useApi';
 import useLoader from "@hooks/useLoader";
-import { wrap } from 'highcharts';
 
 // Хүснэгтийн баганууд
 export function getColumns(currentPage, rowsPerPage, page_count, addModalHandler) {
 
-	const { fetchData } = useLoader({ isFullScreen: false })
-	const focusData = useRef(undefined)
-	const gpaApi = useApi().elselt.gpa
+	// const { fetchData } = useLoader({ isFullScreen: false })
+	// const focusData = useRef(undefined)
+	// const gpaApi = useApi().elselt.gpa
 
 	/** Сонгосон хуудасны тоо датаны тооноос их болсон үед хуудаслалт 1-ээс эхлэнэ */
 	if (currentPage > page_count) {

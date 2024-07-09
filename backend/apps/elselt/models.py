@@ -184,6 +184,10 @@ class AdmissionUserProfession(models.Model):
     yesh_state = models.PositiveIntegerField(choices=STATE, db_index=True, null=True, default=STATE_SEND, verbose_name="Элсэгч ЭШ оноогоор босго онооны төлөв")
     yesh_description = models.CharField(max_length=5000, null=True, verbose_name='Элсэгч ЭШ оноогоор босго онооны төлөвийн тайлбар')
 
+    # Бүртгүүлсний дараа анхан шатандаа тэнцсэн төлөв
+    first_state = models.PositiveIntegerField(choices=STATE, db_index=True, null=True, default=STATE_SEND, verbose_name="Бүртгүүлсний дараа анхан шатандаа тэнцсэн төлөв")
+    first_description = models.CharField(max_length=5000, null=True, verbose_name='Бүртгүүлсний дараа анхан шатандаа тэнцсэн төлөв')
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     updated_user = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name='Зассан хэрэглэгч', null=True)

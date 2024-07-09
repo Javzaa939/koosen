@@ -51,11 +51,6 @@ from surgalt.serializers import (
     ProfessionDefinitionSerializer
 )
 
-from settings.serializers import (
-    AdmissionLessonSerializer,
-    AdmissionLessonListSerializer
-)
-
 from .serializer import (
     AdmissionSerializer,
     ElseltSysInfoSerializer,
@@ -102,13 +97,6 @@ from elselt.models import (
     ArmyUser,
     StateChangeLog,
 )
-
-from core.models import (
-    User,
-    Employee,
-    Schools
-)
-import logging
 
 @permission_classes([IsAuthenticated])
 class ElseltApiView(
@@ -484,6 +472,18 @@ class AdmissionUserInfoAPIView(
         gpa = self.request.query_params.get('gpa')
         justice_state = self.request.query_params.get('justice_state')
         is_justice = self.request.query_params.get('is_justice')
+        start_date = self.request.query_params.get('start_date')
+        end_date = self.request.query_params.get('end_date')
+
+        # Бүртгүүлсэн огноогоор хайх хэсэг
+        filters = {}
+        if start_date:
+            filters['user__created__gte'] = start_date
+        if end_date:
+            filters['user__created__lte'] = end_date
+
+        if filters:
+            queryset = queryset.filter(**filters)
 
         if is_justice:
             justice_profession_ids = AdmissionIndicator.objects.filter(admission_prof__admission__is_active=True, value__in=[AdmissionIndicator.YAL_SHIITGEL]).values_list('admission_prof', flat=True)
@@ -1052,7 +1052,11 @@ class ElseltHealthAnhanShat(
         queryset = queryset.filter(
             age_state=AdmissionUserProfession.STATE_APPROVE,
             gpa_state__in=[AdmissionUserProfession.STATE_APPROVE, AdmissionUserProfession.STATE_SEND],
-            state=AdmissionUserProfession.STATE_SEND
+        )
+
+        # ЭШ тэнцсэн болон анхан мэдээлэлээрээ тэнцсэн
+        queryset = queryset.filter(
+            Q(Q(first_state=AdmissionUserProfession.STATE_APPROVE) | Q(yesh_state=AdmissionUserProfession.STATE_APPROVE))
         )
 
         if gender:
@@ -1064,12 +1068,6 @@ class ElseltHealthAnhanShat(
         # элсэлт
         if elselt:
             queryset = queryset.filter(profession__admission=elselt)
-            # Дэд бакалавр болон бакалаврын бүртгэл
-            if elselt == '4':
-                queryset = queryset.filter(
-                    yesh_mhb_state=AdmissionUserProfession.STATE_APPROVE, # МХБ шалгалтад тэнцээгүй
-                    yesh_state=AdmissionUserProfession.STATE_APPROVE, # ЭШ оноо шалгалтад тэнцээгүй
-                )
 
         # хөтөлбөр
         if profession:
@@ -1091,7 +1089,6 @@ class ElseltHealthAnhanShat(
         if filters:
             dates = HealthUser.objects.filter(**filters).values_list('user', flat=True)
             queryset = queryset.filter(user__in=dates)
-            return queryset
 
         if state:
             if state == '1':
@@ -1359,7 +1356,6 @@ class ElseltHealthProfessional(
                 now = dt.datetime.now()
                 student = AdmissionUserProfession.objects.all().filter(pk=user).first()
                 if student:
-                    logger.debug(f'Student found: {student}')
                     indicator_value = AdmissionIndicator.ERUUL_MEND_MERGEJLIIN
                     if data.get("state"):
                         old_state = student.state
@@ -1367,7 +1363,6 @@ class ElseltHealthProfessional(
                         student.updated_at = now
                         student.state_description = data.get("state_description")
                         student.save()
-                        logger.debug('Student state updated and saved.')
                         StateChangeLog.objects.create(
                             user=student.user,
                             type=StateChangeLog.STATE,
@@ -1377,14 +1372,12 @@ class ElseltHealthProfessional(
                             updated_user=request.user if request.user.is_authenticated else None,
                             updated_at=now
                         )
-                        logger.debug('StateChangeLog entry created for state change.')
                     else:
                         old_justice_state = student.justice_state
                         student.updated_at = now
                         student.justice_state = data.get("justice_state")
                         student.justice_description = data.get("justice_description")
                         student.save()
-                        logger.debug('Student justice state updated and saved.')
                         StateChangeLog.objects.create(
                             user=student.user,
                             type=StateChangeLog.PROFESSION,
@@ -1394,12 +1387,10 @@ class ElseltHealthProfessional(
                             updated_user=request.user if request.user.is_authenticated else None,
                             updated_at=now
                         )
-                        logger.debug('StateChangeLog entry created for justice state change.')
         except Exception as e:
-            logger.error(f'Error occurred: {str(e)}')
             transaction.savepoint_rollback(sid)
             return request.send_error("ERR_004", str(e))
-        
+
         health_user = HealthUpUser.objects.filter(id=pk).first()
         serializer = HealthUpUserSerializer(health_user, data)
         data['updated_user'] = request.user.id
@@ -2231,6 +2222,8 @@ class AdmissionJusticeListAPIView(
 
         return request.send_info("INF_002")
 
+
+@permission_classes([IsAuthenticated])
 class ConversationUserSerializerAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -2368,6 +2361,8 @@ class ConversationUserSerializerAPIView(
 
         return request.send_info('INF_002')
 
+
+@permission_classes([IsAuthenticated])
 class ArmyUserSerializerAPView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -2450,7 +2445,7 @@ class ArmyUserSerializerAPView(
             ArmyUser.objects.filter(
             user=data.get('user')
             ).update(state=data.get("state"),updated_at=now,description=data.get("description"))
-        
+
         user = data.get('user')
         if 'user' in data:
             del data['user']
@@ -2501,6 +2496,8 @@ class ArmyUserSerializerAPView(
 
         return request.send_info('INF_002')
 
+
+@permission_classes([IsAuthenticated])
 class LogSerializerAPView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -2552,6 +2549,8 @@ class LogSerializerAPView(
         all_data = self.list(request).data
         return request.send_data(all_data)
 
+
+@permission_classes([IsAuthenticated])
 class HynaltNumberIsGenderAPIView(generics.GenericAPIView):
     """ Мэргэжлийн хяналтын тоо хүйсээс хамаарах эсэх """
 
@@ -2574,6 +2573,7 @@ class HynaltNumberIsGenderAPIView(generics.GenericAPIView):
         return request.send_data(is_gender)
 
 
+@permission_classes([IsAuthenticated])
 class HynaltNumberAPIView(generics.GenericAPIView):
     """ Хөтөлбөр болох хүйсээс хамаарсан хяналтын тоо """
 
@@ -2610,7 +2610,7 @@ class HynaltNumberAPIView(generics.GenericAPIView):
         return request.send_data(hynalt_number)
 
 
-
+@permission_classes([IsAuthenticated])
 class UserScoreSortAPIView(generics.GenericAPIView):
     """ЭЕШ онооны эрэмбэлэлт"""
 
@@ -2919,11 +2919,6 @@ class UserScoreSortAPIView(generics.GenericAPIView):
 
         # ЭШ-ийн 2 хичээлийн 1-г л өгсөн элсэгчид
         sorted_one_rejected_scores = sorted(all_one_scores, key=lambda x: x['score'], reverse=True)
-        
-        print(len(sorted_one_rejected_scores), 'sorted_one_rejected_scores')
-        print(len(sorted_approve_scores), 'sorted_approve_scores')
-        print(len(sorted_rejected_scores), 'sorted_rejected_scores')
-        print( profession_obj.profession.name.upper())
 
         approve_order_no = 0
         # Тухайн sort хийсэн датаг index-ээс шалтгаалан order_no-уудыг нэмж өгнө
@@ -3087,6 +3082,7 @@ class UserScoreSortAPIView(generics.GenericAPIView):
         )
 
 
+@permission_classes([IsAuthenticated])
 class ElseltEyeshAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -3294,6 +3290,8 @@ class ElseltEyeshAPIView(
 
         return request.send_data(send_data)
 
+
+@permission_classes([IsAuthenticated])
 class EyeshOrderUserInfoAPIView(
       generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -3400,5 +3398,24 @@ class EyeshOrderUserInfoAPIView(
         except Exception as e:
             transaction.savepoint_rollback(sid)
             return request.send_error("ERR_004", str(e))
+
+        return request.send_info('INF_002')
+
+
+@permission_classes([IsAuthenticated])
+class AdmissionUserFirstAPIView(
+    generics.GenericAPIView
+):
+    """ Элсэлтийн анхан шат мэдээллийн төлөв шалгах """
+
+    queryset = AdmissionUserProfession.objects.all()
+    def put(self, request, pk=None):
+        data = request.data
+
+        with transaction.atomic():
+            self.queryset.filter(user=data.get('user')).update(
+                first_state = data.get('first_state'),
+                first_description = data.get('first_description'),
+            )
 
         return request.send_info('INF_002')
