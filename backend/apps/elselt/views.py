@@ -3362,10 +3362,11 @@ class EyeshOrderUserInfoAPIView(
         try:
             with transaction.atomic():
                 now = dt.datetime.now()
-                student = self.queryset.filter(pk=user).first()
+                student = self.queryset.filter(user=user).first()
                 if student:
                     indicator_value = AdmissionIndicator.EESH_EXAM
                     if data.get("yesh_state"):
+                        print('yes', data)
                         old_state = student.yesh_state
                         student.yesh_state = data.get("yesh_state")
                         student.updated_at = now
