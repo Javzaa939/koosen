@@ -2845,7 +2845,7 @@ class UserScoreSortAPIView(generics.GenericAPIView):
             for sub_item in item:
                 # Тухайн хичээлийн босго оноо
                 bottomscore = AdmissionBottomScore.objects.filter(admission_lesson__lesson_name=sub_item['lesson_name'], profession=profession_obj.profession, score_type=sub_item['score_type']).values_list('bottom_score', flat=True).first()
-                if bottomscore >= sub_item['scaledScore']:
+                if bottomscore > sub_item['scaledScore']:
                     users_to_remove.append(sub_item['user'])
                     break
 
