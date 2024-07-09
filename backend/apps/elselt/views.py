@@ -3366,7 +3366,6 @@ class EyeshOrderUserInfoAPIView(
                 if student:
                     indicator_value = AdmissionIndicator.EESH_EXAM
                     if data.get("yesh_state"):
-                        print('yes', data)
                         old_state = student.yesh_state
                         student.yesh_state = data.get("yesh_state")
                         student.updated_at = now
