@@ -45,7 +45,7 @@ urlpatterns = [
     # Элсэгчдэд мессеж илгээх хэсэг
     path('admissionuserdata/message/', AdmissionUserMessageAPIView.as_view()),
 
-    # Эрүүл мэнд анхан шатны үзлэг
+    # Ял шийтгэл шатны үзлэг
     path('justice/', AdmissionJusticeListAPIView.as_view()),
     path('justice/<int:pk>/', AdmissionJusticeListAPIView.as_view()),
 
