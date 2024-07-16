@@ -11,7 +11,7 @@ from rest_framework.filters import SearchFilter
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.db import transaction
-from django.db.models import F, Subquery, OuterRef, Count, Q
+from django.db.models import F, Subquery, OuterRef, Count, Q, Sum
 from django.db.models import Value, Case, When, IntegerField
 from django.db.models.functions import Substr
 
@@ -919,40 +919,113 @@ class DashboardExcelAPIView(
             )
         )
 
+        # AdmissionRegisterProfession-ий ID-г мэргэжилүүддээ тохируулан авна
+        admission_register_profession_ids = AdmissionRegisterProfession.objects.filter(
+            profession__in=professions
+        ).values_list('id', flat=True)
+
+        # AdmissionRegisterProfession-ий ID-г ашиглан AdmissionIndicator-уудыг олно
+        admission_indicators = AdmissionIndicator.objects.filter(
+            admission_prof__in=admission_register_profession_ids
+        )
+
+        # Хяналтын тоонуудын өгөгдлүүдийг олж авсан мэргэжилийн индикатороо ашиглан авна
+        admission_xyanlat_too = AdmissionXyanaltToo.objects.filter(
+            indicator__in=admission_indicators
+        ).values(
+            'norm_all',
+            'norm1',
+            'norm2',
+            'indicator__admission_prof'
+        )
+
+        # Хяналтын тоонуудыг aggregate хийх case-үүдийг хадгалах list-үүд
+        xyanalt_male_cases = []
+        xyanalt_female_cases = []
+        xyanalt_all_cases = []
+
+        # AdmissionIndicator-ийн admission_prof-ийн id-нь манай үндсэн queryset-ийн profession-тэй ижил байх case-үүдэд
+        # хүйс болон бүгд-ээр нь хяналтын тоонуудыг aggregate хийж авах нөхцлүүдийг бичиж өгсөн
+        for value in admission_xyanlat_too:
+            norm1_value = value['norm1'] or 0
+            norm2_value = value['norm2'] or 0
+            norm_all_value = value['norm_all'] or 0
+
+            # Үндсэн нөхцөл
+            condition = Q(profession=value['indicator__admission_prof'])
+
+            xyanalt_male_cases.append(When(condition, then=Value(norm1_value)))
+            xyanalt_female_cases.append(When(condition, then=Value(norm2_value)))
+            xyanalt_all_cases.append(When(condition, then=Value(norm_all_value)))
+
         # annotate хийж өгөх dynamic field-үүдээ хэтэрхий их байгаа учир энд зарлаж өгөв
         aggregations = {
+            # Хяналтын тоо/Бүртгүүлсэн
             'total_male_users': Count('id', filter=Q(gender=1)),
             'total_female_users': Count('id', filter=Q(gender=2)),
+
+            # Насны шаардлага хангасан
             'age_state_true_male': Count('id', filter=Q(gender=1, age_state=AdmissionUserProfession.STATE_APPROVE)),
             'age_state_false_male': Count('id', filter=Q(gender=1, age_state=AdmissionUserProfession.STATE_REJECT)),
             'age_state_true_female': Count('id', filter=Q(gender=2, age_state=AdmissionUserProfession.STATE_APPROVE)),
             'age_state_false_female': Count('id', filter=Q(gender=2, age_state=AdmissionUserProfession.STATE_REJECT)),
+
+            # Дипломын голч дүнгийн шаардлага хангасан эсэх
             'gpa_state_true_male': Count('id', filter=Q(gender=1, gpa_state=AdmissionUserProfession.STATE_APPROVE)),
             'gpa_state_false_male': Count('id', filter=Q(gender=1, gpa_state=AdmissionUserProfession.STATE_REJECT)),
             'gpa_state_true_female': Count('id', filter=Q(gender=2, gpa_state=AdmissionUserProfession.STATE_APPROVE)),
             'gpa_state_false_female': Count('id', filter=Q(gender=2, gpa_state=AdmissionUserProfession.STATE_REJECT)),
+
+            # Хяналтын тоо
+            'hynalt_number_male': Case(*xyanalt_male_cases, default=Value(0), output_field=IntegerField()),
+            'hynalt_number_female': Case(*xyanalt_female_cases, default=Value(0), output_field=IntegerField()),
+            'hynalt_number_all': Case(*xyanalt_all_cases, default=Value(0), output_field=IntegerField()),
+
+            # ЭЕШ шалгуур оноо
+            'yesh_state_true_male': Count('id', filter=Q(gender=1, yesh_state=AdmissionUserProfession.STATE_APPROVE)),
+            'yesh_state_true_female': Count('id', filter=Q(gender=2, yesh_state=AdmissionUserProfession.STATE_APPROVE)),
+            'yesh_state_false_male': Count('id', filter=Q(gender=1, yesh_state=AdmissionUserProfession.STATE_REJECT, yesh_description__icontains='босго онооны шалгуурыг хангасангүй')),
+            'yesh_state_false_female': Count('id', filter=Q(gender=2, yesh_state=AdmissionUserProfession.STATE_REJECT, yesh_description__icontains='босго онооны шалгуурыг хангасангүй')),
+            'yesh_state_false_xyanalt':Count('id', filter=Q(yesh_state=AdmissionUserProfession.STATE_REJECT, yesh_description__icontains='Хяналтын тоонд багтсангүй')),
+
+            # Монгол хэл бичгийн шалгалт
+            'yesh_mhb_state_true_male': Count('id', filter=Q(gender=1, yesh_mhb_state=AdmissionUserProfession.STATE_APPROVE)),
+            'yesh_mhb_state_false_male': Count('id', filter=Q(gender=1, yesh_mhb_state=AdmissionUserProfession.STATE_REJECT)),
+            'yesh_mhb_state_true_female': Count('id', filter=Q(gender=2, yesh_mhb_state=AdmissionUserProfession.STATE_APPROVE)),
+            'yesh_mhb_state_false_female': Count('id', filter=Q(gender=2, yesh_mhb_state=AdmissionUserProfession.STATE_REJECT)),
+
+            # Анхан шатны үзлэг
             'health_user_true_male_users': Count('id', filter=Q(gender=1, user__healthuser__state=AdmissionUserProfession.STATE_APPROVE)),
             'health_user_true_female_users': Count('id', filter=Q(gender=2, user__healthuser__state=AdmissionUserProfession.STATE_APPROVE)),
             'health_user_false_male_users': Count('id', filter=Q(gender=1, user__healthuser__state=AdmissionUserProfession.STATE_REJECT)),
             'health_user_false_female_users': Count('id', filter=Q(gender=2, user__healthuser__state=AdmissionUserProfession.STATE_REJECT)),
             'health_user_send_male_users': Count('id', filter=Q(gender=1, user__healthuser__isnull=True)),
             'health_user_send_female_users': Count('id', filter=Q(gender=2, user__healthuser__isnull=True)),
+
+            # Эрүүл мэндийн үзлэг шинжилгээний дүгнэлт
             'health_up_user_true_male_users': Count('id', filter=Q(gender=1, user__healthupuser__state=AdmissionUserProfession.STATE_APPROVE)),
             'health_up_user_true_female_users': Count('id', filter=Q(gender=2, user__healthupuser__state=AdmissionUserProfession.STATE_APPROVE)),
             'health_up_user_false_male_users': Count('id', filter=Q(gender=1, user__healthupuser__state=AdmissionUserProfession.STATE_REJECT)),
             'health_up_user_false_female_users': Count('id', filter=Q(gender=2, user__healthupuser__state=AdmissionUserProfession.STATE_REJECT)),
             'health_up_user_out_male_users': Count('id', filter=Q(gender=1, user__healthupuser__isnull=True)),
             'health_up_user_out_female_users': Count('id', filter=Q(gender=2, user__healthupuser__isnull=True)),
+
+            # Эрүүгийн хариуцлага хүлээж байсан эсэх шаардлага
             'justice_state_true_male': Count('id', filter=Q(gender=1, justice_state=AdmissionUserProfession.STATE_APPROVE)),
             'justice_state_true_female': Count('id', filter=Q(gender=2, justice_state=AdmissionUserProfession.STATE_APPROVE)),
             'justice_state_false_male': Count('id', filter=Q(gender=1, justice_state=AdmissionUserProfession.STATE_REJECT)),
             'justice_state_false_female': Count('id', filter=Q(gender=2, justice_state=AdmissionUserProfession.STATE_REJECT)),
+
+            # Бие бялдрын шалгалт
             'physque_state_true_male': Count('id', filter=Q(gender=1, user__physqueuser__state=AdmissionUserProfession.STATE_APPROVE)),
             'physque_state_true_female': Count('id', filter=Q(gender=2, user__physqueuser__state=AdmissionUserProfession.STATE_APPROVE)),
             'physque_state_false_male': Count('id', filter=Q(gender=1, user__physqueuser__state=AdmissionUserProfession.STATE_REJECT)),
             'physque_state_false_female': Count('id', filter=Q(gender=2, user__physqueuser__state=AdmissionUserProfession.STATE_REJECT)),
             'physque_state_out_male': Count('id', filter=Q(gender=1, user__physqueuser__isnull=True)),
             'physque_state_out_female': Count('id', filter=Q(gender=2, user__physqueuser__isnull=True)),
+
+            # Нийт
+            'total': Count('id')
         }
 
         # Бүх хөтөлбөрүүдээрээ үндсэн queryset-ээс авах датануудаас aggregate-үүдээ ашиглан авна
@@ -970,7 +1043,11 @@ class DashboardExcelAPIView(
                     'health_up_user_false_female_users', 'health_up_user_out_male_users', 'health_up_user_out_female_users',
                     'justice_state_true_male', 'justice_state_true_female', 'justice_state_false_male',
                     'justice_state_false_female', 'physque_state_true_male', 'physque_state_true_female',
-                    'physque_state_false_male', 'physque_state_false_female', 'physque_state_out_male', 'physque_state_out_female')
+                    'physque_state_false_male', 'physque_state_false_female', 'physque_state_out_male',
+                    'physque_state_out_female', 'hynalt_number_male', 'hynalt_number_all', 'hynalt_number_female',
+                    'yesh_mhb_state_true_male', 'yesh_mhb_state_false_male', 'yesh_mhb_state_true_female',
+                    'yesh_mhb_state_false_female', 'yesh_state_true_male', 'yesh_state_true_female',
+                    'yesh_state_false_male', 'yesh_state_false_female', 'yesh_state_false_xyanalt', 'total')
         )
 
         # Үндсэн хөтөлбөрийн мэдээллүүддээр хөтөлбөрийн нэр болон салбар сургуулийн нэр нэмэгдэж орсон
