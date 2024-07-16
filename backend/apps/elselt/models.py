@@ -286,6 +286,7 @@ class PhysqueUser(models.Model):
     quickness = models.FloatField(verbose_name='Авхаалж самбаа')
     flexible = models.FloatField(verbose_name='Уян хатан')
     total_score = models.FloatField(verbose_name='Нийт оноо')
+    order_no = models.IntegerField(null=True, verbose_name='Эрэмбийн дугаар')
 
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -300,7 +301,7 @@ class PhysqueUser(models.Model):
         else:
             x = 480 + (self.total_score - 60) * 8
 
-        return round(x, 2)
+        return round(x)
 
 
 class MentalUser(models.Model):

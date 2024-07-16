@@ -27,11 +27,9 @@ import { ChevronDown, Search ,FileText} from 'react-feather'
 import { utils, writeFile } from 'xlsx-js-style';
 import { MdMailOutline } from "react-icons/md";
 import { useTranslation } from 'react-i18next'
-import { RiEditFill } from "react-icons/ri";
 import { getColumns } from './helpers';
 
 import DataTable from 'react-data-table-component'
-import moment from 'moment';
 import classnames from "classnames";
 import Select from 'react-select'
 

@@ -1,5 +1,6 @@
 import { Book, CheckCircle, Type } from "react-feather"
 import { Badge, UncontrolledTooltip } from "reactstrap"
+import moment from 'moment'
 
 // Хүснэгтийн баганууд
 export function getColumns (currentPage, rowsPerPage, page_count, addModalHandler, STATE_LIST, user) {
@@ -51,14 +52,6 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 			wrap: true,
 		},
 		{
-			header: 'user__register',
-			name: <div className="px-1">РД</div>,
-			selector: (row) => row?.user_register || '',
-            sortable: true,
-			minWidth: '140px',
-			maxWidth: '140px',
-		},
-		{
 			header: 'gender',
 			name: <div className="px-1">Хүйс</div>,
 			selector: (row) => row?.gender_name || '',
@@ -88,6 +81,13 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 						}
 				</Badge>),
 			center: true,
+		},
+		{
+			header: 'gender',
+			name: <div className="px-1">Үзлэгийн огноо</div>,
+			selector: (row) => row?.updated_at? moment(row?.updated_at).format("YYYY-MM-DD h:mm") : '',
+            sortable: true,
+			minWidth: '200px',
 		},
 
 		// TODO: SORT ALDAA ZASAH
@@ -142,6 +142,14 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 			),
 			minWidth: '220px',
 			maxWidth: '220px',
+		},
+		{
+			header: 'user__register',
+			name: <div className="px-1">РД</div>,
+			selector: (row) => row?.user_register || '',
+            sortable: true,
+			minWidth: '140px',
+			maxWidth: '140px',
 		},
 		{
 			name: "Үйлдэл",
