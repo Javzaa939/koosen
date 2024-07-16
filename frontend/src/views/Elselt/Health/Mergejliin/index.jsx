@@ -76,7 +76,7 @@ function Mergejliin() {
 	// Translate
 	const { t } = useTranslation();
 
-	const default_page = [10, 20, 50, 75, 100];
+	const default_page = ['Бүгд', 10, 20, 50, 75, 100]
 
 	const [searchValue, setSearchValue] = useState("");
 	const [datas, setDatas] = useState([]);
@@ -458,23 +458,12 @@ function Mergejliin() {
 						print="true"
 						theme="solarized"
 						onSort={handleSort}
-						columns={getColumns(
-						currentPage,
-						rowsPerPage,
-						total_count,
-						STATE_LIST,
-						detailHandler,
-						)}
+                        columns={getColumns(currentPage, rowsPerPage === 'Бүгд' ? 1 : rowsPerPage, total_count, STATE_LIST,  detailHandler)}
 						sortIcon={<ChevronDown size={10} />}
 						paginationPerPage={rowsPerPage}
 						paginationDefaultPage={currentPage}
 						data={datas}
-						paginationComponent={getPagination(
-						handlePagination,
-						currentPage,
-						rowsPerPage,
-						total_count
-						)}
+						paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage === 'Бүгд' ? total_count : rowsPerPage, total_count)}
 						fixedHeader
 						fixedHeaderScrollHeight="62vh"
 						selectableRows
