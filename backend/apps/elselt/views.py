@@ -2914,6 +2914,57 @@ class UserScoreSortAPIView(generics.GenericAPIView):
             rejected_objects, ['score_avg', 'order_no', 'yesh_state', 'yesh_description']
         )
 
+class PhysicalScoreSortAPIView(generics.GenericAPIView):
+    """ Бие бялдар оноо эрэмбэлэх """
+
+    queryset = PhysqueUser.objects.all().annotate(gender=(Substr('user__register', 9, 1)))
+
+    def post(self, request):
+        data = request.data
+        try:
+            # front-ooс ирсэн хичээлүүдээ ашиглан AdmissionLesson-д байгаа хичээлүүдийн нэрсийг авна
+            lessons = data.get('lesson')
+            profession = data.get('profession')
+            total_elsegch = data.get('totalElsegch')
+            gender = data.get('gender')
+            lesson_names = AdmissionLesson.objects.filter(id__in=lessons).values_list('lesson_name', flat=True)
+
+            adm_queryset = AdmissionUserProfession.objects.annotate(gender=(Substr('user__register', 9, 1))).filter(
+                profession=profession ,
+                age_state=AdmissionUserProfession.STATE_APPROVE,
+                yesh_mhb_state=AdmissionUserProfession.STATE_APPROVE
+            )
+
+            if int(gender) == 1: # Эрэгтэй хэрэглэгчид
+                adm_queryset = adm_queryset.filter(
+                    gender__in=['1', '3', '5', '7', '9']
+                ).values_list('user', flat=True)
+
+            if int(gender) == 2:
+                adm_queryset = adm_queryset.filter(
+                    gender__in=['0', '2', '4', '6', '8']
+                ).values_list('user', flat=True)
+
+            # Элсэгчийн ids
+            user_ids = adm_queryset.values_list('user', flat=True)
+
+            # Хэрвээ тус хичээл AdmissionLesson-д байхгүй бол олдсонгүй гэсэн мэдээллийг буцаана
+            if not lesson_names:
+                return request.send_error('ERR_002', 'ЭШ-ийн хичээлүүдийн дотор тус хичээл олдсонгүй')
+
+            # AdmissionLesson-ээс ганц хичээл олдвол
+            if len(lesson_names) == 1:
+                # Single lesson function-ийг ажиллуулна
+                self.process_single_lesson(lesson_names, profession, total_elsegch, gender, user_ids)
+            else:
+                # Нэгээс олон хичээл байвал уг function-ийг дуудна
+                self.process_multiple_lessons(lesson_names, profession, total_elsegch, gender, user_ids)
+
+        except Exception as e:
+            print(e)
+            return request.send_error('ERR_002', 'Хадгалахад алдаа гарлаа')
+        
+        return request.send_info('INF_001')
 
 @permission_classes([IsAuthenticated])
 class ElseltEyeshAPIView(
