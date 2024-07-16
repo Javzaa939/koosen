@@ -247,7 +247,7 @@ const Score = () => {
                 'degree.degree_name',
                 'level',
                 'teacher.first_name',
-                'join-year',
+                'join_year',
                 'is_finish',
             ],
         }
