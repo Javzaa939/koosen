@@ -13,8 +13,10 @@ from core.models import User
 
 from .serializers import (
     UserInfoSerializer,
-    AccessHistoryLmsSerializer
+    AccessHistoryLmsSerializer,
+    AccessHistoryLmsSerializerAll
 )
+from lms.models import AccessHistoryLms
 
 from lms.models import AccessHistoryLms
 
@@ -23,6 +25,23 @@ from datetime import datetime
 # LMS рүү нэвтрэх эрх
 LMS_LOGIN = 'lms-login'
 
+class UserDetailAPI(
+    generics.GenericAPIView
+):
+    queryset = AccessHistoryLms.objects
+    serializer_class=AccessHistoryLmsSerializerAll
+
+    def get(self, request):
+        """ Нэвтэрсэн хэрэглэгчийн мэдээллийг авах """
+
+        user = User.objects.filter(email=request.user).first()
+        if not user:
+            return request.send_data({})
+
+        qs = AccessHistoryLms.objects.filter(user=user)
+        serializer = self.get_serializer(qs, many=True)
+        return request.send_data(serializer.data)
+    
 class UserAPILoginView(
     generics.GenericAPIView
 ):

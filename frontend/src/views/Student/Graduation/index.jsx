@@ -1,7 +1,7 @@
 
 import { Fragment, useState, useEffect, useContext} from 'react'
 
-import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, ListGroupItem, Spinner } from 'reactstrap'
+import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, ListGroupItem, Spinner, Dropdown, DropdownToggle, DropdownItem, DropdownMenu } from 'reactstrap'
 import { ChevronDown, Search, Plus, Menu, Edit, Trash2, FileText, Download, Printer } from 'react-feather'
 import DataTable from 'react-data-table-component'
 import { useTranslation } from 'react-i18next'
@@ -75,6 +75,9 @@ const Graduation = () => {
     const [ showModal, setShowModal ] = useState(false)
     const [file, setFile] = useState(false)
     const [errorDatas, setErrorDatas] = useState({})
+
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const togglev2 = () => setDropdownOpen((prevState) => !prevState);
 
     //Api
     const depApi = useApi().hrms.department
@@ -473,7 +476,7 @@ const Graduation = () => {
 			<Card>
                 <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
                     <CardTitle tag="h4">{t('Төгсөлтийн ажил')}</CardTitle>
-                    <div className='d-flex flex-wrap mt-md-0 mt-1 gap-1'>
+                    <div className='d-flex flex-wrap mt-md-0 mt-1 gap-1 align-items-center'>
                         {/* <Button
                             color='primary'
                             disabled={selectedRows.length === 0}
@@ -486,31 +489,42 @@ const Graduation = () => {
                             color='primary'
                             disabled={select_value.group ? false : true}
                             onClick={() => {handleQr()}}
+                            style={{ height: "40px" }}
                         >
                             <Download size={15}/>
                             <span className='align-middle ms-50'>QR татах</span>
                         </Button>
-                        <Button
-                            color='primary'
-                            onClick={() => {
-                                    excelHandler()
-                                }
-                            }
-                        >
-                            <Download size={15}/>
-                            <span className='align-middle ms-50'>Загвар</span>
-                        </Button>
-                        <Button
-                            color='primary'
-                            onClick={() => importModalHandler()}
-                        >
-                            <FileText size={15}/>
-                            <span className='align-middle ms-50'>Import</span>
-                        </Button>
+                        
+                        <Dropdown isOpen={dropdownOpen} toggle={togglev2}>
+                            <DropdownToggle color='primary' className='m-50'>
+                                <span className='align-middle ms-50'>Загвар</span>
+                            </DropdownToggle>
+                            <DropdownMenu style={{ height: "80px" }}>
+                                <DropdownItem 
+                                    style={{ height: "25px", width: "100%"}} 
+                                    className='d-flex align-items-center justify-center'
+                                    onClick={() => {excelHandler()}}
+                                >
+                                    <Download size={15}/>
+                                    <span className='align-middle ms-1'>Татах</span>
+                                </DropdownItem>
+                                <DropdownItem divider />
+                                <DropdownItem 
+                                    style={{ height: "25px", width: "100%"}}
+                                    className='d-flex align-items-center justify-center'
+                                    onClick={() => importModalHandler()}
+                                >
+                                    <FileText size={15}/>
+                                    <span className='align-middle ms-1'>Оруулах</span>
+                                </DropdownItem>
+                            </DropdownMenu>
+                        </Dropdown>
+
                         <Button
                             color='primary'
                             onClick={() => handleModal()}
                             disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-graduate-create') && school_id ? false : true}
+                            style={{ height: "40px" }}
                         >
                             <Plus size={15} />
                             <span className='align-middle ms-50'>{t('Нэмэх')}</span>

@@ -22,11 +22,13 @@ import Survey from './Survey'
 import Statistic from './Statistic'
 // import Test from './Test'
 import Elselt from './Elselt'
+import PsychologicalTesting from './PsychologicalTesting'
 
 import OnlineLesson from "./OnlineLesson";
 export default [
   ...Calendar,
   ...Elselt,
+  ...PsychologicalTesting,
   ...Reference,
   ...Study,
   ...OnlineLesson,

@@ -66,6 +66,28 @@ urlpatterns = [
     path('questions/list/', QuestionsListAPIView.as_view()),
     path('questions/<int:pk>/', QuestionsAPIView.as_view()),
 
+    path('psychological_test_question/title/', PsychologicalQuestionTitleAPIView.as_view()),
+    path('psychological_test_question/title/list/', PsychologicalQuestionTitleListAPIView.as_view()),
+    path('psychological_test_question/title/<int:pk>/', PsychologicalQuestionTitleAPIView.as_view()),
+
+    path('psychological_test_question/', PsychologicalTestQuestionsAPIView.as_view()),
+    path('psychological_test_question/list/', PsychologicalTestQuestionsAPIView.as_view()),
+    path('psychological_test_question/<int:pk>/', PsychologicalTestQuestionsAPIView.as_view()),
+
+    path('psychological_test/', PsychologicalTestAPIView.as_view()),
+    path('psychological_test/<int:pk>/', PsychologicalTestAPIView.as_view()),
+
+    path('psychological_test_one/', PsychologicalTestOneAPIView.as_view()),
+    path('psychological_test_one/<int:pk>/', PsychologicalTestOneAPIView.as_view()),
+
+    path('psychological_test/options/', PsychologicalTestOptionsAPIView.as_view()),
+    path('psychological_test/scope_option/', PsychologicalTestScopeOptionsAPIView.as_view()),
+    path('psychological_test/scope_list/', PsychologicalTestScopesAPIView.as_view()),
+    path('psychological_test/add_scope/<int:pk>/', PsychologicalTestScopeOptionsAPIView.as_view()),
+
+    path('psychological_test_result/', PsychologicalTestResultAPIView.as_view()),
+    path('psychological_test_result_participants/', PsychologicalTestResultParticipantsAPIView.as_view()),
+
     path('lesson/list/', LessonsTeacher.as_view()),
     path('lesson/studentlist/', HomeworkStudentsListAPIView.as_view()),
 

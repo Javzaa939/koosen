@@ -1,6 +1,6 @@
 import { Fragment, useState, useEffect, useContext } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import { Row, Col, Card, Input, Label, CardTitle, CardHeader, Spinner, Button } from 'reactstrap'
+import { Row, Col, Card, Input, Label, CardTitle, CardHeader, Spinner, Button, UncontrolledTooltip } from 'reactstrap'
 import { ChevronDown , Edit, Edit2, Edit3, Printer, Search} from 'react-feather'
 import { useTranslation } from 'react-i18next'
 import Select from 'react-select'
@@ -8,15 +8,46 @@ import DataTable from 'react-data-table-component'
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 
-// import SchoolContext from '@context/SchoolContext'
-
 import { getColumns } from './helpers';
 
 import { useNavigate } from 'react-router-dom'
 import { getPagination, ReactSelectStyles } from '@utils';
 import EditModal from './EditModal'
+import StateModal from '../../Elselt/User/StateModal'
+import AuthContext from '@src/utility/context/AuthContext'
+import { RiEditFill } from 'react-icons/ri'
+
+import classnames from "classnames";
 
 const Enrollment = () => {
+    const genderOp = [
+        {
+            id: 1,
+            name: 'Эрэгтэй',
+        },
+        {
+            id: 2,
+            name: 'Эмэгтэй'
+        }
+    ]
+    const stateop = [
+        {
+            'id': 1,
+            'name': 'БҮРТГҮҮЛСЭН'
+        },
+        {
+            'id': 2,
+            'name': 'ТЭНЦСЭН'
+        },
+        {
+            'id': 3,
+            'name': 'ТЭНЦЭЭГҮЙ'
+        }
+    ]
+
+    const { user } = useContext(AuthContext)
+    const [stateModal, setStateModal] = useState(false)
+    const [gender, setGender] = useState("")
 
     var values = {
         admission: '',
@@ -33,19 +64,17 @@ const Enrollment = () => {
 
     const [currentPage, setCurrentPage] = useState(1)
 
-    // const { school_id } = useContext(SchoolContext)
-
     const { t } = useTranslation()
 
     const { control, formState: { errors } } = useForm({});
-    const [rowsPerPage, setRowsPerPage] = useState(10)
+    const [rowsPerPage, setRowsPerPage] = useState(20)
     const [searchValue, setSearchValue] = useState("");
     const [select_value, setSelectValue] = useState(values);
     const [editModal, setEditModal] = useState(false)
 
     const [total_count, setTotalCount] = useState(1)
 
-    const default_page = [10, 15, 50, 75, 100]
+    const default_page = [10, 20, 50, 75, 100]
 
     // Const Option
     const [admissionOption, setAdmisionOption] = useState([])
@@ -54,9 +83,10 @@ const Enrollment = () => {
 
     // API
     const professionApi = useApi().elselt.profession
-    const admissionApi = useApi().print.admission
     const admissionYearApi = useApi().elselt
+    const elseltApproveApi = useApi().elselt.approve
 
+    // элсэлт
     async function getAdmissionYear() {
         const { success, data } = await fetchData(admissionYearApi.getAll())
         if (success) {
@@ -67,6 +97,7 @@ const Enrollment = () => {
     // Хөтөлбөрийн жагсаалт авах
     async function getProfession() {
         const { success, data } = await fetchData(professionApi.getList(select_value?.admission))
+
         if (success) {
             setProfessionOption(data)
         }
@@ -76,12 +107,13 @@ const Enrollment = () => {
     async function getDatas() {
         var profession = select_value?.profession
         var admission = select_value?.admission
+
         const page_count = Math.ceil(total_count / rowsPerPage)
         if (page_count < currentPage && page_count != 0) {
             setCurrentPage(page_count)
         }
 
-        const { success, data } = await allFetch(admissionApi.get(rowsPerPage, currentPage, sortField, searchValue, admission, profession))
+        const { success, data } = await allFetch(elseltApproveApi.get(rowsPerPage, currentPage, sortField, searchValue, admission, profession, gender))
         if(success)
         {
             setTotalCount(data?.count)
@@ -140,7 +172,7 @@ const Enrollment = () => {
 
 			return () => clearTimeout(timeoutId);
 		}
-	}, [searchValue]);
+	}, [rowsPerPage, currentPage, sortField, searchValue, select_value.admission, select_value.profession, gender]);
 
     function onSelectedRowsChange(state) {
         var selectedRows = state.selectedRows
@@ -152,12 +184,23 @@ const Enrollment = () => {
         setEditModal(!editModal)
     }
 
+    function stateModalHandler() {
+        setStateModal(!stateModal)
+    }
+
     return(
         <Fragment>
+            <StateModal
+                getDatas={getDatas}
+                stateModalHandler={stateModalHandler}
+                stateModal={stateModal}
+                selectedStudents={selectedRows}
+                stateop={stateop}
+            />
             <Card>
             {isLoading && Loader}
                 <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom pt-0'">
-					<CardTitle tag="h4">{t('Элсэлтийн тушаал')}</CardTitle>
+					<CardTitle tag="h4">{t('Тэнцсэн элсэгчидийн элсэлтийн тушаал')}</CardTitle>
 					    <div className='d-flex flex-wrap mt-md-0 mt-1'>
 
                             <Button
@@ -173,7 +216,7 @@ const Enrollment = () => {
                             <Button
                                 color='primary'
                                 className='m-50'
-                                disabled={datas?.length < 1}
+                                disabled={!select_value?.profession}
                                 onClick={() => {navigate(`printlist`,  { state: { 'selectedRows': selectedRows, 'select_value': select_value }, })}}
                             >
                                 <Printer size={15} />
@@ -233,11 +276,52 @@ const Enrollment = () => {
                                 })
                             }}
                             styles={ReactSelectStyles}
+                            getOptionValue={(option) => option.prof_id}
+                            getOptionLabel={(option) => option.name
+                            }
+                        />
+                    </Col>
+                    <Col md={3}>
+                        <Label className="form-label" for="genderOp">
+                            {t('Хүйс')}
+                        </Label>
+                        <Select
+                            name="genderOp"
+                            id="genderOp"
+                            classNamePrefix='select'
+                            isClearable
+                            className={classnames('react-select')}
+                            isLoading={isLoading}
+                            placeholder={t('-- Сонгоно уу --')}
+                            options={genderOp || []}
+                            value={genderOp.find((c) => c.name === gender)}
+                            noOptionsMessage={() => t('Хоосон байна.')}
+                            onChange={(val) => {
+                                setGender(val?.name || '')
+                            }}
+                            styles={ReactSelectStyles}
                             getOptionValue={(option) => option.id}
                             getOptionLabel={(option) => option.name}
                         />
                     </Col>
                 </Row>
+                <div className='d-flex justify-content-between my-50 mt-1'>
+                    <div className='px-1'>
+                         <Button
+                            color='primary'
+                            disabled={(selectedRows.length != 0 && user.permissions.includes('lms-elselt-admission-approve')) ? false : true}
+                            className='d-flex align-items-center px-75'
+                            id='state_button'
+                             onClick={() => stateModalHandler()}
+                        >
+                            <RiEditFill className='me-25'/>
+                            Төлөв солих
+                            </Button>
+                        <UncontrolledTooltip target='state_button'>
+                            Доорхи сонгосон элсэгчдийн төлөвийг нэг дор солих
+                        </UncontrolledTooltip>
+                    </div>
+                </div>
                 <Row className='justify-content-between mx-0 mb-1'>
                     <Col className='d-flex align-items-center justify-content-start' md={6} sm={12}>
                         <Col md={2} sm={3} className='pe-1'>

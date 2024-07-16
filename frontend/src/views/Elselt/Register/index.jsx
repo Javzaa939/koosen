@@ -35,7 +35,7 @@ const ElseltRegister = () => {
     const { control, setValue, formState: { errors } } = useForm({});
 
     const [currentPage, setCurrentPage] = useState(1);
-    const [rowsPerPage, setRowsPerPage] = useState(10)
+    const [rowsPerPage, setRowsPerPage] = useState(20)
 
     // Эрэмбэлэлт
     const [sortField, setSort] = useState('')
@@ -162,7 +162,7 @@ const ElseltRegister = () => {
                     <div className='d-flex flex-wrap mt-md-0 mt-1'>
                         <Button
                             color='primary'
-                            // disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-elselt-create'))? false : true}
+                            disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-elselt-admission-create')) ? false : true}
                             onClick={() => handleModal()}
                         >
                             <Plus size={15} />

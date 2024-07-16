@@ -65,15 +65,15 @@ const GPAProfession = () => {
         }
     }
 
-    useEffect(() => {
-        getProfessionOption()
-    },[select_value])
+    // useEffect(() => {
+    //     getProfessionOption()
+    // },[select_value])
 
-    useEffect(() => {
-        if (select_value) {
-            getDatas()
-        }
-    },[select_value, currentPage, rowsPerPage])
+    // useEffect(() => {
+    //     if (select_value) {
+    //         getDatas()
+    //     }
+    // },[select_value, currentPage, rowsPerPage])
 
     async function handleSearch() {
         getDatas()
@@ -140,6 +140,12 @@ const GPAProfession = () => {
     function handlePerPage(e) {
         setRowsPerPage(parseInt(e.target.value))
     }
+
+    const handleSearchButton = () => {
+        if (select_value) {
+            getDatas();
+        }
+    };
 
     return(
         <Fragment>
@@ -272,6 +278,30 @@ const GPAProfession = () => {
                             getOptionValue={(option) => option.id}
                             getOptionLabel={(option) => option.name}
                         />
+                    </Col>
+                    <Col
+                        md={8}
+                        style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "flex-end",
+                            height: "90px",
+                        }}
+                    >
+                        <Button
+                            color="primary"
+                            style={{
+                                width: "100px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between"
+                            }}
+                            onClick={handleSearchButton}
+                            disabled={datas?.length === 0 && isLoading}
+                        >
+                            <Search size={15} />
+                            <span className="align-middle">{t("Xайх")}</span>
+                        </Button>
                     </Col>
                     <Col sm={4} md={4} className='d-flex align-items-center mt-1'>
                         <Label className="form-label" for="status">

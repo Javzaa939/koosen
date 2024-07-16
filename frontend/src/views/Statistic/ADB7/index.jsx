@@ -410,8 +410,6 @@ function ADB7(){
 
             const tableBodyMerge = groupdata().map((data, idx) => {
 
-                // console.log(data)
-
                 const number_relayer_1 = Array.from({length: idx },(_, nidx) => {
                     return(
                             blank[nidx].length

@@ -1,12 +1,12 @@
 import os
 from datetime import date
-
 from rest_framework import serializers
 
 from django.conf import settings
 from django.db.models.fields.files import ImageFieldFile
-from django.db.models.functions import Cast
+from django.db.models.functions import Cast, ExtractYear
 from django.db.models import Avg, PositiveIntegerField
+from django.db.models import F, Sum
 
 from lms.models import Student, StudentAdmissionScore, StudentLeave
 from lms.models import StudentRegister
@@ -45,6 +45,7 @@ from lms.models import LearningPlan
 from lms.models import StudentViz
 from lms.models import StudentCorrespondScore
 from lms.models import StudentCorrespondLessons
+from lms.models import AttachmentConfig
 
 from surgalt.serializers import ProfessionDefinitionSerializer
 
@@ -67,6 +68,7 @@ from main.utils.function.utils import get_fullName
 from main.utils.function.utils import fix_format_date
 from main.utils.function.utils import json_load
 from main.utils.function.utils import get_active_year_season
+from main.utils.function.utils import get_fullName, start_time, end_time, str2bool
 
 
 # ------------------- Оюутан бүртгэл -----------------
@@ -93,7 +95,6 @@ class StudentRegisterInfoSerializer(serializers.ModelSerializer):
 
 class GroupInfoSerializer(serializers.ModelSerializer):
     profession = ProfessionDefinitionSerializer(many=False)
-
     class Meta:
         model = Group
         fields = "id", "name", 'profession'
@@ -171,13 +172,13 @@ class StudentRegisterListSerializer(serializers.ModelSerializer):
     department_name = serializers.CharField(source='department.name', default='')
     status_name = serializers.CharField(source='status.name', default='')
     group_name = serializers.CharField(source='group.name', default='')
-    group = GroupInfoSerializer(many=False)
     group_level = serializers.CharField(source='group.level', default='')
     profession_name = serializers.CharField(source='group.profession.name', default='')
     school_name = serializers.CharField(source='group.school.name', default='')
     title = serializers.SerializerMethodField()
     correspondlessons = serializers.SerializerMethodField()
     corres_id = serializers.SerializerMethodField()
+
 
     class Meta:
         model = Student
@@ -206,6 +207,113 @@ class StudentRegisterListSerializer(serializers.ModelSerializer):
             ).order_by('my_season').filter(correspond=corresp.id).values()
 
         return list(qs_lesson)
+
+
+class StudentDownloadSerializer(serializers.ModelSerializer):
+    """ Excel download """
+
+    department_name = serializers.CharField(source='department.name', default='')
+    status_name = serializers.CharField(source='status.name', default='')
+    group_name = serializers.CharField(source='group.name', default='')
+    group_level = serializers.CharField(source='group.level', default='')
+    profession_name = serializers.CharField(source='group.profession.name', default='')
+    school_name = serializers.CharField(source='group.school.name', default='')
+    degree_name = serializers.CharField(source='group.degree.degree_name', default='')
+    join_year = serializers.CharField(source='group.join_year')
+    dep_name= serializers.CharField(source='group.profession.dep_name')
+    profession_code= serializers.CharField(source='group.profession.code')
+    learning_status=serializers.CharField(source='group.learning_status.learn_name', default='')
+    full_name = serializers.SerializerMethodField(read_only=True)
+    deplom_num = serializers.SerializerMethodField()
+    lesson_year = serializers.SerializerMethodField()
+    graduation_number = serializers.SerializerMethodField()
+    registration_num = serializers.SerializerMethodField()
+    total_kr = serializers.SerializerMethodField()
+    total_gpa = serializers.SerializerMethodField()
+    graduate_year = serializers.SerializerMethodField()
+    give_date = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Student
+        fields = '__all__'
+
+    def get_full_name(self, obj):
+
+        first_name = obj.first_name
+        last_name = obj.last_name
+        full_name = get_fullName(last_name, first_name, is_dot=False)
+
+        return full_name
+
+    def get_deplom_num(self, obj):
+
+        graduate = GraduationWork.objects.filter(student=obj.id).first()
+        return graduate.diplom_num if  graduate else ''
+
+    def get_graduation_number(self, obj):
+
+        graduate = GraduationWork.objects.filter(student=obj.id).first()
+        return graduate.graduation_number if  graduate else ''
+
+    def get_lesson_year(self, obj):
+
+        graduate = GraduationWork.objects.filter(student=obj.id).first()
+        return graduate.lesson_year if  graduate else ''
+
+    def get_registration_num(self, obj):
+
+        graduate = GraduationWork.objects.filter(student=obj.id).first()
+        return graduate.registration_num if  graduate else ''
+
+    def get_total_kr(self, obj):
+
+        # Төгсөлтийн ажлын голч оноог татах гэж байгаа бол
+        scoreRegister  = CalculatedGpaOfDiploma.objects.filter(student=obj).aggregate(max_kredit=Sum('kredit'))
+        # else: # Үзсэн бүх хичээлийн кредит
+        #     scoreRegister = ScoreRegister.objects.filter(student=stud_id).aggregate(max_kredit=Sum('lesson__kredit'))
+
+        return scoreRegister.get('max_kredit')
+
+    def get_total_gpa(self, obj):
+
+        final_gpa = 0
+        all_kredit = 0
+        all_s_kredit = 0
+        all_gpa = 0
+        final_score = '0.0'
+
+        scoreRegister = CalculatedGpaOfDiploma.objects.filter(student=obj)
+
+        for lesson_score in scoreRegister:
+            # Бүх голч нэмэх
+            if not lesson_score.grade_letter:
+                all_gpa = all_gpa + (lesson_score.gpa * lesson_score.kredit)
+
+            # Бүх нийт кредит нэмэх
+            all_kredit = all_kredit + lesson_score.kredit
+            if lesson_score.grade_letter:
+                all_s_kredit = all_s_kredit + lesson_score.kredit
+
+            # Дундаж оноо
+            # Нийт кредитээс S үнэлгээ буюу тооцов үнэлгээг хасаж голч бодогдоно
+            estimate_kredit = all_kredit - all_s_kredit
+
+            if all_gpa != 0:
+                final_gpa = all_gpa / estimate_kredit
+
+                final_score = format(final_gpa, ".1f")
+
+        return final_score
+
+    def get_give_date (self, obj):
+
+        olgoson_ognoo = AttachmentConfig.objects.filter(group=obj.group).first()
+        return olgoson_ognoo.give_date if olgoson_ognoo else ''
+
+    def get_graduate_year(self,obj):
+
+        graduate_year = GraduationWork.objects.filter(student=obj).annotate(grad_year=ExtractYear('decision_date')).first()
+        return graduate_year.grad_year if  graduate_year else ''
 
 # ----------------Оюутны шилжилт хөдөлгөөн -------------------
 

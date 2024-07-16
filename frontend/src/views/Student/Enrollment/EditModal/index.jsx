@@ -31,20 +31,17 @@ function EditModal({ editModal, toggleEditModal, selectedRows, getDatas }) {
 
     const { control, handleSubmit, reset, setValue, setError, formState: { errors } } = useForm(validate(validateSchema));
 
-		const date_relayer = datas.map(data => data.admission_date ? data.admission_date : new Date)
-		const date_value = date_relayer.filter((value, index) => value === value)[0]
-
+    const date_relayer = datas.map(data => data.admission_date ? data.admission_date : new Date)
+    const date_value = date_relayer.filter((value, index) => value === value)[0]
     const [admissionDate, setAdmissionDate] = useState(date_value ? date_value : '')
 
-
-		const number_relayer = datas.map(data => data.admission_date ? data.admission_date : 'test')
-		const number_value = number_relayer.filter((value, index) => value === value)[0]
-
+    const number_relayer = datas.map(data => data.admission_date ? data.admission_date : 'test')
+    const number_value = number_relayer.filter((value, index) => value === value)[0]
     const [admissionNumber, setAdmissionNumber] = useState(number_value ? number_value : '')
 
-    const admissionApi = useApi().print.admission
+    const admissionApi = useApi().elselt.approve
 
-    async function onSubmit(cdata) {
+    async function onSubmit() {
         let datax = []
 
         for (let i = 0; i < datas.length; i++){
@@ -56,7 +53,7 @@ function EditModal({ editModal, toggleEditModal, selectedRows, getDatas }) {
             "admission_number": admissionNumber
         }
 
-        const { success } = await fetchData(admissionApi.put(all_data))
+        const { success } = await fetchData(admissionApi.post(all_data))
         if (success) {
             reset()
             toggleEditModal()

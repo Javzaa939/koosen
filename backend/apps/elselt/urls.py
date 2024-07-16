@@ -7,12 +7,25 @@ urlpatterns = [
     path('desc/<int:pk>/', ElseltDescApiView.as_view()),
     path('<int:pk>/', ElseltApiView.as_view()),
     path('all/', AdmissionYearAPIView.as_view()),
+    path('all/active/', AdmissionYearActiveAPIView.as_view()),
+    path('first/<int:pk>/', AdmissionUserFirstAPIView.as_view()),
+
     path('dashboard/', DashboardAPIView.as_view()),
+    path('dashboard/excel/', DashboardExcelAPIView.as_view()),
+
+    path('hynalt_number/', HynaltNumberAPIView.as_view()),
+    path('hynalt_is_gender/', HynaltNumberIsGenderAPIView.as_view()),
+    path('userscore/', UserScoreSortAPIView.as_view()),
 
     # Элсэгчдийн мэдээлэл
     path('admissionuserdata/', AdmissionUserInfoAPIView.as_view()),
     path('admissionuserdata/<int:pk>/', AdmissionUserInfoAPIView.as_view()),
     path('admissionuserdata/all/', AdmissionUserAllChange.as_view()),
+    path('admissionuserdata/gpa_check/',GpaCheckUserInfoAPIView.as_view()),
+    path('admissionuserdata/gpa_check/confirm/',GpaCheckConfirmUserInfoAPIView.as_view()),
+    path('admissionuserdata/eyesh_check/',EyeshCheckUserInfoAPIView.as_view()),
+    path('admissionuserdata/eyesh/',EyeshOrderUserInfoAPIView.as_view()),
+    path('admissionuserdata/eyesh/<int:pk>/',EyeshOrderUserInfoAPIView.as_view()),
 
     path('profession/', ElseltProfession.as_view()),
     path('profession/<int:pk>/', ElseltProfession.as_view()),
@@ -29,6 +42,13 @@ urlpatterns = [
     # Элсэгчдэд мэдээлэл илгээх хэсэг
     path('admissionuserdata/email/', AdmissionUserEmailAPIView.as_view()),
 
+    # Элсэгчдэд мессеж илгээх хэсэг
+    path('admissionuserdata/message/', AdmissionUserMessageAPIView.as_view()),
+
+    # Ял шийтгэл шатны үзлэг
+    path('justice/', AdmissionJusticeListAPIView.as_view()),
+    path('justice/<int:pk>/', AdmissionJusticeListAPIView.as_view()),
+
     # Эрүүл мэнд анхан шатны үзлэг
     path('health/anhan/', ElseltHealthAnhanShat.as_view()),
     path('health/anhan/<int:pk>/', ElseltHealthAnhanShat.as_view()),
@@ -43,5 +63,21 @@ urlpatterns = [
 
     # Эрүүл мэндийн нарийвчилсан мэдээллийг хадгалах with POSTMAN
     path('health-up/create', ElseltHealthPhysicalCreateAPIView.as_view()),
+
+    # Бүх шалгуурыг даваад тэнцсэн жагсаалт
+    path('approve/', ElseltStateApprove.as_view()),
+
+    # Элсэгчдийн ярилцлага
+    path('interview/',ConversationUserSerializerAPIView.as_view()),
+    path('interview/<int:pk>/', ConversationUserSerializerAPIView.as_view()),
+
+    path('eyesh/',ElseltEyeshAPIView.as_view()),
+
+    # Цэргийн хээрийн бэлтгэлд тэнцсэн жагсаалт
+    path('preparation/', ArmyUserSerializerAPView.as_view()),
+    path('preparation/<int:pk>/',ArmyUserSerializerAPView.as_view()),
+
+    # Хөтөлбөр,Төлөв лог жагсаалт
+    path('log/',LogSerializerAPView.as_view()),
 ]
 

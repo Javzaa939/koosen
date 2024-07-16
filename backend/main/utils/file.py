@@ -18,7 +18,7 @@ def file_exist(path):
     return is_exist
 
 
-def save_file(file, id, folder):
+def save_file(file, folder, id=''):
     """ Файл хадгалах
         path: Файл хадгалсан зам
         return path
@@ -116,3 +116,10 @@ def get_name_from_path(path):
     """ Замнаас файлын нэрийг авах нь """
     return os.path.basename(path)
 
+
+def create_folder(path):
+    """ Фолдер үүсгэх
+    """
+
+    if not os.path.exists(path):
+        os.makedirs(path)

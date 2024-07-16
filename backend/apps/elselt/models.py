@@ -4,7 +4,8 @@ from lms.models import (
     AimagHot,
     AdmissionRegisterProfession,
     User,
-    Challenge
+    PsychologicalTest,
+    AdmissionIndicator
 )
 class ElseltUser(models.Model):
 
@@ -63,7 +64,7 @@ class UserScore(models.Model):
         db_table = 'elselt_userscore'
         managed = False
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Элсэгч')
+    user = models.ForeignKey(ElseltUser, on_delete=models.CASCADE, verbose_name='Элсэгч')
     exam_loc = models.CharField(max_length=200, verbose_name="Шалгалт өгсөн газар", default="")
     exam_loc_code = models.IntegerField(verbose_name="Шалгалт өгсөн газар", default=0)
     year = models.IntegerField(verbose_name="Шалгалт өгсөн он")
@@ -111,7 +112,7 @@ class UserInfo(models.Model):
         (STATE_EDIT, 'ЗАССАН'),
     )
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Хэрэглэгч')
+    user = models.ForeignKey(ElseltUser, on_delete=models.CASCADE, verbose_name='Хэрэглэгч')
     graduate_school = models.CharField(max_length=1000, null=True, verbose_name='Төгссөн сургууль')
     graduate_school_year = models.IntegerField(null=True, verbose_name='Төгссөн он')
     graduate_profession = models.CharField(max_length=1000, null=True, verbose_name='Төгссөн мэргэжил')
@@ -121,8 +122,10 @@ class UserInfo(models.Model):
     work_organization = models.CharField(max_length=1000, null=True, verbose_name='Ажиллаж байгаа байгууллагын нэр')
     work_heltes = models.CharField(max_length=1000, null=True, verbose_name='Хэлтэс газар')
     position_name = models.CharField(max_length=1000, null=True, verbose_name='Албан тушаал')
+
     gpa = models.FloatField(null=True, verbose_name='Голч дүн')
-    gpa_state = models.PositiveIntegerField(choices=STATE, db_index=True, null=False, default=STATE_CORRECT, verbose_name="Тэнцсэн элсэгчийн төлөв")
+    gpa_state = models.PositiveIntegerField(choices=STATE, db_index=True, null=False, default=STATE_CORRECT, verbose_name="Голчийн мэдээлэл зассан төлөв")
+
     graduate_pdf = models.FileField(upload_to='diplom/', null=True, verbose_name='Төгссөн тушаал/ архивын лавлагаа хавсаргах')
     esse_pdf = models.FileField(upload_to='diplom/', null=True, verbose_name='Эссэ бичсэн файлаа хавсаргах')
     ndsh_file = models.FileField(upload_to='ndsh/', null=True, verbose_name='НД-ын шимтгэл төлөлтийн лавлагаа файл')
@@ -135,7 +138,6 @@ class AdmissionUserProfession(models.Model):
 
     class Meta:
         db_table = 'elselt_admissionuserprofession'
-        managed = False
 
     STATE_SEND = 1
     STATE_APPROVE = 2
@@ -147,24 +149,48 @@ class AdmissionUserProfession(models.Model):
         (STATE_REJECT, 'ТЭНЦЭЭГҮЙ'),
     )
 
-    user = models.ForeignKey(ElseltUser, verbose_name='Элсэгч', on_delete=models.CASCADE)
-    profession = models.ForeignKey(AdmissionRegisterProfession, verbose_name='Элссэн мэргэжил', on_delete=models.PROTECT)
+    user = models.ForeignKey(ElseltUser, verbose_name='Элсэгч', on_delete=models.CASCADE, null=True)
+    profession = models.ForeignKey(AdmissionRegisterProfession, verbose_name='Элссэн мэргэжил', on_delete=models.PROTECT, null=True)
     description = models.CharField(max_length=5000, null=True, verbose_name='Хөтөлбөр сольсон тайлбар')
 
+    score_avg = models.FloatField(null=True,verbose_name='ЭШ дундаж оноо')
+    order_no = models.IntegerField(null=True, verbose_name='ЭШ оноогоор эрэмбэлэх ')
+
     # Элсэгч бүх шалгуурыг даваад тэнцсэн төлөв тайлбар
-    state = models.PositiveIntegerField(choices=STATE, db_index=True, null=False, default=STATE_SEND, verbose_name="Тэнцсэн элсэгчийн төлөв")
+    state = models.PositiveIntegerField(choices=STATE, db_index=True, null=True, default=STATE_SEND, verbose_name="Тэнцсэн элсэгчийн төлөв")
     state_description = models.CharField(max_length=5000, null=True, verbose_name='Тэнцсэн төлөвийн тайлбар')
 
     # Элсэгч ял шийтгэлтэй эсэх тайлбар
-    justice_state = models.PositiveIntegerField(choices=STATE, db_index=True, null=False, default=STATE_SEND, verbose_name="Ял шийтгэлтэй эсэх")
+    justice_state = models.PositiveIntegerField(choices=STATE, db_index=True, null=True, default=STATE_SEND, verbose_name="Ял шийтгэлтэй эсэх")
     justice_description = models.CharField(max_length=5000, null=True, verbose_name='Ял шийтгэлтэй бол тайлбар')
 
     # Тухайн элсэлтэд нас гэсэн шалгуур үзүүлэлттэй бол элсэгчийн насыг шалгаж тэнцсэн эсэх төлөв
-    age_state = models.PositiveIntegerField(choices=STATE, db_index=True, null=False, default=STATE_SEND, verbose_name="Нас шалгуурт тэнцсэн эсэх")
+    age_state = models.PositiveIntegerField(choices=STATE,  null=True, default=STATE_SEND, verbose_name="Нас шалгуурт тэнцсэн эсэх")
     age_description = models.CharField(max_length=5000, null=True, verbose_name='Нас шалгуурт тэнцээгүй тайлбар')
+
+    # Тухайн элсэлтэд голч онооны шалгуур үзүүлэлттэй бол элсэгчийн голчыг шалгаж тэнцсэн эсэх төлөв
+    gpa_state = models.PositiveIntegerField(choices=STATE,  null=True, default=STATE_SEND, verbose_name="Голч шалгуурт тэнцсэн эсэх")
+    gpa_description = models.CharField(max_length=5000, null=True, verbose_name='Голч шалгуурт тэнцээгүй тайлбар')
+
+    # Элсэгчийн элсэлтийн тушаалын дугаар огноо
+    admission_date = models.DateField(null=True, verbose_name="Элсэлтийн тушаалын огноо")
+    admission_number = models.CharField(null=True, max_length=50, verbose_name="Элсэлтийн тушаалын дугаар")
+
+    # Элсэгч Монгол хэл бичгийн шалгалт тэнцэх  төлөв тайлбар
+    yesh_mhb_state = models.PositiveIntegerField(choices=STATE, db_index=True, null=True, default=STATE_SEND, verbose_name="Монгол хэл бичгийн шалгалт тэнцэх  төлөв тайлбар")
+    yesh_mhb_description = models.CharField(max_length=5000, null=True, verbose_name='Монгол хэл бичгийн шалгалт тэнцэх  төлөв тайлбар')
+
+    # Элсэгч ЭШ оноогоор босго оноо даваад тэнцэх  төлөв тайлбар
+    yesh_state = models.PositiveIntegerField(choices=STATE, db_index=True, null=True, default=STATE_SEND, verbose_name="Элсэгч ЭШ оноогоор босго онооны төлөв")
+    yesh_description = models.CharField(max_length=5000, null=True, verbose_name='Элсэгч ЭШ оноогоор босго онооны төлөвийн тайлбар')
+
+    # Бүртгүүлсний дараа анхан шатандаа тэнцсэн төлөв
+    first_state = models.PositiveIntegerField(choices=STATE, db_index=True, null=True, default=STATE_SEND, verbose_name="Бүртгүүлсний дараа анхан шатандаа тэнцсэн төлөв")
+    first_description = models.CharField(max_length=5000, null=True, verbose_name='Бүртгүүлсний дараа анхан шатандаа тэнцсэн төлөв')
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    updated_user = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name='Зассан хэрэглэгч', null=True)
 
 
 class ContactInfo(models.Model):
@@ -216,6 +242,7 @@ class HealthUser(models.Model):
     state = models.IntegerField(choices=AdmissionUserProfession.STATE, default=AdmissionUserProfession.STATE_SEND, verbose_name="Эрүүл мэндийн анхан шатны үзлэгт тэнцсэн эсэх төлөв")
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
+    updated_user = models.ForeignKey(User, verbose_name='Зассан хэрэглэгч', null=True, on_delete=models.CASCADE)
 
 
 class HealthUpUser(models.Model):
@@ -223,24 +250,25 @@ class HealthUpUser(models.Model):
 
     user = models.ForeignKey(ElseltUser, on_delete=models.CASCADE, verbose_name='Элсэгч')
     state = models.IntegerField(choices=AdmissionUserProfession.STATE, default=AdmissionUserProfession.STATE_SEND, verbose_name="Эрүүл мэндийн анхан шатны үзлэгт тэнцсэн эсэх төлөв")
-    belly = models.CharField(max_length=255, verbose_name='Дотор')
-    nerve = models.CharField(max_length=255, verbose_name='Мэдрэл')
-    ear_nose = models.CharField(max_length=255, verbose_name='Чих хамар хоолой')
-    eye = models.CharField(max_length=255, verbose_name='Нүд')
-    teeth = models.CharField(max_length=255, verbose_name='Шүд')
-    surgery = models.CharField(max_length=255, verbose_name='Мэс засал')
-    femini = models.CharField(max_length=255, verbose_name='Эмэгтэйчүүд')
-    heart = models.CharField(max_length=255, verbose_name='Зүрх судас')
-    phthisis = models.CharField(max_length=255, verbose_name='сүрьеэ')
-    allergies = models.CharField(max_length=255, verbose_name='арьс харшил')
-    contagious = models.CharField(max_length=255, verbose_name='халдварт өвчин')
-    neuro_phychic = models.CharField(max_length=255, verbose_name='сэтгэц мэдрэл')
-    injury = models.CharField(max_length=255, verbose_name='гэмтэл')
-    bzdx = models.CharField(max_length=255, verbose_name='БЗДХ')
+    belly = models.CharField(max_length=5000, null=True, verbose_name='Дотор')
+    nerve = models.CharField(max_length=5000, null=True, verbose_name='Мэдрэл')
+    ear_nose = models.CharField(max_length=5000, null=True, verbose_name='Чих хамар хоолой')
+    eye = models.CharField(max_length=5000, null=True, verbose_name='Нүд')
+    teeth = models.CharField(max_length=5000, null=True, verbose_name='Шүд')
+    surgery = models.CharField(max_length=5000, null=True, verbose_name='Мэс засал')
+    femini = models.CharField(max_length=5000, null=True, verbose_name='Эмэгтэйчүүд')
+    heart = models.CharField(max_length=5000, null=True, verbose_name='Зүрх судас')
+    phthisis = models.CharField(max_length=5000, null=True, verbose_name='сүрьеэ')
+    allergies = models.CharField(max_length=5000, null=True, verbose_name='арьс харшил')
+    contagious = models.CharField(max_length=5000, null=True, verbose_name='халдварт өвчин')
+    neuro_phychic = models.CharField(max_length=5000, null=True, verbose_name='сэтгэц мэдрэл')
+    injury = models.CharField(max_length=5000, null=True, verbose_name='гэмтэл')
+    bzdx = models.CharField(max_length=5000, null=True, verbose_name='БЗДХ')
 
     description = models.TextField(verbose_name='Тайлбар', null=True)
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
+    updated_user = models.ForeignKey(User, verbose_name='Зассан хэрэглэгч', null=True, on_delete=models.CASCADE)
 
 
 class PhysqueUser(models.Model):
@@ -258,12 +286,14 @@ class PhysqueUser(models.Model):
     quickness = models.FloatField(verbose_name='Авхаалж самбаа')
     flexible = models.FloatField(verbose_name='Уян хатан')
     total_score = models.FloatField(verbose_name='Нийт оноо')
+    order_no = models.IntegerField(null=True, verbose_name='Эрэмбийн дугаар')
 
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
+    updated_user = models.ForeignKey(User, verbose_name='Зассан хэрэглэгч', null=True, on_delete=models.CASCADE)
 
     @property
-    def score_physque(self):
+    def physice_score(self):
         """ Ур чадварын шалгалтын оноог бодож гаргах """
         x = 0
         if self.total_score > 0 and self.total_score < 59:
@@ -271,21 +301,27 @@ class PhysqueUser(models.Model):
         else:
             x = 480 + (self.total_score - 60) * 8
 
-        return round(x, 2)
+        return round(x)
 
 
 class MentalUser(models.Model):
     """ Элсэгчдийн сэтгэлзүйн сорил """
 
+    class Meta:
+        db_table = 'elselt_mentaluser'
+
     user = models.ForeignKey(ElseltUser, on_delete=models.CASCADE, verbose_name='Элсэгч')
-    challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE, verbose_name='Сэтгэлзүйн сорил')
+    challenge = models.ForeignKey(PsychologicalTest, on_delete=models.CASCADE, verbose_name='Сэтгэлзүйн сорил', null=True)
 
     description = models.TextField(verbose_name='Тайлбар', null=True)
     answer = models.TextField(null=True, verbose_name='Хариулт')
     score = models.FloatField(null=True, verbose_name='Элсэгчийн нийт оноо')
+    start_time = models.DateTimeField(null=True, verbose_name='Шалгалт өгч эхэлсэн хугацаа')
+    end_time = models.DateTimeField(null=True, verbose_name='Шалгалт өгч дууссан хугацаа')
 
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
+    updated_user = models.ForeignKey(User, verbose_name='Зассан хэрэглэгч', null=True, on_delete=models.CASCADE)
 
 
 class ConversationUser(models.Model):
@@ -307,10 +343,11 @@ class ConversationUser(models.Model):
 
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
+    updated_user = models.ForeignKey(User, verbose_name='Зассан хэрэглэгч', null=True, on_delete=models.CASCADE)
 
 
 class ArmyUser(models.Model):
-    """ Элсэгчдийн ярилцлага """
+    """ Цэргийн хээрийн бэлтгэл ярилцлага """
 
     user = models.ForeignKey(ElseltUser, on_delete=models.CASCADE, verbose_name='Элсэгч')
     state = models.IntegerField(choices=AdmissionUserProfession.STATE, default=AdmissionUserProfession.STATE_SEND, verbose_name="тэнцсэн эсэх төлөв")
@@ -318,3 +355,27 @@ class ArmyUser(models.Model):
 
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
+    updated_user = models.ForeignKey(User, verbose_name='Зассан хэрэглэгч', null=True, on_delete=models.CASCADE)
+
+
+class StateChangeLog(models.Model):
+    ''' Элсэгч дээр төлөв болон хөтөлбөр сольсон лог харуулах '''
+
+    PROFESSION = 1
+    STATE = 2
+
+    TYPE = (
+        (PROFESSION, 'ХӨТӨЛБӨР'),
+        (STATE, 'ТӨЛӨВ'),
+    )
+
+    user = models.ForeignKey(ElseltUser, on_delete=models.CASCADE, verbose_name='Элсэгч')
+    type = models.IntegerField(choices=TYPE, verbose_name='Лог төрөл', default=STATE)
+    now_profession = models.CharField(verbose_name='Одоогийн мэргэжил', max_length=255, null=True)
+    change_profession = models.CharField(verbose_name='Өөрчлөгдөж байгаа мэргэжил', max_length=255, null=True)
+    indicator = models.IntegerField(choices=AdmissionIndicator.INDICATOR_VALUE, default=AdmissionIndicator.TENTSSEN_ELSEGCHID, verbose_name='шалгуурын төрөл')
+    now_state = models.IntegerField(choices=AdmissionUserProfession.STATE, default=None, verbose_name='ямар төлөвт шилжиж байгаан')
+    change_state = models.IntegerField(choices=AdmissionUserProfession.STATE, default=None, verbose_name='ямар төлөвт шилжиж байгаан')
+
+    updated_at = models.DateTimeField(auto_now=True)
+    updated_user = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name='Зассан хэрэглэгч', null=True)

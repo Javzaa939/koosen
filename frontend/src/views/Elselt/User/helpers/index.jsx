@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { Badge, Input, UncontrolledTooltip }  from 'reactstrap';
-import { Edit, Eye, Type } from "react-feather";
+import { CheckCircle, Edit, Eye, Type } from "react-feather";
 import { t } from 'i18next'
 
 import moment from 'moment'
@@ -10,7 +10,7 @@ import useLoader from "@hooks/useLoader";
 import './style.css'
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, page_count, editModal, handleDelete, user, handleDetail, handleDescModal) {
+export function getColumns (currentPage, rowsPerPage, page_count, editModal, handleDelete, user, handleDetail, handleDescModal, handleStateModal) {
 
 	const { fetchData } = useLoader({ isFullScreen: false })
 	const focusData = useRef(undefined)
@@ -83,6 +83,7 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 						<>
 							<a role="button"
 								onClick={() => editModal(row)}
+								style={{pointerEvents: user?.permissions?.includes('lms-elselt-admission-update') ? '' : 'none'}}
 								id={`edit${row?.id}`}
 								className={`me-1`}
 							>
@@ -105,6 +106,13 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 						<Badge color="light-primary" pill><Type  width={"15px"} /></Badge>
 					</a>
 					<UncontrolledTooltip placement='top' target={`description${row.id}`}>Тайлбар оруулах</UncontrolledTooltip>
+					<a role="button" onClick={() => { handleStateModal(row)} }
+						id={`state${row?.id}`}
+						className="me-1"
+					>
+						<Badge color="light-success" pill><CheckCircle  width={"15px"}/></Badge>
+					</a>
+					<UncontrolledTooltip placement='top' target={`state${row.id}`}>Төлөв</UncontrolledTooltip>
 				</div>
 			),
 		},
@@ -135,6 +143,22 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 			name: t("РД"),
 			reorder: true,
 			selector: (row) => row?.user?.register,
+			center: true
+		},
+		{
+			maxWidth: "180px",
+			minWidth: "180px",
+			header: 'register',
+			name: t("Бү/Дугаар"),
+			reorder: true,
+			selector: (row) => row?.user?.code,
+			center: true
+		},
+		{
+			header: 'user_age',
+			name: t("Нас"),
+			reorder: true,
+			selector: (row) => row?.user_age,
 			center: true
 		},
 		{
@@ -187,6 +211,22 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 			reorder: true,
 			selector: (row) => <span title={row?.userinfo?.info_description} style={{fontSize:'10px'}}>{row?.userinfo?.info_description}</span>,
 			wrap:true
+		},
+		{
+			maxWidth: "150px",
+			minWidth: "150px",
+			header: 'state',
+			reorder: true,
+			sortable: true,
+			name: t("Насны шалгуур"),
+			selector: (row) => (
+				<Badge
+					color={`${row?.age_state == 1 ? 'primary' : row?.age_state == 2 ? 'success' : row?.age_state == 3 ? 'danger' : 'primary'}`}
+					pill
+				>
+					{row?.age_state == 2 ? 'Тэнцсэн':'Тэнцээгүй'}
+				</Badge>),
+			center: true,
 		},
 		{
 			name: t("Хүйс"),

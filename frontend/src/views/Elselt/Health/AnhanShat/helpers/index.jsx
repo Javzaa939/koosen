@@ -1,8 +1,9 @@
 import { Book, CheckCircle, Type } from "react-feather"
 import { Badge, UncontrolledTooltip } from "reactstrap"
+import moment from 'moment'
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, page_count, addModalHandler, STATE_LIST) {
+export function getColumns (currentPage, rowsPerPage, page_count, addModalHandler, STATE_LIST, user) {
 
     // /** Сонгосон хуудасны тоо датаны тооноос их болсон үед хуудаслалт 1-ээс эхлэнэ */
     if (currentPage > page_count) {
@@ -25,27 +26,30 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 					tableRow.style.borderLeft = `${border}`
 				}
 
-				// console.log((currentPage-1) * rowsPerPage + index + 1)
 				return (currentPage-1) * rowsPerPage + index + 1
 			},
 			minWidth: '100px',
 			maxWidth: '100px',
 		},
 		{
-			header: 'user__first_name',
-			name: <div className="px-1">Нэр</div>,
-			minWidth: '160px',
-			maxWidth: '160px',
+			minWidth: "150px",
+			header: 'user__last_name',
+			name:"Овог",
+			cell: (row) => (row?.user?.last_name),
 			sortable: true,
-			selector: (row) => row?.full_name || ''
+			reorder: true,
+			center: true,
+			wrap: true,
 		},
 		{
-			header: 'user__register',
-			name: <div className="px-1">РД</div>,
-			selector: (row) => row?.user_register || '',
-            sortable: true,
-			minWidth: '140px',
-			maxWidth: '140px',
+			minWidth: "150px",
+			header: 'user__first_name',
+			name: "Нэр",
+			cell: (row) => (row?.user?.first_name),
+			sortable: true,
+			reorder: true,
+			center: true,
+			wrap: true,
 		},
 		{
 			header: 'gender',
@@ -77,6 +81,13 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 						}
 				</Badge>),
 			center: true,
+		},
+		{
+			header: 'update_date',
+			name: <div className="px-1">Үзлэгийн огноо</div>,
+			selector: (row) => row?.health_user_data?.updated_at? moment(row?.health_user_data?.updated_at).format("YYYY-MM-DD h:mm") : '',
+            sortable: true,
+			minWidth: '200px',
 		},
 
 		// TODO: SORT ALDAA ZASAH
@@ -133,23 +144,24 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 			maxWidth: '220px',
 		},
 		{
+			header: 'user__register',
+			name: <div className="px-1">РД</div>,
+			selector: (row) => row?.user_register || '',
+            sortable: true,
+			minWidth: '140px',
+			maxWidth: '140px',
+		},
+		{
 			name: "Үйлдэл",
 			center: true,
 			maxWidth: "120px",
 			minWidth: "120px",
 			selector: (row) => (
 				<div className="text-center" style={{ width: "auto" }}>
-					{/* <a
-						id={`requestLeaveDatatableDetails${row.id}`}
-						onClick={() => console.log(row?.id, row)}
-						className="me-50"
-					>
-						<Badge color="light-info" pill><Book width={"15px"} /></Badge>
-					</a>
-
-					<UncontrolledTooltip placement='top' target={`requestLeaveDatatableDetails${row.id}`}>Дэлгэрэнгүй</UncontrolledTooltip> */}
-
-					<a role="button" onClick={(e) => { addModalHandler(e, row)} }
+					<a
+						role="button"
+						style={{pointerEvents: user?.permissions?.includes('lms-elselt-health-create') ? '' : 'none'}}
+						onClick={(e) => { addModalHandler(e, row)} }
 						id={`description${row?.id}`}
 						className="me-1"
 					>

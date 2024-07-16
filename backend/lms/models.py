@@ -408,9 +408,17 @@ class ProfessionAverageScore(models.Model):
 class AdmissionBottomScore(models.Model):
     """Элсэлтийн шалгалтын хичээл ба босго оноо мэргэжлээр"""
 
+    GENERAL = 1
+    SUPPORT = 2
+    SCORE_TYPE = (
+        (GENERAL, 'Суурь шалгалт'),
+        (SUPPORT, 'Дагалдах шалгалт')
+    )
+
     profession = models.ForeignKey(ProfessionDefinition, on_delete=models.PROTECT, verbose_name="Мэргэжил")
     admission_lesson = models.ForeignKey(AdmissionLesson, on_delete=models.PROTECT, verbose_name="ЭЕШ өгсөн хичээл")
     bottom_score = models.PositiveIntegerField(default=400, verbose_name="Босго оноо")
+    score_type = models.PositiveIntegerField(choices=SCORE_TYPE, db_index=True, default=GENERAL, verbose_name="Шалгалтын хичээлийн төрөл")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -550,7 +558,7 @@ class SystemSettings(models.Model):
 class Group(models.Model):
     """ Ангийн бүртгэл """
 
-    name = models.CharField(unique=True, max_length=100, verbose_name='Ангийн нэр')
+    name = models.CharField(max_length=100, verbose_name='Ангийн нэр')
     profession = models.ForeignKey(ProfessionDefinition, on_delete=models.PROTECT, verbose_name='Мэргэжил')
     degree = models.ForeignKey(ProfessionalDegree, on_delete=models.PROTECT,verbose_name='Боловсролын зэрэг')
     level = models.IntegerField(verbose_name='Курс')
@@ -3182,16 +3190,113 @@ class UserRightCert(models.Model):
 
 # -------------------------------------------------------- Өөрийгөө сорих тест ------------------------------------------------------------------------------------------
 
-def get_image_path(instance, filename):
+def get_image_path(instance):
     """ Өөрийгөө сорих шалгалтын файлын замыг зааж байна """
 
-    return os.path.join('challenge', 'questions', "asuult_%s" % str(instance.id), filename)
+    return os.path.join('challenge', 'questions', "asuult_%s" % str(instance.id))
 
 
-def get_choice_image_path(instance, filename):
-    """ Өөрийгөө сорих шалгалтын файлын замыг зааж байна """
+def get_choice_image_path(instance):
+    """ Өөрийгөө сорих шалгалтын сонголтын файлын замыг зааж байна """
 
-    return os.path.join('challenge', 'questions', "answer_%s" % str(instance.id), filename)
+    return os.path.join('challenge', 'questions', "answer_%s" % str(instance.id))
+
+
+class PsychologicalQuestionTitle(models.Model):
+    """ Асуултын сэдэв """
+
+    name = models.CharField(max_length=255, null=True, verbose_name='Сэдвийн нэр')
+    created_at = models.DateTimeField(auto_now=True)
+
+
+class PsychologicalQuestionChoices(models.Model):
+    """ Асуултын сонголтууд """
+
+    value = models.CharField(verbose_name="Сонголт", max_length=250, null=False, blank=False)
+    image = models.ImageField(upload_to=get_choice_image_path, null=True, blank=True, verbose_name='зураг')
+    is_correct = models.BooleanField(null=False, default=False, verbose_name="Энэ сонголт зөв эсэх")
+
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class PsychologicalTestQuestions(models.Model):
+    """ Сэтгэлзүйн  асуултууд """
+
+    KIND_ONE_CHOICE = 1
+    KIND_MULTI_CHOICE = 2
+    KIND_BOOLEAN = 3
+    KIND_RATING = 4
+    KIND_TEXT = 5
+
+    KIND_CHOICES = (
+        (KIND_ONE_CHOICE, 'Нэг сонголт'),
+        (KIND_MULTI_CHOICE, 'Олон сонголт'),
+        (KIND_BOOLEAN, 'Тийм, Үгүй сонголт'),
+        (KIND_RATING, 'Үнэлгээ'),
+        (KIND_TEXT, 'Бичвэр'),
+    )
+
+    kind = models.IntegerField(choices=KIND_CHOICES, null=False, blank=False, verbose_name='Асуултын төрөл')
+    question = models.CharField(max_length=1000, null=False, blank=False, verbose_name="Асуулт")
+    image = models.ImageField(upload_to=get_image_path, null=True, blank=True, verbose_name='зураг')
+
+    title = models.ManyToManyField(PsychologicalQuestionTitle, verbose_name='Асуултын ерөнхий сэдэв')
+    has_score = models.BooleanField(null=True, default=False, verbose_name="Энэ асуулт оноотой юу гэдгийг шалгана")
+    score = models.FloatField(null=True, verbose_name="Асуултын оноо")
+
+    # KIND_BOOLEAN үед
+    yes_or_no = models.PositiveIntegerField(null=True, verbose_name='Тийм үгүй асуултны хариулт хадгалах хэсэг') # 1 0 хадгалах
+
+    # KIND_RATING үед
+    rating_max_count = models.IntegerField(default=0, verbose_name="Үнэлгээний дээд тоо", null=True, blank=True)
+    low_rating_word = models.CharField(max_length=100, verbose_name="Доод үнэлгээг илэрхийлэх үг")
+    high_rating_word = models.CharField(max_length=100, verbose_name="Дээд үнэлгээг илэрхийлэх үг")
+
+    # KIND_MULTI_CHOICE үед
+    max_choice_count = models.IntegerField(default=0, verbose_name="Сонголтын хязгаар", null=True, blank=True)
+
+    # KIND_ONE_CHOICE болон KIND_MULTI_CHOICE үед
+    choices = models.ManyToManyField(PsychologicalQuestionChoices)
+
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class PsychologicalTest(models.Model):
+    """ Сэтгэлзүйн сорил """
+
+    SCOPE_EMPLOYEES = 1
+    SCOPE_ELSEGCH = 2
+    SCOPE_STUDENTS = 3
+
+    SCOPE_CHOICES = (
+        (SCOPE_EMPLOYEES, 'Багш ажилчид'),
+        (SCOPE_ELSEGCH, 'Элсэгч'),
+        (SCOPE_STUDENTS, 'Оюутан'),
+    )
+
+    participants = ArrayField(
+        models.IntegerField(null=True),
+        blank=True,
+        null=True,
+        verbose_name='Сорилд оролцогчдыг хадгална'
+    )
+
+    scope_kind = models.IntegerField(choices=SCOPE_CHOICES, null=True, blank=False)
+    title = models.CharField(max_length=250, null=False, blank=False, verbose_name="Гарчиг")
+    description = models.TextField(null=True, blank=False, verbose_name="Тайлбар")
+    duration = models.PositiveIntegerField(verbose_name='Үргэлжлэх хугацаа', null=True)
+    questions = models.ManyToManyField(PsychologicalTestQuestions)
+
+    start_date = models.DateTimeField(null=False, blank=False, verbose_name="Эхлэх хугацаа")
+    end_date = models.DateTimeField(null=False, blank=False, verbose_name="Дуусах хугацаа")
+
+    created_by = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
 
 class QuestionChoices(models.Model):
@@ -3965,11 +4070,14 @@ class AdmissionIndicator(models.Model):
     XYANALTIIN_TOO = 2
     NAS = 3
     YAL_SHIITGEL = 4
-    ERUUL_MEND = 5
-    BIE_BYALDAR = 6
-    SETGEL_ZUI = 7
-    TUGSSUN_SURGUULI = 8
-    ESSE = 9
+    ERUUL_MEND_ANHAN = 5
+    ERUUL_MEND_MERGEJLIIN = 6
+    BIE_BYALDAR = 7
+    SETGEL_ZUI = 8
+    TUGSSUN_SURGUULI = 9
+    ESSE = 10
+    HEERIIN_BELTGEL = 11
+    TENTSSEN_ELSEGCHID = 12
 
     INDICATOR_VALUE = (
 
@@ -3978,11 +4086,14 @@ class AdmissionIndicator(models.Model):
 
         (NAS, 'Нас'),
         (YAL_SHIITGEL, 'Ял шийтгэл'),
-        (ERUUL_MEND, 'Эрүүл мэнд'),
+        (ERUUL_MEND_ANHAN, 'Эрүүл мэнд анхан'),
+        (ERUUL_MEND_MERGEJLIIN, 'Эрүүл мэнд мэргэжлийн'),
         (BIE_BYALDAR, 'Ур чадвар'),
         (SETGEL_ZUI, 'Сэтгэлзүйн ярилцлага'),
         (TUGSSUN_SURGUULI, 'Төгссөн сургууль'),
         (ESSE, 'Cудалгааны ажлын агуулга чиглэл, зорилгын талаар бичсэн танилцуулга'),
+        (HEERIIN_BELTGEL, 'Хээрийн бэлтгэл'),
+        (TENTSSEN_ELSEGCHID, 'Тэнцсэн элсэгч, бүртгүүлэгчид')
     )
 
     admission_prof = models.ForeignKey(AdmissionRegisterProfession, on_delete=models.CASCADE, verbose_name="Мэргэжил")

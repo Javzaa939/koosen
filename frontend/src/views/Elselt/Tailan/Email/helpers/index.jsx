@@ -50,6 +50,16 @@ export function getColumns ( currentPage, rowsPerPage, page_count, emailModalHan
 			),
 		},
 		{
+			sortField: 'send_date',
+			header: 'send_date',
+			maxWidth: "300px",
+			minWidth: "300px",
+			reorder: true,
+			name: t("Илгээсэн огноо"),
+			selector: (row) => row?.send_date? moment(row?.send_date).format("YYYY-MM-DD h:mm") : '',
+			center: true,
+		},
+		{
 			minWidth: "150px",
 			header: 'user__last_name',
 			name: t("Овог"),
@@ -89,13 +99,6 @@ export function getColumns ( currentPage, rowsPerPage, page_count, emailModalHan
 			center: true,
 		},
 		{
-			minWidth: "250px",
-			name: 'Мэдээллийн тайлбар',
-			reorder: true,
-			selector: (row) => <span title={row?.userinfo?.info_description} style={{fontSize:'10px'}}>{row?.userinfo?.info_description}</span>,
-			wrap:true
-		},
-		{
 			name: t("Хүйс"),
 			selector: (row) => row?.gender_name,
 			center: true,
@@ -116,17 +119,6 @@ export function getColumns ( currentPage, rowsPerPage, page_count, emailModalHan
 			wrap: true,
 			reorder: true,
 			center: true
-		},
-		{
-			sortField: 'send_date',
-			header: 'send_date',
-			maxWidth: "300px",
-			minWidth: "300px",
-			reorder: true,
-			// sortable: true,
-			name: t("Бүрт/огноо"),
-			selector: (row) => row?.send_date? moment(row?.send_date).format("YYYY-MM-DD h:mm") : '',
-			center: true,
 		},
         {
 			maxWidth: "150px",

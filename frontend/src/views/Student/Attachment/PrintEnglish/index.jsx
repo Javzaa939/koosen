@@ -495,7 +495,7 @@ export default function PrintAttachmentEnglish()
                         }
                     </div>
                     <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
-                        <span className='fw-normal w-50' style={{ width: '200px'}}>Graduated:</span> <span>{printDatas?.student?.graduation_work?.lesson_year?.substring(5, 9)}</span>
+                        <span className='fw-normal w-50' style={{ width: '200px'}}>Graduated:</span> <span>{printDatas?.student?.graduation_work?.decision_date?.substring(0, 4)}</span>
                     </div>
                 </div>
                 <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
@@ -582,7 +582,7 @@ export default function PrintAttachmentEnglish()
                             :
                                 <>
                                     <span className=''>
-                                        Graduation Exams:
+                                        Graduation Exams: <span>{datas?.graduation_work?.shalgalt_onoo && `${datas?.graduation_work?.shalgalt_onoo}`}</span>
                                     </span>
                                         {
                                             datas?.graduation_work?.lesson?.map((val, idx) =>

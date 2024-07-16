@@ -33,6 +33,13 @@ from django.shortcuts import reverse
 from operator import or_
 from functools import reduce
 
+import os
+
+from main.utils.file import create_folder
+
+import subprocess
+
+
 def list_to_dict(data):
     """ List датаг Dict рүү хөрвүүлэх """
 
@@ -232,7 +239,7 @@ def get_user_permissions(user):
     permissions = []
 
     if user.is_superuser:
-        permissions = list(Permissions.objects.all().filter(name__startswith='lms').values_list('name', flat=True))
+        permissions = list(Permissions.objects.all().exclude(name__contains='elselt').filter(name__startswith='lms').values_list('name', flat=True))
 
     elif emp_list and not user.is_superuser:
         permissions = list(emp_list.org_position.roles.values_list("permissions__name", flat=True))
@@ -882,6 +889,22 @@ def calculate_birthday(register):
         return None, gender
 
 
+def find_gender(register):
+    """ Регистрийн дугаараас хүйс тодорхойлох function
+        return gender
+    """
+    gender = ''
+    try:
+        last_number = int(register[-2])
+        if (last_number % 2) == 0:
+            gender = 2
+        else:
+            gender = 1
+        return gender
+    except Exception as e:
+        print(e)
+        return None, gender
+
 def bytes_image_encode(image):
     """ Base64 зургийг image болгох
     """
@@ -1094,20 +1117,194 @@ def send_message_skytel(phone_numbers, message):
         rsp = requests.get(send_url)
 
         # Хүсэлт амжилттай илгээгдсэн байвал
-        if rsp.json() == 200:
+        if rsp.status_code == 200:
             success_count += 1
 
         # хүлээн авагчийн дугаар буруу
-        if rsp.json() == 103:
+        if rsp.status_code == 103:
             not_found_numbers.append(phone_number)
 
-        if rsp.json() == 202:
+        if rsp.status_code == 202:
             return False, 'IP хаяг эсвэл id буруу', success_count, not_found_numbers
 
-        if rsp.json() == 203:
+        if rsp.status_code == 203:
             return False, 'Бүртгэл хаагдсан байна. Скайтел ХХК холбогдоно уу', success_count, not_found_numbers
 
-        if rsp.json() == 206:
+        if rsp.status_code == 206:
             return False, 'Бусад оператор руу sms явуулах эрх алга', success_count, not_found_numbers
 
     return True, 'Амжилттай илгээлээ', success_count, not_found_numbers
+
+
+def create_backup(
+    db_pass,
+    db_user_name,
+    data_base,
+    host='localhost',
+    port='5432'
+):
+    """
+        backup авах crontab
+    """
+
+    # Үндсэн прожект байгаа фолдерийн зам
+    backup_path = str(settings.BASE_DIR.parent.parent)
+
+    today = date.today()
+    now = datetime.now()
+    now_hour = str(now.time().hour)
+
+    year = str(today.year)
+    month = str(today.month)
+    today = str(today)
+
+    backup_path = os.path.join(backup_path, 'dxis_backup')
+    yearFolderYear = os.path.join(backup_path, year)
+    yearFolderMonth = os.path.join(yearFolderYear, month)
+
+    create_folder(backup_path)
+    create_folder(yearFolderYear)
+    create_folder(yearFolderMonth)
+
+    filename = "{full_path}/{today}-{now_hour}.backup".format(
+        full_path=yearFolderMonth,
+        today=today.replace('\n', ''),
+        now_hour=now_hour,
+    )
+
+    cmd = [
+        '/usr/bin/pg_dump',
+        '--host', host,
+        '--port', port,
+        '--username', db_user_name,
+        '--no-password',
+        '--format=c',
+        '--file', filename,
+        '--blobs',
+        data_base,
+    ]
+
+    try:
+        subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stdin=subprocess.PIPE,
+            env={'PGPASSWORD': str(db_pass)},
+        )
+
+        print("\x1b[6;30;42m 'backup үүсгэлээ!' \x1b[0m", )
+
+    except Exception as e:
+        print(e)
+
+def check_phone_number(phone_numbers):
+    """Утасны дугаарын үүрэн телефон шалгах
+       phone_numbers: Шалгаж буй утасны дугаарууд (list)
+    """
+
+    #үүрэн телефон
+    categorized_numbers = {
+        'mobicom': [],
+        'skytel': [],
+        'unitel': [],
+        'gmobile': [],
+        'other': []
+    }
+
+    for phone_number in phone_numbers:
+
+        # Эхний 2 орон
+        two_digits = phone_number[:2]
+
+        if two_digits in ["99", "85", "95", "94"]:
+            categorized_numbers['mobicom'].append(phone_number)
+        elif two_digits in ["90", "91", "96"]:
+            categorized_numbers['skytel'].append(phone_number)
+        elif two_digits in ["80", "86", "88", "89"]:
+            categorized_numbers['unitel'].append(phone_number)
+        elif two_digits in ["93", "97", "98"]:
+            categorized_numbers['gmobile'].append(phone_number)
+        else:
+            categorized_numbers['other'].append(phone_number)
+
+    # Хоосон массив хаях
+    categorized_numbers = {k: v for k, v in categorized_numbers.items() if v}
+
+    return categorized_numbers
+
+
+def send_message_unitel(phone_numbers, message):
+    """ phone_numbers: Илгээх утасны дугаарууд
+        message: Илгээх мессеж
+        Unitel дугаартай элсэгчид рүү мессеж илгээх
+    """
+
+    success_count = 0
+    not_found_numbers = []
+
+    # Утасны дугаараар гүйлгэх
+    for phone_number in phone_numbers:
+        send_url = 'http://sms.unitel.mn/sendSMS.php?uname=uia&upass=Lxx0upJSZe&sms={text}&from=135038&mobile={phone_number}'.format(phone_number=phone_number, text=message)
+
+        rsp = requests.get(send_url)
+
+        # Хүсэлт амжилттай илгээгдсэн байвал
+        if rsp.status_code == 200:
+            success_count += 1
+
+    return True, 'Амжилттай илгээлээ', success_count, not_found_numbers
+
+
+def send_message_gmobile(phone_numbers, message):
+    """ phone_numbers: Илгээх утасны дугаарууд
+        message: Илгээх мессеж
+        GMobile дугаартай элсэгчид рүү мессеж илгээх
+    """
+
+    success_count = 0
+    not_found_numbers = []
+
+    # Утасны дугаараар гүйлгэх
+    for phone_number in phone_numbers:
+        send_url = 'http://sms-special.gmobile.mn/cgi-bin/sendsms?username=dt_school38&password=dtdi*0319&from=135038&to={phone_number}&text={text}'.format(phone_number=phone_number, text=message)
+
+        rsp = requests.get(send_url)
+
+        # Хүсэлт амжилттай илгээгдсэн байвал
+        if rsp.status_code == 200:
+            success_count += 1
+
+    return True, 'Амжилттай илгээлээ', success_count, not_found_numbers
+
+
+def send_message_mobicom(phone_numbers, message):
+    """ phone_numbers: Илгээх утасны дугаарууд
+        message: Илгээх мессеж
+        Mobicom дугаартай элсэгчид рүү мессеж илгээх
+    """
+
+    success_count = 0
+    not_found_numbers = []
+
+    # Утасны дугаараар гүйлгэх
+    for phone_number in phone_numbers:
+        send_url = 'http://27.123.214.168/smsmt/mt?servicename=Dotood&username=Hereg&from=135038&to=976{phone_number}&msg={text}'.format(phone_number=phone_number, text=message)
+
+        rsp = requests.get(send_url)
+
+        # Хүсэлт амжилттай илгээгдсэн байвал
+        if rsp.status_code == 200:
+            success_count += 1
+
+    return True, 'Амжилттай илгээлээ', success_count, not_found_numbers
+
+def calculate_age(birthdate):
+    today = datetime.today()
+    age = today.year - birthdate.year
+
+    # Сар өдөрөөр бодож хэрэв сар өдөр нь хүрээгүй бол 1 ийг хасна
+    # NOTE ДХИС элсэлтийн системдээ зөвхөн оноор нь насыг шалгах хүсэлт тавьсан
+    # if (today.month,today.day) < (birthdate.month , birthdate.day):
+    #     age -=1
+
+    return age

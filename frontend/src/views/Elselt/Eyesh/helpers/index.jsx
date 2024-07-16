@@ -1,0 +1,241 @@
+import { useRef } from 'react';
+import { Badge} from 'reactstrap';
+import { CheckCircle } from "react-feather";
+import { t } from 'i18next'
+
+import useApi from '@hooks/useApi';
+import useLoader from "@hooks/useLoader";
+
+// Хүснэгтийн баганууд
+export function getColumns(currentPage, rowsPerPage, page_count, addModalHandler) {
+
+	// const { fetchData } = useLoader({ isFullScreen: false })
+	// const focusData = useRef(undefined)
+	// const gpaApi = useApi().elselt.gpa
+
+	/** Сонгосон хуудасны тоо датаны тооноос их болсон үед хуудаслалт 1-ээс эхлэнэ */
+	if (currentPage > page_count) {
+		currentPage = 1
+	}
+
+	const columns = [
+		{
+			name: "№",
+			selector: (row, index) => {
+				let tableRow = document.getElementById(`row-${row.id}`)
+
+				// Тэнцсэн тэнцээгүйгээс хамаарж border-left-д улаан ногоон border өгөх
+				if (tableRow) {
+					let border = row.yesh_state == 1 ? '' : row.yesh_state == 2 ? '4px solid rgba(40, 199, 111, 1)' : '4px solid #EA5455'
+					tableRow.style.borderLeft = `${border}`
+				}
+
+				return (currentPage - 1) * rowsPerPage + index + 1
+			},
+			center: true,
+			maxWidth: "80px",
+			minWidth: "80px",
+		},
+		{
+			maxWidth: "180px",
+			minWidth: "180px",
+			header: 'register',
+			name: t("РД"),
+			reorder: true,
+			selector: (row, index) => {
+				let tableRow = document.getElementById(`row-${row.id}`)
+
+				// Тэнцсэн тэнцээгүйгээс хамаарж border-left-д улаан ногоон border өгөх
+				if (tableRow) {
+					let border = row.yesh_state == 1 ? '' : row.yesh_state == 2 ? '4px solid rgba(40, 199, 111, 1)' : '4px solid #EA5455'
+					tableRow.style.borderLeft = `${border}`
+				}
+
+				return row?.user?.register
+			},
+			center: true
+		},
+		{
+			minWidth: "150px",
+			header: 'user__last_name',
+			name: t("Овог"),
+			cell: (row) => (row?.user?.last_name),
+			sortable: true,
+			reorder: true,
+			center: true,
+			wrap: true,
+		},
+		{
+			minWidth: "150px",
+			header: 'user__first_name',
+			name: t("Нэр"),
+			cell: (row) => (row?.user?.first_name),
+			sortable: true,
+			reorder: true,
+			center: true,
+			wrap: true,
+		},
+		{
+			maxWidth: "250px",
+			minWidth: "250px",
+			header: 'profession__profession__name',
+			name: 'Хөтөлбөр',
+			reorder: true,
+			selector: (row) => <span title={row?.profession}>{row?.profession}</span>,
+			sortable: true,
+			center: true,
+		},
+		{
+			maxWidth: "180px",
+			minWidth: "180px",
+			header: 'age',
+			name: t("Нас"),
+			reorder: true,
+			selector: (row) => row?.age,
+			center: true
+		},
+		{
+			maxWidth: "180px",
+			minWidth: "180px",
+			header: 'gender',
+			name: t("Хүйс"),
+			reorder: true,
+			selector: (row) => row?.gender,
+			center: true
+		},
+		{
+			maxWidth: "180px",
+			minWidth: "180px",
+			name: t("Бүртгэлийн дугаар"),
+			selector: (row) => row?.user?.code,
+			center: true
+		},
+		{
+			maxWidth: "180px",
+			minWidth: "180px",
+			name: t("Суурь ЭШ"),
+			selector: (row) => row?.first_yesh,
+			center: true
+		},
+		{
+			maxWidth: "180px",
+			minWidth: "180px",
+			name: t("Дагалдан ЭШ"),
+			selector: (row) => row?.second_yesh,
+			center: true
+		},
+		{
+			maxWidth: "180px",
+			minWidth: "180px",
+			header: 'score_avg',
+			name: t("ЭЕШ"),
+			reorder: true,
+			selector: (row) => row?.score_avg,
+			center: true
+		},
+		{
+			maxWidth: "180px",
+			minWidth: "180px",
+			header: 'order',
+			name: t("Эрэмбэ"),
+			reorder: true,
+			sortable: true,
+			selector: (row) => row?.order_no,
+			center: true
+		},
+		{
+			maxWidth: "150px",
+			minWidth: "150px",
+			header: 'state',
+			reorder: true,
+			sortable: true,
+			name: t("ЭШ босго төлөв"),
+			selector: (row) => (
+				<Badge
+					color={`${row?.yesh_state == 1 ? 'primary' : row?.yesh_state == 2 ? 'success' : row?.yesh_state == 3 ? 'danger' : 'primary'}`}
+					pill
+				>
+					{row?.yesh_state == 1 ? 'Бүртгүүлсэн' : row?.yesh_state == 2 ? 'Тэнцсэн' : row?.yesh_state == 3 ? 'Тэнцээгүй' : 'Бүртгүүлсэн'}
+				</Badge>),
+			center: true,
+		},
+		{
+			minWidth: "250px",
+			name: 'ЭШ босго тайлбар',
+			reorder: true,
+			selector: (row) => <span title={row?.yesh_description} style={{ fontSize: '10px' }}>{row?.yesh_description}</span>,
+			wrap: true
+		},
+		{
+			maxWidth: "150px",
+			minWidth: "150px",
+			header: 'state',
+			reorder: true,
+			sortable: true,
+			name: t("МХБ шалгалт төлөв"),
+			selector: (row) => (
+				<Badge
+					color={`${row?.yesh_mhb_state == 1 ? 'primary' : row?.yesh_mhb_state == 2 ? 'success' : row?.yesh_mhb_state == 3 ? 'danger' : 'primary'}`}
+					pill
+				>
+					{row?.yesh_mhb_state == 1 ? 'Бүртгүүлсэн' : row?.yesh_mhb_state == 2 ? 'Тэнцсэн' : row?.yesh_mhb_state == 3 ? 'Тэнцээгүй' : 'Бүртгүүлсэн'}
+				</Badge>),
+			center: true,
+		},
+		{
+			minWidth: "250px",
+			name: 'МХБ тайлбар',
+			reorder: true,
+			selector: (row) => <span title={row?.yesh_mhb_description} style={{ fontSize: '10px' }}>{row?.yesh_mhb_description}</span>,
+			wrap: true
+		},
+		{
+			maxWidth: "180px",
+			minWidth: "180px",
+			header: 'phone',
+			name: t("Утас"),
+			reorder: true,
+			selector: (row) => row?.user?.mobile,
+			center: true
+		},
+		{
+			maxWidth: "180px",
+			minWidth: "180px",
+			header: 'E-Mail',
+			name: t("ИМЭЙЛ"),
+			reorder: true,
+			selector: (row) => row?.user?.email,
+			center: true
+		},
+		{
+			maxWidth: "180px",
+			minWidth: "180px",
+			header: 'gender',
+			name: t("Овог нэр"),
+			reorder: true,
+			selector: (row) => row?.full_name,
+			center: true
+		},
+		{
+			name: "Төлөв солих",
+			center: true,
+			maxWidth: "120px",
+			minWidth: "120px",
+			selector: (row) => (
+				<div className="text-center" style={{ width: "auto" }}>
+					<a
+						role="button"
+						onClick={(e) => { addModalHandler(e, row)} }
+						id={`description${row?.id}`}
+						className="me-1"
+					>
+						<Badge color="light-success" pill><CheckCircle  width={"15px"} /></Badge>
+					</a>
+				</div>
+			),
+		}
+	]
+
+	return columns
+
+}

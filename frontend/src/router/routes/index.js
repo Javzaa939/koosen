@@ -25,6 +25,7 @@ import ScienceRoutes from "./Science"
 import StatisticRoutes from "./Statistic"
 import Test from "./Test"
 import ElseltRoutes from "./Elselt"
+import PsychologicalTestingRoutes from "./PsychologicalTesting"
 import OnlineLessonRoutes from "./OnlineLesson";
 // ** Layouts
 import BlankLayout from "@layouts/BlankLayout"
@@ -73,6 +74,7 @@ const Routes = [
   ...ScienceRoutes,
   ...Test,
   ...ElseltRoutes,
+  ...PsychologicalTestingRoutes,
   ...OnlineLessonRoutes,
 ];
 

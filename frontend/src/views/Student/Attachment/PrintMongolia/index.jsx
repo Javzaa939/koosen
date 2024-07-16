@@ -419,7 +419,7 @@ export default function PrintAttachmentMongolia()
                         }
                     </div>
                     <div className='d-flex px-2' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
-                        <span className='fw-normal w-50' style={{ width: '200px'}}>Төгссөн он:</span> <span>{printDatas?.student?.graduation_work?.lesson_year?.substring(5, 9)}</span>
+                        <span className='fw-normal w-50' style={{ width: '200px'}}>Төгссөн он:</span> <span>{printDatas?.student?.graduation_work?.decision_date?.substring(0, 4)}</span>
                     </div>
                 </div>
                 <div className='fw-bolder d-flex' style={{ fontSize: '11px' }}>
@@ -512,12 +512,12 @@ export default function PrintAttachmentMongolia()
                         {
                             datas?.graduation_work?.lesson_type == 1
                             ?
-                                <span className=''>{`${printDatas?.student?.group?.degree?.degree_code == 'E' ? 'Магистрын' : 'Докторын'} төгсөлтийн ажил/диссертацийн:`}&nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic}</span></span>
+                                <span className=''>{`${printDatas?.student?.group?.degree?.degree_code == 'E' ? 'Магистрын' : 'Докторын'} төгсөлтийн ажил/диссертацийн нэр:`}&nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic}</span></span>
 
                             :
                                 <>
                                     <span className=''>
-                                        Төгсөлтийн шалгалт:
+                                    Төгсөлтийн шалгалт: <span>{datas?.graduation_work?.shalgalt_onoo && `${datas?.graduation_work?.shalgalt_onoo}`}</span>
                                     </span>
                                         {
                                             datas?.graduation_work?.lesson?.map((val, idx) =>

@@ -74,6 +74,8 @@ INSTALLED_APPS = [
     'django_cleanup.apps.CleanupConfig',
     'elselt',
     'django_user_agents',
+
+    'django_crontab',
 ]
 
 MIDDLEWARE = [
@@ -190,6 +192,14 @@ END_DAY = 28
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
 
 STUDENT_DOMAIN_URL = 'http://student.mnun.edu.mn/'
+
+# doc https://pypi.org/project/django-crontab/
+# шинээр crontab үүсгэх нь ./manage.py crontab add
+# Server-н цагт тохируулсан болно
+CRONJOBS = [
+    ('0 10 * * *', 'main.utils.cronjobs.dbCreateBackup'),                                        # 06:00 минутанд backup хийнэ
+    ('0 6 * * *', 'main.utils.cronjobs.dbCreateBackup'),                                         # 14:00 минутанд backup хийнэ
+]
 
 # QUERY DEBUG хийхэд хэрэгтэй LOGGING=1 ./manage.py runserver
 # гэж асаавал server дээр ажиллаж query -г буцаана

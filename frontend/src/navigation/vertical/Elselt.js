@@ -32,6 +32,24 @@ export default [
                 navLink: "elselt/user"
             },
             {
+                id: 'elselt3_1',
+                title: 'Сэтгэлзүйн ярилцлага',
+                icon: <Circle size={8} />,
+                navLink: "elselt/interview"
+            },
+            {
+                id: 'elselt3_3',
+                title: 'Ял шийтгэл',
+                icon: <Circle size={8} />,
+                navLink: "elselt/ylshiitgel"
+            },
+            {
+                id: 'elselt3_4',
+                title: 'ЭЕШ',
+                icon: <Circle size={8} />,
+                navLink: "elselt/eyesh"
+            },
+            {
                 id: 'elselt4',
                 title: 'Эрүүл мэнд анхан шатны үзлэг',
                 icon: <Circle size={8} />,
@@ -50,10 +68,22 @@ export default [
                 navLink: "elselt/physical"
             },
             {
+                id: 'elselt6_1',
+                title: 'Хээрийн бэлтгэл',
+                icon: <Circle size={8} />,
+                navLink: "elselt/preparation"
+            },
+            {
                 id: 'elselt7',
-                title: 'Элсэлтийн тушаал',
+                title: 'Тэнцсэн элсэгчид',
                 icon: <Circle size={8} />,
                 navLink: "student/enrollment"
+            },
+            {
+                id: 'elselt7_1',
+                title: 'Хөтөлбөр төлөв лог',
+                icon: <Circle size={8} />,
+                navLink: "elselt/log"
             },
             {
                 id: 'elselt8',
@@ -61,6 +91,13 @@ export default [
                 icon: <Circle size={8} />,
                 navLink: "elselt/tailan"
             },
+            {
+                id: 'elselt9',
+                title: 'Мессеж тайлан',
+                icon: <Circle size={8} />,
+                navLink: "elselt/message"
+            },
+
         ]
     }
 ]

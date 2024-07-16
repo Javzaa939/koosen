@@ -116,9 +116,6 @@ export default function PrintMongolia({ printOnce })
 
     const PADDING_QR = 50
 
-    console.log(data?.student?.group?.degree?.degree_code)
-    console.log(data?.student?.group?.degree?.degree_code == 'F')
-
     return (
         <div
             className={`vh-100 position-relative d-flex flex-column justify-content-end align-items-center bg-white`}
@@ -145,7 +142,15 @@ export default function PrintMongolia({ printOnce })
                         <div className='m-auto' style={{ width: '700px' }}>
                             {data?.student?.citizenship?.name} Улсын иргэн <span className='text-uppercase fw-bolder'>{data?.student?.last_name}</span> овогтой <span className='text-uppercase fw-bolder'>{data?.student?.first_name}</span> нь
                             <br/>
-                            {data?.student?.group?.profession?.name}, {data?.student?.group?.profession?.code} хөтөлбөрөөр суралцан төгссөн тул Их сургуулийн захирлын {data?.graduation_date?.substring(0, 4)} оны {data?.graduation_date?.substring(5, 7)} {dugeerUg(data?.graduation_date?.substring(5, 7) && data?.graduation_date?.substring(5, 7).charAt(data?.graduation_date?.substring(5, 7).length - 1))} сарын {data?.graduation_date?.substring(8, 10)}{niiUg(data?.graduation_date?.substring(8, 10) && data?.graduation_date?.substring(8, 10).charAt(data?.graduation_date?.substring(8, 10).length - 1))} өдрийн {data?.graduation_number} {dugeerUg(data?.graduation_number && data?.graduation_number.charAt(data?.graduation_number.length - 1))} тушаалаар
+                            {data?.student?.group?.profession?.name}, {data?.student?.group?.profession?.code} хөтөлбөрөөр суралцан төгссөн тул <span className='text-nowrap'>Их сургуулийн захирлын {data?.graduation_date?.substring(0, 4)} оны {data?.graduation_date?.substring(5, 7)} {dugeerUg(data?.graduation_date?.substring(5, 7) && data?.graduation_date?.substring(5, 7).charAt(data?.graduation_date?.substring(5, 7).length - 1))} сарын {data?.graduation_date?.substring(8, 10)}{niiUg(data?.graduation_date?.substring(8, 10) && data?.graduation_date?.substring(8, 10).charAt(data?.graduation_date?.substring(8, 10).length - 1))} өдрийн </span>
+                            {
+                                data?.student?.group?.degree?.degree_code !== 'D'
+                                ?
+                                <br/>
+                                :
+                                ''
+                            }
+                            <span className='text-nowrap'>{data?.graduation_number} {dugeerUg(data?.graduation_number && data?.graduation_number.charAt(data?.graduation_number.length - 1))} тушаалаар</span>
                             <br/>
                             <span style={{ whiteSpace: 'nowrap' }}><span className='text-uppercase ' style={{ whiteSpace: 'nowrap' }}> {data?.student?.group?.profession?.dep_name} {data?.student?.group?.degree?.degree_name}</span>-ын зэрэг олгов.</span>
                         </div>

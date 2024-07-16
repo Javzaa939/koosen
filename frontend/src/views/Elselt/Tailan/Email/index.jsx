@@ -1,4 +1,4 @@
-import { Fragment, useState, useEffect, useContext } from 'react'
+import { useState, useEffect, useContext } from 'react'
 
 import useLoader from '@hooks/useLoader';
 import useApi from '@hooks/useApi';
@@ -7,7 +7,7 @@ import { getPagination, ReactSelectStyles } from '@utils'
 
 // ** React Imports
 
-import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, Spinner, UncontrolledTooltip } from 'reactstrap'
+import { Row, Col,  Input, Label, Button} from 'reactstrap'
 
 import { ChevronDown, Search } from 'react-feather'
 
@@ -16,10 +16,8 @@ import classnames from "classnames";
 import { useTranslation } from 'react-i18next'
 
 import Select from 'react-select'
-
 import AuthContext from "@context/AuthContext"
 
-import { useNavigate } from 'react-router-dom';
 import useUpdateEffect from '@hooks/useUpdateEffect'
 
 import { getColumns } from './helpers';
@@ -37,7 +35,7 @@ function Email() {
     const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({})
 
     const [currentPage, setCurrentPage] = useState(1);
-    const [rowsPerPage, setRowsPerPage] = useState(10)
+    const [rowsPerPage, setRowsPerPage] = useState(20)
 
     // Эрэмбэлэлт
     const [sortField, setSort] = useState('')

@@ -283,7 +283,7 @@ class GroupListAPIView(
 
         all_list = self.list(request).data
         return request.send_data(all_list)
-
+    
 @permission_classes([IsAuthenticated])
 class GroupListNoLimitAPIView(
     mixins.ListModelMixin,
@@ -307,6 +307,8 @@ class GroupListNoLimitAPIView(
         grade_lesson_list = []
         kredits = {}
         seasons = {}
+        grade_dict = {}
+        lesson_totals = {lesson: {"total_score": 0, "student_count": 0} for lesson in group_lessons}
         id = 0
 
         # Хичээлүүдийн үнэлгээний нийлбэрийг хадгалах dict-н хүснэгт бэлдэх нь
@@ -330,7 +332,8 @@ class GroupListNoLimitAPIView(
             # Хэрэгтэй хувьсагчдыг зарлах хэсэг
             lessons = {}
             total_kr = 0
-            # onoo = 0
+            total_score = 0
+            total_gpa = 0
             id = 0
             lesson_standart = None
             grade_dict = {
@@ -341,6 +344,8 @@ class GroupListNoLimitAPIView(
                 "F": 0
             }
 
+            # Үзсэн хичээлийг тоолох
+            lesson_count = 0
             # Хичээлээр гүйлгэх нь
             for lesson in group_lessons:
                 # Сурагчын id болон хичээлээр хайх хэсэг
@@ -367,9 +372,10 @@ class GroupListNoLimitAPIView(
                     lesson_name = lesson_standart_name
 
                     # Хичээлийн дүн авах хэсэг
-                    total = '-'
+                    total = 0
 
                 else:
+                    lesson_count = lesson_count + 1
                     # Хичээлийн жилийг авах хэсэг
                     if score["lesson_year"]:
                         lesson_year = score["lesson_year"]
@@ -413,12 +419,19 @@ class GroupListNoLimitAPIView(
                             grade_dict["F"] += 1
                             grade_lesson_list[id]["F"] += 1
 
-                # score_total = full if score else 0
-                # нийт кр
-                total_kr = total_kr + kredit
+                # Дүнг gpa-руу хөрвүүлэх
+                score_qs = Score.objects.filter(score_max__gte=total, score_min__lte=total).first()
+                if score_qs:
+                    gpa = score_qs.gpa
 
-                # дундаж олох нь
-                # onoo = onoo + kredit * score_total
+                # Нийлбэр gpa
+                total_gpa = total_gpa + gpa
+
+                # Нийлбэр оноо
+                total_score = total_score + total
+
+                # Нийлбэр кредит
+                total_kr = total_kr + kredit
 
                 # Хичээлийн нэрний дагуу дүнг оруулах хэсэг
                 lessons[lesson_name] = total
@@ -428,13 +441,17 @@ class GroupListNoLimitAPIView(
                 kredits[lesson_name] = kredit
                 seasons[lesson_name] = lesson_year_season
 
+                # Add score to lesson totals
+                if isinstance(total, (int, float)):
+                    lesson_totals[lesson]["total_score"] += total
+                    lesson_totals[lesson]["student_count"] += 1
+
                 id += 1
 
-            # голч
-            # total_onoo = round(onoo/total_kr, 2)
-            # score_qs = Score.objects.filter(score_max__gte=total_onoo, score_min__lte=total_onoo).first()
-            # if score_qs:
-            #     gpa = score_qs.gpa
+            # Дундаж дүн болон голч
+            avg_score = round(total_score / lesson_count, 2)
+            avg_gpa = round(total_gpa / lesson_count, 2)
+
 
             # Сурагчын бодогдсон мэдээллийг үндсэн хүснэгт рүү нэгтгэх хэсэг
             all_data.append(
@@ -445,10 +462,13 @@ class GroupListNoLimitAPIView(
                     'B': grade_dict['B'],
                     'C': grade_dict['C'],
                     'D': grade_dict['D'],
-                    'F': grade_dict['F']
+                    'F': grade_dict['F'],
+                    "Үзсэн кредит": total_kr,
+                    "Нийт хичээлийн тоо": lesson_count,
+                    "Голч оноо": avg_score,
+                    "Голч дүн": avg_gpa
                 }
             )
-
         id = 0
 
         # Хичээл болгоны үнэлгээний нийлбэрийг мөр дата хэлбэрээр үндсэн хүснэгт рүү оруулах хэсэг
@@ -471,36 +491,48 @@ class GroupListNoLimitAPIView(
                     'B': '',
                     'C': '',
                     'D': '',
-                    'F': ''
+                    'F': '',
                 }
             )
 
-        result_datas.append(
+        lesson_avg_scores = {}
+        total_students = {}
+        for lesson in group_lessons:
+            lesson_standart = lesson_qs.filter(id=lesson).first()
+            lesson_standart_name = lesson_standart__code_name(lesson_standart["code"], lesson_standart["name"]) if lesson_standart else ""
+            total_score = lesson_totals[lesson]["total_score"]
+            student_count = lesson_totals[lesson]["student_count"]
+            average_score = round(total_score / student_count, 2) if student_count > 0 else '-'
+            lesson_avg_scores[lesson_standart_name] = average_score
+            total_students[lesson_standart_name] = student_count
+
+        all_data.append(
             {
-                'Овог/нэр': 'Кредит',
-                **kredits,
+                'Овог/нэр': 'Дундаж оноо',
+                **lesson_avg_scores,
                 'A': '',
                 'B': '',
                 'C': '',
                 'D': '',
-                'F': ''
-            }
-        )
-        result_datas.append(
-            {
-                'Овог/нэр': 'Улирал',
-                **seasons,
-                'A': '',
-                'B': '',
-                'C': '',
-                'D': '',
-                'F': ''
+                'F': '',
             }
         )
 
+        all_data.append(
+            {
+                'Овог/нэр': 'Нийт оюутан оноо',
+                **total_students,
+                'A': '',
+                'B': '',
+                'C': '',
+                'D': '',
+                'F': '',
+            }
+        )
         merged_datas = result_datas + all_data
 
         return request.send_data(merged_datas)
+
 
 
 @permission_classes([IsAuthenticated])
@@ -700,7 +732,7 @@ class AdmissionAPIView(
         # Эрүүл мэнд, Бие бялдар гэх мэт шат дараалсан шалгуур үзүүлэлтгүй элсэлтийн мэргэжлүүд
         # TODO цаашдаа элсэгч нь бүх үе шатыг давсны дараа элсэлтйин тушаал руу орох тул яаж шүүхийг тэр үед нь шийдий
         all_not_shalguur_profession_ids = AdmissionIndicator.objects.filter(admission_prof__admission__is_active=True) \
-                                .exclude(value__in=[AdmissionIndicator.EESH_EXAM, AdmissionIndicator.ERUUL_MEND, AdmissionIndicator.BIE_BYALDAR, AdmissionIndicator.SETGEL_ZUI]) \
+                                .exclude(value__in=[AdmissionIndicator.EESH_EXAM, AdmissionIndicator.ERUUL_MEND_ANHAN, AdmissionIndicator.BIE_BYALDAR, AdmissionIndicator.SETGEL_ZUI]) \
                                 .values_list('admission_prof', flat=True)
 
         # Тэнцсэн төлөвтэй шалгуур үзүүлэлтүүдгүй элсэгчдийг шүүх

@@ -5,6 +5,8 @@ __pycache__
 
 # enviroment оруулахгүй
 venv
+.venv
+env
 activate
 
 # in the developer environment

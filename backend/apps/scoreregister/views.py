@@ -856,7 +856,7 @@ class ScoreOldAPIView(
         file_name = file.name
 
         # Файл түр хадгалах
-        path = save_file(file, 1, 'score_sheet')
+        path = save_file(file, 'score_sheet', 1)
 
         full_path = os.path.join(settings.MEDIA_ROOT, str(path))
 
@@ -1301,7 +1301,7 @@ class ScoreOldV2APIView(
         group_id = data.get('group_id')  # тухайн ангийн id-г авна
 
         file_name = file.name  # файлын нэр
-        path = save_file(file, 1, 'score_sheet')  # Түр хугацаанд файлыг folder дотор хадгалж ашиглана
+        path = save_file(file, 'score_sheet', 1)  # Түр хугацаанд файлыг folder дотор хадгалж ашиглана
         full_path = os.path.join(settings.MEDIA_ROOT, str(path))  # Хадгалсан файлын замыг авна
 
         reader = openpyxl_dictreader.DictReader(full_path)  # Dict reader ашиглан файлыг уншина (файлын замыг ашиглан)
@@ -1329,7 +1329,7 @@ class ScoreOldV2APIView(
                 continue  # Шаардлагатай өгөгдлүүдийн аль нэг нь дутуу байвал алгасна
 
             # Оюутан гэсэн модел дотроос нэр болон кодын ашиглан тухайн оюутныг олно
-            student = Student.objects.filter(Q(code=student_code) | Q(first_name=student_first_name, last_name=student_last_name)).first()
+            student = Student.objects.filter(Q(code=student_code) & Q(first_name=student_first_name, last_name=student_last_name)).first()
 
             # Хэрвээ оюутан олдохгүй бол
             if student is None:
@@ -1377,10 +1377,10 @@ class ScoreOldV2APIView(
 
                 if score:
                     check_score = str(score)
-                    if  check_score.isalpha():
+                    if  check_score.isalpha() or check_score.isspace() or not check_score.isnumeric():
                         continue
 
-                if score is None and score != 0:
+                if score is None and score != 0 :
                     # Хэрвээ хичээлийн оноо олдоогүй үед бас тэр оноо нь 0-ээс ялгаатай үед хичээл олдсонгүй гэсэн list-д нэмнэ
                     not_found_lesson.append({
                         'student_code': student_code,

@@ -1,4 +1,4 @@
-import { Book, CheckCircle, Type } from "react-feather"
+import { Book, CheckCircle } from "react-feather"
 import { Badge, UncontrolledTooltip } from "reactstrap"
 
 // Хүснэгтийн баганууд
@@ -8,7 +8,6 @@ export function getColumns (currentPage, rowsPerPage, page_count, STATE_LIST, de
     if (currentPage > page_count) {
         currentPage = 1
     }
-
     const columns = [
 		{
 			name: "№",
@@ -25,24 +24,43 @@ export function getColumns (currentPage, rowsPerPage, page_count, STATE_LIST, de
 					tableRow.style.borderLeft = `${border}`
 				}
 
-				// console.log((currentPage-1) * rowsPerPage + index + 1)
 				return (currentPage-1) * rowsPerPage + index + 1
 			},
 			minWidth: '100px',
 			maxWidth: '100px',
 		},
 		{
-			header: 'user__first_name',
-			name: <div className="px-1">Нэр</div>,
-			minWidth: '160px',
-			maxWidth: '160px',
+			minWidth: "150px",
+			header: 'user__last_name',
+			name:"Овог",
+			cell: (row) => (row?.user?.last_name),
 			sortable: true,
-			selector: (row) => row?.full_name || ''
+			reorder: true,
+			center: true,
+			wrap: true,
+		},
+		{
+			minWidth: "150px",
+			header: 'user__first_name',
+			name: "Нэр",
+			cell: (row) => (row?.user?.first_name),
+			sortable: true,
+			reorder: true,
+			center: true,
+			wrap: true,
 		},
 		{
 			header: 'user__register',
 			name: <div className="px-1">РД</div>,
 			selector: (row) => row?.user_register || '',
+            sortable: true,
+			minWidth: '140px',
+			maxWidth: '140px',
+		},
+		{
+			header: 'user_age',
+			name: <div className="px-1">Hac</div>,
+			selector: (row) => row?.user_age || '',
             sortable: true,
 			minWidth: '140px',
 			maxWidth: '140px',
@@ -80,59 +98,103 @@ export function getColumns (currentPage, rowsPerPage, page_count, STATE_LIST, de
 
 		{
 			name: <div className="px-1">Дотор</div>,
-			selector: (row) => row?.health_up_user_data?.belly || '',
+			selector: (row) => <span title={row?.health_up_user_data?.belly}>{row?.health_up_user_data?.belly || ''} </span>,
+			minWidth: '300px',
+			maxWidth: '300px',
 		},
 		{
 			name: <div className="px-1">Мэдрэл</div>,
-			selector: (row) => row?.health_up_user_data?.nerve || '',
+			selector: (row) => <span title={row?.health_up_user_data?.nerve}>{row?.health_up_user_data?.nerve || ''} </span>,
+			minWidth: '300px',
+			maxWidth: '300px',
 		},
 		{
 			name: <div className="px-1">Чих хамар хоолой</div>,
-			selector: (row) => row?.health_up_user_data?.ear_nose || '',
+			selector: (row) => <span title={row?.health_up_user_data?.ear_nose}>{row?.health_up_user_data?.ear_nose || ''} </span>,
+			minWidth: '300px',
+			maxWidth: '300px',
 		},
 		{
 			name: <div className="px-1">Нүд</div>,
-			selector: (row) => row?.health_up_user_data?.eye || '',
+			selector: (row) => <span title={row?.health_up_user_data?.eye}>{row?.health_up_user_data?.eye || ''} </span>,
+			minWidth: '300px',
+			maxWidth: '300px',
 		},
 		{
 			name: <div className="px-1">Шүд</div>,
-			selector: (row) => row?.health_up_user_data?.teeth || '',
+			selector: (row) => <span title={row?.health_up_user_data?.teeth}>{row?.health_up_user_data?.teeth || ''} </span>,
+			minWidth: '300px',
+			maxWidth: '300px',
 		},
 		{
 			name: <div className="px-1">Мэс засал</div>,
-			selector: (row) => row?.health_up_user_data?.surgery || '',
+			selector: (row) => <span title={row?.health_up_user_data?.surgery || ''}>{row?.health_up_user_data?.surgery || ''}</span>,
+			minWidth: '300px',
+			maxWidth: '300px',
 		},
 		{
 			name: <div className="px-1">Эмэгтэйчүүд</div>,
-			selector: (row) => row?.health_up_user_data?.femini || '',
+			selector: (row) => <span title={row?.health_up_user_data?.femini || ''}>{row?.health_up_user_data?.femini || ''}</span>,
+			minWidth: '300px',
+			maxWidth: '300px',
 		},
 		{
 			name: <div className="px-1">Зүрх судас</div>,
-			selector: (row) => row?.health_up_user_data?.heart || '',
+			selector: (row) => <span title={row?.health_up_user_data?.heart || ''}> {row?.health_up_user_data?.heart || ''}</span> ,
+			minWidth: '300px',
+			maxWidth: '300px',
 		},
 		{
 			name: <div className="px-1">Сүрьеэ</div>,
-			selector: (row) => row?.health_up_user_data?.phthisis || '',
+			selector: (row) => <span title={row?.health_up_user_data?.phthisis || ''}> {row?.health_up_user_data?.phthisis || ''}</span>,
+			minWidth: '300px',
+			maxWidth: '300px',
 		},
 		{
 			name: <div className="px-1">Арьс харшил</div>,
-			selector: (row) => row?.health_up_user_data?.allergies || '',
+			selector: (row) => <span title={row?.health_up_user_data?.allergies || ''}> {row?.health_up_user_data?.allergies || ''}</span>,
+			minWidth: '300px',
+			maxWidth: '300px',
 		},
 		{
 			name: <div className="px-1">Халдварт өвчин</div>,
-			selector: (row) => row?.contagious || '',
+			selector: (row) => <span title={row?.health_up_user_data?.contagious || ''}> {row?.health_up_user_data?.contagious || ''}</span>,
+			minWidth: '300px',
+			maxWidth: '300px',
 		},
 		{
 			name: <div className="px-1">Сэтгэц мэдрэл</div>,
-			selector: (row) => row?.health_up_user_data?.neuro_phychic || '',
+			selector: (row) => <span title={row?.health_up_user_data?.neuro_phychic || ''}> {row?.health_up_user_data?.neuro_phychic || ''}</span>,
+			minWidth: '300px',
+			maxWidth: '300px',
 		},
 		{
 			name: <div className="px-1">Гэмтэл</div>,
-			selector: (row) => row?.health_up_user_data?.injury || '',
+			selector: (row) => <span title={row?.health_up_user_data?.injury || ''}> {row?.health_up_user_data?.injury || ''}</span>,
+			minWidth: '300px',
+			maxWidth: '300px',
 		},
 		{
 			name: <div className="px-1">БЗДХ</div>,
-			selector: (row) => row?.health_up_user_data?.bzdx || '',
+			selector: (row) => <span title={row?.health_up_user_data?.bzdx || ''}> {row?.health_up_user_data?.bzdx || ''}</span>,
+			minWidth: '300px',
+			maxWidth: '300px',
+		},
+		{
+			name: <div className="px-1">Үйлдэл</div>,
+			selector: (row) => (
+			<div className="text-center" style={{ width: "auto" }}>
+				<a
+					role="button"
+					onClick={(e) => { detailHandler(e, row)} }
+				>
+					<Badge color="light-success" pill><CheckCircle  width={"15px"} /></Badge>
+				</a>
+				<UncontrolledTooltip target="email_button">төлөв солих</UncontrolledTooltip>
+			</div>
+			),
+			// minWidth: '300px',
+			// maxWidth: '300px',
 		},
 	]
     return columns

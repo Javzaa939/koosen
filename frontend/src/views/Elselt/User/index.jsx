@@ -1,7 +1,7 @@
 // ** React Imports
 import { Fragment, useState, useEffect, useContext } from 'react'
 
-import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, Spinner, UncontrolledTooltip } from 'reactstrap'
+import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, Spinner, UncontrolledTooltip,Alert } from 'reactstrap'
 
 import { ChevronDown, Search } from 'react-feather'
 
@@ -26,10 +26,11 @@ import { getColumns } from './helpers';
 import { useNavigate } from 'react-router-dom';
 
 import { utils, writeFile } from 'xlsx-js-style';
+import Flatpickr from 'react-flatpickr'
+import '@styles/react/libs/flatpickr/flatpickr.scss'
 
 import { HiOutlineDocumentReport } from "react-icons/hi";
 import { BiMessageRoundedError } from "react-icons/bi";
-import { CiMail } from "react-icons/ci";
 import { MdMailOutline } from "react-icons/md";
 import { RiEditFill } from "react-icons/ri";
 import EditModal from './Edit';
@@ -37,8 +38,9 @@ import StateModal from './StateModal';
 import DescModal from './DescModal';
 import EmailModal from './EmailModal';
 import MessageModal from './MessageModal';
-import useUpdateEffect from '@hooks/useUpdateEffect'
-
+import useUpdateEffect from '@hooks/useUpdateEffect';
+import GpaModal from './GpaModal';
+import StateOneModal from './StateOneModal';
 // import Addmodal from './Add'
 
 const ElseltUser = () => {
@@ -47,6 +49,8 @@ const ElseltUser = () => {
 
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(20)
+    const [end_date, setEndDate] = useState('')
+    const [start_date, setStartDate] = useState('')
 
     const navigate = useNavigate()
 
@@ -77,9 +81,11 @@ const ElseltUser = () => {
     const [edit_modal, setEditModal] = useState(false)
 
     const [editData, setEditData] = useState({})
-
     const [profOption, setProfession] = useState([])
     const [profession_id, setProfession_id] = useState('')
+
+    const [selectedAdmission, setSelectedAdmission] = useState(null);
+    const [selectedProfession, setSelectedProfession] = useState(null);
 
     const [admop, setAdmop] = useState([])
     const [adm, setAdm] = useState('')
@@ -92,6 +98,7 @@ const ElseltUser = () => {
 
     const [emailModal, setEmailModal] = useState(false)
     const [messageModal, setMessageModal] = useState(false)
+    const [gpaModal , setGpaModal] = useState(false)
 
     const genderOp = [
         {
@@ -118,6 +125,16 @@ const ElseltUser = () => {
             'name': 'ТЭНЦЭЭГҮЙ'
         }
     ]
+    const ageop = [
+        {
+            'id': 2,
+            'name': 'ТЭНЦСЭН'
+        },
+        {
+            'id': 3,
+            'name': 'ТЭНЦЭЭГҮЙ'
+        }
+    ]
 
     const infop = [
         {
@@ -129,10 +146,25 @@ const ElseltUser = () => {
             'name': 'ЗАСАГДСАН'
         },
     ]
+    const restateOp = [
+        {
+            'id': 3,
+            'name': 'Тийм'
+        },
+        {
+            'id': 1,
+            'name': 'Үгүй'
+        },
+    ]
+    const [now_state, setNowState] = useState('')
+    const [justice_state, setJusticeState] = useState('')
+    const [is_justice, setIsJustice] = useState('')
     const [state, setState] = useState('')
     const [gpa_state, setGpaState] = useState('')
-
+    const [age_state, setAge_state] = useState('')
     const [gender, setGender] = useState('')
+    const [stateData, setStateData] = useState({})
+    const [stateOneModal, setStateOneModal] = useState(false)
 
 	const elseltApi = useApi().elselt.admissionuserdata
     const admissionYearApi = useApi().elselt
@@ -177,12 +209,11 @@ const ElseltUser = () => {
 
 	/* Жагсаалтын дата авах функц */
 	async function getDatas() {
-
-        const {success, data} = await allFetch(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, adm, profession_id, unit1, gender, state, gpa_state))
+        const {success, data} = await allFetch(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, adm, profession_id, unit1, gender, state,
+                                                                gpa_state,age_state, justice_state, is_justice, now_state, start_date, end_date))
         if(success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
-
             // Нийт хуудасны тоо
             var cpage_count = Math.ceil(data?.count / rowsPerPage === 'Бүгд' ? 1 : rowsPerPage)
             setPageCount(cpage_count)
@@ -229,7 +260,7 @@ const ElseltUser = () => {
 
 			return () => clearTimeout(timeoutId);
 		}
-    }, [sortField, currentPage, rowsPerPage, searchValue, adm, profession_id, unit1, gender, state, gpa_state])
+    }, [sortField, currentPage, rowsPerPage, searchValue, adm, profession_id, unit1, gender, state, gpa_state,age_state, justice_state, is_justice, now_state, start_date, end_date])
 
     useEffect(() => {
         getAdmissionYear()
@@ -259,7 +290,9 @@ const ElseltUser = () => {
                     'Овог': data?.user?.last_name || '',
                     'Нэр': data?.user?.first_name || '',
                     'РД': data?.user?.register || '',
+                    'Нас': data?.user_age || '',
                     'Хүйс': data?.gender_name || '',
+                    'Насны шалгуур':data?.age_state || '',
                     'Имейл': data?.user?.email || '',
                     'Утасны дугаар': data?.user?.mobile || '',
                     'Яаралтай холбогдох': data?.user?.parent_mobile || '',
@@ -292,7 +325,9 @@ const ElseltUser = () => {
             'Овог',
             'Нэр',
             'РД',
+            'Нас',
             'Хүйс',
+            'Насны шалгуур',
             'Имейл',
             'Утасны дугаар',
             'Яаралтай холбогдох',
@@ -305,7 +340,7 @@ const ElseltUser = () => {
             'Ажиллаж байгаа байгууллагын нэр',
             'Албан тушаал',
             'Цол',
-            'Мэдээлэл шалгасан тайлбар'
+            'Мэдээлэл шалгасан тайлбар',
         ];
 
         utils.sheet_add_aoa(worksheet, [staticCells], { origin: "A1" });
@@ -366,7 +401,7 @@ const ElseltUser = () => {
         const styleRow = 0;
         const sendRow = datas?.length + 1;
         const styleCol = 0;
-        const sendCol = 17;
+        const sendCol = 20;
 
         for (let row = styleRow; row <= sendRow; row++) {
             for (let col = styleCol; col <= sendCol; col++) {
@@ -427,6 +462,22 @@ const ElseltUser = () => {
         setMessageModal(!messageModal)
     }
 
+    function gpaModalHandler(){
+        setGpaModal(!gpaModal);
+    }
+
+    /* Төлөв нээх модал */
+    const handleStateModal = (row={}) => {
+        setStateData(row)
+        setStateOneModal(!stateOneModal)
+    }
+
+     /* Төлөв хаах модал */
+    const closeStateModal = () => {
+        setStateData({})
+        setStateOneModal(!stateOneModal)
+    }
+
 	return (
 		<Fragment>
             <StateModal
@@ -445,6 +496,23 @@ const ElseltUser = () => {
             <MessageModal
                 messageModalHandler={messageModalHandler}
                 messageModal={messageModal}
+                selectedStudents={selectedStudents}
+                getDatas={getDatas}
+            />
+            <GpaModal
+                gpaModalHandler = {gpaModalHandler}
+                gpaModal = {gpaModal}
+                lesson_year = {adm}
+                prof_id = {profession_id}
+                gplesson_year={selectedAdmission?.name || ''}
+                profession_name={selectedProfession?.name || ''}
+            />
+            <StateOneModal
+                addModal={stateOneModal}
+                addModalHandler={setStateOneModal}
+                addModalData={stateData}
+                getDatas={getDatas}
+                closeStateModal={closeStateModal}
             />
             {isLoading && Loader}
 			<Card>
@@ -469,10 +537,35 @@ const ElseltUser = () => {
                                 noOptionsMessage={() => t('Хоосон байна.')}
                                 onChange={(val) => {
                                     setAdm(val?.id || '')
+                                    setSelectedAdmission(val);
                                 }}
                                 styles={ReactSelectStyles}
                                 getOptionValue={(option) => option.id}
                                 getOptionLabel={(option) => option.lesson_year + ' ' + option.name}
+                            />
+                    </Col>
+                    <Col sm={6} lg={3} >
+                        <Label className="form-label" for="profession">
+                            {t('Хөтөлбөр')}
+                        </Label>
+                            <Select
+                                name="profession"
+                                id="profession"
+                                classNamePrefix='select'
+                                isClearable
+                                className={classnames('react-select')}
+                                isLoading={isLoading}
+                                placeholder={t('-- Сонгоно уу --')}
+                                options={profOption || []}
+                                value={profOption.find((c) => c?.prof_id === profession_id)}
+                                noOptionsMessage={() => t('Хоосон байна.')}
+                                onChange={(val) => {
+                                    setProfession_id(val?.prof_id || '')
+                                    setSelectedProfession(val)
+                                }}
+                                styles={ReactSelectStyles}
+                                getOptionValue={(option) => option?.prof_id}
+                                getOptionLabel={(option) => option.name}
                             />
                     </Col>
                     <Col sm={6} lg={3} >
@@ -495,29 +588,6 @@ const ElseltUser = () => {
                                 }}
                                 styles={ReactSelectStyles}
                                 getOptionValue={(option) => option.id}
-                                getOptionLabel={(option) => option.name}
-                            />
-                    </Col>
-                    <Col sm={6} lg={3} >
-                        <Label className="form-label" for="profession">
-                            {t('Хөтөлбөр')}
-                        </Label>
-                            <Select
-                                name="profession"
-                                id="profession"
-                                classNamePrefix='select'
-                                isClearable
-                                className={classnames('react-select')}
-                                isLoading={isLoading}
-                                placeholder={t('-- Сонгоно уу --')}
-                                options={profOption || []}
-                                value={profOption.find((c) => c?.prof_id === profession_id)}
-                                noOptionsMessage={() => t('Хоосон байна.')}
-                                onChange={(val) => {
-                                    setProfession_id(val?.prof_id || '')
-                                }}
-                                styles={ReactSelectStyles}
-                                getOptionValue={(option) => option?.prof_id}
                                 getOptionLabel={(option) => option.name}
                             />
                     </Col>
@@ -592,11 +662,118 @@ const ElseltUser = () => {
                                 getOptionLabel={(option) => option.name}
                             />
                     </Col>
+                    <Col md={3} sm={6} xs={12} >
+                        <Label className="form-label" for="state">
+                            {t('Насны шалгуур')}
+                        </Label>
+                            <Select
+                                name="age_state"
+                                id="age_state"
+                                classNamePrefix='select'
+                                isClearable
+                                className={classnames('react-select')}
+                                isLoading={isLoading}
+                                placeholder={t('-- Сонгоно уу --')}
+                                options={ageop || []}
+                                value={ageop.find((c) => c.id === age_state)}
+                                noOptionsMessage={() => t('Хоосон байна.')}
+                                onChange={(val) => {
+                                    setAge_state(val?.id || '')
+                                }}
+                                styles={ReactSelectStyles}
+                                getOptionValue={(option) => option.id}
+                                getOptionLabel={(option) => option.name}
+                            />
+                    </Col>
+                    <Col md={3} sm={6} xs={12} >
+                        <Label className="form-label" for="restateOp">
+                            {t('Дахин тэнцүүлсэн эсэх')}
+                        </Label>
+                            <Select
+                                name="restateOp"
+                                id="restateOp"
+                                classNamePrefix='select'
+                                isClearable
+                                className={classnames('react-select')}
+                                isLoading={isLoading}
+                                placeholder={t('-- Сонгоно уу --')}
+                                options={restateOp || []}
+                                value={restateOp.find((c) => c.id === now_state)}
+                                noOptionsMessage={() => t('Хоосон байна.')}
+                                onChange={(val) => {
+                                    setNowState(val?.id || '')
+                                }}
+                                styles={ReactSelectStyles}
+                                getOptionValue={(option) => option.id}
+                                getOptionLabel={(option) => option.name}
+                            />
+                    </Col>
+                </Row>
+                <Row  className='justify-content-start mx-0 mt-50'>
+                    <Col md={3} className='my-0 py-0 '>
+                        <Label className="form-label" for="">
+                            {t('Бүртгүүлсэн огноо эхлэх')}
+                        </Label>
+                        <Flatpickr
+                            className='form-control form-control-sm  bg-white '
+                            style={{ maxWidth: '480px' }}
+                            placeholder={`-- Сонгоно уу --`}
+
+                            onChange={(selectedDates, dateStr) => {
+
+                                if (selectedDates.length !== 0) {
+                                    const values = {
+                                        val: moment(dateStr).format('YYYY-MM-DD')
+                                    }
+                                    setStartDate(values.val || '')
+                                }
+                            }}
+                            value={start_date}
+                            options={{
+                                enableTime: true,
+                                dateFormat: "Y-m-d",
+                                mode: "single",
+                                // locale: Mongolian
+                            }}
+                        />
+                    </Col>
+                    <Col md={3} className='my-0 py-0 '>
+                        <Label className="form-label" for="">
+                            {t('Бүртгүүлсэн огноо дуусах')}
+                        </Label>
+                        <Flatpickr
+                            className='form-control form-control-sm  bg-white '
+                            style={{ maxWidth: '480px' }}
+                            placeholder={`-- Сонгоно уу --`}
+
+                            onChange={(selectedDates, dateStr) => {
+                                if (selectedDates.length !== 0) {
+                                    const values = {
+                                        val: moment(dateStr).format('YYYY-MM-DD')
+                                    }
+                                    setEndDate(values.val || '')
+                                }
+                            }}
+                            value={end_date}
+                            options={{
+                                enableTime: true,
+                                dateFormat: "Y-m-d",
+                                mode: "single",
+                                // locale: Mongolian
+                            }}
+                        />
+                    </Col>
                 </Row>
                 <div className='d-flex justify-content-between my-50 mt-1'>
                     <div className='d-flex'>
                         <div className='px-1'>
-                            <Button color='primary' disabled={selectedStudents.length == 0} className='d-flex align-items-center px-75' id='state_button' onClick={() => stateModalHandler()}>
+                            <Button
+                                color='primary'
+                                disabled={(selectedStudents.length != 0 && user.permissions.includes('lms-elselt-admission-approve')) ? false : true}
+                                className='d-flex align-items-center px-75'
+                                id='state_button'
+                                onClick={() => stateModalHandler()}
+                            >
                                 <RiEditFill className='me-25'/>
                                 Төлөв солих
                             </Button>
@@ -605,7 +782,13 @@ const ElseltUser = () => {
                             </UncontrolledTooltip>
                         </div>
                         <div className='px-1'>
-                            <Button color='primary' disabled={selectedStudents.length == 0} className='d-flex align-items-center px-75' id='email_button' onClick={() => emailModalHandler()}>
+                            <Button
+                                color='primary'
+                                disabled={(selectedStudents.length != 0 && user.permissions.includes('lms-elselt-mail-create')) ? false : true}
+                                className='d-flex align-items-center px-75'
+                                id='email_button'
+                                onClick={() => emailModalHandler()}
+                            >
                                 <MdMailOutline className='me-25'/>
                                 Email илгээх
                             </Button>
@@ -614,13 +797,33 @@ const ElseltUser = () => {
                             </UncontrolledTooltip>
                         </div>
                         <div className='px-1'>
-                            <Button color='primary' disabled className='d-flex align-items-center px-75' id='message_button' onClick={() => messageModalHandler()}>
-                            {/* <Button color='primary' disabled={selectedStudents.length == 0} className='d-flex align-items-center px-75' id='message_button' onClick={() => messageModalHandler()}> */}
+                            <Button
+                                color='primary'
+                                disabled={(selectedStudents.length != 0 && user?.permissions?.includes('lms-elselt-message-create')) ? false : true}
+                                className='d-flex align-items-center px-75'
+                                id='message_button'
+                                onClick={() => messageModalHandler()}
+                            >
                                 <BiMessageRoundedError className='me-25'/>
                                 Мессеж илгээх
                             </Button>
                             <UncontrolledTooltip target='message_button'>
                                 Сонгосон элсэгчид руу мессеж илгээх
+                            </UncontrolledTooltip>
+                        </div>
+                        <div className='px-1'>
+                            <Button
+                                color='primary'
+                                disabled={(adm && profession_id && user?.permissions?.includes('lms-elselt-gpa-approve')) ? false : true }
+                                className='d-flex align-items-center px-75'
+                                id='message_button'
+                                onClick={() => gpaModalHandler()}
+                            >
+                                <BiMessageRoundedError className='me-25'/>
+                                Голч Шалгах
+                            </Button>
+                            <UncontrolledTooltip target='message_button'>
+                                Элсэлт, Хөтөлбөр хоёуланг нь сонгоно уу
                             </UncontrolledTooltip>
                         </div>
                     </div>
@@ -701,7 +904,7 @@ const ElseltUser = () => {
                         print='true'
                         theme="solarized"
                         onSort={handleSort}
-                        columns={getColumns(currentPage, rowsPerPage === 'Бүгд' ? 1 : rowsPerPage, total_count, editModal, handleDelete, user, handleRowClicked, handleDescModal)}
+                        columns={getColumns(currentPage, rowsPerPage === 'Бүгд' ? 1 : rowsPerPage, total_count, editModal, handleDelete, user, handleRowClicked, handleDescModal, handleStateModal)}
                         sortIcon={<ChevronDown size={10} />}
                         paginationPerPage={rowsPerPage === 'Бүгд' ? 1 : rowsPerPage}
                         paginationDefaultPage={currentPage}
