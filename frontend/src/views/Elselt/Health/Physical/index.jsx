@@ -63,7 +63,7 @@ function Physical() {
     // Translate
     const { t } = useTranslation()
 
-    const default_page = [ 10, 20, 50, 75, 100 ]
+    const default_page = ['Бүгд', 10, 20, 50, 75, 100]
 
 	const [searchValue, setSearchValue] = useState("");
 	const [datas, setDatas] = useState([]);
@@ -127,7 +127,6 @@ function Physical() {
         if(success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
-
             // Нийт хуудасны тоо
             var cpage_count = Math.ceil(data?.count / rowsPerPage === 'Бүгд' ? 1 : rowsPerPage)
             setPageCount(cpage_count)
@@ -160,6 +159,7 @@ function Physical() {
                     'Нас': data?.user_age || 0,
                     'Үзлэгийн төлөв':STATE_LIST.find(val => val.id === data?.health_up_user_data?.state).name|| '',
                     'Тайлбар': data?.health_up_user_data?.description  || '',
+                    'Хэмжээст оноо' : data?.health_up_user_data?.physice_score || '',
                     'Савлуурт суниах':data?.health_up_user_data?.turnik || '',
                     'Гэдэсний даралт': data?.health_up_user_data?.belly_draught || '',
                     'Тэсвэр 1000М': data?.health_up_user_data?.patience_1000m || '',
@@ -195,8 +195,10 @@ function Physical() {
             'Нэр',
             'Хүйс',
             'РД',
+            'Нас',
             'Үзлэгийн төлөв',
             'Тайлбар',
+            'Хэмжээст оноо',
             'Савлуурт суниах',
             'Гэдэсний даралт',
             'Тэсвэр 1000М',
@@ -585,12 +587,12 @@ function Physical() {
                         print='true'
                         theme="solarized"
                         onSort={handleSort}
-                        columns={getColumns(currentPage, rowsPerPage, total_count, addModalHandler, STATE_LIST, user)}
+                        columns={getColumns(currentPage, rowsPerPage === 'Бүгд' ? 1 : rowsPerPage, total_count, addModalHandler, STATE_LIST, user)}
                         sortIcon={<ChevronDown size={10} />}
                         paginationPerPage={rowsPerPage}
                         paginationDefaultPage={currentPage}
                         data={datas}
-                        paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
+						paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage === 'Бүгд' ? total_count : rowsPerPage, total_count)}
                         fixedHeader
                         fixedHeaderScrollHeight='62vh'
                         selectableRows

@@ -11,7 +11,6 @@ import Select from 'react-select'
 import Flatpickr from 'react-flatpickr'
 import '@styles/react/libs/flatpickr/flatpickr.scss'
 import moment from 'moment';
-import { Mongolian } from "flatpickr/dist/l10n/mn.js"
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import AuthContext from "@context/AuthContext"
@@ -62,7 +61,7 @@ function AnhanShat() {
     // Translate
     const { t } = useTranslation()
 
-    const default_page = [10, 20, 50, 75, 100]
+    const default_page = ['Бүгд', 10, 20, 50, 75, 100]
 
     const [searchValue, setSearchValue] = useState("");
     const [datas, setDatas] = useState([]);
@@ -352,6 +351,8 @@ function AnhanShat() {
         setMessageModal(!messageModal)
     }
 
+    console.log(datas)
+
     return (
         <Card>
             <EmailModal
@@ -629,7 +630,7 @@ function AnhanShat() {
                         </Button>
                     </Col>
                 </Row>
-                <div className="react-dataTable react-dataTable-selectable-rows" >
+                <div className="react-dataTable react-dataTable-selectable-rows" id='datatableLeftTwoRightTwo'>
                     <DataTable
                         noHeader
                         paginationServer
@@ -649,12 +650,12 @@ function AnhanShat() {
                         print='true'
                         theme="solarized"
                         onSort={handleSort}
-                        columns={getColumns(currentPage, rowsPerPage, total_count, addModalHandler, STATE_LIST, user)}
+                        columns={getColumns(currentPage, rowsPerPage === 'Бүгд' ? 1 : rowsPerPage, total_count, addModalHandler,  STATE_LIST, user)}
                         sortIcon={<ChevronDown size={10} />}
                         paginationPerPage={rowsPerPage}
                         paginationDefaultPage={currentPage}
                         data={datas}
-                        paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
+                        paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage === 'Бүгд' ? total_count : rowsPerPage, total_count)}
                         fixedHeader
                         fixedHeaderScrollHeight='62vh'
                         selectableRows

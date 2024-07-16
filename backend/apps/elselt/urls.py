@@ -8,6 +8,7 @@ urlpatterns = [
     path('<int:pk>/', ElseltApiView.as_view()),
     path('all/', AdmissionYearAPIView.as_view()),
     path('all/active/', AdmissionYearActiveAPIView.as_view()),
+    path('first/<int:pk>/', AdmissionUserFirstAPIView.as_view()),
 
     path('dashboard/', DashboardAPIView.as_view()),
     path('dashboard/excel/', DashboardExcelAPIView.as_view()),
@@ -24,6 +25,7 @@ urlpatterns = [
     path('admissionuserdata/gpa_check/confirm/',GpaCheckConfirmUserInfoAPIView.as_view()),
     path('admissionuserdata/eyesh_check/',EyeshCheckUserInfoAPIView.as_view()),
     path('admissionuserdata/eyesh/',EyeshOrderUserInfoAPIView.as_view()),
+    path('admissionuserdata/eyesh/<int:pk>/',EyeshOrderUserInfoAPIView.as_view()),
 
     path('profession/', ElseltProfession.as_view()),
     path('profession/<int:pk>/', ElseltProfession.as_view()),
@@ -43,7 +45,7 @@ urlpatterns = [
     # Элсэгчдэд мессеж илгээх хэсэг
     path('admissionuserdata/message/', AdmissionUserMessageAPIView.as_view()),
 
-    # Эрүүл мэнд анхан шатны үзлэг
+    # Ял шийтгэл шатны үзлэг
     path('justice/', AdmissionJusticeListAPIView.as_view()),
     path('justice/<int:pk>/', AdmissionJusticeListAPIView.as_view()),
 

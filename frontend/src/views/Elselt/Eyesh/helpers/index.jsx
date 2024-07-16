@@ -1,19 +1,17 @@
 import { useRef } from 'react';
-import { Badge, Input, UncontrolledTooltip } from 'reactstrap';
-import { Edit, Eye, Type } from "react-feather";
+import { Badge} from 'reactstrap';
+import { CheckCircle } from "react-feather";
 import { t } from 'i18next'
 
-import moment from 'moment'
 import useApi from '@hooks/useApi';
 import useLoader from "@hooks/useLoader";
-import { wrap } from 'highcharts';
 
 // Хүснэгтийн баганууд
-export function getColumns(currentPage, rowsPerPage, page_count) {
+export function getColumns(currentPage, rowsPerPage, page_count, addModalHandler) {
 
-	const { fetchData } = useLoader({ isFullScreen: false })
-	const focusData = useRef(undefined)
-	const gpaApi = useApi().elselt.gpa
+	// const { fetchData } = useLoader({ isFullScreen: false })
+	// const focusData = useRef(undefined)
+	// const gpaApi = useApi().elselt.gpa
 
 	/** Сонгосон хуудасны тоо датаны тооноос их болсон үед хуудаслалт 1-ээс эхлэнэ */
 	if (currentPage > page_count) {
@@ -39,6 +37,25 @@ export function getColumns(currentPage, rowsPerPage, page_count) {
 			minWidth: "80px",
 		},
 		{
+			maxWidth: "180px",
+			minWidth: "180px",
+			header: 'register',
+			name: t("РД"),
+			reorder: true,
+			selector: (row, index) => {
+				let tableRow = document.getElementById(`row-${row.id}`)
+
+				// Тэнцсэн тэнцээгүйгээс хамаарж border-left-д улаан ногоон border өгөх
+				if (tableRow) {
+					let border = row.yesh_state == 1 ? '' : row.yesh_state == 2 ? '4px solid rgba(40, 199, 111, 1)' : '4px solid #EA5455'
+					tableRow.style.borderLeft = `${border}`
+				}
+
+				return row?.user?.register
+			},
+			center: true
+		},
+		{
 			minWidth: "150px",
 			header: 'user__last_name',
 			name: t("Овог"),
@@ -57,15 +74,6 @@ export function getColumns(currentPage, rowsPerPage, page_count) {
 			reorder: true,
 			center: true,
 			wrap: true,
-		},
-		{
-			maxWidth: "180px",
-			minWidth: "180px",
-			header: 'register',
-			name: t("РД"),
-			reorder: true,
-			selector: (row) => row?.user?.register,
-			center: true
 		},
 		{
 			maxWidth: "250px",
@@ -98,7 +106,28 @@ export function getColumns(currentPage, rowsPerPage, page_count) {
 		{
 			maxWidth: "180px",
 			minWidth: "180px",
-			header: 'register',
+			name: t("Бүртгэлийн дугаар"),
+			selector: (row) => row?.user?.code,
+			center: true
+		},
+		{
+			maxWidth: "180px",
+			minWidth: "180px",
+			name: t("Суурь ЭШ"),
+			selector: (row) => row?.first_yesh,
+			center: true
+		},
+		{
+			maxWidth: "180px",
+			minWidth: "180px",
+			name: t("Дагалдан ЭШ"),
+			selector: (row) => row?.second_yesh,
+			center: true
+		},
+		{
+			maxWidth: "180px",
+			minWidth: "180px",
+			header: 'score_avg',
 			name: t("ЭЕШ"),
 			reorder: true,
 			selector: (row) => row?.score_avg,
@@ -178,6 +207,33 @@ export function getColumns(currentPage, rowsPerPage, page_count) {
 			selector: (row) => row?.user?.email,
 			center: true
 		},
+		{
+			maxWidth: "180px",
+			minWidth: "180px",
+			header: 'gender',
+			name: t("Овог нэр"),
+			reorder: true,
+			selector: (row) => row?.full_name,
+			center: true
+		},
+		{
+			name: "Төлөв солих",
+			center: true,
+			maxWidth: "120px",
+			minWidth: "120px",
+			selector: (row) => (
+				<div className="text-center" style={{ width: "auto" }}>
+					<a
+						role="button"
+						onClick={(e) => { addModalHandler(e, row)} }
+						id={`description${row?.id}`}
+						className="me-1"
+					>
+						<Badge color="light-success" pill><CheckCircle  width={"15px"} /></Badge>
+					</a>
+				</div>
+			),
+		}
 	]
 
 	return columns

@@ -89,6 +89,27 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 		},
 
 		{
+			header: 'age',
+			name: <div className="px-1">Нас</div>,
+			selector: (row) => row?.user_age || '',
+			minWidth: '140px',
+			maxWidth: '140px',
+		},
+		{
+			header: 'total_score',
+			name: <div className="px-1">Нийт оноо</div>,
+			selector: (row) => row?.health_up_user_data?.total_score || '',
+			minWidth: '140px',
+			maxWidth: '140px',
+		},
+		{
+			header: 'physice_score',
+			name: <div className="px-1">Хэмжээст оноо</div>,
+			selector: (row) => row?.health_up_user_data?.physice_score || '',
+			minWidth: '140px',
+			maxWidth: '140px',
+		},
+		{
 			header: 'description',
 			name: <div className="px-1">Тайлбар</div>,
 			selector: (row) => row?.health_up_user_data?.description || '',
@@ -134,13 +155,6 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 			header: 'flexible',
 			name: <div className="px-1">Уян хатан</div>,
 			selector: (row) => row?.health_up_user_data?.flexible || '',
-			minWidth: '140px',
-			maxWidth: '140px',
-		},
-		{
-			header: 'total_score',
-			name: <div className="px-1">Нийт оноо</div>,
-			selector: (row) => row?.health_up_user_data?.total_score || '',
 			minWidth: '140px',
 			maxWidth: '140px',
 		},

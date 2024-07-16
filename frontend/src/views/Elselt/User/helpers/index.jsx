@@ -1,6 +1,6 @@
 import { useRef } from 'react';
 import { Badge, Input, UncontrolledTooltip }  from 'reactstrap';
-import { Edit, Eye, Type } from "react-feather";
+import { CheckCircle, Edit, Eye, Type } from "react-feather";
 import { t } from 'i18next'
 
 import moment from 'moment'
@@ -10,7 +10,7 @@ import useLoader from "@hooks/useLoader";
 import './style.css'
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, page_count, editModal, handleDelete, user, handleDetail, handleDescModal) {
+export function getColumns (currentPage, rowsPerPage, page_count, editModal, handleDelete, user, handleDetail, handleDescModal, handleStateModal) {
 
 	const { fetchData } = useLoader({ isFullScreen: false })
 	const focusData = useRef(undefined)
@@ -106,6 +106,13 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 						<Badge color="light-primary" pill><Type  width={"15px"} /></Badge>
 					</a>
 					<UncontrolledTooltip placement='top' target={`description${row.id}`}>Тайлбар оруулах</UncontrolledTooltip>
+					<a role="button" onClick={() => { handleStateModal(row)} }
+						id={`state${row?.id}`}
+						className="me-1"
+					>
+						<Badge color="light-success" pill><CheckCircle  width={"15px"}/></Badge>
+					</a>
+					<UncontrolledTooltip placement='top' target={`state${row.id}`}>Төлөв</UncontrolledTooltip>
 				</div>
 			),
 		},
