@@ -1019,7 +1019,7 @@ class ElseltHealthAnhanShat(
     mixins.DestroyModelMixin
 ):
 
-    queryset = AdmissionUserProfession.objects.all().order_by('created_at')
+    queryset = AdmissionUserProfession.objects.all().order_by('updated_at')
 
     serializer_class = HealthUserDataSerializer
     pagination_class = CustomPagination
