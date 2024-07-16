@@ -1019,7 +1019,7 @@ class ElseltHealthAnhanShat(
     mixins.DestroyModelMixin
 ):
 
-    queryset = AdmissionUserProfession.objects.all().order_by('updated_at')
+    queryset = AdmissionUserProfession.objects.all()
 
     serializer_class = HealthUserDataSerializer
     pagination_class = CustomPagination
@@ -1029,12 +1029,14 @@ class ElseltHealthAnhanShat(
 
     def get_queryset(self):
         queryset = self.queryset
+        date_query = HealthUser.objects.filter(user=OuterRef('user')).values('updated_at')[:1]
         queryset = queryset.annotate(
             gender=(Substr('user__register', 9, 1)),
             user_email=F("user__email"),
             degree_name=F("profession__profession__degree__degree_name"),
             profession_name=F("profession__profession__name"),
-        )
+            update_date=Subquery(date_query)
+        ).order_by('update_date')
 
         # Эрүүл мэндийн шалгуур үзүүлэлттэй мэргэжлүүд
         # TODO Одоогоор идэвхтэй байгаа элсэлтээс л харуулж байгаа гэсэн үг
@@ -1095,7 +1097,7 @@ class ElseltHealthAnhanShat(
                 exclude_ids = HealthUser.objects.filter(Q(Q(state=AdmissionUserProfession.STATE_APPROVE) | Q(state=AdmissionUserProfession.STATE_REJECT))).values_list('user', flat=True)
                 user_id = AdmissionUserProfession.objects.exclude(user__in=exclude_ids).values_list('user', flat=True)
             else:
-                user_id = HealthUser.objects.filter(state=state).values_list('user', flat=True)
+                user_id = HealthUser.objects.filter(state=state).order_by('updated_at').values_list('user', flat=True)
             queryset = queryset.filter(user__in=user_id)
 
         return queryset
