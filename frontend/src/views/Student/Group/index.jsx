@@ -236,6 +236,7 @@ const Score = () => {
                 'Боловсролын зэрэг',
                 'Курс',
                 'Багш',
+                'Элссэн он',
                 'Төгссөн эсэх',
             ],
 
@@ -246,6 +247,7 @@ const Score = () => {
                 'degree.degree_name',
                 'level',
                 'teacher.first_name',
+                'join-year',
                 'is_finish',
             ],
         }
