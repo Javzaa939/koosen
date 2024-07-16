@@ -2,7 +2,6 @@ import os
 import requests
 from googletrans import Translator
 import openpyxl_dictreader
-from operator import itemgetter
 
 from datetime import date
 
