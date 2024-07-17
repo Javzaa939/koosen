@@ -53,7 +53,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, type, userId }) => {
   const getAcceptableTypes = (type) => {
     switch (type) {
       case 1:
-        return ".docx,.pdf,.html,.ppt,.xls,.txt,.notes";
+        return ".docx,.pdf,.html,.ppt,.xlsx,.txt,.notes";
       case 2:
         return ".png,.jpg,.jpeg";
       case 4:
@@ -67,7 +67,6 @@ const Addmodal = ({ open, handleModal, refreshDatas, type, userId }) => {
     cdata["user"] = userId;
     cdata["material_type"] = type;
     cdata = convertDefaultValue(cdata);
-
     const formData = new FormData();
 
     if (featurefile && featurefile.length > 0) {
@@ -82,6 +81,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, type, userId }) => {
     for (const key in cdata) {
       formData.append(key, cdata[key]);
     }
+
     const { success, errors } = await materialApi.post(formData);
     if (success) {
       reset();

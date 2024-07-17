@@ -2455,12 +2455,10 @@ function useApi(isDisplay=false) {
 			getStructure: () => able_instance.get(`/?a=ableApi&tsk=getDeps&key=uia`),
 		}
 	},
-}
         // Элсэлт явагдаж байгаа хөтөлбөрийн жагсаалт
         getList: (elselt) =>
           instance.get(`/elselt/profession/list/?elselt=${elselt}`),
         putPropState: (datas) => instance.put(`/elselt/profession/`, datas),
-      },
 
       sysinfo: {
         get: () => instance.get(`/elselt/sysinfo/`),
@@ -2547,7 +2545,6 @@ function useApi(isDisplay=false) {
             instance.put(`/elselt/health/physical/${id}/`, cdata),
         },
       },
-    },
     able: {
       getWorker: () => able_instance.get(`/?a=ableApi&tsk=getWorkers&key=uia`),
       getStructure: () => able_instance.get(`/?a=ableApi&tsk=getDeps&key=uia`),

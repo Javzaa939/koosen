@@ -3,9 +3,8 @@ from lms.models import OnlineLesson, LessonMaterial
 from core.models import Teachers
 from django.db.models import Count
 from rest_framework.response import Response
-from itertools import groupby
-from operator import itemgetter
-from collections import defaultdict
+import requests
+
 class OnlineLessonSerializer(serializers.ModelSerializer):
     class Meta:
         model = OnlineLesson
@@ -39,20 +38,50 @@ class LessonMaterialSerializer(serializers.ModelSerializer):
         if obj.user.full_name:
             return obj.user.full_name
         return None
+
     def get_file(self, obj):
         data = []
         for material_type in range(1, 5):
-            queryset = LessonMaterial.objects.filter(user=obj.user, material_type=material_type).values('id','path', 'created_at').annotate(count=Count('id'))
-            file_count = sum(item['count'] for item in queryset)
+            queryset = LessonMaterial.objects.filter(user=obj.user, material_type=material_type).values('id', 'path', 'created_at')
+
+            files_info = []
+            for item in queryset:
+                file_path = item['path']
+                try:
+
+                    # File-ийн хэмжээ авах requests
+                    response = requests.head(file_path)
+                    if response.status_code == 200:
+                        file_size = response.headers.get('content-length')
+
+                        item_data = {
+                            'id': item['id'],
+                            'path': file_path,
+                            'created_at': item['created_at'],
+                            'size': file_size
+                        }
+                        files_info.append(item_data)
+                    else:
+
+                        files_info.append({
+                            'id': item['id'],
+                            'path': file_path,
+                            'created_at': item['created_at'],
+                            'size': None
+                        })
+                except requests.exceptions.RequestException as e:
+                    # Handle request exception
+                    files_info.append({
+                        'id': item['id'],
+                        'path': file_path,
+                        'created_at': item['created_at'],
+                        'size': None
+                    })
             data.append({
-            'material_type': material_type,
-            'count': file_count,
-            'files': [{
-                'id':item['id'],
-                'path': item['path'],
-                'created_at': item['created_at'],
-            } for item in queryset]
-        })
+                'material_type': material_type,
+                'count': len(files_info),
+                'files': files_info
+            })
 
         return data
 
