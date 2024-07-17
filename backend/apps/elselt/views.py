@@ -11,9 +11,9 @@ from rest_framework.filters import SearchFilter
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.db import transaction
-from django.db.models import F, Subquery, OuterRef, Count, Q
+from django.db.models import F, Subquery, OuterRef, Count, Q, FloatField
 from django.db.models import Value, Case, When, IntegerField
-from django.db.models.functions import Substr
+from django.db.models.functions import Substr, Cast
 
 from main.utils.function.utils import (
     json_load,
@@ -2914,20 +2914,26 @@ class UserScoreSortAPIView(generics.GenericAPIView):
             rejected_objects, ['score_avg', 'order_no', 'yesh_state', 'yesh_description']
         )
 
+@permission_classes([IsAuthenticated])
 class PhysicalScoreSortAPIView(generics.GenericAPIView):
     """ Бие бялдар оноо эрэмбэлэх """
 
     queryset = PhysqueUser.objects.all().annotate(gender=(Substr('user__register', 9, 1)))
 
+    def physice_score(self, request):
+        """ Ур чадварын шалгалтын оноог бодож гаргах """
+        x = 0
+        if request['total_score'] > 0 and request['total_score'] < 59:
+            x = 200 + request['total_score'] * 4.66
+        else:
+            x = 480 + (request['total_score'] - 60) * 8
+        return round(x)
+
     def post(self, request):
         data = request.data
         try:
-            # front-ooс ирсэн хичээлүүдээ ашиглан AdmissionLesson-д байгаа хичээлүүдийн нэрсийг авна
-            lessons = data.get('lesson')
-            profession = data.get('profession')
-            total_elsegch = data.get('totalElsegch')
             gender = data.get('gender')
-            lesson_names = AdmissionLesson.objects.filter(id__in=lessons).values_list('lesson_name', flat=True)
+            profession = data.get('profession')
 
             adm_queryset = AdmissionUserProfession.objects.annotate(gender=(Substr('user__register', 9, 1))).filter(
                 profession=profession ,
@@ -2935,30 +2941,33 @@ class PhysicalScoreSortAPIView(generics.GenericAPIView):
                 yesh_mhb_state=AdmissionUserProfession.STATE_APPROVE
             )
 
-            if int(gender) == 1: # Эрэгтэй хэрэглэгчид
+            if gender == 1: # Эрэгтэй хэрэглэгчид
                 adm_queryset = adm_queryset.filter(
                     gender__in=['1', '3', '5', '7', '9']
                 ).values_list('user', flat=True)
 
-            if int(gender) == 2:
+            if gender == 2: # Эмэгтэй хэрэглэгчид
                 adm_queryset = adm_queryset.filter(
                     gender__in=['0', '2', '4', '6', '8']
                 ).values_list('user', flat=True)
 
-            # Элсэгчийн ids
-            user_ids = adm_queryset.values_list('user', flat=True)
+            score_list = list()
+            for value in self.queryset.values():
+                score = self.physice_score(value)
+                score_list.append({'id':value['id'], 'physice_score':score})
 
-            # Хэрвээ тус хичээл AdmissionLesson-д байхгүй бол олдсонгүй гэсэн мэдээллийг буцаана
-            if not lesson_names:
-                return request.send_error('ERR_002', 'ЭШ-ийн хичээлүүдийн дотор тус хичээл олдсонгүй')
+            # Хосолсон оноог 70/30 харьцаагаар тооцоолox
+            combined_scores = PhysqueUser.objects.annotate(
+                main_score=F('user__userscore__scaledScore'),
+                combined_score=Cast(
+                    F('user__userscore__scaledScore') * 0.7 + score * 0.3,
+                    FloatField()
+                )
+            ).order_by('-combined_score')
 
-            # AdmissionLesson-ээс ганц хичээл олдвол
-            if len(lesson_names) == 1:
-                # Single lesson function-ийг ажиллуулна
-                self.process_single_lesson(lesson_names, profession, total_elsegch, gender, user_ids)
-            else:
-                # Нэгээс олон хичээл байвал уг function-ийг дуудна
-                self.process_multiple_lessons(lesson_names, profession, total_elsegch, gender, user_ids)
+            # order_no update хийх
+            for idx, score in enumerate(combined_scores):
+                PhysqueUser.objects.filter(pk=score.pk).update(order_no=idx + 1)
 
         except Exception as e:
             print(e)
