@@ -422,6 +422,7 @@ const ElseltEyesh = () => {
         setAddModalData(data || null)
     }
 
+	// User details button handler
 	function handleRowClicked(row) {
         window.open(`elselt/user/${row.id}`)
     }
