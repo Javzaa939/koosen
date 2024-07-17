@@ -422,6 +422,10 @@ const ElseltEyesh = () => {
         setAddModalData(data || null)
     }
 
+	function handleRowClicked(row) {
+        window.open(`elselt/user/${row.id}`)
+    }
+
 	return (
 		<Fragment>
 			<OrderModal
@@ -729,7 +733,7 @@ const ElseltEyesh = () => {
 						print='true'
 						theme="solarized"
 						onSort={handleSort}
-						columns={getColumns(currentPage, rowsPerPage === 'Бүгд' ? 1 : rowsPerPage, total_count, addModalHandler)}
+						columns={getColumns(currentPage, rowsPerPage === 'Бүгд' ? 1 : rowsPerPage, total_count, addModalHandler, handleRowClicked)}
 						sortIcon={<ChevronDown size={10} />}
 						paginationPerPage={rowsPerPage === 'Бүгд' ? 1 : rowsPerPage}
 						paginationDefaultPage={currentPage}
