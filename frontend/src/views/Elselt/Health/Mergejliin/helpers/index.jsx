@@ -2,7 +2,8 @@ import { Book, CheckCircle } from "react-feather"
 import { Badge, UncontrolledTooltip } from "reactstrap"
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, page_count, STATE_LIST, detailHandler) {
+export function getColumns (currentPage, rowsPerPage, total_count, STATE_LIST, detailHandler) {
+	const page_count = Math.ceil(total_count / rowsPerPage)
 
     // /** Сонгосон хуудасны тоо датаны тооноос их болсон үед хуудаслалт 1-ээс эхлэнэ */
     if (currentPage > page_count) {
