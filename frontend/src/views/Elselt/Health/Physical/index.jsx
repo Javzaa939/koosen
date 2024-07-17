@@ -376,16 +376,6 @@ function Physical() {
                 selectedStudents={selectedStudents}
                 getDatas={getDatas}
             />
-            {
-                modal && 
-                <SortModal 
-                    open={modal} 
-                    handleModal={handleModal} 
-                    refreshDatas={getDatas} 
-                    type={type} 
-                    editData={editData} 
-                />
-            }
         <Card>
             {
                 addModal &&
@@ -406,6 +396,7 @@ function Physical() {
 						color='primary'
 						className='d-flex align-items-center px-75 ms-1'
 						id='sort_button'
+                        disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-elselt-admission-create')) ? false : true}
 						onClick={() => handleModal()}
 					>
 						<RiEditFill className='me-25' />
@@ -634,6 +625,7 @@ function Physical() {
                 </div>
             </CardBody>
         </Card>
+        {modal && <SortModal open={modal} handleModal={handleModal} refreshDatas={getDatas} type={type} editData={editData} />}
     </Fragment>
     )
 }

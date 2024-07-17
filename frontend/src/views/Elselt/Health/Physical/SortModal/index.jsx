@@ -31,7 +31,6 @@ export const validateSchema = Yup.object().shape({
     elselt: Yup.string().nullable().trim().required('Хоосон байна'),
     gender: Yup.string().nullable().trim().required('Хоосон байна'),
     value: Yup.string().nullable().trim().required('Хоосон байна'),
-    addRate: Yup.string().nullable().trim().required('Хоосон байна'),
 });
 
 
@@ -47,7 +46,7 @@ export const SortModal = ({ open, handleModal, refreshDatas, editData }) => {
 
     const genderFalseValue = [{ id: 3, name: 'Бүгд' }]
 
-    const { control, handleSubmit, reset, setValue, setError, getValues, formState: { errors } } = useForm({
+    const { control, handleSubmit, reset, setValue, formState: { errors } } = useForm({
         resolver: yupResolver(validateSchema)
     });
 
@@ -127,18 +126,14 @@ export const SortModal = ({ open, handleModal, refreshDatas, editData }) => {
         }
     }, [isGender, profession]);
 
-    async function onSubmit(cdata) {
-        cdata = convertDefaultValue(cdata);
+    const onSubmit = async (cdata) => {
+        cdata = convertDefaultValue(cdata)
 
-        const { success, errors } = await postFetch(hynaltApi.post(cdata));
+        const {success, errors} = await postFetch(hynaltApi.postPhysical(cdata))
         if (success) {
-            reset();
-            refreshDatas();
-            handleModal();
-        } else {
-            for (let key in errors) {
-                setError(key, { type: 'custom', message: errors[key][0] });
-            }
+            reset()
+            refreshDatas()
+            handleModal()
         }
     }
     

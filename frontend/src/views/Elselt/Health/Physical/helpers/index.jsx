@@ -110,6 +110,28 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 			maxWidth: '140px',
 		},
 		{
+			header: 'score_avg',
+			name: <div className="px-1">ЭЕШ оноо</div>,
+			reorder: true,
+			selector: (row) => row?.score_avg || '',
+			minWidth: '140px',
+			maxWidth: '140px',
+		},
+		{
+			header: 'combined_score',
+			name: <div className="px-1">Эрэмбэлэлт хэмжээст оноо</div>,
+			selector: (row) => row?.health_up_user_data?.combined_score || '',
+			minWidth: '140px',
+			maxWidth: '140px',
+		},
+		{
+			header: 'order_no',
+			name: <div className="px-1">Эрэмбэлэлт оноо</div>,
+			selector: (row) => row?.health_up_user_data?.order_no || '',
+			minWidth: '140px',
+			maxWidth: '140px',
+		},
+		{
 			header: 'description',
 			name: <div className="px-1">Тайлбар</div>,
 			selector: (row) => row?.health_up_user_data?.description || '',
