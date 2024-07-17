@@ -7,7 +7,8 @@ import useApi from '@hooks/useApi';
 import useLoader from "@hooks/useLoader";
 
 // Хүснэгтийн баганууд
-export function getColumns(currentPage, rowsPerPage, page_count, addModalHandler) {
+export function getColumns(currentPage, rowsPerPage, total_count, addModalHandler) {
+	const page_count = Math.ceil(total_count / rowsPerPage)
 
 	// const { fetchData } = useLoader({ isFullScreen: false })
 	// const focusData = useRef(undefined)
