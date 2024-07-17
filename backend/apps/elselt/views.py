@@ -51,11 +51,6 @@ from surgalt.serializers import (
     ProfessionDefinitionSerializer
 )
 
-from settings.serializers import (
-    AdmissionLessonSerializer,
-    AdmissionLessonListSerializer
-)
-
 from .serializer import (
     AdmissionSerializer,
     ElseltSysInfoSerializer,
@@ -102,13 +97,6 @@ from elselt.models import (
     ArmyUser,
     StateChangeLog,
 )
-
-from core.models import (
-    User,
-    Employee,
-    Schools
-)
-import logging
 
 @permission_classes([IsAuthenticated])
 class ElseltApiView(
@@ -455,7 +443,7 @@ class AdmissionUserInfoAPIView(
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['user__first_name', 'user__register', 'user__email', 'gpa', 'org']
+    search_fields = ['user__first_name', 'user__register', 'user__email', 'gpa', 'org', 'user__code', 'user__last_name', 'user__mobile']
 
     def get_queryset(self):
         queryset = self.queryset
@@ -484,6 +472,18 @@ class AdmissionUserInfoAPIView(
         gpa = self.request.query_params.get('gpa')
         justice_state = self.request.query_params.get('justice_state')
         is_justice = self.request.query_params.get('is_justice')
+        start_date = self.request.query_params.get('start_date')
+        end_date = self.request.query_params.get('end_date')
+
+        # Бүртгүүлсэн огноогоор хайх хэсэг
+        filters = {}
+        if start_date:
+            filters['user__created__gte'] = start_date
+        if end_date:
+            filters['user__created__lte'] = end_date
+
+        if filters:
+            queryset = queryset.filter(**filters)
 
         if is_justice:
             justice_profession_ids = AdmissionIndicator.objects.filter(admission_prof__admission__is_active=True, value__in=[AdmissionIndicator.YAL_SHIITGEL]).values_list('admission_prof', flat=True)
@@ -1019,7 +1019,7 @@ class ElseltHealthAnhanShat(
     mixins.DestroyModelMixin
 ):
 
-    queryset = AdmissionUserProfession.objects.all().order_by('created_at')
+    queryset = AdmissionUserProfession.objects.all()
 
     serializer_class = HealthUserDataSerializer
     pagination_class = CustomPagination
@@ -1029,12 +1029,14 @@ class ElseltHealthAnhanShat(
 
     def get_queryset(self):
         queryset = self.queryset
+        date_query = HealthUser.objects.filter(user=OuterRef('user')).values('updated_at')[:1]
         queryset = queryset.annotate(
             gender=(Substr('user__register', 9, 1)),
             user_email=F("user__email"),
             degree_name=F("profession__profession__degree__degree_name"),
             profession_name=F("profession__profession__name"),
-        )
+            update_date=Subquery(date_query)
+        ).order_by('update_date')
 
         # Эрүүл мэндийн шалгуур үзүүлэлттэй мэргэжлүүд
         # TODO Одоогоор идэвхтэй байгаа элсэлтээс л харуулж байгаа гэсэн үг
@@ -1049,16 +1051,16 @@ class ElseltHealthAnhanShat(
         start_date=self.request.query_params.get('start_date')
         end_date=self.request.query_params.get('end_date')
 
-
-        # Ял шийтгэл, Насны үзүүлэлтүүдэд ТЭНЦЭЭГҮЙ элсэгчдийг хасах
-        queryset = queryset.exclude(
-            age_state=AdmissionUserProfession.STATE_REJECT,
-            gpa_state=AdmissionUserProfession.STATE_REJECT,
-            yesh_mhb_state=AdmissionUserProfession.STATE_REJECT, # МХБ шалгалтад тэнцээгүй
-            yesh_state=AdmissionUserProfession.STATE_REJECT, # ЭШ оноо шалгалтад тэнцээгүй
-            state__in=[AdmissionUserProfession.STATE_REJECT, AdmissionUserProfession.STATE_APPROVE]
+        queryset = queryset.filter(
+            age_state=AdmissionUserProfession.STATE_APPROVE,
+            gpa_state__in=[AdmissionUserProfession.STATE_APPROVE, AdmissionUserProfession.STATE_SEND],
         )
-    
+
+        # ЭШ тэнцсэн болон анхан мэдээлэлээрээ тэнцсэн
+        queryset = queryset.filter(
+            Q(Q(first_state=AdmissionUserProfession.STATE_APPROVE) | Q(yesh_state=AdmissionUserProfession.STATE_APPROVE))
+        )
+
         if gender:
             if gender == 'Эрэгтэй':
                 queryset = queryset.filter(gender__in=['1', '3', '5', '7', '9'])
@@ -1089,14 +1091,13 @@ class ElseltHealthAnhanShat(
         if filters:
             dates = HealthUser.objects.filter(**filters).values_list('user', flat=True)
             queryset = queryset.filter(user__in=dates)
-            return queryset
 
         if state:
             if state == '1':
                 exclude_ids = HealthUser.objects.filter(Q(Q(state=AdmissionUserProfession.STATE_APPROVE) | Q(state=AdmissionUserProfession.STATE_REJECT))).values_list('user', flat=True)
                 user_id = AdmissionUserProfession.objects.exclude(user__in=exclude_ids).values_list('user', flat=True)
             else:
-                user_id = HealthUser.objects.filter(state=state).values_list('user', flat=True)
+                user_id = HealthUser.objects.filter(state=state).order_by('updated_at').values_list('user', flat=True)
             queryset = queryset.filter(user__in=user_id)
 
         return queryset
@@ -1160,60 +1161,33 @@ class ElseltHealthAnhanShat(
 
         data['user'] = user
 
-        sid = transaction.savepoint()
         try:
             with transaction.atomic():
                 now = dt.datetime.now()
-                student = self.queryset.filter(pk=user).first()
-                if student:
-                    indicator_value = AdmissionIndicator.ERUUL_MEND_ANHAN
-                    if data.get("state"):
-                        old_state = student.state
-                        student.state = data.get("state")
-                        student.updated_at = now
-                        student.state_description = data.get("state_description")
-                        student.save()
+                student = HealthUser.objects.filter(user=user).first()
+                indicator_value = AdmissionIndicator.ERUUL_MEND_ANHAN
+                old_state = student.state
 
-                        StateChangeLog.objects.create(
-                            user=student.user,
-                            type=StateChangeLog.STATE,
-                            indicator=indicator_value,
-                            now_state=old_state,
-                            change_state=data.get("state"),
-                            updated_user=request.user if request.user.is_authenticated else None,
-                            updated_at=now
-                        )
-                    else:
-                        old_justice_state = student.justice_state
-                        student.updated_at = now
-                        student.justice_state = data.get("justice_state")
-                        student.justice_description = data.get("justice_description")
-                        student.save()
-
-                        StateChangeLog.objects.create(
-                            user=student.user,
-                            type=StateChangeLog.PROFESSION,
-                            indicator=indicator_value,
-                            now_state=old_justice_state,
-                            change_state=data.get("justice_state"),
-                            updated_user=request.user if request.user.is_authenticated else None,
-                            updated_at=now
-                        )
+                StateChangeLog.objects.create(
+                    user=student.user,
+                    type=StateChangeLog.STATE,
+                    indicator=indicator_value,
+                    now_state=old_state,
+                    change_state=data.get("state"),
+                    updated_user=request.user if request.user.is_authenticated else None,
+                    updated_at=now
+                )
         except Exception as e:
-            transaction.savepoint_rollback(sid)
             return request.send_error("ERR_004", str(e))
 
         health_user = HealthUser.objects.filter(id=pk).first()
         serializer = HealthUserSerializer(health_user, data)
 
         if serializer.is_valid():
-
             serializer.save()
             return request.send_info('INF_002')
-
         else:
             error_obj = []
-            print(serializer.errors)
             for key in serializer.errors:
                 msg = "Хоосон байна"
 
@@ -1347,57 +1321,22 @@ class ElseltHealthProfessional(
         data = request.data
 
         user = data.get('user')
-        if 'user' in data:
-            del data['user']
-        data['user'] = user
-
-        sid = transaction.savepoint()
         try:
             with transaction.atomic():
                 now = dt.datetime.now()
-                student = AdmissionUserProfession.objects.all().filter(pk=user).first()
-                if student:
-                    logger.debug(f'Student found: {student}')
-                    indicator_value = AdmissionIndicator.ERUUL_MEND_MERGEJLIIN
-                    if data.get("state"):
-                        old_state = student.state
-                        student.state = data.get("state")
-                        student.updated_at = now
-                        student.state_description = data.get("state_description")
-                        student.save()
-                        logger.debug('Student state updated and saved.')
-                        StateChangeLog.objects.create(
-                            user=student.user,
-                            type=StateChangeLog.STATE,
-                            indicator=indicator_value,
-                            now_state=old_state,
-                            change_state=data.get("state"),
-                            updated_user=request.user if request.user.is_authenticated else None,
-                            updated_at=now
-                        )
-                        logger.debug('StateChangeLog entry created for state change.')
-                    else:
-                        old_justice_state = student.justice_state
-                        student.updated_at = now
-                        student.justice_state = data.get("justice_state")
-                        student.justice_description = data.get("justice_description")
-                        student.save()
-                        logger.debug('Student justice state updated and saved.')
-                        StateChangeLog.objects.create(
-                            user=student.user,
-                            type=StateChangeLog.PROFESSION,
-                            indicator=indicator_value,
-                            now_state=old_justice_state,
-                            change_state=data.get("justice_state"),
-                            updated_user=request.user if request.user.is_authenticated else None,
-                            updated_at=now
-                        )
-                        logger.debug('StateChangeLog entry created for justice state change.')
+                student = HealthUpUser.objects.filter(user=user).first()
+                StateChangeLog.objects.create(
+                    user=student.user,
+                    type=StateChangeLog.STATE,
+                    indicator=AdmissionIndicator.ERUUL_MEND_MERGEJLIIN,
+                    now_state=student.state, # Хуучин төлөв
+                    change_state=data.get("state"),
+                    updated_user=request.user if request.user.is_authenticated else None,
+                    updated_at=now
+                )
         except Exception as e:
-            logger.error(f'Error occurred: {str(e)}')
-            transaction.savepoint_rollback(sid)
             return request.send_error("ERR_004", str(e))
-        
+
         health_user = HealthUpUser.objects.filter(id=pk).first()
         serializer = HealthUpUserSerializer(health_user, data)
         data['updated_user'] = request.user.id
@@ -1555,47 +1494,23 @@ class ElseltHealthPhysical(
 
         data['user'] = user
 
-        sid = transaction.savepoint()
         try:
             with transaction.atomic():
                 now = dt.datetime.now()
-                student = self.queryset.filter(pk=user).first()
-                if student:
-                    indicator_value = AdmissionIndicator.BIE_BYALDAR
-                    if data.get("state"):
-                        old_state = student.state
-                        student.state = data.get("state")
-                        student.updated_at = now
-                        student.state_description = data.get("state_description")
-                        student.save()
-                        StateChangeLog.objects.create(
-                            user=student.user,
-                            type=StateChangeLog.STATE,
-                            indicator=indicator_value,
-                            now_state=old_state,
-                            change_state=data.get("state"),
-                            updated_user=request.user if request.user.is_authenticated else None,
-                            updated_at=now
-                        )
-                    else:
-                        old_justice_state = student.justice_state
-                        student.updated_at = now
-                        student.justice_state = data.get("justice_state")
-                        student.justice_description = data.get("justice_description")
-                        student.save()
-                        StateChangeLog.objects.create(
-                            user=student.user,
-                            type=StateChangeLog.PROFESSION,
-                            indicator=indicator_value,
-                            now_state=old_justice_state,
-                            change_state=data.get("justice_state"),
-                            updated_user=request.user if request.user.is_authenticated else None,
-                            updated_at=now
-                        )
+                student = PhysqueUser.objects.filter(user=user).first()
+
+                StateChangeLog.objects.create(
+                    user_id=user,
+                    type=StateChangeLog.STATE,
+                    indicator=AdmissionIndicator.BIE_BYALDAR,
+                    now_state=student.state,
+                    change_state=data.get("state"),
+                    updated_user=request.user if request.user.is_authenticated else None,
+                    updated_at=now
+                )
         except Exception as e:
-            transaction.savepoint_rollback(sid)
             return request.send_error("ERR_004", str(e))
-        
+
         try:
             physque_user = PhysqueUser.objects.filter(id=pk).first()
             serializer = PhysqueUserSerializer(physque_user, data)
@@ -2184,93 +2099,33 @@ class AdmissionJusticeListAPIView(
     def put(self, request):
 
         data = request.data
-        sid = transaction.savepoint()
         try:
             with transaction.atomic():
                 now = dt.datetime.now()
-                students = self.queryset.filter(pk__in=data["students"])
+                students = self.queryset.filter(user__in=data["students"])
                 for student in students:
-                    indicator_value = AdmissionIndicator.YAL_SHIITGEL
-                    if data.get("state"):
-                        old_state = student.state
-                        student.state = data.get("state")
-                        student.updated_at = now
-                        student.state_description = data.get("state_description")
-                        student.save()
+                    StateChangeLog.objects.create(
+                        user=student.user,
+                        type=StateChangeLog.STATE,
+                        indicator=AdmissionIndicator.YAL_SHIITGEL,
+                        now_state=student.justice_state,
+                        change_state=data.get("justice_state"),
+                        updated_user=request.user if request.user.is_authenticated else None,
+                        updated_at=now
+                    )
 
-                        StateChangeLog.objects.create(
-                            user=student.user,
-                            type=StateChangeLog.STATE,
-                            indicator=indicator_value,
-                            now_state=old_state,
-                            change_state=data.get("state"),
-                            updated_user=request.user if request.user.is_authenticated else None,
-                            updated_at=now
-                        )
-                    else:
-                        old_justice_state = student.justice_state
-                        student.updated_at = now
-                        student.justice_state = data.get("justice_state")
-                        student.justice_description = data.get("justice_description")
-                        student.save()
-
-                        StateChangeLog.objects.create(
-                            user=student.user,
-                            type=StateChangeLog.PROFESSION,
-                            indicator=indicator_value,
-                            now_state=old_justice_state,
-                            change_state=data.get("justice_state"),
-                            updated_user=request.user if request.user.is_authenticated else None,
-                            updated_at=now
-                        )
+                # Төлөв шинэчлэх
+                self.queryset.filter(user__in=data["students"]).update(
+                    justice_state=data.get("justice_state"),
+                    justice_description=data.get("justice_description")
+                )
         except Exception as e:
-            transaction.savepoint_rollback(sid)
             return request.send_error("ERR_002", e.__str__)
 
         return request.send_info("INF_002")
 
-        data = request.data
-        sid = transaction.savepoint()
-        try:
-            with transaction.atomic():
-                now = dt.datetime.now()
-                students = self.queryset.filter(pk__in=data["students"])
-                for student in students:
-                    indicator_value = AdmissionIndicator.YAL_SHIITGEL
-                    if data.get("state"):
-                        old_state = student.state
-                        student.state = data.get("state")
-                        student.updated_at = now
-                        student.state_description = data.get("state_description")
-                        student.save()
-                        StateChangeLog.objects.create(
-                            user=student.user,
-                            type=StateChangeLog.STATE,
-                            indicator=indicator_value,
-                            now_state=old_state,
-                            change_state=data.get("state"),
-                            updated_user=request.user if request.user.is_authenticated else None,
-                            updated_at=now
-                        )
-                    else:
-                        old_justice_state = student.justice_state
-                        student.updated_at = now
-                        student.justice_state = data.get("justice_state")
-                        student.justice_description = data.get("justice_description")
-                        student.save()
-                        StateChangeLog.objects.create(
-                            user=student.user,
-                            type=StateChangeLog.PROFESSION,
-                            indicator=indicator_value,
-                            now_state=old_justice_state,
-                            change_state=data.get("justice_state"),
-                            updated_user=request.user if request.user.is_authenticated else None,
-                            updated_at=now
-                        )
-        except Exception as e:
-            transaction.savepoint_rollback(sid)
-            return request.send_error("ERR_004", str(e))
 
+@permission_classes([IsAuthenticated])
 class ConversationUserSerializerAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -2355,59 +2210,30 @@ class ConversationUserSerializerAPIView(
     def put(self, request,pk=None):
 
         data = request.data
+        user = data.get('user')
+
         with transaction.atomic():
             now = dt.datetime.now()
+
+            student = ConversationUser.objects.filter(user=user).first()
+            StateChangeLog.objects.create(
+                user=student.user,
+                type=StateChangeLog.STATE,
+                indicator=AdmissionIndicator.SETGEL_ZUI,
+                now_state=student.state,
+                change_state=data.get("state"),
+                updated_user=request.user if request.user.is_authenticated else None,
+                updated_at=now
+            )
+
             ConversationUser.objects.filter(
                user=data.get('user')
             ).update(state=data.get("state"),updated_at=now,description=data.get("description"))
 
-        user = data.get('user')
-        if 'user' in data:
-            del data['user']
-        data['user'] = user
-        sid = transaction.savepoint()
-        try:
-            with transaction.atomic():
-                now = dt.datetime.now()
-                student = self.queryset.filter(pk=user).first()
-                if student:
-                    indicator_value = AdmissionIndicator.SETGEL_ZUI
-                    if data.get("state"):
-                        old_state = student.state
-                        student.state = data.get("state")
-                        student.updated_at = now
-                        student.state_description = data.get("state_description")
-                        student.save()
-                        StateChangeLog.objects.create(
-                            user=student.user,
-                            type=StateChangeLog.STATE,
-                            indicator=indicator_value,
-                            now_state=old_state,
-                            change_state=data.get("state"),
-                            updated_user=request.user if request.user.is_authenticated else None,
-                            updated_at=now
-                        )
-                    else:
-                        old_justice_state = student.justice_state
-                        student.updated_at = now
-                        student.justice_state = data.get("justice_state")
-                        student.justice_description = data.get("justice_description")
-                        student.save()
-                        StateChangeLog.objects.create(
-                            user=student.user,
-                            type=StateChangeLog.PROFESSION,
-                            indicator=indicator_value,
-                            now_state=old_justice_state,
-                            change_state=data.get("justice_state"),
-                            updated_user=request.user if request.user.is_authenticated else None,
-                            updated_at=now
-                        )
-        except Exception as e:
-            transaction.savepoint_rollback(sid)
-            return request.send_error("ERR_004", str(e))
-
         return request.send_info('INF_002')
 
+
+@permission_classes([IsAuthenticated])
 class ArmyUserSerializerAPView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -2485,62 +2311,28 @@ class ArmyUserSerializerAPView(
     def put(self, request,pk=None):
 
         data = request.data
+        user = data.get('user')
         with transaction.atomic():
             now = dt.datetime.now()
+            student = ArmyUser.objects.filter(user=user).first()
+            StateChangeLog.objects.create(
+                user=student.user,
+                type=StateChangeLog.STATE,
+                indicator=AdmissionIndicator.HEERIIN_BELTGEL,
+                now_state=student.state,
+                change_state=data.get("state"),
+                updated_user=request.user if request.user.is_authenticated else None,
+                updated_at=now
+            )
+
             ArmyUser.objects.filter(
-            user=data.get('user')
+                user=data.get('user')
             ).update(state=data.get("state"),updated_at=now,description=data.get("description"))
-        
-        user = data.get('user')
-        if 'user' in data:
-            del data['user']
-        data['user'] = user
-
-        sid = transaction.savepoint()
-        try:
-            with transaction.atomic():
-                now = dt.datetime.now()
-                student = self.queryset.filter(pk=user).first()
-                if student:
-                    indicator_value = AdmissionIndicator.HEERIIN_BELTGEL
-                    if data.get("state"):
-                        old_state = student.state
-                        student.state = data.get("state")
-                        student.updated_at = now
-                        student.state_description = data.get("state_description")
-                        student.save()
-
-                        StateChangeLog.objects.create(
-                            user=student.user,
-                            type=StateChangeLog.STATE,
-                            indicator=indicator_value,
-                            now_state=old_state,
-                            change_state=data.get("state"),
-                            updated_user=request.user if request.user.is_authenticated else None,
-                            updated_at=now
-                        )
-                    else:
-                        old_justice_state = student.justice_state
-                        student.updated_at = now
-                        student.justice_state = data.get("justice_state")
-                        student.justice_description = data.get("justice_description")
-                        student.save()
-
-                        StateChangeLog.objects.create(
-                            user=student.user,
-                            type=StateChangeLog.PROFESSION,
-                            indicator=indicator_value,
-                            now_state=old_justice_state,
-                            change_state=data.get("justice_state"),
-                            updated_user=request.user if request.user.is_authenticated else None,
-                            updated_at=now
-                        )
-        except Exception as e:
-            transaction.savepoint_rollback(sid)
-            return request.send_error("ERR_004", str(e))
 
         return request.send_info('INF_002')
 
+
+@permission_classes([IsAuthenticated])
 class LogSerializerAPView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -2553,7 +2345,7 @@ class LogSerializerAPView(
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = [ 'user__first_name', 'user__last_name', 'user__registeDr', 'user__mobile']
+    search_fields = [ 'user__first_name', 'user__last_name', 'user__register', 'user__mobile']
 
     def get_queryset(self):
         queryset = self.queryset
@@ -2561,6 +2353,10 @@ class LogSerializerAPView(
         sorting = self.request.query_params.get('sorting')
         profession = self.request.query_params.get('profession')
         elselt = self.request.query_params.get('elselt')
+        menu_option = self.request.query_params.get('menu_option')
+
+        if menu_option:
+            queryset = queryset.filter(type=menu_option)
 
         if profession:
             queryset = queryset.filter(
@@ -2588,6 +2384,8 @@ class LogSerializerAPView(
         all_data = self.list(request).data
         return request.send_data(all_data)
 
+
+@permission_classes([IsAuthenticated])
 class HynaltNumberIsGenderAPIView(generics.GenericAPIView):
     """ Мэргэжлийн хяналтын тоо хүйсээс хамаарах эсэх """
 
@@ -2610,6 +2408,7 @@ class HynaltNumberIsGenderAPIView(generics.GenericAPIView):
         return request.send_data(is_gender)
 
 
+@permission_classes([IsAuthenticated])
 class HynaltNumberAPIView(generics.GenericAPIView):
     """ Хөтөлбөр болох хүйсээс хамаарсан хяналтын тоо """
 
@@ -2646,7 +2445,7 @@ class HynaltNumberAPIView(generics.GenericAPIView):
         return request.send_data(hynalt_number)
 
 
-
+@permission_classes([IsAuthenticated])
 class UserScoreSortAPIView(generics.GenericAPIView):
     """ЭЕШ онооны эрэмбэлэлт"""
 
@@ -2660,11 +2459,30 @@ class UserScoreSortAPIView(generics.GenericAPIView):
             profession = data.get('profession')
             total_elsegch = data.get('totalElsegch')
             gender = data.get('gender')
-            lesson_names = AdmissionLesson.objects.filter(lesson_code__in=lessons).values_list('lesson_name', flat=True)
-            user_ids = AdmissionUserProfession.objects.filter(profession=profession , age_state=AdmissionUserProfession.STATE_APPROVE, yesh_mhb_state=AdmissionUserProfession.STATE_APPROVE).values_list('user', flat=True)
+            lesson_names = AdmissionLesson.objects.filter(id__in=lessons).values_list('lesson_name', flat=True)
+
+            adm_queryset = AdmissionUserProfession.objects.annotate(gender=(Substr('user__register', 9, 1))).filter(
+                profession=profession ,
+                age_state=AdmissionUserProfession.STATE_APPROVE,
+                yesh_mhb_state=AdmissionUserProfession.STATE_APPROVE
+            )
+
+            if int(gender) == 1: # Эрэгтэй хэрэглэгчид
+                adm_queryset = adm_queryset.filter(
+                    gender__in=['1', '3', '5', '7', '9']
+                ).values_list('user', flat=True)
+
+            if int(gender) == 2:
+                adm_queryset = adm_queryset.filter(
+                    gender__in=['0', '2', '4', '6', '8']
+                ).values_list('user', flat=True)
+
+            # Элсэгчийн ids
+            user_ids = adm_queryset.values_list('user', flat=True)
+
             # Хэрвээ тус хичээл AdmissionLesson-д байхгүй бол олдсонгүй гэсэн мэдээллийг буцаана
             if not lesson_names:
-                return request.send_error('ERR_002', 'ЭЕШ-ийн хичээлүүдийн дотор тус хичээл олдсонгүй')
+                return request.send_error('ERR_002', 'ЭШ-ийн хичээлүүдийн дотор тус хичээл олдсонгүй')
 
             # AdmissionLesson-ээс ганц хичээл олдвол
             if len(lesson_names) == 1:
@@ -2704,6 +2522,18 @@ class UserScoreSortAPIView(generics.GenericAPIView):
                 user__in=user_ids,
                 lesson_name__in=lesson_names,
             ).values_list('user', flat=True)
+
+        # ЭШ өгсөн хүүхдүүд
+        yesh_score_user_ids = user_score_users.values_list('user', flat=True)
+
+        # Шалгаж байгаа хичээлээр огт ЭШ өгөөгүй хүүхдүүд
+        not_yesh_score_user_ids = list(set(user_ids) - set(yesh_score_user_ids))
+
+        # ЭШ өгөөгүй хүүхдүүдийг state өөрчлөх
+        AdmissionUserProfession.objects.filter(user__in=not_yesh_score_user_ids).update(
+            yesh_state=AdmissionUserProfession.STATE_REJECT,
+            yesh_description='Шалгуур хичээлээр ЭШ өгөөгүй.'
+        )
 
         # Counter ашиглан тус хэрэглэгч уг шалгалтыг хэдэн удаа өгснийг тоолно
         counts = Counter(user_score_users)
@@ -2764,12 +2594,31 @@ class UserScoreSortAPIView(generics.GenericAPIView):
                 lesson_name__in=lesson_names,
                 gender__in=['1', '3', '5', '7', '9']
             ).values('user', 'lesson_name', 'scaledScore')
-        else:
+
+        if int(gender) == 2:
             elsegch_users = self.queryset.filter(
                 user__in=user_ids,
                 lesson_name__in=lesson_names,
                 gender__in=['0', '2', '4', '6', '8']
             ).values('user', 'lesson_name', 'scaledScore')
+
+        if int(gender) == 3:
+            elsegch_users = self.queryset.filter(
+                user__in=user_ids,
+                lesson_name__in=lesson_names,
+            ).values('user', 'lesson_name', 'scaledScore')
+
+        # ЭШ өгсөн хүүхдүүд
+        yesh_score_user_ids = elsegch_users.values_list('user', flat=True)
+
+        # Шалгаж байгаа хичээлээр огт ЭШ өгөөгүй хүүхдүүд
+        not_yesh_score_user_ids = list(set(user_ids) - set(yesh_score_user_ids))
+
+        # ЭШ өгөөгүй хүүхдүүдийг state өөрчлөх
+        AdmissionUserProfession.objects.filter(user__in=not_yesh_score_user_ids).update(
+            yesh_state=AdmissionUserProfession.STATE_REJECT,
+            yesh_description='Шалгуур хичээлээр ЭШ өгөөгүй.'
+        )
 
         # Тус хэрэглэгч нэг шалгалтыг олон удаа өгсөн бол зөвхөн хамгийн өндөр оноог нь авна
         max_scores = {}
@@ -2821,15 +2670,17 @@ class UserScoreSortAPIView(generics.GenericAPIView):
         # Дараагаар үндсэн list дотроо зөвхөн тухайн хэрэглэгч дотор 2 хичээлийн мэдээлэл group-лэгдсэн датаг нэмнэ
         grouped_list = [group for group in grouped_data.values() if len(group) == 2]
 
+        # 2 хичээлийн нэг хичээлээр ЭШ өгөөгүй хүүхдүүд
+        grouped_one_list = [group for group in grouped_data.values() if len(group) == 1]
+
         # 2 хичээлийн аль нэгнийхэн босго оноонд хүрээгүй тохиолдодл state солиж тэнцүүлэхгүй
         users_to_remove = []
 
         for item in grouped_list:
             for sub_item in item:
-
                 # Тухайн хичээлийн босго оноо
-                bottomscore = AdmissionBottomScore.objects.filter(admission_lesson__lesson_name=sub_item['lesson_name'], profession=profession_obj.profession).values_list('bottom_score', flat=True).first()
-                if bottomscore >= sub_item['scaledScore']:
+                bottomscore = AdmissionBottomScore.objects.filter(admission_lesson__lesson_name=sub_item['lesson_name'], profession=profession_obj.profession, score_type=sub_item['score_type']).values_list('bottom_score', flat=True).first()
+                if bottomscore > sub_item['scaledScore']:
                     users_to_remove.append(sub_item['user'])
                     break
 
@@ -2864,13 +2715,45 @@ class UserScoreSortAPIView(generics.GenericAPIView):
                 # all_score дотроо датагаа user,score-оор нь цэгцлэнэ
                 all_scores.append({'score': round(score), 'user': user})
 
+        all_one_scores = []
+        # 2 хичээлээр шалгаж байгаа үед 1 хичээлээр нь ЭШ өгсөн элсэгчид
+        for group_one in grouped_one_list:
+            # user_scores дотор нийт жинлэгдсэн оноог хадгална
+            user_scores = {}
+
+            for entry in group_one:
+                # Мэдээллүүдээ багцалж аваад
+                user = entry['user']
+                score_type = entry['score_type']
+                scaled_score = entry['scaledScore']
+
+                # Хэрвээ тус хичээлийн score_type GENERAL байвал weight-ийг 70% гэж үзнэ
+                # Бусад үед дагалдах хичээл гэж ойлгоод 30% байна
+                weighted_score = scaled_score * 1
+
+                # Хэрвээ user_scores дотор тухайн хэрэглэгчийн id-аар илэрхийлэгдэх
+                # key-тэй оноо байвал тэр оноон дээр нь нэмнэ
+                if user in user_scores:
+                    user_scores[user] += weighted_score
+                else: # Байхгүй бол тус key-гээр оноог үүсгэнэ
+                    user_scores[user] = weighted_score
+
+            # Нийт жинлэгдсэн оноо үүссэний дараа
+            for user, score in user_scores.items():
+                # all_one_scores дотроо датагаа user,score-оор нь цэгцлэнэ
+                all_one_scores.append({'score': round(score), 'user': user})
+
         approved_user_bottom_score = [item for item in all_scores if item['user'] not in users_to_remove]
         rejected_user_bottom_score = [item for item in all_scores if item['user'] in users_to_remove]
 
         # Scores-оор орж ирсэн датаг score-уудийг нь ашиглан эрэмбэлэнэ
         sorted_approve_scores = sorted(approved_user_bottom_score, key=lambda x: x['score'], reverse=True)
 
+        # Босго оноо даваагүй элсэгчид
         sorted_rejected_scores = sorted(rejected_user_bottom_score, key=lambda x: x['score'], reverse=True)
+
+        # ЭШ-ийн 2 хичээлийн 1-г л өгсөн элсэгчид
+        sorted_one_rejected_scores = sorted(all_one_scores, key=lambda x: x['score'], reverse=True)
 
         approve_order_no = 0
         # Тухайн sort хийсэн датаг index-ээс шалтгаалан order_no-уудыг нэмж өгнө
@@ -2891,7 +2774,6 @@ class UserScoreSortAPIView(generics.GenericAPIView):
                 approve_obj = AdmissionUserProfession.objects.filter(
                     user=item['user']
                 ).first()
-
                 if approve_obj:
                     approve_obj.score_avg = item['score']
                     approve_obj.order_no = item['order_no']
@@ -2917,6 +2799,8 @@ class UserScoreSortAPIView(generics.GenericAPIView):
                 if reject_obj:
                     reject_obj.score_avg = item['score']
                     reject_obj.order_no = item['order_no']
+                    reject_obj.yesh_state = item['yesh_state']
+                    reject_obj.yesh_description = item['yesh_description']
                     reject_obj.save()
 
         # ЭШ босго оноо тэнцээгүй элсэгчид
@@ -2927,9 +2811,6 @@ class UserScoreSortAPIView(generics.GenericAPIView):
             item['yesh_description'] = 'ЭШ-ийн оноо босго онооны шалгуурыг хангасангүй.'
 
             # ЭШ оноогоор тэнцсэн ч хяналтын тоонд багтсаагүй датаг хадгалах хэсэг
-            user = item['user']
-            user = AdmissionUserProfession.objects.filter(user=user)
-
             reject_off_obj = AdmissionUserProfession.objects.filter(
                 user=item['user']
             ).first()
@@ -2937,9 +2818,28 @@ class UserScoreSortAPIView(generics.GenericAPIView):
             if reject_off_obj:
                 reject_off_obj.score_avg = item['score']
                 reject_off_obj.order_no = item['order_no']
-                reject_off_obj.yesh_state = item['state']
+                reject_off_obj.yesh_state = item['yesh_state']
                 reject_off_obj.yesh_description = item['yesh_description']
                 reject_off_obj.save()
+
+        # ЭШ 2 хичээлээр шалгаж байхад 1 хичээлээр л ЭШ өгсөн элсэгчид
+        for idx, item in enumerate(sorted_one_rejected_scores):
+            approve_order_no = approve_order_no + 1
+            item['order_no'] = approve_order_no
+            item['yesh_state'] = AdmissionUserProfession.STATE_REJECT
+            item['yesh_description'] = 'ЭШ-ын шалгуур хичээл дутуу учраас тэнцсэнгүй.'
+
+            # ЭШ 2 хичээлээр шалгаж байхад 1 хичээлээр л ЭШ өгсөн элсэгчид датаг хадгалах хэсэг
+            reject_one_off_obj = AdmissionUserProfession.objects.filter(
+                user=item['user']
+            ).first()
+
+            if reject_one_off_obj:
+                reject_one_off_obj.score_avg = item['score']
+                reject_one_off_obj.order_no = item['order_no']
+                reject_one_off_obj.yesh_state = item['yesh_state']
+                reject_one_off_obj.yesh_description = item['yesh_description']
+                reject_one_off_obj.save()
 
     # Нийт өгөгдлөө update хийх function
     def save_scores(self, scores, total_elsegch, bottom_score):
@@ -2966,7 +2866,6 @@ class UserScoreSortAPIView(generics.GenericAPIView):
         # Тэнцсэн болон тэнцээгүй хэрэглэгчидийг ялгана
         for item in sorted_scores:
             if item['score'] >= bottom_score:
-                print('success', item['score'])
                 # Нийт авах элсэгчдийн тоон дотор эрэмбэлсэн хэрэглэгчийн эрэмбийн дугаар байвал
                 if item['order_no'] <= int(total_elsegch):
                     item['yesh_state'] = AdmissionUserProfession.STATE_APPROVE
@@ -3018,6 +2917,7 @@ class UserScoreSortAPIView(generics.GenericAPIView):
         )
 
 
+@permission_classes([IsAuthenticated])
 class ElseltEyeshAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -3167,6 +3067,7 @@ class ElseltEyeshAPIView(
                         existing_user_score.semester = data['semester']
                         existing_user_score.school_code = data['school_code']
                         existing_user_score.year = data['year']
+                        existing_user_score.scaledScore = data['scaledScore']
                         update_data_list.append(existing_user_score)
                     else:
                     # Шинэ OBJECT үүсгэх
@@ -3178,7 +3079,7 @@ class ElseltEyeshAPIView(
                 # Bulk update existing instances
                 UserScore.objects.bulk_update(update_data_list, [
                      'percentage_score', 'raw_score', 'word_score',
-                    'exam_loc', 'exam_loc_code', 'school_name', 'school_code'
+                    'exam_loc', 'exam_loc_code', 'school_name', 'school_code', 'scaledScore'
                 ])
 
             #UserScore бүх датаг UserScoreSerializer ашиглан датаг авна
@@ -3202,16 +3103,19 @@ class ElseltEyeshAPIView(
                 admission_user_data.yesh_mhb_state = AdmissionUserProfession.STATE_REJECT
                 admission_user_data.yesh_mhb_description = 'Монгол хэл бичигийн шалгалтанд тэнцээгүй'
                 admission_user_data.save()
+
             for item in success_entries:
                 user_id = item['user']
                 admission_user_data = AdmissionUserProfession.objects.get(user__id=user_id)
                 admission_user_data.yesh_mhb_state = AdmissionUserProfession.STATE_APPROVE
                 admission_user_data.yesh_mhb_description = 'Монгол хэл бичигийн шалгалтанд тэнцсэн'
+                admission_user_data.state_description = ''
+                admission_user_data.state = AdmissionUserProfession.STATE_SEND
                 admission_user_data.save()
 
         #AdmissionUserProfession тэнцсэн тэнцээгүй сурагч
-        failed_student = queryset.filter(yesh_state = AdmissionUserProfession.STATE_REJECT).count()
-        passed_student = queryset.filter(Q(yesh_state=AdmissionUserProfession.STATE_APPROVE) | Q(yesh_state=AdmissionUserProfession.STATE_SEND)).count()
+        failed_student = queryset.filter(yesh_mhb_state = AdmissionUserProfession.STATE_REJECT).count()
+        passed_student = queryset.filter(Q(yesh_mhb_state=AdmissionUserProfession.STATE_APPROVE)).count()
 
         send_data = {
             'total_count' : failed_student + passed_student,
@@ -3221,6 +3125,8 @@ class ElseltEyeshAPIView(
 
         return request.send_data(send_data)
 
+
+@permission_classes([IsAuthenticated])
 class EyeshOrderUserInfoAPIView(
       generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -3235,17 +3141,19 @@ class EyeshOrderUserInfoAPIView(
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['user__first_name', 'user__register', 'user__email', 'user__last_name', 'user__mobile']
+    search_fields = ['user__first_name', 'user__register', 'user__email', 'user__last_name', 'user__mobile', 'user__code']
 
     def get_queryset(self):
         user_ids = UserScore.objects.values_list('user', flat=True)
         queryset = self.queryset.filter(user__in=user_ids)
         queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
         gender = self.request.query_params.get('gender')
+        # queryset = queryset.filter(state__in=[AdmissionUserProfession.STATE_SEND, AdmissionUserProfession.STATE_APPROVE])
 
         elselt = self.request.query_params.get('elselt')
         profession = self.request.query_params.get('profession')
-        state = self.request.query_params.get('state')
+        yesh_state = self.request.query_params.get('yesh_state')
+        yesh_mhb_state = self.request.query_params.get('yesh_mhb_state')
 
         if elselt:
             queryset = queryset.filter(profession__admission=elselt)
@@ -3259,8 +3167,11 @@ class EyeshOrderUserInfoAPIView(
             else:
                 queryset = queryset.filter(gender__in=['0', '2', '4', '6', '8'])
 
-        if state:
-            queryset = queryset.filter(state=state)
+        if yesh_state and yesh_state.isdigit():
+            queryset = queryset.filter(yesh_state=yesh_state)
+
+        if yesh_mhb_state and yesh_mhb_state.isdigit():
+            queryset = queryset.filter(yesh_mhb_state=yesh_mhb_state)
 
         return queryset
 
@@ -3274,3 +3185,55 @@ class EyeshOrderUserInfoAPIView(
         all_data = self.list(request).data
 
         return request.send_data(all_data)
+
+    def put(self, request, pk=None):
+
+        data = request.data
+        user = data.get('user')
+
+        sid = transaction.savepoint()
+        try:
+            with transaction.atomic():
+                now = dt.datetime.now()
+                student = self.queryset.filter(user=user).first()
+                if student:
+                    indicator_value = AdmissionIndicator.EESH_EXAM
+                    old_state = student.yesh_state
+                    student.yesh_state = data.get("yesh_state")
+                    student.updated_at = now
+                    student.yesh_description = data.get("yesh_description")
+                    student.save()
+
+                    StateChangeLog.objects.create(
+                        user=student.user,
+                        type=StateChangeLog.STATE,
+                        indicator=indicator_value,
+                        now_state=old_state,
+                        change_state=data.get("yesh_state"),
+                        updated_user=request.user if request.user.is_authenticated else None,
+                        updated_at=now
+                    )
+        except Exception as e:
+            transaction.savepoint_rollback(sid)
+            return request.send_error("ERR_004", str(e))
+
+        return request.send_info('INF_002')
+
+
+@permission_classes([IsAuthenticated])
+class AdmissionUserFirstAPIView(
+    generics.GenericAPIView
+):
+    """ Элсэлтийн анхан шат мэдээллийн төлөв шалгах """
+
+    queryset = AdmissionUserProfession.objects.all()
+    def put(self, request, pk=None):
+        data = request.data
+
+        with transaction.atomic():
+            self.queryset.filter(user=data.get('user')).update(
+                first_state = data.get('first_state'),
+                first_description = data.get('first_description'),
+            )
+
+        return request.send_info('INF_002')

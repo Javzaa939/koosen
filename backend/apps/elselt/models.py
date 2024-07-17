@@ -184,6 +184,10 @@ class AdmissionUserProfession(models.Model):
     yesh_state = models.PositiveIntegerField(choices=STATE, db_index=True, null=True, default=STATE_SEND, verbose_name="Элсэгч ЭШ оноогоор босго онооны төлөв")
     yesh_description = models.CharField(max_length=5000, null=True, verbose_name='Элсэгч ЭШ оноогоор босго онооны төлөвийн тайлбар')
 
+    # Бүртгүүлсний дараа анхан шатандаа тэнцсэн төлөв
+    first_state = models.PositiveIntegerField(choices=STATE, db_index=True, null=True, default=STATE_SEND, verbose_name="Бүртгүүлсний дараа анхан шатандаа тэнцсэн төлөв")
+    first_description = models.CharField(max_length=5000, null=True, verbose_name='Бүртгүүлсний дараа анхан шатандаа тэнцсэн төлөв')
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     updated_user = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name='Зассан хэрэглэгч', null=True)
@@ -282,13 +286,14 @@ class PhysqueUser(models.Model):
     quickness = models.FloatField(verbose_name='Авхаалж самбаа')
     flexible = models.FloatField(verbose_name='Уян хатан')
     total_score = models.FloatField(verbose_name='Нийт оноо')
+    order_no = models.IntegerField(null=True, verbose_name='Эрэмбийн дугаар')
 
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
     updated_user = models.ForeignKey(User, verbose_name='Зассан хэрэглэгч', null=True, on_delete=models.CASCADE)
 
     @property
-    def score_physque(self):
+    def physice_score(self):
         """ Ур чадварын шалгалтын оноог бодож гаргах """
         x = 0
         if self.total_score > 0 and self.total_score < 59:
@@ -296,7 +301,7 @@ class PhysqueUser(models.Model):
         else:
             x = 480 + (self.total_score - 60) * 8
 
-        return round(x, 2)
+        return round(x)
 
 
 class MentalUser(models.Model):

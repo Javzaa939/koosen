@@ -1690,6 +1690,7 @@ function useApi(isDisplay=false) {
 		post: (data) => instance.post('/elselt/', data),
 		put: (data, id) => instance.put(`/elselt/${id}/`, data),
 		delete: (id) => instance.delete(`/elselt/${id}/`),
+		putFirst: (id, data) => instance.put(`/elselt/first/${id}/`, data),
 		profession: {
 			get: (elselt_id) => instance.get(`/elselt/profession/?elselt=${elselt_id}`),
 			post: (data) => instance.post('/elselt/profession/', data),
@@ -1710,8 +1711,8 @@ function useApi(isDisplay=false) {
 					instance.post(`/elselt/sysinfo/`, data),
 		},
 		admissionuserdata: {
-			get: (limit, page, sort, search, lesson_year_id, profession_id, unit1_id, gender, state, gpa_state, age_state, justice_state='', is_justice='', now_state='') =>
-				instance.get(`/elselt/admissionuserdata/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}&unit1_id=${unit1_id}&gender=${gender}&state=${state}&gpa_state=${gpa_state}&age_state=${age_state}&justice_state=${justice_state}&is_justice=${is_justice}&now_state=${now_state}`),
+			get: (limit, page, sort, search, lesson_year_id, profession_id, unit1_id, gender, state, gpa_state, age_state, justice_state='', is_justice='', now_state='', start_date, end_date) =>
+				instance.get(`/elselt/admissionuserdata/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}&unit1_id=${unit1_id}&gender=${gender}&state=${state}&gpa_state=${gpa_state}&age_state=${age_state}&justice_state=${justice_state}&is_justice=${is_justice}&now_state=${now_state}&start_date=${start_date}&end_date=${end_date}`),
 			getOne: (pk) => instance.get(`/elselt/admissionuserdata/${pk}/`),
 			put: (data, id) => instance.put(`/elselt/admissionuserdata/${id}/`, data),
 			putDesc: (data, id) => instance.put(`/elselt/desc/${id}/`, data),
@@ -1784,7 +1785,7 @@ function useApi(isDisplay=false) {
 		},
 		// Хөтөлбөр,Төлөв лог жагсаалт
 		log:{
-			get:(limit,page,sort,search,elselt,profession)=>instance.get(`/elselt/log/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&elselt=${elselt}&profession=${profession}`)
+			get:(limit,page,sort,search,elselt,profession,menu_option)=>instance.get(`/elselt/log/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&elselt=${elselt}&profession=${profession}&menu_option=${menu_option}`)
 		},
 		hynalt:{
 			get: (gender, profession) => instance.get(`/elselt/hynalt_number/?gender=${gender}&profession=${profession}`),
@@ -1797,8 +1798,9 @@ function useApi(isDisplay=false) {
 		},
 		// ЭЕШ хэсгийн жагсаалт татах
 		eyesh_order:{
-			get: (limit, page, search, lesson_year_id, profession_id , gender, state) =>
-				instance.get(`/elselt/admissionuserdata/eyesh/?page=${page}&limit=${limit}&search=${search}&elselt=${lesson_year_id}&profession=${profession_id}&gender=${gender}&state=${state}`),
+			put: (id, cdata) => instance.put(`/elselt/admissionuserdata/eyesh/${id}/`, cdata),
+			get: (limit, page, search, lesson_year_id, profession_id , gender, state, yesh_state, yesh_mhb_state) =>
+				instance.get(`/elselt/admissionuserdata/eyesh/?page=${page}&limit=${limit}&search=${search}&elselt=${lesson_year_id}&profession=${profession_id}&gender=${gender}&state=${state}&yesh_state=${yesh_state}&yesh_mhb_state=${yesh_mhb_state}`),
 		},
 		able: {
 			getWorker: () => able_instance.get(`/?a=ableApi&tsk=getWorkers&key=uia`),

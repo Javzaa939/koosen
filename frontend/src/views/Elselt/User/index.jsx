@@ -26,10 +26,11 @@ import { getColumns } from './helpers';
 import { useNavigate } from 'react-router-dom';
 
 import { utils, writeFile } from 'xlsx-js-style';
+import Flatpickr from 'react-flatpickr'
+import '@styles/react/libs/flatpickr/flatpickr.scss'
 
 import { HiOutlineDocumentReport } from "react-icons/hi";
 import { BiMessageRoundedError } from "react-icons/bi";
-import { CiMail } from "react-icons/ci";
 import { MdMailOutline } from "react-icons/md";
 import { RiEditFill } from "react-icons/ri";
 import EditModal from './Edit';
@@ -39,7 +40,7 @@ import EmailModal from './EmailModal';
 import MessageModal from './MessageModal';
 import useUpdateEffect from '@hooks/useUpdateEffect';
 import GpaModal from './GpaModal';
-
+import StateOneModal from './StateOneModal';
 // import Addmodal from './Add'
 
 const ElseltUser = () => {
@@ -48,6 +49,8 @@ const ElseltUser = () => {
 
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(20)
+    const [end_date, setEndDate] = useState('')
+    const [start_date, setStartDate] = useState('')
 
     const navigate = useNavigate()
 
@@ -160,6 +163,8 @@ const ElseltUser = () => {
     const [gpa_state, setGpaState] = useState('')
     const [age_state, setAge_state] = useState('')
     const [gender, setGender] = useState('')
+    const [stateData, setStateData] = useState({})
+    const [stateOneModal, setStateOneModal] = useState(false)
 
 	const elseltApi = useApi().elselt.admissionuserdata
     const admissionYearApi = useApi().elselt
@@ -204,7 +209,8 @@ const ElseltUser = () => {
 
 	/* Жагсаалтын дата авах функц */
 	async function getDatas() {
-        const {success, data} = await allFetch(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, adm, profession_id, unit1, gender, state, gpa_state,age_state, justice_state, is_justice, now_state))
+        const {success, data} = await allFetch(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, adm, profession_id, unit1, gender, state,
+                                                                gpa_state,age_state, justice_state, is_justice, now_state, start_date, end_date))
         if(success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
@@ -254,7 +260,7 @@ const ElseltUser = () => {
 
 			return () => clearTimeout(timeoutId);
 		}
-    }, [sortField, currentPage, rowsPerPage, searchValue, adm, profession_id, unit1, gender, state, gpa_state,age_state, justice_state, is_justice, now_state])
+    }, [sortField, currentPage, rowsPerPage, searchValue, adm, profession_id, unit1, gender, state, gpa_state,age_state, justice_state, is_justice, now_state, start_date, end_date])
 
     useEffect(() => {
         getAdmissionYear()
@@ -460,6 +466,18 @@ const ElseltUser = () => {
         setGpaModal(!gpaModal);
     }
 
+    /* Төлөв нээх модал */
+    const handleStateModal = (row={}) => {
+        setStateData(row)
+        setStateOneModal(!stateOneModal)
+    }
+
+     /* Төлөв хаах модал */
+    const closeStateModal = () => {
+        setStateData({})
+        setStateOneModal(!stateOneModal)
+    }
+
 	return (
 		<Fragment>
             <StateModal
@@ -488,6 +506,13 @@ const ElseltUser = () => {
                 prof_id = {profession_id}
                 gplesson_year={selectedAdmission?.name || ''}
                 profession_name={selectedProfession?.name || ''}
+            />
+            <StateOneModal
+                addModal={stateOneModal}
+                addModalHandler={setStateOneModal}
+                addModalData={stateData}
+                getDatas={getDatas}
+                closeStateModal={closeStateModal}
             />
             {isLoading && Loader}
 			<Card>
@@ -684,6 +709,61 @@ const ElseltUser = () => {
                             />
                     </Col>
                 </Row>
+                <Row  className='justify-content-start mx-0 mt-50'>
+                    <Col md={3} className='my-0 py-0 '>
+                        <Label className="form-label" for="">
+                            {t('Бүртгүүлсэн огноо эхлэх')}
+                        </Label>
+                        <Flatpickr
+                            className='form-control form-control-sm  bg-white '
+                            style={{ maxWidth: '480px' }}
+                            placeholder={`-- Сонгоно уу --`}
+
+                            onChange={(selectedDates, dateStr) => {
+
+                                if (selectedDates.length !== 0) {
+                                    const values = {
+                                        val: moment(dateStr).format('YYYY-MM-DD')
+                                    }
+                                    setStartDate(values.val || '')
+                                }
+                            }}
+                            value={start_date}
+                            options={{
+                                enableTime: true,
+                                dateFormat: "Y-m-d",
+                                mode: "single",
+                                // locale: Mongolian
+                            }}
+                        />
+                    </Col>
+                    <Col md={3} className='my-0 py-0 '>
+                        <Label className="form-label" for="">
+                            {t('Бүртгүүлсэн огноо дуусах')}
+                        </Label>
+                        <Flatpickr
+                            className='form-control form-control-sm  bg-white '
+                            style={{ maxWidth: '480px' }}
+                            placeholder={`-- Сонгоно уу --`}
+
+                            onChange={(selectedDates, dateStr) => {
+                                if (selectedDates.length !== 0) {
+                                    const values = {
+                                        val: moment(dateStr).format('YYYY-MM-DD')
+                                    }
+                                    setEndDate(values.val || '')
+                                }
+                            }}
+                            value={end_date}
+                            options={{
+                                enableTime: true,
+                                dateFormat: "Y-m-d",
+                                mode: "single",
+                                // locale: Mongolian
+                            }}
+                        />
+                    </Col>
+                </Row>
                 <div className='d-flex justify-content-between my-50 mt-1'>
                     <div className='d-flex'>
                         <div className='px-1'>
@@ -824,7 +904,7 @@ const ElseltUser = () => {
                         print='true'
                         theme="solarized"
                         onSort={handleSort}
-                        columns={getColumns(currentPage, rowsPerPage === 'Бүгд' ? 1 : rowsPerPage, total_count, editModal, handleDelete, user, handleRowClicked, handleDescModal)}
+                        columns={getColumns(currentPage, rowsPerPage === 'Бүгд' ? 1 : rowsPerPage, total_count, editModal, handleDelete, user, handleRowClicked, handleDescModal, handleStateModal)}
                         sortIcon={<ChevronDown size={10} />}
                         paginationPerPage={rowsPerPage === 'Бүгд' ? 1 : rowsPerPage}
                         paginationDefaultPage={currentPage}
