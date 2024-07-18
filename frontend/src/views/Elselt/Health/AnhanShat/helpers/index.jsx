@@ -3,7 +3,8 @@ import { Badge, UncontrolledTooltip } from "reactstrap"
 import moment from 'moment'
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, page_count, addModalHandler, STATE_LIST, user) {
+export function getColumns (currentPage, rowsPerPage, total_count, addModalHandler, STATE_LIST, user) {
+    const page_count = Math.ceil(total_count / rowsPerPage)
 
     // /** Сонгосон хуудасны тоо датаны тооноос их болсон үед хуудаслалт 1-ээс эхлэнэ */
     if (currentPage > page_count) {

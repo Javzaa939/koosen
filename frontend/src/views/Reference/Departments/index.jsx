@@ -155,12 +155,12 @@ const Departments = () => {
 									<h5>{t('Өгөгдөл байхгүй байна')}</h5>
 								</div>
 							)}
-							columns={getColumns(currentPage, rowsPerPage, searchValue.length ? filteredData : datas, handleUpdateModal, handleDelete)}
+							columns={getColumns(currentPage, rowsPerPage, total_count, handleUpdateModal, handleDelete)}
 							sortIcon={<ChevronDown size={10} />}
 							paginationPerPage={rowsPerPage}
 							paginationDefaultPage={currentPage}
 							data={datas}
-							paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count, searchValue, filteredData)}
+							paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
 							fixedHeader
 							fixedHeaderScrollHeight='62vh'
 						/>
