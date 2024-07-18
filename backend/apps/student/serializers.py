@@ -1,6 +1,7 @@
 import os
 from datetime import date
 from rest_framework import serializers
+from django.core.exceptions import ValidationError
 
 from django.conf import settings
 from django.db.models.fields.files import ImageFieldFile
@@ -118,11 +119,20 @@ class DepartmentsSerializer(serializers.ModelSerializer):
 
 # Анги жагсаалт
 class GroupListSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
 
     class Meta:
         model = Group
         fields = "id", 'name', 'join_year'
 
+    def get_name(self,obj):
+        name = obj.name
+        year = obj.join_year
+
+        #элссэн он дамжааны нэрийг нийлүүлсэн
+        return_name = name + ' ('+ year[0:4] + ')'
+
+        return return_name
 
 # Харьяалал
 class CountrySerializer(serializers.ModelSerializer):
@@ -408,9 +418,19 @@ class StudentGroupRegisterSerailizer(serializers.ModelSerializer):
         model = Group
         fields = "__all__"
 
+    def validate(self,data):
+        name = data.get('name')
+
+        # Нэг анги дээр суралцаж буй төлөвтэй анги байвал шинээр үүсгэхгүй
+        if Group.objects.filter(name=name, is_finish = False).exists():
+            raise ValidationError(f"'{name}'- анги бүртгэгдсэн байна")
+
+        return data
+
 
 class StudentGroupRegisterListSerailizer(serializers.ModelSerializer):
 
+    name =  serializers.SerializerMethodField()
     profession = ProfessionDefinitionSerializer(many=False)
     learning_status = LearningListSerializer(many=False)
     degree = ProfessionalDegreeListSerializer(many=False)
@@ -426,6 +446,14 @@ class StudentGroupRegisterListSerailizer(serializers.ModelSerializer):
 
         return list(all_data)
 
+    def get_name(self,obj):
+        name = obj.name
+        year = obj.join_year
+
+        #элссэн он дамжааны нэрийг нийлүүлсэн
+        return_name = name + ' ('+ year[0:4] + ')'
+
+        return return_name
 # --------------------------------------- Оюутны гэр бүлийн байдал ----------------------------------------------
 
 class StudentFamilySerializer(serializers.ModelSerializer):
