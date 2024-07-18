@@ -2845,6 +2845,53 @@ class PsychologicalTestResultParticipantsAPIView(
             datas = self.list(request).data
         return request.send_data(datas)
 
+class PsychologicalTestResultShowAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin
+):
+    """Сорилийн оноо асуулт хариултыг харах API"""
+
+    queryset = PsychologicalTestQuestions.objects.all()
+    serializer_class = PsychologicalTestQuestionsSerializer
+
+    def post(self,request):
+
+        datas = request.data
+        question_ids = []
+        chosen_choices = []
+        big_data = []
+
+        # Орж ирж буй датан {} хаалттай орж ирж байгаа учир авна
+        value = str(datas)[1:-1]
+
+        # таслалаар нь салгах
+        pairs = [pair.strip() for pair in value.split(',')]
+
+        # 176:250 ийм датаг урд талын question_ids-д авч хойд тал нь сонгосон хариултын id
+        for pair in pairs:
+                question_id, choice_id = pair.split(':')
+                question_ids.append(question_id.strip().strip("'"))
+                chosen_choices.append(choice_id.strip().strip("'"))
+
+        question_ids = list(map(int, question_ids))
+        chosen_choices = list(map(int, chosen_choices))
+
+        # Тухайн 2 датаг нийлүүлж асуултын id гаар нь бүх мэдээлэлийн PsychologicalTestQuestions model-оос авчирна
+        for question_id, choice_id in zip(question_ids, chosen_choices):
+            queryset = PsychologicalTestQuestions.objects.filter(id=question_id).first()
+            if queryset:
+
+                serializer = self.serializer_class(queryset)
+                data = serializer.data
+
+                # bid_data шалгуулагчийн сонгосон хариултын id буцаан
+                data['chosen_choice'] = int(choice_id)
+                big_data.append(data)
+
+        return request.send_data(big_data)
+
+
+
 @permission_classes([IsAuthenticated])
 class QuestionsListAPIView(
     generics.GenericAPIView,
