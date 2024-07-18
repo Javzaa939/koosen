@@ -50,7 +50,6 @@ function Participants(){
     async function getDatas(){
         const { success, data } = await fetchData(challengeAPI.getParticipants(rowsPerPage, currentPage, searchValue, challenge_id));
         if (success) {
-            console.log(data)
             setDatas(data?.results);
             setTotalCount(data?.count);
         }

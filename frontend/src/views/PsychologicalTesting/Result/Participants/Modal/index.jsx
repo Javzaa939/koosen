@@ -1,6 +1,6 @@
 import React, { Fragment, useState, useEffect } from 'react';
 import useApi from "@hooks/useApi";
-import { Modal, ModalBody, ModalHeader, Card, CardBody, Label, Input } from "reactstrap";
+import { Modal, ModalBody, ModalHeader, Card, CardBody, Label, Input, Button } from "reactstrap";
 import useLoader from "@hooks/useLoader";
 import './style.css'
 
@@ -10,6 +10,7 @@ const KIND_BOOLEAN = 3; // 'Тийм // Үгүй сонголт'
 const KIND_RATING = 4; // 'Үнэлгээ'
 const KIND_TEXT = 5; // 'Бичвэр'
 
+// Асуулт бэлдэж өгөх function
 function makeQuestionText(question, image, kind) {
     return (
         <div className='qtext'>
@@ -26,7 +27,7 @@ function makeQuestionText(question, image, kind) {
     );
 }
 
-// Helper function to render the rating answers
+// Үнэлгээтэй асуултын хариултыг render-лэх function
 function makeRatingAns(textLow, textHigh, numStars, qIndx, chosen_choice) {
     const radios = [];
     for (let index = 1; index <= numStars; index++) {
@@ -56,20 +57,29 @@ function makeRatingAns(textLow, textHigh, numStars, qIndx, chosen_choice) {
 }
 
 export default function ResultModal({ open, handleModal, datas }) {
+
+    //Loader
     const { isLoading, fetchData } = useLoader({});
+
+    //useState
     const [resultData, setDatas] = useState([]);
+    const [totalScore, setTotalScore] = useState([]);
+
+    // API
     const resultApi = useApi().challenge.psychologicalTestResult;
 
     async function getDatas() {
         const { success, data } = await fetchData(resultApi.getResult(datas.answer));
         if (success) {
-            console.log(data)
-            setDatas(data)
+            setDatas(data.question)
+            setTotalScore(data.total_score)
         }
     };
+
     useEffect(() => {
         getDatas()
     }, [])
+
     return (
         <Fragment>
             <Modal
@@ -83,7 +93,7 @@ export default function ResultModal({ open, handleModal, datas }) {
                     className='bg-transparent pb-0'
                     toggle={handleModal}>
                 </ModalHeader>
-                <ModalBody className="">
+                <ModalBody >
                     <Card className='invoice-preview-card'>
                         <CardBody className='invoice-padding pb-0'>
                             <div className='d-flex justify-content-between flex-md-row flex-column invoice-spacing mt-0'>
@@ -107,7 +117,7 @@ export default function ResultModal({ open, handleModal, datas }) {
                         <hr className='invoice-spacing' />
                         <CardBody className='invoice-padding pt-0'>
                             {resultData.map((question, qid) => {
-                                const { kind, question: questionText,rating_max_count, low_rating_word, high_rating_word,  image, choices, id, chosen_choice, score } = question;
+                                const { kind, question: questionText, rating_max_count, low_rating_word, high_rating_word, image, choices, id, chosen_choice, score } = question;
 
                                 return (
                                     <Card className='p-2 border-1' key={id}>
@@ -172,6 +182,14 @@ export default function ResultModal({ open, handleModal, datas }) {
                                     </Card>
                                 );
                             })}
+                            <div className='d-flex justify-content-between align-items-center'>
+                                <div>
+                                    <p>Нийт {totalScore} / {datas.score} оноо</p>
+                                </div>
+                                <Button color="secondary" onClick={handleModal} >
+                                    Буцах
+                                </Button>
+                            </div>
                         </CardBody>
 
                     </Card>

@@ -2860,6 +2860,8 @@ class PsychologicalTestResultShowAPIView(
         question_ids = []
         chosen_choices = []
         big_data = []
+        return_data = []
+        totalscore = 0
 
         # Орж ирж буй датан {} хаалттай орж ирж байгаа учир авна
         value = str(datas)[1:-1]
@@ -2884,11 +2886,19 @@ class PsychologicalTestResultShowAPIView(
                 serializer = self.serializer_class(queryset)
                 data = serializer.data
 
-                # bid_data шалгуулагчийн сонгосон хариултын id буцаан
+                # big_data шалгуулагчийн сонгосон хариултын id буцаан
                 data['chosen_choice'] = int(choice_id)
+
+                # Тухайн өгсөн шалгалтийн нийт оноо
+                if(data['has_score']):
+                    totalscore += data['score']
                 big_data.append(data)
 
-        return request.send_data(big_data)
+        return_data ={
+            'question':big_data,
+            'total_score':totalscore
+        }
+        return request.send_data(return_data)
 
 
 
