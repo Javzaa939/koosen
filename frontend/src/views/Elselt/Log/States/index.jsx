@@ -160,7 +160,7 @@ const States = () => {
         const worksheet = utils.json_to_sheet(combo);
 
         const workbook = utils.book_new();
-        utils.book_append_sheet(workbook, worksheet, "Хээрийн бэлтгэл")
+        utils.book_append_sheet(workbook, worksheet, "Төлөв лог")
         const staticCells = [
                 '№',
                 'Овог',
