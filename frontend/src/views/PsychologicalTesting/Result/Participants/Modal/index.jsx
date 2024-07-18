@@ -1,8 +1,8 @@
 import React, { Fragment, useState, useEffect } from 'react';
 import useApi from "@hooks/useApi";
-import { Modal, ModalBody, ModalHeader, Card, CardBody, Label, Input, Button } from "reactstrap";
+import { Modal, ModalBody, ModalHeader, Card, CardBody, Label, Input, Button, Spinner } from "reactstrap";
 import useLoader from "@hooks/useLoader";
-import './style.css'
+import './style.css';
 
 const KIND_ONE_CHOICE = 1; // 'Нэг сонголт'
 const KIND_MULTI_CHOICE = 2; // 'Олон сонголт'
@@ -116,82 +116,90 @@ export default function ResultModal({ open, handleModal, datas }) {
                         </CardBody>
                         <hr className='invoice-spacing' />
                         <CardBody className='invoice-padding pt-0'>
-                            {resultData.map((question, qid) => {
-                                const { kind, question: questionText, rating_max_count, low_rating_word, high_rating_word, image, choices, id, chosen_choice, score } = question;
+                            {isLoading ? (
+                                <div className="d-flex justify-content-center align-items-center" style={{ height: '200px' }}>
+                                    <Spinner />
+                                </div>
+                            ) : (
+                                resultData.map((question, qid) => {
+                                    const { kind, question: questionText, rating_max_count, low_rating_word, high_rating_word, image, choices, id, chosen_choice, score } = question;
 
-                                return (
-                                    <Card className='p-2 border-1' key={id}>
-                                        <div>
-                                            <div className="d-flex gap-1 mt-1 font-weight-bold">
-                                                {qid + 1}.
-                                                <p>{makeQuestionText(questionText, image, kind)}</p>
-                                                {score && (
-                                                    <p>{score} оноо / {choices.some(choice => choice.is_correct && chosen_choice === choice.id) ? score : '0'} оноо</p>
-                                                )}
-                                            </div>
-                                            <div className="d-flex">
-                                                {kind === KIND_TEXT && (
-                                                    <Input
-                                                        type='textarea'
-                                                        className="form-control mt-1"
-                                                        placeholder="Хариултыг бичнэ"
-                                                        value={chosen_choice || ''}
-                                                        readOnly
-                                                    />
-                                                )}
-                                                {(kind === KIND_ONE_CHOICE || kind === KIND_MULTI_CHOICE) && (
-                                                    <div className='d-flex flex-row flex-wrap justify-content-center w-100'>
-                                                        {choices.map((choice, idx) => (
-                                                            <div className="form-check my-1 me-3" key={idx}>
-                                                                <Input
-                                                                    type={kind === KIND_MULTI_CHOICE ? 'checkbox' : 'radio'}
-                                                                    name={`choice${qid}`}
-                                                                    className={`form-check-input mb-1 ${choice.is_correct ? 'green-checkbox' : ''} ${chosen_choice === choice.id && !choice.is_correct ? 'red-checkbox' : ''}`}
-                                                                    readOnly
-                                                                />
-                                                                {choice.image || choice.imageUrl ? (
-                                                                    <div className='m-1 ms-0 showChoiceDiv'>
-                                                                        <img src={choice.imageUrl || choice.image} alt='choice' />
-                                                                    </div>
-                                                                ) : (
-                                                                    <Label className="form-check-label" for={`choice${qid}`}>
-                                                                        {choice.value}
-                                                                    </Label>
-                                                                )}
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                                {kind === KIND_RATING && makeRatingAns(low_rating_word, high_rating_word, rating_max_count, qid, chosen_choice)}
-                                                {kind === KIND_BOOLEAN && ['Тийм', 'Үгүй'].map((text, yIdx) => (
-                                                    <div className="form-check my-1 me-3" key={yIdx}>
+                                    return (
+                                        <Card className='p-2 border-1' key={id}>
+                                            <div>
+                                                <div className="d-flex gap-1 mt-1 font-weight-bold">
+                                                    {qid + 1}.
+                                                    <p>{makeQuestionText(questionText, image, kind)}</p>
+                                                    {score && (
+                                                        <p>{score} оноо / {choices.some(choice => choice.is_correct && chosen_choice === choice.id) ? score : '0'} оноо</p>
+                                                    )}
+                                                </div>
+                                                <div className="d-flex">
+                                                    {kind === KIND_TEXT && (
                                                         <Input
-                                                            type="radio"
-                                                            id={`yes${id}`}
-                                                            name={`yes${qid}`}
-                                                            className="form-check-input mb-1"
+                                                            type='textarea'
+                                                            className="form-control mt-1"
+                                                            placeholder="Хариултыг бичнэ"
+                                                            value={chosen_choice || ''}
                                                             readOnly
                                                         />
-                                                        <Label className="form-check-label">
-                                                            {text} {chosen_choice === text && <span className={text === 'Тийм' ? 'text-success' : 'text-danger'}>({text === 'Тийм' ? 'Correct' : 'Incorrect'})</span>}
-                                                        </Label>
-                                                    </div>
-                                                ))}
+                                                    )}
+                                                    {(kind === KIND_ONE_CHOICE || kind === KIND_MULTI_CHOICE) && (
+                                                        <div className='d-flex flex-row flex-wrap justify-content-center w-100'>
+                                                            {choices.map((choice, idx) => (
+                                                                <div className="form-check my-1 me-3" key={idx}>
+                                                                    <Input
+                                                                        type={kind === KIND_MULTI_CHOICE ? 'checkbox' : 'radio'}
+                                                                        name={`choice${qid}`}
+                                                                        className={`form-check-input mb-1 ${choice.is_correct ? 'green-checkbox' : ''} ${chosen_choice === choice.id && !choice.is_correct ? 'red-checkbox' : ''}`}
+                                                                        readOnly
+                                                                    />
+                                                                    {choice.image || choice.imageUrl ? (
+                                                                        <div className='m-1 ms-0 showChoiceDiv'>
+                                                                            <img src={choice.imageUrl || choice.image} alt='choice' />
+                                                                        </div>
+                                                                    ) : (
+                                                                        <Label className="form-check-label" for={`choice${qid}`}>
+                                                                            {choice.value}
+                                                                        </Label>
+                                                                    )}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                    {kind === KIND_RATING && makeRatingAns(low_rating_word, high_rating_word, rating_max_count, qid, chosen_choice)}
+                                                    {kind === KIND_BOOLEAN && ['Тийм', 'Үгүй'].map((text, yIdx) => (
+                                                        <div className="form-check my-1 me-3" key={yIdx}>
+                                                            <Input
+                                                                type="radio"
+                                                                id={`yes${id}`}
+                                                                name={`yes${qid}`}
+                                                                className="form-check-input mb-1"
+                                                                checked = {chosen_choice === text}
+                                                                readOnly
+                                                            />
+                                                            <Label className="form-check-label">
+                                                                {text}
+                                                            </Label>
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
-                                        </div>
-                                    </Card>
-                                );
-                            })}
-                            <div className='d-flex justify-content-between align-items-center'>
-                                <div>
-                                    <p>Нийт {totalScore} / {datas.score} оноо</p>
+                                        </Card>
+                                    );
+                                })
+                            )}
+                            {!isLoading && (
+                                <div className='d-flex justify-content-between align-items-center'>
+                                    <div>
+                                        <p>Нийт {totalScore} / {datas.score} оноо</p>
+                                    </div>
+                                    <Button color="secondary" onClick={handleModal} >
+                                        Буцах
+                                    </Button>
                                 </div>
-                                <Button color="secondary" onClick={handleModal} >
-                                    Буцах
-                                </Button>
-                            </div>
+                            )}
                         </CardBody>
-
                     </Card>
                 </ModalBody>
             </Modal>
