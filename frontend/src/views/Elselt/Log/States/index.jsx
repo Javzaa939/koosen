@@ -4,7 +4,7 @@ import { Col, Row, Card, Button, Input, Label, Spinner } from 'reactstrap'
 
 import { useTranslation } from 'react-i18next'
 
-import { ChevronDown, Search } from 'react-feather'
+import { ChevronDown, Search, FileText } from 'react-feather'
 
 import { getColumnState } from "../helpers";
 
@@ -19,6 +19,10 @@ import AuthContext from '@context/AuthContext'
 import useLoader from '@hooks/useLoader'
 
 import useApi from "@hooks/useApi"
+
+import moment from 'moment'
+
+import { utils, writeFile } from 'xlsx-js-style'
 
 const States = () => {
 
@@ -132,6 +136,119 @@ const States = () => {
         }
     }, [searchValue, adm, profession_id]);
 
+    // Excel button handler
+    function convert() {
+        const mainData = datas.map((data, idx) => {
+            return(
+                {
+                    '№': idx + 1,
+                    'Овог': data?.last_name || '',
+                    'Нэр': data?.first_name || '',
+                    'Шалгуур': data?.indicator_name || '',
+                    'Одоогийн төлөв': data?.now_state_name || '',
+                    'Сольсон төлөв': data?.change_state_name || '',
+                    'Сольсон хэрэглэгч': data?.admin_name || '',
+                    'Бүрт/огноо': data?.updated_at ? moment(data?.updated_at).format("YYYY-MM-DD h:mm") || '' : '',
+                }
+            )}
+        )
+
+        const combo = [
+            ...mainData,
+        ]
+
+        const worksheet = utils.json_to_sheet(combo);
+
+        const workbook = utils.book_new();
+        utils.book_append_sheet(workbook, worksheet, "Хээрийн бэлтгэл")
+        const staticCells = [
+                '№',
+                'Овог',
+                'Нэр',
+                'Шалгуур',
+                'Одоогийн төлөв',
+                'Сольсон төлөв',
+                'Сольсон хэрэглэгч',
+                'Бүрт/огноо',
+            ];
+
+        utils.sheet_add_aoa(worksheet, [staticCells], { origin: "A1" });
+
+        const numberCellStyle = {
+            border: {
+                top: { style: "thin", color: { rgb: "000000" } },
+                bottom: { style: "thin", color: { rgb: "000000" } },
+                left: { style: "thin", color: { rgb: "000000" } },
+                right: { style: "thin", color: { rgb: "000000" } }
+            },
+            alignment: {
+                horizontal: 'left',
+                vertical: 'center',
+                wrapText: true
+            },
+            font:{
+                sz:10
+            }
+        };
+
+        const tableHeader = {
+            border: {
+                top: { style: "thin", color: { rgb: "000000" } },
+                bottom: { style: "thin", color: { rgb: "0000000" } },
+                left: { style: "thin", color: { rgb: "000000" } },
+                right: { style: "thin", color: { rgb: "000000" } },
+                wrapText: true
+            },
+            alignment: {
+                vertical: 'center',
+                wrapText: true
+            },
+            font:{
+                sz: 12,
+                bold: true
+            }
+
+        };
+
+        const styleRow = 0;
+        const sendRow = mainData.length;
+        const styleCol = 0;
+        const sendCol = 15;
+
+        for (let row = styleRow; row <= sendRow; row++) {
+            for (let col = styleCol; col <= sendCol; col++) {
+            const cellNum = utils.encode_cell({ r: row, c: col });
+
+                if (!worksheet[cellNum]) {
+                    worksheet[cellNum] = {};
+                }
+
+                worksheet[cellNum].s =
+                    (row === styleRow)
+                        ? tableHeader
+                            : numberCellStyle;
+            }
+        }
+
+        const phaseTwoCells = Array.from({length: 15}, (_) => {return({wch: 15})})
+
+        worksheet["!cols"] = [
+            { wch: 5 },
+            ...phaseTwoCells,
+            { wch: 20 }
+        ];
+
+        const tableRow = Array.from({length: mainData.length}, (_) => {return({hpx: 20})})
+
+        worksheet["!rows"] = [
+            { hpx: 40 },
+            ...tableRow
+        ];
+
+        writeFile(workbook, "Төлөв лог.xlsx");
+
+    }
+
     function handleSearch() {
         getDatas()
     }
@@ -152,6 +269,15 @@ const States = () => {
         <Fragment>
             {Loader && isLoading}
             <Card>
+                <div className='d-flex flex-wrap justify-content-end mt-md-0 mt-1'>
+                    <Button
+                        color='primary'
+                        onClick={convert}
+                    >
+                    <FileText size={14}/>
+                        Excel
+                    </Button>
+                </div>
                 <Row>
                     <Col sm={6} lg={3} >
                         <Label className="form-label" for="lesson_year">
