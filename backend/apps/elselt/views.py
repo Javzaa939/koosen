@@ -2936,7 +2936,7 @@ class PhysicalScoreSortAPIView(generics.GenericAPIView):
             profession = data.get('profession')
 
             adm_queryset = AdmissionUserProfession.objects.annotate(gender=(Substr('user__register', 9, 1))).filter(
-                profession=profession ,
+                profession=profession,
                 age_state=AdmissionUserProfession.STATE_APPROVE,
                 yesh_mhb_state=AdmissionUserProfession.STATE_APPROVE
             )
@@ -2951,28 +2951,37 @@ class PhysicalScoreSortAPIView(generics.GenericAPIView):
                     gender__in=['0', '2', '4', '6', '8']
                 ).values_list('user', flat=True)
 
+            # list ашиглан score_avg, physice_score авах
             score_list = list()
             for value in self.queryset.values():
+                score_avg = AdmissionUserProfession.objects.filter(user=value['user_id']).values_list('score_avg', flat=True).first()
+                score_avg = score_avg if score_avg is not None else 0
                 score = self.physice_score(value)
-                score_list.append({'id':value['id'], 'physice_score':score})
+                score_list.append({
+                    'id': value['id'],
+                    'physice_score': score,
+                    'score_avg': score_avg
+                })
 
             # Хосолсон оноог 70/30 харьцаагаар тооцоолox
-            combined_scores = PhysqueUser.objects.annotate(
-                main_score=F('user__userscore__scaledScore'),
-                combined_score=Cast(
-                    F('user__userscore__scaledScore') * 0.7 + score * 0.3,
-                    FloatField()
-                )
-            ).order_by('-combined_score')
+            combined_scores = []
+            for item in score_list:
+                combined_score = item['score_avg'] * 0.7 + item['physice_score'] * 0.3
+                combined_scores.append({
+                    'id': item['id'],
+                    'combined_score': combined_score
+                })
+
+            combined_scores = sorted(combined_scores, key=lambda x: x['combined_score'], reverse=True)
 
             # order_no update хийх
             for idx, score in enumerate(combined_scores):
-                PhysqueUser.objects.filter(pk=score.pk).update(order_no=idx + 1)
+                PhysqueUser.objects.filter(pk=score['id']).update(order_no=idx + 1)
 
         except Exception as e:
             print(e)
             return request.send_error('ERR_002', 'Хадгалахад алдаа гарлаа')
-        
+
         return request.send_info('INF_001')
 
 @permission_classes([IsAuthenticated])

@@ -55,7 +55,6 @@ export const SortModal = ({ open, handleModal, refreshDatas, editData }) => {
     const [elseltOption, setElseltOption] = useState([]);
     const [professionOption, setProfessionOption] = useState([]);
 
-    // 
     const [gender, setGender] = useState('');
     const [profession, setProfession] = useState('');
     const [elselt, setElselt] = useState('');
@@ -136,7 +135,7 @@ export const SortModal = ({ open, handleModal, refreshDatas, editData }) => {
             handleModal()
         }
     }
-    
+
     return (
         <Fragment>
             <Modal

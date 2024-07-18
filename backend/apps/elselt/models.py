@@ -303,16 +303,16 @@ class PhysqueUser(models.Model):
             x = 480 + (self.total_score - 60) * 8
 
         return round(x)
-    
+
     @property
     def combined_score(self):
         """ Хосолсон оноог тооцоолох """
-        main_score_sum = UserScore.objects.filter(user=self.user).aggregate(total_score=Sum('scaledScore'))['total_score']
+        main_score_sum = AdmissionUserProfession.objects.filter(user=self.user).aggregate(score_avg=Sum('score_avg'))['score_avg']
 
         if main_score_sum is not None:
             combined_score_value = main_score_sum * 0.7 + self.physice_score * 0.3
             return round(combined_score_value, 2)
-        
+
         return None
 
 
