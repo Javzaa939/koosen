@@ -178,7 +178,7 @@ function LessonMaterial() {
 					<Row>
 						{displayedLessons.map((lesson) => (
 							<Col key={lesson.id} xl={3} md={6} className="mb-1">
-								<Link to={`/online_lesson/detail/${lesson.user}`}>
+								<Link to={`/online_lesson/material/detail/${lesson.user}`}>
 									<Card className="lesson-card bg-white border rounded-lg shadow-sm">
 										<CardBody>
 											<h5 className="fw-bold">{lesson.school_name}</h5>

@@ -53,7 +53,7 @@ const DetailPage = () => {
 
 	//Navigate function
 	const handleNavigate = () => {
-		navigate(`/online_lesson`);
+		navigate(`/online_lesson/material`);
 	};
 
 	// ирж буй path-ийн урд талийг арилгах function

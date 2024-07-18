@@ -7,11 +7,11 @@ const DetailPage = lazy(() => import("@views/OnlineLesson/LessonMaterial/DetailP
 
 const OnlineLessonRoutes = [
   {
-    path: "/online_lesson",
+    path: "/online_lesson/material",
     element: <LessonMaterial />,
   },
   {
-    path: "online_lesson/detail/:index",
+    path: "online_lesson/material/detail/:index",
     element: <DetailPage />,
   }
 ];
