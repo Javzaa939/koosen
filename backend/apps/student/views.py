@@ -197,7 +197,7 @@ class GroupAPIView(
 ):
     """" Анги """
 
-    queryset = Group.objects.all().order_by('level')
+    queryset = Group.objects.all().order_by('level','join_year')
     serializer_class = StudentGroupRegisterSerailizer
 
     pagination_class = CustomPagination
@@ -282,7 +282,7 @@ class GroupAPIView(
             serializer = self.serializer_class(data=data, many=False)
             if not serializer.is_valid():
                 transaction.savepoint_rollback(sid)
-                return request.send_error_valid(serializer.errors)
+                return request.send_error("ERR_002","Тухайн анги бүлэг бүртгэлтэй байна")
 
             serializer.save()
 
