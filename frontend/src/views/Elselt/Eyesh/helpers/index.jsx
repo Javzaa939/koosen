@@ -1,13 +1,13 @@
 import { useRef } from 'react';
-import { Badge} from 'reactstrap';
-import { CheckCircle } from "react-feather";
+import { Badge, UncontrolledTooltip } from 'reactstrap';
+import { CheckCircle, Eye } from "react-feather";
 import { t } from 'i18next'
 
 import useApi from '@hooks/useApi';
 import useLoader from "@hooks/useLoader";
 
 // Хүснэгтийн баганууд
-export function getColumns(currentPage, rowsPerPage, page_count, addModalHandler) {
+export function getColumns(currentPage, rowsPerPage, page_count, addModalHandler, handleDetail) {
 
 	// const { fetchData } = useLoader({ isFullScreen: false })
 	// const focusData = useRef(undefined)
@@ -231,6 +231,13 @@ export function getColumns(currentPage, rowsPerPage, page_count, addModalHandler
 					>
 						<Badge color="light-success" pill><CheckCircle  width={"15px"} /></Badge>
 					</a>
+					<a role="button" onClick={() => { handleDetail(row)} }
+						id={`detail${row?.id}`}
+						className="me-1"
+					>
+						<Badge color="light-secondary" pill><Eye width={"15px"} /></Badge>
+					</a>
+					<UncontrolledTooltip placement='top' target={`detail${row.id}`} >Дэлгэрэнгүй</UncontrolledTooltip>
 				</div>
 			),
 		}
