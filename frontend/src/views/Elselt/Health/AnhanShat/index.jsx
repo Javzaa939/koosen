@@ -351,8 +351,6 @@ function AnhanShat() {
         setMessageModal(!messageModal)
     }
 
-    console.log(datas)
-
     return (
         <Card>
             <EmailModal

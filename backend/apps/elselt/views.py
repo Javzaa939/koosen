@@ -604,6 +604,9 @@ class AdmissionUserAllChange(
                 now = dt.datetime.now()
                 students = self.queryset.filter(pk__in=data["students"])
                 for student in students:
+                    if student.state == eval(data.get("state")):
+                        return Response({"info_code": "INF_001", "message": "state equal"}, status=200)
+
                     indicator_value = AdmissionIndicator.TENTSSEN_ELSEGCHID
                     if data.get("state"):
                         old_state = student.state
@@ -1168,6 +1171,9 @@ class ElseltHealthAnhanShat(
                 indicator_value = AdmissionIndicator.ERUUL_MEND_ANHAN
                 old_state = student.state
 
+                if old_state == eval(data.get('state')):
+                    return Response({"info_code": "INF_001", "message": "state equal"}, status=200)
+
                 StateChangeLog.objects.create(
                     user=student.user,
                     type=StateChangeLog.STATE,
@@ -1325,6 +1331,10 @@ class ElseltHealthProfessional(
             with transaction.atomic():
                 now = dt.datetime.now()
                 student = HealthUpUser.objects.filter(user=user).first()
+
+                if student.state == data.get('state'):
+                    return Response({"info_code": "INF_001", "message": "state equal"}, status=200)
+
                 StateChangeLog.objects.create(
                     user=student.user,
                     type=StateChangeLog.STATE,
@@ -1498,6 +1508,9 @@ class ElseltHealthPhysical(
             with transaction.atomic():
                 now = dt.datetime.now()
                 student = PhysqueUser.objects.filter(user=user).first()
+
+                if student.state == eval(data.get('state')):
+                    return Response({"info_code": "INF_001", "message": "state equal"}, status=200)
 
                 StateChangeLog.objects.create(
                     user_id=user,
@@ -2105,6 +2118,9 @@ class AdmissionJusticeListAPIView(
                 now = dt.datetime.now()
                 students = self.queryset.filter(user__in=data["students"])
                 for student in students:
+                    if student.justice_state == eval(data.get("justice_state")):
+                        return Response({"info_code": "INF_001", "message": "justice_state equal"}, status=200)
+
                     StateChangeLog.objects.create(
                         user=student.user,
                         type=StateChangeLog.STATE,
@@ -2217,6 +2233,10 @@ class ConversationUserSerializerAPIView(
             now = dt.datetime.now()
 
             student = ConversationUser.objects.filter(user=user).first()
+
+            if student.state == eval(data.get('state')):
+                return Response({"info_code": "INF_001", "message": "state equal"}, status=200)
+
             StateChangeLog.objects.create(
                 user=student.user,
                 type=StateChangeLog.STATE,
@@ -2316,6 +2336,10 @@ class ArmyUserSerializerAPView(
         with transaction.atomic():
             now = dt.datetime.now()
             student = ArmyUser.objects.filter(user=user).first()
+
+            if student.state == eval(data.get("state")):
+                return Response({"info_code": "INF_001", "message": "state equal"}, status=200)
+
             StateChangeLog.objects.create(
                 user=student.user,
                 type=StateChangeLog.STATE,
@@ -3198,6 +3222,9 @@ class EyeshOrderUserInfoAPIView(
                 now = dt.datetime.now()
                 student = self.queryset.filter(user=user).first()
                 if student:
+                    if student.yesh_state == data.get("yesh_state"):
+                        return Response({"info_code": "INF_001", "message": "state equal"}, status=200)
+
                     indicator_value = AdmissionIndicator.EESH_EXAM
                     old_state = student.yesh_state
                     student.yesh_state = data.get("yesh_state")
