@@ -632,6 +632,7 @@ class HealthPhysicalUserInfoSerializer(serializers.ModelSerializer):
     user = ElseltUserSerializer(many=False, read_only=True)
     userinfo= serializers.SerializerMethodField()
     user_age = serializers.SerializerMethodField()
+    profession_name = serializers.CharField(source='profession.profession.name', default='')
 
     class Meta:
         model = AdmissionUserProfession
@@ -698,6 +699,7 @@ class ElseltApproveSerializer(serializers.ModelSerializer):
 
 class PhysqueUserSerializer(serializers.ModelSerializer):
     physice_score = serializers.SerializerMethodField()
+    combined_score = serializers.SerializerMethodField()
 
     class Meta:
         model = PhysqueUser
@@ -705,6 +707,9 @@ class PhysqueUserSerializer(serializers.ModelSerializer):
 
     def get_physice_score(self, obj):
         return obj.physice_score
+
+    def get_combined_score(self, obj):
+        return obj.combined_score
 
 
 class GpaCheckUserInfoSerializer(serializers.ModelSerializer):

@@ -11,9 +11,9 @@ from rest_framework.filters import SearchFilter
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.db import transaction
-from django.db.models import F, Subquery, OuterRef, Count, Q, Sum
+from django.db.models import F, Subquery, OuterRef, Count, Q, Sum, Exists
 from django.db.models import Value, Case, When, IntegerField
-from django.db.models.functions import Substr
+from django.db.models.functions import Substr, Cast
 
 from main.utils.function.utils import (
     json_load,
@@ -3060,6 +3060,78 @@ class UserScoreSortAPIView(generics.GenericAPIView):
             rejected_objects, ['score_avg', 'order_no', 'yesh_state', 'yesh_description']
         )
 
+@permission_classes([IsAuthenticated])
+class PhysicalScoreSortAPIView(generics.GenericAPIView):
+    """ Бие бялдар оноо эрэмбэлэх """
+
+    queryset = PhysqueUser.objects.all().annotate(gender=(Substr('user__register', 9, 1)))
+
+    def post(self, request):
+        data = request.data
+        try:
+            gender = data.get('gender')
+            profession = data.get('profession')
+
+            health_check_subquery = HealthUpUser.objects.filter(
+                user=OuterRef('user'),
+                state=AdmissionUserProfession.STATE_APPROVE
+            )
+
+            adm_queryset = AdmissionUserProfession.objects.annotate(gender=(Substr('user__register', 9, 1))).filter(
+                profession=profession,
+                age_state=AdmissionUserProfession.STATE_APPROVE,
+                yesh_state=AdmissionUserProfession.STATE_APPROVE
+            ).filter(Exists(health_check_subquery))
+
+            if gender == 1: # Эрэгтэй хэрэглэгчид
+                adm_queryset = adm_queryset.filter(
+                    gender__in=['1', '3', '5', '7', '9']
+                )
+
+            if gender == 2: # Эмэгтэй хэрэглэгчид
+                adm_queryset = adm_queryset.filter(
+                    gender__in=['0', '2', '4', '6', '8']
+                )
+
+            users = adm_queryset.values('user', 'score_avg')
+
+            # list ашиглан score_avg, physice_score авах
+            score_list = list()
+            for value in list(users):
+                score_avg = PhysqueUser.objects.filter(user=value['user']).first()
+                if score_avg:
+                    score_list.append({
+                        'id': score_avg.id,
+                        'physice_score': score_avg.physice_score,
+                        'score_avg': value.get('score_avg')
+                    })
+
+            # Хосолсон оноог 70/30 харьцаагаар тооцоолox
+            combined_scores = []
+            for item in score_list:
+                if item['score_avg'] != 0:
+                    combined_score = item['score_avg'] * 0.7 + item['physice_score'] * 0.3
+                else:
+                    combined_score = 0
+                combined_scores.append({
+                    'id': item['id'],
+                    'combined_score': combined_score
+                })
+
+            combined_scores = sorted(combined_scores, key=lambda x: x['combined_score'], reverse=True)
+
+            # order_no update хийх
+            for idx, score in enumerate(combined_scores):
+                if score['combined_score'] != 0:
+                    PhysqueUser.objects.filter(pk=score['id']).update(order_no=idx + 1)
+                else:
+                    PhysqueUser.objects.filter(pk=score['id']).update(order_no=None)
+
+        except Exception as e:
+            print(e)
+            return request.send_error('ERR_002', 'Хадгалахад алдаа гарлаа')
+
+        return request.send_info('INF_001')
 
 @permission_classes([IsAuthenticated])
 class ElseltEyeshAPIView(
