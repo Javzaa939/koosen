@@ -153,17 +153,15 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
     const handleClick = (idx, v) => {
         if (questionState.level === 1) {
             if (data.kind === 2) {
-                setSelectedValue(prev => {
-                    const newSelectedValues = prev.includes(v.id)
-                    ? prev.filter(id => id !== v.id)
-                    : [...prev, v.id];
-                // Dispatch the updated selection
-                dispatchQuestion({ type: 'SET_ANSWER', payload: newSelectedValues });
-                return newSelectedValues;
-                })
+                // setSelectedValue(prev => {
+                //     const newSelectedValues = prev.includes(v.id)
+                //     ? prev.filter(id => id !== v.id)
+                //     : [...prev, v.id];
+                // // Dispatch the updated selection
+                // dispatchQuestion({ type: 'SET_ANSWER', payload: newSelectedValues });
+                // return newSelectedValues;
+                // })
                 console.log(selectedValue)
-
-
             }
             else {
                 setSelectedValue(idx);
@@ -352,7 +350,7 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
                                         return (
                                             <Fragment key={idx}>
                                                 <span
-                                                    className={`ms-50 cursor-pointer p-25 py-0 ${idx ? 'border-success bg-light-success' : 'border-secondary'}`}
+                                                    className={`ms-50 cursor-pointer p-25 py-0 ${selectedValue === idx ? 'border-success bg-light-success' : 'border-secondary'}`}
                                                     style={{ borderRadius: "50%", fontSize: "12px", fontWeight: "bold" }}
                                                     onClick={() => { handleClick(idx, v) }}
                                                 >
