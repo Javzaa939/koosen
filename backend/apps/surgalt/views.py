@@ -2174,30 +2174,58 @@ class PsychologicalTestQuestionsAPIView(
 
     @login_required()
     def put(self, request, pk):
-
+        print(pk)
         request_data = request.data.dict()
         type = request.query_params.get('type')
+        print(request_data)
 
         if type == "question":
             question_img = request_data['image']
-            request_data = remove_key_from_dict(request_data, [ 'image'])
+
+            answer = request_data['answer']
+            request_data = remove_key_from_dict(request_data, [ 'image','answer'])
+
             with transaction.atomic():
                 question_obj = PsychologicalTestQuestions.objects.filter(id=pk).first()
+                all_choice =question_obj.choices.all()
+                print(all_choice)
+
+                if answer and request_data['score']!='null' and answer != 'undefined':
+                    answer_object = PsychologicalQuestionChoices.objects.filter(id=answer).first()
+
+                    if answer_object and not answer_object.is_correct and question_obj.kind == PsychologicalTestQuestions.KIND_ONE_CHOICE :
+                        answer_object.is_correct = True
+                        other_choices = question_obj.choices.exclude(id=answer)
+                        other_choices.update(is_correct=False)
+                        answer_object.save()
+
+                    if answer_object and not answer_object.is_correct and question_obj.kind == PsychologicalTestQuestions.KIND_MULTI_CHOICE:
+                        answer_object.is_correct = True
+                        answer_object.save()
+                    if answer_object and not answer_object.is_correct and question_obj.kind == PsychologicalTestQuestions.KIND_BOOLEAN:
+                        answer_object.is_correct = True
+                        other_choices = question_obj.choices.exclude(id=answer)
+                        other_choices.update(is_correct=False)
+                        answer_object.save()
 
                 if 'score' in request_data:
                     score = request_data.get('score')
                     if score and score != 'null':
                         request_data['score'] = int(score)
+                        request_data['has_score'] = True
                     else:
                         request_data['score'] = None
+                        request_data['has_score'] = False
+                        other_choices = question_obj.choices.all()
+                        other_choices.update(is_correct=False)
 
-                request_data['has_score'] = request_data['level'] == 1
                 request_data = remove_key_from_dict(request_data, [ 'level'])
+                print(request_data)
 
                 updated_question_rows = PsychologicalTestQuestions.objects.filter(id=pk).update(
                     **request_data
                 )
-
+                print(PsychologicalTestQuestions.objects.filter(id=pk).values())
                 if isinstance(question_img, str) != True:
                     question_img_path = get_image_path(question_obj)
 
@@ -2229,8 +2257,7 @@ class PsychologicalTestQuestionsAPIView(
         else:
             answer_img = request_data["image"]
             answer_id = request_data["id"]
-
-            request_data["value"] = request_data["choices"]
+            updated_value = request_data['value']
 
             if 'score' in request_data:
                 score = request_data.get('score')
@@ -2239,7 +2266,7 @@ class PsychologicalTestQuestionsAPIView(
                 else:
                     request_data['score'] = None
 
-            request_data = remove_key_from_dict(request_data, ['image', 'id', 'score', 'choices'])
+            request_data = remove_key_from_dict(request_data, ['image', 'id', 'score'])
             with transaction.atomic():
                 answer_obj = PsychologicalQuestionChoices.objects.filter(id=answer_id).first()
                 question_obj = PsychologicalTestQuestions.objects.filter(id=pk).first()
@@ -2266,6 +2293,8 @@ class PsychologicalTestQuestionsAPIView(
                     updated_answer = PsychologicalQuestionChoices.objects.filter(id=answer_id).first()
                     ser = dynamic_serializer(PsychologicalQuestionChoices, "__all__")
                     data = ser(updated_answer).data
+                    updated_answer.value = updated_value
+                    updated_answer.save()
                 return request.send_info('INF_002', data)
 
 

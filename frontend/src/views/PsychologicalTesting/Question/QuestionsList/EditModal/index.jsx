@@ -23,7 +23,6 @@ import {
 } from 'reactstrap'
 import empty from "@src/assets/images/empty-image.jpg"
 import { Edit, Minus, MinusCircle, PlusCircle, Save, X } from "react-feather";
-import DataTable from "react-data-table-component";
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
 
@@ -32,6 +31,7 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
     const [levelType, setLevelType] = useState(get_boolean_list())
     const [questionKind, setQuestionType] = useState(get_questionype())
 
+    const [selectedValue, setSelectedValue] = useState([])
     const [editQuestion, setEditQuestion] = useState({ id: null, isEdit: false })
     const [editAnswer, setEditAnswer] = useState({ qId: null, id: null, isEdit: false })
     const hasScore = data?.has_score
@@ -40,7 +40,8 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
         question: '',
         image: '',
         score: '',
-        level: ''
+        level: '',
+        answer: ''
     }
     const questionReducer = (state, action) => {
         switch (action.type) {
@@ -54,6 +55,8 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
                 return { ...state, score: action.payload }
             case 'SET_IMAGE':
                 return { ...state, image: action.payload }
+            case 'SET_ANSWER':
+                return { ...state, answer: action.payload }
             case 'SET_RESET':
                 return initialQuestionRow
             default:
@@ -93,6 +96,7 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
         dispatchQuestion({ type: 'SET_QUESTION', payload: questoinData.question })
         dispatchQuestion({ type: 'SET_SCORE', payload: questoinData.score })
         dispatchQuestion({ type: 'SET_LEVEL', payload: questoinData.level })
+        dispatchQuestion({ type: 'SET_ANSWER', payload: questoinData.answer })
         if (questoinData.image) {
             dispatchQuestion({ type: "SET_IMAGE", payload: { preview: urlfinder + questoinData.image } })
         }
@@ -124,6 +128,7 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
 
     async function handleAnswerSave(questionId, answerId) {
         const formData = new FormData()
+
         for (let key in answerState) {
             formData.append(key, answerState[key])
         }
@@ -145,6 +150,27 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
         }
     }
 
+    const handleClick = (idx, v) => {
+        if (questionState.level === 1) {
+            if (data.kind === 2) {
+                setSelectedValue(prev => {
+                    const newSelectedValues = prev.includes(v.id)
+                    ? prev.filter(id => id !== v.id)
+                    : [...prev, v.id];
+                // Dispatch the updated selection
+                dispatchQuestion({ type: 'SET_ANSWER', payload: newSelectedValues });
+                return newSelectedValues;
+                })
+                console.log(selectedValue)
+
+
+            }
+            else {
+                setSelectedValue(idx);
+                dispatchQuestion({ type: 'SET_ANSWER', payload: v.id })
+            }
+        }
+    }
     return (
         <Modal
             isOpen={open}
@@ -204,8 +230,8 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
                             <Col md={12} className="d-flex align-items-center">
                                 {
                                     hasScore && hasScore === true
-                                    ? <label className="me-50">Нийт оноо:</label>
-                                    : <></>
+                                        ? <label className="me-50">Нийт оноо:</label>
+                                        : <></>
                                 }
                                 {
                                     editQuestion.isEdit && editQuestion.id == data.id ? <span className="">
@@ -229,8 +255,8 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
                                 <label className="me-50">Оноотой эсэх:</label>
                                 {
                                     hasScore && hasScore === true
-                                    ? <>Тийм</>
-                                    : <>Үгүй</>
+                                        ? <>Тийм</>
+                                        : <>Үгүй</>
                                 }
                                 {
                                     editQuestion.isEdit && editQuestion.id == data.id ?
@@ -318,8 +344,39 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
                         <div className="d-flex justify-content-between">
                             <div className="pb-25" style={{ fontWeight: 500, }}>Хариултууд:</div>
                             {/* <div className="pb-25" style={{ fontWeight: 500, }}> */}
-                                {/* <PlusCircle className="text-primary cursor-pointer" size={16} onClick={() => {addAnswer()}}/> */}
+                            {/* <PlusCircle className="text-primary cursor-pointer" size={16} onClick={() => {addAnswer()}}/> */}
                             {/* </div> */}
+                            <div>
+                                {editQuestion.isEdit && editQuestion.id == data.id ? (
+                                    data.choices.map((v, idx) => {
+                                        return (
+                                            <Fragment key={idx}>
+                                                <span
+                                                    className={`ms-50 cursor-pointer p-25 py-0 ${idx ? 'border-success bg-light-success' : 'border-secondary'}`}
+                                                    style={{ borderRadius: "50%", fontSize: "12px", fontWeight: "bold" }}
+                                                    onClick={() => { handleClick(idx, v) }}
+                                                >
+                                                    {v.value}
+                                                </span>
+                                            </Fragment>
+                                        );
+                                    })
+                                ) : (
+                                    data.has_score && data.choices.map((v, idx) => {
+                                        return (
+                                            <Fragment key={idx}>
+                                                <span
+                                                    className={`ms-50 p-25 py-0 ${v?.is_correct ? 'border-success bg-light-success' : 'border-secondary'}`}
+                                                    style={{ borderRadius: "50%", fontSize: "12px", fontWeight: "bold" }}
+                                                >
+                                                    {v.value}
+                                                </span>
+                                            </Fragment>
+                                        );
+                                    })
+                                )}
+
+                            </div>
                         </div>
                         <Row className="g-0" style={{ fontWeight: 300 }}>
                             {
@@ -361,25 +418,6 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
                                                         :
                                                         <span>
                                                             {answer?.value}
-                                                        </span>
-                                                }
-                                            </div>
-                                            <div>
-                                                <label className="me-50">Оноо:</label>
-                                                {
-                                                    editAnswer.isEdit && editAnswer.id == answer.id ? <>
-                                                        <Input
-                                                            value={answerState.score}
-                                                            type="number"
-                                                            bsSize={'sm'}
-                                                            onChange={(e) => {
-                                                                dispatchAnswer({ type: 'SET_SCORE', payload: e.target.value })
-                                                            }}
-                                                        />
-                                                    </>
-                                                        :
-                                                        <span>
-                                                            {answer?.score}
                                                         </span>
                                                 }
                                             </div>
