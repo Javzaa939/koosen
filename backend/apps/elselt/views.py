@@ -2061,7 +2061,7 @@ class AdmissionJusticeListAPIView(
 
         elselt = self.request.query_params.get('elselt')
         profession = self.request.query_params.get('profession')
-        state = self.request.query_params.get('state')
+        justice_state = self.request.query_params.get('justice_state')
         sorting = self.request.query_params.get('sorting')
 
         # Сэтгэлзүйн сорилд тэнцсэн элсэгчид
@@ -2080,12 +2080,12 @@ class AdmissionJusticeListAPIView(
             else:
                 queryset = queryset.filter(gender__in=['0', '2', '4', '6', '8'])
 
-        if state:
-            if state == '1':
+        if justice_state:
+            if justice_state == '1':
                 exclude_ids = PhysqueUser.objects.filter(Q(Q(state=AdmissionUserProfession.STATE_APPROVE) | Q(state=AdmissionUserProfession.STATE_REJECT))).values_list('user', flat=True)
-                user_id = AdmissionUserProfession.objects.filter(state=state).exclude(user__in=exclude_ids).values_list('user', flat=True)
+                user_id = AdmissionUserProfession.objects.filter(justice_state=justice_state).exclude(user__in=exclude_ids).values_list('user', flat=True)
             else:
-                user_id = PhysqueUser.objects.filter(state=state).values_list('user', flat=True)
+                user_id = PhysqueUser.objects.filter(state=justice_state).values_list('user', flat=True)
 
             queryset = queryset.filter(user__in=user_id)
 
