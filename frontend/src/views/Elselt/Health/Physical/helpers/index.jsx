@@ -66,6 +66,16 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 			minWidth: '140px',
 			maxWidth: '140px',
 		},
+		{
+			maxWidth: "250px",
+			minWidth: "250px",
+			header: 'profession__profession__name',
+			name: 'Хөтөлбөр',
+			reorder: true,
+			selector: (row) => row?.profession || '',
+			sortable: true,
+			center: true,
+		},
         {
 			maxWidth: "200px",
 			minWidth: "200px",
