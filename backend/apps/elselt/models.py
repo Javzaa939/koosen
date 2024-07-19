@@ -307,11 +307,15 @@ class PhysqueUser(models.Model):
     @property
     def combined_score(self):
         """ Хосолсон оноог тооцоолох """
-        main_score_sum = AdmissionUserProfession.objects.filter(user=self.user).aggregate(score_avg=Sum('score_avg'))['score_avg']
+        main_score_sum = AdmissionUserProfession.objects.filter(user=self.user).values_list('score_avg', flat=True).first()
 
         if main_score_sum is not None:
             combined_score_value = main_score_sum * 0.7 + self.physice_score * 0.3
-            return round(combined_score_value, 2)
+            combined_score_value_int= (main_score_sum * 70 + self.physice_score * 30) // 100
+            if combined_score_value % combined_score_value_int >= 0.5:
+                return round(combined_score_value_int + 1, 2)
+            else:
+                return round(combined_score_value_int, 2)
 
         return None
 
