@@ -5,7 +5,8 @@ import moment from 'moment'
 import { CheckCircle} from "react-feather"
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, page_count,stateop, stateModalHandler) {
+export function getColumns (currentPage, rowsPerPage, total_count,stateop, stateModalHandler) {
+	const page_count = Math.ceil(total_count / rowsPerPage)
 
 	/** Сонгосон хуудасны тоо датаны тооноос их болсон үед хуудаслалт 1-ээ эхлэнэ */
     if (currentPage > page_count) {

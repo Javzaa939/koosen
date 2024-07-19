@@ -3,7 +3,8 @@ import { Badge, UncontrolledTooltip } from "reactstrap"
 import moment from 'moment'
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, page_count, addModalHandler, STATE_LIST, user) {
+export function getColumns (currentPage, rowsPerPage, total_count, addModalHandler, STATE_LIST, user) {
+    const page_count = Math.ceil(total_count / rowsPerPage)
 
     // /** Сонгосон хуудасны тоо датаны тооноос их болсон үед хуудаслалт 1-ээс эхлэнэ */
     if (currentPage > page_count) {
@@ -83,9 +84,9 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 			center: true,
 		},
 		{
-			header: 'gender',
+			header: 'update_date',
 			name: <div className="px-1">Үзлэгийн огноо</div>,
-			selector: (row) => row?.updated_at? moment(row?.updated_at).format("YYYY-MM-DD h:mm") : '',
+			selector: (row) => row?.health_user_data?.updated_at? moment(row?.health_user_data?.updated_at).format("YYYY-MM-DD h:mm") : '',
             sortable: true,
 			minWidth: '200px',
 		},

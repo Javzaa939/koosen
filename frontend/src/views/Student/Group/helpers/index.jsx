@@ -79,6 +79,14 @@ export function getColumns (currentPage, rowsPerPage, page_count, editModal, han
 			center: true
 		},
 		{
+			header: 'join-year',
+			name: t("Элссэн он"),
+			selector: (row) => row?.join_year,
+            sortable: true,
+			minWidth: "50px",
+			center: true
+		},
+		{
 			header: 'is_finish',
 			name: t("Төгссөн эсэх"),
 			selector: (row) => {

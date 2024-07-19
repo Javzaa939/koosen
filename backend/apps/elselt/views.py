@@ -11,7 +11,7 @@ from rest_framework.filters import SearchFilter
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.db import transaction
-from django.db.models import F, Subquery, OuterRef, Count, Q, FloatField, Exists
+from django.db.models import F, Subquery, OuterRef, Count, Q, Sum, Exists
 from django.db.models import Value, Case, When, IntegerField
 from django.db.models.functions import Substr, Cast
 
@@ -903,7 +903,7 @@ class DashboardExcelAPIView(
             self.queryset = self.queryset.filter(profession__admission=elselt)
 
         # Хурдан болгохын тулд шаардлагатай field-үүдэд select_related ашигласан
-        profession_ids = self.queryset.values_list('profession__profession', flat=True).distinct()
+        profession_ids = self.queryset.values_list('profession__profession', flat=True).distinct('profession__profession')
         professions = ProfessionDefinition.objects.filter(id__in=profession_ids).select_related('school')
 
         # Үндсэн queryset дээрээ gender-ийг нь annotate хийж өгсөн
@@ -919,40 +919,179 @@ class DashboardExcelAPIView(
             )
         )
 
+        # AdmissionRegisterProfession-ий ID-г мэргэжилүүддээ тохируулан авна
+        admission_register_profession_ids = AdmissionRegisterProfession.objects.filter(
+            profession__in=professions
+        ).values_list('id', flat=True)
+
+        # AdmissionRegisterProfession-ий ID-г ашиглан AdmissionIndicator-уудыг олно
+        admission_indicators = AdmissionIndicator.objects.filter(
+            admission_prof__in=admission_register_profession_ids
+        )
+
+        # Хяналтын тоонуудын өгөгдлүүдийг олж авсан мэргэжилийн индикатороо ашиглан авна
+        admission_xyanlat_too = AdmissionXyanaltToo.objects.filter(
+            indicator__in=admission_indicators
+        ).values(
+            'norm_all',
+            'norm1',
+            'norm2',
+            'indicator__admission_prof'
+        )
+
+        # Хяналтын тоонуудыг aggregate хийх case-үүдийг хадгалах list-үүд
+        xyanalt_male_cases = []
+        xyanalt_female_cases = []
+        xyanalt_all_cases = []
+
+        # AdmissionIndicator-ийн admission_prof-ийн id-нь манай үндсэн queryset-ийн profession-тэй ижил байх case-үүдэд
+        # хүйс болон бүгд-ээр нь хяналтын тоонуудыг aggregate хийж авах нөхцлүүдийг бичиж өгсөн
+        for value in admission_xyanlat_too:
+            # 30%-иар нэмэгдүүлсэн
+            norm1_value = (value['norm1'] if value['norm1'] is not None else 0) + (value['norm1'] * 0.3 if value['norm1'] is not None else 0)
+            norm2_value = (value['norm2'] if value['norm2'] is not None else 0) + (value['norm2'] * 0.3 if value['norm2'] is not None else 0)
+            norm_all_value = (value['norm_all'] if value['norm_all'] is not None else 0) + (value['norm_all'] * 0.3 if value['norm_all'] is not None else 0)
+
+            # Үндсэн нөхцөл
+            condition = Q(profession=value['indicator__admission_prof'])
+
+            xyanalt_male_cases.append(When(condition, then=Value(norm1_value)))
+            xyanalt_female_cases.append(When(condition, then=Value(norm2_value)))
+            xyanalt_all_cases.append(When(condition, then=Value(norm_all_value)))
+
+        health_profession_ids = AdmissionIndicator.objects.filter(admission_prof__admission__is_active=True, value__in=[AdmissionIndicator.ERUUL_MEND_ANHAN], ).values_list('admission_prof', flat=True)
+        # Анхан шат тэнцсэн хэрэглэгчид
+        anhan_shat_ids = HealthUser.objects.filter(state=AdmissionUserProfession.STATE_APPROVE).values_list('user', flat=True)
+        health_users = HealthUser.objects.filter(user__in=anhan_shat_ids).values_list('user', flat=True)
+
+        # Бие бялдар шалгуур үзүүлэлттэй мэргэжилд бүртгүүлсэн элсэгчид
+        physical_profession_ids = AdmissionIndicator.objects.filter(admission_prof__admission__is_active=True, value__in=[AdmissionIndicator.BIE_BYALDAR]).values_list('admission_prof', flat=True)
+
+        # Нарийн мэргэжлийн үзлэгт тэнцсэн хүүхдүүд бие бялдарын шалгалтад орно
+        healt_user_ids = HealthUpUser.objects.filter(state=AdmissionUserProfession.STATE_APPROVE).values_list('user', flat=True)
+
         # annotate хийж өгөх dynamic field-үүдээ хэтэрхий их байгаа учир энд зарлаж өгөв
         aggregations = {
+            # Хяналтын тоо/Бүртгүүлсэн
             'total_male_users': Count('id', filter=Q(gender=1)),
             'total_female_users': Count('id', filter=Q(gender=2)),
+
+            # Насны шаардлага хангасан
             'age_state_true_male': Count('id', filter=Q(gender=1, age_state=AdmissionUserProfession.STATE_APPROVE)),
             'age_state_false_male': Count('id', filter=Q(gender=1, age_state=AdmissionUserProfession.STATE_REJECT)),
             'age_state_true_female': Count('id', filter=Q(gender=2, age_state=AdmissionUserProfession.STATE_APPROVE)),
             'age_state_false_female': Count('id', filter=Q(gender=2, age_state=AdmissionUserProfession.STATE_REJECT)),
+
+            # Дипломын голч дүнгийн шаардлага хангасан эсэх
             'gpa_state_true_male': Count('id', filter=Q(gender=1, gpa_state=AdmissionUserProfession.STATE_APPROVE)),
             'gpa_state_false_male': Count('id', filter=Q(gender=1, gpa_state=AdmissionUserProfession.STATE_REJECT)),
             'gpa_state_true_female': Count('id', filter=Q(gender=2, gpa_state=AdmissionUserProfession.STATE_APPROVE)),
             'gpa_state_false_female': Count('id', filter=Q(gender=2, gpa_state=AdmissionUserProfession.STATE_REJECT)),
+
+            # Хяналтын тоо
+            'hynalt_number_male': Case(*xyanalt_male_cases, default=Value(0), output_field=IntegerField()),
+            'hynalt_number_female': Case(*xyanalt_female_cases, default=Value(0), output_field=IntegerField()),
+            'hynalt_number_all': Case(*xyanalt_all_cases, default=Value(0), output_field=IntegerField()),
+
+            # ЭЕШ шалгуур оноо
+            'yesh_state_true_male': Count('id', filter=Q(gender=1, yesh_state=AdmissionUserProfession.STATE_APPROVE)),
+            'yesh_state_true_female': Count('id', filter=Q(gender=2, yesh_state=AdmissionUserProfession.STATE_APPROVE)),
+            'yesh_state_false_male': Count(
+                'id',filter=Q(
+                        Q(gender=1, yesh_state=AdmissionUserProfession.STATE_REJECT),
+                        ~Q(yesh_description__icontains='хяналтын тоонд багтсангүй')
+                    )
+            ),
+            'yesh_state_false_female': Count(
+                'id',filter=Q(
+                        Q(gender=2, yesh_state=AdmissionUserProfession.STATE_REJECT),
+                        ~Q(yesh_description__icontains='хяналтын тоонд багтсангүй')
+                    )
+            ),
+            'yesh_state_false_xyanalt': Count('id', filter=Q(yesh_state=AdmissionUserProfession.STATE_REJECT, yesh_description__icontains='Хяналтын тоонд багтсангүй')),
+
+            # Монгол хэл бичгийн шалгалт
+            'yesh_mhb_state_true_male': Count('id', filter=Q(gender=1, yesh_mhb_state=AdmissionUserProfession.STATE_APPROVE)),
+            'yesh_mhb_state_false_male': Count('id', filter=Q(gender=1, yesh_mhb_state=AdmissionUserProfession.STATE_REJECT)),
+            'yesh_mhb_state_true_female': Count('id', filter=Q(gender=2, yesh_mhb_state=AdmissionUserProfession.STATE_APPROVE)),
+            'yesh_mhb_state_false_female': Count('id', filter=Q(gender=2, yesh_mhb_state=AdmissionUserProfession.STATE_REJECT)),
+
+            # Анхан шатны үзлэг
             'health_user_true_male_users': Count('id', filter=Q(gender=1, user__healthuser__state=AdmissionUserProfession.STATE_APPROVE)),
             'health_user_true_female_users': Count('id', filter=Q(gender=2, user__healthuser__state=AdmissionUserProfession.STATE_APPROVE)),
             'health_user_false_male_users': Count('id', filter=Q(gender=1, user__healthuser__state=AdmissionUserProfession.STATE_REJECT)),
             'health_user_false_female_users': Count('id', filter=Q(gender=2, user__healthuser__state=AdmissionUserProfession.STATE_REJECT)),
-            'health_user_send_male_users': Count('id', filter=Q(gender=1, user__healthuser__isnull=True)),
-            'health_user_send_female_users': Count('id', filter=Q(gender=2, user__healthuser__isnull=True)),
+            'health_user_send_male_users': Count(
+                'id',filter=Q(
+                    Q(gender=1),
+                    Q(profession__in=health_profession_ids),
+                    Q(age_state=AdmissionUserProfession.STATE_APPROVE),
+                    Q(gpa_state__in=[AdmissionUserProfession.STATE_APPROVE, AdmissionUserProfession.STATE_SEND]),
+                    Q(Q(first_state=AdmissionUserProfession.STATE_APPROVE) | Q(yesh_state=AdmissionUserProfession.STATE_APPROVE)),
+                    Q(user__healthuser__isnull=True)
+                )
+            ),
+            'health_user_send_female_users': Count(
+                'id',filter=Q(
+                    Q(gender=2),
+                    Q(profession__in=health_profession_ids),
+                    Q(age_state=AdmissionUserProfession.STATE_APPROVE),
+                    Q(gpa_state__in=[AdmissionUserProfession.STATE_APPROVE, AdmissionUserProfession.STATE_SEND]),
+                    Q(Q(first_state=AdmissionUserProfession.STATE_APPROVE) | Q(yesh_state=AdmissionUserProfession.STATE_APPROVE)),
+                    Q(user__healthuser__isnull=True)
+                )
+            ),
+
+            # Эрүүл мэндийн үзлэг шинжилгээний дүгнэлт
             'health_up_user_true_male_users': Count('id', filter=Q(gender=1, user__healthupuser__state=AdmissionUserProfession.STATE_APPROVE)),
             'health_up_user_true_female_users': Count('id', filter=Q(gender=2, user__healthupuser__state=AdmissionUserProfession.STATE_APPROVE)),
             'health_up_user_false_male_users': Count('id', filter=Q(gender=1, user__healthupuser__state=AdmissionUserProfession.STATE_REJECT)),
             'health_up_user_false_female_users': Count('id', filter=Q(gender=2, user__healthupuser__state=AdmissionUserProfession.STATE_REJECT)),
-            'health_up_user_out_male_users': Count('id', filter=Q(gender=1, user__healthupuser__isnull=True)),
-            'health_up_user_out_female_users': Count('id', filter=Q(gender=2, user__healthupuser__isnull=True)),
+            'health_up_user_out_male_users': Count(
+                'id',filter=Q(
+                    Q(gender=1),
+                    Q(user__in=health_users),
+                    Q(user__healthupuser__isnull=True)
+                )
+            ),
+            'health_up_user_out_female_users': Count(
+                'id',filter=Q(
+                    Q(gender=2),
+                    Q(user__in=health_users),
+                    Q(user__healthupuser__isnull=True)
+                )
+            ),
+
+            # Эрүүгийн хариуцлага хүлээж байсан эсэх шаардлага
             'justice_state_true_male': Count('id', filter=Q(gender=1, justice_state=AdmissionUserProfession.STATE_APPROVE)),
             'justice_state_true_female': Count('id', filter=Q(gender=2, justice_state=AdmissionUserProfession.STATE_APPROVE)),
             'justice_state_false_male': Count('id', filter=Q(gender=1, justice_state=AdmissionUserProfession.STATE_REJECT)),
             'justice_state_false_female': Count('id', filter=Q(gender=2, justice_state=AdmissionUserProfession.STATE_REJECT)),
+
+            # Бие бялдрын шалгалт
             'physque_state_true_male': Count('id', filter=Q(gender=1, user__physqueuser__state=AdmissionUserProfession.STATE_APPROVE)),
             'physque_state_true_female': Count('id', filter=Q(gender=2, user__physqueuser__state=AdmissionUserProfession.STATE_APPROVE)),
             'physque_state_false_male': Count('id', filter=Q(gender=1, user__physqueuser__state=AdmissionUserProfession.STATE_REJECT)),
             'physque_state_false_female': Count('id', filter=Q(gender=2, user__physqueuser__state=AdmissionUserProfession.STATE_REJECT)),
-            'physque_state_out_male': Count('id', filter=Q(gender=1, user__physqueuser__isnull=True)),
-            'physque_state_out_female': Count('id', filter=Q(gender=2, user__physqueuser__isnull=True)),
+            'physque_state_out_male': Count(
+                'id',filter=Q(
+                    Q(gender=1),
+                    Q(user__in=healt_user_ids),
+                    Q(profession__in=physical_profession_ids),
+                    Q(user__physqueuser__isnull=True)
+                )
+            ),
+            'physque_state_out_female': Count(
+                'id',filter=Q(
+                    Q(gender=2),
+                    Q(user__in=healt_user_ids),
+                    Q(profession__in=physical_profession_ids),
+                    Q(user__physqueuser__isnull=True)
+                )
+            ),
+
+            # Нийт
+            'total': Count('id')
         }
 
         # Бүх хөтөлбөрүүдээрээ үндсэн queryset-ээс авах датануудаас aggregate-үүдээ ашиглан авна
@@ -970,7 +1109,11 @@ class DashboardExcelAPIView(
                     'health_up_user_false_female_users', 'health_up_user_out_male_users', 'health_up_user_out_female_users',
                     'justice_state_true_male', 'justice_state_true_female', 'justice_state_false_male',
                     'justice_state_false_female', 'physque_state_true_male', 'physque_state_true_female',
-                    'physque_state_false_male', 'physque_state_false_female', 'physque_state_out_male', 'physque_state_out_female')
+                    'physque_state_false_male', 'physque_state_false_female', 'physque_state_out_male',
+                    'physque_state_out_female', 'hynalt_number_male', 'hynalt_number_all', 'hynalt_number_female',
+                    'yesh_mhb_state_true_male', 'yesh_mhb_state_false_male', 'yesh_mhb_state_true_female',
+                    'yesh_mhb_state_false_female', 'yesh_state_true_male', 'yesh_state_true_female',
+                    'yesh_state_false_male', 'yesh_state_false_female', 'yesh_state_false_xyanalt', 'total')
         )
 
         # Үндсэн хөтөлбөрийн мэдээллүүддээр хөтөлбөрийн нэр болон салбар сургуулийн нэр нэмэгдэж орсон
@@ -1019,7 +1162,7 @@ class ElseltHealthAnhanShat(
     mixins.DestroyModelMixin
 ):
 
-    queryset = AdmissionUserProfession.objects.all().order_by('created_at')
+    queryset = AdmissionUserProfession.objects.all()
 
     serializer_class = HealthUserDataSerializer
     pagination_class = CustomPagination
@@ -1029,12 +1172,14 @@ class ElseltHealthAnhanShat(
 
     def get_queryset(self):
         queryset = self.queryset
+        date_query = HealthUser.objects.filter(user=OuterRef('user')).values('updated_at')[:1]
         queryset = queryset.annotate(
             gender=(Substr('user__register', 9, 1)),
             user_email=F("user__email"),
             degree_name=F("profession__profession__degree__degree_name"),
             profession_name=F("profession__profession__name"),
-        )
+            update_date=Subquery(date_query)
+        ).order_by('update_date')
 
         # Эрүүл мэндийн шалгуур үзүүлэлттэй мэргэжлүүд
         # TODO Одоогоор идэвхтэй байгаа элсэлтээс л харуулж байгаа гэсэн үг
@@ -1095,7 +1240,7 @@ class ElseltHealthAnhanShat(
                 exclude_ids = HealthUser.objects.filter(Q(Q(state=AdmissionUserProfession.STATE_APPROVE) | Q(state=AdmissionUserProfession.STATE_REJECT))).values_list('user', flat=True)
                 user_id = AdmissionUserProfession.objects.exclude(user__in=exclude_ids).values_list('user', flat=True)
             else:
-                user_id = HealthUser.objects.filter(state=state).values_list('user', flat=True)
+                user_id = HealthUser.objects.filter(state=state).order_by('updated_at').values_list('user', flat=True)
             queryset = queryset.filter(user__in=user_id)
 
         return queryset
@@ -1570,6 +1715,7 @@ class ElseltHealthPhysicalCreateAPIView(
                     serializer = self.serializer_class(data=data)
 
                 if not serializer.is_valid():
+                    print(serializer.errors)
                     transaction.savepoint_rollback(sid)
                     return Response({'status': '400 Bad Request', 'message': 'Оруулсан өгөгдөл буруу байна'}, status=status.HTTP_400_BAD_REQUEST)
 
