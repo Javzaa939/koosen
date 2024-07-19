@@ -632,6 +632,7 @@ class HealthPhysicalUserInfoSerializer(serializers.ModelSerializer):
     user = ElseltUserSerializer(many=False, read_only=True)
     userinfo= serializers.SerializerMethodField()
     user_age = serializers.SerializerMethodField()
+    profession_name = serializers.CharField(source='profession.profession.name', default='')
 
     class Meta:
         model = AdmissionUserProfession

@@ -72,7 +72,7 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 			header: 'profession__profession__name',
 			name: 'Хөтөлбөр',
 			reorder: true,
-			selector: (row) => row?.profession || '',
+			selector: (row) => row?.profession_name || '',
 			sortable: true,
 			center: true,
 		},
