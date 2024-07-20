@@ -261,13 +261,13 @@ const Teacher = () => {
                                     <h5>Өгөгдөл байхгүй байна.</h5>
                                 </div>
                             )}
-                            columns={getColumns(currentPage, rowsPerPage, handleEdit, handleDelete)}
+                            columns={getColumns(currentPage, rowsPerPage, total_count, handleEdit, handleDelete)}
 							onSort={handleSort}
                             sortIcon={<ChevronDown size={10} />}
                             paginationPerPage={rowsPerPage}
                             paginationDefaultPage={currentPage}
                             data={datas}
-                            paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count, searchValue, datas)}
+                            paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
                             fixedHeader
                             fixedHeaderScrollHeight='62vh'
                         />

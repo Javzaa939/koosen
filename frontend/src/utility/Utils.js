@@ -235,10 +235,13 @@ export function getPagination(handlePagination, pageNo, rowsPerPage, total_count
     if(searchValue && searchValue.length) {
       filtered_page_count = Math.ceil(filteredData.length / rowsPerPage)
     }
+    if (pageNo > page_count) {
+      pageNo = 1
+    }
     const CustomPagination = () => (
       <div className="d-flex align-items-center justify-content-end flex-wrap mt-1">
         <Label className="mx-2 text-wrap">
-            Дэлгэцэнд: {(pageNo-1) * rowsPerPage + 1} - {rowsPerPage != -1 ? ((pageNo) * rowsPerPage > total_count) ? total_count : (pageNo) * rowsPerPage : total_count} Нийт: {total_count} бичлэг
+          Дэлгэцэнд: {(pageNo-1) * rowsPerPage + 1} - {rowsPerPage != -1 ? ((pageNo) * rowsPerPage > total_count) ? total_count : (pageNo) * rowsPerPage : total_count} Нийт: {total_count} бичлэг
         </Label>
         <ReactPaginate
           previousLabel={<Previous size={15} />}
