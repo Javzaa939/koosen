@@ -1714,6 +1714,96 @@ class ElseltHealthPhysical(
 
         return request.send_info('INF_003')
 
+# class ElseltPhysicalExcelImportAPIView(
+#     generics.GenericAPIView
+# ):
+#     """ Оюутны жагсаалт import хийх """
+
+#     @transaction.atomic()
+#     def post(self, request):
+
+
+#         datas = request.data
+#         file = datas.get("file")
+
+#         # Файл түр хадгалах
+#         path = save_file(file, 'student', 1)
+#         full_path = os.path.join(settings.MEDIA_ROOT, str(path))
+
+#         error_datas = list()
+#         correct_datas = list()
+
+#         excel_data = pd.read_excel(full_path)
+#         datas = excel_data.to_dict(orient='records')
+
+#         try:
+#             for created_data in datas:
+#                 pay_type_id = 8 # төлбөр төлөлтын төрөл
+
+#                 department = created_data.get('Тэнхим')
+#                 group = created_data.get('Анги/дамжаа')
+#                 register_num = created_data.get('Регистрийн дугаар')
+#                 # family_name = created_data.get('Ургийн овог')
+#                 last_name = created_data.get('Эцэг эхийн нэр')
+#                 first_name = created_data.get('Өөрийн нэр')
+#                 last_name_uig = created_data.get('Эцэг эхийн нэр уйгаржин')
+#                 first_name_uig = created_data.get('Өөрийн нэр уйгаржин')
+#                 phone = created_data.get('Утасны дугаар')
+#                 # yas_undes = created_data.get('Яс үндэс')
+
+#                 # gender = created_data.get('Хүйс')
+#                 birth_date, gender = calculate_birthday(register_num)
+#                 status = created_data.get('Төлөв')
+#                 code = created_data.get('Суралцагчдын код')
+
+#                 pay_type_id = Student.EXPENSES
+
+#                 status_id = None
+
+#                 # суралцах хэлбэр
+#                 status_id = StudentRegister.objects.filter(name__icontains='Суралцаж буй').first()
+
+#                 dep_obj = Salbars.objects.filter(name__icontains=department).first()
+#                 group_obj = Group.objects.filter(name__icontains=group).first()
+
+#                 obj = {
+#                     'department': department,
+#                     'group': group,
+#                     'register_num': register_num,
+#                     'last_name': last_name,
+#                     'first_name': first_name,
+#                     'phone': phone,
+#                     'status': status,
+#                     'last_name_uig': last_name_uig,
+#                     'first_name_uig': first_name_uig,
+#                     'gender': gender,
+#                     'birth_date': birth_date,
+#                     'pay_type': pay_type_id,
+#                     'code': code,
+#                 }
+
+#                 student_qs = Student.objects.filter(code=code)
+
+#                 if not (code or dep_obj or group_obj or pay_type_id or register_num or last_name or first_name or phone or status_id) or student_qs:
+#                     error_datas.append(obj)
+#                 else:
+#                     correct_datas.append(obj)
+
+#                 if file:
+#                     remove_folder(full_path)
+
+#         except Exception as e:
+#             print(e)
+#             return request.send_error('ERR_012')
+
+#         return_datas = {
+#             'create_datas': correct_datas,
+#             'all_error_datas': error_datas,
+#             'file_name': file.name,
+#             'not_found_student': error_datas,
+#         }
+
+#         return request.send_data(return_datas)
 
  # -------------------Элсэгчдийн нарийн мэргэжилийн шатны эрүүл мэндийн үзлэг-------------------------#
 class ElseltHealthPhysicalCreateAPIView(

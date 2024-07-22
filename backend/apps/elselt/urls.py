@@ -60,6 +60,7 @@ urlpatterns = [
 
     # Эрүүл мэнд бие бялдарын үзлэг
     path('health/physical/', ElseltHealthPhysical.as_view()),
+    # path('health/physical/import', ElseltPhysicalExcelImportAPIView.as_view()),
     path('health/physical/<int:pk>/', ElseltHealthPhysical.as_view()),
 
     # Эрүүл мэндийн нарийвчилсан мэдээллийг хадгалах with POSTMAN

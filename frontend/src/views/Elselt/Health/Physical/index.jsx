@@ -4,7 +4,7 @@ import { Fragment, useState, useEffect, useContext } from 'react'
 
 import { Row, Col, Card, Input, Label, Button, CardHeader, Spinner, UncontrolledTooltip, CardBody } from 'reactstrap'
 
-import { ChevronDown, Search } from 'react-feather'
+import { ChevronDown, Search, UploadCloud } from 'react-feather'
 
 import DataTable from 'react-data-table-component'
 
@@ -28,6 +28,7 @@ import moment from 'moment'
 import classnames from "classnames";
 import { RiEditFill } from 'react-icons/ri'
 import { SortModal } from './SortModal'
+import FileModal from '@src/components/FileModal'
 
 const STATE_LIST = [
     {
@@ -79,6 +80,9 @@ function Physical() {
 
     const [addModal, setAddModal] = useState(false)
     const [addModalData, setAddModalData] = useState(null)
+    // excel file import
+    const [open_file, setFileModal] = useState(false)
+    const [file, setFile] = useState(false)
 
     const [modal, setModal] = useState(false)
     const [type, setType] = useState('')
@@ -100,6 +104,7 @@ function Physical() {
 	const elseltApi = useApi().elselt.health.physical
     const professionApi = useApi().elselt.profession
     const admissionYearApi = useApi().elselt
+    const ExcelImportApi = useApi().elselt.health.physical
 
     useEffect(() => {
         getAdmissionYear()
@@ -142,6 +147,28 @@ function Physical() {
             setPageCount(cpage_count)
         }
 	}
+
+    async function onSubmit() {
+        if (file) {
+            const formData = new FormData()
+            formData.append('file', file)
+
+            const { success, data }  = await fetchData(ExcelImportApi.postExcelImport(formData))
+            if (success) {
+                handleFileModal()
+                handleShowDetailModal()
+                if (data?.file_name) {
+                    setFileName(data?.file_name)
+                    delete data['file_name']
+                }
+                if (data?.all_error_datas) {
+                    setErrorDatas(data?.all_error_datas)
+                    delete data['all_error_datas']
+                }
+                setDetailDatas(data)
+            }
+        }
+    }
 
 	// Хайлтийн хэсэг хоосон болох үед анхны датаг дуудна
 	useEffect(() => {
@@ -366,6 +393,11 @@ function Physical() {
     function handleModal() {
         setModal(!modal)
     }
+
+    function handleFileModal() {
+        setFileModal(!open_file)
+        setFile('')
+    }
     return (
         <Fragment>
             <EmailModal
@@ -381,6 +413,19 @@ function Physical() {
                 getDatas={getDatas}
             />
         <Card>
+            {open_file &&
+                <FileModal
+                    isOpen={open_file}
+                    handleModal={handleFileModal}
+                    isLoading={isLoading}
+                    file={file}
+                    setFile={setFile}
+                    title="Бие бялдар оюутны мэдээлэл оруулах"
+                    fileAccept='.csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
+                    extension={['xlsx']}
+                    onSubmit={onSubmit}
+                />
+            }
             {
                 addModal &&
                 <AddModal
@@ -587,14 +632,22 @@ function Physical() {
                             </UncontrolledTooltip>
                         </div>
                     </div>
-                    <div className='px-0'>
-                        <Button color='primary' className='d-flex align-items-center px-75' id='excel_button' onClick={() => convert()}>
-                            <HiOutlineDocumentReport className='me-25'/>
-                            Excel татах
-                        </Button>
-                        <UncontrolledTooltip target='excel_button'>
-                            Доорхи хүснэгтэнд харагдаж байгаа мэдээллийн жагсаалтаар эксел файл үүсгэнэ
-                        </UncontrolledTooltip>
+                    <div className='d-flex'>
+                        <div className='px-1'>
+                            <Button color='primary' className='d-flex align-items-center px-75 justify-content-between' onClick={() => handleFileModal()}>
+                                <UploadCloud size={15} />
+                                Excel оруулах
+                            </Button>
+                        </div>
+                        <div className='px-0'>
+                            <Button color='primary' className='d-flex align-items-center px-75' id='excel_button' onClick={() => convert()}>
+                                <HiOutlineDocumentReport className='me-25'/>
+                                Excel татах
+                            </Button>
+                            <UncontrolledTooltip target='excel_button'>
+                                Доорхи хүснэгтэнд харагдаж байгаа мэдээллийн жагсаалтаар эксел файл үүсгэнэ
+                            </UncontrolledTooltip>
+                        </div>
                     </div>
                 </div>
                 <Row className="justify-content-between " >
