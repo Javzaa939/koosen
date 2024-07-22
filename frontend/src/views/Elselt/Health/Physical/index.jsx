@@ -22,6 +22,8 @@ import { getColumns } from './helpers';
 import AddModal from './AddModal'
 import EmailModal from '../../User/EmailModal'
 import MessageModal from '../../User/MessageModal'
+import Flatpickr from 'react-flatpickr'
+import moment from 'moment'
 
 import classnames from "classnames";
 import { RiEditFill } from 'react-icons/ri'
@@ -85,6 +87,8 @@ function Physical() {
     const [emailModal, setEmailModal] = useState(false)      // email modal
     const [messageModal, setMessageModal] = useState(false)  // message modal
     const [selectedStudents, setSelectedStudents] = useState([])
+    const [end_date, setEnd_date] = useState('')
+    const [start_date, setStart_date] = useState('')
 
     // Нийт датаны тоо
     const [total_count, setTotalCount] = useState(datas.length || 1)
@@ -129,7 +133,7 @@ function Physical() {
 	/* Жагсаалтын дата авах функц */
 	async function getDatas() {
 
-        const {success, data} = await fetchData(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, chosenState, admId, profId, gender))
+        const {success, data} = await fetchData(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, chosenState, admId, profId, gender,start_date,end_date))
         if(success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
@@ -150,7 +154,7 @@ function Physical() {
 
 			return () => clearTimeout(timeoutId);
 		}
-    }, [sortField, currentPage, rowsPerPage, searchValue, chosenState, admId, profId, gender])
+    }, [sortField, currentPage, rowsPerPage, searchValue, chosenState, admId, profId, gender,start_date,end_date])
 
        // excel татах
        function convert(){
@@ -496,6 +500,58 @@ function Physical() {
                                 getOptionValue={(option) => option.id}
                                 getOptionLabel={(option) => option.name}
                             />
+                    </Col>
+                    <Col md={3} className='my-0 py-0 '>
+                        <Label className="form-label" for="">
+                            {t('Эхлэх огноо')}
+                        </Label>
+                        <Flatpickr
+                            className='form-control form-control-sm  bg-white '
+                            style={{ maxWidth: '480px' }}
+                            placeholder={`-- Сонгоно уу --`}
+
+                            onChange={(selectedDates, dateStr) => {
+								setStart_date(
+									selectedDates.length === 0
+										? ''
+										: moment(dateStr).format('YYYY-MM-DD HH:mm')
+								);
+							}}
+                            value={start_date}
+                            options={{
+                                time_24hr: true,
+                                enableTime: true,
+                                dateFormat: "Y-m-d H:i",
+                                mode: "single",
+                                // locale: Mongolian
+                            }}
+                        />
+                    </Col>
+                    <Col md={3} className='my-0 py-0 '>
+                        <Label className="form-label" for="">
+                            {t('Дуусах огноо')}
+                        </Label>
+                        <Flatpickr
+                            className='form-control form-control-sm  bg-white '
+                            style={{ maxWidth: '480px' }}
+                            placeholder={`-- Сонгоно уу --`}
+
+                            onChange={(selectedDates, dateStr) => {
+								setEnd_date(
+									selectedDates.length === 0
+										? ''
+										: moment(dateStr).format('YYYY-MM-DD HH:mm')
+								);
+							}}
+                            value={end_date}
+                            options={{
+                                time_24hr: true,
+                                enableTime: true,
+                                dateFormat: "Y-m-d H:i",
+                                mode: "single",
+                                // locale: Mongolian
+                            }}
+                        />
                     </Col>
                 </Row>
                 <div className='d-flex justify-content-between my-50 mt-1'>

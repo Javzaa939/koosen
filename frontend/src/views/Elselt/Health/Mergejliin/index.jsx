@@ -5,18 +5,20 @@ import { BiMessageRoundedError } from "react-icons/bi";
 import { MdMailOutline } from "react-icons/md";
 
 import {
-  Row,
-  Col,
-  Card,
-  Input,
-  Label,
-  Button,
-  CardHeader,
-  Spinner,
-  CardBody,
-  UncontrolledTooltip,
+	Row,
+	Col,
+	Card,
+	Input,
+	Label,
+	Button,
+	CardHeader,
+	Spinner,
+	CardBody,
+	UncontrolledTooltip,
 } from "reactstrap";
 
+import Flatpickr from 'react-flatpickr'
+import moment from 'moment';
 import { ChevronDown, Search, Zap, FileText } from "react-feather";
 import classnames from "classnames";
 
@@ -55,15 +57,15 @@ const STATE_LIST = [
 
 function Mergejliin() {
 	const genderOp = [
-        {
-            id: 1,
-            name: 'Эрэгтэй',
-        },
-        {
-            id: 2,
-            name: 'Эмэгтэй'
-        }
-    ]
+		{
+			id: 1,
+			name: 'Эрэгтэй',
+		},
+		{
+			id: 2,
+			name: 'Эмэгтэй'
+		}
+	]
 	const [gender, setGender] = useState("")
 
 	const { user } = useContext(AuthContext)
@@ -92,6 +94,8 @@ function Mergejliin() {
 	const [adm, setAdm] = useState("");
 
 	const [selectedStudents, setSelectedStudents] = useState([]);
+	const [end_date, setEnd_date] = useState('')
+	const [start_date, setStart_date] = useState('')
 
 	const [emailModal, setEmailModal] = useState(false);
 	const [messageModal, setMessageModal] = useState(false);
@@ -107,7 +111,7 @@ function Mergejliin() {
 	const admissionYearApi = useApi().elselt;
 	const professionApi = useApi().elselt.profession;
 
-  /* Жагсаалтын дата авах функц */
+	/* Жагсаалтын дата авах функц */
 	async function getDatas() {
 		const { success, data } = await fetchData(
 			elseltApi.get(
@@ -118,7 +122,9 @@ function Mergejliin() {
 				adm,
 				profession_id,
 				chosenState,
-				gender
+				gender,
+				start_date,
+				end_date
 			)
 		);
 		if (success) {
@@ -137,14 +143,14 @@ function Mergejliin() {
 	async function getProfession() {
 		const { success, data } = await fetchData(professionApi.getList(adm));
 		if (success) {
-		setProfession(data);
+			setProfession(data);
 		}
 	}
 
 	async function getAdmissionYear() {
 		const { success, data } = await fetchData(admissionYearApi.getAll());
 		if (success) {
-		setAdmop(data);
+			setAdmop(data);
 		}
 	}
 
@@ -167,7 +173,9 @@ function Mergejliin() {
 		adm,
 		profession_id,
 		chosenState,
-		gender
+		gender,
+		start_date,
+		end_date
 	]);
 
 	useEffect(() => {
@@ -187,9 +195,9 @@ function Mergejliin() {
 
 	function handleSort(column, sort) {
 		if (sort === "asc") {
-		setSort(column.header);
+			setSort(column.header);
 		} else {
-		setSort("-" + column.header);
+			setSort("-" + column.header);
 		}
 	}
 
@@ -226,15 +234,15 @@ function Mergejliin() {
 		setMessageModal(!messageModal);
 	}
 	function excelHandler() {
-        excelDownLoadv2(datas, STATE_LIST)
-    }
+		excelDownLoadv2(datas, STATE_LIST)
+	}
 	return (
 		<Card>
 			<Detail
 				detail={detail}
 				detailHandler={detailHandler}
 				detailData={detailData}
-                getDatas={getDatas}
+				getDatas={getDatas}
 
 			/>
 			<EmailModal
@@ -247,26 +255,26 @@ function Mergejliin() {
 				messageModalHandler={messageModalHandler}
 				messageModal={messageModal}
 				selectedStudents={selectedStudents}
-                getDatas={getDatas}
+				getDatas={getDatas}
 			/>
 			<CardHeader>
 				<h5>Нарийн мэргэжлийн шатны эрүүл мэндийн үзлэг</h5>
 				<Col className="d-flex justify-content-end">
-				<Button
-					color="primary"
-					className="d-flex align-items-center"
-					onClick={() => excelHandler()}
-				>
-					<FileText className='me-50' size={14}/>
-					<div>Нарийн мэргэжил excel татах</div>
-				</Button>
+					<Button
+						color="primary"
+						className="d-flex align-items-center"
+						onClick={() => excelHandler()}
+					>
+						<FileText className='me-50' size={14} />
+						<div>Нарийн мэргэжил excel татах</div>
+					</Button>
 				</Col>
 			</CardHeader>
 			<CardBody>
 				<Row>
 					<Col sm={6} lg={3}>
 						<Label className="form-label" for="lesson_year">
-						{t("Элсэлт")}
+							{t("Элсэлт")}
 						</Label>
 						<Select
 							name="lesson_year"
@@ -330,28 +338,80 @@ function Mergejliin() {
 						/>
 					</Col>
 					<Col md={3} >
-                    	<Label className="form-label" for="genderOp">
-                        	{t('Хүйс')}
+						<Label className="form-label" for="genderOp">
+							{t('Хүйс')}
 						</Label>
-							<Select
-								name="genderOp"
-								id="genderOp"
-								classNamePrefix='select'
-								isClearable
-								className={classnames('react-select')}
-								isLoading={isLoading}
-								placeholder={t('-- Сонгоно уу --')}
-								options={genderOp || []}
-								value={genderOp.find((c) => c.name === gender)}
-								noOptionsMessage={() => t('Хоосон байна.')}
-								onChange={(val) => {
-									setGender(val?.name || '')
-								}}
-								styles={ReactSelectStyles}
-								getOptionValue={(option) => option.id}
-								getOptionLabel={(option) => option.name}
-							/>
-                	</Col>
+						<Select
+							name="genderOp"
+							id="genderOp"
+							classNamePrefix='select'
+							isClearable
+							className={classnames('react-select')}
+							isLoading={isLoading}
+							placeholder={t('-- Сонгоно уу --')}
+							options={genderOp || []}
+							value={genderOp.find((c) => c.name === gender)}
+							noOptionsMessage={() => t('Хоосон байна.')}
+							onChange={(val) => {
+								setGender(val?.name || '')
+							}}
+							styles={ReactSelectStyles}
+							getOptionValue={(option) => option.id}
+							getOptionLabel={(option) => option.name}
+						/>
+					</Col>
+					<Col md={3} className='my-0 py-0 '>
+						<Label className="form-label" for="">
+							{t('Эхлэх огноо')}
+						</Label>
+						<Flatpickr
+							className='form-control form-control-sm  bg-white '
+							style={{ maxWidth: '480px' }}
+							placeholder={`-- Сонгоно уу --`}
+
+							onChange={(selectedDates, dateStr) => {
+								setStart_date(
+									selectedDates.length === 0
+										? ''
+										: moment(dateStr).format('YYYY-MM-DD HH:mm')
+								);
+							}}
+							value={start_date}
+							options={{
+								time_24hr: true,
+								enableTime: true,
+								dateFormat: "Y-m-d H:i",
+								mode: "single",
+								// locale: Mongolian
+							}}
+						/>
+					</Col>
+					<Col md={3} className='my-0 py-0 '>
+						<Label className="form-label" for="">
+							{t('Дуусах огноо')}
+						</Label>
+						<Flatpickr
+							className='form-control form-control-sm  bg-white '
+							style={{ maxWidth: '480px' }}
+							placeholder={`-- Сонгоно уу --`}
+
+							onChange={(selectedDates, dateStr) => {
+								setEnd_date(
+									selectedDates.length === 0
+										? ''
+										: moment(dateStr).format('YYYY-MM-DD HH:mm')
+								);
+							}}
+							value={end_date}
+							options={{
+								time_24hr: true,
+								enableTime: true,
+								dateFormat: "Y-m-d H:i",
+								mode: "single",
+								// locale: Mongolian
+							}}
+						/>
+					</Col>
 					<Col md={9} className="d-flex mt-2 mb-1 justify-content-start">
 						<div className="">
 							<Button
@@ -361,7 +421,7 @@ function Mergejliin() {
 								id="email_button"
 								onClick={() => emailModalHandler()}
 							>
-							<MdMailOutline className="me-25" />
+								<MdMailOutline className="me-25" />
 								Email илгээх
 							</Button>
 							<UncontrolledTooltip target="email_button">
@@ -399,9 +459,9 @@ function Mergejliin() {
 								onChange={(e) => handlePerPage(e)}
 							>
 								{default_page.map((page, idx) => (
-								<option key={idx} value={page}>
-									{page}
-								</option>
+									<option key={idx} value={page}>
+										{page}
+									</option>
 								))}
 							</Input>
 						</Col>
@@ -445,20 +505,20 @@ function Mergejliin() {
 						className="react-dataTable-header-md"
 						progressPending={isLoading}
 						progressComponent={
-						<div className="my-2 d-flex align-items-center justify-content-center">
-							<Spinner className="me-1" color="" size="sm" />
-							<h5>Түр хүлээнэ үү...</h5>
-						</div>
+							<div className="my-2 d-flex align-items-center justify-content-center">
+								<Spinner className="me-1" color="" size="sm" />
+								<h5>Түр хүлээнэ үү...</h5>
+							</div>
 						}
 						noDataComponent={
-						<div className="my-2">
-							<h5>{t("Өгөгдөл байхгүй байна")}</h5>
-						</div>
+							<div className="my-2">
+								<h5>{t("Өгөгдөл байхгүй байна")}</h5>
+							</div>
 						}
 						print="true"
 						theme="solarized"
 						onSort={handleSort}
-                        columns={getColumns(currentPage, rowsPerPage === 'Бүгд' ? 1 : rowsPerPage, total_count, STATE_LIST,  detailHandler)}
+						columns={getColumns(currentPage, rowsPerPage === 'Бүгд' ? 1 : rowsPerPage, total_count, STATE_LIST, detailHandler)}
 						sortIcon={<ChevronDown size={10} />}
 						paginationPerPage={rowsPerPage}
 						paginationDefaultPage={currentPage}

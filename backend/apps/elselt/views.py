@@ -1378,6 +1378,9 @@ class ElseltHealthProfessional(
         state  = self.request.query_params.get('state')
         admission = self.request.query_params.get("lesson_year_id")
         profession = self.request.query_params.get('profession_id')
+        start_date=self.request.query_params.get('start_date')
+        end_date=self.request.query_params.get('end_date')
+
 
         # Анхан шат тэнцсэн хэрэглэгчид
         anhan_shat_ids = HealthUser.objects.filter(state=AdmissionUserProfession.STATE_APPROVE).values_list('user', flat=True)
@@ -1414,6 +1417,15 @@ class ElseltHealthProfessional(
                 user__admissionuserprofession__profession__profession=profession
             )
 
+        filters = {}
+        if start_date:
+            filters['updated_at__gte'] = start_date
+        if end_date:
+            filters['updated_at__lte'] = end_date
+
+        if filters:
+            dates = HealthUpUser.objects.filter(**filters).values_list('user', flat=True)
+            queryset = queryset.filter(user__in=dates)
 
         return queryset
 
@@ -1554,6 +1566,8 @@ class ElseltHealthPhysical(
         state  = self.request.query_params.get('state')
         elselt = self.request.query_params.get('elselt')
         profession = self.request.query_params.get('profession')
+        start_date=self.request.query_params.get('start_date')
+        end_date=self.request.query_params.get('end_date')
 
         # Нарийн мэргэжлийн үзлэгт тэнцсэн хүүхдүүд бие бялдарын шалгалтад орно
         healt_user_ids = HealthUpUser.objects.filter(state=AdmissionUserProfession.STATE_APPROVE).values_list('user', flat=True)
@@ -1588,6 +1602,15 @@ class ElseltHealthPhysical(
                 user_id = PhysqueUser.objects.filter(state=state).values_list('user', flat=True)
                 queryset = queryset.filter(user__in=user_id)
 
+        filters = {}
+        if start_date:
+            filters['updated_at__gte'] = start_date
+        if end_date:
+            filters['updated_at__lte'] = end_date
+
+        if filters:
+            dates = PhysqueUser.objects.filter(**filters).values_list('user', flat=True)
+            queryset = queryset.filter(user__in=dates)
         return queryset
 
     def get(self, request, pk=None):
