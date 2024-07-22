@@ -102,7 +102,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, addModalHandl
 		{
 			header: 'updated_date',
 			name: <div className="px-1">Огноо</div>,
-			selector: (row) => row?.updated_at? moment(row?.updated_at).format("YYYY-MM-DD h:mm") : '',
+			selector: (row) => row?.health_up_user_data?.updated_at? moment(row?.health_up_user_data?.updated_at).format("YYYY-MM-DD h:mm") : '',
             sortable: true,
 			minWidth: '180px',
 		},
