@@ -2308,19 +2308,21 @@ class PsychologicalTestQuestionsAPIView(
         return request.send_info("INF_003")
 
 
-class PsychologicalQuestionTitleListAPIView(
-    generics.GenericAPIView,
-    mixins.ListModelMixin,
-):
-    """ Шалгалтын Гарчиг
-    """
-    queryset = PsychologicalQuestionTitle.objects.all()
+class PsychologicalQuestionTitleListAPIView(APIView):
+
+    """ Шалгалтын Гарчиг"""
+
+    def get_queryset(self, user):
+        if user.is_superuser:
+            question_titles = PsychologicalTestQuestions.objects.all().values_list("title", flat=True)
+        else:
+            question_titles = PsychologicalTestQuestions.objects.filter(created_by=user).values_list("title", flat=True)
+        return PsychologicalQuestionTitle.objects.filter(id__in=question_titles)
 
     @login_required()
     def get(self, request):
-        user = request.user.id
-        question_titles = PsychologicalTestQuestions.objects.filter(created_by=user).values_list("title", flat=True)
-        data = self.queryset.filter(id__in=question_titles).values("id", "name")
+        user = request.user
+        data = self.get_queryset(user).values("id", "name")
         return request.send_data(list(data))
 
 

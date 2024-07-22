@@ -3239,6 +3239,8 @@ class PsychologicalTestQuestions(models.Model):
     )
 
     kind = models.IntegerField(choices=KIND_CHOICES, null=False, blank=False, verbose_name='Асуултын төрөл')
+    # Асуултууд өөрсдийн гэсэн дугаар номертой байна
+    question_number = models.PositiveIntegerField(null=True, blank=True, verbose_name="Асуултын дугаар")
     question = models.CharField(max_length=1000, null=False, blank=False, verbose_name="Асуулт")
     image = models.ImageField(upload_to=get_image_path, null=True, blank=True, verbose_name='зураг')
 

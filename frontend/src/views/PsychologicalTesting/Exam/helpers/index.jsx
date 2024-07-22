@@ -26,7 +26,8 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleEditMod
 			name: t("Сорилын нэр"),
 			selector: (row) => (row?.title),
             sortable: true,
-			minWidth: "80px",
+			maxWidth: "400px",
+			minWidth: "150px",
 			center: true
 		},
 		{
@@ -42,27 +43,29 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleEditMod
 				)
 			},
             sortable: true,
+			maxWidth: "550px",
+			minWidth: "200px",
 			center: true
         },
         {
 			name: t("Хамрах хүрээ"),
 			selector: (row) => row?.scope_name,
+			width: '200px',
 			center: true,
-			width: '250px'
         },
 		{
 			header: 'start_date',
 			name: t("Эхлэх огноо"),
 			selector: (row) => row?.start_date,
             sortable: true,
-			center: true
+			width: '150px',
         },
 		{
 			header: 'end_date',
 			name: t("Дуусах огноо"),
 			selector: (row) => row?.end_date,
             sortable: true,
-			center: true
+			width: '150px',
         },
         {
 			header: 'duration',
@@ -77,6 +80,8 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleEditMod
 				)
 			},
             sortable: true,
+			maxWidth: "200px",
+			minWidth: "100px",
 			center: true
         },
 	]
