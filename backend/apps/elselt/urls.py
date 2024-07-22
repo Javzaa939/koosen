@@ -16,6 +16,7 @@ urlpatterns = [
     path('hynalt_number/', HynaltNumberAPIView.as_view()),
     path('hynalt_is_gender/', HynaltNumberIsGenderAPIView.as_view()),
     path('userscore/', UserScoreSortAPIView.as_view()),
+    path('physical/', PhysicalScoreSortAPIView.as_view()),
 
     # Элсэгчдийн мэдээлэл
     path('admissionuserdata/', AdmissionUserInfoAPIView.as_view()),

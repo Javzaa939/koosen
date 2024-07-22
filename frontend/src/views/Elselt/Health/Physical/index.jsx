@@ -24,6 +24,8 @@ import EmailModal from '../../User/EmailModal'
 import MessageModal from '../../User/MessageModal'
 
 import classnames from "classnames";
+import { RiEditFill } from 'react-icons/ri'
+import { SortModal } from './SortModal'
 
 const STATE_LIST = [
     {
@@ -75,6 +77,10 @@ function Physical() {
 
     const [addModal, setAddModal] = useState(false)
     const [addModalData, setAddModalData] = useState(null)
+
+    const [modal, setModal] = useState(false)
+    const [type, setType] = useState('')
+	const [editData, setEditData] = useState([])
 
     const [emailModal, setEmailModal] = useState(false)      // email modal
     const [messageModal, setMessageModal] = useState(false)  // message modal
@@ -156,17 +162,17 @@ function Physical() {
                     'Нэр': data?.user?.first_name || '',
                     'Хүйс': data?.gender_name || '',
                     'РД': data?.user_register || '',
+                    'Үзлэгийн төлөв':STATE_LIST.find(val => val.id === data?.health_up_user_data?.state)?.name|| '',
                     'Нас': data?.user_age || 0,
-                    'Үзлэгийн төлөв':STATE_LIST.find(val => val.id === data?.health_up_user_data?.state).name|| '',
-                    'Тайлбар': data?.health_up_user_data?.description  || '',
+                    'Нийт оноо': data?.health_up_user_data?.total_score  || '',
                     'Хэмжээст оноо' : data?.health_up_user_data?.physice_score || '',
+                    'Тайлбар': data?.health_up_user_data?.description  || '',
                     'Савлуурт суниах':data?.health_up_user_data?.turnik || '',
                     'Гэдэсний даралт': data?.health_up_user_data?.belly_draught || '',
                     'Тэсвэр 1000М': data?.health_up_user_data?.patience_1000m || '',
                     'Хурд 100М': data?.health_up_user_data?.speed_100m || '',
                     'Авхаалж самбаа ': data?.health_up_user_data?.quickness|| '',
                     'Уян хатан': data?.health_up_user_data?.flexible || '',
-                    'Нийт оноо': data?.health_up_user_data?.total_score  || '',
                     'Төгссөн сургууль': data?.userinfo?.graduate_school || '',
                     'Хөтөлбөр': data?.userinfo?.graduate_profession || '',
                     'Төгссөн он': data?.userinfo?.graduate_school_year || '',
@@ -195,17 +201,17 @@ function Physical() {
             'Нэр',
             'Хүйс',
             'РД',
-            'Нас',
             'Үзлэгийн төлөв',
-            'Тайлбар',
+            'Нас',
+            'Нийт оноо',
             'Хэмжээст оноо',
+            'Тайлбар',
             'Савлуурт суниах',
             'Гэдэсний даралт',
             'Тэсвэр 1000М',
             'Хурд 100М',
             'Авхаалж самбаа',
             'Уян хатан',
-            'Нийт оноо',
             'Төгссөн сургууль',
             'Хөтөлбөр',
             'Төгссөн он',
@@ -353,6 +359,9 @@ function Physical() {
         setMessageModal(!messageModal)
     }
 
+    function handleModal() {
+        setModal(!modal)
+    }
     return (
         <Fragment>
             <EmailModal
@@ -382,6 +391,18 @@ function Physical() {
                 <h5>
                     Элсэгчдийн бие бялдарын үзүүлэлт
                 </h5>
+                <div className='d-flex flex-wrap mt-md-0 mt-1'>
+					<Button
+						color='primary'
+						className='d-flex align-items-center px-75 ms-1'
+						id='sort_button'
+                        disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-elselt-admission-create')) ? false : true}
+						onClick={() => handleModal()}
+					>
+						<RiEditFill className='me-25' />
+						Оноо эрэмбэлэх
+					</Button>
+				</div>
             </CardHeader>
             <CardBody>
                 {/* <Row>
@@ -604,6 +625,7 @@ function Physical() {
                 </div>
             </CardBody>
         </Card>
+        {modal && <SortModal open={modal} handleModal={handleModal} refreshDatas={getDatas} type={type} editData={editData} />}
     </Fragment>
     )
 }

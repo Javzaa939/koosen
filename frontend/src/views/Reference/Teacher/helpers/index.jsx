@@ -4,7 +4,11 @@ import { CheckCircle, Edit, X} from 'react-feather'
 import useModal from "@hooks/useModal"
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, handleEdit, handleDelete) {
+export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, handleDelete) {
+	const page_count = Math.ceil(total_count/ rowsPerPage)
+	if (currentPage > page_count) {
+        currentPage = 1
+    }
 	const { showWarning } = useModal()
 
     const columns = [
