@@ -2052,13 +2052,7 @@ class AdmissionJusticeListAPIView(
                 queryset = queryset.filter(gender__in=['0', '2', '4', '6', '8'])
 
         if justice_state:
-            if justice_state == '1':
-                exclude_ids = PhysqueUser.objects.filter(Q(Q(state=AdmissionUserProfession.STATE_APPROVE) | Q(state=AdmissionUserProfession.STATE_REJECT))).values_list('user', flat=True)
-                user_id = AdmissionUserProfession.objects.filter(justice_state=justice_state).exclude(user__in=exclude_ids).values_list('user', flat=True)
-            else:
-                user_id = PhysqueUser.objects.filter(state=justice_state).values_list('user', flat=True)
-
-            queryset = queryset.filter(user__in=user_id)
+            queryset = queryset.filter(justice_state=justice_state)
 
         # Sort хийх үед ажиллана
         if sorting:
