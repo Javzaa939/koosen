@@ -604,42 +604,40 @@ class AdmissionUserAllChange(
                 now = dt.datetime.now()
                 students = self.queryset.filter(pk__in=data["students"])
                 for student in students:
-                    if student.state == eval(data.get("state")):
-                        return Response({"info_code": "INF_001", "message": "state equal"}, status=200)
+                    if student.state != eval(data.get("state")):
+                        indicator_value = AdmissionIndicator.TENTSSEN_ELSEGCHID
+                        if data.get("state"):
+                            old_state = student.state
+                            student.state = data.get("state")
+                            student.updated_at = now
+                            student.state_description = data.get("state_description")
+                            student.save()
 
-                    indicator_value = AdmissionIndicator.TENTSSEN_ELSEGCHID
-                    if data.get("state"):
-                        old_state = student.state
-                        student.state = data.get("state")
-                        student.updated_at = now
-                        student.state_description = data.get("state_description")
-                        student.save()
+                            StateChangeLog.objects.create(
+                                user=student.user,
+                                type=StateChangeLog.STATE,
+                                indicator=indicator_value,
+                                now_state=old_state,
+                                change_state=data.get("state"),
+                                updated_user=request.user if request.user.is_authenticated else None,
+                                updated_at=now
+                            )
+                        else:
+                            old_justice_state = student.justice_state
+                            student.updated_at = now
+                            student.justice_state = data.get("justice_state")
+                            student.justice_description = data.get("justice_description")
+                            student.save()
 
-                        StateChangeLog.objects.create(
-                            user=student.user,
-                            type=StateChangeLog.STATE,
-                            indicator=indicator_value,
-                            now_state=old_state,
-                            change_state=data.get("state"),
-                            updated_user=request.user if request.user.is_authenticated else None,
-                            updated_at=now
-                        )
-                    else:
-                        old_justice_state = student.justice_state
-                        student.updated_at = now
-                        student.justice_state = data.get("justice_state")
-                        student.justice_description = data.get("justice_description")
-                        student.save()
-
-                        StateChangeLog.objects.create(
-                            user=student.user,
-                            type=StateChangeLog.PROFESSION,
-                            indicator=indicator_value,
-                            now_state=old_justice_state,
-                            change_state=data.get("justice_state"),
-                            updated_user=request.user if request.user.is_authenticated else None,
-                            updated_at=now
-                        )
+                            StateChangeLog.objects.create(
+                                user=student.user,
+                                type=StateChangeLog.PROFESSION,
+                                indicator=indicator_value,
+                                now_state=old_justice_state,
+                                change_state=data.get("justice_state"),
+                                updated_user=request.user if request.user.is_authenticated else None,
+                                updated_at=now
+                            )
         except Exception as e:
             transaction.savepoint_rollback(sid)
             return request.send_error("ERR_002", e.__str__)
@@ -1171,18 +1169,16 @@ class ElseltHealthAnhanShat(
                 indicator_value = AdmissionIndicator.ERUUL_MEND_ANHAN
                 old_state = student.state
 
-                if old_state == eval(data.get('state')):
-                    return Response({"info_code": "INF_001", "message": "state equal"}, status=200)
-
-                StateChangeLog.objects.create(
-                    user=student.user,
-                    type=StateChangeLog.STATE,
-                    indicator=indicator_value,
-                    now_state=old_state,
-                    change_state=data.get("state"),
-                    updated_user=request.user if request.user.is_authenticated else None,
-                    updated_at=now
-                )
+                if old_state != eval(data.get('state')):
+                    StateChangeLog.objects.create(
+                        user=student.user,
+                        type=StateChangeLog.STATE,
+                        indicator=indicator_value,
+                        now_state=old_state,
+                        change_state=data.get("state"),
+                        updated_user=request.user if request.user.is_authenticated else None,
+                        updated_at=now
+                    )
         except Exception as e:
             return request.send_error("ERR_004", str(e))
 
@@ -1332,18 +1328,16 @@ class ElseltHealthProfessional(
                 now = dt.datetime.now()
                 student = HealthUpUser.objects.filter(user=user).first()
 
-                if student.state == data.get('state'):
-                    return Response({"info_code": "INF_001", "message": "state equal"}, status=200)
-
-                StateChangeLog.objects.create(
-                    user=student.user,
-                    type=StateChangeLog.STATE,
-                    indicator=AdmissionIndicator.ERUUL_MEND_MERGEJLIIN,
-                    now_state=student.state, # Хуучин төлөв
-                    change_state=data.get("state"),
-                    updated_user=request.user if request.user.is_authenticated else None,
-                    updated_at=now
-                )
+                if student.state != data.get('state'):
+                    StateChangeLog.objects.create(
+                        user=student.user,
+                        type=StateChangeLog.STATE,
+                        indicator=AdmissionIndicator.ERUUL_MEND_MERGEJLIIN,
+                        now_state=student.state, # Хуучин төлөв
+                        change_state=data.get("state"),
+                        updated_user=request.user if request.user.is_authenticated else None,
+                        updated_at=now
+                    )
         except Exception as e:
             return request.send_error("ERR_004", str(e))
 
@@ -1509,18 +1503,16 @@ class ElseltHealthPhysical(
                 now = dt.datetime.now()
                 student = PhysqueUser.objects.filter(user=user).first()
 
-                if student.state == eval(data.get('state')):
-                    return Response({"info_code": "INF_001", "message": "state equal"}, status=200)
-
-                StateChangeLog.objects.create(
-                    user_id=user,
-                    type=StateChangeLog.STATE,
-                    indicator=AdmissionIndicator.BIE_BYALDAR,
-                    now_state=student.state,
-                    change_state=data.get("state"),
-                    updated_user=request.user if request.user.is_authenticated else None,
-                    updated_at=now
-                )
+                if student.state != eval(data.get('state')):
+                    StateChangeLog.objects.create(
+                        user_id=user,
+                        type=StateChangeLog.STATE,
+                        indicator=AdmissionIndicator.BIE_BYALDAR,
+                        now_state=student.state,
+                        change_state=data.get("state"),
+                        updated_user=request.user if request.user.is_authenticated else None,
+                        updated_at=now
+                    )
         except Exception as e:
             return request.send_error("ERR_004", str(e))
 
@@ -2118,18 +2110,16 @@ class AdmissionJusticeListAPIView(
                 now = dt.datetime.now()
                 students = self.queryset.filter(user__in=data["students"])
                 for student in students:
-                    if student.justice_state == eval(data.get("justice_state")):
-                        return Response({"info_code": "INF_001", "message": "justice_state equal"}, status=200)
-
-                    StateChangeLog.objects.create(
-                        user=student.user,
-                        type=StateChangeLog.STATE,
-                        indicator=AdmissionIndicator.YAL_SHIITGEL,
-                        now_state=student.justice_state,
-                        change_state=data.get("justice_state"),
-                        updated_user=request.user if request.user.is_authenticated else None,
-                        updated_at=now
-                    )
+                    if student.justice_state != eval(data.get("justice_state")):
+                        StateChangeLog.objects.create(
+                            user=student.user,
+                            type=StateChangeLog.STATE,
+                            indicator=AdmissionIndicator.YAL_SHIITGEL,
+                            now_state=student.justice_state,
+                            change_state=data.get("justice_state"),
+                            updated_user=request.user if request.user.is_authenticated else None,
+                            updated_at=now
+                        )
 
                 # Төлөв шинэчлэх
                 self.queryset.filter(user__in=data["students"]).update(
@@ -2234,18 +2224,16 @@ class ConversationUserSerializerAPIView(
 
             student = ConversationUser.objects.filter(user=user).first()
 
-            if student.state == eval(data.get('state')):
-                return Response({"info_code": "INF_001", "message": "state equal"}, status=200)
-
-            StateChangeLog.objects.create(
-                user=student.user,
-                type=StateChangeLog.STATE,
-                indicator=AdmissionIndicator.SETGEL_ZUI,
-                now_state=student.state,
-                change_state=data.get("state"),
-                updated_user=request.user if request.user.is_authenticated else None,
-                updated_at=now
-            )
+            if student.state != eval(data.get('state')):
+                StateChangeLog.objects.create(
+                    user=student.user,
+                    type=StateChangeLog.STATE,
+                    indicator=AdmissionIndicator.SETGEL_ZUI,
+                    now_state=student.state,
+                    change_state=data.get("state"),
+                    updated_user=request.user if request.user.is_authenticated else None,
+                    updated_at=now
+                )
 
             ConversationUser.objects.filter(
                user=data.get('user')
@@ -2337,18 +2325,16 @@ class ArmyUserSerializerAPView(
             now = dt.datetime.now()
             student = ArmyUser.objects.filter(user=user).first()
 
-            if student.state == eval(data.get("state")):
-                return Response({"info_code": "INF_001", "message": "state equal"}, status=200)
-
-            StateChangeLog.objects.create(
-                user=student.user,
-                type=StateChangeLog.STATE,
-                indicator=AdmissionIndicator.HEERIIN_BELTGEL,
-                now_state=student.state,
-                change_state=data.get("state"),
-                updated_user=request.user if request.user.is_authenticated else None,
-                updated_at=now
-            )
+            if student.state != eval(data.get("state")):
+                StateChangeLog.objects.create(
+                    user=student.user,
+                    type=StateChangeLog.STATE,
+                    indicator=AdmissionIndicator.HEERIIN_BELTGEL,
+                    now_state=student.state,
+                    change_state=data.get("state"),
+                    updated_user=request.user if request.user.is_authenticated else None,
+                    updated_at=now
+                )
 
             ArmyUser.objects.filter(
                 user=data.get('user')
@@ -3221,12 +3207,7 @@ class EyeshOrderUserInfoAPIView(
             with transaction.atomic():
                 now = dt.datetime.now()
                 student = self.queryset.filter(user=user).first()
-                if student:
-                    if student.yesh_state == data.get("yesh_state"):
-                        return Response({"info_code": "INF_001", "message": "state equal"}, status=200)
-
-                    indicator_value = AdmissionIndicator.EESH_EXAM
-                    old_state = student.yesh_state
+                if student.yesh_state != data.get("yesh_state"):
                     student.yesh_state = data.get("yesh_state")
                     student.updated_at = now
                     student.yesh_description = data.get("yesh_description")
@@ -3235,8 +3216,8 @@ class EyeshOrderUserInfoAPIView(
                     StateChangeLog.objects.create(
                         user=student.user,
                         type=StateChangeLog.STATE,
-                        indicator=indicator_value,
-                        now_state=old_state,
+                        indicator=AdmissionIndicator.EESH_EXAM,
+                        now_state=student.yesh_state,
                         change_state=data.get("yesh_state"),
                         updated_user=request.user if request.user.is_authenticated else None,
                         updated_at=now
