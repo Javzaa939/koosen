@@ -1,6 +1,7 @@
 import os
 import logging
 import json
+import ast
 
 from rest_framework import mixins
 from rest_framework import generics
@@ -2830,7 +2831,7 @@ class PsychologicalTestResultParticipantsAPIView(
         test_id = request.query_params.get('test_id')
         search_value = request.query_params.get('search')
 
-        # Тухайн ёорилоо авна
+        # Тухайн сорилоо авна
         test_instance = self.queryset.get(id=test_id)
 
         # Cорилын хамрах хүрээний төрлөөс шалтгаалан хамрах хүрээг хаанаас авхаа тодорхойлно
@@ -2857,14 +2858,14 @@ class PsychologicalTestResultParticipantsAPIView(
         # scope-д тохирсон model байвал
         if model_class is not None:
             if model_class == MentalUser:
-                self.queryset = model_class.objects.filter(user__in=participants).annotate(
+                self.queryset = model_class.objects.filter(user__in=participants, challenge=test_id).annotate(
                     first_name = F('user__first_name'),
                     last_name = F('user__last_name'),
                     code = F('user__code'),
                 )
             else:
                 # Оролцогчдоороо filter-ээд
-                self.queryset = model_class.objects.filter(id__in=participants)
+                self.queryset = model_class.objects.filter(id__in=participants, challenge=test_id)
             # Serializer-г нь заагаад
             self.serializer_class = serializer_class
             # Хайх утгуудын өгнө
@@ -2929,6 +2930,85 @@ class PsychologicalTestResultShowAPIView(
         }
         return request.send_data(return_data)
 
+
+class PsychologicalTestResultExcelAPIView(
+    generics.GenericAPIView
+):
+    """ Сэтгэлзүйн шалгалтын үр дүн тайлан excel """
+
+    # Оноо бүрд if нөхцөл ашиглахгүйн тулд function ашигласан
+    def classify_score(self, score, thresholds, labels):
+        # threshold нь үүнээс бага гэсэн нөхцлийг зааж өгнө
+        for idx, threshold in enumerate(thresholds):
+            # Оноо нь thres дотор байвал label-ийн ижил idx-тэй value-г буцаана
+            if score <= threshold:
+                return labels[idx]
+            # Бусад үед маш хүчтэй гэсэн value-г буцаана
+        return labels[-1]
+
+    def get(self, request):
+        datas = list()
+
+        # Элсэлгчдийн шалгалтын хариу
+        mental_users = MentalUser.objects.filter(challenge__title__icontains='DASS21').select_related('user')
+
+        # Сэтгэл гутралын асуултууд
+        depression_questions = set(PsychologicalTest.objects.filter(
+            title__icontains='DASS21',
+            questions__question_number__in=[3, 5, 10, 13, 16, 17, 21]
+        ).values_list('questions__id', flat=True))
+
+        # Түгшүүрийн асуултууд
+        anxiety_questions = set(PsychologicalTest.objects.filter(
+            title__icontains='DASS21',
+            questions__question_number__in=[2, 4, 7, 9, 15, 19, 20]
+        ).values_list('questions__id', flat=True))
+
+        # Стрессийн асуултууд
+        stress_questions = set(PsychologicalTest.objects.filter(
+            title__icontains='DASS21',
+            questions__question_number__in=[1, 6, 8, 11, 12, 14, 18]
+        ).values_list('questions__id', flat=True))
+
+        # Бүх асуултын хариултуудыг нэг dict дотор key-д нь id-г нь өгөөд value-д нь obj-ын өгөөд авна
+        # Энэ нь асуултуудаа ялгаж авхад хялбар бас хурдан
+        question_choices = PsychologicalQuestionChoices.objects.in_bulk(field_name='id')
+
+        # user-үүдээ бас өмнөхтэй ижил format-аар авсан
+        elselt_users = {user.id: user for user in ElseltUser.objects.filter(id__in=mental_users.values_list('user_id', flat=True))}
+
+        for user in mental_users:
+            user_data = dict()
+            user_obj = elselt_users[user.user.id]
+            user_data['first_name'] = user_obj.first_name
+            user_data['last_name'] = user_obj.last_name
+
+            # Хэрэглэгчийн хариултууд
+            answer = ast.literal_eval(user.answer)
+
+            total_depression_score = sum(
+                int(question_choices[value].value) for key, value in answer.items() if int(key) in depression_questions)
+            total_anxiety_score = sum(
+                int(question_choices[value].value) for key, value in answer.items() if int(key) in anxiety_questions)
+            total_stress_score = sum(
+                int(question_choices[value].value) for key, value in answer.items() if int(key) in stress_questions)
+
+            user_data['depression_score'] = total_depression_score
+            user_data['anxiety_score'] = total_anxiety_score
+            user_data['stress_score'] = total_stress_score
+
+            depression_thresholds = [4, 6, 10, 13]
+            anxiety_thresholds = [3, 5, 7, 9]
+            stress_thresholds = [7, 9, 12, 16]
+            labels = ['Хэвийн', 'Хөнгөн', 'Дунд зэрэг', 'Хүчтэй', 'Маш хүчтэй']
+
+            user_data['depression'] = self.classify_score(total_depression_score, depression_thresholds, labels)
+            user_data['anxiety'] = self.classify_score(total_anxiety_score, anxiety_thresholds, labels)
+            user_data['stress'] = self.classify_score(total_stress_score, stress_thresholds, labels)
+
+            datas.append(user_data)
+
+        return request.send_data(datas)
 
 
 @permission_classes([IsAuthenticated])
