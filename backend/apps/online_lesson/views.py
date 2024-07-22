@@ -10,6 +10,7 @@ from django.shortcuts import get_object_or_404
 from django.conf import settings
 from django.utils import timezone
 
+from main.utils.function.utils import get_cdn_url
 from lms.models import OnlineLesson, LessonMaterial
 from .serializers import OnlineLessonSerializer, LessonMaterialSerializer
 
@@ -85,7 +86,7 @@ class LessonMaterialDetailAPIView(
         file = request.FILES.get('path')
 
         # CDN server дээр файлаа хадгалах url
-        cdn_url = 'http://127.0.0.1:8001/cdn/save-file/'
+        cdn_url = get_cdn_url('save-file')
 
         # Хадгалах зам
         path = settings.ONLINE_LESSON
@@ -99,7 +100,7 @@ class LessonMaterialDetailAPIView(
         response = requests.post(cdn_url, data = cdn_data,files=files)
 
         # CDN server дээр файлаа шалгах url
-        cdn_get_url = 'http://127.0.0.1:8001/cdn/check-file/'
+        cdn_get_url = get_cdn_url('check-file')
 
         # Зөвхөн файлийн нэрийг авна
         file_name = file.name
@@ -136,7 +137,8 @@ class LessonMaterialDetailAPIView(
             file_path = str(file.path)
 
             # CDN server delete url
-            cdn_delete_url = 'http://127.0.0.1:8001/cdn/delete-file/'
+            cdn_delete_url = get_cdn_url('delete-file')
+
             cdn_delete_data = {
                 'path':file_path,
                 'is_file':True
