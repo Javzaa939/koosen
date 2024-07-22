@@ -103,7 +103,7 @@ const ElseltYlshiitgel = () => {
     const stateop = [
         {
             'id': 1,
-            'name': 'БҮРТГҮҮЛСЭН'
+            'name': 'ХҮЛЭЭГДЭЖ БУЙ'
         },
         {
             'id': 2,

@@ -1,58 +1,20 @@
-import { useRef } from 'react';
-import { Badge, Input, UncontrolledTooltip }  from 'reactstrap';
+import { Badge }  from 'reactstrap';
 
 import { t } from 'i18next'
 import moment from 'moment'
-import useApi from '@hooks/useApi';
-import useLoader from "@hooks/useLoader";
 
 import './style.css'
 
 // Хүснэгтийн баганууд
 export function getColumns (currentPage, rowsPerPage, page_count, user) {
 
-	const { fetchData } = useLoader({ isFullScreen: false })
-	const focusData = useRef(undefined)
-	const gpaApi = useApi().elselt.gpaс
-
     /** Сонгосон хуудасны тоо датаны тооноос их болсон үед хуудаслалт 1-ээ эхлэнэ */
     if (currentPage > page_count) {
         currentPage = 1
     }
 
-	const focusOut = (event) => {
-		if (focusData.current || focusData.current == '')
-		{
-			event.target.value = focusData.current
-		}
-	}
-
-	const handleSetGpaResult = async(event, id, index, key) => {
-
-		var value = event.target.value
-
-		if(event.key === 'Enter'){
-			let cdata = {
-				[key]: parseFloat(value),
-				'gpa_state': 2
-			}
-			if (id){
-				const { success } = await fetchData(gpaApi.put(cdata, id))
-				if (success){
-					focusData.current = undefined
-
-					var nextElementId = `${key}-${index + 1}-input`
-					var element = document.getElementById(`${nextElementId}`)
-
-					if (element) element.focus()
-				}
-			}
-		}
-	};
-
     const columns = [
 		{
-
 			name: "№",
 			selector: (row, index) => {
 				let tableRow = document.getElementById(`row-${row.id}`)
@@ -70,7 +32,6 @@ export function getColumns (currentPage, rowsPerPage, page_count, user) {
 			maxWidth: "80px",
 			minWidth: "80px",
 		},
-
 		{
 			minWidth: "150px",
 			header: 'user__last_name',
@@ -117,7 +78,6 @@ export function getColumns (currentPage, rowsPerPage, page_count, user) {
 			selector: (row) => row?.userinfo?.gpa,
 			center: true,
 		},
-
 		{
 			name: t("Хүйс"),
 			selector: (row) => row?.gender_name,
@@ -132,9 +92,6 @@ export function getColumns (currentPage, rowsPerPage, page_count, user) {
 			reorder: true,
 			center: true
 		},
-
-
-
 		{
 			minWidth: "120px",
 			name: t("Яаралтай холбогдох утас"),
@@ -142,7 +99,6 @@ export function getColumns (currentPage, rowsPerPage, page_count, user) {
 			wrap: true,
 			center: true
 		},
-
 		{
 			sortField: 'created_at',
 			header: 'created_at',
@@ -155,8 +111,8 @@ export function getColumns (currentPage, rowsPerPage, page_count, user) {
 			center: true,
 		},
 		{
-			maxWidth: "150px",
-			minWidth: "150px",
+			maxWidth: "200px",
+			minWidth: "200px",
 			header: 'justice_state',
 			reorder: true,
 			sortable: true,
@@ -166,7 +122,7 @@ export function getColumns (currentPage, rowsPerPage, page_count, user) {
 					color={`${row?.justice_state == 1 ? 'primary' : row?.justice_state == 2 ? 'success' : row?.justice_state == 3 ? 'danger' : 'primary'}`}
 					pill
 				>
-					{row?.justice_state_name}
+					{row?.justice_state == 1 ? 'ХҮЛЭЭГДЭЖ БУЙ' : row?.justice_state_name}
 				</Badge>),
 			center: true,
 		},
@@ -180,9 +136,6 @@ export function getColumns (currentPage, rowsPerPage, page_count, user) {
 			center: true,
 			wrap: true,
 		},
-
 	]
-
     return columns
-
 }
