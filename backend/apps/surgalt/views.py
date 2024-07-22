@@ -77,7 +77,7 @@ from core.models import (
 )
 
 from elselt.models import (
-    HealthUser,
+    PhysqueUser,
 )
 
 from lms.models import get_image_path
@@ -2766,9 +2766,9 @@ class PsychologicalTestScopeOptionsAPIView(
                     prof_ids = [item.get('id') for item in profession]
                     queryset = queryset.filter(profession__in=prof_ids)
 
-                # Анхан шат тэнцсэн хэрэглэгчид
-                anhan_shat_ids = HealthUser.objects.filter(state=AdmissionUserProfession.STATE_APPROVE).values_list('user', flat=True)
-                queryset = queryset.filter(user__in=anhan_shat_ids)
+                # Бие бялдар тэнцсэн элсэгч
+                biy_byldar_ids = PhysqueUser.objects.filter(state=AdmissionUserProfession.STATE_APPROVE).values_list('user', flat=True)
+                queryset = queryset.filter(user__in=biy_byldar_ids)
 
                 participant_ids = ElseltUser.objects.filter(
                     id__in=queryset.values_list('user', flat=True)
