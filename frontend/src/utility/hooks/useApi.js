@@ -1791,6 +1791,7 @@ function useApi(isDisplay=false) {
 			get: (gender, profession) => instance.get(`/elselt/hynalt_number/?gender=${gender}&profession=${profession}`),
 			getIsGender: (profession) => instance.get(`/elselt/hynalt_is_gender/?profession=${profession}`),
 			post:(cdata) => instance.post(`/elselt/userscore/`, cdata),
+			postPhysical:(cdata) => instance.post(`/elselt/physical/`, cdata),
 		},
 		// ЭЕШ хэсгийн оноо татах
 		eyesh:{

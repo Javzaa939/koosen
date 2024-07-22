@@ -24,6 +24,8 @@ import EmailModal from '../../User/EmailModal'
 import MessageModal from '../../User/MessageModal'
 
 import classnames from "classnames";
+import { RiEditFill } from 'react-icons/ri'
+import { SortModal } from './SortModal'
 
 const STATE_LIST = [
     {
@@ -75,6 +77,10 @@ function Physical() {
 
     const [addModal, setAddModal] = useState(false)
     const [addModalData, setAddModalData] = useState(null)
+
+    const [modal, setModal] = useState(false)
+    const [type, setType] = useState('')
+	const [editData, setEditData] = useState([])
 
     const [emailModal, setEmailModal] = useState(false)      // email modal
     const [messageModal, setMessageModal] = useState(false)  // message modal
@@ -353,6 +359,9 @@ function Physical() {
         setMessageModal(!messageModal)
     }
 
+    function handleModal() {
+        setModal(!modal)
+    }
     return (
         <Fragment>
             <EmailModal
@@ -382,6 +391,18 @@ function Physical() {
                 <h5>
                     Элсэгчдийн бие бялдарын үзүүлэлт
                 </h5>
+                <div className='d-flex flex-wrap mt-md-0 mt-1'>
+					<Button
+						color='primary'
+						className='d-flex align-items-center px-75 ms-1'
+						id='sort_button'
+                        disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-elselt-admission-create')) ? false : true}
+						onClick={() => handleModal()}
+					>
+						<RiEditFill className='me-25' />
+						Оноо эрэмбэлэх
+					</Button>
+				</div>
             </CardHeader>
             <CardBody>
                 {/* <Row>
@@ -604,6 +625,7 @@ function Physical() {
                 </div>
             </CardBody>
         </Card>
+        {modal && <SortModal open={modal} handleModal={handleModal} refreshDatas={getDatas} type={type} editData={editData} />}
     </Fragment>
     )
 }
