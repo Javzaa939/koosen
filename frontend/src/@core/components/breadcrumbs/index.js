@@ -59,7 +59,7 @@ const BreadCrumbs = (props) => {
             <div className="breadcrumb-wrapper vs-breadcrumbs d-sm-block d-none col-12">
               <Breadcrumb>
                 <BreadcrumbItem tag="li">
-                  <Link to={parentUrl || '/'}>{parentTitle || 'Home'}</Link>
+                  <Link to={parentUrl || '/'}>{parentTitle || 'Нүүр хуудас'}</Link>
                 </BreadcrumbItem>
                 {renderBreadCrumbs()}
               </Breadcrumb>

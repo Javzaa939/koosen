@@ -1503,7 +1503,7 @@ function useApi(isDisplay=false) {
 		},
 
 		psychologicalTest:{
-			get: (limit, page, sort, search) => instance.get(`learning/psychological_test/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}`),
+			get: (limit, page, sort, search, scope) => instance.get(`learning/psychological_test/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&scope=${scope}`),
 			getOne: (pk) => instance.get(`learning/psychological_test/${pk}/`),
 			post: (cdatas) => instance.post('learning/psychological_test/', cdatas),
 			put: (data, pk) => instance.put(`learning/psychological_test/${pk}/`, data),
@@ -1525,6 +1525,7 @@ function useApi(isDisplay=false) {
 		psychologicalTestResult:{
 			get: (limit, page, sort, search, scope) => instance.get(`learning/psychological_test_result/?page=${page}&limit=${limit}&sort=${sort}&search=${search}&scope=${scope}`),
 			getParticipants: (limit, page, search, test_id) => instance.get(`learning/psychological_test_result_participants/?page=${page}&limit=${limit}&search=${search}&test_id=${test_id}`),
+			getResult: (cdata) => instance.post(`learning/psychological_test_result_show/`,cdata),
 		}
 
 	},

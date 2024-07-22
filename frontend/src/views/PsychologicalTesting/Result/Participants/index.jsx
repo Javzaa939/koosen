@@ -19,6 +19,8 @@ import {
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
 import DataTable from "react-data-table-component";
+import BreadCrumbs from '@components/breadcrumbs';
+import ResultModal from "./Modal";
 
 function Participants(){
 
@@ -35,6 +37,12 @@ function Participants(){
     const [searchValue, setSearchValue] = useState('');
 
     const [datas, setDatas] = useState([]);
+
+
+    // row modal
+    const [modal, setModal] = useState(false);
+    const [modalId, setModalId] = useState();
+    const [modalData, setModalData] = useState([]);
 
 
     const challengeAPI = useApi().challenge.psychologicalTestResult;
@@ -69,6 +77,12 @@ function Participants(){
         setRowsPerPage(parseInt(e.target.value))
     };
 
+    function handleModal(id, data){
+        setModal(!modal);
+        setModalId(id);
+        setModalData(data);
+    }
+
     useEffect(() => {
         if (searchValue.length === 0) getDatas()
     },[searchValue])
@@ -76,9 +90,18 @@ function Participants(){
     return(
         <Fragment>
             <Card md={12}>
-                <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
-					<CardTitle tag="h4">{t("Сорил өгсөн оролцогчдын жагсаалт")}</CardTitle>
-                </CardHeader>
+                <Row className="mt-2 d-flex  flex-row align-items-center border-bottom m-1">
+                    <BreadCrumbs
+                        parentTitle={'Сэтгэлзүйн сорил'}
+                        parentUrl={'/psychologicaltesting/exam'}
+                        title={'Сэтгэлзүйн сорил'}
+                        data={[
+                            { title: 'Үр дүн', link: '/psychologicaltesting/result' },
+                            { title: 'Элсэгч'},
+                            { title: 'Сорил өгсөн оролцогчдын жагсаалт' }
+                        ]}
+                    />
+                </Row>
                 <Row className='justify-content-between mx-0 mb-1'>
                     <Col className='d-flex align-items-center justify-content-start '>
                         <Col md={2} sm={3} className='pe-1'>
@@ -146,6 +169,7 @@ function Participants(){
 							currentPage,
 							rowsPerPage,
 							total_count,
+                            handleModal
 						)}
 						paginationPerPage={rowsPerPage}
 						paginationDefaultPage={currentPage}
@@ -160,6 +184,7 @@ function Participants(){
 						fixedHeaderScrollHeight="62vh"
 					/>
 				</div>
+                {modal && <ResultModal open={modal} handleModal={handleModal} datas={modalData} />}
             </Card>
         </Fragment>
     )

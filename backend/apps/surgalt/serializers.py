@@ -41,7 +41,7 @@ from lms.models import Lesson_materials
 from lms.models import Lesson_material_file
 from lms.models import Lesson_assignment, AdmissionRegisterProfession
 from lms.models import PsychologicalTest
-from lms.models import PsychologicalTestQuestions
+from lms.models import PsychologicalTestQuestions,PsychologicalQuestionChoices
 
 from main.utils.file import split_root_path
 
@@ -858,8 +858,14 @@ class PsychologicalTestSerializer(serializers.ModelSerializer):
         model = PsychologicalTest
         exclude = ['questions']
 
+class PsychologicalQuestionChoicesSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = PsychologicalQuestionChoices
+        fields = '__all__'
 
 class PsychologicalTestQuestionsSerializer(serializers.ModelSerializer):
+    choices = PsychologicalQuestionChoicesSerializer(many=True, read_only=True)
 
     class Meta:
         model = PsychologicalTestQuestions
