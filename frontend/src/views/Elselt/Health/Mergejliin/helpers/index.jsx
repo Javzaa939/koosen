@@ -1,5 +1,6 @@
 import { Book, CheckCircle } from "react-feather"
 import { Badge, UncontrolledTooltip } from "reactstrap"
+import moment from "moment"
 
 // Хүснэгтийн баганууд
 export function getColumns (currentPage, rowsPerPage, total_count, STATE_LIST, detailHandler) {
@@ -73,6 +74,13 @@ export function getColumns (currentPage, rowsPerPage, total_count, STATE_LIST, d
             sortable: true,
 			minWidth: '140px',
 			maxWidth: '140px',
+		},
+		{
+			header: 'updated_date',
+			name: <div className="px-1">Огноо</div>,
+			selector: (row) => row?.health_up_user_data?.updated_at? moment(row?.health_up_user_data?.updated_at).format("YYYY-MM-DD h:mm") : '',
+            sortable: true,
+			minWidth: '180px',
 		},
 
         {

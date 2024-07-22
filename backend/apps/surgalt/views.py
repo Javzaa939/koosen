@@ -2175,58 +2175,62 @@ class PsychologicalTestQuestionsAPIView(
 
     @login_required()
     def put(self, request, pk):
-        print(pk)
+
         request_data = request.data.dict()
         type = request.query_params.get('type')
-        print(request_data)
 
+        # Асуултийг edit хийх үед
         if type == "question":
             question_img = request_data['image']
 
-            answer = request_data['answer']
-            request_data = remove_key_from_dict(request_data, [ 'image','answer'])
+            answers = request_data['answer']
+
+            # Олон хариу ирвэл салгаж авна
+            answers_list = answers.split(',') if answers else []
+            request_data = remove_key_from_dict(request_data, ['image', 'answer'])
 
             with transaction.atomic():
                 question_obj = PsychologicalTestQuestions.objects.filter(id=pk).first()
-                all_choice =question_obj.choices.all()
-                print(all_choice)
 
-                if answer and request_data['score']!='null' and answer != 'undefined':
-                    answer_object = PsychologicalQuestionChoices.objects.filter(id=answer).first()
+                # Хариулт нь хоосон биш мөн оноотой үед ажилна
+                if answers_list and request_data['score'] != 'null' and answers != 'undefined':
 
-                    if answer_object and not answer_object.is_correct and question_obj.kind == PsychologicalTestQuestions.KIND_ONE_CHOICE :
-                        answer_object.is_correct = True
-                        other_choices = question_obj.choices.exclude(id=answer)
-                        other_choices.update(is_correct=False)
-                        answer_object.save()
+                    # Зөв хариултуудыг авна
+                    correct_choice_ids = set()
 
-                    if answer_object and not answer_object.is_correct and question_obj.kind == PsychologicalTestQuestions.KIND_MULTI_CHOICE:
-                        answer_object.is_correct = True
-                        answer_object.save()
-                    if answer_object and not answer_object.is_correct and question_obj.kind == PsychologicalTestQuestions.KIND_BOOLEAN:
-                        answer_object.is_correct = True
-                        other_choices = question_obj.choices.exclude(id=answer)
-                        other_choices.update(is_correct=False)
-                        answer_object.save()
+                    # Орж ирсэн хариулт болгоныг авч өөрчлөн
+                    for answer in answers_list:
+                        answer_object = PsychologicalQuestionChoices.objects.filter(id=answer).first()
 
+                        if answer_object:
+                            answer_object.is_correct = True
+                            answer_object.save()
+                            correct_choice_ids.add(answer_object.id)
+
+                    # Үлдсэн хариуг худал болгох
+                    question_obj.choices.exclude(id__in=correct_choice_ids).update(is_correct=False)
+
+                # Хэрэв оноо орж ирсэн тохиолдолд тухайн object-ийн has_score field-ийг true болгоно
                 if 'score' in request_data:
                     score = request_data.get('score')
                     if score and score != 'null':
                         request_data['score'] = int(score)
                         request_data['has_score'] = True
+
+                    # Хэрэв оноогүй тохиолдолд тухайн object-ийн хариултуудыг is_correct-STATE False болгож зөв хариултгүй болгон
                     else:
                         request_data['score'] = None
                         request_data['has_score'] = False
                         other_choices = question_obj.choices.all()
                         other_choices.update(is_correct=False)
 
-                request_data = remove_key_from_dict(request_data, [ 'level'])
-                print(request_data)
+                request_data = remove_key_from_dict(request_data, ['level'])
 
+                # Тухайн data-г base дээр update хийнэ
                 updated_question_rows = PsychologicalTestQuestions.objects.filter(id=pk).update(
                     **request_data
                 )
-                print(PsychologicalTestQuestions.objects.filter(id=pk).values())
+
                 if isinstance(question_img, str) != True:
                     question_img_path = get_image_path(question_obj)
 
@@ -2237,7 +2241,6 @@ class PsychologicalTestQuestionsAPIView(
                     question_obj.save()
                     if old_image:
                         remove_folder(str(old_image))
-
 
                 if isinstance(question_img, str) == True and question_img == '':
                     old_image = question_obj.image
@@ -2255,6 +2258,7 @@ class PsychologicalTestQuestionsAPIView(
                     data = ser(updated_question).data
                 return request.send_info('INF_002', data)
 
+        # Хариултыг өөрчлөх үед
         else:
             answer_img = request_data["image"]
             answer_id = request_data["id"]
@@ -2293,9 +2297,9 @@ class PsychologicalTestQuestionsAPIView(
                 if updated_rows > 0:
                     updated_answer = PsychologicalQuestionChoices.objects.filter(id=answer_id).first()
                     ser = dynamic_serializer(PsychologicalQuestionChoices, "__all__")
-                    data = ser(updated_answer).data
                     updated_answer.value = updated_value
                     updated_answer.save()
+                    data = ser(updated_answer).data
                 return request.send_info('INF_002', data)
 
 

@@ -351,8 +351,6 @@ function AnhanShat() {
         setMessageModal(!messageModal)
     }
 
-    console.log(datas)
-
     return (
         <Card>
             <EmailModal
@@ -469,24 +467,24 @@ function AnhanShat() {
                         <Label className="form-label" for="genderOp">
                             {t('Хүйс')}
                         </Label>
-                            <Select
-                                name="genderOp"
-                                id="genderOp"
-                                classNamePrefix='select'
-                                isClearable
-                                className={classnames('react-select')}
-                                isLoading={isLoading}
-                                placeholder={t('-- Сонгоно уу --')}
-                                options={genderOp || []}
-                                value={genderOp.find((c) => c.name === gender)}
-                                noOptionsMessage={() => t('Хоосон байна.')}
-                                onChange={(val) => {
-                                    setGender(val?.name || '')
-                                }}
-                                styles={ReactSelectStyles}
-                                getOptionValue={(option) => option.id}
-                                getOptionLabel={(option) => option.name}
-                            />
+                        <Select
+                            name="genderOp"
+                            id="genderOp"
+                            classNamePrefix='select'
+                            isClearable
+                            className={classnames('react-select')}
+                            isLoading={isLoading}
+                            placeholder={t('-- Сонгоно уу --')}
+                            options={genderOp || []}
+                            value={genderOp.find((c) => c.name === gender)}
+                            noOptionsMessage={() => t('Хоосон байна.')}
+                            onChange={(val) => {
+                                setGender(val?.name || '')
+                            }}
+                            styles={ReactSelectStyles}
+                            getOptionValue={(option) => option.id}
+                            getOptionLabel={(option) => option.name}
+                        />
                     </Col>
                 </Row>
                 <Row className='justify-content-start mt-1 '>
@@ -500,13 +498,11 @@ function AnhanShat() {
                             placeholder={`-- Сонгоно уу --`}
 
                             onChange={(selectedDates, dateStr) => {
-
-                                if (selectedDates.length !== 0) {
-                                    const values = {
-                                        val: moment(dateStr).format('YYYY-MM-DD HH:mm')
-                                    }
-                                    setStart_date(values.val || '')
-                                }
+                                setStart_date(
+                                    selectedDates.length === 0
+                                        ? ''
+                                        : moment(dateStr).format('YYYY-MM-DD HH:mm')
+                                );
                             }}
                             value={start_date}
                             options={{
@@ -528,12 +524,11 @@ function AnhanShat() {
                             placeholder={`-- Сонгоно уу --`}
 
                             onChange={(selectedDates, dateStr) => {
-                                if (selectedDates.length !== 0) {
-                                    const values = {
-                                        val: moment(dateStr).format('YYYY-MM-DD HH:mm')
-                                    }
-                                    setEnd_date(values.val || '')
-                                }
+                                setEnd_date(
+                                    selectedDates.length === 0
+                                        ? ''
+                                        : moment(dateStr).format('YYYY-MM-DD HH:mm')
+                                );
                             }}
                             value={end_date}
                             options={{
@@ -650,7 +645,7 @@ function AnhanShat() {
                         print='true'
                         theme="solarized"
                         onSort={handleSort}
-                        columns={getColumns(currentPage, rowsPerPage === 'Бүгд' ? 1 : rowsPerPage, total_count, addModalHandler,  STATE_LIST, user)}
+                        columns={getColumns(currentPage, rowsPerPage === 'Бүгд' ? 1 : rowsPerPage, total_count, addModalHandler, STATE_LIST, user)}
                         sortIcon={<ChevronDown size={10} />}
                         paginationPerPage={rowsPerPage}
                         paginationDefaultPage={currentPage}

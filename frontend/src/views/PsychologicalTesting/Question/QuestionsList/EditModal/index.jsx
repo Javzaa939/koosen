@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect, useReducer, useMemo, useCallback } from "react";
+import React, { Fragment, useState, useEffect, useReducer } from "react";
 import { useTranslation } from "react-i18next";
 import { getPagination, get_boolean_list, get_questionype, ReactSelectStyles } from "@utils";
 import Select from 'react-select'
@@ -112,6 +112,7 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
             if (data) {
                 setEditQuestion({ id: null, isEdit: false })
                 dispatchQuestion({ type: "SET_RESET" })
+                setSelectedValue([])
                 setData(data)
             }
         }
@@ -151,24 +152,28 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
     }
 
     const handleClick = (idx, v) => {
-        if (questionState.level === 1) {
+
+        // Заавал оноотой байж идэвхжинэ
+        if (data.has_score || questionState.level === 1) {
+
+            // Олон сонголттой үед
             if (data.kind === 2) {
-                // setSelectedValue(prev => {
-                //     const newSelectedValues = prev.includes(v.id)
-                //     ? prev.filter(id => id !== v.id)
-                //     : [...prev, v.id];
-                // // Dispatch the updated selection
-                // dispatchQuestion({ type: 'SET_ANSWER', payload: newSelectedValues });
-                // return newSelectedValues;
-                // })
-                console.log(selectedValue)
+                setSelectedValue(prev => {
+                    const newSelectedValues = prev.includes(v.id)
+                        ? prev.filter(id => id !== v.id)
+                        : [...prev, v.id];
+
+                    dispatchQuestion({ type: 'SET_ANSWER', payload: newSelectedValues });
+                    return newSelectedValues;
+                })
             }
             else {
-                setSelectedValue(idx);
+                setSelectedValue([v.id]);
                 dispatchQuestion({ type: 'SET_ANSWER', payload: v.id })
             }
         }
     }
+
     return (
         <Modal
             isOpen={open}
@@ -341,16 +346,13 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
                     <Col md={12} className="mt-50">
                         <div className="d-flex justify-content-between">
                             <div className="pb-25" style={{ fontWeight: 500, }}>Хариултууд:</div>
-                            {/* <div className="pb-25" style={{ fontWeight: 500, }}> */}
-                            {/* <PlusCircle className="text-primary cursor-pointer" size={16} onClick={() => {addAnswer()}}/> */}
-                            {/* </div> */}
                             <div>
                                 {editQuestion.isEdit && editQuestion.id == data.id ? (
                                     data.choices.map((v, idx) => {
                                         return (
                                             <Fragment key={idx}>
                                                 <span
-                                                    className={`ms-50 cursor-pointer p-25 py-0 ${selectedValue === idx ? 'border-success bg-light-success' : 'border-secondary'}`}
+                                                    className={`ms-50 cursor-pointer p-25 py-0 ${selectedValue.includes(v.id) ? 'border-success bg-light-success' : 'border-secondary'}`}
                                                     style={{ borderRadius: "50%", fontSize: "12px", fontWeight: "bold" }}
                                                     onClick={() => { handleClick(idx, v) }}
                                                 >
