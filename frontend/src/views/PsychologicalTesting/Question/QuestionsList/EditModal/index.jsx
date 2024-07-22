@@ -1,4 +1,4 @@
-import React, { Fragment, useState, useEffect, useReducer, useMemo, useCallback } from "react";
+import React, { Fragment, useState, useEffect, useReducer } from "react";
 import { useTranslation } from "react-i18next";
 import { getPagination, get_boolean_list, get_questionype, ReactSelectStyles } from "@utils";
 import Select from 'react-select'

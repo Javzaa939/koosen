@@ -2296,9 +2296,9 @@ class PsychologicalTestQuestionsAPIView(
                 if updated_rows > 0:
                     updated_answer = PsychologicalQuestionChoices.objects.filter(id=answer_id).first()
                     ser = dynamic_serializer(PsychologicalQuestionChoices, "__all__")
-                    data = ser(updated_answer).data
                     updated_answer.value = updated_value
                     updated_answer.save()
+                    data = ser(updated_answer).data
                 return request.send_info('INF_002', data)
 
 
