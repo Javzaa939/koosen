@@ -16,7 +16,6 @@ import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
 import AddQuestion from "./AddQuestion";
 
-import { ReactSelectStyles, get_questionype, get_leveltype } from "@utils"
 import EditModal from "./EditModal";
 const QuestionsList = ({filterId}) => {
 
@@ -24,12 +23,11 @@ const QuestionsList = ({filterId}) => {
 
 	const { isLoading, fetchData } = useLoader({});
 
-	const default_page = [10, 15, 50, 75, 100];
 	const [datas, setDatas] = useState([]);
 	const [questionDetail, setQuestionDetail] = useState({})
 
 	const [currentPage, setCurrentPage] = useState(1);
-	const [rowsPerPage, setRowsPerPage] = useState(10);
+	const [rowsPerPage, setRowsPerPage] = useState(25);
 	const [searchValue, setSearchValue] = useState('');
 	const [total_count, setTotalCount] = useState(1);
 

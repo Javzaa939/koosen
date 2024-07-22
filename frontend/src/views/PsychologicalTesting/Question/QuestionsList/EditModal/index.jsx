@@ -41,7 +41,8 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
         image: '',
         score: '',
         level: '',
-        answer: ''
+        answer: '',
+        question_number: ''
     }
     const questionReducer = (state, action) => {
         switch (action.type) {
@@ -57,6 +58,8 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
                 return { ...state, image: action.payload }
             case 'SET_ANSWER':
                 return { ...state, answer: action.payload }
+            case 'SET_QUESTION_NUMBER':
+                return { ...state, question_number: action.payload }
             case 'SET_RESET':
                 return initialQuestionRow
             default:
@@ -97,6 +100,7 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
         dispatchQuestion({ type: 'SET_SCORE', payload: questoinData.score })
         dispatchQuestion({ type: 'SET_LEVEL', payload: questoinData.level })
         dispatchQuestion({ type: 'SET_ANSWER', payload: questoinData.answer })
+        dispatchQuestion({ type: 'SET_QUESTION_NUMBER', payload: questoinData.question_number })
         if (questoinData.image) {
             dispatchQuestion({ type: "SET_IMAGE", payload: { preview: urlfinder + questoinData.image } })
         }
@@ -113,7 +117,6 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
                 setEditQuestion({ id: null, isEdit: false })
                 dispatchQuestion({ type: "SET_RESET" })
                 setSelectedValue([])
-                setData(data)
             }
         }
     }
@@ -251,6 +254,26 @@ export default function EditModal({ open, handleModal, questionDetail, getDatas 
 
                                         <span>
                                             {data.score}
+                                        </span>
+                                }
+                            </Col>
+                            <Col md={12} className="d-flex align-items-center">
+                                <label className="me-50">Асуултын дугаар:</label>
+                                {
+                                    editQuestion.isEdit && editQuestion.id == data.id ? <span className="">
+                                        <Input
+                                            value={questionState.question_number}
+                                            type="number"
+                                            bsSize={'sm'}
+                                            onChange={(e) => {
+                                                dispatchQuestion({ type: 'SET_QUESTION_NUMBER', payload: e.target.value })
+                                            }}
+                                        />
+                                    </span>
+                                        :
+
+                                        <span>
+                                            {data.question_number}
                                         </span>
                                 }
                             </Col>

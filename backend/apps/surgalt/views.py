@@ -2375,14 +2375,18 @@ class PsychologicalQuestionTitleAPIView(
 
     @login_required()
     def get(self, request, pk=None):
-
+        title_id = request.query_params.get('titleId')
+        title_id = int(title_id)
         user = request.user.id
         user_obj = User.objects.filter(pk=user).first()
         if user_obj.is_superuser:
-            all_queations = PsychologicalTestQuestions.objects.all()
+            challenge_qs = PsychologicalTestQuestions.objects.all().order_by('question_number')
+            if title_id:
+                challenge_qs = challenge_qs.filter(title=title_id)
+
             ser = dynamic_serializer(PsychologicalTestQuestions, "__all__", 1)
-            data = ser(all_queations, many=True)
-            count = all_queations.count()
+            data = ser(challenge_qs, many=True)
+            count = challenge_qs.count()
 
             result = {
                 "count": count,
@@ -2393,13 +2397,10 @@ class PsychologicalQuestionTitleAPIView(
         if pk:
             data = self.retrieve(request, pk).data
             questions = PsychologicalTestQuestions.objects.filter(title=pk, created_by=user)
-            other_questions = PsychologicalTestQuestions.objects.filter(created_by=user).exclude(id__in=questions.values_list('id', flat=True)).values("id", "question", "title__name")
+            other_questions = PsychologicalTestQuestions.objects.filter(created_by=user).exclude(id__in=questions.values_list('id', flat=True)).values("id", "question", "title__name").order_by('question_number')
 
             questions = questions.values("id", "question", "title__name")
             return request.send_data({"title": data, "questions": list(questions), "other_questions": list(other_questions)})
-
-        title_id = request.query_params.get('titleId')
-        title_id = int(title_id)
 
         # 0  Бүх асуулт
         if title_id == 0 and not user_obj.is_superuser:
@@ -2411,6 +2412,7 @@ class PsychologicalQuestionTitleAPIView(
             challenge_qs = PsychologicalTestQuestions.objects.filter(created_by=user, title=title_id)
 
         ser = dynamic_serializer(PsychologicalTestQuestions, "__all__", 1)
+        challenge_qs = challenge_qs.order_by('question_number')
         data = ser(challenge_qs, many=True)
         count = challenge_qs.count()
 
