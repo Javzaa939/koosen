@@ -620,7 +620,7 @@ function Physical() {
                         onSelectedRowsChange={(state) => onSelectedRowsChange(state)}
                         direction="auto"
                         style={{ border: '1px solid red' }}
-                        defaultSortFieldId={'created_at'}
+                        defaultSortFieldId={'order_no'}
                     />
                 </div>
             </CardBody>
