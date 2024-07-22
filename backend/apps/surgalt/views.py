@@ -4094,3 +4094,20 @@ class ProfessionPosterFile(
             instance.save()
 
         return request.send_info('INF_003')
+
+
+# import pandas as pd
+# import math
+
+# csv_file = '/home/daria/Downloads/data-1721382723541.csv'
+
+# # Read CSV file into a DataFrame
+# df = pd.read_csv(csv_file)
+
+# # Print each row in the DataFrame
+# for index, row in df.iterrows():
+#     row_data = row.to_dict()
+#     print(row_data.get('question_number'))
+#     if row_data.get('question_number') and not math.isnan(row_data.get('question_number')):
+#         obj = PsychologicalTestQuestions.objects.filter(id=row_data.get('id')).update(question_number=int(row_data.get('question_number')))
+#         print(obj)
