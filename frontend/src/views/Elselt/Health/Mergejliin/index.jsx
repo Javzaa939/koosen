@@ -360,7 +360,7 @@ function Mergejliin() {
 							getOptionLabel={(option) => option.name}
 						/>
 					</Col>
-					<Col md={3} className='my-0 py-0 '>
+					<Col md={3} className='my-0 py-0 mt-1 '>
 						<Label className="form-label" for="">
 							{t('Эхлэх огноо')}
 						</Label>
@@ -386,7 +386,7 @@ function Mergejliin() {
 							}}
 						/>
 					</Col>
-					<Col md={3} className='my-0 py-0 '>
+					<Col md={3} className='my-0 py-0 mt-1 '>
 						<Label className="form-label" for="">
 							{t('Дуусах огноо')}
 						</Label>

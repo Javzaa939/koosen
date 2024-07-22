@@ -135,6 +135,7 @@ function Physical() {
 
         const {success, data} = await fetchData(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, chosenState, admId, profId, gender,start_date,end_date))
         if(success) {
+            console.log(data)
             setTotalCount(data?.count)
             setDatas(data?.results)
             // Нийт хуудасны тоо
