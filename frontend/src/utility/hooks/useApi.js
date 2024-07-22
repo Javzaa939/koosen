@@ -2088,7 +2088,7 @@ function useApi(isDisplay=false) {
 		},
 
 		psychologicalTest:{
-			get: (limit, page, sort, search) => instance.get(`learning/psychological_test/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}`),
+			get: (limit, page, sort, search, scope) => instance.get(`learning/psychological_test/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&scope=${scope}`),
 			getOne: (pk) => instance.get(`learning/psychological_test/${pk}/`),
 			post: (cdatas) => instance.post('learning/psychological_test/', cdatas),
 			put: (data, pk) => instance.put(`learning/psychological_test/${pk}/`, data),
@@ -2110,6 +2110,7 @@ function useApi(isDisplay=false) {
 		psychologicalTestResult:{
 			get: (limit, page, sort, search, scope) => instance.get(`learning/psychological_test_result/?page=${page}&limit=${limit}&sort=${sort}&search=${search}&scope=${scope}`),
 			getParticipants: (limit, page, search, test_id) => instance.get(`learning/psychological_test_result_participants/?page=${page}&limit=${limit}&search=${search}&test_id=${test_id}`),
+			getResult: (cdata) => instance.post(`learning/psychological_test_result_show/`,cdata),
 		}
 
 	},
@@ -2399,12 +2400,12 @@ function useApi(isDisplay=false) {
 				put: (id, cdata) => instance.put(`/elselt/health/anhan/${id}/`, cdata)
 			},
 			professional:{
-				get: (limit, page, sort, search,lesson_year_id, profession_id, state, gender) => instance.get(`/elselt/health/professional/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}&state=${state}&gender=${gender}`),
+				get: (limit, page, sort, search,lesson_year_id, profession_id, state, gender, start_date, end_date) => instance.get(`/elselt/health/professional/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}&state=${state}&gender=${gender}&start_date=${start_date}&end_date=${end_date}`),
 				post: (cdata) => instance.post(`/elselt/health/professional/`, cdata),
 				put: (id, cdata) => instance.put(`/elselt/health/professional/${id}/`, cdata)
 			},
 			physical:{
-				get: (limit, page, sort, search, state, elselt, profession, gender) => instance.get(`/elselt/health/physical/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}&elselt=${elselt}&profession=${profession}&gender=${gender}`),
+				get: (limit, page, sort, search, state, elselt, profession, gender, start_date , end_date) => instance.get(`/elselt/health/physical/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}&elselt=${elselt}&profession=${profession}&gender=${gender}&start_date=${start_date}&end_date=${end_date}`),
 				post: (cdata) => instance.post(`/elselt/health/physical/`, cdata),
 				put: (id, cdata) => instance.put(`/elselt/health/physical/${id}/`, cdata)
 			},
@@ -2439,6 +2440,7 @@ function useApi(isDisplay=false) {
 			get: (gender, profession) => instance.get(`/elselt/hynalt_number/?gender=${gender}&profession=${profession}`),
 			getIsGender: (profession) => instance.get(`/elselt/hynalt_is_gender/?profession=${profession}`),
 			post:(cdata) => instance.post(`/elselt/userscore/`, cdata),
+			postPhysical:(cdata) => instance.post(`/elselt/physical/`, cdata),
 		},
 		// ЭЕШ хэсгийн оноо татах
 		eyesh:{

@@ -2178,22 +2178,54 @@ class PsychologicalTestQuestionsAPIView(
         request_data = request.data.dict()
         type = request.query_params.get('type')
 
+        # Асуултийг edit хийх үед
         if type == "question":
             question_img = request_data['image']
-            request_data = remove_key_from_dict(request_data, [ 'image'])
+
+            answers = request_data['answer']
+
+            # Олон хариу ирвэл салгаж авна
+            answers_list = answers.split(',') if answers else []
+            request_data = remove_key_from_dict(request_data, ['image', 'answer'])
+
             with transaction.atomic():
                 question_obj = PsychologicalTestQuestions.objects.filter(id=pk).first()
 
+                # Хариулт нь хоосон биш мөн оноотой үед ажилна
+                if answers_list and request_data['score'] != 'null' and answers != 'undefined':
+
+                    # Зөв хариултуудыг авна
+                    correct_choice_ids = set()
+
+                    # Орж ирсэн хариулт болгоныг авч өөрчлөн
+                    for answer in answers_list:
+                        answer_object = PsychologicalQuestionChoices.objects.filter(id=answer).first()
+
+                        if answer_object:
+                            answer_object.is_correct = True
+                            answer_object.save()
+                            correct_choice_ids.add(answer_object.id)
+
+                    # Үлдсэн хариуг худал болгох
+                    question_obj.choices.exclude(id__in=correct_choice_ids).update(is_correct=False)
+
+                # Хэрэв оноо орж ирсэн тохиолдолд тухайн object-ийн has_score field-ийг true болгоно
                 if 'score' in request_data:
                     score = request_data.get('score')
                     if score and score != 'null':
                         request_data['score'] = int(score)
+                        request_data['has_score'] = True
+
+                    # Хэрэв оноогүй тохиолдолд тухайн object-ийн хариултуудыг is_correct-STATE False болгож зөв хариултгүй болгон
                     else:
                         request_data['score'] = None
+                        request_data['has_score'] = False
+                        other_choices = question_obj.choices.all()
+                        other_choices.update(is_correct=False)
 
-                request_data['has_score'] = request_data['level'] == 1
-                request_data = remove_key_from_dict(request_data, [ 'level'])
+                request_data = remove_key_from_dict(request_data, ['level'])
 
+                # Тухайн data-г base дээр update хийнэ
                 updated_question_rows = PsychologicalTestQuestions.objects.filter(id=pk).update(
                     **request_data
                 )
@@ -2208,7 +2240,6 @@ class PsychologicalTestQuestionsAPIView(
                     question_obj.save()
                     if old_image:
                         remove_folder(str(old_image))
-
 
                 if isinstance(question_img, str) == True and question_img == '':
                     old_image = question_obj.image
@@ -2226,11 +2257,11 @@ class PsychologicalTestQuestionsAPIView(
                     data = ser(updated_question).data
                 return request.send_info('INF_002', data)
 
+        # Хариултыг өөрчлөх үед
         else:
             answer_img = request_data["image"]
             answer_id = request_data["id"]
-
-            request_data["value"] = request_data["choices"]
+            updated_value = request_data['value']
 
             if 'score' in request_data:
                 score = request_data.get('score')
@@ -2239,7 +2270,7 @@ class PsychologicalTestQuestionsAPIView(
                 else:
                     request_data['score'] = None
 
-            request_data = remove_key_from_dict(request_data, ['image', 'id', 'score', 'choices'])
+            request_data = remove_key_from_dict(request_data, ['image', 'id', 'score'])
             with transaction.atomic():
                 answer_obj = PsychologicalQuestionChoices.objects.filter(id=answer_id).first()
                 question_obj = PsychologicalTestQuestions.objects.filter(id=pk).first()
@@ -2265,6 +2296,8 @@ class PsychologicalTestQuestionsAPIView(
                 if updated_rows > 0:
                     updated_answer = PsychologicalQuestionChoices.objects.filter(id=answer_id).first()
                     ser = dynamic_serializer(PsychologicalQuestionChoices, "__all__")
+                    updated_answer.value = updated_value
+                    updated_answer.save()
                     data = ser(updated_answer).data
                 return request.send_info('INF_002', data)
 
@@ -2472,6 +2505,11 @@ class PsychologicalTestAPIView(
 
     @has_permission(must_permissions=['lms-psychologicaltesting-exam-read'])
     def get(self, request, pk=None):
+
+        scope = self.request.query_params.get('scope')
+
+        if scope:
+            self.queryset = self.queryset.filter(scope_kind=scope)
 
         if pk:
             data = self.retrieve(request, pk).data
@@ -2839,6 +2877,63 @@ class PsychologicalTestResultParticipantsAPIView(
 
             datas = self.list(request).data
         return request.send_data(datas)
+
+class PsychologicalTestResultShowAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin
+):
+    """Сорилийн оноо асуулт хариултыг харах API"""
+
+    queryset = PsychologicalTestQuestions.objects.all()
+    serializer_class = PsychologicalTestQuestionsSerializer
+
+    def post(self,request):
+
+        datas = request.data
+        question_ids = []
+        chosen_choices = []
+        big_data = []
+        return_data = []
+        totalscore = 0
+
+        # Орж ирж буй датан {} хаалттай орж ирж байгаа учир авна
+        value = str(datas)[1:-1]
+
+        # таслалаар нь салгах
+        pairs = [pair.strip() for pair in value.split(',')]
+
+        # 176:250 ийм датаг урд талын question_ids-д авч хойд тал нь сонгосон хариултын id
+        for pair in pairs:
+                question_id, choice_id = pair.split(':')
+                question_ids.append(question_id.strip().strip("'"))
+                chosen_choices.append(choice_id.strip().strip("'"))
+
+        question_ids = list(map(int, question_ids))
+        chosen_choices = list(map(int, chosen_choices))
+
+        # Тухайн 2 датаг нийлүүлж асуултын id гаар нь бүх мэдээлэлийн PsychologicalTestQuestions model-оос авчирна
+        for question_id, choice_id in zip(question_ids, chosen_choices):
+            queryset = PsychologicalTestQuestions.objects.filter(id=question_id).first()
+            if queryset:
+
+                serializer = self.serializer_class(queryset)
+                data = serializer.data
+
+                # big_data шалгуулагчийн сонгосон хариултын id буцаан
+                data['chosen_choice'] = int(choice_id)
+
+                # Тухайн өгсөн шалгалтийн нийт оноо
+                if(data['has_score']):
+                    totalscore += data['score']
+                big_data.append(data)
+
+        return_data ={
+            'question':big_data,
+            'total_score':totalscore
+        }
+        return request.send_data(return_data)
+
+
 
 @permission_classes([IsAuthenticated])
 class QuestionsListAPIView(

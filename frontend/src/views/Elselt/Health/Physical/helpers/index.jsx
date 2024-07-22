@@ -1,8 +1,10 @@
 import { CheckCircle} from "react-feather"
 import { Badge, UncontrolledTooltip } from "reactstrap"
+import moment from "moment"
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, page_count, addModalHandler, STATE_LIST, user) {
+export function getColumns (currentPage, rowsPerPage, total_count, addModalHandler, STATE_LIST, user) {
+	const page_count = Math.ceil(total_count / rowsPerPage)
 
     // /** Сонгосон хуудасны тоо датаны тооноос их болсон үед хуудаслалт 1-ээс эхлэнэ */
     if (currentPage > page_count) {
@@ -66,6 +68,16 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 			minWidth: '140px',
 			maxWidth: '140px',
 		},
+		{
+			maxWidth: "250px",
+			minWidth: "250px",
+			header: 'profession__profession__name',
+			name: 'Хөтөлбөр',
+			reorder: true,
+			selector: (row) => row?.profession_name || '',
+			sortable: true,
+			center: true,
+		},
         {
 			maxWidth: "200px",
 			minWidth: "200px",
@@ -87,6 +99,13 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 				</Badge>),
 			center: true,
 		},
+		{
+			header: 'updated_date',
+			name: <div className="px-1">Огноо</div>,
+			selector: (row) => row?.health_up_user_data?.updated_at? moment(row?.health_up_user_data?.updated_at).format("YYYY-MM-DD h:mm") : '',
+            sortable: true,
+			minWidth: '180px',
+		},
 
 		{
 			header: 'age',
@@ -106,6 +125,28 @@ export function getColumns (currentPage, rowsPerPage, page_count, addModalHandle
 			header: 'physice_score',
 			name: <div className="px-1">Хэмжээст оноо</div>,
 			selector: (row) => row?.health_up_user_data?.physice_score || '',
+			minWidth: '140px',
+			maxWidth: '140px',
+		},
+		{
+			header: 'score_avg',
+			name: <div className="px-1">ЭЕШ оноо</div>,
+			reorder: true,
+			selector: (row) => row?.score_avg || '',
+			minWidth: '140px',
+			maxWidth: '140px',
+		},
+		{
+			header: 'combined_score',
+			name: <div className="px-1">Эрэмбэлэлт хэмжээст оноо</div>,
+			selector: (row) => row?.health_up_user_data?.combined_score || '',
+			minWidth: '140px',
+			maxWidth: '140px',
+		},
+		{
+			header: 'order_no',
+			name: <div className="px-1">Эрэмбэлэлт оноо</div>,
+			selector: (row) => row?.health_up_user_data?.order_no || '',
 			minWidth: '140px',
 			maxWidth: '140px',
 		},

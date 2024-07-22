@@ -22,8 +22,12 @@ import { getColumns } from './helpers';
 import AddModal from './AddModal'
 import EmailModal from '../../User/EmailModal'
 import MessageModal from '../../User/MessageModal'
+import Flatpickr from 'react-flatpickr'
+import moment from 'moment'
 
 import classnames from "classnames";
+import { RiEditFill } from 'react-icons/ri'
+import { SortModal } from './SortModal'
 
 const STATE_LIST = [
     {
@@ -76,9 +80,15 @@ function Physical() {
     const [addModal, setAddModal] = useState(false)
     const [addModalData, setAddModalData] = useState(null)
 
+    const [modal, setModal] = useState(false)
+    const [type, setType] = useState('')
+	const [editData, setEditData] = useState([])
+
     const [emailModal, setEmailModal] = useState(false)      // email modal
     const [messageModal, setMessageModal] = useState(false)  // message modal
     const [selectedStudents, setSelectedStudents] = useState([])
+    const [end_date, setEnd_date] = useState('')
+    const [start_date, setStart_date] = useState('')
 
     // Нийт датаны тоо
     const [total_count, setTotalCount] = useState(datas.length || 1)
@@ -123,7 +133,7 @@ function Physical() {
 	/* Жагсаалтын дата авах функц */
 	async function getDatas() {
 
-        const {success, data} = await fetchData(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, chosenState, admId, profId, gender))
+        const {success, data} = await fetchData(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, chosenState, admId, profId, gender,start_date,end_date))
         if(success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
@@ -144,7 +154,7 @@ function Physical() {
 
 			return () => clearTimeout(timeoutId);
 		}
-    }, [sortField, currentPage, rowsPerPage, searchValue, chosenState, admId, profId, gender])
+    }, [sortField, currentPage, rowsPerPage, searchValue, chosenState, admId, profId, gender,start_date,end_date])
 
        // excel татах
        function convert(){
@@ -156,17 +166,17 @@ function Physical() {
                     'Нэр': data?.user?.first_name || '',
                     'Хүйс': data?.gender_name || '',
                     'РД': data?.user_register || '',
+                    'Үзлэгийн төлөв':STATE_LIST.find(val => val.id === data?.health_up_user_data?.state)?.name|| '',
                     'Нас': data?.user_age || 0,
-                    'Үзлэгийн төлөв':STATE_LIST.find(val => val.id === data?.health_up_user_data?.state).name|| '',
-                    'Тайлбар': data?.health_up_user_data?.description  || '',
+                    'Нийт оноо': data?.health_up_user_data?.total_score  || '',
                     'Хэмжээст оноо' : data?.health_up_user_data?.physice_score || '',
+                    'Тайлбар': data?.health_up_user_data?.description  || '',
                     'Савлуурт суниах':data?.health_up_user_data?.turnik || '',
                     'Гэдэсний даралт': data?.health_up_user_data?.belly_draught || '',
                     'Тэсвэр 1000М': data?.health_up_user_data?.patience_1000m || '',
                     'Хурд 100М': data?.health_up_user_data?.speed_100m || '',
                     'Авхаалж самбаа ': data?.health_up_user_data?.quickness|| '',
                     'Уян хатан': data?.health_up_user_data?.flexible || '',
-                    'Нийт оноо': data?.health_up_user_data?.total_score  || '',
                     'Төгссөн сургууль': data?.userinfo?.graduate_school || '',
                     'Хөтөлбөр': data?.userinfo?.graduate_profession || '',
                     'Төгссөн он': data?.userinfo?.graduate_school_year || '',
@@ -195,17 +205,17 @@ function Physical() {
             'Нэр',
             'Хүйс',
             'РД',
-            'Нас',
             'Үзлэгийн төлөв',
-            'Тайлбар',
+            'Нас',
+            'Нийт оноо',
             'Хэмжээст оноо',
+            'Тайлбар',
             'Савлуурт суниах',
             'Гэдэсний даралт',
             'Тэсвэр 1000М',
             'Хурд 100М',
             'Авхаалж самбаа',
             'Уян хатан',
-            'Нийт оноо',
             'Төгссөн сургууль',
             'Хөтөлбөр',
             'Төгссөн он',
@@ -353,6 +363,9 @@ function Physical() {
         setMessageModal(!messageModal)
     }
 
+    function handleModal() {
+        setModal(!modal)
+    }
     return (
         <Fragment>
             <EmailModal
@@ -382,6 +395,18 @@ function Physical() {
                 <h5>
                     Элсэгчдийн бие бялдарын үзүүлэлт
                 </h5>
+                <div className='d-flex flex-wrap mt-md-0 mt-1'>
+					<Button
+						color='primary'
+						className='d-flex align-items-center px-75 ms-1'
+						id='sort_button'
+                        disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-elselt-admission-create')) ? false : true}
+						onClick={() => handleModal()}
+					>
+						<RiEditFill className='me-25' />
+						Оноо эрэмбэлэх
+					</Button>
+				</div>
             </CardHeader>
             <CardBody>
                 {/* <Row>
@@ -475,6 +500,58 @@ function Physical() {
                                 getOptionValue={(option) => option.id}
                                 getOptionLabel={(option) => option.name}
                             />
+                    </Col>
+                    <Col md={3} className='my-0 py-0 '>
+                        <Label className="form-label" for="">
+                            {t('Эхлэх огноо')}
+                        </Label>
+                        <Flatpickr
+                            className='form-control form-control-sm  bg-white '
+                            style={{ maxWidth: '480px' }}
+                            placeholder={`-- Сонгоно уу --`}
+
+                            onChange={(selectedDates, dateStr) => {
+								setStart_date(
+									selectedDates.length === 0
+										? ''
+										: moment(dateStr).format('YYYY-MM-DD HH:mm')
+								);
+							}}
+                            value={start_date}
+                            options={{
+                                time_24hr: true,
+                                enableTime: true,
+                                dateFormat: "Y-m-d H:i",
+                                mode: "single",
+                                // locale: Mongolian
+                            }}
+                        />
+                    </Col>
+                    <Col md={3} className='my-0 py-0 '>
+                        <Label className="form-label" for="">
+                            {t('Дуусах огноо')}
+                        </Label>
+                        <Flatpickr
+                            className='form-control form-control-sm  bg-white '
+                            style={{ maxWidth: '480px' }}
+                            placeholder={`-- Сонгоно уу --`}
+
+                            onChange={(selectedDates, dateStr) => {
+								setEnd_date(
+									selectedDates.length === 0
+										? ''
+										: moment(dateStr).format('YYYY-MM-DD HH:mm')
+								);
+							}}
+                            value={end_date}
+                            options={{
+                                time_24hr: true,
+                                enableTime: true,
+                                dateFormat: "Y-m-d H:i",
+                                mode: "single",
+                                // locale: Mongolian
+                            }}
+                        />
                     </Col>
                 </Row>
                 <div className='d-flex justify-content-between my-50 mt-1'>
@@ -604,6 +681,7 @@ function Physical() {
                 </div>
             </CardBody>
         </Card>
+        {modal && <SortModal open={modal} handleModal={handleModal} refreshDatas={getDatas} type={type} editData={editData} />}
     </Fragment>
     )
 }

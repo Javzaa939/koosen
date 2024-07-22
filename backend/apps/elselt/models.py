@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Sum
 
 from lms.models import (
     AimagHot,
@@ -302,6 +303,16 @@ class PhysqueUser(models.Model):
             x = 480 + (self.total_score - 60) * 8
 
         return round(x)
+
+    @property
+    def combined_score(self):
+        """ Хосолсон оноог тооцоолох """
+        main_score_sum = AdmissionUserProfession.objects.filter(user=self.user).values_list('score_avg', flat=True).first()
+
+        if main_score_sum is not None:
+            combined_score_value_int= (main_score_sum * 70 + self.physice_score * 30) // 100
+            return round(combined_score_value_int)
+        return None
 
 
 class MentalUser(models.Model):

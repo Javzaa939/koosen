@@ -583,7 +583,7 @@ class TeacherApiView(
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['first_name', 'last_name', 'register']
+    search_fields = ['first_name', 'last_name', 'register', 'user__email', 'user__phone_number']
 
     def get_queryset(self):
         "Багшийн мэдээллийг сургууль, Хөтөлбөрийн багаар харуулах "
