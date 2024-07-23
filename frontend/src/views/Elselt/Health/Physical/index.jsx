@@ -136,10 +136,6 @@ function Physical() {
             // Нийт хуудасны тоо
             var cpage_count = Math.ceil(data?.count / rowsPerPage === 'Бүгд' ? 1 : rowsPerPage)
             setPageCount(cpage_count)
-
-            // order_no-р эрэмбэлсэн байдал
-            const sortedData = (data) => data.sort((a, b) => a.health_up_user_data?.order_no - b.health_up_user_data?.order_no);
-            setDatas(sortedData)
         }
 	}
 

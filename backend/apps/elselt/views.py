@@ -1571,11 +1571,20 @@ class ElseltHealthPhysical(
         if sorting:
             if not isinstance(sorting, str):
                 sorting = str(sorting)
+
+            # Sorting by PhysqueUser model fields
+            # Desc adding hyfen symbol (-), so removing it for check sorting field name
             sortinghyfen = sorting
             if sorting.startswith('-'):
                 sortinghyfen=sorting[1:]
+
+            # Checking sorting field name
             if sortinghyfen == 'updated_at' or sortinghyfen == 'order_no':
+
+                # Gathering sorted ids from PhysqueUser model
                 sortedids = PhysqueUser.objects.order_by(sorting).values_list('user', flat=True)
+
+                # Sorting main queryset by gathered ids order
                 queryset = queryset.annotate(
                     custom_ordering=Case(
                         *[When(user_id=id_val, then=pos) for pos, id_val in enumerate(sortedids)],
@@ -1584,6 +1593,7 @@ class ElseltHealthPhysical(
                     )
                 ).order_by('custom_ordering')
             else:
+                # regular sorting in queryset model itself
                 queryset = queryset.order_by(sorting)
 
         if gender:
