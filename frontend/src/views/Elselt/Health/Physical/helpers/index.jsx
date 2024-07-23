@@ -1,3 +1,4 @@
+import moment from "moment"
 import { CheckCircle} from "react-feather"
 import { Badge, UncontrolledTooltip } from "reactstrap"
 import moment from "moment"
@@ -144,11 +145,14 @@ export function getColumns (currentPage, rowsPerPage, total_count, addModalHandl
 			maxWidth: '140px',
 		},
 		{
+			sortField: 'order_no',
 			header: 'order_no',
 			name: <div className="px-1">Эрэмбэлэлт оноо</div>,
 			selector: (row) => row?.health_up_user_data?.order_no || '',
 			minWidth: '140px',
 			maxWidth: '140px',
+			reorder: true,
+			sortable: true,
 		},
 		{
 			header: 'description',
@@ -198,6 +202,16 @@ export function getColumns (currentPage, rowsPerPage, total_count, addModalHandl
 			selector: (row) => row?.health_up_user_data?.flexible || '',
 			minWidth: '140px',
 			maxWidth: '140px',
+		},
+		{
+			sortField: 'updated_at',
+			header: 'updated_at',
+			name: "Огноо",
+			selector: (row) => row?.health_up_user_data?.updated_at? moment(row?.health_up_user_data?.updated_at).format("YYYY-MM-DD H:mm") : '',
+			minWidth: "300px",
+			maxWidth: "300px",
+			reorder: true,
+			sortable: true,
 		},
 		{
 			name: "Үйлдэл",
