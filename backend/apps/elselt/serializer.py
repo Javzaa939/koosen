@@ -881,10 +881,12 @@ class MentalUserSerializer(serializers.ModelSerializer):
 
     def get_duration(self, obj):
         difference_in_minutes = 0
-        start_time = datetime.fromisoformat(str(obj.start_time))
-        end_time = datetime.fromisoformat(str(obj.end_time))
-        time_difference = end_time - start_time
-        difference_in_minutes = time_difference.total_seconds() / 60
+        start_time = datetime.fromisoformat(str(obj.start_time))if obj.start_time else ''
+        end_time = datetime.fromisoformat(str(obj.end_time)) if obj.end_time else ''
+        if start_time and end_time:
+            time_difference = end_time - start_time
+            difference_in_minutes = time_difference.total_seconds() / 60
+
         return round(difference_in_minutes, 2)
 
 

@@ -2908,12 +2908,20 @@ class PsychologicalTestResultShowAPIView(
 
         # 176:250 ийм датаг урд талын question_ids-д авч хойд тал нь сонгосон хариултын id
         for pair in pairs:
-                question_id, choice_id = pair.split(':')
-                question_ids.append(question_id.strip().strip("'"))
-                chosen_choices.append(choice_id.strip().strip("'"))
+            question_id, choice_id = pair.split(':')
+            question_ids.append(question_id.strip().strip("'"))
+            chosen_choices.append(choice_id.strip().strip("'"))
+
+        def convert_to_int(value):
+            if value == 'True':
+                return 1
+            elif value == 'False':
+                return 0
+            else:
+                return int(value)
 
         question_ids = list(map(int, question_ids))
-        chosen_choices = list(map(int, chosen_choices))
+        chosen_choices = list(map(convert_to_int, chosen_choices))
 
         # Тухайн 2 датаг нийлүүлж асуултын id гаар нь бүх мэдээлэлийн PsychologicalTestQuestions model-оос авчирна
         for question_id, choice_id in zip(question_ids, chosen_choices):
@@ -2923,12 +2931,16 @@ class PsychologicalTestResultShowAPIView(
                 serializer = self.serializer_class(queryset)
                 data = serializer.data
 
-                # big_data шалгуулагчийн сонгосон хариултын id буцаан
-                data['chosen_choice'] = int(choice_id)
+                if choice_id != 1 or choice_id != 0:
+                    # big_data шалгуулагчийн сонгосон хариултын id буцаан
+                    data['chosen_choice'] = int(choice_id)
+                else:
+                    data['chosen_choice'] = choice_id
 
                 # Тухайн өгсөн шалгалтийн нийт оноо
                 if(data['has_score']):
                     totalscore += data['score']
+
                 big_data.append(data)
 
         return_data ={
