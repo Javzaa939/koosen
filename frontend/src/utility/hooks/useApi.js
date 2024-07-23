@@ -1526,6 +1526,8 @@ function useApi(isDisplay=false) {
 			get: (limit, page, sort, search, scope) => instance.get(`learning/psychological_test_result/?page=${page}&limit=${limit}&sort=${sort}&search=${search}&scope=${scope}`),
 			getParticipants: (limit, page, search, test_id) => instance.get(`learning/psychological_test_result_participants/?page=${page}&limit=${limit}&search=${search}&test_id=${test_id}`),
 			getResult: (cdata) => instance.post(`learning/psychological_test_result_show/`,cdata),
+
+			excelResult:() => instance.get(`learning/psychological_test_result_excel/`)
 		}
 
 	},

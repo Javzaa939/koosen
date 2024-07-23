@@ -1,6 +1,7 @@
 import os
 import logging
 import json
+import ast
 
 from rest_framework import mixins
 from rest_framework import generics
@@ -2838,7 +2839,7 @@ class PsychologicalTestResultParticipantsAPIView(
         test_id = request.query_params.get('test_id')
         search_value = request.query_params.get('search')
 
-        # Тухайн ёорилоо авна
+        # Тухайн сорилоо авна
         test_instance = self.queryset.get(id=test_id)
 
         # Cорилын хамрах хүрээний төрлөөс шалтгаалан хамрах хүрээг хаанаас авхаа тодорхойлно
@@ -2865,14 +2866,14 @@ class PsychologicalTestResultParticipantsAPIView(
         # scope-д тохирсон model байвал
         if model_class is not None:
             if model_class == MentalUser:
-                self.queryset = model_class.objects.filter(user__in=participants).annotate(
+                self.queryset = model_class.objects.filter(user__in=participants, challenge=test_id).annotate(
                     first_name = F('user__first_name'),
                     last_name = F('user__last_name'),
                     code = F('user__code'),
                 )
             else:
                 # Оролцогчдоороо filter-ээд
-                self.queryset = model_class.objects.filter(id__in=participants)
+                self.queryset = model_class.objects.filter(id__in=participants, challenge=test_id)
             # Serializer-г нь заагаад
             self.serializer_class = serializer_class
             # Хайх утгуудын өгнө
@@ -2937,6 +2938,214 @@ class PsychologicalTestResultShowAPIView(
         }
         return request.send_data(return_data)
 
+
+class PsychologicalTestResultExcelAPIView(
+    generics.GenericAPIView
+):
+    """ Сэтгэлзүйн шалгалтын үр дүн тайлан excel """
+
+    # Оноо бүрд if нөхцөл ашиглахгүйн тулд function ашигласан
+    def classify_score(self, score, thresholds, labels):
+        # threshold нь үүнээс бага гэсэн нөхцлийг зааж өгнө
+        for idx, threshold in enumerate(thresholds):
+            # Оноо нь thres дотор байвал label-ийн ижил idx-тэй value-г буцаана
+            if score <= threshold:
+                return labels[idx]
+            # Бусад үед маш хүчтэй гэсэн value-г буцаана
+        return labels[-1]
+
+    # Асуулга
+    def find_question_type(self, all_questions, type):
+        data_keys = all_questions.keys()
+
+        question_type_3 = PsychologicalTestQuestions.objects.filter(question__icontains=f'Асуулга-{type}')
+
+        questions = {}
+        for question in question_type_3:
+            question_id_str = str(question.id)
+            if question_id_str in data_keys:
+                questions[question_id_str] = all_questions[question_id_str]
+        return questions
+
+    def get(self, request):
+        datas = list()
+
+        # Элсэлгчдийн шалгалтын хариу
+        mental_users = MentalUser.objects.filter(challenge__title__icontains='Сэтгэлзүйн сорил').select_related('user')
+
+        # Сэтгэл гутралын асуултууд
+        depression_questions = set(PsychologicalTest.objects.filter(
+            title__icontains='Сэтгэлзүйн сорил',
+            questions__question_number__in=[3, 5, 10, 13, 16, 17, 21]
+        ).values_list('questions__id', flat=True))
+
+        # Түгшүүрийн асуултууд
+        anxiety_questions = set(PsychologicalTest.objects.filter(
+            title__icontains='Сэтгэлзүйн сорил',
+            questions__question_number__in=[2, 4, 7, 9, 15, 19, 20]
+        ).values_list('questions__id', flat=True))
+
+        # Стрессийн асуултууд
+        stress_questions = set(PsychologicalTest.objects.filter(
+            title__icontains='Сэтгэлзүйн сорил',
+            questions__question_number__in=[1, 6, 8, 11, 12, 14, 18]
+        ).values_list('questions__id', flat=True))
+
+        # Бүх асуултын хариултуудыг нэг dict дотор key-д нь id-г нь өгөөд value-д нь obj-ын өгөөд авна
+        # Энэ нь асуултуудаа ялгаж авхад хялбар бас хурдан
+        question_choices = PsychologicalQuestionChoices.objects.in_bulk(field_name='id')
+
+        # user-үүдээ бас өмнөхтэй ижил format-аар авсан
+        elselt_users = {user.id: user for user in ElseltUser.objects.filter(id__in=mental_users.values_list('user_id', flat=True))}
+
+        for user in mental_users:
+            user_data = dict()
+            user_obj = elselt_users[user.user.id]
+            user_data['first_name'] = user_obj.first_name
+            user_data['last_name'] = user_obj.last_name
+
+            # Хэрэглэгчийн хариултууд
+            if user.answer:
+                answer = ast.literal_eval(user.answer)
+
+                type_question_3 = self.find_question_type(answer, '3')
+                type_question_4 = self.find_question_type(answer, '4')
+                dass21_answers = {key: value for key, value in answer.items() if not isinstance(value, bool)}
+
+                total_depression_score = sum(
+                    int(question_choices[value].value) for key, value in dass21_answers.items() if int(key) in depression_questions)
+                total_anxiety_score = sum(
+                    int(question_choices[value].value) for key, value in dass21_answers.items() if int(key) in anxiety_questions)
+                total_stress_score = sum(
+                    int(question_choices[value].value) for key, value in dass21_answers.items() if int(key) in stress_questions)
+
+                user_data['depression_score'] = total_depression_score
+                user_data['anxiety_score'] = total_anxiety_score
+                user_data['stress_score'] = total_stress_score
+
+                depression_thresholds = [4, 6, 10, 13]
+                anxiety_thresholds = [3, 5, 7, 9]
+                stress_thresholds = [7, 9, 12, 16]
+                labels = ['Хэвийн', 'Хөнгөн', 'Дунд зэрэг', 'Хүчтэй', 'Маш хүчтэй']
+
+                user_data['depression'] = self.classify_score(total_depression_score, depression_thresholds, labels)
+                user_data['anxiety'] = self.classify_score(total_anxiety_score, anxiety_thresholds, labels)
+                user_data['stress'] = self.classify_score(total_stress_score, stress_thresholds, labels)
+
+
+                # Асуулга-3
+                type_question_3_keys = list(type_question_3.keys())
+
+                knowledge_score_map = {
+                    4: 3.6,
+                    17: 3.6,
+                    26: 2.4,
+                    28: 1.2,
+                    42: 1.2
+                }
+
+                skill_score_map = {
+                    9: 1,
+                    31: 2,
+                    33: 2,
+                    43: 3,
+                    48: 1,
+                    49: 1,
+                }
+
+                diplom_score_map = {
+                    24: 2.5,
+                    35: 1.5,
+                    38: 1.5,
+                    44: 1,
+                    11: 3.5,
+                }
+
+                all_question_numbers = {
+                    **knowledge_score_map,
+                    **skill_score_map,
+                    **diplom_score_map
+                }.keys()
+
+                all_questions_type_3 = PsychologicalTestQuestions.objects.filter(
+                    question__icontains='Асуулга-3',
+                    question_number__in=all_question_numbers
+                ).in_bulk(field_name='id')
+
+                knowledge_score = 0
+                skill_score = 0
+                diplom_score = 0
+
+                for key, question in all_questions_type_3.items():
+                    if str(key) in type_question_3_keys:
+                        sub_value = type_question_3[f'{key}']
+                        question_number = question.question_number
+
+                        if question_number in knowledge_score_map:
+                            if ((question_number in {4, 17, 26} and sub_value is True) or
+                                (question_number in {28, 42} and sub_value is False)):
+                                knowledge_score += knowledge_score_map[question_number]
+
+                        if question_number in skill_score_map:
+                            if sub_value is True:
+                                skill_score += skill_score_map[question_number]
+
+                        if question_number in diplom_score_map:
+                            if ((question_number in {24, 35, 38, 44} and sub_value is True) or
+                                (question_number in {11} and sub_value is False)):
+                                diplom_score += diplom_score_map[question_number]
+
+                user_data['knowledge_score'] = knowledge_score
+                user_data['skill_score'] = skill_score
+                user_data['diplom_score'] = diplom_score
+
+                # Асуулга 4
+                type_question_4_keys = list(type_question_4.keys())
+
+                true_false = [1, 6, 10, 12, 15, 19, 21, 26, 33, 38, 44, 49, 52, 58, 61]
+                mental_true = [2, 3, 5, 7, 9, 11, 13, 14, 16, 18, 20, 22, 23, 25, 27, 28,
+                               29, 31, 32, 33, 34, 36, 37, 39, 40, 42, 43, 45, 47, 48, 51,
+                               53, 54, 56, 57, 59, 60, 62, 63, 65, 66, 67, 68, 69, 70, 71,
+                               72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86]
+                mental_false = [4, 8, 17, 24, 30, 35, 41, 46, 50, 55, 64]
+                all_question_numbers_type_4 = mental_true + mental_false + true_false
+
+                all_questions_type_4 = PsychologicalTestQuestions.objects.filter(
+                    question__icontains='Асуулга-4',
+                    question_number__in=all_question_numbers_type_4
+                ).in_bulk(field_name='id')
+
+                true_false_score = 0
+                mental_score = 0
+
+                for key, question in all_questions_type_4.items():
+                    if str(key) in type_question_4_keys:
+                        sub_value = type_question_4[f'{key}']
+                        question_number = question.question_number
+
+                        if question_number in true_false:
+                            if sub_value is False:
+                                true_false_score += 1
+
+                        if question_number in mental_true:
+                            if sub_value is True:
+                                mental_score += 1
+
+                        if question_number in mental_false:
+                            if sub_value is False:
+                                mental_score += 1
+
+                user_data['mental_score'] = mental_score
+                user_data['true_false_score'] = true_false_score
+
+                overall_review_thresholds = [6, 13, 28, 16]
+                overall_labels = ['өндөр', 'сайн', 'дунд', 'муу']
+
+                user_data['overall_review'] = self.classify_score(mental_score, overall_review_thresholds, overall_labels)
+
+                datas.append(user_data)
+
+        return request.send_data(datas)
 
 
 @permission_classes([IsAuthenticated])
