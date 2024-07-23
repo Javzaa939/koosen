@@ -23,7 +23,8 @@ export function getColumns (currentPage, rowsPerPage, total_count)
 			name: t("Сорилын нэр"),
 			selector: (row) => (row?.title),
             sortable: true,
-			minWidth: "80px",
+			maxWidth: "300px",
+			minWidth: "250px",
 			center: true
 		},
 		{
@@ -38,6 +39,8 @@ export function getColumns (currentPage, rowsPerPage, total_count)
 						<></>
 				)
 			},
+			maxWidth: "550px",
+			minWidth: "300px",
             sortable: true,
 			center: true
         },
@@ -46,14 +49,16 @@ export function getColumns (currentPage, rowsPerPage, total_count)
 			name: t("Эхлэх огноо"),
 			selector: (row) => row?.start_date,
             sortable: true,
-			center: true
+			maxWidth: "200px",
+			minWidth: "100px",
         },
 		{
 			header: 'end_date',
 			name: t("Дуусах огноо"),
 			selector: (row) => row?.end_date,
             sortable: true,
-			center: true
+			maxWidth: "200px",
+			minWidth: "100px",
         },
         {
 			header: 'duration',
@@ -68,7 +73,8 @@ export function getColumns (currentPage, rowsPerPage, total_count)
 				)
 			},
             sortable: true,
-			center: true
+			maxWidth: "200px",
+			minWidth: "100px",
         },
         {
             name: `${'Төлөв'}`,
@@ -77,12 +83,12 @@ export function getColumns (currentPage, rowsPerPage, total_count)
 					return state_flag_color(row?.state)
 				} else ''
 			},
-            minWidth: "100px",
-            center: true
+			maxWidth: "150px",
+			minWidth: "100px",
+            center: true,
         },
         {
             name: t("Үйлдэл"),
-			width: "160px",
 			center: true,
 			selector: (row) => (
 				<div className="text-center" style={{ width: "auto" }}>
@@ -97,6 +103,8 @@ export function getColumns (currentPage, rowsPerPage, total_count)
 				</div>
 			),
             center: true,
+			maxWidth: "150px",
+			minWidth: "100px",
         },
 	]
 
