@@ -1,7 +1,6 @@
 import moment from "moment"
 import { CheckCircle} from "react-feather"
 import { Badge, UncontrolledTooltip } from "reactstrap"
-import moment from "moment"
 
 // Хүснэгтийн баганууд
 export function getColumns (currentPage, rowsPerPage, total_count, addModalHandler, STATE_LIST, user) {
