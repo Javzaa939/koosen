@@ -24,7 +24,7 @@ function Result(){
     const [active, setActive] = useState('1')
     const [component, setComponent] = useState('')
 
-    const {isLoading, fetchData} = useLoader({});
+    const {Loader, isLoading, fetchData} = useLoader({isFullScreen: false});
 
     const navMenus = [
         {
@@ -64,6 +64,7 @@ function Result(){
 
     return (
         <Fragment>
+            {isLoading && Loader}
             <Card body>
                 <Row className='d-flex align-items-center justify-content-between'>
                     <Col>

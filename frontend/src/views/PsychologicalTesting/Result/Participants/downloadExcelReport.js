@@ -1,4 +1,7 @@
 import {utils, writeFile} from 'xlsx-js-style'
+import { dass21Sheet } from './dass21Sheet'
+import { motivationSheet } from './motivationSheet'
+import { prognozSheet } from './prognozSheet'
 
 export function downloadExcelReport(datas){
     const header = Array.from({length: 2},(_, hidx) => {
@@ -22,12 +25,11 @@ export function downloadExcelReport(datas){
         )
     })
 
-    const mainData = datas.map((data, index) => {
-        console.log(data)
+    const mainData = datas?.overall_datas.map((data, index) => {
         return(
             {
                 'д/д':index + 1,
-                'Цол, овог, нэр':`${data?.last_name} ${data?.first_name}`,
+                'Цол, овог, нэр':`${data?.last_name} ${data?.first_name}, ${data?.register}`,
                 'DASS21 | Депресс | Оноо':data?.depression_score,
                 'DASS21 | Депресс | Түвшин':data?.depression,
                 'DASS21 | Түгшүүр | Оноо':data?.anxiety_score,
@@ -52,7 +54,7 @@ export function downloadExcelReport(datas){
     const worksheet = utils.json_to_sheet(merge);
     const workbook = utils.book_new();
 
-    utils.book_append_sheet(workbook, worksheet, "result")
+    utils.book_append_sheet(workbook, worksheet, "Нийт")
 
     const staticCell1 = [
         'д/д',
@@ -202,7 +204,7 @@ export function downloadExcelReport(datas){
 
     worksheet["!cols"] = [
         {wch: 5},
-        {wch: 25},
+        {wch: 50},
         ...colWidth
     ]
 
@@ -277,6 +279,20 @@ export function downloadExcelReport(datas){
             e: { r: 2, c: 13 }
         },
     ]
+
+    const additionalData = []
+
+    // DASS21 шинэ sheet
+    const dass21NewSheet = dass21Sheet(datas?.dass21_datas);
+    utils.book_append_sheet(workbook, dass21NewSheet, "DASS21");
+
+    // Сурах сэдэл шинэ sheet
+    const motivationNewSheet = motivationSheet(datas?.motivation_datas);
+    utils.book_append_sheet(workbook, motivationNewSheet, "Сурах сэдэл");
+
+    // prognozSheet
+    const prognozSheetNewSheet = prognozSheet(datas?.prognoz_datas);
+    utils.book_append_sheet(workbook, prognozSheetNewSheet, "Прогноз");
 
     writeFile(workbook, "Сэтгэлзүйн_Шалгалт_Үр_Дүн.xlsx", { compression: true });
 }
