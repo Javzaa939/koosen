@@ -5,7 +5,7 @@ export function motivationSheet(datas){
         return(
             {
                 'д/д': index + 1,
-                'Цол, овог, нэр': `${data?.last_name} ${data?.first_name}`,
+                'Цол, овог, нэр': `${data?.last_name} ${data?.first_name}, ${data?.register}`,
                 'DATA1': data[1],
                 'DATA2': data[2],
                 'DATA3': data[3],
@@ -244,7 +244,7 @@ export function motivationSheet(datas){
 
     worksheet["!cols"] = [
         {wch: 5},
-        {wch: 35},
+        {wch: 50},
         ...colWidth
     ]
 

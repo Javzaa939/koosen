@@ -29,7 +29,7 @@ export function downloadExcelReport(datas){
         return(
             {
                 'д/д':index + 1,
-                'Цол, овог, нэр':`${data?.last_name} ${data?.first_name}`,
+                'Цол, овог, нэр':`${data?.last_name} ${data?.first_name}, ${data?.register}`,
                 'DASS21 | Депресс | Оноо':data?.depression_score,
                 'DASS21 | Депресс | Түвшин':data?.depression,
                 'DASS21 | Түгшүүр | Оноо':data?.anxiety_score,
@@ -204,7 +204,7 @@ export function downloadExcelReport(datas){
 
     worksheet["!cols"] = [
         {wch: 5},
-        {wch: 25},
+        {wch: 50},
         ...colWidth
     ]
 

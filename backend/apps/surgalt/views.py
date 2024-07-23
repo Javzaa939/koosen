@@ -2995,6 +2995,7 @@ class PsychologicalTestResultExcelAPIView(
         # Сүүлд нь хэрэглэгчийнхээ мэдээллийг өгөөд
         datas['first_name'] = user.first_name
         datas['last_name'] = user.last_name
+        datas['register'] = user.register
 
         return datas # Буцаана
 
@@ -3050,6 +3051,7 @@ class PsychologicalTestResultExcelAPIView(
         # Сүүлд нь хэрэглэгчийнхээ мэдээллийг өгөөд
         datas['first_name'] = user.first_name
         datas['last_name'] = user.last_name
+        datas['register'] = user.register
 
         return datas # Буцаана
 
@@ -3109,6 +3111,7 @@ class PsychologicalTestResultExcelAPIView(
         # Сүүлд нь хэрэглэгчийнхээ мэдээллийг өгөөд
         datas['first_name'] = user.first_name
         datas['last_name'] = user.last_name
+        datas['register'] = user.register
 
         return datas # Буцаана
 
@@ -3155,6 +3158,7 @@ class PsychologicalTestResultExcelAPIView(
             user_obj = elselt_users[user.user.id]
             user_data['first_name'] = user_obj.first_name
             user_data['last_name'] = user_obj.last_name
+            user_data['register'] = user_obj.register
 
             # Хэрэглэгчийн хариултууд
             if user.answer:
