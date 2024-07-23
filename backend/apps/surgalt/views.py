@@ -2777,8 +2777,27 @@ class PsychologicalTestScopeOptionsAPIView(
                     id__in=queryset.values_list('user', flat=True)
                 ).values_list('id', flat=True)
 
+            # Хуучин хүүхдүүд
+            old_participants = PsychologicalTest.objects.get(id=pk).participants
+
+            # Convert lists to sets and find the difference
+            set_parts = set(participant_ids)
+            set_old_participants = set(old_participants)
+
+            # Өмнө нэмэгдсэн хэрэглэгчийг олох
+            common_elements = set_parts & set_old_participants
+
+            # Огт нэмэгдээгүй хэрэглэгчид
+            unique_parts = set_parts - common_elements
+
+            # Convert sets back to lists
+            unique_parts = list(unique_parts)
+
+            # Хуучин сэтгэлзүй өгөх хэрэглэгч дээрээ шинээр нэмэгдэж байгаагаа нэмж update хийнэ
+            old_new_participants = old_participants + unique_parts
+
             # Тэгээд эцэст нь бааздаа хадгална
-            PsychologicalTest.objects.filter(id=pk).update(participants=list(participant_ids))
+            PsychologicalTest.objects.filter(id=pk).update(participants=list(old_new_participants))
 
         return request.send_info("INF_002")
 
