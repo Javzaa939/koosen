@@ -60,7 +60,7 @@ function Physical() {
     const [rowsPerPage, setRowsPerPage] = useState(20)
 
     // Эрэмбэлэлт
-    const [sortField, setSort] = useState('')
+    const [sortField, setSort] = useState('order_no')
 
     // Translate
     const { t } = useTranslation()
