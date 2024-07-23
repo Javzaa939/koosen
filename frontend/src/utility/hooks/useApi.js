@@ -1763,7 +1763,7 @@ function useApi(isDisplay=false) {
 			},
 		},
 		justice: {
-			get: (limit, page, sort, search, state, elselt, profession, gender) => instance.get(`/elselt/justice/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}&elselt=${elselt}&profession=${profession}&gender=${gender}`),
+			get: (limit, page, sort, search, justice_state, elselt, profession, gender) => instance.get(`/elselt/justice/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&justice_state=${justice_state}&elselt=${elselt}&profession=${profession}&gender=${gender}`),
 			post: (cdata) => instance.post(`/elselt/justice/`, cdata),
 			put: (cdata) => instance.put(`/elselt/justice/`, cdata)
 		},

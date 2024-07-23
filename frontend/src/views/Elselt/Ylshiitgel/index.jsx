@@ -69,7 +69,7 @@ const ElseltYlshiitgel = () => {
     const [admop, setAdmop] = useState([])
     const [adm, setAdm] = useState('')
     const [selectedStudents, setSelectedStudents] = useState([])
-    const [state, setState] = useState('')
+    const [justice_state, setJusticeState] = useState('')
 
 	const elseltApi = useApi().elselt.justice
     const admissionYearApi = useApi().elselt
@@ -103,7 +103,7 @@ const ElseltYlshiitgel = () => {
     const stateop = [
         {
             'id': 1,
-            'name': 'БҮРТГҮҮЛСЭН'
+            'name': 'ХҮЛЭЭГДЭЖ БУЙ'
         },
         {
             'id': 2,
@@ -117,11 +117,10 @@ const ElseltYlshiitgel = () => {
 
 	/* Жагсаалтын дата авах функц */
 	async function getDatas() {
-        const {success, data} = await allFetch(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, state, adm, profession_id, gender))
+        const {success, data} = await allFetch(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, justice_state, adm, profession_id, gender))
         if(success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
-            console.log("profession_data",data)
 
             // Нийт хуудасны тоо
             var cpage_count = Math.ceil(data?.count / rowsPerPage === 'Бүгд' ? 1 : rowsPerPage)
@@ -180,7 +179,7 @@ const ElseltYlshiitgel = () => {
 
 			return () => clearTimeout(timeoutId);
 		}
-    }, [sortField, currentPage, rowsPerPage, searchValue, adm, profession_id, state, gender])
+    }, [sortField, currentPage, rowsPerPage, searchValue, adm, profession_id, justice_state, gender])
 
     useEffect(() => {
         getAdmissionYear()
@@ -387,22 +386,22 @@ const ElseltYlshiitgel = () => {
                 </CardHeader>
                 <Row className='justify-content-start mx-0 mt-1'>
                     <Col md={3} sm={6} xs={12} >
-                        <Label className="form-label" for="state">
+                        <Label className="form-label" for="justice_state">
                             {t('Төлөв')}
                         </Label>
                             <Select
-                                name="state"
-                                id="state"
+                                name="justice_state"
+                                id="justice_state"
                                 classNamePrefix='select'
                                 isClearable
                                 className={classnames('react-select')}
                                 isLoading={isLoading}
                                 placeholder={t('-- Сонгоно уу --')}
                                 options={stateop || []}
-                                value={stateop.find((c) => c?.id === state)}
+                                value={stateop.find((c) => c?.id === justice_state)}
                                 noOptionsMessage={() => t('Хоосон байна.')}
                                 onChange={(val) => {
-                                    setState(val?.id || '')
+                                    setJusticeState(val?.id || '')
                                 }}
                                 styles={ReactSelectStyles}
                                 getOptionValue={(option) => option.id}
