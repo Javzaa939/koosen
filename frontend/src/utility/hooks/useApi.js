@@ -2413,6 +2413,8 @@ function useApi(isDisplay=false) {
 				put: (id, cdata) => instance.put(`/elselt/health/physical/${id}/`, cdata),
 				// оюутны жагсаалт import хийх
 				postExcelImport: (data) => instance.post(`/elselt/health/physical/import/`, data),
+				// оюутны жагсаалт post хийх
+				postExcelImportData: data => instance.post(`/elselt/health/physical/postdata/`, data),
 			},
 		},
 		justice: {

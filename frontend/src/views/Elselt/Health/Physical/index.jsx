@@ -29,6 +29,7 @@ import classnames from "classnames";
 import { RiEditFill } from 'react-icons/ri'
 import { SortModal } from './SortModal'
 import FileModal from '@src/components/FileModal'
+import DetailModal from './DetailModal'
 
 const STATE_LIST = [
     {
@@ -82,7 +83,11 @@ function Physical() {
     const [addModalData, setAddModalData] = useState(null)
     // excel file import
     const [open_file, setFileModal] = useState(false)
+    const [showModal, setShowModal] = useState(false)
     const [file, setFile] = useState(false)
+    const [file_name, setFileName] = useState('')
+    const [errorDatas, setErrorDatas] = useState({})
+    const [detailDatas, setDetailDatas] = useState({})
 
     const [modal, setModal] = useState(false)
     const [type, setType] = useState('')
@@ -147,6 +152,16 @@ function Physical() {
             setPageCount(cpage_count)
         }
 	}
+
+    // Файл импорт хийх
+    function handleFileModal() {
+        setFileModal(!open_file)
+        setFile('')
+    }
+    // Датаны жагсаалт харуулах модал
+    const handleShowDetailModal = () => {
+        setShowModal(!showModal)
+    }
 
     async function onSubmit() {
         if (file) {
@@ -394,10 +409,6 @@ function Physical() {
         setModal(!modal)
     }
 
-    function handleFileModal() {
-        setFileModal(!open_file)
-        setFile('')
-    }
     return (
         <Fragment>
             <EmailModal
@@ -427,6 +438,16 @@ function Physical() {
                 />
             }
             {
+                showModal &&
+                    <DetailModal
+                        isOpen={showModal}
+                        handleModal={handleShowDetailModal}
+                        datas={detailDatas}
+                        file_name={file_name}
+                        errorDatas={errorDatas}
+                    />
+            }
+            {
                 addModal &&
                 <AddModal
                     addModal={addModal}
@@ -454,18 +475,6 @@ function Physical() {
 				</div>
             </CardHeader>
             <CardBody>
-                {/* <Row>
-                    <Col>
-                    </Col>
-                    <Col className='d-flex justify-content-end'>
-                        <Button color='primary' className='d-flex align-items-center' onClick={() => excelHandler()}>
-                            <FileText className='me-50' size={14}/>
-                            <div>
-                                Excel татах
-                            </div>
-                        </Button>
-                    </Col>
-                </Row> */}
                 <Row className='justify-content-start mt-1'>
                     <Col md={3}>
                         <Label for='sort-select'>{t('Үзлэгийн төлөвөөр шүүх')}</Label>
@@ -634,7 +643,7 @@ function Physical() {
                     </div>
                     <div className='d-flex'>
                         <div className='px-1'>
-                            <Button color='primary' className='d-flex align-items-center px-75 justify-content-between' onClick={() => handleFileModal()}>
+                            <Button color='primary' className='d-flex align-items-center px-75' onClick={() => handleFileModal()}>
                                 <UploadCloud size={15} />
                                 Excel оруулах
                             </Button>

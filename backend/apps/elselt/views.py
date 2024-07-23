@@ -1,6 +1,8 @@
 import hashlib
 import datetime as dt
 import requests
+import os
+import pandas as pd
 from collections import Counter
 
 from rest_framework import mixins
@@ -14,6 +16,7 @@ from django.db import transaction
 from django.db.models import F, Subquery, OuterRef, Count, Q, Sum, Exists
 from django.db.models import Value, Case, When, IntegerField
 from django.db.models.functions import Substr, Cast
+from django.conf import settings
 
 from main.utils.function.utils import (
     json_load,
@@ -31,6 +34,7 @@ from main.utils.function.utils import (
 )
 
 from main.utils.function.pagination import CustomPagination
+from main.utils.file import save_file, remove_folder
 from main.decorators import login_required
 from rest_framework.response import Response
 from rest_framework import status
@@ -1714,96 +1718,122 @@ class ElseltHealthPhysical(
 
         return request.send_info('INF_003')
 
-# class ElseltPhysicalExcelImportAPIView(
-#     generics.GenericAPIView
-# ):
-#     """ Оюутны жагсаалт import хийх """
+class ElseltPhysicalExcelImportAPIView(
+    generics.GenericAPIView
+):
+    """ Бие бялдар жагсаалт import хийх """
 
-#     @transaction.atomic()
-#     def post(self, request):
+    @transaction.atomic()
+    def post(self, request):
+        datas = request.data
+        file = datas.get("file")
+
+        path = save_file(file, 'student', 1)
+        full_path = os.path.join(settings.MEDIA_ROOT, str(path))
+        error_datas = list()
+        correct_datas = list()
+
+        try:
+            excel_data = pd.read_excel(full_path)
+            datas = excel_data.to_dict(orient='records')
+
+            for created_data in datas:
+                register_num = created_data.get('РД')
+
+                # PhysqueUser
+                total_score = created_data.get('Нийт оноо')
+                turnik = created_data.get('Савлуурт суниах')
+                patience_1000m = created_data.get('Тэсвэр 1000М')
+                speed_100m = created_data.get('Хурд 100М')
+                quickness = created_data.get('Авхаалж самбаа')
+                flexible = created_data.get('Уян хатан')
+
+                # Already exists шалгах
+                student = ElseltUser.objects.filter(register=register_num).first()
+                if not student:
+                    error_datas.append({
+                        'register_num': register_num,
+                        'message': 'Student not found'
+                    })
+                    continue
+
+                physque_user_data = {
+                    'user': student,
+                    'total_score': total_score,
+                    'turnik': turnik,
+                    'patience_1000m': patience_1000m,
+                    'speed_100m': speed_100m,
+                    'quickness': quickness,
+                    'flexible': flexible,
+                    'updated_user': request.user if request.user.is_authenticated else None
+                }
+
+                created = PhysqueUser.objects.update_or_create(
+                    user=student,
+                    defaults=physque_user_data
+                )
+
+                correct_datas.append({
+                    'register_num': register_num,
+                    'total_score': total_score,
+                    'turnik': turnik,
+                    'patience_1000m': patience_1000m,
+                    'speed_100m': speed_100m,
+                    'quickness': quickness,
+                    'flexible': flexible,
+                    'created' if created else 'updated': True
+                })
+
+            if file:
+                remove_folder(full_path)
+
+        except Exception as e:
+            print(e)
+            return request.send_error('ERR_012')
+
+        return_datas = {
+            'create_datas': correct_datas,
+            'all_error_datas': error_datas,
+            'file_name': file.name,
+            'not_found_student': error_datas,
+        }
+        return request.send_data(return_datas)
 
 
-#         datas = request.data
-#         file = datas.get("file")
+class ElseltPhysicalExcelPostDataAPIView(
+    generics.GenericAPIView
+):
+    """ Дата оруулах  """
 
-#         # Файл түр хадгалах
-#         path = save_file(file, 'student', 1)
-#         full_path = os.path.join(settings.MEDIA_ROOT, str(path))
+    @transaction.atomic()
+    def post(self, request):
+        datas = request.data
+        all_datas = list()
 
-#         error_datas = list()
-#         correct_datas = list()
+        try:
+            for created_data in datas:
+                total_score = created_data.get('Нийт оноо')
+                turnik = created_data.get('Савлуурт суниах')
+                patience_1000m = created_data.get('Тэсвэр 1000М')
+                speed_100m = created_data.get('Хурд 100М')
+                quickness = created_data.get('Авхаалж самбаа')
+                flexible = created_data.get('Уян хатан')
 
-#         excel_data = pd.read_excel(full_path)
-#         datas = excel_data.to_dict(orient='records')
+                qs = PhysqueUser(
+                    total_score=total_score,
+                    turnik=turnik,
+                    patience_1000m=patience_1000m,
+                    speed_100m=speed_100m,
+                    quickness=quickness,
+                    flexible=flexible,
+                )
+                all_datas.append(qs)
 
-#         try:
-#             for created_data in datas:
-#                 pay_type_id = 8 # төлбөр төлөлтын төрөл
+        except Exception as e:
+            print(e)
+            return request.send_error('ERR_002')
 
-#                 department = created_data.get('Тэнхим')
-#                 group = created_data.get('Анги/дамжаа')
-#                 register_num = created_data.get('Регистрийн дугаар')
-#                 # family_name = created_data.get('Ургийн овог')
-#                 last_name = created_data.get('Эцэг эхийн нэр')
-#                 first_name = created_data.get('Өөрийн нэр')
-#                 last_name_uig = created_data.get('Эцэг эхийн нэр уйгаржин')
-#                 first_name_uig = created_data.get('Өөрийн нэр уйгаржин')
-#                 phone = created_data.get('Утасны дугаар')
-#                 # yas_undes = created_data.get('Яс үндэс')
-
-#                 # gender = created_data.get('Хүйс')
-#                 birth_date, gender = calculate_birthday(register_num)
-#                 status = created_data.get('Төлөв')
-#                 code = created_data.get('Суралцагчдын код')
-
-#                 pay_type_id = Student.EXPENSES
-
-#                 status_id = None
-
-#                 # суралцах хэлбэр
-#                 status_id = StudentRegister.objects.filter(name__icontains='Суралцаж буй').first()
-
-#                 dep_obj = Salbars.objects.filter(name__icontains=department).first()
-#                 group_obj = Group.objects.filter(name__icontains=group).first()
-
-#                 obj = {
-#                     'department': department,
-#                     'group': group,
-#                     'register_num': register_num,
-#                     'last_name': last_name,
-#                     'first_name': first_name,
-#                     'phone': phone,
-#                     'status': status,
-#                     'last_name_uig': last_name_uig,
-#                     'first_name_uig': first_name_uig,
-#                     'gender': gender,
-#                     'birth_date': birth_date,
-#                     'pay_type': pay_type_id,
-#                     'code': code,
-#                 }
-
-#                 student_qs = Student.objects.filter(code=code)
-
-#                 if not (code or dep_obj or group_obj or pay_type_id or register_num or last_name or first_name or phone or status_id) or student_qs:
-#                     error_datas.append(obj)
-#                 else:
-#                     correct_datas.append(obj)
-
-#                 if file:
-#                     remove_folder(full_path)
-
-#         except Exception as e:
-#             print(e)
-#             return request.send_error('ERR_012')
-
-#         return_datas = {
-#             'create_datas': correct_datas,
-#             'all_error_datas': error_datas,
-#             'file_name': file.name,
-#             'not_found_student': error_datas,
-#         }
-
-#         return request.send_data(return_datas)
+        return request.send_info("INF_001")
 
  # -------------------Элсэгчдийн нарийн мэргэжилийн шатны эрүүл мэндийн үзлэг-------------------------#
 class ElseltHealthPhysicalCreateAPIView(
