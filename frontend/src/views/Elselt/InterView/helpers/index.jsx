@@ -195,7 +195,7 @@ export function getColumns (currentPage, rowsPerPage, total_count,stateop, state
 			reorder: true,
 			sortable: true,
 			name: t("Бүрт/огноо"),
-			selector: (row) => row?.created_at? moment(row?.created_at).format("YYYY-MM-DD h:mm") : '',
+			selector: (row) => row?.created_at? moment(row?.created_at).format("YYYY-MM-DD H:mm") : '',
 			center: true,
 		},
 		{
