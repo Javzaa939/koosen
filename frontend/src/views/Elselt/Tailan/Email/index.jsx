@@ -24,6 +24,8 @@ import { getColumns } from './helpers';
 import EmailModal from './EmailModal';
 import TableLoader from '@src/components/TableLoader';
 import TableBlank from '@src/components/TableBlank';
+import Flatpickr from 'react-flatpickr'
+import moment from 'moment';
 
 function Email() {
 
@@ -53,6 +55,8 @@ function Email() {
 
     const [emailModal, setEmailModal] = useState(false)
     const [selectedEmail, setSelectedEmail] = useState('')
+    const [end_date, setEnd_date] = useState('')
+    const [start_date, setStart_date] = useState('')
 
     // Хуудас солих үед ажиллах хэсэг
 	function handlePagination(page) {
@@ -158,7 +162,7 @@ function Email() {
 	// /* Жагсаалтын дата авах функц */
 	async function getDatas() {
 
-        const {success, data} = await allFetch(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, adm, profession_id, unit1, gender, state, gpa_state))
+        const {success, data} = await allFetch(elseltApi.get(rowsPerPage, currentPage, sortField, searchValue, adm, profession_id, unit1, gender, state, gpa_state, start_date, end_date))
         if(success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
@@ -210,7 +214,7 @@ function Email() {
 
 			return () => clearTimeout(timeoutId);
 		}
-    }, [sortField, currentPage, rowsPerPage, searchValue, adm, profession_id, unit1, gender, state, gpa_state])
+    }, [sortField, currentPage, rowsPerPage, searchValue, adm, profession_id, unit1, gender, state, gpa_state, start_date, end_date])
 
     useEffect(() => {
         getAdmissionYear()
@@ -369,6 +373,59 @@ function Email() {
                                 getOptionValue={(option) => option.id}
                                 getOptionLabel={(option) => option.name}
                             />
+                    </Col>
+                    <Col md={3} className='my-0 py-0 '>
+                        <Label className="form-label" for="">
+                            {t('Эхлэх огноо')}
+                        </Label>
+                        <Flatpickr
+                            className='form-control form-control-sm  bg-white '
+                            style={{ maxWidth: '480px' }}
+                            placeholder={`-- Сонгоно уу --`}
+
+                            onChange={(selectedDates, dateStr) => {
+								setStart_date(
+									selectedDates.length === 0
+										? ''
+										: moment(dateStr).format('YYYY-MM-DD HH:mm')
+								);
+                                console.log(start_date)
+							}}
+                            value={start_date}
+                            options={{
+                                time_24hr: true,
+                                enableTime: true,
+                                dateFormat: "Y-m-d H:i",
+                                mode: "single",
+                                // locale: Mongolian
+                            }}
+                        />
+                    </Col>
+                    <Col md={3} className='my-0 py-0 '>
+                        <Label className="form-label" for="">
+                            {t('Дуусах огноо')}
+                        </Label>
+                        <Flatpickr
+                            className='form-control form-control-sm  bg-white '
+                            style={{ maxWidth: '480px' }}
+                            placeholder={`-- Сонгоно уу --`}
+
+                            onChange={(selectedDates, dateStr) => {
+								setEnd_date(
+									selectedDates.length === 0
+										? ''
+										: moment(dateStr).format('YYYY-MM-DD HH:mm')
+								);
+							}}
+                            value={end_date}
+                            options={{
+                                time_24hr: true,
+                                enableTime: true,
+                                dateFormat: "Y-m-d H:i",
+                                mode: "single",
+                                // locale: Mongolian
+                            }}
+                        />
                     </Col>
                 </Row>
                 <Row className="justify-content-between mx-0" >
