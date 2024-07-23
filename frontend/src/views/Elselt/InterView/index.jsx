@@ -40,6 +40,7 @@ import useUpdateEffect from '@hooks/useUpdateEffect';
 
 import EmailModal from '../User/EmailModal'
 import MessageModal from '../User/MessageModal'
+import Flatpickr from 'react-flatpickr'
 
 import StateModal from './StateModal';
 
@@ -69,6 +70,8 @@ const InterView = () => {
     const [adm, setAdm] = useState('')
     const [selectedStudents, setSelectedStudents] = useState([])
     const [chosenState, setChosenState] = useState('')
+    const [end_date, setEnd_date] = useState('')
+    const [start_date, setStart_date] = useState('')
 
     const interViewApi = useApi().elselt.interview
     const admissionYearApi = useApi().elselt
@@ -114,7 +117,7 @@ const InterView = () => {
 
     /* Жагсаалтын дата авах функц */
     async function getDatas() {
-      const {success, data} = await allFetch(interViewApi.get(rowsPerPage, currentPage, sortField, searchValue, chosenState,adm,profession_id, gender))
+      const {success, data} = await allFetch(interViewApi.get(rowsPerPage, currentPage, sortField, searchValue, chosenState,adm,profession_id, gender, start_date, end_date))
       if(success) {
           setTotalCount(data?.count)
           setDatas(data?.results)
@@ -176,7 +179,7 @@ const InterView = () => {
 
     return () => clearTimeout(timeoutId);
     }
-    }, [sortField, currentPage, rowsPerPage, searchValue, chosenState,adm,profession_id, gender])
+    }, [sortField, currentPage, rowsPerPage, searchValue, chosenState,adm,profession_id, gender, start_date, end_date])
 
     useEffect(() => {
         getAdmissionYear()
@@ -327,6 +330,58 @@ const InterView = () => {
                                     getOptionLabel={(option) => option.name}
                                 />
                         </Col>
+                        <Col md={3} className='my-0 py-0 '>
+                        <Label className="form-label" for="">
+                            {t('Эхлэх огноо')}
+                        </Label>
+                        <Flatpickr
+                            className='form-control form-control-sm  bg-white '
+                            style={{ maxWidth: '480px' }}
+                            placeholder={`-- Сонгоно уу --`}
+
+                            onChange={(selectedDates, dateStr) => {
+								setStart_date(
+									selectedDates.length === 0
+										? ''
+										: moment(dateStr).format('YYYY-MM-DD HH:mm')
+								);
+							}}
+                            value={start_date}
+                            options={{
+                                time_24hr: true,
+                                enableTime: true,
+                                dateFormat: "Y-m-d H:i",
+                                mode: "single",
+                                // locale: Mongolian
+                            }}
+                        />
+                    </Col>
+                    <Col md={3} className='my-0 py-0 '>
+                        <Label className="form-label" for="">
+                            {t('Дуусах огноо')}
+                        </Label>
+                        <Flatpickr
+                            className='form-control form-control-sm  bg-white '
+                            style={{ maxWidth: '480px' }}
+                            placeholder={`-- Сонгоно уу --`}
+
+                            onChange={(selectedDates, dateStr) => {
+								setEnd_date(
+									selectedDates.length === 0
+										? ''
+										: moment(dateStr).format('YYYY-MM-DD HH:mm')
+								);
+							}}
+                            value={end_date}
+                            options={{
+                                time_24hr: true,
+                                enableTime: true,
+                                dateFormat: "Y-m-d H:i",
+                                mode: "single",
+                                // locale: Mongolian
+                            }}
+                        />
+                    </Col>
                 </Row>
                 <div className='d-flex justify-content-between my-50 mt-1'>
                     <div className='d-flex'>

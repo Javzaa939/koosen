@@ -2295,6 +2295,8 @@ class ConversationUserSerializerAPIView(
         state = self.request.query_params.get('state')
         elselt = self.request.query_params.get('elselt')
         profession = self.request.query_params.get('profession')
+        start_date=self.request.query_params.get('start_date')
+        end_date=self.request.query_params.get('end_date')
 
         # Бие бялдарт тэнцсэн элсэгчид
         biy_byldar_ids = PhysqueUser.objects.filter(state=AdmissionUserProfession.STATE_APPROVE).values_list('user',flat=True)
@@ -2329,6 +2331,14 @@ class ConversationUserSerializerAPIView(
 
             queryset = queryset.filter(user__in=user_id)
 
+        filters = {}
+        if start_date:
+            filters['created_at__gte'] = start_date
+        if end_date:
+            filters['created_at__lte'] = end_date
+
+        if filters:
+            queryset = queryset.filter(**filters)
 
         return queryset
 
