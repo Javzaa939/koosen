@@ -199,7 +199,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, addModalHandl
 			sortField: 'updated_at',
 			header: 'updated_at',
 			name: "Огноо",
-			selector: (row) => row?.health_up_user_data?.updated_at? moment(row?.health_up_user_data?.updated_at).format("YYYY-MM-DD h:mm") : '',
+			selector: (row) => row?.health_up_user_data?.updated_at? moment(row?.health_up_user_data?.updated_at).format("YYYY-MM-DD H:mm") : '',
 			minWidth: "300px",
 			maxWidth: "300px",
 			reorder: true,
