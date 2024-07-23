@@ -2932,11 +2932,11 @@ class PsychologicalTestResultShowAPIView(
                 serializer = self.serializer_class(queryset)
                 data = serializer.data
 
-                if choice_id != 1 or choice_id != 0:
+                if choice_id != 1 and choice_id != 0:
                     # big_data шалгуулагчийн сонгосон хариултын id буцаан
                     data['chosen_choice'] = int(choice_id)
                 else:
-                    data['chosen_choice'] = choice_id
+                    data['chosen_choice'] = 'Тийм' if choice_id == 1 else 'Үгүй'
 
                 # Тухайн өгсөн шалгалтийн нийт оноо
                 if(data['has_score']):
