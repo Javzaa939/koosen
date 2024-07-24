@@ -2552,12 +2552,12 @@ function useApi(isDisplay=false) {
       getStructure: () => able_instance.get(`/?a=ableApi&tsk=getDeps&key=uia`),
     },
 
-    online_lesson:{
-        get_lessons: ()=> instance.get('/online_lessson/'),
-        getOne: (pk) => instance.get(`/online_lesson/${pk}`),
-        post: (data) => instance.post(`/online_lesson/`),
-        put: (pk, data) => instance.put(`online_lesson/${pk}`),
-        delete_lesson: (pk) => instance.delete('delete')
+    online_lesson: {
+      get_lessons: () => instance.get("/online_lesson/"),
+      getOne: (pk) => instance.get(`/online_lesson/${pk}/`),
+      LessonRegister: (data) => instance.post(`/online_lesson/`, data),
+      EditLesson: (pk, data) => instance.put(`online_lesson/${pk}/`, data),
+      delete_lesson: (pk) => instance.delete(`online_lesson/${pk}`),
     },
     material : {
       get: ()=> instance.get('/online_lesson/material/'),

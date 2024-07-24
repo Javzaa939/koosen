@@ -33,6 +33,7 @@ const DetailPage = () => {
 
 	const { showWarning } = useModal();
 	const { index } = useParams();
+
 	const navigate = useNavigate();
 
 	//State

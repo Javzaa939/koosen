@@ -1,12 +1,127 @@
-import React from 'react'
-import { useLocation } from 'react-router-dom';
+import useApi from "@src/utility/hooks/useApi";
+import { Fragment, useEffect, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import { Card, CardBody, CardHeader, Col, Row, Button } from "reactstrap";
+import { BiArrowToLeft } from "react-icons/bi";
+import { IoMdRefresh } from "react-icons/io";
+import LessonTable from "./LessontTable";
+const menuOptions = [
+  {
+    name: "Бүгд",
+    option: 1,
+  },
+  {
+    name: "Хугацаа дуусаагүй",
+    option: 3,
+  },
+  {
+    name: "Хугацаа дууссан",
+    option: 4,
+  },
+  {
+    name: "Дүн татах",
+    option: 5,
+  },
+  {
+    name: "Засвар оруулах",
+    option: 2,
+  },
+];
 
 function OnlineLessonPage() {
-      const location = useLocation();
-      const lesson = location.state.lesson;
+  // states
+  const [selectedContent, setSelectedContent] = useState(1);
+  const [lesson, setLesson] = useState(null);
+  const [lessonStandart, setLessonStandart] = useState(null);
+
+  // api
+  const onlineLessonApi = useApi().online_lesson;
+  const studyApi = useApi().study.lessonStandart;
+
+  // hooks
+  const { index: lessonId } = useParams();
+
+  // Хичээлийн мэдээлэл
+  const getLesson = async () => {
+    try {
+      const res = await onlineLessonApi.getOne(lessonId);
+      setLesson(res);
+      console.log("Lesson:", res);
+    } catch (error) {
+      console.error("Failed to fetch lesson:", error);
+    }
+  };
+
+  const getLessonStandart = async () => {
+    try {
+      const res = await studyApi.getOne(lesson?.lesson);
+      setLessonStandart(res.data);
+      console.log("Lesson Standart:", res.data);
+    } catch (error) {
+      console.error("Failed to fetch lesson standard:", error);
+    }
+  };
+
+  useEffect(() => {
+    getLesson();
+  }, [lessonId]);
+
+  useEffect(() => {
+    if (lesson) {
+      getLessonStandart();
+    }
+  }, [lesson]);
+
+  const refresh = () => {
+    getLesson();
+  };
+
   return (
-    <div>OnlineLessonPage{lesson?.name}</div>
-  )
+    <div className="d-flex flex-row w-100">
+      <Card className="w-100">
+        <CardHeader className="p-1 w-100">
+          <div className="d-flex flex-row justify-content-between w-100">
+
+              <Link to="/online__lessons">
+                <Button outline size="md">
+                  <BiArrowToLeft size={16} />
+                </Button>
+              </Link>
+
+
+            <div className="col-10 p-0">
+              <h4 className="m-0">{lessonStandart?.name}</h4>
+              <span className="">кредит: {lessonStandart?.kredit}</span>
+            </div>
+
+            <div className="col-1 p-0 d-flex justify-content-end">
+              <Button outline size="sm" onClick={refresh}>
+                <IoMdRefresh />
+              </Button>
+            </div>
+
+          </div>
+        </CardHeader>
+        <CardBody className="m-0 p-0">
+          <Row className="m-0 p-0">
+            {menuOptions.map((item, index) => (
+              <Col xl={3} md={6} className="mb-0" key={index}>
+                <Card className="border rounded-lg shadow-sm">
+                  <CardBody onClick={() => setSelectedContent(item.option)}>
+                    <div className="d-flex justify-content-between">
+                      <h4>{item.name}</h4>
+                    </div>
+                  </CardBody>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+          <LessonTable lesson={lesson} selectedContent={selectedContent} />
+        </CardBody>
+      </Card>
+
+    </div>
+  );
 }
 
-export default OnlineLessonPage
+export default OnlineLessonPage;

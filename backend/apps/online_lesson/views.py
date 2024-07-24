@@ -14,7 +14,9 @@ from main.utils.function.utils import get_cdn_url
 from lms.models import OnlineLesson, LessonMaterial
 from .serializers import OnlineLessonSerializer, LessonMaterialSerializer
 
-# OnlineLesson List and Create View
+from core.models import Teachers
+from rest_framework.response import Response
+from rest_framework import status
 @permission_classes([IsAuthenticated])
 class OnlineLessonListAPIView(
     mixins.ListModelMixin,
@@ -24,27 +26,35 @@ class OnlineLessonListAPIView(
     ''' Handles listing and creating online lessons '''
     queryset = OnlineLesson.objects.all()
     serializer_class = OnlineLessonSerializer
+    userset = Teachers.objects.all()
 
     def get(self, request, *args, **kwargs):
         return self.list(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-         return self.create(request, *args, **kwargs)
+        print("Received data:", request.data)
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            self.perform_create(serializer)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        print("Errors:", serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+# OnlineLesson Retrieve, Update, and Delete View
 @permission_classes([IsAuthenticated])
 class OnlineLessonDetailAPIView(
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
     mixins.DestroyModelMixin,
-    mixins.ListModelMixin,
     generics.GenericAPIView
 ):
-    ''' Онлайн хичээл '''
+    ''' Handles retrieving, updating, and deleting a specific online lesson '''
     queryset = OnlineLesson.objects.all()
     serializer_class = OnlineLessonSerializer
 
-    def get(self, request, pk=None):
-        return self.retrieve(request)
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
 
     def put(self, request, *args, **kwargs):
         return self.update(request, *args, **kwargs)
