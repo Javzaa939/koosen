@@ -644,7 +644,7 @@ function Physical() {
                     <div className='d-flex'>
                         <div className='px-1'>
                             <Button color='primary' className='d-flex align-items-center px-75' onClick={() => handleFileModal()}>
-                                <UploadCloud size={15} />
+                                <UploadCloud className='me-25' size={15}/>
                                 Excel оруулах
                             </Button>
                         </div>

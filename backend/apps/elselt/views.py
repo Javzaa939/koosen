@@ -1735,6 +1735,7 @@ class ElseltPhysicalExcelImportAPIView(
 
         try:
             excel_data = pd.read_excel(full_path)
+            excel_data = excel_data.fillna(0)
             datas = excel_data.to_dict(orient='records')
 
             for created_data in datas:
