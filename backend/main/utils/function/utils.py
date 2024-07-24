@@ -8,6 +8,7 @@ from datetime import date
 
 from random import randint
 from crontab import CronTab
+from urllib.parse import urljoin
 
 from io import BytesIO
 import PIL.Image as Image
@@ -1308,3 +1309,25 @@ def calculate_age(birthdate):
     #     age -=1
 
     return age
+
+def get_cdn_url(endpoint):
+    """
+    Орчиноос шалтгаалж cdn-server-ийн url буцаан.
+
+    :param endpoint: method заах url.
+    :return: The full CDN URL.
+    """
+
+    # Орчиноос шалтгаалж url авах
+    if settings.DEBUG is True:
+        cdn_urls = 'http://127.0.0.1:8001/cdn/'
+    else:
+        #NOTE cdn-server domain-тай болох үед url тавих
+        cdn_urls = ''
+
+    if not endpoint.endswith('/'):
+        endpoint = endpoint + '/'
+
+    full_url = urljoin(cdn_urls, endpoint)
+
+    return full_url
