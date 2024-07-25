@@ -2555,8 +2555,8 @@ function useApi(isDisplay=false) {
     online_lesson: {
       get_lessons: () => instance.get("/online_lesson/"),
       getOne: (pk) => instance.get(`/online_lesson/${pk}/`),
-      LessonRegister: (data) => instance.post(`/online_lesson/`, data),
-      EditLesson: (pk, data) => instance.put(`online_lesson/${pk}/`, data),
+      lessonRegister: (data) => instance.post(`/online_lesson/`, data),
+      editLesson: (pk, data) => instance.put(`online_lesson/${pk}/`, data),
       delete_lesson: (pk) => instance.delete(`online_lesson/${pk}`),
     },
     material : {

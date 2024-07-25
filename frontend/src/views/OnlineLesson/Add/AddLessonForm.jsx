@@ -61,7 +61,7 @@ function AddLessonForm({toggle}) {
       cdata.lesson = parseInt(cdata.lesson);
       cdata.created_user = parseInt(cdata.created_user);
 
-      await postFetch(OnlineLessonAPI.LessonRegister(cdata));
+      await postFetch(OnlineLessonAPI.lessonRegister(cdata));
 
         reset();
         toggle();
