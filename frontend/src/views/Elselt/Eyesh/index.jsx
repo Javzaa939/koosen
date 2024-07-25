@@ -83,11 +83,9 @@ const ElseltEyesh = () => {
 	]
 	const [yesh_state, setEyeshState] = useState()
 	const [yesh_mhb_state, setEyeshMhbState] = useState()
-	
 	//Жагсаалт дата
 	const [datas, setDatas] = useState([])
 	const [total_count, setTotalCount] = useState('')
-
 	// ЭЕШ дата
 	const [eyeshData, setEyeshData] = useState([])
 
