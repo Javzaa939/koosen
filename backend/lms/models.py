@@ -4080,6 +4080,7 @@ class AdmissionIndicator(models.Model):
     ESSE = 10
     HEERIIN_BELTGEL = 11
     TENTSSEN_ELSEGCHID = 12
+    ESSE_MHB = 13
 
     INDICATOR_VALUE = (
 
@@ -4091,11 +4092,11 @@ class AdmissionIndicator(models.Model):
         (ERUUL_MEND_ANHAN, 'Эрүүл мэнд анхан'),
         (ERUUL_MEND_MERGEJLIIN, 'Эрүүл мэнд мэргэжлийн'),
         (BIE_BYALDAR, 'Ур чадвар'),
-        (SETGEL_ZUI, 'Сэтгэлзүйн ярилцлага'),
+        (SETGEL_ZUI, 'Сэтгэл зүйн сорил'),
         (TUGSSUN_SURGUULI, 'Төгссөн сургууль'),
         (ESSE, 'Cудалгааны ажлын агуулга чиглэл, зорилгын талаар бичсэн танилцуулга'),
         (HEERIIN_BELTGEL, 'Хээрийн бэлтгэл'),
-        (TENTSSEN_ELSEGCHID, 'Тэнцсэн элсэгч, бүртгүүлэгчид')
+        (ESSE_MHB, 'Монгол хэл эсcэ бичлэг')
     )
 
     admission_prof = models.ForeignKey(AdmissionRegisterProfession, on_delete=models.CASCADE, verbose_name="Мэргэжил")
