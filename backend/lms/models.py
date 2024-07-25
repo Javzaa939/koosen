@@ -4405,7 +4405,7 @@ class OnlineLesson(models.Model):
     DATE = 2
 
     CREATE_TYPE = (
-        (WEEK, "16 долоо хоног"),
+        (WEEK, "Долоо хоног"),
         (DATE, "Хугацаагаар"),
     )
 
