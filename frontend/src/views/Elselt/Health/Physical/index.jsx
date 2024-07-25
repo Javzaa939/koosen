@@ -62,7 +62,7 @@ function Physical() {
     const [rowsPerPage, setRowsPerPage] = useState(20)
 
     // Эрэмбэлэлт
-    const [sortField, setSort] = useState('')
+    const [sortField, setSort] = useState('order_no')
 
     // Translate
     const { t } = useTranslation()
@@ -676,7 +676,7 @@ function Physical() {
                         onSelectedRowsChange={(state) => onSelectedRowsChange(state)}
                         direction="auto"
                         style={{ border: '1px solid red' }}
-                        defaultSortFieldId={'created_at'}
+                        defaultSortFieldId={'order_no'}
                     />
                 </div>
             </CardBody>

@@ -27,7 +27,8 @@ import { RiEditFill } from "react-icons/ri";
 import { getColumns } from './helpers';
 import { MdMailOutline } from "react-icons/md";
 import { BiMessageRoundedError } from "react-icons/bi";
-
+import { HiOutlineDocumentReport } from "react-icons/hi";
+import { utils, writeFile } from 'xlsx-js-style';
 import DataTable from 'react-data-table-component'
 import moment from 'moment';
 import classnames from "classnames";
@@ -40,6 +41,7 @@ import useUpdateEffect from '@hooks/useUpdateEffect';
 
 import EmailModal from '../User/EmailModal'
 import MessageModal from '../User/MessageModal'
+import Flatpickr from 'react-flatpickr'
 
 import StateModal from './StateModal';
 
@@ -69,6 +71,8 @@ const InterView = () => {
     const [adm, setAdm] = useState('')
     const [selectedStudents, setSelectedStudents] = useState([])
     const [chosenState, setChosenState] = useState('')
+    const [end_date, setEnd_date] = useState('')
+    const [start_date, setStart_date] = useState('')
 
     const interViewApi = useApi().elselt.interview
     const admissionYearApi = useApi().elselt
@@ -114,7 +118,7 @@ const InterView = () => {
 
     /* Жагсаалтын дата авах функц */
     async function getDatas() {
-      const {success, data} = await allFetch(interViewApi.get(rowsPerPage, currentPage, sortField, searchValue, chosenState,adm,profession_id, gender))
+      const {success, data} = await allFetch(interViewApi.get(rowsPerPage, currentPage, sortField, searchValue, chosenState,adm,profession_id, gender, start_date, end_date))
       if(success) {
           setTotalCount(data?.count)
           setDatas(data?.results)
@@ -176,7 +180,7 @@ const InterView = () => {
 
     return () => clearTimeout(timeoutId);
     }
-    }, [sortField, currentPage, rowsPerPage, searchValue, chosenState,adm,profession_id, gender])
+    }, [sortField, currentPage, rowsPerPage, searchValue, chosenState,adm,profession_id, gender, start_date, end_date])
 
     useEffect(() => {
         getAdmissionYear()
@@ -186,6 +190,168 @@ const InterView = () => {
     useUpdateEffect(() => {
         getProfession()
     }, [adm])
+
+    function convert() {
+		const mainData = datas.map((data, idx) => {
+			return (
+				{
+					'№': idx + 1,
+                    'Үзлэгийн төлөв':data?.conversation_data?.state == 1 ? 'Нөхцөлтэй	' : data?.conversation_data?.state == 2 ? 'Тэнцсэн' : data?.conversation_data?.state == 3 ? 'Тэнцэхгүй' : '' || '',
+                    'Тайлбар': data?.conversation_data?.description|| '',
+					'Овог': data?.user?.last_name || '',
+					'Нэр': data?.user?.first_name || '',
+					'РД': data?.user?.register || '',
+					'Нас': data?.user_age || '',
+                    'Хөтөлбөр': data?.profession || '',
+                    'Голч Дүн':data?.userinfo?.gpa || '',
+					'Хүйс': data?.gender_name || '',
+                    'Утасны дугаар': data?.user?.mobile || '',
+					'Имейл': data?.user?.email || '',
+                    'Төгссөн сургууль':data?.userinfo?.graduate_school || '',
+                    'Мэргэжил': data?.userinfo?.graduate_profession || '',
+                    'Цол': data?.userinfo?.tsol_name || '',
+					'Яаралтай холбогдох': data?.user?.parent_mobile || '',
+                    'А / байгууллага': data?.userinfo?.work_organization || '',
+					'Бүртгүүлсэн огноо': moment(data?.created_at).format('YYYY-MM-DD HH:SS:MM') || '',
+				}
+			)
+		})
+		const combo = [
+			// ...header,
+			...mainData
+		]
+
+		const worksheet = utils.json_to_sheet(combo);
+
+		const workbook = utils.book_new();
+		utils.book_append_sheet(workbook, worksheet, "Элсэгчдийн мэдээлэл");
+
+		const staticCells = [
+			'№',
+            'Үзлэгийн төлөв',
+            'Тайлбар',
+			'Овог',
+			'Нэр',
+			'РД',
+			'Нас',
+            'Хөтөлбөр',
+            'Голч Дүн',
+			'Хүйс',
+            'Утасны дугаар',
+			'Имейл',
+            'Төгссөн сургууль',
+            'Мэргэжил',
+            'Цол',
+			'Яаралтай холбогдох',
+            'А / байгууллага',
+			'Бүртгүүлсэн огноо',
+
+
+		];
+
+		utils.sheet_add_aoa(worksheet, [staticCells], { origin: "A1" });
+
+
+		const headerCell = {
+			border: {
+				top: { style: "thin", color: { rgb: "000000" } },
+				bottom: { style: "thin", color: { rgb: "000000" } },
+				left: { style: "thin", color: { rgb: "000000" } },
+				right: { style: "thin", color: { rgb: "000000" } }
+			},
+			alignment: {
+				horizontal: 'center',
+				vertical: 'center',
+				wrapText: true
+			},
+			font: {
+				sz: 10,
+				bold: true
+			}
+		};
+
+		const defaultCell = {
+			border: {
+				top: { style: "thin", color: { rgb: "000000" } },
+				bottom: { style: "thin", color: { rgb: "000000" } },
+				left: { style: "thin", color: { rgb: "000000" } },
+				right: { style: "thin", color: { rgb: "000000" } }
+			},
+			alignment: {
+				horizontal: 'left',
+				vertical: 'center',
+				wrapText: true
+			},
+			font: {
+				sz: 10
+			}
+		};
+
+		const defaultCenteredCell = {
+			border: {
+				top: { style: "thin", color: { rgb: "000000" } },
+				bottom: { style: "thin", color: { rgb: "000000" } },
+				left: { style: "thin", color: { rgb: "000000" } },
+				right: { style: "thin", color: { rgb: "000000" } }
+			},
+			alignment: {
+				horizontal: 'center',
+				vertical: 'center',
+				wrapText: true
+			},
+			font: {
+				sz: 10
+			}
+		};
+
+		const styleRow = 0;
+		const sendRow = datas?.length + 1;
+		const styleCol = 0;
+		const sendCol = 20;
+
+		for (let row = styleRow; row <= sendRow; row++) {
+			for (let col = styleCol; col <= sendCol; col++) {
+				const cellNum = utils.encode_cell({ r: row, c: col });
+
+				if (!worksheet[cellNum]) {
+					worksheet[cellNum] = {};
+				}
+
+				worksheet[cellNum].s = row === 0 ? headerCell : col === 0 ? defaultCenteredCell : defaultCell
+
+			}
+		}
+
+		const phaseZeroCells = Array.from({ length: 4 }, (_) => { return ({ wch: 10 }) })
+
+		worksheet["!cols"] = [
+			{ wch: 3 },
+			...phaseZeroCells,
+			{ wch: 25 },
+			{ wch: 10 },
+			{ wch: 25 },
+			{ wch: 25 },
+			{ wch: 25 },
+			{ wch: 25 },
+			{ wch: 25 },
+			{ wch: 25 },
+			{ wch: 25 },
+			{ wch: 25 },
+			{ wch: 25 },
+			{ wch: 25 },
+			{ wch: 15 },
+		];
+
+		const phaseOneRow = Array.from({ length: datas.length }, (_) => { return ({ hpx: 30 }) })
+
+		worksheet["!rows"] = [
+			{ hpx: 40 },
+			...phaseOneRow
+		]
+
+		writeFile(workbook, "Элсэгчдийн мэдээлэл.xlsx", { compression: true });
+	}
+
 
 
 
@@ -327,6 +493,58 @@ const InterView = () => {
                                     getOptionLabel={(option) => option.name}
                                 />
                         </Col>
+                        <Col md={3} className='my-0 py-0 '>
+                        <Label className="form-label" for="">
+                            {t('Эхлэх огноо')}
+                        </Label>
+                        <Flatpickr
+                            className='form-control form-control-sm  bg-white '
+                            style={{ maxWidth: '480px' }}
+                            placeholder={`-- Сонгоно уу --`}
+
+                            onChange={(selectedDates, dateStr) => {
+								setStart_date(
+									selectedDates.length === 0
+										? ''
+										: moment(dateStr).format('YYYY-MM-DD HH:mm')
+								);
+							}}
+                            value={start_date}
+                            options={{
+                                time_24hr: true,
+                                enableTime: true,
+                                dateFormat: "Y-m-d H:i",
+                                mode: "single",
+                                // locale: Mongolian
+                            }}
+                        />
+                    </Col>
+                    <Col md={3} className='my-0 py-0 '>
+                        <Label className="form-label" for="">
+                            {t('Дуусах огноо')}
+                        </Label>
+                        <Flatpickr
+                            className='form-control form-control-sm  bg-white '
+                            style={{ maxWidth: '480px' }}
+                            placeholder={`-- Сонгоно уу --`}
+
+                            onChange={(selectedDates, dateStr) => {
+								setEnd_date(
+									selectedDates.length === 0
+										? ''
+										: moment(dateStr).format('YYYY-MM-DD HH:mm')
+								);
+							}}
+                            value={end_date}
+                            options={{
+                                time_24hr: true,
+                                enableTime: true,
+                                dateFormat: "Y-m-d H:i",
+                                mode: "single",
+                                // locale: Mongolian
+                            }}
+                        />
+                    </Col>
                 </Row>
                 <div className='d-flex justify-content-between my-50 mt-1'>
                     <div className='d-flex'>
@@ -361,6 +579,15 @@ const InterView = () => {
                             </UncontrolledTooltip>
                         </div>
                     </div>
+                    <div className='px-1'>
+						<Button color='primary' className='d-flex align-items-center px-75' id='excel_button' onClick={() => convert()}>
+							<HiOutlineDocumentReport className='me-25' />
+							Excel
+						</Button>
+						<UncontrolledTooltip target='excel_button'>
+							Доорхи хүснэгтэнд харагдаж байгаа мэдээллийн жагсаалтаар эксел файл үүсгэнэ
+						</UncontrolledTooltip>
+					</div>
                 </div>
                 <Row className="justify-content-between mx-0" >
                     <Col className='d-flex align-items-center justify-content-start' md={4}>

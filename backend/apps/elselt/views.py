@@ -604,39 +604,21 @@ class AdmissionUserAllChange(
                 now = dt.datetime.now()
                 students = self.queryset.filter(pk__in=data["students"])
                 for student in students:
-                    indicator_value = AdmissionIndicator.TENTSSEN_ELSEGCHID
-                    if data.get("state"):
-                        old_state = student.state
-                        student.state = data.get("state")
-                        student.updated_at = now
-                        student.state_description = data.get("state_description")
-                        student.save()
-
+                    if student.state != eval(data.get("state")):
                         StateChangeLog.objects.create(
                             user=student.user,
                             type=StateChangeLog.STATE,
-                            indicator=indicator_value,
-                            now_state=old_state,
+                            indicator=AdmissionIndicator.TENTSSEN_ELSEGCHID,
+                            now_state=student.state,
                             change_state=data.get("state"),
                             updated_user=request.user if request.user.is_authenticated else None,
                             updated_at=now
                         )
-                    else:
-                        old_justice_state = student.justice_state
-                        student.updated_at = now
-                        student.justice_state = data.get("justice_state")
-                        student.justice_description = data.get("justice_description")
-                        student.save()
 
-                        StateChangeLog.objects.create(
-                            user=student.user,
-                            type=StateChangeLog.PROFESSION,
-                            indicator=indicator_value,
-                            now_state=old_justice_state,
-                            change_state=data.get("justice_state"),
-                            updated_user=request.user if request.user.is_authenticated else None,
-                            updated_at=now
-                        )
+                self.queryset.filter(pk__in=data["students"]).update(
+                    state=data.get("state"),
+                    state_description=data.get("state_description")
+                )
         except Exception as e:
             transaction.savepoint_rollback(sid)
             return request.send_error("ERR_002", e.__str__)
@@ -678,6 +660,8 @@ class AdmissionUserEmailAPIView(
         gpa_state = self.request.query_params.get('gpa_state')
         gender = self.request.query_params.get('gender')
         sorting = self.request.query_params.get('sorting')
+        start_date=self.request.query_params.get('start_date')
+        end_date=self.request.query_params.get('end_date')
 
         if lesson_year_id:
             admission_id = AdmissionRegisterProfession.objects.filter(admission=lesson_year_id).values_list('id', flat=True)
@@ -712,6 +696,15 @@ class AdmissionUserEmailAPIView(
                 sorting = str(sorting)
 
             queryset = queryset.order_by(sorting)
+
+        filters = {}
+        if start_date:
+            filters['send_date__gte'] = start_date
+        if end_date:
+            filters['send_date__lte'] = end_date
+
+        if filters:
+            queryset = queryset.filter(**filters)
 
         return queryset
 
@@ -1308,18 +1301,17 @@ class ElseltHealthAnhanShat(
             with transaction.atomic():
                 now = dt.datetime.now()
                 student = HealthUser.objects.filter(user=user).first()
-                indicator_value = AdmissionIndicator.ERUUL_MEND_ANHAN
-                old_state = student.state
 
-                StateChangeLog.objects.create(
-                    user=student.user,
-                    type=StateChangeLog.STATE,
-                    indicator=indicator_value,
-                    now_state=old_state,
-                    change_state=data.get("state"),
-                    updated_user=request.user if request.user.is_authenticated else None,
-                    updated_at=now
-                )
+                if student.state != eval(data.get('state')):
+                    StateChangeLog.objects.create(
+                        user=student.user,
+                        type=StateChangeLog.STATE,
+                        indicator=AdmissionIndicator.ERUUL_MEND_ANHAN,
+                        now_state=student.state,
+                        change_state=data.get("state"),
+                        updated_user=request.user if request.user.is_authenticated else None,
+                        updated_at=now
+                    )
         except Exception as e:
             return request.send_error("ERR_004", str(e))
 
@@ -1480,15 +1472,17 @@ class ElseltHealthProfessional(
             with transaction.atomic():
                 now = dt.datetime.now()
                 student = HealthUpUser.objects.filter(user=user).first()
-                StateChangeLog.objects.create(
-                    user=student.user,
-                    type=StateChangeLog.STATE,
-                    indicator=AdmissionIndicator.ERUUL_MEND_MERGEJLIIN,
-                    now_state=student.state, # Хуучин төлөв
-                    change_state=data.get("state"),
-                    updated_user=request.user if request.user.is_authenticated else None,
-                    updated_at=now
-                )
+
+                if student.state != data.get('state'):
+                    StateChangeLog.objects.create(
+                        user=student.user,
+                        type=StateChangeLog.STATE,
+                        indicator=AdmissionIndicator.ERUUL_MEND_MERGEJLIIN,
+                        now_state=student.state, # Хуучин төлөв
+                        change_state=data.get("state"),
+                        updated_user=request.user if request.user.is_authenticated else None,
+                        updated_at=now
+                    )
         except Exception as e:
             return request.send_error("ERR_004", str(e))
 
@@ -1586,7 +1580,29 @@ class ElseltHealthPhysical(
             if not isinstance(sorting, str):
                 sorting = str(sorting)
 
-            queryset = queryset.order_by(sorting)
+            # Sorting by PhysqueUser model fields
+            # Desc adding hyfen symbol (-), so removing it for check sorting field name
+            sortinghyfen = sorting
+            if sorting.startswith('-'):
+                sortinghyfen=sorting[1:]
+
+            # Checking sorting field name
+            if sortinghyfen == 'updated_at' or sortinghyfen == 'order_no':
+
+                # Gathering sorted ids from PhysqueUser model
+                sortedids = PhysqueUser.objects.order_by(sorting).values_list('user', flat=True)
+
+                # Sorting main queryset by gathered ids order
+                queryset = queryset.annotate(
+                    custom_ordering=Case(
+                        *[When(user_id=id_val, then=pos) for pos, id_val in enumerate(sortedids)],
+                        default=Value(len(sortedids)),
+                        output_field=IntegerField(),
+                    )
+                ).order_by('custom_ordering')
+            else:
+                # regular sorting in queryset model itself
+                queryset = queryset.order_by(sorting)
 
         if gender:
             if gender == 'Эрэгтэй':
@@ -1665,15 +1681,16 @@ class ElseltHealthPhysical(
                 now = dt.datetime.now()
                 student = PhysqueUser.objects.filter(user=user).first()
 
-                StateChangeLog.objects.create(
-                    user_id=user,
-                    type=StateChangeLog.STATE,
-                    indicator=AdmissionIndicator.BIE_BYALDAR,
-                    now_state=student.state,
-                    change_state=data.get("state"),
-                    updated_user=request.user if request.user.is_authenticated else None,
-                    updated_at=now
-                )
+                if student.state != eval(data.get('state')):
+                    StateChangeLog.objects.create(
+                        user_id=user,
+                        type=StateChangeLog.STATE,
+                        indicator=AdmissionIndicator.BIE_BYALDAR,
+                        now_state=student.state,
+                        change_state=data.get("state"),
+                        updated_user=request.user if request.user.is_authenticated else None,
+                        updated_at=now
+                    )
         except Exception as e:
             return request.send_error("ERR_004", str(e))
 
@@ -2081,6 +2098,8 @@ class AdmissionUserMessageAPIView(
         gpa_state = self.request.query_params.get('gpa_state')
         gender = self.request.query_params.get('gender')
         sorting = self.request.query_params.get('sorting')
+        start_date=self.request.query_params.get('start_date')
+        end_date=self.request.query_params.get('end_date')
 
         if lesson_year_id:
             admission_id = AdmissionRegisterProfession.objects.filter(admission=lesson_year_id).values_list('id', flat=True)
@@ -2115,6 +2134,15 @@ class AdmissionUserMessageAPIView(
                 sorting = str(sorting)
 
             queryset = queryset.order_by(sorting)
+
+        filters = {}
+        if start_date:
+            filters['send_date__gte'] = start_date
+        if end_date:
+            filters['send_date__lte'] = end_date
+
+        if filters:
+            queryset = queryset.filter(**filters)
 
         return queryset
 
@@ -2214,7 +2242,7 @@ class AdmissionJusticeListAPIView(
 
         elselt = self.request.query_params.get('elselt')
         profession = self.request.query_params.get('profession')
-        state = self.request.query_params.get('state')
+        justice_state = self.request.query_params.get('justice_state')
         sorting = self.request.query_params.get('sorting')
 
         # Сэтгэлзүйн сорилд тэнцсэн элсэгчид
@@ -2233,14 +2261,8 @@ class AdmissionJusticeListAPIView(
             else:
                 queryset = queryset.filter(gender__in=['0', '2', '4', '6', '8'])
 
-        if state:
-            if state == '1':
-                exclude_ids = PhysqueUser.objects.filter(Q(Q(state=AdmissionUserProfession.STATE_APPROVE) | Q(state=AdmissionUserProfession.STATE_REJECT))).values_list('user', flat=True)
-                user_id = AdmissionUserProfession.objects.filter(state=state).exclude(user__in=exclude_ids).values_list('user', flat=True)
-            else:
-                user_id = PhysqueUser.objects.filter(state=state).values_list('user', flat=True)
-
-            queryset = queryset.filter(user__in=user_id)
+        if justice_state:
+            queryset = queryset.filter(justice_state=justice_state)
 
         # Sort хийх үед ажиллана
         if sorting:
@@ -2271,15 +2293,16 @@ class AdmissionJusticeListAPIView(
                 now = dt.datetime.now()
                 students = self.queryset.filter(user__in=data["students"])
                 for student in students:
-                    StateChangeLog.objects.create(
-                        user=student.user,
-                        type=StateChangeLog.STATE,
-                        indicator=AdmissionIndicator.YAL_SHIITGEL,
-                        now_state=student.justice_state,
-                        change_state=data.get("justice_state"),
-                        updated_user=request.user if request.user.is_authenticated else None,
-                        updated_at=now
-                    )
+                    if student.justice_state != eval(data.get("justice_state")):
+                        StateChangeLog.objects.create(
+                            user=student.user,
+                            type=StateChangeLog.STATE,
+                            indicator=AdmissionIndicator.YAL_SHIITGEL,
+                            now_state=student.justice_state,
+                            change_state=data.get("justice_state"),
+                            updated_user=request.user if request.user.is_authenticated else None,
+                            updated_at=now
+                        )
 
                 # Төлөв шинэчлэх
                 self.queryset.filter(user__in=data["students"]).update(
@@ -2316,6 +2339,8 @@ class ConversationUserSerializerAPIView(
         state = self.request.query_params.get('state')
         elselt = self.request.query_params.get('elselt')
         profession = self.request.query_params.get('profession')
+        start_date=self.request.query_params.get('start_date')
+        end_date=self.request.query_params.get('end_date')
 
         # Бие бялдарт тэнцсэн элсэгчид
         biy_byldar_ids = PhysqueUser.objects.filter(state=AdmissionUserProfession.STATE_APPROVE).values_list('user',flat=True)
@@ -2350,6 +2375,14 @@ class ConversationUserSerializerAPIView(
 
             queryset = queryset.filter(user__in=user_id)
 
+        filters = {}
+        if start_date:
+            filters['created_at__gte'] = start_date
+        if end_date:
+            filters['created_at__lte'] = end_date
+
+        if filters:
+            queryset = queryset.filter(**filters)
 
         return queryset
 
@@ -2383,15 +2416,17 @@ class ConversationUserSerializerAPIView(
             now = dt.datetime.now()
 
             student = ConversationUser.objects.filter(user=user).first()
-            StateChangeLog.objects.create(
-                user=student.user,
-                type=StateChangeLog.STATE,
-                indicator=AdmissionIndicator.SETGEL_ZUI,
-                now_state=student.state,
-                change_state=data.get("state"),
-                updated_user=request.user if request.user.is_authenticated else None,
-                updated_at=now
-            )
+
+            if student.state != eval(data.get('state')):
+                StateChangeLog.objects.create(
+                    user=student.user,
+                    type=StateChangeLog.STATE,
+                    indicator=AdmissionIndicator.SETGEL_ZUI,
+                    now_state=student.state,
+                    change_state=data.get("state"),
+                    updated_user=request.user if request.user.is_authenticated else None,
+                    updated_at=now
+                )
 
             ConversationUser.objects.filter(
                user=data.get('user')
@@ -2482,15 +2517,17 @@ class ArmyUserSerializerAPView(
         with transaction.atomic():
             now = dt.datetime.now()
             student = ArmyUser.objects.filter(user=user).first()
-            StateChangeLog.objects.create(
-                user=student.user,
-                type=StateChangeLog.STATE,
-                indicator=AdmissionIndicator.HEERIIN_BELTGEL,
-                now_state=student.state,
-                change_state=data.get("state"),
-                updated_user=request.user if request.user.is_authenticated else None,
-                updated_at=now
-            )
+
+            if student.state != eval(data.get("state")):
+                StateChangeLog.objects.create(
+                    user=student.user,
+                    type=StateChangeLog.STATE,
+                    indicator=AdmissionIndicator.HEERIIN_BELTGEL,
+                    now_state=student.state,
+                    change_state=data.get("state"),
+                    updated_user=request.user if request.user.is_authenticated else None,
+                    updated_at=now
+                )
 
             ArmyUser.objects.filter(
                 user=data.get('user')
@@ -3435,23 +3472,22 @@ class EyeshOrderUserInfoAPIView(
             with transaction.atomic():
                 now = dt.datetime.now()
                 student = self.queryset.filter(user=user).first()
-                if student:
-                    indicator_value = AdmissionIndicator.EESH_EXAM
-                    old_state = student.yesh_state
-                    student.yesh_state = data.get("yesh_state")
-                    student.updated_at = now
-                    student.yesh_description = data.get("yesh_description")
-                    student.save()
 
+                if student.yesh_state != data.get("yesh_state"):
                     StateChangeLog.objects.create(
                         user=student.user,
                         type=StateChangeLog.STATE,
-                        indicator=indicator_value,
-                        now_state=old_state,
+                        indicator=AdmissionIndicator.EESH_EXAM,
+                        now_state=student.yesh_state,
                         change_state=data.get("yesh_state"),
                         updated_user=request.user if request.user.is_authenticated else None,
                         updated_at=now
                     )
+
+                    student.yesh_state = data.get("yesh_state")
+                    student.updated_at = now
+                    student.yesh_description = data.get("yesh_description")
+                    student.save()
         except Exception as e:
             transaction.savepoint_rollback(sid)
             return request.send_error("ERR_004", str(e))

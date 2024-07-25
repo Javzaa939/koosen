@@ -4,6 +4,7 @@ import {useForm, Controller} from "react-hook-form";
 import {X} from "react-feather";
 import {t} from 'i18next';
 
+import { useQuill } from 'react-quilljs';
 import {
     Row,
     Col,
@@ -25,6 +26,7 @@ import useApi from "@hooks/useApi";
 import moment from 'moment';
 import * as Yup from 'yup';
 import '@styles/react/libs/flatpickr/flatpickr.scss'
+import 'quill/dist/quill.snow.css'
 
 export const validateSchema = Yup.object().shape({
 	title: Yup.string().trim().required('Хоосон байна'),
@@ -41,6 +43,38 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
     const CloseBtn = (
         <X className="cursor-pointer" size={15} onClick={handleModal} />
     )
+
+    const [value, defaultValue] = useState('');
+
+    const { quill, quillRef } = useQuill({
+        modules: {
+            toolbar: [
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ align: [] }],
+
+                    [{ list: 'ordered'}, { list: 'bullet' }],
+                    [{ indent: '-1'}, { indent: '+1' }],
+
+                    [{ size: ['small', false, 'large', 'huge'] }],
+                    ['link'],
+
+                    [{ color: [] }, { background: [] }],
+
+                    ['clean'],
+            ],
+        },
+        value: value,
+        theme: 'snow',
+        formats: [
+            'header','bold', 'italic', 'underline', 'strike',
+            'align', 'list', 'indent',
+            'size',
+            'link',
+            'color', 'background',
+            'clean',
+        ],
+        readOnly: false,
+    });
 
     // Form, Loader, Context
     const {user} = useContext(AuthContext)
@@ -59,6 +93,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
         cdata['start_date'] = moment(startPicker).format('YYYY-MM-DD HH:mm:ss')
         cdata['end_date'] =  moment(endPicker).format('YYYY-MM-DD HH:mm:ss')
         cdata['created_by'] = user?.id
+        cdata['description'] = quill?.root?.innerHTML
 
         if (editData?.id) {
             cdata = convertDefaultValue(cdata)
@@ -111,15 +146,19 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
                 if (editData[field] !== null) {
                     setValue(field, editData[field]);
                 }
+                if (field === 'description' && quill) {
+                    quill.pasteHTML(editData[field]);
+                }
             });
-            if (editData.start_date) {
-                setStartPicker(editData.start_date);
+            if (editData?.start_date) {
+                setStartPicker(editData?.start_date);
             }
-            if (editData.end_date) {
-                setEndPicker(editData.end_date);
+            if (editData?.end_date) {
+                setEndPicker(editData?.end_date);
             }
+
         }
-    }, [editData]);
+    }, [editData, quill]);
 
 	return (
         <Fragment>
@@ -244,7 +283,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
                             />
                             {errors.start_date && <FormFeedback className='d-block'>{t(errors.start_date.message)}</FormFeedback>}
                         </Col>
-                        <Col md={6}>
+                        <Col md={12}>
                             <Label className="form-label" for="description">
                                {t('Тайлбар')}
                             </Label>
@@ -252,14 +291,15 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
                                 control={control}
                                 defaultValue=''
                                 name="description"
-                                render={({ field }) => (
-                                    <Input
-                                        id='description'
-                                        placeholder='Тайлбар'
-                                        {...field}
-                                        bsSize="sm"
-                                        type='textarea'
-                                    />
+                                render={({field}) => (
+                                    <div style={{ width: 'auto',}}>
+                                        <div
+                                            {...field}
+                                            name='description'
+                                            id='description'
+                                            ref={quillRef}
+                                        />
+                                    </div>
                                 )}
                             ></Controller>
                         </Col>

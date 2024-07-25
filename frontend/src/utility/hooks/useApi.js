@@ -2111,6 +2111,9 @@ function useApi(isDisplay=false) {
 			get: (limit, page, sort, search, scope) => instance.get(`learning/psychological_test_result/?page=${page}&limit=${limit}&sort=${sort}&search=${search}&scope=${scope}`),
 			getParticipants: (limit, page, search, test_id) => instance.get(`learning/psychological_test_result_participants/?page=${page}&limit=${limit}&search=${search}&test_id=${test_id}`),
 			getResult: (cdata) => instance.post(`learning/psychological_test_result_show/`,cdata),
+
+			excelResult:() => instance.get(`learning/psychological_test_result_excel/`),
+      iqExcelResult:()=>instance.get(`learning/iq_test_result_excel/`)
 		}
 
 	},
@@ -2369,11 +2372,11 @@ function useApi(isDisplay=false) {
 				put: (data) => instance.put(`/elselt/admissionuserdata/all/`, data),
 			},
 			email: {
-				get: (limit, page, sort, search, lesson_year_id, profession_id, unit1_id, gender, state, gpa_state) => instance.get(`/elselt/admissionuserdata/email/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}&unit1_id=${unit1_id}&gender=${gender}&state=${state}&gpa_state=${gpa_state}`),
+				get: (limit, page, sort, search, lesson_year_id, profession_id, unit1_id, gender, state, gpa_state, start_date, end_date) => instance.get(`/elselt/admissionuserdata/email/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}&unit1_id=${unit1_id}&gender=${gender}&state=${state}&gpa_state=${gpa_state}&start_date=${start_date}&end_date=${end_date}`),
 				post: (data) => instance.post(`/elselt/admissionuserdata/email/`, data),
 			},
 			message: {
-				get: (limit, page, sort, search, lesson_year_id, profession_id, unit1_id, gender, state, gpa_state) => instance.get(`/elselt/admissionuserdata/message/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}&unit1_id=${unit1_id}&gender=${gender}&state=${state}&gpa_state=${gpa_state}`),
+				get: (limit, page, sort, search, lesson_year_id, profession_id, unit1_id, gender, state, gpa_state, start_date, end_date) => instance.get(`/elselt/admissionuserdata/message/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}&unit1_id=${unit1_id}&gender=${gender}&state=${state}&gpa_state=${gpa_state}&start_date=${start_date}&end_date=${end_date}`),
 				post: (data) => instance.post(`/elselt/admissionuserdata/message/`, data),
 			},
 			gpa:{
@@ -2411,7 +2414,7 @@ function useApi(isDisplay=false) {
 			},
 		},
 		justice: {
-			get: (limit, page, sort, search, state, elselt, profession, gender) => instance.get(`/elselt/justice/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}&elselt=${elselt}&profession=${profession}&gender=${gender}`),
+			get: (limit, page, sort, search, justice_state, elselt, profession, gender) => instance.get(`/elselt/justice/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&justice_state=${justice_state}&elselt=${elselt}&profession=${profession}&gender=${gender}`),
 			post: (cdata) => instance.post(`/elselt/justice/`, cdata),
 			put: (cdata) => instance.put(`/elselt/justice/`, cdata)
 		},
@@ -2422,7 +2425,7 @@ function useApi(isDisplay=false) {
 
 		},
 		interview:{
-			get: (limit, page, sort, search, state, elselt, profession, gender) => instance.get(`/elselt/interview/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}&elselt=${elselt}&profession=${profession}&gender=${gender}`),
+			get: (limit, page, sort, search, state, elselt, profession, gender, start_date , end_date) => instance.get(`/elselt/interview/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}&elselt=${elselt}&profession=${profession}&gender=${gender}&start_date=${start_date}&end_date=${end_date}`),
 			post: (cdata) => instance.post(`/elselt/interview/`, cdata),
 			put: (id, cdata) => instance.put(`/elselt/interview/${id}/`, cdata)
 		},

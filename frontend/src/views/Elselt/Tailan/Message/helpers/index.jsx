@@ -51,7 +51,7 @@ export function getColumns ( currentPage, rowsPerPage, page_count, emailModalHan
 			minWidth: "150px",
 			header: 'user__last_name',
 			name: t("И / хугацаа"),
-			cell: (row) => (row?.send_date? moment(row?.send_date).format("YYYY-MM-DD hh:mm") : ''),
+			cell: (row) => (row?.send_date? moment(row?.send_date).format("YYYY-MM-DD H:mm") : ''),
 			sortable: true,
 			reorder: true,
 			center: true,

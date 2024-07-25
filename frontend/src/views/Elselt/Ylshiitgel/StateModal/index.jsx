@@ -16,7 +16,7 @@ function StateModal({ stateModalHandler ,stateModal,selectedStudents, stateop, g
     const justiceStateChangeApi = useApi().elselt.justice;
 
     async function onSubmit(cdata){
-        cdata['students'] = selectedStudents.map(val => val?.id) || [];
+        cdata['students'] = selectedStudents.map(val => val?.user?.id) || [];
         const { success } = await fetchData(justiceStateChangeApi.put(cdata));
         if (success) {
             reset();

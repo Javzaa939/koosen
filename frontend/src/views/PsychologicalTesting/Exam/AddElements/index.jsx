@@ -3,10 +3,9 @@ import React, { Fragment, useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useForm, Controller } from "react-hook-form";
-import { Plus, Search } from "react-feather";
+import { Plus, Search, AlertCircle } from "react-feather";
 import { getQuestionColumns } from "./QuestionHelpers";
 import { getColumns } from "./helpers";
-import * as Yup from 'yup';
 
 import {
 	Row,
@@ -15,10 +14,10 @@ import {
 	Input,
 	Label,
 	Button,
-	FormFeedback,
 	CardHeader,
 	Card,
 	CardTitle,
+    Badge
 } from "reactstrap";
 
 import Select from "react-select";
@@ -262,6 +261,17 @@ function AddStudent(){
                                                     </Label>
                                                 </Col>
                                             </Row>
+                                            {
+                                                scope == 2
+                                                &&
+                                                <Row>
+                                                    <div>
+                                                        <Badge pill color='light-info' className='p-1 m-2 text-wrap'>
+                                                            <AlertCircle size={15}/> Бие бялдарын элсэлтэд тэнцсэн элсэгчид л нэмэгдэхийг анхаарна уу.
+                                                        </Badge>
+                                                    </div>
+                                                </Row>
+                                            }
                                             {
                                                 scope === 2 &&
                                                     <Row className='mt-1'>
