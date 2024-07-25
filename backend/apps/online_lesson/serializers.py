@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from lms.models import OnlineLesson, LessonMaterial
+from lms.models import OnlineLesson, LessonMaterial, OnlineWeek
 from core.models import Teachers
 from django.db.models import Count
 from rest_framework.response import Response

@@ -11,7 +11,7 @@ from django.conf import settings
 from django.utils import timezone
 
 from main.utils.function.utils import get_cdn_url
-from lms.models import OnlineLesson, LessonMaterial
+from lms.models import OnlineLesson, LessonMaterial, OnlineWeek
 from .serializers import OnlineLessonSerializer, LessonMaterialSerializer
 
 from core.models import Teachers
@@ -38,9 +38,25 @@ class OnlineLessonListAPIView(
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+@permission_classes([IsAuthenticated])
+class OnlineWeekAPIView(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    generics.GenericAPIView
+):
+    '''Хичээлийн 7 хоног'''
+    queryset = OnlineWeek.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        return self.list(request, *args, **kwargs)
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        if(serializer.is_valid):
+            self.perform_create(serializer)
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # OnlineLesson Retrieve, Update, and Delete View
-@permission_classes([IsAuthenticated])
 class OnlineLessonDetailAPIView(
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,

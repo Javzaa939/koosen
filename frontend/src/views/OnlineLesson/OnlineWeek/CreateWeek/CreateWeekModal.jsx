@@ -1,8 +1,6 @@
-import AuthContext from "@src/utility/context/AuthContext";
 import useApi from "@src/utility/hooks/useApi";
 import useLoader from "@src/utility/hooks/useLoader";
 import { t } from "i18next";
-import { useContext } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
 	Button,
@@ -16,17 +14,10 @@ import {
 	Row,
 } from "reactstrap";
 
-function AddLessonForm({toggle}) {
-	// state
+function CreateWeekModal({toggle}) {
 
-	//API
+	const onlineWeekAPI = useApi().online_week;
 
-	const OnlineLessonAPI = useApi().online_lesson;
-
-  // context
-	const { loading, user, setUser, menuVisibility, setMenuVisibility } =
-	  useContext(AuthContext);
-	// hooks
 	const {
 		control,
 		setError,
@@ -43,7 +34,6 @@ function AddLessonForm({toggle}) {
 
   	const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
 
-
   	const calculateFutureDate = (weeks) => {
   	  	const date = new Date();
   	  	date.setDate(date.getDate() + weeks * 7);
@@ -51,26 +41,11 @@ function AddLessonForm({toggle}) {
   	};
 
 	async function onSubmit(cdata) {
+		console.log(cdata)
 	  	try {
-	  		if (typeof cdata.students === "string") {
-	  	    	cdata.students = [parseInt(cdata.students)];
-	  	    } else if (Array.isArray(cdata.students)) {
-	  	    	cdata.students = cdata.students.map((student) => parseInt(student));
-	  	  	}
-
-	  	  	cdata.create_type = parseInt(cdata.create_type);
-	  	  	cdata.total_score = parseFloat(cdata.total_score);
-	  	  	cdata.lekts_count = parseInt(cdata.lekts_count);
-	  	  	cdata.seminar_count = parseInt(cdata.seminar_count);
-	  	  	cdata.exam_count = parseInt(cdata.exam_count);
-	  	  	cdata.lesson = parseInt(cdata.lesson);
-	  	  	cdata.created_user = parseInt(cdata.created_user);
-
-	  	  	await postFetch(OnlineLessonAPI.lessonRegister(cdata));
-
+	  	  	await postFetch(onlineWeekAPI.post(cdata));
 	  	    reset();
 	  	    toggle();
-
 	  	} catch (err) {
 	  	  console.error("Unexpected error:", err);
 	  	}
@@ -81,81 +56,56 @@ function AddLessonForm({toggle}) {
     	<ModalBody className="row margin_fix">
     		<Row className="col-xs-6">
           		<Col md={6}>
-            		<Label for="lesson">Хичээл</Label>
+            		<Label for="week_number">7 хоногийн дугаар</Label>
             		<Controller
-              			name="lesson"
+              			name="week_number"
               			control={control}
-              			rules={{ required: "Хичээл шаардлагатай" }}
-              			render={({ field }) => (
-               				<Input {...field} type="select">
-               				  <option value="">Сонгох...</option>
-               				  <option value={1}>1</option>
-               				  <option value={2}>2</option>
-               				</Input>
-             			)}
+              			rules={{ required: "хоногийн дугаар шаардлагатай" }}
+						  render={({ field }) => (
+        		    		<Input {...field} type="number" />
+        		    	)}
             		/>
-            		{errors.lesson && (
+            		{errors.week_number && (
               			<FormFeedback className="d-block">
-                			{t(errors.lesson.message)}
+                			{t(errors.week_number.message)}
               			</FormFeedback>
             		)}
           		</Col>
-          		<Col md={6}>
-          			<Label for="create_type">Үүсгэх төрөл</Label>
-          		  	<Controller
-          		    	name="create_type"
-          		    	control={control}
-          		    	rules={{ required: "Үүсгэх төрөл шаардлагатай" }}
-          		    	render={({ field }) => (
-          		    		<Input {...field} type="select">
-          		    		  <option value="">Сонгох...</option>
-          		    		  <option value={1}>16 долоо хоног</option>
-          		    		  <option value={2}>Хугацаа тохируулах</option>
-          		    		</Input>
-          		    	)}
-          			/>
-            		{errors.create_type && (
-            		  <FormFeedback className="d-block">
-            		    {t(errors.create_type.message)}
-            		  </FormFeedback>
-            		)}
-        		</Col>
-
         		<Col md={6}>
-        		  	<Label for="total_score">Нийт үнэлэх оноо</Label>
+        		  	<Label for="before_week">Хамаарах өмнөх хичээл</Label>
         		  	<Controller
-        		    	name="total_score"
+        		    	name="before_week"
         		    	control={control}
         		    	rules={{
-        		    		required: "Нийт үнэлэх оноо шаардлагатай",
-        		    		validate: value => value !== '' || "Нийт үнэлэх оноо шаардлагатай"
+        		    		required: "Хамаарах өмнөх хичээл шаардлагатай",
+        		    		validate: value => value !== '' || "Хамаарах өмнөх хичээл шаардлагатай"
         		    	 }}
         		    	render={({ field }) => (
         		    		<Input {...field} type="number" />
         		    	)}
         		   	/>
-        		   	{errors.total_score && (
+        		   	{errors.before_week && (
         		   	  <FormFeedback className="d-block">
-        		   	    {t(errors.total_score.message)}
+        		   	    {t(errors.before_week.message)}
         		   	  </FormFeedback>
         			)}
 				</Col>
 	    		<Col md={6}>
-	    		    <Label for="lekts_count">Лекцийн тоо</Label>
+	    		    <Label for="showed_type">Хичээл үзсэнээр тооцох төрөл</Label>
 	    		    <Controller
-	    		    	name="lekts_count"
+	    		    	name="showed_type"
 	    		    	control={control}
 	    		    	rules={{ required: "Лекцийн тоо шаардлагатай" }}
 	    		    	render={({ field }) => <Input {...field} type="number" />}
 	    		    />
-	    		    {errors.lekts_count && (
+	    		    {errors.showed_type && (
 	    		    	<FormFeedback className="d-block">
-	    		    		{t(errors.lekts_count.message)}
+	    		    		{t(errors.showed_type.message)}
 	    		    	</FormFeedback>
 	    		    )}
 	    		</Col>
 	    		<Col md={6}>
-	    		    <Label for="start_date">Эхлэх хугацаа</Label>
+	    		    <Label for="start_date">Тухайн хичээлийн эхлэх хугацаа</Label>
 	    		    <Controller
 	    		    	name="start_date"
 	    		    	control={control}
@@ -171,7 +121,7 @@ function AddLessonForm({toggle}) {
 	    		    )}
 	    		</Col>
         		<Col md={6}>
-            		<Label for="end_date">Дуусах хугацаа</Label>
+            		<Label for="end_date">Тухайн хичээлийн дуусах хугацаа</Label>
             		<Controller
             			name="end_date"
             			control={control}
@@ -191,54 +141,54 @@ function AddLessonForm({toggle}) {
             		)}
                 </Col>
           		<Col md={6}>
-          			<Label for="seminar_count">Семинар лабораторын тоо</Label>
+          			<Label for="work_type">Даалгаврын тооцох төрөл</Label>
           		  		<Controller
-          		    		name="seminar_count"
+          		    		name="work_type"
           		    		control={control}
           		    		rules={{ required: "Семинар лабораторын тоо шаардлагатай" }}
           		    		render={({ field }) => <Input {...field} type="number" />}
           		  		/>
-          		  		{errors.seminar_count && (
+          		  		{errors.work_type && (
           		  		  	<FormFeedback className="d-block">
-          		  		  		{t(errors.seminar_count.message)}
+          		  		  		{t(errors.work_type.message)}
           		  		  	</FormFeedback>
           		  		)}
           		</Col>
         		<Col md={6}>
-        			<Label for="exam_count">Шалгалтын тоо</Label>
+        			<Label for="challenge_check_score">Шалгалтаар тооцох оноо</Label>
         			<Controller
-        			  	name="exam_count"
+        			  	name="challenge_check_score"
         			  	control={control}
-        			  	rules={{ required: "Шалгалтын тоо шаардлагатай" }}
+        			  	rules={{ required: "Шалгалтаар тооцох оноо шаардлагатай" }}
         			  	render={({ field }) => <Input {...field} type="number" />}
         			/>
-        			{errors.exam_count && (
+        			{errors.challenge_check_score && (
         			  	<FormFeedback className="d-block">
-        			  	  	{t(errors.exam_count.message)}
+        			  	  	{t(errors.challenge_check_score.message)}
         			  	</FormFeedback>
         			)}
         		</Col>
           		<Col check>
           			<Controller
-          				name="is_end_exam"
+          				name="is_lock"
           				control={control}
           				render={({ field }) => <Input {...field} type="checkbox" />}
           		  	/>{" "}
-          		  	<Label check>Төгсөлтийн шалгалтай эсэх</Label>
-          		  	{errors.is_end_exam && (
+          		  	<Label check>Өмнөх 7 хоногийн хичээлээс хамаарах</Label>
+          		  	{errors.is_lock && (
           		    	<FormFeedback className="d-block">
-          		      		{t(errors.is_end_exam.message)}
+          		      		{t(errors.is_lock.message)}
           		    	</FormFeedback>
           		  	)}
           		</Col>
         		</Row>
         		<div className="col-xs-6">
         			<Col md={6}>
-        		    	<Label for="created_user">Үүсгэсэн хэрэглэгч</Label>
+        		    	<Label for="homework">Гэрийн даалгавар</Label>
         		    	<Controller
-        		      		name="created_user"
+        		      		name="homework"
         		      		control={control}
-        		      		rules={{ required: "Үүсгэсэн хэрэглэгч шаардлагатай" }}
+        		      		rules={{ required: "Гэрийн даалгавар" }}
         		      		render={({ field }) => (
         		      			<Input {...field} type="select">
         		      		    	<option value="">Сонгох...</option>
@@ -247,21 +197,21 @@ function AddLessonForm({toggle}) {
         		      		  	</Input>
         		      		)}
         		    	/>
-        		    	{errors.created_user && (
+        		    	{errors.homework && (
         		    	  <FormFeedback className="d-block">
-        		    	    {t(errors.created_user.message)}
+        		    	    {t(errors.homework.message)}
         		    	  </FormFeedback>
         		    	)}
         		  	</Col>
         		  	<Col md={6}>
-        		    	<Label for="students">Хичээл үзэх оюутнууд</Label>
+        		    	<Label for="challenge">7 хоногийн шалгалт</Label>
         		    	<Controller
-        		    	  	name="students"
+        		    	  	name="challenge"
         		    	  	control={control}
-        		    	  	rules={{ required: "Оюутнуудын жагсаалт шаардлагатай" }}
+        		    	  	rules={{ required: "7 хоногийн шалгалт шаардлагатай" }}
         		    	  	render={({ field }) => (
         		    	  	  	<Input {...field} multiple type="select">
-        		    	  	  	  	<option value={1891}>1</option>
+        		    	  	  	  	<option value={1891}>this must be exam name and takes id</option>
         		    	  	  	  	<option value={1891}>2</option>
         		    	  	  	  	<option value={1891}>3</option>
         		    	  	  	  	<option value={1891}>4</option>
@@ -269,9 +219,31 @@ function AddLessonForm({toggle}) {
         		    	  	  	</Input>
         		    	  	)}
         		    	/>
-        		    	{errors.students && (
+        		    	{errors.challenge && (
         		    	  	<FormFeedback className="d-block">
-        		    	  	  	{t(errors.students.message)}
+        		    	  	  	{t(errors.challenge.message)}
+        		    	  	</FormFeedback>
+        		    	)}
+        		  	</Col>
+					  <Col md={6}>
+        		    	<Label for="materials">7 хоногийн шалгалт</Label>
+        		    	<Controller
+        		    	  	name="materials"
+        		    	  	control={control}
+        		    	  	rules={{ required: "Тухайн 7 хоногийн материалууд" }}
+        		    	  	render={({ field }) => (
+        		    	  	  	<Input {...field} multiple type="select">
+        		    	  	  	  	<option value={1891}>this must be exam name and takes id</option>
+        		    	  	  	  	<option value={1891}>2</option>
+        		    	  	  	  	<option value={1891}>3</option>
+        		    	  	  	  	<option value={1891}>4</option>
+        		    	  	  	  	<option value={1891}>5</option>
+        		    	  	  	</Input>
+        		    	  	)}
+        		    	/>
+        		    	{errors.materials && (
+        		    	  	<FormFeedback className="d-block">
+        		    	  	  	{t(errors.materials.message)}
         		    	  	</FormFeedback>
         		    	)}
         		  	</Col>
@@ -286,4 +258,4 @@ function AddLessonForm({toggle}) {
   );
 }
 
-export default AddLessonForm;
+export default CreateWeekModal;

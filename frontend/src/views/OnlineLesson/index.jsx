@@ -14,27 +14,27 @@ function OnlineLesson() {
 	const { loading, user, setUser, menuVisibility, setMenuVisibility } = useContext(AuthContext);
 
 	const getLessons = async () => {
-    try {
-    	const response = await onlineLessonApi.get_lessons();
-		// console.log(response)
-		// const names = await Promise.all(
-		// 	response.map(async (item) => {
-		// 	const lessonStandartResponse = await studyApi.getOne(item.lesson);
-		// 	return {
-		// 		...item,
-		// 		standartid: item?.lesson,
-		// 		name: lessonStandartResponse?.data?.name,
-		// 		credit: lessonStandartResponse?.data?.kredit,
-		// 	};
-		// 	})
-		// );
-
-      setLessons(response);
-      setIsLoading(false);
-    } catch (error) {
-      console.error("Error fetching lessons or lesson names:", error);
-      setIsLoading(false);
-    }
+      try {
+        const response = await onlineLessonApi.get_lessons();
+        // console.log(response)
+        // const names = await Promise.all(
+        // 	response.map(async (item) => {
+        // 	const lessonStandartResponse = await studyApi.getOne(item.lesson);
+        // 	return {
+        // 		...item,
+        // 		standartid: item?.lesson,
+        // 		name: lessonStandartResponse?.data?.name,
+        // 		credit: lessonStandartResponse?.data?.kredit,
+        // 	};
+        // 	})
+        // );
+            
+            setLessons(response);
+            setIsLoading(false);
+      } catch (error) {
+            console.error("Error fetching lessons or lesson names:", error);
+            setIsLoading(false);
+      }
   };
 
   useEffect(() => {

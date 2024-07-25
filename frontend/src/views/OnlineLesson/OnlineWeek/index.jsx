@@ -7,6 +7,8 @@ import { Button, Card, CardBody, CardHeader, Col, Row } from "reactstrap";
 
 import LessonTable from "./LessontTable";
 
+import CreateWeek from "./CreateWeek";
+
 const menuOptions = [
 	{
 		name: "Зарлал",
@@ -96,6 +98,9 @@ function OnlineLessonPage() {
 					<div className="col-10 p-0">
 						<h4 className="m-0">{lessonStandart?.name}</h4>
 						<span className="">кредит: {lessonStandart?.kredit}</span>
+					</div>
+					<div>
+						<CreateWeek/>
 					</div>
 					<div className="col-1 p-0 d-flex justify-content-end">
 						<Button outline size="sm" onClick={refresh}>

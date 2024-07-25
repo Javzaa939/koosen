@@ -4,11 +4,11 @@ import { lazy } from "react";
 
 const LessonMaterial = lazy(() => import("@views/OnlineLesson/LessonMaterial"));
 const DetailPage = lazy(() => import("@views/OnlineLesson/LessonMaterial/DetailPage"));
-const ExamPage = lazy(() => import("@src/views/OnlineLesson/OnlineLessonPage/LessonMenus/Exam"));
-const LessonNotficationPage = lazy(() => import("@src/views/OnlineLesson/OnlineLessonPage/LessonMenus/LessonNotfication"));
-const StatsPage = lazy(() => import("@src/views/OnlineLesson/OnlineLessonPage/LessonMenus/Stats"));
+const ExamPage = lazy(() => import("@src/views/OnlineLesson/OnlineWeek/LessonMenus/Exam"));
+const LessonNotficationPage = lazy(() => import("@src/views/OnlineLesson/OnlineWeek/LessonMenus/LessonNotfication"));
+const StatsPage = lazy(() => import("@src/views/OnlineLesson/OnlineWeek/LessonMenus/Stats"));
 const OnlineLessonPage = lazy(() =>
-  import("@views/OnlineLesson/OnlineLessonPage/index")
+  import("@src/views/OnlineLesson/OnlineWeek/index")
 );
 const MainPage = lazy(() => import("@views/OnlineLesson/index"));
 

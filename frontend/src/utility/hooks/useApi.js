@@ -2562,6 +2562,10 @@ function useApi(isDisplay=false) {
       editLesson: (pk, data) => instance.put(`online_lesson/${pk}/`, data),
       delete_lesson: (pk) => instance.delete(`online_lesson/${pk}`),
     },
+    online_week:{
+      get: () => instance.get("/online_week"),
+      post: () => instance.post(`/online_week/`, cdata),
+    },
     material : {
       get: ()=> instance.get('/online_lesson/material/'),
       getOne: (pk)=> instance.get(`/online_lesson/material/${pk}/`),

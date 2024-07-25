@@ -5,10 +5,14 @@ import ReactPaginate from "react-paginate";
 import { Link } from "react-router-dom";
 import { Card, CardBody, CardHeader, Col, Row } from "reactstrap";
 import AddLesson from "../Add/index";
+import useApi from "@src/utility/hooks/useApi";
 
 function AllLessons({ lessons }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(12);
+
+  //API
+  const deleteLessonAPI = useApi().online_lesson
 
   const totalPages = Math.ceil(lessons.length / rowsPerPage);
 
@@ -21,6 +25,17 @@ function AllLessons({ lessons }) {
     currentPage * rowsPerPage
   );
 
+  async function deleteLesson(id){
+    try{
+        const {success, error} = await deleteLessonAPI.delete_lesson(id)
+        console.log(success)
+        if(error){
+            console.log(error)
+        }
+    }catch(err){
+        console.log(err)
+    }
+  }
   return (
     <Fragment>
         <Card>
@@ -41,6 +56,7 @@ function AllLessons({ lessons }) {
                     {displayedLessons.map((lesson, index) => (
                     <Col key={index} xl={3} md={6} className="mb-1">
                         <Link to={`/online_lesson/${lesson.id}`}>
+                        <button onClick={()=>deleteLesson(lesson?.id)}>delete</button>
                             <Card className="lesson-card border rounded-lg shadow-sm">
                                 <CardBody>
                                     <div className="d-flex justify-content-between">
