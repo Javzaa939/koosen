@@ -3368,7 +3368,7 @@ class IQTestResultExcelAPIView(
             # IQ test Нийт асуултын тоо авах
             question = PsychologicalTest.objects.filter(id=3).values('questions').count()
 
-            mental_users = MentalUser.objects.filter(challenge__title__icontains='IQ Test').select_related('user')
+            mental_users = MentalUser.objects.filter(challenge__title__icontains='IQ Test', answer__isnull=False).select_related('user')
             elselt_users = {user.id: user for user in ElseltUser.objects.filter(id__in=mental_users.values_list('user_id', flat=True))}
 
             # Шалгалт өгсөн хүн бүр
@@ -3386,41 +3386,43 @@ class IQTestResultExcelAPIView(
                 user_data['register'] = user_obj.register
 
                 # Хариулттай үед
-                if user.answer:
-                    answer = ast.literal_eval(user.answer)
-                    value = str(answer)[1:-1]
-                    pairs = [pair.strip() for pair in value.split(',')]
+                answer = ast.literal_eval(user.answer)
+                value = str(answer)[1:-1]
+                pairs = [pair.strip() for pair in value.split(',')]
 
-                    question_ids = []
-                    chosen_choices = []
-                    for pair in pairs:
-                        question_id, choice_id = pair.split(':')
-                        question_ids.append(question_id.strip().strip("'"))
-                        chosen_choices.append(choice_id.strip().strip("'"))
+                question_ids = []
+                chosen_choices = []
+                for pair in pairs:
+                    question_id, choice_id = pair.split(':')
+                    question_ids.append(question_id.strip().strip("'"))
+                    chosen_choices.append(choice_id.strip().strip("'"))
 
-                    def convert_to_int(value):
-                        if value == 'True':
-                            return 1
-                        elif value == 'False':
-                            return 0
-                        else:
-                            return int(value)
+                def convert_to_int(value):
+                    if value == 'True':
+                        return 1
+                    elif value == 'False':
+                        return 0
+                    else:
+                        return int(value)
 
-                    question_ids = list(map(int, question_ids))
-                    chosen_choices = list(map(convert_to_int, chosen_choices))
+                question_ids = list(map(int, question_ids))
+                chosen_choices = list(map(convert_to_int, chosen_choices))
 
-                    for question_id, choice_id in zip(question_ids, chosen_choices):
-                        queryset = PsychologicalTestQuestions.objects.filter(id=question_id).first()
-                        if queryset:
+                # TODO Энэ давталт доторх код л удаж байгаа шалтгаан байх
+                for question_id, choice_id in zip(question_ids, chosen_choices):
+                    # TODO Хүүхэд бүрээр сорилын асуултыг авах шаардлагагүй байх 1 сорилын асуултууд хүүхэд бүр дээр өөрчлөгдөхгүй учраас
+                    queryset = PsychologicalTestQuestions.objects.filter(id=question_id).first()
+                    if queryset:
 
-                            # Хариулт зөв үгүйг шалгах
-                            choice = PsychologicalQuestionChoices.objects.filter(id=choice_id).first()
-                            if choice:
-                                score = queryset.score if choice.is_correct else 0
+                        # Хариулт зөв үгүйг шалгах
+                        # TODO Шалгалтын асуулт хариулт бүрийг нэг л авчихвал энэ for дотор хүүхэд бүрийг тоогоор бааз руу ачааллах хурд сайжрах байх
+                        choice = PsychologicalQuestionChoices.objects.filter(id=choice_id).first()
+                        if choice:
+                            score = queryset.score if choice.is_correct else 0
 
-                                # Зөв бол оноо шалгах
-                                user_data['scores'].append(int(score))
-                                user_data['total_score'] += score
+                            # Зөв бол оноо шалгах
+                            user_data['scores'].append(int(score))
+                            user_data['total_score'] += score
 
                 big_data.append(user_data)
 
