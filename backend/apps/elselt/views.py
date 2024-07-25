@@ -48,7 +48,6 @@ from lms.models import (
 )
 
 from core.models import Employee
-
 from surgalt.serializers import (
     ProfessionDefinitionSerializer
 )
@@ -169,7 +168,6 @@ class ElseltProfession(
     """ Элсэлтийн мэргэжил """
 
     queryset = AdmissionRegisterProfession.objects.all()
-    query = AdmissionUserProfession.objects.all()
     serializer_class = AdmissionProfessionSerializer
 
     def get(self, request):
@@ -177,7 +175,7 @@ class ElseltProfession(
         employee_sub_org_id = Employee.objects.filter(user=user).values_list('sub_org', flat=True).first()
 
         if employee_sub_org_id == 21:
-            self.query = self.query.filter(profession__profession__school=employee_sub_org_id)
+            self.queryset = self.queryset.filter(profession__school=employee_sub_org_id)
         elselt = request.query_params.get('elselt')
 
         admission_querysets = self.queryset.filter(admission=elselt)
@@ -642,7 +640,6 @@ class AdmissionUserEmailAPIView(
 ):
 
     queryset = EmailInfo.objects.all().order_by('send_date')
-    query = AdmissionUserProfession.objects.all()
     serializer_class = EmailInfoSerializer
 
     pagination_class = CustomPagination
@@ -663,6 +660,8 @@ class AdmissionUserEmailAPIView(
         )
 
         queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
+        p = AdmissionUserProfession.objects.filter(user=OuterRef('user')).values('profession__profession__school')
+
 
         lesson_year_id = self.request.query_params.get('lesson_year_id')
         profession_id = self.request.query_params.get('profession_id')
@@ -719,12 +718,12 @@ class AdmissionUserEmailAPIView(
 
         return queryset
 
-    def get(self, request):
+    def get(self, request, pk=None):
         user = request.user.id
         employee_sub_org_id = Employee.objects.filter(user=user).values_list('sub_org', flat=True).first()
 
         if employee_sub_org_id == 21:
-            self.query = self.query.filter(profession__profession__school=employee_sub_org_id)
+            self.queryset = self.queryset.filter(send_user__employee__sub_org=employee_sub_org_id)
 
         send_data = self.list(request).data
 
@@ -1373,7 +1372,6 @@ class ElseltHealthProfessional(
 ):
 
     queryset = HealthUser.objects.all().order_by('created_at')
-    query = AdmissionUserProfession.objects.all()
 
     serializer_class = HealthUpUserInfoSerializer
     pagination_class = CustomPagination
@@ -1445,7 +1443,7 @@ class ElseltHealthProfessional(
         employee_sub_org_id = Employee.objects.filter(user=user).values_list('sub_org', flat=True).first()
 
         if employee_sub_org_id == 21:
-            self.query = self.query.filter(profession__profession__school=employee_sub_org_id)
+            self.queryset = self.queryset.filter(user__admissionuserprofession__profession__profession__school=employee_sub_org_id)
 
         if pk:
             all_data = self.retrieve(request, pk).data
@@ -2102,7 +2100,6 @@ class AdmissionUserMessageAPIView(
 ):
 
     queryset = MessageInfo.objects.all().order_by('send_date')
-    query = AdmissionUserProfession.objects.all()
     serializer_class = MessageInfoSerializer
 
     pagination_class = CustomPagination
@@ -2184,7 +2181,7 @@ class AdmissionUserMessageAPIView(
         employee_sub_org_id = Employee.objects.filter(user=user).values_list('sub_org', flat=True).first()
 
         if employee_sub_org_id == 21:
-            self.query = self.query.filter(profession__profession__school=employee_sub_org_id)
+            self.queryset = self.queryset.filter(send_user__employee__sub_org=employee_sub_org_id)
 
         send_data = self.list(request).data
 
