@@ -111,7 +111,7 @@ function LessonMaterial() {
 	);
 
 	return (
-		<Fragment>
+		<div className="w-100" >
 			{Loader && isLoading}
 			<Card>
 				<CardHeader className="d-flex justify-content-between">
@@ -314,7 +314,7 @@ function LessonMaterial() {
 					</Row>
 				</CardBody>
 			</Card>
-		</Fragment>
+		</div>
 	);
 }
 

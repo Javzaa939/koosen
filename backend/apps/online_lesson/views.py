@@ -32,12 +32,10 @@ class OnlineLessonListAPIView(
         return self.list(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        print("Received data:", request.data)
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             self.perform_create(serializer)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        print("Errors:", serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

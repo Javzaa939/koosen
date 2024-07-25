@@ -3,7 +3,7 @@ import { Fragment, useState } from "react";
 import { GoDotFill } from "react-icons/go";
 import ReactPaginate from "react-paginate";
 import { Link } from "react-router-dom";
-import { Card, CardBody, CardHeader, Col, Row } from "reactstrap";
+import { Card, CardBody, CardHeader, Col, Row ,Container} from "reactstrap";
 import AddLesson from "../Add/index";
 
 function AllLessons({ lessons }) {
@@ -21,7 +21,6 @@ function AllLessons({ lessons }) {
     currentPage * rowsPerPage
   );
 
-  console.log(lessons);
   return (
     <Fragment>
       <Card>
@@ -49,16 +48,26 @@ function AllLessons({ lessons }) {
                           Оюутны тоо:{" "}
                           <span className="text-primary">{"??"}</span>
                       </div>
-                      <div className="mt-1 d-flex flex-col justify-content-between align-items-center">
-                          <Stats />
-                        <div>
-                         <div className="d-flex flex-row">
-                           <div> <GoDotFill />Хичээл</div>
-                           <div> 15/30</div>
-                           <div>28.5%</div>
-                         </div>
-                         <div><GoDotFill />даалгавар</div>
-                         <div> <GoDotFill />Шалгалт</div>
+                      <div>
+                        <div className="flex flex-md-row flex-column">
+                            <Stats lesson={lesson}/>
+                          <div>
+                               <div className="d-flex flex-column flex-md-row">
+                                 <Row className="w-100">
+                                   <Col xs={6}> <GoDotFill />Хичээл</Col>
+                                   <Col xs={3}>15/30</Col>
+                                   <Col xs={3}>28.5%</Col>
+                                 </Row>
+                               </div>
+                               <div className="mt-2">
+                                 <GoDotFill />
+                                 <span>даалгавар</span>
+                               </div>
+                               <div className="mt-2">
+                                 <GoDotFill />
+                                 <span>Шалгалт</span>
+                               </div>
+                             </div>
                         </div>
                       </div>
                     </CardBody>
@@ -101,7 +110,7 @@ function AllLessons({ lessons }) {
 
 export default AllLessons;
 
-function Stats() {
+function Stats({ lesson }) {
   const pieParams = { height: 180, margin: { right: 0 } };
   const palette = ["#14B8A6", "#3B82F6", "#6366F1"];
   const seriess = [
@@ -117,9 +126,23 @@ function Stats() {
       cy: 80,
     },
   ];
+
   return (
-    <>
+    <div style={{ position: 'relative', width: '200px', height: '200px' }}>
       <PieChart colors={palette} series={seriess} {...pieParams} />
-    </>
+      <span 
+        style={{
+          position: 'absolute',
+          top: '43%',
+          left: '52%',
+          transform: 'translate(-50%, -50%)',
+          padding: '4px 8px',
+          borderRadius: '50%',
+          fontWeight: 'bold',
+        }}
+      >
+        {lesson?.total_score +"/"+ lesson?.total_score}
+      </span>
+    </div>
   );
 }

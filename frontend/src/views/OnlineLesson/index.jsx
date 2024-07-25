@@ -11,7 +11,6 @@ function OnlineLesson() {
   const userApi = useApi().user;
   const { loading, user, setUser, menuVisibility, setMenuVisibility } =
     useContext(AuthContext);
-  console.log(user);
   const getLessons = async () => {
     try {
       const response = await onlineLessonApi.get_lessons();
@@ -29,7 +28,6 @@ function OnlineLesson() {
       );
 
       setLessons(names);
-      console.log("names", names);
       setIsLoading(false);
     } catch (error) {
       console.error("Error fetching lessons or lesson names:", error);

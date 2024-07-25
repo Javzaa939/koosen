@@ -15,7 +15,7 @@ import {
   ModalFooter,
   Row,
 } from "reactstrap";
-function AddLessonForm(args) {
+function AddLessonForm({toggle}) {
   // context
   const { loading, user, setUser, menuVisibility, setMenuVisibility } =
     useContext(AuthContext);
@@ -28,7 +28,11 @@ function AddLessonForm(args) {
     getValues,
     setValue,
     reset,
-  } = useForm();
+  } = useForm({
+    defaultValues: {
+      total_score: 100
+    },
+  });
 
   const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
 
@@ -38,7 +42,7 @@ function AddLessonForm(args) {
   const calculateFutureDate = (weeks) => {
     const date = new Date();
     date.setDate(date.getDate() + weeks * 7);
-    return date.toISOString().split(".")[0]; // Removes milliseconds
+    return date.toISOString().split(".")[0];
   };
 
   async function onSubmit(cdata) {
@@ -57,33 +61,14 @@ function AddLessonForm(args) {
       cdata.lesson = parseInt(cdata.lesson);
       cdata.created_user = parseInt(cdata.created_user);
 
-      console.log(cdata);
-      const response = await postFetch(OnlineLessonAPI.LessonRegister(cdata));
-      console.log("API Response:", response);
+      await postFetch(OnlineLessonAPI.LessonRegister(cdata));
 
-      const { success, error } = response;
-
-      if (success) {
         reset();
-        toggle(); // Close the modal
-        // refreshDatas(); // Uncomment if you have a refreshDatas function
-        console.log(success, "success");
-      } else {
-        for (let key in error) {
-          setError(error[key].field, {
-            type: "custom",
-            message: error[key].msg,
-          });
-        }
-      }
+        toggle();
     } catch (err) {
       console.error("Unexpected error:", err);
     }
   }
-
-  const test = () => {
-    console.log(getValues());
-  };
 
   return (
     <Form onSubmit={handleSubmit(onSubmit)}>
@@ -133,18 +118,22 @@ function AddLessonForm(args) {
           <Col md={6}>
             <Label for="total_score">Нийт үнэлэх оноо</Label>
             <Controller
-              name="total_score"
-              control={control}
-              rules={{ required: "Нийт үнэлэх оноо шаардлагатай" }}
-              render={({ field }) => (
-                <Input {...field} type="number" defaultValue={100} />
-              )}
-            />
-            {errors.total_score && (
-              <FormFeedback className="d-block">
-                {t(errors.total_score.message)}
-              </FormFeedback>
-            )}
+               name="total_score"
+               control={control}
+               rules={{ 
+                 required: "Нийт үнэлэх оноо шаардлагатай",
+                 validate: value => value !== '' || "Нийт үнэлэх оноо шаардлагатай"
+               }}
+               render={({ field }) => (
+                 <Input {...field} type="number" />
+               )}
+             />
+             {errors.total_score && (
+               <FormFeedback className="d-block">
+                 {t(errors.total_score.message)}
+               </FormFeedback>
+        )}
+
           </Col>
 
           <Col md={6}>

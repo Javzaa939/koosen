@@ -19,7 +19,7 @@ function AddLesson(args) {
         {...args}
       >
         <ModalHeader toggle={toggle}>Хичээл үүсгэх</ModalHeader>
-        <AddLessonForm />
+        <AddLessonForm toggle={toggle} />
       </Modal>
     </div>
   );

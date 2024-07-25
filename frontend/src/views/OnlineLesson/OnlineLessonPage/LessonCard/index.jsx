@@ -7,7 +7,6 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Button from "@mui/material/Button";
 export default function LessonCard({ count }) {
-  console.log(count);
   return (
     <div>
       <Accordion>

@@ -67,7 +67,6 @@ const DetailPage = () => {
 	const getOneDatas = async () => {
 		const { success, data } = await fetchData(materialApi.getOne(index));
 		if (success) {
-			console.log(data)
 			setDatas(data);
 		}
 	};

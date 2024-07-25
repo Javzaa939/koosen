@@ -7,23 +7,27 @@ import { IoMdRefresh } from "react-icons/io";
 import LessonTable from "./LessontTable";
 const menuOptions = [
   {
-    name: "Бүгд",
+    name: "Зарлал",
     option: 1,
   },
   {
-    name: "Хугацаа дуусаагүй",
+    name: "Хичээлийн 7 хоног",
     option: 3,
   },
   {
-    name: "Хугацаа дууссан",
+    name: "Шалгалт",
+    option: 6,
+  },
+  {
+    name: "Хичээлийн материал",
     option: 4,
   },
   {
-    name: "Дүн татах",
+    name: "Суралцагчдын гүйцэтгэл ",
     option: 5,
   },
   {
-    name: "Засвар оруулах",
+    name: "засвар оруулах",
     option: 2,
   },
 ];
@@ -46,7 +50,6 @@ function OnlineLessonPage() {
     try {
       const res = await onlineLessonApi.getOne(lessonId);
       setLesson(res);
-      console.log("Lesson:", res);
     } catch (error) {
       console.error("Failed to fetch lesson:", error);
     }
@@ -56,9 +59,7 @@ function OnlineLessonPage() {
     try {
       const res = await studyApi.getOne(lesson?.lesson);
       setLessonStandart(res.data);
-      console.log("Lesson Standart:", res.data);
     } catch (error) {
-      console.error("Failed to fetch lesson standard:", error);
     }
   };
 
@@ -82,7 +83,7 @@ function OnlineLessonPage() {
         <CardHeader className="p-1 w-100">
           <div className="d-flex flex-row justify-content-between w-100">
 
-              <Link to="/online__lessons">
+              <Link to="/online_lesson">
                 <Button outline size="md">
                   <BiArrowToLeft size={16} />
                 </Button>
@@ -105,7 +106,7 @@ function OnlineLessonPage() {
         <CardBody className="m-0 p-0">
           <Row className="m-0 p-0">
             {menuOptions.map((item, index) => (
-              <Col xl={3} md={6} className="mb-0" key={index}>
+              <Col xl={3} md={6} className="mb-0 cursor-pointer" key={index}>
                 <Card className="border rounded-lg shadow-sm">
                   <CardBody onClick={() => setSelectedContent(item.option)}>
                     <div className="d-flex justify-content-between">

@@ -121,7 +121,6 @@ const ElseltYlshiitgel = () => {
         if(success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
-            console.log("profession_data",data)
 
             // Нийт хуудасны тоо
             var cpage_count = Math.ceil(data?.count / rowsPerPage === 'Бүгд' ? 1 : rowsPerPage)
