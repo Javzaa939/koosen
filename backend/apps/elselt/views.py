@@ -47,6 +47,7 @@ from lms.models import (
     AdmissionBottomScore
 )
 
+from core.models import Employee
 from surgalt.serializers import (
     ProfessionDefinitionSerializer
 )
@@ -170,6 +171,11 @@ class ElseltProfession(
     serializer_class = AdmissionProfessionSerializer
 
     def get(self, request):
+        user = request.user.id
+        employee_sub_org_id = Employee.objects.filter(user=user).values_list('sub_org', flat=True).first()
+
+        if employee_sub_org_id == 21:
+            self.queryset = self.queryset.filter(profession__school=employee_sub_org_id)
         elselt = request.query_params.get('elselt')
 
         admission_querysets = self.queryset.filter(admission=elselt)
@@ -535,15 +541,17 @@ class AdmissionUserInfoAPIView(
         return queryset
 
     def get(self, request, pk=None):
+        user = request.user.id
+        employee_sub_org_id = Employee.objects.filter(user=user).values_list('sub_org', flat=True).first()
+
+        if employee_sub_org_id == 21:
+            self.queryset = self.queryset.filter(profession__profession__school=employee_sub_org_id)
 
         if pk:
-
             all_data = self.retrieve(request, pk).data
-
             return request.send_data(all_data)
 
         all_data = self.list(request).data
-
         return request.send_data(all_data)
 
     @transaction.atomic()
@@ -652,6 +660,8 @@ class AdmissionUserEmailAPIView(
         )
 
         queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
+        p = AdmissionUserProfession.objects.filter(user=OuterRef('user')).values('profession__profession__school')
+
 
         lesson_year_id = self.request.query_params.get('lesson_year_id')
         profession_id = self.request.query_params.get('profession_id')
@@ -708,8 +718,12 @@ class AdmissionUserEmailAPIView(
 
         return queryset
 
+    def get(self, request, pk=None):
+        user = request.user.id
+        employee_sub_org_id = Employee.objects.filter(user=user).values_list('sub_org', flat=True).first()
 
-    def get(self, request):
+        if employee_sub_org_id == 21:
+            self.queryset = self.queryset.filter(send_user__employee__sub_org=employee_sub_org_id)
 
         send_data = self.list(request).data
 
@@ -1239,15 +1253,18 @@ class ElseltHealthAnhanShat(
         return queryset
 
     def get(self, request, pk=None):
+            user = request.user.id
+            employee_sub_org_id = Employee.objects.filter(user=user).values_list('sub_org', flat=True).first()
 
-        if pk:
-            all_data = self.retrieve(request, pk).data
+            if employee_sub_org_id == 21:
+                self.queryset = self.queryset.filter(profession__profession__school=employee_sub_org_id)
 
+            if pk:
+                all_data = self.retrieve(request, pk).data
+                return request.send_data(all_data)
+
+            all_data = self.list(request).data
             return request.send_data(all_data)
-
-        all_data = self.list(request).data
-
-        return request.send_data(all_data)
 
 
     @transaction.atomic
@@ -1422,6 +1439,11 @@ class ElseltHealthProfessional(
         return queryset
 
     def get(self, request, pk=None):
+        user = request.user.id
+        employee_sub_org_id = Employee.objects.filter(user=user).values_list('sub_org', flat=True).first()
+
+        if employee_sub_org_id == 21:
+            self.queryset = self.queryset.filter(user__admissionuserprofession__profession__profession__school=employee_sub_org_id)
 
         if pk:
             all_data = self.retrieve(request, pk).data
@@ -1630,15 +1652,18 @@ class ElseltHealthPhysical(
         return queryset
 
     def get(self, request, pk=None):
+            user = request.user.id
+            employee_sub_org_id = Employee.objects.filter(user=user).values_list('sub_org', flat=True).first()
 
-        if pk:
-            all_data = self.retrieve(request, pk).data
+            if employee_sub_org_id == 21:
+                self.queryset = self.queryset.filter(profession__profession__school=employee_sub_org_id)
 
+            if pk:
+                all_data = self.retrieve(request, pk).data
+                return request.send_data(all_data)
+
+            all_data = self.list(request).data
             return request.send_data(all_data)
-
-        all_data = self.list(request).data
-
-        return request.send_data(all_data)
 
     @transaction.atomic
     def post(self, request):
@@ -1819,6 +1844,11 @@ class ElseltStateApprove(
 
     def get(self, request):
         " тэнцсэн элсэгчидын жагсаалт "
+        user = request.user.id
+        employee_sub_org_id = Employee.objects.filter(user=user).values_list('sub_org', flat=True).first()
+
+        if employee_sub_org_id == 21:
+            self.queryset = self.queryset.filter(profession__profession__school=employee_sub_org_id)
 
         all_data = self.list(request).data
         return request.send_data(all_data)
@@ -2146,8 +2176,12 @@ class AdmissionUserMessageAPIView(
 
         return queryset
 
-
     def get(self, request):
+        user = request.user.id
+        employee_sub_org_id = Employee.objects.filter(user=user).values_list('sub_org', flat=True).first()
+
+        if employee_sub_org_id == 21:
+            self.queryset = self.queryset.filter(send_user__employee__sub_org=employee_sub_org_id)
 
         send_data = self.list(request).data
 
@@ -2274,16 +2308,18 @@ class AdmissionJusticeListAPIView(
         return queryset
 
     def get(self, request, pk=None):
+            user = request.user.id
+            employee_sub_org_id = Employee.objects.filter(user=user).values_list('sub_org', flat=True).first()
 
-        if pk:
+            if employee_sub_org_id == 21:
+                self.queryset = self.queryset.filter(profession__profession__school=employee_sub_org_id)
 
-            all_data = self.retrieve(request, pk).data
+            if pk:
+                all_data = self.retrieve(request, pk).data
+                return request.send_data(all_data)
 
+            all_data = self.list(request).data
             return request.send_data(all_data)
-
-        all_data = self.list(request).data
-
-        return request.send_data(all_data)
 
     def put(self, request):
 
@@ -2387,13 +2423,18 @@ class ConversationUserSerializerAPIView(
         return queryset
 
     def get(self, request, pk=None):
+            user = request.user.id
+            employee_sub_org_id = Employee.objects.filter(user=user).values_list('sub_org', flat=True).first()
 
-        if pk:
-            all_data = self.retrieve(request, pk).data
+            if employee_sub_org_id == 21:
+                self.queryset = self.queryset.filter(profession__profession__school=employee_sub_org_id)
+
+            if pk:
+                all_data = self.retrieve(request, pk).data
+                return request.send_data(all_data)
+
+            all_data = self.list(request).data
             return request.send_data(all_data)
-
-        all_data = self.list(request).data
-        return request.send_data(all_data)
 
     def post(self, request):
 
@@ -3451,16 +3492,19 @@ class EyeshOrderUserInfoAPIView(
 
         return queryset
 
-    def get(self, request, pk = None):
+    def get(self, request, pk=None):
+            user = request.user.id
+            employee_sub_org_id = Employee.objects.filter(user=user).values_list('sub_org', flat=True).first()
 
-        if pk:
-            all_data = self.retrieve(request, pk).data
+            if employee_sub_org_id == 21:
+                self.queryset = self.queryset.filter(profession__profession__school=employee_sub_org_id)
 
+            if pk:
+                all_data = self.retrieve(request, pk).data
+                return request.send_data(all_data)
+
+            all_data = self.list(request).data
             return request.send_data(all_data)
-
-        all_data = self.list(request).data
-
-        return request.send_data(all_data)
 
     def put(self, request, pk=None):
 

@@ -379,6 +379,166 @@ const InterView = () => {
         setMessageModal(!messageModal)
     }
 
+    function convert() {
+		const mainData = datas.map((data, idx) => {
+			return (
+				{
+					'№': idx + 1,
+                    'Үзлэгийн төлөв':data?.conversation_data?.state == 1 ? 'Нөхцөлтэй	' : data?.conversation_data?.state == 2 ? 'Тэнцсэн' : data?.conversation_data?.state == 3 ? 'Тэнцэхгүй' : '' || '',
+                    'Тайлбар': data?.conversation_data?.description|| '',
+					'Овог': data?.user?.last_name || '',
+					'Нэр': data?.user?.first_name || '',
+					'РД': data?.user?.register || '',
+					'Нас': data?.user_age || '',
+                    'Хөтөлбөр': data?.profession || '',
+                    'Голч Дүн':data?.userinfo?.gpa || '',
+					'Хүйс': data?.gender_name || '',
+                    'Утасны дугаар': data?.user?.mobile || '',
+					'Имейл': data?.user?.email || '',
+                    'Төгссөн сургууль':data?.userinfo?.graduate_school || '',
+                    'Мэргэжил': data?.userinfo?.graduate_profession || '',
+                    'Цол': data?.userinfo?.tsol_name || '',
+					'Яаралтай холбогдох': data?.user?.parent_mobile || '',
+                    'А / байгууллага': data?.userinfo?.work_organization || '',
+					'Бүртгүүлсэн огноо': moment(data?.created_at).format('YYYY-MM-DD HH:SS:MM') || '',
+				}
+			)
+		})
+		const combo = [
+			// ...header,
+			...mainData
+		]
+
+		const worksheet = utils.json_to_sheet(combo);
+
+		const workbook = utils.book_new();
+		utils.book_append_sheet(workbook, worksheet, "Элсэгчдийн мэдээлэл");
+
+		const staticCells = [
+			'№',
+            'Үзлэгийн төлөв',
+            'Тайлбар',
+			'Овог',
+			'Нэр',
+			'РД',
+			'Нас',
+            'Хөтөлбөр',
+            'Голч Дүн',
+			'Хүйс',
+            'Утасны дугаар',
+			'Имейл',
+            'Төгссөн сургууль',
+            'Мэргэжил',
+            'Цол',
+			'Яаралтай холбогдох',
+            'А / байгууллага',
+			'Бүртгүүлсэн огноо',
+
+
+		];
+
+		utils.sheet_add_aoa(worksheet, [staticCells], { origin: "A1" });
+
+
+		const headerCell = {
+			border: {
+				top: { style: "thin", color: { rgb: "000000" } },
+				bottom: { style: "thin", color: { rgb: "000000" } },
+				left: { style: "thin", color: { rgb: "000000" } },
+				right: { style: "thin", color: { rgb: "000000" } }
+			},
+			alignment: {
+				horizontal: 'center',
+				vertical: 'center',
+				wrapText: true
+			},
+			font: {
+				sz: 10,
+				bold: true
+			}
+		};
+
+		const defaultCell = {
+			border: {
+				top: { style: "thin", color: { rgb: "000000" } },
+				bottom: { style: "thin", color: { rgb: "000000" } },
+				left: { style: "thin", color: { rgb: "000000" } },
+				right: { style: "thin", color: { rgb: "000000" } }
+			},
+			alignment: {
+				horizontal: 'left',
+				vertical: 'center',
+				wrapText: true
+			},
+			font: {
+				sz: 10
+			}
+		};
+
+		const defaultCenteredCell = {
+			border: {
+				top: { style: "thin", color: { rgb: "000000" } },
+				bottom: { style: "thin", color: { rgb: "000000" } },
+				left: { style: "thin", color: { rgb: "000000" } },
+				right: { style: "thin", color: { rgb: "000000" } }
+			},
+			alignment: {
+				horizontal: 'center',
+				vertical: 'center',
+				wrapText: true
+			},
+			font: {
+				sz: 10
+			}
+		};
+
+		const styleRow = 0;
+		const sendRow = datas?.length + 1;
+		const styleCol = 0;
+		const sendCol = 20;
+
+		for (let row = styleRow; row <= sendRow; row++) {
+			for (let col = styleCol; col <= sendCol; col++) {
+				const cellNum = utils.encode_cell({ r: row, c: col });
+
+				if (!worksheet[cellNum]) {
+					worksheet[cellNum] = {};
+				}
+
+				worksheet[cellNum].s = row === 0 ? headerCell : col === 0 ? defaultCenteredCell : defaultCell
+
+			}
+		}
+
+		const phaseZeroCells = Array.from({ length: 4 }, (_) => { return ({ wch: 10 }) })
+
+		worksheet["!cols"] = [
+			{ wch: 3 },
+			...phaseZeroCells,
+			{ wch: 25 },
+			{ wch: 10 },
+			{ wch: 25 },
+			{ wch: 25 },
+			{ wch: 25 },
+			{ wch: 25 },
+			{ wch: 25 },
+			{ wch: 25 },
+			{ wch: 25 },
+			{ wch: 25 },
+			{ wch: 25 },
+			{ wch: 25 },
+			{ wch: 15 },
+		];
+
+		const phaseOneRow = Array.from({ length: datas.length }, (_) => { return ({ hpx: 30 }) })
+
+		worksheet["!rows"] = [
+			{ hpx: 40 },
+			...phaseOneRow
+		]
+
+		writeFile(workbook, "Элсэгчдийн мэдээлэл.xlsx", { compression: true });
+	}
 
     return (
     <Fragment>
