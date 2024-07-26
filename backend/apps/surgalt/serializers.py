@@ -411,6 +411,8 @@ class LessonStandartPlanPrintSerializer(serializers.ModelSerializer):
 
         year = request.query_params.get('lesson_year')
         season = request.query_params.get('lesson_season')
+        profession = request.query_params.get('profession')
+        student = request.query_params.get('student')
 
         group_queryset = data.get('group_queryset')
 
@@ -422,6 +424,11 @@ class LessonStandartPlanPrintSerializer(serializers.ModelSerializer):
             group_data['group_id'] = group.id
 
             students_queryset = Student.objects.filter(group=group)
+            if student != '':
+                if profession:
+                    students_queryset = students_queryset.filter(group__profession=profession)
+                if student:
+                    students_queryset = students_queryset.filter(id=student)
 
             time_table_qs = TimeTable.objects.filter(lesson_year=year, lesson_season=season, lesson=obj.id).values_list('id', flat=True)
 
@@ -566,7 +573,7 @@ class StudentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Student
-        fields = ["id", "code", "full_name"]
+        fields = ["id", "code", "full_name", "group"]
 
     def get_full_name(self, obj):
 
@@ -889,7 +896,7 @@ class StudentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Student
-        fields = ["id", "code", "last_name", "first_name"]
+        fields = ['id', 'code', 'last_name', 'first_name', 'group']
 
 
 class ElsegchSerializer(serializers.ModelSerializer):

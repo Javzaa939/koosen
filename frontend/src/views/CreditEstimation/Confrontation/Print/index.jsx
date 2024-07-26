@@ -87,18 +87,21 @@ export default function Print()
                             <div className="text-center border position-relative" style={{ width: '6%' }} >
                                 <p className={`${groupLength != 0 && 'position-absolute top-50 start-50 translate-middle'} w-100 fw-bolder`}>{"Улирал"}</p>
                             </div>
-
                             {
-                                data.group.map((val, idx) =>
-                                {
-                                    return (
-                                        <div key={idx} className={`text-center border ${groupLength-1 != idx && 'border-end-0'} ${idx == 0 && 'border-start-0'} `} style={{ width: `${53 / groupLength}%`, padding: '0px 1px' }} >
-                                            <span className="w-100 fw-bolder">{val?.name}</span>
-                                        </div>
-                                    )
-                                })
+                                data?.code != undefined ? (
+                                    <div className={`text-center border ${groupLength-1 != 1 && 'border-start-0'}`} style={{ width: `${53 / groupLength}%`, padding: '0px 1px' }} >
+                                        <span className="w-100 fw-bolder">{data?.code} {data?.last_name} {data?.first_name} {data?.register_num}</span>
+                                    </div>
+                                ): (
+                                    data.group.map((val, idx) => {
+                                        return  (
+                                            <div className={`text-center border ${groupLength-1 != idx && 'border-end-0'} ${idx == 0 && 'border-start-0'}`} style={{ width: `${53 / groupLength}%`, padding: '0px 1px' }} >
+                                                <span span className="w-100 fw-bolder">{val?.name}</span>
+                                            </div>
+                                        )
+                                    })
+                                )
                             }
-
                         </div>
 
                         {
@@ -154,6 +157,15 @@ export default function Print()
                                                         {
                                                             val.lessons.map((val, idx) =>
                                                             {
+                                                                if(val?.season === '[1]') val.season = 'I'
+                                                                if(val?.season === '[2]') val.season = 'II'
+                                                                if(val?.season === '[3]') val.season = 'III'
+                                                                if(val?.season === '[4]') val.season = 'IV'
+                                                                if(val?.season === '[3, 4]') val.season = 'III, IV'
+                                                                if(val?.season === '[5]') val.season = 'V'
+                                                                if(val?.season === '[6]') val.season = 'VI'
+                                                                if(val?.season === '[7]') val.season = 'VII'
+                                                                if(val?.season === '[8]') val.season = 'VIII'
                                                                 count++
                                                                 return (
                                                                     <div key={idx} className="w-100 p-0">
@@ -182,8 +194,8 @@ export default function Print()
                                                                                     switch (val?.value)
                                                                                     {
                                                                                         case 1:
-                                                                                            value = ''
-                                                                                            backgroundColor = ''
+                                                                                            value = 'Үзээгүй'
+                                                                                            backgroundColor = 'bg-danger'
                                                                                             break;
                                                                                         case 2:
                                                                                             value = 'Үзсэн'
@@ -227,7 +239,10 @@ export default function Print()
                                 <span className="w-100 fw-bolder">{"Хичээлийн нэр"}</span>
                             </div>
                             <div className="text-center border border-end-0" style={{ width: '6%' }} >
-                                <span className="w-100 fw-bolder">{"Багц цаг"}</span>
+                                <span className="w-100 fw-bolder">{"Үзэх багц цаг"}</span>
+                            </div>
+                            <div className="text-center border border-end-0" style={{ width: '6%' }} >
+                                <span className="w-100 fw-bolder">{"Үзсэн багц цаг"}</span>
                             </div>
                             <div className="text-center border" style={{ width: '6%' }} >
                                 <span className="w-100 fw-bolder">{"Улирал"}</span>
@@ -250,6 +265,9 @@ export default function Print()
                                             <div className="text-center border border-end-0 border-top-0" style={{ width: '6%' }} >
                                                 <span className="w-100">{val?.count}</span>
                                             </div>
+                                            <div className="text-center border border-end-0 border-top-0" style={{ width: '6%' }} >
+                                                <span className="w-100">{val?.count}</span>
+                                            </div>
                                             <div className="text-center border border-top-0" style={{ width: '6%' }} >
                                                 <span className="w-100">{`${parseInt((val?.count * 100) / countLessonTypeCount)}%`}</span>
                                             </div>
@@ -265,6 +283,9 @@ export default function Print()
                             </div>
                             <div className="text-center border border-end-0 border-top-0" style={{ width: '25%' }} >
                                 <span className="w-100 fw-bolder">{"Нийт кредит"}</span>
+                            </div>
+                            <div className="text-center border border-end-0 border-top-0" style={{ width: '6%' }} >
+                                <span className="w-100 fw-bolder">{countLessonTypeCount}</span>
                             </div>
                             <div className="text-center border border-end-0 border-top-0" style={{ width: '6%' }} >
                                 <span className="w-100 fw-bolder">{countLessonTypeCount}</span>

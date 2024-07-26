@@ -420,7 +420,7 @@ function useApi(isDisplay=false) {
 				postPlan: data => instance.post('/learning/profession/plan/', data),
 				deletePlan: (pk) => instance.delete(`/learning/profession/plan/${pk}/`),
 
-				printGetPlan: (department, profession) =>  instance.get(`/learning/profession/print/plan/?department=${department}&profession=${profession}&lesson_year=${cyear_name}&lesson_season=${cseason_id}`),
+				printGetPlan: (department, profession, group, student) =>  instance.get(`/learning/profession/print/plan/?department=${department}&profession=${profession}&group=${group}&student=${student}&lesson_year=${cyear_name}&lesson_season=${cseason_id}`),
 
 				putCopyProfession: (data) => instance.put(`/learning/profession/copy/`, data),
 			},

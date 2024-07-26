@@ -1165,16 +1165,30 @@ class ProfessionPrintPlanAPIView(
         all_data = dict()
 
         profession = request.query_params.get('profession')
+        group = request.query_params.get('group')
+        student = request.query_params.get('student')
 
         profession_qs = ProfessionDefinition.objects.filter(id=profession).values('id', 'dep_name', 'name').last()
-        group_queryset = Group.objects.filter(profession=profession, is_finish=False).order_by('id')
+        group_queryset = Group.objects.filter(profession=profession, id=group, is_finish=False).order_by('id')
         group_data = GroupSerializer(group_queryset, many=True).data
+
+        # student байгаа эсэх шалгах
+        if student != '':
+            student_qs = Student.objects.filter(id=student).values('id', 'code', 'first_name', 'last_name', 'register_num').first()
 
         all_data['group'] = group_data
 
         all_data['id'] = profession_qs['id']
         all_data['dep_name'] = profession_qs['dep_name']
         all_data['name'] = profession_qs['name']
+
+        # student info авах
+        if student != '':
+            all_data['student_id'] = student_qs['id']
+            all_data['code'] = student_qs['code']
+            all_data['first_name'] = student_qs['first_name']
+            all_data['last_name'] = student_qs['last_name']
+            all_data['register_num'] = student_qs['register_num']
 
         request.data['group_queryset'] = group_queryset
 
