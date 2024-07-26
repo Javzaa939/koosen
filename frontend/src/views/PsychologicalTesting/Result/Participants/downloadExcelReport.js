@@ -25,7 +25,7 @@ export function downloadExcelReport(datas){
         )
     })
 
-    const mainData = datas?.overall_datas.map((data, index) => {
+    const mainData = datas?.overall_datas?.map((data, index) => {
         return(
             {
                 'д/д':index + 1,

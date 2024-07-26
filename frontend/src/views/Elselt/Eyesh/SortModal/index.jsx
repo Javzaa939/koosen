@@ -89,7 +89,6 @@ export const SortModal = ({ open, handleModal, refreshDatas, editData }) => {
     const getAdmissionLesson = async () => {
         const { success, data } = await fetchData(admissionLessionApi.get());
         if (success) {
-            console.log(data)
             setLessonOption(data);
         }
     };
