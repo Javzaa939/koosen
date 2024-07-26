@@ -33,6 +33,7 @@ const DetailPage = () => {
 
 	const { showWarning } = useModal();
 	const { index } = useParams();
+
 	const navigate = useNavigate();
 
 	//State
@@ -66,7 +67,6 @@ const DetailPage = () => {
 	const getOneDatas = async () => {
 		const { success, data } = await fetchData(materialApi.getOne(index));
 		if (success) {
-			console.log(data)
 			setDatas(data);
 		}
 	};

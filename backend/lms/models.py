@@ -4419,7 +4419,7 @@ class OnlineLesson(models.Model):
     is_end_exam = models.BooleanField(default=True, verbose_name='Төгсөлтийн шалгалттай эсэх')
     is_certificate = models.BooleanField(default=False, verbose_name='Сертификаттай эсэх')
     plan = models.TextField(verbose_name='Сургалтын төлөвлөгөө', null=True)
-    weeks = models.ManyToManyField(OnlineWeek, verbose_name='7 хоногууд')
+    weeks = models.ManyToManyField(OnlineWeek, blank=True, verbose_name='7 хоногууд')
 
     created_user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Үүсгэсэн хэрэглэгч', null=True)
     created_at = models.DateTimeField(auto_now=True, null=True)
