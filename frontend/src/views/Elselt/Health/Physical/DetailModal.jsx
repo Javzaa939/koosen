@@ -60,6 +60,7 @@ export default function DetailModal({ isOpen, handleModal, datas, file_name, err
     const ExcelPostDataApi = useApi().elselt.health.physical
 
     const headers = [
+        { key: 'state', name: 'Үзлэгийн төлөв'},
         { key: 'register_num', name: 'РД' },
         { key: 'total_score', name: 'Нийт оноо' },
         { key: 'turnik', name: 'Савлуурт суниах' },
@@ -164,16 +165,23 @@ export default function DetailModal({ isOpen, handleModal, datas, file_name, err
                                                     </thead>
                                                     <tbody>
                                                         {
-                                                            data?.map((row, idx) =>
-                                                                <tr key={idx}>
-                                                                    <td className='bg-transparent'>{idx + 1}</td>
-                                                                    {
-                                                                        headers.map((column, idx2) => (
-                                                                            <td key={`score-${idx2}${idx}`} className='bg-transparent'>{row[column.key]}</td>
-                                                                        )
-                                                                        )}
-                                                                </tr>
-                                                            )}
+                                                            data?.map((row, idx) => {
+                                                                if(row.state == 1) row.state = 'Бүртгүүлсэн'
+                                                                if(row.state == 2) row.state = 'Тэнцсэн'
+                                                                if(row.state == 3) row.state = 'Тэнцээгүй'
+                                                                return (
+                                                                        <tr key={idx}>
+                                                                            <td className='bg-transparent'>{idx + 1}</td>
+                                                                            {
+                                                                                headers.map((column, idx2) => (
+                                                                                    <td key={`score-${idx2}${idx}`} className='bg-transparent'>{row[column.key]}</td>
+                                                                                ))
+                                                                            }
+                                                                        </tr>
+                                                                    )
+                                                                }
+                                                            )
+                                                        }
                                                     </tbody>
                                                 </Table>
                                             </div>

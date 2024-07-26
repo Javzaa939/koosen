@@ -1739,9 +1739,17 @@ class ElseltPhysicalExcelImportAPIView(
             datas = excel_data.to_dict(orient='records')
 
             for created_data in datas:
+                state = created_data.get('Үзлэгийн төлөв')
                 register_num = created_data.get('РД')
 
+                if state == 0: state=1
+                if state == 'Бүртгүүлсэн': state=1
+                if state == 'Тэнцсэн': state=2
+                if state == 'Тэнцээгүй': state=3
+
                 # PhysqueUser
+                description = created_data.get('Тайлбар') or 0
+                belly_draught = created_data.get('Гэдэсний таталт') or 0
                 total_score = created_data.get('Нийт оноо')
                 turnik = created_data.get('Савлуурт суниах')
                 patience_1000m = created_data.get('Тэсвэр 1000М')
@@ -1760,6 +1768,9 @@ class ElseltPhysicalExcelImportAPIView(
 
                 physque_user_data = {
                     'user': student,
+                    'state': state,
+                    'description': description,
+                    'belly_draught': belly_draught,
                     'total_score': total_score,
                     'turnik': turnik,
                     'patience_1000m': patience_1000m,
@@ -1775,7 +1786,10 @@ class ElseltPhysicalExcelImportAPIView(
                 )
 
                 correct_datas.append({
+                    'state': state,
                     'register_num': register_num,
+                    'description': description,
+                    'belly_draught': belly_draught,
                     'total_score': total_score,
                     'turnik': turnik,
                     'patience_1000m': patience_1000m,
@@ -1813,6 +1827,9 @@ class ElseltPhysicalExcelPostDataAPIView(
 
         try:
             for created_data in datas:
+                description = created_data.get('Тайлбар') or 0
+                belly_draught = created_data.get('Гэдэсний таталт') or 0
+                state = created_data.get('Үзлэгийн төлөв')
                 total_score = created_data.get('Нийт оноо')
                 turnik = created_data.get('Савлуурт суниах')
                 patience_1000m = created_data.get('Тэсвэр 1000М')
@@ -1821,6 +1838,9 @@ class ElseltPhysicalExcelPostDataAPIView(
                 flexible = created_data.get('Уян хатан')
 
                 qs = PhysqueUser(
+                    description=description,
+                    belly_draught=belly_draught,
+                    state=state,
                     total_score=total_score,
                     turnik=turnik,
                     patience_1000m=patience_1000m,
