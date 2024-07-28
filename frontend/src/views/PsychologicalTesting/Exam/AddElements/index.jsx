@@ -1,5 +1,5 @@
 import { getPagination, convertDefaultValue, ReactSelectStyles, validate} from "@utils";
-import React, { Fragment, useState, useEffect } from "react";
+import React, { Fragment, useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useForm, Controller } from "react-hook-form";
@@ -35,7 +35,8 @@ function AddStudent(){
 	const { t } = useTranslation();
 
     const { isLoading, Loader, fetchData } = useLoader({});
-    const { fetchData: fetchSelectData} = useLoader({});
+    // loading indicator corrected
+    const { isLoading:isLoadingSelectData, Loader:SelectDataLoader, fetchData: fetchSelectData } = useLoader({});
     const { fetchData: fetchQuestion } = useLoader({});
     const { control, handleSubmit, setError, formState: { errors }, } = useForm();
     const { challenge_id } = useParams();
@@ -71,10 +72,15 @@ function AddStudent(){
         }
     };
 
+    // to populate select inputs on startup and to filter students groups list in select input
     async function getSelects(){
-		const { success, data } = await fetchSelectData(challengeAPI.getSelect(scope, challenge_id, department))
+		const { success, data } = await fetchSelectData(challengeAPI.getSelect(scope, challenge_id, department, '', '', '', '', ''))
 		if(success){
-			setSelectOption(data)
+            setSelectOption(data)
+            setDepartmentOption(data?.teacher_department)
+            setScrollBottomDatasTeacher(data?.teacher)
+            setScrollBottomDatasElseltUser(data?.elsegch)
+            setScrollBottomDatas(data?.student)
 		}
 	}
 
@@ -110,7 +116,7 @@ function AddStudent(){
 
     useEffect(() => {
         getSelects()
-    },[scope, department])
+    },[])
 
     function handleFilter(e){
         const value = e.target.value.trimStart();
@@ -169,29 +175,77 @@ function AddStudent(){
     const professionApi = useApi().elselt.profession
 
     // States
-    const [student_id , setStudentId] = useState('');
+    // teachers adding inputs states
+    const [bottom_check_teacher, setBottomCheckTeacher] = useState(3);
+    const [select_teacher, setTeacherOption] = useState([]);
+    const [teacher_search_value, setTeacherSearchValue] = useState([]);
+    const [scroll_bottom_datas_teacher, setScrollBottomDatasTeacher] = useState([]);
+    const [departmentOption, setDepartmentOption] = useState([]);
+    const [departmentTeacher, setDepartmentTeacher] = useState([]);
+    const [teacher, setTeacher] = useState(0);
+
+    const { isLoading:TeacherLoading, Loader:TeacherLoader, fetchData: fetchSelectTeachers } = useLoader({});
+
+    // students adding inputs states
     const [bottom_check, setBottomCheck] = useState(3);
     const [select_student, setStudentOption] = useState([]);
     const [student_search_value, setStudentSearchValue] = useState([]);
     const [scroll_bottom_datas, setScrollBottomDatas] = useState([]);
-    const [profOption, setProfessionOption] = useState([]);
-    const [profession, setProfession] = useState([]);
+    const [group, setGroup] = useState([]);
+    const [student, setStudent] = useState(0);
+    const hasMounted = useRef(false);
 
     const { isLoading:StudentLoading, Loader:StudentLoader, fetchData: fetchSelectStudents } = useLoader({});
 
+    // elesltUsers adding inputs states
+    const [bottom_check_elselt_user, setBottomCheckElseltUser] = useState(3);
+    const [select_elselt_user, setElseltUserOption] = useState([]);
+    const [elselt_user_search_value, setElseltUserSearchValue] = useState([]);
+    const [scroll_bottom_datas_elselt_user, setScrollBottomDatasElseltUser] = useState([]);
+    const [profOption, setProfessionOption] = useState([]);
+    const [profession, setProfession] = useState([]);
+    const [elselt_user, setElseltUser] = useState(0);
+
+    const { isLoading:ElseltUserLoading, Loader:ElseltUserLoader, fetchData: fetchSelectElseltUsers } = useLoader({});
+
+    // to filter teachers by search string from select input
+    async function getTeacherOption(searchValue) {
+        const { success, data } = await fetchSelectTeachers(challengeAPI.getSelect(scope, challenge_id, department, 'participants', 2, departmentTeacher, '', searchValue))
+        if (success) {
+            setTeacherOption(data?.teacher)
+        }
+    }
+
+    // populating teachers in select input initially and by scroll
+    async function getSelectBottomDatasTeacher(state){
+        const { success, data } = await fetchSelectElseltUsers(challengeAPI.getSelect(1, challenge_id, department, 'participants', state, departmentTeacher, '', ''))
+        if(success){
+            if(state===2){
+                setScrollBottomDatasTeacher(data?.teacher)
+            } else {
+                setScrollBottomDatasTeacher((prev) => [...prev, ...data?.teacher])
+            }
+        }
+    }
+
     //  Оюутны жагсаалт хайлтаар
     async function getStudentOption(searchValue) {
-        const { success, data } = await fetchSelectStudents(permissionStudentApi.getStudent(searchValue))
+        const { success, data } = await fetchSelectStudents(challengeAPI.getSelect(scope, challenge_id, department, 'participants', 2, '', group, searchValue))
         if(success) {
-            setStudentOption(data)
+            setStudentOption(data?.student)
         }
     }
 
     //  Оюутны жагсаалт select ашигласан
     async function getSelectBottomDatas(state){
-        const { success, data } = await fetchSelectStudents(permissionStudentApi.getSelectStudents(state))
+        const { success, data } = await fetchSelectStudents(challengeAPI.getSelect(3, challenge_id, department, 'participants', state, '', group, ''))
         if(success){
-            setScrollBottomDatas((prev) => [...prev, ...data])
+            // when select input list is needed to be resetted for current conditions
+            if(state===2){
+                setScrollBottomDatas(data?.student)
+            } else {
+                setScrollBottomDatas((prev) => [...prev, ...data?.student])
+            }
         }
     }
 
@@ -202,18 +256,96 @@ function AddStudent(){
             setProfessionOption(data)
         }
     }
+    // to filter elseltUsers by search string from select input
+    async function getElseltUserOption(searchValue) {
+        const { success, data } = await fetchSelectElseltUsers(challengeAPI.getSelect(scope, challenge_id, department, 'participants', 2, elsegchDef, profession, searchValue))
+        if (success) {
+            setElseltUserOption(data?.elsegch)
+        }
+    }
 
+    // populating elseltUser in select input initially and by scroll
+    async function getSelectBottomDatasElseltUser(state){
+        const { success, data } = await fetchSelectElseltUsers(challengeAPI.getSelect(2, challenge_id, department, 'participants', state, elsegchDef, profession, ''))
+        if(success){
+            if(state===2){
+                setScrollBottomDatasElseltUser(data?.elsegch)
+            } else {
+                setScrollBottomDatasElseltUser((prev) => [...prev, ...data?.elsegch])
+            }
+        }
+    }
+
+    // teachers searching handler
+    function handleTeacherSelect(value){
+        getTeacherOption(value)
+    }
+
+    // handler to filter teachers list in select input by other select inputs
+    function handleTeacher(){
+        setScrollBottomDatasTeacher([])
+        setBottomCheckTeacher(3)
+        setTeacher(teacher ? teacher == 1 ? 2 : 1 : 1)
+    }
+
+    // students searching handler
     function handleStudentSelect(value){
         getStudentOption(value)
     }
 
-    useEffect(() => {
-        getSelectBottomDatas(2)
-    }, []);
+    // handler to filter students list in select input by other select inputs
+    function handleStudent(){
+        setScrollBottomDatas([])
+        setBottomCheck(3)
+        setStudent(student ? student == 1 ? 2 : 1 : 1)
+    }
 
+     // elseltUser searching handler
+    function handleElseltUserSelect(value){
+        getElseltUserOption(value)
+    }
+
+    // handler to filter elseltUser list in select input by other select inputs
+    function handleElseltUser(){
+        setScrollBottomDatasElseltUser([])
+        setBottomCheckElseltUser(3)
+        setElseltUser(elselt_user ? elselt_user == 1 ? 2 : 1 : 1)
+    }
+
+    // to filter students groups when department changed
+    useEffect(() => {
+        if (hasMounted.current) {
+            getSelects()
+        } else {
+            hasMounted.current = true;
+        }
+    },[department])
+
+    // to filter elseltUsers professions when admissiion changed
     useEffect(() => {
         getProfession()
     },[elsegchDef])
+
+    // to filter teachers list in select input by other select inputs
+    useEffect(() => {
+        if(teacher){
+            getSelectBottomDatasTeacher(2)
+        }
+    }, [teacher])
+
+    // to filter students list in select input by other select inputs
+    useEffect(() => {
+        if(student){
+            getSelectBottomDatas(2)
+        }
+    }, [student])
+
+    // to filter elseltUsers list in select input by other select inputs
+    useEffect(() => {
+        if(elselt_user){
+            getSelectBottomDatasElseltUser(2)
+        }
+    }, [elselt_user])
 
     return(
         <Fragment>
@@ -262,6 +394,107 @@ function AddStudent(){
                                                 </Col>
                                             </Row>
                                             {
+                                                scope === 1 &&
+                                                    <Row className='mt-1'>
+                                                        <Col md={6}>
+                                                            <Label className='form-label' for="departmentTeacher">
+                                                                {t('Хөтөлбөрийн баг')}
+                                                            </Label>
+                                                            <Controller
+                                                                control={control}
+                                                                defaultValue=''
+                                                                name="departmentTeacher"
+                                                                render={({ field: { value, onChange} }) => {
+                                                                    return (
+                                                                        <Select
+                                                                            name="departmentTeacher"
+                                                                            id="departmentTeacher"
+                                                                            classNamePrefix='select'
+                                                                            isClearable
+                                                                            isMulti
+                                                                            value={value}
+                                                                            className={classnames('react-select')}
+                                                                            isLoading={isLoadingSelectData}
+                                                                            options={departmentOption || []}
+                                                                            placeholder={t('-- Сонгоно уу --')}
+                                                                            noOptionsMessage={() => t('Хоосон байна.')}
+                                                                            onChange={(val) => {
+                                                                                onChange(val)
+                                                                                const ids = val.map(item => item.id);
+                                                                                setDepartmentTeacher(ids)
+                                                                                handleTeacher()
+                                                                            }}
+                                                                            styles={ReactSelectStyles}
+                                                                            getOptionValue={(option) => option.id}
+                                                                            getOptionLabel={(option) => option.name}
+                                                                        />
+                                                                    )
+                                                                }}
+                                                            />
+                                                        </Col>
+                                                        <Col md={4}>
+                                                            <Label className='form-label' for='participants'>
+                                                                {t('Нэр')}
+                                                            </Label>
+                                                            <Controller
+                                                                control={control}
+                                                                defaultValue=''
+                                                                name="participants"
+                                                                render={({ field: { value, onChange} }) => {
+                                                                    return (
+                                                                        <Select
+                                                                            name="participants"
+                                                                            id="participants"
+                                                                            classNamePrefix='select'
+                                                                            isClearable
+                                                                            isMulti
+                                                                            className={classnames('react-select')}
+                                                                            placeholder={t('-- Хайх --')}
+                                                                            isLoading={TeacherLoading}
+                                                                            loadingMessage={() => "Түр хүлээнэ үү..."}
+                                                                            options={
+                                                                                teacher_search_value.length === 0
+                                                                                    ? scroll_bottom_datas_teacher || []
+                                                                                    : select_teacher || []
+                                                                            }
+                                                                            value={
+                                                                                teacher_search_value.length === 0
+                                                                                    ? scroll_bottom_datas_teacher.find((c) => c.id === value)
+                                                                                    : select_teacher.find((c) => c.id === value)
+                                                                            }
+                                                                            noOptionsMessage={() =>
+                                                                                teacher_search_value.length > 1
+                                                                                    ? t('Хоосон байна')
+                                                                                    : null
+                                                                            }
+                                                                            onMenuScrollToBottom={() => {
+                                                                                if(teacher_search_value.length === 0){
+                                                                                    setBottomCheckTeacher(bottom_check_teacher + 1)
+                                                                                    getSelectBottomDatasTeacher(bottom_check_teacher)
+                                                                                }
+                                                                            }}
+                                                                            onChange={(val) => {
+                                                                                onChange(val)
+                                                                            }}
+                                                                            onInputChange={(e) => {
+                                                                                setTeacherSearchValue(e);
+                                                                                if(e.length > 1 && e !== teacher_search_value){
+                                                                                    handleTeacherSelect(e);
+                                                                                } else if (e.length === 0){
+                                                                                    setTeacherOption([]);
+                                                                                }
+                                                                            }}
+                                                                            styles={ReactSelectStyles}
+                                                                            getOptionValue={(option) => option.id}
+                                                                            getOptionLabel={(option) => (option.code ? option.code + ' ' : '') + option.full_name}
+                                                                        />
+                                                                    )
+                                                                }}
+                                                            />
+                                                        </Col>
+                                                    </Row>
+                                            }
+                                            {
                                                 scope == 2
                                                 &&
                                                 <Row>
@@ -292,13 +525,14 @@ function AddStudent(){
                                                                             classNamePrefix='select'
                                                                             value={value}
                                                                             className={classnames('react-select')}
-                                                                            isLoading={isLoading}
+                                                                            isLoading={isLoadingSelectData}
                                                                             options={selectOption?.elsegch_admission || []}
                                                                             placeholder={t('-- Сонгоно уу --')}
                                                                             noOptionsMessage={() => t('Хоосон байна.')}
                                                                             onChange={(val) => {
                                                                                 onChange(val)
-                                                                                setElsegchDef(val?.admission);
+                                                                                setElsegchDef(val?.admission || '')
+                                                                                handleElseltUser()
                                                                             }}
                                                                             styles={ReactSelectStyles}
                                                                             getOptionValue={(option) => option.admission}
@@ -309,7 +543,9 @@ function AddStudent(){
                                                             />
                                                         </Col>
                                                         <Col md={6}>
-                                                            <Label for='form-label'>{t('Хөтөлбөр')}</Label>
+                                                            <Label className='form-label' for="profession">
+                                                                {t('Хөтөлбөр')}
+                                                            </Label>
                                                             <Controller
                                                                 control={control}
                                                                 defaultValue=''
@@ -324,18 +560,79 @@ function AddStudent(){
                                                                             isMulti
                                                                             value={value}
                                                                             className={classnames('react-select')}
-                                                                            isLoading={isLoading}
+                                                                            isLoading={isLoadingSelectData}
                                                                             options={profOption || []}
                                                                             placeholder={t('-- Сонгоно уу --')}
                                                                             noOptionsMessage={() => t('Хоосон байна.')}
                                                                             onChange={(val) => {
                                                                                 onChange(val)
-                                                                                const ids = val.map(item => item.id);
+                                                                                const ids = val.map(item => item.prof_id);
                                                                                 setProfession(ids)
+                                                                                handleElseltUser()
                                                                             }}
                                                                             styles={ReactSelectStyles}
                                                                             getOptionValue={(option) => option.prof_id}
                                                                             getOptionLabel={(option) => option.name}
+                                                                        />
+                                                                    )
+                                                                }}
+                                                            />
+                                                        </Col>
+                                                        <Col md={4}>
+                                                            <Label className='form-label' for='participants'>
+                                                                {t('Нэр')}
+                                                            </Label>
+                                                            <Controller
+                                                                control={control}
+                                                                defaultValue=''
+                                                                name="participants"
+                                                                render={({ field: { value, onChange} }) => {
+                                                                    return (
+                                                                        <Select
+                                                                            name="participants"
+                                                                            id="participants"
+                                                                            classNamePrefix='select'
+                                                                            isClearable
+                                                                            isMulti
+                                                                            className={classnames('react-select')}
+                                                                            placeholder={t('-- Хайх --')}
+                                                                            isLoading={ElseltUserLoading}
+                                                                            loadingMessage={() => "Түр хүлээнэ үү..."}
+                                                                            options={
+                                                                                elselt_user_search_value.length === 0
+                                                                                    ? scroll_bottom_datas_elselt_user || []
+                                                                                    : select_elselt_user || []
+                                                                            }
+                                                                            value={
+                                                                                elselt_user_search_value.length === 0
+                                                                                    ? scroll_bottom_datas_elselt_user.find((c) => c.id === value)
+                                                                                    : select_elselt_user.find((c) => c.id === value)
+                                                                            }
+                                                                            noOptionsMessage={() =>
+                                                                                elselt_user_search_value.length > 1
+                                                                                    ? t('Хоосон байна')
+                                                                                    : null
+                                                                            }
+                                                                            onMenuScrollToBottom={() => {
+                                                                                if(elselt_user_search_value.length === 0){
+                                                                                    setBottomCheckElseltUser(bottom_check_elselt_user + 1)
+                                                                                    getSelectBottomDatasElseltUser(bottom_check_elselt_user)
+                                                                                }
+                                                                            }}
+                                                                            onChange={(val) => {
+                                                                                onChange(val)
+                                                                            }}
+                                                                            onInputChange={(e) => {
+                                                                                setElseltUserSearchValue(e);
+                                                                                if(e.length > 1 && e !== elselt_user_search_value){
+                                                                                    handleElseltUserSelect(e);
+                                                                                } else if (e.length === 0){
+                                                                                    setElseltUserOption([]);
+                                                                                }
+                                                                            }}
+                                                                            styles={ReactSelectStyles}
+                                                                            getOptionValue={(option) => option.id}
+                                                                            getOptionLabel={(option) => (option.code ? option.code + ' ' : '') + option.full_name}
                                                                         />
                                                                     )
                                                                 }}
@@ -361,17 +658,16 @@ function AddStudent(){
                                                                             id="department"
                                                                             classNamePrefix='select'
                                                                             isClearable
-                                                                            isMulti
                                                                             value={value}
                                                                             className={classnames('react-select')}
-                                                                            isLoading={isLoading}
-                                                                            options={selectOption?.deparment_options || []}
+                                                                            isLoading={isLoadingSelectData}
+                                                                            options={selectOption?.department_options || []}
                                                                             placeholder={t('-- Сонгоно уу --')}
                                                                             noOptionsMessage={() => t('Хоосон байна.')}
                                                                             onChange={(val) => {
                                                                                 onChange(val)
-                                                                                const ids = val.map(item => item.id);
-                                                                                setDepartment(ids);
+                                                                                setDepartment(val?.id || '')
+                                                                                handleStudent()
                                                                             }}
                                                                             styles={ReactSelectStyles}
                                                                             getOptionValue={(option) => option.id}
@@ -382,29 +678,32 @@ function AddStudent(){
                                                             />
                                                         </Col>
                                                         <Col md={6}>
-                                                            <Label className="form-label" for="participants">
+                                                            <Label className="form-label" for="groups">
                                                                 {'Анги сонгох'}
                                                             </Label>
                                                             <Controller
                                                                 control={control}
                                                                 defaultValue=''
-                                                                name="participants"
+                                                                name="groups"
                                                                 render={({ field: { value, onChange} }) => {
                                                                     return (
                                                                         <Select
-                                                                            name="participants"
-                                                                            id="participants"
+                                                                            name="groups"
+                                                                            id="groups"
                                                                             classNamePrefix='select'
                                                                             isClearable
                                                                             isMulti
                                                                             value={value}
                                                                             className={classnames('react-select')}
-                                                                            isLoading={isLoading}
+                                                                            isLoading={isLoadingSelectData}
                                                                             options={selectOption?.select_student_data || []}
                                                                             placeholder={t('-- Сонгоно уу --')}
                                                                             noOptionsMessage={() => t('Хоосон байна.')}
                                                                             onChange={(val) => {
                                                                                 onChange(val)
+                                                                                const ids = val.map(item => item.id);
+                                                                                setGroup(ids)
+                                                                                handleStudent()
                                                                             }}
                                                                             styles={ReactSelectStyles}
                                                                             getOptionValue={(option) => option.id}
@@ -414,21 +713,22 @@ function AddStudent(){
                                                                 }}
                                                             />
                                                         </Col>
-                                                        {/* <Col sm={4}>
-                                                            <Label className='form-label' for='student'>
+                                                        <Col sm={4}>
+                                                            <Label className='form-label' for='participants'>
                                                                 {t('Нийт оюутнууд')}
                                                             </Label>
                                                             <Controller
                                                                 control={control}
                                                                 defaultValue=''
-                                                                name="student"
+                                                                name="participants"
                                                                 render={({ field: {value, onChange } }) => {
                                                                     return (
                                                                         <Select
-                                                                            name="student"
-                                                                            id="student"
+                                                                            name="participants"
+                                                                            id="participants"
                                                                             classNamePrefix='select'
                                                                             isClearable
+                                                                            isMulti
                                                                             className={classnames('react-select')}
                                                                             placeholder={`-- Хайх --`}
                                                                             isLoading={StudentLoading}
@@ -455,8 +755,7 @@ function AddStudent(){
                                                                                 }
                                                                             }}
                                                                             onChange={(val) => {
-                                                                                onChange(val?.id || '')
-                                                                                setStudentId(val?.id || '')
+                                                                                onChange(val)
                                                                             }}
                                                                             onInputChange={(e) => {
                                                                                 setStudentSearchValue(e);
@@ -468,12 +767,12 @@ function AddStudent(){
                                                                             }}
                                                                             styles={ReactSelectStyles}
                                                                             getOptionValue={(option) => option.id}
-                                                                            getOptionLabel={(option) => option.full_name}
+                                                                            getOptionLabel={(option) => (option.code ? option.code + ' ' : '') + option.full_name}
                                                                         />
                                                                     )
                                                                 }}
                                                             />
-                                                        </Col> */}
+                                                        </Col>
                                                     </Row>
                                             }
                                             <Button

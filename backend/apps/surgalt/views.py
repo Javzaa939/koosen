@@ -2704,6 +2704,12 @@ class PsychologicalTestScopeOptionsAPIView(
     def get(self, request):
         scope = self.request.query_params.get('scope')
         department = self.request.query_params.get('department')
+        school=self.request.query_params.get('school')
+        mode=self.request.query_params.get('mode')
+        state = self.request.query_params.get('state')
+        select1 = self.request.query_params.get('select1')
+        select2 = self.request.query_params.get('select2')
+        search_query = self.request.query_params.get('search')
         group_options = list()
 
         if department:
@@ -2711,28 +2717,161 @@ class PsychologicalTestScopeOptionsAPIView(
         else:
             department_list = list()
 
-        # Хамрах хүрээг элсэгч гэж сонговол
-        if scope == '2':
-            profession = AdmissionRegisterProfession.objects.annotate(
+        if school:
+            school = int(school)
+
+        # to set select inputs seprarated states
+        if mode == 'participants':
+            if scope == '1':
+                if school:
+                    teacher = Teachers.objects.order_by('id').filter(sub_org=school)
+                else:
+                    teacher = Teachers.objects.order_by('id')
+
+                if select1:
+                    department_id = [int(item) for item in select1.split(',')]
+                    teacher = teacher.filter(salbar__in=department_id)
+
+                if search_query:
+                    search_vector = Q()
+                    # List of searchable fields
+                    for field in ['user__code', 'user__register', 'user__first_name']:
+                        search_vector |= Q(**{f"{field}__icontains": search_query})
+                    teacher = teacher.filter(search_vector)
+                else:
+                    # scroll lazy loading inside select input
+                    if state == '2':
+                        qs_start = (int(state) - 2) * 10
+                        qs_filter = int(state) * 10
+                    else:
+                        qs_start = (int(state) - 1) * 10
+                        qs_filter = int(state) * 10
+                    teacher = teacher[qs_start:qs_filter]
+
+                return_data = {'teacher': [{'id': item.id, 'code': item.register, 'full_name': item.full_name} for item in teacher]}
+
+            # Хамрах хүрээг элсэгч гэж сонговол
+            elif scope == '2':
+                elseltUser = AdmissionUserProfession.objects.order_by('id')
+
+                # Бие бялдар тэнцсэн элсэгч
+                biy_byldar_ids = PhysqueUser.objects.filter(state=AdmissionUserProfession.STATE_APPROVE).values_list('user', flat=True)
+                elseltUser = elseltUser.filter(user__in=biy_byldar_ids)
+
+                biy_byldar_ids = ElseltUser.objects.filter(
+                    id__in=elseltUser.values_list('user', flat=True)
+                ).values_list('id', flat=True)
+                elseltUser = elseltUser.filter(user__in=biy_byldar_ids)
+
+                if select1:
+                    elseltUser = elseltUser.filter(profession__admission=select1)
+
+                if select2:
+                    profession_id = [int(item) for item in select2.split(',')]
+                    elseltUser = elseltUser.filter(profession__profession__id__in=profession_id)
+
+                if search_query:
+                    search_vector = Q()
+                    # List of searchable fields
+                    for field in ['user__code', 'user__register', 'user__first_name']:
+                        search_vector |= Q(**{f"{field}__icontains": search_query})
+                    elseltUser = elseltUser.filter(search_vector)
+                else:
+                    # scroll lazy loading inside select input
+                    if state == '2':
+                        qs_start = (int(state) - 2) * 10
+                        qs_filter = int(state) * 10
+                    else:
+                        qs_start = (int(state) - 1) * 10
+                        qs_filter = int(state) * 10
+                    elseltUser = elseltUser[qs_start:qs_filter]
+
+                return_data = {'elsegch': [{'id': item.user.id, 'code': item.user.code if item.user.code and '@' not in item.user.code else item.user.register, 'full_name': item.user.full_name} for item in elseltUser]}
+
+            # Хамрах хүрээг оюутан гэж сонговол
+            elif scope == '3':
+                if school:
+                    student = Student.objects.order_by('id').filter(school=school)
+                else:
+                    student = Student.objects.order_by('id')
+
+                select1=department_list
+                if select1:
+                    student = student.filter(department__in=select1)
+
+                if select2:
+                    group_id = [int(item) for item in select2.split(',')]
+                    student = student.filter(group__in=group_id)
+
+                if search_query:
+                    search_vector = Q()
+                    # List of searchable fields
+                    for field in ['code', 'first_name']:
+                        search_vector |= Q(**{f"{field}__icontains": search_query})
+                    student = student.filter(search_vector)
+                else:
+                    # scroll lazy loading inside select input
+                    if state == '2':
+                        qs_start = (int(state) - 2) * 10
+                        qs_filter = int(state) * 10
+                    else:
+                        qs_start = (int(state) - 1) * 10
+                        qs_filter = int(state) * 10
+                    student = student[qs_start:qs_filter]
+
+                return_data = {'student': [{'id': item.id, 'code': item.code, 'full_name': item.full_name()} for item in student]}
+        # to set select inputs "selectOption" united state on frontend. for startup values and for students groups filtering
+        else:
+            if school:
+                teacher_options = Teachers.objects.order_by('id').filter(sub_org=school)
+
+                student_options = Student.objects.order_by('id').filter(school=school)
+
+                department_options = list(Salbars.objects.filter(sub_orgs=school).values('id', 'name'))
+
+                if len(department_list) > 0:
+                    group_options = list(Group.objects.filter(school=school,department__in=department_list).values('id', 'name'))
+                else:
+                    group_options = list(Group.objects.filter(school=school).values('id', 'name'))
+            else:
+                teacher_options = Teachers.objects.order_by('id')
+
+                student_options = Student.objects.order_by('id')
+
+                department_options = list(Salbars.objects.values('id', 'name'))
+
+                if len(department_list) > 0:
+                    group_options = list(Group.objects.filter(department__in=department_list).values('id', 'name'))
+                else:
+                    group_options = list(Group.objects.values('id', 'name'))
+
+            elseltUser_options = AdmissionUserProfession.objects.order_by('id')
+
+            # Бие бялдар тэнцсэн элсэгч
+            biy_byldar_ids = PhysqueUser.objects.filter(state=AdmissionUserProfession.STATE_APPROVE).values_list('user', flat=True)
+            elseltUser_options = elseltUser_options.filter(user__in=biy_byldar_ids)
+
+            biy_byldar_ids = ElseltUser.objects.filter(
+                id__in=elseltUser_options.values_list('user', flat=True)
+            ).values_list('id', flat=True)
+            elseltUser_options = elseltUser_options.filter(user__in=biy_byldar_ids)
+
+            profession_options = list(AdmissionRegisterProfession.objects.annotate(
                 admission_name=F('admission__name'),
-            ).values('admission_name', 'admission').distinct('admission')
-            return_data = {'elsegch_admission': list(profession)}
-            return request.send_data(return_data)
+            ).values('admission_name', 'admission').distinct('admission'))
 
-        # Хамрах хүрээг оюутан гэж сонговол
-        if scope == '3':
-            if len(department_list) > 0:
-                # Бүх ангиудийг id, name-ээр авчирна
-                group_options = list(Group.objects.filter(department__in=department_list).values('id', 'name'))
+            # Тэгээд  select-д харуулхын тулд буцаана
+            return_data = {
+                'scope_kind': scope,
+                'teacher_department': department_options,
+                'elsegch_admission': profession_options,
+                'department_options': department_options,
+                'select_student_data': group_options,
+                'teacher': [{'id': item.id, 'code': item.register, 'full_name': item.full_name} for item in teacher_options],
+                'elsegch': [{'id': item.user.id, 'code': item.user.code if item.user.code and '@' not in item.user.code else item.user.register, 'full_name': item.user.full_name} for item in elseltUser_options],
+                'student': [{'id': item.id, 'code': item.code, 'full_name': item.full_name()} for item in student_options],
+            }
 
-        deparment_options = list(Salbars.objects.values('id', 'name'))
-
-        # Тэгээд  select-д харуулхын тулд буцаана
-        return_data = {
-            'scope_kind': scope,
-            'select_student_data': group_options,
-            'deparment_options': deparment_options,
-        }
         return request.send_data(return_data)
 
     def put(self, request, pk):
@@ -2741,33 +2880,38 @@ class PsychologicalTestScopeOptionsAPIView(
         scope = datas.get('scope')
         participants = datas.get('participants', [])
 
+        # nothing to do if nothing to add
+        if not participants: return request.send_info("INF_002")
         # pk болон scope 2-ийн утга 2-уулаа байх үед
         if pk and scope is not None:
             # Оролцогчдын төрлөө өөрчлөөд
             PsychologicalTest.objects.filter(id=pk).update(scope_kind=scope)
             participant_ids = PsychologicalTest.objects.filter(id=pk).values_list('participants', flat=True).first()
             # Хэрвээ оюутанаас сорил авах бол
-            if scope == 3 and participants:
-                # Ангийн id-уудаа ирсэн датан дотроосоо аваад
-                group_ids = [participant['id'] for participant in participants]
-                # Тус ангид харьялагдах бүх оюутнуудын id-г хадгална
-                participant_ids = Student.objects.filter(group__in=group_ids).values_list('id', flat=True)
+            if scope == 3:
+                student_ids = [participant['id'] for participant in participants]
+                participant_ids = Student.objects.filter(id__in=student_ids).values_list('id', flat=True)
 
             # Бусад үед бүх элсэгч болон багшаа авна
             elif scope == 1:
-                participant_ids = Teachers.objects.values_list('id', flat=True)
+                teachers_ids = [participant['id'] for participant in participants]
+                participant_ids = Teachers.objects.filter(id__in=teachers_ids).values_list('id', flat=True)
 
             # Хэрвээ элсэгчдээс сорил авах бол
-            if scope == 2:
+            elif scope == 2:
                 profession = datas.get('profession')
                 admission = datas.get('admission')
-                queryset = AdmissionUserProfession.objects.all()
+                # looks only required participants
+                elsegch_ids = [participant['id'] for participant in participants]
+                queryset = AdmissionUserProfession.objects.filter(user__in=elsegch_ids)
                 if admission:
                     professions = AdmissionRegisterProfession.objects.filter(admission=admission).values_list('profession', flat=True)
                     queryset = queryset.filter(profession__profession__in=professions)
                 if profession:
-                    prof_ids = [item.get('id') for item in profession]
-                    queryset = queryset.filter(profession__in=prof_ids)
+                    # prof_id is proper id
+                    prof_ids = [item.get('prof_id') for item in profession]
+                    # profession__profession is correct id
+                    queryset = queryset.filter(profession__profession__in=prof_ids)
 
                 # Бие бялдар тэнцсэн элсэгч
                 biy_byldar_ids = PhysqueUser.objects.filter(state=AdmissionUserProfession.STATE_APPROVE).values_list('user', flat=True)
@@ -2778,7 +2922,7 @@ class PsychologicalTestScopeOptionsAPIView(
                 ).values_list('id', flat=True)
 
             # Хуучин хүүхдүүд
-            old_participants = PsychologicalTest.objects.get(id=pk).participants
+            old_participants = PsychologicalTest.objects.get(id=pk).participants or []
 
             # Convert lists to sets and find the difference
             set_parts = set(participant_ids)
