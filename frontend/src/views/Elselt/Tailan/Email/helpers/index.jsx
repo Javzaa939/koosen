@@ -56,7 +56,7 @@ export function getColumns ( currentPage, rowsPerPage, page_count, emailModalHan
 			minWidth: "300px",
 			reorder: true,
 			name: t("Илгээсэн огноо"),
-			selector: (row) => row?.send_date? moment(row?.send_date).format("YYYY-MM-DD h:mm") : '',
+			selector: (row) => row?.send_date? moment(row?.send_date).format("YYYY-MM-DD H:mm") : '',
 			center: true,
 		},
 		{

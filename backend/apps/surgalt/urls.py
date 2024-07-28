@@ -90,6 +90,7 @@ urlpatterns = [
     path('psychological_test_result_show/', PsychologicalTestResultShowAPIView.as_view()),
 
     path('psychological_test_result_excel/', PsychologicalTestResultExcelAPIView.as_view()),
+    path('iq_test_result_excel/', IQTestResultExcelAPIView.as_view()),
 
     path('lesson/list/', LessonsTeacher.as_view()),
     path('lesson/studentlist/', HomeworkStudentsListAPIView.as_view()),

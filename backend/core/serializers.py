@@ -842,3 +842,22 @@ class DashboardSerializer(serializers.ModelSerializer):
     class Meta:
         model = Teachers
         fields = "__all__"
+
+
+def generate_model_serializer(Model, inserted_fields='__all__'):
+
+    ''' Serializer үүсгэх функц '''
+
+    # Inserted_fields байгаа тохиолдолд авч string-г list болгож хувиргах
+    if not inserted_fields == '__all__':
+
+        inserted_fields = inserted_fields.replace(',', '').split()
+
+    # Serializer үүсгэх хэсэг
+    class TemplateSerializer(serializers.ModelSerializer):
+
+        class Meta:
+            model = Model
+            fields = inserted_fields
+
+    return TemplateSerializer

@@ -1,7 +1,7 @@
-import React, {useState, Fragment, useEffect} from 'react';
-import {downloadExcelReport} from './Participants/downloadExcelReport';
-import {RiDownloadFill} from "react-icons/ri";
-
+import React, { useState, Fragment, useEffect } from 'react';
+import { downloadExcelReport } from './Participants/downloadExcelReport';
+import { RiDownloadFill } from "react-icons/ri";
+import {downloadIQExcelReport} from './Participants/downloadIQExcelReport'
 import {
     Col,
     Row,
@@ -20,27 +20,27 @@ import Teacher from './Teacher';
 import Student from './Student';
 import Elsegch from './Elsegch';
 
-function Result(){
+function Result() {
     const [active, setActive] = useState('1')
     const [component, setComponent] = useState('')
 
-    const {isLoading, fetchData} = useLoader({});
+    const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: false });
 
     const navMenus = [
         {
             activeId: 1,
             name: 'Багш',
-            component: <Teacher scope={active}/>
+            component: <Teacher scope={active} />
         },
         {
             activeId: 2,
             name: 'Элсэгч',
-            component: <Elsegch scope={active}/>
+            component: <Elsegch scope={active} />
         },
         {
             activeId: 3,
             name: 'Оюутан',
-            component: <Student scope={active}/>
+            component: <Student scope={active} />
         }
     ]
 
@@ -51,26 +51,34 @@ function Result(){
     useEffect(() => {
         var check = navMenus.find(menus => menus.activeId == active)
         setComponent(check.component)
-    },[active])
+    }, [active])
 
     const excelApi = useApi().challenge.psychologicalTestResult
 
     async function resultExcelReport() {
-        const {success, data} = await fetchData(excelApi.excelResult());
-        if(success){
+        const { success, data } = await fetchData(excelApi.excelResult());
+        if (success) {
             downloadExcelReport(data)
+        }
+    }
+
+    async function IQresultExcelReport(){
+        const {success,data} = await fetchData(excelApi.iqExcelResult());
+        if(success){
+            downloadIQExcelReport(data)
         }
     }
 
     return (
         <Fragment>
+            {isLoading && Loader}
             <Card body>
                 <Row className='d-flex align-items-center justify-content-between'>
                     <Col>
                         <Nav tabs>
                             {
                                 navMenus.map((menu, idx) => {
-                                    return(
+                                    return (
                                         <NavItem key={idx}>
                                             <NavLink
                                                 active={active == menu.activeId}
@@ -86,7 +94,19 @@ function Result(){
                             }
                         </Nav>
                     </Col>
-                    <Col className="me-2 d-flex justify-content-end">
+                    <Col className="me-2 d-flex justify-content-end gap-1">
+                        <Button
+                            color='primary'
+                            className='d-flex align-items-center px-75'
+                            id='test_button'
+                            onClick={() => IQresultExcelReport()}
+                        >
+                            <RiDownloadFill className='me-25' />
+                           IQ Test
+                        </Button>
+                        <UncontrolledTooltip target='test_button'>
+                            IQ test өгсөн оролцогчдын үр дүнг татах
+                        </UncontrolledTooltip>
                         <Button
                             color='primary'
                             className='d-flex align-items-center px-75'

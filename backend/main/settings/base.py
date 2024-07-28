@@ -36,10 +36,12 @@ STUDENTS = "students/"
 STIPEND = "stipend/"
 DORMITORY = "dormitory/"
 NEWS = "news/"
+EFILE ="efile/"
 CHAT = "chat/"
 CLUB = "club/"
 PROFESSION = 'profession/'
 STIPEND_FILE = "stipend_files/"
+ONLINE_LESSON = 'online_lesson/'
 
 TIMETABLE = 'timetable/'
 
