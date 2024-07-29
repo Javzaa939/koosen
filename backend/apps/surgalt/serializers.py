@@ -851,9 +851,6 @@ class ProfessionDefinitionJustProfessionSerializer(serializers.ModelSerializer):
 
 
 class PsychologicalTestSerializer(serializers.ModelSerializer):
-    start_date = DateOnlyField()
-    end_date = DateOnlyField()
-
     class Meta:
         model = PsychologicalTest
         exclude = ['questions']
