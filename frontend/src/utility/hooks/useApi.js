@@ -2097,7 +2097,7 @@ function useApi(isDisplay=false) {
 			getOptions: () => instance.get(`learning/psychological_test/options/`),
 			getScope: (limit, page, search, test_id) => instance.get(`learning/psychological_test/scope_list/?page=${page}&limit=${limit}&search=${search}&test_id=${test_id}`),
 			// populates participant adding inputs
-			getSelect: (scope, test_id, department, mode, state, select1, select2, search) => instance.get(`learning/psychological_test/scope_option/?scope=${scope}&test_id=${test_id}&department=${department}&school=${school_id}&mode=${mode}&state=${state}&select1=${select1}&select2=${select2}&search=${search}`),
+			getSelect: (scope, mode, state, select1, select2, search) => instance.get(`learning/psychological_test/scope_option/?scope=${scope}&school=${school_id}&mode=${mode}&state=${state}&select1=${select1}&select2=${select2}&search=${search}`),
 			putAddScope: (data, pk) => instance.put(`learning/psychological_test/add_scope/${pk}/`, data),
 			deleteParticitant: (pk, test_id) => instance.delete(`learning/psychological_test/add_scope/${pk}/?test_id=${test_id}`)
 		},

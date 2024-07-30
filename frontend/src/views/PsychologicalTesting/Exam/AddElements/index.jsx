@@ -72,15 +72,18 @@ function AddStudent(){
         }
     };
 
-    // to populate select inputs on startup and to filter students groups list in select input
+    // to populate select inputs on startup
     async function getSelects(){
-		const { success, data } = await fetchSelectData(challengeAPI.getSelect(scope, challenge_id, department, '', '', '', '', ''))
+		const { success, data } = await fetchSelectData(challengeAPI.getSelect('', 'start', 2, '', '', ''))
 		if(success){
             setSelectOption(data)
-            setDepartmentOption(data?.teacher_department)
-            setScrollBottomDatasTeacher(data?.teacher)
-            setScrollBottomDatasElseltUser(data?.elsegch)
-            setScrollBottomDatas(data?.student)
+            setDepartmentOption(data?.department_options)
+            setGroupOption(data?.group_options)
+
+            // participants select inputs
+            setScrollBottomDatasTeacher(data?.teacher_options)
+            setScrollBottomDatas(data?.student_options)
+            setScrollBottomDatasElseltUser(data?.elselt_user_options)
 		}
 	}
 
@@ -182,20 +185,14 @@ function AddStudent(){
     const [scroll_bottom_datas_teacher, setScrollBottomDatasTeacher] = useState([]);
     const [departmentOption, setDepartmentOption] = useState([]);
     const [departmentTeacher, setDepartmentTeacher] = useState([]);
-    const [teacher, setTeacher] = useState(0);
-
-    const { isLoading:TeacherLoading, Loader:TeacherLoader, fetchData: fetchSelectTeachers } = useLoader({});
 
     // students adding inputs states
     const [bottom_check, setBottomCheck] = useState(3);
     const [select_student, setStudentOption] = useState([]);
     const [student_search_value, setStudentSearchValue] = useState([]);
     const [scroll_bottom_datas, setScrollBottomDatas] = useState([]);
+    const [groupOption, setGroupOption] = useState([]);
     const [group, setGroup] = useState([]);
-    const [student, setStudent] = useState(0);
-    const hasMounted = useRef(false);
-
-    const { isLoading:StudentLoading, Loader:StudentLoader, fetchData: fetchSelectStudents } = useLoader({});
 
     // elesltUsers adding inputs states
     const [bottom_check_elselt_user, setBottomCheckElseltUser] = useState(3);
@@ -204,47 +201,66 @@ function AddStudent(){
     const [scroll_bottom_datas_elselt_user, setScrollBottomDatasElseltUser] = useState([]);
     const [profOption, setProfessionOption] = useState([]);
     const [profession, setProfession] = useState([]);
-    const [elselt_user, setElseltUser] = useState(0);
 
+    // Loaders
+    const { isLoading:TeacherLoading, Loader:TeacherLoader, fetchData: fetchSelectTeachers } = useLoader({});
+    const { isLoading:StudentLoading, Loader:StudentLoader, fetchData: fetchSelectStudents } = useLoader({});
     const { isLoading:ElseltUserLoading, Loader:ElseltUserLoader, fetchData: fetchSelectElseltUsers } = useLoader({});
+
+    // Refs
+    const hasMountedDepartmentTeacher = useRef(false);
+
+    const hasMountedDepartment = useRef(false);
+    const hasMountedGroups = useRef(false);
+
+    const hasMountedElsegchDef = useRef(false);
+    const hasMountedProfession = useRef(false);
 
     // to filter teachers by search string from select input
     async function getTeacherOption(searchValue) {
-        const { success, data } = await fetchSelectTeachers(challengeAPI.getSelect(scope, challenge_id, department, 'participants', 2, departmentTeacher, '', searchValue))
+        const { success, data } = await fetchSelectTeachers(challengeAPI.getSelect(scope, 'participants', 2, departmentTeacher, '', searchValue))
         if (success) {
-            setTeacherOption(data?.teacher)
+            setTeacherOption(data?.teacher_options)
         }
     }
 
     // populating teachers in select input initially and by scroll
     async function getSelectBottomDatasTeacher(state){
-        const { success, data } = await fetchSelectElseltUsers(challengeAPI.getSelect(1, challenge_id, department, 'participants', state, departmentTeacher, '', ''))
+        const { success, data } = await fetchSelectElseltUsers(challengeAPI.getSelect(1, 'participants', state, departmentTeacher, '', ''))
         if(success){
             if(state===2){
-                setScrollBottomDatasTeacher(data?.teacher)
+                setScrollBottomDatasTeacher(data?.teacher_options)
             } else {
-                setScrollBottomDatasTeacher((prev) => [...prev, ...data?.teacher])
+                setScrollBottomDatasTeacher((prev) => [...prev, ...data?.teacher_options])
             }
+        }
+    }
+
+    // Getting students groups
+    async function getGroup() {
+        const { success, data } = await fetchSelectData(challengeAPI.getSelect(scope, 'group', 2, department, '', ''))
+        if (success) {
+            setGroupOption(data?.group_options)
         }
     }
 
     //  Оюутны жагсаалт хайлтаар
     async function getStudentOption(searchValue) {
-        const { success, data } = await fetchSelectStudents(challengeAPI.getSelect(scope, challenge_id, department, 'participants', 2, '', group, searchValue))
+        const { success, data } = await fetchSelectStudents(challengeAPI.getSelect(scope, 'participants', 2, department, group, searchValue))
         if(success) {
-            setStudentOption(data?.student)
+            setStudentOption(data?.student_options)
         }
     }
 
     //  Оюутны жагсаалт select ашигласан
     async function getSelectBottomDatas(state){
-        const { success, data } = await fetchSelectStudents(challengeAPI.getSelect(3, challenge_id, department, 'participants', state, '', group, ''))
+        const { success, data } = await fetchSelectStudents(challengeAPI.getSelect(3, 'participants', state, department, group, ''))
         if(success){
             // when select input list is needed to be resetted for current conditions
             if(state===2){
-                setScrollBottomDatas(data?.student)
+                setScrollBottomDatas(data?.student_options)
             } else {
-                setScrollBottomDatas((prev) => [...prev, ...data?.student])
+                setScrollBottomDatas((prev) => [...prev, ...data?.student_options])
             }
         }
     }
@@ -256,22 +272,23 @@ function AddStudent(){
             setProfessionOption(data)
         }
     }
+
     // to filter elseltUsers by search string from select input
     async function getElseltUserOption(searchValue) {
-        const { success, data } = await fetchSelectElseltUsers(challengeAPI.getSelect(scope, challenge_id, department, 'participants', 2, elsegchDef, profession, searchValue))
+        const { success, data } = await fetchSelectElseltUsers(challengeAPI.getSelect(scope, 'participants', 2, elsegchDef, profession, searchValue))
         if (success) {
-            setElseltUserOption(data?.elsegch)
+            setElseltUserOption(data?.elselt_user_options)
         }
     }
 
     // populating elseltUser in select input initially and by scroll
     async function getSelectBottomDatasElseltUser(state){
-        const { success, data } = await fetchSelectElseltUsers(challengeAPI.getSelect(2, challenge_id, department, 'participants', state, elsegchDef, profession, ''))
+        const { success, data } = await fetchSelectElseltUsers(challengeAPI.getSelect(2, 'participants', state, elsegchDef, profession, ''))
         if(success){
             if(state===2){
-                setScrollBottomDatasElseltUser(data?.elsegch)
+                setScrollBottomDatasElseltUser(data?.elselt_user_options)
             } else {
-                setScrollBottomDatasElseltUser((prev) => [...prev, ...data?.elsegch])
+                setScrollBottomDatasElseltUser((prev) => [...prev, ...data?.elselt_user_options])
             }
         }
     }
@@ -282,10 +299,10 @@ function AddStudent(){
     }
 
     // handler to filter teachers list in select input by other select inputs
-    function handleTeacher(){
+    function handleTeacher(ids){
+        setDepartmentTeacher(ids)
         setScrollBottomDatasTeacher([])
         setBottomCheckTeacher(3)
-        setTeacher(teacher ? teacher == 1 ? 2 : 1 : 1)
     }
 
     // students searching handler
@@ -294,10 +311,14 @@ function AddStudent(){
     }
 
     // handler to filter students list in select input by other select inputs
-    function handleStudent(){
+    function handleStudent(ids, select){
+        if(select == 1) {
+            setDepartment(ids)
+        } else if (select == 2) {
+            setGroup(ids)
+        }
         setScrollBottomDatas([])
         setBottomCheck(3)
-        setStudent(student ? student == 1 ? 2 : 1 : 1)
     }
 
      // elseltUser searching handler
@@ -306,46 +327,63 @@ function AddStudent(){
     }
 
     // handler to filter elseltUser list in select input by other select inputs
-    function handleElseltUser(){
+    function handleElseltUser(ids, select){
+        if(select == 1) {
+            setElsegchDef(ids)
+        } else if (select == 2) {
+            setProfession(ids)
+        }
         setScrollBottomDatasElseltUser([])
         setBottomCheckElseltUser(3)
-        setElseltUser(elselt_user ? elselt_user == 1 ? 2 : 1 : 1)
     }
 
-    // to filter students groups when department changed
+    // to filter students list and groups when chosen departments changed
     useEffect(() => {
-        if (hasMounted.current) {
-            getSelects()
+        if (hasMountedDepartment.current) {
+            getGroup()
+            getSelectBottomDatas(2)
         } else {
-            hasMounted.current = true;
+            hasMountedDepartment.current = true;
         }
     },[department])
 
-    // to filter elseltUsers professions when admissiion changed
+    // to filter students list when chosen groups changed
+    useEffect(() => {
+        if (hasMountedGroups.current) {
+            getSelectBottomDatas(2)
+        } else {
+            hasMountedGroups.current = true;
+        }
+    },[group])
+
+    // startup professions populating
+    // to filter elseltUsers list and professions when chosen admissions changed
     useEffect(() => {
         getProfession()
+        if(hasMountedElsegchDef.current){
+            getSelectBottomDatasElseltUser(2)
+        } else {
+            hasMountedElsegchDef.current = true
+        }
     },[elsegchDef])
+
+    // to filter elseltUsers list when chosen professions changed
+    useEffect(() => {
+        if(hasMountedProfession.current){
+            getSelectBottomDatasElseltUser(2)
+        } else {
+            hasMountedProfession.current = true
+        }
+    },[profession])
 
     // to filter teachers list in select input by other select inputs
     useEffect(() => {
-        if(teacher){
+        if(hasMountedDepartmentTeacher.current){
             getSelectBottomDatasTeacher(2)
+        } else {
+            hasMountedDepartmentTeacher.current = true
         }
-    }, [teacher])
-
-    // to filter students list in select input by other select inputs
-    useEffect(() => {
-        if(student){
-            getSelectBottomDatas(2)
-        }
-    }, [student])
-
-    // to filter elseltUsers list in select input by other select inputs
-    useEffect(() => {
-        if(elselt_user){
-            getSelectBottomDatasElseltUser(2)
-        }
-    }, [elselt_user])
+    }, [departmentTeacher])
 
     return(
         <Fragment>
@@ -421,8 +459,7 @@ function AddStudent(){
                                                                             onChange={(val) => {
                                                                                 onChange(val)
                                                                                 const ids = val.map(item => item.id);
-                                                                                setDepartmentTeacher(ids)
-                                                                                handleTeacher()
+                                                                                handleTeacher(ids)
                                                                             }}
                                                                             styles={ReactSelectStyles}
                                                                             getOptionValue={(option) => option.id}
@@ -526,13 +563,12 @@ function AddStudent(){
                                                                             value={value}
                                                                             className={classnames('react-select')}
                                                                             isLoading={isLoadingSelectData}
-                                                                            options={selectOption?.elsegch_admission || []}
+                                                                            options={selectOption?.admission_options || []}
                                                                             placeholder={t('-- Сонгоно уу --')}
                                                                             noOptionsMessage={() => t('Хоосон байна.')}
                                                                             onChange={(val) => {
                                                                                 onChange(val)
-                                                                                setElsegchDef(val?.admission || '')
-                                                                                handleElseltUser()
+                                                                                handleElseltUser(val?.admission || '', 1)
                                                                             }}
                                                                             styles={ReactSelectStyles}
                                                                             getOptionValue={(option) => option.admission}
@@ -567,8 +603,7 @@ function AddStudent(){
                                                                             onChange={(val) => {
                                                                                 onChange(val)
                                                                                 const ids = val.map(item => item.prof_id);
-                                                                                setProfession(ids)
-                                                                                handleElseltUser()
+                                                                                handleElseltUser(ids, 2)
                                                                             }}
                                                                             styles={ReactSelectStyles}
                                                                             getOptionValue={(option) => option.prof_id}
@@ -666,8 +701,7 @@ function AddStudent(){
                                                                             noOptionsMessage={() => t('Хоосон байна.')}
                                                                             onChange={(val) => {
                                                                                 onChange(val)
-                                                                                setDepartment(val?.id || '')
-                                                                                handleStudent()
+                                                                                handleStudent(val?.id || '', 1)
                                                                             }}
                                                                             styles={ReactSelectStyles}
                                                                             getOptionValue={(option) => option.id}
@@ -696,14 +730,13 @@ function AddStudent(){
                                                                             value={value}
                                                                             className={classnames('react-select')}
                                                                             isLoading={isLoadingSelectData}
-                                                                            options={selectOption?.select_student_data || []}
+                                                                            options={groupOption || []}
                                                                             placeholder={t('-- Сонгоно уу --')}
                                                                             noOptionsMessage={() => t('Хоосон байна.')}
                                                                             onChange={(val) => {
                                                                                 onChange(val)
                                                                                 const ids = val.map(item => item.id);
-                                                                                setGroup(ids)
-                                                                                handleStudent()
+                                                                                handleStudent(ids, 2)
                                                                             }}
                                                                             styles={ReactSelectStyles}
                                                                             getOptionValue={(option) => option.id}
