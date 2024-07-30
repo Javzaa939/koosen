@@ -1,4 +1,3 @@
-from collections import OrderedDict
 import os
 import logging
 import json
@@ -2801,7 +2800,7 @@ class PsychologicalTestScopeOptionsAPIView(
             # make "code" key from register or code fields because some records contains emails instead of real code
             elselt_user_options_temp = []
             for ordered_dict in elselt_user_options:
-                filtered_dict = OrderedDict()
+                filtered_dict = {}
                 filtered_dict['id'] = ordered_dict['id']
                 filtered_dict['code'] = ordered_dict['code'] if ordered_dict['code'] and '@' not in ordered_dict['code'] else ordered_dict['register'] if '@' not in ordered_dict['register'] else ''
                 filtered_dict['full_name'] = ordered_dict['full_name']
