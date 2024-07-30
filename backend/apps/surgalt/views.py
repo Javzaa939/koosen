@@ -1,3 +1,4 @@
+from collections import OrderedDict
 import os
 import logging
 import json
@@ -2822,54 +2823,90 @@ class PsychologicalTestScopeOptionsAPIView(
                 return_data = {'student': [{'id': item.id, 'code': item.code, 'full_name': item.full_name()} for item in student]}
         # to set select inputs "selectOption" united state on frontend. for startup values and for students groups filtering
         else:
+            teacher_options = Teachers.objects.order_by('id')
+            student_options = Student.objects.order_by('id')
+
+            department_options = Salbars.objects.values('id', 'name')
+
+            group_options = Group.objects.values('id', 'name')
+            if len(department_list) > 0:
+                group_options = group_options.filter(department__in=department_list)
+
             if school:
-                teacher_options = Teachers.objects.order_by('id').filter(sub_org=school)
+                teacher_options = teacher_options.filter(sub_org=school)
+                student_options = student_options.filter(school=school)
+                department_options = department_options.filter(sub_orgs=school)
+                group_options = group_options.filter(school=school)
 
-                student_options = Student.objects.order_by('id').filter(school=school)
-
-                department_options = list(Salbars.objects.filter(sub_orgs=school).values('id', 'name'))
-
-                if len(department_list) > 0:
-                    group_options = list(Group.objects.filter(school=school,department__in=department_list).values('id', 'name'))
-                else:
-                    group_options = list(Group.objects.filter(school=school).values('id', 'name'))
-            else:
-                teacher_options = Teachers.objects.order_by('id')
-
-                student_options = Student.objects.order_by('id')
-
-                department_options = list(Salbars.objects.values('id', 'name'))
-
-                if len(department_list) > 0:
-                    group_options = list(Group.objects.filter(department__in=department_list).values('id', 'name'))
-                else:
-                    group_options = list(Group.objects.values('id', 'name'))
-
-            elseltUser_options = AdmissionUserProfession.objects.order_by('id')
-
+            elselt_user_options = ElseltUser.objects.order_by('id')
             # Бие бялдар тэнцсэн элсэгч
             biy_byldar_ids = PhysqueUser.objects.filter(state=AdmissionUserProfession.STATE_APPROVE).values_list('user', flat=True)
-            elseltUser_options = elseltUser_options.filter(user__in=biy_byldar_ids)
+            elselt_user_options = elselt_user_options.filter(id__in=biy_byldar_ids)
 
-            biy_byldar_ids = ElseltUser.objects.filter(
-                id__in=elseltUser_options.values_list('user', flat=True)
-            ).values_list('id', flat=True)
-            elseltUser_options = elseltUser_options.filter(user__in=biy_byldar_ids)
+            # scroll lazy loading inside select input
+            if state == '':
+                state = '2'
+            if state == '2':
+                qs_start = (int(state) - 2) * 10
+                qs_filter = int(state) * 10
+            else:
+                qs_start = (int(state) - 1) * 10
+                qs_filter = int(state) * 10
+            teacher_options = teacher_options[qs_start:qs_filter]
+            student_options = student_options[qs_start:qs_filter]
+            elselt_user_options = elselt_user_options[qs_start:qs_filter]
 
-            profession_options = list(AdmissionRegisterProfession.objects.annotate(
+            self.serializer_class = TeachersSerializer
+            teacher_options = self.get_serializer(teacher_options, many=True).data
+
+            self.serializer_class = StudentSerializer
+            student_options = self.get_serializer(student_options, many=True).data
+
+            self.serializer_class = ElsegchSerializer
+            elselt_user_options = self.get_serializer(elselt_user_options, many=True).data
+
+            # Define the mapping of original fields to custom keys and get only them
+            only_mapped_fields = {
+                'id': 'id',
+                'register': 'code',
+                'full_name': 'full_name'
+            }
+            teacher_options = [{only_mapped_fields.get(key, key): item[key] for key in item if key in only_mapped_fields} for item in teacher_options]
+
+            elselt_user_options_temp = []
+            for ordered_dict in elselt_user_options:
+                filtered_dict = OrderedDict()
+                filtered_dict['id'] = ordered_dict['id']
+                filtered_dict['code'] = ordered_dict['code'] if ordered_dict['code'] and '@' not in ordered_dict['code'] else ordered_dict['register']
+                filtered_dict['full_name'] = ordered_dict['full_name']
+                # Append the new OrderedDict to the new_data list
+                elselt_user_options_temp.append(filtered_dict)
+
+            elselt_user_options = elselt_user_options_temp
+            del elselt_user_options_temp
+
+            # Define the mapping of original fields to custom keys and get only them
+            only_mapped_fields = {
+                'id': 'id',
+                'code': 'code',
+                'full_name': 'full_name'
+            }
+            student_options = [{only_mapped_fields.get(key, key): item[key] for key in item if key in only_mapped_fields} for item in student_options]
+
+            profession_options = AdmissionRegisterProfession.objects.annotate(
                 admission_name=F('admission__name'),
-            ).values('admission_name', 'admission').distinct('admission'))
+            ).values('admission_name', 'admission').distinct('admission')
 
             # Тэгээд  select-д харуулхын тулд буцаана
             return_data = {
                 'scope_kind': scope,
-                'teacher_department': department_options,
-                'elsegch_admission': profession_options,
-                'department_options': department_options,
-                'select_student_data': group_options,
-                'teacher': [{'id': item.id, 'code': item.register, 'full_name': item.full_name} for item in teacher_options],
-                'elsegch': [{'id': item.user.id, 'code': item.user.code if item.user.code and '@' not in item.user.code else item.user.register, 'full_name': item.user.full_name} for item in elseltUser_options],
-                'student': [{'id': item.id, 'code': item.code, 'full_name': item.full_name()} for item in student_options],
+                'teacher_department': list(department_options),
+                'elsegch_admission': list(profession_options),
+                'department_options': list(department_options),
+                'select_student_data': list(group_options),
+                'teacher': list(teacher_options),
+                'elsegch': list(elselt_user_options),
+                'student': list(student_options)
             }
 
         return request.send_data(return_data)
