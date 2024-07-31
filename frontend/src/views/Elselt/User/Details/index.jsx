@@ -261,7 +261,7 @@ function Details() {
 											datas?.admission === 6
 											?
                                             <div className='p-50 d-flex align-items-center'>
-                                                <span className='text_prefixer me-50'>Бусад файл:</span>
+                                                <span className='text_prefixer me-50'>Бүрэн дунд боловсролын гэрчилгээний зураг:</span>
                                                 {
                                                     datas?.userinfo?.other_file ?
                                                         <span className='text-primary d-flex align-items-center' role='button' onClick={() => {window.open(`${process.env.REACT_APP_SERVER_FILE_URL}${datas?.userinfo?.other_file}`)}}>
