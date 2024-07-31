@@ -2703,8 +2703,8 @@ class PsychologicalTestScopeOptionsAPIView(
 
     def get(self, request):
         scope = self.request.query_params.get('scope')
-        school=self.request.query_params.get('school')
-        mode=self.request.query_params.get('mode')
+        school = self.request.query_params.get('school')
+        mode = self.request.query_params.get('mode')
         state = self.request.query_params.get('state')
         select1 = self.request.query_params.get('select1')
 
@@ -2852,7 +2852,7 @@ class PsychologicalTestScopeOptionsAPIView(
 
             # Elselt users admissions
             admission_options = AdmissionRegisterProfession.objects.annotate(
-                admission_name=F('admission__name'),
+                admission_name = F('admission__name'),
             ).values('admission_name', 'admission').distinct('admission')
 
         # Students groups
@@ -2923,7 +2923,7 @@ class PsychologicalTestScopeOptionsAPIView(
                 queryset = queryset.filter(user__in=biy_byldar_ids)
 
                 participant_ids = ElseltUser.objects.filter(
-                    id__in=queryset.values_list('user', flat=True)
+                    id__in = queryset.values_list('user', flat=True)
                 ).values_list('id', flat=True)
 
             # Хуучин хүүхдүүд

@@ -228,7 +228,7 @@ function AddStudent(){
     async function getSelectBottomDatasTeacher(state){
         const { success, data } = await fetchSelectElseltUsers(challengeAPI.getSelect(1, 'participants', state, departmentTeacher, '', ''))
         if(success){
-            if(state===2){
+            if(state === 2){
                 setScrollBottomDatasTeacher(data?.teacher_options)
             } else {
                 setScrollBottomDatasTeacher((prev) => [...prev, ...data?.teacher_options])
@@ -257,7 +257,7 @@ function AddStudent(){
         const { success, data } = await fetchSelectStudents(challengeAPI.getSelect(3, 'participants', state, department, group, ''))
         if(success){
             // when select input list is needed to be resetted for current conditions
-            if(state===2){
+            if(state === 2){
                 setScrollBottomDatas(data?.student_options)
             } else {
                 setScrollBottomDatas((prev) => [...prev, ...data?.student_options])
@@ -285,7 +285,7 @@ function AddStudent(){
     async function getSelectBottomDatasElseltUser(state){
         const { success, data } = await fetchSelectElseltUsers(challengeAPI.getSelect(2, 'participants', state, elsegchDef, profession, ''))
         if(success){
-            if(state===2){
+            if(state === 2){
                 setScrollBottomDatasElseltUser(data?.elselt_user_options)
             } else {
                 setScrollBottomDatasElseltUser((prev) => [...prev, ...data?.elselt_user_options])
