@@ -409,10 +409,12 @@ class LessonStandartPlanPrintSerializer(serializers.ModelSerializer):
 
         data = request.data
 
-        year = request.query_params.get('lesson_year')
-        season = request.query_params.get('lesson_season')
+        lesson_year = request.query_params.get('lesson_year')
+        lesson_season = request.query_params.get('lesson_season')
         profession = request.query_params.get('profession')
         student = request.query_params.get('student')
+        year = request.query_params.get('year')
+        season = request.query_params.get('season')
 
         group_queryset = data.get('group_queryset')
 
@@ -424,19 +426,26 @@ class LessonStandartPlanPrintSerializer(serializers.ModelSerializer):
             group_data['group_id'] = group.id
 
             students_queryset = Student.objects.filter(group=group)
-            if student != '':
-                if profession:
-                    students_queryset = students_queryset.filter(group__profession=profession)
-                if student:
-                    students_queryset = students_queryset.filter(id=student)
+            if profession:
+                students_queryset = students_queryset.filter(group__profession=profession)
+            if student:
+                students_queryset = students_queryset.filter(id=student)
 
-            time_table_qs = TimeTable.objects.filter(lesson_year=year, lesson_season=season, lesson=obj.id).values_list('id', flat=True)
+            time_table_qs = TimeTable.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season, lesson=obj.id).values_list('id', flat=True)
 
             time_table_to_group_count = TimeTable_to_group.objects.filter(timetable__in=time_table_qs, group=group).count()
 
-            score_reg_count = ScoreRegister.objects.filter(
+            score_queryset =  ScoreRegister.objects.filter(
                 Q(student__in=students_queryset) & (Q(status=ScoreRegister.TEACHER_WEB ) | Q(status=ScoreRegister.EXAM) | Q(status=ScoreRegister.START_SYSTEM_SCORE )) & Q(lesson=obj.id)
-            ).count()
+            )
+
+            # хичээлийн жил болон улираал filter хийх
+            if year:
+                score_queryset = score_queryset.filter(lesson_year=year)
+            if season:
+                score_queryset = score_queryset.filter(lesson_season=season)
+
+            score_reg_count = score_queryset.count()
 
             if score_reg_count >= max_student:
                 value = 2

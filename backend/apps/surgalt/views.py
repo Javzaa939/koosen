@@ -69,7 +69,8 @@ from lms.models import (
     PsychologicalQuestionChoices,
     PsychologicalQuestionTitle,
     PsychologicalTest,
-    AdmissionRegisterProfession
+    AdmissionRegisterProfession,
+    Season
 )
 
 from core.models import (
@@ -1168,8 +1169,17 @@ class ProfessionPrintPlanAPIView(
         group = request.query_params.get('group')
         student = request.query_params.get('student')
 
+        # active lesson year
+        lesson_year = request.query_params.get('lesson_year')
+        year = request.query_params.get('year')
+        season = request.query_params.get('season')
+
         profession_qs = ProfessionDefinition.objects.filter(id=profession).values('id', 'dep_name', 'name').last()
-        group_queryset = Group.objects.filter(profession=profession, id=group, is_finish=False).order_by('id')
+        group_queryset = Group.objects.filter(profession=profession, is_finish=False).order_by('id')
+
+        if group:
+            group_queryset = group_queryset.filter(id=group)
+
         group_data = GroupSerializer(group_queryset, many=True).data
 
         # student байгаа эсэх шалгах
@@ -1194,7 +1204,45 @@ class ProfessionPrintPlanAPIView(
 
         learning_plan_queryset = LearningPlan.objects.filter(profession=profession)
 
+        # хичээлийн жил улирал хамт хайх
+        if season != '' and year != '':
+            year_diff = int(lesson_year[:4]) - int(year[:4])
+            total_season = year_diff * 2
+
+            if int(season)%2 != 0:
+                total_season += 1
+            total_season = 8 - total_season
+
+            # улиралаар queryset хийх
+            lookups = [Q(season__contains=str(value)) for value in str(total_season)]
+            filter_query = Q()
+            for lookup in lookups:
+                filter_query |= lookup
+
+            learning_plan_queryset = learning_plan_queryset.filter(filter_query)
+
+        # хичээлийн жилээр хайх
+        if season == '' and year != '':
+            year_diff = int(lesson_year[:4]) - int(year[:4])
+            total_season = year_diff * 2
+
+            total_season = 8 - total_season
+
+            # сонгосон жилийн 2 улиралаар queryset хийх
+            learning_plan_queryset = learning_plan_queryset.filter(
+                season__in=[f"[{total_season}]", f"[{total_season-1}]"]
+            )
+
+        # хичээлийн улиралаар хайх
+        if season != '' and year == '':
+            year_diff = int(season) % 2
+
+            # тэгш эсвэл сондгой улиралаар хайх
+            odd_or_even_seasons = [f"[{season}]" for season in range(1, 9) if season % 2 == year_diff % 2]
+            learning_plan_queryset = learning_plan_queryset.filter(season__in=odd_or_even_seasons)
+
         all_levels_data = list()
+        total_studied_credits = 0
 
         for lesson_level in LearningPlan.LESSON_LEVEL:
             level_data = learning_plan_queryset.filter(lesson_level=lesson_level[0])
@@ -1203,6 +1251,7 @@ class ProfessionPrintPlanAPIView(
                 one_lesson_datas = dict()
                 one_lesson_datas['level'] = lesson_level[1]
                 one_lesson_datas['count'] = level_data.aggregate(Sum('lesson__kredit')).get('lesson__kredit__sum')
+                one_lesson_datas['total_studied_credits'] = 0
                 one_type_datas = list()
 
                 for lesson_type in LearningPlan.LESSON_TYPE:
@@ -1217,11 +1266,20 @@ class ProfessionPrintPlanAPIView(
                         lesson_datas['count'] = type_datas.aggregate(Sum('lesson__kredit')).get('lesson__kredit__sum')
                         one_type_datas.append(lesson_datas)
 
+                        # lesson_typr болгонд хэдэн хичээл үзэж буйг тоолох
+                        for lesson in type_data:
+                            if 'student_study' in lesson['lesson']:
+                                for study in lesson['lesson']['student_study']:
+                                    if study['value'] == 2:
+                                        one_lesson_datas['total_studied_credits'] += lesson['lesson']['kredit']
+
                 one_lesson_datas['data'] = one_type_datas
 
                 all_levels_data.append(one_lesson_datas)
+                total_studied_credits += one_lesson_datas['total_studied_credits']
 
         all_data['lesson'] = all_levels_data
+        all_data['total_studied_credits'] = total_studied_credits
 
         return request.send_data(all_data)
 

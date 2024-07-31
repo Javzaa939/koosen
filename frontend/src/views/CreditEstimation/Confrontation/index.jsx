@@ -23,9 +23,8 @@ import ActiveYearContext from "@src/utility/context/ActiveYearContext";
 
 export default function Confrontation()
 {
-    const { cyear_name } = useContext(ActiveYearContext)
     var values = {
-        year: cyear_name,
+        year: '',
         season: '',
         profession: '',
         department: '',
@@ -42,7 +41,7 @@ export default function Confrontation()
     const { control, setValue, handleSubmit, formState: { errors } } = useForm(validate(validateSchema));
 
     // Хичээлийн жил
-    const [year, setYear] = useState(cyear_name)
+    const [year, setYear] = useState('')
 
     // UseState
     const [ datas, setDatas ] = useState({})
@@ -132,6 +131,14 @@ export default function Confrontation()
         []
     )
 
+    useEffect(() => {
+        setSelectValue(prev => ({
+            ...prev,
+            year: year,
+            season: season_id
+        }));
+    }, [select_value.year, select_value.season]);
+
     useUpdateEffect(
         () =>
         {
@@ -162,10 +169,10 @@ export default function Confrontation()
         let profession = cdatas.profession
         let group = cdatas.group
         let student = cdatas.student
-        let year = select_value.year;
-        let season = select_value.season;
+        let year = select_value.year
+        let season = select_value.season
 
-        const { success, data } = await fetchData(planApi.printGetPlan(department, profession, group, student))
+        const { success, data } = await fetchData(planApi.printGetPlan(department, profession, group, student, year, season))
         if (success)
         {
             setDatas(data)
