@@ -2744,7 +2744,7 @@ class PsychologicalTestScopeOptionsAPIView(
             if search_query:
                 search_vector = Q()
                 # List of searchable fields
-                for field in ['user__code', 'user__register', 'user__first_name']:
+                for field in ['register', 'first_name']:
                     search_vector |= Q(**{f"{field}__icontains": search_query})
                 teacher_options = teacher_options.filter(search_vector)
         # load by scroll if search by string is not performed

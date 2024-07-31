@@ -469,7 +469,7 @@ function AddStudent(){
                                                                 }}
                                                             />
                                                         </Col>
-                                                        <Col md={4}>
+                                                        <Col md={6}>
                                                             <Label className='form-label' for='participants'>
                                                                 {t('Нэр')}
                                                             </Label>
@@ -613,7 +613,7 @@ function AddStudent(){
                                                                 }}
                                                             />
                                                         </Col>
-                                                        <Col md={4}>
+                                                        <Col md={6}>
                                                             <Label className='form-label' for='participants'>
                                                                 {t('Нэр')}
                                                             </Label>
@@ -746,7 +746,7 @@ function AddStudent(){
                                                                 }}
                                                             />
                                                         </Col>
-                                                        <Col sm={4}>
+                                                        <Col sm={6}>
                                                             <Label className='form-label' for='participants'>
                                                                 {t('Нийт оюутнууд')}
                                                             </Label>
