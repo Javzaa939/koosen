@@ -2694,7 +2694,7 @@ class PsychologicalTestScopesAPIView(
             datas = self.list(request).data
         return request.send_data(datas)
 
-
+@permission_classes([IsAuthenticated])
 class PsychologicalTestScopeOptionsAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
