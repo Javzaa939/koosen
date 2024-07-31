@@ -222,7 +222,7 @@ function Details() {
 											: null
 										}
                                             <div className='p-50'>
-                                                <span className='text_prefixer'>{datas?.admission === 6 ? <>Бүрэн дунд боловсролын гэрчилгээ</> : Голч}:</span> {datas?.userinfo?.gpa}
+                                                <span className='text_prefixer'>{datas?.admission === 6 ? <>Бүрэн дунд боловсролын гэрчилгээ</> : <>Голч</>}:</span> {datas?.userinfo?.gpa}
                                             </div>
 										{
 											datas?.admission !== 6
