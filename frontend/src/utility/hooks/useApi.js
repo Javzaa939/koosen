@@ -2411,7 +2411,11 @@ function useApi(isDisplay=false) {
 			physical:{
 				get: (limit, page, sort, search, state, elselt, profession, gender, start_date , end_date) => instance.get(`/elselt/health/physical/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}&elselt=${elselt}&profession=${profession}&gender=${gender}&start_date=${start_date}&end_date=${end_date}`),
 				post: (cdata) => instance.post(`/elselt/health/physical/`, cdata),
-				put: (id, cdata) => instance.put(`/elselt/health/physical/${id}/`, cdata)
+				put: (id, cdata) => instance.put(`/elselt/health/physical/${id}/`, cdata),
+				// оюутны жагсаалт import хийх
+				postExcelImport: (data) => instance.post(`/elselt/health/physical/import/`, data),
+				// оюутны жагсаалт post хийх
+				postExcelImportData: data => instance.post(`/elselt/health/physical/postdata/`, data),
 			},
 		},
 		justice: {

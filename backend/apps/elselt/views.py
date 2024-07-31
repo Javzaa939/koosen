@@ -1,6 +1,8 @@
 import hashlib
 import datetime as dt
 import requests
+import os
+import pandas as pd
 from collections import Counter
 
 from rest_framework import mixins
@@ -14,6 +16,7 @@ from django.db import transaction
 from django.db.models import F, Subquery, OuterRef, Count, Q, Sum, Exists
 from django.db.models import Value, Case, When, IntegerField
 from django.db.models.functions import Substr, Cast
+from django.conf import settings
 
 from main.utils.function.utils import (
     json_load,
@@ -31,6 +34,7 @@ from main.utils.function.utils import (
 )
 
 from main.utils.function.pagination import CustomPagination
+from main.utils.file import save_file, remove_folder
 from main.decorators import login_required
 from rest_framework.response import Response
 from rest_framework import status
@@ -1741,6 +1745,143 @@ class ElseltHealthPhysical(
 
         return request.send_info('INF_003')
 
+class ElseltPhysicalExcelImportAPIView(
+    generics.GenericAPIView
+):
+    """ Бие бялдар жагсаалт import хийх """
+
+    @transaction.atomic()
+    def post(self, request):
+        datas = request.data
+        file = datas.get("file")
+
+        path = save_file(file, 'student', 1)
+        full_path = os.path.join(settings.MEDIA_ROOT, str(path))
+        error_datas = list()
+        correct_datas = list()
+
+        try:
+            excel_data = pd.read_excel(full_path)
+            excel_data = excel_data.fillna(0)
+            datas = excel_data.to_dict(orient='records')
+
+            for created_data in datas:
+                state = created_data.get('Үзлэгийн төлөв')
+                register_num = created_data.get('РД')
+
+                if state == 0: state=1
+                if state == 'Бүртгүүлсэн': state=1
+                if state == 'Тэнцсэн': state=2
+                if state == 'Тэнцээгүй': state=3
+
+                # PhysqueUser
+                description = created_data.get('Тайлбар') or 0
+                belly_draught = created_data.get('Гэдэсний таталт') or 0
+                total_score = created_data.get('Нийт оноо')
+                turnik = created_data.get('Савлуурт суниах')
+                patience_1000m = created_data.get('Тэсвэр 1000М')
+                speed_100m = created_data.get('Хурд 100М')
+                quickness = created_data.get('Авхаалж самбаа')
+                flexible = created_data.get('Уян хатан')
+
+                # Already exists шалгах
+                student = ElseltUser.objects.filter(register=register_num).first()
+                if not student:
+                    error_datas.append({
+                        'register_num': register_num,
+                        'message': 'Student not found'
+                    })
+                    continue
+
+                physque_user_data = {
+                    'user': student,
+                    'state': state,
+                    'description': description,
+                    'belly_draught': belly_draught,
+                    'total_score': total_score,
+                    'turnik': turnik,
+                    'patience_1000m': patience_1000m,
+                    'speed_100m': speed_100m,
+                    'quickness': quickness,
+                    'flexible': flexible,
+                    'updated_user': request.user if request.user.is_authenticated else None
+                }
+
+                created = PhysqueUser.objects.update_or_create(
+                    user=student,
+                    defaults=physque_user_data
+                )
+
+                correct_datas.append({
+                    'state': state,
+                    'register_num': register_num,
+                    'description': description,
+                    'belly_draught': belly_draught,
+                    'total_score': total_score,
+                    'turnik': turnik,
+                    'patience_1000m': patience_1000m,
+                    'speed_100m': speed_100m,
+                    'quickness': quickness,
+                    'flexible': flexible,
+                    'created' if created else 'updated': True
+                })
+
+            if file:
+                remove_folder(full_path)
+
+        except Exception as e:
+            print(e)
+            return request.send_error('ERR_012')
+
+        return_datas = {
+            'create_datas': correct_datas,
+            'all_error_datas': error_datas,
+            'file_name': file.name,
+            'not_found_student': error_datas,
+        }
+        return request.send_data(return_datas)
+
+
+class ElseltPhysicalExcelPostDataAPIView(
+    generics.GenericAPIView
+):
+    """ Дата оруулах  """
+
+    @transaction.atomic()
+    def post(self, request):
+        datas = request.data
+        all_datas = list()
+
+        try:
+            for created_data in datas:
+                description = created_data.get('Тайлбар') or 0
+                belly_draught = created_data.get('Гэдэсний таталт') or 0
+                state = created_data.get('Үзлэгийн төлөв')
+                total_score = created_data.get('Нийт оноо')
+                turnik = created_data.get('Савлуурт суниах')
+                patience_1000m = created_data.get('Тэсвэр 1000М')
+                speed_100m = created_data.get('Хурд 100М')
+                quickness = created_data.get('Авхаалж самбаа')
+                flexible = created_data.get('Уян хатан')
+
+                qs = PhysqueUser(
+                    description=description,
+                    belly_draught=belly_draught,
+                    state=state,
+                    total_score=total_score,
+                    turnik=turnik,
+                    patience_1000m=patience_1000m,
+                    speed_100m=speed_100m,
+                    quickness=quickness,
+                    flexible=flexible,
+                )
+                all_datas.append(qs)
+
+        except Exception as e:
+            print(e)
+            return request.send_error('ERR_002')
+
+        return request.send_info("INF_001")
 
  # -------------------Элсэгчдийн нарийн мэргэжилийн шатны эрүүл мэндийн үзлэг-------------------------#
 class ElseltHealthPhysicalCreateAPIView(
