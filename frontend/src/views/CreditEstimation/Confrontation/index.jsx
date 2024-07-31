@@ -18,13 +18,9 @@ import { ReactSelectStyles, validate } from '@utils'
 
 import { validateSchema } from './validateSchema';
 
-import { generateLessonYear } from "@src/utility/Utils";
-import ActiveYearContext from "@src/utility/context/ActiveYearContext";
-
 export default function Confrontation()
 {
     var values = {
-        year: '',
         season: '',
         profession: '',
         department: '',
@@ -40,15 +36,11 @@ export default function Confrontation()
     // Hook
     const { control, setValue, handleSubmit, formState: { errors } } = useForm(validate(validateSchema));
 
-    // Хичээлийн жил
-    const [year, setYear] = useState('')
-
     // UseState
     const [ datas, setDatas ] = useState({})
     const [season_id, setSeasonId] = useState('')
 
     // Options
-    const [yearOption] = useState(generateLessonYear(5))
     const [seasonOption, setSeasonOption] = useState([])
     const [ profOption, setProfession] = useState([])
     const [ depOption, setDepartment] = useState([])
@@ -134,10 +126,9 @@ export default function Confrontation()
     useEffect(() => {
         setSelectValue(prev => ({
             ...prev,
-            year: year,
             season: season_id
         }));
-    }, [select_value.year, select_value.season]);
+    }, [select_value.season]);
 
     useUpdateEffect(
         () =>
@@ -169,10 +160,9 @@ export default function Confrontation()
         let profession = cdatas.profession
         let group = cdatas.group
         let student = cdatas.student
-        let year = select_value.year
         let season = select_value.season
 
-        const { success, data } = await fetchData(planApi.printGetPlan(department, profession, group, student, year, season))
+        const { success, data } = await fetchData(planApi.printGetPlan(department, profession, group, student, season))
         if (success)
         {
             setDatas(data)
@@ -202,34 +192,7 @@ export default function Confrontation()
                         </Button>
                     </div>
                 </CardHeader>
-                <Row className="justify-content-between mx-0 mt-1 mb-1">
-                    <Col md={4}>
-                        <Label className="form-label" for="lesson_year">
-                            {t('Хичээлийн жил')}
-                        </Label>
-                        <Select
-                            name="lesson_year"
-                            id="lesson_year"
-                            classNamePrefix='select'
-                            isClearable
-                            className={classnames('react-select')}
-                            isLoading={isLoading}
-                            placeholder={t('-- Сонгоно уу --')}
-                            options={yearOption || []}
-                            value={yearOption.find((c) => c.id === year)}
-                            noOptionsMessage={() => t('Хоосон байна.')}
-                            onChange={(val) => {
-                                setYear(val?.id || '')
-                                setSelectValue((prev) => ({
-                                    ...prev,
-                                    year: val?.id || ''
-                                }));
-                            }}
-                            styles={ReactSelectStyles}
-                            getOptionValue={(option) => option.id}
-                            getOptionLabel={(option) => option.name}
-                        />
-                    </Col>
+                <Row className="justify-content-start mx-0 mt-1 mb-1">
                     <Col md={4}>
                         <Label className="form-label" for="season">
                             {t('Улирал')}

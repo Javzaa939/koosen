@@ -413,7 +413,6 @@ class LessonStandartPlanPrintSerializer(serializers.ModelSerializer):
         lesson_season = request.query_params.get('lesson_season')
         profession = request.query_params.get('profession')
         student = request.query_params.get('student')
-        year = request.query_params.get('year')
         season = request.query_params.get('season')
 
         group_queryset = data.get('group_queryset')
@@ -426,8 +425,12 @@ class LessonStandartPlanPrintSerializer(serializers.ModelSerializer):
             group_data['group_id'] = group.id
 
             students_queryset = Student.objects.filter(group=group)
+
+            # мэргэжил байгаа үед мэргэжилээр filter хийх
             if profession:
                 students_queryset = students_queryset.filter(group__profession=profession)
+
+            # оюутан байгаа үед оюутнаар filter хийх
             if student:
                 students_queryset = students_queryset.filter(id=student)
 
@@ -439,9 +442,7 @@ class LessonStandartPlanPrintSerializer(serializers.ModelSerializer):
                 Q(student__in=students_queryset) & (Q(status=ScoreRegister.TEACHER_WEB ) | Q(status=ScoreRegister.EXAM) | Q(status=ScoreRegister.START_SYSTEM_SCORE )) & Q(lesson=obj.id)
             )
 
-            # хичээлийн жил болон улираал filter хийх
-            if year:
-                score_queryset = score_queryset.filter(lesson_year=year)
+            # улирал байгаа үед хичээлийн улиралаар filter хийх
             if season:
                 score_queryset = score_queryset.filter(lesson_season=season)
 
