@@ -3,6 +3,7 @@ import {Edit, Trash, Book} from 'react-feather'
 import {t} from 'i18next';
 
 import useModal from "@hooks/useModal"
+import moment from 'moment';
 
 
 export function getColumns (currentPage, rowsPerPage, total_count, handleEditModal, handleDelete, id, handleViewModal)
@@ -56,16 +57,16 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleEditMod
 		{
 			header: 'start_date',
 			name: t("Эхлэх огноо"),
-			selector: (row) => row?.start_date,
+			selector: (row) => moment(row?.start_date).format("YYYY-MM-DD H:mm"),
             sortable: true,
-			width: '150px',
+			width: '160px',
         },
 		{
 			header: 'end_date',
 			name: t("Дуусах огноо"),
-			selector: (row) => row?.end_date,
+			selector: (row) => moment(row?.end_date).format("YYYY-MM-DD H:mm"),
             sortable: true,
-			width: '150px',
+			width: '160px',
         },
         {
 			header: 'duration',
