@@ -208,15 +208,25 @@ function Details() {
                                             </div>
                                         </div>
                                         <div className='mt-2'>
+										{
+											datas?.admission !== 6
+											?
+											<>
                                             <div className='p-50'>
                                                 <span className='text_prefixer'>Төгссөн сургууль:</span> {datas?.userinfo?.graduate_school}
                                             </div>
                                             <div className='p-50'>
                                                 <span className='text_prefixer'>Мэргэжил:</span> {datas?.userinfo?.graduate_profession}
                                             </div>
+											</>
+											: null
+										}
                                             <div className='p-50'>
-                                                <span className='text_prefixer'>Голч:</span> {datas?.userinfo?.gpa}
+                                                <span className='text_prefixer'>{datas?.admission === 6 ? <>Бүрэн дунд боловсролын гэрчилгээ</> : <>Голч</>}:</span> {datas?.userinfo?.gpa}
                                             </div>
+										{
+											datas?.admission !== 6
+											?
                                             <div className='p-50 d-flex align-items-center'>
                                                 <span className='text_prefixer me-50'>Дипломын хуулбар:</span>
                                                 {
@@ -231,6 +241,8 @@ function Details() {
                                                             </span>
                                                 }
                                             </div>
+											: null
+										}
                                             <div className='p-50 d-flex align-items-center'>
                                                 <span className='text_prefixer me-50'>Е-Монголиа дипломын хуулбар:</span>
                                                 {
@@ -245,6 +257,24 @@ function Details() {
                                                             </span>
                                                 }
                                             </div>
+										{
+											datas?.admission === 6
+											?
+                                            <div className='p-50 d-flex align-items-center'>
+                                                <span className='text_prefixer me-50'>Бүрэн дунд боловсролын гэрчилгээний зураг:</span>
+                                                {
+                                                    datas?.userinfo?.other_file ?
+                                                        <span className='text-primary d-flex align-items-center' role='button' onClick={() => {window.open(`${process.env.REACT_APP_SERVER_FILE_URL}${datas?.userinfo?.other_file}`)}}>
+                                                            {ftext(datas?.userinfo?.other_file)} <Download className='ms-25' size={14}/>
+                                                        </span>
+                                                    :
+                                                    <span>
+                                                        Файл байхгүй
+                                                    </span>
+                                                }
+                                            </div>
+											:
+											<>
                                             <div className='p-50'>
                                                 <span className='text_prefixer'>Ажиллаж байгаа байгууллагын нэр:</span> {datas?.userinfo?.work_organization}
                                             </div>
@@ -263,6 +293,8 @@ function Details() {
                                                     </div>
                                                 </>
                                             }
+											</>
+										}
                                             <div className='p-50'>
                                                 <span className='text_prefixer'>Бүртгүүлсэн огноо:</span> {moment(datas?.created_at).format('YYYY-MM-DD HH:MM:SS')}
                                             </div>
