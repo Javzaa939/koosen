@@ -185,7 +185,8 @@ function useApi(isDisplay=false) {
       logged: () => instance.get("/user/logged/"),
       login: (data) => instance.post(`/user/login/`, data),
       logout: () => instance.get(`/user/logout/`),
-      forgotPassword: (data) => instance.post(`/user/forgot-password`, data),
+      forgotPassword: (data) => instance.post(`/user/forgot-password/`, data),
+      forgotPasswordConfirm: (data) => instance.post(`/user/forgot-password-confirm/`, data),
       changePassword: (data, pk) =>
         instance.put(`/user/change-password/${pk}`, data),
 

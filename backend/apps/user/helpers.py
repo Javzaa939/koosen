@@ -1,3 +1,4 @@
+import base64
 import uuid
 
 from django.conf import settings
@@ -8,6 +9,11 @@ from django.core.mail import EmailMultiAlternatives
 
 # from lms.models import UserValidationEmail
 
+# to make user reset token able to expire
+from django.core.signing import TimestampSigner, BadSignature
+from django.utils import timezone
+from django.utils.encoding import force_str, force_bytes
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 
 def email_send(user_id, email):
     """
@@ -43,3 +49,37 @@ def email_send(user_id, email):
     email = EmailMultiAlternatives(subject, text_body, settings.DEFAULT_FROM_EMAIL, [email])
     email.attach_alternative(html_body, "text/html")
     email.send()
+
+# to make user reset-token able to expire
+class SignedTokenManager:
+    def __init__(self):
+        self.signer = TimestampSigner()
+
+    def generate_token(self, user):
+        timestamp = timezone.now().isoformat()
+        token_data = f"{user.pk}_{timestamp}"
+        signed_token = self.signer.sign(token_data)
+        encoded_token = urlsafe_base64_encode(force_bytes(signed_token))
+        return encoded_token
+
+    def validate_token(self, signed_token, max_age=5*60):
+        try:
+            decoded_data = force_str(urlsafe_base64_decode(signed_token))
+            token_data = self.signer.unsign(decoded_data, max_age=max_age)
+            user_id, timestamp = token_data.split('_')
+            timestamp = timezone.datetime.fromisoformat(timestamp)
+
+            # Validate max_age
+            if max_age:
+                age = timezone.now() - timestamp
+                if age.total_seconds() > max_age:
+                    print('Expired token')
+                    return False
+
+            return {'user_id': user_id, 'timestamp': timestamp}
+        except BadSignature:
+            print('BadSignature')
+            return False
+        except Exception as e:
+            print(f"Error validating token: {e}")
+            return False
