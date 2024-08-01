@@ -1194,7 +1194,7 @@ class ElseltHealthAnhanShat(
 
         # Эрүүл мэндийн шалгуур үзүүлэлттэй мэргэжлүүд
         # TODO Одоогоор идэвхтэй байгаа элсэлтээс л харуулж байгаа гэсэн үг
-        health_profession_ids = AdmissionIndicator.objects.filter(admission_prof__admission__is_active=True, value__in=[AdmissionIndicator.ERUUL_MEND_ANHAN], ).values_list('admission_prof', flat=True)
+        health_profession_ids = AdmissionIndicator.objects.filter(value__in=[AdmissionIndicator.ERUUL_MEND_ANHAN], ).values_list('admission_prof', flat=True)
         queryset = queryset.filter(profession__in=health_profession_ids)
 
         gender = self.request.query_params.get('gender')
@@ -1577,7 +1577,7 @@ class ElseltHealthPhysical(
 
         # Бие бялдар шалгуур үзүүлэлттэй мэргэжлүүд
         # TODO Одоогоор идэвхтэй байгаа элсэлтээс л харуулж байгаа гэсэн үг Дараа жил яахыг үл мэднэ
-        physical_profession_ids = AdmissionIndicator.objects.filter(admission_prof__admission__is_active=True, value__in=[AdmissionIndicator.BIE_BYALDAR]).values_list('admission_prof', flat=True)
+        physical_profession_ids = AdmissionIndicator.objects.filter(value__in=[AdmissionIndicator.BIE_BYALDAR]).values_list('admission_prof', flat=True)
 
         # Бие бялдар шалгуур үзүүлэлттэй мэргэжилд бүртгүүлсэн элсэгчид
         queryset = queryset.filter(profession__in=physical_profession_ids)
