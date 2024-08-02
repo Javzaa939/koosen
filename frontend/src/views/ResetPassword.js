@@ -78,7 +78,8 @@ const ResetPassword = () => {
 
   const { search } = useLocation();
   const query = new URLSearchParams(search);
-  const token = query.get('token');
+  const uid = query.get('ab1');
+  const token = query.get('ab2');
 
   return (
     <div className="auth-wrapper auth-cover">
@@ -116,10 +117,17 @@ const ResetPassword = () => {
               onSubmit={handleSubmit(onSubmit)}
             >
                 <Controller
+                  defaultValue={uid}
+                  control={control}
+                  id='ab1'
+                  name='ab1'
+                  render={({ field }) => <input type="hidden" {...field} />}
+                />
+                <Controller
                   defaultValue={token}
                   control={control}
-                  id='token'
-                  name='token'
+                  id='ab2'
+                  name='ab2'
                   render={({ field }) => <input type="hidden" {...field} />}
                 />
                 <Row >
