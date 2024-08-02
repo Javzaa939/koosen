@@ -48,7 +48,7 @@ class UserDetailAPI(
         qs = AccessHistoryLms.objects.filter(user=user)
         serializer = self.get_serializer(qs, many=True)
         return request.send_data(serializer.data)
-    
+
 class UserAPILoginView(
     generics.GenericAPIView
 ):
@@ -294,8 +294,7 @@ class UserForgotPasswordAPI(
         # Building reset link. default token expiration is 3 days and can be changed in settings with PASSWORD_RESET_TIMEOUT
         token = default_token_generator.make_token(user)
         uid = urlsafe_base64_encode(force_bytes(user.pk))
-        link_domain = get_domain_url_link()
-        link_domain = get_domain_url()
+        link_domain = get_domain_url() or get_domain_url_link()
         react_app_base_url = 'http://localhost:3000' if 'http://localhost:' in link_domain else link_domain
         reset_link = f'{react_app_base_url}/reset-password/?ab1={uid}&ab2={token}'
 
