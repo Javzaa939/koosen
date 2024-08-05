@@ -503,7 +503,9 @@ class AdmissionUserInfoAPIView(
             queryset = queryset.filter(profession__admission=lesson_year_id)
 
         if profession_id:
-            queryset = queryset.filter(profession__profession__id=profession_id)
+            # for multiple selection in psychological testing inputs
+            profession_id = [int(item) for item in profession_id.split(',')]
+            queryset = queryset.filter(profession__profession__id__in=profession_id)
 
         if unit1_id:
             queryset = queryset.filter(user__aimag__id=unit1_id)
