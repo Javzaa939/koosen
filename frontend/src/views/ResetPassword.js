@@ -1,16 +1,24 @@
 // ** React Imports
 import { Link, useNavigate } from "react-router-dom"
+import { useState } from 'react'
 
 // ** Custom Hooks
 import { useSkin } from "@hooks/useSkin"
+import useApi from "@hooks/useApi"
+import useLoader from "@hooks/useLoader"
 
 // ** Icons Imports
 import { ChevronLeft } from "react-feather"
 
 
 import {useForm, Controller } from "react-hook-form"
+import { useLocation } from 'react-router-dom'
 
 import InputPasswordToggle from "@components/input-password-toggle"
+
+import { validate } from "@utils"
+import * as yup from 'yup'
+
 // ** Reactstrap Imports
 import {
   Row,
@@ -20,16 +28,37 @@ import {
   Button,
   CardText,
   CardTitle,
+  Spinner,
+  FormFeedback
 } from "reactstrap"
 
 // ** Styles
 import "@styles/react/pages/page-authentication.scss"
 
-const ForgotPassword = () => {
+const passwordSchema = yup.object().shape({
+  password: yup.string()
+  .min(8, 'Password must be at least 8 characters')
+  .max(20, 'Password must be at most 20 characters')
+  .matches(/[A-Z]/, 'Password must contain at least one uppercase letter')
+  .matches(/[a-z]/, 'Password must contain at least one lowercase letter')
+  .matches(/[0-9]/, 'Password must contain at least one number')
+  .matches(/[\W_]/, 'Password must contain at least one special character')
+  .required('Password is required')
+})
+
+const ResetPassword = () => {
   // ** Hooks
   const { skin } = useSkin()
 
-  const { control, formState: { errors }} = useForm()
+  const userApi = useApi().user
+
+  const { control, handleSubmit, formState: { errors }} = useForm(validate(passwordSchema))
+
+  const { fetchData } = useLoader({})
+
+  const [is_loading, setIsLoading] = useState(false)
+
+	const navigate = useNavigate()
 
   const logo = require("@src/assets/images/logo/dxis_logo.png").default
 
@@ -37,8 +66,30 @@ const ForgotPassword = () => {
     skin === "dark" ? "forgot-password-v2-dark.svg" : "forgot-password-v2.svg",
     source = require(`@src/assets/images/pages/${illustration}`).default
 
+
+  async function onSubmit (datas) {
+    setIsLoading(true)
+    const { success } = await fetchData(userApi.forgotPasswordConfirm(datas))
+    setIsLoading(false)
+    if (success) {
+      navigate("/login")
+    }
+  }
+
+  const { search } = useLocation();
+  const query = new URLSearchParams(search);
+  const uid = query.get('ab1');
+  const token = query.get('ab2');
+
   return (
     <div className="auth-wrapper auth-cover">
+      {
+          is_loading &&
+          <div className='suspense-loader'>
+              <Spinner size='bg'/>
+              <span className='ms-50'>Түр хүлээнэ үү...</span>
+          </div>
+      }
       <Row className="auth-inner m-0">
         <Link className="brand-logo" to="/" onClick={(e) => e.preventDefault()}>
           <img src={logo} alt="logo" style={{objectFit: 'cover'}} width={40} height={40}/>
@@ -63,8 +114,22 @@ const ForgotPassword = () => {
             </CardText>
             <Form
               className="auth-forgot-password-form mt-2"
-              onSubmit={(e) => e.preventDefault()}
+              onSubmit={handleSubmit(onSubmit)}
             >
+                <Controller
+                  defaultValue={uid}
+                  control={control}
+                  id='ab1'
+                  name='ab1'
+                  render={({ field }) => <input type="hidden" {...field} />}
+                />
+                <Controller
+                  defaultValue={token}
+                  control={control}
+                  id='ab2'
+                  name='ab2'
+                  render={({ field }) => <input type="hidden" {...field} />}
+                />
                 <Row >
                     <Col xs={12} md={12}>
                     <Label className="form-label" for="register-password">
@@ -112,4 +177,4 @@ const ForgotPassword = () => {
   )
 }
 
-export default ForgotPassword
+export default ResetPassword
