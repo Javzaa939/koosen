@@ -727,7 +727,7 @@ class StudentListAPIView(
             self.queryset = self.queryset.filter(group__join_year=join_year)
 
         # Ангиар хайлт хийх
-        if group:
+        if group != 'undefined' and group:
             self.queryset = self.queryset.filter(group_id=group)
 
         # Тухайн хичээлийг үзэж буй оюутнуудын жагсаалт

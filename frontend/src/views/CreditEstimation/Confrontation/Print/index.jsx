@@ -18,9 +18,11 @@ export default function Print()
     var count = 0
     var countLessonType = 0
     var countLessonTypeCount = 0
+    var countLessonUzsenAll = 0
 
     for (let lesson of data.lesson)
     {
+        countLessonUzsenAll += lesson.total_studied_credits
         countLessonTypeCount += lesson.count
     }
 
@@ -87,18 +89,21 @@ export default function Print()
                             <div className="text-center border position-relative" style={{ width: '6%' }} >
                                 <p className={`${groupLength != 0 && 'position-absolute top-50 start-50 translate-middle'} w-100 fw-bolder`}>{"Улирал"}</p>
                             </div>
-
                             {
-                                data.group.map((val, idx) =>
-                                {
-                                    return (
-                                        <div key={idx} className={`text-center border ${groupLength-1 != idx && 'border-end-0'} ${idx == 0 && 'border-start-0'} `} style={{ width: `${53 / groupLength}%`, padding: '0px 1px' }} >
-                                            <span className="w-100 fw-bolder">{val?.name}</span>
-                                        </div>
-                                    )
-                                })
+                                data?.code != undefined ? (
+                                    <div className={`text-center border ${groupLength-1 != 1 && 'border-start-0'}`} style={{ width: `${53 / groupLength}%`, padding: '0px 1px' }} >
+                                        <span className="w-100 fw-bolder">{data?.code} {data?.last_name} {data?.first_name} {data?.register_num}</span>
+                                    </div>
+                                ): (
+                                    data.group.map((val, idx) => {
+                                        return  (
+                                            <div className={`text-center border ${groupLength-1 != idx && 'border-end-0'} ${idx == 0 && 'border-start-0'}`} style={{ width: `${53 / groupLength}%`, padding: '0px 1px' }} >
+                                                <span span className="w-100 fw-bolder">{val?.name}</span>
+                                            </div>
+                                        )
+                                    })
+                                )
                             }
-
                         </div>
 
                         {
@@ -154,6 +159,27 @@ export default function Print()
                                                         {
                                                             val.lessons.map((val, idx) =>
                                                             {
+                                                                const romanNumerals = {
+                                                                    1: 'I',
+                                                                    2: 'II',
+                                                                    3: 'III',
+                                                                    4: 'IV',
+                                                                    5: 'V',
+                                                                    6: 'VI',
+                                                                    7: 'VII',
+                                                                    8: 'VIII',
+                                                                    9: 'IX',
+                                                                    10: 'X',
+                                                                };
+                                                                const convertSeasonToRoman = (season) => {
+                                                                    let seasons = JSON.parse(season);
+                                                                    if (Array.isArray(seasons)) {
+                                                                        return seasons.map(s => romanNumerals[s]).join(', ');
+                                                                    } else {
+                                                                        return romanNumerals[seasons];
+                                                                    }
+                                                                };
+                                                                val.season = convertSeasonToRoman(val?.season);
                                                                 count++
                                                                 return (
                                                                     <div key={idx} className="w-100 p-0">
@@ -171,7 +197,7 @@ export default function Print()
                                                                                 <span className="w-100">{val?.lesson?.kredit}</span>
                                                                             </div>
                                                                             <div className="text-center border border-top-0 position-relative" style={{ width: '6%' }} >
-                                                                                <span className="w-100">{val?.season}</span>
+                                                                                <span className="w-100">{val.season}</span>
                                                                             </div>
                                                                             {
                                                                                 val?.lesson?.student_study.map((val, idx) =>
@@ -182,8 +208,8 @@ export default function Print()
                                                                                     switch (val?.value)
                                                                                     {
                                                                                         case 1:
-                                                                                            value = ''
-                                                                                            backgroundColor = ''
+                                                                                            value = 'Үзээгүй'
+                                                                                            backgroundColor = 'bg-danger'
                                                                                             break;
                                                                                         case 2:
                                                                                             value = 'Үзсэн'
@@ -227,7 +253,10 @@ export default function Print()
                                 <span className="w-100 fw-bolder">{"Хичээлийн нэр"}</span>
                             </div>
                             <div className="text-center border border-end-0" style={{ width: '6%' }} >
-                                <span className="w-100 fw-bolder">{"Багц цаг"}</span>
+                                <span className="w-100 fw-bolder">{"Үзэх багц цаг"}</span>
+                            </div>
+                            <div className="text-center border border-end-0" style={{ width: '6%' }} >
+                                <span className="w-100 fw-bolder">{"Үзсэн багц цаг"}</span>
                             </div>
                             <div className="text-center border" style={{ width: '6%' }} >
                                 <span className="w-100 fw-bolder">{"Улирал"}</span>
@@ -250,8 +279,11 @@ export default function Print()
                                             <div className="text-center border border-end-0 border-top-0" style={{ width: '6%' }} >
                                                 <span className="w-100">{val?.count}</span>
                                             </div>
+                                            <div className="text-center border border-end-0 border-top-0" style={{ width: '6%' }} >
+                                                <span className="w-100">{val?.total_studied_credits}</span>
+                                            </div>
                                             <div className="text-center border border-top-0" style={{ width: '6%' }} >
-                                                <span className="w-100">{`${parseInt((val?.count * 100) / countLessonTypeCount)}%`}</span>
+                                                <span className="w-100">{val?.total_studied_credits === 0 && val?.count === 0 ? `0%` : `${parseInt(val?.total_studied_credits * 100 / val?.count)}%`}</span>
                                             </div>
                                         </div>
                                     </div>
@@ -269,8 +301,11 @@ export default function Print()
                             <div className="text-center border border-end-0 border-top-0" style={{ width: '6%' }} >
                                 <span className="w-100 fw-bolder">{countLessonTypeCount}</span>
                             </div>
+                            <div className="text-center border border-end-0 border-top-0" style={{ width: '6%' }} >
+                                <span className="w-100 fw-bolder">{countLessonUzsenAll}</span>
+                            </div>
                             <div className="text-center border border-top-0" style={{ width: '6%' }} >
-                                <span className="w-100 fw-bolder">{"100%"}</span>
+                                <span className="w-100 fw-bolder">{countLessonTypeCount === 0 && countLessonUzsenAll === 0 ? '0%' : `${parseInt(countLessonUzsenAll * 100 / countLessonTypeCount)}%`}</span>
                             </div>
                         </div>
 
