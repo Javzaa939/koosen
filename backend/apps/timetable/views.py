@@ -2322,7 +2322,6 @@ class TimeTableNewAPIView(
 
         begin_date = week.get('start_date')
         end_date = week.get('end_date')
-
         is_volume = request.query_params.get('is_volume')
 
         if not begin_date and not end_date:
