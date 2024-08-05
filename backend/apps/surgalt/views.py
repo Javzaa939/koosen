@@ -69,7 +69,8 @@ from lms.models import (
     PsychologicalQuestionChoices,
     PsychologicalQuestionTitle,
     PsychologicalTest,
-    AdmissionRegisterProfession
+    AdmissionRegisterProfession,
+    Season
 )
 
 from core.models import (
@@ -1165,10 +1166,22 @@ class ProfessionPrintPlanAPIView(
         all_data = dict()
 
         profession = request.query_params.get('profession')
+        group = request.query_params.get('group')
+        student = request.query_params.get('student')
+        season = request.query_params.get('season')
 
         profession_qs = ProfessionDefinition.objects.filter(id=profession).values('id', 'dep_name', 'name').last()
         group_queryset = Group.objects.filter(profession=profession, is_finish=False).order_by('id')
+
+        # анги байгаа үед л ангиар шүүх
+        if group:
+            group_queryset = group_queryset.filter(id=group)
+
         group_data = GroupSerializer(group_queryset, many=True).data
+
+        # student байгаа эсэх шалгах
+        if student:
+            student_qs = Student.objects.filter(id=student).values('id', 'code', 'first_name', 'last_name', 'register_num').first()
 
         all_data['group'] = group_data
 
@@ -1176,11 +1189,29 @@ class ProfessionPrintPlanAPIView(
         all_data['dep_name'] = profession_qs['dep_name']
         all_data['name'] = profession_qs['name']
 
+        # student байгаа үед info авах
+        if student:
+            all_data['student_id'] = student_qs['id']
+            all_data['code'] = student_qs['code']
+            all_data['first_name'] = student_qs['first_name']
+            all_data['last_name'] = student_qs['last_name']
+            all_data['register_num'] = student_qs['register_num']
+
         request.data['group_queryset'] = group_queryset
 
         learning_plan_queryset = LearningPlan.objects.filter(profession=profession)
 
+        # хичээлийн улиралаар хайх
+        if season:
+            # улирал тэгш сондгой эсэхийг шалгах
+            year_diff = int(season) % 2
+
+            # тэгш эсвэл сондгой улиралаар хайх
+            odd_or_even_seasons = [f"[{season}]" for season in range(1, 9) if season % 2 == year_diff % 2]
+            learning_plan_queryset = learning_plan_queryset.filter(season__in=odd_or_even_seasons)
+
         all_levels_data = list()
+        total_studied_credits = 0
 
         for lesson_level in LearningPlan.LESSON_LEVEL:
             level_data = learning_plan_queryset.filter(lesson_level=lesson_level[0])
@@ -1189,6 +1220,7 @@ class ProfessionPrintPlanAPIView(
                 one_lesson_datas = dict()
                 one_lesson_datas['level'] = lesson_level[1]
                 one_lesson_datas['count'] = level_data.aggregate(Sum('lesson__kredit')).get('lesson__kredit__sum')
+                one_lesson_datas['total_studied_credits'] = 0
                 one_type_datas = list()
 
                 for lesson_type in LearningPlan.LESSON_TYPE:
@@ -1203,11 +1235,21 @@ class ProfessionPrintPlanAPIView(
                         lesson_datas['count'] = type_datas.aggregate(Sum('lesson__kredit')).get('lesson__kredit__sum')
                         one_type_datas.append(lesson_datas)
 
+                        # lesson_type болгонд хэдэн хичээл үзсэн тоолох
+                        for lesson in type_data:
+                            if 'student_study' in lesson['lesson']:
+                                for study in lesson['lesson']['student_study']:
+                                    # хичээлийг үзсэн бол кредитийг тоолох
+                                    if study['value'] == 2:
+                                        one_lesson_datas['total_studied_credits'] += lesson['lesson']['kredit']
+
                 one_lesson_datas['data'] = one_type_datas
 
                 all_levels_data.append(one_lesson_datas)
+                total_studied_credits += one_lesson_datas['total_studied_credits']
 
         all_data['lesson'] = all_levels_data
+        all_data['total_studied_credits'] = total_studied_credits
 
         return request.send_data(all_data)
 
