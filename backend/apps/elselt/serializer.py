@@ -1122,7 +1122,7 @@ class EyeshOrderUserInfoSerializer(serializers.ModelSerializer):
         profession = AdmissionBottomScore.objects.filter(profession=obj.profession.profession, score_type=AdmissionBottomScore.GENERAL).first()
 
         # Мэргэжлийн Суурь шалгалт хичээлийн нэр
-        lesson_name = profession.admission_lesson.lesson_name
+        lesson_name = profession.admission_lesson.lesson_name if profession.admission_lesson else ''
 
         # Тухайн хичээлээр ЭШ өгсөн бол оноонуудын хамгийн өндрийг нь авна
         max_score = UserScore.objects.filter(user=obj.user, lesson_name__iexact=lesson_name).aggregate(max_score=Max('scaledScore'))

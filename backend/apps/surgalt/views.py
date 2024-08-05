@@ -2736,7 +2736,7 @@ class PsychologicalTestScopesAPIView(
             datas = self.list(request).data
         return request.send_data(datas)
 
-
+@permission_classes([IsAuthenticated])
 class PsychologicalTestScopeOptionsAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -2745,36 +2745,180 @@ class PsychologicalTestScopeOptionsAPIView(
 
     def get(self, request):
         scope = self.request.query_params.get('scope')
-        department = self.request.query_params.get('department')
-        group_options = list()
+        school = self.request.query_params.get('school')
+        mode = self.request.query_params.get('mode')
+        state = self.request.query_params.get('state')
+        select1 = self.request.query_params.get('select1')
 
-        if department:
-            department_list = [int(item) for item in department.split(',')]
-        else:
-            department_list = list()
+        # only for participants filtering arguments
+        if mode == 'participants':
+            select2 = self.request.query_params.get('select2')
+            search_query = self.request.query_params.get('search')
+        # if school selected filters all by school
+        if school:
+            school = int(school)
 
-        # Хамрах хүрээг элсэгч гэж сонговол
-        if scope == '2':
-            profession = AdmissionRegisterProfession.objects.annotate(
-                admission_name=F('admission__name'),
+        # to avoid not assigned errors on return
+        return_data = {}
+        admission_options = department_options = group_options = teacher_options = elselt_user_options = student_options = []
+
+        # partial loading of participants on startup and ondemand
+        if mode in ['start'] or mode in ['participants'] and not search_query:
+            # scroll lazy loading inside select input
+            if state == '2':
+                qs_start = (int(state) - 2) * 10
+                qs_filter = int(state) * 10
+            else:
+                qs_start = (int(state) - 1) * 10
+                qs_filter = int(state) * 10
+
+        # Teachers
+        if mode in ['start'] or mode in ['participants'] and scope == '1':
+            teacher_options = Teachers.objects.order_by('id')
+            if school:
+                teacher_options = teacher_options.filter(sub_org=school)
+        # filter teachers by select input
+        if mode in ['participants'] and scope == '1':
+            if select1:
+                select1 = [int(item) for item in select1.split(',')]
+                teacher_options = teacher_options.filter(salbar__in=select1)
+
+            if search_query:
+                search_vector = Q()
+                # List of searchable fields
+                for field in ['register', 'first_name']:
+                    search_vector |= Q(**{f"{field}__icontains": search_query})
+                teacher_options = teacher_options.filter(search_vector)
+        # load by scroll if search by string is not performed
+        if mode in ['start'] or mode in ['participants'] and scope == '1' and not search_query:
+            teacher_options = teacher_options[qs_start:qs_filter]
+        # building output data fields
+        if mode in ['start'] or mode in ['participants'] and scope == '1':
+            self.serializer_class = TeachersSerializer
+            teacher_options = self.get_serializer(teacher_options, many=True).data
+            # mapping of original fields to custom keys and getting only them
+            only_mapped_fields = {
+                'id': 'id',
+                'register': 'code',
+                'full_name': 'full_name'
+            }
+            teacher_options = [{only_mapped_fields.get(key, key): item[key] for key in item if key in only_mapped_fields} for item in teacher_options]
+
+        # Elselt users
+        if mode in ['start'] or mode in ['participants'] and scope == '2':
+            elselt_user_options = ElseltUser.objects.order_by('id')
+
+            # Бие бялдар тэнцсэн элсэгч
+            biy_byldar_ids = PhysqueUser.objects.filter(state=AdmissionUserProfession.STATE_APPROVE).values_list('user', flat=True)
+            elselt_user_options = elselt_user_options.filter(id__in=biy_byldar_ids)
+        # filter elselt users by select inputs
+        if mode in ['participants'] and scope == '2':
+            if select1 or select2:
+                elselt_user_table2 = AdmissionUserProfession.objects.filter(user__in=elselt_user_options.values_list('id', flat=True))
+
+            if select1:
+                elselt_user_table2 = elselt_user_table2.filter(profession__admission=select1).values_list('user', flat=True)
+
+            if select2:
+                select2 = [int(item) for item in select2.split(',')]
+                elselt_user_table2 = elselt_user_table2.filter(profession__profession__in=select2).values_list('user', flat=True)
+
+            if select1 or select2:
+                elselt_user_options = elselt_user_options.filter(id__in=elselt_user_table2)
+
+            if search_query:
+                search_vector = Q()
+                # List of searchable fields
+                for field in ['code', 'register', 'first_name']:
+                    search_vector |= Q(**{f"{field}__icontains": search_query})
+                elselt_user_options = elselt_user_options.filter(search_vector)
+        # load by scroll if search by string is not performed
+        if mode in ['start'] or mode in ['participants'] and scope == '2' and not search_query:
+            elselt_user_options = elselt_user_options[qs_start:qs_filter]
+        # building output data fields
+        if mode in ['start'] or mode in ['participants'] and scope == '2':
+            self.serializer_class = ElsegchSerializer
+            elselt_user_options = self.get_serializer(elselt_user_options, many=True).data
+            # make "code" key from register or code fields because some records contains emails instead of real code
+            elselt_user_options_temp = []
+            for ordered_dict in elselt_user_options:
+                filtered_dict = {}
+                filtered_dict['id'] = ordered_dict['id']
+                filtered_dict['code'] = ordered_dict['code'] if ordered_dict['code'] and '@' not in ordered_dict['code'] else ordered_dict['register'] if '@' not in ordered_dict['register'] else ''
+                filtered_dict['full_name'] = ordered_dict['full_name']
+                # Append the new OrderedDict to the new_data list
+                elselt_user_options_temp.append(filtered_dict)
+            elselt_user_options = elselt_user_options_temp
+            del elselt_user_options_temp
+
+        # Students
+        if mode in ['start'] or mode in ['participants'] and scope == '3':
+            student_options = Student.objects.order_by('id')
+            if school:
+                student_options = student_options.filter(school=school)
+        # filter students by select inputs
+        if mode in ['participants'] and scope == '3':
+            if select1:
+                student_options = student_options.filter(department__in=select1)
+
+            if select2:
+                group_id = [int(item) for item in select2.split(',')]
+                student_options = student_options.filter(group__in=group_id)
+
+            if search_query:
+                search_vector = Q()
+                # List of searchable fields
+                for field in ['code', 'first_name']:
+                    search_vector |= Q(**{f"{field}__icontains": search_query})
+                student_options = student_options.filter(search_vector)
+        # load by scroll if search by string is not performed
+        if mode in ['start'] or mode in ['participants'] and scope == '3' and not search_query:
+            student_options = student_options[qs_start:qs_filter]
+        # building output data fields
+        if mode in ['start'] or mode in ['participants'] and scope == '3':
+            self.serializer_class = StudentSerializer
+            student_options = self.get_serializer(student_options, many=True).data
+            # getting only specified keys
+            only_mapped_fields = {
+                'id': 'id',
+                'code': 'code',
+                'full_name': 'full_name'
+            }
+            student_options = [{only_mapped_fields.get(key, key): item[key] for key in item if key in only_mapped_fields} for item in student_options]
+
+        if mode in ['start']:
+            # Teachers and students departments
+            department_options = Salbars.objects.values('id', 'name')
+            if school:
+                department_options = department_options.filter(sub_orgs=school)
+
+            # Elselt users admissions
+            admission_options = AdmissionRegisterProfession.objects.annotate(
+                admission_name = F('admission__name'),
             ).values('admission_name', 'admission').distinct('admission')
-            return_data = {'elsegch_admission': list(profession)}
-            return request.send_data(return_data)
 
-        # Хамрах хүрээг оюутан гэж сонговол
-        if scope == '3':
-            if len(department_list) > 0:
-                # Бүх ангиудийг id, name-ээр авчирна
-                group_options = list(Group.objects.filter(department__in=department_list).values('id', 'name'))
+        # Students groups
+        if mode in ['start', 'group']:
+            group_options = Group.objects.values('id', 'name')
+            if school:
+                group_options = group_options.filter(school=school)
 
-        deparment_options = list(Salbars.objects.values('id', 'name'))
+        # to filter students groups by selected departments
+        if mode in ['group'] and select1:
+            select1 = [int(item) for item in select1.split(',')]
+            group_options = group_options.filter(department__in=select1)
 
         # Тэгээд  select-д харуулхын тулд буцаана
         return_data = {
             'scope_kind': scope,
-            'select_student_data': group_options,
-            'deparment_options': deparment_options,
+            'admission_options': list(admission_options),
+            'department_options': list(department_options),
+            'group_options': list(group_options),
+            'teacher_options': teacher_options,
+            'elselt_user_options': elselt_user_options,
+            'student_options': student_options
         }
+
         return request.send_data(return_data)
 
     def put(self, request, pk):
@@ -2783,44 +2927,49 @@ class PsychologicalTestScopeOptionsAPIView(
         scope = datas.get('scope')
         participants = datas.get('participants', [])
 
+        # nothing to do if nothing to add
+        if not participants: return request.send_info("INF_002")
         # pk болон scope 2-ийн утга 2-уулаа байх үед
         if pk and scope is not None:
             # Оролцогчдын төрлөө өөрчлөөд
             PsychologicalTest.objects.filter(id=pk).update(scope_kind=scope)
             participant_ids = PsychologicalTest.objects.filter(id=pk).values_list('participants', flat=True).first()
             # Хэрвээ оюутанаас сорил авах бол
-            if scope == 3 and participants:
-                # Ангийн id-уудаа ирсэн датан дотроосоо аваад
-                group_ids = [participant['id'] for participant in participants]
-                # Тус ангид харьялагдах бүх оюутнуудын id-г хадгална
-                participant_ids = Student.objects.filter(group__in=group_ids).values_list('id', flat=True)
+            if scope == 3:
+                student_ids = [participant['id'] for participant in participants]
+                participant_ids = Student.objects.filter(id__in=student_ids).values_list('id', flat=True)
 
             # Бусад үед бүх элсэгч болон багшаа авна
             elif scope == 1:
-                participant_ids = Teachers.objects.values_list('id', flat=True)
+                teachers_ids = [participant['id'] for participant in participants]
+                participant_ids = Teachers.objects.filter(id__in=teachers_ids).values_list('id', flat=True)
 
             # Хэрвээ элсэгчдээс сорил авах бол
-            if scope == 2:
+            elif scope == 2:
                 profession = datas.get('profession')
                 admission = datas.get('admission')
-                queryset = AdmissionUserProfession.objects.all()
+                # looks only required participants
+                elsegch_ids = [participant['id'] for participant in participants]
+                queryset = AdmissionUserProfession.objects.filter(user__in=elsegch_ids)
                 if admission:
                     professions = AdmissionRegisterProfession.objects.filter(admission=admission).values_list('profession', flat=True)
                     queryset = queryset.filter(profession__profession__in=professions)
                 if profession:
-                    prof_ids = [item.get('id') for item in profession]
-                    queryset = queryset.filter(profession__in=prof_ids)
+                    # prof_id is proper id
+                    prof_ids = [item.get('prof_id') for item in profession]
+                    # profession__profession is correct id
+                    queryset = queryset.filter(profession__profession__in=prof_ids)
 
                 # Бие бялдар тэнцсэн элсэгч
                 biy_byldar_ids = PhysqueUser.objects.filter(state=AdmissionUserProfession.STATE_APPROVE).values_list('user', flat=True)
                 queryset = queryset.filter(user__in=biy_byldar_ids)
 
                 participant_ids = ElseltUser.objects.filter(
-                    id__in=queryset.values_list('user', flat=True)
+                    id__in = queryset.values_list('user', flat=True)
                 ).values_list('id', flat=True)
 
             # Хуучин хүүхдүүд
-            old_participants = PsychologicalTest.objects.get(id=pk).participants
+            old_participants = PsychologicalTest.objects.get(id=pk).participants or []
 
             # Convert lists to sets and find the difference
             set_parts = set(participant_ids)
@@ -3397,6 +3546,83 @@ class PsychologicalTestResultExcelAPIView(
         }
         return request.send_data(return_datas)
 
+class IQTestResultExcelAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin
+):
+    serializer_class = PsychologicalTestQuestionsSerializer
+    """ IQ Test үр дүн тайлан excel """
+
+    def get(self, request):
+            big_data = []
+
+            # IQ test Нийт асуултын тоо авах
+            question = PsychologicalTest.objects.filter(id=3).values('questions').count()
+
+            mental_users = MentalUser.objects.filter(challenge__title__icontains='IQ Test', answer__isnull=False).select_related('user')
+            elselt_users = {user.id: user for user in ElseltUser.objects.filter(id__in=mental_users.values_list('user_id', flat=True))}
+
+            # Шалгалт өгсөн хүн бүр
+            for user in mental_users:
+                user_data = {
+                    'first_name': '',
+                    'last_name': '',
+                    'register': '',
+                    'scores': [],
+                    'total_score': 0
+                }
+                user_obj = elselt_users[user.user.id]
+                user_data['first_name'] = user_obj.first_name
+                user_data['last_name'] = user_obj.last_name
+                user_data['register'] = user_obj.register
+
+                # Хариулттай үед
+                answer = ast.literal_eval(user.answer)
+                value = str(answer)[1:-1]
+                pairs = [pair.strip() for pair in value.split(',')]
+
+                question_ids = []
+                chosen_choices = []
+                for pair in pairs:
+                    question_id, choice_id = pair.split(':')
+                    question_ids.append(question_id.strip().strip("'"))
+                    chosen_choices.append(choice_id.strip().strip("'"))
+
+                def convert_to_int(value):
+                    if value == 'True':
+                        return 1
+                    elif value == 'False':
+                        return 0
+                    else:
+                        return int(value)
+
+                question_ids = list(map(int, question_ids))
+                chosen_choices = list(map(convert_to_int, chosen_choices))
+
+                # TODO Энэ давталт доторх код л удаж байгаа шалтгаан байх
+                for question_id, choice_id in zip(question_ids, chosen_choices):
+                    # TODO Хүүхэд бүрээр сорилын асуултыг авах шаардлагагүй байх 1 сорилын асуултууд хүүхэд бүр дээр өөрчлөгдөхгүй учраас
+                    queryset = PsychologicalTestQuestions.objects.filter(id=question_id).first()
+                    if queryset:
+
+                        # Хариулт зөв үгүйг шалгах
+                        # TODO Шалгалтын асуулт хариулт бүрийг нэг л авчихвал энэ for дотор хүүхэд бүрийг тоогоор бааз руу ачааллах хурд сайжрах байх
+                        choice = PsychologicalQuestionChoices.objects.filter(id=choice_id).first()
+                        if choice:
+                            score = queryset.score if choice.is_correct else 0
+
+                            # Зөв бол оноо шалгах
+                            user_data['scores'].append(int(score))
+                            user_data['total_score'] += score
+
+                big_data.append(user_data)
+
+            return_data = {
+                'question':question,
+                'user_data':big_data
+            }
+
+            return request.send_data(return_data)
 
 @permission_classes([IsAuthenticated])
 class QuestionsListAPIView(

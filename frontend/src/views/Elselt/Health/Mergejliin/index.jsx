@@ -128,7 +128,7 @@ function Mergejliin() {
 			)
 		);
 		if (success) {
-			console.log(data)
+			// console.log(data)
 			setTotalCount(data?.count);
 			setDatas(data?.results);
 

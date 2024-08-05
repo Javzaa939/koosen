@@ -3,7 +3,7 @@ import { createContext, useState, useEffect } from "react";
 // hooks imports
 import useApi from "@hooks/useApi"
 import useLoader from "@hooks/useLoader"
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 
 const AuthContext = createContext();
 
@@ -14,6 +14,7 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState({});
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate()
+    const location = useLocation()
 
     // Apis
     const userApi = useApi().user
@@ -32,7 +33,9 @@ export const AuthProvider = ({ children }) => {
                 if (Object.keys(data).length > 0) {
                     setUser(data)
                 } else {
-                    navigate('/login')
+                    if (location.pathname !== '/reset-password/') {
+                        navigate('/login')
+                    }
                 }
             }
         }

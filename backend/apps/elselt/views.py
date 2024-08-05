@@ -1,6 +1,8 @@
 import hashlib
 import datetime as dt
 import requests
+import os
+import pandas as pd
 from collections import Counter
 
 from rest_framework import mixins
@@ -14,6 +16,7 @@ from django.db import transaction
 from django.db.models import F, Subquery, OuterRef, Count, Q, Sum, Exists
 from django.db.models import Value, Case, When, IntegerField
 from django.db.models.functions import Substr, Cast
+from django.conf import settings
 
 from main.utils.function.utils import (
     json_load,
@@ -31,6 +34,7 @@ from main.utils.function.utils import (
 )
 
 from main.utils.function.pagination import CustomPagination
+from main.utils.file import save_file, remove_folder
 from main.decorators import login_required
 from rest_framework.response import Response
 from rest_framework import status
@@ -47,6 +51,7 @@ from lms.models import (
     AdmissionBottomScore
 )
 
+from core.models import Employee
 from surgalt.serializers import (
     ProfessionDefinitionSerializer
 )
@@ -170,6 +175,11 @@ class ElseltProfession(
     serializer_class = AdmissionProfessionSerializer
 
     def get(self, request):
+        user = request.user.id
+        employee_sub_org_id = Employee.objects.filter(user=user).values_list('sub_org', flat=True).first()
+
+        if employee_sub_org_id == 21:
+            self.queryset = self.queryset.filter(profession__school=employee_sub_org_id)
         elselt = request.query_params.get('elselt')
 
         admission_querysets = self.queryset.filter(admission=elselt)
@@ -493,7 +503,9 @@ class AdmissionUserInfoAPIView(
             queryset = queryset.filter(profession__admission=lesson_year_id)
 
         if profession_id:
-            queryset = queryset.filter(profession__profession__id=profession_id)
+            # for multiple selection in psychological testing inputs
+            profession_id = [int(item) for item in profession_id.split(',')]
+            queryset = queryset.filter(profession__profession__id__in=profession_id)
 
         if unit1_id:
             queryset = queryset.filter(user__aimag__id=unit1_id)
@@ -535,15 +547,17 @@ class AdmissionUserInfoAPIView(
         return queryset
 
     def get(self, request, pk=None):
+        user = request.user.id
+        employee_sub_org_id = Employee.objects.filter(user=user).values_list('sub_org', flat=True).first()
+
+        if employee_sub_org_id == 21:
+            self.queryset = self.queryset.filter(profession__profession__school=employee_sub_org_id)
 
         if pk:
-
             all_data = self.retrieve(request, pk).data
-
             return request.send_data(all_data)
 
         all_data = self.list(request).data
-
         return request.send_data(all_data)
 
     @transaction.atomic()
@@ -652,6 +666,8 @@ class AdmissionUserEmailAPIView(
         )
 
         queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
+        p = AdmissionUserProfession.objects.filter(user=OuterRef('user')).values('profession__profession__school')
+
 
         lesson_year_id = self.request.query_params.get('lesson_year_id')
         profession_id = self.request.query_params.get('profession_id')
@@ -708,8 +724,12 @@ class AdmissionUserEmailAPIView(
 
         return queryset
 
+    def get(self, request, pk=None):
+        user = request.user.id
+        employee_sub_org_id = Employee.objects.filter(user=user).values_list('sub_org', flat=True).first()
 
-    def get(self, request):
+        if employee_sub_org_id == 21:
+            self.queryset = self.queryset.filter(send_user__employee__sub_org=employee_sub_org_id)
 
         send_data = self.list(request).data
 
@@ -1176,7 +1196,7 @@ class ElseltHealthAnhanShat(
 
         # Эрүүл мэндийн шалгуур үзүүлэлттэй мэргэжлүүд
         # TODO Одоогоор идэвхтэй байгаа элсэлтээс л харуулж байгаа гэсэн үг
-        health_profession_ids = AdmissionIndicator.objects.filter(admission_prof__admission__is_active=True, value__in=[AdmissionIndicator.ERUUL_MEND_ANHAN], ).values_list('admission_prof', flat=True)
+        health_profession_ids = AdmissionIndicator.objects.filter(value__in=[AdmissionIndicator.ERUUL_MEND_ANHAN], ).values_list('admission_prof', flat=True)
         queryset = queryset.filter(profession__in=health_profession_ids)
 
         gender = self.request.query_params.get('gender')
@@ -1239,15 +1259,18 @@ class ElseltHealthAnhanShat(
         return queryset
 
     def get(self, request, pk=None):
+            user = request.user.id
+            employee_sub_org_id = Employee.objects.filter(user=user).values_list('sub_org', flat=True).first()
 
-        if pk:
-            all_data = self.retrieve(request, pk).data
+            if employee_sub_org_id == 21:
+                self.queryset = self.queryset.filter(profession__profession__school=employee_sub_org_id)
 
+            if pk:
+                all_data = self.retrieve(request, pk).data
+                return request.send_data(all_data)
+
+            all_data = self.list(request).data
             return request.send_data(all_data)
-
-        all_data = self.list(request).data
-
-        return request.send_data(all_data)
 
 
     @transaction.atomic
@@ -1422,6 +1445,11 @@ class ElseltHealthProfessional(
         return queryset
 
     def get(self, request, pk=None):
+        user = request.user.id
+        employee_sub_org_id = Employee.objects.filter(user=user).values_list('sub_org', flat=True).first()
+
+        if employee_sub_org_id == 21:
+            self.queryset = self.queryset.filter(user__admissionuserprofession__profession__profession__school=employee_sub_org_id)
 
         if pk:
             all_data = self.retrieve(request, pk).data
@@ -1551,7 +1579,7 @@ class ElseltHealthPhysical(
 
         # Бие бялдар шалгуур үзүүлэлттэй мэргэжлүүд
         # TODO Одоогоор идэвхтэй байгаа элсэлтээс л харуулж байгаа гэсэн үг Дараа жил яахыг үл мэднэ
-        physical_profession_ids = AdmissionIndicator.objects.filter(admission_prof__admission__is_active=True, value__in=[AdmissionIndicator.BIE_BYALDAR]).values_list('admission_prof', flat=True)
+        physical_profession_ids = AdmissionIndicator.objects.filter(value__in=[AdmissionIndicator.BIE_BYALDAR]).values_list('admission_prof', flat=True)
 
         # Бие бялдар шалгуур үзүүлэлттэй мэргэжилд бүртгүүлсэн элсэгчид
         queryset = queryset.filter(profession__in=physical_profession_ids)
@@ -1630,15 +1658,18 @@ class ElseltHealthPhysical(
         return queryset
 
     def get(self, request, pk=None):
+            user = request.user.id
+            employee_sub_org_id = Employee.objects.filter(user=user).values_list('sub_org', flat=True).first()
 
-        if pk:
-            all_data = self.retrieve(request, pk).data
+            if employee_sub_org_id == 21:
+                self.queryset = self.queryset.filter(profession__profession__school=employee_sub_org_id)
 
+            if pk:
+                all_data = self.retrieve(request, pk).data
+                return request.send_data(all_data)
+
+            all_data = self.list(request).data
             return request.send_data(all_data)
-
-        all_data = self.list(request).data
-
-        return request.send_data(all_data)
 
     @transaction.atomic
     def post(self, request):
@@ -1714,6 +1745,143 @@ class ElseltHealthPhysical(
 
         return request.send_info('INF_003')
 
+class ElseltPhysicalExcelImportAPIView(
+    generics.GenericAPIView
+):
+    """ Бие бялдар жагсаалт import хийх """
+
+    @transaction.atomic()
+    def post(self, request):
+        datas = request.data
+        file = datas.get("file")
+
+        path = save_file(file, 'student', 1)
+        full_path = os.path.join(settings.MEDIA_ROOT, str(path))
+        error_datas = list()
+        correct_datas = list()
+
+        try:
+            excel_data = pd.read_excel(full_path)
+            excel_data = excel_data.fillna(0)
+            datas = excel_data.to_dict(orient='records')
+
+            for created_data in datas:
+                state = created_data.get('Үзлэгийн төлөв')
+                register_num = created_data.get('РД')
+
+                if state == 0: state=1
+                if state == 'Бүртгүүлсэн': state=1
+                if state == 'Тэнцсэн': state=2
+                if state == 'Тэнцээгүй': state=3
+
+                # PhysqueUser
+                description = created_data.get('Тайлбар') or 0
+                belly_draught = created_data.get('Гэдэсний таталт') or 0
+                total_score = created_data.get('Нийт оноо')
+                turnik = created_data.get('Савлуурт суниах')
+                patience_1000m = created_data.get('Тэсвэр 1000М')
+                speed_100m = created_data.get('Хурд 100М')
+                quickness = created_data.get('Авхаалж самбаа')
+                flexible = created_data.get('Уян хатан')
+
+                # Already exists шалгах
+                student = ElseltUser.objects.filter(register=register_num).first()
+                if not student:
+                    error_datas.append({
+                        'register_num': register_num,
+                        'message': 'Student not found'
+                    })
+                    continue
+
+                physque_user_data = {
+                    'user': student,
+                    'state': state,
+                    'description': description,
+                    'belly_draught': belly_draught,
+                    'total_score': total_score,
+                    'turnik': turnik,
+                    'patience_1000m': patience_1000m,
+                    'speed_100m': speed_100m,
+                    'quickness': quickness,
+                    'flexible': flexible,
+                    'updated_user': request.user if request.user.is_authenticated else None
+                }
+
+                created = PhysqueUser.objects.update_or_create(
+                    user=student,
+                    defaults=physque_user_data
+                )
+
+                correct_datas.append({
+                    'state': state,
+                    'register_num': register_num,
+                    'description': description,
+                    'belly_draught': belly_draught,
+                    'total_score': total_score,
+                    'turnik': turnik,
+                    'patience_1000m': patience_1000m,
+                    'speed_100m': speed_100m,
+                    'quickness': quickness,
+                    'flexible': flexible,
+                    'created' if created else 'updated': True
+                })
+
+            if file:
+                remove_folder(full_path)
+
+        except Exception as e:
+            print(e)
+            return request.send_error('ERR_012')
+
+        return_datas = {
+            'create_datas': correct_datas,
+            'all_error_datas': error_datas,
+            'file_name': file.name,
+            'not_found_student': error_datas,
+        }
+        return request.send_data(return_datas)
+
+
+class ElseltPhysicalExcelPostDataAPIView(
+    generics.GenericAPIView
+):
+    """ Дата оруулах  """
+
+    @transaction.atomic()
+    def post(self, request):
+        datas = request.data
+        all_datas = list()
+
+        try:
+            for created_data in datas:
+                description = created_data.get('Тайлбар') or 0
+                belly_draught = created_data.get('Гэдэсний таталт') or 0
+                state = created_data.get('Үзлэгийн төлөв')
+                total_score = created_data.get('Нийт оноо')
+                turnik = created_data.get('Савлуурт суниах')
+                patience_1000m = created_data.get('Тэсвэр 1000М')
+                speed_100m = created_data.get('Хурд 100М')
+                quickness = created_data.get('Авхаалж самбаа')
+                flexible = created_data.get('Уян хатан')
+
+                qs = PhysqueUser(
+                    description=description,
+                    belly_draught=belly_draught,
+                    state=state,
+                    total_score=total_score,
+                    turnik=turnik,
+                    patience_1000m=patience_1000m,
+                    speed_100m=speed_100m,
+                    quickness=quickness,
+                    flexible=flexible,
+                )
+                all_datas.append(qs)
+
+        except Exception as e:
+            print(e)
+            return request.send_error('ERR_002')
+
+        return request.send_info("INF_001")
 
  # -------------------Элсэгчдийн нарийн мэргэжилийн шатны эрүүл мэндийн үзлэг-------------------------#
 class ElseltHealthPhysicalCreateAPIView(
@@ -1819,6 +1987,11 @@ class ElseltStateApprove(
 
     def get(self, request):
         " тэнцсэн элсэгчидын жагсаалт "
+        user = request.user.id
+        employee_sub_org_id = Employee.objects.filter(user=user).values_list('sub_org', flat=True).first()
+
+        if employee_sub_org_id == 21:
+            self.queryset = self.queryset.filter(profession__profession__school=employee_sub_org_id)
 
         all_data = self.list(request).data
         return request.send_data(all_data)
@@ -2146,8 +2319,12 @@ class AdmissionUserMessageAPIView(
 
         return queryset
 
-
     def get(self, request):
+        user = request.user.id
+        employee_sub_org_id = Employee.objects.filter(user=user).values_list('sub_org', flat=True).first()
+
+        if employee_sub_org_id == 21:
+            self.queryset = self.queryset.filter(send_user__employee__sub_org=employee_sub_org_id)
 
         send_data = self.list(request).data
 
@@ -2274,16 +2451,18 @@ class AdmissionJusticeListAPIView(
         return queryset
 
     def get(self, request, pk=None):
+            user = request.user.id
+            employee_sub_org_id = Employee.objects.filter(user=user).values_list('sub_org', flat=True).first()
 
-        if pk:
+            if employee_sub_org_id == 21:
+                self.queryset = self.queryset.filter(profession__profession__school=employee_sub_org_id)
 
-            all_data = self.retrieve(request, pk).data
+            if pk:
+                all_data = self.retrieve(request, pk).data
+                return request.send_data(all_data)
 
+            all_data = self.list(request).data
             return request.send_data(all_data)
-
-        all_data = self.list(request).data
-
-        return request.send_data(all_data)
 
     def put(self, request):
 
@@ -2387,13 +2566,18 @@ class ConversationUserSerializerAPIView(
         return queryset
 
     def get(self, request, pk=None):
+            user = request.user.id
+            employee_sub_org_id = Employee.objects.filter(user=user).values_list('sub_org', flat=True).first()
 
-        if pk:
-            all_data = self.retrieve(request, pk).data
+            if employee_sub_org_id == 21:
+                self.queryset = self.queryset.filter(profession__profession__school=employee_sub_org_id)
+
+            if pk:
+                all_data = self.retrieve(request, pk).data
+                return request.send_data(all_data)
+
+            all_data = self.list(request).data
             return request.send_data(all_data)
-
-        all_data = self.list(request).data
-        return request.send_data(all_data)
 
     def post(self, request):
 
@@ -3451,16 +3635,19 @@ class EyeshOrderUserInfoAPIView(
 
         return queryset
 
-    def get(self, request, pk = None):
+    def get(self, request, pk=None):
+            user = request.user.id
+            employee_sub_org_id = Employee.objects.filter(user=user).values_list('sub_org', flat=True).first()
 
-        if pk:
-            all_data = self.retrieve(request, pk).data
+            if employee_sub_org_id == 21:
+                self.queryset = self.queryset.filter(profession__profession__school=employee_sub_org_id)
 
+            if pk:
+                all_data = self.retrieve(request, pk).data
+                return request.send_data(all_data)
+
+            all_data = self.list(request).data
             return request.send_data(all_data)
-
-        all_data = self.list(request).data
-
-        return request.send_data(all_data)
 
     def put(self, request, pk=None):
 

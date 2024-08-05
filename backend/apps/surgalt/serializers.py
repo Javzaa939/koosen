@@ -583,11 +583,11 @@ class StudentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Student
-        fields = ["id", "code", "full_name", "group"]
+        fields = ["id", "code", "last_name", "first_name", "full_name"]
 
     def get_full_name(self, obj):
 
-        return obj.full_name
+        return obj.full_name()
 
 class ChallengeQuestionListSerializer(serializers.ModelSerializer):
 
@@ -868,9 +868,6 @@ class ProfessionDefinitionJustProfessionSerializer(serializers.ModelSerializer):
 
 
 class PsychologicalTestSerializer(serializers.ModelSerializer):
-    start_date = DateOnlyField()
-    end_date = DateOnlyField()
-
     class Meta:
         model = PsychologicalTest
         exclude = ['questions']
@@ -897,23 +894,27 @@ class PsychologicalTestScopeSerializer(serializers.ModelSerializer):
 
 
 class TeachersSerializer(serializers.ModelSerializer):
+    full_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Teachers
-        fields = ["id", "register", "last_name", "first_name"]
+        fields = ["id", "register", "last_name", "first_name", "full_name"]
 
-class StudentSerializer(serializers.ModelSerializer):
+    def get_full_name(self, obj):
 
-    class Meta:
-        model = Student
-        fields = ['id', 'code', 'last_name', 'first_name', 'group']
+        return obj.full_name
 
 
 class ElsegchSerializer(serializers.ModelSerializer):
+    full_name = serializers.SerializerMethodField()
 
     class Meta:
         model = ElseltUser
-        fields = ["id", "code", "last_name", "first_name"]
+        fields = ["id", "code", "register", "last_name", "first_name", "full_name"]
+
+    def get_full_name(self, obj):
+
+        return obj.full_name
 
 
 class PsychologicalTestResultSerializer(serializers.ModelSerializer):
