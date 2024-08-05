@@ -279,6 +279,7 @@ class UserForgotPasswordAPI(
             school = Employee.objects.filter(user=user.id).values_list('org', flat=True).first()
             if not school:
                 school = Teachers.objects.filter(user=school).values_list('org', flat=True).first()
+        # NOTE Student never login this system.
         else:
             user = Student.objects.filter(email=email).first()
             if user:
@@ -287,6 +288,7 @@ class UserForgotPasswordAPI(
                 return request.send_info('INF_001')
         if not school:
             return request.send_info('INF_001')
+
         school = Schools.objects.filter(id=school).values('email_password', 'email_port', 'email_host', 'email_use_tls', 'email_host_user').first()
         if not school:
             return request.send_info('INF_001')
