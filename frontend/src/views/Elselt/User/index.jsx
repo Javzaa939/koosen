@@ -486,6 +486,7 @@ const ElseltUser = () => {
                 stateModal={stateModal}
                 selectedStudents={selectedStudents}
                 stateop={stateop}
+                first_state={true}
             />
             <EmailModal
                 emailModalHandler={emailModalHandler}
@@ -775,7 +776,7 @@ const ElseltUser = () => {
                                 onClick={() => stateModalHandler()}
                             >
                                 <RiEditFill className='me-25'/>
-                                Төлөв солих
+                                Анхны төлөв солих
                             </Button>
                             <UncontrolledTooltip target='state_button'>
                                 Доорхи сонгосон элсэгчдийн төлөвийг нэг дор солих

@@ -7,7 +7,7 @@ import useLoader from '@hooks/useLoader';
 
 import { validateSchema } from './validateSchema';
 
-function StateModal({ stateModalHandler, stateModal, selectedStudents, stateop, getDatas }) {
+function StateModal({ stateModalHandler, stateModal, selectedStudents, stateop, getDatas, first_state=false }) {
 
     const { formState: { errors }, handleSubmit, control, reset } = useForm(validate(validateSchema));
     const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true});
@@ -18,6 +18,7 @@ function StateModal({ stateModalHandler, stateModal, selectedStudents, stateop, 
 
     async function onSubmit(cdata){
         cdata['students'] = selectedStudents.map(val => val?.id) || [];
+        cdata['first_state'] = first_state
         const { success } = await fetchData(admissionStateChangeApi.put(cdata));
         if (success) {
             reset();

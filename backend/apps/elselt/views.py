@@ -623,16 +623,22 @@ class AdmissionUserAllChange(
                             user=student.user,
                             type=StateChangeLog.STATE,
                             indicator=AdmissionIndicator.TENTSSEN_ELSEGCHID,
-                            now_state=student.state,
+                            now_state=student.first_state if data.get('first_state') else student.state,
                             change_state=data.get("state"),
                             updated_user=request.user if request.user.is_authenticated else None,
                             updated_at=now
                         )
+                if data.get('first_state'):
+                    self.queryset.filter(pk__in=data["students"]).update(
+                        first_state=data.get("state"),
+                        first_description=data.get("state_description")
+                    )
+                else:
+                    self.queryset.filter(pk__in=data["students"]).update(
+                        state=data.get("state"),
+                        state_description=data.get("state_description")
+                    )
 
-                self.queryset.filter(pk__in=data["students"]).update(
-                    state=data.get("state"),
-                    state_description=data.get("state_description")
-                )
         except Exception as e:
             transaction.savepoint_rollback(sid)
             return request.send_error("ERR_002", e.__str__)
