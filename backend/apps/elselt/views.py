@@ -3756,6 +3756,7 @@ class EyeshOrderUserInfoAPIView(
 
                 new_data = {
                     'score_avg': score_avg,
+                    'yesh_state': 2,
                     'updated_user': request.user.id if request.user.is_authenticated else None
                 }
 
