@@ -3618,7 +3618,7 @@ class EyeshOrderUserInfoAPIView(
         prof_ids = AdmissionRegisterProfession.objects.filter(admission=6).values_list('id', flat=True)
 
         # just get admission = 6 users
-        queryset = self.queryset.filter(profession__in=prof_ids)
+        queryset = queryset.filter(profession__in=prof_ids)
 
         # filter for state approved in HealthUpUser only
         user_ids = HealthUpUser.objects.filter(state=2).values_list('user', flat=True)
@@ -3728,8 +3728,12 @@ class EyeshOrderUserInfoAPIView(
                     })
                     continue
 
+                # filter for admission 6 in AdmissionRegister only
+                prof_ids = AdmissionRegisterProfession.objects.filter(admission=6).values_list('id', flat=True)
+
                 target_instance = AdmissionUserProfession.objects.filter(
-                    user=student
+                    user=student,
+                    profession__in=prof_ids
                 )
 
                 if created_at:
