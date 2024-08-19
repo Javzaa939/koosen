@@ -17,6 +17,7 @@ from django.db.models import F, Subquery, OuterRef, Count, Q, Sum, Exists
 from django.db.models import Value, Case, When, IntegerField
 from django.db.models.functions import Substr, Cast
 from django.conf import settings
+from django.utils.dateparse import parse_datetime
 
 from main.utils.function.utils import (
     json_load,
@@ -3714,6 +3715,7 @@ class EyeshOrderUserInfoAPIView(
             for created_data in datas:
                 register_num = created_data.get('РД')
                 score_avg = created_data.get('МХ оноо')
+                created_at = created_data.get('Бүртгүүлсэн огноо')
 
                 # Already exists шалгах
                 student = ElseltUser.objects.filter(register=register_num).first()
@@ -3726,7 +3728,18 @@ class EyeshOrderUserInfoAPIView(
 
                 target_instance = AdmissionUserProfession.objects.filter(
                     user=student
-                ).first()
+                )
+
+                if created_at:
+                    created_at = parse_datetime(created_at)
+                    end_time = created_at + dt.timedelta(seconds=1)
+                    if created_at:
+                        target_instance = target_instance.filter(
+                            created_at__gte=created_at,
+                            created_at__lt=end_time
+                        )
+
+                target_instance = target_instance.first()
 
                 if not target_instance:
                     error_datas.append({
