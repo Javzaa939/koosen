@@ -2528,7 +2528,7 @@ class ConversationUserSerializerAPIView(
         end_date=self.request.query_params.get('end_date')
 
         # Бие бялдарт тэнцсэн элсэгчид
-        biy_byldar_ids = PhysqueUser.objects.filter(state=AdmissionUserProfession.STATE_APPROVE).values_list('user',flat=True)
+        biy_byldar_ids = HealthUpUser.objects.filter(state=AdmissionUserProfession.STATE_APPROVE).values_list('user',flat=True)
         queryset = queryset.filter(user__in=biy_byldar_ids)
 
         # Sort хийх үед ажиллана
