@@ -1530,7 +1530,9 @@ function useApi(isDisplay=false) {
 			getParticipants: (limit, page, search, test_id) => instance.get(`learning/psychological_test_result_participants/?page=${page}&limit=${limit}&search=${search}&test_id=${test_id}`),
 			getResult: (cdata) => instance.post(`learning/psychological_test_result_show/`,cdata),
 
-			excelResult:() => instance.get(`learning/psychological_test_result_excel/`)
+			excelResult:(adm) => instance.get(`learning/psychological_test_result_excel/?adm=${adm}`),
+			iqExcelResult:(adm)=>instance.get(`learning/iq_test_result_excel/?adm=${adm}`)
+
 		}
 
 	},

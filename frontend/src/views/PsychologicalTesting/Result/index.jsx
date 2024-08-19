@@ -23,6 +23,7 @@ import Elsegch from './Elsegch';
 function Result() {
     const [active, setActive] = useState('1')
     const [component, setComponent] = useState('')
+    const [adm, setAdm] = useState('')
 
     const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: false });
 
@@ -35,7 +36,7 @@ function Result() {
         {
             activeId: 2,
             name: 'Элсэгч',
-            component: <Elsegch scope={active} />
+            component: <Elsegch scope={active} adm={adm} setAdm={setAdm}/>
         },
         {
             activeId: 3,
@@ -56,14 +57,14 @@ function Result() {
     const excelApi = useApi().challenge.psychologicalTestResult
 
     async function resultExcelReport() {
-        const { success, data } = await fetchData(excelApi.excelResult());
+        const { success, data } = await fetchData(excelApi.excelResult(adm));
         if (success) {
             downloadExcelReport(data)
         }
     }
 
     async function IQresultExcelReport(){
-        const {success,data} = await fetchData(excelApi.iqExcelResult());
+        const {success,data} = await fetchData(excelApi.iqExcelResult(adm));
         if(success){
             downloadIQExcelReport(data)
         }
@@ -97,6 +98,7 @@ function Result() {
                     <Col className="me-2 d-flex justify-content-end gap-1">
                         <Button
                             color='primary'
+                            disabled={adm ? false : true}
                             className='d-flex align-items-center px-75'
                             id='test_button'
                             onClick={() => IQresultExcelReport()}
@@ -111,6 +113,7 @@ function Result() {
                             color='primary'
                             className='d-flex align-items-center px-75'
                             id='state_button'
+                            disabled={adm ? false : true}
                             onClick={() => resultExcelReport()}
                         >
                             <RiDownloadFill className='me-25' />

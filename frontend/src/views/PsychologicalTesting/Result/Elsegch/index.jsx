@@ -4,6 +4,8 @@ import {getPagination} from '@utils';
 import {getColumns} from './helpers';
 import {useForm} from 'react-hook-form';
 
+import Select from 'react-select'
+import classnames from "classnames";
 import {
     Row,
     Col,
@@ -25,9 +27,9 @@ import {
 import DataTable from 'react-data-table-component';
 import useLoader from '@hooks/useLoader';
 import useApi from '@hooks/useApi';
+import { ReactSelectStyles } from '@utils'
 
-
-function Elsegch({scope}){
+function Elsegch({scope, adm, setAdm}){
 
     // Translation
     const {t} = useTranslation();
@@ -48,9 +50,19 @@ function Elsegch({scope}){
 
     // Data States
     const [datas, setDatas] = useState([]);
+    
+    const [admop, setAdmop] = useState([])
 
     // Api
     const examApi = useApi().challenge.psychologicalTestResult
+    const admissionYearApi = useApi().elselt
+
+    async function getAdmissionYear() {
+        const { success, data } = await fetchData(admissionYearApi.getAll())
+        if (success) {
+            setAdmop(data)
+        }
+	}
 
     //----------Backend-тэй харьцах функцууд----------//
     async function getDatas(){
@@ -109,6 +121,14 @@ function Elsegch({scope}){
     },[rowsPerPage, currentPage])
     //----------END----------//
 
+    useEffect(
+        () =>
+        {
+            getAdmissionYear()
+        },
+        [scope]
+    )
+
     return(
         <Fragment>
             <Card>
@@ -117,6 +137,31 @@ function Elsegch({scope}){
                     <CardTitle tag="h4">{t("Сэтгэл зүйн сорил үр дүн")}</CardTitle>
                 </CardHeader>
                 <CardBody>
+                    <Row>
+                        <Col md={4}>
+                            <Label className="form-label" for="lesson_year">
+                                {t('Элсэлт')}
+                            </Label>
+                            <Select
+                                name="lesson_year"
+                                id="lesson_year"
+                                classNamePrefix='select'
+                                isClearable
+                                className={classnames('react-select')}
+                                isLoading={isLoading}
+                                placeholder={t('-- Сонгоно уу --')}
+                                options={admop || []}
+                                value={admop.find((c) => c.id === adm)}
+                                noOptionsMessage={() => t('Хоосон байна.')}
+                                onChange={(val) => {
+                                    setAdm(val?.id || '')
+                                }}
+                                styles={ReactSelectStyles}
+                                getOptionValue={(option) => option.id}
+                                getOptionLabel={(option) => option.lesson_year + ' ' + option.name}
+                            />
+                        </Col>
+                    </Row>
                     <Row className='mt-1 d-flex justify-content-between mx-0'>
                         <Col className='d-flex align-items-center justify-content-start '>
                             <Col md={2} sm={3} className='pe-1'>
