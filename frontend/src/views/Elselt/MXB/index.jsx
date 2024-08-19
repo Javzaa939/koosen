@@ -46,18 +46,12 @@ const MXB = () => {
 	const [rowsPerPage, setRowsPerPage] = useState(20)
 
 	//Элсэлт state
-	const [admop, setAdmop] = useState([])
 	const [adm, setAdm] = useState('')
 
 	//Хөтөлбөр state
 	const [profOption, setProfession] = useState([])
-	const [profession_id, setProfession_id] = useState('')
-
-	//gender state
-	const [gender, setGender] = useState('')
 
 	//төлөв state
-	const [state, setState] = useState('')
 	const [emailModal, setEmailModal] = useState(false)
 	const [messageModal, setMessageModal] = useState(false)
 	const [selectedStudents, setSelectedStudents] = useState([])
@@ -77,8 +71,7 @@ const MXB = () => {
 			'name': 'ТЭНЦЭЭГҮЙ'
 		}
 	]
-	const [yesh_state, setEyeshState] = useState()
-	const [yesh_mhb_state, setEyeshMhbState] = useState()
+	const [yesh_mhb_state, setEyeshMhbState] = useState('')
 	//Жагсаалт дата
 	const [datas, setDatas] = useState([])
 	const [total_count, setTotalCount] = useState('')
@@ -86,42 +79,14 @@ const MXB = () => {
 
 	//Modal
 	const [addModal, setAddModal] = useState(false)
-	const [addModalData, setAddModalData] = useState(null)
 
 	// API
 	const professionApi = useApi().elselt.profession
-	const admissionYearApi = useApi().elselt
-	const elseltApi = useApi().elselt.eyesh_order
-	const elseltEyeshApi = useApi().elselt.eyesh;
+	const elseltApi = useApi().elselt.mhb
 
     // excel file import
     const [open_file, setFileModal] = useState(false)
     const [file, setFile] = useState(false)
-	const genderOp = [
-		{
-			id: 1,
-			name: 'Эрэгтэй',
-		},
-		{
-			id: 2,
-			name: 'Эмэгтэй'
-		}
-	]
-
-	const stateop = [
-		{
-			'id': 1,
-			'name': 'БҮРТГҮҮЛСЭН'
-		},
-		{
-			'id': 2,
-			'name': 'ТЭНЦСЭН'
-		},
-		{
-			'id': 3,
-			'name': 'ТЭНЦЭЭГҮЙ'
-		}
-	]
 
 	// Эрэмбэлэлт
 	const [sortField, setSort] = useState('')
@@ -150,17 +115,9 @@ const MXB = () => {
 		}
 	}
 
-	// Элсэлтийн жагсаалт авах
-	async function getAdmissionYear() {
-		const { success, data } = await fetchData(admissionYearApi.getAll())
-		if (success) {
-			setAdmop(data)
-		}
-	}
-
 	/* Жагсаалтын дата авах функц */
 	async function getDatas() {
-		const { success, data } = await allFetch(elseltApi.get(rowsPerPage, currentPage, searchValue, adm, profession_id, gender, state, yesh_state, yesh_mhb_state))
+		const { success, data } = await allFetch(elseltApi.get(rowsPerPage, currentPage, searchValue, yesh_mhb_state))
 		if (success) {
 			setTotalCount(data?.count)
 			setDatas(data?.results)
@@ -169,11 +126,6 @@ const MXB = () => {
 			setPageCount(cpage_count)
 		}
 	}
-
-	// useEffect(() => {
-	// 	getAdmissionYear()
-	// 	getProfession()
-	// }, [])
 
 	useEffect(() => {
 		if (searchValue.length == 0) {
@@ -185,16 +137,11 @@ const MXB = () => {
 
 			return () => clearTimeout(timeoutId);
 		}
-	}, [sortField, currentPage, rowsPerPage, searchValue, adm, profession_id, gender, state, yesh_state, yesh_mhb_state])
+	}, [sortField, currentPage, rowsPerPage, searchValue, adm, yesh_mhb_state])
 
 	useUpdateEffect(() => {
 		getProfession()
 	}, [adm])
-
-	const getStateName = (stateId) => {
-		const state = stateop.find(item => item.id === stateId);
-		return state ? state.name : '';
-	};
 
 	function convert() {
 		const mainData = datas.map((data, idx) => {
@@ -470,10 +417,10 @@ const MXB = () => {
 							isLoading={isLoading}
 							placeholder={t('-- Сонгоно уу --')}
 							options={tentssenEsehOp || []}
-							value={tentssenEsehOp.find((c) => c.id === yesh_state)}
+							value={tentssenEsehOp.find((c) => c.id === yesh_mhb_state)}
 							noOptionsMessage={() => t('Хоосон байна.')}
 							onChange={(val) => {
-								setEyeshState(val?.id || '')
+								setEyeshMhbState(val?.id || '')
 							}}
 							styles={ReactSelectStyles}
 							getOptionValue={(option) => option.id}
