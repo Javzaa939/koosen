@@ -1803,11 +1803,12 @@ function useApi(isDisplay=false) {
 		eyesh:{
 			get : (elselt, profession_id) => instance.get(`/elselt/eyesh/?&elselt=${elselt}&profession=${profession_id}`)
 		},
-		// ЭЕШ хэсгийн жагсаалт татах
+		// ЭЕШ хэсгийн жагсаалт татахebackend/apps/surgalt/views.py
 		eyesh_order:{
 			put: (id, cdata) => instance.put(`/elselt/admissionuserdata/eyesh/${id}/`, cdata),
 			get: (limit, page, search, lesson_year_id, profession_id , gender, state, yesh_state, yesh_mhb_state) =>
 				instance.get(`/elselt/admissionuserdata/eyesh/?page=${page}&limit=${limit}&search=${search}&elselt=${lesson_year_id}&profession=${profession_id}&gender=${gender}&state=${state}&yesh_state=${yesh_state}&yesh_mhb_state=${yesh_mhb_state}`),
+			postExcelImport: (cdata) => instance.post(`/elselt/admissionuserdata/eyesh/`, cdata),
 		},
 		able: {
 			getWorker: () => able_instance.get(`/?a=ableApi&tsk=getWorkers&key=uia`),

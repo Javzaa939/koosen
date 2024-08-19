@@ -17,6 +17,7 @@ from django.db.models import F, Subquery, OuterRef, Count, Q, Sum, Exists
 from django.db.models import Value, Case, When, IntegerField
 from django.db.models.functions import Substr, Cast
 from django.conf import settings
+from django.utils.dateparse import parse_datetime
 
 from main.utils.function.utils import (
     json_load,
@@ -3601,7 +3602,7 @@ class EyeshOrderUserInfoAPIView(
 ):
     """ Элсэгчийн ЭЕШ ийн оноо жагсаалт харуулах """
 
-    queryset = AdmissionUserProfession.objects.all().order_by('order_no')
+    queryset = AdmissionUserProfession.objects.all().order_by('-score_avg')
 
     serializer_class = EyeshOrderUserInfoSerializer
     pagination_class = CustomPagination
@@ -3612,6 +3613,17 @@ class EyeshOrderUserInfoAPIView(
     def get_queryset(self):
         user_ids = UserScore.objects.values_list('user', flat=True)
         queryset = self.queryset.filter(user__in=user_ids)
+
+        # filter for admission 6 in AdmissionRegister only
+        prof_ids = AdmissionRegisterProfession.objects.filter(admission=6).values_list('id', flat=True)
+
+        # just get admission = 6 users
+        queryset = self.queryset.filter(profession__in=prof_ids)
+
+        # filter for state approved in HealthUpUser only
+        user_ids = HealthUpUser.objects.filter(state=2).values_list('user', flat=True)
+        queryset = queryset.filter(user__in=user_ids)
+
         queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
         gender = self.request.query_params.get('gender')
         # queryset = queryset.filter(state__in=[AdmissionUserProfession.STATE_SEND, AdmissionUserProfession.STATE_APPROVE])
@@ -3686,6 +3698,93 @@ class EyeshOrderUserInfoAPIView(
             return request.send_error("ERR_004", str(e))
 
         return request.send_info('INF_002')
+
+    @transaction.atomic()
+    def post(self, request):
+        datas = request.data
+        file = datas.get("file")
+
+        path = save_file(file, 'student', 1)
+        full_path = os.path.join(settings.MEDIA_ROOT, str(path))
+        error_datas = list()
+        correct_datas = list()
+
+        try:
+            excel_data = pd.read_excel(full_path)
+            excel_data = excel_data.fillna(0)
+            datas = excel_data.to_dict(orient='records')
+
+            for created_data in datas:
+                register_num = created_data.get('РД')
+                score_avg = created_data.get('МХ оноо')
+                created_at = created_data.get('Бүртгүүлсэн огноо')
+
+                # Already exists шалгах
+                student = ElseltUser.objects.filter(register=register_num).first()
+                if not student:
+                    error_datas.append({
+                        'register_num': register_num,
+                        'message': 'Student not found'
+                    })
+                    continue
+
+                target_instance = AdmissionUserProfession.objects.filter(
+                    user=student
+                )
+
+                if created_at:
+                    created_at = parse_datetime(created_at)
+                    end_time = created_at + dt.timedelta(seconds=1)
+                    if created_at:
+                        target_instance = target_instance.filter(
+                            created_at__gte=created_at,
+                            created_at__lt=end_time
+                        )
+
+                target_instance = target_instance.first()
+
+                if not target_instance:
+                    error_datas.append({
+                        'register_num': register_num,
+                        'message': 'Student not found'
+                    })
+                    continue
+
+                new_data = {
+                    'score_avg': score_avg,
+                    'yesh_state': 2,
+                    'updated_user': request.user.id if request.user.is_authenticated else None
+                }
+
+                serializer = EyeshOrderUserInfoSerializer(instance=target_instance, data=new_data, partial=True)
+                if not serializer.is_valid():
+                    error_datas.append({
+                        'register_num': register_num,
+                        'message': serializer.errors
+                    })
+                    continue
+                serializer.save()
+
+                correct_datas.append({
+                    'register_num': register_num,
+                    'score_avg': score_avg,
+                    'updated': True
+                })
+
+            if file:
+                remove_folder(full_path)
+
+        except Exception as e:
+            print(e)
+            return request.send_error('ERR_012')
+
+        return_datas = {
+            'create_datas': correct_datas,
+            'all_error_datas': error_datas,
+            'file_name': file.name,
+        }
+
+        return request.send_data(return_datas)
 
 
 @permission_classes([IsAuthenticated])

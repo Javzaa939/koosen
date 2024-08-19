@@ -653,6 +653,10 @@ permissions = [
         'name' : 'lms-elselt-healthup-read',
         'description' : 'Элсэлтийн систем эрүүл мэнд нарийн мэргэжил цэс'
     },
+     {
+        'name' : 'lms-elselt-mhb-read',
+        'description' : 'Элсэлтийн монгол хэлний шалгалт цэс'
+    },
     {
         'name' : 'lms-elselt-physical-read',
         'description' : 'Элсэлтийн систем бие бялдар цэс'
