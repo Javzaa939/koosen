@@ -123,16 +123,6 @@ export function getColumns(currentPage, rowsPerPage, total_count, addModalHandle
 		{
 			maxWidth: "180px",
 			minWidth: "180px",
-			header: 'order',
-			name: t("Эрэмбэ"),
-			reorder: true,
-			sortable: true,
-			selector: (row) => row?.order_no,
-			center: true
-		},
-		{
-			maxWidth: "180px",
-			minWidth: "180px",
 			header: 'phone',
 			name: t("Утас"),
 			reorder: true,

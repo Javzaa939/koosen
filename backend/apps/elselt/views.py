@@ -3602,7 +3602,7 @@ class EyeshOrderUserInfoAPIView(
 ):
     """ Элсэгчийн ЭЕШ ийн оноо жагсаалт харуулах """
 
-    queryset = AdmissionUserProfession.objects.all().order_by('order_no')
+    queryset = AdmissionUserProfession.objects.all().order_by('-score_avg')
 
     serializer_class = EyeshOrderUserInfoSerializer
     pagination_class = CustomPagination
@@ -3614,13 +3614,15 @@ class EyeshOrderUserInfoAPIView(
         user_ids = UserScore.objects.values_list('user', flat=True)
         queryset = self.queryset.filter(user__in=user_ids)
 
-        # filter for state approved in HealthUpUser only
-        user_ids = HealthUpUser.objects.filter(state=2).values_list('user', flat=True)
-        queryset = self.queryset.filter(user__in=user_ids)
-
         # filter for admission 6 in AdmissionRegister only
         prof_ids = AdmissionRegisterProfession.objects.filter(admission=6).values_list('id', flat=True)
+
+        # just get admission = 6 users
         queryset = self.queryset.filter(profession__in=prof_ids)
+
+        # filter for state approved in HealthUpUser only
+        user_ids = HealthUpUser.objects.filter(state=2).values_list('user', flat=True)
+        queryset = queryset.filter(user__in=user_ids)
 
         queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
         gender = self.request.query_params.get('gender')
@@ -3780,6 +3782,7 @@ class EyeshOrderUserInfoAPIView(
             'all_error_datas': error_datas,
             'file_name': file.name,
         }
+
         return request.send_data(return_datas)
 
 

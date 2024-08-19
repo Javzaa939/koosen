@@ -3,7 +3,6 @@ import { Fragment, useState, useEffect, useContext } from 'react'
 import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, Spinner, UncontrolledTooltip } from 'reactstrap'
 
 import { ChevronDown, Plus, Search, UploadCloud } from 'react-feather'
-import { MdMailOutline } from "react-icons/md";
 import { BiMessageRoundedError } from "react-icons/bi";
 import { HiOutlineDocumentReport } from "react-icons/hi";
 import moment from 'moment';
@@ -24,17 +23,13 @@ import Select from 'react-select'
 import useApi from '@hooks/useApi';
 
 import useLoader from '@hooks/useLoader';
-import OrderModal from './OrderModal';
 import EmailModal from '../User/EmailModal';
 import MessageModal from '../User/MessageModal';
 
 import AuthContext from "@context/AuthContext"
 
-import { SortModal } from './SortModal'
 import useUpdateEffect from '@hooks/useUpdateEffect';
-import AddModal from './AddModal';
 import FileModal from '@src/components/FileModal';
-
 
 const MXB = () => {
 	const { user } = useContext(AuthContext)
@@ -87,17 +82,9 @@ const MXB = () => {
 	//Жагсаалт дата
 	const [datas, setDatas] = useState([])
 	const [total_count, setTotalCount] = useState('')
-	// ЭЕШ дата
-	const [eyeshData, setEyeshData] = useState([])
-
-	const [selectedAdmission, setSelectedAdmission] = useState(null);
-	const [selectedProfession, setSelectedProfession] = useState(null);
 	const [modal, setModal] = useState(false)
-	const [type, setType] = useState('')
-	const [editData, setEditData] = useState([])
 
 	//Modal
-	const [orderModal, setOrderModal] = useState(false)
 	const [addModal, setAddModal] = useState(false)
 	const [addModalData, setAddModalData] = useState(null)
 
@@ -171,15 +158,6 @@ const MXB = () => {
 		}
 	}
 
-	// Хөтөлбөрөөр нь эеш оноо татаж авах
-	async function getEyeshData() {
-		const { success, data } = await fetchData(elseltEyeshApi.get(adm, profession_id));
-		if (success) {
-			setEyeshData(data)
-			orderModalHandler()
-		}
-	}
-
 	/* Жагсаалтын дата авах функц */
 	async function getDatas() {
 		const { success, data } = await allFetch(elseltApi.get(rowsPerPage, currentPage, searchValue, adm, profession_id, gender, state, yesh_state, yesh_mhb_state))
@@ -192,10 +170,10 @@ const MXB = () => {
 		}
 	}
 
-	useEffect(() => {
-		getAdmissionYear()
-		getProfession()
-	}, [])
+	// useEffect(() => {
+	// 	getAdmissionYear()
+	// 	getProfession()
+	// }, [])
 
 	useEffect(() => {
 		if (searchValue.length == 0) {
@@ -228,12 +206,7 @@ const MXB = () => {
 					'РД': data?.user?.register || '',
 					'Нас': data?.age || '',
 					'Хүйс': data?.gender || '',
-					'ЭЕШ шалгуур': getStateName(data?.yesh_state) || '',
 					'МХ оноо': data?.score_avg || '',
-					'ЭЕШ Эрэмбэ': data?.order_no || '',
-					'ЭЕШ тайлбар': data?.yesh_description || '',
-					'МХБ шалгуур': getStateName(data?.yesh_mhb_state) || '',
-					'МХБ тайлбар': data?.yesh_mhb_description || '',
 					'Имейл': data?.user?.email || '',
 					'Утасны дугаар': data?.user?.mobile || '',
 					'Яаралтай холбогдох': data?.user?.parent_mobile || '',
@@ -259,19 +232,12 @@ const MXB = () => {
 			'РД',
 			'Нас',
 			'Хүйс',
-			'ЭЕШ шалгуур',
 			'МХ оноо',
-			'ЭЕШ Эрэмбэ',
-			'ЭЕШ тайлбар',
-			'МХБ шалгуур',
-			'МХБ тайлбар',
 			'Имейл',
 			'Утасны дугаар',
 			'Яаралтай холбогдох',
 			'Хөтөлбөр',
 			'Бүртгүүлсэн огноо',
-
-
 		];
 
 		utils.sheet_add_aoa(worksheet, [staticCells], { origin: "A1" });
@@ -421,11 +387,6 @@ const MXB = () => {
         }
     }
 
-	// Order modal toggle function
-	function orderModalHandler() {
-		setOrderModal(!orderModal);
-	}
-
 	//EMail modal toggle function
 	function emailModalHandler() {
 		setEmailModal(!emailModal)
@@ -443,7 +404,6 @@ const MXB = () => {
 
     function addModalHandler(e, data) {
         setAddModal(!addModal)
-        setAddModalData(data || null)
     }
 
 	// User details button handler
@@ -453,13 +413,6 @@ const MXB = () => {
 
 	return (
 		<Fragment>
-			<OrderModal
-				gpaModalHandler={orderModalHandler}
-				gpaModal={orderModal}
-				data={eyeshData}
-				gplesson_year={selectedAdmission?.name || ''}
-				profession_name={selectedProfession?.name || ''}
-			/>
 			<EmailModal
 				emailModalHandler={emailModalHandler}
 				emailModal={emailModal}
@@ -472,16 +425,6 @@ const MXB = () => {
 				selectedStudents={selectedStudents}
 				getDatas={getDatas}
 			/>
-			{
-				addModal &&
-				<AddModal
-					addModal={addModal}
-					addModalHandler={addModalHandler}
-					addModalData={addModalData}
-					getDatas={getDatas}
-					stateop={stateop}
-				/>
-			}
             {open_file &&
                 <FileModal
                     isOpen={open_file}
@@ -657,7 +600,6 @@ const MXB = () => {
 					/>
 				</div>
 			</Card>
-			{modal && <SortModal open={modal} handleModal={handleModal} refreshDatas={getDatas} type={type} editData={editData} />}
 		</Fragment>
 	)
 }
