@@ -2,7 +2,7 @@ import { Fragment, useState, useEffect, useContext } from 'react'
 
 import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, Spinner, UncontrolledTooltip } from 'reactstrap'
 
-import { ChevronDown, Plus, Search } from 'react-feather'
+import { ChevronDown, Plus, Search, UploadCloud } from 'react-feather'
 import { MdMailOutline } from "react-icons/md";
 import { BiMessageRoundedError } from "react-icons/bi";
 import { HiOutlineDocumentReport } from "react-icons/hi";
@@ -33,6 +33,7 @@ import AuthContext from "@context/AuthContext"
 import { SortModal } from './SortModal'
 import useUpdateEffect from '@hooks/useUpdateEffect';
 import AddModal from './AddModal';
+import FileModal from '@src/components/FileModal';
 
 
 const MXB = () => {
@@ -106,6 +107,9 @@ const MXB = () => {
 	const elseltApi = useApi().elselt.eyesh_order
 	const elseltEyeshApi = useApi().elselt.eyesh;
 
+    // excel file import
+    const [open_file, setFileModal] = useState(false)
+    const [file, setFile] = useState(false)
 	const genderOp = [
 		{
 			id: 1,
@@ -225,7 +229,7 @@ const MXB = () => {
 					'Нас': data?.age || '',
 					'Хүйс': data?.gender || '',
 					'ЭЕШ шалгуур': getStateName(data?.yesh_state) || '',
-					'ЭЕШ оноо': data?.score_avg || '',
+					'МХ оноо': data?.score_avg || '',
 					'ЭЕШ Эрэмбэ': data?.order_no || '',
 					'ЭЕШ тайлбар': data?.yesh_description || '',
 					'МХБ шалгуур': getStateName(data?.yesh_mhb_state) || '',
@@ -234,7 +238,7 @@ const MXB = () => {
 					'Утасны дугаар': data?.user?.mobile || '',
 					'Яаралтай холбогдох': data?.user?.parent_mobile || '',
 					'Хөтөлбөр': data?.profession || '',
-					'Бүртгүүлсэн огноо': moment(data?.created_at).format('YYYY-MM-DD HH:SS:MM') || '',
+					'Бүртгүүлсэн огноо': moment(data?.created_at).format('YYYY-MM-DD HH:mm:ss') || '',
 				}
 			)
 		})
@@ -256,7 +260,7 @@ const MXB = () => {
 			'Нас',
 			'Хүйс',
 			'ЭЕШ шалгуур',
-			'ЭЕШ оноо',
+			'МХ оноо',
 			'ЭЕШ Эрэмбэ',
 			'ЭЕШ тайлбар',
 			'МХБ шалгуур',
@@ -391,9 +395,31 @@ const MXB = () => {
 		getDatas()
 	}
 
+    // Файл импорт хийх
+    function handleFileModal() {
+        setFileModal(!open_file)
+        setFile('')
+    }
+
 	function onSelectedRowsChange(state) {
 		setSelectedStudents(state?.selectedRows)
 	}
+
+	// import from excel handler
+    async function onSubmit() {
+        if (file) {
+            const formData = new FormData()
+            formData.append('file', file)
+
+            const { success, data }  = await fetchData(elseltApi.postExcelImport(formData))
+            if (success) {
+                handleFileModal()
+            }
+			if (Array.isArray(data?.all_error_datas) && data.all_error_datas.length === 0) {
+				getDatas()
+			}
+        }
+    }
 
 	// Order modal toggle function
 	function orderModalHandler() {
@@ -456,6 +482,19 @@ const MXB = () => {
 					stateop={stateop}
 				/>
 			}
+            {open_file &&
+                <FileModal
+                    isOpen={open_file}
+                    handleModal={handleFileModal}
+                    isLoading={isLoading}
+                    file={file}
+                    setFile={setFile}
+                    title="Элсэгчдийн МХ оноо мэдээлэл оруулах"
+                    fileAccept='.csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel'
+                    extension={['xlsx']}
+                    onSubmit={onSubmit}
+                />
+            }
 			{isLoading && Loader}
 			<Card>
 				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
@@ -475,77 +514,6 @@ const MXB = () => {
 				</CardHeader>
 				{isTableLoading && TableLoader}
 				<Row className='justify-content-start mx-0 mt-1'>
-					<Col sm={6} lg={3} >
-						<Label className="form-label" for="lesson_year">
-							{t('Элсэлт')}
-						</Label>
-						<Select
-							name="lesson_year"
-							id="lesson_year"
-							classNamePrefix='select'
-							isClearable
-							className={classnames('react-select')}
-							isLoading={isLoading}
-							placeholder={t('-- Сонгоно уу --')}
-							options={admop || []}
-							value={admop.find((c) => c.id === adm)}
-							noOptionsMessage={() => t('Хоосон байна.')}
-							onChange={(val) => {
-								setAdm(val?.id || '')
-								setSelectedAdmission(val);
-							}}
-							styles={ReactSelectStyles}
-							getOptionValue={(option) => option.id}
-							getOptionLabel={(option) => option.lesson_year + ' ' + option.name}
-						/>
-					</Col>
-					<Col sm={6} lg={3} >
-						<Label className="form-label" for="profession">
-							{t('Хөтөлбөр')}
-						</Label>
-						<Select
-							name="profession"
-							id="profession"
-							classNamePrefix='select'
-							isClearable
-							className={classnames('react-select')}
-							isLoading={isLoading}
-							placeholder={t('-- Сонгоно уу --')}
-							options={profOption || []}
-							value={profOption.find((c) => c?.prof_id === profession_id)}
-							noOptionsMessage={() => t('Хоосон байна.')}
-							onChange={(val) => {
-								setProfession_id(val?.id || '')
-								setSelectedProfession(val)
-							}}
-							styles={ReactSelectStyles}
-							getOptionValue={(option) => option?.id}
-							getOptionLabel={(option) => option.name}
-						/>
-					</Col>
-					<Col sm={6} lg={3} >
-						<Label className="form-label" for="genderOp">
-							{t('Хүйс')}
-						</Label>
-						<Select
-							name="genderOp"
-							id="genderOp"
-							classNamePrefix='select'
-							isClearable
-							className={classnames('react-select')}
-							isLoading={isLoading}
-							placeholder={t('-- Сонгоно уу --')}
-							options={genderOp || []}
-							value={genderOp.find((c) => c.name === gender)}
-							noOptionsMessage={() => t('Хоосон байна.')}
-							onChange={(val) => {
-								setGender(val?.name || '')
-							}}
-							styles={ReactSelectStyles}
-							getOptionValue={(option) => option.id}
-							getOptionLabel={(option) => option.name}
-						/>
-					</Col>
 					<Col md={3} sm={6} xs={12} >
 						<Label className="form-label" for="tentssenEsehOp">
 							{t('MX шалгалт онооны төлөв')}
@@ -588,14 +556,22 @@ const MXB = () => {
 							</UncontrolledTooltip>
 						</div>
 					</div>
-					<div className='px-1'>
-						<Button color='primary' className='d-flex align-items-center px-75' id='excel_button' onClick={() => convert()}>
-							<HiOutlineDocumentReport className='me-25' />
-							Excel
-						</Button>
-						<UncontrolledTooltip target='excel_button'>
-							Доорхи хүснэгтэнд харагдаж байгаа мэдээллийн жагсаалтаар эксел файл үүсгэнэ
-						</UncontrolledTooltip>
+                    <div className='d-flex pe-1'>
+                        <div className='px-1'>
+							<Button color='primary' className='d-flex align-items-center px-75' onClick={() => handleFileModal()}>
+								<UploadCloud className='me-25' size={15}/>
+								Excel оруулах
+							</Button>
+                        </div>
+                        <div className='px-0'>
+							<Button color='primary' className='d-flex align-items-center px-75' id='excel_button' onClick={() => convert()}>
+								<HiOutlineDocumentReport className='me-25' />
+								Excel татах
+							</Button>
+							<UncontrolledTooltip target='excel_button'>
+								Доорхи хүснэгтэнд харагдаж байгаа мэдээллийн жагсаалтаар эксел файл үүсгэнэ
+							</UncontrolledTooltip>
+						</div>
 					</div>
 				</div>
 				<Row className="justify-content-between mx-0 mt-1" >
