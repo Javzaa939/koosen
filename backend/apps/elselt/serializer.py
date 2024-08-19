@@ -692,11 +692,43 @@ class ElseltApproveSerializer(serializers.ModelSerializer):
 
     profession = AdmissionRegisterProfessionSerializer(many=False)
     user = ElseltUserSerializer(many=False)
+    first_yesh = serializers.SerializerMethodField()
+    second_yesh = serializers.SerializerMethodField()
 
     class Meta:
         model = AdmissionUserProfession
         fields = '__all__'
+    def get_first_yesh(self, obj):
+        """ Элсэгч суурь шалгалт """
 
+        # Тухайн мэргэжлийн ЭШ онооны босго оноо
+        profession = AdmissionBottomScore.objects.filter(profession=obj.profession.profession, score_type=AdmissionBottomScore.GENERAL).first()
+        if profession:
+            # Мэргэжлийн Суурь шалгалт хичээлийн нэр
+            lesson_name = profession.admission_lesson.lesson_name if profession.admission_lesson else ''
+
+            # Тухайн хичээлээр ЭШ өгсөн бол оноонуудын хамгийн өндрийг нь авна
+            max_score = UserScore.objects.filter(user=obj.user, lesson_name__iexact=lesson_name).aggregate(max_score=Max('scaledScore'))
+
+            return max_score.get('max_score')
+        else:
+            return ''
+
+    def get_second_yesh(self, obj):
+        """ Элсэгч дагалдан шалгалт """
+
+        # Тухайн мэргэжлийн ЭШ онооны босго оноо
+        profession = AdmissionBottomScore.objects.filter(profession=obj.profession.profession, score_type=AdmissionBottomScore.SUPPORT).first()
+        if profession:
+
+            # Мэргэжлийн Суурь шалгалт хичээлийн нэр
+            lesson_name = profession.admission_lesson.lesson_name
+
+            # Тухайн хичээлээр ЭШ өгсөн бол оноонуудын хамгийн өндрийг нь авна
+            max_score = UserScore.objects.filter(user=obj.user, lesson_name__iexact=lesson_name).aggregate(max_score=Max('scaledScore'))
+            return max_score.get('max_score')
+        else:
+            return ''
 class PhysqueUserSerializer(serializers.ModelSerializer):
     physice_score = serializers.SerializerMethodField()
     combined_score = serializers.SerializerMethodField()
