@@ -3330,14 +3330,13 @@ class PsychologicalTestResultExcelAPIView(
         dass21_datas = list()
         motivation_datas = list()
         prognoz_datas = list()
-        user_ids = list()
 
+        user_ids = AdmissionUserProfession.objects.all().values_list('user', flat=True)
         if adm:
-            user_ids = AdmissionUserProfession.objects.filter(profession=adm).values_list('user', flat=True)
+            prod_ids = AdmissionRegisterProfession.objects.filter(admission=adm).values_list('id', flat=True)
+            user_ids = AdmissionUserProfession.objects.filter(profession__in=prod_ids).values_list('user', flat=True)
 
-        queryset = MentalUser.objects.all()
-        if len(user_ids):
-            queryset = queryset.filter(user__in=user_ids)
+        queryset = MentalUser.objects.filter(user__in=user_ids)
 
         # Шалгалт өгсөн элсэлгчдийн шалгалтын хариу
         mental_users = queryset.filter(challenge__title__icontains='Сэтгэлзүйн сорил').select_related('user')
@@ -3562,11 +3561,17 @@ class IQTestResultExcelAPIView(
 
     def get(self, request):
             big_data = []
+            adm = request.query_params.get('adm')
 
             # IQ test Нийт асуултын тоо авах
             question = PsychologicalTest.objects.filter(id=3).values('questions').count()
+            user_ids = AdmissionUserProfession.objects.values_list('user', flat=True)
+            if adm:
+                prof_ids = AdmissionRegisterProfession.objects.filter(admission=adm).values_list('id', flat=True)
+                user_ids = AdmissionUserProfession.objects.filter(profession__in=prof_ids).values_list('user', flat=True)
 
-            mental_users = MentalUser.objects.filter(challenge__title__icontains='IQ Test', answer__isnull=False).select_related('user')
+            queryser_mental = MentalUser.objects.filter(user__in=user_ids)
+            mental_users = queryser_mental.filter(challenge__title__icontains='IQ Test', answer__isnull=False).select_related('user')
             elselt_users = {user.id: user for user in ElseltUser.objects.filter(id__in=mental_users.values_list('user_id', flat=True))}
 
             # Шалгалт өгсөн хүн бүр
