@@ -3323,14 +3323,24 @@ class PsychologicalTestResultExcelAPIView(
         return datas # Буцаана
 
     def get(self, request):
+        adm = request.query_params.get('adm') # Элсэлтээр хайх
+
         # Нийт буцаах датануудыг store хийх variable-ууд
         datas = list()
         dass21_datas = list()
         motivation_datas = list()
         prognoz_datas = list()
+        user_ids = list()
+
+        if adm:
+            user_ids = AdmissionUserProfession.objects.filter(profession=adm).values_list('user', flat=True)
+
+        queryset = MentalUser.objects.all()
+        if len(user_ids):
+            queryset = queryset.filter(user__in=user_ids)
 
         # Шалгалт өгсөн элсэлгчдийн шалгалтын хариу
-        mental_users = MentalUser.objects.filter(challenge__title__icontains='Сэтгэлзүйн сорил').select_related('user')
+        mental_users = queryset.filter(challenge__title__icontains='Сэтгэлзүйн сорил').select_related('user')
 
         # Сэтгэл гутралын асуултууд
         depression_questions = set(PsychologicalTest.objects.filter(
