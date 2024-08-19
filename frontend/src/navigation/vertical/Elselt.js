@@ -62,6 +62,12 @@ export default [
                 navLink: "elselt/health/mergejliin"
             },
             {
+                id: 'elselt5_1',
+                title: 'МХ шалгалт',
+                icon: <Circle size={8} />,
+                navLink: "elselt/mhb-exam"
+            },
+            {
                 id: 'elselt6',
                 title: 'Бие бялдар',
                 icon: <Circle size={8} />,
