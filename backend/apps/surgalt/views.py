@@ -2794,8 +2794,7 @@ class PsychologicalTestScopeOptionsAPIView(
             teacher_options = teacher_options[qs_start:qs_filter]
         # building output data fields
         if mode in ['start'] or mode in ['participants'] and scope == '1':
-            self.serializer_class = TeachersSerializer
-            teacher_options = self.get_serializer(teacher_options, many=True).data
+            teacher_options = TeachersSerializer(teacher_options, many=True).data
             # mapping of original fields to custom keys and getting only them
             only_mapped_fields = {
                 'id': 'id',
@@ -2837,8 +2836,7 @@ class PsychologicalTestScopeOptionsAPIView(
             elselt_user_options = elselt_user_options[qs_start:qs_filter]
         # building output data fields
         if mode in ['start'] or mode in ['participants'] and scope == '2':
-            self.serializer_class = ElsegchSerializer
-            elselt_user_options = self.get_serializer(elselt_user_options, many=True).data
+            elselt_user_options = ElsegchSerializer(elselt_user_options, many=True).data
             # make "code" key from register or code fields because some records contains emails instead of real code
             elselt_user_options_temp = []
             for ordered_dict in elselt_user_options:
@@ -2876,8 +2874,7 @@ class PsychologicalTestScopeOptionsAPIView(
             student_options = student_options[qs_start:qs_filter]
         # building output data fields
         if mode in ['start'] or mode in ['participants'] and scope == '3':
-            self.serializer_class = StudentSerializer
-            student_options = self.get_serializer(student_options, many=True).data
+            student_options = StudentSerializer(student_options, many=True).data
             # getting only specified keys
             only_mapped_fields = {
                 'id': 'id',
