@@ -3602,7 +3602,7 @@ class EyeshOrderUserInfoAPIView(
 ):
     """ Элсэгчийн ЭЕШ ийн оноо жагсаалт харуулах """
 
-    queryset = AdmissionUserProfession.objects.all().order_by('-score_avg')
+    queryset = AdmissionUserProfession.objects.all().order_by('order_no')
 
     serializer_class = EyeshOrderUserInfoSerializer
     pagination_class = CustomPagination
@@ -3613,16 +3613,6 @@ class EyeshOrderUserInfoAPIView(
     def get_queryset(self):
         user_ids = UserScore.objects.values_list('user', flat=True)
         queryset = self.queryset.filter(user__in=user_ids)
-
-        # filter for admission 6 in AdmissionRegister only
-        prof_ids = AdmissionRegisterProfession.objects.filter(admission=6).values_list('id', flat=True)
-
-        # just get admission = 6 users
-        queryset = self.queryset.filter(profession__in=prof_ids)
-
-        # filter for state approved in HealthUpUser only
-        user_ids = HealthUpUser.objects.filter(state=2).values_list('user', flat=True)
-        queryset = queryset.filter(user__in=user_ids)
 
         queryset = queryset.annotate(gender=(Substr('user__register', 9, 1)))
         gender = self.request.query_params.get('gender')
@@ -3699,6 +3689,48 @@ class EyeshOrderUserInfoAPIView(
 
         return request.send_info('INF_002')
 
+
+@permission_classes([IsAuthenticated])
+class ElseltMHBExamAPIView(
+      generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin
+):
+    """ Элсэгчийн МХ оноо жагсаалт харуулах """
+
+    queryset = AdmissionUserProfession.objects.all().order_by('-score_avg')
+
+    serializer_class = EyeshOrderUserInfoSerializer
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['user__first_name', 'user__register', 'user__email', 'user__last_name', 'user__mobile', 'user__code']
+
+    def get_queryset(self):
+        yesh_mhb_state = self.request.query_params.get('yesh_mhb_state')
+
+        # filter for admission 6 in AdmissionRegister only
+        prof_ids = AdmissionRegisterProfession.objects.filter(admission=6).values_list('id', flat=True)
+        queryset = self.queryset.filter(profession__in=prof_ids)
+
+        # filter for state approved in HealthUpUser only
+        user_ids = HealthUpUser.objects.filter(state=2).values_list('user', flat=True)
+        queryset = queryset.filter(user__in=user_ids)
+
+        if yesh_mhb_state and yesh_mhb_state.isdigit():
+            queryset = queryset.filter(yesh_mhb_state=yesh_mhb_state)
+
+        return queryset
+
+    def get(self, request, pk=None):
+            if pk:
+                all_data = self.retrieve(request, pk).data
+                return request.send_data(all_data)
+
+            all_data = self.list(request).data
+            return request.send_data(all_data)
+
     @transaction.atomic()
     def post(self, request):
         datas = request.data
@@ -3719,8 +3751,10 @@ class EyeshOrderUserInfoAPIView(
                 score_avg = created_data.get('МХ оноо')
                 created_at = created_data.get('Бүртгүүлсэн огноо')
 
-                # Already exists шалгах
-                student = ElseltUser.objects.filter(register=register_num).first()
+                # filter for state approved in HealthUpUser only
+                user_ids = HealthUpUser.objects.filter(state=2).values_list('user', flat=True)
+
+                student = ElseltUser.objects.filter(register=register_num, id__in=user_ids).first()
                 if not student:
                     error_datas.append({
                         'register_num': register_num,
@@ -3728,8 +3762,12 @@ class EyeshOrderUserInfoAPIView(
                     })
                     continue
 
+                # filter for admission 6 in AdmissionRegister only
+                prof_ids = AdmissionRegisterProfession.objects.filter(admission=6).values_list('id', flat=True)
+
                 target_instance = AdmissionUserProfession.objects.filter(
-                    user=student
+                    user=student,
+                    profession__in=prof_ids
                 )
 
                 if created_at:
