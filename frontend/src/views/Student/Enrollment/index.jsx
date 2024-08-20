@@ -186,6 +186,8 @@ const Enrollment = () => {
         setStateModal(!stateModal)
     }
 
+    console.log(datas)
+
     function convert() {
         const mainData = datas.map((data, idx) => {
             return (
@@ -194,6 +196,7 @@ const Enrollment = () => {
                     'Овог': data?.user?.last_name || '',
                     'Нэр': data?.user?.first_name || '',
                     'РД': data?.user?.register || '',
+                    'Хөтөлбөр': data?.profession?.profession?.name || '',
                     'Тушаалын дугаар': data?.admission_number || '',
                     'Тушаалын огноо': data?.admission_date || '',
                     'Суурь шалгалт оноо': data?.first_yesh || '',
@@ -219,12 +222,12 @@ const Enrollment = () => {
             'Овог',
             'Нэр',
             'РД',
+            'Хөтөлбөр',
             'Тушаалын дугаар',
             'Тушаалын огноо',
             'Суурь шалгалт оноо',
             'Дагалдан шалгалт оноо',
             'Дундаж шалгалт оноо',
-
         ];
 
         utils.sheet_add_aoa(worksheet, [staticCells], { origin: "A1" });
