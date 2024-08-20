@@ -3710,13 +3710,8 @@ class ElseltMHBExamAPIView(
     def get_queryset(self):
         yesh_mhb_state = self.request.query_params.get('yesh_mhb_state')
 
-        # filter for admission 6 in AdmissionRegister only
-        prof_ids = AdmissionRegisterProfession.objects.filter(admission=6).values_list('id', flat=True)
-        queryset = self.queryset.filter(profession__in=prof_ids)
-
-        # filter for state approved in HealthUpUser only
-        user_ids = HealthUpUser.objects.filter(state=2).values_list('user', flat=True)
-        queryset = queryset.filter(user__in=user_ids)
+        # filter for admission 6 in AdmissionRegister and state approved in HealthUpUser with inner joins instead of subqueries to improve perfomance and decrease usage of resources
+        queryset = self.queryset.filter(profession__admission=6, user__healthupuser__state=2)
 
         if yesh_mhb_state and yesh_mhb_state.isdigit():
             queryset = queryset.filter(yesh_mhb_state=yesh_mhb_state)
@@ -3741,6 +3736,10 @@ class ElseltMHBExamAPIView(
         error_datas = list()
         correct_datas = list()
 
+        score_avg_updates = {}
+        yesh_state_updates = 2
+        updated_user_updates = request.user.id if request.user.is_authenticated else None
+
         try:
             excel_data = pd.read_excel(full_path)
             excel_data = excel_data.fillna(0)
@@ -3751,25 +3750,14 @@ class ElseltMHBExamAPIView(
                 score_avg = created_data.get('МХ оноо')
                 created_at = created_data.get('Бүртгүүлсэн огноо')
 
-                # filter for state approved in HealthUpUser only
-                user_ids = HealthUpUser.objects.filter(state=2).values_list('user', flat=True)
-
-                student = ElseltUser.objects.filter(register=register_num, id__in=user_ids).first()
-                if not student:
-                    error_datas.append({
-                        'register_num': register_num,
-                        'message': 'Student not found'
-                    })
-                    continue
-
-                # filter for admission 6 in AdmissionRegister only
-                prof_ids = AdmissionRegisterProfession.objects.filter(admission=6).values_list('id', flat=True)
-
+                # using inner joins to maximize perfomance and minimize usage of resources
                 target_instance = AdmissionUserProfession.objects.filter(
-                    user=student,
-                    profession__in=prof_ids
+                    user__register=register_num,
+                    profession__admission=6,
+                    user__healthupuser__state=2
                 )
 
+                # to avoid duplicated user fields
                 if created_at:
                     created_at = parse_datetime(created_at)
                     end_time = created_at + dt.timedelta(seconds=1)
@@ -3779,8 +3767,6 @@ class ElseltMHBExamAPIView(
                             created_at__lt=end_time
                         )
 
-                target_instance = target_instance.first()
-
                 if not target_instance:
                     error_datas.append({
                         'register_num': register_num,
@@ -3788,22 +3774,30 @@ class ElseltMHBExamAPIView(
                     })
                     continue
 
+                # to ensure that instance is single
+                target_instance = target_instance.first()
+
+                # to use serializer to validate data
                 new_data = {
                     'score_avg': score_avg,
-                    'yesh_state': 2,
-                    'updated_user': request.user.id if request.user.is_authenticated else None
+                    'yesh_state': yesh_state_updates,
+                    'updated_user': updated_user_updates
                 }
 
                 serializer = EyeshOrderUserInfoSerializer(instance=target_instance, data=new_data, partial=True)
                 if not serializer.is_valid():
                     error_datas.append({
+                        'id': target_instance.id,
                         'register_num': register_num,
                         'message': serializer.errors
                     })
                     continue
-                serializer.save()
+
+                # to make single database query instead of multiple queries for perfomance and decrease usage of resources
+                score_avg_updates[target_instance.id] = score_avg
 
                 correct_datas.append({
+                    'id': target_instance.id,
                     'register_num': register_num,
                     'score_avg': score_avg,
                     'updated': True
@@ -3811,6 +3805,15 @@ class ElseltMHBExamAPIView(
 
             if file:
                 remove_folder(full_path)
+
+            # make all changes by single update query
+            if score_avg_updates:
+                score_avg_cases = [When(id=pk, then=value) for pk, value in score_avg_updates.items()]
+                AdmissionUserProfession.objects.filter(id__in=score_avg_updates.keys()).update(
+                    score_avg=Case(*score_avg_cases),
+                    yesh_state=yesh_state_updates,
+                    updated_user=updated_user_updates
+                )
 
         except Exception as e:
             print(e)
