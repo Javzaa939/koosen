@@ -2937,6 +2937,7 @@ class PsychologicalTestScopeOptionsAPIView(
         # Data болон scope, оролцогчдоо авна
         datas = request.data
         scope = datas.get('scope')
+        school_id = datas.get('school_id')
 
         # teachers select inputs
         department_teacher = datas.get('department_teacher')
@@ -2975,6 +2976,9 @@ class PsychologicalTestScopeOptionsAPIView(
                     department_teacher = [item['id'] for item in department_teacher]
                     participant_ids = participant_ids.filter(salbar__in=department_teacher)
 
+                if school_id:
+                    participant_ids = participant_ids.filter(sub_org=school_id)
+
             # Хэрвээ элсэгчдээс сорил авах бол
             elif scope == 2:
                 # Бие бялдар тэнцсэн элсэгч
@@ -3005,6 +3009,9 @@ class PsychologicalTestScopeOptionsAPIView(
 
                 if department_student:
                     participant_ids = participant_ids.filter(department=department_student['id'])
+
+                if school_id:
+                    participant_ids = participant_ids.filter(school=school_id)
 
             # Хуучин хүүхдүүд
             old_participants = PsychologicalTest.objects.get(id=pk).participants or []

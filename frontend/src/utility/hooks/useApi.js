@@ -1515,7 +1515,10 @@ function useApi(isDisplay=false) {
 			// populates participant adding inputs
 			getSelect: (scope, mode, state, select1, select2, search) => instance.get(`learning/psychological_test/scope_option/?scope=${scope}&school=${school_id}&mode=${mode}&state=${state}&select1=${select1}&select2=${select2}&search=${search}`),
 
-			putAddScope: (data, pk) => instance.put(`learning/psychological_test/add_scope/${pk}/`, data),
+			putAddScope: (data, pk) => {
+				data['school_id'] = school_id
+				return instance.put(`learning/psychological_test/add_scope/${pk}/`, data)
+			},
 			deleteParticitant: (pk, test_id) => instance.delete(`learning/psychological_test/add_scope/${pk}/?test_id=${test_id}`)
 		},
 
