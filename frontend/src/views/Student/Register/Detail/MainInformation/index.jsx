@@ -183,7 +183,7 @@ const MainInformation = () => {
     }
 
     useEffect(() => {
-        if(Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-update') && school_id ) {
+        if(Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-update')) {
             set_Disabled(false)
         }
     },[user])
