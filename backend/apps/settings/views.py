@@ -1,6 +1,7 @@
 
 import json
-
+from django.db.models import F
+import re
 from rest_framework import mixins
 from rest_framework import generics
 from rest_framework.views import APIView
@@ -992,144 +993,188 @@ class SystemSettingsAPIView(
         season = data.get("active_lesson_season")
         season_type = data.get("season_type")
 
-        instance = self.get_object()
+        # instance = self.get_object()
 
-        if active_lesson_year:
-            check_qs = self.queryset.filter(active_lesson_year=active_lesson_year, active_lesson_season=season).exclude(id=pk)
-            if len(check_qs) > 0:
-                return request.send_error("ERR_003", "Тухай сургууль дээр энэ хичээлийн жил улирлын тохиргоо орсон байна.")
+        # if active_lesson_year:
+        #     check_qs = self.queryset.filter(active_lesson_year=active_lesson_year, active_lesson_season=season).exclude(id=pk)
+        #     if len(check_qs) > 0:
+        #         return request.send_error("ERR_003", "Тухай сургууль дээр энэ хичээлийн жил улирлын тохиргоо орсон байна.")
 
-        if season_type == SystemSettings.ACTIVE:
-            # Улирал идэвхижүүлэхэд өмнөх хичээлийн жилийн улирлыг хаасан байх ёстой
+        # if season_type == SystemSettings.ACTIVE:
+        #     # Улирал идэвхижүүлэхэд өмнөх хичээлийн жилийн улирлыг хаасан байх ёстой
 
-            prev_lesson_year = instance.prev_lesson_year
-            prev_lesson_season = instance.prev_lesson_season
-            check_qs = self.queryset.filter(active_lesson_year=prev_lesson_year, active_lesson_season=prev_lesson_season, season_type=SystemSettings.CLOSED)
+        #     prev_lesson_year = instance.prev_lesson_year
+        #     prev_lesson_season = instance.prev_lesson_season
+        #     check_qs = self.queryset.filter(active_lesson_year=prev_lesson_year, active_lesson_season=prev_lesson_season, season_type=SystemSettings.CLOSED)
 
-            if not check_qs:
-                return request.send_error('ERR_02', 'Та өмнөх улирлаа хаана уу?')
+        #     if not check_qs:
+        #         return request.send_error('ERR_02', 'Та өмнөх улирлаа хаана уу?')
 
-            self.queryset.filter(season_type=SystemSettings.ACTIVE).update(season_type=SystemSettings.INACTIVE)
+        #     self.queryset.filter(season_type=SystemSettings.ACTIVE).update(season_type=SystemSettings.INACTIVE)
 
-        elif season_type == SystemSettings.CLOSED:
-            # Улирлын хаалт хийхэд с/төлбөрийн хаалтыг хийсэн байх шаардлагатай
+        # elif season_type == SystemSettings.CLOSED:
+        #     # Улирлын хаалт хийхэд с/төлбөрийн хаалтыг хийсэн байх шаардлагатай
 
-            active_lesson_year = instance.active_lesson_year
-            active_lesson_season = instance.active_lesson_season
-            closing_qs = PaymentSeasonClosing.objects.filter(lesson_year=active_lesson_year, lesson_season=active_lesson_season)
+        #     active_lesson_year = instance.active_lesson_year
+        #     active_lesson_season = instance.active_lesson_season
+        #     closing_qs = PaymentSeasonClosing.objects.filter(lesson_year=active_lesson_year, lesson_season=active_lesson_season)
 
-            if not closing_qs:
-                return request.send_error('ERR_02', 'Сургалтын төлбөрийн улирлын хаалт хийгээгүй байна')
+        #     if not closing_qs:
+        #         return request.send_error('ERR_02', 'Сургалтын төлбөрийн улирлын хаалт хийгээгүй байна')
 
-        serializer = self.get_serializer(instance, data=data, partial=True)
-        if not serializer.is_valid(raise_exception=False):
-            return request.send_error_valid(serializer.errors)
+        # serializer = self.get_serializer(instance, data=data, partial=True)
+        # if not serializer.is_valid(raise_exception=False):
+        #     return request.send_error_valid(serializer.errors)
 
-        serializer.save()
+        # serializer.save()
 
-        # Бодогдсон голчуудыг хадгалах хүснэгт
-        student_grade_list = []
+        # # Бодогдсон голчуудыг хадгалах хүснэгт
+        # student_grade_list = []
 
-        # Тухайн жил, улирал болон идэвхитэй суралцаж байгаа оюутнуудын дүн авах хэсэг
-        score_qs = ScoreRegister.objects.filter(student__status__code=1, lesson_year=active_lesson_year, lesson_season=season)
+        # # Тухайн жил, улирал болон идэвхитэй суралцаж байгаа оюутнуудын дүн авах хэсэг
+        # score_qs = ScoreRegister.objects.filter(student__status__code=1, lesson_year=active_lesson_year, lesson_season=season)
         try:
-            # Идэвхитэй суралцаж байгаа оюутнуудын ID-г авах хэсэг
-            student_list = Student.objects.filter(status__code=1).values_list("id", flat=True)
+            # # Идэвхитэй суралцаж байгаа оюутнуудын ID-г авах хэсэг
+            # student_list = Student.objects.filter(status__code=1).values_list("id", flat=True)
 
-            # оюутнуудын ID-гаар гүйлгэх хэсэг
-            for student in student_list:
-                # Хувьсагчдыг зарлах хэсэг
-                grade_cr_sum = 0
-                cr_sum = 0
-                average = 0
-                # Оюутны тухайн улирлын дүнг авах хэсэг
-                student_grade = score_qs.filter(student=student)
+            # # оюутнуудын ID-гаар гүйлгэх хэсэг
+            # for student in student_list:
+            #     # Хувьсагчдыг зарлах хэсэг
+            #     grade_cr_sum = 0
+            #     cr_sum = 0
+            #     average = 0
+            #     # Оюутны тухайн улирлын дүнг авах хэсэг
+            #     student_grade = score_qs.filter(student=student)
 
-                # Хичээлүүдээр гүйлгэх хэсэг
-                for lesson in student_grade:
-                    cr = lesson.lesson.kredit
-                    score_total = lesson.score_total
-                    cr_sum += cr
-                    grade_cr_sum += (score_total * cr)
+            #     # Хичээлүүдээр гүйлгэх хэсэг
+            #     for lesson in student_grade:
+            #         cr = lesson.lesson.kredit
+            #         score_total = lesson.score_total
+            #         cr_sum += cr
+            #         grade_cr_sum += (score_total * cr)
 
-                if cr_sum != 0 and grade_cr_sum != 0:
-                    average = grade_cr_sum / cr_sum
-                    average = round(average, 2)
+            #     if cr_sum != 0 and grade_cr_sum != 0:
+            #         average = grade_cr_sum / cr_sum
+            #         average = round(average, 2)
 
-                # Авсан датагаар instance үүсгэх хэсэг
-                student_grade_list.append(StudentGrade(
-                    student = Student.objects.get(id=student),
-                    score = Score.objects.filter(score_max__gte=average, score_min__lte=average).first(),
-                    lesson_year = active_lesson_year,
-                    lesson_season = Season.objects.get(id=season),
-                    credit = cr_sum,
-                    average = average
-                ))
+            #     # Авсан датагаар instance үүсгэх хэсэг
+            #     student_grade_list.append(StudentGrade(
+            #         student = Student.objects.get(id=student),
+            #         score = Score.objects.filter(score_max__gte=average, score_min__lte=average).first(),
+            #         lesson_year = active_lesson_year,
+            #         lesson_season = Season.objects.get(id=season),
+            #         credit = cr_sum,
+            #         average = average
+            #     ))
 
-            # Өгөгдлийн санд хадгалах хэсэг
-            StudentGrade.objects.bulk_create(student_grade_list)
+            # # Өгөгдлийн санд хадгалах хэсэг
+            # StudentGrade.objects.bulk_create(student_grade_list)
 
-            # Сурагчдын дүнгийн мэдээллийг авах хэсэг
-            grade_qs = StudentGrade.objects.all()
+            # # Сурагчдын дүнгийн мэдээллийг авах хэсэг
+            # grade_qs = StudentGrade.objects.all()
 
-            # Бодогдогдсон дүнг хадгалах хэсэг
-            student_grade_list_create = []
-            student_grade_list_update = []
+            # # Бодогдогдсон дүнг хадгалах хэсэг
+            # student_grade_list_create = []
+            # student_grade_list_update = []
 
-            # Сурагч сурагчаар дүн бодох хэсэг
-            for student in student_list:
-                cr_sum = 0                  # Кредитүүдийн нийлбэрийг хадгалах хувьсагч
-                grade_cr_sum = 0            # Кредит болон дундажуудын нийлбэрийг хадгалах хувьсагч
-                all_sem_average = 0         # Бодогдсон дүнг хадгалах хувьсагч
+            # # Сурагч сурагчаар дүн бодох хэсэг
+            # for student in student_list:
+            #     cr_sum = 0                  # Кредитүүдийн нийлбэрийг хадгалах хувьсагч
+            #     grade_cr_sum = 0            # Кредит болон дундажуудын нийлбэрийг хадгалах хувьсагч
+            #     all_sem_average = 0         # Бодогдсон дүнг хадгалах хувьсагч
 
-                # Сурагчийн мэдээллийг авах хэсэг
-                grade_qs_student = grade_qs.filter(student=student)
+            #     # Сурагчийн мэдээллийг авах хэсэг
+            #     grade_qs_student = grade_qs.filter(student=student)
 
-                # 1 үед тухайн семистерт шинээр элссэн сурагч гэж үзэн энэ семистерт бодогдсон дүнгээр бүх дүнг хадгална
-                if grade_qs_student.count() == 1:
+            #     # 1 үед тухайн семистерт шинээр элссэн сурагч гэж үзэн энэ семистерт бодогдсон дүнгээр бүх дүнг хадгална
+            #     if grade_qs_student.count() == 1:
 
-                    all_sem_average_obj = grade_qs_student.first()
+            #         all_sem_average_obj = grade_qs_student.first()
 
-                    # Тухайн оюутны үндсэн дүнг шинээр оруулан обьект болгон хүснэгтэд оруулах хэсэг
-                    student_grade_list_create.append(StudentGrade(
-                        student = Student.objects.get(id=student),
-                        score = Score.objects.filter(score_max__gte=all_sem_average_obj.average, score_min__lte=all_sem_average_obj.average).first(),
-                        lesson_year = None,
-                        lesson_season = None,
-                        credit = all_sem_average_obj.credit,
-                        average = all_sem_average_obj.average
-                    ))
+            #         # Тухайн оюутны үндсэн дүнг шинээр оруулан обьект болгон хүснэгтэд оруулах хэсэг
+            #         student_grade_list_create.append(StudentGrade(
+            #             student = Student.objects.get(id=student),
+            #             score = Score.objects.filter(score_max__gte=all_sem_average_obj.average, score_min__lte=all_sem_average_obj.average).first(),
+            #             lesson_year = None,
+            #             lesson_season = None,
+            #             credit = all_sem_average_obj.credit,
+            #             average = all_sem_average_obj.average
+            #         ))
+            #     else:
+
+            #         # Тухайн оюутны өмнөх семистерт бодогдсон дүнгээр бодолт хийх хэсэг
+            #         for grade in grade_qs_student:
+            #             if grade.lesson_season != None and grade.lesson_year != None:
+
+            #                 if not grade.credit:
+            #                     cr_sum += grade.credit
+            #                 if grade.average and grade.credit:
+            #                     grade_cr_sum += grade.credit * grade.average
+            #             else:
+
+            #                 all_sem_average_before = grade
+
+            #         if grade_cr_sum != 0 and cr_sum != 0:
+            #             all_sem_average = round((grade_cr_sum / cr_sum), 2)
+
+            #         all_sem_average_before.score = Score.objects.filter(score_max__gte=all_sem_average, score_max__lte=all_sem_average).first()
+            #         all_sem_average_before.average = all_sem_average
+            #         all_sem_average_before.credit = cr_sum
+
+            #         # Тухайн оюутны үндсэн дүнг засаж оруулан обьект болгон хүснэгтэд оруулах хэсэг
+            #         student_grade_list_update.append(all_sem_average_before)
+
+            # # Шинээр оруулах мэдээлэл байхгүй үед уг үйлдлийг хийхгүй
+            # if len(student_grade_list_create) > 0:
+            #     # Өгөгдлийн санд оруулах хэсэг
+            #     StudentGrade.objects.bulk_create(student_grade_list_create)
+
+            # # Өгөгдлийн санд оруулах хэсэг
+            # StudentGrade.objects.bulk_update(student_grade_list_update, ["average", "credit", "score"])
+
+            # Суралцаж буй төлөвтэй бүх ангийн курсын тоог 1 ээр нэмэгдүүлэх
+            Group.objects.filter(is_finish=False).update(level=F('level') + 1)
+
+            # Нэрийг шинэ түвшинд тааруулах (жишээ нь, 211 -> 221, 3311 -> 3321)
+            groups = Group.objects.filter(is_finish=False,level__lt=4)
+            for group in groups:
+
+                # Group-ийн нэрийг авах
+                name = group.name
+
+                # Нэр нь дотроос зөвхөн тоог нь авах
+                numbers = re.findall(r'\d+', name)
+
+                # Тоогүй бол level нэр солихгүй
+                if not numbers:
+                    continue
+
+                # Тоог 2022-312 эсвэл 312 гэдгийг ялгана
+                if len(numbers) > 1:
+                    target_number = numbers[1]
                 else:
+                    target_number = numbers[0]
 
-                    # Тухайн оюутны өмнөх семистерт бодогдсон дүнгээр бодолт хийх хэсэг
-                    for grade in grade_qs_student:
-                        if grade.lesson_season != None and grade.lesson_year != None:
+                # Хэрэв ганц 8 гэсэн нэртэй байвал солихгүй
+                if len(target_number) <= 1:
+                    continue
 
-                            if not grade.credit:
-                                cr_sum += grade.credit
-                            if grade.average and grade.credit:
-                                grade_cr_sum += grade.credit * grade.average
-                        else:
+                # Сүүлээсээ 2 дох оронг авах
+                second_last_digit = int(target_number[-2])
 
-                            all_sem_average_before = grade
+                # Хэрэв Сүүлээсээ 2 дох орон нь ийм байвал солихгүй
+                if second_last_digit >= 4:
+                    continue
 
-                    if grade_cr_sum != 0 and cr_sum != 0:
-                        all_sem_average = round((grade_cr_sum / cr_sum), 2)
+                # Шинэ нэр бэлдэх
+                new_number = target_number[:-2] + str(second_last_digit + 1) + target_number[-1]
 
-                    all_sem_average_before.score = Score.objects.filter(score_max__gte=all_sem_average, score_max__lte=all_sem_average).first()
-                    all_sem_average_before.average = all_sem_average
-                    all_sem_average_before.credit = cr_sum
+                # Шинэ нэрэнд хуучныг солих
+                new_name = name.replace(target_number, new_number)
 
-                    # Тухайн оюутны үндсэн дүнг засаж оруулан обьект болгон хүснэгтэд оруулах хэсэг
-                    student_grade_list_update.append(all_sem_average_before)
+                group.name = new_name
+                group.save()
 
-            # Шинээр оруулах мэдээлэл байхгүй үед уг үйлдлийг хийхгүй
-            if len(student_grade_list_create) > 0:
-                # Өгөгдлийн санд оруулах хэсэг
-                StudentGrade.objects.bulk_create(student_grade_list_create)
-
-            # Өгөгдлийн санд оруулах хэсэг
-            StudentGrade.objects.bulk_update(student_grade_list_update, ["average", "credit", "score"])
 
         except Exception as e:
             return request.send_error("ERR_002", e.__str__)
