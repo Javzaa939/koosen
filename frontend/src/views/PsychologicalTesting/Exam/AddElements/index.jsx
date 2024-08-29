@@ -148,7 +148,6 @@ function AddStudent(){
 
     async function onSubmit(cdata) {
         cdata['scope'] = scope
-        cdata['admission'] = elsegchDef
         cdata = convertDefaultValue(cdata)
 
         const { success, error } = await fetchData(challengeAPI.putAddScope(cdata, challenge_id))
@@ -435,18 +434,18 @@ function AddStudent(){
                                                 scope === 1 &&
                                                     <Row className='mt-1'>
                                                         <Col md={6}>
-                                                            <Label className='form-label' for="departmentTeacher">
+                                                            <Label className='form-label' for="department_teacher">
                                                                 {t('Хөтөлбөрийн баг')}
                                                             </Label>
                                                             <Controller
                                                                 control={control}
                                                                 defaultValue=''
-                                                                name="departmentTeacher"
+                                                                name="department_teacher"
                                                                 render={({ field: { value, onChange} }) => {
                                                                     return (
                                                                         <Select
-                                                                            name="departmentTeacher"
-                                                                            id="departmentTeacher"
+                                                                            name="department_teacher"
+                                                                            id="department_teacher"
                                                                             classNamePrefix='select'
                                                                             isClearable
                                                                             isMulti
@@ -470,18 +469,18 @@ function AddStudent(){
                                                             />
                                                         </Col>
                                                         <Col md={6}>
-                                                            <Label className='form-label' for='participants'>
+                                                            <Label className='form-label' for='teacher'>
                                                                 {t('Нэр')}
                                                             </Label>
                                                             <Controller
                                                                 control={control}
                                                                 defaultValue=''
-                                                                name="participants"
+                                                                name="teacher"
                                                                 render={({ field: { value, onChange} }) => {
                                                                     return (
                                                                         <Select
-                                                                            name="participants"
-                                                                            id="participants"
+                                                                            name="teacher"
+                                                                            id="teacher"
                                                                             classNamePrefix='select'
                                                                             isClearable
                                                                             isMulti
@@ -614,18 +613,18 @@ function AddStudent(){
                                                             />
                                                         </Col>
                                                         <Col md={6}>
-                                                            <Label className='form-label' for='participants'>
+                                                            <Label className='form-label' for='elselt_user'>
                                                                 {t('Нэр')}
                                                             </Label>
                                                             <Controller
                                                                 control={control}
                                                                 defaultValue=''
-                                                                name="participants"
+                                                                name="elselt_user"
                                                                 render={({ field: { value, onChange} }) => {
                                                                     return (
                                                                         <Select
-                                                                            name="participants"
-                                                                            id="participants"
+                                                                            name="elselt_user"
+                                                                            id="elselt_user"
                                                                             classNamePrefix='select'
                                                                             isClearable
                                                                             isMulti
@@ -679,18 +678,18 @@ function AddStudent(){
                                                 scope === 3 &&
                                                     <Row className='mt-1'>
                                                         <Col md={6}>
-                                                            <Label className="form-label" for="department">
+                                                            <Label className="form-label" for="department_student">
                                                                 {'Хөтөлбөрийн баг'}
                                                             </Label>
                                                             <Controller
                                                                 control={control}
                                                                 defaultValue=''
-                                                                name="department"
+                                                                name="department_student"
                                                                 render={({ field: { value, onChange} }) => {
                                                                     return (
                                                                         <Select
-                                                                            name="department"
-                                                                            id="department"
+                                                                            name="department_student"
+                                                                            id="department_student"
                                                                             classNamePrefix='select'
                                                                             isClearable
                                                                             value={value}
@@ -712,18 +711,18 @@ function AddStudent(){
                                                             />
                                                         </Col>
                                                         <Col md={6}>
-                                                            <Label className="form-label" for="groups">
+                                                            <Label className="form-label" for="group">
                                                                 {'Анги сонгох'}
                                                             </Label>
                                                             <Controller
                                                                 control={control}
                                                                 defaultValue=''
-                                                                name="groups"
+                                                                name="group"
                                                                 render={({ field: { value, onChange} }) => {
                                                                     return (
                                                                         <Select
-                                                                            name="groups"
-                                                                            id="groups"
+                                                                            name="group"
+                                                                            id="group"
                                                                             classNamePrefix='select'
                                                                             isClearable
                                                                             isMulti
@@ -747,18 +746,18 @@ function AddStudent(){
                                                             />
                                                         </Col>
                                                         <Col sm={6}>
-                                                            <Label className='form-label' for='participants'>
+                                                            <Label className='form-label' for='student'>
                                                                 {t('Нийт оюутнууд')}
                                                             </Label>
                                                             <Controller
                                                                 control={control}
                                                                 defaultValue=''
-                                                                name="participants"
+                                                                name="student"
                                                                 render={({ field: {value, onChange } }) => {
                                                                     return (
                                                                         <Select
-                                                                            name="participants"
-                                                                            id="participants"
+                                                                            name="student"
+                                                                            id="student"
                                                                             classNamePrefix='select'
                                                                             isClearable
                                                                             isMulti
