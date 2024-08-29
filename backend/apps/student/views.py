@@ -326,43 +326,35 @@ def generate_student_code(school_id, group):
 
     school_code = SubOrgs.objects.get(pk=school_id).org_code
     group_qs = Group.objects.get(pk=group)
-    profession_code = group_qs.profession.profession_code
     degree_code = group_qs.profession.degree.degree_code
     lesson_year = group_qs.join_year
+    duration = group_qs.profession.duration
+    profession_code = group_qs.profession.profession_code
 
-    settings_qs = SystemSettings.objects.filter(season_type=SystemSettings.ACTIVE).last()
+    year = int(lesson_year[2:4])
 
-    with_start = '001'
-    student_register_count = 1
+    study_period_from_excel = {
+        'M-1-11': '09',
+        'M-1-12': '09',
+        'M-1-13': '09',
+        'M-1-14': '09',
+        'M-1-21': '09',
+        'M-1-22': '09',
+        'M-1-31': '09',
+        'M-1-32': '09',
+        'M-1-33': '09',
+        'M-1-41': '09',
+        'M-1-42': '09',
+        'M-1-43': '09',
+        'M-1-51': '09',
+    }
 
-    season = settings_qs.active_lesson_season.id
-    # lesson_year = settings_qs.active_lesson_year
+    unique_combo = f'{degree_code}-{school_code}-{profession_code}'
 
-    season_qs = (
-        Season
-        .objects
-        .filter(
-            pk=season
-        )
-        .annotate(
-            search_text=Upper('season_name'),
-            desc=Replace('search_text', Value('H'), Value('Н')),
-            last_text=Replace('desc', Value('X'), Value('Х')),
-        )
-        .filter(
-            last_text__icontains='ХАВАР',
-        )
-    ).first()
-
-    now_date = date.today().year
-    now_date = str(now_date)
-
-    year = int(now_date[2:4])
-
-    if season_qs:
-        year = int(lesson_year[-2:])
+    if degree_code == 'M':
+        duration = study_period_from_excel.get(unique_combo)
     else:
-        year = int(lesson_year[2:4])
+        duration = int(duration)
 
     generate_code = f'{degree_code}{year}{school_code}{profession_code}'
 
@@ -383,6 +375,9 @@ def generate_student_code(school_id, group):
         )
         .order_by('-code')
     ).first()
+
+    with_start = '001'
+    student_register_count = 1
 
     if student_qs:
         check_code = student_qs.code
