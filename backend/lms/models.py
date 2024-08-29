@@ -4362,9 +4362,11 @@ class HomeWorkStudent(models.Model):
     description = models.TextField(verbose_name='Тайлбар', null=True)
     created_at = models.DateTimeField(auto_now=True, verbose_name='Үүсгэсэн огноо')
 
+
 class WeekMaterials(models.Model):
     """ Тухайн 7 хоногт оруулах файлууд """
 
+    is_leks = models.BooleanField(default=True, verbose_name='Лекц эсэх')
     description = models.CharField(verbose_name='Тайлбар', max_length=255)
     material = models.ForeignKey(LessonMaterial, on_delete=models.CASCADE, verbose_name='Хичээлийн материал')
     created_at = models.DateTimeField(auto_now=True)
@@ -4386,7 +4388,7 @@ class OnlineWeek(models.Model):
     start_date = models.DateTimeField(null=True, verbose_name='Тухайн хичээлийн эхлэх хугацаа')
     end_date = models.DateTimeField(null=True, verbose_name='Тухайн хичээлийн дуусах хугацаа')
     is_lock = models.BooleanField(verbose_name='Өмнөх 7 хоногийн хичээлээс хамаарах')
-    before_week = models.ForeignKey("self", null=True, on_delete=models.CASCADE, verbose_name='Хамаарах өмнөх хичээл')
+    before_week = models.ForeignKey("self", null=True, on_delete=models.CASCADE, verbose_name='Хамаарах өмнөх 7 хоног')
     showed_type = models.IntegerField(choices=SHOW_TYPE, default=CHALLENGE, verbose_name='Хичээл үзсэнээр тооцох төрөл')
     challenge = models.ForeignKey(Challenge, on_delete=models.SET_NULL, null=True, verbose_name='7 хоногийн шалгалт')
     homework = models.ForeignKey(HomeWork, on_delete=models.SET_NULL, null=True, verbose_name='Гэрийн даалгавар')
@@ -4423,6 +4425,14 @@ class OnlineLesson(models.Model):
 
     created_user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Үүсгэсэн хэрэглэгч', null=True)
     created_at = models.DateTimeField(auto_now=True, null=True)
+
+
+class OnlineWeekStudent(models.Model):
+    """ Оюутны лекцийн материал хадгалах хэсэг """
+
+    week = models.ForeignKey(OnlineWeek, verbose_name='7 хоног', on_delete=models.CASCADE)
+    student = models.ForeignKey(Student, verbose_name='Оюутан', on_delete=models.CASCADE)
+    lekts_file = models.FileField(upload_to='student_lekts', verbose_name='Лекцийн материал хөтөлсөн зураг', null=True)
 
 
 class Announcement(models.Model):
