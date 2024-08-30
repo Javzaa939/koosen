@@ -333,30 +333,23 @@ def generate_student_code(school_id, group):
 
     year = int(lesson_year[2:4])
 
-    study_period_from_excel = {
-        'M-1-11': '09',
-        'M-1-12': '09',
-        'M-1-13': '09',
-        'M-1-14': '09',
-        'M-1-21': '09',
-        'M-1-22': '09',
-        'M-1-31': '09',
-        'M-1-32': '09',
-        'M-1-33': '09',
-        'M-1-41': '09',
-        'M-1-42': '09',
-        'M-1-43': '09',
-        'M-1-51': '09',
-    }
+    now_date = date.today()
 
-    unique_combo = f'{degree_code}-{school_code}-{profession_code}'
-
+    # to get month of end of study for specific degree
     if degree_code == 'M':
-        duration = study_period_from_excel.get(unique_combo)
+        duration = (
+            SystemSettings.objects
+            .filter(
+                active_lesson_year=lesson_year,
+                start_date__lte=now_date,
+                finish_date__gte=now_date
+            ).first().finish_date.month
+        )
+        duration = f'{duration:0{2}d}' if duration is not None else None
     else:
         duration = int(duration)
 
-    generate_code = f'{degree_code}{year}{school_code}{profession_code}'
+    generate_code = f'{degree_code}{school_code}{year}{duration}{profession_code}'
 
     student_qs = (
         Student
