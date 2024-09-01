@@ -1353,12 +1353,14 @@ class Payment(models.Model):
     DORMITORY = 2
     SPORT = 3
     GYM = 4
+    SYSTEM = 5
 
     PAYMENT_FOR = (
-        (STUDY,"Сургалтын төлбөр"),
-        (DORMITORY,"Дотуур байрны төлбөр"),
-        (SPORT,"Заалны түрээс"),
-        (GYM,"Фитнесийн төлбөр")
+        (STUDY, "Сургалтын төлбөр"),
+        (DORMITORY, "Дотуур байрны төлбөр"),
+        (SPORT, "Заалны түрээс"),
+        (GYM, "Фитнесийн төлбөр"),
+        (SYSTEM, "Програм ашигласны төлбөр"),
     )
 
     user = models.ForeignKey(User, on_delete=models.PROTECT, null=True)
@@ -1366,7 +1368,7 @@ class Payment(models.Model):
 
     total_amount = models.FloatField(null=True)
     kind = models.PositiveIntegerField(choices=KIND_CHOICES, db_index=True, null=True)
-    dedication = models.PositiveBigIntegerField(choices=PAYMENT_FOR, db_index=True,default=STUDY, verbose_name="Төлбөрийн зориулалт")
+    dedication = models.PositiveBigIntegerField(choices=PAYMENT_FOR, db_index=True, default=STUDY, verbose_name="Төлбөрийн зориулалт")
 
     unique_id = models.CharField(max_length=300, verbose_name='qpay үүсгэхэд шаардаг unique id', null=True)
     card_number = models.CharField(max_length=500, null=True)
