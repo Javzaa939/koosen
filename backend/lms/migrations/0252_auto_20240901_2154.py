@@ -10,19 +10,18 @@ def custom_studentlogin_passwords(apps, schema_editor):
     Student = apps.get_model('lms', 'Student')
     StudentLogin = apps.get_model('lms', 'StudentLogin')
 
-    students = Student.objects.filter().values('id', 'register_num')
+    students = Student.objects.filter().values('id', 'register_num', 'code')
     count = 0
     for student in list(students):
         count += 1
         password = student.get('register_num')[-8:]
-        student_obj = Student.objects.filter(id=student.get('id')).first()
 
         hashed_password = make_password(password)
 
         StudentLogin.objects.update_or_create(
-            student=student_obj,
+            student_id=student.get('id'),
             defaults={
-                'username': student_obj.code,
+                'username': student.get('code'),
                 'password': hashed_password
             }
         )
