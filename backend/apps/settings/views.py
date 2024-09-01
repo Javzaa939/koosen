@@ -1175,7 +1175,8 @@ class SystemSettingsAPIView(
                     group.save()
 
             except Exception as e:
-                return request.send_error("ERR_002", e.__str__)
+                print(e)
+                return request.send_error("ERR_002")
 
         serializer = self.get_serializer(instance, data=data, partial=True)
         if not serializer.is_valid(raise_exception=False):
