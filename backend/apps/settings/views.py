@@ -1129,7 +1129,7 @@ class SystemSettingsAPIView(
                 StudentGrade.objects.bulk_update(student_grade_list_update, ["average", "credit", "score"])
 
                 # 4 курсын ангийг төгсгөх
-                Group.objects.filter(is_finish=False, level_gte=4).update(is_finish=True)
+                Group.objects.filter(is_finish=False, level__gte=4).update(is_finish=True)
 
                 # Суралцаж буй төлөвтэй бүх ангийн курсын тоог 1 ээр нэмэгдүүлэх
                 Group.objects.filter(is_finish=False).update(level=F('level') + 1)
