@@ -4365,15 +4365,6 @@ class HomeWorkStudent(models.Model):
     created_at = models.DateTimeField(auto_now=True, verbose_name='Үүсгэсэн огноо')
 
 
-class WeekMaterials(models.Model):
-    """ Тухайн 7 хоногт оруулах файлууд """
-
-    is_leks = models.BooleanField(default=True, verbose_name='Лекц эсэх')
-    description = models.CharField(verbose_name='Тайлбар', max_length=255)
-    material = models.ForeignKey(LessonMaterial, on_delete=models.CASCADE, verbose_name='Хичээлийн материал')
-    created_at = models.DateTimeField(auto_now=True)
-
-
 class OnlineWeek(models.Model):
     """ Цахим хичээлийн 7 хоног """
 
