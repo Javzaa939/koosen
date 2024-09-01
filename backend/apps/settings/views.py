@@ -989,9 +989,12 @@ class SystemSettingsAPIView(
         " ажиллах жилийн тохиргоо засах "
 
         data = request.data
-        active_lesson_year = data.get("active_lesson_year")
-        season = data.get("active_lesson_season")
         season_type = data.get("season_type")
+
+        active_obj = self.queryset.get(pk=pk)
+        active_lesson_year = active_obj.active_lesson_year
+        season = active_obj.active_lesson_season.id
+
 
         instance = self.get_object()
 
@@ -1017,168 +1020,168 @@ class SystemSettingsAPIView(
 
             active_lesson_year = instance.active_lesson_year
             active_lesson_season = instance.active_lesson_season
-            closing_qs = PaymentSeasonClosing.objects.filter(lesson_year=active_lesson_year, lesson_season=active_lesson_season)
+            # closing_qs = PaymentSeasonClosing.objects.filter(lesson_year=active_lesson_year, lesson_season=active_lesson_season)
 
-            if not closing_qs:
-                return request.send_error('ERR_02', 'Сургалтын төлбөрийн улирлын хаалт хийгээгүй байна')
+            # if not closing_qs:
+            #     return request.send_error('ERR_02', 'Сургалтын төлбөрийн улирлын хаалт хийгээгүй байна')
+            # Бодогдсон голчуудыг хадгалах хүснэгт
+            student_grade_list = []
+
+            # Тухайн жил, улирал болон идэвхитэй суралцаж байгаа оюутнуудын дүн авах хэсэг
+            score_qs = ScoreRegister.objects.filter(student__status__code=1, lesson_year=active_lesson_year, lesson_season=season)
+            try:
+                # Идэвхитэй суралцаж байгаа оюутнуудын ID-г авах хэсэг
+                student_list = Student.objects.filter(status__code=1).values_list("id", flat=True)
+
+                # оюутнуудын ID-гаар гүйлгэх хэсэг
+                for student in student_list:
+                    # Хувьсагчдыг зарлах хэсэг
+                    grade_cr_sum = 0
+                    cr_sum = 0
+                    average = 0
+                    # Оюутны тухайн улирлын дүнг авах хэсэг
+                    student_grade = score_qs.filter(student=student)
+
+                    # Хичээлүүдээр гүйлгэх хэсэг
+                    for lesson in student_grade:
+                        cr = lesson.lesson.kredit
+                        score_total = lesson.score_total
+                        cr_sum += cr
+                        grade_cr_sum += (score_total * cr)
+
+                    if cr_sum != 0 and grade_cr_sum != 0:
+                        average = grade_cr_sum / cr_sum
+                        average = round(average, 2)
+
+                    # Авсан датагаар instance үүсгэх хэсэг
+                    student_grade_list.append(StudentGrade(
+                        student = Student.objects.get(id=student),
+                        score = Score.objects.filter(score_max__gte=average, score_min__lte=average).first(),
+                        lesson_year = active_lesson_year,
+                        lesson_season = Season.objects.get(id=season),
+                        credit = cr_sum,
+                        average = average
+                    ))
+
+                # Өгөгдлийн санд хадгалах хэсэг
+                StudentGrade.objects.bulk_create(student_grade_list)
+
+                # Сурагчдын дүнгийн мэдээллийг авах хэсэг
+                grade_qs = StudentGrade.objects.all()
+
+                # Бодогдогдсон дүнг хадгалах хэсэг
+                student_grade_list_create = []
+                student_grade_list_update = []
+
+                # Сурагч сурагчаар дүн бодох хэсэг
+                for student in student_list:
+                    cr_sum = 0                  # Кредитүүдийн нийлбэрийг хадгалах хувьсагч
+                    grade_cr_sum = 0            # Кредит болон дундажуудын нийлбэрийг хадгалах хувьсагч
+                    all_sem_average = 0         # Бодогдсон дүнг хадгалах хувьсагч
+
+                    # Сурагчийн мэдээллийг авах хэсэг
+                    grade_qs_student = grade_qs.filter(student=student)
+
+                    # 1 үед тухайн семистерт шинээр элссэн сурагч гэж үзэн энэ семистерт бодогдсон дүнгээр бүх дүнг хадгална
+                    if grade_qs_student.count() == 1:
+
+                        all_sem_average_obj = grade_qs_student.first()
+
+                        # Тухайн оюутны үндсэн дүнг шинээр оруулан обьект болгон хүснэгтэд оруулах хэсэг
+                        student_grade_list_create.append(StudentGrade(
+                            student = Student.objects.get(id=student),
+                            score = Score.objects.filter(score_max__gte=all_sem_average_obj.average, score_min__lte=all_sem_average_obj.average).first(),
+                            lesson_year = None,
+                            lesson_season = None,
+                            credit = all_sem_average_obj.credit,
+                            average = all_sem_average_obj.average
+                        ))
+                    else:
+
+                        # Тухайн оюутны өмнөх семистерт бодогдсон дүнгээр бодолт хийх хэсэг
+                        for grade in grade_qs_student:
+                            if grade.lesson_season != None and grade.lesson_year != None:
+
+                                if not grade.credit:
+                                    cr_sum += grade.credit
+                                if grade.average and grade.credit:
+                                    grade_cr_sum += grade.credit * grade.average
+                            else:
+
+                                all_sem_average_before = grade
+
+                        if grade_cr_sum != 0 and cr_sum != 0:
+                            all_sem_average = round((grade_cr_sum / cr_sum), 2)
+
+                        all_sem_average_before.score = Score.objects.filter(score_max__gte=all_sem_average, score_max__lte=all_sem_average).first()
+                        all_sem_average_before.average = all_sem_average
+                        all_sem_average_before.credit = cr_sum
+
+                        # Тухайн оюутны үндсэн дүнг засаж оруулан обьект болгон хүснэгтэд оруулах хэсэг
+                        student_grade_list_update.append(all_sem_average_before)
+
+                # Шинээр оруулах мэдээлэл байхгүй үед уг үйлдлийг хийхгүй
+                if len(student_grade_list_create) > 0:
+                    # Өгөгдлийн санд оруулах хэсэг
+                    StudentGrade.objects.bulk_create(student_grade_list_create)
+
+                # Өгөгдлийн санд оруулах хэсэг
+                StudentGrade.objects.bulk_update(student_grade_list_update, ["average", "credit", "score"])
+
+                # 4 курсын ангийг төгсгөх
+                Group.objects.filter(is_finish=False, level_gte=4).update(is_finish=True)
+
+                # Суралцаж буй төлөвтэй бүх ангийн курсын тоог 1 ээр нэмэгдүүлэх
+                Group.objects.filter(is_finish=False).update(level=F('level') + 1)
+
+                # Нэрийг шинэ түвшинд тааруулах (жишээ нь, 211 -> 221, 3311 -> 3321)
+                groups = Group.objects.filter(is_finish=False, level__lt=4)
+                for group in groups:
+
+                    # Group-ийн нэрийг авах
+                    name = group.name
+
+                    # Нэр нь дотроос зөвхөн тоог нь авах
+                    numbers = re.findall(r'\d+', name)
+
+                    # Тоогүй бол level нэр солихгүй
+                    if not numbers:
+                        continue
+
+                    # Тоог 2022-312 эсвэл 312 гэдгийг ялгана
+                    if len(numbers) > 1:
+                        target_number = numbers[1]
+                    else:
+                        target_number = numbers[0]
+
+                    # Хэрэв ганц 8 гэсэн нэртэй байвал солихгүй
+                    if len(target_number) <= 1:
+                        continue
+
+                    # Сүүлээсээ 2 дох оронг авах
+                    second_last_digit = int(target_number[-2])
+
+                    # Хэрэв Сүүлээсээ 2 дох орон нь ийм байвал солихгүй
+                    if second_last_digit >= 4:
+                        continue
+
+                    # Шинэ нэр бэлдэх
+                    new_number = target_number[:-2] + str(second_last_digit + 1) + target_number[-1]
+
+                    # Шинэ нэрэнд хуучныг солих
+                    new_name = name.replace(target_number, new_number)
+
+                    group.name = new_name
+                    group.save()
+
+            except Exception as e:
+                return request.send_error("ERR_002", e.__str__)
 
         serializer = self.get_serializer(instance, data=data, partial=True)
         if not serializer.is_valid(raise_exception=False):
             return request.send_error_valid(serializer.errors)
 
         serializer.save()
-
-        # Бодогдсон голчуудыг хадгалах хүснэгт
-        student_grade_list = []
-
-        # Тухайн жил, улирал болон идэвхитэй суралцаж байгаа оюутнуудын дүн авах хэсэг
-        score_qs = ScoreRegister.objects.filter(student__status__code=1, lesson_year=active_lesson_year, lesson_season=season)
-        try:
-            # Идэвхитэй суралцаж байгаа оюутнуудын ID-г авах хэсэг
-            student_list = Student.objects.filter(status__code=1).values_list("id", flat=True)
-
-            # оюутнуудын ID-гаар гүйлгэх хэсэг
-            for student in student_list:
-                # Хувьсагчдыг зарлах хэсэг
-                grade_cr_sum = 0
-                cr_sum = 0
-                average = 0
-                # Оюутны тухайн улирлын дүнг авах хэсэг
-                student_grade = score_qs.filter(student=student)
-
-                # Хичээлүүдээр гүйлгэх хэсэг
-                for lesson in student_grade:
-                    cr = lesson.lesson.kredit
-                    score_total = lesson.score_total
-                    cr_sum += cr
-                    grade_cr_sum += (score_total * cr)
-
-                if cr_sum != 0 and grade_cr_sum != 0:
-                    average = grade_cr_sum / cr_sum
-                    average = round(average, 2)
-
-                # Авсан датагаар instance үүсгэх хэсэг
-                student_grade_list.append(StudentGrade(
-                    student = Student.objects.get(id=student),
-                    score = Score.objects.filter(score_max__gte=average, score_min__lte=average).first(),
-                    lesson_year = active_lesson_year,
-                    lesson_season = Season.objects.get(id=season),
-                    credit = cr_sum,
-                    average = average
-                ))
-
-            # Өгөгдлийн санд хадгалах хэсэг
-            StudentGrade.objects.bulk_create(student_grade_list)
-
-            # Сурагчдын дүнгийн мэдээллийг авах хэсэг
-            grade_qs = StudentGrade.objects.all()
-
-            # Бодогдогдсон дүнг хадгалах хэсэг
-            student_grade_list_create = []
-            student_grade_list_update = []
-
-            # Сурагч сурагчаар дүн бодох хэсэг
-            for student in student_list:
-                cr_sum = 0                  # Кредитүүдийн нийлбэрийг хадгалах хувьсагч
-                grade_cr_sum = 0            # Кредит болон дундажуудын нийлбэрийг хадгалах хувьсагч
-                all_sem_average = 0         # Бодогдсон дүнг хадгалах хувьсагч
-
-                # Сурагчийн мэдээллийг авах хэсэг
-                grade_qs_student = grade_qs.filter(student=student)
-
-                # 1 үед тухайн семистерт шинээр элссэн сурагч гэж үзэн энэ семистерт бодогдсон дүнгээр бүх дүнг хадгална
-                if grade_qs_student.count() == 1:
-
-                    all_sem_average_obj = grade_qs_student.first()
-
-                    # Тухайн оюутны үндсэн дүнг шинээр оруулан обьект болгон хүснэгтэд оруулах хэсэг
-                    student_grade_list_create.append(StudentGrade(
-                        student = Student.objects.get(id=student),
-                        score = Score.objects.filter(score_max__gte=all_sem_average_obj.average, score_min__lte=all_sem_average_obj.average).first(),
-                        lesson_year = None,
-                        lesson_season = None,
-                        credit = all_sem_average_obj.credit,
-                        average = all_sem_average_obj.average
-                    ))
-                else:
-
-                    # Тухайн оюутны өмнөх семистерт бодогдсон дүнгээр бодолт хийх хэсэг
-                    for grade in grade_qs_student:
-                        if grade.lesson_season != None and grade.lesson_year != None:
-
-                            if not grade.credit:
-                                cr_sum += grade.credit
-                            if grade.average and grade.credit:
-                                grade_cr_sum += grade.credit * grade.average
-                        else:
-
-                            all_sem_average_before = grade
-
-                    if grade_cr_sum != 0 and cr_sum != 0:
-                        all_sem_average = round((grade_cr_sum / cr_sum), 2)
-
-                    all_sem_average_before.score = Score.objects.filter(score_max__gte=all_sem_average, score_max__lte=all_sem_average).first()
-                    all_sem_average_before.average = all_sem_average
-                    all_sem_average_before.credit = cr_sum
-
-                    # Тухайн оюутны үндсэн дүнг засаж оруулан обьект болгон хүснэгтэд оруулах хэсэг
-                    student_grade_list_update.append(all_sem_average_before)
-
-            # Шинээр оруулах мэдээлэл байхгүй үед уг үйлдлийг хийхгүй
-            if len(student_grade_list_create) > 0:
-                # Өгөгдлийн санд оруулах хэсэг
-                StudentGrade.objects.bulk_create(student_grade_list_create)
-
-            # Өгөгдлийн санд оруулах хэсэг
-            StudentGrade.objects.bulk_update(student_grade_list_update, ["average", "credit", "score"])
-
-            # Суралцаж буй төлөвтэй бүх ангийн курсын тоог 1 ээр нэмэгдүүлэх
-            Group.objects.filter(is_finish=False).update(level=F('level') + 1)
-
-            # Нэрийг шинэ түвшинд тааруулах (жишээ нь, 211 -> 221, 3311 -> 3321)
-            groups = Group.objects.filter(is_finish=False,level__lt=4)
-            for group in groups:
-
-                # Group-ийн нэрийг авах
-                name = group.name
-
-                # Нэр нь дотроос зөвхөн тоог нь авах
-                numbers = re.findall(r'\d+', name)
-
-                # Тоогүй бол level нэр солихгүй
-                if not numbers:
-                    continue
-
-                # Тоог 2022-312 эсвэл 312 гэдгийг ялгана
-                if len(numbers) > 1:
-                    target_number = numbers[1]
-                else:
-                    target_number = numbers[0]
-
-                # Хэрэв ганц 8 гэсэн нэртэй байвал солихгүй
-                if len(target_number) <= 1:
-                    continue
-
-                # Сүүлээсээ 2 дох оронг авах
-                second_last_digit = int(target_number[-2])
-
-                # Хэрэв Сүүлээсээ 2 дох орон нь ийм байвал солихгүй
-                if second_last_digit >= 4:
-                    continue
-
-                # Шинэ нэр бэлдэх
-                new_number = target_number[:-2] + str(second_last_digit + 1) + target_number[-1]
-
-                # Шинэ нэрэнд хуучныг солих
-                new_name = name.replace(target_number, new_number)
-
-                group.name = new_name
-                group.save()
-
-
-        except Exception as e:
-            return request.send_error("ERR_002", e.__str__)
-
         return request.send_info('INF_002')
 
     def delete(self, request, pk=None):
