@@ -4393,7 +4393,10 @@ class OnlineWeek(models.Model):
     challenge = models.ForeignKey(Challenge, on_delete=models.SET_NULL, null=True, verbose_name='7 хоногийн шалгалт')
     homework = models.ForeignKey(HomeWork, on_delete=models.SET_NULL, null=True, verbose_name='Гэрийн даалгавар')
     challenge_check_score = models.FloatField(null=True, verbose_name='Шалгалтаар тооцох оноо')
-    materials = models.ManyToManyField(WeekMaterials, verbose_name='Тухайн 7 хоногийн материалууд')
+
+    description = models.CharField(verbose_name='Тайлбар', max_length=1000, null=True)
+    lekts_file = models.FileField(verbose_name='Лекцийн материал', null=True)
+
     work_type = models.IntegerField(choices=HomeWorkStudent.ASSIGNMENT_TYPE, db_index=True, default=HomeWorkStudent.CHECKED, verbose_name="Даалгаврын тооцох төрөл", null=True)
 
     created_user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Үүсгэсэн хэрэглэгч', null=True)
