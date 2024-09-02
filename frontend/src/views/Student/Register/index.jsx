@@ -327,6 +327,8 @@ const Register = () => {
             formData.append('file', file)
 
             const { success, data }  = await fetchData(studentImportApi.postImportStudent(formData))
+            console.log(success)
+            console.log(data)
             if (success) {
 
                 handleFileModal()
