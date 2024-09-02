@@ -20,7 +20,7 @@ import Survey from './Survey'
 // import Role from './Role'
 // import Science from './Science'
 import Statistic from './Statistic'
-// import Test from './Test'
+import Test from './Test'
 import Elselt from './Elselt'
 import PsychologicalTesting from './PsychologicalTesting'
 
@@ -50,5 +50,5 @@ export default [
   ...Settings,
   // ...Role,
   // ...Science
-  // ...Test,
+  ...Test,
 ];

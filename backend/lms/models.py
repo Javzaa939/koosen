@@ -3303,8 +3303,26 @@ class PsychologicalTest(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 
+
+# --------------------------------------------------------- Шалгалтын модуль -------------------------------------------------------------------------------------------
+
+# -------------------------------------------------------- Өөрийгөө сорих тест ------------------------------------------------------------------------------------------
+
+def get_image_path(instance):
+    """ Өөрийгөө сорих шалгалтын файлын замыг зааж байна """
+
+    return os.path.join('challenge', 'questions', "asuult_%s" % str(instance.id))
+
+
+def get_choice_image_path(instance):
+    """ Өөрийгөө сорих шалгалтын сонголтын файлын замыг зааж байна """
+
+    return os.path.join('challenge', 'questions', "answer_%s" % str(instance.id))
+
+
 class QuestionChoices(models.Model):
     """ Өөрийгөө сорих шалгалтын сонголттой асуултын сонголтууд """
+
 
     choices = models.CharField(verbose_name="Сонголт", max_length=250, null=False, blank=False)
     image = models.ImageField(upload_to=get_choice_image_path, null=True, blank=True, verbose_name='зураг')
@@ -3314,6 +3332,7 @@ class QuestionChoices(models.Model):
     created_by = models.ForeignKey(Teachers, on_delete=models.CASCADE, related_name="+")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
 
 
 class ChallengeQuestions(models.Model):
@@ -3333,23 +3352,35 @@ class ChallengeQuestions(models.Model):
         (KIND_TEXT, 'Бичвэр'),
     )
 
+    LEVEL_EASY = 1
+    LEVEL_NORMAL = 2
+    LEVEL_HARD = 3
+
+    DIFFICULTY_LEVELS = (
+        (LEVEL_EASY, 'Хөнгөн'),
+        (LEVEL_NORMAL, 'Дунд'),
+        (LEVEL_HARD, 'Хүнд'),
+    )
+
     kind = models.IntegerField(choices=KIND_CHOICES, null=False, blank=False, verbose_name='Асуултын төрөл')
     question = models.CharField(max_length=1000, null=False, blank=False, verbose_name="Асуулт")
 
-    subject = models.ForeignKey(Lesson_title_plan, on_delete=models.SET_NULL, null=True)
-    score = models.FloatField(verbose_name="Асуултын оноо", null=True)
-
-    yes_or_no = models.PositiveIntegerField(null=True, verbose_name='Тийм үгүй асуултны хариулт хадгалах хэсэг') # 1 0 хадгалах
-
     is_required = models.BooleanField(default=False, verbose_name="Заавал санал өгөх эсэх")
     image = models.ImageField(upload_to=get_image_path, null=True, blank=True, verbose_name='зураг')
+
+    score = models.FloatField(verbose_name="Асуултын оноо", null=True)
+    yes_or_no = models.PositiveIntegerField(null=True, verbose_name='Тийм үгүй асуултны хариулт хадгалах хэсэг') # 1 0 хадгалах
+
+    subject = models.ForeignKey(Lesson_title_plan, on_delete=models.SET_NULL, null=True)
+
+    level = models.IntegerField(choices=DIFFICULTY_LEVELS, default=LEVEL_NORMAL,  verbose_name='Асуултын түвшин')
 
     # KIND_RATING үед
     rating_max_count = models.IntegerField(default=0, verbose_name="Үнэлгээний дээд тоо", null=True, blank=True)
     low_rating_word = models.CharField(max_length=100, verbose_name="Доод үнэлгээг илэрхийлэх үг")
     high_rating_word = models.CharField(max_length=100, verbose_name="Дээд үнэлгээг илэрхийлэх үг")
 
-    #  KIND_MULTI_CHOICE үед
+    # KIND_MULTI_CHOICE үед
     max_choice_count = models.IntegerField(default=0, verbose_name="Сонголтын хязгаар", null=True, blank=True)
 
     # KIND_ONE_CHOICE болон KIND_MULTI_CHOICE үед
@@ -3359,9 +3390,9 @@ class ChallengeQuestions(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+
 class Challenge(models.Model):
     """ Өөрийгөө сорих тест  """
-
 
     KIND_LESSON = 1
     KIND_GROUP = 2
@@ -3372,7 +3403,6 @@ class Challenge(models.Model):
         (KIND_GROUP, 'Ангийн хүрээнд'),
         (KIND_STUDENT, 'Оюутны хүрээнд'),
     )
-
 
     MAX_SCORE = 1
     AVG_SCORE = 2
@@ -3396,22 +3426,19 @@ class Challenge(models.Model):
     SORIL2 = 2
     SEMESTR_EXAM = 3
     SELF_TEST = 4
-    MENTAL_TEST = 5
 
     CHALLENGE_TYPE = (
         (SORIL1, 'Cорил 1'),
         (SORIL2, 'Cорил 2'),
         (SEMESTR_EXAM, 'Улирлын шалгалт'),
         (SELF_TEST, 'Өөрийгөө сорих тест'),
-        (MENTAL_TEST, 'Сэтгэлзүйн сорил')
     )
 
     #  Хамрах хүрээ нь
     lesson = models.ForeignKey(LessonStandart, on_delete=models.CASCADE, verbose_name="Хичээл", null=True)
-    group = models.ManyToManyField(Group, blank=True, verbose_name="Анги")
     student = models.ManyToManyField(Student, blank=True, verbose_name="Оюутнууд")
 
-    kind = models.IntegerField(choices=KIND_CHOICES, null=False, blank=False)
+    kind = models.IntegerField(choices=KIND_CHOICES, null=False, default=KIND_LESSON, blank=False)
 
     title = models.CharField(max_length=250, null=False, blank=False, verbose_name="Гарчиг")
     description = models.TextField(null=True, blank=False, verbose_name="Тайлбар")
@@ -3422,14 +3449,14 @@ class Challenge(models.Model):
     end_date = models.DateTimeField(null=False, blank=False, verbose_name="Дуусах хугацаа")
     duration = models.PositiveIntegerField(verbose_name='Үргэлжлэх хугацаа', null=True)
 
-    send_type = models.PositiveIntegerField(choices=SEND_TYPE, db_index=True, verbose_name="Шалгалт илгээсэн төрөл", null=True)
-    challenge_type = models.PositiveIntegerField(choices=CHALLENGE_TYPE, db_index=True, default=SELF_TEST, verbose_name="Шалгалтын төрөл")
-
-    comment = models.TextField(null=True, verbose_name='ХБА татгалзсан тайлбар бичих')
     assess = models.IntegerField(choices=ASSESS_CHOICES, default=MAX_SCORE, verbose_name='Үнэлэх арга')
+    week = models.IntegerField(null=True, verbose_name='7 хоногийн тоо')
 
     try_number = models.IntegerField(default=1, verbose_name='Оролдлогын тоо')
-    week = models.IntegerField(null=True, verbose_name='7 хоногийн тоо')
+
+    send_type = models.PositiveIntegerField(choices=SEND_TYPE, db_index=True, verbose_name="Шалгалт илгээсэн төрөл", null=True)
+    challenge_type = models.PositiveIntegerField(choices=CHALLENGE_TYPE, db_index=True, default=SELF_TEST, verbose_name="Шалгалтын төрөл",)
+    comment = models.TextField(null=True, verbose_name='ХБА татгалзсан тайлбар бичих')
 
     has_shuffle = models.BooleanField(default=False, verbose_name="Холих эсэх")
     has_choice_shuffle = models.BooleanField(default=False, verbose_name="Сонголтуудыг холих эсэх")
@@ -3440,7 +3467,6 @@ class Challenge(models.Model):
     created_by = models.ForeignKey(Teachers, on_delete=models.CASCADE, related_name="+")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
 
     # @staticmethod Ашиглагдаж магадгүй
     # def get_filter(request):
@@ -3472,6 +3498,10 @@ class Challenge(models.Model):
 class ChallengeStudents(models.Model):
     """ Шалгалтад оролцогчид """
 
+    class Meta:
+        db_table = 'lms_challengestudents'
+        managed = False
+
     challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE)
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
 
@@ -3487,6 +3517,24 @@ class ChallengeStudents(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+class ChallengeSedevCount(models.Model):
+
+    lesson_title = models.ForeignKey(Lesson_title_plan, on_delete=models.CASCADE, verbose_name='Хичээлийн гарчиг')
+    status = models.IntegerField(choices=ChallengeQuestions.DIFFICULTY_LEVELS, default=ChallengeQuestions.LEVEL_NORMAL)
+    count = models.IntegerField(default=0)
+
+
+class ChallengeQuestionCount(models.Model):
+    """ Шалгалтанд оролцох асуултын тоо болон төлөв"""
+
+    challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE, verbose_name='Шалгалт')
+    question_counts = models.ManyToManyField(ChallengeSedevCount)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    updated_user = models.ForeignKey(User, on_delete=models.CASCADE)
 
 
 class CalculatedGpaOfDiploma(models.Model):
