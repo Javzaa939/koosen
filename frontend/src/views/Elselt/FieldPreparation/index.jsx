@@ -349,7 +349,7 @@ const FieldPreparation = () => {
             <StateModal
                 addModalHandler={stateModalHandler}
                 addModal={stateModal}
-
+                selectedStudents={selectedStudents}
                 stateop={stateop}
                 addModalData={addModalData}
                 getDatas={getDatas}
@@ -462,6 +462,20 @@ const FieldPreparation = () => {
                                 Сонгосон элсэгчид руу мессеж илгээх
                             </UncontrolledTooltip>
                         </div>
+                        <div className='px-1'>
+                            <Button
+                                color='primary'
+                                disabled={(selectedStudents.length != 0 && user.permissions.includes('lms-elselt-mail-create')) ? false : true}
+                                className='d-flex align-items-center px-75'
+                                id='state'
+                                onClick={() => stateModalHandler()}
+                            >
+                                Тэнцүүлэх
+                            </Button>
+                            <UncontrolledTooltip target='state'>
+                                Массаар нь тэнцүүлэх
+                            </UncontrolledTooltip>
+                        </div>
                     </div>
                     <div className='px-1'>
                         <Button
@@ -541,7 +555,7 @@ const FieldPreparation = () => {
                         print='true'
                         theme="solarized"
                         onSort={handleSort}
-                        columns={getColumns(currentPage, rowsPerPage === 'Бүгд' ? 1 : rowsPerPage, total_count, stateop, stateModalHandler)}
+                        columns={getColumns(currentPage, rowsPerPage === 'Бүгд' ? 1 : rowsPerPage, total_count, stateop)}
                         sortIcon={<ChevronDown size={10} />}
                         paginationPerPage={rowsPerPage === 'Бүгд' ? 1 : rowsPerPage}
                         paginationDefaultPage={currentPage}

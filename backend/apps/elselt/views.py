@@ -1970,7 +1970,9 @@ class ElseltStateApprove(
         profession = self.request.query_params.get('profession')
         admission = self.request.query_params.get('admission')
         sorting = self.request.query_params.get('sorting')
-        queryset = queryset.filter(state=AdmissionUserProfession.STATE_APPROVE)
+
+        army_user_ids = ArmyUser.objects.filter(state=AdmissionUserProfession.STATE_APPROVE).values_list('user', flat=True)
+        queryset = queryset.filter(Q(Q(state=AdmissionUserProfession.STATE_APPROVE) | Q(user__in=army_user_ids)))
 
         if admission:
             queryset = queryset.filter(profession__admission=admission)
@@ -2693,9 +2695,25 @@ class ArmyUserSerializerAPView(
     def post(self, request):
 
         data = request.data
+        users = data.get('students')
+        state = data.get('state')
+        description = data.get('description')
         try:
-            data['user'] = ElseltUser.objects.get(pk=data.get('user'))
-            ArmyUser.objects.create(**data)
+            create_users = []
+            for user in users:
+                if ArmyUser.objects.filter(user=user).exists():
+                    continue
+
+                create_users.append(
+                    ArmyUser(
+                        user=ElseltUser.objects.get(id=user),
+                        state=state,
+                        description=description
+                    )
+                )
+
+            ArmyUser.objects.bulk_create(create_users)
+
         except Exception as e:
             print(e)
             return request.send_error('ERR_002', 'Хадгалахад алдаа гарлаа')

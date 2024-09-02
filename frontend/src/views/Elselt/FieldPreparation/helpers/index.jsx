@@ -198,27 +198,27 @@ export function getColumns (currentPage, rowsPerPage, total_count,stateop, state
 			selector: (row) => row?.created_at? moment(row?.created_at).format("YYYY-MM-DD h:mm") : '',
 			center: true,
 		},
-		{
-			name: "Үйлдэл",
-			center: true,
-			maxWidth: "120px",
-			minWidth: "120px",
-			selector: (row) => (
-				<div className="text-center" style={{ width: "auto" }}>
-					<a
-						role="button"
-						onClick={(e) => { stateModalHandler(row)} }
-						// onClick={() => stateModalHandler()}
-						id={`description${row?.id}`}
-						className="me-1"
-						// style={{pointerEvents: user?.permissions?.includes('lms-elselt-physque-create') ? '' : 'none'}}
-					>
-						<Badge color="light-success" pill><CheckCircle  width={"15px"} /></Badge>
-					</a>
-					<UncontrolledTooltip placement='top' target={`description${row.id}`}>Мэдээлэл оруулах</UncontrolledTooltip>
-				</div>
-			),
-		},
+		// {
+		// 	name: "Үйлдэл",
+		// 	center: true,
+		// 	maxWidth: "120px",
+		// 	minWidth: "120px",
+		// 	selector: (row) => (
+		// 		<div className="text-center" style={{ width: "auto" }}>
+		// 			<a
+		// 				role="button"
+		// 				onClick={(e) => { stateModalHandler(row)} }
+		// 				// onClick={() => stateModalHandler()}
+		// 				id={`description${row?.id}`}
+		// 				className="me-1"
+		// 				// style={{pointerEvents: user?.permissions?.includes('lms-elselt-physque-create') ? '' : 'none'}}
+		// 			>
+		// 				<Badge color="light-success" pill><CheckCircle  width={"15px"} /></Badge>
+		// 			</a>
+		// 			<UncontrolledTooltip placement='top' target={`description${row.id}`}>Мэдээлэл оруулах</UncontrolledTooltip>
+		// 		</div>
+		// 	),
+		// },
 	]
 
     return columns
