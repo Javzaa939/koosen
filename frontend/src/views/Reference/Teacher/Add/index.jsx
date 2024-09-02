@@ -79,18 +79,34 @@ const AddModal = ({ open, handleModal, refreshDatas, editData}) =>{
         cdata['sub_org']=school_id
         cdata = convertDefaultValue(cdata)
 
-        const { success, error } = await postFetch(teacherApi.postRegister(cdata))
-        if(success) {
-            reset()
-            handleModal()
-            refreshDatas()
+        if (editData && editData?.id) {
+            const { success, error } = await postFetch(teacherApi.putRegister(cdata, editData?.id))
+            if(success) {
+                reset()
+                handleModal()
+                refreshDatas()
+            } else {
+                setLoader(false)
+                /** Алдааны мессэжийг input дээр харуулна */
+                for (let key in error) {
+                    setError(error[key].field, { type: 'custom', message:  error[key].msg});
+                }
+            }
         } else {
-            setLoader(false)
-            /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in error) {
-                setError(error[key].field, { type: 'custom', message:  error[key].msg});
+            const { success, error } = await postFetch(teacherApi.postRegister(cdata))
+            if(success) {
+                reset()
+                handleModal()
+                refreshDatas()
+            } else {
+                setLoader(false)
+                /** Алдааны мессэжийг input дээр харуулна */
+                for (let key in error) {
+                    setError(error[key].field, { type: 'custom', message:  error[key].msg});
+                }
             }
         }
+
 	}
 
     useEffect(

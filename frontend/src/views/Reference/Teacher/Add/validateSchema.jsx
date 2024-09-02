@@ -19,7 +19,7 @@ export const validateSchema = Yup.object().shape({
 	email: Yup.string()
 		.trim()
 		.required('Хоосон байна'),
-	phone_number: Yup.string()
-		.trim()
-		.required('Хоосон байна'),
+	// phone_number: Yup.string()
+	// 	.trim()
+	// 	.required('Хоосон байна'),
 });

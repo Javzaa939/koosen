@@ -91,7 +91,7 @@ from .serializers import DepartmentPostSerailizer
 from .serializers import EmployeePostSerializer
 from .serializers import UserRegisterSerializer
 from .serializers import UserInfoSerializer
-from .serializers import EmployeeSerializer
+from .serializers import EmployeeSerializer, UserSerializer
 
 from lms.models import ProfessionDefinition
 from lms.models import LessonStandart
@@ -1068,6 +1068,26 @@ class EmployeeApiView(
 
         return request.send_info("INF_001")
 
+
+    def put(self, request, pk=None):
+        datas = request.data
+        instance = Teachers.objects.filter(id=pk).first()
+        user_obj = User.objects.get(id=instance.user.id)
+        user_serializer = UserSerializer(user_obj, data=request.data, partial=True)
+        if not user_serializer.is_valid():
+            print(user_serializer.errors)
+            return request.send_error_valid(user_serializer.errors)
+
+        user = user_serializer.save()
+        datas['user'] = str(user.id)
+
+        userinfo_serializer = UserInfoSerializer(instance, data=datas, partial=True)
+        if not userinfo_serializer.is_valid():
+            print(userinfo_serializer.errors)
+            return request.send_error_valid(userinfo_serializer.errors)
+
+        userinfo_serializer.save()
+        return request.send_info("INF_002")
 
 
 class CRUDAPIView(

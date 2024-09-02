@@ -59,6 +59,14 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
         return instance
 
+
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = '__all__'
+
+
 class UserInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
