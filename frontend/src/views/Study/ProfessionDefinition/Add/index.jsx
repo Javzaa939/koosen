@@ -156,7 +156,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                         </Col>
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="code">
-                                {t('Хөтөлбөрийн код')}
+                                {t('Хөтөлбөрийн индекс')}
                             </Label>
                             <Controller
                                 defaultValue=''
@@ -167,7 +167,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                     <Input
                                         id ="code"
                                         bsSize="sm"
-                                        placeholder={t('Хөтөлбөрийн код')}
+                                        placeholder={t('Хөтөлбөрийн индекс')}
                                         {...field}
                                         type="text"
                                         invalid={errors.code && true}
@@ -175,6 +175,29 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                 )}
                             />
                             {errors.code && <FormFeedback className='d-block'>{t(errors.code.message)}</FormFeedback>}
+                        </Col>
+                        <Col lg={6} xs={12}>
+                            <Label className="form-label" for="profession_code">
+                                {t('Хөтөлбөрийн код')}
+                            </Label>
+                            <Controller
+                                defaultValue=''
+                                control={control}
+                                id="profession_code"
+                                name="profession_code"
+                                render={({ field }) => (
+                                    <Input
+                                        id="profession_code"
+                                        bsSize="sm"
+                                        placeholder={t('Хөтөлбөрийн код')}
+                                        {...field}
+                                        type="text"
+                                        maxLength={3}
+                                        invalid={errors.profession_code && true}
+                                    />
+                                )}
+                            />
+                            {errors.profession_code && <FormFeedback className='d-block'>{t(errors.profession_code.message)}</FormFeedback>}
                         </Col>
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="name">

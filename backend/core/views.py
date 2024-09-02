@@ -402,6 +402,22 @@ class SubSchoolAPIView(
         group_list = self.list(request).data
         return request.send_data(group_list)
 
+    @transaction.atomic()
+    def post(self, request):
+
+        data = request.data
+        data['is_school'] = True
+
+        serializer = self.serializer_class(data=data)
+
+        if not serializer.is_valid():
+
+            return request.send_error('ERR_002', serializer.errors)
+
+        serializer.save()
+
+        return request.send_info('INF_001')
+
     def put(self, request, pk=None):
         " Дэд сургуулийн мэдээлэл засах "
         self.serializer_class = SubSchoolPutRegisterSerailizer
@@ -422,6 +438,7 @@ class SubSchoolAPIView(
         tsol_name = data.get("tsol_name")
         tsol_name_eng = data.get("tsol_name_eng")
         tsol_name_uig = data.get("tsol_name_uig")
+        org_code = data.get("org_code")
 
         instance = self.get_object()
         serializer = self.get_serializer(data=data)
@@ -439,7 +456,8 @@ class SubSchoolAPIView(
                             zahiral_name_uig=zahiral_name_uig,
                             tsol_name=tsol_name,
                             tsol_name_eng=tsol_name_eng,
-                            tsol_name_uig =tsol_name_uig
+                            tsol_name_uig =tsol_name_uig,
+                            org_code =org_code,
                         )
                 except Exception:
                     raise

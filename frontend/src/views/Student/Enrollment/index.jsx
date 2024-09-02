@@ -186,8 +186,6 @@ const Enrollment = () => {
         setStateModal(!stateModal)
     }
 
-    console.log(datas)
-
     function convert() {
         const mainData = datas.map((data, idx) => {
             return (
@@ -343,7 +341,6 @@ const Enrollment = () => {
                         <Button
                             color='primary'
                             className='m-50'
-                            disabled={selectedRows.length === 0}
                             onClick={() => toggleEditModal()}
                         >
                             <Edit3 size={15} />
@@ -408,13 +405,13 @@ const Enrollment = () => {
                             className='react-select'
                             placeholder={t('-- Сонгоно уу --')}
                             options={professionOption || []}
-                            value={professionOption.find((c) => c.id === select_value.profession)}
+                            value={professionOption.find((c) => c.prof_id === select_value.profession)}
                             noOptionsMessage={() => t('Хоосон байна.')}
                             onChange={(val) => {
                                 setSelectValue(current => {
                                     return {
                                         ...current,
-                                        profession: val?.id || '',
+                                        profession: val?.prof_id || '',
                                     }
                                 })
                             }}
@@ -544,7 +541,10 @@ const Enrollment = () => {
                 </div>
             </Card>
 
-            <EditModal editModal={editModal} toggleEditModal={toggleEditModal} selectedRows={selectedRows} getDatas={getDatas} />
+            {
+                editModal &&
+                <EditModal editModal={editModal} toggleEditModal={toggleEditModal} selectedRows={selectedRows} getDatas={getDatas} profession={select_value.profession} />
+            }
 
         </Fragment>
     )

@@ -960,6 +960,7 @@ class StudentGroupListAPIView(generics.GenericAPIView, mixins.ListModelMixin):
         degree = self.request.query_params.get('degree')
         profession = self.request.query_params.get('profession')
         join_year = self.request.query_params.get('join_year')
+        level = self.request.query_params.get('level')
 
         # Сургууль хайлт
         if schoolId:
@@ -980,6 +981,9 @@ class StudentGroupListAPIView(generics.GenericAPIView, mixins.ListModelMixin):
         # Элссэн хичээлийн жил
         if join_year:
             queryset = queryset.filter(join_year=join_year)
+
+        if level:
+            queryset = queryset.filter(level=level)
 
         return queryset
 
