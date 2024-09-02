@@ -3402,55 +3402,28 @@ class StudentImportAPIView(
             for created_data in datas:
                 pay_type_id = 8 # төлбөр төлөлтын төрөл
 
-                department = created_data.get('Тэнхим')
                 group = created_data.get('Анги/дамжаа')
                 register_num = created_data.get('Регистрийн дугаар')
-                # family_name = created_data.get('Ургийн овог')
                 last_name = created_data.get('Эцэг эхийн нэр')
                 first_name = created_data.get('Өөрийн нэр')
                 last_name_uig = created_data.get('Эцэг эхийн нэр уйгаржин')
                 first_name_uig = created_data.get('Өөрийн нэр уйгаржин')
                 phone = created_data.get('Утасны дугаар')
-                # yas_undes = created_data.get('Яс үндэс')
-
-                # gender = created_data.get('Хүйс')
                 birth_date, gender = calculate_birthday(register_num)
                 status = created_data.get('Төлөв')
                 code = created_data.get('Суралцагчдын код')
 
-                # төлбөр төлөлт
-                # if pay_type == 'Засгийн газар хоорондын тэтгэлэг':
-                #     pay_type_id = Student.IG
-                # elif pay_type == 'Төрөөс үзүүлэх тэтгэлэ' :
-                #     pay_type_id = Student.GG
-                # elif pay_type == 'Боловсролын зээлийн сангийн хөнгөлөлттэй зээл':
-                #     pay_type_id = Student.LEL
-                # elif pay_type == 'Төрөөс үзүүлэх буцалтгүй тусламж':
-                #     pay_type_id = Student.GRANTS
-                # elif pay_type == 'Дотоод, гадаадын аж ахуйн нэгж, байгууллага, сан, хүвь хүний нэрэмжит тэтгэлэг':
-                #     pay_type_id = Student.IEEOF
-                # elif pay_type == 'Тухайн сургуулийн тэтгэлэг':
-                #     pay_type_id = Student.SCHOLARSHIP
-                # elif pay_type == 'Хувийн зардал':
-                #     pay_type_id = Student.EXPENSES
-                # elif pay_type == 'Бусад':
                 pay_type_id = Student.EXPENSES
 
                 status_id = None
 
                 # суралцах хэлбэр
                 status_id = StudentRegister.objects.filter(name__icontains='Суралцаж буй').first()
-                # if status:
 
-                    # if not status_id:
-                    #     count = StudentRegister.objects.count()
-                    #     status_id = StudentRegister.objects.create(name=status, code=count+1)
-
-                dep_obj = Salbars.objects.filter(name__icontains=department).first()
                 group_obj = Group.objects.filter(name__icontains=group).first()
 
                 obj = {
-                    'department': department,
+                    'department': group.department,
                     'group': group,
                     'register_num': register_num,
                     'last_name': last_name,
@@ -3467,7 +3440,7 @@ class StudentImportAPIView(
 
                 student_qs = Student.objects.filter(code=code)
 
-                if not (code or dep_obj or group_obj or pay_type_id or register_num or last_name or first_name or phone or status_id) or student_qs:
+                if not (code or group_obj or pay_type_id or register_num or last_name or first_name or phone or status_id) or student_qs:
                     error_datas.append(obj)
                 else:
                     correct_datas.append(obj)

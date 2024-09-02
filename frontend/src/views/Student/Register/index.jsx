@@ -347,7 +347,7 @@ const Register = () => {
 
     function staticExcelHandler() {
 
-        var excelUrl = '/assets/burtgel_zagvar.xlsx'
+        var excelUrl = '/assets/oyutan_zagwar.xlsx'
 
         const link = document.createElement('a');
         link.href = excelUrl;
