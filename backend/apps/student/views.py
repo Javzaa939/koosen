@@ -3423,13 +3423,16 @@ class StudentImportAPIView(
                 if isinstance(group, float):
                     continue
 
+                if isinstance(phone, float):
+                    phone = ''
+
                 # суралцах хэлбэр
                 status_id = StudentRegister.objects.filter(name__icontains='Суралцаж буй').first()
 
                 group_obj = Group.objects.filter(name__iexact=str(group)).first()
 
                 obj = {
-                    'department': group_obj.department.id if group_obj else None,
+                    'department': group_obj.department.name if group_obj else '',
                     'group': group,
                     'register_num': register_num,
                     'last_name': last_name,
