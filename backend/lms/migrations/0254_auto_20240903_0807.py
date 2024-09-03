@@ -11,7 +11,7 @@ def custom_studentlogin_passwords(apps, schema_editor):
     Student = apps.get_model('lms', 'Student')
     StudentLogin = apps.get_model('lms', 'StudentLogin')
 
-    students = Student.objects.filter(updated_at__lte='2024-09-01').values('id', 'register_num', 'code')
+    students = Student.objects.filter(updated_at__gte='2024-09-01').values('id', 'register_num', 'code')
     count = 0
     for student in list(students):
         count += 1
