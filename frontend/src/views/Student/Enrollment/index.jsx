@@ -335,7 +335,7 @@ const Enrollment = () => {
             <Card>
                 {isLoading && Loader}
                 <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom pt-0'">
-                    <CardTitle tag="h4">{t('Тэнцсэн элсэгчидийн элсэлтийн тушаал')}</CardTitle>
+                    <CardTitle tag="h4">{t('Тэнцсэн элсэгчид')}</CardTitle>
                     <div className='d-flex flex-wrap mt-md-0 mt-1'>
 
                         <Button
@@ -344,7 +344,7 @@ const Enrollment = () => {
                             onClick={() => toggleEditModal()}
                         >
                             <Edit3 size={15} />
-                            <span className='align-middle ms-50'>{t('Тушаал бүртгэх')}</span>
+                            <span className='align-middle ms-50'>{t('Элсэгчдийг оюутан болгох')}</span>
                         </Button>
 
                         <Button

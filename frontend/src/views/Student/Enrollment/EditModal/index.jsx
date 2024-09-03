@@ -16,44 +16,37 @@ import Select from 'react-select'
 
 import Flatpickr from 'react-flatpickr'
 import '@styles/react/libs/flatpickr/flatpickr.scss'
-import { validate, convertDefaultValue, ReactSelectStyles, formatDate } from "@utils"
+import { validate, ReactSelectStyles, formatDate } from "@utils"
 import { Controller, useForm } from 'react-hook-form';
 import { validateSchema } from './validateSchema';
 import { useTranslation } from "react-i18next";
 
-import moment from 'moment';
 import useApi from '@hooks/useApi';
 
 import useLoader from '@hooks/useLoader';
 import classNames from 'classnames'
 
+import Addmodal from '../../Group/Add'
+
 function EditModal({ editModal, toggleEditModal, selectedRows, getDatas, profession }) {
 
-    const datas = selectedRows
     const { t } = useTranslation()
     const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
 
-    const { control, handleSubmit, reset, setValue, setError, formState: { errors } } = useForm(validate(validateSchema));
+    const { control, handleSubmit, reset, setValue, setError, watch, formState: { errors } } = useForm(validate(validateSchema));
 
-    const date_relayer = datas.map(data => data.admission_date ? data.admission_date : new Date)
-    const date_value = date_relayer.filter((value, index) => value === value)[0]
-    const [admissionDate, setAdmissionDate] = useState(date_value ? date_value : '')
-
-    const number_relayer = datas.map(data => data.admission_date ? data.admission_date : 'test')
-    const number_value = number_relayer.filter((value, index) => value === value)[0]
-    const [admissionNumber, setAdmissionNumber] = useState(number_value ? number_value : '')
     const [groupDatas, setGroupDatas] = useState([])
     const [professionOption, setProfessionOption] = useState([])
+    const [isGroupModal, setIsGroupModal] = useState(false)
 
     const groupApi = useApi().student.group
     const admissionApi = useApi().elselt.approve
     const professionApi = useApi().elselt.profession
 
-    async function getGroupDatas(profession) {
+    async function getGroupDatas(profession='') {
         if(profession) {
             const { success, data } = await fetchData(groupApi.getList('', '', profession, '', 1))
             if(success) {
-                console.log('data', data)
                 setGroupDatas(data)
             }
         }
@@ -73,17 +66,6 @@ function EditModal({ editModal, toggleEditModal, selectedRows, getDatas, profess
     }, [])
 
     async function onSubmit(cdatas) {
-        let datax = []
-
-        // for (let i = 0; i < datas.length; i++){
-        //     datax.push(datas[i]?.id)
-        // }
-        // let all_data = {
-        //     "id": datax,
-        //     "admission_date": moment(admissionDate).format('YYYY-MM-DD'),
-        //     "admission_number": admissionNumber
-        // }
-
         cdatas['admission_date'] = formatDate(cdatas?.admission_date)
 
         const { success } = await fetchData(admissionApi.post(cdatas))
@@ -102,7 +84,7 @@ function EditModal({ editModal, toggleEditModal, selectedRows, getDatas, profess
         >
             {isLoading && Loader}
             <ModalHeader toggle={toggleEditModal}>
-                Тушаалын огноо болон дугаар засах
+                Тэнцсэн элсэгчдийг оюутан болгох
             </ModalHeader>
             <ModalBody tag={Form} onSubmit={handleSubmit(onSubmit)}>
                 <Row className='gy-1'>
@@ -121,7 +103,7 @@ function EditModal({ editModal, toggleEditModal, selectedRows, getDatas, profess
                                         id="profession"
                                         classNamePrefix='select'
                                         isClearable
-                                        className='react-select'
+                                        className={classNames('react-select', { 'is-invalid': errors.profession })}
                                         placeholder={t('-- Сонгоно уу --')}
                                         options={professionOption || []}
                                         value={professionOption.find((c) => c.prof_id === value)}
@@ -137,7 +119,7 @@ function EditModal({ editModal, toggleEditModal, selectedRows, getDatas, profess
                                 )
                             }}
                         />
-                        {errors.group && <FormFeedback className='d-block'>{t(errors.group.message)}</FormFeedback>}
+                        {errors.profession && <FormFeedback className='d-block'>{t(errors.profession.message)}</FormFeedback>}
                     </Col>
                     <Col md={12}>
                         <Label className="form-label" for="group">
@@ -159,11 +141,18 @@ function EditModal({ editModal, toggleEditModal, selectedRows, getDatas, profess
                                         placeholder={t('-- Сонгоно уу --')}
                                         options={groupDatas || []}
                                         value={groupDatas.find((c) => c.id === value)}
-                                        noOptionsMessage={() => t('Хоосон байна')}
                                         onChange={(val) => {
                                             onChange(val?.id || '')
                                         }}
                                         styles={ReactSelectStyles}
+                                        noOptionsMessage={() => {
+                                            if(!watch('profession')) {
+                                                return 'Хөтөлбөр сонгоно уу'
+                                            }
+                                            return (
+                                                <Button color='primary' size='sm' onClick={() => setIsGroupModal(!isGroupModal)}>Анги нэмэх</Button>
+                                            )
+                                        }}
                                         getOptionValue={(option) => option.id}
                                         getOptionLabel={(option) => option.name}
                                     />
@@ -186,7 +175,7 @@ function EditModal({ editModal, toggleEditModal, selectedRows, getDatas, profess
                                         id='admission_date'
                                         name='admission_date'
                                         placeholder='Огноо'
-                                        className='form-control'
+                                        className={classNames('form-control', {'is-invalid': errors.admission_date})}
                                         onChange={dates => {
                                             onChange(dates[0]);
                                         }}
@@ -219,21 +208,39 @@ function EditModal({ editModal, toggleEditModal, selectedRows, getDatas, profess
                                         id='admission_number'
                                         bsSize="sm"
                                         name='admission_number'
+                                        invalid={errors?.admission_number && true}
                                     />
                                 )
                             }}
                         />
+                        {errors.admission_number && <FormFeedback className='d-block'>{t(errors.admission_number.message)}</FormFeedback>}
+                    </Col>
+                    <Col md={12} className='text-center'>
+                        <Button
+                            type='submit'
+                            color='primary'
+                            className='me-1'
+                        >
+                            Оюутан болгох
+                        </Button>
+                        <Button
+                            outline
+                            onClick={toggleEditModal}
+                        >
+                            Болих
+                        </Button>
                     </Col>
                 </Row>
-                <div className='my-1'>
-                    <Button
-                        type='submit'
-                        color='primary'
-                    >
-                        Хадгалах
-                    </Button>
-                </div>
             </ModalBody>
+            {
+                isGroupModal &&
+                <Addmodal
+                    open={isGroupModal}
+                    handleModal={() => setIsGroupModal(!isGroupModal)}
+                    refreshDatas={() => getGroupDatas(watch('profession'))}
+                    profession={watch('profession')}
+                />
+            }
         </Modal>
     )
 }

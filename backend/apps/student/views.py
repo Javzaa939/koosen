@@ -321,7 +321,7 @@ class GroupAPIView(
         return request.send_info("INF_003")
 
 
-def generate_student_code(school_id, group):
+def generate_student_code(school_id, group, is_two=False):
     """ Оюутны код generate хийх """
 
     school_code = SubOrgs.objects.get(pk=school_id).org_code
@@ -378,9 +378,12 @@ def generate_student_code(school_id, group):
 
     new_student_code = f'{int(student_register_count):0{len(with_start)}d}'
 
-    generate_code = f'{generate_code}{new_student_code}'
+    full_generate_code = f'{generate_code}{new_student_code}'
 
-    return generate_code
+    if is_two:
+        return full_generate_code, generate_code
+
+    return full_generate_code
 
 
 @permission_classes([IsAuthenticated])
