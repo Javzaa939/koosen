@@ -132,6 +132,28 @@ const AddModal = ({ open, handleModal, refreshDatas}) =>{
                             {errors.name && <FormFeedback className='d-block'>{t(errors.name.message)}</FormFeedback>}
                         </Col>
                         <Col md={12}>
+                            <Label className="form-label" for="org_code">
+                                {t('Сургуулийн код')}
+                            </Label>
+                            <Controller
+                                defaultValue=''
+                                control={control}
+                                id="org_code"
+                                name="org_code"
+                                render={({ field }) => (
+                                    <Input
+                                        {...field}
+                                        id="org_code"
+                                        bsSize="sm"
+                                        placeholder={t('Сургуулийн код')}
+                                        type="text"
+                                        maxLength={2}
+                                    />
+                                )}
+                            />
+                            {errors.org_code && <FormFeedback className='d-block'>{t(errors.org_code.message)}</FormFeedback>}
+                        </Col>
+                        <Col md={12}>
                             <Label className="form-label" for="name_eng">
                                 {t('Сургуулийн англи нэр')}
                             </Label>

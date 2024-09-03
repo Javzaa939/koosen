@@ -21,7 +21,7 @@ import { validateSchema } from '../validateSchema';
 import { useEffect } from 'react';
 import { t } from 'i18next';
 
-const Addmodal = ({ open, handleModal, refreshDatas }) => {
+const Addmodal = ({ open, handleModal, refreshDatas, profession='' }) => {
 
     const CloseBtn = (
         <X className="cursor-pointer" size={15} onClick={handleModal} />
@@ -108,7 +108,9 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
 
     // Хадгалах
 	async function onSubmit(cdata) {
-        cdata['school'] = school_id
+        if(!cdata['school']) {
+            cdata['school'] = school_id
+        }
         const { success, error } = await postFetch(groupApi.post(cdata))
         if(success) {
             reset()
@@ -130,6 +132,18 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
         getStatus()
         getTeacher()
     },[])
+
+    useEffect(() => {
+        if(profession) {
+            const prof_datas = profOption?.find((val) => val?.id == profession)
+
+            setValue('degree', prof_datas?.degree || '')
+            setValue('profession', prof_datas?.id || '')
+            setValue('school', prof_datas?.school || '')
+            setValue('department', prof_datas?.department || '')
+        }
+
+    }, [profOption, profession])
 
     useEffect(
         () =>

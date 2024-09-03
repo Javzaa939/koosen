@@ -19,6 +19,9 @@ export const validateSchema = Yup.object().shape({
 	gen_direct_type: Yup.string()
 		.trim()
 		.required('Хоосон байна') ,
+	profession_code: Yup.string()
+		.trim()
+		.required('Хоосон байна'),
     confirm_year: Yup.string()
         .max(4, 'Зөв утга оруулна уу.')
 		.nullable()

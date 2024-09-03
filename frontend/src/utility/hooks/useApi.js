@@ -689,7 +689,7 @@ function useApi(isDisplay=false) {
 
 			/* Анги бүлгийн бүртгэл */
 			group:{
-				getList: (departId, degree, profession, joined_year) => {
+				getList: (departId, degree, profession, joined_year, level='') => {
 					var degree_id = ''
 					var profession_id = ''
 					var join_year = ''
@@ -698,7 +698,7 @@ function useApi(isDisplay=false) {
 					if (degree ) degree_id = degree
 					if (profession ) profession_id = profession
 					if (joined_year ) join_year = joined_year
-					return instance.get(`/student/group/list/?department=${depart_id}&degree=${degree_id}&profession=${profession_id}&join_year=${join_year}&schoolId=${school_id}`)
+					return instance.get(`/student/group/list/?department=${depart_id}&degree=${degree_id}&profession=${profession_id}&join_year=${join_year}&schoolId=${school_id}&level=${level}`)
 				},
 				getEditList: (pk) => instance.get(`/student/group/list/${pk}/`),
 				get: (limit, page, sort, search, only_study, department, degree, profession, join_year) => instance.get(`/student/group/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&salbar=${department}&degree=${degree}&profession=${profession}&join=${join_year}&school=${school_id}&study=${only_study}`),

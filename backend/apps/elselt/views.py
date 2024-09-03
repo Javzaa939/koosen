@@ -18,6 +18,7 @@ from django.db.models import Value, Case, When, IntegerField
 from django.db.models.functions import Substr, Cast
 from django.conf import settings
 from django.utils.dateparse import parse_datetime
+from django.contrib.auth.hashers import make_password
 
 from main.utils.function.utils import (
     json_load,
@@ -40,16 +41,24 @@ from main.decorators import login_required
 from rest_framework.response import Response
 from rest_framework import status
 
+from student.views import generate_student_code
+
 
 from lms.models import (
+    Group,
+    Student,
+    Country,
     AdmissionRegister,
     AdmissionRegisterProfession,
     ProfessionDefinition,
     AdmissionIndicator,
     AdmissionXyanaltToo,
     AimagHot,
+    StudentLogin,
+    StudentRegister,
     AdmissionLesson,
-    AdmissionBottomScore
+    AdmissionBottomScore,
+    StudentAdmissionScore,
 )
 
 from core.models import Employee
@@ -2005,33 +2014,162 @@ class ElseltStateApprove(
         all_data = self.list(request).data
         return request.send_data(all_data)
 
+    @login_required()
     def post(self, request):
-        " Тэнцсэн элсэгчдын тушаал шинээр үүсгэх нь "
+        " Тэнцсэн элсэгчдийг оюутан болгох нь "
 
         datas = request.data
-        users = datas.get('id')                             # Элсэгч
-        admission_date = datas.get('admission_date')        # Элсэлтийн тушаалын огноо
-        admission_number = datas.get('admission_number')    # Элсэлтийн тушаалын дугаар
+        users = datas.get('id')                                 # Элсэгч
+        group = datas.get('group')                              # Анги
+        profession = datas.get('profession')                    # Хөтөлбөр
+        admission_date = datas.get('admission_date')            # Элсэлтийн тушаалын огноо
+        admission_number = datas.get('admission_number')        # Элсэлтийн тушаалын дугаар
+
+        created_student_datas = list()
+        created_studentlogin_datas = list()
+        created_studentadmissionscore_datas = list()
+
+        # Оюутны кодоо шууд үүсгэж байгаа учир давхцал шалгана
+        remove_duplicate_student_codes = list()
+
+        group_qs = Group.objects.get(pk=group)
 
         with transaction.atomic():
             try:
-                for user in users:
-                    AdmissionUserProfession.objects.update_or_create(
-                        id=user,
-                        defaults={
-                            "admission_number": admission_number,
-                            "admission_date": admission_date
-                        }
+                army_user_ids = ArmyUser.objects.filter(state=AdmissionUserProfession.STATE_APPROVE).values_list('user', flat=True)
+
+                admission_user_qs = (
+                    AdmissionUserProfession
+                    .objects
+                    .filter(
+                        Q(profession__profession=profession) &
+                        Q(
+                            Q(user__in=army_user_ids) |
+                            Q(state=AdmissionUserProfession.STATE_APPROVE)
+                        )
                     )
+                )
+
+                # Хөтөлбөрт тэнцсэн элсэгч олдоогүй үед
+                if not admission_user_qs:
+                    msg = f"'{group_qs.profession.name}' хөтөлбөрт тэнцсэн элсэгч олдсонгүй"
+                    return request.send_error('ERR_002', msg)
+
+                # Оюутны код үүсгэх үед сургуулийн код ашиглагддаг учир шалгана
+                if group_qs.school and not group_qs.school.org_code:
+                    msg = f"'{group_qs.school.name}'-н кодыг оруулснаар элсэгчийг оюутан болгох боломжтой"
+                    return request.send_error('ERR_002', msg)
+
+                # Оюутны код үүсгэх үед хөтөлбөрийн код ашиглагддаг учир шалгана
+                if group_qs.profession and not group_qs.profession.profession_code:
+                    msg = f"'{ group_qs.profession.name}' хөтөлбөрийн кодыг оруулна уу"
+                    return request.send_error('ERR_002', msg)
+
+                with_start = '001'
+                student_code, generate_code = generate_student_code(group_qs.school.id, group, True)
+
+                for admission_user in admission_user_qs:
+                    register = admission_user.user.register
+
+                    # Оюутан болоогүй тохиолдолд оюутан болгоно
+                    if not Student.objects.filter(register_num=register):
+                        admission_user.admission_date = admission_date
+                        admission_user.admission_number = admission_number
+                        admission_user.save()
+
+                        birth_date, gender = calculate_birthday(register)
+
+                        if student_code in remove_duplicate_student_codes:
+                            # Оюутын код generate хийсэн үед үүсгэсэн кодоо нэмэгдүүлнэ
+                            student_register_count = int(student_code[-3:]) + 1
+
+                            new_student_code = f'{int(student_register_count):0{len(with_start)}d}'
+
+                            student_code = f'{generate_code}{new_student_code}'
+
+                        remove_duplicate_student_codes.append(student_code)
+
+                        admission_to_student = Student(
+                            code=student_code,
+                            email=admission_user.user.email,
+                            last_name=admission_user.user.last_name,
+                            first_name=admission_user.user.first_name,
+                            register_num=register,
+                            phone=admission_user.user.mobile,
+                            admission_date=admission_date,
+                            admission_number=admission_number,
+                            gender=gender,
+                            group=group_qs,
+                            citizenship=Country.objects.get(code='496'),
+                            birth_date=birth_date,
+                            unit1=admission_user.user.aimag,
+                            school=group_qs.school,
+                            department=group_qs.department,
+                            created_user=request.user,
+                            status=StudentRegister.objects.filter(Q(name__icontains='Суралцаж  буй') | Q(name__icontains='Суралцаж буй')).first()
+                        )
+
+                        created_student_datas.append(admission_to_student)
+
+                        # Оюутан бүртгүүлэх үед оюутны нэвтрэх нэр нууц үгийг хадгалах хэсэг
+                        password = register[-8:]
+
+                        hashed_password = make_password(password)
+
+                        student_login_qs = StudentLogin(
+                            username=student_code,
+                            password=hashed_password,
+                            student=admission_to_student,
+                        )
+
+                        created_studentlogin_datas.append(student_login_qs)
+
+                        all_userschore_qs = (
+                            UserScore
+                            .objects
+                            .filter(
+                                user=admission_user.user
+                            )
+                        )
+
+                        for user_score in all_userschore_qs:
+                            adm_lesson = AdmissionLesson.objects.filter(lesson_name__icontains=user_score.lesson_name)
+
+                            if adm_lesson:
+                                student_admission_score_qs = StudentAdmissionScore(
+                                    student=admission_to_student,
+                                    confirmation_num=user_score.user.code,
+                                    admission_lesson=adm_lesson.first(),
+                                    score=user_score.scaledScore,
+                                    perform=user_score.percentage_score,
+                                    exam_year=user_score.year,
+                                    exam_location=user_score.exam_loc
+                                )
+
+                                created_studentadmissionscore_datas.append(student_admission_score_qs)
+
+                if len(created_student_datas) > 0:
+                    Student.objects.bulk_create(created_student_datas)
+
+                if len(created_studentlogin_datas) > 0:
+                    StudentLogin.objects.bulk_create(created_studentlogin_datas)
+
+                if len(created_studentadmissionscore_datas) > 0:
+                    StudentAdmissionScore.objects.bulk_create(created_studentadmissionscore_datas)
 
             except Exception as e:
-                return request.send_error('ERR_002')
+                return request.send_error('ERR_002', e.__str__())
 
-        return request.send_info('INF_001', "Амжилттай тушаал үүслээ")
+        return_msg = f'Нийт {len(created_student_datas)} элсэгчийг амжилттай оюутан болголоо'
+
+        if len(created_student_datas) == 0:
+            return_msg = f'{group_qs.profession.name} хөтөлбөрийн элсэгчдийг оюутан болгосон байна'
+
+        return request.send_info_msg('INF_001', return_msg)
 
 
 class GpaCheckUserInfoAPIView(
- generics.GenericAPIView,
+    generics.GenericAPIView,
     mixins.RetrieveModelMixin,
     mixins.ListModelMixin,
     mixins.CreateModelMixin,

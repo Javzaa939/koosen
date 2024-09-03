@@ -27,6 +27,13 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 			minWidth: "250px",
 			wrap: true,
 			left: true
+		},
+		{
+			name: `${t('Код')}`,
+			selector: (row) => <span title={row?.org_code}>{row?.org_code}</span>,
+			minWidth: "250px",
+			wrap: true,
+			left: true
 
 		},
 		{

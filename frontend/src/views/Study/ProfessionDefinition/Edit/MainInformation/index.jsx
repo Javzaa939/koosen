@@ -174,6 +174,32 @@ const MainInformation = ({ }) => {
                             />
                             {errors.department && <FormFeedback className='d-block'>{t(errors.department.message)}</FormFeedback>}
                         </Col>
+                        <Col  lg={6} xs={12}>
+                            <Label className="form-label" for="profession_code">
+                                {t('Хөтөлбөрийн код')}
+                            </Label>
+                            <Controller
+                                control={control}
+                                defaultValue=''
+                                name="profession_code"
+                                render={({ field }) => {
+                                    return (
+                                        <Input
+                                            id ="name"
+                                            bsSize="sm"
+                                            placeholder={t('Хөтөлбөрийн код')}
+                                            {...field}
+                                            type="text"
+                                            maxLength={3}
+                                            readOnly={is_valid}
+                                            disabled={is_valid}
+                                            invalid={errors.profession_code && true}
+                                        />
+                                    )
+                                }}
+                            />
+                            {errors.profession_code && <FormFeedback className='d-block'>{t(errors.profession_code.message)}</FormFeedback>}
+                        </Col>
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="code">
                                 {t('Хөтөлбөрийн индекс')}
