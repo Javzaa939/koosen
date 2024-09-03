@@ -69,6 +69,26 @@ def success_rp(get_response):
 
         return JsonResponse(error_obj)
 
+    def _send_info_msg(info_code, msg=''):
+        '''
+            Амжилттай болсон success мэдээллийг буцаах нь
+
+            Parameters:
+            * ``info_code``: Info мэдээллийн code нь
+            * msg: str
+                info ний мэдээлэлд оноож өгөх үгнүүд
+        '''
+
+        info_obj = {
+            "success": True,
+            "data": [],
+            "error": "",
+            "code": info_code,
+            "info": msg if msg else info[info_code]['message']
+        }
+
+        return JsonResponse(info_obj)
+
     def middleware(request):
 
         # view үүд рүү очих request дотор response буцаах функцийг оноосон нь
@@ -76,6 +96,7 @@ def success_rp(get_response):
         request.send_info = _send_info
         request.send_error = _send_error
         request.send_error_valid = _send_error_valid
+        request.send_info_msg = _send_info_msg
 
         response = get_response(request)
 

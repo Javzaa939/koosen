@@ -2029,22 +2029,13 @@ class ElseltStateApprove(
         created_studentlogin_datas = list()
         created_studentadmissionscore_datas = list()
 
+        # Оюутны кодоо шууд үүсгэж байгаа учир давхцал шалгана
         remove_duplicate_student_codes = list()
+
+        group_qs = Group.objects.get(pk=group)
 
         with transaction.atomic():
             try:
-                group_qs = Group.objects.get(pk=group)
-
-                # Оюутны код үүсгэх үед сургуулийн код ашиглагддаг учир шалгана
-                if group_qs.school and not group_qs.school.org_code:
-                    msg = f"'{group_qs.school.name}'-н кодыг оруулснаар элсэгчийг оюутан болгох боломжтой"
-                    return request.send_error('ERR_002', msg)
-
-                # Оюутны код үүсгэх үед хөтөлбөрийн код ашиглагддаг учир шалгана
-                if group_qs.profession and not group_qs.profession.profession_code:
-                    msg = f"'{ group_qs.profession.name}' хөтөлбөрийн кодыг оруулна уу"
-                    return request.send_error('ERR_002', msg)
-
                 army_user_ids = ArmyUser.objects.filter(state=AdmissionUserProfession.STATE_APPROVE).values_list('user', flat=True)
 
                 admission_user_qs = (
@@ -2058,6 +2049,21 @@ class ElseltStateApprove(
                         )
                     )
                 )
+
+                # Хөтөлбөрт тэнцсэн элсэгч олдоогүй үед
+                if not admission_user_qs:
+                    msg = f"'{group_qs.profession.name}' хөтөлбөрт тэнцсэн элсэгч олдсонгүй"
+                    return request.send_error('ERR_002', msg)
+
+                # Оюутны код үүсгэх үед сургуулийн код ашиглагддаг учир шалгана
+                if group_qs.school and not group_qs.school.org_code:
+                    msg = f"'{group_qs.school.name}'-н кодыг оруулснаар элсэгчийг оюутан болгох боломжтой"
+                    return request.send_error('ERR_002', msg)
+
+                # Оюутны код үүсгэх үед хөтөлбөрийн код ашиглагддаг учир шалгана
+                if group_qs.profession and not group_qs.profession.profession_code:
+                    msg = f"'{ group_qs.profession.name}' хөтөлбөрийн кодыг оруулна уу"
+                    return request.send_error('ERR_002', msg)
 
                 with_start = '001'
                 student_code, generate_code = generate_student_code(group_qs.school.id, group, True)
@@ -2154,12 +2160,12 @@ class ElseltStateApprove(
             except Exception as e:
                 return request.send_error('ERR_002', e.__str__())
 
-        return_msg = f'{len(created_student_datas)} элсэгчийг амжилттай оюутан болголоо'
+        return_msg = f'Нийт {len(created_student_datas)} элсэгчийг амжилттай оюутан болголоо'
 
         if len(created_student_datas) == 0:
-            return_msg = 'Элсэгчдийг оюутан болгосон байна'
+            return_msg = f'{group_qs.profession.name} хөтөлбөрийн элсэгчдийг оюутан болгосон байна'
 
-        return request.send_info('INF_001', return_msg)
+        return request.send_info_msg('INF_001', return_msg)
 
 
 class GpaCheckUserInfoAPIView(
