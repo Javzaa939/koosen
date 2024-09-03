@@ -83,7 +83,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
         },
 		{
 			header: 'status',
-			name: t("суралцаж буй төлөв"),
+			name: t("Суралцаж буй төлөв"),
 			selector: (row) => (
 				<Badge color="light-primary" pill>
 					{t(row.status_name)}

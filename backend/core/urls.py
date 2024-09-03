@@ -13,6 +13,7 @@ urlpatterns = [
     path('teacher/listschoolfilter/', TeacherListSubschoolApiView.as_view()),
     path('teacher/create/', EmployeeApiView.as_view()),
     path('teacher/create/<int:pk>/', EmployeeApiView.as_view()),
+    path('teacher/reset-password/<int:pk>/', TeacherResetPassword.as_view()),
 
     path('teacher/part/', TeacherPartListApiView.as_view()),
 

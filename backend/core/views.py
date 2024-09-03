@@ -957,23 +957,7 @@ class CalendarCountAPIView(
         return request.send_data(collected_data)
 
 
-# import resource
-# import sys
-
-# print(resource.getrlimit(resource.RLIMIT_STACK))
-# print(sys.getrecursionlimit())
-
-# # Will segfault without this line.
-# resource.setrlimit(resource.RLIMIT_STACK, [0x10000000, resource.RLIM_INFINITY])
-# sys.setrecursionlimit(0x100000)
-
-# def f(i):
-#     print(i)
-#     sys.stdout.flush()
-#     f(i + 1)
-# f(0)
-
-
+@permission_classes([IsAuthenticated])
 class EmployeeApiView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -1090,6 +1074,7 @@ class EmployeeApiView(
         return request.send_info("INF_002")
 
 
+@permission_classes([IsAuthenticated])
 class CRUDAPIView(
     generics.GenericAPIView,
     mixins.RetrieveModelMixin,
@@ -1248,10 +1233,20 @@ class CRUDAPIView(
         return request.send_info('INF_003')
 
 
+@permission_classes([IsAuthenticated])
+class TeacherResetPassword(
+    generics.GenericAPIView
+):
+    """ Багшийн нууц үг сэргээх """
 
-# obj = OrgPosition.objects.create(
-#     name = 'Систем хариуцсан админ',
-#     org_id = 1
-# )
+    queryset = User.objects.all()
+    def put(self, request, pk=None):
+        change_password = request.data
 
-# print(obj)
+        user_id = Teachers.objects.get(pk=pk).user.id
+        with transaction.atomic():
+            hashed_password = make_password(str(change_password))
+
+            self.queryset.filter(id=user_id).update(password=hashed_password)
+
+        return request.send_info('INF_018')

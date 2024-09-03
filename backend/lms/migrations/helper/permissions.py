@@ -1281,4 +1281,8 @@ permissions = [
         'name' : 'lms-psychologicaltesting-exam-delete',
         'description' : 'Сэтгэлзүйн сорил устгах эрх'
     },
+    {
+        'name' : 'lms-subschools-password-update',
+        'description' : 'Багшийн нууц үг сэргээх '
+    },
 ]

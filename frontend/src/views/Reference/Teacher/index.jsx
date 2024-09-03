@@ -3,7 +3,7 @@ import { Fragment, useState, useEffect, useContext } from 'react'
 
 import { Controller, useForm } from 'react-hook-form'
 
-import { Row, Col, Card, Input, Label, CardTitle, CardHeader, Spinner, Button } from 'reactstrap'
+import { Row, Col, Card, Input, Label, CardTitle, CardHeader, Spinner, Button, Modal, ModalHeader, ModalBody } from 'reactstrap'
 
 import { ChevronDown, Plus } from 'react-feather'
 import { useTranslation } from 'react-i18next'
@@ -43,6 +43,10 @@ const Teacher = () => {
 
 	const { user } = useContext(AuthContext)
 	const { school_id } = useContext(SchoolContext)
+
+	const [changeModal, setChangeModal] = useState(false)
+	const [changeData, setChangeData] = useState("");
+	const [changePassword, setChangePassword] = useState('')
 
 	const [datas, setDatas] = useState([]);
 	const [department, setDepartmentData] = useState([]);
@@ -152,6 +156,24 @@ const Teacher = () => {
 		}
 	}
 
+	/* Password сэргээх функц */
+    const changePassModal = async(row) => {
+		setChangeData(row)
+		handleChangeModal()
+		setChangePassword(row?.register?.slice(-8))
+    }
+
+	const handleChangeModal = () => {
+		setChangeModal(!changeModal)
+	}
+
+	async function handleSubmitPassword() {
+		const { success, data } = await fetchData(teacherApi.resetPassword(changeData?.id, changePassword))
+		if (success) {
+			handleChangeModal()
+		}
+	}
+
 	return (
 		<Fragment>
 			<Card>
@@ -161,7 +183,6 @@ const Teacher = () => {
 					<div className='d-flex flex-wrap mt-md-0 mt-1'>
 						<Button
                             color='primary'
-                            // disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-subschools-create') && school_id) ? false : true}
                             disabled={Object.keys(user).length > 0 && school_id ? false : true}
                             onClick={() => handleModal()}>
                             <Plus size={15} />
@@ -261,7 +282,7 @@ const Teacher = () => {
                                     <h5>Өгөгдөл байхгүй байна.</h5>
                                 </div>
                             )}
-                            columns={getColumns(currentPage, rowsPerPage, total_count, handleEdit, handleDelete)}
+                            columns={getColumns(currentPage, rowsPerPage, total_count, handleEdit, handleDelete, user, changePassModal)}
 							onSort={handleSort}
                             sortIcon={<ChevronDown size={10} />}
                             paginationPerPage={rowsPerPage}
@@ -275,6 +296,36 @@ const Teacher = () => {
 				}
 			</Card>
 			{ add_modal && <AddModal open={add_modal} handleModal={handleModal} refreshDatas={getDatas} editData={editData}/> }
+			{
+				changeModal
+				&&
+				<Modal
+					isOpen={changeModal}
+					toggle={handleChangeModal}
+					className="modal-dialog-centered modal-md"
+				>
+					<ModalHeader toggle={handleChangeModal}>Хэрэглэгчийн нууц үг солих</ModalHeader>
+					<ModalBody>
+						<div className="d-flex align-items-center">
+							<Label>Нууц үг</Label>
+							<Input
+								id="menu-hidden"
+								name="menu-hidden"
+								type='text'
+								defaultValue={changePassword}
+								bsSize='sm'
+								onChange={(e) => setChangePassword(e.target.value)}
+							/>
+						</div>
+						<div className='d-flex justify-content-between mt-1'>
+							<Button size='sm' color='primary' onClick={() => handleSubmitPassword()}>Нууц үг сэргээх</Button>
+							<Button size='sm' onClick={() => handleChangeModal()}>Буцах</Button>
+						</div>
+
+					</ModalBody>
+
+				</Modal>
+			}
         </Fragment>
     )
 }

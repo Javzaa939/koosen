@@ -1,10 +1,10 @@
 import { t } from 'i18next';
 import { Badge, UncontrolledTooltip} from 'reactstrap'
-import { CheckCircle, Edit, X} from 'react-feather'
+import { Lock, Edit, X} from 'react-feather'
 import useModal from "@hooks/useModal"
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, handleDelete) {
+export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, handleDelete, user, changePassModal) {
 	const page_count = Math.ceil(total_count/ rowsPerPage)
 	if (currentPage > page_count) {
         currentPage = 1
@@ -27,6 +27,12 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, h
 		{
 			name: `${t("И-мэйл")}`,
 			selector: (row) => row?.email,
+			maxWidth: "300px",
+			center: true
+		},
+		{
+			name: `${t("Регистр")}`,
+			selector: (row) => row?.register,
 			maxWidth: "300px",
 			center: true
 		},
@@ -57,7 +63,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, h
                             >
                                 <Badge color="light-primary" pill><Edit width={"100px"} /></Badge>
                             </a>
-                            <UncontrolledTooltip placement='top' target={`updateSchool${row?.id}`}>засах</UncontrolledTooltip>
+                            <UncontrolledTooltip placement='top' target={`updateSchool${row?.id}`}>Засах</UncontrolledTooltip>
 						</>
                     }
 					{
@@ -79,6 +85,20 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, h
 							<UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${row?.id}`} >Устгах</UncontrolledTooltip>
 						</>
 					}
+					{
+						(user.permissions.includes('lms-subschools-password-update')) &&
+                        <>
+                            <a
+								role="button"
+								onClick={() => changePassModal(row)}
+								id={`complaintListDatatableEditPass${row?.id}`}
+								className="ms-1"
+							>
+								<Badge color="light-info" pill><Lock  width={"15px"}/></Badge>
+							</a>
+							<UncontrolledTooltip placement='top' target={`complaintListDatatableEditPass${row.id}`} >Нууц үг сэргээх</UncontrolledTooltip>
+						</>
+                    }
 				</div>
             ),
             minWidth: "200px",
