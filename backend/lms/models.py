@@ -359,7 +359,7 @@ class ProfessionDefinition(models.Model):
         (SERVICE, 'Үйлчилгээ'),
     )
 
-    profession_code = models.CharField(max_length=3, null=True, unique=True, verbose_name="Мэргэжлийн код")
+    profession_code = models.CharField(max_length=3, null=True, verbose_name="Мэргэжлийн код")
     code = models.CharField( max_length=50, verbose_name="Мэргэжлийн индекс")
     name = models.CharField(max_length=500, verbose_name="Мэргэжлийн нэр монгол")
     name_eng = models.CharField(max_length=500, null=True, verbose_name="Мэргэжлийн нэр англи")
