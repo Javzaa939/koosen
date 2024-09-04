@@ -336,7 +336,7 @@ def generate_student_code(school_id, group, is_two=False):
     now_date = date.today()
 
     # to get month of end of study for specific degree
-    if degree_code == 'M':
+    if degree_code == 'MB' or degree_code == 'MC':
         duration = (
             SystemSettings.objects
             .filter(
