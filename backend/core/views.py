@@ -1089,6 +1089,13 @@ class EmployeeApiView(
             return request.send_error_valid(userinfo_serializer.errors)
 
         userinfo_serializer.save()
+
+        employee_obj = Employee.objects.filter(user=user_obj, state=Employee.STATE_WORKING, partial=True).first()
+        employee_serializer = EmployeeSerializer(employee_obj, data=datas)
+        if not employee_serializer.is_valid(raise_exception=True):
+            return request.send_error_valid(employee_serializer.errors)
+
+        employee_serializer.save()
         return request.send_info("INF_002")
 
 
