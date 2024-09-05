@@ -32,7 +32,7 @@ def custom_studentlogin_passwords(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('lms', '0251_remove_studentordersport_teacher_payment_and_more'),
+        ('lms', '0251_remove_onlineweek_materials_and_more'),
     ]
 
     operations = [

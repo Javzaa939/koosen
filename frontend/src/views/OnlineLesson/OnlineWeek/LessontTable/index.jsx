@@ -1,54 +1,53 @@
-import { ListGroup, ListGroupItem } from "reactstrap";
-import AddLessonForm from "../../Add/AddLessonForm";
-import LessonMaterial from "../../LessonMaterial";
-import LessonCard from "../LessonCard";
+import Weeks from "../Weeks/index";
 
-const RenderDetailPage = () => (
-	<ListGroup>
-		<ListGroupItem>
-			<div
-				className="d-flex flex-row justify-content-between"
-				style={{
-					cursor: "pointer",
-				}}
-			>
-				<LessonMaterial />
+import Announcement from "../Announcement";
+import Plan from "../Plan";
+import WeekExam from "../WeekExam";
+import Performance from "../Performance";
+
+
+const RenderLessonCards = ({ lesson }) => {
+	return(
+		<>
+			<div>
+				<Weeks lesson = { lesson }/>
 			</div>
-		</ListGroupItem>
-    </ListGroup>
-);
+		</>
+	)
+}
 
-const RenderLessonCards = ({ lesson }) =>
-	lesson?.create_type === 1 && (
-		<ListGroup>
-			{Array.from({ length: 16 }, (_, i) => (
-				<LessonCard count={i} />
-			))}
-		</ListGroup>
-  );
+const RenderAnnouncementList = ({ lesson }) => {
 
-const RenderAddLessonForm = () => (
-	<ListGroup>
-			<ListGroupItem>
-				<AddLessonForm />
-			</ListGroupItem>
-	</ListGroup>
-);
+	return<>
+		<div>
+			<Announcement lesson = { lesson }/>
+		</div>
+	</>
+}
 
-const LessonTable = ({ lesson, selectedContent }) => {
+const RenderExamForm = () => {
+	return (
+		<WeekExam/>
+	)
+}
+
+const LessonTable = ({ lesson, selectedContent, getLesson }) => {
 	const id = selectedContent;
-
 	if (!id) return null;
 
 	switch (id) {
-		case 4:
-		return <RenderDetailPage />;
 		case 1:
-		return <RenderLessonCards lesson={lesson} />;
+			return <RenderAnnouncementList lesson={lesson} getLesson={getLesson}/>;
 		case 2:
-		return <RenderAddLessonForm />;
+			return <Plan lesson={lesson} getLesson={getLesson}/>;
+		case 3:
+			return <RenderLessonCards lesson={lesson} getLesson={getLesson}/>;
+		case 4:
+			return <RenderExamForm getLesson={getLesson}/>;
+		case 5:
+			return <Performance lesson={lesson} getLesson={getLesson}/>
 		default:
-		return null;
+			return null;
 	}
 };
 
