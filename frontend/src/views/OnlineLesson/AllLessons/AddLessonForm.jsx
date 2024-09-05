@@ -1,4 +1,3 @@
-import { AuthContext } from '@context/AuthContext'
 import useApi from "@src/utility/hooks/useApi";
 import useLoader from "@src/utility/hooks/useLoader";
 import { convertDefaultValue } from '@src/utility/Utils';
@@ -20,12 +19,10 @@ import {
 	ModalFooter,
 	ModalHeader,
 	Row,
-	CardBody,
-	Card,
 } from "reactstrap";
 
 import ReactQuill from 'react-quill';
-
+import AuthContext from "@src/utility/context/AuthContext";
 import 'react-quill/dist/quill.snow.css';
 
 const modules = {

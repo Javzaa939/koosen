@@ -1377,457 +1377,526 @@ function useApi(isDisplay=false) {
 			}
 		},
 
-	// Хандах эрх
-	role :{
-		/** Зөвхөн 1 багшийн дүн оруулах хандах эрх */
-		teacherscore:{
-			get: (limit, page, sort, search, teacher_id) => instance.get(`permissions/teachers/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&teacher=${teacher_id}`),
-			getOne: (pk) => instance.get(`permissions/teachers/${pk}/?lesson_year=${cyear_name}&lesson_season=${cseason_id}`),
-			/**зөвхөн багшийн мэдээлэл */
-			getTeacher: () => instance.get(`permissions/teacher_info/?lesson_year=${cyear_name}&lesson_season=${cseason_id}`),
-			/**зөвхөн багшийн заах хичээлүүдийг авах */
-			getLesson: (teacher)  => instance.get(`permissions/lesson_info/?lesson_year=${cyear_name}&lesson_season=${cseason_id}&teacher=${teacher}`),
-			/**зөвхөн багшийн заах хичээлүүдийн дүгнэх хэлбэр авах */
-			getType: (teacher_id, lesson_id)  => instance.get(`permissions/type/?teacher=${teacher_id}&lesson=${lesson_id}`),
-			post: data => instance.post(`permissions/teachers/?lesson_year=${cyear_name}&lesson_season=${cseason_id}`, data),
-			put: (data, pk) => instance.put(`permissions/teachers/${pk}/?lesson_year=${cyear_name}&lesson_season=${cseason_id}`, data),
-			delete: (pk) => instance.delete(`permissions/teachers/${pk}/?lesson_year=${cyear_name}&lesson_season=${cseason_id}`),
+		// Хандах эрх
+		role :{
+			/** Зөвхөн 1 багшийн дүн оруулах хандах эрх */
+			teacherscore:{
+				get: (limit, page, sort, search, teacher_id) => instance.get(`permissions/teachers/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&teacher=${teacher_id}`),
+				getOne: (pk) => instance.get(`permissions/teachers/${pk}/?lesson_year=${cyear_name}&lesson_season=${cseason_id}`),
+				/**зөвхөн багшийн мэдээлэл */
+				getTeacher: () => instance.get(`permissions/teacher_info/?lesson_year=${cyear_name}&lesson_season=${cseason_id}`),
+				/**зөвхөн багшийн заах хичээлүүдийг авах */
+				getLesson: (teacher)  => instance.get(`permissions/lesson_info/?lesson_year=${cyear_name}&lesson_season=${cseason_id}&teacher=${teacher}`),
+				/**зөвхөн багшийн заах хичээлүүдийн дүгнэх хэлбэр авах */
+				getType: (teacher_id, lesson_id)  => instance.get(`permissions/type/?teacher=${teacher_id}&lesson=${lesson_id}`),
+				post: data => instance.post(`permissions/teachers/?lesson_year=${cyear_name}&lesson_season=${cseason_id}`, data),
+				put: (data, pk) => instance.put(`permissions/teachers/${pk}/?lesson_year=${cyear_name}&lesson_season=${cseason_id}`, data),
+				delete: (pk) => instance.delete(`permissions/teachers/${pk}/?lesson_year=${cyear_name}&lesson_season=${cseason_id}`),
 
-		},
-		other:{
-			get: (limit, page, sort, search, other_id) => instance.get(`permissions/other/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&other=${other_id}`),
-			getOne: (pk) => instance.get(`permissions/other/${pk}/?lesson_year=${cyear_name}&lesson_season=${cseason_id}`),
-			post: data => instance.post(`permissions/other/?lesson_year=${cyear_name}&lesson_season=${cseason_id}`, data),
-			put: (data, pk) => instance.put(`permissions/other/${pk}/?lesson_year=${cyear_name}&lesson_season=${cseason_id}`, data),
-			delete: (pk) => instance.delete(`permissions/other/${pk}/?lesson_year=${cyear_name}&lesson_season=${cseason_id}`),
+			},
+			other:{
+				get: (limit, page, sort, search, other_id) => instance.get(`permissions/other/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&other=${other_id}`),
+				getOne: (pk) => instance.get(`permissions/other/${pk}/?lesson_year=${cyear_name}&lesson_season=${cseason_id}`),
+				post: data => instance.post(`permissions/other/?lesson_year=${cyear_name}&lesson_season=${cseason_id}`, data),
+				put: (data, pk) => instance.put(`permissions/other/${pk}/?lesson_year=${cyear_name}&lesson_season=${cseason_id}`, data),
+				delete: (pk) => instance.delete(`permissions/other/${pk}/?lesson_year=${cyear_name}&lesson_season=${cseason_id}`),
 
-		},
-		/** Оюутны хичээл сонголтыг төлбөрөөс хамааралгүйгээр хийх эрх */
-		student:{
-			get: (limit, page, sort, search, student) => instance.get(`permissions/student/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&student=${student}`),
-			getOne: (pk) => instance.get(`permissions/student/${pk}/?lesson_year=${cyear_name}&lesson_season=${cseason_id}`),
-			getStudent: (search) => instance.get(`permissions/students/?lesson_year=${cyear_name}&lesson_season=${cseason_id}&search=${search}`),
-			getSelectStudents: (state) => instance.get(`permissions/students/select_bottom/?lesson_year=${cyear_name}&lesson_season=${cseason_id}&state=${state}`),
-			post: data => instance.post(`permissions/student/?lesson_year=${cyear_name}&lesson_season=${cseason_id}`, data),
-			put: (data, pk) => instance.put(`permissions/student/${pk}/?lesson_year=${cyear_name}&lesson_season=${cseason_id}`, data),
-			delete: (pk) => instance.delete(`permissions/student/${pk}/?lesson_year=${cyear_name}&lesson_season=${cseason_id}`),
-		},
-		// Хандах эрх шалгах
-		check: {
-			get: (type) => instance.get(`permissions/check/?permission_type=${type}`)
-		},
-
-		crontab: {
-			get: ( page, limit, search ) => instance.get(`permissions/crontab/?page=${page}&limit=${limit}&search=${search}`),
-			post: ( datas ) => instance.post(`permissions/crontab/`, datas),
-			delete: (pk) => instance.delete(`permissions/crontab/${pk}/`),
-			limit: (pk) => instance.get(`permissions/crontab/limit/${pk}/`),
-			active: (pk) => instance.get(`permissions/crontab/active/${pk}/`),
-		}
-	},
-	challenge: {
-		get: (page, limit, lesson, type) =>
-			instance.get(`learning/challenge/?page=${page}&limit=${limit}&lesson=${lesson}&type=${type}`),
-
-		getAll: (challenge) => {
-			var c_challenge = ''
-			if (challenge) c_challenge = challenge
-			return instance.get(`learning/challenge/all/?challenge=${c_challenge}`)
-		},
-
-		getSelect: (type, lesson) =>
-			instance.get(`learning/challenge/select/?type=${type}&year=${cyear_name}&season=${cseason_id}&lesson=${lesson}`),
-
-		post: (data) =>
-			instance.post(`learning/challenge/?year=${cyear_name}&season=${cseason_id}`, data),
-
-		put: (data, id) =>
-			instance.put(`learning/challenge/${id}/?year=${cyear_name}&season=${cseason_id}`, data),
-
-		delete: (id) =>
-			instance.delete(`learning/challenge/${id}/`),
-
-		send: (id) =>
-			instance.get(`learning/challenge/send/${id}/`),
-
-		// ХБА шалгалт батлуулах хүсэлт
-		getApprove: (page, limit, sort, search, type, teacherId, lessonId) =>
-			instance.get(`learning/challenge/approve/?page=${page}&limit=${limit}&type=${type}&sorting=${sort}&search=${search}&teacher=${teacherId}&lesson=${lessonId}`),
-
-		postAnswer: (data) =>
-			instance.post(`learning/challenge/approve/`, data),
-		question: {
-			get: (page, limit, lessonId, subjectId, search) =>
-				instance.get(`learning/questions/?page=${page}&limit=${limit}&lesson=${lessonId}&subject=${subjectId}&search=${search}`),
-
-			getOne: (page, limit, search, question_id) => instance.get(`learning/questions/subject/?page=${page}&limit=${limit}&search=${search}&question_id=${question_id}`),
-
-			getList: (checked_ids, count, type) => {
-				var check_ids = ''
-				for(var i of checked_ids) {
-					check_ids += `&checked=${i}`
-				}
-				return instance.get(`learning/questions/list/?count=${count}&type=${type}${check_ids}`)
+			},
+			/** Оюутны хичээл сонголтыг төлбөрөөс хамааралгүйгээр хийх эрх */
+			student:{
+				get: (limit, page, sort, search, student) => instance.get(`permissions/student/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&student=${student}`),
+				getOne: (pk) => instance.get(`permissions/student/${pk}/?lesson_year=${cyear_name}&lesson_season=${cseason_id}`),
+				getStudent: (search) => instance.get(`permissions/students/?lesson_year=${cyear_name}&lesson_season=${cseason_id}&search=${search}`),
+				getSelectStudents: (state) => instance.get(`permissions/students/select_bottom/?lesson_year=${cyear_name}&lesson_season=${cseason_id}&state=${state}`),
+				post: data => instance.post(`permissions/student/?lesson_year=${cyear_name}&lesson_season=${cseason_id}`, data),
+				put: (data, pk) => instance.put(`permissions/student/${pk}/?lesson_year=${cyear_name}&lesson_season=${cseason_id}`, data),
+				delete: (pk) => instance.delete(`permissions/student/${pk}/?lesson_year=${cyear_name}&lesson_season=${cseason_id}`),
+			},
+			// Хандах эрх шалгах
+			check: {
+				get: (type) => instance.get(`permissions/check/?permission_type=${type}`)
 			},
 
+			crontab: {
+				get: ( page, limit, search ) => instance.get(`permissions/crontab/?page=${page}&limit=${limit}&search=${search}`),
+				post: ( datas ) => instance.post(`permissions/crontab/`, datas),
+				delete: (pk) => instance.delete(`permissions/crontab/${pk}/`),
+				limit: (pk) => instance.get(`permissions/crontab/limit/${pk}/`),
+				active: (pk) => instance.get(`permissions/crontab/active/${pk}/`),
+			}
+		},
+		challenge: {
+			get: (page, limit, lesson, type) =>
+				instance.get(`learning/challenge/?page=${page}&limit=${limit}&lesson=${lesson}&type=${type}`),
+
+			getAll: (challenge) => {
+				var c_challenge = ''
+				if (challenge) c_challenge = challenge
+				return instance.get(`learning/challenge/all/?challenge=${c_challenge}`)
+			},
+
+			getSelect: (type, lesson) =>
+				instance.get(`learning/challenge/select/?type=${type}&year=${cyear_name}&season=${cseason_id}&lesson=${lesson}`),
+
 			post: (data) =>
-				instance.post(`learning/questions/?year=${cyear_name}&season=${cseason_id}`, data),
+				instance.post(`learning/challenge/?year=${cyear_name}&season=${cseason_id}`, data),
 
-			put: (data, pk) =>
-				instance.put(`learning/questions/${pk}/?year=${cyear_name}&season=${cseason_id}`, data),
+			put: (data, id) =>
+				instance.put(`learning/challenge/${id}/?year=${cyear_name}&season=${cseason_id}`, data),
 
-			delete: (delete_ids) =>
-			{
-				var remove_ids = ''
-				for(var i of delete_ids) {
-					remove_ids += `&delete=${i}`
+			delete: (id) =>
+				instance.delete(`learning/challenge/${id}/`),
+
+			send: (id) =>
+				instance.get(`learning/challenge/send/${id}/`),
+
+			// ХБА шалгалт батлуулах хүсэлт
+			getApprove: (page, limit, sort, search, type, teacherId, lessonId) =>
+				instance.get(`learning/challenge/approve/?page=${page}&limit=${limit}&type=${type}&sorting=${sort}&search=${search}&teacher=${teacherId}&lesson=${lessonId}`),
+
+			postAnswer: (data) =>
+				instance.post(`learning/challenge/approve/`, data),
+			question: {
+				get: (page, limit, lessonId, subjectId, search) =>
+					instance.get(`learning/questions/?page=${page}&limit=${limit}&lesson=${lessonId}&subject=${subjectId}&search=${search}`),
+
+				getOne: (page, limit, search, question_id) => instance.get(`learning/questions/subject/?page=${page}&limit=${limit}&search=${search}&question_id=${question_id}`),
+
+				getList: (checked_ids, count, type) => {
+					var check_ids = ''
+					for(var i of checked_ids) {
+						check_ids += `&checked=${i}`
+					}
+					return instance.get(`learning/questions/list/?count=${count}&type=${type}${check_ids}`)
+				},
+
+				post: (data) =>
+					instance.post(`learning/questions/?year=${cyear_name}&season=${cseason_id}`, data),
+
+				put: (data, pk) =>
+					instance.put(`learning/questions/${pk}/?year=${cyear_name}&season=${cseason_id}`, data),
+
+				delete: (delete_ids) =>
+				{
+					var remove_ids = ''
+					for(var i of delete_ids) {
+						remove_ids += `&delete=${i}`
+					}
+					return instance.delete(`learning/questions/?year=${cyear_name}&season=${cseason_id}${remove_ids}`)
 				}
-				return instance.delete(`learning/questions/?year=${cyear_name}&season=${cseason_id}${remove_ids}`)
+			},
+
+			psychologicalTestQuestion:{
+				getOneTitle: (id) => instance.get(`learning/psychological_test_question/title/${id}/`),
+				getByTitle: (page, limit, search, titleId) => instance.get(`learning/psychological_test_question/title/?page=${page}&limit=${limit}&search=${search}&titleId=${titleId}`),
+				getTitle: () => instance.get(`learning/psychological_test_question/title/list/`),
+				postTitle: (datas) => instance.post(`learning/psychological_test_question/title/`, datas),
+				putTitle: (id, datas) => instance.put(`learning/psychological_test_question/title/${id}/`, datas),
+				deleteTitle: (id) => instance.delete(`learning/psychological_test_question/title/${id}/`),
+
+				getList: () => instance.get(`learning/psychological_test_question/list/`),
+
+				get: (page, limit, userId, search) =>
+					instance.get(`learning/psychological_test_question/?page=${page}&limit=${limit}&lesson=${userId}&search=${search}`),
+				post: (data) =>
+					instance.post(`learning/psychological_test_question/?year=${cyear_name}&season=${cseason_id}`, data),
+				put: (data, pk, type="question") =>
+					instance.put(`learning/psychological_test_question/${pk}/?year=${cyear_name}&season=${cseason_id}&type=${type}`, data),
+				delete: (delete_id) => instance.delete(`learning/psychological_test_question/?year=${cyear_name}&season=${cseason_id}&delete=${delete_id}`)
+			},
+
+			psychologicalTest:{
+				get: (limit, page, sort, search, scope) => instance.get(`learning/psychological_test/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&scope=${scope}`),
+				getOne: (pk) => instance.get(`learning/psychological_test/${pk}/`),
+				post: (cdatas) => instance.post('learning/psychological_test/', cdatas),
+				put: (data, pk) => instance.put(`learning/psychological_test/${pk}/`, data),
+				delete: (pk) => instance.delete(`learning/psychological_test/${pk}/`),
+
+				getOptions: () => instance.get(`learning/psychological_test/options/`),
+				getScope: (limit, page, search, test_id) => instance.get(`learning/psychological_test/scope_list/?page=${page}&limit=${limit}&search=${search}&test_id=${test_id}`),
+
+				// populates participant adding inputs
+				getSelect: (scope, mode, state, select1, select2, search) => instance.get(`learning/psychological_test/scope_option/?scope=${scope}&school=${school_id}&mode=${mode}&state=${state}&select1=${select1}&select2=${select2}&search=${search}`),
+
+				putAddScope: (data, pk) => {
+					data['school_id'] = school_id
+					return instance.put(`learning/psychological_test/add_scope/${pk}/`, data)
+				},
+				deleteParticitant: (pk, test_id) => instance.delete(`learning/psychological_test/add_scope/${pk}/?test_id=${test_id}`)
+			},
+
+			psychologicalTestOne:{
+				get: (limit, page, test_id) => instance.get(`learning/psychological_test_one/?page=${page}&limit=${limit}&test_id=${test_id}`),
+				post: (data, pk) => instance.post(`learning/psychological_test_one/${pk}/`, data),
+				delete: (pk, test_id) => instance.delete(`learning/psychological_test_one/${pk}/?test_id=${test_id}`)
+			},
+
+			psychologicalTestResult:{
+				get: (limit, page, sort, search, scope) => instance.get(`learning/psychological_test_result/?page=${page}&limit=${limit}&sort=${sort}&search=${search}&scope=${scope}`),
+				getParticipants: (limit, page, search, test_id) => instance.get(`learning/psychological_test_result_participants/?page=${page}&limit=${limit}&search=${search}&test_id=${test_id}`),
+				getResult: (cdata) => instance.post(`learning/psychological_test_result_show/`,cdata),
+
+				excelResult:(adm) => instance.get(`learning/psychological_test_result_excel/?adm=${adm}`),
+				iqExcelResult:(adm)=>instance.get(`learning/iq_test_result_excel/?adm=${adm}`)
+
+			}
+
+		},
+
+		// Судалгаа
+		survey:{
+
+			studentlist:{
+				get: () => instance.get(`/student/info/?page=1&limit=${10}`)
+			},
+
+			surveyrange:{
+				// types болон selected_value дамжиж ирэх үед back-руу дамжуулна
+				get:(types, selectedValue) => instance.get(`survey/surveyrange/?types=${types}&selected_value=${selectedValue}`),
+			},
+			get:(limit, page, selectedTime, search) => instance.get(`survey/?limit=${limit}&page=${page}&time_type=${selectedTime}&search=${search}`),
+			getList: (search) => instance.get(`survey/list/?search=${search}`),
+			getOne: (pk) => instance.get(`survey/${pk}/`),
+			post: (cdatas) => instance.post('survey/', cdatas),
+			put: (data, pk) => instance.put(`survey/${pk}/`, data),
+			delete: (pk) => instance.delete(`survey/${pk}/`),
+
+			pollee:{
+				get: (id) => instance.get(`/survey/pollee/${id}/`)
 			}
 		},
 
-		psychologicalTestQuestion:{
-			getOneTitle: (id) => instance.get(`learning/psychological_test_question/title/${id}/`),
-			getByTitle: (page, limit, search, titleId) => instance.get(`learning/psychological_test_question/title/?page=${page}&limit=${limit}&search=${search}&titleId=${titleId}`),
-			getTitle: () => instance.get(`learning/psychological_test_question/title/list/`),
-			postTitle: (datas) => instance.post(`learning/psychological_test_question/title/`, datas),
-			putTitle: (id, datas) => instance.put(`learning/psychological_test_question/title/${id}/`, datas),
-			deleteTitle: (id) => instance.delete(`learning/psychological_test_question/title/${id}/`),
-
-			getList: () => instance.get(`learning/psychological_test_question/list/`),
-
-			get: (page, limit, userId, search) =>
-				instance.get(`learning/psychological_test_question/?page=${page}&limit=${limit}&lesson=${userId}&search=${search}`),
-			post: (data) =>
-				instance.post(`learning/psychological_test_question/?year=${cyear_name}&season=${cseason_id}`, data),
-			put: (data, pk, type="question") =>
-				instance.put(`learning/psychological_test_question/${pk}/?year=${cyear_name}&season=${cseason_id}&type=${type}`, data),
-			delete: (delete_id) => instance.delete(`learning/psychological_test_question/?year=${cyear_name}&season=${cseason_id}&delete=${delete_id}`)
+		// Багшийн үнэлгээний асуулт
+		evaluation: {
+			register: {
+				get: (limit, page, sort, search) => instance.get(`/survey/questions/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}`),
+				post: (data) => instance.post('/survey/questions/', data),
+				put: (data, pk) => instance.put(`/survey/questions/${pk}/`, data),
+				delete: (pk) => instance.delete(`/survey/questions/${pk}/`)
+			}
 		},
 
-		psychologicalTest:{
-			get: (limit, page, sort, search, scope) => instance.get(`learning/psychological_test/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&scope=${scope}`),
-			getOne: (pk) => instance.get(`learning/psychological_test/${pk}/`),
-			post: (cdatas) => instance.post('learning/psychological_test/', cdatas),
-			put: (data, pk) => instance.put(`learning/psychological_test/${pk}/`, data),
-			delete: (pk) => instance.delete(`learning/psychological_test/${pk}/`),
-
-			getOptions: () => instance.get(`learning/psychological_test/options/`),
-			getScope: (limit, page, search, test_id) => instance.get(`learning/psychological_test/scope_list/?page=${page}&limit=${limit}&search=${search}&test_id=${test_id}`),
-
-			// populates participant adding inputs
-			getSelect: (scope, mode, state, select1, select2, search) => instance.get(`learning/psychological_test/scope_option/?scope=${scope}&school=${school_id}&mode=${mode}&state=${state}&select1=${select1}&select2=${select2}&search=${search}`),
-
-			putAddScope: (data, pk) => {
-				data['school_id'] = school_id
-				return instance.put(`learning/psychological_test/add_scope/${pk}/`, data)
+		// Эрдэм шинжилгээ
+		science: {
+			paper: {
+				get: (limit, page, sort, search, salbar,teacher,publish_year,category='') => instance.get(`/science/papers/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&sub_org=${school_id}&salbar=${salbar}&teachers=${teacher}&published_year=${publish_year}&category=${category}`),
+				category: {
+					getList: ()=>instance.get(`/science/papers/category/`)
+				},
 			},
-			deleteParticitant: (pk, test_id) => instance.delete(`learning/psychological_test/add_scope/${pk}/?test_id=${test_id}`)
-		},
-
-		psychologicalTestOne:{
-			get: (limit, page, test_id) => instance.get(`learning/psychological_test_one/?page=${page}&limit=${limit}&test_id=${test_id}`),
-			post: (data, pk) => instance.post(`learning/psychological_test_one/${pk}/`, data),
-			delete: (pk, test_id) => instance.delete(`learning/psychological_test_one/${pk}/?test_id=${test_id}`)
-		},
-
-		psychologicalTestResult:{
-			get: (limit, page, sort, search, scope) => instance.get(`learning/psychological_test_result/?page=${page}&limit=${limit}&sort=${sort}&search=${search}&scope=${scope}`),
-			getParticipants: (limit, page, search, test_id) => instance.get(`learning/psychological_test_result_participants/?page=${page}&limit=${limit}&search=${search}&test_id=${test_id}`),
-			getResult: (cdata) => instance.post(`learning/psychological_test_result_show/`,cdata),
-
-			excelResult:(adm) => instance.get(`learning/psychological_test_result_excel/?adm=${adm}`),
-			iqExcelResult:(adm)=>instance.get(`learning/iq_test_result_excel/?adm=${adm}`)
-
-		}
-
-	},
-
-	// Судалгаа
-	survey:{
-
-		studentlist:{
-			get: () => instance.get(`/student/info/?page=1&limit=${10}`)
-		},
-
-		surveyrange:{
-			// types болон selected_value дамжиж ирэх үед back-руу дамжуулна
-			get:(types, selectedValue) => instance.get(`survey/surveyrange/?types=${types}&selected_value=${selectedValue}`),
-		},
-		get:(limit, page, selectedTime, search) => instance.get(`survey/?limit=${limit}&page=${page}&time_type=${selectedTime}&search=${search}`),
-		getList: (search) => instance.get(`survey/list/?search=${search}`),
-		getOne: (pk) => instance.get(`survey/${pk}/`),
-		post: (cdatas) => instance.post('survey/', cdatas),
-		put: (data, pk) => instance.put(`survey/${pk}/`, data),
-		delete: (pk) => instance.delete(`survey/${pk}/`),
-
-		pollee:{
-			get: (id) => instance.get(`/survey/pollee/${id}/`)
-		}
-	},
-
-	// Багшийн үнэлгээний асуулт
-	evaluation: {
-		register: {
-			get: (limit, page, sort, search) => instance.get(`/survey/questions/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}`),
-			post: (data) => instance.post('/survey/questions/', data),
-			put: (data, pk) => instance.put(`/survey/questions/${pk}/`, data),
-			delete: (pk) => instance.delete(`/survey/questions/${pk}/`)
-		}
-	},
-
-	// Эрдэм шинжилгээ
-	science: {
-		paper: {
-			get: (limit, page, sort, search, salbar,teacher,publish_year,category='') => instance.get(`/science/papers/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&sub_org=${school_id}&salbar=${salbar}&teachers=${teacher}&published_year=${publish_year}&category=${category}`),
-			category: {
-				getList: ()=>instance.get(`/science/papers/category/`)
+			notes: {
+				get: (limit, page, sort, search, category, salbar) => instance.get(`/science/notes/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&category=${category}&salbar=${salbar}`),
+				values:{
+					getList: ()=>instance.get(`/science/notes/values/`)
+				},
 			},
-		},
-		notes: {
-			get: (limit, page, sort, search, category, salbar) => instance.get(`/science/notes/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&category=${category}&salbar=${salbar}`),
-			values:{
-				getList: ()=>instance.get(`/science/notes/values/`)
+
+			quotation: {
+				get: (limit, page, sort, search,salbar,category, quotation_year) => instance.get(`/science/quotation/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&salbar=${salbar}&category=${category}&quotation_year=${quotation_year}`),
 			},
-		},
 
-		quotation: {
-			get: (limit, page, sort, search,salbar,category, quotation_year) => instance.get(`/science/quotation/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&salbar=${salbar}&category=${category}&quotation_year=${quotation_year}`),
-		},
-
-		invention: {
-			get: (limit, page, sort, search, salbar,teacher,publish_year,category='') => instance.get(`/science/invention/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&sub_org=${school_id}&salbar=${salbar}&teachers=${teacher}&published_year=${publish_year}&category=${category}`),
-			category: {
-				getList: ()=>instance.get(`/science/inventioncategory/list/`)
+			invention: {
+				get: (limit, page, sort, search, salbar,teacher,publish_year,category='') => instance.get(`/science/invention/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&sub_org=${school_id}&salbar=${salbar}&teachers=${teacher}&published_year=${publish_year}&category=${category}`),
+				category: {
+					getList: ()=>instance.get(`/science/inventioncategory/list/`)
+				},
 			},
-		},
 
-		project: {
-			get: (limit, page, sort, search, salbar,teacher,start_date,category,sub_category='') => instance.get(`/science/project/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&salbar=${salbar}&teacher=${teacher}&start_date=${start_date}&category=${category}&sub_category=${sub_category}`),
-			category: {
-				getList: () => instance.get(`/science/project/category/`)
+			project: {
+				get: (limit, page, sort, search, salbar,teacher,start_date,category,sub_category='') => instance.get(`/science/project/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&salbar=${salbar}&teacher=${teacher}&start_date=${start_date}&category=${category}&sub_category=${sub_category}`),
+				category: {
+					getList: () => instance.get(`/science/project/category/`)
+				},
 			},
-		},
 
-		settings: {
-			get: (type) => instance.get(`/science/settings/?type=${type}`),
-			post: (type, datas) => instance.post(`/science/settings/?type=${type}`, datas),
-			put: (type, datas) => instance.put(`/science/settings/?type=${type}`, datas),
-			delete: (type, id) => instance.delete(`/science/settings/${id}/?type=${type}`),
-		},
-
-		student: {
-			get: (limit, page, sort, search) => instance.get(`/science/student/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}`),
-		},
-
-		patent: {
-			get: (limit, page, sort, search) => instance.get(`/science/patent/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}`),
-		},
-		estimate: {
-			get: (limit, page, sort, search, salbar) => instance.get(`/science/estimate/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&school=${school_id}&salbar=${salbar}`)
-		},
-
-		report: {
-			get: (year) => instance.get(`/science/report/?year=${year}`),
-		}
-	},
-	status: {
-		db1:{
-			get: () => instance.get(`/statistic/db1/`),
-		},
-		db3:{
-			get: () => instance.get(`/statistic/db3/`),
-		},
-		db4:{
-			get: () => instance.get(`/statistic/db4/`),
-		},
-		db5:{
-			get: () => instance.get(`/statistic/db5/`),
-		},
-		db6:{
-			get: () => instance.get(`/statistic/db6/`),
-		},
-		db7:{
-			get: () => instance.get(`/statistic/db7/`),
-		},
-		db8:{
-			get: () => instance.get(`/statistic/db8/`),
-		},
-		db9:{
-			get: () => instance.get(`/statistic/db9/`),
-		},
-		db10:{
-			get: () => instance.get(`/statistic/db10/`),
-		},
-		db11:{
-			get: () => instance.get(`/statistic/db11/`),
-		},
-		db12:{
-			get: () => instance.get(`/statistic/db12/`),
-		},
-		db13:{
-			get: () => instance.get(`/statistic/db13/`),
-		},
-		db14:{
-			get: () => instance.get(`/statistic/db14/`),
-		},
-		db15:{
-			get: () => instance.get(`/statistic/db15/`),
-		},
-		db16:{
-			get: () => instance.get(`/statistic/db16/`),
-		},
-		db17:{
-			get: () => instance.get(`/statistic/db17/`),
-		}
-	},
-	calendarCard: {
-		get: () => instance.get('/core/calendarCard/'),
-	},
-	calendarNews: {
-		get: () => instance.get(`/service/news/calendar/`),
-	},
-	studentPass: {
-		changePass: (pk)=> instance.put(`/student/defaultPass/${pk}/`),
-	},
-	activeYearAndSeason: {
-		get: () => instance.get(`/settings/year-season/`)
-	},
-	calendar1: {
-		get: () => instance.get('/core/calendar1/'),
- 	},
-
-	elselt: {
-		get: (limit, page, sort, search, lesson_year) => instance.get(`/elselt/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year=${lesson_year}`),
-		getAll: () => instance.get(`/elselt/all/`),
-		getActiveAll: () => instance.get(`/elselt/all/active/`),
-		post: (data) => instance.post('/elselt/', data),
-		put: (data, id) => instance.put(`/elselt/${id}/`, data),
-		delete: (id) => instance.delete(`/elselt/${id}/`),
-		putFirst: (id, data) => instance.put(`/elselt/first/${id}/`, data),
-		profession: {
-			get: (elselt_id) => instance.get(`/elselt/profession/?elselt=${elselt_id}`),
-			post: (data) => instance.post('/elselt/profession/', data),
-			delete: (id, elselt_id) => instance.delete(`/elselt/profession/${id}/?elselt=${elselt_id}`),
-			postShalguur: (datas) => instance.post(`/elselt/profession/shalguur/`, datas),
-
-			// Элсэлт явагдаж байгаа хөтөлбөрийн жагсаалт
-			getList: (elselt) => instance.get(`/elselt/profession/list/?elselt=${elselt}`),
-			putPropState: (datas) => instance.put(`/elselt/profession/`, datas)
-		},
-		sysinfo: {
-			get: () => instance.get(`/elselt/sysinfo/`),
-			put: (id, data) =>
-				id
-				?
-					instance.put(`/elselt/sysinfo/${id}/`, data)
-				:
-					instance.post(`/elselt/sysinfo/`, data),
-		},
-		admissionuserdata: {
-			get: (limit, page, sort, search, lesson_year_id, profession_id, unit1_id, gender, state, gpa_state, age_state, justice_state='', is_justice='', now_state='', start_date, end_date) =>
-				instance.get(`/elselt/admissionuserdata/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}&unit1_id=${unit1_id}&gender=${gender}&state=${state}&gpa_state=${gpa_state}&age_state=${age_state}&justice_state=${justice_state}&is_justice=${is_justice}&now_state=${now_state}&start_date=${start_date}&end_date=${end_date}`),
-			getOne: (pk) => instance.get(`/elselt/admissionuserdata/${pk}/`),
-			put: (data, id) => instance.put(`/elselt/admissionuserdata/${id}/`, data),
-			putDesc: (data, id) => instance.put(`/elselt/desc/${id}/`, data),
-			all: {
-				put: (data) => instance.put(`/elselt/admissionuserdata/all/`, data),
+			settings: {
+				get: (type) => instance.get(`/science/settings/?type=${type}`),
+				post: (type, datas) => instance.post(`/science/settings/?type=${type}`, datas),
+				put: (type, datas) => instance.put(`/science/settings/?type=${type}`, datas),
+				delete: (type, id) => instance.delete(`/science/settings/${id}/?type=${type}`),
 			},
-			email: {
-				get: (limit, page, sort, search, lesson_year_id, profession_id, unit1_id, gender, state, gpa_state, start_date, end_date) => instance.get(`/elselt/admissionuserdata/email/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}&unit1_id=${unit1_id}&gender=${gender}&state=${state}&gpa_state=${gpa_state}&start_date=${start_date}&end_date=${end_date}`),
-				post: (data) => instance.post(`/elselt/admissionuserdata/email/`, data),
+
+			student: {
+				get: (limit, page, sort, search) => instance.get(`/science/student/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}`),
 			},
-			message: {
-				get: (limit, page, sort, search, lesson_year_id, profession_id, unit1_id, gender, state, gpa_state, start_date, end_date) => instance.get(`/elselt/admissionuserdata/message/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}&unit1_id=${unit1_id}&gender=${gender}&state=${state}&gpa_state=${gpa_state}&start_date=${start_date}&end_date=${end_date}`),
-				post: (data) => instance.post(`/elselt/admissionuserdata/message/`, data),
+
+			patent: {
+				get: (limit, page, sort, search) => instance.get(`/science/patent/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}`),
 			},
-			gpa:{
-				get: (limit, lesson_year_id, profession_id, gpa) => instance.get(`/elselt/admissionuserdata/gpa_check/?limit=${limit}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}&gpa=${gpa}`)
+			estimate: {
+				get: (limit, page, sort, search, salbar) => instance.get(`/science/estimate/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&school=${school_id}&salbar=${salbar}`)
 			},
+
+			report: {
+				get: (year) => instance.get(`/science/report/?year=${year}`),
+			}
+		},
+
+		status: {
+			db1:{
+				get: () => instance.get(`/statistic/db1/`),
+			},
+			db3:{
+				get: () => instance.get(`/statistic/db3/`),
+			},
+			db4:{
+				get: () => instance.get(`/statistic/db4/`),
+			},
+			db5:{
+				get: () => instance.get(`/statistic/db5/`),
+			},
+			db6:{
+				get: () => instance.get(`/statistic/db6/`),
+			},
+			db7:{
+				get: () => instance.get(`/statistic/db7/`),
+			},
+			db8:{
+				get: () => instance.get(`/statistic/db8/`),
+			},
+			db9:{
+				get: () => instance.get(`/statistic/db9/`),
+			},
+			db10:{
+				get: () => instance.get(`/statistic/db10/`),
+			},
+			db11:{
+				get: () => instance.get(`/statistic/db11/`),
+			},
+			db12:{
+				get: () => instance.get(`/statistic/db12/`),
+			},
+			db13:{
+				get: () => instance.get(`/statistic/db13/`),
+			},
+			db14:{
+				get: () => instance.get(`/statistic/db14/`),
+			},
+			db15:{
+				get: () => instance.get(`/statistic/db15/`),
+			},
+			db16:{
+				get: () => instance.get(`/statistic/db16/`),
+			},
+			db17:{
+				get: () => instance.get(`/statistic/db17/`),
+			}
+		},
+		calendarCard: {
+			get: () => instance.get('/core/calendarCard/'),
+		},
+		calendarNews: {
+			get: () => instance.get(`/service/news/calendar/`),
+		},
+		studentPass: {
+			changePass: (pk)=> instance.put(`/student/defaultPass/${pk}/`),
+		},
+		activeYearAndSeason: {
+			get: () => instance.get(`/settings/year-season/`)
+		},
+		calendar1: {
+			get: () => instance.get('/core/calendar1/'),
+		},
+
+		elselt: {
+			get: (limit, page, sort, search, lesson_year) => instance.get(`/elselt/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year=${lesson_year}`),
+			getAll: () => instance.get(`/elselt/all/`),
+			getActiveAll: () => instance.get(`/elselt/all/active/`),
+			post: (data) => instance.post('/elselt/', data),
+			put: (data, id) => instance.put(`/elselt/${id}/`, data),
+			delete: (id) => instance.delete(`/elselt/${id}/`),
+			putFirst: (id, data) => instance.put(`/elselt/first/${id}/`, data),
+			profession: {
+				get: (elselt_id) => instance.get(`/elselt/profession/?elselt=${elselt_id}`),
+				post: (data) => instance.post('/elselt/profession/', data),
+				delete: (id, elselt_id) => instance.delete(`/elselt/profession/${id}/?elselt=${elselt_id}`),
+				postShalguur: (datas) => instance.post(`/elselt/profession/shalguur/`, datas),
+
+				// Элсэлт явагдаж байгаа хөтөлбөрийн жагсаалт
+				getList: (elselt) => instance.get(`/elselt/profession/list/?elselt=${elselt}`),
+				putPropState: (datas) => instance.put(`/elselt/profession/`, datas)
+			},
+			sysinfo: {
+				get: () => instance.get(`/elselt/sysinfo/`),
+				put: (id, data) =>
+					id
+					?
+						instance.put(`/elselt/sysinfo/${id}/`, data)
+					:
+						instance.post(`/elselt/sysinfo/`, data),
+			},
+			admissionuserdata: {
+				get: (limit, page, sort, search, lesson_year_id, profession_id, unit1_id, gender, state, gpa_state, age_state, justice_state='', is_justice='', now_state='', start_date, end_date) =>
+					instance.get(`/elselt/admissionuserdata/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}&unit1_id=${unit1_id}&gender=${gender}&state=${state}&gpa_state=${gpa_state}&age_state=${age_state}&justice_state=${justice_state}&is_justice=${is_justice}&now_state=${now_state}&start_date=${start_date}&end_date=${end_date}`),
+				getOne: (pk) => instance.get(`/elselt/admissionuserdata/${pk}/`),
+				put: (data, id) => instance.put(`/elselt/admissionuserdata/${id}/`, data),
+				putDesc: (data, id) => instance.put(`/elselt/desc/${id}/`, data),
+				all: {
+					put: (data) => instance.put(`/elselt/admissionuserdata/all/`, data),
+				},
+				email: {
+					get: (limit, page, sort, search, lesson_year_id, profession_id, unit1_id, gender, state, gpa_state, start_date, end_date) => instance.get(`/elselt/admissionuserdata/email/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}&unit1_id=${unit1_id}&gender=${gender}&state=${state}&gpa_state=${gpa_state}&start_date=${start_date}&end_date=${end_date}`),
+					post: (data) => instance.post(`/elselt/admissionuserdata/email/`, data),
+				},
+				message: {
+					get: (limit, page, sort, search, lesson_year_id, profession_id, unit1_id, gender, state, gpa_state, start_date, end_date) => instance.get(`/elselt/admissionuserdata/message/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}&unit1_id=${unit1_id}&gender=${gender}&state=${state}&gpa_state=${gpa_state}&start_date=${start_date}&end_date=${end_date}`),
+					post: (data) => instance.post(`/elselt/admissionuserdata/message/`, data),
+				},
+				gpa:{
+					get: (limit, lesson_year_id, profession_id, gpa) => instance.get(`/elselt/admissionuserdata/gpa_check/?limit=${limit}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}&gpa=${gpa}`)
+				},
+				eyesh:{
+					get: (limit,lesson_year_id,profession_id) => instance.get(`/elselt/admissionuserdata/eyesh_check/?limit=${limit}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}`)
+				},
+				gpaconfirm: {
+					get:(limit , lesson_year_id , profession_id , gpa) => instance.get(`/elselt/admissionuserdata/gpa_check/confirm/?limit=${limit}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}&gpa=${gpa}`)
+				}
+			},
+			gpa: {
+				put: (data, id) => instance.put(`/elselt/gpa/${id}/`, data)
+			},
+			dashboard: {
+				get: (elselt) => instance.get(`/elselt/dashboard/?elselt=${elselt}`),
+				excel: (elselt) => instance.get(`/elselt/dashboard/excel/?elselt=${elselt}`)
+			},
+			health: {
+				anhan:{
+					get: (limit, page, sort, search, state, elselt, profession, gender, start_date, end_date) => instance.get(`/elselt/health/anhan/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}&elselt=${elselt}&profession=${profession}&gender=${gender}&start_date=${start_date}&end_date=${end_date}`),
+					post: (cdata) => instance.post(`/elselt/health/anhan/`, cdata),
+					put: (id, cdata) => instance.put(`/elselt/health/anhan/${id}/`, cdata)
+				},
+				professional:{
+					get: (limit, page, sort, search,lesson_year_id, profession_id, state, gender, start_date, end_date) => instance.get(`/elselt/health/professional/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}&state=${state}&gender=${gender}&start_date=${start_date}&end_date=${end_date}`),
+					post: (cdata) => instance.post(`/elselt/health/professional/`, cdata),
+					put: (id, cdata) => instance.put(`/elselt/health/professional/${id}/`, cdata)
+				},
+				physical:{
+					get: (limit, page, sort, search, state, elselt, profession, gender, start_date , end_date) => instance.get(`/elselt/health/physical/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}&elselt=${elselt}&profession=${profession}&gender=${gender}&start_date=${start_date}&end_date=${end_date}`),
+					post: (cdata) => instance.post(`/elselt/health/physical/`, cdata),
+					put: (id, cdata) => instance.put(`/elselt/health/physical/${id}/`, cdata)
+				},
+			},
+			justice: {
+				get: (limit, page, sort, search, justice_state, elselt, profession, gender) => instance.get(`/elselt/justice/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&justice_state=${justice_state}&elselt=${elselt}&profession=${profession}&gender=${gender}`),
+				post: (cdata) => instance.post(`/elselt/justice/`, cdata),
+				put: (cdata) => instance.put(`/elselt/justice/`, cdata)
+			},
+			// тэнцсэн элсэгчид
+			approve: {
+				get: (limit, page, sort, search,admission, profession, gender) => instance.get(`/elselt/approve/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&admission=${admission}&profession=${profession}&gender=${gender}`),
+				post: (cdata) => instance.post(`/elselt/approve/`, cdata),
+
+			},
+			interview:{
+				get: (limit, page, sort, search, state, elselt, profession, gender, start_date , end_date) => instance.get(`/elselt/interview/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}&elselt=${elselt}&profession=${profession}&gender=${gender}&start_date=${start_date}&end_date=${end_date}`),
+				post: (cdata) => instance.post(`/elselt/interview/`, cdata),
+				put: (id, cdata) => instance.put(`/elselt/interview/${id}/`, cdata)
+			},
+			// цэргийн бэлтгэл тэнцсэн эсэх
+			preparation:{
+				get: (limit, page, sort, search, state, elselt, profession) => instance.get(`/elselt/preparation/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}&elselt=${elselt}&profession=${profession}`),
+				post: (cdata) => instance.post(`/elselt/preparation/`, cdata),
+				put: (id, cdata) => instance.put(`/elselt/preparation/${id}/`, cdata)
+			},
+			// Хөтөлбөр,Төлөв лог жагсаалт
+			log:{
+				get:(limit,page,sort,search,elselt,profession,menu_option)=>instance.get(`/elselt/log/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&elselt=${elselt}&profession=${profession}&menu_option=${menu_option}`)
+			},
+			hynalt:{
+				get: (gender, profession) => instance.get(`/elselt/hynalt_number/?gender=${gender}&profession=${profession}`),
+				getIsGender: (profession) => instance.get(`/elselt/hynalt_is_gender/?profession=${profession}`),
+				post:(cdata) => instance.post(`/elselt/userscore/`, cdata),
+				postPhysical:(cdata) => instance.post(`/elselt/physical/`, cdata),
+			},
+			// ЭЕШ хэсгийн оноо татах
 			eyesh:{
-				get: (limit,lesson_year_id,profession_id) => instance.get(`/elselt/admissionuserdata/eyesh_check/?limit=${limit}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}`)
+				get : (elselt, profession_id) => instance.get(`/elselt/eyesh/?&elselt=${elselt}&profession=${profession_id}`)
 			},
-			gpaconfirm: {
-				get:(limit , lesson_year_id , profession_id , gpa) => instance.get(`/elselt/admissionuserdata/gpa_check/confirm/?limit=${limit}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}&gpa=${gpa}`)
+			// ЭЕШ хэсгийн жагсаалт татахebackend/apps/surgalt/views.py
+			eyesh_order:{
+				put: (id, cdata) => instance.put(`/elselt/admissionuserdata/eyesh/${id}/`, cdata),
+				get: (limit, page, search, lesson_year_id, profession_id , gender, state, yesh_state, yesh_mhb_state) =>
+					instance.get(`/elselt/admissionuserdata/eyesh/?page=${page}&limit=${limit}&search=${search}&elselt=${lesson_year_id}&profession=${profession_id}&gender=${gender}&state=${state}&yesh_state=${yesh_state}&yesh_mhb_state=${yesh_mhb_state}`),
+			},
+			mhb:{
+				get: (limit, page, search, yesh_mhb_state) =>
+					instance.get(`/elselt/admissionuserdata/mhb/?page=${page}&limit=${limit}&search=${search}&yesh_mhb_state=${yesh_mhb_state}`),
+				postExcelImport: (cdata) => instance.post(`/elselt/admissionuserdata/mhb/`, cdata),
+			},
+			able: {
+				getWorker: () => able_instance.get(`/?a=ableApi&tsk=getWorkers&key=uia`),
+				getStructure: () => able_instance.get(`/?a=ableApi&tsk=getDeps&key=uia`),
 			}
 		},
-		gpa: {
-			put: (data, id) => instance.put(`/elselt/gpa/${id}/`, data)
-		},
-		dashboard: {
-			get: (elselt) => instance.get(`/elselt/dashboard/?elselt=${elselt}`),
-			excel: (elselt) => instance.get(`/elselt/dashboard/excel/?elselt=${elselt}`)
-		},
-		health: {
-			anhan:{
-				get: (limit, page, sort, search, state, elselt, profession, gender, start_date, end_date) => instance.get(`/elselt/health/anhan/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}&elselt=${elselt}&profession=${profession}&gender=${gender}&start_date=${start_date}&end_date=${end_date}`),
-				post: (cdata) => instance.post(`/elselt/health/anhan/`, cdata),
-				put: (id, cdata) => instance.put(`/elselt/health/anhan/${id}/`, cdata)
-			},
-			professional:{
-				get: (limit, page, sort, search,lesson_year_id, profession_id, state, gender, start_date, end_date) => instance.get(`/elselt/health/professional/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson_year_id=${lesson_year_id}&profession_id=${profession_id}&state=${state}&gender=${gender}&start_date=${start_date}&end_date=${end_date}`),
-				post: (cdata) => instance.post(`/elselt/health/professional/`, cdata),
-				put: (id, cdata) => instance.put(`/elselt/health/professional/${id}/`, cdata)
-			},
-			physical:{
-				get: (limit, page, sort, search, state, elselt, profession, gender, start_date , end_date) => instance.get(`/elselt/health/physical/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}&elselt=${elselt}&profession=${profession}&gender=${gender}&start_date=${start_date}&end_date=${end_date}`),
-				post: (cdata) => instance.post(`/elselt/health/physical/`, cdata),
-				put: (id, cdata) => instance.put(`/elselt/health/physical/${id}/`, cdata)
-			},
-		},
-		justice: {
-			get: (limit, page, sort, search, justice_state, elselt, profession, gender) => instance.get(`/elselt/justice/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&justice_state=${justice_state}&elselt=${elselt}&profession=${profession}&gender=${gender}`),
-			post: (cdata) => instance.post(`/elselt/justice/`, cdata),
-			put: (cdata) => instance.put(`/elselt/justice/`, cdata)
-		},
-		// тэнцсэн элсэгчид
-		approve: {
-			get: (limit, page, sort, search,admission, profession, gender) => instance.get(`/elselt/approve/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&admission=${admission}&profession=${profession}&gender=${gender}`),
-			post: (cdata) => instance.post(`/elselt/approve/`, cdata),
+		online_lesson: {
+			get_lessons: () => instance.get("/online_lesson/"),
+			getOne: (pk) => instance.get(`/online_lesson/${pk}/`),
 
+			deletePlan: (pk) => instance.delete(`/online_lesson/plan/${pk}/`),
+			postPlan: (pk, data) => instance.put(`/online_lesson/plan/${pk}/`, data),
+
+			lessonRegister: (cdata) => instance.post(`/online_lesson/`, cdata),
+			editLesson: (pk, data) => instance.put(`online_lesson/${pk}/`, data),
+			delete_lesson: (pk) => instance.delete(`online_lesson/${pk}`),
+			test:{
+				getAll:(id)=>instance.get(`/online_lesson/test/${id}/`),
+				post:(id,data)=>instance.post(`/online_lesson/test/${id}/`,data),
+				delete:(id)=>instance.delete(`/online_lesson/test/${id}/`)
+			},
+			lekts_material: {
+				post: (cdata) => instance.post(`/online_lesson/online_week/lekts/`, cdata, multiPart),
+				delete: (pk) => instance.delete(`/online_lesson/online_week/lekts/${pk}/`),
+			}
 		},
-		interview:{
-			get: (limit, page, sort, search, state, elselt, profession, gender, start_date , end_date) => instance.get(`/elselt/interview/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}&elselt=${elselt}&profession=${profession}&gender=${gender}&start_date=${start_date}&end_date=${end_date}`),
-			post: (cdata) => instance.post(`/elselt/interview/`, cdata),
-			put: (id, cdata) => instance.put(`/elselt/interview/${id}/`, cdata)
+
+		online_week:{
+			get: (lesson, week='') => instance.get(`/online_lesson/online_week/?lesson=${lesson}&week=${week}`),
+			getOne: (id) => instance.get(`/online_lesson/online_week/${id}/`),
+			post: (cdata, id) => instance.post(`/online_lesson/online_week/${id}/`, cdata),
+			put: (pk, data) => instance.put(`/online_lesson/online_week/?pk=${pk}`,data),
+			delete: (pk) => instance.delete(`/online_lesson/onlone_week/${pk}/`),
+			getList: (pk) => instance.get(`/online_lesson/onlone_week/${pk}/`),
 		},
-		// цэргийн бэлтгэл тэнцсэн эсэх
-		preparation:{
-			get: (limit, page, sort, search, state, elselt, profession) => instance.get(`/elselt/preparation/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&state=${state}&elselt=${elselt}&profession=${profession}`),
-			post: (cdata) => instance.post(`/elselt/preparation/`, cdata),
-			put: (id, cdata) => instance.put(`/elselt/preparation/${id}/`, cdata)
+
+		material : {
+			get: (type="")=> instance.get(`/online_lesson/material/?type=${type}`),
+			getOne: (pk)=> instance.get(`/online_lesson/material/${pk}/`),
+			post: (cdata)=> instance.post(`/online_lesson/material/`,cdata),
+			delete: (pk)=> instance.delete(`/online_lesson/material/${pk}/`)
 		},
-		// Хөтөлбөр,Төлөв лог жагсаалт
-		log:{
-			get:(limit,page,sort,search,elselt,profession,menu_option)=>instance.get(`/elselt/log/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&elselt=${elselt}&profession=${profession}&menu_option=${menu_option}`)
+		announcement : {
+			get : (lessonId) => instance.get(`online_lesson/announcement/${lessonId}/`),
+			getAll : (pk) => instance.get(`online_lesson/announcement/?teacher_id=${pk}`),
+			getOne : () => instance.get(`online_lesson/announcement/${pk}`),
+			delete : (pk) => instance.delete(`online_lesson/announcement/${pk}/`),
+			post : (data) => instance.post(`online_lesson/announcement/`,data),
+			put : (pk,data) => instance.put(`online_lesson/announcement/${pk}/`,data),
+			global_post : (data) => instance.post(`online_lesson/global_announcement/`,data),
 		},
-		hynalt:{
-			get: (gender, profession) => instance.get(`/elselt/hynalt_number/?gender=${gender}&profession=${profession}`),
-			getIsGender: (profession) => instance.get(`/elselt/hynalt_is_gender/?profession=${profession}`),
-			post:(cdata) => instance.post(`/elselt/userscore/`, cdata),
-			postPhysical:(cdata) => instance.post(`/elselt/physical/`, cdata),
+		homework : {
+			get : (week_id) => instance.get(`online_lesson/online_homework/${week_id}`),
+			getOne : (pk) => instance.get(`online_lesson/online_homework/${pk}`),
+			delete : (pk) => instance.delete(`online_lesson/online_homework/${pk}`),
+			post : (data) => instance.post(`online_lesson/online_homework/`, data, multiPart),
+			put : (data, pk) => instance.put(`online_lesson/online_homework/${pk}/`, data, multiPart)
 		},
-		// ЭЕШ хэсгийн оноо татах
-		eyesh:{
-			get : (elselt, profession_id) => instance.get(`/elselt/eyesh/?&elselt=${elselt}&profession=${profession_id}`)
+		sent_home_work : {
+			get : (week_id) => instance.get(`online_lesson/sent_home_work/${week_id}`),
+			getOne : () => instance.get(`online_lesson/sent_home_work/${pk}`),
+			delete : (pk) => instance.delete(`online_lesson/sent_home_work/${pk}`),
+			post : (data, weekId) => instance.post(`online_lesson/sent_home_work/${weekId}`,data),
+			put : () => instance.put(`online_lesson/sent_home_work/${pk}`,data)
 		},
-		// ЭЕШ хэсгийн жагсаалт татахebackend/apps/surgalt/views.py
-		eyesh_order:{
-			put: (id, cdata) => instance.put(`/elselt/admissionuserdata/eyesh/${id}/`, cdata),
-			get: (limit, page, search, lesson_year_id, profession_id , gender, state, yesh_state, yesh_mhb_state) =>
-				instance.get(`/elselt/admissionuserdata/eyesh/?page=${page}&limit=${limit}&search=${search}&elselt=${lesson_year_id}&profession=${profession_id}&gender=${gender}&state=${state}&yesh_state=${yesh_state}&yesh_mhb_state=${yesh_mhb_state}`),
+		lesson_list :{
+			get : (teacherId) => instance.get(`online_lesson/choose_online_lesson/?teacher_id=${teacherId}`),
 		},
-		mhb:{
-			get: (limit, page, search, yesh_mhb_state) =>
-				instance.get(`/elselt/admissionuserdata/mhb/?page=${page}&limit=${limit}&search=${search}&yesh_mhb_state=${yesh_mhb_state}`),
-			postExcelImport: (cdata) => instance.post(`/elselt/admissionuserdata/mhb/`, cdata),
+		get_group : {
+			get: () => instance.get(`online_lesson/get_group/`)
 		},
-		able: {
-			getWorker: () => able_instance.get(`/?a=ableApi&tsk=getWorkers&key=uia`),
-			getStructure: () => able_instance.get(`/?a=ableApi&tsk=getDeps&key=uia`),
+		get_lesson_students: {
+			get: (limit, page, search, selectedGroup,lesson_id) => instance.get(`online_lesson/lesson_students/?limit=${limit}&page=${page}&search=${search}&group=${selectedGroup}&lesson_id=${lesson_id}`),
 		}
-	},
-}
+	}
 }
 
 export default useApi;

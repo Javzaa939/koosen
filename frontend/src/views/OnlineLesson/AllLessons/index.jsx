@@ -172,7 +172,7 @@ function AllLessons({ lessons, getLessons }) {
                 </CardBody>
             </Card>
 
-            <Card className={'mt-2'}>
+            {/* <Card className={'mt-2'}>
                 <CardHeader><div className="d-flex "><HelpCircle size={20}/><h5 className="ms-25 fw-bolder">Тусламж хэсэг</h5></div></CardHeader>
                 <CardBody>
                     <Alert color='primary' className={'p-1 тме1'}>
@@ -180,7 +180,7 @@ function AllLessons({ lessons, getLessons }) {
                     </Alert>
                     <iframe src="assets/Цахим хичээд.pdf" width="100%" height="640" allowfullscreen frameborder="0"></iframe>
                 </CardBody>
-            </Card>
+            </Card> */}
         </Fragment>
     );
 }

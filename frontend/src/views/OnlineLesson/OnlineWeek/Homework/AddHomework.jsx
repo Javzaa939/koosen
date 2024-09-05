@@ -1,4 +1,4 @@
-import { AuthContext } from "@src/utility/context/AuthContext";
+import AuthContext from "@src/utility/context/AuthContext";
 import useApi from "@src/utility/hooks/useApi";
 import useLoader from "@src/utility/hooks/useLoader";
 import useToast from "@src/utility/hooks/useToast";

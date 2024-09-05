@@ -18,14 +18,8 @@ const OnlineLessonRoutes = [
         id:'onlinelesson1',
         title:'Хичээлийн материал',
         icon: <Circle size={8} />,
-        navLink:"online_lesson/material"
+        navLink:"material"
       },
-      {
-        id:'onlinelesson2 ',
-        title:'Хичээлийн материал',
-        icon: <Circle size={8} />,
-        navLink:"online_lesson/page"
-      }
     ]
   },
 ];

@@ -46,6 +46,7 @@ ONLINE_LESSON = 'online_lesson/'
 TIMETABLE = 'timetable/'
 
 CORRESPOND = 'correspond/'
+ASSIGNMENT = 'assignment/'
 
 
 MUIS_HR_MEDIA_URL = 'http://hr.utilitysolution.mn/media/'
@@ -248,3 +249,11 @@ if os.environ.get("LOGGING") == "1":
             },
         },
     }
+
+
+# Тухайн сургууль бүрт зориулсан cdn folder
+CDN_MAIN_FOLDER = 'dxis/'
+
+# CDN файл байршиж бай
+CDN_MAIN_DOMAIN = 'http://sis.uia.gov.mn/cdn/'
+CDN_FILE_URL = 'http://sis.uia.gov.mn/cdn/files/'

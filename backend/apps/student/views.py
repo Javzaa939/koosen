@@ -328,7 +328,7 @@ def generate_student_code(school_id, group, is_two=False):
     group_qs = Group.objects.get(pk=group)
     degree_code = group_qs.profession.degree.degree_code
     lesson_year = group_qs.join_year
-    duration = group_qs.profession.duration
+    duration = group_qs.profession.duration or 4
     profession_code = group_qs.profession.profession_code
 
     year = int(lesson_year[2:4])

@@ -1,6 +1,6 @@
 import React, { Fragment, useState, useEffect, useContext } from "react";
 import { useTranslation } from "react-i18next";
-import { AuthContext } from "@context/AuthContext";
+import AuthContext from "@src/utility/context/AuthContext";
 import {  ChevronsRight, Edit, PlusCircle, Trash } from "react-feather";
 
 import {

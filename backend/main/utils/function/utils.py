@@ -1331,3 +1331,99 @@ def get_cdn_url(endpoint):
     full_url = urljoin(cdn_urls, endpoint)
 
     return full_url
+
+
+# ------------------------------------------------- CDN рүү файл хадгалах function ----------------------------------------------------------------------------
+
+
+def get_cdn_urls():
+    path = settings.CDN_MAIN_DOMAIN
+
+    # Орчиноос шалтгаалж url авах
+    if settings.DEBUG:
+        path = 'http://192.168.1.7:8003/cdn/'
+
+    return path
+
+
+def create_file_to_cdn(filepath, file):
+    """ Production орчинд cdn folder луу файл хадгалах
+        file_path: Өгөгдлийн санд хадгалагдах folder Жишээлбэл шилжилт хөдөлгөөний файл хадгалах гэж байгаа бол "movement" гэх мэт
+        file: Хадгалах файл
+        return {
+            "file_name": "viber_image_2024-08-07_16-43-51-283.png",
+            "full_path": "movement/viber_image_2024-08-07_16-43-51-283.png"
+        }
+    """
+
+    path = get_cdn_urls()
+
+    cdn_save_path = path + 'save-file/'
+    cdn_root_folder = settings.CDN_MAIN_FOLDER
+
+    saved_path = os.path.join(cdn_root_folder, filepath)
+
+    cdn_data = {
+        'path': saved_path
+    }
+    files = {'file': file}
+
+    # CDN server дээр файлаа хадгалах post method
+    response = requests.post(cdn_save_path, data=cdn_data, files=files)
+
+    # Амжилттай хадгалвал
+    if response.status_code == 200:
+        return response.json().get('data')
+    else:
+        raise Exception('Файл хадгалахад алдаа гарсан байна. \n')
+
+
+def remove_file_from_cdn(path, is_file=True):
+    """
+        CDN серверээс файл устгах нь,
+        path: заавал дэд folder  path агуулсан байх Example: movement/image.png
+        is_file: True байвал Зөвхөн файл устгах Үгүй байвал folder устгах
+    """
+
+    # cdn дээрх зам биш бол cdn ий замыг үүсгэж авах нь
+
+    body = {
+        "path": path,
+        'is_file': is_file
+    }
+
+    cdn_path = get_cdn_urls()
+
+    cdn_delete_path = cdn_path + 'delete-file/'
+    rsp = requests.delete(cdn_delete_path, json=body)
+    if rsp.status_code != 200:
+        raise Exception('Файл утсгахад алдаа гарсан байна. \n' + rsp.text)
+    else:
+        return True
+
+
+def get_file_from_cdn(path):
+    """
+        CDN серверээс файл унших нь,
+        path: заавал дэд folder  path агуулсан байх Example: movement/image.png
+    """
+
+    # cdn дээрх зам биш бол cdn ий замыг үүсгэж авах нь
+
+    cdn_root_folder = settings.CDN_MAIN_FOLDER
+    path = path.replace(cdn_root_folder, '')
+    cdn_full_path = os.path.join(cdn_root_folder, path)
+
+    body = {
+        "path": cdn_full_path,
+    }
+
+    cdn_path = get_cdn_urls()
+
+    cdn_check_path = cdn_path + 'check-file/'
+    rsp = requests.get(cdn_check_path, json=body)
+    if rsp.status_code != 200:
+        raise Exception('Файл уншихад алдаа гарсан байна. \n' + rsp.text)
+    else:
+        data = rsp.json()
+        return data

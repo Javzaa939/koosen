@@ -1,6 +1,6 @@
 import { useState, useContext, useEffect } from "react";
 import { Modal, ModalHeader, ModalBody, Form, Row, Input, Col, Label, FormFeedback, Button, Alert, Badge } from "reactstrap";
-import { AuthContext } from "@context/AuthContext";
+import AuthContext from "@src/utility/context/AuthContext";
 import { Controller, useForm } from "react-hook-form";
 import classnames from "classnames"
 import Select from 'react-select'

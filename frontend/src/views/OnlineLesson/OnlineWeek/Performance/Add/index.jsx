@@ -1,4 +1,3 @@
-import { AuthContext } from '@context/AuthContext';
 import useLoader from "@src/utility/hooks/useLoader";
 import { convertDefaultValue } from '@src/utility/Utils';
 import { ReactSelectStyles } from '@utils';
@@ -8,7 +7,8 @@ import { X } from "react-feather";
 import { Controller, useForm } from "react-hook-form";
 import { useTranslation } from "react-i18next";
 import Select from 'react-select';
-import {useState}	from "react";
+import { useState }	from "react";
+import AuthContext from "@src/utility/context/AuthContext";
 import {
 	Button,
 	Col,
