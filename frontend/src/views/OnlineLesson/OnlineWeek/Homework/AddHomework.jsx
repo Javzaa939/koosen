@@ -28,7 +28,7 @@ function AddHomework({ toggle='', item, refresh }) {
 		setError,
 	} = useForm({
 		defaultValues: {
-			created_user: user.id,
+			created_user: user?.id,
 		},
 	});
 

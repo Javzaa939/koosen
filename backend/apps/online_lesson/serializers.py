@@ -2,7 +2,8 @@ import os
 
 from rest_framework import serializers
 from student.serializers import StudentSimpleListSerializer
-from lms.models import OnlineLesson,Challenge, LessonMaterial, OnlineWeek , Announcement, Student , HomeWork,  HomeWorkStudent
+from core.serializers import TeachersSerializer
+from lms.models import OnlineLesson,Challenge, LessonMaterial, OnlineWeek , Announcement, HomeWork,  HomeWorkStudent
 from core.models import Teachers
 from django.db.models import Count
 from rest_framework.response import Response
@@ -18,6 +19,7 @@ class OnlineLessonSerializer(serializers.ModelSerializer):
     student_count = serializers.SerializerMethodField()
     total_homeworks_and_exams = serializers.SerializerMethodField()
     student_data = StudentSimpleListSerializer(source='students', many=True, read_only=True)
+    teacher = TeachersSerializer(read_only=True)
 
     class Meta:
         model = OnlineLesson

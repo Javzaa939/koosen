@@ -1829,7 +1829,7 @@ function useApi(isDisplay=false) {
 			}
 		},
 		online_lesson: {
-			get_lessons: () => instance.get("/online_lesson/"),
+			get_lessons: () => instance.get(`/online_lesson/?school=${school_id}`),
 			getOne: (pk) => instance.get(`/online_lesson/${pk}/`),
 
 			deletePlan: (pk) => instance.delete(`/online_lesson/plan/${pk}/`),
@@ -1875,8 +1875,8 @@ function useApi(isDisplay=false) {
 		},
 		homework : {
 			get : (week_id) => instance.get(`online_lesson/online_homework/${week_id}`),
-			getOne : (pk) => instance.get(`online_lesson/online_homework/${pk}`),
-			delete : (pk) => instance.delete(`online_lesson/online_homework/${pk}`),
+			getOne : (pk) => instance.get(`online_lesson/online_homework/${pk}/`),
+			delete : (pk) => instance.delete(`online_lesson/online_homework/${pk}/`),
 			post : (data) => instance.post(`online_lesson/online_homework/`, data, multiPart),
 			put : (data, pk) => instance.put(`online_lesson/online_homework/${pk}/`, data, multiPart)
 		},

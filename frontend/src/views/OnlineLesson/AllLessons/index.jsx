@@ -19,19 +19,21 @@ function AllLessons({ lessons, getLessons }) {
     const [modal, setModal] = useState(false);
   	const toggle = () => setModal(!modal);
 
+    console.log(lessons)
+
     const { showWarning } = useModal();
 
     //API
     const deleteLessonAPI = useApi().online_lesson
     const { fetchData } = useLoader({})
 
-    const totalPages = Math.ceil(lessons.length / rowsPerPage);
+    const totalPages = Math.ceil(lessons?.length / rowsPerPage);
 
     function handlePagination({ selected }) {
         setCurrentPage(selected + 1);
     }
 
-    const displayedLessons = lessons.slice(
+    const displayedLessons = lessons?.slice(
         (currentPage - 1) * rowsPerPage,
         currentPage * rowsPerPage
     );
@@ -96,6 +98,7 @@ function AllLessons({ lessons, getLessons }) {
                                                 <UncontrolledTooltip placement='top' target={`delete${index}`} >{'Устгах'}</UncontrolledTooltip>
                                             </div>
                                         </div>
+                                        <h6 className="mb-1">{'Багш:'}<span className="ms-1">{lesson?.teacher?.full_name}</span></h6>
                                         <h6 className="mb-1">{'Оюутны тоо:'}<span className="ms-1">{lesson?.student_count}</span></h6>
                                         <div>
                                             <div className="flex flex-md-row flex-column">

@@ -1,23 +1,20 @@
 import useApi from "@src/utility/hooks/useApi";
 import { useEffect, useState } from "react";
 import AllLessons from "./AllLessons";
+import useLoader from "@src/utility/hooks/useLoader";
 
 function OnlineLesson() {
 	// States
 	const [lessons, setLessons] = useState([]);
-	const [isLoading, setIsLoading] = useState(true);
+	const { fetchData, isLoading } = useLoader({})
 
 	// API
 	const onlineLessonApi = useApi().online_lesson;
 
 	const getLessons = async () => {
-		try {
-			const response = await onlineLessonApi.get_lessons();
-			setLessons(response);
-			setIsLoading(false);
-		} catch (error) {
-			console.error("Error fetching lessons or lesson names:", error);
-			setIsLoading(false);
+		const { success, data } = await fetchData(onlineLessonApi.get_lessons());
+		if (success) {
+			setLessons(data)
 		}
   	};
 

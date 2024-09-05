@@ -25,7 +25,7 @@ function ReceviedHomeWorks({ toggle, item }) {
         setError
     } = useForm({
         defaultValues: {
-            created_user: user.id,
+            created_user: user?.id,
         },
     });
 

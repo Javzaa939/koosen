@@ -49,8 +49,12 @@ class OnlineLessonListAPIView(
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
 
+        school = request.query_params.get('school')
+        if school:
+            queryset = self.queryset.filter(lesson__school=school)
+
         serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+        return request.send_data(serializer.data)
 
     def post(self, request, *args, **kwargs):
         """ Цахим хичээл бүртгэх """
