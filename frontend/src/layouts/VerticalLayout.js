@@ -355,8 +355,10 @@ const VerticalLayout = (props) =>
 
 
                         /** ----------------------------- Онлайн хичээл цэс ---------------------------- */
+                        /**  Онлайн хичээл */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-online-lesson-read', 'onlinelesson1')
                         /** Хичээлийн материал */
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-study-lessonstandart-read', 'onlinelesson1')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-lesson-material-read', 'onlinelesson2')
 
 
                         let men = {
