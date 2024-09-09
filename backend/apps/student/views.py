@@ -3546,7 +3546,7 @@ class StudentPostDataAPIView(
                         status_id = StudentRegister.objects.create(name=status, code=count+1)
 
                 dep_obj = Salbars.objects.filter(name__icontains=department).first()
-                group_obj = Group.objects.filter(name__iexact=group).first()
+                group_obj = Group.objects.filter(name__iexact=str(group)).first()
 
                 if Student.objects.filter(code=code).exists():
                     Student.objects.filter(code=code).update(group=group_obj)
