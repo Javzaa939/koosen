@@ -2019,7 +2019,7 @@ class ElseltStateApprove(
         " Тэнцсэн элсэгчдийг оюутан болгох нь "
 
         datas = request.data
-        users = datas.get('id')                                 # Элсэгч
+        users = datas.get('users')                                 # Элсэгч
         group = datas.get('group')                              # Анги
         profession = datas.get('profession')                    # Хөтөлбөр
         admission_date = datas.get('admission_date')            # Элсэлтийн тушаалын огноо
@@ -2036,17 +2036,11 @@ class ElseltStateApprove(
 
         with transaction.atomic():
             try:
-                army_user_ids = ArmyUser.objects.filter(state=AdmissionUserProfession.STATE_APPROVE).values_list('user', flat=True)
-
                 admission_user_qs = (
                     AdmissionUserProfession
                     .objects
                     .filter(
-                        Q(profession__profession=profession) &
-                        Q(
-                            Q(user__in=army_user_ids) |
-                            Q(state=AdmissionUserProfession.STATE_APPROVE)
-                        )
+                        user__in=users
                     )
                 )
 
@@ -2072,7 +2066,7 @@ class ElseltStateApprove(
                     register = admission_user.user.register
 
                     # Оюутан болоогүй тохиолдолд оюутан болгоно
-                    if not Student.objects.filter(register_num=register):
+                    if not Student.objects.filter(register_num=register).exists():
                         admission_user.admission_date = admission_date
                         admission_user.admission_number = admission_number
                         admission_user.save()
@@ -4001,3 +3995,20 @@ class AdmissionUserFirstAPIView(
             )
 
         return request.send_info('INF_002')
+
+
+@permission_classes([IsAuthenticated])
+class AdmissionUserProfessionAPIView(
+    generics.GenericAPIView
+):
+    """ Мэргэжлээр нь элсэгчдийг авах """
+
+    queryset = AdmissionUserProfession.objects.all()
+    def get(self, request):
+        profession = request.query_params.get('profession')
+
+        army_user_ids = ArmyUser.objects.filter(state=AdmissionUserProfession.STATE_APPROVE).values_list('user', flat=True)
+        user_ids = self.queryset.filter(profession=profession).filter(Q(Q(state=AdmissionUserProfession.STATE_APPROVE) | Q(user__in=army_user_ids))).values_list('user', flat=True)
+
+        datas = ElseltUser.objects.filter(id__in=user_ids).annotate(gender=(Substr('register', 9, 1))).values('id', 'first_name', 'last_name', 'register', 'gender')
+        return request.send_data(list(datas))

@@ -104,7 +104,7 @@ const VerticalLayout = (props) =>
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-psychological-read', 'elselt3_1')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-justice-read', 'elselt3_3')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-army-read', 'elselt6_1')
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-main-read', 'elselt7')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-approve-read', 'elselt7')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-log-read', 'elselt7_1')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-mail-read', 'elselt8')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-elselt-message-read', 'elselt9')
@@ -355,8 +355,10 @@ const VerticalLayout = (props) =>
 
 
                         /** ----------------------------- Онлайн хичээл цэс ---------------------------- */
+                        /**  Онлайн хичээл */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-online-lesson-read', 'onlinelesson1')
                         /** Хичээлийн материал */
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-study-lessonstandart-read', 'onlinelesson1')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-lesson-material-read', 'onlinelesson2')
 
 
                         let men = {

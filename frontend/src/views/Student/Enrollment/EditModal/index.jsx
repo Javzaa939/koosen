@@ -27,6 +27,8 @@ import useLoader from '@hooks/useLoader';
 import classNames from 'classnames'
 
 import Addmodal from '../../Group/Add'
+import { Eye } from 'react-feather'
+import StudentList from './StudentModal'
 
 function EditModal({ editModal, toggleEditModal, selectedRows, getDatas, profession }) {
 
@@ -39,12 +41,17 @@ function EditModal({ editModal, toggleEditModal, selectedRows, getDatas, profess
     const [professionOption, setProfessionOption] = useState([])
     const [admissionOption, setAdmission] = useState([])
     const [isGroupModal, setIsGroupModal] = useState(false)
+    const [isElsegchModal, setIsElsegchModal] = useState(false)
     const [admissionValue, setAdmissionValue] = useState('')
+    const [professionValue, setProfessionValue] = useState('')
+    const [students, setStudents] = useState([])
+    const [add_students, setAddStudents] = useState([])
 
     const groupApi = useApi().student.group
     const admissionApi = useApi().elselt.approve
     const professionApi = useApi().elselt.profession
     const elseltApi = useApi().elselt
+    const admissionUserApi = useApi().elselt.admissionuserdata
 
     async function getGroupDatas(profession='') {
         if(profession) {
@@ -73,16 +80,31 @@ function EditModal({ editModal, toggleEditModal, selectedRows, getDatas, profess
         }
     }
 
+    // Элсэгчдийн жагсаалт авах
+    async function getAdmissionUsers() {
+        const { success, data } = await fetchData(admissionUserApi.getAll(professionValue))
+
+        if (success) {
+            setStudents(data)
+        }
+    }
+
     useEffect(() => {
         getAdmission()
     }, [])
 
     useEffect(() => {
-        getProfession()
+        if (admissionValue) getProfession()
     }, [admissionValue])
+
+    useEffect(() => {
+        if (professionValue) getAdmissionUsers()
+    }, [professionValue])
+
 
     async function onSubmit(cdatas) {
         cdatas['admission_date'] = formatDate(cdatas?.admission_date)
+        cdatas['users'] = add_students
 
         const { success } = await fetchData(admissionApi.post(cdatas))
         if (success) {
@@ -92,13 +114,32 @@ function EditModal({ editModal, toggleEditModal, selectedRows, getDatas, profess
         }
     }
 
+    const handleElsegchModal = () => {
+        setIsElsegchModal(!isElsegchModal)
+    }
+
+    // Шалгалт өгөх оюутнуудын id авах функц
+    function handleSelectedModal(params) {
+        setAddStudents([...params])
+        if(students) {
+            for (let i in students) {
+                if(!params.includes(students[i].id)) {
+                    students[i].selected = false
+                }
+                else {
+                    students[i].selected = true
+                }
+            }
+        }
+    }
+
     return (
         <Modal
             isOpen={editModal}
             toggle={toggleEditModal}
             centered
         >
-            {/* {isLoading && Loader} */}
+            {isLoading && Loader}
             <ModalHeader toggle={toggleEditModal}>
                 Тэнцсэн элсэгчдийг оюутан болгох
             </ModalHeader>
@@ -149,6 +190,7 @@ function EditModal({ editModal, toggleEditModal, selectedRows, getDatas, profess
                                         onChange={(val) => {
                                             onChange(val?.prof_id || '')
                                             getGroupDatas(val?.prof_id || '')
+                                            setProfessionValue(val?.id)
                                         }}
                                         styles={ReactSelectStyles}
                                         getOptionValue={(option) => option.prof_id}
@@ -161,7 +203,7 @@ function EditModal({ editModal, toggleEditModal, selectedRows, getDatas, profess
                     </Col>
                     <Col md={12}>
                         <Label className="form-label" for="group">
-                            {t('Анги')}
+                            {t('Элсүүлэх анги')}
                         </Label>
                         <Controller
                             control={control}
@@ -198,6 +240,9 @@ function EditModal({ editModal, toggleEditModal, selectedRows, getDatas, profess
                             }}
                         />
                         {errors.group && <FormFeedback className='d-block'>{t(errors.group.message)}</FormFeedback>}
+                    </Col>
+                    <Col md={12}>
+                        <Button size='sm' color='primary' onClick={() => handleElsegchModal()}><Eye size={15}/> Элсэгч сонгох</Button>
                     </Col>
                     <Col md={12}>
                         <Label className='form-label' for='admission_date'>
@@ -278,6 +323,16 @@ function EditModal({ editModal, toggleEditModal, selectedRows, getDatas, profess
                     refreshDatas={() => getGroupDatas(watch('profession'))}
                     profession={watch('profession')}
                 />
+            }
+            {
+                isElsegchModal &&
+                    <StudentList
+                        open={isElsegchModal}
+                        handleModal={handleElsegchModal}
+                        handleSelectedModal={handleSelectedModal}
+                        datas={students}
+                    />
+
             }
         </Modal>
     )

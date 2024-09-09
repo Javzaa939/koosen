@@ -1857,6 +1857,15 @@ class RolesAPIView(
 
         oobj = self.get_object()
         querysets = OrgPosition.objects.filter(id__in=request.data.get('orgpositions'))
+
+        # Тухайн эрх дээр байгаа сонгогдсон албан тушаалаас бусад нь устгах
+        old_perms = OrgPosition.objects.filter(roles__in=[pk]).exclude(id__in=request.data.get('orgpositions'))
+
+        with transaction.atomic():
+            if len(old_perms) > 0:
+                for old_perm in old_perms:
+                    old_perm.roles.clear()
+
         for queryset in querysets:
             queryset.roles.add(oobj)
 

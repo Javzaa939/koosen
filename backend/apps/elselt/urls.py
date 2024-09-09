@@ -20,6 +20,7 @@ urlpatterns = [
 
     # Элсэгчдийн мэдээлэл
     path('admissionuserdata/', AdmissionUserInfoAPIView.as_view()),
+    path('admissionuserdata/profession/', AdmissionUserProfessionAPIView.as_view()),
     path('admissionuserdata/<int:pk>/', AdmissionUserInfoAPIView.as_view()),
     path('admissionuserdata/all/', AdmissionUserAllChange.as_view()),
     path('admissionuserdata/gpa_check/',GpaCheckUserInfoAPIView.as_view()),

@@ -1731,6 +1731,7 @@ function useApi(isDisplay=false) {
 				getOne: (pk) => instance.get(`/elselt/admissionuserdata/${pk}/`),
 				put: (data, id) => instance.put(`/elselt/admissionuserdata/${id}/`, data),
 				putDesc: (data, id) => instance.put(`/elselt/desc/${id}/`, data),
+				getAll: (profession) => instance.get(`/elselt/admissionuserdata/profession/?profession=${profession}`),
 				all: {
 					put: (data) => instance.put(`/elselt/admissionuserdata/all/`, data),
 				},
