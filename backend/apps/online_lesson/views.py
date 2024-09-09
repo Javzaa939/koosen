@@ -105,7 +105,8 @@ class AnnouncementAPIView(
     serializer_class = AnnouncementSerializer
 
     def get(self, request, pk=None):
-
+        if pk:
+            self.queryset = self.queryset.filter(online_lesson=pk)
         data = self.list(request).data
         return request.send_data(data)
 
