@@ -31,21 +31,24 @@ import Addmodal from '../../Group/Add'
 function EditModal({ editModal, toggleEditModal, selectedRows, getDatas, profession }) {
 
     const { t } = useTranslation()
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
+    const { Loader, isLoading, fetchData } = useLoader({})
 
     const { control, handleSubmit, reset, setValue, setError, watch, formState: { errors } } = useForm(validate(validateSchema));
 
     const [groupDatas, setGroupDatas] = useState([])
     const [professionOption, setProfessionOption] = useState([])
+    const [admissionOption, setAdmission] = useState([])
     const [isGroupModal, setIsGroupModal] = useState(false)
+    const [admissionValue, setAdmissionValue] = useState('')
 
     const groupApi = useApi().student.group
     const admissionApi = useApi().elselt.approve
     const professionApi = useApi().elselt.profession
+    const elseltApi = useApi().elselt
 
     async function getGroupDatas(profession='') {
         if(profession) {
-            const { success, data } = await fetchData(groupApi.getList('', '', profession, '', 1))
+            const { success, data } = await fetchData(groupApi.getList('', '', '', '', 1))
             if(success) {
                 setGroupDatas(data)
             }
@@ -54,16 +57,29 @@ function EditModal({ editModal, toggleEditModal, selectedRows, getDatas, profess
 
     // Хөтөлбөрийн жагсаалт авах
     async function getProfession() {
-        const { success, data } = await fetchData(professionApi.getList())
+        const { success, data } = await fetchData(professionApi.getList(admissionValue))
 
         if (success) {
             setProfessionOption(data)
         }
     }
 
+    // Элсэлтийн жагсаалт авах
+    async function getAdmission() {
+        const { success, data } = await fetchData(elseltApi.getAll())
+
+        if (success) {
+            setAdmission(data)
+        }
+    }
+
+    useEffect(() => {
+        getAdmission()
+    }, [])
+
     useEffect(() => {
         getProfession()
-    }, [])
+    }, [admissionValue])
 
     async function onSubmit(cdatas) {
         cdatas['admission_date'] = formatDate(cdatas?.admission_date)
@@ -82,12 +98,34 @@ function EditModal({ editModal, toggleEditModal, selectedRows, getDatas, profess
             toggle={toggleEditModal}
             centered
         >
-            {isLoading && Loader}
+            {/* {isLoading && Loader} */}
             <ModalHeader toggle={toggleEditModal}>
                 Тэнцсэн элсэгчдийг оюутан болгох
             </ModalHeader>
             <ModalBody tag={Form} onSubmit={handleSubmit(onSubmit)}>
                 <Row className='gy-1'>
+                    <Col md={12}>
+                        <Label className="form-label" for="profession">
+                            {t('Элсэлт')}
+                        </Label>
+                        <Select
+                            name="profession"
+                            id="profession"
+                            classNamePrefix='select'
+                            isClearable
+                            className={classNames('react-select')}
+                            placeholder={t('-- Сонгоно уу --')}
+                            options={admissionOption || []}
+                            value={admissionOption.find((c) => c.id === admissionValue)}
+                            noOptionsMessage={() => t('Хоосон байна.')}
+                            onChange={(val) => {
+                                setAdmissionValue(val?.id || '')
+                            }}
+                            styles={ReactSelectStyles}
+                            getOptionValue={(option) => option.id}
+                            getOptionLabel={(option) => option.name}
+                        />
+                    </Col>
                     <Col md={12}>
                         <Label className="form-label" for="profession">
                             {t('Хөтөлбөр')}
