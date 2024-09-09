@@ -2066,7 +2066,7 @@ class ElseltStateApprove(
                     register = admission_user.user.register
 
                     # Оюутан болоогүй тохиолдолд оюутан болгоно
-                    if not Student.objects.filter(register_num=register):
+                    if not Student.objects.filter(register_num=register).exists():
                         admission_user.admission_date = admission_date
                         admission_user.admission_number = admission_number
                         admission_user.save()
