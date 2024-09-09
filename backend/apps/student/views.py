@@ -3456,7 +3456,7 @@ class StudentImportAPIView(
 
                 student_qs = Student.objects.filter(code=code).first()
 
-                if not (code or group_obj or pay_type_id or register_num or last_name or first_name or phone or status_id) or student_qs:
+                if not (code or group_obj or pay_type_id or register_num or last_name or first_name or phone or status_id):
                     error_datas.append(obj)
                 else:
                     correct_datas.append(obj)
@@ -3549,6 +3549,7 @@ class StudentPostDataAPIView(
                 group_obj = Group.objects.filter(name__iexact=group).first()
 
                 if Student.objects.filter(code=code).exists():
+                    Student.objects.filter(code=code).update(group=group_obj)
                     continue
 
                 qs = Student(
