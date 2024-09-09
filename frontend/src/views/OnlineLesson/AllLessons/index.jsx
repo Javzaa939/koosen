@@ -19,7 +19,7 @@ function AllLessons({ lessons, getLessons }) {
     const [modal, setModal] = useState(false);
   	const toggle = () => setModal(!modal);
 
-    console.log(lessons)
+    // console.log(lessons)
 
     const { showWarning } = useModal();
 

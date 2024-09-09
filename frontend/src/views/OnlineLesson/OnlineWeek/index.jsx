@@ -31,7 +31,7 @@ const menuOptions = [
 
 function OnlineLessonPage() {
   	// States
-  	const [selectedContent, setSelectedContent] = useState(1);
+  	const [selectedContent, setSelectedContent] = useState(3);
   	const [lesson, setLesson] = useState(null);
 
 	const { fetchData } = useLoader({})

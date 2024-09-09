@@ -63,7 +63,11 @@ class OnlineWeekSerializer(serializers.ModelSerializer):
 
         if path:
             full_path = settings.ASSIGNMENT + str(path)
-            cdn_data = get_file_from_cdn(full_path)
+            cdn_data = {}
+            try:
+                cdn_data = get_file_from_cdn(full_path)
+            except Exception as e:
+                print(e)
 
             if cdn_data.get('success'):
                 full_path = settings.CDN_FILE_URL + full_path
