@@ -103,6 +103,7 @@ class LessonMaterialSerializer(serializers.ModelSerializer):
         data = []
         request = self.context.get('request')
         material_type = request.query_params.get('type')
+        cdn_connection_alive = True
 
         if material_type:
             queryset = LessonMaterial.objects.filter(user=obj.user, material_type=material_type).values('id', 'path', 'created_at')
@@ -110,59 +111,17 @@ class LessonMaterialSerializer(serializers.ModelSerializer):
             for item in queryset:
                 file_path = item['path']
                 full_path = settings.ASSIGNMENT + str(file_path)
-                cdn_data = get_file_from_cdn(full_path)
+                cdn_data = {}
+
+                if cdn_connection_alive:
+                    try:
+                        cdn_data = get_file_from_cdn(full_path)
+                    except Exception as e:
+                        print(e)
+                        cdn_connection_alive = False
 
                 if cdn_data.get('success'):
                     file_path = settings.CDN_FILE_URL + full_path
-                try:
-
-                    # File-ийн хэмжээ авах requests
-                    response = requests.head(file_path)
-                    if response.status_code == 200:
-                        file_size = response.headers.get('content-length')
-
-                        item_data = {
-                            'id': item['id'],
-                            'path': file_path,
-                            'created_at': item['created_at'],
-                            'size': file_size
-                        }
-                        files_info.append(item_data)
-                    else:
-
-                        files_info.append({
-                            'id': item['id'],
-                            'path': file_path,
-                            'created_at': item['created_at'],
-                            'size': None
-                        })
-                except requests.exceptions.RequestException as e:
-                    # Handle request exception
-                    files_info.append({
-                        'id': item['id'],
-                        'path': file_path,
-                        'created_at': item['created_at'],
-                        'size': None
-                    })
-            return {
-                'material_type': material_type,
-                'count': len(files_info),
-                'files': files_info
-            }
-        else:
-            for material_type in range(1, 5):
-                queryset = LessonMaterial.objects.filter(user=obj.user, material_type=material_type).values('id', 'path', 'created_at')
-
-                files_info = []
-                for item in queryset:
-                    file_path = item['path']
-                    full_path = settings.ASSIGNMENT + str(file_path)
-                    cdn_data = get_file_from_cdn(full_path)
-
-                    if cdn_data.get('success'):
-                        success_data = cdn_data.get('data')
-
-                        file_path = success_data.get('full_path')
 
                     try:
 
@@ -188,6 +147,78 @@ class LessonMaterialSerializer(serializers.ModelSerializer):
                             })
                     except requests.exceptions.RequestException as e:
                         # Handle request exception
+                        files_info.append({
+                            'id': item['id'],
+                            'path': file_path,
+                            'created_at': item['created_at'],
+                            'size': None
+                        })
+                else:
+                    files_info.append({
+                        'id': item['id'],
+                        'path': file_path,
+                        'created_at': item['created_at'],
+                        'size': None
+                    })
+
+            return {
+                'material_type': material_type,
+                'count': len(files_info),
+                'files': files_info
+            }
+        else:
+            for material_type in range(1, 5):
+                queryset = LessonMaterial.objects.filter(user=obj.user, material_type=material_type).values('id', 'path', 'created_at')
+
+                files_info = []
+                for item in queryset:
+                    file_path = item['path']
+                    full_path = settings.ASSIGNMENT + str(file_path)
+                    cdn_data = {}
+
+                    if cdn_connection_alive:
+                        try:
+                            cdn_data = get_file_from_cdn(full_path)
+                        except Exception as e:
+                            print(e)
+                            cdn_connection_alive = False
+
+                    if cdn_data.get('success'):
+                        success_data = cdn_data.get('data')
+
+                        file_path = success_data.get('full_path')
+
+                        try:
+
+                            # File-ийн хэмжээ авах requests
+                            response = requests.head(file_path)
+                            if response.status_code == 200:
+                                file_size = response.headers.get('content-length')
+
+                                item_data = {
+                                    'id': item['id'],
+                                    'path': file_path,
+                                    'created_at': item['created_at'],
+                                    'size': file_size
+                                }
+                                files_info.append(item_data)
+                            else:
+
+                                files_info.append({
+                                    'id': item['id'],
+                                    'path': file_path,
+                                    'created_at': item['created_at'],
+                                    'size': None
+                                })
+                        except requests.exceptions.RequestException as e:
+                            # Handle request exception
+                            files_info.append({
+                                'id': item['id'],
+                                'path': file_path,
+                                'created_at': item['created_at'],
+                                'size': None
+                            })
+                    else:
                         files_info.append({
                             'id': item['id'],
                             'path': file_path,

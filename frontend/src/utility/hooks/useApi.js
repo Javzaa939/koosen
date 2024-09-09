@@ -1859,7 +1859,7 @@ function useApi(isDisplay=false) {
 		},
 
 		material : {
-			get: (type="")=> instance.get(`/online_lesson/material/?type=${type}`),
+			get: ({type = "", full_name = "", salbar = "", school_name = ""} = {})=> instance.get(`/online_lesson/material/?type=${type}&full_name=${full_name}&salbar=${salbar}&school_name=${school_name}`),
 			getOne: (pk)=> instance.get(`/online_lesson/material/${pk}/`),
 			post: (cdata)=> instance.post(`/online_lesson/material/`,cdata),
 			delete: (pk)=> instance.delete(`/online_lesson/material/${pk}/`)
