@@ -1285,4 +1285,9 @@ permissions = [
         'name' : 'lms-subschools-password-update',
         'description' : 'Багшийн нууц үг сэргээх '
     },
+    {
+        'name' : 'lms-elselt-approve-read',
+        'description' : 'Тэнцсэн элсэгчид цэс унших эрх'
+    },
+
 ]
