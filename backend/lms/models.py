@@ -4480,10 +4480,19 @@ class OnlineLesson(models.Model):
 
 class OnlineWeekStudent(models.Model):
     """ Оюутны лекцийн материал хадгалах хэсэг """
+    SEND = 1
+    CHECKED = 2
 
+    ASSIGNMENT_TYPE = (
+        (SEND, 'Илгээсэн'),
+        (CHECKED, 'Дүгнэгдсэн'),
+    )
     week = models.ForeignKey(OnlineWeek, verbose_name='7 хоног', on_delete=models.CASCADE)
     student = models.ForeignKey(Student, verbose_name='Оюутан', on_delete=models.CASCADE)
     lekts_file = models.FileField(upload_to='student_lekts', verbose_name='Лекцийн материал хөтөлсөн зураг', null=True)
+    status = models.IntegerField(choices=ASSIGNMENT_TYPE, db_index=True, default=SEND, verbose_name="Лекцийн материал төрөл", null=True)
+    created_at = models.DateTimeField(auto_now=True, verbose_name='Үүсгэсэн огноо')
+
 
 
 class Announcement(models.Model):
