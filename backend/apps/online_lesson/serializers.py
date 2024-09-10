@@ -246,9 +246,16 @@ class LessonMaterialPostSerializer(serializers.ModelSerializer):
 
 
 class AnnouncementSerializer(serializers.ModelSerializer):
+    full_name = serializers.SerializerMethodField()
+
     class Meta:
         model = Announcement
         fields = '__all__'
+
+    def get_full_name(self, obj):
+        if obj.created_user.full_name:
+            return obj.created_user.full_name
+        return None
 
 
 class HomeWorkSerializer(serializers.ModelSerializer):
