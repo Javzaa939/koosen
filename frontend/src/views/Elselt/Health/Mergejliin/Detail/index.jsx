@@ -113,7 +113,7 @@ function Detail({ detail, detailHandler, detailData, getDatas }) {
                                 />
                                 {errors.state && <FormFeedback className='d-block'>{errors.state.message}</FormFeedback>}
                                 {
-                                    datas && stateId ?
+                                    stateId ?
                                     <div className='m-50 text-center'>
                                         <Button type='submit' color='primary' disabled={isLoading}>
                                             Хадгалах

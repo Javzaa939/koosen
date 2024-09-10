@@ -4410,6 +4410,15 @@ class HomeWorkStudent(models.Model):
     created_at = models.DateTimeField(auto_now=True, verbose_name='Үүсгэсэн огноо')
 
 
+class WeekMaterials(models.Model):
+    """ Тухайн 7 хоногт оруулах файлууд """
+
+    is_leks = models.BooleanField(default=True, verbose_name='Лекц эсэх')
+    description = models.CharField(verbose_name='Тайлбар', max_length=255)
+    material = models.ForeignKey(LessonMaterial, on_delete=models.CASCADE, verbose_name='Хичээлийн материал')
+    created_at = models.DateTimeField(auto_now=True)
+
+
 class OnlineWeek(models.Model):
     """ Цахим хичээлийн 7 хоног """
 
@@ -4434,6 +4443,7 @@ class OnlineWeek(models.Model):
 
     description = models.CharField(verbose_name='Тайлбар', max_length=1000, null=True)
     lekts_file = models.FileField(verbose_name='Лекцийн материал', null=True)
+    materials = models.ManyToManyField(WeekMaterials, verbose_name='Тухайн 7 хоногийн материалууд')
 
     work_type = models.IntegerField(choices=HomeWorkStudent.ASSIGNMENT_TYPE, db_index=True, default=HomeWorkStudent.CHECKED, verbose_name="Даалгаврын тооцох төрөл", null=True)
 
@@ -4470,10 +4480,19 @@ class OnlineLesson(models.Model):
 
 class OnlineWeekStudent(models.Model):
     """ Оюутны лекцийн материал хадгалах хэсэг """
+    SEND = 1
+    CHECKED = 2
 
+    ASSIGNMENT_TYPE = (
+        (SEND, 'Илгээсэн'),
+        (CHECKED, 'Дүгнэгдсэн'),
+    )
     week = models.ForeignKey(OnlineWeek, verbose_name='7 хоног', on_delete=models.CASCADE)
     student = models.ForeignKey(Student, verbose_name='Оюутан', on_delete=models.CASCADE)
     lekts_file = models.FileField(upload_to='student_lekts', verbose_name='Лекцийн материал хөтөлсөн зураг', null=True)
+    status = models.IntegerField(choices=ASSIGNMENT_TYPE, db_index=True, default=SEND, verbose_name="Лекцийн материал төрөл", null=True)
+    created_at = models.DateTimeField(auto_now=True, verbose_name='Үүсгэсэн огноо')
+
 
 
 class Announcement(models.Model):

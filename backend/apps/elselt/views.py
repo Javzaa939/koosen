@@ -1723,6 +1723,10 @@ class ElseltHealthPhysical(
 
         data['user'] = user
 
+        # Байхгүй бол устгах
+        if 'order_no' in data:
+            del data['order_no']
+
         try:
             with transaction.atomic():
                 now = dt.datetime.now()
