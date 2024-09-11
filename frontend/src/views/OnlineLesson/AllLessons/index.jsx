@@ -1,5 +1,5 @@
 // import { PieChart } from "@mui/x-charts/PieChart";
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { GoDotFill } from "react-icons/go";
 import ReactPaginate from "react-paginate";
 import { Link } from "react-router-dom";
@@ -12,9 +12,11 @@ import useLoader from '@hooks/useLoader'
 import AddLessonForm from "./AddLessonForm";
 import { ChevronDown, ChevronsRight, Grid, List, X } from 'react-feather'
 import DataTable from "react-data-table-component";
-import { getPagination } from "@src/utility/Utils";
+import { getPagination, ReactSelectStyles } from "@src/utility/Utils";
 import { getColumns } from './helpers'
 import { t } from "i18next";
+import Select from 'react-select'
+import classnames from 'classnames'
 
 function AllLessons({ lessons, getLessons }) {
     const [currentPage, setCurrentPage] = useState(1);
@@ -29,7 +31,8 @@ function AllLessons({ lessons, getLessons }) {
 
     //API
     const deleteLessonAPI = useApi().online_lesson
-    const { fetchData } = useLoader({})
+
+    const { isLoading, fetchData } = useLoader({isFullScreen: false})
 
     const totalPages = Math.ceil(lessons?.length / rowsPerPage);
 
@@ -49,43 +52,132 @@ function AllLessons({ lessons, getLessons }) {
         }
     }
 
+    // grid view switcher
     const [view, setView] = useState('grid');
+
+    // text input filter
 	const [searchValue, setSearchValue] = useState("");
 	const [filteredData, setFilteredData] = useState([]);
 
-	// Хайлт хийх үед ажиллах хэсэг
+    // departments filter
+    const [dep_option, setDepOption] = useState([])
+    const departmentApi = useApi().hrms.department
+    const teacherApi = useApi().hrms.teacher
+    const [dep_id, setDepId] = useState('')
+    const [dep_name, setDepName] = useState('')
+
+    // teachers filter
+    const [ teacherOption, setTeacherOption ] = useState([])
+    const [ teacherId, setTeacherId ] = useState('')
+
+	// filters handler
 	const handleFilter = (e) => {
 		var updatedData = [];
-		const value = e.target.value.trimStart();
+        let value = [];
 
-		setSearchValue(value);
+        if (e) {
+		    value = e.target.value.trimStart();
+		    setSearchValue(value);
+        }
 
-		if (value.length) {
-			updatedData = lessons.filter((item) => {
-                console.log(item)
-				const startsWith =
-					item.teacher.full_name.toString().toLowerCase().startsWith(value.toString().toLowerCase()) ||
-					item.lesson_name.toString().toLowerCase().startsWith(value.toString().toLowerCase())
+        updatedData = lessons.filter((item) => {
+            let textFilter = null;
+            if (e || searchValue) {
+                if (!e) value = searchValue
+                if (value !== '') {
+                    textFilter = item.student_data.some((student_data_item)=>{
+                        const startsWith =
+                            student_data_item.first_name.toString().toLowerCase().startsWith(value.toString().toLowerCase()) ||
+                            student_data_item.code.toString().toLowerCase().startsWith(value.toString().toLowerCase())
 
-				const includes =
-					item.teacher.full_name.toString().toLowerCase().includes(value.toString().toLowerCase()) ||
-					item.lesson_name.toString().toLowerCase().includes(value.toString().toLowerCase())
+                        const includes =
+                            student_data_item.first_name.toString().toLowerCase().includes(value.toString().toLowerCase()) ||
+                            student_data_item.code.toString().toLowerCase().includes(value.toString().toLowerCase())
 
-				if (startsWith) {
-					return startsWith;
-				}
-				else if (!startsWith && includes) {
-					return includes;
-				}
-				else {
-					return null;
-				}
-			});
+                        if (startsWith) {
+                            return startsWith;
+                        }
+                        else if (!startsWith && includes) {
+                            return includes;
+                        }
+                        else {
+                            return null;
+                        }
+                    })
+                }
+            }
 
-			setFilteredData(updatedData);
-			setSearchValue(value);
-		}
+            let depFilter = null;
+            if (dep_id) depFilter = item.teacher.salbar === dep_id;
+
+            let teachersFilter = null;
+            if (teacherId) {
+                teachersFilter = item.teacher.id === teacherId;
+            }
+
+            return (textFilter === null ? true : textFilter)
+                && (depFilter === null ? true : depFilter)
+                && (teachersFilter === null ? true : teachersFilter);
+        });
+        setFilteredData(updatedData);
+
+        if (e)
+            setSearchValue(value);
 	};
+
+    function chooseDep(){
+        if (!dep_id) { return(<div>Тэнхим сонгоно уу.</div>) }
+        else { return(<div>Хоосон байна</div>)}
+    }
+
+    /**Тэнхимын жагсаалт */
+    async function getDepartment() {
+        const { success, data } = await fetchData(departmentApi.get())
+        if(success) {
+            setDepOption(data)
+        }
+    }
+
+    /**Багшийн жагсаалт */
+    async function getTeachers(dep_id)
+    {
+        const { success, data } = await fetchData(teacherApi.get(dep_id))
+        if(success)
+        {
+            setTeacherOption(data)
+        }
+    }
+
+    // department filter initialization
+    useEffect(() => {
+        getDepartment()
+    },[])
+
+    // departments filter updates teachers filter
+    const skipFirstRender = useRef(false)
+    useEffect(() => {
+        if (dep_id) {
+            getTeachers(dep_id)
+        } else {
+            getTeachers(0)
+        }
+
+        if (skipFirstRender.current) {
+            handleFilter()
+        } else {
+            skipFirstRender.current = true
+        }
+    },[dep_id])
+
+    // teachers filter
+    const skipFirstRenderTeachersFilter = useRef(false)
+    useEffect(() => {
+        if (skipFirstRenderTeachersFilter.current) {
+            handleFilter()
+        } else {
+            skipFirstRenderTeachersFilter.current = true
+        }
+    },[teacherId])
 
     return (
         <Fragment>
@@ -227,7 +319,54 @@ function AllLessons({ lessons, getLessons }) {
                 :
                     <>
                         <Row>
-                            <Col className="datatable-search-text d-flex justify-content-start mt-1" md={6} sm={6}>
+                            <Col md={3} className='mb-1'>
+                                <Label className="form-label" for="department">
+                                    {t('Тэнхим')}
+                                </Label>
+                                <Select
+                                    name="department"
+                                    id="department"
+                                    classNamePrefix='select'
+                                    isClearable
+                                    className={classnames('react-select')}
+                                    isLoading={isLoading}
+                                    placeholder={t('-- Сонгоно уу --')}
+                                    options={dep_option || []}
+                                    value={dep_option.find((c) => c.id === dep_id)}
+                                    noOptionsMessage={() => t('Хоосон байна.')}
+                                    onChange={(val) => {
+                                        setDepId(val?.id || '')
+                                        setDepName(val?.name || '')
+                                    }}
+                                    styles={ReactSelectStyles}
+                                    getOptionValue={(option) => option.id}
+                                    getOptionLabel={(option) => option.name}
+                                />
+                            </Col>
+                            <Col md={3} className='mb-1'>
+                                <Label className="form-label" for="teacher">
+                                    {t('Заах багш')}
+                                </Label>
+                                <Select
+                                    name="teacher"
+                                    id="teacher"
+                                    classNamePrefix='select'
+                                    isClearable
+                                    className={classnames('react-select')}
+                                    isLoading={isLoading}
+                                    placeholder={t('-- Сонгоно уу --')}
+                                    options={teacherOption || []}
+                                    value={teacherOption.find((c) => c.id === teacherId)}
+                                    noOptionsMessage={chooseDep}
+                                    onChange={(val) => {
+                                        setTeacherId(val?.id || '')
+                                    }}
+                                    styles={ReactSelectStyles}
+                                    getOptionValue={(option) => option.id}
+                                    getOptionLabel={(option) => `${option?.last_name[0]}.${option?.first_name}`}
+                                />
+                            </Col>
+                            <Col className="datatable-search-text d-flex justify-content-end mt-1" md={6} sm={6}>
                                 <Label className="me-1 search-filter-title pt-50" for="search-input">
                                     {t('Хайлт')}
                                 </Label>
@@ -257,12 +396,12 @@ function AllLessons({ lessons, getLessons }) {
                                             <h5>{t('Өгөгдөл байхгүй байна')}</h5>
                                         </div>
                                     )}
-                                    columns={getColumns(currentPage, rowsPerPage, searchValue.length ? filteredData : lessons)}
+                                    columns={getColumns(currentPage, rowsPerPage, dep_id || teacherId || searchValue ? filteredData : lessons)}
                                     sortIcon={<ChevronDown size={10} />}
                                     paginationPerPage={rowsPerPage}
                                     paginationDefaultPage={currentPage}
-                                    data={searchValue.length ? filteredData : displayedLessons}
-                                    paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, lessons?.length, searchValue, filteredData)}
+                                    data={dep_id || teacherId || searchValue ? filteredData : lessons}
+                                    paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, dep_id || teacherId || searchValue ? filteredData.length : lessons?.length, searchValue ? searchValue : dep_id || teacherId || searchValue ? [true] : false, filteredData)}
                                     fixedHeader
                                     fixedHeaderScrollHeight='62vh'
                                 />
