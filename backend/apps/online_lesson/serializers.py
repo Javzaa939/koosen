@@ -16,6 +16,7 @@ from main.utils.function.utils import get_file_from_cdn
 
 class OnlineLessonSerializer(serializers.ModelSerializer):
     lesson_name = serializers.SerializerMethodField()
+    lesson_code = serializers.SerializerMethodField()
     student_count = serializers.SerializerMethodField()
     total_homeworks_and_exams = serializers.SerializerMethodField()
     student_data = StudentSimpleListSerializer(source='students', many=True, read_only=True)
@@ -27,6 +28,9 @@ class OnlineLessonSerializer(serializers.ModelSerializer):
 
     def get_lesson_name(self, obj):
         return obj.lesson.name
+
+    def get_lesson_code(self, obj):
+        return obj.lesson.code
 
     def get_student_count(self, obj):
         return obj.students.count()

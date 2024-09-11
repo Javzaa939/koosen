@@ -25,8 +25,6 @@ function AllLessons({ lessons, getLessons }) {
     const [modal, setModal] = useState(false);
   	const toggle = () => setModal(!modal);
 
-    // console.log(lessons)
-
     const { showWarning } = useModal();
 
     //API
@@ -40,10 +38,24 @@ function AllLessons({ lessons, getLessons }) {
         setCurrentPage(selected + 1);
     }
 
-    const displayedLessons = lessons?.slice(
-        (currentPage - 1) * rowsPerPage,
-        currentPage * rowsPerPage
-    );
+	const [filteredData, setFilteredData] = useState([]);
+
+    // filters current states
+	const [searchValue, setSearchValue] = useState("");
+    const [dep_id, setDepId] = useState('')
+    const [teacherId, setTeacherId] = useState('')
+
+    const displayedLessons = dep_id || teacherId || searchValue
+        ?
+            filteredData?.slice(
+                (currentPage - 1) * rowsPerPage,
+                currentPage * rowsPerPage
+            )
+        :
+            lessons?.slice(
+                (currentPage - 1) * rowsPerPage,
+                currentPage * rowsPerPage
+            );
 
     async function deleteLesson(id){
         const {success, error} = await fetchData(deleteLessonAPI.delete_lesson(id))
@@ -55,20 +67,13 @@ function AllLessons({ lessons, getLessons }) {
     // grid view switcher
     const [view, setView] = useState('grid');
 
-    // text input filter
-	const [searchValue, setSearchValue] = useState("");
-	const [filteredData, setFilteredData] = useState([]);
-
     // departments filter
-    const [dep_option, setDepOption] = useState([])
     const departmentApi = useApi().hrms.department
-    const teacherApi = useApi().hrms.teacher
-    const [dep_id, setDepId] = useState('')
-    const [dep_name, setDepName] = useState('')
+    const [dep_option, setDepOption] = useState([])
 
     // teachers filter
+    const teacherApi = useApi().hrms.teacher
     const [ teacherOption, setTeacherOption ] = useState([])
-    const [ teacherId, setTeacherId ] = useState('')
 
 	// filters handler
 	const handleFilter = (e) => {
@@ -85,25 +90,23 @@ function AllLessons({ lessons, getLessons }) {
             if (e || searchValue) {
                 if (!e) value = searchValue
                 if (value !== '') {
-                    textFilter = item.student_data.some((student_data_item)=>{
-                        const startsWith =
-                            student_data_item.first_name.toString().toLowerCase().startsWith(value.toString().toLowerCase()) ||
-                            student_data_item.code.toString().toLowerCase().startsWith(value.toString().toLowerCase())
+                    const startsWith =
+                        item.lesson_name.toString().toLowerCase().startsWith(value.toString().toLowerCase()) ||
+                        item.lesson_code.toString().toLowerCase().startsWith(value.toString().toLowerCase())
 
-                        const includes =
-                            student_data_item.first_name.toString().toLowerCase().includes(value.toString().toLowerCase()) ||
-                            student_data_item.code.toString().toLowerCase().includes(value.toString().toLowerCase())
+                    const includes =
+                        item.lesson_name.toString().toLowerCase().includes(value.toString().toLowerCase()) ||
+                        item.lesson_code.toString().toLowerCase().includes(value.toString().toLowerCase())
 
-                        if (startsWith) {
-                            return startsWith;
-                        }
-                        else if (!startsWith && includes) {
-                            return includes;
-                        }
-                        else {
-                            return null;
-                        }
-                    })
+                    if (startsWith) {
+                        textFilter = startsWith;
+                    }
+                    else if (!startsWith && includes) {
+                        textFilter = includes;
+                    }
+                    else {
+                        textFilter = false;
+                    }
                 }
             }
 
@@ -114,10 +117,11 @@ function AllLessons({ lessons, getLessons }) {
             if (teacherId) {
                 teachersFilter = item.teacher.id === teacherId;
             }
+            const result = (textFilter === null ? true : textFilter)
+            && (depFilter === null ? true : depFilter)
+            && (teachersFilter === null ? true : teachersFilter);
 
-            return (textFilter === null ? true : textFilter)
-                && (depFilter === null ? true : depFilter)
-                && (teachersFilter === null ? true : teachersFilter);
+            return result
         });
         setFilteredData(updatedData);
 
@@ -215,6 +219,68 @@ function AllLessons({ lessons, getLessons }) {
                     </Row>
                 </CardHeader>
                 <CardBody className="">
+                    <Row>
+                        <Col md={3} className='mb-1'>
+                            <Label className="form-label" for="department">
+                                {t('Тэнхим')}
+                            </Label>
+                            <Select
+                                name="department"
+                                id="department"
+                                classNamePrefix='select'
+                                isClearable
+                                className={classnames('react-select')}
+                                isLoading={isLoading}
+                                placeholder={t('-- Сонгоно уу --')}
+                                options={dep_option || []}
+                                value={dep_option.find((c) => c.id === dep_id)}
+                                noOptionsMessage={() => t('Хоосон байна.')}
+                                onChange={(val) => {
+                                    setDepId(val?.id || '')
+                                }}
+                                styles={ReactSelectStyles}
+                                getOptionValue={(option) => option.id}
+                                getOptionLabel={(option) => option.name}
+                            />
+                        </Col>
+                        <Col md={3} className='mb-1'>
+                            <Label className="form-label" for="teacher">
+                                {t('Заах багш')}
+                            </Label>
+                            <Select
+                                name="teacher"
+                                id="teacher"
+                                classNamePrefix='select'
+                                isClearable
+                                className={classnames('react-select')}
+                                isLoading={isLoading}
+                                placeholder={t('-- Сонгоно уу --')}
+                                options={teacherOption || []}
+                                value={teacherOption.find((c) => c.id === teacherId)}
+                                noOptionsMessage={chooseDep}
+                                onChange={(val) => {
+                                    setTeacherId(val?.id || '')
+                                }}
+                                styles={ReactSelectStyles}
+                                getOptionValue={(option) => option.id}
+                                getOptionLabel={(option) => `${option?.last_name[0]}.${option?.first_name}`}
+                            />
+                        </Col>
+                        <Col className="datatable-search-text d-flex justify-content-end mt-1" md={6} sm={6}>
+                            <Label className="me-1 search-filter-title pt-50" for="search-input">
+                                {t('Хайлт')}
+                            </Label>
+                            <Input
+                                className="dataTable-filter mb-50"
+                                type="text"
+                                bsSize="sm"
+                                id="search-input"
+                                value={searchValue}
+                                onChange={handleFilter}
+                                placeholder={t('Хайх үг....')}
+                            />
+                        </Col>
+                    </Row>
                 {view === 'grid' ?
                     <>
                         <Row>
@@ -317,97 +383,32 @@ function AllLessons({ lessons, getLessons }) {
                         </Row>
                     </>
                 :
-                    <>
-                        <Row>
-                            <Col md={3} className='mb-1'>
-                                <Label className="form-label" for="department">
-                                    {t('Тэнхим')}
-                                </Label>
-                                <Select
-                                    name="department"
-                                    id="department"
-                                    classNamePrefix='select'
-                                    isClearable
-                                    className={classnames('react-select')}
-                                    isLoading={isLoading}
-                                    placeholder={t('-- Сонгоно уу --')}
-                                    options={dep_option || []}
-                                    value={dep_option.find((c) => c.id === dep_id)}
-                                    noOptionsMessage={() => t('Хоосон байна.')}
-                                    onChange={(val) => {
-                                        setDepId(val?.id || '')
-                                        setDepName(val?.name || '')
-                                    }}
-                                    styles={ReactSelectStyles}
-                                    getOptionValue={(option) => option.id}
-                                    getOptionLabel={(option) => option.name}
-                                />
-                            </Col>
-                            <Col md={3} className='mb-1'>
-                                <Label className="form-label" for="teacher">
-                                    {t('Заах багш')}
-                                </Label>
-                                <Select
-                                    name="teacher"
-                                    id="teacher"
-                                    classNamePrefix='select'
-                                    isClearable
-                                    className={classnames('react-select')}
-                                    isLoading={isLoading}
-                                    placeholder={t('-- Сонгоно уу --')}
-                                    options={teacherOption || []}
-                                    value={teacherOption.find((c) => c.id === teacherId)}
-                                    noOptionsMessage={chooseDep}
-                                    onChange={(val) => {
-                                        setTeacherId(val?.id || '')
-                                    }}
-                                    styles={ReactSelectStyles}
-                                    getOptionValue={(option) => option.id}
-                                    getOptionLabel={(option) => `${option?.last_name[0]}.${option?.first_name}`}
-                                />
-                            </Col>
-                            <Col className="datatable-search-text d-flex justify-content-end mt-1" md={6} sm={6}>
-                                <Label className="me-1 search-filter-title pt-50" for="search-input">
-                                    {t('Хайлт')}
-                                </Label>
-                                <Input
-                                    className="dataTable-filter mb-50"
-                                    type="text"
-                                    bsSize="sm"
-                                    id="search-input"
-                                    value={searchValue}
-                                    onChange={handleFilter}
-                                    placeholder={t('Хайх үг....')}
-                                />
-                            </Col>
-                        </Row>
-                        <Row>
-                            <Col>
-                                <DataTable
-                                    pagination
-                                    className='react-dataTable'
-                                    progressComponent={(
-                                        <div className='my-2'>
-                                            <h5>{t('Түр хүлээнэ үү')}...</h5>
-                                        </div>
-                                    )}
-                                    noDataComponent={(
-                                        <div className="my-2">
-                                            <h5>{t('Өгөгдөл байхгүй байна')}</h5>
-                                        </div>
-                                    )}
-                                    columns={getColumns(currentPage, rowsPerPage, dep_id || teacherId || searchValue ? filteredData : lessons)}
-                                    sortIcon={<ChevronDown size={10} />}
-                                    paginationPerPage={rowsPerPage}
-                                    paginationDefaultPage={currentPage}
-                                    data={dep_id || teacherId || searchValue ? filteredData : lessons}
-                                    paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, dep_id || teacherId || searchValue ? filteredData.length : lessons?.length, searchValue ? searchValue : dep_id || teacherId || searchValue ? [true] : false, filteredData)}
-                                    fixedHeader
-                                    fixedHeaderScrollHeight='62vh'
-                                />
-                            </Col>
-                        </Row>
-                    </>
+                    <Row>
+                        <Col>
+                            <DataTable
+                                pagination
+                                className='react-dataTable'
+                                progressComponent={(
+                                    <div className='my-2'>
+                                        <h5>{t('Түр хүлээнэ үү')}...</h5>
+                                    </div>
+                                )}
+                                noDataComponent={(
+                                    <div className="my-2">
+                                        <h5>{t('Өгөгдөл байхгүй байна')}</h5>
+                                    </div>
+                                )}
+                                columns={getColumns(currentPage, rowsPerPage, dep_id || teacherId || searchValue ? filteredData : lessons)}
+                                sortIcon={<ChevronDown size={10} />}
+                                paginationPerPage={rowsPerPage}
+                                paginationDefaultPage={currentPage}
+                                data={dep_id || teacherId || searchValue ? filteredData : lessons}
+                                paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, dep_id || teacherId || searchValue ? filteredData.length : lessons?.length, searchValue ? searchValue : dep_id || teacherId || searchValue ? [true] : false, filteredData)}
+                                fixedHeader
+                                fixedHeaderScrollHeight='62vh'
+                            />
+                        </Col>
+                    </Row>
                 }
                 </CardBody>
             </Card>

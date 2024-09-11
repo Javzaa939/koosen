@@ -49,9 +49,16 @@ class OnlineLessonListAPIView(
     def get(self, request, *args, **kwargs):
         queryset = self.get_queryset()
 
-        school = request.query_params.get('school')
-        if school:
-            queryset = self.queryset.filter(lesson__school=school)
+        user = request.user
+        user_obj = User.objects.filter(email=user).first()
+
+        school_id = user_obj.info.sub_org.id if user_obj.info.sub_org else None
+
+        if school_id == None:
+            school_id = user_obj.employee.sub_org.id if user_obj.employee.sub_org else None
+
+        if school_id:
+            queryset = self.queryset.filter(lesson__school=school_id)
 
         serializer = self.get_serializer(queryset, many=True)
         return request.send_data(serializer.data)
