@@ -192,7 +192,7 @@ class StudentRegisterListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Student
-        fields = "id", 'code', 'first_name', 'last_name', 'register_num', 'department_name', 'group_name', 'status_name', 'profession_name', 'title', 'group_level', 'phone', 'group', 'school_name', 'correspondlessons', 'corres_id'
+        fields = "id", 'code', 'first_name', 'last_name', 'register_num', 'department_name', 'group_name', 'status_name', 'profession_name', 'title', 'group_level', 'phone', 'group', 'school_name', 'correspondlessons', 'corres_id', 'is_active'
 
     def get_corres_id(self,obj):
 

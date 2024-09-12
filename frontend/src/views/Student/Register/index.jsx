@@ -120,6 +120,7 @@ const Register = () => {
     const professionApi = useApi().study.professionDefinition
     const settingsApi = useApi().settings.studentRegisterType
     const studentPassApi = useApi().studentPass
+    const studentRightsApi = useApi().studentRights
     const studentImportApi = useApi().student
 
 
@@ -222,6 +223,15 @@ const Register = () => {
     /* Password сэргээх функц */
     const changePassModal = async(id) => {
         await fetchData(studentPassApi.changePass(id))
+    }
+
+    /* Оюутны эрх хаах/нээх функц */
+    const toggleRightsActivation = async(id) => {
+        const { success } = await fetchData(studentRightsApi.toggleRightsActivation(id))
+        if(success)
+        {
+            getDatas()
+        }
     }
 
     // ** Function to handle Modal toggle
@@ -798,7 +808,7 @@ const Register = () => {
                         )}
                         onSort={handleSort}
                         sortIcon={<ChevronDown size={10} />}
-                        columns={getColumns(currentPage, rowsPerPage, total_count, editModal, handleDelete, user, changePassModal)}
+                        columns={getColumns(currentPage, rowsPerPage, total_count, editModal, handleDelete, user, changePassModal, toggleRightsActivation)}
                         paginationPerPage={rowsPerPage}
                         paginationDefaultPage={currentPage}
                         paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
