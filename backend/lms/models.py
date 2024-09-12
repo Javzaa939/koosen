@@ -655,6 +655,14 @@ class Student(models.Model):
     eysh_score = models.IntegerField(null=True, verbose_name="ЭЕШ-н оноо")
     secondary_school = models.CharField(null=True, verbose_name="Өмнөх шатны боловсролын үнэлгээний оноо", max_length=6)
 
+    before_diplom_num = models.CharField(verbose_name='Өмнөх боловсролын гэрчилгээний дугаар', null=True, max_length=255)
+    diplom_num = models.CharField(verbose_name='Диплом дугаар', null=True, max_length=255)
+    is_active = models.BooleanField(default=True, verbose_name='Оюутны эрх нээлттэй эсэх')
+
+    qr_image = models.BinaryField(verbose_name='Оюутны код QR', editable=True, null=True)
+    barcode_image = models.BinaryField(verbose_name='Оюутны barcode QR', editable=True, null=True)
+    definition_qr = models.BinaryField(verbose_name='Тодорхойлолтын QR', editable=True, null=True)
+
     image = models.ImageField(upload_to=user_directory_path, max_length=255, null=True)
     department = models.ForeignKey(Salbars, on_delete=models.SET_NULL, null=True, verbose_name="Хөтөлбөрийн баг")
     school = models.ForeignKey(SubOrgs, on_delete=models.SET_NULL, null=True, verbose_name="Сургууль")
