@@ -632,7 +632,7 @@ def get_domain_url():
     """ domain url авах """
 
     if settings.DEBUG is False:
-        domain_url = 'http://sis.uia.gov.mn'
+        domain_url = 'https://sis.uia.gov.mn'
     else:
         domain_url = 'http://localhost:8000'
 
@@ -1025,7 +1025,7 @@ def get_domain_url_link():
     """ domain url авах """
 
     if settings.DEBUG is False:
-        domain_url = 'http://sis.uia.gov.mn'
+        domain_url = 'https://sis.uia.gov.mn'
     else:
         domain_url = 'http://192.168.1.7:3001'
 
@@ -1036,7 +1036,7 @@ def get_domain_url():
     """ domain url авах """
 
     if settings.DEBUG is False:
-        domain_url = 'http://sis.uia.gov.mn'
+        domain_url = 'https://sis.uia.gov.mn'
     else:
         domain_url = 'http://localhost:8000'
 

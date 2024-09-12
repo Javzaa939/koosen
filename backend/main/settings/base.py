@@ -255,5 +255,5 @@ if os.environ.get("LOGGING") == "1":
 CDN_MAIN_FOLDER = 'dxis/'
 
 # CDN файл байршиж бай
-CDN_MAIN_DOMAIN = 'http://sis.uia.gov.mn/cdn/'
-CDN_FILE_URL = 'http://sis.uia.gov.mn/cdn/files/'
+CDN_MAIN_DOMAIN = 'https://sis.uia.gov.mn/cdn/'
+CDN_FILE_URL = 'https://sis.uia.gov.mn/cdn/files/'
