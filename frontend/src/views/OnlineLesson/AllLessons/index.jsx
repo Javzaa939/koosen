@@ -219,6 +219,7 @@ function AllLessons({ lessons, getLessons }) {
                     </Row>
                 </CardHeader>
                 <CardBody className="">
+                    <div className="fw-bolder mb-50">{`Нийт хичээлийн тоо: ${dep_id || teacherId || searchValue ? filteredData?.length : lessons?.length}`}</div>
                     <Row>
                         <Col md={3} className='mb-1'>
                             <Label className="form-label" for="department">
