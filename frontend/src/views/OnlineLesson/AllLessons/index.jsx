@@ -310,6 +310,12 @@ function AllLessons({ lessons, getLessons }) {
                                             </div>
                                             <h6 className="mb-1">{'Багш:'}<span className="ms-1">{lesson?.teacher?.full_name}</span></h6>
                                             <h6 className="mb-1">{'Оюутны тоо:'}<span className="ms-1">{lesson?.student_count}</span></h6>
+                                            <h6 className="mb-1">{'Ангийн нэр:'}<span className="ms-1">
+                                                {
+                                                    lesson?.student_data?.map(item => item.group_name)
+                                                        .filter((value, index, self) => self.indexOf(value) === index).join(', ')
+                                                }
+                                                </span></h6>
                                             <div>
                                                 <div className="flex flex-md-row flex-column">
                                                     <div>
