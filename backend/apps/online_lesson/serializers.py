@@ -16,6 +16,7 @@ from main.utils.function.utils import get_file_from_cdn
 
 class OnlineLessonSerializer(serializers.ModelSerializer):
     lesson_name = serializers.SerializerMethodField()
+    lesson_code = serializers.SerializerMethodField()
     student_count = serializers.SerializerMethodField()
     total_homeworks_and_exams = serializers.SerializerMethodField()
     student_data = StudentSimpleListSerializer(source='students', many=True, read_only=True)
@@ -27,6 +28,9 @@ class OnlineLessonSerializer(serializers.ModelSerializer):
 
     def get_lesson_name(self, obj):
         return obj.lesson.name
+
+    def get_lesson_code(self, obj):
+        return obj.lesson.code
 
     def get_student_count(self, obj):
         return obj.students.count()
@@ -63,7 +67,11 @@ class OnlineWeekSerializer(serializers.ModelSerializer):
 
         if path:
             full_path = settings.ASSIGNMENT + str(path)
-            cdn_data = get_file_from_cdn(full_path)
+            cdn_data = {}
+            try:
+                cdn_data = get_file_from_cdn(full_path)
+            except Exception as e:
+                print(e)
 
             if cdn_data.get('success'):
                 full_path = settings.CDN_FILE_URL + full_path
@@ -103,6 +111,7 @@ class LessonMaterialSerializer(serializers.ModelSerializer):
         data = []
         request = self.context.get('request')
         material_type = request.query_params.get('type')
+        cdn_connection_alive = True
 
         if material_type:
             queryset = LessonMaterial.objects.filter(user=obj.user, material_type=material_type).values('id', 'path', 'created_at')
@@ -110,59 +119,17 @@ class LessonMaterialSerializer(serializers.ModelSerializer):
             for item in queryset:
                 file_path = item['path']
                 full_path = settings.ASSIGNMENT + str(file_path)
-                cdn_data = get_file_from_cdn(full_path)
+                cdn_data = {}
+
+                if cdn_connection_alive:
+                    try:
+                        cdn_data = get_file_from_cdn(full_path)
+                    except Exception as e:
+                        print(e)
+                        cdn_connection_alive = False
 
                 if cdn_data.get('success'):
                     file_path = settings.CDN_FILE_URL + full_path
-                try:
-
-                    # File-ийн хэмжээ авах requests
-                    response = requests.head(file_path)
-                    if response.status_code == 200:
-                        file_size = response.headers.get('content-length')
-
-                        item_data = {
-                            'id': item['id'],
-                            'path': file_path,
-                            'created_at': item['created_at'],
-                            'size': file_size
-                        }
-                        files_info.append(item_data)
-                    else:
-
-                        files_info.append({
-                            'id': item['id'],
-                            'path': file_path,
-                            'created_at': item['created_at'],
-                            'size': None
-                        })
-                except requests.exceptions.RequestException as e:
-                    # Handle request exception
-                    files_info.append({
-                        'id': item['id'],
-                        'path': file_path,
-                        'created_at': item['created_at'],
-                        'size': None
-                    })
-            return {
-                'material_type': material_type,
-                'count': len(files_info),
-                'files': files_info
-            }
-        else:
-            for material_type in range(1, 5):
-                queryset = LessonMaterial.objects.filter(user=obj.user, material_type=material_type).values('id', 'path', 'created_at')
-
-                files_info = []
-                for item in queryset:
-                    file_path = item['path']
-                    full_path = settings.ASSIGNMENT + str(file_path)
-                    cdn_data = get_file_from_cdn(full_path)
-
-                    if cdn_data.get('success'):
-                        success_data = cdn_data.get('data')
-
-                        file_path = success_data.get('full_path')
 
                     try:
 
@@ -194,6 +161,78 @@ class LessonMaterialSerializer(serializers.ModelSerializer):
                             'created_at': item['created_at'],
                             'size': None
                         })
+                else:
+                    files_info.append({
+                        'id': item['id'],
+                        'path': file_path,
+                        'created_at': item['created_at'],
+                        'size': None
+                    })
+
+            return {
+                'material_type': material_type,
+                'count': len(files_info),
+                'files': files_info
+            }
+        else:
+            for material_type in range(1, 5):
+                queryset = LessonMaterial.objects.filter(user=obj.user, material_type=material_type).values('id', 'path', 'created_at')
+
+                files_info = []
+                for item in queryset:
+                    file_path = item['path']
+                    full_path = settings.ASSIGNMENT + str(file_path)
+                    cdn_data = {}
+
+                    if cdn_connection_alive:
+                        try:
+                            cdn_data = get_file_from_cdn(full_path)
+                        except Exception as e:
+                            print(e)
+                            cdn_connection_alive = False
+
+                    if cdn_data.get('success'):
+                        success_data = cdn_data.get('data')
+
+                        file_path = success_data.get('full_path')
+
+                        try:
+
+                            # File-ийн хэмжээ авах requests
+                            response = requests.head(file_path)
+                            if response.status_code == 200:
+                                file_size = response.headers.get('content-length')
+
+                                item_data = {
+                                    'id': item['id'],
+                                    'path': file_path,
+                                    'created_at': item['created_at'],
+                                    'size': file_size
+                                }
+                                files_info.append(item_data)
+                            else:
+
+                                files_info.append({
+                                    'id': item['id'],
+                                    'path': file_path,
+                                    'created_at': item['created_at'],
+                                    'size': None
+                                })
+                        except requests.exceptions.RequestException as e:
+                            # Handle request exception
+                            files_info.append({
+                                'id': item['id'],
+                                'path': file_path,
+                                'created_at': item['created_at'],
+                                'size': None
+                            })
+                    else:
+                        files_info.append({
+                            'id': item['id'],
+                            'path': file_path,
+                            'created_at': item['created_at'],
+                            'size': None
+                        })
 
                 data.append({
                     'material_type': material_type,
@@ -211,9 +250,16 @@ class LessonMaterialPostSerializer(serializers.ModelSerializer):
 
 
 class AnnouncementSerializer(serializers.ModelSerializer):
+    full_name = serializers.SerializerMethodField()
+
     class Meta:
         model = Announcement
         fields = '__all__'
+
+    def get_full_name(self, obj):
+        if obj.created_user.full_name:
+            return obj.created_user.full_name
+        return None
 
 
 class HomeWorkSerializer(serializers.ModelSerializer):

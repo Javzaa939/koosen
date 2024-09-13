@@ -58,7 +58,7 @@ export default function WeeksList({ lesson, isFresh }) {
 
 	useEffect(() => {
 		if (lesson?.id) getWeeks()
-	},[isFresh]);
+	},[isFresh, lesson]);
 
 	const weeksDisplay = useMemo(() => {
 		return(
