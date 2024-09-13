@@ -969,7 +969,8 @@ function useApi(isDisplay=false) {
 				postOldScoreV2: (data) => instance.post(`/score/register/old/v2/`, data),
 				postImportData: (data) => instance.post(`/score/register/import/`, data),
 
-				putScore: (id, data) => instance.put(`score/register/old/${id}/`, data)
+				putScore: (id, data) => instance.put(`score/register/old/${id}/`, data),
+				refresh: (group) => instance.get(`/score/register/refresh/${group}/`)
 				// student: (search, group, lesson, teacher) =>
 				// 	instance.get(`/score/register/student/?search=${search}&lesson=${lesson}&teacher=${teacher}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&group=${group}&school=${school_id}`)
 			},
