@@ -1442,3 +1442,28 @@ class ScoreOldV2APIView(
         }
 
         return request.send_data(return_datas)
+
+@permission_classes([IsAuthenticated])
+class ScoreRefreshAPIView(
+    generics.GenericAPIView
+):
+    """ Дүнгийн бүртгэл """
+
+    queryset = ScoreRegister.objects.all()
+
+    def get(self, request, group=None):
+        all_student = self.queryset.filter(student__group=group)
+
+        with transaction.atomic():
+            try:
+                for student_score in all_student:
+                    score_total = student_score.score_total
+                    score = round(score_total, 2)
+                    assessment = Score.objects.filter(score_max__gte=score,score_min__lte=score).first()
+                    student_score.assessment = assessment
+                    student_score.save()
+            except Exception as e:
+                print(e)
+                return request.send_error('ERR_002', 'Үнэлгээ шинэчлэхэд алдаа гарлаа дахин оролдоно уу')
+
+        return request.send_info('INF_002', 'Амжилттай шинэчлэлээ')

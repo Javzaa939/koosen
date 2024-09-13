@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Button, Modal, ModalHeader } from "reactstrap";
+import { Button, Col, Modal, ModalHeader, Row } from "reactstrap";
 import AddAnnouncementModal from "./AddAnnouncement";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Accordion from "@mui/material/Accordion";
@@ -10,6 +10,8 @@ import useApi from "@hooks/useApi";
 import useLoader from '@hooks/useLoader';
 import useModal from '@hooks/useModal';
 import { useParams } from "react-router-dom";
+import { Clock } from "react-feather";
+import moment from "moment";
 
 
 function Announcement({ lesson }) {
@@ -88,7 +90,23 @@ function Announcement({ lesson }) {
                                 aria-controls="panel3-content"
                                 id="panel3-header"
                             >
-                               {index + 1}.  {`${item?.title}`}
+                                <Row>
+                                    <Col>
+                                        <Row>
+                                            <Col>
+                                                {index + 1}.  {`${item?.title}`}
+                                            </Col>
+                                        </Row>
+                                        <Row>
+                                            <Col>
+                                                <Clock size={10} />
+                                                <small className='ms-1' >
+                                                    {moment(item?.created_at).format('YYYY-MM-DD HH:mm:ss')} - {item?.full_name}
+                                                </small>
+                                            </Col>
+                                        </Row>
+                                    </Col>
+                                </Row>
                             </AccordionSummary>
                             <AccordionDetails style={{ backgroundColor: "#E5E5E5" }}>
                                 <div className="text-end">

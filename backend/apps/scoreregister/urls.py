@@ -29,4 +29,5 @@ urlpatterns = [
     # дүнгийн тодорхойлолт
     path('print/<int:student>/', ScoreRegisterPrintAPIView.as_view()),
 
+    path('register/refresh/<int:group>/', ScoreRefreshAPIView.as_view()),
 ]
