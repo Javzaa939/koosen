@@ -3357,6 +3357,30 @@ class DefaultPassApi(
             return request.send_error('ERR_012')
 
 
+@permission_classes([IsAuthenticated])
+class RightActivationApi(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    generics.CreateAPIView
+):
+    # Оюутны эрх хаах/нээх
+    def put(self, request, pk = None):
+
+        if pk is None:
+            return request.send_error('ERR_012')
+
+        student_obj = Student.objects.filter(id=pk).first()
+
+        if student_obj:
+            with transaction.atomic():
+                student_obj.is_active=not student_obj.is_active
+                student_obj.save()
+
+            return request.send_info('INF_018')
+        else:
+            return request.send_error('ERR_012')
+
+
 class StudentDefinitionListLiteAPIView(
     mixins.ListModelMixin,
     generics.GenericAPIView

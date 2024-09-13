@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 
-import { X, Edit, Lock } from 'react-feather'
+import { X, Edit, Lock, Shield, ShieldOff } from 'react-feather'
 import {Badge, UncontrolledTooltip} from 'reactstrap'
 
 import useModal from "@hooks/useModal"
@@ -11,7 +11,7 @@ import SchoolContext from "@context/SchoolContext"
 
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, total_count, editModal, handleDelete, user, changePassModal)
+export function getColumns (currentPage, rowsPerPage, total_count, editModal, handleDelete, user, changePassModal, toggleRightsActivation)
 {
 
 	const { school_id } = useContext(SchoolContext)
@@ -141,6 +141,27 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 							<Badge color="light-danger" pill><X width={"100px"} /></Badge>
 						</a>
 						<UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${row.id}`} >Устгах</UncontrolledTooltip>
+						</>
+					}
+					{
+						Object.keys(user).length > 0 && user?.is_superuser &&
+						<>
+							{isLoading && Loader}
+							<a
+								role="button"
+								onClick={() => showWarning({
+									header: {
+										title: t(`Оюутны эрх нээлттэй эсэх`),
+									},
+									question: t(`Оюутны Эрх хаах/нээх үү?`),
+									onClick: () => toggleRightsActivation(row.id)
+								})}
+								id={`complaintListDatatableToggleRightActivation${row?.id}`}
+								className="me-1"
+							>
+								<Badge color="light-warning" pill>{row?.is_active ? <Shield  width={"15px"} /> : <ShieldOff  width={"15px"} />}</Badge>
+							</a>
+							<UncontrolledTooltip placement='top' target={`complaintListDatatableToggleRightActivation${row.id}`} >Эрх хаах/нээх</UncontrolledTooltip>
 						</>
 					}
 				</div>

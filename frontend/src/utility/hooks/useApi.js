@@ -1691,6 +1691,9 @@ function useApi(isDisplay=false) {
 		studentPass: {
 			changePass: (pk)=> instance.put(`/student/defaultPass/${pk}/`),
 		},
+		studentRights: {
+			toggleRightsActivation: (pk) => instance.put(`/student/rightActivation/${pk}/`),
+		},
 		activeYearAndSeason: {
 			get: () => instance.get(`/settings/year-season/`)
 		},
