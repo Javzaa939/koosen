@@ -35,23 +35,23 @@ function HomeWork({ item, deleteHomeWork, refresh }) {
 
 	const maxLength = 100
 
-	const handleUrl = (url) => {
-		if(url) {
-			const lastIndexOfUrl = url.lastIndexOf('/') + 1;
-			return url.substring(lastIndexOfUrl, url.length);
-		}
-	}
+	// const handleUrl = (url) => {
+	// 	if(url) {
+	// 		const lastIndexOfUrl = url.lastIndexOf('/') + 1;
+	// 		return url.substring(lastIndexOfUrl, url.length);
+	// 	}
+	// }
 
-	const formatDate = (isoDateString) => {
-		if (!isoDateString) return '';
+	// const formatDate = (isoDateString) => {
+	// 	if (!isoDateString) return '';
 
-		const date = new Date(isoDateString);
-		const year = date.getFullYear();
-		const month = (date.getMonth() + 1).toString().padStart(2, '0');
-		const day = date.getDate().toString().padStart(2, '0');
+	// 	const date = new Date(isoDateString);
+	// 	const year = date.getFullYear();
+	// 	const month = (date.getMonth() + 1).toString().padStart(2, '0');
+	// 	const day = date.getDate().toString().padStart(2, '0');
 
-		return `${year}-${month}-${day}`;
-	};
+	// 	return `${year}-${month}-${day}`;
+	// };
 
 	return (
 		<div className="w-100">

@@ -1,4 +1,4 @@
-import AuthContext from "@src/utility/context/AuthContext";
+import AuthContext from "@context/AuthContext"
 import useApi from "@src/utility/hooks/useApi";
 import useLoader from "@src/utility/hooks/useLoader";
 import useToast from "@src/utility/hooks/useToast";
@@ -8,6 +8,7 @@ import { Controller, useForm } from "react-hook-form";
 import { Button, Col, Form, FormFeedback, Input, Label, ModalBody, ModalFooter, Row } from "reactstrap";
 
 import { t } from 'i18next';
+import DetailModal from "./DetailModal";
 
 
 function AddHomework({ toggle='', item, refresh }) {
@@ -19,6 +20,7 @@ function AddHomework({ toggle='', item, refresh }) {
 	const [featurefile, setFeaturefile] = useState([]);
 	const [datas, setDatas] = useState({})
 
+	const [detailModal,setDetailModal] = useState(false)
 	const {
 		control,
 		formState: { errors },
@@ -100,12 +102,17 @@ function AddHomework({ toggle='', item, refresh }) {
 		return date.toISOString().split(".")[0];
 	};
 
+	const handleModal = () => {
+		setDetailModal(!detailModal)
+	}
+
 	useEffect(() => {
 		getOneDatas()
 		setFeaturefile([]);
 		setValue('start_date', calculateFutureDate(0))
 		setValue('end_date', calculateFutureDate(1))
 	}, [])
+
 	return (
 		<Form onSubmit={handleSubmit(onSubmit)} encType="multipart/form-data">
 			<ModalBody className="row margin_fix">
@@ -203,11 +210,19 @@ function AddHomework({ toggle='', item, refresh }) {
 					</Col>
 				</Row>
 			</ModalBody>
-			<ModalFooter>
+			<ModalFooter className='d-flex gap-1 mt-1'>
+			{item?.homework && (
+				<Button color='info' onClick={handleModal}>
+					Гэрийн даалгавар шалгах
+				</Button>
+			)}
 				<Button type="submit" color="primary">
-					{item?.id ? 'Засах' : 'Хадгалах'}
+					{item?.homework ? 'Засах' : 'Хадгалах'}
 				</Button>
 			</ModalFooter>
+			{
+				detailModal && <DetailModal open={DetailModal} handleModal={handleModal} homework={item?.homework}/>
+			}
 		</Form>
 	);
 }
