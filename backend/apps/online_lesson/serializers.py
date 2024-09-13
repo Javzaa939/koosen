@@ -12,12 +12,19 @@ from main.utils.file import split_root_path
 from main.utils.function.utils import get_file_from_cdn
 
 
+class StudentSerializer(serializers.ModelSerializer):
+	group_name = serializers.CharField(source='group.name', default='')
+	class Meta:
+		model = Student
+		fields = 'first_name', 'last_name', 'image', 'code', 'email', 'group_name', 'register_num', 'id'
+
+
 class OnlineLessonSerializer(serializers.ModelSerializer):
     lesson_name = serializers.SerializerMethodField()
     lesson_code = serializers.SerializerMethodField()
     student_count = serializers.SerializerMethodField()
     total_homeworks_and_exams = serializers.SerializerMethodField()
-    student_data = StudentSimpleListSerializer(source='students', many=True, read_only=True)
+    student_data = StudentSerializer(source='students', many=True, read_only=True)
     teacher = TeachersSerializer(read_only=True)
 
     class Meta:
@@ -48,6 +55,8 @@ class OnlineLessonSerializer(serializers.ModelSerializer):
             'challenge_count': challenge_count,
             'week_count': week_count
         }
+
+
 class ChallengeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Challenge
@@ -305,10 +314,3 @@ class LectureStudentSerializer(serializers.ModelSerializer):
 
     def get_send_file(self,obj):
         return settings.CDN_FILE_URL + str(obj.lekts_file)
-
-
-class StudentSerializer(serializers.ModelSerializer):
-	group_name = serializers.CharField(source='group.name', default='')
-	class Meta:
-		model = Student
-		fields = 'first_name', 'last_name', 'image', 'code', 'email', 'group_name', 'register_num', 'id'
