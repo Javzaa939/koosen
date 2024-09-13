@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
 import useApi from "@hooks/useApi";
-import useToast from "@hooks/useToast";
 import useLoader from "@hooks/useLoader";
 
 import {
@@ -21,9 +20,7 @@ import {
 
 import AddHomework from "../Homework/AddHomework";
 
-function CreateWeekModal({ toggle, lesson, isFresh, setIsFresh }) {
-	const addToast = useToast()
-
+function CreateWeekModal({ toggle, lesson, isFresh, setIsFresh, editId='' }) {
 	const [beforeWeeks, setBeforeWeeks] = useState([])
 	const [homeworkModal, setHomeWorkModal] = useState(false);
 
@@ -51,16 +48,29 @@ function CreateWeekModal({ toggle, lesson, isFresh, setIsFresh }) {
 	};
 
 	async function onSubmit(cdata) {
-		const id = lesson.id
 		cdata['is_lock'] = cdata?.before_week ? true : false
-		const { success, errors } = await postFetch(onlineWeekAPI.post(cdata, id))
-		if(success) {
-			setIsFresh(!isFresh)
-			reset();
-			toggle();
+		cdata['online_lesson'] = lesson.id
+		if(editId) {
+			const { success, errors } = await postFetch(onlineWeekAPI.put(editId, cdata))
+			if(success) {
+				setIsFresh(!isFresh)
+				reset();
+				toggle();
+			} else {
+				for (let key in errors) {
+					setError(key, { type: "custom", message: errors[key][0] });
+				}
+			}
 		} else {
-			for (let key in errors) {
-				setError(key, { type: "custom", message: errors[key][0] });
+			const { success, errors } = await postFetch(onlineWeekAPI.post(cdata))
+			if(success) {
+				setIsFresh(!isFresh)
+				reset();
+				toggle();
+			} else {
+				for (let key in errors) {
+					setError(key, { type: "custom", message: errors[key][0] });
+				}
 			}
 		}
 	}
@@ -75,19 +85,42 @@ function CreateWeekModal({ toggle, lesson, isFresh, setIsFresh }) {
 		}
 	}
 
+	async function getOneDatas() {
+		const { success, data } = await fetchData(onlineWeekAPI.getOne(editId))
+		if(success) {
+			if (Object.keys(data).length > 0) {
+				if(data === null) return
+				for(let key in data) {
+					if(data[key] !== null) {
+						setValue(key, data[key])
+					}
+				}
+			}
+		}
+	}
+
+	useEffect(() => {
+		if(editId) {
+			getOneDatas()
+		}
+	}, [editId])
+
 	useEffect(() => {
 		getOtherWeeks()
 		const week_number = watch('week_number')
-		if(week_number) {
+		if(week_number && !editId) {
 			setValue('start_date', calculateFutureDate(week_number))
 			setValue('end_date', calculateFutureDate(week_number))
 		}
 	}, [watch('week_number')])
 
 	useEffect(() => {
-		setValue('start_date', calculateFutureDate(0))
-		setValue('end_date', calculateFutureDate(16))
-	}, [])
+		if(!editId) {
+			// Зөвхөн нэмэх үед анхны утга оноо нь
+			setValue('start_date', calculateFutureDate(0))
+			setValue('end_date', calculateFutureDate(16))
+		}
+	}, [editId])
 
 	return (
 		<Form onSubmit={handleSubmit(onSubmit)}>

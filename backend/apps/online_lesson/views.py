@@ -8,7 +8,6 @@ from rest_framework.decorators import parser_classes
 from rest_framework.response import Response
 from rest_framework import status
 
-from student.serializers  import StudentSimpleListSerializer
 from main.utils.function.pagination import CustomPagination
 from django.shortcuts import get_object_or_404
 from django.conf import settings
@@ -17,7 +16,7 @@ from django.db import transaction
 from django.db.models import F
 
 from lms.models import (
-    Group, LessonStandart, OnlineLesson, LessonMaterial, OnlineWeek, Announcement, HomeWork , HomeWorkStudent, Challenge, Student
+    Group, LessonStandart, OnlineLesson, LessonMaterial, OnlineWeek, Announcement, HomeWork , HomeWorkStudent, Challenge, Student, OnlineWeekStudent
 )
 from .serializers import (
     OnlineLessonSerializer,
@@ -25,7 +24,9 @@ from .serializers import (
     OnlineWeekSerializer,
     AnnouncementSerializer,
     HomeWorkSerializer,
-    HomeWorkStudentSerializer
+    HomeWorkStudentSerializer,
+    LectureStudentSerializer,
+    StudentSerializer
 )
 
 from core.models import (
@@ -229,35 +230,39 @@ class OnlineWeekAPIView(
 
         return request.send_info('INF_001')
 
-    def put(self, request, *args, **kwargs):
-        week_id = request.query_params.get('pk')
-        data = request.data
-
-        material_id = data.get('material')
-        description = data.get('description')
-
+    def put(self, request, pk=None):
         try:
-            lesson_material = LessonMaterial.objects.get(id=material_id)
-        except LessonMaterial.DoesNotExist:
-            return request.send_error("LessonMaterial not found")
+            instance = self.get_object()
+            datas = request.data
 
+            # NOTE хэрэггүй датануудаа update хийх гээд байна
+            if 'lekts_file' in datas:
+                del datas['lekts_file']
+
+            if 'description' in datas:
+                del datas['description']
+
+            serializer = self.serializer_class(instance, data=datas, partial=True)
+            if serializer.is_valid(raise_exception=False):
+                serializer.save()
+            else:
+                return request.send_error_valid(serializer.errors)
+
+            return request.send_info("INF_002")
+        except Exception as e:
+            print('e', e)
+            return request.send_error('ERR_002', e.__str__())
+
+    def delete(self, request, pk=None):
         try:
-            online_week = OnlineWeek.objects.get(id=week_id)
-        except OnlineWeek.DoesNotExist:
-            return request.send_error("OnlineWeek not found")
+            self.destroy(request, pk)
+        except Exception as e:
+            print('e', e)
+            return request.send_error('ERR_002', e.__str__())
 
-        # week_material = WeekMaterials.objects.create(
-        #     material=lesson_material,
-        #     description=description
-        # )
+        return request.send_info("INF_003")
 
-        # online_week.materials.add(week_material)
-        # online_week.save()
 
-        return Response(status=status.HTTP_200_OK)
-
-    def delete(self,request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
 
 
 @permission_classes([IsAuthenticated])
@@ -382,18 +387,17 @@ class SentHomeWorkAPIView(
     serializer_class = HomeWorkStudentSerializer
 
     def get(self, request, *args, **kwargs):
-        week_id = kwargs.get('pk')
-        if week_id:
+        homework_id = kwargs.get('pk')
+        if homework_id:
             try:
-                instance = HomeWork.objects.get(id=week_id)
-                week_homework = instance.homework.all()
-                return_datas = self.get_serializer(week_homework, many=True).data
-                return Response(return_datas)
+                instance = HomeWorkStudent.objects.filter(homework_id=homework_id)
+                return_datas = self.get_serializer(instance, many=True).data
+                return request.send_data(return_datas)
             except OnlineWeek.DoesNotExist:
                 return Response({'error': 'OnlineWeek not found'}, status=status.HTTP_404_NOT_FOUND)
 
         serializer = self.list(request).data
-        return Response(serializer)
+        return request.send_data(serializer)
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
@@ -402,8 +406,25 @@ class SentHomeWorkAPIView(
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+    def put(self,request,pk=None):
+        homework_id = pk
+        data=request.data
+        student_id = data.get('studentId')
+        score = data.get('score')
+        description = data.get('description')
+
+        with transaction.atomic():
+            obj = HomeWorkStudent.objects.get(homework_id=homework_id,student_id=student_id)
+            obj.score = score
+            obj.description = description
+            obj.status = HomeWorkStudent.CHECKED
+            obj.save()
+
+        return request.send_info("INF_002")
+
     def delete(self, request, *args, **kwargs):
         return self.destroy(request, *args, **kwargs)
+
 
 
 @permission_classes([IsAuthenticated])
@@ -656,25 +677,117 @@ class LessonStudentsAPIView(
 ):
     queryset = OnlineLesson.objects.all()
     pagination_class = CustomPagination
-    filter_backends = [SearchFilter]
-    search_fields = ['students__last_name', 'students__first_name', 'students__code']
 
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        lesson_id = self.request.query_params.get('lesson_id')
-        if lesson_id:
-            queryset = queryset.filter(id=lesson_id)
-        return queryset
+    filter_backends = SearchFilter
+    search_fields = ['students__last_name', 'students__first_name', 'students__code', 'students__register_num']
 
-    def get(self, request, *args, **kwargs):
+
+    def get(self, request, pk=None):
         group_id = request.query_params.get('group')
+        lesson_id = self.request.query_params.get('lesson_id')
 
-        online_lesson = self.get_queryset().first()
-
+        online_lesson = self.queryset.filter(id=lesson_id).first()
         students = online_lesson.students.all()
+
+        # Тухайн онлайн хичээл үзэж байгаа ангиуд
+        groups = online_lesson.students.all().values_list('group', flat=True).distinct('group')
+        group_data = Group.objects.filter(id__in=groups).values('id', 'name')
 
         if group_id:
             students = students.filter(group=group_id)
 
-        serializer = StudentSimpleListSerializer(students, many=True)
-        return request.send_data(list(serializer.data))
+        datas = StudentSerializer(students, many=True).data
+
+        return_datas = {
+            'datas': datas,
+            'groups': list(group_data)
+        }
+
+        return request.send_data(return_datas)
+
+    def put(self, request, pk=None):
+        online_lesson = self.queryset.filter(id=pk).first()
+        datas = request.data
+        group_ids = [data.get('id') for data in datas]
+        students = Student.objects.filter(group__in=group_ids).values_list('id', flat=True)
+        old_students = online_lesson.students.all().values_list('id', flat=True)
+
+        removed_students = set(old_students) - set(students)
+        added_students = set(students) - set(old_students)
+
+        removed_students = list(removed_students)
+        added_students = list(added_students)
+
+        with transaction.atomic():
+            # Хасагдагсан оюутнуудыг хасах
+            for student in removed_students:
+                online_lesson.students.remove(student)
+
+            # Нэмэгдэж байгаа оюутнуудыг нэмэх
+            if len(added_students) > 0:
+                online_lesson.students.add(*added_students)
+
+        return request.send_info('INF_002')
+
+    def delete(self, request, pk=None):
+        online_lesson = self.queryset.filter(id=pk).first()
+        student = request.query_params.get('student')
+
+        with transaction.atomic():
+            # Хасагдагсан оюутнуудыг хасах
+            online_lesson.students.remove(student)
+
+        return request.send_info('INF_003')
+
+
+@permission_classes([IsAuthenticated])
+class SentLectureAPIView(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    generics.GenericAPIView
+):
+    '''Илгээсэн лекц материал харах нэг нэгээр нь дүгнэх'''
+
+    queryset = OnlineWeekStudent.objects.all()
+    serializer_class = LectureStudentSerializer
+
+    def get(self, request, *args, **kwargs):
+        week_id = kwargs.get('pk')
+        if week_id:
+            try:
+                instance = OnlineWeekStudent.objects.filter(week_id=week_id)
+                return_datas = self.get_serializer(instance, many=True).data
+                return request.send_data(return_datas)
+            except OnlineWeek.DoesNotExist:
+                return Response({'error': 'OnlineWeek not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = self.list(request).data
+        return request.send_data(serializer)
+
+    def put(self,request,pk=None):
+        obj = OnlineWeekStudent.objects.get(id=pk)
+        if obj:
+            obj.status = OnlineWeekStudent.CHECKED
+            obj.save()
+            return request.send_info("INF_002")
+
+
+class SummarizeLessonMaterialAPIView(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    generics.GenericAPIView
+):
+    '''Илгээсэн лекц материал дүгнэх'''
+
+    queryset = OnlineWeekStudent.objects.all()
+    serializer_class = LectureStudentSerializer
+
+
+    def put(self,request,pk=None):
+        user_ids = request.data
+        with transaction.atomic:
+            OnlineWeekStudent.objects.filter(week_id=pk,student_id__in=user_ids).update(status=OnlineWeekStudent.CHECKED)
+
+        return request.send_info("INF_002")

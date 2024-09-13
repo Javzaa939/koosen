@@ -1,13 +1,14 @@
-import { useContext, useEffect, useState , useRef} from "react";
-import { ReactSelectStyles } from '@utils';
 import useApi from "@src/utility/hooks/useApi";
 import useLoader from "@src/utility/hooks/useLoader";
+import { ReactSelectStyles } from '@utils';
+import classnames from "classnames";
+import { useContext, useEffect, useState , useRef} from "react";
 import { Controller, useForm } from "react-hook-form";
 import Select from 'react-select';
-import classnames from "classnames";
 import { Button, Card, CardBody, Col, Form, FormFeedback, Input, Label, ModalBody, ModalFooter, Row } from "reactstrap";
 
-import AuthContext from "@src/utility/context/AuthContext";
+import AuthContext from "@context/AuthContext"
+
 import ReactQuill from 'react-quill';
 
 import 'react-quill/dist/quill.snow.css';

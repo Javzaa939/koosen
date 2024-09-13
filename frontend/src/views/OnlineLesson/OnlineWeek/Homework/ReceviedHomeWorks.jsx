@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { X } from "react-feather";
 import { Controller, useForm } from "react-hook-form";
 import { Button, Col, Form, FormFeedback, FormGroup, Input, Label, ModalBody, ModalFooter, Row } from "reactstrap";
-import { AuthContext } from "@src/utility/context/AuthContext";
+import AuthContext from "@context/AuthContext"
 import useApi from "@src/utility/hooks/useApi";
 import useLoader from "@src/utility/hooks/useLoader";
 import useToast from "@src/utility/hooks/useToast";
@@ -25,7 +25,7 @@ function ReceviedHomeWorks({ toggle, item }) {
         setError
     } = useForm({
         defaultValues: {
-            created_user: user?.id,
+            created_user: user.id,
         },
     });
 

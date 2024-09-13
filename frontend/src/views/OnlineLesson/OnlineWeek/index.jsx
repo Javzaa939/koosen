@@ -1,5 +1,5 @@
 import useApi from "@src/utility/hooks/useApi";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { BiArrowToLeft } from "react-icons/bi";
 import { Link, useParams } from "react-router-dom";
 import { Button, Card, CardBody, CardHeader, Col, Row } from "reactstrap";
@@ -59,6 +59,13 @@ function OnlineLessonPage() {
 		color: 'white'
 	};
 
+	const lesson_week = useMemo(() =>
+	{
+		return (
+			<LessonTable lesson={lesson} selectedContent={selectedContent} getLesson={getLesson}/>
+		)
+	}, [selectedContent, lesson])
+
 	return (
 		<div className="d-flex flex-row w-100">
 			<Card className="w-100">
@@ -96,7 +103,7 @@ function OnlineLessonPage() {
 							</Col>
 						))}
 					</Row>
-					<LessonTable lesson={lesson} selectedContent={selectedContent} getLesson={getLesson}/>
+					{lesson_week}
 				</CardBody>
 			</Card>
 		</div>

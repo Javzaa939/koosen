@@ -1879,18 +1879,23 @@ function useApi(isDisplay=false) {
 			global_post : (data) => instance.post(`online_lesson/global_announcement/`,data),
 		},
 		homework : {
-			get : (week_id) => instance.get(`online_lesson/online_homework/${week_id}`),
+			get : (week_id) => instance.get(`online_lesson/online_homework/${week_id}/`),
 			getOne : (pk) => instance.get(`online_lesson/online_homework/${pk}/`),
 			delete : (pk) => instance.delete(`online_lesson/online_homework/${pk}/`),
 			post : (data) => instance.post(`online_lesson/online_homework/`, data, multiPart),
-			put : (data, pk) => instance.put(`online_lesson/online_homework/${pk}/`, data, multiPart)
+			put : (data, pk) => instance.put(`online_lesson/online_homework/${pk}/`, data, multiPart),
 		},
 		sent_home_work : {
-			get : (week_id) => instance.get(`online_lesson/sent_home_work/${week_id}`),
+			get : (week_id) => instance.get(`online_lesson/sent_home_work/${week_id}/`),
 			getOne : () => instance.get(`online_lesson/sent_home_work/${pk}`),
 			delete : (pk) => instance.delete(`online_lesson/sent_home_work/${pk}`),
 			post : (data, weekId) => instance.post(`online_lesson/sent_home_work/${weekId}`,data),
-			put : () => instance.put(`online_lesson/sent_home_work/${pk}`,data)
+			put : (pk,data) => instance.put(`online_lesson/sent_home_work/${pk}/`,data)
+		},
+		sent_lecture_file : {
+			get : (week_id) => instance.get(`online_lesson/sent_lecture_file/${week_id}/`),
+			put : (id) => instance.put(`online_lesson/sent_lecture_file/${id}/`),
+			putAll : (id,data) => instance.put(`online_lesson/sent_lecture_file/all/${id}/`,data)
 		},
 		lesson_list :{
 			get : (teacherId) => instance.get(`online_lesson/choose_online_lesson/?teacher_id=${teacherId}`),

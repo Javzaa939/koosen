@@ -1,14 +1,12 @@
 import os
-
-from rest_framework import serializers
-from student.serializers import StudentSimpleListSerializer
-from core.serializers import TeachersSerializer
-from lms.models import OnlineLesson,Challenge, LessonMaterial, OnlineWeek , Announcement, HomeWork,  HomeWorkStudent
-from core.models import Teachers
-from django.db.models import Count
-from rest_framework.response import Response
 import requests
 from django.conf import settings
+from rest_framework import serializers
+
+from student.serializers import StudentSimpleListSerializer
+from core.serializers import TeachersSerializer
+from lms.models import OnlineLesson,Challenge, LessonMaterial, OnlineWeek , Announcement, HomeWork,  HomeWorkStudent, OnlineWeekStudent, Student
+from core.models import Teachers
 
 from main.utils.file import split_root_path
 from main.utils.function.utils import get_file_from_cdn
@@ -295,3 +293,22 @@ class HomeWorkStudentSerializer(serializers.ModelSerializer):
 
     def get_send_file(self,obj):
         return settings.CDN_FILE_URL+str(obj.send_file)
+
+
+class LectureStudentSerializer(serializers.ModelSerializer):
+    student = StudentSimpleListSerializer()
+    week = OnlineWeekSerializer()
+    send_file = serializers.SerializerMethodField()
+    class Meta:
+        model = OnlineWeekStudent
+        fields = '__all__'
+
+    def get_send_file(self,obj):
+        return settings.CDN_FILE_URL + str(obj.lekts_file)
+
+
+class StudentSerializer(serializers.ModelSerializer):
+	group_name = serializers.CharField(source='group.name', default='')
+	class Meta:
+		model = Student
+		fields = 'first_name', 'last_name', 'image', 'code', 'email', 'group_name', 'register_num', 'id'

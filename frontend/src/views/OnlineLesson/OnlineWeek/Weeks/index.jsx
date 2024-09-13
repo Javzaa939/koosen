@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Button, Modal, ModalHeader } from "reactstrap";
 
 import WeeksList from "./WeeksList";
@@ -9,6 +9,16 @@ function CreateWeek({ lesson}) {
 
   	const [modal, setModal] = useState(false);
 	const [isFresh, setIsFresh] = useState(false);
+
+	const weeks = useMemo(
+		() =>
+		{
+			return (
+				<WeeksList lesson={lesson} isFresh={isFresh}/>
+			)
+		},
+		[lesson]
+	)
 
   	return (
 		<div>
@@ -27,7 +37,7 @@ function CreateWeek({ lesson}) {
 					<CreateWeekModal toggle={toggle} lesson={lesson} isFresh={isFresh} setIsFresh={setIsFresh}/>
 				</Modal>
 			</div>
-			<WeeksList lesson={lesson} isFresh={isFresh}/>
+			{weeks}
   	  </div>
   	);
 }
