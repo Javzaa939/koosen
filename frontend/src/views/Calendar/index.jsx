@@ -230,7 +230,6 @@ const CalendarComponent = () => {
                                     {t('Зарлал')}
                                 </h4>
                                     <DataTable
-                                        noHeader
                                         noTableHead
                                         pagination
                                         className='AnnouncementBlock'
