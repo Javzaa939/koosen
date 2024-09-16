@@ -4422,7 +4422,7 @@ class WeekMaterials(models.Model):
     """ Тухайн 7 хоногт оруулах файлууд """
 
     is_leks = models.BooleanField(default=True, verbose_name='Лекц эсэх')
-    description = models.CharField(verbose_name='Тайлбар', max_length=255)
+    description = models.TextField(verbose_name='Тайлбар')
     material = models.ForeignKey(LessonMaterial, on_delete=models.CASCADE, verbose_name='Хичээлийн материал')
     created_at = models.DateTimeField(auto_now=True)
 
