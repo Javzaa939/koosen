@@ -1905,6 +1905,8 @@ function useApi(isDisplay=false) {
 		},
 		get_lesson_students: {
 			get: (limit, page, search, selectedGroup,lesson_id) => instance.get(`online_lesson/lesson_students/?limit=${limit}&page=${page}&search=${search}&group=${selectedGroup}&lesson_id=${lesson_id}`),
+			put: (datas, pk) => instance.put(`online_lesson/lesson_students/${pk}/`, datas),
+			delete: (student, pk) => instance.delete(`online_lesson/lesson_students/${pk}/?student=${student}`)
 		}
 	}
 }

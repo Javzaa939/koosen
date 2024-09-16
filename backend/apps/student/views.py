@@ -3346,7 +3346,7 @@ class DefaultPassApi(
         student_obj = Student.objects.filter(id=pk)
 
         if student_obj:
-            passwordDefault = '0123456789'
+            passwordDefault = student_obj.register_num[-8:]
             hashed_password = make_password(passwordDefault)
 
             with transaction.atomic():
