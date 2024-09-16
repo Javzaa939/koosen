@@ -3512,6 +3512,7 @@ class StudentPostDataAPIView(
 
         datas = request.data
         all_datas = list()
+        created_studentlogin_datas = list()
 
         user = request.user
         try:
@@ -3596,10 +3597,25 @@ class StudentPostDataAPIView(
                     created_user=user,
                 )
 
+                # Оюутан бүртгүүлэх үед оюутны нэвтрэх нэр нууц үгийг хадгалах хэсэг
+                password = register_num[-8:]
+
+                hashed_password = make_password(password)
+
+                student_login_qs = StudentLogin(
+                    username=code,
+                    password=hashed_password,
+                    student=qs,
+                )
+
+                created_studentlogin_datas.append(student_login_qs)
                 all_datas.append(qs)
 
             if len(all_datas) > 0:
                 Student.objects.bulk_create(all_datas)
+
+            if len(created_studentlogin_datas) > 0:
+                StudentLogin.objects.bulk_create(created_studentlogin_datas)
 
         except Exception as e:
             print(e)
