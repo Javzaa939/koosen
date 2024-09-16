@@ -1,10 +1,9 @@
 import os
 from rest_framework import mixins
 from rest_framework import generics
+from rest_framework import serializers
 
-from datetime import date, timedelta
 from django.db import transaction
-from dateutil import parser
 from django.conf import settings
 
 from main.utils.file import remove_folder
@@ -18,7 +17,6 @@ from main.utils.function.utils import has_permission, null_to_none
 from main.utils.file import save_file
 
 from lms.models import StudentNotice
-from lms.models import StudentNoticeFile
 
 from .serializers import StudentNoticeSerializer
 from .serializers import StudentNoticeListSerializer
@@ -68,22 +66,24 @@ class StudentNoticeAPIView(
         data = request.data.dict()
         data = null_to_none(data)
 
-        if 'department'  in data and not data.get('department'):
+        if 'department' in data and not data.get('department'):
             del data['department']
 
         serializer = self.get_serializer(data=data)
 
-        if serializer.is_valid(raise_exception=False):
-            with transaction.atomic():
-                try:
+        with transaction.atomic():
+            try:
+                if serializer.is_valid(raise_exception=False):
                     self.perform_create(serializer)
-                except Exception as e:
-                    print(e)
-                    return request.send_error("ERR_002")
-            return request.send_info("INF_001")
+                else:
+                    print(serializer.errors)
+                    raise serializers.ValidationError(serializer.errors)
 
-        else:
-            return request.send_error_valid(serializer.errors)
+            except Exception as e:
+                print(e)
+                return request.send_error("ERR_002")
+
+        return request.send_info("INF_001")
 
     @has_permission(must_permissions=['lms-service-news-update'])
     def put(self, request, pk=None):
@@ -101,12 +101,12 @@ class StudentNoticeAPIView(
         else:
             return request.send_error_valid(serializer.errors)
 
-
     @has_permission(must_permissions=['lms-service-news-delete'])
     def delete(self, request, pk=None):
         self.destroy(request, pk)
 
         return request.send_info("INF_003")
+
 
 class StudentNoticeFileAPIView(
     generics.GenericAPIView,
@@ -124,6 +124,7 @@ class StudentNoticeFileAPIView(
             self.destroy(request, pk)
 
             return request.send_info("INF_003")
+
 
 class StudentNoticeFileAPIView(
     generics.GenericAPIView,

@@ -7,6 +7,7 @@ import {
     CardTitle,
     Row,
     Col,
+    Spinner,
 } from "reactstrap";
 import classnames from "classnames";
 
@@ -27,6 +28,13 @@ import { VOLUNTEER_ACTION_TYPE } from "@utility/consts";
 import StatsHorizontal from "@components/widgets/stats/StatsHorizontal";
 import "./style.scss";
 import AccessHistory from "./AccessHistory";
+import DataTable from "react-data-table-component";
+
+// Announcements
+import { getColumns } from './helpers'
+import { getPagination } from "@src/utility/Utils";
+import { t } from "i18next";
+
 const CalendarComponent = () => {
     const blankEvent = {
         title: "",
@@ -34,7 +42,22 @@ const CalendarComponent = () => {
         end: "",
     };
 
+    // announcements count
+    const rowsPerPage = 5
+
+    // announcements - Хуудаслалтын анхны утга
+    const [currentPage, setCurrentPage] = useState(1)
+
+    // announcements - Нийт датаны тоо
+    const [total_count, setTotalCount] = useState(1)
+
+    // announcements data
+    const [announcements, setAnnouncements] = useState([])
+
     const { fetchData } = useLoader({});
+
+    // announcements - loader
+    const { isLoading: isAnnouncementsLoading, fetchData: fetchAnnouncements } = useLoader({isFullScreen: false})
 
     // ** states
     const [addSidebarOpen, setAddSidebarOpen] = useState(false);
@@ -57,6 +80,7 @@ const CalendarComponent = () => {
     const calendarListApi = useApi().calendar;
     const parentschoolApi = useApi().calendarCard;
     const calendarNewsApi = useApi().calendarNews;
+    const announcementsApi = useApi().service.news;
 
     // ** AddEventSidebar Toggle Function
     const handleAddEventSidebar = () => {
@@ -93,6 +117,17 @@ const CalendarComponent = () => {
         }
     }
 
+    // announcements
+    async function getAnnouncements()
+    {
+        const { success, data } = await fetchAnnouncements(announcementsApi.getAd(rowsPerPage,currentPage,'created_at',''))
+        if (success)
+        {
+            setAnnouncements(data?.results)
+            setTotalCount(data?.count)
+        }
+    }
+
     useEffect(() => {
         getDatas();
     }, [searchChecked]);
@@ -109,8 +144,12 @@ const CalendarComponent = () => {
         getDatas1();
     }, []);
 
-    // Хуанли дах мэдээлэллийн хэсэг
+    // announcements initial loading and page switching
+    useEffect(() => {
+        getAnnouncements()
+    },[currentPage])
 
+    // Хуанли дах мэдээлэллийн хэсэг
     async function getDatas2() {
         const { success, data } = await fetchData(calendarNewsApi.get());
         if (success) {
@@ -121,6 +160,11 @@ const CalendarComponent = () => {
     useEffect(() => {
         getDatas2();
     }, []);
+
+     // announcements page changing handler
+     const handlePagination = (page) => {
+		setCurrentPage(page.selected + 1);
+	};
 
     return (
         <Fragment>
@@ -179,34 +223,66 @@ const CalendarComponent = () => {
 
             <div className="app-calendar overflow-hidden border">
                 <Row className="g-0">
-                    <Col
-                        id="app-calendar-sidebar"
-                        className={classnames(
-                            "col app-calendar-sidebar flex-grow-0 overflow-hidden d-flex flex-column",
-                            {
-                                show: leftSidebarOpen,
-                            }
-                        )}
-                    >
-                        <SidebarLeft
-                            toggleSidebar={toggleSidebar}
-                            handleAddEventSidebar={handleAddEventSidebar}
-                            searchValue={setSearchChecked}
-                            setNew={setNew}
-                            active_week={active_week}
-                        />
-                    </Col>
-                    <Col className="position-relative">
-                        <Calendar
-                            isRtl={isRtl}
-                            toggleSidebar={toggleSidebar}
-                            handleAddEventSidebar={handleAddEventSidebar}
-                            eventDatas={datas}
-                            setEditId={setEditId}
-                            setNew={setNew}
-                            blankEvent={blankEvent}
-                            getDates={setDates}
-                        />
+                    <Col>
+                        <Row>
+                            <div className='mb-2'>
+                                <h4 className='p-1 m-0' style={{ fontWeight: 700, background: 'linear-gradient(118deg, #144e97, rgba(20, 78, 151, 0.7))', color: '#fff' }}>
+                                    {t('Зарлал')}
+                                </h4>
+                                    <DataTable
+                                        noTableHead
+                                        pagination
+                                        className='AnnouncementBlock'
+                                        progressPending={isAnnouncementsLoading}
+                                        progressComponent={
+                                            <div className='my-2 d-flex align-items-center justify-content-center'>
+                                                <Spinner className='me-1' color="" size='sm'/><h5>Түр хүлээнэ үү...</h5>
+                                            </div>
+                                        }
+                                        noDataComponent={(
+                                            <div className="my-2">
+                                                <h5>Өгөгдөл байхгүй байна</h5>
+                                            </div>
+                                        )}
+                                        columns={getColumns(currentPage, rowsPerPage, total_count)}
+                                        paginationPerPage={rowsPerPage}
+                                        paginationDefaultPage={currentPage}
+                                        data={announcements}
+                                        paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
+                                    />
+                            </div>
+                        </Row>
+                        <Row>
+                            <Col
+                                id="app-calendar-sidebar"
+                                className={classnames(
+                                    "col app-calendar-sidebar flex-grow-0 overflow-hidden d-flex flex-column",
+                                    {
+                                        show: leftSidebarOpen,
+                                    }
+                                )}
+                            >
+                                <SidebarLeft
+                                    toggleSidebar={toggleSidebar}
+                                    handleAddEventSidebar={handleAddEventSidebar}
+                                    searchValue={setSearchChecked}
+                                    setNew={setNew}
+                                    active_week={active_week}
+                                />
+                            </Col>
+                            <Col className="position-relative">
+                                <Calendar
+                                    isRtl={isRtl}
+                                    toggleSidebar={toggleSidebar}
+                                    handleAddEventSidebar={handleAddEventSidebar}
+                                    eventDatas={datas}
+                                    setEditId={setEditId}
+                                    setNew={setNew}
+                                    blankEvent={blankEvent}
+                                    getDates={setDates}
+                                />
+                            </Col>
+                        </Row>
                     </Col>
 
                     <Col lg="3" sm="9" className="m-2">

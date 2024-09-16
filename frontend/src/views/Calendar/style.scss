@@ -40,6 +40,18 @@
     margin-bottom: -8px;
 }
 
+.AnnouncementBlock .rdt_Table, .AnnouncementBlock .rdt_TableRow {
+    background-color: inherit;
+}
+
+.AnnouncementBlock .rdt_TableCell {
+    padding: 0;
+}
+
+.AnnouncementBlock .rdt_TableCell > div {
+    width: 100%;
+}
+
 .dark-layout {
     .sidebar-left-color1 {
         background: #124787;
@@ -85,6 +97,11 @@
 
     .react-datepicker__day-names {
         margin-bottom: -8px;
+    }
+
+    .AnnouncementBlock .rdt_TableRow {
+        background-color: #283046;
+        color: #fff;
     }
 }
 
