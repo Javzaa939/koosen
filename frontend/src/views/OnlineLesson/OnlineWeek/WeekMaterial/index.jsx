@@ -1,30 +1,45 @@
 import { useState, useContext, useEffect } from "react";
-import { Modal, ModalHeader, ModalBody, Form, Row, Input, Col, Label, FormFeedback, Button, Alert, Badge } from "reactstrap";
+import { Modal, ModalHeader, ModalBody, Form, Row, Input, Col, Label, FormFeedback, Button, Alert, Badge, Spinner } from "reactstrap";
 import AuthContext from "@context/AuthContext"
 import { Controller, useForm } from "react-hook-form";
 import classnames from "classnames"
 import Select from 'react-select'
 import { t } from "i18next";
-import { ReactSelectStyles } from '@utils'
+import { ReactSelectStyles, material_type, validate } from '@utils'
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 import useModal from "@hooks/useModal";
 import LectureModal from './LectureModal'
 import { X } from "react-feather";
 
+import * as Yup from "yup";
+
+export const validateSchema = Yup.object().shape({
+	material_type: Yup.string().trim().required("Хоосон байна"),
+	description: Yup.string().trim().required("Хоосон байна"),
+});
+
+
 function WeekMaterial({ week, refresh }) {
+	console.log(week)
 	// ирж буй path-ийн урд талийг арилгах function
 	const handleUrl = (url) => {
 		const lastIndexOfUrl = url.lastIndexOf('/') + 1;
-		return url.substring(lastIndexOfUrl, url.length);
+        const encodedFileName = url.substring(lastIndexOfUrl, url.length);
+        const decodedFileName = decodeURIComponent(encodedFileName);
+        return decodedFileName;
 	}
 
 	const [isMaterial, setIsMaterial] = useState(false)
 	const [lektsFile, setFile] = useState(null)
 	const [materialOption, setMaterialOption] = useState([])
+	const [materialType, setMaterialType] = useState('')
 
 	const [modal, setModal] = useState(false);
-	const toggle = () => setModal(!modal);
+	const toggle = () => {
+		setModal(!modal)
+		reset()
+	};
 
 	const [lectureModal, setLectureModal] = useState(false)
 	const toggleLecture = () => setLectureModal(!lectureModal)
@@ -33,19 +48,20 @@ function WeekMaterial({ week, refresh }) {
 
 	const { userDetail: user } = useContext(AuthContext)
 	const { fetchData, isLoading } = useLoader({})
+	const { fetchData: fetchSubmit, isLoading: submitLoading } = useLoader({})
 
 	const {
 		control,
 		formState: { errors },
 		handleSubmit,
 		reset,
-	} = useForm();
+	} = useForm(validate(validateSchema));
 
 	const materialApi = useApi().material
 	const lektsApi = useApi().online_lesson.lekts_material
 
 	async function getMaterial() {
-		const { success, data } = await fetchData(materialApi.get(1))
+		const { success, data } = await fetchData(materialApi.get(materialType))
 		if (success) {
 			if (data.length > 0) {
 				setMaterialOption(data[0]?.file?.files)
@@ -54,6 +70,7 @@ function WeekMaterial({ week, refresh }) {
 	}
 
 	async function onSubmit(cdata) {
+		setIsMaterial(false)
 		cdata['created_user'] = user.id
 		cdata['id'] = week?.id
 		var formData = new FormData()
@@ -68,7 +85,7 @@ function WeekMaterial({ week, refresh }) {
 			formData.append(key, cdata[key])
 		}
 
-		const { success, data } = await fetchData(lektsApi.post(formData))
+		const { success, data } = await fetchSubmit(lektsApi.post(formData))
 		if (success) {
 			toggle()
 			reset()
@@ -77,8 +94,8 @@ function WeekMaterial({ week, refresh }) {
 	}
 
 	// delete api
-	const handleDelete = async () => {
-		const { success } = await fetchData(lektsApi.delete(week?.id));
+	const handleDelete = async (id) => {
+		const { success } = await fetchData(lektsApi.delete(id));
 		if (success) {
 			refresh()
 		}
@@ -86,9 +103,11 @@ function WeekMaterial({ week, refresh }) {
 
 	useEffect(
 		() => {
-			getMaterial()
+			if (materialType) {
+				getMaterial()
+			}
 		},
-		[]
+		[materialType]
 	)
 
 	return (
@@ -96,84 +115,153 @@ function WeekMaterial({ week, refresh }) {
 
 			<div className="d-flex flex-row justify-content-end align-items-center w-100">
 				{
-					week.lekts_path ? (
-						<Button size="sm" color="primary" onClick={toggleLecture}>
-							Тэмдэглэл шалгах
-						</Button>
-					) : (
-						<Button size="sm" color="primary" onClick={toggle}>
-							Оруулах
-						</Button>
-					)
+					!week?.material_data.length > 0
+					?
+					<Button size='sm' color="primary" onClick={toggle}>
+						Оруулах
+					</Button>
+					:
+					<Button size='sm' color="primary" onClick={toggle} className='mb-1'>
+						Нэмэх
+					</Button>
 				}
 			</div>
 			{
-				week?.lekts_path &&
-				<>
-					<div>
-						{week?.description || ''}
-					</div>
-					<div>
-						{
-							['pdf', 'PDF'].includes(week?.lekts_path?.split('.').pop())
-								?
-								<div className="text-end">
-									<iframe src={week?.lekts_path} width="100%" height="400px" className='border'></iframe>
-									<Button
-										size="sm"
-										color="danger"
-										className="ms-1"
-										onClick={() =>
-											showWarning({
-												header: {
-													title: t(`Лекцийн материал`),
-												},
-												question: t(`Лекцийн материал устгах уу?`),
-												onClick: () => handleDelete(week.id),
-												btnText: t("Устгах"),
-											})
-										}
-									>
-										Устгах
-									</Button>
-								</div>
-								:
-								['pptx', 'PPTX', 'ppt'].includes(week?.lekts_path?.split('.').pop())
+				week?.material_data &&
+				week?.material_data?.map((item, idx) => {
+					return (
+						<div key={idx} className={idx === 0 ? 'shadow p-1' : 'mt-1 border-top shadow p-1'}>
+							<div className="my-1">
+								{item?.description || ''}
+							</div>
+							<div>
+								{
+									['pdf', 'PDF'].includes(item?.material.file_path?.split('.').pop())
 									?
-									<iframe
-										title={'PDF-Viewer'}
-										width={'100%'}
-										height='400px'
-										src={`https://view.officeapps.live.com/op/embed.aspx?src=${week?.lekts_path}`}
-									></iframe>
-									:
-									<div>
-										<a href={week?.lekts_path} download>
-											{handleUrl(week?.lekts_path)}
-										</a>
-										<a
-											className="ms-1"
-											role="button"
-											onClick={() =>
-												showWarning({
-													header: {
-														title: t(`Лекцийн материал`),
-													},
-													question: t(`Лекцийн материал устгах уу?`),
-													onClick: () => handleDelete(week.id),
-													btnText: t("Устгах"),
-												})
-											}
-											id={`complaintListDatatableCancel${week?.id}`}
-										>
-											<Badge color="light-danger" pill>
-												<X width={18} />
-											</Badge>
-										</a>
+									<div className="d-flex flex-row justify-content-between m-1 m-sm-0" style={{ borderBottom: '1px solid #dee2e6' }}>
+										<iframe src={item?.material.file_path} width={"100%"} height={"300px"} className='border'></iframe>
+										<div>
+											<a
+												className="ms-1"
+												role="button"
+												onClick={() =>
+													showWarning({
+														header: {
+															title: t(`Лекцийн материал`),
+														},
+														question: t(`Лекцийн материал устгах уу?`),
+														onClick: () => handleDelete(item.id),
+														btnText: t("Устгах"),
+													})
+												}
+												id={`complaintListDatatableCancel${item.id}`}
+											>
+												<Badge color="light-danger" pill>
+													<X width={18} />
+												</Badge>
+											</a>
+										</div>
 									</div>
-						}
-					</div>
-				</>
+									:
+									['mp4'].includes(item?.material?.file_path.split('.').pop())
+									?
+										<div className="d-flex flex-row justify-content-between m-1 m-sm-0 h-sm-100" style={{ borderBottom: '1px solid #dee2e6' }}>
+											<video
+												controls
+												src={item?.material?.file_path}
+												width={"90%"}
+												height={'350px'}
+											>
+											Видео тоглуулахад алдаа гарлаа.
+											</video>
+											<div>
+												<a
+													className="ms-1"
+													role="button"
+													onClick={() =>
+														showWarning({
+															header: {
+																title: t(`Лекцийн материал`),
+															},
+															question: t(`Лекцийн материал устгах уу?`),
+															onClick: () => handleDelete(item.id),
+															btnText: t("Устгах"),
+														})
+													}
+													id={`complaintListDatatableCancel${item.id}`}
+												>
+													<Badge color="light-danger" pill>
+														<X width={18} />
+													</Badge>
+												</a>
+											</div>
+										</div>
+									:
+										['pptx', 'PPTX', 'ppt'].includes(item?.material?.file_path?.split('.').pop())
+										?
+											<div className="d-flex flex-row justify-content-between m-1 m-sm-0" style={{ borderBottom: '1px solid #dee2e6' }}>
+												<iframe
+													title={'PDF-Viewer'}
+													src={`https://view.officeapps.live.com/op/embed.aspx?src=${item?.material?.file_path}`}
+													width={"90%"}
+													height={"300px"}
+												></iframe>
+											<div>
+												<a
+													className="ms-1"
+													role="button"
+													onClick={() =>
+														showWarning({
+															header: {
+																title: t(`Лекцийн материал`),
+															},
+															question: t(`Лекцийн материал устгах уу?`),
+															onClick: () => handleDelete(item.id),
+															btnText: t("Устгах"),
+														})
+													}
+													id={`complaintListDatatableCancel${item.id}`}
+												>
+													<Badge color="light-danger" pill>
+														<X width={18} />
+													</Badge>
+												</a>
+											</div>
+										</div>
+									:
+									<div className="d-flex flex-row justify-content-between p-1" style={{borderBottom: '1px solid #dee2e6'}}>
+										<div>
+											<a href={item?.material?.file_path} download>
+												{handleUrl(item?.material?.file_path)}
+											</a>
+										</div>
+										<div>
+											<a
+												className="ms-1"
+												role="button"
+												onClick={() =>
+													showWarning({
+														header: {
+															title: t(`Лекцийн материал`),
+														},
+														question: t(`Лекцийн материал устгах уу?`),
+														onClick: () => handleDelete(item.id),
+														btnText: t("Устгах"),
+													})
+												}
+												id={`complaintListDatatableCancel${item.id}`}
+											>
+												<Badge color="light-danger" pill>
+													<X width={18} />
+												</Badge>
+											</a>
+										</div>
+									</div>
+								}
+							</div>
+						</div>
+					)
+				})
 			}
 			{
 				modal &&
@@ -184,13 +272,35 @@ function WeekMaterial({ week, refresh }) {
 					isOpen={modal}
 					toggle={toggle}
 				>
-					<ModalHeader toggle={toggle}>Хичээлийн лекц оруулах</ModalHeader>
+					<ModalHeader toggle={toggle}>Хичээлийн 7 хоногт файл оруулах</ModalHeader>
 					<ModalBody className="row">
 						<Form onSubmit={handleSubmit(onSubmit)}>
 							<Row className="">
+								<Col md={12} className={'mt-25'}>
+									<Label className="form-label" for="is_lekts">
+										Лекц эсэх
+									</Label>
+									<Controller
+										defaultValue=''
+										control={control}
+										id="is_lekts"
+										name="is_lekts"
+										render={({ field }) => (
+											<Input
+												{...field}
+												id="is_lekts"
+												checked={field.value}
+												type="checkbox"
+												className='ms-1'
+												invalid={errors.is_lekts && true}
+											/>
+										)}
+									/>
+									{errors.is_lekts && <FormFeedback className='d-block'>{t(errors.is_lekts.message)}</FormFeedback>}
+								</Col>
 								<Col md={12}>
 									<Label className="form-label" for="description">
-										{'Лекцийн тайлбар'}
+										{'Тайлбар'}
 									</Label>
 									<Controller
 										defaultValue=''
@@ -202,7 +312,7 @@ function WeekMaterial({ week, refresh }) {
 												{...field}
 												id="description"
 												bsSize="sm"
-												placeholder={'Лекцийн тайлбар'}
+												placeholder={'Тайлбар'}
 												type="textarea"
 												invalid={errors.description && true}
 											/>
@@ -215,6 +325,41 @@ function WeekMaterial({ week, refresh }) {
 									<Alert color={'primary'} className={'p-50'}>
 										Оруулсан хичээлийн материалын файлаас сонгох эсвэл шинээр файл оруулахыг анхаарна уу.
 									</Alert>
+								</Col>
+								<Col md={12} className={'mt-25'}>
+									<Label className="form-label" for="material_type">
+										Хичээлийн материалын төрөл
+									</Label>
+									<Controller
+										defaultValue=''
+										control={control}
+										id="material_type"
+										name="material_type"
+										render={({ field: { value, onChange } }) => {
+											return (
+												<Select
+													name="material_type"
+													id="material_type"
+													classNamePrefix="select"
+													isClearable
+													className={classnames("react-select", {"is-invalid": errors.material_type})}
+													isLoading={isLoading}
+													placeholder={t("-- Сонгоно уу --")}
+													options={material_type() || []}
+													value={material_type().find((c) => c.id === value)}
+													noOptionsMessage={() => t("Хоосон байна")}
+													onChange={(val) => {
+														setMaterialType(val?.id)
+														onChange(val?.id)
+													}}
+													styles={ReactSelectStyles}
+													getOptionValue={(option) => option.id}
+													getOptionLabel={(option) => option.name}
+												/>
+											);
+										}}
+									/>
+									<FormFeedback className="d-block">{errors?.material_type?.message}</FormFeedback>
 								</Col>
 								<Col md={12} className={'mt-25'}>
 									<Label className="form-label" for="lekts_file">
@@ -285,8 +430,15 @@ function WeekMaterial({ week, refresh }) {
 									</Col>
 								}
 								<Col md={12} className={'d-flex justify-content-between mt-1'}>
-									<Button type="submit" color="primary">
-										Хадгалах
+									<Button type="submit" disabled={isLoading} color="primary">
+										{isLoading &&
+											<Spinner
+												style={{
+													height: '1rem',
+													width: '1rem'
+												}}
+											/>
+										} Хадгалах
 									</Button>
 									<Button type="reset" color="secondary" onClick={() => setModal(false)}>
 										Буцах

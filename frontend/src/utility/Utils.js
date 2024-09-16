@@ -1853,3 +1853,14 @@ export const score_type = () => {
 
 	return options
 }
+
+export const material_type = () => {
+	const options = [
+		{ id: 1, name: 'Файл' },
+		{ id: 2, name: 'Видео' },
+		{ id: 3, name: 'Зураг' },
+		{ id: 4, name: 'Audio' },
+	]
+
+	return options
+}

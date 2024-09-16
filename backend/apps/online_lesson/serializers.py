@@ -5,7 +5,7 @@ from rest_framework import serializers
 
 from student.serializers import StudentSimpleListSerializer
 from core.serializers import TeachersSerializer
-from lms.models import OnlineLesson,Challenge, LessonMaterial, OnlineWeek , Announcement, HomeWork,  HomeWorkStudent, OnlineWeekStudent, Student
+from lms.models import OnlineLesson,Challenge, LessonMaterial, OnlineWeek , Announcement, HomeWork,  HomeWorkStudent, OnlineWeekStudent, Student, WeekMaterials
 from core.models import Teachers
 
 from main.utils.file import split_root_path
@@ -62,28 +62,59 @@ class ChallengeSerializer(serializers.ModelSerializer):
         model = Challenge
         fields = '__all__'
 
-class OnlineWeekSerializer(serializers.ModelSerializer):
-    lekts_path = serializers.SerializerMethodField()
+
+class LessonMaterialDataSerializer(serializers.ModelSerializer):
+    file_path = serializers.SerializerMethodField()
+
     class Meta:
-        model = OnlineWeek
+        model = LessonMaterial
         fields = '__all__'
 
-    def get_lekts_path(self, obj):
+    def get_file_path(self, obj):
         full_path = ''
-        path = obj.lekts_file
+        file = obj.path
 
-        if path:
-            full_path = settings.ASSIGNMENT + str(path)
-            cdn_data = {}
-            try:
-                cdn_data = get_file_from_cdn(full_path)
-            except Exception as e:
-                print(e)
+        if file:
+            full_path = settings.ASSIGNMENT + str(file)
+            cdn_data = get_file_from_cdn(full_path)
 
             if cdn_data.get('success'):
                 full_path = settings.CDN_FILE_URL + full_path
 
         return full_path
+
+
+class WeekMaterialsSerializer(serializers.ModelSerializer):
+    material = LessonMaterialDataSerializer(read_only=True)
+
+    class Meta:
+        model = WeekMaterials
+        fields = '__all__'
+
+
+class OnlineWeekSerializer(serializers.ModelSerializer):
+    # lekts_path = serializers.SerializerMethodField()
+    material_data = WeekMaterialsSerializer(source='materials', many=True, read_only=True)
+    class Meta:
+        model = OnlineWeek
+        fields = '__all__'
+
+    # def get_lekts_path(self, obj):
+    #     full_path = ''
+    #     path = obj.lekts_file
+
+    #     if path:
+    #         full_path = settings.ASSIGNMENT + str(path)
+    #         cdn_data = {}
+    #         try:
+    #             cdn_data = get_file_from_cdn(full_path)
+    #         except Exception as e:
+    #             print(e)
+
+    #         if cdn_data.get('success'):
+    #             full_path = settings.CDN_FILE_URL + full_path
+
+    #     return full_path
 
 class LessonMaterialSerializer(serializers.ModelSerializer):
     school_name = serializers.SerializerMethodField()
