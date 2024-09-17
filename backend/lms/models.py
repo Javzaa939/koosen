@@ -4516,3 +4516,13 @@ class Announcement(models.Model):
     created_user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Үүсгэсэн хэрэглэгч', null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+
+
+class AnnouncementComment(models.Model):
+    """ Зарлал сэтгэгдэл """
+
+    announcement = models.ForeignKey(Announcement, verbose_name='Зарлал', on_delete=models.CASCADE)
+    student = models.ForeignKey(Student, verbose_name='Оюутан', null=True, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, verbose_name='Хэрэглэгч', null=True, on_delete=models.CASCADE)
+    comment = models.TextField(verbose_name='Сэтгэгдэл', null=True)
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Сэтгэгдэл үлдээсэн хугацаа')
