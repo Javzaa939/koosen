@@ -13,9 +13,11 @@ import useLoader from "@hooks/useLoader";
 import { validate } from "@utils"
 
 import { validateSchema } from './validateSchema';
+import SchoolContext from '@src/utility/context/SchoolContext';
 
 export default function FormModal({ open, handleModal, refreshDatas, defaultDatas })
 {
+    const { school_id } = useContext(SchoolContext)
     const CloseBtn = (
         <X className="cursor-pointer" size={15} onClick={handleModal} />
     )
@@ -34,7 +36,7 @@ export default function FormModal({ open, handleModal, refreshDatas, defaultData
     async function onSubmit(cdata)
     {
         cdata['dedication_type'] = 1
-
+        cdata['school'] = school_id
 
         const { success, data, error } = await postFetch(Object.keys(defaultDatas).length != 0 ? signatureApi.put(cdata, defaultDatas?.id) : signatureApi.post(cdata))
         if (success) {
@@ -93,6 +95,28 @@ export default function FormModal({ open, handleModal, refreshDatas, defaultData
                             {errors.last_name && <FormFeedback className='d-block'>{t(errors.last_name.message)}</FormFeedback>}
                         </Col>
                         <Col sm={12} className='mt-1'>
+                            <Label className="form-label" for="last_name_eng">
+                                {t('Овог /англи/')}
+                            </Label>
+                            <Controller
+                                defaultValue={defaultDatas?.last_name_eng || ''}
+                                control={control}
+                                id="last_name_eng"
+                                name="last_name_eng"
+                                render={({ field }) => (
+                                    <Input
+                                        {...field}
+                                        id="last_name_eng"
+                                        bsSize="sm"
+                                        type="text"
+                                        placeholder={t('овог оруулна уу')}
+                                        invalid={errors.last_name_eng && true}
+                                    />
+                                )}
+                            />
+                            {errors.last_name_eng && <FormFeedback className='d-block'>{t(errors.last_name_eng.message)}</FormFeedback>}
+                        </Col>
+                        <Col sm={12} className='mt-1'>
                             <Label className="form-label" for="first_name">
                                 {t('Нэр')}
                             </Label>
@@ -115,6 +139,28 @@ export default function FormModal({ open, handleModal, refreshDatas, defaultData
                             {errors.first_name && <FormFeedback className='d-block'>{t(errors.first_name.message)}</FormFeedback>}
                         </Col>
                         <Col sm={12} className='mt-1'>
+                            <Label className="form-label" for="first_name_eng">
+                                {t('Нэр /англи/')}
+                            </Label>
+                            <Controller
+                                defaultValue={defaultDatas?.first_name_eng || ''}
+                                control={control}
+                                id="first_name_eng"
+                                name="first_name_eng"
+                                render={({ field }) => (
+                                    <Input
+                                        {...field}
+                                        id="first_name_eng"
+                                        bsSize="sm"
+                                        type="text"
+                                        placeholder={t('нэр оруулна уу')}
+                                        invalid={errors.first_name_eng && true}
+                                    />
+                                )}
+                            />
+                            {errors.first_name_eng && <FormFeedback className='d-block'>{t(errors.first_name_eng.message)}</FormFeedback>}
+                        </Col>
+                        <Col sm={12} className='mt-1'>
                             <Label className="form-label" for="position_name">
                                 {t('Албан тушаалын нэр (эрдмийн зэрэг цол)')}
                             </Label>
@@ -135,6 +181,28 @@ export default function FormModal({ open, handleModal, refreshDatas, defaultData
                                 )}
                             />
                             {errors.position_name && <FormFeedback className='d-block'>{t(errors.position_name.message)}</FormFeedback>}
+                        </Col>
+                        <Col sm={12} className='mt-1'>
+                            <Label className="form-label" for="position_name_eng">
+                                {t('Албан тушаалын нэр (эрдмийн зэрэг цол) англи')}
+                            </Label>
+                            <Controller
+                                defaultValue={defaultDatas?.position_name_eng || ''}
+                                control={control}
+                                id="position_name_eng"
+                                name="position_name_eng"
+                                render={({ field }) => (
+                                    <Input
+                                        {...field}
+                                        id="position_name_eng"
+                                        bsSize="sm"
+                                        type="text"
+                                        placeholder={t('албан тушаал оруулна уу')}
+                                        invalid={errors.position_name_eng && true}
+                                    />
+                                )}
+                            />
+                            {errors.position_name_eng && <FormFeedback className='d-block'>{t(errors.position_name_eng.message)}</FormFeedback>}
                         </Col>
                         <Col md={12} className="text-center mt-2">
                             <Button className="me-2" color="primary" type="submit" disabled={postLoading}>

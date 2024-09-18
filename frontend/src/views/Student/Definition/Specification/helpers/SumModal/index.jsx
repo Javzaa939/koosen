@@ -22,6 +22,7 @@ import {
 import useApi from '@hooks/useApi'
 import useLoader from '@hooks/useLoader'
 import ReactCountryFlag from 'react-country-flag'
+import { generateLessonYear }  from '@utils'
 
 export default function SumModal(props)
 {
@@ -50,10 +51,10 @@ export default function SumModal(props)
 
     async function getYear()
     {
+        setYears(generateLessonYear(10))
         const { success, data } = await fetchData(studentDefinitionApi.getYear(datas))
         if (success)
         {
-            setYears(data.year)
             setSeason(data.season)
             setHaveDun(data.have_dun)
         }
@@ -171,9 +172,9 @@ export default function SumModal(props)
                                                 years.map((page, idx) => (
                                                 <option
                                                     key={idx}
-                                                    value={page}
+                                                    value={page?.id}
                                                 >
-                                                    {page}
+                                                    {page?.name}
                                                 </option>
                                             ))}
                                         </Input>
@@ -187,15 +188,22 @@ export default function SumModal(props)
                                             bsSize='sm'
                                             style={{ height: "30px",}}
                                         >
+                                            <option
+                                                key={0}
+                                                value={''}
+                                            >
+                                                {'Бүгд'}
+                                            </option>
                                             {
                                                 season.map((page, idx) => (
-                                                <option
-                                                    key={idx}
-                                                    value={page.season_code}
-                                                >
-                                                    {page.season_name}
-                                                </option>
-                                            ))}
+                                                    <option
+                                                        key={idx}
+                                                        value={page.season_code}
+                                                    >
+                                                        {page.season_name}
+                                                    </option>
+                                                ))
+                                            }
                                         </Input>
                                     </Col>
                                 </>

@@ -36,7 +36,7 @@ const SwiperFade = ({ datas }) => {
 							{
 								data?.image
 								&&
-									<img width={400} height ={400} style={{ textAlign: 'center', objectFit:'cover' }} src={data?.image ? data?.image : null}></img>
+									<img width={350} height ={400} style={{ textAlign: 'center', objectFit:'cover' }} src={data?.image ? data?.image : null}></img>
 							}
 							<h4 className='mt-1'>{data?.title}</h4>
 							<div className='mb-4 mt-1 '>

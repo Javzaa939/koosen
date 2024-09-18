@@ -91,7 +91,7 @@ from .serializers import BigSchoolsSerializer
 from .serializers import StudentDefinitionSerializer
 from .serializers import ScoreRegisterDefinitionSerializer
 from .serializers import SeasonSerializer
-from .serializers import CalculatedGpaOfDiplomaPrintSerializer
+from .serializers import SchoolSerializer
 from .serializers import StudentAttachmentSerializer
 from .serializers import GraduationWorkPrintSerailizer
 from .serializers import StudentVizListSerializer
@@ -2408,9 +2408,8 @@ class DefinitionSumAPIView(
         student_id = data.get('student_id')
 
         student_qs = Student.objects.get(id=student_id)
-        school_qs = Schools.objects.all().first()
-
-        school_data = BigSchoolsSerializer(school_qs, many=False).data
+        school_qs = SubOrgs.objects.filter(id=student_qs.school.id).first()
+        school_data = SchoolSerializer(school_qs, many=False).data
         student_data = StudentDefinitionSerializer(student_qs, many=False).data
 
         all_data['school'] = school_data
@@ -2421,8 +2420,11 @@ class DefinitionSumAPIView(
         else:
             score = get_student_score_register(student_id, data.get('season_code'), data.get('year_value'))
 
-            season_name = Season.objects.filter(season_code=data.get('season_code')).last()
-            all_data['season_name'] = season_name.season_name
+            season_name = ''
+            if data.get('season_code'):
+                season_name = Season.objects.filter(season_code=data.get('season_code')).first().season_name
+
+            all_data['season_name'] = season_name
 
         # if score['total_kr'] == 0:
         #     return request.send_data(all_data)

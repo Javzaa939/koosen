@@ -745,7 +745,7 @@ class SchoolSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SubOrgs
-        fields = ['id', 'name']
+        fields = '__all__'
 
 
 class LessonScheduleSerializer(serializers.ModelSerializer):
@@ -977,10 +977,23 @@ class StudentDefinitionSerializer(serializers.ModelSerializer):
 
     score_code = serializers.SerializerMethodField()
     graduation_work = serializers.SerializerMethodField()
+    profession_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Student
         fields = "__all__"
+
+    def get_profession_name(self, obj):
+        profession_name = obj.group.profession.name
+        split_name = profession_name
+
+        if '/' in profession_name:
+            split_name = profession_name.split('/')[0]
+
+        if '(' in profession_name:
+            split_name = profession_name.split('(')[0]
+
+        return split_name
 
     def get_score_code(self, obj):
         # Голч дүнгийн жагсаалт
@@ -1234,7 +1247,8 @@ class StudentDefinitionListLiteSerializer(serializers.ModelSerializer):
     degree_name = serializers.CharField(source="group.degree.degree_name", default='')
     status_name = serializers.CharField(source="status.name", default='')
     status_code = serializers.IntegerField(source="status.code", default=None)
-    profession_name = serializers.CharField(source='group.profession.name', default='')
+    profession_name = serializers.SerializerMethodField()
+    profession_eng_name = serializers.CharField(source="group.profession.name_eng", default='')
     group_level = serializers.CharField(source='group.level', default='')
     group_join_year = serializers.CharField(source='group.join_year', default='')
     graduation_work = serializers.SerializerMethodField()
@@ -1243,7 +1257,19 @@ class StudentDefinitionListLiteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Student
-        fields = "id", "code", "first_name", "last_name", "register_num", "group_name", "degree_name", "status_name", "profession_name", "group_level", "group_join_year", "graduation_work", "status_code", "school_data"
+        fields = "id", "code", "first_name", "last_name", "register_num", "group_name", "degree_name", "status_name", "profession_name", "group_level", "group_join_year", "graduation_work", "status_code", "school_data", 'profession_eng_name'
+
+    def get_profession_name(self, obj):
+        profession_name = obj.group.profession.name
+        split_name = profession_name
+
+        if '/' in profession_name:
+            split_name = profession_name.split('/')[0]
+
+        if '(' in profession_name:
+            split_name = profession_name.split('(')[0]
+
+        return split_name
 
     def get_graduation_work(self, obj):
 
@@ -1259,7 +1285,7 @@ class StudentDefinitionListLiteSerializer(serializers.ModelSerializer):
 
     def get_school_data(self, obj):
 
-        school_qs = Schools.objects.all().first()
-        school_data = BigSchoolsSerializer(school_qs, many=False).data
+        school_qs = SubOrgs.objects.filter(id=obj.school.id).first()
+        school_data = SchoolSerializer(school_qs, many=False).data
 
         return school_data

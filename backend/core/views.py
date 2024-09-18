@@ -429,39 +429,10 @@ class SubSchoolAPIView(
         errors = []
         datas = request.data
         data = null_to_none(datas)
-        org = data.get("org")
-        name_eng = data.get("name_eng")
-        name_uig = data.get("name_uig")
-        zahiral_name = data.get("zahiral_name")
-        zahiral_name_eng = data.get("zahiral_name_eng")
-        zahiral_name_uig = data.get("zahiral_name_uig")
-        tsol_name = data.get("tsol_name")
-        tsol_name_eng = data.get("tsol_name_eng")
-        tsol_name_uig = data.get("tsol_name_uig")
-        org_code = data.get("org_code")
-
         instance = self.get_object()
-        serializer = self.get_serializer(data=data)
+        serializer = self.get_serializer(instance, data=data, partial=True)
         if serializer.is_valid(raise_exception=False):
-            with transaction.atomic():
-                try:
-                    qs = self.queryset.filter(id=pk)
-                    if qs:
-                        qs.update(
-                            org=org,
-                            name_eng=name_eng,
-                            name_uig=name_uig,
-                            zahiral_name=zahiral_name,
-                            zahiral_name_eng=zahiral_name_eng,
-                            zahiral_name_uig=zahiral_name_uig,
-                            tsol_name=tsol_name,
-                            tsol_name_eng=tsol_name_eng,
-                            tsol_name_uig =tsol_name_uig,
-                            org_code =org_code,
-                        )
-                except Exception:
-                    raise
-
+            serializer.save()
         else:
             for key in serializer.errors:
                 return_error = {

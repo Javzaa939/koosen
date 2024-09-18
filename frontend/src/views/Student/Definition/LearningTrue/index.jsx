@@ -22,9 +22,9 @@ export default function LearningTrue()
         {
             window.onafterprint = function()
             {
-                window.close()
-                sessionStorage.removeItem("student_data")
-                sessionStorage.removeItem("signature_data")
+                // window.close()
+                // sessionStorage.removeItem("student_data")
+                // sessionStorage.removeItem("signature_data")
             }
         },
         []
@@ -32,10 +32,10 @@ export default function LearningTrue()
 
     function imageLoaded()
     {
-        if (Object.keys(datas).length != 0)
-        {
-            setTimeout(() => window.print(), 1000)
-        }
+        // if (Object.keys(datas).length != 0)
+        // {
+        //     setTimeout(() => window.print(), 1000)
+        // }
     }
 
     /** 1 => 01 болгох Format */
@@ -57,10 +57,13 @@ export default function LearningTrue()
                         {/* <img className="fallback-logo" width={100} height={100} src='http://hr.mnun.edu.mn/media/orgs/logo/MNU-Logo_1.png' alt="logo" onLoad={imageLoaded} /> */}
                         <img className="fallback-logo" width={100} height={100} src={logo} alt="logo" onLoad={imageLoaded} />
                         <div className="d-flex flex-column text-center fw-bolder">
-                            <span className='mt-1'>
-                                {datas?.school_data?.name?.toUpperCase()}
+                            <span className='mt-1 text-uppercase'>
+                                Дотоод хэргийн их сургууль
                             </span>
-                            <span style={{ marginTop: '6px' }}>{datas?.school_data?.name_eng?.toUpperCase()}</span>
+                            <span style={{ marginTop: '6px' }} className="text-uppercase">
+                                {/* {datas?.school_data?.name_eng?.toUpperCase()} */}
+                                University of internal affairs, mongolia
+                            </span>
                         </div>
                     </div>
                     <Row className="pb-2 ps-1 pe-3 pt-1" style={{ fontSize: '14px' }} >
@@ -68,8 +71,9 @@ export default function LearningTrue()
                         {/* <p>Огноо: {new Date().getFullYear()}-{zeroFill(new Date().getMonth() + 1)}-{new Date().getDate()}</p> */}
 
                         <div className="text-center mt-1">
-                            {datas?.school_data?.address} {datas?.school_data?.phone_number && `Утас: ${datas?.school_data?.phone_number}`} {datas?.school_data?.home_phone && `Факс: ${datas?.school_data?.home_phone}`}
-                            <div>{datas?.school_data?.email && `E-mail: ${datas?.school_data?.email}`}</div>
+                            {datas?.school?.address ? datas?.school?.address : 'Баянзүрх дүүрэг, VIII хороо Хилчний гудамж, ш/х - 210332, Улаанбаатар хот'}
+                            {/* {datas?.school_data?.phone_number && `Утас: ${datas?.school_data?.phone_number}`} {datas?.school_data?.home_phone && `Факс: ${datas?.school_data?.home_phone}`} */}
+                            <div>{datas?.school_data?.social && `E-mail: ${datas?.school_data?.social}`}</div>
                         </div>
                         <div className="text-center fst-italic">
                             _______________________________№_______________________________
@@ -83,11 +87,13 @@ export default function LearningTrue()
                         {
                             datas?.status_code == 1
                             ?
-                                `${datas?.code} кодтой ${datas?.last_name} овогтой ${datas?.first_name} нь ${datas?.school_data?.name}-д ${datas?.degree_name?.toLowerCase()}-н ${datas?.profession_name} мэргэжлээр ${datas?.group_level}-р курст суралцдаг нь үнэн болохыг тодорхойлов.`
+                            <div>
+                                <span className="fw-bolder">{datas?.code} </span><span className="fw-bolder">{datas?.last_name}</span> овогтой <span className="fw-bolder">{datas?.first_name}</span> нь тус сургуульд <span className="fw-bolder">{datas?.profession_name}</span> хөтөлбөрөөр <span>{datas?.group_level}</span>-р курст суралцдаг нь үнэн болохыг тодорхойлов.
+                            </div>
                             :
                                 datas?.status_code == 5
                                 ?
-                                    `${datas?.code} кодтой ${datas?.last_name} овогтой ${datas?.first_name} нь ${datas?.school_data?.name}-д ${datas?.degree_name?.toLowerCase()}-н ${datas?.group_name} мэргэжлээр ${datas?.group_join_year?.substring(0, 4)}-${datas?.graduation_work?.graduation_year?.substring(0, 4)} оны хооронд суралцаж ${datas?.graduation_work?.diplom_num} дипломын дугаартай төгссөн нь үнэн болохыг тодорхойлов.`
+                                    `${datas?.code} кодтой ${datas?.last_name} овогтой ${datas?.first_name} нь ${datas?.school_data?.name}-д ${datas?.degree_name?.toLowerCase()}-н ${datas?.group_name} хөтөлбөрөөр ${datas?.group_join_year?.substring(0, 4)}-${datas?.graduation_work?.graduation_year?.substring(0, 4)} оны хооронд суралцаж ${datas?.graduation_work?.diplom_num} дипломын дугаартай төгссөн нь үнэн болохыг тодорхойлов.`
                                 :
                                     `${datas?.code} кодтой ${datas?.last_name} овогтой ${datas?.first_name} нь ${datas?.school_data?.name}-ээс ${datas?.status_name?.toLowerCase()} нь үнэн болохыг тодорхойлов.`
                         }

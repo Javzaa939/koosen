@@ -453,7 +453,6 @@ export const generateLessonYear = ( year ) =>{
     var check_years = { id: value, name: value }
     years.push(check_years);
   }
-  // setYears(years)
 
   return years
 }

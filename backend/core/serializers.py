@@ -266,14 +266,14 @@ class SubSchoolRegisterSerailizer(serializers.ModelSerializer):
         model = SubOrgs
         fields = "__all__"
 
+
 class SubSchoolPutRegisterSerailizer(serializers.ModelSerializer):
-    "засах"
 
     class Meta:
         model = SubOrgs
-        fields = "id", "name_eng","name_uig",  "zahiral_name", "zahiral_name_eng", "zahiral_name_uig", "tsol_name", "tsol_name_eng", "tsol_name_uig", "org"
+        fields = '__all__'
 
-# Байгууллага сонгох
+
 class OrgSerailizer(serializers.ModelSerializer):
 
     class Meta:

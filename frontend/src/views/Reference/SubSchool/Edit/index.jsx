@@ -139,6 +139,48 @@ const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
                             {errors.org_code && <FormFeedback className='d-block'>{t(errors.org_code.message)}</FormFeedback>}
                         </Col>
                         <Col md={12}>
+                            <Label className="form-label" for="social">
+                                {t('Сургуулийн цахим шуудан')}
+                            </Label>
+                            <Controller
+                                defaultValue=''
+                                control={control}
+                                id="social"
+                                name="social"
+                                render={({ field }) => (
+                                    <Input
+                                        {...field}
+                                        id="social"
+                                        bsSize="sm"
+                                        placeholder={t('Сургуулийн цахим шуудан')}
+                                        type="email"
+                                    />
+                                )}
+                            />
+                            {errors.social && <FormFeedback className='d-block'>{t(errors.social.message)}</FormFeedback>}
+                        </Col>
+                        <Col md={12}>
+                            <Label className="form-label" for="address">
+                                {t('Сургуулийн хаяг')}
+                            </Label>
+                            <Controller
+                                defaultValue=''
+                                control={control}
+                                id="address"
+                                name="address"
+                                render={({ field }) => (
+                                    <Input
+                                        {...field}
+                                        id="address"
+                                        bsSize="sm"
+                                        placeholder={t('Сургуулийн хаяг')}
+                                        type="textarea"
+                                    />
+                                )}
+                            />
+                            {errors.address && <FormFeedback className='d-block'>{t(errors.address.message)}</FormFeedback>}
+                        </Col>
+                        <Col md={12}>
                             <Label className="form-label" for="name_eng">
                                 {t('Сургуулийн англи нэр')}
                             </Label>

@@ -1,5 +1,5 @@
 
-import React, { Fragment, useState, useEffect } from "react"
+import React, { Fragment, useState, useEffect, useContext } from "react"
 
 import { Card, CardHeader, CardTitle, Row, Col, Input, Label, Button, ListGroupItem, Spinner } from "reactstrap"
 import { ChevronDown, Plus, Search, Menu, Trash2, Edit } from 'react-feather'
@@ -19,11 +19,13 @@ import '@styles/react/libs/drag-and-drop/drag-and-drop.scss'
 
 import FormModal from "./form"
 import { getColumns, ExpandedComponent } from './helpers'
+import SchoolContext from "@src/utility/context/SchoolContext"
 
 export default function Specification()
 {
     const default_page = [10, 15, 50, 75, 100]
 
+    const { school_id } = useContext(SchoolContext)
     const { showWarning } = useModal()
     const { t } = useTranslation()
 
@@ -63,11 +65,12 @@ export default function Specification()
         },
         [rowsPerPage, currentPage, sortField, searchValue]
     )
+
     function getAllData()
     {
         Promise.all([
             fetchData(studentApi.getDefinitionLite(rowsPerPage, currentPage, sortField, searchValue)),
-            fetchData(signatureApi.get(1)),
+            fetchData(signatureApi.get(1, school_id)),
         ]).then((values) => {
             setDatas(values[0]?.data?.results)
             setListArr(values[1]?.data)
