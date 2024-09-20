@@ -71,17 +71,17 @@ class StudentNoticeAPIView(
 
         serializer = self.get_serializer(data=data)
 
-        with transaction.atomic():
-            try:
-                if serializer.is_valid(raise_exception=False):
+        try:
+            if serializer.is_valid():
+                with transaction.atomic():
                     self.perform_create(serializer)
-                else:
-                    print(serializer.errors)
-                    raise serializers.ValidationError(serializer.errors)
-
-            except Exception as e:
-                print(e)
+            else:
+                print(serializer.errors)
                 return request.send_error("ERR_002")
+
+        except Exception as e:
+            print(e)
+            return request.send_error("ERR_002")
 
         return request.send_info("INF_001")
 
