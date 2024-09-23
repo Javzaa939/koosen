@@ -327,30 +327,35 @@ class UserForgotPasswordConfirmAPI(
     def post(self, request):
         sid = transaction.savepoint()
         try:
-            with transaction.atomic():
-                try:
-                    uid = request.data.get('ab1')
-                    uid = force_str(urlsafe_base64_decode(uid).decode())
-                    user_model = get_user_model()
-                    user = user_model.objects.get(pk=uid)
-                except (TypeError, ValueError, OverflowError, user_model.DoesNotExist):
-                    # success result to decrease user ID bruteforce simplicity
-                    return request.send_info('INF_001')
+            try:
+                uid = request.data.get('ab1')
+                uid = force_str(urlsafe_base64_decode(uid).decode())
+                user_model = get_user_model()
+                user = user_model.objects.get(pk=uid)
 
-                token = request.data.get('ab2')
-                if not default_token_generator.check_token(user, token):
-                    # Invalid or expired token
-                    # success result to decrease token bruteforce simplicity
-                    return request.send_info('INF_001')
+            except (TypeError, ValueError, OverflowError, user_model.DoesNotExist):
+                # success result to decrease user ID bruteforce simplicity
+                transaction.savepoint_rollback(sid)
+                return request.send_info('INF_001')
 
-                new_password = request.data.get('password')
-                if new_password:
-                    user.set_password(new_password)
-                    user.save()
-                    # Password has been reset
-                    return request.send_info('INF_001')
-                return request.send_error("ERR_002", 'Password is required.')
+            token = request.data.get('ab2')
+            if not default_token_generator.check_token(user, token):
+                # Invalid or expired token
+                # success result to decrease token bruteforce simplicity
+                transaction.savepoint_rollback(sid)
+                return request.send_info('INF_001')
+
+            new_password = request.data.get('password')
+            if new_password:
+                user.set_password(new_password)
+                user.save()
+                # Password has been reset
+                return request.send_info('INF_001')
+
+            transaction.savepoint_rollback(sid)
+            return request.send_error("ERR_002", 'Password is required.')
+
         except Exception as e:
             print(e)
             transaction.savepoint_rollback(sid)
-            return request.send_error("ERR_002", e.__str__)
+            return request.send_error("ERR_002", e)
