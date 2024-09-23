@@ -409,7 +409,7 @@ class TeacherNameSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Teachers
-        fields = ["id", "last_name", "first_name", "salbar", "sub_org", "code", "org_position", "state", "full_name", 'register', 'org_position_name', 'email', 'phone_number', 'register']
+        fields = ["id", "last_name", "first_name", "salbar", "sub_org", "code", "org_position", "state", "full_name", 'register', 'org_position_name', 'email', 'phone_number', 'register', 'rank_type', 'rank_name', 'rank_rate']
 
     def get_email(self, obj):
         return User.objects.get(id=obj.user.id).email

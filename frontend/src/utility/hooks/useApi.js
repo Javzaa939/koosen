@@ -1827,12 +1827,16 @@ function useApi(isDisplay=false) {
 				get: (limit, page, search, yesh_mhb_state) =>
 					instance.get(`/elselt/admissionuserdata/mhb/?page=${page}&limit=${limit}&search=${search}&yesh_mhb_state=${yesh_mhb_state}`),
 				postExcelImport: (cdata) => instance.post(`/elselt/admissionuserdata/mhb/`, cdata),
-			},
-			able: {
-				getWorker: () => able_instance.get(`/?a=ableApi&tsk=getWorkers&key=uia`),
-				getStructure: () => able_instance.get(`/?a=ableApi&tsk=getDeps&key=uia`),
 			}
 		},
+		able: {
+			getWorker: () => instance.get(`/core/able/get-worker/`),
+			getPosition: () => instance.get(`/core/able/get-position/`),
+			// getStructure: () => able_instance.get(`/?a=ableApi&tsk=getDeps&key=uia`),
+
+			// getWorker: () => able_instance.get(`/?a=ableApi&tsk=getWorkers&key=uia`),
+		},
+
 		online_lesson: {
 			get_lessons: () => instance.get(`/online_lesson/?school=${school_id}`),
 			getOne: (pk) => instance.get(`/online_lesson/${pk}/`),
