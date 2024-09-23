@@ -65,5 +65,9 @@ urlpatterns = [
 
     # Dynamic api
     path('crud/', CRUDAPIView.as_view()),
-    path('crud/<int:pk>/', CRUDAPIView.as_view())
+    path('crud/<int:pk>/', CRUDAPIView.as_view()),
+
+    # ABLE
+    path('able/get-position/', AblePositionAPIView.as_view()),
+    path('able/get-worker/', AbleWorkerAPIView.as_view())
 ]

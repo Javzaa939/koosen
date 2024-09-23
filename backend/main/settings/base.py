@@ -51,6 +51,7 @@ HOMEWORK = 'homework/'
 
 MUIS_HR_MEDIA_URL = 'http://hr.utilitysolution.mn/media/'
 
+GPT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.kc3xuhFLonTzyzu4WzKlJETwuQaNPdX6hKeOuXHywWU'
 
 ALLOWED_HOSTS = []
 

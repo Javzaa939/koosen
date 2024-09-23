@@ -227,8 +227,8 @@ class Salbars(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
-        return self.name
+    # def __str__(self):
+    #     return self.name
 
 
 class Permissions(models.Model):
@@ -368,6 +368,11 @@ class Teachers(models.Model):
     body_height = models.FloatField(default=0, verbose_name="Биеийн өндөр")
     is_foreigner = models.BooleanField(default=False)
     body_weight = models.FloatField(default=0, verbose_name="Биеийн жин")
+
+    # Цолны мэдээлэл
+    rank_type = models.CharField(max_length=255, verbose_name='Цол', null=True)
+    rank_name = models.CharField(max_length=255, verbose_name='Цол', null=True)
+    rank_rate = models.CharField(max_length=255, verbose_name='Цол', null=True)
 
     org = models.ForeignKey(Schools, blank=True, null=True, on_delete=models.CASCADE, verbose_name="Байгууллага")
     sub_org = models.ForeignKey(SubOrgs, on_delete=models.CASCADE, null=True, blank=True, verbose_name="Харьяалагдах алба нэгж")

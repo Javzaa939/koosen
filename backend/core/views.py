@@ -1,12 +1,13 @@
+import json
+import requests
 from rest_framework import mixins
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 from rest_framework.filters import SearchFilter
 
-import json
-
 from django.db import transaction
+from django.conf import settings
 
 from .serializers import (
     generate_model_serializer
@@ -1034,7 +1035,6 @@ class EmployeeApiView(
                 )
 
                 if not user_serializer.is_valid():
-                    print(user_serializer.errors)
                     transaction.savepoint_rollback(sid)
                     return request.send_error_valid(user_serializer.errors)
 
@@ -1053,7 +1053,6 @@ class EmployeeApiView(
                 )
 
                 if not userinfo_serializer.is_valid():
-                    print(userinfo_serializer.errors)
                     transaction.savepoint_rollback(sid)
                     return request.send_error_valid(userinfo_serializer.errors)
                 userinfo_serializer.save()
@@ -1077,7 +1076,6 @@ class EmployeeApiView(
         user_obj = User.objects.get(id=instance.user.id)
         user_serializer = UserSerializer(user_obj, data=request.data, partial=True)
         if not user_serializer.is_valid():
-            print(user_serializer.errors)
             return request.send_error_valid(user_serializer.errors)
 
         user = user_serializer.save()
@@ -1085,7 +1083,6 @@ class EmployeeApiView(
 
         userinfo_serializer = UserInfoSerializer(instance, data=datas, partial=True)
         if not userinfo_serializer.is_valid():
-            print(userinfo_serializer.errors)
             return request.send_error_valid(userinfo_serializer.errors)
 
         userinfo_serializer.save()
@@ -1275,3 +1272,186 @@ class TeacherResetPassword(
             self.queryset.filter(id=user_id).update(password=hashed_password)
 
         return request.send_info('INF_018')
+
+
+@permission_classes([IsAuthenticated])
+class AblePositionAPIView(
+    generics.GenericAPIView,
+):
+    def get(self, request):
+
+        header = {
+            'token': settings.GPT,
+        }
+
+        url = 'https://uia.able.mn/insight.php/?a=ableApi&tsk=getPositions&key=uia'
+
+        rsp = requests.get(url=url, headers=header)
+        if rsp.status_code == 200:
+            datas = rsp.json()
+            count = 0
+            create_datas = []
+            update_datas = []
+            for data in datas:
+                name = data.get('name')
+                position_obj = OrgPosition.objects.filter(name__icontains=name).first()
+                if not position_obj:
+                    is_teacher = False
+                    if name in ['Багш', 'багш']:
+                        is_teacher = True
+
+                    create_datas.append(
+                        OrgPosition(
+                            name=name,
+                            is_teacher=is_teacher,
+                            org=Schools.objects.first(),
+                        )
+                    )
+                else:
+                    position_obj.name=name
+                    position_obj.save()
+
+        return request.send_info('INF_020')
+
+
+@permission_classes([IsAuthenticated])
+class AbleWorkerAPIView(
+    generics.GenericAPIView,
+):
+    def get(self, request):
+        dep_datas = []
+
+        def find_data_from_list_by_key(list, key, value):
+            return next(filter(lambda x: x[key] == value, list), None)
+
+        def get_key_from_name(name):
+            for key, value in Employee.EDUCATION_LEVEL:
+                if value == name:
+                    return key
+            return None
+
+        header = {
+            'token': settings.GPT
+        }
+        url = 'https://uia.able.mn/insight.php/?a=ableApi&tsk=getWorkers&key=uia'
+        rsp = requests.get(url=url, headers=header)
+
+        dep_url = 'https://uia.able.mn/insight.php/?a=ableApi&tsk=getDeps&key=uia'
+        dep_rsp = requests.get(url=dep_url, headers=header)
+        if dep_rsp.status_code == 200:
+            dep_datas = dep_rsp.json()
+
+        if rsp.status_code == 200:
+            datas = rsp.json()
+            count = 0
+            in_count = 0
+            create_datas = []
+            for data in datas:
+                reg_number = data.get('reg_number')
+                last_name = data.get('last_name')
+                first_name = data.get('first_name')
+                position_name = data.get('app_name')
+
+                rank_type = data.get('rank_type')
+                rank_name = data.get('rank_name')
+                rank_rate = data.get('rank_rate')
+
+                personal_mail = data.get('personal_mail')
+                subschool_id = data.get('com_id')
+                dep_id = data.get('dep_id')
+                edu_rank = data.get('edu_rank')
+
+                teacher = Teachers.objects.filter(Q(Q(register=reg_number) | Q(user__email__iexact=personal_mail))).first()
+                position = OrgPosition.objects.filter(name__icontains=position_name).first()
+                data['org_position'] = position.id if position else None
+
+                if teacher:
+                    in_count += 1
+                    teacher.rank_name = rank_name
+                    teacher.rank_type = rank_type
+                    teacher.rank_rate = rank_rate
+                    teacher.save()
+
+                    employee = Employee.objects.filter(user=teacher.user).first()
+                    employee.org_position = position
+                    employee.save()
+                else:
+                    def check_field(field, value):
+                        if not data.get(field):
+                            data[field] = value
+
+                    check_field('body_height', 0)
+                    check_field('body_weight', 0)
+                    check_field('emdd_number', None)
+                    check_field('hudul_number', None)
+                    check_field('ndd_number', None)
+                    check_field("home_phone", 0)
+                    check_field("register_code", None)
+
+                    data['register_code'] = data.get('id_number')
+                    data['password'] = reg_number[-8:]
+                    data['email'] = personal_mail
+                    data['register'] = reg_number
+
+                    school_data = find_data_from_list_by_key(dep_datas, 'id', subschool_id)
+                    if school_data:
+                        name = school_data['name']
+                        school = SubOrgs.objects.filter(name__iexact=name).first()
+                        data['sub_org'] = school.id if school else None
+                        sub_list = school_data['subs']
+                        sub_data = find_data_from_list_by_key(sub_list, 'id', dep_id)
+                        if sub_data:
+                            salbar_obj = Salbars.objects.filter(sub_orgs=school, name__iexact=sub_data['name']).first()
+                            if salbar_obj:
+                                data['salbar'] = salbar_obj.id
+                            else:
+                                print('sub', sub_data['name'])
+                                print('name', name)
+                                continue
+                        else:
+                            continue
+
+                    # User моделийн датаг эхлэээд үүсгэнэ
+                    user_serializer = UserRegisterSerializer(
+                        data=data,
+                    )
+
+                    if not user_serializer.is_valid():
+                        print('User үүсч чадсангүй')
+                        break
+
+                    user = user_serializer.save()
+                    data['user'] = str(user.id)
+                    data['birthday'], data['gender'] = calculate_birthday(reg_number)
+                    data['action_status_type'] = Teachers.ACTION_TYPE_ALL
+                    data['action_status'] = Teachers.APPROVED
+
+                    userinfo_serializer = UserInfoSerializer(
+                        data=data,
+                    )
+
+                    if not userinfo_serializer.is_valid():
+                        print('UserInfo үүсч чадсангүй')
+                        break
+                    userinfo_serializer.save()
+
+                    if 'worker_type' in data:
+                        data['worker_type'] = Employee.WORKER_TYPE_EMPLOYEE
+
+                    level = get_key_from_name(edu_rank)
+                    if level:
+                        data['education_level'] = level
+
+                    employee_serializer = EmployeeSerializer(data=data)
+                    if not employee_serializer.is_valid(raise_exception=True):
+                        print('Employee үүсч чадсангүй')
+                        break
+
+                    employee_serializer.save()
+                    count += 1
+                    print('Амжилттай үүслээ', count)
+
+            return_datas = {
+                'new': count,
+            }
+        return request.send_info('INF_020', return_datas)
