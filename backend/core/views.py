@@ -580,7 +580,7 @@ class TeacherApiView(
 
         queryset = self.queryset
         teacher_queryset = queryset.all().values_list('user', flat=True)
-        qs_employee_user = Employee.objects.filter(user_id__in=list(teacher_queryset), org_position__is_teacher=True, state=Employee.STATE_WORKING).values_list('user', flat=True)
+        qs_employee_user = Employee.objects.filter(user_id__in=list(teacher_queryset), state=Employee.STATE_WORKING).values_list('user', flat=True)
         if qs_employee_user:
             queryset = queryset.filter(user_id__in = list(qs_employee_user))
 
@@ -867,7 +867,6 @@ class OrgPositionListAPIView(
 
     def get(self, request):
 
-        self.queryset = self.queryset.filter(is_teacher=True)
         datas = self.list(request).data
         return request.send_data(datas)
 
@@ -1262,7 +1261,7 @@ class AblePositionAPIView(
             datas = rsp.json()
             count = 0
             create_datas = []
-            update_datas = []
+            crete_namess = []
             for data in datas:
                 name = data.get('name')
                 position_obj = OrgPosition.objects.filter(name__icontains=name).first()
@@ -1271,17 +1270,21 @@ class AblePositionAPIView(
                     if name in ['Багш', 'багш']:
                         is_teacher = True
 
-                    create_datas.append(
-                        OrgPosition(
-                            name=name,
-                            is_teacher=is_teacher,
-                            org=Schools.objects.first(),
+                    if name not in crete_namess:
+                        create_datas.append(
+                            OrgPosition(
+                                name=name,
+                                is_teacher=is_teacher,
+                                org=Schools.objects.first(),
+                            )
                         )
-                    )
+
+                    crete_namess.append(name)
                 else:
                     position_obj.name=name
                     position_obj.save()
 
+            OrgPosition.objects.bulk_create(create_datas)
         return request.send_info('INF_020')
 
 
@@ -1333,7 +1336,7 @@ class AbleWorkerAPIView(
                 edu_rank = data.get('edu_rank')
 
                 teacher = Teachers.objects.filter(Q(Q(register=reg_number) | Q(user__email__iexact=personal_mail))).first()
-                position = OrgPosition.objects.filter(name__icontains=position_name).first()
+                position = OrgPosition.objects.filter(name__iexact=position_name).first()
                 data['org_position'] = position.id if position else None
 
                 if teacher:
@@ -1376,11 +1379,9 @@ class AbleWorkerAPIView(
                             if salbar_obj:
                                 data['salbar'] = salbar_obj.id
                             else:
-                                print('sub', sub_data['name'])
-                                print('name', name)
-                                continue
+                                data['salbar'] = None
                         else:
-                            continue
+                            data['salbar'] = None
 
                     # User моделийн датаг эхлэээд үүсгэнэ
                     user_serializer = UserRegisterSerializer(
