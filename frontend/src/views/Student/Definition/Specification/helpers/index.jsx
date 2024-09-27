@@ -10,86 +10,90 @@ import {
     DropdownMenu,
     DropdownItem,
     UncontrolledDropdown
-}from 'reactstrap'
+} from 'reactstrap'
 
 import Avatar from "@components/avatar"
 
-import { t } from 'i18next';
+import { t, use } from 'i18next';
 
 import SumModal from './SumModal';
 import ScoreModal from './ScoreModal';
 import ReactCountryFlag from 'react-country-flag'
+import SignatureModal from './SignatureModal';
 
-export function getColumns (currentPage, rowsPerPage, total_count)
-{
-	const page_count = Math.ceil(total_count / rowsPerPage)
+export function getColumns(currentPage, rowsPerPage, total_count) {
+    const page_count = Math.ceil(total_count / rowsPerPage)
 
-	/** Сонгосон хуудасны тоо датаны тооноос их болсон үед хуудаслалт 1-ээс эхлэнэ */
-    if (currentPage > page_count)
-    {
+    /** Сонгосон хуудасны тоо датаны тооноос их болсон үед хуудаслалт 1-ээс эхлэнэ */
+    if (currentPage > page_count) {
         currentPage = 1
     }
 
     const columns = [
-		{
-			name: "№",
-			selector: (row, index) => (currentPage-1) * rowsPerPage + index + 1,
-			maxWidth: "30px",
-			center: true
-		},
-		{
-			header: 'code',
-			name: t("Оюутны код"),
-			selector: (row) => (row?.code),
-            sortable: true,
-			minWidth: "80px",
-			center: true
-		},
-		{
-			header: 'full_name',
-			name: t("Овог Нэр"),
-			selector: (row) => `${row?.first_name} ${row?.last_name}`,
-            sortable: true,
-			center: true
-        },
-		{
-			header: 'register_num',
-			name: t("Регистрийн дугаар"),
-			selector: (row) => row?.register_num,
-            sortable: true,
-			center: true
+        {
+            name: "№",
+            selector: (row, index) => (currentPage - 1) * rowsPerPage + index + 1,
+            maxWidth: "30px",
+            center: true
         },
         {
-			header: 'group',
-			name: t("Анги"),
-			selector: (row) => row?.group_name,
+            header: 'code',
+            name: t("Оюутны код"),
+            selector: (row) => (row?.code),
             sortable: true,
-			center: true
+            minWidth: "80px",
+            center: true
         },
-	]
+        {
+            header: 'full_name',
+            name: t("Овог Нэр"),
+            selector: (row) => `${row?.first_name} ${row?.last_name}`,
+            sortable: true,
+            center: true
+        },
+        {
+            header: 'register_num',
+            name: t("Регистрийн дугаар"),
+            selector: (row) => row?.register_num,
+            sortable: true,
+            center: true
+        },
+        {
+            header: 'group',
+            name: t("Анги"),
+            selector: (row) => row?.group_name,
+            sortable: true,
+            center: true
+        },
+    ]
     return columns
 }
 
-export function ExpandedComponent({ data })
-{
+export function ExpandedComponent({ data }) {
     /** State */
-    const [ sumModalOpen, setSumModalOpen ] = useState(false)
-    const [ sumModalData, setSumModalData ] = useState({})
+    const [sumModalOpen, setSumModalOpen] = useState(false)
+    const [sumModalData, setSumModalData] = useState({})
 
-    const [ scoreModal, setScoreModal ] = useState(false)
-    const [ scoreModalData, setScoreModalData ] = useState({})
+    const [scoreModal, setScoreModal] = useState(false)
+    const [scoreModalData, setScoreModalData] = useState({})
 
-    async function handleRequestSum(studentId)
-    {
-		setSumModalOpen(!sumModalOpen)
-		setSumModalData(studentId)
-	}
+    const [signatureModal, setSignaturModal] = useState(false)
+    const [ismon, setIsMon] = useState()
 
-    async function handleScoreModal(studentId)
-    {
-		setScoreModal(!scoreModal)
-		setScoreModalData(studentId)
-	}
+    async function handleSignatureModal(c) {
+        setSignaturModal(!signatureModal)
+        setIsMon(c)
+    }
+
+    async function handleRequestSum(studentId) {
+        setSumModalOpen(!sumModalOpen)
+        setSumModalData(studentId)
+    }
+
+    async function handleScoreModal(studentId) {
+        setScoreModal(!scoreModal)
+        setScoreModalData(studentId)
+    }
 
     return (
         <Card className='mb-0 rounded-0 border-bottom'>
@@ -99,18 +103,18 @@ export function ExpandedComponent({ data })
                         <div className='p-1'>
                             {
                                 data.image
-                                ?
+                                    ?
                                     <Avatar
                                         img={data.image}
                                         size='xl'
                                         className='pe-none'
                                     />
-                                :
+                                    :
                                     <Avatar
                                         initials
-                                        color = {'light-success'}
-                                        content = {data?.first_name || ''}
-                                        contentStyles = {{
+                                        color={'light-success'}
+                                        content={data?.first_name || ''}
+                                        contentStyles={{
                                             borderRadius: 0,
                                         }}
                                         size='xl'
@@ -137,7 +141,7 @@ export function ExpandedComponent({ data })
                             Тодорхойлолт
                         </DropdownToggle>
                         <DropdownMenu>
-                            <DropdownItem style={{width: '100%'}} onClick={() => {sessionStorage.setItem("student_data", JSON.stringify(data)), window.open('/student/learning-true')}}>
+                            <DropdownItem style={{ width: '100%' }} onClick={() => handleSignatureModal(true)}>
                                 Монгол
                                 <ReactCountryFlag
                                     svg
@@ -145,7 +149,7 @@ export function ExpandedComponent({ data })
                                     countryCode='mn'
                                 />
                             </DropdownItem>
-                            <DropdownItem style={{width: '100%'}} onClick={() => {sessionStorage.setItem("student_data", JSON.stringify(data)), window.open('/student/learning-true/en')}}>
+                            <DropdownItem style={{ width: '100%' }} onClick={() => handleSignatureModal(false)}>
                                 English
                                 <ReactCountryFlag
                                     svg
@@ -175,8 +179,11 @@ export function ExpandedComponent({ data })
                     >Судлах кредитийн тооцоо дэд цэс үүсгэх</Button> */}
                 </Col>
             </Row>
-            { sumModalOpen && <SumModal isOpen={sumModalOpen} handleModal={handleRequestSum} datas={sumModalData} /> }
-            { scoreModal && <ScoreModal isOpen={scoreModal} handleModal={handleScoreModal} studentId={scoreModalData} /> }
+            {sumModalOpen && <SumModal isOpen={sumModalOpen} handleModal={handleRequestSum} datas={sumModalData} />}
+            {scoreModal && <ScoreModal isOpen={scoreModal} handleModal={handleScoreModal} studentId={scoreModalData} />}
+            {
+                signatureModal && <SignatureModal isOpen={signatureModal} handleModal={handleSignatureModal} data={data} isMon={ismon} />
+            }
         </Card>
     )
 }
