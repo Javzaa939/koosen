@@ -80,7 +80,7 @@ function SignatureModal({ isOpen, handleModal, data, isMon }) {
                 />
                 <div className="d-flex gap-1 justify-content-end">
                     <Button color="primary" size="sm" className="mt-1" onClick={handleSave}>
-                        {t("Хадгалах")}
+                        {t("Сонгох")}
                     </Button>
                     <Button onClick={handleModal} size="sm" className="mt-1">
                         {t("Буцах")}
