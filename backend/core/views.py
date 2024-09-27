@@ -929,16 +929,27 @@ class CalendarCountAPIView(
 
     def get(self, request):
 
+        school = request.query_params.get('school')
         collected_data = dict()
 
         STUDYING_CODE = 1           # Суралцаж байгаа сурагчид
         TAKE_LEAVE = 2              # Чөлөө авсан сурагчид
 
         teacher_qs = get_teacher_queryset()
-        collected_data['total_profession'] = ProfessionDefinition.objects.count()
+
+        profession_queryset = ProfessionDefinition.objects
+        lessons_queryset = LessonStandart.objects
+        students_queryset = Student.objects
+        if school:
+            profession_queryset = profession_queryset.filter(school=school)
+            teacher_qs = teacher_qs.filter(sub_org=school)
+            lessons_queryset = lessons_queryset.filter(school=school)
+            students_queryset = students_queryset.filter(group__school=school)
+
+        collected_data['total_profession'] = profession_queryset.count()
         collected_data['total_workers'] = teacher_qs.count()
-        collected_data['total_studies'] = LessonStandart.objects.count()
-        collected_data['total_students'] = Student.objects.filter(Q(status__code__in = (STUDYING_CODE, TAKE_LEAVE))).count()
+        collected_data['total_studies'] = lessons_queryset.count()
+        collected_data['total_students'] = students_queryset.filter(status__code=1).count()
         salbar_data = []
 
         collected_data['salbar_data'] = salbar_data

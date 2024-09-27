@@ -137,10 +137,10 @@ const VerticalLayout = (props) =>
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-loanfund-read', 'student7')
 
                         /** Оюутаны хавсралт, төгсөлтийн ажил */
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-graduate-read', 'student10')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-graduate-read', 'student17')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-graduate-read', 'student10')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-graduate-read', 'student16')
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-graduation-read', 'graduation')
+                        // childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-graduation-read', 'graduation')
 
                         /** Оюутан тодорхойлолт */
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-student-definition-read', 'student11')

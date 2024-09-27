@@ -453,9 +453,7 @@ class StudentRegisterAPIView(
 
         self.serializer_class = StudentRegisterListSerializer
 
-        # status = StudentRegister.objects.filter(Q(Q(code=2) | Q(name__icontains='Төгссөн'))).first()
-        # self.queryset = self.queryset.exclude(status=status)
-
+        self.queryset = self.queryset.exclude(status__code=2)
         if pk:
             student = self.retrieve(request, pk).data
             return request.send_data(student)

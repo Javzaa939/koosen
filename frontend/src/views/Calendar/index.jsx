@@ -209,7 +209,7 @@ const CalendarComponent = () => {
                     <Col lg="3" sm="6">
                         <StatsHorizontal
                             color="danger"
-                            statTitle="Нийт суралцагчдын тоо"
+                            statTitle="Идэвхтэй суралцагчдын тоо"
                             icon={<User size={20} />}
                             renderStats={
                                 <h3 className="fw-bolder mb-75">

@@ -1684,7 +1684,7 @@ function useApi(isDisplay=false) {
 			}
 		},
 		calendarCard: {
-			get: () => instance.get('/core/calendarCard/'),
+			get: () => instance.get(`/core/calendarCard/?school=${school_id}`),
 		},
 		calendarNews: {
 			get: () => instance.get(`/service/news/calendar/`),
