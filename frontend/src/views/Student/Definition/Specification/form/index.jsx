@@ -36,7 +36,7 @@ export default function FormModal({ open, handleModal, refreshDatas, defaultData
     async function onSubmit(cdata)
     {
         cdata['dedication_type'] = 1
-        cdata['school'] = school_id
+        cdata['school_id'] = school_id
 
         const { success, data, error } = await postFetch(Object.keys(defaultDatas).length != 0 ? signatureApi.put(cdata, defaultDatas?.id) : signatureApi.post(cdata))
         if (success) {

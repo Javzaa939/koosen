@@ -666,7 +666,7 @@ function useApi(isDisplay=false) {
 			getStudentCommandList: () =>instance.get(`/student/graduate/list/?year=${cyear_name}&season=${cseason_id}&school=${school_id}`),
 			post: data => instance.post('/student/info/', data),
 			getOne: (pk, type) => instance.get(`/student/info/detail/${pk}/?type=${type}`),
-			put: (data, pk, type) => instance.put(`/student/info/detail/${pk}/?type=${type}`, data),
+			put: (data, pk, type) => instance.put(`/student/info/detail/${pk}/?type=${type}&school=${school_id}`, data),
 			delete: pk => instance.delete(`/student/info/${pk}/`),
 			getStudentOne: (pk) => instance.get(`/student/info/all/${pk}/?year=${cyear_name}&season=${cseason_id}`),
 

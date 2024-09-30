@@ -539,6 +539,8 @@ class StudentRegisterAPIView(
         if 'gender' in data and not data.get('gender'):
             del data['gender']
 
+        data['created_user'] = request.user.pk
+
         try:
             serializer = self.serializer_class(data=data, many=False)
             if not serializer.is_valid():
@@ -1222,6 +1224,9 @@ class StudentDetailAPIView(
         instance = self.get_object()
 
         data = null_to_none(data)
+
+        data['updated_user'] = request.user.pk
+
         # хуучин зураг
         old_image = instance.image
 

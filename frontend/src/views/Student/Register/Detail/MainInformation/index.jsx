@@ -133,7 +133,7 @@ const MainInformation = () => {
 
     // Ангийн жагсаалт авах
     async function getGroup() {
-        const { success, data } = await fetchData(groupApi.getList(departId, '', '', '', school_id))
+        const { success, data } = await fetchData(groupApi.getList(departId))
         if(success) {
             setGroupOption(data)
         }
@@ -197,7 +197,6 @@ const MainInformation = () => {
     },[school_id, st_school])
 
 	async function onSubmit(cdata) {
-        cdata['school'] = school_id
         cdata["created_user"] = user.id
         cdata["updated_user"] = user.id
         cdata["change_image"] = changeImage
