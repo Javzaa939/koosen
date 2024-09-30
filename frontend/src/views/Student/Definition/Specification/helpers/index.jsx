@@ -140,7 +140,10 @@ export function ExpandedComponent({ data }) {
                             Тодорхойлолт
                         </DropdownToggle>
                         <DropdownMenu>
-                            <DropdownItem style={{ width: '100%' }} onClick={() => handleSignatureModal(true)}>
+                            <DropdownItem style={{ width: '100%' }} onClick={() => {
+                                handleSignatureModal(true)
+                                sessionStorage.setItem("student_data", JSON.stringify(data)), window.open('/student/learning-true')
+                            }}>
                                 Монгол
                                 <ReactCountryFlag
                                     svg
@@ -148,7 +151,10 @@ export function ExpandedComponent({ data }) {
                                     countryCode='mn'
                                 />
                             </DropdownItem>
-                            <DropdownItem style={{ width: '100%' }} onClick={() => handleSignatureModal(false)}>
+                            <DropdownItem style={{ width: '100%' }} onClick={() => {
+                                handleSignatureModal(false)
+                                sessionStorage.setItem("student_data", JSON.stringify(data)), window.open('/student/learning-true/en')
+                            }}>
                                 English
                                 <ReactCountryFlag
                                     svg
