@@ -191,7 +191,7 @@ function useApi(isDisplay=false) {
 			get: () => instance.get(`/core/menu/`),
 		},
 		signature: {
-			get: (typeNumber, school_id='') => instance.get(`/student/signature/?type=${typeNumber}&school_id=${school_id}`),
+			get: (typeNumber, school='') => instance.get(`/student/signature/?type=${typeNumber}&school_id=${school ? school: school_id}`),
 			getGraduate: (typeNumber, school_id='') => instance.get(`/student/signature/?type=${typeNumber}&school_id=${school_id}`),
 			post: (data) => instance.post(`/student/signature/`, data),
 			put: (data, pk) => instance.put(`/student/signature/${pk}/`, data),

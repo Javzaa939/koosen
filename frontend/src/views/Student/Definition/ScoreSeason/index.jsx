@@ -21,22 +21,22 @@ export default function ScoreSeason() {
     const { parentschoolName} = useContext(SchoolContext)
 
 
-    function imageLoaded()
-    {
-        !isLoading &&
-        Object.keys(datas).length > 0 && setTimeout(() => window.print(), 1000)
-    }
+    // function imageLoaded()
+    // {
+    //     !isLoading &&
+    //     Object.keys(datas).length > 0 && setTimeout(() => window.print(), 1000)
+    // }
 
-    useEffect(
-        () =>
-        {
-            window.onafterprint = function()
-            {
-                window.history.go(-1);
-            }
-        },
-        []
-    )
+    // useEffect(
+    //     () =>
+    //     {
+    //         window.onafterprint = function()
+    //         {
+    //             window.history.go(-1);
+    //         }
+    //     },
+    //     []
+    // )
 
     const lessons = datas?.scoreregister[0]?.lesson_info
     const total_data = datas?.all_total[0].all_total

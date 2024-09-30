@@ -81,7 +81,6 @@ export function ExpandedComponent({ data }) {
     const [ismon, setIsMon] = useState()
 
     async function handleSignatureModal(c) {
-        setSignaturModal(!signatureModal)
         setIsMon(c)
     }
 

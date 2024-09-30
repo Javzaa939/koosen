@@ -54,14 +54,14 @@ export default function AmountDetails()
     useEffect(
         () =>
         {
-            if (datas, listArr.length != 0)
-            {
-                setTimeout(() =>
-                    window.print(),
-                    document.title = `${datas?.student?.code + ' ' + datas?.student?.full_name}`,
-                    1000
-                )
-            }
+            // if (datas, listArr.length != 0)
+            // {
+            //     setTimeout(() =>
+            //         window.print(),
+            //         document.title = `${datas?.student?.code + ' ' + datas?.student?.full_name}`,
+            //         1000
+            //     )
+            // }
         },
         [datas, listArr]
     )
@@ -291,7 +291,7 @@ export default function AmountDetails()
                                     )
                                 })
                             }
-                            Дүн зөвшөөрсөн оюутан: ........................................... {datas?.student?.full_name}
+                            {/* Дүн зөвшөөрсөн оюутан: ........................................... {datas?.student?.full_name} */}
                         </div>
                     </Row>
                 </>
