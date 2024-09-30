@@ -81,6 +81,7 @@ export function ExpandedComponent({ data }) {
     const [ismon, setIsMon] = useState()
 
     async function handleSignatureModal(c) {
+        setSignaturModal(!signatureModal)
         setIsMon(c)
     }
 
@@ -142,7 +143,7 @@ export function ExpandedComponent({ data }) {
                         <DropdownMenu>
                             <DropdownItem style={{ width: '100%' }} onClick={() => {
                                 handleSignatureModal(true)
-                                sessionStorage.setItem("student_data", JSON.stringify(data)), window.open('/student/learning-true')
+                                // sessionStorage.setItem("student_data", JSON.stringify(data)), window.open('/student/learning-true')
                             }}>
                                 Монгол
                                 <ReactCountryFlag
@@ -153,7 +154,7 @@ export function ExpandedComponent({ data }) {
                             </DropdownItem>
                             <DropdownItem style={{ width: '100%' }} onClick={() => {
                                 handleSignatureModal(false)
-                                sessionStorage.setItem("student_data", JSON.stringify(data)), window.open('/student/learning-true/en')
+                                // sessionStorage.setItem("student_data", JSON.stringify(data)), window.open('/student/learning-true/en')
                             }}>
                                 English
                                 <ReactCountryFlag
