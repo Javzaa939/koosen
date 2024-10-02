@@ -1148,9 +1148,6 @@ def create_backup(
         backup авах crontab
     """
 
-    # Үндсэн прожект байгаа фолдерийн зам
-    backup_path = str(settings.BASE_DIR.parent.parent)
-
     today = date.today()
     now = datetime.now()
     now_hour = str(now.time().hour)
@@ -1159,7 +1156,10 @@ def create_backup(
     month = str(today.month)
     today = str(today)
 
-    backup_path = os.path.join(backup_path, 'dxis_backup')
+    home_directory = os.path.expanduser('~')
+
+    folder = os.path.join(home_directory, 'common')
+    backup_path = os.path.join(folder, 'files/dxis')
     yearFolderYear = os.path.join(backup_path, year)
     yearFolderMonth = os.path.join(yearFolderYear, month)
 
