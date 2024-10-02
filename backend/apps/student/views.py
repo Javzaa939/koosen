@@ -3348,15 +3348,19 @@ class DefaultPassApi(
         if pk is None:
             return request.send_error('ERR_012')
 
-        student_obj = Student.objects.filter(id=pk)
-
+        student_obj = Student.objects.filter(id=pk).first()
         if student_obj:
             passwordDefault = student_obj.register_num[-8:]
             hashed_password = make_password(passwordDefault)
 
             with transaction.atomic():
-                StudentLogin.objects.filter(student__in=student_obj).update(password=hashed_password)
+                stud_login = StudentLogin.objects.filter(student=student_obj.id).first()
 
+                if stud_login:
+                    StudentLogin.objects.filter(student=student_obj.id).update(password=hashed_password)
+
+                else:
+                    StudentLogin.objects.create(student_id=student_obj.id, username=student_obj.code, password=hashed_password, is_active=True)
             return request.send_info('INF_018')
         else:
             return request.send_error('ERR_012')
