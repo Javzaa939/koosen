@@ -120,6 +120,7 @@ class AnnouncementAPIView(
         return request.send_data(data)
 
     def post(self, request, *args, **kwargs):
+        request.data['created_user'] = request.user.id
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             self.perform_create(serializer)

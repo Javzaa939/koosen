@@ -295,7 +295,8 @@ class AnnouncementSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_full_name(self, obj):
-        if obj.created_user.full_name:
+
+        if obj.created_user:
             return obj.created_user.full_name
         return None
 
