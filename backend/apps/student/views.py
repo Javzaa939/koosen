@@ -1,4 +1,5 @@
 import os
+import traceback
 import requests
 from googletrans import Translator
 import openpyxl_dictreader
@@ -3472,7 +3473,6 @@ class StudentImportAPIView(
                 group_obj = Group.objects.filter(name__iexact=str(group)).first()
 
                 obj = {
-                    'department': group_obj.department.name if group_obj else '',
                     'group': group,
                     'register_num': register_num,
                     'last_name': last_name,
@@ -3522,112 +3522,108 @@ class StudentPostDataAPIView(
         datas = request.data
         all_datas = list()
         created_studentlogin_datas = list()
-
         user = request.user
+
+        string_fields = [
+            'code',
+            'group',
+            'register_num',
+            'last_name',
+            'last_name_uig',
+            'first_name',
+            'first_name_uig'
+            'status',
+            'birth_date'
+        ]
+
         try:
-            for created_data in datas:
-                gen = 0 # хүйс
-                pay_type_id = 0 # төлбөр төлөлтын төрөл
+            with transaction.atomic():
+                for created_data in datas:
+                    # to normalize string data
+                    for string_field in string_fields:
+                        string_field_value = created_data.get(string_field)
 
-                code = created_data.get('code')
-                department = created_data.get('department')
-                group = created_data.get('group')
-                register_num = created_data.get('register_num')
-                family_name = created_data.get('family_name')
-                last_name = created_data.get('last_name')
-                first_name = created_data.get('first_name')
-                last_name_eng = created_data.get('last_name_eng')
-                first_name_eng = created_data.get('first_name_eng')
-                phone = created_data.get('phone')
-                yas_undes = created_data.get('yas_undes')
+                        if string_field_value:
+                            created_data[string_field] = str(string_field_value).strip()
 
-                gender = created_data.get('gender')
-                status = created_data.get('status')
-                pay_type = created_data.get('pay_type')
+                    #region to get data from import function indirectly
+                    # string fields
+                    code = created_data.get('code')
+                    group = created_data.get('group')
+                    register_num = created_data.get('register_num')
+                    family_name = created_data.get('family_name')
+                    last_name = created_data.get('last_name')
+                    first_name = created_data.get('first_name')
+                    last_name_uig = created_data.get('last_name_uig')
+                    first_name_uig = created_data.get('first_name_uig')
+                    status = created_data.get('status')
+                    birth_date = created_data.get('birth_date')
 
-                # хүйс
-                if gender == 'Эрэгтэй':
-                    gen = Student.GENDER_MALE
-                else:
-                    gen = Student.GENDER_FEMALE
+                    # not string fields
+                    phone = created_data.get('phone')
+                    gen = created_data.get('gender')
+                    pay_type_id = created_data.get('pay_type')
+                    #endregion to get data from import function indirectly
 
-                # төлбөр төлөлт
-                if pay_type == 'Засгийн газар хоорондын тэтгэлэг':
-                    pay_type_id = Student.IG
-                elif pay_type == 'Төрөөс үзүүлэх тэтгэлэ' :
-                    pay_type_id = Student.GG
-                elif pay_type == 'Боловсролын зээлийн сангийн хөнгөлөлттэй зээл':
-                    pay_type_id = Student.LEL
-                elif pay_type == 'Төрөөс үзүүлэх буцалтгүй тусламж':
-                    pay_type_id = Student.GRANTS
-                elif pay_type == 'Дотоод, гадаадын аж ахуйн нэгж, байгууллага, сан, хүвь хүний нэрэмжит тэтгэлэг':
-                    pay_type_id = Student.IEEOF
-                elif pay_type == 'Тухайн сургуулийн тэтгэлэг':
-                    pay_type_id = Student.SCHOLARSHIP
-                elif pay_type == 'Хувийн зардал':
-                    pay_type_id = Student.EXPENSES
-                elif pay_type == 'Бусад':
-                    pay_type_id = Student.OTHER
+                    status_id = None
 
-                status_id = None
+                    # суралцах хэлбэр
+                    if status:
+                        status_id = StudentRegister.objects.filter(name__icontains=status).first()
 
-                # суралцах хэлбэр
-                if status:
-                    status_id = StudentRegister.objects.filter(name__icontains=status).first()
+                        if not status_id:
+                            count = StudentRegister.objects.count()
+                            status_id = StudentRegister.objects.create(name=status, code=count+1)
 
-                    if not status_id:
-                        count = StudentRegister.objects.count()
-                        status_id = StudentRegister.objects.create(name=status, code=count+1)
+                    group_obj = Group.objects.filter(name__iexact=group).first()
 
-                dep_obj = Salbars.objects.filter(name__icontains=department).first()
-                group_obj = Group.objects.filter(name__iexact=str(group)).first()
+                    if Student.objects.filter(code=code).exists():
+                        Student.objects.filter(code=code).update(group=group_obj)
+                        continue
 
-                if Student.objects.filter(code=code).exists():
-                    Student.objects.filter(code=code).update(group=group_obj)
-                    continue
+                    qs = Student(
+                        school=group_obj.school,
+                        code=code,
+                        family_name=family_name,
+                        register_num=register_num,
+                        last_name=last_name,
+                        first_name=first_name,
+                        gender=gen,
+                        phone=phone,
+                        citizenship=Country.objects.get(name__icontains='Монгол'),
+                        pay_type=pay_type_id,
+                        status=status_id,
+                        group=group_obj,
+                        department=group_obj.department,
+                        last_name_uig=last_name_uig,
+                        first_name_uig=first_name_uig,
+                        created_user=user,
+                        birth_date=birth_date
+                    )
 
-                qs = Student(
-                    school=group_obj.school if group_obj else None,
-                    code=code,
-                    family_name=family_name,
-                    register_num=register_num,
-                    last_name=last_name,
-                    first_name=first_name,
-                    gender = gen,
-                    phone=phone,
-                    citizenship=Country.objects.get(name__icontains='Монгол'),
-                    pay_type=pay_type_id,
-                    status=status_id,
-                    group=group_obj,
-                    department=dep_obj,
-                    yas_undes=yas_undes,
-                    last_name_eng=last_name_eng,
-                    first_name_eng=first_name_eng,
-                    created_user=user,
-                )
+                    # Оюутан бүртгүүлэх үед оюутны нэвтрэх нэр нууц үгийг хадгалах хэсэг
+                    password = register_num[-8:]
 
-                # Оюутан бүртгүүлэх үед оюутны нэвтрэх нэр нууц үгийг хадгалах хэсэг
-                password = register_num[-8:]
+                    hashed_password = make_password(password)
 
-                hashed_password = make_password(password)
+                    student_login_qs = StudentLogin(
+                        username=code,
+                        password=hashed_password,
+                        student=qs,
+                    )
 
-                student_login_qs = StudentLogin(
-                    username=code,
-                    password=hashed_password,
-                    student=qs,
-                )
+                    created_studentlogin_datas.append(student_login_qs)
+                    all_datas.append(qs)
 
-                created_studentlogin_datas.append(student_login_qs)
-                all_datas.append(qs)
+                if len(all_datas) > 0:
+                    Student.objects.bulk_create(all_datas)
 
-            if len(all_datas) > 0:
-                Student.objects.bulk_create(all_datas)
-
-            if len(created_studentlogin_datas) > 0:
-                StudentLogin.objects.bulk_create(created_studentlogin_datas)
+                if len(created_studentlogin_datas) > 0:
+                    StudentLogin.objects.bulk_create(created_studentlogin_datas)
 
         except Exception as e:
             print(e)
+            traceback.print_exc()
             return request.send_error('ERR_002')
 
         return request.send_info("INF_001")
