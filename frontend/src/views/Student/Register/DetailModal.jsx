@@ -56,18 +56,13 @@ export default function DetailModal({ isOpen, handleModal, datas, file_name, err
 
     const excelColumns = {
         "code": "Оюутны код",
-        "department": "Хөтөлбөрийн баг",
         "group": "Анги",
         "register_num": "РД",
-        "family_name": "Ургийн овог",
         "last_name": "Эцэг эхийн нэр",
-        "last_name_eng": "Эцэг эхийн нэр англи",
+        "last_name_uig": "Эцэг эхийн нэр уйгаржин",
         "first_name": "Өөрийн нэр",
-        "first_name_eng": "Өөрийн нэр англи",
-        "gender": "Хүйс",
-        "yas_undes": "Яс үндэс",
+        "first_name_uig": "Өөрийн нэр уйгаржин",
         "status": "Бүртгэлийн байдал",
-        "pay_type": "Төлбөр төлөлт",
     }
 
     const CloseBtn = (
@@ -84,52 +79,36 @@ export default function DetailModal({ isOpen, handleModal, datas, file_name, err
             name: 'Оюутны код',
         },
         {
-            key: 'department',
-            name: 'Хөтөлбөрийн баг',
-        },
-        {
             key: 'group',
             name: 'Анги',
         },
         {
-            key: 'register',
+            key: 'register_num',
             name: 'РД',
-        },
-        {
-            key: 'family_name',
-            name: 'Ургийн овог',
         },
         {
             key: 'last_name',
             name: 'Эцэг эхийн нэр',
         },
         {
-            key: 'last_name_eng',
-            name: 'Эцэг эхийн нэр англи',
+            key: 'last_name_uig',
+            name: 'Эцэг эхийн нэр уйгаржин',
         },
         {
             key: 'first_name',
             name: 'Өөрийн нэр',
         },
         {
-            key: 'first_name_eng',
-            name: 'Өөрийн нэр англи',
+            key: 'first_name_uig',
+            name: 'Өөрийн нэр уйгаржин',
         },
         {
-            key: 'gender',
-            name: 'Хүйс',
-        },
-        {
-            key: 'yas_undes',
-            name: 'Яс үндэс',
+            key: 'phone',
+            name: 'Утасны дугаар',
         },
         {
             key: 'status',
             name: 'Бүртгэлийн байдал',
-        },
-        {
-            key: 'pay_type',
-            name: 'Төлбөр төлөлт',
         },
     ]
 
