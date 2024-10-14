@@ -3489,10 +3489,10 @@ class StudentImportAPIView(
 
                 student_qs = Student.objects.filter(code=code).first()
 
-                if not (code or group_obj or pay_type_id or register_num or last_name or first_name or phone or status_id):
-                    error_datas.append(obj)
-                else:
+                if code and group_obj and pay_type_id and register_num and last_name and first_name and phone and status_id:
                     correct_datas.append(obj)
+                else:
+                    error_datas.append(obj)
 
                 if file:
                     remove_folder(full_path)
@@ -3577,12 +3577,15 @@ class StudentPostDataAPIView(
 
                     group_obj = Group.objects.filter(name__iexact=group).first()
 
+                    if not group_obj:
+                        continue
+
                     if Student.objects.filter(code=code).exists():
                         Student.objects.filter(code=code).update(group=group_obj)
                         continue
 
                     qs = Student(
-                        school=group_obj.school,
+                        school=group_obj.school if group_obj else None,
                         code=code,
                         family_name=family_name,
                         register_num=register_num,
