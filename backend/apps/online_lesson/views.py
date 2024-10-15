@@ -232,8 +232,10 @@ class OnlineWeekAPIView(
         return request.send_info('INF_001')
 
     def put(self, request, pk=None):
+
         try:
-            instance = self.get_object()
+            if pk:
+                instance = self.queryset.filter(id=pk).first()
             datas = request.data
 
             # NOTE хэрэггүй датануудаа update хийх гээд байна

@@ -1862,7 +1862,7 @@ function useApi(isDisplay=false) {
 			get: (lesson, week='') => instance.get(`/online_lesson/online_week/?lesson=${lesson}&week=${week}`),
 			getOne: (id) => instance.get(`/online_lesson/online_week/${id}/`),
 			post: (cdata, id) => instance.post(`/online_lesson/online_week/${id}/`, cdata),
-			put: (pk, data) => instance.put(`/online_lesson/online_week/?pk=${pk}`,data),
+			put: (pk, data) => instance.put(`/online_lesson/online_week/${pk}/`,data),
 			delete: (pk) => instance.delete(`/online_lesson/onlone_week/${pk}/`),
 			getList: (pk) => instance.get(`/online_lesson/onlone_week/${pk}/`),
 		},
