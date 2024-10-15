@@ -231,8 +231,7 @@ class OnlineWeekAPIView(
 
         return request.send_info('INF_001')
 
-    def put(self, request):
-        pk = request.query_params.get('pk')
+    def put(self, request, pk=None):
 
         try:
             if pk:
