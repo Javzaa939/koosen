@@ -59,10 +59,6 @@ const Createmodal = ({ open, handleModal, refreshDatas, edit_id }) => {
 
     const [ schoolOption, setSchoolOption] = useState([]);
     const [ studentOption, setStudentOption] = useState([]);
-    const [ selectedValue, setSelectedValue] = useState(null);
-    const [ selectedDep, setSelectedDep] = useState(null);
-    const [ selectedPro, setSelectedPro] = useState(null);
-    const [ selectedGroup, setSelectedGroup] = useState(null);
     const [ studentInfo, setStudentInfo ] = useState({})
 	// Loader
 	const { Loader, isLoading, fetchData } = useLoader({});
@@ -76,7 +72,34 @@ const Createmodal = ({ open, handleModal, refreshDatas, edit_id }) => {
     const [bottom_check, setBottomCheck] = useState(3)
     const [scroll_bottom_datas, setScrollBottomDatas] = useState([]);
     const [student_search_value, setStudentSearchValue] = useState([]);
+
+    const [departmentOption, setDepartmentOption] = useState([])
+    const [professionOption, setProfessionOption] = useState([])
+    const [groupOption, setGroupOption] = useState([])
+
+    const [depId, setDepId] = useState('')                          // Очих сургуулийн хөтөлбөрийн баг
+    const [proId, setProId] = useState('')                          // Очих сургуулийн мэргэжил
+    const [groupId, setGroupId] = useState('')                      // Очих сургуулийн анги
+    const [schoolId, setschoolId] = useState('')                    // Очих сургуулийн
+
     const SelectStudentApi = useApi().role.student
+    const departmentApi = useApi().hrms.department
+    const professionDefApi = useApi().hrms.department
+    const groupApi = useApi().hrms.department
+
+
+    useEffect(()=>{
+        getSchoolOption()
+        getSelectBottomDatas(2)
+    },[])
+
+    useEffect(()=>{
+        getDepartmentOption()
+        getProfessionDefOption()
+        getGroupOption()
+    },[depId, proId, schoolId])
+
+
 
     // Сургуулийн жагсаалт
     async function getSchoolOption() {
@@ -85,6 +108,36 @@ const Createmodal = ({ open, handleModal, refreshDatas, edit_id }) => {
         if(success) {
             setLoader(false)
             setSchoolOption(data)
+        }
+    }
+
+    // Хөтөлбөрийн баг
+    async function getDepartmentOption() {
+        if (schoolId){
+            const { success, data } = await fetchData(departmentApi.getSelectSchool(schoolId))
+            if(success) {
+                setDepartmentOption(data)
+            }
+        }
+    }
+
+    // Мэргэжил
+    async function getProfessionDefOption() {
+        if (depId){
+            const { success, data } = await fetchData(professionDefApi.getProfList(depId))
+            if(success) {
+                setProfessionOption(data)
+            }
+        }
+    }
+
+    // Анги
+    async function getGroupOption() {
+        if(proId){
+            const { success, data } = await fetchData(groupApi.getGroupList(proId))
+            if(success) {
+                setGroupOption(data)
+            }
         }
     }
 
@@ -104,11 +157,6 @@ const Createmodal = ({ open, handleModal, refreshDatas, edit_id }) => {
         }
     }
 
-    useEffect(()=>{
-        getSchoolOption()
-        getSelectBottomDatas(2)
-    },[])
-
     function handleStudentSelect(value){
         getStudentOption(value)
     }
@@ -118,7 +166,7 @@ const Createmodal = ({ open, handleModal, refreshDatas, edit_id }) => {
         cdata['school'] = school_id
         cdata['lesson_year'] = cyear_name
         cdata['lesson_season'] = cseason_id
-        cdata['group'] = selectedGroup? selectedGroup.id : ''
+        cdata['group'] = groupId ? groupId : ''
         if(edit_id){
             if(!school_checked){
                 cdata['destination_school'] = ''
@@ -175,28 +223,9 @@ const Createmodal = ({ open, handleModal, refreshDatas, edit_id }) => {
                         setSchoolChecked(data[key])
                     }
                     if(key === 'destination_school'){
-                        var school = schoolOption.find((val) => {
-                            return val.id === data[key]
-                        })
-                        setSelectedValue(school)
-                    }
-                    if(key === 'school_dep' && data.group){
-                        var school = schoolOption.find((val) => {
-                            return val.id === data.school_dep.school_id
-                        })
-                        setSelectedValue(school)
-                        var dep = school?.children.find((val) => {
-                            return val.id === data.school_dep.dep_id
-                        })
-                        setSelectedDep(dep)
-                        var pro = dep?.children.find((val) => {
-                            return val.id === data.school_dep.pro_id
-                        })
-                        setSelectedPro(pro)
-                        var group = pro?.children.find((val) => {
-                            return val.id === data.school_dep.group_id
-                        })
-                        setSelectedGroup(group)
+                        setschoolId(data.school_dep.school_id)
+                        setDepId(data.school_dep.dep_id)
+                        setProId(data.school_dep.pro_id)
                     }
                 }
             }
@@ -436,17 +465,21 @@ const Createmodal = ({ open, handleModal, refreshDatas, edit_id }) => {
                                                         name="destination_school"
                                                         id="destination_school"
                                                         classNamePrefix='select'
-                                                        isDisabled={selectedDep}
-                                                        isClearable
+                                                        isClearable={true}
                                                         className={classnames('react-select', { 'is-invalid': errors.destination_school })}
                                                         isLoading={isLoading}
                                                         placeholder={t(`Та салбар сургуулиа сонгоно уу`)}
                                                         options={schoolOption || []}
-                                                        value={schoolOption.find((val) => val.id === value)}
+                                                        value={value && schoolOption.find((val) => val.id === value)}
                                                         noOptionsMessage={() => t('Хоосон байна')}
                                                         onChange={(val) => {
                                                             onChange(val?.id || '')
-                                                            setSelectedValue(val)
+                                                            setValue('destination_department', '')
+                                                            setValue('destination_pro', '')
+                                                            setValue('destination_group', '')
+                                                            if (val?.id){
+                                                                setschoolId(val?.id || '')
+                                                            }
                                                         }}
                                                         styles={ReactSelectStyles}
                                                         getOptionValue={(option) => option.id}
@@ -471,17 +504,21 @@ const Createmodal = ({ open, handleModal, refreshDatas, edit_id }) => {
                                                         name="destination_department"
                                                         id="destination_department"
                                                         classNamePrefix='select'
-                                                        isDisabled={selectedPro}
-                                                        isClearable={!selectedPro}
+                                                        isClearable={true}
+
                                                         className={classnames('react-select', { 'is-invalid': errors.destination_department})}
                                                         isLoading={isLoading}
                                                         placeholder={t(`Та хөтөлбөрийн багаа сонгоно уу`)}
-                                                        options={selectedValue?.children}
-                                                        value={selectedValue?.children.find((val) => val.id === value)}
+                                                        options={departmentOption || ""}
+                                                        value={value && departmentOption?.find((val) => val?.id === value)}
                                                         noOptionsMessage={() => t('Хоосон байна')}
                                                         onChange={(val) => {
                                                             onChange(val?.id || '')
-                                                            setSelectedDep(val)
+                                                            setValue('destination_pro', '')
+                                                            setValue('destination_group', '')
+                                                            if (val?.id){
+                                                                setDepId(val?.id)
+                                                            }
                                                         }}
                                                         styles={ReactSelectStyles}
                                                         getOptionValue={(option) => option.id}
@@ -506,17 +543,19 @@ const Createmodal = ({ open, handleModal, refreshDatas, edit_id }) => {
                                                         name="destination_pro"
                                                         id="destination_pro"
                                                         classNamePrefix='select'
-                                                        isDisabled={selectedGroup}
-                                                        isClearable={!selectedGroup}
+                                                        isClearable={true}
                                                         className={classnames('react-select', { 'is-invalid': errors.destination_pro})}
                                                         isLoading={isLoading}
                                                         placeholder={t(`Та мэргэжлээ сонгоно уу`)}
-                                                        options={selectedDep?.children}
-                                                        value={selectedDep?.children.find((val) => val.id === value)}
+                                                        options={professionOption}
+                                                        value={value && professionOption.find((val) => val.id === value)}
                                                         noOptionsMessage={() => t('Хоосон байна')}
                                                         onChange={(val) => {
                                                             onChange(val?.id || '')
-                                                            setSelectedPro(val)
+                                                            setValue('destination_group', '')
+                                                            if(val?.id){
+                                                                setProId(val?.id || '')
+                                                            }
                                                         }}
                                                         styles={ReactSelectStyles}
                                                         getOptionValue={(option) => option.id}
@@ -541,16 +580,18 @@ const Createmodal = ({ open, handleModal, refreshDatas, edit_id }) => {
                                                         name="destination_group"
                                                         id="destination_group"
                                                         classNamePrefix='select'
-                                                        isClearable
+                                                        isClearable={true}
                                                         className={classnames('react-select', { 'is-invalid': errors.destination_group})}
                                                         isLoading={isLoading}
                                                         placeholder={t(`Та ангиа сонгоно уу`)}
-                                                        options={selectedPro?.children}
-                                                        value={selectedPro?.children.find((val) => val.id === value)}
+                                                        options={groupOption}
+                                                        value={value && groupOption.find((val) => val.id === value)}
                                                         noOptionsMessage={() => t('Хоосон байна')}
                                                         onChange={(val) => {
                                                             onChange(val?.id || '')
-                                                            setSelectedGroup(val)
+                                                            if(val?.id){
+                                                                setGroupId(val?.id || '')
+                                                            }
                                                         }}
                                                         styles={ReactSelectStyles}
                                                         getOptionValue={(option) => option.id}

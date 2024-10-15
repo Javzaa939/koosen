@@ -4842,6 +4842,44 @@ class ProfessionPosterFile(
 
         return request.send_info('INF_003')
 
+class ProfessionAPIView(
+    generics.GenericAPIView
+):
+    """ Хөтөлбөрийн багаас хамаарч мэргэжлийн жагсаалт авах нь  """
+
+    queryset = ProfessionDefinition.objects.all()
+
+    def get(self, request, depId=None):
+
+        if depId:
+            dep_list = self.queryset.filter(department_id=depId).values("id", "name")
+            return request.send_data(list(dep_list))
+
+class GroupAPIView(
+    generics.GenericAPIView
+):
+    """ Мэргэжлээс хамаарч ангийн жагсаалт авах нь """
+
+    queryset = Group.objects.all()
+
+    def get(self, request, profId=None):
+
+        if profId:
+            group_list = self.queryset.filter(profession_id=profId).values("id", "name")
+            return request.send_data(list(group_list))
+
+class SubOrgDepartListAPIView(
+    generics.GenericAPIView,
+):
+    """ Сургуулиас хамаарч хөтөлбөрийн багийн жагсаалт авах нь """
+
+    queryset = Salbars.objects
+
+    def get(self, request, sub_org=None):
+
+        if sub_org:
+            list_data = self.queryset.filter(sub_orgs_id=sub_org).values('id', 'name')
+            return request.send_data(list(list_data))
 
 # import pandas as pd
 # import math
