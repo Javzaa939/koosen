@@ -90,6 +90,7 @@ const Register = () => {
     const [groupOption, setGroup] = useState([])
     const [yearOption, setYear] = useState(generateLessonYear(10))
     const [level, setLevel] = useState('')
+    const [isPayed, setIsPayed] = useState('')
 
     // Хуудаслалтын анхны утга
     const [currentPage, setCurrentPage] = useState(1)
@@ -128,7 +129,7 @@ const Register = () => {
     // API
     useEffect(() => {
         getDatas()
-    }, [sortField, currentPage, rowsPerPage, level, select_value])
+    }, [sortField, currentPage, rowsPerPage, level, select_value, isPayed])
 
     useEffect(
         () =>
@@ -204,7 +205,7 @@ const Register = () => {
             setCurrentPage(page_count)
         }
 
-        const { success, data } = await allFetch(studentApi.get(rowsPerPage, currentPage, sortField, searchValue, department, degree, profession, group, join_year, select_value?.status, level))
+        const { success, data } = await allFetch(studentApi.get(rowsPerPage, currentPage, sortField, searchValue, department, degree, profession, group, join_year, select_value?.status, level, isPayed))
         if(success)
         {
             setTotalCount(data?.count)
@@ -746,6 +747,27 @@ const Register = () => {
                             styles={ReactSelectStyles}
                             getOptionValue={(option) => option.id}
                             getOptionLabel={(option) => option.name}
+                        />
+                    </Col>
+                    <Col sm={6} md={3} className='mt-1'>
+                        <Label className="form-label" for="isPayed">
+                            {t("Тухайн хичээлийн жилийн систем ашиглалтын төлбөр төлсөн эсэх")}
+                        </Label>
+                        <Select
+                            name="isPayed"
+                            id="isPayed"
+                            classNamePrefix='select'
+                            isClearable
+                            className={classnames('react-select')}
+                            isLoading={isLoading}
+                            placeholder={`-- Сонгоно уу --`}
+                            options={[
+                                {value: 1, label: t('Тийм')},
+                                {value: 2, label: t('Үгүй')},
+                            ]}
+                            noOptionsMessage={() => 'Хоосон байна'}
+                            onChange={(val) => setIsPayed(val.value)}
+                            styles={ReactSelectStyles}
                         />
                     </Col>
                 </Row>

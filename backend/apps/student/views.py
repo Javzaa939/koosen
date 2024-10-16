@@ -416,6 +416,7 @@ class StudentRegisterAPIView(
         schoolId = self.request.query_params.get('schoolId')
         status = self.request.query_params.get('status')
         level = self.request.query_params.get('level')
+        isPayed = self.request.query_params.get('isPayed')
 
         # сургуулиар хайлт хийх
         if schoolId:
@@ -446,6 +447,35 @@ class StudentRegisterAPIView(
 
         if level:
             queryset = queryset.filter(group__level=level)
+
+        if isPayed:
+            year, season = get_active_year_season()
+            payment_state = None
+
+            if isPayed == 1:
+                isPayed = True
+                payment_state = Q(paymentestimate__last_balance__gte=0)
+            else:
+                isPayed = False
+                payment_state = Q(paymentestimate__last_balance__lt=0)
+
+            queryset = queryset.filter(
+                Q(
+                    Q(paymentestimate__isnull=False)
+                    & Q(
+                        payment_state
+                        & Q(
+                            Q(group__profession__department__isnull=False, paymentestimate__school=F('group__profession__department__suborgs'))
+                            | Q(group__profession__department__isnull=True, paymentestimate__school=F('group__profession__school'))
+                        )
+                        & Q(paymentestimate__lesson_year=year, paymentestimate__lesson_season=season)
+                    )
+                )
+                | Q(
+                    Q(paymentestimate__isnull=True)
+                    & Q(False) if isPayed else Q()
+                )
+            )
 
         return queryset
 
