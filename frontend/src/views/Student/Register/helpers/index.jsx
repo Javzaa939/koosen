@@ -92,6 +92,18 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
             sortable: true,
 			center: true
         },
+		{
+			header: 'last_balance',
+			name: t("Төлбөрийн үлдэгдэл"),
+			selector: (row) => (
+				<Badge color="light-primary" pill>
+					{row.last_balance ? row.last_balance : t('Төлбөр байхгүй байна')}
+				</Badge>
+			),
+            sortable: true,
+			center: true,
+			minWidth: "200px",
+        },
 	]
 
 	if(Object.keys(user).length > 0) {

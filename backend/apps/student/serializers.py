@@ -188,11 +188,12 @@ class StudentRegisterListSerializer(serializers.ModelSerializer):
     title = serializers.SerializerMethodField()
     correspondlessons = serializers.SerializerMethodField()
     corres_id = serializers.SerializerMethodField()
+    last_balance = serializers.SerializerMethodField()
 
 
     class Meta:
         model = Student
-        fields = "id", 'code', 'first_name', 'last_name', 'register_num', 'department_name', 'group_name', 'status_name', 'profession_name', 'title', 'group_level', 'phone', 'group', 'school_name', 'correspondlessons', 'corres_id', 'is_active'
+        fields = "id", 'code', 'first_name', 'last_name', 'register_num', 'department_name', 'group_name', 'status_name', 'profession_name', 'title', 'group_level', 'phone', 'group', 'school_name', 'correspondlessons', 'corres_id', 'is_active', 'last_balance'
 
     def get_corres_id(self,obj):
 
@@ -217,6 +218,20 @@ class StudentRegisterListSerializer(serializers.ModelSerializer):
             ).order_by('my_season').filter(correspond=corresp.id).values()
 
         return list(qs_lesson)
+
+    def get_last_balance(self, obj):
+
+        year, season = get_active_year_season()
+        actual_school = None
+
+        if obj.group.profession.department:
+            actual_school = obj.group.profession.department.sub_orgs.id
+        else:
+            actual_school = obj.group.profession.school.id
+
+        paymentEstimateQuery = PaymentEstimate.objects.filter(student=obj,lesson_year=year,lesson_season=season, school=actual_school).first()
+
+        return paymentEstimateQuery.last_balance if paymentEstimateQuery else None
 
 
 class StudentDownloadSerializer(serializers.ModelSerializer):
