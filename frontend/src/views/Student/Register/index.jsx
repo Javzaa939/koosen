@@ -18,7 +18,7 @@ import {
     Dropdown
 } from 'reactstrap'
 
-import { ChevronDown, Plus, Search, FileText, Grid, Download, PenTool, UploadCloud } from 'react-feather'
+import { ChevronDown, Plus, Search, FileText, Grid, Download, PenTool, UploadCloud, File } from 'react-feather'
 
 import { useNavigate } from 'react-router-dom'
 
@@ -108,6 +108,7 @@ const Register = () => {
 
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
+    const [dashBoardOpen, setDashBoardOpen] = useState(false);
 
 
     const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
@@ -312,6 +313,7 @@ const Register = () => {
 
     const toggle = () => setDropdownOpen((prevState) => !prevState);
     const toggleExport = () => {setExportDropdownOpen((prevState) => !prevState)}
+    const toggleDashboard = () => setDashBoardOpen((prevState) => !prevState)
 
     const [open_file, setFileModal] = useState(false)
     const [file, setFile] = useState(false)
@@ -401,7 +403,13 @@ const Register = () => {
                 <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
                     <CardTitle tag='h4'>{t('Оюутны бүртгэл')}</CardTitle>
                     <div className='d-flex flex-wrap gap-1 mt-md-0 mt-1'>
-
+                        <Button
+                            color='primary'
+                            onClick={() => toggleDashboard()}
+                        >
+                            <File size={15} />
+                            <span className='align-middle ms-50'>{t('Тайлан')}</span>
+                        </Button>
                         <Dropdown isOpen={dropdownOpen} toggle={toggle}>
                         {/* <Dropdown isOpen={dropdownOpen} toggle={toggle} disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-read')  && school_id? false : true}> */}
                             <DropdownToggle color={skin === 'light' ? 'dark' : 'light'} className='' caret outline>
