@@ -772,7 +772,7 @@ const Register = () => {
                                 {value: 2, label: t('Үгүй')},
                             ]}
                             noOptionsMessage={() => 'Хоосон байна'}
-                            onChange={(val) => setIsPayed(val.value)}
+                            onChange={(val) => setIsPayed(val?.value)}
                             styles={ReactSelectStyles}
                         />
                     </Col>
