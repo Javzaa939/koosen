@@ -30,7 +30,7 @@ from main.utils.function.pagination import CustomPagination
 from main.utils.function.utils import str2bool, has_permission, get_lesson_choice_student, remove_key_from_dict, get_fullName, get_student_score_register, calculate_birthday, null_to_none, bytes_image_encode, get_active_year_season,start_time, json_load, dict_fetchall, unit_static_datas
 # from main.khur.XypClient import citizen_regnum, highschool_regnum
 from main.utils.file import save_file, remove_folder
-from lms.models import Learning, Student, StudentAdmissionScore, StudentEducation, StudentLeave, StudentLogin, TimeTable
+from lms.models import Learning, ProfessionalDegree, Student, StudentAdmissionScore, StudentEducation, StudentLeave, StudentLogin, TimeTable
 from lms.models import StudentMovement
 from lms.models import Group
 from lms.models import StudentFamily

@@ -190,21 +190,14 @@ const Group = () => {
                     className="py-1 shadow-sm bg-white rounded border"
                     statTitle={t('Нийт')}
                     icon={<Users size={20} />}
-                    renderStats={<h3 className='fw-bolder text-info mb-75'>{moneyFormat(Number(totals["Өдрийн анги"]) + Number(totals["E-Сургалт"]))}</h3>}
+                    renderStats={<h3 className='fw-bolder text-info mb-75'>{moneyFormat(totals["Өдөр"])}</h3>}
                 />
                 <StatsHorizontal
                     color='success'
                     className="py-1 shadow-sm bg-white rounded border"
                     statTitle={t('Өдрийн анги')}
                     icon={<Sunrise size={20} />}
-                    renderStats={<h3 className='fw-bolder text-success mb-75'>{moneyFormat(totals["Өдрийн анги"])}</h3>}
-                />
-                <StatsHorizontal
-                    color='primary'
-                    statTitle={t('E-Сургалт')}
-                    icon={<Sunset size={20} />}
-                    className="py-1 shadow-sm bg-white rounded border"
-                    renderStats={<h3 className='fw-bolder text-primary mb-75'>{moneyFormat(totals["E-Сургалт"])}</h3>}
+                    renderStats={<h3 className='fw-bolder text-success mb-75'>{moneyFormat(totals["Өдөр"])}</h3>}
                 />
             </Col>
         </Row>

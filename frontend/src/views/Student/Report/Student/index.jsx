@@ -188,7 +188,14 @@ const Student = ({ currentYear = '' }) => {
                     className="py-1 shadow-sm bg-white rounded border"
                     statTitle={t('Нийт')}
                     icon={<Users size={20} />}
-                    renderStats={<h3 className='fw-bolder text-info mb-70'>{moneyFormat(totals['Суралцаж буй'] + totals['Сурлагаар хасагдсан'] + totals['Жилийн чөлөө'])}</h3>}
+                    renderStats={<h3 className='fw-bolder text-info mb-70'>{moneyFormat(totals['Суралцаж  буй'] + totals['Суралцаж буй'])}</h3>}
+                />
+                <StatsHorizontal
+                    color='success'
+                    className="py-1 shadow-sm bg-white rounded border"
+                    statTitle={t('Суралцаж  байгаа')}
+                    icon={<Activity size={20} />}
+                    renderStats={<h3 className='fw-bolder text-success mb-70'>{moneyFormat(totals['Суралцаж  буй'])}</h3>}
                 />
                 <StatsHorizontal
                     color='success'
@@ -196,20 +203,6 @@ const Student = ({ currentYear = '' }) => {
                     statTitle={t('Суралцаж байгаа')}
                     icon={<Activity size={20} />}
                     renderStats={<h3 className='fw-bolder text-success mb-70'>{moneyFormat(totals['Суралцаж буй'])}</h3>}
-                />
-                <StatsHorizontal
-                    color='danger'
-                    className="py-1 shadow-sm bg-white rounded border"
-                    statTitle={t('Хасагдсан')}
-                    icon={<XCircle size={20} />}
-                    renderStats={<h3 className='fw-bolder text-danger mb-70'>{moneyFormat(totals['Сурлагаар хасагдсан'])}</h3>}
-                />
-                <StatsHorizontal
-                    color='warning'
-                    className="py-1 shadow-sm bg-white rounded border"
-                    statTitle={t('Жилийн чөлөө')}
-                    icon={<Briefcase size={20} />}
-                    renderStats={<h3 className='fw-bolder text-warning mb-70'>{moneyFormat(totals['Жилийн чөлөө'])}</h3>}
                 />
             </Col>
         </Row>
