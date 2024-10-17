@@ -93,11 +93,11 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 			center: true
         },
 		{
-			header: 'last_balance',
-			name: t("Төлбөрийн үлдэгдэл"),
+			header: 'is_payed',
+			name: t("Төлбөр төлөгдсөн эсэх"),
 			selector: (row) => (
 				<Badge color="light-primary" pill>
-					{row.last_balance ? row.last_balance : t('Төлбөр байхгүй байна')}
+					{row.is_payed ? t('Төлбөр төлөгдсөн') : t('Төлбөр төлөгдсөнгүй')}
 				</Badge>
 			),
             sortable: true,

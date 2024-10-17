@@ -9,7 +9,7 @@ from django.db.models.functions import Cast, ExtractYear
 from django.db.models import Avg, PositiveIntegerField
 from django.db.models import F, Sum
 
-from lms.models import Student, StudentAdmissionScore, StudentLeave
+from lms.models import Payment, Student, StudentAdmissionScore, StudentLeave
 from lms.models import StudentRegister
 from lms.models import Group
 from lms.models import StudentMovement
@@ -188,12 +188,12 @@ class StudentRegisterListSerializer(serializers.ModelSerializer):
     title = serializers.SerializerMethodField()
     correspondlessons = serializers.SerializerMethodField()
     corres_id = serializers.SerializerMethodField()
-    last_balance = serializers.SerializerMethodField()
+    is_payed = serializers.SerializerMethodField()
 
 
     class Meta:
         model = Student
-        fields = "id", 'code', 'first_name', 'last_name', 'register_num', 'department_name', 'group_name', 'status_name', 'profession_name', 'title', 'group_level', 'phone', 'group', 'school_name', 'correspondlessons', 'corres_id', 'is_active', 'last_balance'
+        fields = "id", 'code', 'first_name', 'last_name', 'register_num', 'department_name', 'group_name', 'status_name', 'profession_name', 'title', 'group_level', 'phone', 'group', 'school_name', 'correspondlessons', 'corres_id', 'is_active', 'is_payed'
 
     def get_corres_id(self,obj):
 
@@ -219,19 +219,11 @@ class StudentRegisterListSerializer(serializers.ModelSerializer):
 
         return list(qs_lesson)
 
-    def get_last_balance(self, obj):
+    def get_is_payed(self, obj):
 
-        year, season = get_active_year_season()
-        actual_school = None
+        is_payed = Payment.objects.filter(student=obj,dedication=Payment.STUDY).first()
 
-        if obj.group.profession.department:
-            actual_school = obj.group.profession.department.sub_orgs.id
-        else:
-            actual_school = obj.group.profession.school.id
-
-        paymentEstimateQuery = PaymentEstimate.objects.filter(student=obj,lesson_year=year,lesson_season=season, school=actual_school).first()
-
-        return paymentEstimateQuery.last_balance if paymentEstimateQuery else None
+        return is_payed.status if is_payed else None
 
 
 class StudentDownloadSerializer(serializers.ModelSerializer):

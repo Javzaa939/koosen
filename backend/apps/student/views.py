@@ -30,7 +30,7 @@ from main.utils.function.pagination import CustomPagination
 from main.utils.function.utils import str2bool, has_permission, get_lesson_choice_student, remove_key_from_dict, get_fullName, get_student_score_register, calculate_birthday, null_to_none, bytes_image_encode, get_active_year_season,start_time, json_load, dict_fetchall, unit_static_datas
 # from main.khur.XypClient import citizen_regnum, highschool_regnum
 from main.utils.file import save_file, remove_folder
-from lms.models import Learning, ProfessionalDegree, Student, StudentAdmissionScore, StudentEducation, StudentLeave, StudentLogin, TimeTable
+from lms.models import Learning, Payment, ProfessionalDegree, Student, StudentAdmissionScore, StudentEducation, StudentLeave, StudentLogin, TimeTable
 from lms.models import StudentMovement
 from lms.models import Group
 from lms.models import StudentFamily
@@ -450,28 +450,13 @@ class StudentRegisterAPIView(
             queryset = queryset.filter(group__level=level)
 
         if isPayed:
-            year, season = get_active_year_season()
+            payed_status_condition = Q(payment__status=True, payment__dedication=Payment.STUDY)
 
-            last_balance_condition = Q(
-                    Q(paymentestimate__last_balance__gte=0)
-                    & Q(
-                        Q(
-                            Q(group__profession__department__isnull=False)
-                            & Q(paymentestimate__school=F('group__profession__department__sub_orgs'))
-                        )
-                        | Q(
-                            Q(group__profession__department__isnull=True)
-                            & Q(paymentestimate__school=F('group__profession__school'))
-                        )
-                    )
-                    & Q(paymentestimate__lesson_year=year)
-                    & Q(paymentestimate__lesson_season=season)
-                )
-
+            # "2" is not payed
             if isPayed == '2':
-                last_balance_condition = ~last_balance_condition
+                payed_status_condition = ~payed_status_condition
 
-            queryset = queryset.filter(last_balance_condition)
+            queryset = queryset.filter(payed_status_condition)
 
         return queryset
 
