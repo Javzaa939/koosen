@@ -455,10 +455,17 @@ class StudentRegisterAPIView(
             last_balance_condition = Q(
                     Q(paymentestimate__last_balance__gte=0)
                     & Q(
-                        Q(group__profession__department__isnull=False, paymentestimate__school=F('group__profession__department__sub_orgs'))
-                        | Q(group__profession__department__isnull=True, paymentestimate__school=F('group__profession__school'))
+                        Q(
+                            Q(group__profession__department__isnull=False)
+                            & Q(paymentestimate__school=F('group__profession__department__sub_orgs'))
+                        )
+                        | Q(
+                            Q(group__profession__department__isnull=True)
+                            & Q(paymentestimate__school=F('group__profession__school'))
+                        )
                     )
-                    & Q(paymentestimate__lesson_year=year, paymentestimate__lesson_season=season)
+                    & Q(paymentestimate__lesson_year=year)
+                    & Q(paymentestimate__lesson_season=season)
                 )
 
             if isPayed == '2':
