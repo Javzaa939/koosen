@@ -47,6 +47,7 @@ import { downloadTemplate } from './downLoadExcel'
 import FileModal from '@src/components/FileModal'
 import DetailModal from './DetailModal'
 import { useSkin } from '@src/utility/hooks/useSkin'
+import Report from '../Report'
 
 const Register = () => {
 
@@ -375,6 +376,11 @@ const Register = () => {
 
     return (
         <Fragment>
+            {dashBoardOpen &&
+            <Card body className='p-1'>
+                <Report />
+            </Card>
+            }
             <Card>
             {open_file &&
                 <FileModal

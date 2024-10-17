@@ -1,0 +1,57 @@
+.dash_card{
+    padding: 1rem;
+    margin: 1rem;
+    font-weight: 100;
+    display: flex;
+    justify-content:space-between;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px 0 rgba(34, 41, 47, 0.1);
+    font-size: 12px;
+}
+
+@mixin card_icon($color, $background_color) {
+    width: 4rem;
+    height: 4rem;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: $color;
+    background-color: $background_color;
+}
+
+.simple_icon{
+    @include card_icon(var(--bs-primary), rgba(var(--bs-primary-rgb), 0.2));
+}
+.male_icon{
+    @include card_icon(#417be6, #003cc71e);
+}
+.female_icon{
+    @include card_icon(#e074c9, #a73db81e);
+}
+
+.dash_card_number{
+    font-size: 2rem;
+    font-weight: 200;
+    color: #5d5d5d;
+}
+
+.recharts_custom_tooltip{
+    background-color: white!important;
+}
+
+.dark-layout{
+    .dash_card{
+        color: #b9b9b9;
+        box-shadow: 0 4px 24px 0 rgba(106, 107, 107, 0.116);
+    }
+    .dash_card_number{
+        font-size: 2rem;
+        font-weight: 200;
+        color: #d0d0d0;
+    }
+    .recharts_custom_tooltip{
+        background-color: rgb(23, 21, 21)!important;
+    }
+}
+

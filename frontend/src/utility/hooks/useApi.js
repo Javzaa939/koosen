@@ -815,7 +815,17 @@ function useApi(isDisplay=false) {
 				post: data => instance.post(`/student/viz-status/`, data),
 				put: (data) => instance.put(`/student/viz-status/`, data),
 
-			}
+			},
+
+			/** Тайлан */
+			report: {
+				get: (currentYear) => instance.get(`/student/report/?school=${school_id}&currentYear=${currentYear}`),
+				getGroup: () => instance.get(`/student/group/dashboard/?school=${school_id}&`),
+				getCourse: () => instance.get(`/student/course/?school=${school_id}&`),
+				getProfession: () => instance.get(`/student/profession/?school=${school_id}&`),
+				getProvince: () => instance.get(`/student/province/?school=${school_id}&`),
+				getSchool: () => instance.get(`/student/school/?school=${school_id}&`),
+			},
 		},
 
 		/** Цагийн хуваарь */
