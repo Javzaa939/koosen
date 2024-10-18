@@ -21,6 +21,7 @@ urlpatterns = [
     path('profession/', StudentProfessionAPI().as_view()),
     path('province/', StudentProvinceAPI().as_view()),
     path('school/', StudentSchoolAPI().as_view()),
+    path('report/payment/', StudentReportPaymentAPI().as_view()),
 
     # Оюутны дэлгэрэнгүй мэдээлэл
     path('info/lesson/<int:lessonId>/', StudentLessonListAPIView.as_view()),
