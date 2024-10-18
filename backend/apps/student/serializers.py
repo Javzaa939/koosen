@@ -221,7 +221,7 @@ class StudentRegisterListSerializer(serializers.ModelSerializer):
 
     def get_is_payed(self, obj):
 
-        is_payed = Payment.objects.filter(student=obj,dedication=Payment.STUDY).first()
+        is_payed = Payment.objects.filter(student=obj,dedication=Payment.SYSTEM).first()
 
         return is_payed.status if is_payed else None
 

@@ -450,7 +450,7 @@ class StudentRegisterAPIView(
             queryset = queryset.filter(group__level=level)
 
         if isPayed:
-            payed_status_condition = Q(payment__status=True, payment__dedication=Payment.STUDY)
+            payed_status_condition = Q(payment__status=True, payment__dedication=Payment.SYSTEM)
 
             # "2" is not payed
             if isPayed == '2':
