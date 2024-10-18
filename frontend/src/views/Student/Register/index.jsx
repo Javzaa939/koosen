@@ -18,7 +18,7 @@ import {
     Dropdown
 } from 'reactstrap'
 
-import { ChevronDown, Plus, Search, FileText, Grid, Download, PenTool, UploadCloud } from 'react-feather'
+import { ChevronDown, Plus, Search, FileText, Grid, Download, PenTool, UploadCloud, File } from 'react-feather'
 
 import { useNavigate } from 'react-router-dom'
 
@@ -47,6 +47,7 @@ import { downloadTemplate } from './downLoadExcel'
 import FileModal from '@src/components/FileModal'
 import DetailModal from './DetailModal'
 import { useSkin } from '@src/utility/hooks/useSkin'
+import Report from '../Report'
 
 const Register = () => {
 
@@ -90,6 +91,7 @@ const Register = () => {
     const [groupOption, setGroup] = useState([])
     const [yearOption, setYear] = useState(generateLessonYear(10))
     const [level, setLevel] = useState('')
+    const [isPayed, setIsPayed] = useState('')
 
     // Хуудаслалтын анхны утга
     const [currentPage, setCurrentPage] = useState(1)
@@ -108,6 +110,7 @@ const Register = () => {
 
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
+    const [dashBoardOpen, setDashBoardOpen] = useState(false);
 
 
     const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
@@ -127,7 +130,7 @@ const Register = () => {
     // API
     useEffect(() => {
         getDatas()
-    }, [sortField, currentPage, rowsPerPage, level, select_value])
+    }, [sortField, currentPage, rowsPerPage, level, select_value, isPayed])
 
     useEffect(
         () =>
@@ -203,7 +206,7 @@ const Register = () => {
             setCurrentPage(page_count)
         }
 
-        const { success, data } = await allFetch(studentApi.get(rowsPerPage, currentPage, sortField, searchValue, department, degree, profession, group, join_year, select_value?.status, level))
+        const { success, data } = await allFetch(studentApi.get(rowsPerPage, currentPage, sortField, searchValue, department, degree, profession, group, join_year, select_value?.status, level, isPayed))
         if(success)
         {
             setTotalCount(data?.count)
@@ -312,6 +315,7 @@ const Register = () => {
 
     const toggle = () => setDropdownOpen((prevState) => !prevState);
     const toggleExport = () => {setExportDropdownOpen((prevState) => !prevState)}
+    const toggleDashboard = () => setDashBoardOpen((prevState) => !prevState)
 
     const [open_file, setFileModal] = useState(false)
     const [file, setFile] = useState(false)
@@ -372,6 +376,11 @@ const Register = () => {
 
     return (
         <Fragment>
+            {dashBoardOpen &&
+            <Card body className='p-1'>
+                <Report />
+            </Card>
+            }
             <Card>
             {open_file &&
                 <FileModal
@@ -401,7 +410,13 @@ const Register = () => {
                 <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
                     <CardTitle tag='h4'>{t('Оюутны бүртгэл')}</CardTitle>
                     <div className='d-flex flex-wrap gap-1 mt-md-0 mt-1'>
-
+                        <Button
+                            color='primary'
+                            onClick={() => toggleDashboard()}
+                        >
+                            <File size={15} />
+                            <span className='align-middle ms-50'>{t('Тайлан')}</span>
+                        </Button>
                         <Dropdown isOpen={dropdownOpen} toggle={toggle}>
                         {/* <Dropdown isOpen={dropdownOpen} toggle={toggle} disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-read')  && school_id? false : true}> */}
                             <DropdownToggle color={skin === 'light' ? 'dark' : 'light'} className='' caret outline>
@@ -738,6 +753,27 @@ const Register = () => {
                             styles={ReactSelectStyles}
                             getOptionValue={(option) => option.id}
                             getOptionLabel={(option) => option.name}
+                        />
+                    </Col>
+                    <Col sm={6} md={3} className='mt-1'>
+                        <Label className="form-label" for="isPayed">
+                            {t("Тухайн хичээлийн жилийн систем ашиглалтын төлбөр төлсөн эсэх")}
+                        </Label>
+                        <Select
+                            name="isPayed"
+                            id="isPayed"
+                            classNamePrefix='select'
+                            isClearable
+                            className={classnames('react-select')}
+                            isLoading={isLoading}
+                            placeholder={`-- Сонгоно уу --`}
+                            options={[
+                                {value: 1, label: t('Тийм')},
+                                {value: 2, label: t('Үгүй')},
+                            ]}
+                            noOptionsMessage={() => 'Хоосон байна'}
+                            onChange={(val) => setIsPayed(val?.value)}
+                            styles={ReactSelectStyles}
                         />
                     </Col>
                 </Row>
