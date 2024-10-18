@@ -9,7 +9,7 @@ from django.db.models.functions import Cast, ExtractYear
 from django.db.models import Avg, PositiveIntegerField
 from django.db.models import F, Sum
 
-from lms.models import Student, StudentAdmissionScore, StudentLeave
+from lms.models import Payment, Student, StudentAdmissionScore, StudentLeave
 from lms.models import StudentRegister
 from lms.models import Group
 from lms.models import StudentMovement
@@ -188,11 +188,12 @@ class StudentRegisterListSerializer(serializers.ModelSerializer):
     title = serializers.SerializerMethodField()
     correspondlessons = serializers.SerializerMethodField()
     corres_id = serializers.SerializerMethodField()
+    is_payed = serializers.SerializerMethodField()
 
 
     class Meta:
         model = Student
-        fields = "id", 'code', 'first_name', 'last_name', 'register_num', 'department_name', 'group_name', 'status_name', 'profession_name', 'title', 'group_level', 'phone', 'group', 'school_name', 'correspondlessons', 'corres_id', 'is_active'
+        fields = "id", 'code', 'first_name', 'last_name', 'register_num', 'department_name', 'group_name', 'status_name', 'profession_name', 'title', 'group_level', 'phone', 'group', 'school_name', 'correspondlessons', 'corres_id', 'is_active', 'is_payed'
 
     def get_corres_id(self,obj):
 
@@ -217,6 +218,12 @@ class StudentRegisterListSerializer(serializers.ModelSerializer):
             ).order_by('my_season').filter(correspond=corresp.id).values()
 
         return list(qs_lesson)
+
+    def get_is_payed(self, obj):
+
+        is_payed = Payment.objects.filter(student=obj,dedication=Payment.SYSTEM).first()
+
+        return is_payed.status if is_payed else None
 
 
 class StudentDownloadSerializer(serializers.ModelSerializer):

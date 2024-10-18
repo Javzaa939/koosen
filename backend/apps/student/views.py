@@ -1,3 +1,4 @@
+from collections import defaultdict
 import os
 import traceback
 import requests
@@ -12,11 +13,11 @@ import pandas as pd
 
 from django.conf import settings
 from django.db import transaction
-from django.db.models import Max, Sum, F, FloatField, Q, Value
-from django.db.models.functions import Replace, Upper
-from django.db.models.functions import Coalesce
+from django.db.models import Max, Sum, F, FloatField, Q, Value, Count, OuterRef, Subquery, Func
+from django.db.models.functions import Replace, Upper, Coalesce
 from django.contrib.auth.hashers import make_password
 from django.db import connection
+from django.utils import timezone
 
 from main.utils.function.pagination import CustomPagination
 from main.decorators import login_required
@@ -26,10 +27,10 @@ from main.utils.file import remove_folder, split_root_path
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 from main.utils.function.pagination import CustomPagination
-from main.utils.function.utils import str2bool, has_permission, get_lesson_choice_student, remove_key_from_dict, get_fullName, get_student_score_register, calculate_birthday, null_to_none, bytes_image_encode, get_active_year_season,start_time, json_load, dict_fetchall
+from main.utils.function.utils import str2bool, has_permission, get_lesson_choice_student, remove_key_from_dict, get_fullName, get_student_score_register, calculate_birthday, null_to_none, bytes_image_encode, get_active_year_season,start_time, json_load, dict_fetchall, unit_static_datas
 # from main.khur.XypClient import citizen_regnum, highschool_regnum
 from main.utils.file import save_file, remove_folder
-from lms.models import Student, StudentAdmissionScore, StudentEducation, StudentLeave, StudentLogin, TimeTable
+from lms.models import Learning, Payment, ProfessionalDegree, Student, StudentAdmissionScore, StudentEducation, StudentLeave, StudentLogin, TimeTable
 from lms.models import StudentMovement
 from lms.models import Group
 from lms.models import StudentFamily
@@ -416,6 +417,7 @@ class StudentRegisterAPIView(
         schoolId = self.request.query_params.get('schoolId')
         status = self.request.query_params.get('status')
         level = self.request.query_params.get('level')
+        isPayed = self.request.query_params.get('isPayed')
 
         # сургуулиар хайлт хийх
         if schoolId:
@@ -446,6 +448,15 @@ class StudentRegisterAPIView(
 
         if level:
             queryset = queryset.filter(group__level=level)
+
+        if isPayed:
+            payed_status_condition = Q(payment__status=True, payment__dedication=Payment.SYSTEM)
+
+            # "2" is not payed
+            if isPayed == '2':
+                payed_status_condition = ~payed_status_condition
+
+            queryset = queryset.filter(payed_status_condition)
 
         return queryset
 
@@ -766,6 +777,567 @@ class StudentsListSimpleAPIView(
 
         return request.send_data(all_list)
 
+
+
+@permission_classes([IsAuthenticated])
+class GroupReportAPI(
+    mixins.ListModelMixin,
+    generics.GenericAPIView,
+):
+
+    ''' Оюутны бүртгэлийн нийт анги бүлгийн тоо '''
+
+    def get(self, request):
+
+        school = request.query_params.get('school')
+
+        extra_filter = {}
+
+        if school:
+            extra_filter.update({'school': school})
+
+        status = Learning.objects.values('id', 'learn_name').order_by('id')
+
+        def fill_data(chart_data):
+            sorted_data = []
+            if len(chart_data) != len(status):
+
+                for grade in status:
+                    name = grade['learn_name']
+                    has = False
+                    for item in chart_data:
+                        aname = item['name']
+                        has = name == aname
+                        if has is True:
+                            break
+
+                    if has is False:
+                        chart_data.append({
+                            'name': name,
+                            "count": 0,
+                            "id": grade['id'],
+                        })
+                sorted_data = sorted(chart_data, key=lambda d: d['id'])
+
+            return sorted_data if len(sorted_data) else chart_data
+
+        label = []
+        data = {}
+
+        if school:
+            label_obj = ProfessionalDegree.objects.annotate(name=F('degree_name')).values('id', 'name')
+        else:
+            label_obj = SubOrgs.objects.filter(is_school=True).values('id', 'name')
+
+        for index, item in enumerate(label_obj):
+            if school:
+                label_obj_filter = {'degree': item.get('id')}
+            else:
+                label_obj_filter = {'school': item.get('id')}
+
+            group = list(
+                Group
+                .objects
+                .filter(
+                    **extra_filter,
+                    **label_obj_filter
+                )
+                .values('learning_status', 'learning_status__learn_name')
+                .annotate(count=Count("learning_status"), id=F('learning_status'), name=F('learning_status__learn_name'))
+                .values('id', 'count', 'name')
+                .order_by('id')
+            )
+            group = fill_data(group)
+
+            key = f"group_{index}_{''.join(word[0].upper() for word in item.get('name').split())}"
+            label.append({
+                "key": key,
+                "name": item.get('name')
+            })
+
+            data[key] = group
+
+        data = {
+            "label": label,
+            "data": data,
+            "ylabel": [[item.get('id'), item.get('learn_name').capitalize()] for item in status],
+        }
+
+        return request.send_data(data)
+
+
+@permission_classes([IsAuthenticated])
+class StudentReportAPI(
+    mixins.ListModelMixin,
+    generics.GenericAPIView,
+):
+
+    ''' Оюутны бүртгэл тайлан '''
+
+    def get(self, request):
+
+        school = request.query_params.get('school')
+
+        currentYear = request.GET.get("currentYear")
+
+        extra_filter = {}
+
+        if school:
+            extra_filter.update({'group__school': school})
+
+        exclude_filter = {
+            'status__name__icontains': 'Төгссөн'
+        }
+
+        if currentYear:
+            currentYear = timezone.now().year
+            currentYear = f"{currentYear}-{currentYear + 1}"
+            extra_filter.update({
+                "group__join_year": currentYear,
+            })
+
+        status = StudentRegister.objects.exclude(name__icontains='Төгссөн').values('code', 'name').order_by('code')
+
+        def fill_data(chart_data):
+            sorted_data = []
+            if len(chart_data) != len(status):
+
+                for grade in status:
+                    name = grade['name']
+                    has = False
+                    for item in chart_data:
+                        aname = item['name']
+                        has = name == aname
+                        if has is True:
+                            break
+
+                    if has is False:
+                        chart_data.append({
+                            'name': name,
+                            "count": 0,
+                            "code": grade['code'],
+                        })
+                sorted_data = sorted(chart_data, key=lambda d: d['code'])
+
+            return sorted_data if len(sorted_data) else chart_data
+
+        label = []
+        data = {}
+
+        # male
+        student = list(
+            Student
+            .objects
+            .filter(
+                **extra_filter,
+                gender=Student.GENDER_MALE
+            )
+            .exclude(**exclude_filter)
+            .values('status__code', 'status__name')
+            .annotate(count=Count("status__code"), code=F('status__code'), name=F('status__name'))
+            .values('code', 'count', 'name')
+            .order_by('code')
+        )
+        student = fill_data(student)
+
+        label.append({
+            "key": Student.GENDER_MALE,
+            "name": Student.GENDER_TYPE[Student.GENDER_MALE - 1][1].capitalize()
+        })
+
+        data[Student.GENDER_MALE] = student
+
+        # female
+        student = list(
+            Student
+            .objects
+            .filter(
+                **extra_filter,
+                gender=Student.GENDER_FEMALE
+            )
+            .exclude(**exclude_filter)
+            .values('status__code', 'status__name')
+            .annotate(count=Count("status__code"), code=F('status__code'), name=F('status__name'))
+            .values('code', 'count', 'name')
+            .order_by('code')
+        )
+        student = fill_data(student)
+
+        label.append({
+            "key": Student.GENDER_FEMALE,
+            "name": Student.GENDER_TYPE[Student.GENDER_FEMALE - 1][1].capitalize()
+        })
+
+        data[Student.GENDER_FEMALE] = student
+
+        data = {
+            "label": label,
+            "data": data,
+            "ylabel": [[item.get('code'), item.get('name').capitalize()] for item in status],
+        }
+
+        return request.send_data(data)
+
+
+@permission_classes([IsAuthenticated])
+class StudentCourseAPI(
+    mixins.ListModelMixin,
+    generics.GenericAPIView,
+):
+
+    ''' Оюутны бүртгэлийн нийт суралцагчийн тоо хүйсээр '''
+
+    def get(self, request):
+
+        school = request.query_params.get('school')
+
+        extra_filter = dict()
+
+        if school:
+            extra_filter.update({'group__school': school})
+
+        total = Student.objects.filter(**extra_filter).exclude(status__name__icontains='Төгссөн').count()
+
+        student_qs = (
+            Student
+            .objects
+            .annotate(
+                group__level=F('group__level'),
+            )
+            .filter(
+                **extra_filter,
+            )
+            .exclude(status__name__icontains='Төгссөн')
+        )
+
+        male_qs = (
+            student_qs
+            .filter(
+                gender=Student.GENDER_MALE,
+                group__level=OuterRef("level"),
+            )
+            .annotate(count=Count("*"))
+            .values("count")
+        )
+        male_qs.query.set_group_by()
+
+        female_qs = (
+            student_qs
+            .filter(
+                gender=Student.GENDER_FEMALE,
+                group__level=OuterRef("level"),
+            )
+            .annotate(count=Count("*"))
+            .values("count")
+        )
+        female_qs.query.set_group_by()
+
+        total_qs = (
+            student_qs
+            .filter(
+                group__level=OuterRef("level"),
+            )
+            .annotate(count=Count("*"))
+            .values("count")
+        )
+        total_qs.query.set_group_by()
+
+        chart_data = list(
+            Group
+            .objects
+            .values("level")
+            .annotate(count=Count("*"))
+            .values("level", "count")
+            .annotate(
+                total=Subquery(total_qs),
+                male=Subquery(male_qs),
+                female=Subquery(female_qs),
+            )
+            .values("level", "total", "male", "female")
+            .order_by('level')
+        )
+
+        data = {
+            "data": chart_data,
+            "total": total
+        }
+
+        return request.send_data(data)
+
+
+@permission_classes([IsAuthenticated])
+class StudentProfessionAPI(
+    mixins.ListModelMixin,
+    generics.GenericAPIView,
+):
+
+    ''' Оюутны бүртгэлийн нийт суралцагчийн тоо хөтөлбөрөөр '''
+
+    def get(self, request):
+
+        school = request.query_params.get('school')
+
+        extra_filter = dict()
+
+        if school:
+            extra_filter.update({'group__school': school})
+
+        total = Student.objects.filter(**extra_filter).exclude(status__name__icontains='Төгссөн').count()
+
+        student_qs = (
+            Student
+            .objects
+            .annotate(
+                profession=F('group__profession'),
+            )
+            .filter(
+                **extra_filter,
+            )
+            .exclude(status__name__icontains='Төгссөн')
+        )
+
+        male_qs = (
+            student_qs
+            .filter(
+                gender=Student.GENDER_MALE,
+                profession=OuterRef("pk"),
+            )
+            .annotate(count=Count("*"))
+            .values("count")
+        )
+        male_qs.query.set_group_by()
+
+        female_qs = (
+            student_qs
+            .filter(
+                gender=Student.GENDER_FEMALE,
+                profession=OuterRef("pk"),
+            )
+            .annotate(count=Count("*"))
+            .values("count")
+        )
+        female_qs.query.set_group_by()
+
+        total_qs = (
+            student_qs
+            .filter(
+                profession=OuterRef("pk"),
+            )
+            .annotate(count=Count("*"))
+            .values("count")
+        )
+        total_qs.query.set_group_by()
+
+        chart_data = list(
+            ProfessionDefinition
+            .objects
+            .values("name")
+            .annotate(count=Count("*"))
+            .values("name", "count")
+            .annotate(
+                total=Subquery(total_qs),
+                male=Subquery(male_qs),
+                female=Subquery(female_qs),
+            )
+            .filter(
+                total__gt=0
+            )
+            .values("name", "total", "male", "female")
+            .order_by('name')
+        )
+
+        data = {
+            "data": chart_data,
+            "total": total
+        }
+
+        return request.send_data(data)
+
+
+@permission_classes([IsAuthenticated])
+class StudentProvinceAPI(
+    mixins.ListModelMixin,
+    generics.GenericAPIView,
+):
+
+    ''' Оюутны бүртгэлийн нийт суралцагчийн тоо аймгаар '''
+
+    def get(self, request):
+
+        school = request.query_params.get('school')
+
+        extra_filter = dict()
+
+        if school:
+            extra_filter.update({'group__school': school})
+
+        unit_names = unit_static_datas()
+
+        student_qs = Student.objects.filter(**extra_filter).exclude(status__name__icontains='Төгссөн')
+
+        # for declare gender types
+        gender_values = [Student.GENDER_MALE, Student.GENDER_FEMALE]
+
+        # Аймаг хадгалагдаагүй байсан учир регистрийн дугаараас аймаг олсон
+        query = Q()
+        for key in unit_names.keys():
+            query |= Q(register_num__startswith=key)
+
+        # to get all students with aimag letter at the start of register_num
+        student_aimag = student_qs.filter(query)
+
+        # to extract first letter
+        class Left(Func):
+            function = 'LEFT'
+            template = '%(function)s(%(expressions)s, 1)'
+
+        # to count by first letter of aimag
+        student_aimag_counts = (
+            student_aimag
+            .annotate(first_letter=Left(F('register_num')))
+            .values('first_letter', 'gender')
+            .annotate(count=Count('id'))
+        )
+
+        # to group letters with same aimag
+        grouped_letters = defaultdict(list)
+
+        for letter, name in unit_names.items():
+            grouped_letters[name].append(letter)
+
+        # to collect aimag count pairs
+        chart_data = []
+        total = 0
+
+        for aimag_name, letters in grouped_letters.items():
+            # to initialize counters for genders
+            gender_totals = {value: 0 for value in gender_values}
+
+            # to count by letters
+            for item in student_aimag_counts:
+                if item['first_letter'] in letters:
+                    if item['gender'] in gender_totals:
+                        gender_totals[item['gender']] += item['count']
+
+            total_by_aimag = gender_totals[gender_values[0]] + gender_totals[gender_values[1]]
+
+            # to add data to summary list
+            chart_data.append({
+                'name': aimag_name,
+                'male_student_total': gender_totals[gender_values[0]],
+                'female_student_total': gender_totals[gender_values[1]],
+                'total': total_by_aimag
+            })
+
+            total += total_by_aimag
+
+        # to sort by aimag name
+        chart_data = sorted(chart_data, key=lambda x: x['name'])
+
+        data = {
+            "haryalal": chart_data,
+            "total": total
+        }
+
+        return request.send_data(data)
+
+
+@permission_classes([IsAuthenticated])
+class StudentSchoolAPI(
+    mixins.ListModelMixin,
+    generics.GenericAPIView,
+):
+
+    ''' Оюутны бүртгэлийн нийт суралцагчийн тоо сургуулиар '''
+
+    def get(self, request):
+
+        school = request.query_params.get('school')
+
+        extra_filter_ylabel = {
+            'is_school': True
+        }
+
+        schools = SubOrgs.objects.filter(**extra_filter_ylabel).values('id', 'name')
+
+        extra_filter = {
+            "group__school__isnull": False
+        }
+
+        if school:
+            extra_filter.update({'group__school': school})
+
+        def fill_data(chart_data):
+            sorted_data = []
+            if len(chart_data) != len(schools):
+
+                for grade in schools:
+                    name = grade.get('name')
+                    has = False
+                    for item in chart_data:
+                        aname = item['school_name']
+                        has = name == aname
+                        if has is True:
+                            break
+
+                    if has is False:
+                        chart_data.append({
+                            'school_name': name,
+                            "count": 0,
+                            "school_code": grade.get('id'),
+                        })
+
+                sorted_data = sorted(chart_data, key=lambda d: d['school_code'])
+
+            return sorted_data if len(sorted_data) else chart_data
+
+        male_student = (
+            Student
+            .objects
+            .filter(
+                **extra_filter,
+                gender=Student.GENDER_MALE
+            )
+            .exclude(status__name__icontains='Төгссөн')
+            .values("group__school", 'group__school__name')
+            .annotate(count=Count("group__school"), school_code=F('group__school'), school_name=F('group__school__name'))
+            .values("school_code", 'count', 'school_name')
+        )
+        male_student = fill_data(list(male_student))
+
+        female_student = (
+            Student
+            .objects
+            .filter(
+                **extra_filter,
+                gender=Student.GENDER_FEMALE
+            )
+            .exclude(status__name__icontains='Төгссөн')
+            .values("group__school", 'group__school__name')
+            .annotate(count=Count("group__school"), school_code=F('group__school'), school_name=F('group__school__name'))
+            .values("school_code", 'count', 'school_name')
+        )
+        female_student = fill_data(list(female_student))
+
+        data = {
+            "label": [
+                {
+                    "key": "male_student",
+                    "name": "Эрэгтэй"
+                },
+                {
+                    "key": "female_student",
+                    "name": "Эмэгтэй"
+                },
+            ],
+            "data": {
+                'male_student': male_student,
+                'female_student': female_student,
+            },
+            "ylabel": [item.get('name') for item in schools]
+        }
+
+        return request.send_data(data)
 
 
 # @permission_classes([IsAuthenticated])
