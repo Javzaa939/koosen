@@ -183,13 +183,14 @@ const Student = ({ currentYear = '' }) => {
                 </Card>
             </Col>
             <Col md={3} xs={12}>
-                <StatsHorizontal
+                {/* <StatsHorizontal
                     color='info'
                     className="py-1 shadow-sm bg-white rounded border"
                     statTitle={t('Нийт')}
                     icon={<Users size={20} />}
-                    renderStats={<h3 className='fw-bolder text-info mb-70'>{moneyFormat(totals['Суралцаж  буй'] + totals['Суралцаж буй'])}</h3>}
-                />
+                    renderStats={<h3 className='fw-bolder text-info mb-70'>{moneyFormat(totals['Суралцаж  буй'])}</h3>}
+                    // renderStats={<h3 className='fw-bolder text-info mb-70'>{moneyFormat(totals['Суралцаж  буй'] + totals['Суралцаж буй'])}</h3>}
+                /> */}
                 <StatsHorizontal
                     color='success'
                     className="py-1 shadow-sm bg-white rounded border"
@@ -197,13 +198,13 @@ const Student = ({ currentYear = '' }) => {
                     icon={<Activity size={20} />}
                     renderStats={<h3 className='fw-bolder text-success mb-70'>{moneyFormat(totals['Суралцаж  буй'])}</h3>}
                 />
-                <StatsHorizontal
+                {/* <StatsHorizontal
                     color='success'
                     className="py-1 shadow-sm bg-white rounded border"
                     statTitle={t('Суралцаж байгаа')}
                     icon={<Activity size={20} />}
                     renderStats={<h3 className='fw-bolder text-success mb-70'>{moneyFormat(totals['Суралцаж буй'])}</h3>}
-                />
+                /> */}
             </Col>
         </Row>
     )
