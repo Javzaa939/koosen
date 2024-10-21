@@ -825,6 +825,7 @@ function useApi(isDisplay=false) {
 				getProfession: () => instance.get(`/student/profession/?school=${school_id}&`),
 				getProvince: () => instance.get(`/student/province/?school=${school_id}&`),
 				getSchool: () => instance.get(`/student/school/?school=${school_id}&`),
+				getPayment: (template='') => instance.get(`/student/report/payment/?school=${school_id}&template=${template}`),
 			},
 		},
 
