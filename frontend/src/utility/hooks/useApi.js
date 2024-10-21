@@ -565,7 +565,7 @@ function useApi(isDisplay=false) {
 				getLongList: () => instance.get(`/core/teacher/longlist/`),
 				getSchoolFilter: (school_id) => instance.get(`/core/teacher/listschoolfilter/?school=${school_id}`),
 
-				resetPassword: (id, data) => instance.put(`/core/teacher/reset-password/${id}/`, data),
+				resetPassword: (id) => instance.put(`/core/teacher/reset-password/${id}/`),
 				/** Хичээлээс хамаарах багшийн жагсаалт */
 				getTeacher: (lesson_id) => {
 					var lesson = ''
