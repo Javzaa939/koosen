@@ -760,7 +760,6 @@ class StudentListAPIView(
         return request.send_data(all_list)
 
 
-
 # @permission_classes([IsAuthenticated])
 class StudentsListSimpleAPIView(
     mixins.ListModelMixin,
@@ -776,7 +775,6 @@ class StudentsListSimpleAPIView(
         all_list = self.list(request).data
 
         return request.send_data(all_list)
-
 
 
 @permission_classes([IsAuthenticated])
@@ -1238,6 +1236,115 @@ class StudentProvinceAPI(
             "haryalal": chart_data,
             "total": total
         }
+
+        return request.send_data(data)
+
+
+@permission_classes([IsAuthenticated])
+class StudentReportPaymentAPI(
+    mixins.ListModelMixin,
+    generics.GenericAPIView,
+):
+    """Оюутны бүртгэлийн нийт суралцагчийн тоо хөтөлбөрөөр. Payment"""
+
+    def get(self, request):
+
+        school = request.query_params.get("school")
+        extra_filter_Q = Q()
+
+        if school:
+            extra_filter_Q = Q(
+                Q(
+                    group__profession__department__isnull=True,
+                    group__profession__school=school,
+                )
+                | Q(
+                    group__profession__department__isnull=False,
+                    group__profession__department__sub_orgs=school,
+                )
+            )
+
+        exclude_filter = {"status__name__icontains": "Төгссөн"}
+        student_qs = Student.objects.filter(extra_filter_Q).exclude(**exclude_filter)
+        total = student_qs.count()
+        template = request.query_params.get("template")
+        level1_condition = None
+
+        if template == "1":
+            level1_condition = Q(
+                Q(
+                    group__profession__department__isnull=False,
+                    group__profession__department__sub_orgs=OuterRef("pk"),
+                )
+                | Q(
+                    group__profession__department__isnull=True,
+                    group__profession__school=OuterRef("pk"),
+                )
+            )
+
+            by_model = SubOrgs
+        elif template == "2":
+            level1_condition = Q(group__profession__department=OuterRef("pk"))
+            by_model = Salbars
+        elif template == "3":
+            level1_condition = Q(group__profession=OuterRef("pk"))
+            by_model = ProfessionDefinition
+        elif template == "4":
+            level1_condition = Q(group=OuterRef("pk"))
+            by_model = Group
+        else:
+
+            return request.send_error("ERR_002")
+
+        labels_level2 = [
+            {"key": "paid", "label": "Төлсөн"},
+            {"key": "unpaid", "label": "Төлсөнгүй"},
+        ]
+
+        level2_conditions = {
+            labels_level2[0]["key"]: Q(
+                payment__status=True, payment__dedication=Payment.SYSTEM
+            ),
+            labels_level2[1]["key"]: Q(
+                Q(
+                    payment__isnull=False,
+                    payment__status=False,
+                    payment__dedication=Payment.SYSTEM,
+                )
+                | Q(payment__isnull=True)
+            ),
+        }
+
+        level2_qs = {}
+
+        for key in level2_conditions:
+            level2_qs[key] = (
+                student_qs.filter(level2_conditions[key] & level1_condition)
+                .annotate(count=Count("*"))
+                .values("count")
+            )
+
+            level2_qs[key].query.set_group_by()
+
+        chart_data_qs = (
+            by_model.objects.annotate(
+                **{
+                    labels_level2[0]["key"]: Subquery(
+                        level2_qs[labels_level2[0]["key"]]
+                    ),
+                    labels_level2[1]["key"]: Subquery(
+                        level2_qs[labels_level2[1]["key"]]
+                    ),
+                },
+                total=F(labels_level2[0]["key"]) + F(labels_level2[1]["key"]),
+            )
+            .filter(total__gt=0)
+            .values("name", "total", labels_level2[0]["key"], labels_level2[1]["key"])
+            .order_by("name")
+        )
+
+        chart_data = list(chart_data_qs)
+        data = {"data": chart_data, "total": total, "labels_level2": labels_level2}
 
         return request.send_data(data)
 
@@ -3218,7 +3325,6 @@ class StudentCalculateGpaDiplomaGroupAPIView(
         return request.send_info('INF_019')
 
 
-
 @permission_classes([IsAuthenticated])
 class StudentAttachmentConfigAPIView(
     generics.GenericAPIView
@@ -4080,7 +4186,6 @@ class StudentImportAPIView(
         }
 
         return request.send_data(return_datas)
-
 
 
 class StudentPostDataAPIView(
