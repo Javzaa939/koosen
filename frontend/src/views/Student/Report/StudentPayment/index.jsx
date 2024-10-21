@@ -46,15 +46,15 @@ export default function StudentPayment({ template }) {
 
                     break
                 case 'department':
-                    setSlideTitle('салбараар')
+                    setSlideTitle('Салбараар')
 
                     break
                 case 'profession':
-                    setSlideTitle('мэргэжлээр')
+                    setSlideTitle('Мэргэжлээр')
 
                     break
                 case 'group':
-                    setSlideTitle('ангиараа')
+                    setSlideTitle('Ангиараа')
 
                     break
                 default:
