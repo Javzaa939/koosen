@@ -4040,7 +4040,7 @@ class StudentImportAPIView(
                     phone = ''
 
                 # суралцах хэлбэр
-                status_id = StudentRegister.objects.filter(name__icontains='Суралцаж буй').first()
+                status_id = StudentRegister.objects.filter(Q(Q(name__icontains='Суралцаж буй') | Q(code=1))).first()
 
                 group_obj = Group.objects.filter(name__iexact=str(group)).first()
 
