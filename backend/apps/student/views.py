@@ -2528,9 +2528,9 @@ class GraduationWorkAPIView(
         school = self.request.query_params.get('school')
         group = self.request.query_params.get('group')
 
-        lesson_year, lesson_season = get_active_year_season()
+        # lesson_year, lesson_season = get_active_year_season()
 
-        self.queryset = self.queryset.filter(lesson_year=lesson_year, lesson_season=lesson_season)
+        # self.queryset = self.queryset.filter(lesson_year=lesson_year, lesson_season=lesson_season)
 
         if school:
             self.queryset = self.queryset.filter(student__school_id=school)
