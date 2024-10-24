@@ -44,10 +44,6 @@ const Teacher = () => {
 	const { user } = useContext(AuthContext)
 	const { school_id } = useContext(SchoolContext)
 
-	const [changeModal, setChangeModal] = useState(false)
-	const [changeData, setChangeData] = useState("");
-	const [changePassword, setChangePassword] = useState('')
-
 	const [datas, setDatas] = useState([]);
 	const [department, setDepartmentData] = useState([]);
 	const [position_option, setOrgPositions] = useState([]);
@@ -157,22 +153,9 @@ const Teacher = () => {
 	}
 
 	/* Password сэргээх функц */
-    const changePassModal = async(row) => {
-		setChangeData(row)
-		handleChangeModal()
-		setChangePassword(row?.register?.slice(-8))
+    const changePassModal = async(id) => {
+		await fetchData(teacherApi.resetPassword(id))
     }
-
-	const handleChangeModal = () => {
-		setChangeModal(!changeModal)
-	}
-
-	async function handleSubmitPassword() {
-		const { success, data } = await fetchData(teacherApi.resetPassword(changeData?.id, changePassword))
-		if (success) {
-			handleChangeModal()
-		}
-	}
 
 	return (
 		<Fragment>
@@ -296,36 +279,6 @@ const Teacher = () => {
 				}
 			</Card>
 			{ add_modal && <AddModal open={add_modal} handleModal={handleModal} refreshDatas={getDatas} editData={editData}/> }
-			{
-				changeModal
-				&&
-				<Modal
-					isOpen={changeModal}
-					toggle={handleChangeModal}
-					className="modal-dialog-centered modal-md"
-				>
-					<ModalHeader toggle={handleChangeModal}>Хэрэглэгчийн нууц үг солих</ModalHeader>
-					<ModalBody>
-						<div className="d-flex align-items-center">
-							<Label>Нууц үг</Label>
-							<Input
-								id="menu-hidden"
-								name="menu-hidden"
-								type='text'
-								defaultValue={changePassword}
-								bsSize='sm'
-								onChange={(e) => setChangePassword(e.target.value)}
-							/>
-						</div>
-						<div className='d-flex justify-content-between mt-1'>
-							<Button size='sm' color='primary' onClick={() => handleSubmitPassword()}>Нууц үг сэргээх</Button>
-							<Button size='sm' onClick={() => handleChangeModal()}>Буцах</Button>
-						</div>
-
-					</ModalBody>
-
-				</Modal>
-			}
         </Fragment>
     )
 }

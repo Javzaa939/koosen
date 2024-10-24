@@ -1242,15 +1242,18 @@ class TeacherResetPassword(
 ):
     """ Багшийн нууц үг сэргээх """
 
-    queryset = User.objects.all()
+    queryset = User.objects
+
     def put(self, request, pk=None):
-        change_password = request.data
+        self.queryset = self.queryset.filter(teachers__id=pk)
+        default_password = self.queryset.values_list('teachers__register',flat=True).first()
 
-        user_id = Teachers.objects.get(pk=pk).user.id
-        with transaction.atomic():
-            hashed_password = make_password(str(change_password))
-
-            self.queryset.filter(id=user_id).update(password=hashed_password)
+        if default_password and len(default_password) >= 8:
+            with transaction.atomic():
+                hashed_password = make_password(default_password[-8:])
+                self.queryset.update(password=hashed_password)
+        else:
+            return request.send_error('ERR_002')
 
         return request.send_info('INF_018')
 
