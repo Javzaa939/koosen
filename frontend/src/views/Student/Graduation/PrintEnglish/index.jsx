@@ -155,7 +155,7 @@ export default function PrintEnglish()
                             <br />
                             <span className='fw-bolder'>The Degree of <span className='text-uppercase'>{data?.student?.group?.degree?.degree_eng_name} IN {data?.student?.group?.profession?.dep_name_eng}</span></span> in the recognition of the
                             <br />
-                            completion of the prescribed curriculum of {data?.student?.group?.profession?.dep_name_eng} ({data?.student?.group?.profession?.code}).
+                            completion of the prescribed curriculum of {data?.student?.group?.profession?.name_eng} ({data?.student?.group?.profession?.code}).
                         </span>
                     }
                 </div>
