@@ -61,7 +61,6 @@ function ScoreModal({ isOpen, handleModal, studentId }) {
 
     async function getDatas()
     {
-        console.log(chosenYear)
         const { success, data } = await fetchMainData(scoreApi.get(studentId, chosenYear, chosenSeason))
         if (success)
         {
