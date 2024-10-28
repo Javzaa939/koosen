@@ -10,22 +10,19 @@ import useLoader from '@hooks/useLoader';
 // ** Styles
 import './style.scss'
 
-export default function SumEn()
+export default function Sum()
 {
-    const LEARNING_TRUE_TYPE = 'def4'
-
     const location = useLocation()
-    const data = location.state
+    const data = location.state.data
+    const listArr = location.state.signatureData
 
     // State
     const [ datas, setDatas ] = useState({})
-    const [ listArr, setListArr ] = useState([])
 
     // Loader
     const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
 
     // Api
-    const signatureApi = useApi().signature
     const studentApi = useApi().student
 
     function getAllData()
@@ -33,11 +30,9 @@ export default function SumEn()
         if (data)
         {
             Promise.all([
-                fetchData(signatureApi.get(1)),
                 fetchData(studentApi.definition.getSum(data)),
             ]).then((values) => {
-                setListArr(values[0]?.data)
-                setDatas(values[1]?.data)
+                setDatas(values[0]?.data)
             })
         }
     }
@@ -46,7 +41,7 @@ export default function SumEn()
     {
         if (Object.keys(datas).length != 0)
         {
-            setTimeout(() => window.print(), 1000)
+            // setTimeout(() => window.print(), 1000)
         }
     }
 
@@ -54,9 +49,16 @@ export default function SumEn()
         () =>
         {
             getAllData();
+        },
+        []
+    )
+
+    useEffect(
+        () =>
+        {
             window.onafterprint = function()
             {
-                window.history.go(-1);
+                // window.history.go(-1);
             }
         },
         []
@@ -78,21 +80,21 @@ export default function SumEn()
                 <>
                     {isLoading && Loader}
                     <div className='d-flex flex-column justify-content-center align-items-center w-100 mt-3' style={{ fontSize: '14px' }} >
-                        {/* <img className="fallback-logo" width={100} height={100} src={`http://hr.mnun.edu.mn/media/orgs/logo/MNU-Logo_1.png`} alt="logo" onLoad={imageLoaded} /> */}
                         <img className="fallback-logo" width={100} height={100} src={logo} alt="logo" onLoad={imageLoaded} />
                         <div className="d-flex flex-column text-center fw-bolder">
-                            <span className='mt-1'>
-                                {datas?.school?.name.toUpperCase()}
+                            <span className='mt-1 text-uppercase'>
+                                Дотоод хэргийн их сургууль
                             </span>
-                            <span style={{ marginTop: '6px' }}>{datas?.school?.name_eng.toUpperCase()}</span>
+                            <span style={{ marginTop: '6px' }} className="text-uppercase">
+                                University of internal affairs, mongolia
+                            </span>
                         </div>
                     </div>
                     <Row className="pb-2 ps-3 pe-2 pt-1" style={{ fontSize: '14px' }} >
                     <div style={{ borderBottom: '1px solid gray' }} />
-                        {/* <p>Огноо: {new Date().getFullYear()}-{zeroFill(new Date().getMonth() + 1)}-{new Date().getDate()}</p> */}
-
                         <div className="text-center mt-1">
-                            {datas?.school?.address} {datas?.school?.phone_number && `Утас: ${datas?.school?.phone_number}`} {datas?.school?.home_phone && `Факс: ${datas?.school?.home_phone}`}
+                            {datas?.school?.address ? datas?.school?.address : 'Баянзүрх дүүрэг, VIII хороо Хилчний гудамж, ш/х - 210332, Улаанбаатар хот'}
+                            {datas?.school?.home_phone && `Факс: ${datas?.school?.home_phone}`}
                             <div>{datas?.school?.email && `E-mail: ${datas?.school?.email}`}</div>
                         </div>
                         <div className="text-center fst-italic">
@@ -100,25 +102,34 @@ export default function SumEn()
                         </div>
 
                         <div className="text-center mt-3 fw-bolder fs-3">
-                                DEFINITION
+                            DEFINITION
                         </div>
 
                         <div className="mt-2 d-flex justify-content-center">
-                            <div className="text-center" style={{ maxWidth: 700 }}>
+                            <div className="text-center" style={{ maxWidth: 720 }}>
                                 {
                                     data.all_year
                                     ?
-                                        datas?.student?.status?.code == 1
-                                        ?
-                                            `${datas?.student?.last_name} овогтой ${datas?.student?.first_name} /${datas?.student?.first_name}/ нь ${datas?.school?.name}-д ${datas?.student?.group?.profession?.name} мэргэжлээр ${datas?.student?.group?.level}-р курст сурдаг нь үнэн бөгөөд ${Math.round(parseFloat(datas?.score?.score_obj?.gpa || 0) * 10) / 10} голч дүнтэй суралцсан нь үнэн болно.`
-                                        :
-                                            datas?.student?.status?.code == 5
-                                            ?
-                                                `${datas?.student?.last_name} овогтой ${datas?.student?.first_name} /${datas?.student?.first_name}/ нь ${datas?.school?.name}-д ${datas?.student?.group?.profession?.name} мэргэжлээр ${datas?.student?.group?.level}-р курст сурдаг нь үнэн бөгөөд ${datas?.student?.group?.join_year?.substring(0, 4)}-${datas?.graduation_work?.substring(datas?.graduation_work?.length - 4)} оны хичээлийн жил ${Math.round(parseFloat(datas?.score?.score_obj?.gpa || 0) * 10) / 10} голч дүнтэй суралцсан нь үнэн болно.`
-                                            :
-                                                `${datas?.student?.last_name} овогтой ${datas?.student?.first_name} /${datas?.student?.first_name}/ нь ${datas?.school?.name}-д ${datas?.student?.group?.profession?.name} мэргэжлээр ${Math.round(parseFloat(datas?.score?.score_obj?.gpa || 0) * 10) / 10} голч дүнтэй нь үнэн болно.`
+                                        <span>
+                                            <span className="text-uppercase fw-bolder">{datas?.student?.first_name} </span><span/> <span className="text-uppercase fw-bolder">{datas?.student?.last_name} /{datas?.student?.register_num}/</span> is studying in the {datas?.student?.group?.profession?.name_eng} program
+                                            <br/>
+                                            <span>
+                                                with an average grade of {Math.round(parseFloat(datas?.score?.gpa || 0) * 10) / 10}.
+                                            </span>
+                                        </span>
                                     :
-                                        `${datas?.student?.last_name} овогтой ${datas?.student?.first_name} /${datas?.student?.first_name}/ нь ${datas?.school?.name}-д ${datas?.student?.group?.profession?.name} мэргэжлээр ${datas?.student?.group?.level}-р курст сурдаг нь үнэн бөгөөд ${data?.year_value} хичээлийн жилийн ${datas?.season_name} ${Math.round(parseFloat(datas?.score?.score_obj?.gpa || 0) * 10) / 10} голч дүнтэй суралцсан нь үнэн болно.`
+                                        <span>
+                                            <span className="text-uppercase fw-bolder">
+                                                {datas?.student?.first_name}
+                                            </span> <span className="text-uppercase fw-bolder">{datas?.student?.last_name} /{datas?.student?.register_num}/</span>  is studying in the {datas?.student?.group?.profession?.name_eng} program 
+                                            <br/>
+                                            with an average grade of {Math.round(parseFloat(datas?.score?.score_obj?.gpa || 0) * 10) / 10}
+                                            <span>
+                                                {
+                                                    datas?.season_name ? ` in the ${datas?.season_name_eng }` : ''
+                                                }
+                                            </span> semester of the {data?.year_value} academic year.
+                                        </span>
                                 }
                             </div>
                         </div>
@@ -128,8 +139,11 @@ export default function SumEn()
                                 listArr.map((val, idx) =>
                                 {
                                     return (
-                                        <p key={idx} >
-                                            {val?.position_name}: ........................................... /{val?.last_name}&#160;{val?.first_name}/
+                                        <p key={idx} style={{width: '500px'}} className=" mx-auto">
+                                            <span className="text-wrap">
+                                                {val?.position_name_eng}
+                                            </span>
+                                            .................................... /{val?.first_name_eng}&#160;{val?.last_name_eng}/
                                         </p>
                                     )
                                 })
@@ -138,7 +152,7 @@ export default function SumEn()
                     </Row>
                 </>
                 :
-                <p>Sorry, no information found</p>
+                <p>Sorry. No data</p>
             }
             </div>
         </>

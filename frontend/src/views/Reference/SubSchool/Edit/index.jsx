@@ -106,7 +106,6 @@ const UpdateModal = ({ open, handleEdit, editId, refreshDatas }) => {
                                     <Input
                                         id ="name"
                                         bsSize="sm"
-                                        disabled={true}
                                         placeholder={t('Сургуулийн нэр')}
                                         {...field}
                                         type="text"

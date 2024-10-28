@@ -15,6 +15,7 @@ const CreditCalculation = lazy(() => import("@views/Student/Definition/CreditCal
 const AmountDetails = lazy(() => import("@views/Student/Definition/AmountDetails"))
 const AmountDetailsEn = lazy(() => import("@views/Student/Definition/AmountDetails/AmountDetailsEn"))
 const Sum = lazy(() => import("@views/Student/Definition/Sum"))
+const SumEn = lazy(() => import("@views/Student/Definition/Sum/SumEn"))
 
 const PrintMongolia = lazy(() => import("@views/Student/Graduation/PrintMongolia"))
 const PrintEnglish = lazy(() => import("@views/Student/Graduation/PrintEnglish"))
@@ -122,6 +123,13 @@ const StudentRoutes = [
     {
         path: 'student/sum/',
         element: <Sum />,
+        meta: {
+            layout: 'blank'
+        }
+    },
+    {
+        path: 'student/sum/en/',
+        element: <SumEn />,
         meta: {
             layout: 'blank'
         }

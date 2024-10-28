@@ -44,6 +44,7 @@ class StudentRegister(models.Model):
 
     code  = models.IntegerField(unique=True)
     name = models.CharField(max_length=255, verbose_name="Бүртгэлийн хэлбэрийн нэр")
+    status_name_eng = models.CharField(max_length=255, verbose_name="Бүртгэлийн англи хэлбэрийн нэр", null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -94,7 +95,7 @@ class Season(models.Model):
 
     season_code = models.IntegerField(unique=True)
     season_name = models.CharField(max_length=255, verbose_name="Улирлын нэр")
-
+    season_name_eng = models.CharField(max_length=255, verbose_name="Улирлын англи нэр", null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

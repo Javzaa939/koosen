@@ -572,13 +572,25 @@ class ProfessionDefinitionAPIView(
         data = request.data
         degree = data.get("degree")
 
-        prof = ProfessionalDegree.objects.filter(id=degree)
         lear_qs = LearningPlan.objects.filter(profession=pk)
+        prof = ProfessionalDegree.objects.filter(id=degree)
         group = Group.objects.filter(profession=pk)
         prof_songon = Profession_SongonKredit.objects.filter(profession=pk)
 
-        if lear_qs or prof_songon or group or prof:
-            return request.send_error("ERR_003", "Мэргэжлийн тодорхойлолтийг устгах боломжгүй байна.")
+        # Анги бүлэг устгах
+        if group:
+            return request.send_error("ERR_003", "Анги бүлгийн бүртгэлд холбогдсон учраас устгах боломжгүй.")
+
+        with transaction.atomic():
+            # Сургалтын төлөвлөгөө
+            if lear_qs:
+                lear_qs.delete()
+
+            if prof_songon or  prof:
+                prof_songon.delete()
+
+            if prof:
+                prof.delete()
 
         self.destroy(request, pk)
 

@@ -3104,10 +3104,13 @@ class DefinitionSumAPIView(
             score = get_student_score_register(student_id, data.get('season_code'), data.get('year_value'))
 
             season_name = ''
+            season_name_eng = ''
             if data.get('season_code'):
                 season_name = Season.objects.filter(season_code=data.get('season_code')).first().season_name
+                season_name_eng = Season.objects.filter(season_code=data.get('season_code')).first().season_name_eng
 
             all_data['season_name'] = season_name
+            all_data['season_name_eng'] = season_name_eng
 
         # if score['total_kr'] == 0:
         #     return request.send_data(all_data)

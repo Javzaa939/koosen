@@ -13,42 +13,34 @@ import './style.scss'
 
 export default function AmountDetails()
 {
-    const AMOUNT_DETAILS_TYPE = 'def3'
-
     const location = useLocation()
-    const studentId = location?.state?.studentId
-    const mdata = location.state?.data
-    const seasons = location.state?.data?.scoreregister
-
+    const studentId = location?.state?.data?.studentId
+    const mdata = location?.state?.data?.data
+    const seasons = location.state?.data?.data?.scoreregister
+    const  listArr = location.state?.signatureData
     const total_data = mdata?.all_total[0]?.all_total
     const { parentschoolName} = useContext(SchoolContext)
 
-    // var lessonYear = seasons[0]?.year_season.slice(0, 9)
-    // var lessonSeason = seasons[0]?.year_season.slice(10, 15)
     var chanars = []
 
     // State
-    const datas = location.state?.def
-    const [ listArr, setListArr ] = useState([])
+    const datas = location.state?.data?.dep
 
     // Loader
     const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
     // Api
-    const signatureApi = useApi().signature
-    const studentApi = useApi().student
+    // const studentApi = useApi().student
 
-    function getAllData()
-    {
-        if (studentId)
-        {
-            Promise.all([
-                fetchData(signatureApi.get(1)),
-                fetchData(studentApi.getDefinitionStudent(AMOUNT_DETAILS_TYPE, studentId)),
-            ]).then((values) => {
-                setListArr(values[0]?.data)
-            })
-        }
-    }
+    // function getAllData()
+    // {
+    //     if (studentId)
+    //     {
+    //         Promise.all([
+    //             fetchData(studentApi.getDefinitionStudent(AMOUNT_DETAILS_TYPE, studentId)),
+    //         ]).then((values) => {
+    //         })
+    //     }
+    // }
 
 
     useEffect(
@@ -69,7 +61,7 @@ export default function AmountDetails()
     useEffect(
         () =>
         {
-            getAllData();
+            // getAllData();
 
             // window.onafterprint = function()
             // {
@@ -137,7 +129,7 @@ export default function AmountDetails()
                             </div>
                             <div style={{width: '80%'}} className="d-inline-block">
                                 <div className="me-5">
-                                    <div className="text-center me-5 fw-bolder fs-5">
+                                    <div className="text-center me-5 fw-bolder fs-5 text-uppercase">
                                         {parentschoolName}
                                     </div>
                                 </div>

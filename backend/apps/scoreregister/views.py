@@ -1219,7 +1219,8 @@ class ScoreRegisterPrintAPIView(
                 onoo = onoo + total_scores * eachScore.lesson.kredit
 
             # дундаж олох нь
-            total_onoo = round(onoo / total_kr, 2)
+            if onoo != 0:
+                total_onoo = round(onoo / total_kr, 2)
 
             # нийт kr
             total_kr_count = total_kr_count+ total_kr

@@ -13,6 +13,7 @@ export default function LearningTrueEn()
 
     const datas = sessionStorage.getItem("student_data")? JSON.parse(sessionStorage.getItem("student_data")) : null;
     const listArr = sessionStorage.getItem("signature_data")? JSON.parse(sessionStorage.getItem("signature_data")) : null;
+
     console.log(listArr)
     // const studentId = datas["id"]
     const { t } = useTranslation()
@@ -194,7 +195,7 @@ export default function LearningTrueEn()
                                     `${datas?.code}: ${transliterateCyrillicToLatin(datas?.first_name)} ${transliterateCyrillicToLatin(datas?.last_name)} has successfully completed the ${datas?.degree_name} program at MSU. Their studies, specializing in ${datas?.group_name}, were conducted from ${datas?.group_join_year?.substring(0, 4)} to ${datas?.graduation_work ? datas?.graduation_work?.diplom_num?.substring(datas?.graduation_work?.diplom_num?.length - 4 ) : '2024'}. They have been verified to have completed their degree, obtaining diploma number ${datas?.graduation_work?.diplom_num}.`
 
                                     :
-                                    `This document certifies that ${transliterateCyrillicToLatin(datas?.first_name)} ${transliterateCyrillicToLatin(datas?.last_name)}, identified by the code //${datas?.code} //, is ${t(datas?.status_name?.toLowerCase())}. This certification is issued in accordance with university records and policies.`
+                                    `This document certifies that ${transliterateCyrillicToLatin(datas?.first_name)} ${transliterateCyrillicToLatin(datas?.last_name)}, identified by the code /${datas?.code} /, is ${t(datas?.status_name_eng?.toLowerCase())}. This certification is issued in accordance with university records and policies.`
 
                             }
                             </div>

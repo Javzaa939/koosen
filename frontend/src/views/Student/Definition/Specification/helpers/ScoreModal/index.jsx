@@ -18,9 +18,10 @@ import './style.scss'
 import { AlertTriangle, Check, Eye, Printer } from "react-feather";
 import ActiveYearContext from "@context/ActiveYearContext"
 import { useNavigate } from 'react-router-dom';
-import { ReactSelectStyleWidth } from "@utils"
+import { ReactSelectStyleWidth, generateLessonYear } from "@utils"
 import Select from 'react-select'
 import ReactCountryFlag from 'react-country-flag'
+import SignatureModal from "../SignatureModal";
 
 import useApi from '@hooks/useApi'
 import useLoader from '@hooks/useLoader'
@@ -36,12 +37,18 @@ function ScoreModal({ isOpen, handleModal, studentId }) {
     const [ chosenYear, setYear ] = useState('')
     const [ chosenSeason, setSeason ] = useState('')
     const [ def, setDef ] = useState({})
+    const [ cdatas, setCDatas ] = useState({})
+    const [ years, setYears ] = useState([])
+    const [ seasonOption, setSeasonOption ] = useState([])
+    const [ismon, setIsMon] = useState()
+    const [signatureModal, setSignaturModal] = useState(false)
 
     const { isLoading, Loader, fetchData } = useLoader({isSmall: true, initValue: true})
     const { isLoading: isDataLoading,fetchData: fetchMainData } = useLoader({isSmall: true, initValue: true})
     const scoreApi = useApi().score.print
 
     const studentApi = useApi().student
+    const seasonApi = useApi().settings.season
     const AMOUNT_DETAILS_TYPE = 'def3'
 
     async function getDef(){
@@ -54,6 +61,7 @@ function ScoreModal({ isOpen, handleModal, studentId }) {
 
     async function getDatas()
     {
+        console.log(chosenYear)
         const { success, data } = await fetchMainData(scoreApi.get(studentId, chosenYear, chosenSeason))
         if (success)
         {
@@ -62,43 +70,38 @@ function ScoreModal({ isOpen, handleModal, studentId }) {
     }
 
     useEffect(() => {getDatas()},[chosenSeason, chosenYear])
-    useEffect(() => {getDef()},[])
+    useEffect(() => {getDef(), getYear()},[])
 
-    const yearlist = [
-        {
-            v: cyear_name,
-        },
-        {
-            v:'2022-2023',
-        },
-        {
-            v:'2021-2022',
-        },
-        {
-            v:'2020-2021',
-        },
-        {
-            v:'2019-2020',
-        },
-        {
-            v:'2018-2019',
-        }
-    ]
+    async function handleSignatureModal(c) {
+        setSignaturModal(!signatureModal)
+        setIsMon(c)
 
-    const seasonlist = [
-        {
-            value: '',
-            label: 'Бүгд'
-        },
-        {
-            value: 1,
-            label: 'Намар'
-        },
-        {
-            value: 2,
-            label: 'Хавар'
+        var cdata = {
+            studentId: studentId,
+            data: data,
+            year: chosenYear,
+            season: chosenSeason,
+            dep: def
         }
-    ]
+        setCDatas(cdata)
+    }
+
+    async function getYear()
+    {
+        setYears(generateLessonYear(10))
+        const { success, data } = await fetchData(seasonApi.get())
+        if (success)
+        {
+            var cdata = [...data]
+            cdata.push(
+                {
+                    'id': '',
+                    'season_name': 'Бүгд'
+                }
+            )
+            setSeasonOption(cdata)
+        }
+    }
 
     return(
         <Modal size='lg' isOpen={isOpen} toggle={handleModal} className="modal-dialog-centered" onClosed={handleModal}>
@@ -153,31 +156,29 @@ function ScoreModal({ isOpen, handleModal, studentId }) {
                                     classNamePrefix='select'
                                     className={`react-select me-1 mb-50`}
                                     isLoading={isLoading}
-                                    // defaultValue={yearlist[1]}
-                                    defaultValue={yearlist.filter(option => option.v === cyear_name )}
-                                    // value={yearlist.filter(option => option.v === cyear_name )}
+                                    defaultValue={years.filter(option => option.v === cyear_name )}
                                     placeholder={t(`-- Сонгоно уу --`)}
-                                    options={yearlist || []}
+                                    options={years || []}
                                     noOptionsMessage={() => 'Хоосон байна'}
-                                    onChange={(val) => {setYear(val.v)}}
+                                    onChange={(val) => {setYear(val.id)}}
                                     styles={ReactSelectStyleWidth}
-                                    getOptionValue={(option) => option.v}
-                                    getOptionLabel={(option) => option.v}
+                                    getOptionValue={(option) => option.id}
+                                    getOptionLabel={(option) => option.name}
                                 />
                             </Col>
                             <Col md={12} lg={6} xl={6}>
                                 <Select
                                     classNamePrefix='select'
                                     className={`react-select me-1 mb-50`}
-                                    defaultValue={seasonlist.filter(option => option.value === chosenSeason )}
+                                    defaultValue={seasonOption.filter(option => option.id === chosenSeason )}
                                     isLoading={isLoading}
                                     placeholder={t(`-- Сонгоно уу --`)}
-                                    options={seasonlist || []}
+                                    options={seasonOption || []}
                                     noOptionsMessage={() => 'Хоосон байна'}
-                                    onChange={(val) => {setSeason(val.value)}}
+                                    onChange={(val) => {setSeason(val.id)}}
                                     styles={ReactSelectStyleWidth}
-                                    getOptionValue={(option) => option.value}
-                                    getOptionLabel={(option) => option.label}
+                                    getOptionValue={(option) => option.id}
+                                    getOptionLabel={(option) => option.season_name}
                                 />
                             </Col>
                         </Row>
@@ -214,10 +215,12 @@ function ScoreModal({ isOpen, handleModal, studentId }) {
                         </DropdownToggle>
                         <DropdownMenu>
                             <DropdownItem style={{width: '100%'}} onClick={() => {
-                                radio ?
-                                    navigate('/student/amount-details', { state: {studentId: studentId, data: data, year: chosenYear, season: chosenSeason, def: def} })
-                                :
-                                    navigate('/student/amount-details', { state: {studentId: studentId, data: data, year: chosenYear, season: chosenSeason, def: def} })}
+                                handleSignatureModal(true)
+                                // radio ?
+                                //     navigate('/student/amount-details', { state: {studentId: studentId, data: data, year: chosenYear, season: chosenSeason, def: def} })
+                                // :
+                                //     navigate('/student/amount-details', { state: {studentId: studentId, data: data, year: chosenYear, season: chosenSeason, def: def} })
+                                }
                             }>
                                 Монгол
                                 <ReactCountryFlag
@@ -227,10 +230,12 @@ function ScoreModal({ isOpen, handleModal, studentId }) {
                                 />
                             </DropdownItem>
                             <DropdownItem style={{width: '100%'}} onClick={() => {
-                                radio ?
-                                    navigate('/student/amount-details/en', { state: {studentId: studentId, data: data, year: chosenYear, season: chosenSeason, def: def} })
-                                :
-                                    navigate('/student/amount-details/en', { state: {studentId: studentId, data: data, year: chosenYear, season: chosenSeason, def: def} })}
+                                handleSignatureModal(false)
+                                // radio ?
+                                //     navigate('/student/amount-details/en', { state: {studentId: studentId, data: data, year: chosenYear, season: chosenSeason, def: def} })
+                                // :
+                                //     navigate('/student/amount-details/en', { state: {studentId: studentId, data: data, year: chosenYear, season: chosenSeason, def: def} })
+                                }
                             }>
                                 English
                                 <ReactCountryFlag
@@ -243,6 +248,9 @@ function ScoreModal({ isOpen, handleModal, studentId }) {
                     </UncontrolledDropdown>
                 </div>
             </ModalBody>
+            {
+                signatureModal && <SignatureModal isOpen={signatureModal} handleModal={handleSignatureModal} data={cdatas} isMon={ismon} isScore={true}/>
+            }
         </Modal>
     )
 }
