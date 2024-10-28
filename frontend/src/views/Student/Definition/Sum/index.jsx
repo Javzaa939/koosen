@@ -13,17 +13,16 @@ import './style.scss'
 export default function Sum()
 {
     const location = useLocation()
-    const data = location.state
+    const data = location.state.data
+    const listArr = location.state.signatureData
 
     // State
     const [ datas, setDatas ] = useState({})
-    const [ listArr, setListArr ] = useState([])
 
     // Loader
     const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
 
     // Api
-    const signatureApi = useApi().signature
     const studentApi = useApi().student
 
     function getAllData()
@@ -31,11 +30,9 @@ export default function Sum()
         if (data)
         {
             Promise.all([
-                fetchData(signatureApi.get(1)),
                 fetchData(studentApi.definition.getSum(data)),
             ]).then((values) => {
-                setListArr(values[0]?.data)
-                setDatas(values[1]?.data)
+                setDatas(values[0]?.data)
             })
         }
     }
@@ -114,9 +111,19 @@ export default function Sum()
                                 {
                                     data.all_year
                                     ?
-                                        `${datas?.student?.last_name} овогтой ${datas?.student?.first_name} /${datas?.student?.register_num}/ нь ${datas?.student?.profession_name} хөтөлбөрт ${Math.round(parseFloat(datas?.score?.gpa || 0) * 10) / 10} голч дүнтэй суралцдаг нь үнэн болно.`
+                                        <span>
+                                            <span className="text-uppercase fw-bolder">{datas?.student?.last_name} </span><span/> овогтой <span className="text-uppercase fw-bolder">{datas?.student?.first_name} /{datas?.student?.register_num}/</span> нь {datas?.student?.profession_name} хөтөлбөрт
+                                            <br/>
+                                            <span>{Math.round(parseFloat(datas?.score?.gpa || 0) * 10) / 10}</span> голч дүнтэй суралцдаг нь үнэн болно.
+                                        </span>
                                     :
-                                        `${datas?.student?.last_name} овогтой ${datas?.student?.first_name} /${datas?.student?.register_num}/ нь ${datas?.student?.group?.profession?.name} хөтөлбөрт ${data?.year_value} хичээлийн ${datas?.season_name ? 'жилийн' : 'жилд'} ${datas?.season_name?.toLowerCase()}${datas?.season_name ? 'ын улиралд' : ''} ${Math.round(parseFloat(datas?.score?.score_obj?.gpa || 0) * 10) / 10} голч дүнтэй суралцсан нь үнэн болно.`
+                                        <span>
+                                            <span className="text-uppercase fw-bolder">
+                                                {datas?.student?.last_name}
+                                            </span> овогтой <span className="text-uppercase fw-bolder">{datas?.student?.first_name} /{datas?.student?.register_num}/</span> нь {datas?.student?.profession_name} хөтөлбөрт
+                                            <br/>
+                                            {data?.year_value} хичээлийн {datas?.season_name ? 'жилийн' : 'жилд'} {datas?.season_name?.toLowerCase()}{datas?.season_name ? 'ын улиралд' : ''} {Math.round(parseFloat(datas?.score?.score_obj?.gpa || 0) * 10) / 10} голч дүнтэй суралцсан нь үнэн болно.
+                                        </span>
                                 }
                             </div>
                         </div>

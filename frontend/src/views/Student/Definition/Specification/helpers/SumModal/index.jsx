@@ -23,6 +23,7 @@ import useApi from '@hooks/useApi'
 import useLoader from '@hooks/useLoader'
 import ReactCountryFlag from 'react-country-flag'
 import { generateLessonYear }  from '@utils'
+import SignatureModal from '../SignatureModal'
 
 export default function SumModal(props)
 {
@@ -37,7 +38,10 @@ export default function SumModal(props)
     const [ radio, setRadio ] = useState(false)
     const [ years, setYears ] = useState([])
     const [ season, setSeason ] = useState([])
+    const [ cdatas, setDatas ] = useState({})
     const [ haveDun, setHaveDun ] = useState(false)
+    const [ismon, setIsMon] = useState()
+    const [signatureModal, setSignaturModal] = useState(false)
 
     const { isOpen, handleModal, datas } = props
 
@@ -48,6 +52,16 @@ export default function SumModal(props)
         },
         []
     )
+
+    async function handleSignatureModal(c) {
+        setSignaturModal(!signatureModal)
+        setIsMon(c)
+        if (c) {
+            handleSearch()
+        } else {
+            handleSearchEn()
+        }
+    }
 
     async function getYear()
     {
@@ -85,8 +99,8 @@ export default function SumModal(props)
                 'student_id': datas,
             }
         }
-
-        navigate('/student/sum/', { state: filterDatas })
+        setDatas(filterDatas)
+        // navigate('/student/sum/', { state: filterDatas })
     }
 
     function handleSearchEn()
@@ -114,8 +128,7 @@ export default function SumModal(props)
                 'student_id': datas,
             }
         }
-
-        navigate('/student/sum/en/', { state: filterDatas })
+        setDatas(filterDatas)
     }
 
     return (
@@ -221,7 +234,7 @@ export default function SumModal(props)
                                         Хайх
                                     </DropdownToggle>
                                     <DropdownMenu>
-                                        <DropdownItem style={{width: '100%'}} onClick={handleSearch}>
+                                        <DropdownItem style={{width: '100%'}} onClick={() => handleSignatureModal(true)}>
                                             Монгол
                                             <ReactCountryFlag
                                                 svg
@@ -229,7 +242,7 @@ export default function SumModal(props)
                                                 countryCode='mn'
                                             />
                                         </DropdownItem>
-                                        <DropdownItem style={{width: '100%'}} onClick={handleSearchEn}>
+                                        <DropdownItem style={{width: '100%'}} onClick={() => handleSignatureModal(false)}>
                                             English
                                             <ReactCountryFlag
                                                 svg
@@ -263,6 +276,9 @@ export default function SumModal(props)
                 }
                 </ModalBody>
             </Modal>
+            {
+                signatureModal && <SignatureModal isOpen={signatureModal} handleModal={handleSignatureModal} data={cdatas} isMon={ismon} isGpa={true}/>
+            }
         </Fragment>
     )
 }

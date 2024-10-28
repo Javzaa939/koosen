@@ -188,7 +188,7 @@ export function ExpandedComponent({ data }) {
             {sumModalOpen && <SumModal isOpen={sumModalOpen} handleModal={handleRequestSum} datas={sumModalData} />}
             {scoreModal && <ScoreModal isOpen={scoreModal} handleModal={handleScoreModal} studentId={scoreModalData} />}
             {
-                signatureModal && <SignatureModal isOpen={signatureModal} handleModal={handleSignatureModal} data={data} isMon={ismon} />
+                signatureModal && <SignatureModal isOpen={signatureModal} handleModal={handleSignatureModal} data={data} isMon={ismon} isTrue={true}/>
             }
         </Card>
     )

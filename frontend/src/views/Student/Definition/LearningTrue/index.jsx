@@ -88,24 +88,30 @@ export default function LearningTrue()
                             datas?.status_code == 1
                             ?
                             <div>
-                                <span className="fw-bolder">{datas?.code} </span><span className="fw-bolder">{datas?.last_name}</span> овогтой <span className="fw-bolder">{datas?.first_name}</span> нь тус сургуульд <span className="fw-bolder">{datas?.profession_name}</span> хөтөлбөрөөр <span>{datas?.group_level}</span>-р курст суралцдаг нь үнэн болохыг тодорхойлов.
+                                <span className="fw-bolder">{datas?.code} </span><span className="fw-bolder text-uppercase">{datas?.last_name}</span> овогтой <span className="fw-bolder text-uppercase">{datas?.first_name}</span> нь тус сургуульд <span className="fw-bolder text-uppercase">{datas?.profession_name}</span> хөтөлбөрөөр <span>{datas?.group_level}</span>-р курст 
+                                <br/>
+                                суралцдаг нь үнэн болохыг тодорхойлов.
                             </div>
                             :
                                 datas?.status_code == 5
                                 ?
-                                    `${datas?.code} кодтой ${datas?.last_name} овогтой ${datas?.first_name} нь тус сургуульд ${datas?.profession_name} хөтөлбөрөөр ${datas?.group_join_year?.substring(0, 4)}-${datas?.graduation_work?.graduation_year?.substring(0, 4)} оны хооронд суралцаж ${datas?.graduation_work?.diplom_num} дипломын дугаартай төгссөн нь үнэн болохыг тодорхойлов.`
+                                   <span>
+                                     <span className="text-uppercase">{datas?.code} кодтой {datas?.last_name} овогтой {datas?.first_name} нь тус сургуульд {datas?.profession_name} хөтөлбөрөөр {datas?.group_join_year?.substring(0, 4)}-{datas?.graduation_work?.graduation_year?.substring(0, 4)} оны хооронд суралцаж {datas?.graduation_work?.diplom_num} дипломын дугаартай </span>
+                                     <br/> төгссөн нь үнэн болохыг тодорхойлов.
+                                   </span>
                                 :
                                     `${datas?.code} кодтой ${datas?.last_name} овогтой ${datas?.first_name} нь тус сургуулиас ${datas?.status_name?.toLowerCase()} нь үнэн болохыг тодорхойлов.`
                         }
                         </div>
 
-                        <div className="text-center mt-3 text-uppercase">
+                        <div className="text-center mt-3 text-uppercase mx-auto">
                             {
                                 listArr.map((val, idx) =>
                                 {
                                     return (
                                         <p key={idx} >
-                                            {val?.position_name}: ........................................... /{val?.last_name}&#160;{val?.first_name}/
+                                            <span style={{textWrap: 'wrap'}}></span>{val?.position_name}
+                                            <span>: ........................................... /{val?.last_name}&#160;{val?.first_name}/</span>
                                         </p>
                                     )
                                 })

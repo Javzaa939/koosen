@@ -141,6 +141,28 @@ const Addmodal = ({ open, handleModal, refreshDatas, editId }) => {
                             />
                             {errors.name && <FormFeedback className='d-block'>{t(errors.name.message)}</FormFeedback>}
                         </Col>
+                        <Col md={12}>
+                            <Label className="form-label" for="status_name_eng">
+                                {t('Нэр')}
+                            </Label>
+                            <Controller
+                                defaultValue=''
+                                control={control}
+                                id="status_name_eng"
+                                name="status_name_eng"
+                                render={({ field }) => (
+                                    <Input
+                                        {...field}
+                                        id="status_name_eng"
+                                        bsSize="sm"
+                                        placeholder={t('Нэр')}
+                                        type="text"
+                                        invalid={errors.status_name_eng && true}
+                                    />
+                                )}
+                            />
+                            {errors.status_name_eng && <FormFeedback className='d-block'>{t(errors.status_name_eng.message)}</FormFeedback>}
+                        </Col>
                         <Col md={12} className=" text-center mt-2">
                             <Button className="me-2" color="primary" type="submit" disabled={postLoading}>
                                 {postLoading &&<Spinner size='sm' className='me-1'/>}

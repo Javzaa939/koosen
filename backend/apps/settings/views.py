@@ -338,9 +338,6 @@ class StudentRegisterAPIView(
         "Оюутны бүртгэл засах"
 
         datas = request.data
-        st_count = Student.objects.filter(status=pk)
-        if st_count:
-            return request.send_error("ERR_003", "Тухайн бүртгэлийн хэлбэрт оюутан бүртгэлтэй байгаа тул засах боломжгүй.")
 
         instance = self.queryset.filter(id=pk).first()
 

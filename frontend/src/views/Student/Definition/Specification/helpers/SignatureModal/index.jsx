@@ -12,9 +12,11 @@ import { Controller, useForm } from 'react-hook-form';
 import { ReactSelectStyles } from "@utils";
 import useLoader from '@hooks/useLoader';
 import classnames from "classnames";
+import { useNavigate } from "react-router-dom";
 
-function SignatureModal({ isOpen, handleModal, data, isMon }) {
+function SignatureModal({ isOpen, handleModal, data, isMon, isTrue=false, isGpa=false, isScore=false }) {
     const { t } = useTranslation();
+    const navigate = useNavigate()
     const { control, formState: { errors }, setValue } = useForm();
     const [signatureOption, setSignatureOption] = useState([]);
     const [selectedSignatures, setSelectedSignatures] = useState([]);
@@ -31,11 +33,34 @@ function SignatureModal({ isOpen, handleModal, data, isMon }) {
         sessionStorage.clear()
         sessionStorage.setItem('student_data', JSON.stringify(data));
         sessionStorage.setItem('signature_data', JSON.stringify(selectedSignatures));
-        if(isMon){
-            window.open('/student/learning-true/')
+        if (isTrue) {
+            if(isMon == true){
+                window.open('/student/learning-true/')
+            }
+            if(isMon == false) {
+                window.open('/student/learning-true/en/')
+            }
         }
-        else{
-            window.open('/student/learning-true/en/')
+
+        if (isGpa) {
+            if (isMon == true) {
+                navigate('/student/sum/', { state: { data: data, signatureData: selectedSignatures} })
+            }
+
+            if (isMon == false) {
+                navigate('/student/sum/en/', { state: {data: data, signatureData: selectedSignatures} })
+            }
+        }
+
+        if (isScore) {
+            console.log(isScore)
+            if (isMon == true) {
+                navigate('/student/amount-details', { state: { data: data, signatureData: selectedSignatures} })
+            }
+
+            if (isMon == false) {
+                navigate('/student/amount-details/en', { state: {data: data, signatureData: selectedSignatures} })
+            }
         }
     };
 
