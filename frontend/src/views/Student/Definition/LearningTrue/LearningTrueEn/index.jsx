@@ -14,7 +14,6 @@ export default function LearningTrueEn()
     const datas = sessionStorage.getItem("student_data")? JSON.parse(sessionStorage.getItem("student_data")) : null;
     const listArr = sessionStorage.getItem("signature_data")? JSON.parse(sessionStorage.getItem("signature_data")) : null;
 
-    console.log(listArr)
     // const studentId = datas["id"]
     const { t } = useTranslation()
     const { i18n } = useTranslation()
