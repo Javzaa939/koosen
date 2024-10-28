@@ -3813,14 +3813,19 @@ class EyeshOrderUserInfoAPIView(
 
     def put(self, request, pk=None):
 
+        school = self.request.query_params.get('school_id')
         data = request.data
         user = data.get('user')
-
         sid = transaction.savepoint()
         try:
             with transaction.atomic():
                 now = dt.datetime.now()
                 student = self.queryset.filter(user=user).first()
+
+                # эрх зүйн сургууль байвал
+                if school == 12:
+                    # Элсэгч бүх шалгуурыг даваад тэнцсэн төлөв
+                    AdmissionUserProfession.objects.filter(user=student.user.id).update(state=AdmissionUserProfession.STATE_APPROVE)
 
                 if student.yesh_state != data.get("yesh_state"):
                     StateChangeLog.objects.create(

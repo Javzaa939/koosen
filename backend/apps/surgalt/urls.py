@@ -118,4 +118,14 @@ urlpatterns = [
     path('lesson/editor/image/<int:pk>/', LessonEditorImage.as_view()),
 
     path('lesson/image/<int:pk>/', LessonImage.as_view()),
+
+    # Хөтөлбөрөөс хамаарч мэргэжлийн жагсаалт авах нь
+    path('prof/list/<int:depId>/', ProfessionAPIView.as_view()),
+
+    # Мэргэжлээс хамаарч ангийн жагсаалт авах нь
+    path('group/list/<int:profId>/', GroupAPIView.as_view()),
+
+    # Сургуулиас хамаарч хөтөлбөрийн багийн жагсаалт авах нь
+    path('depart/list/<int:sub_org>/', SubOrgDepartListAPIView().as_view()),
+
 ]

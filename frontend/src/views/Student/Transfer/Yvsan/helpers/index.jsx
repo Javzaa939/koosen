@@ -35,7 +35,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 			name: `${t('Оюутан')}`,
 			selector: (row) => row?.student?.code +' '+ row?.student?.last_name[0] + '.' + row?.student?.first_name,
             sortable: true,
-			minWidth: "250px",
+			minWidth: "150px",
         },
 		{
 			header: 'is_internal',
@@ -93,7 +93,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 			name: `${t('Тушаалын огноо')}`,
 			selector: (row) => row?.statement_date,
             sortable: true,
-			minWidth: "80px",
+			minWidth: "50px",
 			center: true
         },
 	]
@@ -101,14 +101,17 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 	if(Object.keys(user).length > 0 && school_id ) {
 		var delete_column = {
 			name: `${t('Устгах')}`,
-			maxWidth: "80px",
+			maxWidth: "150px",
+			center: true,
 			selector: (row) => (
 				<div className="text-center" style={{ width: "auto" }}>
 					{
 						user.permissions.includes('lms-student-movement-update')&&
 						<>
 							<a role="button" onClick={() => { editModal(row.id)} }
-								id={`complaintListDatatableEdit${row?.id}`}>
+								id={`complaintListDatatableEdit${row?.id}`}
+								className="me-1"
+								>
 								<Badge color="light-secondary" pill><Edit  width={"15px"} /></Badge>
 							</a>
 

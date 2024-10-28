@@ -543,6 +543,13 @@ function useApi(isDisplay=false) {
 
 				getOne: (pk) => instance.get(`/core/department/${pk}/`),
 				getTeachers: (pk) => instance.get(`/core/department/teacher/${pk}/`),
+				// сургуулиас хамаарч хөтөлбөрийн багийн жагсаалт авах нь
+				getDepartList: (sub_org) => instance.get(`/learning/school/list/${sub_org}/`),
+				// хөтөлбөрийн багаас хамаарч мэргэжлийн жагсаалт авах нь
+				getProfList: (depId) => instance.get(`/learning/prof/list/${depId}/`),
+				// мэргэжлээс хамаарч ангийн жагсаалт авах нь
+				getGroupList: (profId) => instance.get(`/learning/group/list/${profId}/`),
+
 			},
 			/** Багш */
 			teacher: {
@@ -1830,7 +1837,7 @@ function useApi(isDisplay=false) {
 			},
 			// ЭЕШ хэсгийн жагсаалт татахebackend/apps/surgalt/views.py
 			eyesh_order:{
-				put: (id, cdata) => instance.put(`/elselt/admissionuserdata/eyesh/${id}/`, cdata),
+				put: (id, cdata) => instance.put(`/elselt/admissionuserdata/eyesh/${id}/?school_id=${school_id}`, cdata),
 				get: (limit, page, search, lesson_year_id, profession_id , gender, state, yesh_state, yesh_mhb_state) =>
 					instance.get(`/elselt/admissionuserdata/eyesh/?page=${page}&limit=${limit}&search=${search}&elselt=${lesson_year_id}&profession=${profession_id}&gender=${gender}&state=${state}&yesh_state=${yesh_state}&yesh_mhb_state=${yesh_mhb_state}`),
 			},
