@@ -3448,6 +3448,7 @@ class Challenge(models.Model):
 
     title = models.CharField(max_length=250, null=False, blank=False, verbose_name="Гарчиг")
     description = models.TextField(null=True, blank=False, verbose_name="Тайлбар")
+    question_count = models.IntegerField(null=True, verbose_name='Нийт асуултын тоо')
 
     questions = models.ManyToManyField(ChallengeQuestions)
 
