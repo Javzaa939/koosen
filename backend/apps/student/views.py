@@ -458,6 +458,12 @@ class StudentRegisterAPIView(
 
             queryset = queryset.filter(payed_status_condition)
 
+        if status:
+            queryset = queryset.filter(status=status)
+        else:
+            status__in = StudentRegister.objects.filter(name__icontains='Суралцаж буй').values_list('id', flat=True)
+            queryset = queryset.filter(status__in=status__in)
+
         return queryset
 
     def get(self, request, pk=None):
@@ -465,7 +471,6 @@ class StudentRegisterAPIView(
 
         self.serializer_class = StudentRegisterListSerializer
 
-        self.queryset = self.queryset.exclude(status__code=2)
         if pk:
             student = self.retrieve(request, pk).data
             return request.send_data(student)

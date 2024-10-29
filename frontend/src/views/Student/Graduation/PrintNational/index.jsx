@@ -97,13 +97,13 @@ export default function PrintNational()
             case '0' || 0:
                 return 'ᠳ᠋ᠤᠭᠠᠷ'
             case '1' || 1:
-                return 'ᠳ᠋ᠦᠭᠠᠷ'
+                return 'ᠳ᠋ᠦ᠋ᢉᠡᠷ'
             case '2' || 2:
                 return 'ᠳ᠋ᠤᠭᠠᠷ'
             case '3' || 3:
                 return 'ᠳ᠋ᠤᠭᠠᠷ'
             case '4' || 4:
-                return 'ᠳ᠋ᠦᠭᠠᠷ'
+                return 'ᠳ᠋ᠦ᠋ᢉᠡᠷ'
             case '5' || 5:
                 return 'ᠳ᠋ᠤᠭᠠᠷ'
             case '6' || 6:
@@ -113,7 +113,7 @@ export default function PrintNational()
             case '8' || 8:
                 return 'ᠳ᠋ᠤᠭᠠᠷ'
             case '9' || 9:
-                return 'ᠳ᠋ᠦᠭᠠᠷ'
+                return 'ᠳ᠋ᠦ᠋ᢉᠡᠷ'
             default:
                 break;
         }
