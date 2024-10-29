@@ -376,7 +376,7 @@ export default function PrintNationalAttachment()
                 <div className='d-flex flex-column text-center' style={{ writingMode: 'vertical-lr', fontSize: '16px', marginRight: '3px', marginBottom: '75px' }} >
                     <span style={{ marginLeft: '13px' }}>{printDatas?.student?.department?.school_uig}</span>
                     <span style={{ fontSize: '11px', marginLeft: '10px' }}>
-                        {tooBichih(printDatas?.student?.graduation_work?.diplom_num)} ᠳᠤᠭᠠᠷᠲᠠᠢ {printDatas?.student?.group?.degree?.degree_uig_name} ᠤ᠋ᠨ ᠳ᠋ᠢᠫᠯᠣᠮ ᠤ᠋ᠨ ᠬᠠᠪᠰᠤᠷᠤᠯᠲᠠ
+                        {tooBichih(printDatas?.student?.graduation_work?.diplom_num)} ᠳ᠋ᠤᠭᠠᠷ ᠲᠠᠢ {printDatas?.student?.group?.degree?.degree_uig_name} ᠤ᠋ᠨ ᠳ᠋ᠢᠫᠯᠣᠮ ᠤ᠋ᠨ ᠬᠠᠪᠰᠤᠷᠤᠯᠲᠠ
                     </span>
                     <span style={{ fontSize: '11px', marginLeft: '10px' }}>
                         ᠪᠦᠷᠢᠳᢈᠡᠯ ᠦ᠋ᠨ ᠳ᠋ᠤᠭᠠᠷ {tooBichih(printDatas?.student?.graduation_work?.registration_num)}
@@ -487,9 +487,9 @@ export default function PrintNationalAttachment()
                             ?
                                 printDatas?.student?.group?.degree?.degree_code == 'E'
                                 ?
-                                    <span className=''>ᠮᠠᢉᠢᠰᠲ᠋ᠷ ᠤ᠋ᠨ ᠲᠡᢉᠦᠰᠦᠯᠲᠡ ᠶ᠋ᠢᠨ ᠠᠵᠢᠯ/ᠳᠢᠰᠰᠧᠷᠲ᠋ᠠᠼᠢ ᠶ᠋ᠢᠨ ᠨᠡᠷ᠎ᠡ: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic_uig}</span></span>
+                                    <span className=''>ᠮᠠᢉᠢᠰᠲ᠋ᠷ ᠤ᠋ᠨ ᠲᠡᢉᠦᠰᠦᠯᠲᠡ ᠶ᠋ᠢᠨ ᠠᠵᠢᠯ/ ᠳ᠋ᠢᠰᠰᠠᠷᠲ᠋ᠠᠴᠠ ᠶ᠋ᠢᠨ ᠨᠡᠷ᠎ᠡ: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic_uig}</span></span>
                                 :
-                                    <span className=''>ᠳ᠋ᠣᠻᠲ᠋ᠣᠷ ᠤ᠋ᠨ ᠲᠡᢉᠦᠰᠦᠯᠲᠡ ᠶ᠋ᠢᠨ ᠠᠵᠢᠯ/ᠳᠢᠰᠰᠧᠷᠲ᠋ᠠᠼᠢ ᠶ᠋ᠢᠨ ᠨᠡᠷ᠎ᠡ: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic_uig}</span></span>
+                                    <span className=''>ᠳ᠋ᠣᠻᠲ᠋ᠣᠷ ᠤ᠋ᠨ ᠲᠡᢉᠦᠰᠦᠯᠲᠡ ᠶ᠋ᠢᠨ ᠠᠵᠢᠯ/ ᠳ᠋ᠢᠰᠰᠠᠷᠲ᠋ᠠᠴᠠ ᠶ᠋ᠢᠨ ᠨᠡᠷ᠎ᠡ: &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic_uig}</span></span>
 
                             :
                                 <>
@@ -558,7 +558,7 @@ export default function PrintNationalAttachment()
                             {
                                 datas?.graduation_work?.lesson_type == 1
                                 ?
-                                    <span className=''>{`ᠮᠠᢉᠢᠰᠲ᠋ᠷ ᠤ᠋ᠨ ᠲᠡᢉᠦᠰᠦᠯᠲᠡ ᠶ᠋ᠢᠨ ᠠᠵᠢᠯ/ᠳᠢᠰᠰᠧᠷᠲ᠋ᠠᠼᠢ ᠶ᠋ᠢᠨ ᠨᠡᠷ᠎ᠡ:`} &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic_uig}</span></span>
+                                    <span className=''>{`ᠮᠠᢉᠢᠰᠲ᠋ᠷ ᠤ᠋ᠨ ᠲᠡᢉᠦᠰᠦᠯᠲᠡ ᠶ᠋ᠢᠨ ᠠᠵᠢᠯ/ ᠳ᠋ᠢᠰᠰᠠᠷᠲ᠋ᠠᠴᠠ ᠶ᠋ᠢᠨ ᠨᠡᠷ᠎ᠡ:`} &nbsp;<span className='fw-bolder'>{datas?.graduation_work?.diplom_topic_uig}</span></span>
                                 :
                                     <>
                                         <span className=''>
