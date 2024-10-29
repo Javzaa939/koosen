@@ -444,7 +444,7 @@ const Register = () => {
                             </DropdownMenu>
                         </Dropdown>
                         {/* <Dropdown isOpen={exportDropdownOpen} toggle={toggleExport}> */}
-                        <Dropdown isOpen={exportDropdownOpen} toggle={toggleExport} disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-read')  && school_id ? false : true}>
+                        <Dropdown isOpen={exportDropdownOpen} toggle={toggleExport} disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-student-register-read') ? false : true}>
                             <DropdownToggle
                                 color='secondary'
                                 className={``}
