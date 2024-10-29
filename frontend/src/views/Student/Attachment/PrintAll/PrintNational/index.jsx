@@ -209,13 +209,13 @@ export default function PrintNationalAttachment()
             case 'Г':
                 return 'ᠭ'
             case 'Д':
-                return 'ᠲ'
+                return 'ᠳ'
             case 'Е':
                 return 'ᠶᠢ'
             case 'Ё':
                 return 'ᠶ'
             case 'Ж':
-                return 'ᠵᠢ'
+                return 'ᠵ'
             case 'З':
                 return 'ᠵ'
             case 'И':
