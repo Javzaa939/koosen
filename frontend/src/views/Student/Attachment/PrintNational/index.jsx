@@ -440,7 +440,7 @@ export default function PrintNationalAttachment()
                         </div>
                     }
                     <div style={{ height: '27.3%', writingMode: 'vertical-lr', display: 'flex' }}>
-                        <span className='h-50'>ᠲᠤᠰᠢᠶᠠᠯ ᠤ᠋ᠨ ᠳᠤᠭᠠᠷ:</span>
+                        <span className='h-50'>ᠲᠤᠰᠢᠶᠠᠯ ᠤ᠋ᠨ ᠳ᠋ᠤᠭᠠᠷ:</span>
                         {uigVseg(printDatas?.student?.graduation_work?.graduation_number ? printDatas?.student?.graduation_work?.graduation_number[0] : printDatas?.student?.graduation_work?.graduation_number)} &nbsp; <span style={{ fontFamily: 'cmdashitseden' }}>/</span> &nbsp;{tooBichih(printDatas?.student?.graduation_work?.graduation_number?.slice(-3))}
                     </div>
                 </div>
