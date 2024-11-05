@@ -670,8 +670,20 @@ class StudentRegisterAPIView(
             address = StudentAddress.objects.filter(student=pk)
             exam = Exam_to_group.objects.filter(student=pk)
             estimate = PaymentEstimate.objects.filter(student=pk)
-            if qs_timetable or score_reg or address or exam or estimate:
-                return request.send_error("ERR_002", "Оюутны бүртгэлийн мэдээлэл устгах боломжгүй байна.")
+            if qs_timetable:
+                qs_timetable.delete()
+
+            if address:
+                address.delete()
+
+            if exam:
+                exam.delete()
+
+            if estimate:
+                estimate.delete()
+
+            if score_reg:
+                return request.send_error("ERR_002", "Дүнгийн мэдээлэлтэй учир устгах боломжгүй.")
 
             # Оюутны ерөнхий мэдээлэл устгах
             qs_student.delete()
