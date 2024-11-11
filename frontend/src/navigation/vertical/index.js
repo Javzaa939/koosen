@@ -47,8 +47,8 @@ export default [
   ...Service,
   ...Print,
   // ...Report,
+  ...Test,
   ...Settings,
   // ...Role,
   // ...Science
-  ...Test,
 ];

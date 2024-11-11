@@ -30,12 +30,6 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleNext) {
 			maxWidth: "300px",
 			center: true
 		},
-		{
-			name: `${t("Регистр")}`,
-			selector: (row) => row?.register,
-			maxWidth: "300px",
-			center: true
-		},
         {
 			header: 'org_position',
 			name: `${t("Албан тушаал")}`,
@@ -51,7 +45,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleNext) {
 			wrap: true,
 		},
 		{
-            name: `${t('Үйлдэл')}`,
+            name: `${t('Асуултууд')}`,
 
             selector:  (row) => (
                 <div className="text-center" style={{ width: "auto" }}>
@@ -63,7 +57,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleNext) {
                             >
                                 <Badge color="light-primary" pill><Edit width={"100px"} /></Badge>
                             </a>
-                            <UncontrolledTooltip placement='top' target={`updateSchool${row?.id}`}>Асуултууд</UncontrolledTooltip>
+                            <UncontrolledTooltip placement='top' target={`updateSchool${row?.id}`}>Асуултууд харах</UncontrolledTooltip>
 						</>
                     }
 				</div>

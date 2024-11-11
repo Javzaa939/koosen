@@ -17,7 +17,7 @@ export function getColumnsLesson(currentPage, rowsPerPage, total_count, handleDe
 			center: true
 		},
 		{
-			name: `${t("Хичээл")}`,
+			name: `${t("Хичээлийн нэр")}`,
 			selector: (row) => <span title={row?.lesson}>{row?.lesson}</span>,
 			maxWidth: "300px",
 			center: true
@@ -29,13 +29,13 @@ export function getColumnsLesson(currentPage, rowsPerPage, total_count, handleDe
 			center: true
 		},
 		{
-			name: `${t("Асуултын тоо")}`,
+			name: `${t("Нийт асуултын тоо")}`,
 			selector: (row) => row?.challengequestions_count,
 			maxWidth: "300px",
 			center: true
 		},
 		{
-			name: `${t('Үйлдэл')}`,
+			name: `${t('Асуултууд')}`,
 
 			selector: (row) => (
 				<div className="text-center" style={{ width: "auto" }}>
@@ -44,13 +44,11 @@ export function getColumnsLesson(currentPage, rowsPerPage, total_count, handleDe
 							<FileText id={`questionDetail${row.id}`} className='text-primary me-50 cursor-pointer' onClick={() => {
 								handleDetail(row?.id)
 							}} size={14} />
-							<UncontrolledTooltip placement='top' target={`questionDetail${row.id}`} >Дэлгэрэнгүй</UncontrolledTooltip>
+							<UncontrolledTooltip placement='top' target={`questionDetail${row.id}`} >Асуултууд </UncontrolledTooltip>
 						</>
 					}
 				</div>
 			),
-			minWidth: "200px",
-			maxWidth: "200px",
 			center: true,
 		},
 	]

@@ -2,7 +2,7 @@ import React, { Fragment, useState, useEffect, useContext } from "react";
 import { getPagination, get_questiontimetype, ReactSelectStyles } from "@utils";
 import { useTranslation } from "react-i18next";
 import { getColumns } from "./helpers";
-import { Plus, HelpCircle } from "react-feather";
+import { Plus, HelpCircle, Search } from "react-feather";
 import SchoolContext from '@context/SchoolContext'
 
 import {
@@ -40,9 +40,10 @@ const TestProgram = () => {
 	const [currentPage, setCurrentPage] = useState(1);
 	const [rowsPerPage, setRowsPerPage] = useState(10);
 	const [total_count, setTotalCount] = useState(1);
+    const [searchValue, setSearchValue] = useState('');
 
 	const [selectedLesson, setSelectedLesson] = useState('')
-	const [selectedTime, setSelectedTime] = useState('')
+	const [selectedTime, setSelectedTime] = useState('progressing')
 	const [selectedTeacher, setSelectedTeacher] = useState('')
     const [teachers, setTeachers] = useState([]);
 
@@ -67,7 +68,7 @@ const TestProgram = () => {
 	const teacherListApi = useApi().hrms.teacher
 
 	async function getDatas() {
-		const { success, data } = await fetchData(challengeAPI.get(currentPage, rowsPerPage, selectedLesson, selectedTime, selectedTeacher));
+		const { success, data } = await fetchData(challengeAPI.get(currentPage, rowsPerPage, selectedLesson, selectedTime, selectedTeacher, searchValue));
 
 		if (success) {
 			setDatas(data?.results);
@@ -153,16 +154,30 @@ const TestProgram = () => {
 
 	useEffect(() => {
 		getDatas();
-	}, [currentPage, rowsPerPage, selectedLesson, selectedTime,selectedTeacher]);
+	}, [currentPage, rowsPerPage, selectedLesson, selectedTime, selectedTeacher]);
 
 	useEffect(
 		() => {
 			getLesson()
-			getDatas()
 			getTeachers()
 		},
 		[]
 	)
+
+	function handleSearch() {
+        setTimeout(() => {
+            getDatas()
+        }, 100)
+    }
+
+	useEffect(() => {
+        if(searchValue.length < 1) getDatas()
+    },[searchValue])
+
+	const handleFilter = e => {
+        const value = e.target.value.trimStart();
+		setSearchValue(value)
+	}
 
 	return (
 		<Fragment>
@@ -201,7 +216,7 @@ const TestProgram = () => {
 							getOptionLabel={(option) => option.full_name}
 						/>
 					</Col>
-					<Col md={3} sm={10} className="m-1">
+					{/* <Col md={3} sm={10} className="m-1">
 						<Label className="form-label" for="lesson">
 							{t('Хичээл')}
 						</Label>
@@ -221,7 +236,7 @@ const TestProgram = () => {
 							getOptionValue={(option) => option.id}
 							getOptionLabel={(option) => option.name}
 						/>
-					</Col>
+					</Col> */}
 					<Col md={3} sm={10} className="m-1">
 						<Label className="form-label" for="time">
 							{t('Хугацаагаар')}
@@ -233,6 +248,7 @@ const TestProgram = () => {
 							classNamePrefix='select'
 							className='react-select'
 							placeholder={`-- Сонгоно уу --`}
+							value={get_questiontimetype()?.find((e) => e.id == selectedTime)}
 							options={get_questiontimetype() || []}
 							noOptionsMessage={() => 'Хоосон байна'}
 							onChange={(val) => {
@@ -271,6 +287,27 @@ const TestProgram = () => {
 							</Label>
 						</Col>
 					</Col>
+					<Col className='d-flex align-items-end mobile-datatable-search mt-50'>
+                        <Input
+                            className='dataTable-filter mb-50'
+                            type='text'
+                            bsSize='sm'
+                            id='search-input'
+                            placeholder={t("Хайх")}
+                            value={searchValue}
+                            onChange={handleFilter}
+                            onKeyPress={e => e.key === 'Enter' && handleSearch()}
+                        />
+                        <Button
+                            size='sm'
+                            className='ms-50 mb-50'
+                            color='primary'
+                            onClick={handleSearch}
+                        >
+                            <Search size={15} />
+                            <span className='align-middle ms-50'></span>
+                        </Button>
+                    </Col>
 				</Row>
 				<div className="react-dataTable react-dataTable-selectable-rows">
 					<DataTable

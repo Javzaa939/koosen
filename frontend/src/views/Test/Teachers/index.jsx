@@ -182,7 +182,7 @@ const Teacher = () => {
 			{step === 1 && <Card>
 				{isLoading && Loader}
 				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
-					<CardTitle tag="h4">{t('Багшийн мэдээлэл')}</CardTitle>
+					<CardTitle tag="h4">{t('Асуулт үүсгэсэн багшийн жагсаалт')}</CardTitle>
 				</CardHeader>
 				<Row className="justify-content-between mx-0 mb-1 mt-1">
 					<Col md={3}>
@@ -294,7 +294,7 @@ const Teacher = () => {
 				<Card>
 					{isLoading && Loader}
 					<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
-						<CardTitle tag="h4">{t('Шалгалтын асуултын мэдээлэл')}</CardTitle>
+						<CardTitle tag="h4">{t('Шалгалтын асуултын сэдвийн мэдээлэл')}</CardTitle>
 						<CardTitle tag="h5">{teacher_name}</CardTitle>
 					</CardHeader>
 					<Row className="justify-content-between mx-0 mb-1 mt-1">

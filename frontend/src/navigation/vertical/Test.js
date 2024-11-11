@@ -19,12 +19,12 @@ export default [
 				icon: <Circle size={8} />,
 				navLink: "challenge/test/",
 			},
-			{
-				id: "exam-timetable",
-				title: "Шалгалтын хуваарь",
-				icon: <Circle size={8} />,
-				navLink: "challenge/exam_schedule/",
-			},
+			// {
+			// 	id: "exam-timetable",
+			// 	title: "Шалгалтын хуваарь",
+			// 	icon: <Circle size={8} />,
+			// 	navLink: "challenge/exam_schedule/",
+			// },
 		]
     },
 ]

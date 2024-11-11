@@ -61,8 +61,14 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, ha
             center: true,
         },
         {
-            name: `${'Тайлбар'}`,
-            selector: (row) => row?.description,
+            name: `${'Эхлэх хугацаа'}`,
+            selector: (row) => row?.startAt,
+            minWidth: "20%",
+            center: true,
+        },
+        {
+            name: `${'Дуусах хугацаа'}`,
+            selector: (row) => row?.endAt,
             minWidth: "20%",
             center: true,
         },
@@ -189,24 +195,24 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, ha
             minWidth: "10%",
             center: true,
         },
-        {
-            name: `${t('Дүн харах')}`,
-            selector: (row) => (
-                <div className="text-center" style={{ width: "auto" }}  >
-                    <a
-                        id={`complaintListDatatableDetail${row?.id}`}
-                        className={` ${row?.is_student === 0 ? ` pe-none opacity-25 ` : ``} ms-1`}
-                        href={`/challenge/detail/${row?.id}`}
-                        target={'_blank'}
-                    >
-                        <Badge color="light-primary"><Eye width={"20px"} /></Badge>
-                    </a>
+        // {
+        //     name: `${t('Дүн харах')}`,
+        //     selector: (row) => (
+        //         <div className="text-center" style={{ width: "auto" }}  >
+        //             <a
+        //                 id={`complaintListDatatableDetail${row?.id}`}
+        //                 className={` ${row?.is_student === 0 ? ` pe-none opacity-25 ` : ``} ms-1`}
+        //                 href={`/challenge/detail/${row?.id}`}
+        //                 target={'_blank'}
+        //             >
+        //                 <Badge color="light-primary"><Eye width={"20px"} /></Badge>
+        //             </a>
 
-                </div>
-            ),
-            center: true,
-            minWidth: "5%",
-        },
+        //         </div>
+        //     ),
+        //     center: true,
+        //     minWidth: "5%",
+        // },
     ]
     return columns
 }

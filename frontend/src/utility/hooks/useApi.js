@@ -1445,8 +1445,8 @@ function useApi(isDisplay=false) {
 			}
 		},
 		challenge: {
-			get: (page, limit, lesson, type, teacher) =>
-				instance.get(`learning/challenge/?page=${page}&limit=${limit}&lesson=${lesson}&type=${type}&teacher=${teacher}`),
+			get: (page, limit, lesson, type, teacher, search) =>
+				instance.get(`learning/challenge/?page=${page}&limit=${limit}&lesson=${lesson}&type=${type}&teacher=${teacher}&search=${search}`),
 			getTeacherList: (limit, page, sort, search, sub_org, salbar, position="") => instance.get(`/learning/teacher/list/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&sub_org=${sub_org}&salbar=${salbar}&position=${position}`),
 			getTeacherLessonList: (limit, page, sort, search, teacher_id) => instance.get(`/learning/teacher/lesson/list/${teacher_id}/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}`),
 			getAll: (challenge) => {
@@ -1480,6 +1480,7 @@ function useApi(isDisplay=false) {
 			getQuestionList: (id) => instance.get(`learning/challenge/add/question/list/?id=${id}`),
 			getAddStudent: (page, limit, search,challenge) => instance.get(`learning/challenge/add/student/?page=${page}&limit=${limit}&search=${search}&challenge=${challenge}`),
 
+			getQuestionAll: (id) => instance.get(`learning/challenge/questions/${id}/`),
 
 			question: {
 				get: (page, limit, lessonId, subjectId, search) =>

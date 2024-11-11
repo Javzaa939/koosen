@@ -44,6 +44,7 @@ from lms.models import PsychologicalTest
 from lms.models import PsychologicalTestQuestions,PsychologicalQuestionChoices
 from lms.models import ExamTimeTable
 from lms.models import QuestionTitle,ChallengeSedevCount
+from lms.models import ChallengeStudents
 
 from main.utils.file import split_root_path
 
@@ -640,14 +641,15 @@ class ChallengeListSerializer(serializers.ModelSerializer):
     startAt = serializers.SerializerMethodField()
     endAt = serializers.SerializerMethodField()
 
-    scopeName = serializers.SerializerMethodField()
+    # scopeName = serializers.SerializerMethodField()
     lesson = LessonStandartSerializer()
+    is_student = serializers.SerializerMethodField()
 
-    student = StudentSerializer(read_only=True, many=True)
-    group = serializers.SerializerMethodField()
+    # student = StudentSerializer(read_only=True, many=True)
+    # group = serializers.SerializerMethodField()
 
-    questions = ChallengeQuestionListSerializer(read_only=True, many=True)
-    created_by = TeacherListSerializer(read_only=True)
+    # questions = ChallengeQuestionListSerializer(read_only=True, many=True)
+    # created_by = TeacherListSerializer(read_only=True)
 
     class Meta:
         model = Challenge
@@ -659,28 +661,35 @@ class ChallengeListSerializer(serializers.ModelSerializer):
     def get_endAt(self, obj):
         return fix_format_date(obj.end_date)
 
-    def get_scopeName(self, obj):
-        return obj.get_kind_display()
+    def get_is_student(self, obj):
+        challenge = Challenge.objects.get(id=obj.id)
+        challenge_student_ids = ChallengeStudents.objects.filter(challenge=challenge).values('student').distinct().count()
+
+        return challenge_student_ids
 
 
-    def get_group(self, obj):
-        groups = []
+    # def get_scopeName(self, obj):
+    #     return obj.get_kind_display()
 
-        if obj.kind == Challenge.KIND_GROUP:
 
-            group_ids = obj.student.all().values_list('group', flat=True)
+    # def get_group(self, obj):
+    #     groups = []
 
-            group_qs = Group.objects.filter(id__in=group_ids)
+    #     if obj.kind == Challenge.KIND_GROUP:
 
-            groups = GroupListSerializer(group_qs, many=True).data
+    #         group_ids = obj.student.all().values_list('group', flat=True)
 
-        return list(groups)
+    #         group_qs = Group.objects.filter(id__in=group_ids)
+
+    #         groups = GroupListSerializer(group_qs, many=True).data
+
+    #     return list(groups)
 
 class LessonAssignmentStudentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
         fields = '__all__'
-    
+
 class LessonAssignmentAssigmentListSerializer(serializers.ModelSerializer):
 
     student = LessonAssignmentStudentSerializer(many=False)

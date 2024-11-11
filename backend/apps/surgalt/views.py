@@ -1446,6 +1446,8 @@ class ChallengeAPIView(
     serializer_class = ChallengeSerializer
 
     pagination_class = CustomPagination
+    filter_backends = [SearchFilter]
+    search_fields = ['lesson__name', 'lesson__code', 'title']
 
     @has_permission(must_permissions=['lms-exam-read'])
     def get(self, request):
@@ -1454,11 +1456,9 @@ class ChallengeAPIView(
         lesson = request.query_params.get('lesson')
         time_type = request.query_params.get('type')
         teacher_id = request.query_params.get('teacher')
+
         if teacher_id:
-
-            teacher = Teachers.objects.filter(id=teacher_id).first()
-
-            self.queryset = self.queryset.filter(created_by=teacher)
+            self.queryset = self.queryset.filter(created_by=teacher_id)
 
         if lesson:
             self.queryset = self.queryset.filter(lesson=lesson)
@@ -5712,3 +5712,23 @@ class ChallengeQuestionsAPIView(
             }
 
         return request.send_data(response_data)
+
+
+class TestQuestionsAllAPIView(
+    mixins.RetrieveModelMixin,
+    generics.GenericAPIView,
+    mixins.ListModelMixin,):
+    "Шалгалтын асуулт"
+
+    queryset = ChallengeQuestions.objects.all()
+    serializer_class= ChallengeQuestionListSerializer
+
+    def get(self, request, pk=None):
+
+        if pk:
+            test = Challenge.objects.get(id=pk)
+            questions= test.questions.order_by('id')
+
+        serializer = self.serializer_class(questions, many=True)
+        data = serializer.data
+        return request.send_data(data)

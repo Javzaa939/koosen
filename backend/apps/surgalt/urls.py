@@ -65,15 +65,16 @@ urlpatterns = [
     path('challenge/add/sedev/count/<int:pk>/', ChallengeSedevCountAPIView.as_view()),
     path('challenge/add/student/', ChallengeAddStudentAPIView.as_view()),
     path('challenge/add/question/list/', ChallengeQuestionsAPIView.as_view()),
+    path('challenge/questions/<int:pk>/', TestQuestionsAllAPIView.as_view()),
 
 
     path('questions/', QuestionsAPIView.as_view()),
+    path('questions/<int:pk>/', QuestionsAPIView.as_view()),
     path('questions/test/', TestQuestionsAPIView.as_view()),
     path('questions/test/list/', TestQuestionsListAPIView.as_view()),
     path('questions/list/', QuestionsListAPIView.as_view()),
     path('questions/title/<int:pk>/', QuestionsTitleAPIView.as_view()),
     path('questions/title/list/<int:pk>/', QuestionsTitleListAPIView.as_view()),
-    path('questions/<int:pk>/', QuestionsAPIView.as_view()),
     path('questions/excel/',QuestionExcelAPIView.as_view()),
 
 
