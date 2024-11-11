@@ -2,6 +2,7 @@ import os
 import logging
 import json
 import ast
+from openpyxl import load_workbook
 
 from rest_framework import mixins
 from rest_framework import generics
@@ -17,7 +18,7 @@ from django.http import Http404
 
 from main.utils.function.pagination import CustomPagination
 from main.utils.function.utils import override_get_queryset
-from main.utils.function.utils import has_permission, get_domain_url, _filter_queries
+from main.utils.function.utils import has_permission, get_domain_url, _filter_queries, get_teacher_queryset
 from main.utils.file import save_file
 from main.utils.file import remove_folder
 from main.decorators import login_required
@@ -70,7 +71,9 @@ from lms.models import (
     PsychologicalQuestionTitle,
     PsychologicalTest,
     AdmissionRegisterProfession,
-    Season
+    Season,
+    QuestionTitle,
+    ChallengeSedevCount
 )
 
 from core.models import (
@@ -120,6 +123,10 @@ from .serializers import StudentSerializer
 from .serializers import ElsegchSerializer
 from .serializers import PsychologicalTestResultSerializer
 from .serializers import PsychologicalTestParticipantsSerializer
+from .serializers import TeacherExamTimeTableSerializer
+from core.serializers import TeacherNameSerializer
+from .serializers import QuestionTitleSerializer
+from .serializers import ChallengeSedevSerializer
 
 from main.utils.function.utils import remove_key_from_dict, fix_format_date, get_domain_url
 from main.utils.function.utils import null_to_none, get_lesson_choice_student, get_active_year_season, json_load
@@ -426,6 +433,7 @@ class LessonStandartListAPIView(
         less_standart_list = self.list(request).data
 
         return request.send_data(less_standart_list)
+
 
 
 @permission_classes([IsAuthenticated])
@@ -1445,11 +1453,12 @@ class ChallengeAPIView(
         self.serializer_class = ChallengeListSerializer
         lesson = request.query_params.get('lesson')
         time_type = request.query_params.get('type')
+        teacher_id = request.query_params.get('teacher')
+        if teacher_id:
 
-        user = request.user
-        teacher = Teachers.objects.filter(user_id=user).first()
+            teacher = Teachers.objects.filter(id=teacher_id).first()
 
-        self.queryset = self.queryset.filter(created_by=teacher)
+            self.queryset = self.queryset.filter(created_by=teacher)
 
         if lesson:
             self.queryset = self.queryset.filter(lesson=lesson)
@@ -1785,166 +1794,241 @@ class QuestionsAPIView(
         return request.send_data(all_list)
 
 
-    @has_permission(must_permissions=['lms-exam-question-update'])
+    # @has_permission(must_permissions=['lms-exam-question-update'])
+    # def put(self, request, pk):
+
+    #     datas = request.data.dict()
+    #     subject_id = datas.get('subject')
+
+    #     subject = Lesson_title_plan.objects.filter(id=subject_id).first()
+
+    #     quesion_imgs = request.FILES.getlist('questionImg')
+    #     choice_imgs = request.FILES.getlist('choiceImg')
+
+    #     questions = request.POST.getlist('question')
+
+    #     user = request.user
+    #     teacher = Teachers.objects.filter(user_id=user).first()
+
+    #     with transaction.atomic():
+    #         sid = transaction.savepoint()
+    #         try:
+    #             # Асуултыг хадгалах хэсэг
+    #             for question in questions:
+    #                 question = json_load(question)
+
+    #                 qkind = question.get("kind")
+    #                 image_name = question.get('imageName')
+
+    #                 score = question.get('score') # Асуултын оноо
+
+    #                 question['created_by'] = teacher
+    #                 question['subject'] = subject
+
+    #                 question_img = None
+
+    #                 # Асуултын сонголтууд
+    #                 choices = question.get('choices')
+
+    #                 # Асуултын зураг хадгалах хэсэг
+    #                 for img in quesion_imgs:
+    #                     if image_name == img.name:
+    #                         question_img = img
+    #                         break
+
+    #                 question = remove_key_from_dict(question, [ 'image', 'choices'])
+
+    #                 if 'imageName' in question:
+    #                     del question['imageName']
+
+    #                 if 'imageUrl' in question:
+    #                     del question['imageUrl']
+
+    #                 if 'kind_name' in question:
+    #                     del question['kind_name']
+
+    #                 if not question.get('max_choice_count'):
+    #                     question['max_choice_count'] = 0
+
+    #                 if not question.get('rating_max_count'):
+    #                     question['rating_max_count'] = 0
+    #                 else:
+    #                     question['rating_max_count'] = 5
+
+    #                 question = null_to_none(question)
+
+    #                 question_obj, created = ChallengeQuestions.objects.update_or_create(
+    #                     id=pk,
+    #                     defaults={
+    #                         **question
+    #                     }
+    #                 )
+
+    #                 # Асуултанд зураг байвал хадгалах хэсэг
+    #                 if question_img:
+    #                     question_img_path = get_image_path(question_obj)
+
+    #                     file_path = save_file(question_img, question_img_path)[0]
+
+    #                     question_obj.image = file_path
+    #                     question_obj.save()
+    #                 else:
+    #                     old_image = question_obj.image
+
+    #                     # Хуучин зураг засах үедээ устгасан бол файл устгана.
+    #                     if old_image and not image_name:
+    #                         remove_folder(str(old_image))
+
+    #                         question_obj.image = None
+    #                         question_obj.save()
+
+    #                 choice_ids = list()
+
+    #                 # Асуултын сонголтуудыг үүсгэх нь
+    #                 if int(qkind) in [ChallengeQuestions.KIND_MULTI_CHOICE, ChallengeQuestions.KIND_ONE_CHOICE]:
+
+    #                     # Олон сонголттой үед асуултын оноог хувааж тавина
+    #                     if int(qkind) == ChallengeQuestions.KIND_MULTI_CHOICE:
+    #                         max_choice_count = int(question.get('max_choice_count'))
+
+    #                         score = float(score) / max_choice_count
+
+    #                     for choice in choices:
+    #                         choice['created_by'] = teacher
+    #                         checked = choice.get('checked')
+
+    #                         choice['score'] = score if checked else 0
+
+    #                         img_name = choice.get('imageName')
+
+    #                         choice_img = None
+
+    #                         # Хариултын зураг хадгалах хэсэг
+    #                         for cimg in choice_imgs:
+    #                             if img_name == cimg.name:
+    #                                 choice_img = cimg
+    #                                 break
+
+    #                         choice = remove_key_from_dict(choice, ['image', 'checked'])
+
+    #                         if 'imageName' in choice:
+    #                             del choice['imageName']
+
+    #                         if 'imageUrl' in choice:
+    #                             del choice['imageUrl']
+
+    #                         choice_obj, created = QuestionChoices.objects.update_or_create(
+    #                             id=choice.get('id'),
+    #                             defaults={
+    #                                 **choice
+    #                             }
+    #                         )
+
+    #                         # Асуултанд зураг байвал хадгалах хэсэг
+    #                         if choice_img:
+    #                             choice_img_path = get_choice_image_path(choice_obj)
+
+    #                             file_path = save_file(choice_img, choice_img_path)[0]
+
+    #                             choice_obj.image = file_path
+    #                             choice_obj.save()
+    #                         else:
+    #                             choice_old_image = choice_obj.image
+
+    #                             # Хуучин зураг засах үедээ устгасан бол файл устгана.
+    #                             if choice_old_image and not img_name:
+    #                                 remove_folder(str(choice_old_image))
+
+    #                                 choice_obj.image = None
+    #                                 choice_obj.save()
+
+    #                         choice_ids.append(choice_obj.id)
+
+    #                 question_obj.choices.set(choice_ids)
+
+    #         except Exception as e:
+    #             print(e)
+    #             transaction.savepoint_rollback(sid)
+
+    #             return request.send_error('ERR_002')
+
+    #         return request.send_info('INF_002')
+    @login_required()
     def put(self, request, pk):
 
-        datas = request.data.dict()
-        subject_id = datas.get('subject')
+        request_data = request.data.dict()
+        type = request.query_params.get('type')
 
-        subject = Lesson_title_plan.objects.filter(id=subject_id).first()
+        if type == "question":
+            question_img = request_data['image']
+            request_data = remove_key_from_dict(request_data, [ 'image'])
+            with transaction.atomic():
+                question_obj = ChallengeQuestions.objects.filter(id=pk).first()
 
-        quesion_imgs = request.FILES.getlist('questionImg')
-        choice_imgs = request.FILES.getlist('choiceImg')
+                if isinstance(question_img, str) != True:
+                    question_img_path = get_image_path(question_obj)
 
-        questions = request.POST.getlist('question')
+                    file_path = save_file(question_img, question_img_path)[0]
 
-        user = request.user
-        teacher = Teachers.objects.filter(user_id=user).first()
+                    old_image = question_obj.image
+                    question_obj.image = file_path
+                    question_obj.save()
+                    if old_image:
+                        remove_folder(str(old_image))
 
-        with transaction.atomic():
-            sid = transaction.savepoint()
-            try:
-                # Асуултыг хадгалах хэсэг
-                for question in questions:
-                    question = json_load(question)
 
-                    qkind = question.get("kind")
-                    image_name = question.get('imageName')
+                if isinstance(question_img, str) == True and question_img == '':
+                    old_image = question_obj.image
+                    question_img_path = get_image_path(question_obj)
+                    # Хуучин зураг засах үедээ устгасан бол файл устгана.
+                    question_obj.image = None
+                    question_obj.save()
+                    if old_image:
+                        remove_folder(str(old_image))
 
-                    score = question.get('score') # Асуултын оноо
+                updated_question_rows = ChallengeQuestions.objects.filter(id=pk).update(
+                    **request_data
+                )
+                data = None
+                if updated_question_rows > 0:
+                    updated_question = ChallengeQuestions.objects.filter(id=pk).first()
+                    ser = dynamic_serializer(ChallengeQuestions, "__all__", 1)
+                    data = ser(updated_question).data
+                return request.send_info('INF_002', data)
 
-                    question['created_by'] = teacher
-                    question['subject'] = subject
+        else:
+            answer_img = request_data["image"]
+            answer_id = request_data.get('id')
+            request_data = remove_key_from_dict(request_data, ['image', 'id'])
+            with transaction.atomic():
+                answer_obj = QuestionChoices.objects.filter(id=answer_id).first()
+                question_obj = ChallengeQuestions.objects.filter(id=pk).first()
+                if isinstance(answer_img, str) != True:
+                    answer_img_path = get_choice_image_path(answer_obj)
+                    file_path = save_file(answer_img, answer_img_path)[0]
+                    old_image = answer_obj.image
+                    answer_obj.image = file_path
+                    answer_obj.save()
+                    if old_image:
+                        remove_folder(str(old_image))
 
-                    question_img = None
+                # Delete image
+                if isinstance(answer_img, str) == True and answer_img == '':
+                    old_image = answer_obj.image
+                    answer_img_path = get_choice_image_path(answer_obj)
+                    answer_obj.image = None
+                    answer_obj.save()
+                    if old_image:
+                        remove_folder(str(old_image))
 
-                    # Асуултын сонголтууд
-                    choices = question.get('choices')
-
-                    # Асуултын зураг хадгалах хэсэг
-                    for img in quesion_imgs:
-                        if image_name == img.name:
-                            question_img = img
-                            break
-
-                    question = remove_key_from_dict(question, [ 'image', 'choices'])
-
-                    if 'imageName' in question:
-                        del question['imageName']
-
-                    if 'imageUrl' in question:
-                        del question['imageUrl']
-
-                    if 'kind_name' in question:
-                        del question['kind_name']
-
-                    if not question.get('max_choice_count'):
-                        question['max_choice_count'] = 0
-
-                    if not question.get('rating_max_count'):
-                        question['rating_max_count'] = 0
-                    else:
-                        question['rating_max_count'] = 5
-
-                    question = null_to_none(question)
-
-                    question_obj, created = ChallengeQuestions.objects.update_or_create(
-                        id=pk,
-                        defaults={
-                            **question
-                        }
-                    )
-
-                    # Асуултанд зураг байвал хадгалах хэсэг
-                    if question_img:
-                        question_img_path = get_image_path(question_obj)
-
-                        file_path = save_file(question_img, question_img_path)[0]
-
-                        question_obj.image = file_path
-                        question_obj.save()
-                    else:
-                        old_image = question_obj.image
-
-                        # Хуучин зураг засах үедээ устгасан бол файл устгана.
-                        if old_image and not image_name:
-                            remove_folder(str(old_image))
-
-                            question_obj.image = None
-                            question_obj.save()
-
-                    choice_ids = list()
-
-                    # Асуултын сонголтуудыг үүсгэх нь
-                    if int(qkind) in [ChallengeQuestions.KIND_MULTI_CHOICE, ChallengeQuestions.KIND_ONE_CHOICE]:
-
-                        # Олон сонголттой үед асуултын оноог хувааж тавина
-                        if int(qkind) == ChallengeQuestions.KIND_MULTI_CHOICE:
-                            max_choice_count = int(question.get('max_choice_count'))
-
-                            score = float(score) / max_choice_count
-
-                        for choice in choices:
-                            choice['created_by'] = teacher
-                            checked = choice.get('checked')
-
-                            choice['score'] = score if checked else 0
-
-                            img_name = choice.get('imageName')
-
-                            choice_img = None
-
-                            # Хариултын зураг хадгалах хэсэг
-                            for cimg in choice_imgs:
-                                if img_name == cimg.name:
-                                    choice_img = cimg
-                                    break
-
-                            choice = remove_key_from_dict(choice, ['image', 'checked'])
-
-                            if 'imageName' in choice:
-                                del choice['imageName']
-
-                            if 'imageUrl' in choice:
-                                del choice['imageUrl']
-
-                            choice_obj, created = QuestionChoices.objects.update_or_create(
-                                id=choice.get('id'),
-                                defaults={
-                                    **choice
-                                }
-                            )
-
-                            # Асуултанд зураг байвал хадгалах хэсэг
-                            if choice_img:
-                                choice_img_path = get_choice_image_path(choice_obj)
-
-                                file_path = save_file(choice_img, choice_img_path)[0]
-
-                                choice_obj.image = file_path
-                                choice_obj.save()
-                            else:
-                                choice_old_image = choice_obj.image
-
-                                # Хуучин зураг засах үедээ устгасан бол файл устгана.
-                                if choice_old_image and not img_name:
-                                    remove_folder(str(choice_old_image))
-
-                                    choice_obj.image = None
-                                    choice_obj.save()
-
-                            choice_ids.append(choice_obj.id)
-
-                    question_obj.choices.set(choice_ids)
-
-            except Exception as e:
-                print(e)
-                transaction.savepoint_rollback(sid)
-
-                return request.send_error('ERR_002')
-
-            return request.send_info('INF_002')
-
+                updated_rows = QuestionChoices.objects.filter(id=answer_id).update(**request_data)
+                data = None
+                if updated_rows > 0:
+                    updated_answer = QuestionChoices.objects.filter(id=answer_id).first()
+                    ser = dynamic_serializer(QuestionChoices, "__all__")
+                    data = ser(updated_answer).data
+                    print(data)
+                return request.send_info('INF_002', data)
 
     @has_permission(must_permissions=['lms-exam-question-create'])
     def post(self, request):
@@ -4908,3 +4992,723 @@ class SubOrgDepartListAPIView(
 #     if row_data.get('question_number') and not math.isnan(row_data.get('question_number')):
 #         obj = PsychologicalTestQuestions.objects.filter(id=row_data.get('id')).update(question_number=int(row_data.get('question_number')))
 #         print(obj)
+
+class QuestionsTitleAPIView(
+    generics.GenericAPIView,
+    APIView,
+    mixins.ListModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin
+
+):
+    """ Шалгалтын асуултууд Гарчигаар
+    """
+    queryset = QuestionTitle.objects.all()
+    serializer_class = dynamic_serializer(QuestionTitle, "__all__")
+
+    @login_required()
+    def get(self, request, pk=None):
+
+        # user_id = request.user
+        # teacher = get_object_or_404(Teachers, user_id=user_id, action_status=Teachers.APPROVED)
+
+        # if pk:
+        #     data = self.retrieve(request, pk).data
+        #     questions = ChallengeQuestions.objects.filter(title=pk)
+        #     other_questions = ChallengeQuestions.objects.exclude(id__in=questions.values_list('id', flat=True)).values("id", "question", "title__name",  'title__lesson__name', 'title__lesson__code')
+
+        #     questions = questions.values("id", "question", "title__name", 'title__lesson__name', 'title__lesson__code')
+        #     return request.send_data({"title": data, "questions": list(questions), "other_questions": list(other_questions)})
+
+        title_id = request.query_params.get('titleId')
+        title_id = int(title_id)
+
+        # # 0  Бүх асуулт
+        if title_id == 0:
+            challenge_qs = ChallengeQuestions.objects.all()
+        # -1  Сэдэвгүй асуултууд
+        elif title_id == -1:
+            challenge_qs = ChallengeQuestions.objects.filter(Q(title__isnull=True))
+        else:
+            challenge_qs = ChallengeQuestions.objects.filter(title=title_id)
+
+        ser = dynamic_serializer(ChallengeQuestions, "__all__", 1)
+        data = ser(challenge_qs, many=True)
+        count = challenge_qs.count()
+
+        result = {
+            "count": count,
+            "results": data.data
+        }
+        return request.send_data(result)
+
+
+    @login_required()
+    def post(self, request):
+        request_data = request.data
+        question_ids = request.data.pop("questions")
+        serializer = self.get_serializer(data=request_data)
+        if serializer.is_valid(raise_exception=False):
+            saved_obj =  serializer.save()
+            questions_to_update = ChallengeQuestions.objects.filter(id__in=question_ids)
+            for question in questions_to_update:
+                question.title.add(saved_obj)
+            data = self.serializer_class(saved_obj).data
+            return request.send_info("INF_001", data)
+
+        return request.send_info("ERR_001")
+
+
+    @login_required()
+    def put(self, request, pk=None):
+        request_data = request.data
+        question_ids = request.data.pop("questions")
+        other_question_ids = request.data.pop("other_questions")
+        qs = self.queryset.filter(id=pk).get()
+        serializer = self.get_serializer(qs, data=request_data, partial=True)
+        if serializer.is_valid(raise_exception=False):
+            self.perform_update(serializer)
+            questions_to_update = ChallengeQuestions.objects.filter(id__in=question_ids)
+            other_questions = ChallengeQuestions.objects.filter(id__in=other_question_ids)
+            for question in questions_to_update:
+                question.title.add(qs)
+            for question in other_questions:
+                question.title.remove(qs)
+            return request.send_info("INF_002")
+
+        return request.send_info("ERR_001")
+
+
+    @login_required()
+    def delete(self, request, pk=None):
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
+
+class QuestionsTitleListAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+):
+    """ Шалгалтын Гарчиг
+    """
+    queryset = QuestionTitle.objects.all()
+    serializer_class = dynamic_serializer(QuestionTitle, "__all__")
+
+    @login_required()
+    def get(self, request,pk):
+        teacher = Teachers.objects.filter(id=pk).first()
+        lesson = request.query_params.get('lesson')
+        if lesson:
+            self.queryset = self.queryset.filter(lesson=lesson)
+
+        question_titles = ChallengeQuestions.objects.filter(created_by=teacher).values_list("title__id", flat=True)
+        data = self.queryset.filter(id__in=list(question_titles)).values("id", "name", 'lesson__name', 'lesson__code')
+        return request.send_data(list(data))
+
+class TestQuestionsAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin
+):
+    """
+        Асуултын хэсэг
+    """
+
+    queryset = ChallengeQuestions.objects.all().order_by('-created_at')
+    serializer_class = ChallengeQuestionListSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['question', 'subject__title']
+
+    @login_required()
+    def get(self, request, pk=None):
+
+        lesson = request.query_params.get('lesson')
+        subject = request.query_params.get('subject')
+
+        user = request.user
+        teacher = get_object_or_404(Teachers, user_id=user, action_status=Teachers.APPROVED)
+
+        self.queryset = self.queryset.filter(created_by=teacher)
+
+        if lesson:
+            self.queryset = self.queryset.filter(subject__lesson=lesson)
+
+        if subject:
+            self.queryset = self.queryset.filter(subject=subject)
+
+        if pk:
+            row_data = self.retrieve(request, pk).data
+            return request.send_data(row_data)
+
+        all_list = self.list(request).data
+
+        return request.send_data(all_list)
+
+    @login_required()
+    def put(self, request, pk):
+
+        request_data = request.data.dict()
+        type = request.query_params.get('type')
+
+        if type == "question":
+            question_img = request_data['image']
+            request_data = remove_key_from_dict(request_data, [ 'image'])
+            with transaction.atomic():
+                question_obj = ChallengeQuestions.objects.filter(id=pk).first()
+
+                if isinstance(question_img, str) != True:
+                    question_img_path = get_image_path(question_obj)
+
+                    file_path = save_file(question_img, question_img_path)[0]
+
+                    old_image = question_obj.image
+                    question_obj.image = file_path
+                    question_obj.save()
+                    if old_image:
+                        remove_folder(str(old_image))
+
+
+                if isinstance(question_img, str) == True and question_img == '':
+                    old_image = question_obj.image
+                    question_img_path = get_image_path(question_obj)
+                    # Хуучин зураг засах үедээ устгасан бол файл устгана.
+                    question_obj.image = None
+                    question_obj.save()
+                    if old_image:
+                        remove_folder(str(old_image))
+
+                updated_question_rows = ChallengeQuestions.objects.filter(id=pk).update(
+                    **request_data
+                )
+                data = None
+                if updated_question_rows > 0:
+                    updated_question = ChallengeQuestions.objects.filter(id=pk).first()
+                    ser = dynamic_serializer(ChallengeQuestions, "__all__", 1)
+                    data = ser(updated_question).data
+                return request.send_info('INF_002', data)
+
+        else:
+            answer_img = request_data["image"]
+            answer_id = request_data.get('id')
+            request_data = remove_key_from_dict(request_data, ['image', 'id'])
+            with transaction.atomic():
+                answer_obj = QuestionChoices.objects.filter(id=answer_id).first()
+                question_obj = ChallengeQuestions.objects.filter(id=pk).first()
+                if isinstance(answer_img, str) != True:
+                    answer_img_path = get_choice_image_path(answer_obj)
+                    file_path = save_file(answer_img, answer_img_path)[0]
+                    old_image = answer_obj.image
+                    answer_obj.image = file_path
+                    answer_obj.save()
+                    if old_image:
+                        remove_folder(str(old_image))
+
+                # Delete image
+                if isinstance(answer_img, str) == True and answer_img == '':
+                    old_image = answer_obj.image
+                    answer_img_path = get_choice_image_path(answer_obj)
+                    answer_obj.image = None
+                    answer_obj.save()
+                    if old_image:
+                        remove_folder(str(old_image))
+
+                updated_rows = QuestionChoices.objects.filter(id=answer_id).update(**request_data)
+                data = None
+                if updated_rows > 0:
+                    updated_answer = QuestionChoices.objects.filter(id=answer_id).first()
+                    ser = dynamic_serializer(QuestionChoices, "__all__")
+                    data = ser(updated_answer).data
+                    print(data)
+                return request.send_info('INF_002', data)
+
+
+    @login_required()
+    def post(self, request):
+        # .dict()
+        questions = request.POST.getlist('questions')
+        files = request.FILES.getlist('files')
+
+        user = request.user
+        teacher = Teachers.objects.filter(user_id=user).first()
+
+        with transaction.atomic():
+            sid = transaction.savepoint()
+            try:
+                # Асуултыг хадгалах хэсэг
+                for question in questions:
+                    question = json.loads(question)
+                    qkind = question.get("kind")
+                    question_img = question.get('image')
+                    score = question.get('score') # Асуултын оноо
+                    answers = question.get('answers')
+                    question['created_by'] = teacher
+                    question['yes_or_no'] = None
+                    question['max_choice_count'] = 0
+                    question['rating_max_count'] = score
+
+                    for image in files:
+                        if hasattr(image, "name") and question['image'] == image.name:
+                            question_img = image
+
+                    for ans in answers:
+                        if ans['is_correct'] == True and ans['value'] == 'Тийм':
+                            question['yes_or_no'] = True
+                        if ans['is_correct'] == True and ans['value'] == 'Үгүй':
+                            question['yes_or_no'] = False
+                        if ans['is_correct'] == True:
+                            question['max_choice_count'] += 1
+
+                    # Асуултын сонголтууд
+                    choices = answers
+
+                    question = remove_key_from_dict(question, ['image','answers'])
+                    question = null_to_none(question)
+
+                    question_obj = ChallengeQuestions.objects.create(
+                        **question
+                    )
+
+
+                    # Асуултанд зураг байвал хадгалах хэсэг
+                    if question_img:
+                        question_img_path = get_image_path(question_obj)
+
+                        file_path = save_file(question_img, question_img_path)[0]
+
+                        question_obj.image = file_path
+                        question_obj.save()
+
+                    choice_ids = list()
+
+                    # Асуултын сонголтуудыг үүсгэх нь
+                    if int(qkind) in [ChallengeQuestions.KIND_MULTI_CHOICE, ChallengeQuestions.KIND_ONE_CHOICE, ChallengeQuestions.KIND_BOOLEAN]:
+
+                        # Олон сонголттой үед асуултын оноог хувааж тавина
+                        if int(qkind) == ChallengeQuestions.KIND_MULTI_CHOICE:
+                            max_choice_count = int(question.get('max_choice_count'))
+
+                            score = float(score) / max_choice_count
+
+                        for choice in choices:
+                            choice['created_by'] = teacher
+
+                            checked = choice.get('is_correct')
+
+                            choice['score'] = score if checked else 0
+                            choice_img = None
+                            choice['choices'] = choice['value']
+                            for image in files:
+                                if hasattr(image, "name") and choice['image'] == image.name:
+                                    choice_img = image
+
+                            choice = remove_key_from_dict(choice, ['image', 'is_correct', 'value'])
+
+
+                            choice_obj = QuestionChoices.objects.create(
+                                **choice
+                            )
+
+                            # Асуултанд зураг байвал хадгалах хэсэг
+                            if choice_img:
+                                choice_img_path = get_choice_image_path(choice_obj)
+
+                                file_path = save_file(choice_img, choice_img_path)[0]
+
+                                choice_obj.image = file_path
+                                choice_obj.save()
+
+                            choice_ids.append(choice_obj.id)
+
+                    question_obj.choices.set(choice_ids)
+
+            except Exception as e:
+                print(e)
+                transaction.savepoint_rollback(sid)
+
+                return request.send_error('ERR_002')
+
+        return request.send_info('INF_001')
+
+class TestQuestionsListAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin
+):
+    """ Шалгалт үүсгэхдээ асуулт сонгох хэсэг """
+
+    queryset = ChallengeQuestions.objects.all()
+    serializer_class = ChallengeQuestionListSerializer
+    @login_required()
+    def get(self, request):
+        questions_qs = ChallengeQuestions.objects.all()
+        ser = dynamic_serializer(ChallengeQuestions, "__all__", 1)
+        data = ser(questions_qs, many=True).data
+        return request.send_data(data)
+
+class TeacherExaminationScheduleAPIView(
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    generics.GenericAPIView
+):
+    " Шалгалтын хуваарь "
+    queryset = ExamTimeTable.objects.all()
+    serializer_class = TeacherExamTimeTableSerializer
+
+    @login_required()
+    def get(self, request):
+
+        year = request.query_params.get('year')
+        season = request.query_params.get('season')
+
+        if year:
+            self.queryset = self.queryset.filter(lesson_year=year)
+
+        if season:
+            self.queryset = self.queryset.filter(lesson_season=season)
+
+        datas = self.list(request).data
+        return request.send_data(datas)
+
+class QuestionExcelAPIView(generics.GenericAPIView, mixins.ListModelMixin):
+    KIND_MAP = {
+        'Нэг сонголт': 1,
+        'Олон сонголт': 2,
+        'Тийм, Үгүй сонголт': 3,
+        'Үнэлгээ': 4,
+        'Бичвэр': 5,
+    }
+
+    LEVEL_MAP = {
+        'Хөнгөн': 1,
+        'Дунд': 2,
+        'Хүнд': 3,
+    }
+
+    def post(self, request):
+        user = request.user
+        teacher = Teachers.objects.filter(user_id=user).first()
+        excel_file = request.FILES.get('file')
+
+        if not excel_file:
+            return request.send_info("INF_002")
+
+        # Load the workbook and get the active sheet
+        workbook = load_workbook(filename=excel_file)
+        sheet = workbook.active
+        data = [row for row in sheet.iter_rows(values_only=True)]
+        headers = data[0]
+        data_dicts = [dict(zip(headers, row)) for row in data[1:]]
+
+        for entry in data_dicts:
+            self.process_entry(entry, teacher)
+
+        return request.send_info("INF_001")
+
+    def process_entry(self, entry, teacher):
+        question = entry.get('Асуулт')
+
+        if question in {"Жишээ 1","Жишээ 2","Жишээ 3"}:
+            return
+
+        level_str = entry.get('Асуултын түвшин')
+        score = entry.get('Асуултын оноо')
+        kind_str = entry.get('Асуултын төрөл')
+        correct_answer_index = entry.get('Зөв хариулт')
+
+        kind = self.KIND_MAP.get(kind_str)
+        level = self.LEVEL_MAP.get(level_str)
+
+        # max_choice зөв хариулт хэд байгаагаас
+        max_choice_count = len(correct_answer_index.split()) if kind == 2 else 1
+
+        # Challenge үүсгэх
+        challenge = ChallengeQuestions(
+            question=question,
+            kind=kind,
+            score=score,
+            level=level,
+            max_choice_count=max_choice_count,
+            created_by=teacher
+        )
+        challenge.save()
+
+        choice_keys = ['Хариулт 1', 'Хариулт 2', 'Хариулт 3', 'Хариулт 4', 'Хариулт 5', 'Хариулт 6']
+        choice_ids = self.process_choices(entry, teacher, choice_keys, kind, score, correct_answer_index)
+
+        challenge.choices.set(choice_ids)
+
+    def process_choices(self, entry, teacher, choice_keys, kind, score, correct_answer_index):
+        choice_ids = []
+
+        if kind in {1, 3}:  # Single choice or true/false
+            correct_answer_index = int(correct_answer_index)
+            for index, key in enumerate(choice_keys):
+                choice_text = entry.get(key)
+                if choice_text:
+                    is_correct = 1 if (index + 1) == correct_answer_index else 0
+                    choice = QuestionChoices(choices=choice_text, created_by=teacher)
+                    choice.score = score if is_correct else 0
+                    choice.save()
+                    choice_ids.append(choice.id)
+
+        elif kind == 2:  # Multiple choice
+            correct_answer_indices = {int(x) for x in correct_answer_index.split()}
+            for index, key in enumerate(choice_keys):
+                choice_text = entry.get(key)
+                if choice_text:
+                    is_correct = 1 if (index + 1) in correct_answer_indices else 0
+                    choice = QuestionChoices(choices=choice_text, created_by=teacher)
+                    choice.score = score / len(correct_answer_indices) if is_correct else 0
+                    choice.save()
+                    choice_ids.append(choice.id)
+
+        return choice_ids
+
+@permission_classes([IsAuthenticated])
+class TestTeacherApiView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin
+):
+    """ Багшийн жагсаалт """
+
+    queryset = Teachers.objects.all()
+    serializer_class = TeacherNameSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['first_name', 'last_name']
+
+    def get_queryset(self):
+        "Багшийн мэдээллийг сургууль, Хөтөлбөрийн багаар харуулах "
+
+        queryset = self.queryset
+        teacher_queryset = queryset.all().values_list('user', flat=True)
+        qs_employee_user = Employee.objects.filter(user_id__in=list(teacher_queryset), state=Employee.STATE_WORKING).values_list('user', flat=True)
+        if qs_employee_user:
+            queryset = queryset.filter(user_id__in = list(qs_employee_user))
+
+        queryset = get_teacher_queryset()
+        sub_org = self.request.query_params.get('sub_org')
+        salbar = self.request.query_params.get('salbar')
+        position = self.request.query_params.get('position')
+        sorting = self.request.query_params.get('sorting')
+
+        # Бүрэлдэхүүн сургууль
+        if sub_org:
+            queryset = queryset.filter(sub_org=sub_org)
+
+        # салбар, тэнхим
+        if salbar:
+            queryset = queryset.filter(salbar=salbar)
+
+        # Албан тушаалаар хайх
+        if position:
+            user_ids = Employee.objects.filter(org_position=position, state=Employee.STATE_WORKING).values_list('user', flat=True)
+
+            queryset = queryset.filter(user_id__in=user_ids)
+
+        # Sort хийх үед ажиллана
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
+
+        created_questions = ChallengeQuestions.objects.values_list('created_by' , flat = True).distinct()
+        queryset = queryset.filter(id__in = created_questions)
+
+        return queryset
+
+    def get(self, request):
+        " нийт багшийн жагсаалт"
+
+        teach_info = self.list(request).data
+        return request.send_data(teach_info)
+
+@permission_classes([IsAuthenticated])
+class TestLessonTeacherApiView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin
+):
+    """ Багшийн хичээлийн жагсаалт """
+    pagination_class = CustomPagination
+    filter_backends = [SearchFilter]
+    search_fields = ['first_name', 'last_name']
+
+    def get(self, request, pk):
+        teacher = Teachers.objects.filter(id=pk).first()
+        if not teacher:
+            return request.send_error("ERR_002", "Багш олдсонгүй.")
+
+        obj = ChallengeQuestions.objects.filter(created_by_id=teacher).prefetch_related('title')
+        titles = set()
+        for q in obj:
+            titles.update(q.title.all())
+        serialized_data = QuestionTitleSerializer(titles, many=True).data
+
+        return_data = {
+            "count":len(serialized_data),
+            "name":teacher.full_name,
+            "data" :serialized_data
+        }
+
+        return request.send_data(return_data)
+
+class ChallengeSedevCountAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin
+):
+    queryset = ChallengeSedevCount.objects.all()
+    serializer_class = ChallengeSedevSerializer
+
+    @login_required()
+    def post(self, request):
+        data = request.data
+        user = request.user
+
+        challenge_id = data.get("challenge")
+        title = data.get("subject")
+        level = data.get("level_of_question")
+        number_of_questions = data.get('number_questions')
+        number_of_questions_percentage = data.get("number_questions_percentage")
+
+        if title is not None and challenge_id is not None:
+                lesson_title = QuestionTitle.objects.filter(id=title).first()
+
+                challenge = Challenge.objects.filter(id=challenge_id).first()
+
+                if challenge and lesson_title:
+                    challenge_questions = ChallengeQuestions.objects.filter(title=lesson_title,level=level)
+                    if number_of_questions:
+                        random_questions = challenge_questions.order_by('?')[:int(number_of_questions)]
+                    elif number_of_questions_percentage:
+                        total_questions = challenge_questions.count()
+                        question_count = int(total_questions * (int(number_of_questions_percentage) /  100))
+                        random_questions = challenge_questions.order_by('?')[:question_count]
+                    else:
+                        random_questions = challenge_questions
+
+                    challenge.questions.add(*random_questions)
+                    challenge.save()
+
+                    return request.send_info("INF_001")
+        return request.send_error("ERR_003")
+
+    @login_required()
+    def delete(self, request, pk=None):
+
+        question = ChallengeQuestions.objects.filter(id=pk).first()
+        challenges = Challenge.objects.filter(questions=question).first()
+        if challenges:
+            challenges.questions.remove(question)
+            question.title.clear()
+            question.save()
+            challenges.save()
+
+        return request.send_info("INF_003")
+
+class ChallengeAddStudentAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin
+):
+    queryset = Student.objects.all()
+    serializer_class = StudentSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['code', 'first_name', 'last_name']
+
+    @login_required()
+    def get(self, request):
+        challenge = request.query_params.get('challenge')
+        challenge_student_all = Challenge.objects.get(id=challenge).student.all().values_list('id', flat=True)
+
+        self.queryset = self.queryset.filter(id__in=list(challenge_student_all))
+
+        datas = self.list(request).data
+        return request.send_data(datas)
+
+    @login_required()
+    def put(self, request):
+        data = request.data
+        challenge_id = data.get("challenge")
+        student_code = data.get("student")
+
+        if student_code is None:
+            return request.send_error("ERR_003", 'Оюутны код хоосон байна!')
+
+        try:
+            student = Student.objects.filter(code=student_code).first()
+
+            if student:
+                challenge = Challenge.objects.filter(id=challenge_id).first()
+
+                if challenge:
+                    check = challenge.student.filter(id=student.id)
+
+                    if check:
+                        return request.send_error("ERR_003",f'"{student_code}" кодтой оюутан шалгалтанд үүссэн байна.')
+
+                    challenge.student.add(student)
+                    challenge.save()
+                    return request.send_info("INF_002")
+                else:
+                    return request.send_error("ERR_002")
+            else:
+                return request.send_error("ERR_003",f'"{student_code}" кодтой оюутан олдсонгүй!')
+        except Exception as e:
+            print(e)
+            return request.send_error("ERR_002")
+
+    @login_required()
+    def delete(self, request, pk, challenge):
+        try:
+            challenge = Challenge.objects.get(id=challenge)
+            student = Student.objects.get(pk=pk)
+            challenge.student.remove(student)
+            challenge.save()
+
+            return request.send_info("INF_003")
+
+        except Exception as e:
+            print(e)
+            return request.send_error("ERR_002")
+
+class ChallengeQuestionsAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+):
+    queryset = ChallengeQuestions.objects.all()
+    serializer_class = ChallengeQuestionListSerializer
+
+    @login_required()
+    def get(self, request):
+
+        challenge_id = request.query_params.get('id')
+        challenge = Challenge.objects.filter(id=challenge_id).first()
+
+        if challenge_id:
+            all_data = challenge.questions.filter(title__lesson=challenge.lesson).all()
+            serializer = self.get_serializer(all_data, many=True)
+
+            response_data = {
+                "questions": serializer.data,
+                "question_count": len(serializer.data),
+                "challenge_question_count": challenge.question_count
+            }
+
+        return request.send_data(response_data)

@@ -42,6 +42,8 @@ from lms.models import Lesson_material_file
 from lms.models import Lesson_assignment, AdmissionRegisterProfession
 from lms.models import PsychologicalTest
 from lms.models import PsychologicalTestQuestions,PsychologicalQuestionChoices
+from lms.models import ExamTimeTable
+from lms.models import QuestionTitle,ChallengeSedevCount
 
 from main.utils.file import split_root_path
 
@@ -597,6 +599,7 @@ class ChallengeQuestionListSerializer(serializers.ModelSerializer):
 
     lesson_id = serializers.CharField(default='', source='subject.lesson.id')
     imageName = serializers.SerializerMethodField()
+    title = serializers.SerializerMethodField()
 
     class Meta:
         model = ChallengeQuestions
@@ -614,6 +617,11 @@ class ChallengeQuestionListSerializer(serializers.ModelSerializer):
             image_name = os.path.basename(image)
 
         return image_name
+
+    def get_title(self,obj):
+        titles = obj.title.all()
+        title_names = [title.name for title in titles]
+        return title_names
 
 class ChallengeSerializer(serializers.ModelSerializer):
 
@@ -940,3 +948,33 @@ class PsychologicalTestParticipantsSerializer(serializers.ModelSerializer):
     class Meta:
         model = PsychologicalTest
         fields = ['participants']
+
+class ChallengeLessonSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = LessonStandart
+        fields = ['id', 'name', 'code', 'kredit']
+
+class TeacherExamTimeTableSerializer(serializers.ModelSerializer):
+    lesson = ChallengeLessonSerializer()
+    class Meta:
+        model = ExamTimeTable
+        fields = '__all__'
+
+class QuestionTitleSerializer(serializers.ModelSerializer):
+
+    lesson = serializers.CharField(source="lesson.name", read_only=True)
+    challengequestions_count = serializers.SerializerMethodField()
+    class Meta:
+        model = QuestionTitle
+        fields = '__all__'
+
+    def get_challengequestions_count(self, obj):
+        return obj.challengequestions_set.count()
+
+class ChallengeSedevSerializer(serializers.ModelSerializer):
+    lesson_title = LessonTitleSerializer()
+
+    class Meta:
+        model = ChallengeSedevCount
+        fields = '__all__'

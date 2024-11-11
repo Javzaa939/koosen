@@ -14,7 +14,7 @@ import {
 	ModalFooter,
 	Row
 } from "reactstrap";
-import CreateTest from "@src/views/Test/create_test";
+import CreateTest from "@src/views/TestV1/create_test";
 
 function AddWeekMaterial({toggle, item}) {
 	const addToast = useToast()

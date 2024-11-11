@@ -1445,9 +1445,10 @@ function useApi(isDisplay=false) {
 			}
 		},
 		challenge: {
-			get: (page, limit, lesson, type) =>
-				instance.get(`learning/challenge/?page=${page}&limit=${limit}&lesson=${lesson}&type=${type}`),
-
+			get: (page, limit, lesson, type, teacher) =>
+				instance.get(`learning/challenge/?page=${page}&limit=${limit}&lesson=${lesson}&type=${type}&teacher=${teacher}`),
+			getTeacherList: (limit, page, sort, search, sub_org, salbar, position="") => instance.get(`/learning/teacher/list/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&sub_org=${sub_org}&salbar=${salbar}&position=${position}`),
+			getTeacherLessonList: (limit, page, sort, search, teacher_id) => instance.get(`/learning/teacher/lesson/list/${teacher_id}/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}`),
 			getAll: (challenge) => {
 				var c_challenge = ''
 				if (challenge) c_challenge = challenge
@@ -1475,6 +1476,11 @@ function useApi(isDisplay=false) {
 
 			postAnswer: (data) =>
 				instance.post(`learning/challenge/approve/`, data),
+			timetable : () => instance.get(`learning/challenge/timetable/`),
+			getQuestionList: (id) => instance.get(`learning/challenge/add/question/list/?id=${id}`),
+			getAddStudent: (page, limit, search,challenge) => instance.get(`learning/challenge/add/student/?page=${page}&limit=${limit}&search=${search}&challenge=${challenge}`),
+
+
 			question: {
 				get: (page, limit, lessonId, subjectId, search) =>
 					instance.get(`learning/questions/?page=${page}&limit=${limit}&lesson=${lessonId}&subject=${subjectId}&search=${search}`),
@@ -1494,6 +1500,8 @@ function useApi(isDisplay=false) {
 
 				put: (data, pk) =>
 					instance.put(`learning/questions/${pk}/?year=${cyear_name}&season=${cseason_id}`, data),
+				putTestQuestions: (data, pk, type='question') =>
+					instance.put(`learning/questions/${pk}/?year=${cyear_name}&season=${cseason_id}&type=${type}`, data),
 
 				delete: (delete_ids) =>
 				{
@@ -1502,7 +1510,19 @@ function useApi(isDisplay=false) {
 						remove_ids += `&delete=${i}`
 					}
 					return instance.delete(`learning/questions/?year=${cyear_name}&season=${cseason_id}${remove_ids}`)
-				}
+				},
+				getByTitle: (page, limit, search, titleId,teacher_id) => instance.get(`learning/questions/title/${teacher_id}/?page=${page}&limit=${limit}&search=${search}&titleId=${titleId}`),
+				getTitle: (lesson='') => instance.get(`learning/questions/title/list/${teacher_id}/?lesson=${lesson}`),
+				postTestQuestions: (data) =>
+					instance.post(`learning/questions/test/?year=${cyear_name}&season=${cseason_id}`, data),
+				getTestList: () => {
+					return instance.get(`learning/questions/test/list/`)
+				},
+				getOneTitle: (id) => instance.get(`learning/questions/title/${id}/`),
+				postExcel:(datas) => instance.post(`learning/questions/excel/` , datas),
+
+
+
 			},
 
 			psychologicalTestQuestion:{
