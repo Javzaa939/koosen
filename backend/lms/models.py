@@ -3326,7 +3326,7 @@ def get_choice_image_path(instance):
 class QuestionChoices(models.Model):
     """ Өөрийгөө сорих шалгалтын сонголттой асуултын сонголтууд """
 
-    choices = models.CharField(verbose_name="Сонголт", max_length=250, null=False, blank=False)
+    choices = models.CharField(verbose_name="Сонголт", max_length=1000, null=False, blank=False)
     image = models.ImageField(upload_to=get_choice_image_path, null=True, blank=True, verbose_name='зураг')
 
     score = models.FloatField(default=0, verbose_name='Зөв хариултын оноо')
