@@ -565,7 +565,7 @@ class StudentRegisterAPIView(
                 return request.send_error_valid(serializer.errors)
 
             # Оюутан бүртгүүлэх үед оюутны нэвтрэх нэр нууц үгийг хадгалах хэсэг
-            password = '0123456789'
+            password = regnum[-8:]
 
             hashed_password = make_password(password)
             serializer.save()
@@ -4391,3 +4391,20 @@ class GraduationWorkQrAPIView(
                     self.queryset.filter(id=graduation_id).update(diplom_qr=image_data)
 
         return request.send_data(not_found_student)
+
+
+def update(diplom_num, path):
+    with open(path, 'rb') as f:
+        image_data = f.read()
+        print(GraduationWork.objects.filter(diplom_num=diplom_num))
+        GraduationWork.objects.filter(diplom_num=diplom_num).update(
+            diplom_qr = image_data
+        )
+    return 'success'
+
+path = '/home/daria/Pictures/viber_image_2024-11-06_15-35-56-846.jpg'
+diplom_num = '8202400186'
+
+ocunt = update(diplom_num, path)
+
+print(ocunt)
