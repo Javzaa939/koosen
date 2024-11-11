@@ -663,7 +663,7 @@ class ChallengeListSerializer(serializers.ModelSerializer):
 
     def get_is_student(self, obj):
         challenge = Challenge.objects.get(id=obj.id)
-        challenge_student_ids = ChallengeStudents.objects.filter(challenge=challenge).values('student').distinct().count()
+        challenge_student_ids = ChallengeStudents.objects.filter(challenge=challenge, answer__isnull=False).values('student').distinct().count()
 
         return challenge_student_ids
 

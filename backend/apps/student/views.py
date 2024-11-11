@@ -357,7 +357,7 @@ def generate_student_code(school_id, group, is_two=False):
         Student
         .objects
         .filter(
-            group__profession=group_qs.profession,
+            group__profession__profession_code=group_qs.profession.profession_code,
             school=school_id
         )
         .annotate(
@@ -374,6 +374,7 @@ def generate_student_code(school_id, group, is_two=False):
     with_start = '001'
     student_register_count = 1
 
+    print(student_qs)
     if student_qs:
         check_code = student_qs.code
         student_register_count = int(check_code[-3:]) + 1
@@ -544,14 +545,14 @@ class StudentRegisterAPIView(
 
         if not student_code:
             student_code = generate_student_code(school_id, group)
+            check_qs = Student.objects.filter(code=student_code).exists()
 
-        check_qs = Student.objects.filter(code=student_code)
+            if check_qs:
+                # Оюутны код давхцаж байвал
+                student_code = generate_student_code(school_id, group)
 
-        if check_qs:
-            # Оюутны код давхцаж байвал
-            student_code = generate_student_code(school_id, group)
-
-        data['code'] = student_code
+            print(student_code)
+            data['code'] = student_code
 
         if 'gender' in data and not data.get('gender'):
             del data['gender']
@@ -561,6 +562,7 @@ class StudentRegisterAPIView(
         try:
             serializer = self.serializer_class(data=data, many=False)
             if not serializer.is_valid():
+                print(serializer.errors)
                 transaction.savepoint_rollback(sid)
                 return request.send_error_valid(serializer.errors)
 
