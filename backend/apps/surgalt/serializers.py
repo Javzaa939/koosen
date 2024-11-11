@@ -42,6 +42,9 @@ from lms.models import Lesson_material_file
 from lms.models import Lesson_assignment, AdmissionRegisterProfession
 from lms.models import PsychologicalTest
 from lms.models import PsychologicalTestQuestions,PsychologicalQuestionChoices
+from lms.models import ExamTimeTable
+from lms.models import QuestionTitle,ChallengeSedevCount
+from lms.models import ChallengeStudents
 
 from main.utils.file import split_root_path
 
@@ -597,6 +600,7 @@ class ChallengeQuestionListSerializer(serializers.ModelSerializer):
 
     lesson_id = serializers.CharField(default='', source='subject.lesson.id')
     imageName = serializers.SerializerMethodField()
+    title = serializers.SerializerMethodField()
 
     class Meta:
         model = ChallengeQuestions
@@ -615,6 +619,11 @@ class ChallengeQuestionListSerializer(serializers.ModelSerializer):
 
         return image_name
 
+    def get_title(self,obj):
+        titles = obj.title.all()
+        title_names = [title.name for title in titles]
+        return title_names
+
 class ChallengeSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -632,14 +641,15 @@ class ChallengeListSerializer(serializers.ModelSerializer):
     startAt = serializers.SerializerMethodField()
     endAt = serializers.SerializerMethodField()
 
-    scopeName = serializers.SerializerMethodField()
+    # scopeName = serializers.SerializerMethodField()
     lesson = LessonStandartSerializer()
+    is_student = serializers.SerializerMethodField()
 
-    student = StudentSerializer(read_only=True, many=True)
-    group = serializers.SerializerMethodField()
+    # student = StudentSerializer(read_only=True, many=True)
+    # group = serializers.SerializerMethodField()
 
-    questions = ChallengeQuestionListSerializer(read_only=True, many=True)
-    created_by = TeacherListSerializer(read_only=True)
+    # questions = ChallengeQuestionListSerializer(read_only=True, many=True)
+    # created_by = TeacherListSerializer(read_only=True)
 
     class Meta:
         model = Challenge
@@ -651,28 +661,35 @@ class ChallengeListSerializer(serializers.ModelSerializer):
     def get_endAt(self, obj):
         return fix_format_date(obj.end_date)
 
-    def get_scopeName(self, obj):
-        return obj.get_kind_display()
+    def get_is_student(self, obj):
+        challenge = Challenge.objects.get(id=obj.id)
+        challenge_student_ids = ChallengeStudents.objects.filter(challenge=challenge).values('student').distinct().count()
+
+        return challenge_student_ids
 
 
-    def get_group(self, obj):
-        groups = []
+    # def get_scopeName(self, obj):
+    #     return obj.get_kind_display()
 
-        if obj.kind == Challenge.KIND_GROUP:
 
-            group_ids = obj.student.all().values_list('group', flat=True)
+    # def get_group(self, obj):
+    #     groups = []
 
-            group_qs = Group.objects.filter(id__in=group_ids)
+    #     if obj.kind == Challenge.KIND_GROUP:
 
-            groups = GroupListSerializer(group_qs, many=True).data
+    #         group_ids = obj.student.all().values_list('group', flat=True)
 
-        return list(groups)
+    #         group_qs = Group.objects.filter(id__in=group_ids)
+
+    #         groups = GroupListSerializer(group_qs, many=True).data
+
+    #     return list(groups)
 
 class LessonAssignmentStudentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
         fields = '__all__'
-    
+
 class LessonAssignmentAssigmentListSerializer(serializers.ModelSerializer):
 
     student = LessonAssignmentStudentSerializer(many=False)
@@ -940,3 +957,33 @@ class PsychologicalTestParticipantsSerializer(serializers.ModelSerializer):
     class Meta:
         model = PsychologicalTest
         fields = ['participants']
+
+class ChallengeLessonSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = LessonStandart
+        fields = ['id', 'name', 'code', 'kredit']
+
+class TeacherExamTimeTableSerializer(serializers.ModelSerializer):
+    lesson = ChallengeLessonSerializer()
+    class Meta:
+        model = ExamTimeTable
+        fields = '__all__'
+
+class QuestionTitleSerializer(serializers.ModelSerializer):
+
+    lesson = serializers.CharField(source="lesson.name", read_only=True)
+    challengequestions_count = serializers.SerializerMethodField()
+    class Meta:
+        model = QuestionTitle
+        fields = '__all__'
+
+    def get_challengequestions_count(self, obj):
+        return obj.challengequestions_set.count()
+
+class ChallengeSedevSerializer(serializers.ModelSerializer):
+    lesson_title = LessonTitleSerializer()
+
+    class Meta:
+        model = ChallengeSedevCount
+        fields = '__all__'

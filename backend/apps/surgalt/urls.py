@@ -61,10 +61,22 @@ urlpatterns = [
     path('challenge/select/', ChallengeSelectAPIView.as_view()),
     path('challenge/send/<int:pk>/', ChallengeSendAPIView.as_view()),
     path('challenge/approve/', ChallengeApprovePIView.as_view()),
+    path('challenge/timetable/', TeacherExaminationScheduleAPIView.as_view()),
+    path('challenge/add/sedev/count/<int:pk>/', ChallengeSedevCountAPIView.as_view()),
+    path('challenge/add/student/', ChallengeAddStudentAPIView.as_view()),
+    path('challenge/add/question/list/', ChallengeQuestionsAPIView.as_view()),
+    path('challenge/questions/<int:pk>/', TestQuestionsAllAPIView.as_view()),
+
 
     path('questions/', QuestionsAPIView.as_view()),
-    path('questions/list/', QuestionsListAPIView.as_view()),
     path('questions/<int:pk>/', QuestionsAPIView.as_view()),
+    path('questions/test/', TestQuestionsAPIView.as_view()),
+    path('questions/test/list/', TestQuestionsListAPIView.as_view()),
+    path('questions/list/', QuestionsListAPIView.as_view()),
+    path('questions/title/<int:pk>/', QuestionsTitleAPIView.as_view()),
+    path('questions/title/list/<int:pk>/', QuestionsTitleListAPIView.as_view()),
+    path('questions/excel/',QuestionExcelAPIView.as_view()),
+
 
     path('psychological_test_question/title/', PsychologicalQuestionTitleAPIView.as_view()),
     path('psychological_test_question/title/list/', PsychologicalQuestionTitleListAPIView.as_view()),
@@ -127,5 +139,9 @@ urlpatterns = [
 
     # Сургуулиас хамаарч хөтөлбөрийн багийн жагсаалт авах нь
     path('depart/list/<int:sub_org>/', SubOrgDepartListAPIView().as_view()),
+
+    path('teacher/list/',TestTeacherApiView.as_view()),
+    path('teacher/lesson/list/<int:pk>/',TestLessonTeacherApiView.as_view())
+
 
 ]

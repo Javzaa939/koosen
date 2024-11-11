@@ -4,21 +4,27 @@ export default [
     {
         id: 'test',
         title: 'Шалгалт',
-        icon: <i className="fa fa-book"></i>,
-        navLink: "/test",
-        navChildren: [
-            {
-                id: 'question',
-                title: 'Асуулт бэлдэх',
-                icon: <Circle size={8} />,
-                navLink: "test/create_question/"
-            },
-            {
-                id: 'create',
-                title: 'Шалгалт үүсгэх',
-                icon: <Circle size={8} />,
-                navLink: "test/create_test/"
-            },
-        ]
-    }
+        icon: <i className="fas fa-user-check"></i>,
+        navLink: "/challenge",
+		children: [
+			{
+				id: "e-challenge",
+				title: "Асуултын сан",
+				icon: <Circle size={8} />,
+				navLink: "challenge/teacher/",
+			},
+			{
+				id: "testchallenge",
+				title: "Онлайн шалгалт",
+				icon: <Circle size={8} />,
+				navLink: "challenge/test/",
+			},
+			// {
+			// 	id: "exam-timetable",
+			// 	title: "Шалгалтын хуваарь",
+			// 	icon: <Circle size={8} />,
+			// 	navLink: "challenge/exam_schedule/",
+			// },
+		]
+    },
 ]
