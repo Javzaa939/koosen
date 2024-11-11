@@ -3220,7 +3220,7 @@ class PsychologicalQuestionTitle(models.Model):
 class PsychologicalQuestionChoices(models.Model):
     """ Асуултын сонголтууд """
 
-    value = models.CharField(verbose_name="Сонголт", max_length=250, null=False, blank=False)
+    value = models.CharField(verbose_name="Сонголт", max_length=1000, null=False, blank=False)
     image = models.ImageField(upload_to=get_choice_image_path, null=True, blank=True, verbose_name='зураг')
     is_correct = models.BooleanField(null=False, default=False, verbose_name="Энэ сонголт зөв эсэх")
 
