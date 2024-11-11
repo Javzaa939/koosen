@@ -13,7 +13,7 @@ from django.shortcuts import get_object_or_404
 from django.conf import settings
 from django.utils import timezone
 from django.db import transaction
-from django.db.models import F
+from django.db.models import F, Q
 
 from lms.models import (
     Group, LessonStandart, OnlineLesson, LessonMaterial, OnlineWeek, Announcement, HomeWork , HomeWorkStudent, Challenge, Student, OnlineWeekStudent
@@ -40,30 +40,37 @@ from main.utils.function.utils import create_file_to_cdn, remove_file_from_cdn, 
 @permission_classes([IsAuthenticated])
 class OnlineLessonListAPIView(
     mixins.ListModelMixin,
-    mixins.CreateModelMixin,
     generics.GenericAPIView
 ):
     ''' Handles listing and creating online lessons '''
     queryset = OnlineLesson.objects.all()
     serializer_class = OnlineLessonSerializer
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['lesson__name', 'lesson__code', 'teacher__first_name']
+
 
     def get(self, request, *args, **kwargs):
-        school = request.query_params.get('school')
-        queryset = self.get_queryset()
-
-        user = request.user
-        user_obj = User.objects.filter(email=user).first()
-
-        school_id = user_obj.info.sub_org.id if user_obj.info.sub_org else None
-
-        if school_id == None:
-            school_id = user_obj.employee.sub_org.id if user_obj.employee.sub_org else None
+        school = request.GET.get('school')
+        dep_id = request.GET.get('dep_id')
+        teacher_id = request.GET.get('teacher_id')
 
         if school:
-            queryset = self.queryset.filter(teacher__sub_org=school)
+            self.queryset = self.queryset.filter(
+                Q(teacher__salbar__isnull=False,teacher__salbar__sub_orgs=school) |
+                Q(teacher__salbar__isnull=True,teacher__sub_org=school)
+            )
 
-        serializer = self.get_serializer(queryset, many=True)
-        return request.send_data(serializer.data)
+        if dep_id:
+            self.queryset = self.queryset.filter(teacher__salbar=dep_id)
+
+        if teacher_id:
+            self.queryset = self.queryset.filter(teacher=teacher_id)
+
+        datas = self.list(request).data
+
+        return request.send_data(datas)
 
     def post(self, request, *args, **kwargs):
         """ Цахим хичээл бүртгэх """
@@ -681,7 +688,7 @@ class LessonStudentsAPIView(
     queryset = OnlineLesson.objects.all()
     pagination_class = CustomPagination
 
-    filter_backends = SearchFilter
+    filter_backends = [SearchFilter]
     search_fields = ['students__last_name', 'students__first_name', 'students__code', 'students__register_num']
 
 

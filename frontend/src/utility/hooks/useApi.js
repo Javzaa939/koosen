@@ -1856,7 +1856,7 @@ function useApi(isDisplay=false) {
 		},
 
 		online_lesson: {
-			get_lessons: () => instance.get(`/online_lesson/?school=${school_id}`),
+			get_lessons: (limit=10000000, page=1, sort='', search='', school=school_id || '', dep_id='', teacher_id='') => instance.get(`/online_lesson/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&school=${school}&dep_id=${dep_id}&teacher_id=${teacher_id}`),
 			getOne: (pk) => instance.get(`/online_lesson/${pk}/`),
 
 			deletePlan: (pk) => instance.delete(`/online_lesson/plan/${pk}/`),

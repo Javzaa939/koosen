@@ -1,0 +1,8 @@
+.lessonPageLoader {
+	position: relative;
+	z-index: 9998;
+	height: 100px;
+}
+.lessonPageLoader > .background-glassmd {
+	height: 100%;
+}
