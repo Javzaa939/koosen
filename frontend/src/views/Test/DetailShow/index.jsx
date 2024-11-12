@@ -1,9 +1,10 @@
 import React, { Fragment, useState, useEffect } from "react";
-import { Search } from "react-feather";
+import { Download, Search } from "react-feather";
 import { useTranslation } from "react-i18next";
 import { getPagination } from "@utils";
 import { getColumns } from "./helpers";
 import { useParams, Link } from 'react-router-dom';
+import { utils, writeFile } from 'xlsx-js-style';
 
 import {
 	Row,
@@ -21,6 +22,115 @@ import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
 
 import DetailModal from './Detail';
+import ResultModal from "./Modal";
+
+export function excelDownLoad(datas, STATE_LIST) {
+	const mainData = datas.map((data, idx) => {
+		return(
+			{
+				'№': idx + 1,
+				'Оюутны код': data?.code || '',
+				'Овог': data?.last_name,
+				'Нэр': data?.first_name || '',
+				'Нийт оноо': data?.challenge[0]?.take_score || '',
+				'Авсан оноо': data?.challenge[0]?.score
+			}
+		)}
+	)
+
+	const combo = [
+		...mainData,
+	]
+
+	const worksheet = utils.json_to_sheet(combo);
+
+	const workbook = utils.book_new();
+	utils.book_append_sheet(workbook, worksheet, "Шалгалтын үр дүн")
+	const staticCells = [
+			'№',
+			'Оюутны код',
+			'Овог',
+			'Нэр',
+			'Нийт оноо',
+			'Авсан оноо',
+		];
+
+	utils.sheet_add_aoa(worksheet, [staticCells], { origin: "A1" });
+
+	const numberCellStyle = {
+		border: {
+			top: { style: "thin", color: { rgb: "000000" } },
+			bottom: { style: "thin", color: { rgb: "000000" } },
+			left: { style: "thin", color: { rgb: "000000" } },
+			right: { style: "thin", color: { rgb: "000000" } }
+		},
+		alignment: {
+			horizontal: 'left',
+			vertical: 'center',
+			wrapText: true
+		},
+		font:{
+			sz:10
+		}
+	};
+
+	const tableHeader = {
+		border: {
+			top: { style: "thin", color: { rgb: "000000" } },
+			bottom: { style: "thin", color: { rgb: "0000000" } },
+			left: { style: "thin", color: { rgb: "000000" } },
+			right: { style: "thin", color: { rgb: "000000" } },
+			wrapText: true
+		},
+		alignment: {
+			vertical: 'center',
+			wrapText: true
+		},
+		font:{
+			sz: 12,
+			bold: true
+		}
+
+	};
+
+	const styleRow = 0;
+	const sendRow = mainData.length;
+	const styleCol = 0;
+	const sendCol = 22;
+
+	for (let row = styleRow; row <= sendRow; row++) {
+		for (let col = styleCol; col <= sendCol; col++) {
+		const cellNum = utils.encode_cell({ r: row, c: col });
+
+			if (!worksheet[cellNum]) {
+				worksheet[cellNum] = {};
+			}
+
+			worksheet[cellNum].s =
+				(row === styleRow)
+					? tableHeader
+						: numberCellStyle;
+		}
+	}
+
+	const phaseTwoCells = Array.from({length: 8}, (_) => {return({wch: 15})})
+
+	worksheet["!cols"] = [
+		{ wch: 5 },
+		...phaseTwoCells,
+		{ wch: 20 }
+	];
+
+	const tableRow = Array.from({length: mainData.length}, (_) => {return({hpx: 20})})
+
+	worksheet["!rows"] = [
+		{ hpx: 40 },
+		...tableRow
+	];
+
+	writeFile(workbook, "ur_dun.xlsx");
+
+}
 
 function DetailShow(){
 
@@ -33,14 +143,17 @@ function DetailShow(){
 	const [detailOneDatas, setDetailDatas] = useState([]);
 	const [helpers_data, setHelpersData] = useState([]);
 	const [modal_data, setModalData] = useState([]);
+	const [resultData, setResultData] = useState([]);
 
-    const default_page = [10, 15, 50, 75, 100];
+
+    const default_page = ['Бүгд', 10, 15, 50, 75, 100];
     const [searchValue, setSearchValue ] = useState("");
 	const [currentPage, setCurrentPage] = useState(1);
 	const [rowsPerPage, setRowsPerPage] = useState(10);
 	const [total_count, setTotalCount] = useState(1);
 
 	const [detail_modal, setDetailModal] = useState(false)
+	const [resultModal, setResultModal] = useState(false)
 
     const detailApi = useApi().challenge
     async function getDatas() {
@@ -90,6 +203,11 @@ function DetailShow(){
         setDetailModal(!detail_modal)
     }
 
+	function handleResultModal(data){
+		setResultData(data)
+		setResultModal(!resultModal)
+	}
+
 	useEffect(
         () =>
         {
@@ -104,6 +222,14 @@ function DetailShow(){
 		<Fragment>
 			<Card>
                 <CardHeader className="border-bottom d-flex flex-row-reverse">
+					<Button
+						color="primary"
+						outline
+						className="btn-sm-block"
+						onClick={() => excelDownLoad(datas)}
+					>
+						<Download size={15} className="me-50"/> Үр дүн татах
+					</Button>
                     <CardTitle tag="h4" className="mx-2">
 						{t("Шалгалт өгсөн оюутнуудын дэлгэрэнгүй мэдээлэл")}
 					</CardTitle>
@@ -228,6 +354,7 @@ function DetailShow(){
 							datas,
 							helpers_data,
 							handleDetailModal,
+							handleResultModal
 						)}
 						paginationPerPage={rowsPerPage}
 						paginationDefaultPage={currentPage}
@@ -239,6 +366,7 @@ function DetailShow(){
 				</div>
 			</Card>
             {detail_modal && <DetailModal open={detail_modal} handleModal={handleDetailModal} data={modal_data}/>}
+            {resultModal && <ResultModal open={resultModal} handleModal={handleResultModal} datas={resultData}/>}
 		</Fragment>
 	);
 };

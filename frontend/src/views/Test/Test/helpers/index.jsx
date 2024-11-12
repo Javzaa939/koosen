@@ -63,63 +63,18 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, ha
         {
             name: `${'Эхлэх хугацаа'}`,
             selector: (row) => row?.startAt,
-            minWidth: "20%",
+            minWidth: "15%",
             center: true,
         },
         {
             name: `${'Дуусах хугацаа'}`,
             selector: (row) => row?.endAt,
-            minWidth: "20%",
+            minWidth: "15%",
             center: true,
         },
         {
             name: <span className='text-center' style={{ marginTop: '3px', marginBottom: '3px' }}>Шалгалт өгсөн оюутны тоо</span>,
             selector: (row) => row?.is_student,
-            minWidth: "10%",
-            center: true,
-        },
-        {
-            name: <span className='text-center' style={{ marginTop: '3px', marginBottom: '3px' }}>Оролцогчид</span>,
-            selector: (row) => {
-                var is_remove = true
-                var is_send = false
-                var is_edit = true
-                var is_question = true
-
-                var end_date = new Date(row?.endAt)
-                var start_date = new Date(row?.startAt)
-                var today = new Date()
-
-                // Хүсэлт илгээхээс өмнө эхлэх болон дуусах хугацаа
-                if ((start_date <= today && today <= end_date) || row?.send_type) {
-                    is_remove = false
-                }
-
-                // Дуусах хугацаа өнөөдрөөс бага үед л баталгаажуулах хүсэлт илгээнэ
-                if (end_date < today && !row?.send_type) {
-                    is_send = true
-                }
-
-                // Шалгалтыг баталгаажуулах хүсэлт илгээсэн үед засах боломжтой
-                if (row?.send_type) {
-                    is_edit = false
-                }
-
-                return (
-                    <div className="text-center" style={{ width: "auto" }}>
-                        <>
-                            <a
-                                role="button"
-                                onClick={() => { handleShow(row) }}
-                                id={`complaintListDatatableShow${row?.id}`}
-                                className='me-1'
-                                href={`/challenge/detail/${row?.id}/`}
-                            >
-                                <Badge color="light-info"><Book width={"15px"} /></Badge>
-                            </a>
-                            <UncontrolledTooltip placement='top' target={`complaintListDatatableShow${row.id}`} >Дэлгэрэнгүй</UncontrolledTooltip>
-                        </>
-                        </div>)},
             minWidth: "10%",
             center: true,
         },
@@ -136,6 +91,9 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, ha
         {
             name: "Үйлдэл",
             center: true,
+            width:"250px",
+            minWidth:"250px",
+            maxWidth:"250px",
             selector: (row) => {
                 var is_remove = true
                 var is_send = false
@@ -162,7 +120,7 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, ha
                 }
 
                 return (
-                    <div className="text-center" style={{ width: "auto" }}>
+                    <div className="text-center " style={{ width: "auto" }}>
                         <>
                             <a
                                 role="button"
@@ -171,7 +129,7 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, ha
                                 className='me-1'
                                 href={`/challenge/test/addstudent/${row?.id}/${row?.lesson?.id}`}
                             >
-                                <Badge color="light-info"><Book width={"15px"} /></Badge>
+                                <Badge color="light-info"><Book width={"10px"} /></Badge>
                             </a>
                             <UncontrolledTooltip placement='top' target={`complaintListDatatableShow${row.id}`} >Дэлгэрэнгүй</UncontrolledTooltip>
                         </>
@@ -183,7 +141,7 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, ha
                                 className='me-1'
                             // href={`/challenge/funtest/addquestion/${row?.id}`}
                             >
-                                <Badge color="light-success"><Edit width={"15px"} /></Badge>
+                                <Badge color="light-success"><Edit width={"10px"} /></Badge>
                             </a>
                             <UncontrolledTooltip placement='top' target={`complaintListDatatableEdit${row.id}`} >Засах</UncontrolledTooltip>
                         </>
@@ -219,7 +177,7 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, ha
                                 className='me-1'
                                 id={`complaintListDatatableCancel${row?.id}`}
                             >
-                                <Badge color="light-danger" ><Trash2 width={"100px"} /></Badge>
+                                <Badge color="light-danger" ><Trash2 width={"10px"} /></Badge>
                             </a>
                             <UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${row.id}`} >Устгах</UncontrolledTooltip>
                         </>
@@ -228,17 +186,27 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, ha
                                 role="button"
                                 onClick={() => { handleExamModal(row?.id) }}
                                 id={`complaintListDatatableExam${row?.id}`}
+                                className='me-1'
                             >
-                                <Badge color="light-primary" ><Eye width={"20px"} /></Badge>
+                                <Badge color="light-primary" ><Eye width={"10px"} /></Badge>
                             </a>
                             <UncontrolledTooltip placement='top' target={`complaintListDatatableExam${row.id}`} >Шалгалт харах</UncontrolledTooltip>
+                        </>
+                        <>
+                            <a
+                                role="button"
+                                onClick={() => { handleShow(row) }}
+                                id={`complaintResultDetail${row?.id}`}
+                                className='me-1'
+                                href={`/challenge/detail/${row?.id}/`}
+                            >
+                                      <Badge color="secondary"><Paperclip width={"10px"} /></Badge>
+                            </a>
+                            <UncontrolledTooltip placement='top' target={`complaintResultDetail${row.id}`} >Дэлгэрэнгүй</UncontrolledTooltip>
                         </>
                     </div>
                 )
             },
-            wrap: true,
-            minWidth: "10%",
-            center: true,
         },
         // {
         //     name: `${t('Дүн харах')}`,

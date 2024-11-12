@@ -5812,17 +5812,12 @@ class TestResultShowAPIView(
 
                 if isinstance(choice_ids, list):
                     # Multiple choices, handle each choice ID
-                    data['chosen_choices'] = [int(id) for id in choice_ids]
-                    # Add scores for each choice, if applicable
-                    for choice_id in choice_ids:
-                        choice_obj = ChallengeQuestions.objects.filter(id=choice_id).first()
-                        if choice_obj and choice_obj.score:
-                            totalscore += choice_obj.score
+                    data['chosen_choice'] = [int(id) for id in choice_ids]
                 else:
                     # Single choice
                     data['chosen_choice'] = int(choice_ids) if choice_ids not in [0, 1] else ('Тийм' if choice_ids == 1 else 'Үгүй')
-                    if data['score']:
-                        totalscore += data['score']
+                if data['score']:
+                    totalscore += data['score']
 
                 big_data.append(data)
 
@@ -5831,3 +5826,144 @@ class TestResultShowAPIView(
             'total_score': totalscore
         }
         return request.send_data(return_data)
+
+class ChallengeAddInformationAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.RetrieveModelMixin,
+):
+    queryset = Challenge.objects.all().order_by("-created_at")
+    serializer_class = ChallengeSerializer
+
+    @login_required()
+    def get(self, request, pk=None):
+        data = self.retrieve(request, pk).data
+        return request.send_data(data)
+
+    @login_required()
+    def post(self, request):
+        data = request.data
+        user = request.user
+        teacher = get_object_or_404(Teachers, user_id=user, action_status=Teachers.APPROVED)
+
+        lesson_standart_id = data.get('lesson')
+        lesson_standart_instance = LessonStandart.objects.get(id=lesson_standart_id)
+
+        data = remove_key_from_dict(data, ['lesson'])
+
+        with transaction.atomic():
+            try:
+                self.queryset.create(lesson=lesson_standart_instance, created_by=teacher, **data)
+
+            except Exception as e:
+                print(e)
+
+                return request.send_error('ERR_002')
+
+        return request.send_info('INF_001')
+
+    @login_required()
+    def put(self, request, pk=None):
+        data = request.data
+        qs = self.queryset.get(id=pk)
+
+        user = request.user
+
+        if 'created_by' in data:
+            data = remove_key_from_dict(data, ['created_by'])
+
+        teacher = get_object_or_404(Teachers, user_id=user, action_status=Teachers.APPROVED)
+        data['created_by'] = teacher.id
+
+        serializer = self.get_serializer(qs, data=data, partial=True)
+
+        if serializer.is_valid(raise_exception=False):
+            self.perform_update(serializer)
+            return request.send_info("INF_002")
+        else:
+            error_fields = []
+            for key in serializer.errors:
+                return_error = {
+                    "field": key,
+                    "msg": serializer.errors[key][0]
+                }
+                error_fields.append(return_error)
+            return request.send_error_valid(error_fields)
+
+class ChallengeSearchStudentAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+):
+    queryset = Student.objects.all()
+    serializer_class = StudentSerializer
+
+    filter_backends = [SearchFilter]
+    search_fields = ['code', 'first_name']
+
+    @login_required()
+    def get(self, request):
+        datas = self.list(request).data
+        return request.send_data(datas)
+
+class ChallengeAddKindAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+):
+
+    queryset = Challenge.objects.all()
+    serializer_class = ChallengeSerializer
+
+    @login_required()
+    def put(self, request, pk=None):
+        user = request.user
+
+        lesson_year = request.query_params.get('year')
+        lesson_season = request.query_params.get('season')
+        datas = request.data
+
+        scope = datas.get('scope')
+        lesson_id = datas.get('lesson')
+        selected = datas.get('groups')
+
+        if selected:
+            select_ids = list()
+            for group in selected:
+                select_ids.append(group.get('id'))
+
+            if len(select_ids) == 0:
+                return request.send_error("ERR_003", 'Ангиа сонгоно уу!')
+
+        qs_student = Student.objects.all()
+        teacher = Teachers.objects.filter(user_id=user).first()
+
+        timetable_qs = TimeTable.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season, lesson=lesson_id, teacher=teacher)
+        timetable_ids = timetable_qs.values_list('id', flat=True)
+
+        exclude_student_ids = TimeTable_to_student.objects.filter(timetable_id__in=timetable_ids, add_flag=False).values_list('student', flat=True)
+
+        if scope == 'all':
+            all_lesson_students = get_lesson_choice_student(lesson_id, teacher.id, '', lesson_year, lesson_season)
+            student_ids = qs_student.filter(id__in=all_lesson_students).values_list('id', flat=True)
+
+        elif scope == 'group':
+            all_student_ids = qs_student.filter(group_id__in=select_ids).values_list('id', flat=True)
+            student_ids = set(all_student_ids) - set(list(exclude_student_ids))
+
+        students = Student.objects.filter(id__in=student_ids)
+
+        try:
+            challenge = Challenge.objects.get(id=pk)
+            for student in students:
+                challenge.student.add(student)
+            challenge.save()
+
+        except Exception as e:
+            print(e)
+            return request.send_error("ERR_002")
+
+        return request.send_info("INF_002")

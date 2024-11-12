@@ -63,10 +63,13 @@ urlpatterns = [
     path('challenge/approve/', ChallengeApprovePIView.as_view()),
     path('challenge/timetable/', TeacherExaminationScheduleAPIView.as_view()),
     path('challenge/add/sedev/count/<int:pk>/', ChallengeSedevCountAPIView.as_view()),
+    path('challenge/add/<int:pk>/', ChallengeAddInformationAPIView.as_view()),
     path('challenge/add/student/', ChallengeAddStudentAPIView.as_view()),
+    path('challenge/add/student/addKind/<int:pk>/', ChallengeAddKindAPIView.as_view()),
     path('challenge/add/question/list/', ChallengeQuestionsAPIView.as_view()),
     path('challenge/questions/<int:pk>/', TestQuestionsAllAPIView.as_view()),
 
+    path('challenge/student/', ChallengeSearchStudentAPIView.as_view()),
 
     path('questions/', QuestionsAPIView.as_view()),
     path('questions/<int:pk>/', QuestionsAPIView.as_view()),
