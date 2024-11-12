@@ -55,6 +55,14 @@ class OnlineLessonListAPIView(
         school = request.GET.get('school')
         dep_id = request.GET.get('dep_id')
         teacher_id = request.GET.get('teacher_id')
+        start_date = request.GET.get('start_date')
+        end_date = request.GET.get('end_date')
+
+        if start_date:
+            self.queryset = self.queryset.filter(created_at__gte=start_date)
+
+        if end_date:
+            self.queryset = self.queryset.filter(created_at__lte=end_date)
 
         if school:
             self.queryset = self.queryset.filter(

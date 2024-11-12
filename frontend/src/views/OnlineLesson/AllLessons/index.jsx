@@ -1,19 +1,35 @@
+// #region 3rd party
 import { Fragment, useEffect, useRef, useState } from "react";
 import { GoDotFill } from "react-icons/go";
 import { Link } from "react-router-dom";
 import { Card, CardBody, CardHeader, Col, Row, Button, Modal, UncontrolledTooltip, Label, Input, Spinner } from "reactstrap";
-import useModal from '@hooks/useModal';
-import useApi from "@src/utility/hooks/useApi";
-import useLoader from '@hooks/useLoader'
-import AddLessonForm from "./AddLessonForm";
 import { ChevronDown, ChevronsRight, Grid, List, X } from 'react-feather'
 import DataTable from "react-data-table-component";
-import { getPagination, ReactSelectStyles } from "@src/utility/Utils";
-import { getColumns } from './helpers'
 import { t } from "i18next";
 import Select from 'react-select'
 import classnames from 'classnames'
+import { Controller, useForm } from "react-hook-form";
+import Flatpickr from 'react-flatpickr'
+
+// css files
+import '@styles/react/libs/flatpickr/flatpickr.scss'
+// #endregion
+
+// #region custom global
+import useModal from '@hooks/useModal';
+import useApi from "@src/utility/hooks/useApi";
+import useLoader from '@hooks/useLoader'
+import { getPagination, ReactSelectStyles } from "@src/utility/Utils";
+// #endregion
+
+// #region custom local
+import AddLessonForm from "./AddLessonForm";
+import { getColumns } from './helpers'
+
+// css files
 import './style.css'
+import moment from "moment";
+// #endregion
 
 export default function AllLessons() {
     // #region States
@@ -29,13 +45,13 @@ export default function AllLessons() {
 
     // filters states
     const [search_value, setSearchValue] = useState('')
-    const [dep_id, setDepId] = useState('')
     const [dep_option, setDepOption] = useState([])
-    const [teacher_id, setTeacherId] = useState('')
     const [teacher_option, setTeacherOption] = useState([])
 
     // grid view switcher
     const [view, setView] = useState('grid');
+
+    const [skipFirstRenders, setSkipFirstRenders] = useState(true)
     // #endregion
 
     // #region Other singleline
@@ -51,14 +67,16 @@ export default function AllLessons() {
     const { fetchData: fetchDataPage, isLoading: isLoadingPage, Loader: LoaderPage } = useLoader({})
     const { fetchData: fetchDataDep, isLoading: isLoadingDep } = useLoader({})
     const { fetchData: fetchDataTeacher, isLoading: isLoadingTeacher } = useLoader({})
-    const skipFirstRender = useRef(false)
 
-	const CustomPagination = getPagination(handlePagination, current_page, rows_per_page, total_count)
+    const CustomPagination = getPagination(handlePagination, current_page, rows_per_page, total_count)
+    const { control, watch } = useForm()
+    const allFields = watch();
+    const defaultDateRef = useRef(moment(new Date()).format('YYYY-MM-DD'));
     // #endregion
 
     // #region API calls
     const getLessons = async () => {
-        const { success, data } = await fetchDataPage(onlineLessonApi.get_lessons(rows_per_page, current_page, '', search_value, '', dep_id, teacher_id));
+        const { success, data } = await fetchDataPage(onlineLessonApi.get_lessons(rows_per_page, current_page, '', search_value, '', allFields.department?.id, allFields.teacher?.id, allFields.start_date, allFields.end_date));
 
         if (success) {
             setLessons(data?.results)
@@ -67,7 +85,7 @@ export default function AllLessons() {
     };
 
     async function deleteLesson(id) {
-        const { success, error } = await fetchDataPage(onlineLessonApi.delete_lesson(id))
+        const { success } = await fetchDataPage(onlineLessonApi.delete_lesson(id))
 
         if (success) {
             getLessons()
@@ -85,7 +103,7 @@ export default function AllLessons() {
 
     /**Багшийн жагсаалт */
     async function getTeachers() {
-        const { success, data } = await fetchDataTeacher(teacherApi.get(dep_id))
+        const { success, data } = await fetchDataTeacher(teacherApi.get(allFields.department?.id))
 
         if (success) {
             setTeacherOption(data)
@@ -102,38 +120,40 @@ export default function AllLessons() {
     const handleFilter = (e) => {
         setSearchValue(e.target.value.trimStart());
     };
-
-    function chooseDep() {
-        if (!dep_id) { return (<div>Тэнхим сонгоно уу.</div>) }
-        else { return (<div>Хоосон байна</div>) }
-    }
     // #endregion
 
     // #regions useEffects
     // department filter initialization
     useEffect(() => {
         getDepartment()
-        getTeachers()
+        if (skipFirstRenders) setSkipFirstRenders(false)
     }, [])
 
     // departments filter updates teachers filter
     useEffect(() => {
-        if (skipFirstRender.current) {
-            if (dep_id) {
-                getTeachers(dep_id)
-            } else {
-                getTeachers()
-            }
-        } else {
-            skipFirstRender.current = true
-        }
-    }, [dep_id])
+        if (skipFirstRenders) return
+
+        if (allFields.department?.id) getTeachers(allFields.department.id)
+        else getTeachers()
+    }, [allFields.department])
 
     useEffect(() => {
-        if (skipFirstRender.current) {
+        if (skipFirstRenders) return
+        getLessons();
+    }, [current_page, allFields.department, allFields.teacher, allFields.start_date, allFields.end_date])
+
+    useEffect(() => {
+        if (skipFirstRenders) return
+
+        const timeoutId = setTimeout(() => {
+            if (search_value.length === 1) return
             getLessons();
+        }, 1000);
+
+        return () => {
+            clearTimeout(timeoutId)
         }
-    }, [current_page, search_value, dep_id, teacher_id])
+    }, [search_value])
     // #endregion
 
     return (
@@ -178,47 +198,55 @@ export default function AllLessons() {
                             <Label className="form-label" for="department">
                                 {t('Тэнхим')}
                             </Label>
-                            <Select
-                                name="department"
-                                id="department"
-                                classNamePrefix='select'
-                                isClearable
-                                className={classnames('react-select')}
-                                isLoading={isLoadingDep}
-                                placeholder={t('-- Сонгоно уу --')}
-                                options={dep_option || []}
-                                noOptionsMessage={() => t('Хоосон байна.')}
-                                onChange={(val) => {
-                                    setDepId(val?.id || '')
-                                }}
-                                styles={ReactSelectStyles}
-                                getOptionValue={(option) => option.id}
-                                getOptionLabel={(option) => option.name}
+                            <Controller
+                                defaultValue=''
+                                name='department'
+                                control={control}
+                                render={({ field }) => (
+                                    <Select
+                                        {...field}
+                                        id={field.name}
+                                        classNamePrefix='select'
+                                        isClearable
+                                        className={classnames('react-select')}
+                                        isLoading={isLoadingDep}
+                                        placeholder={t('-- Сонгоно уу --')}
+                                        options={dep_option || []}
+                                        noOptionsMessage={() => t('Хоосон байна.')}
+                                        styles={ReactSelectStyles}
+                                        getOptionValue={(option) => option.id}
+                                        getOptionLabel={(option) => option.name}
+                                    />
+                                )}
                             />
                         </Col>
                         <Col md={3} className='mb-1'>
                             <Label className="form-label" for="teacher">
                                 {t('Заах багш')}
                             </Label>
-                            <Select
-                                name="teacher"
-                                id="teacher"
-                                classNamePrefix='select'
-                                isClearable
-                                className={classnames('react-select')}
-                                isLoading={isLoadingTeacher}
-                                placeholder={t('-- Сонгоно уу --')}
-                                options={teacher_option || []}
-                                noOptionsMessage={chooseDep}
-                                onChange={(val) => {
-                                    setTeacherId(val?.id || '')
-                                }}
-                                styles={ReactSelectStyles}
-                                getOptionValue={(option) => option.id}
-                                getOptionLabel={(option) => `${option?.last_name[0]}.${option?.first_name}`}
+                            <Controller
+                                defaultValue=''
+                                name='teacher'
+                                control={control}
+                                render={({ field }) => (
+                                    <Select
+                                        {...field}
+                                        id={field.name}
+                                        classNamePrefix='select'
+                                        isClearable
+                                        className={classnames('react-select')}
+                                        isLoading={isLoadingTeacher}
+                                        placeholder={t('-- Сонгоно уу --')}
+                                        options={teacher_option || []}
+                                        noOptionsMessage={() => t('Хоосон байна.')}
+                                        styles={ReactSelectStyles}
+                                        getOptionValue={(option) => option.id}
+                                        getOptionLabel={(option) => `${option?.last_name[0]}.${option?.first_name}`}
+                                    />
+                                )}
                             />
                         </Col>
-                        <Col className="datatable-search-text d-flex justify-content-end mt-1" md={6} sm={6}>
+                        <Col className="datatable-search-text d-flex justify-content-end mt-1" md={6}>
                             <Label className="me-1 search-filter-title pt-50" for="search-input">
                                 {t('Хайлт')}
                             </Label>
@@ -229,6 +257,56 @@ export default function AllLessons() {
                                 id="search-input"
                                 onChange={handleFilter}
                                 placeholder={t('Хайх үг....')}
+                            />
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col md={3} className='mb-1'>
+                            <Label className="form-label" for="start_date">
+                                {t('Эхлэх хугацаа')}
+                            </Label>
+                            <Controller
+                                defaultValue={defaultDateRef.current}
+                                name='start_date'
+                                control={control}
+                                render={({ field: { onChange, ...rest } }) => (
+                                    <Flatpickr
+                                        {...rest}
+                                        id={rest.name}
+                                        className='form-control'
+                                        style={{ height: "30px" }}
+                                        placeholder='Огноо'
+                                        options={{
+                                            onChange: (selectedDates, dateStr) => {
+                                                onChange(dateStr);
+                                            }
+                                        }}
+                                    />
+                                )}
+                            />
+                        </Col>
+                        <Col md={3} className='mb-1'>
+                            <Label className="form-label" for="end_date">
+                                {t('Дуусах хугацаа')}
+                            </Label>
+                            <Controller
+                                defaultValue={defaultDateRef.current}
+                                name='end_date'
+                                control={control}
+                                render={({ field: { onChange, ...rest } }) => (
+                                    <Flatpickr
+                                        {...rest}
+                                        id={rest.name}
+                                        className='form-control'
+                                        style={{ height: "30px" }}
+                                        placeholder='Огноо'
+                                        options={{
+                                            onChange: (selectedDates, dateStr) => {
+                                                onChange(dateStr);
+                                            }
+                                        }}
+                                    />
+                                )}
                             />
                         </Col>
                     </Row>

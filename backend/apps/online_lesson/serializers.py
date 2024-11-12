@@ -1,4 +1,5 @@
 import os
+import traceback
 import requests
 from django.conf import settings
 from rest_framework import serializers
@@ -76,10 +77,19 @@ class LessonMaterialDataSerializer(serializers.ModelSerializer):
 
         if file:
             full_path = settings.ASSIGNMENT + str(file)
-            cdn_data = get_file_from_cdn(full_path)
+            cdn_data = None
 
-            if cdn_data.get('success'):
-                full_path = settings.CDN_FILE_URL + full_path
+            try:
+                cdn_data = get_file_from_cdn(full_path)
+            except Exception:
+                print('exception. file: ' + full_path)
+                traceback.print_exc()
+
+            if cdn_data:
+                if cdn_data.get('success'):
+                    full_path = settings.CDN_FILE_URL + full_path
+                else:
+                    print('unsuccessful. file: '+ full_path, cdn_data)
 
         return full_path
 
