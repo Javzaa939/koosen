@@ -62,7 +62,7 @@ class OnlineLessonListAPIView(
             self.queryset = self.queryset.filter(created_at__gte=start_date)
 
         if end_date:
-            self.queryset = self.queryset.filter(created_at__lte=end_date)
+            self.queryset = self.queryset.filter(created_at__lte=end_date+' 23:59:59')
 
         if school:
             self.queryset = self.queryset.filter(
