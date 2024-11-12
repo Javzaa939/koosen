@@ -61,6 +61,13 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, ha
             center: true,
         },
         {
+            name: `${'Багш'}`,
+            selector: (row) => row?.teacher_name,
+            minWidth: "15%",
+            wrap: true,
+            center: true,
+        },
+        {
             name: `${'Эхлэх хугацаа'}`,
             selector: (row) => row?.startAt,
             minWidth: "15%",

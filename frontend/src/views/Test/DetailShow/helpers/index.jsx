@@ -106,7 +106,7 @@ export function getColumns (currentPage, rowsPerPage, datas, helpers_data, handl
                             </>
                         :
                             <>
-                                <a
+                                {/* <a
                                     role="button"
                                     onClick={() => { handleDetailModal(row?.challenge[0])} }
                                     id={`complaintListDatatableEdit${row?.challenge[0]?.id}`}
@@ -114,7 +114,7 @@ export function getColumns (currentPage, rowsPerPage, datas, helpers_data, handl
                                 >
                                     <Badge color="light-success" pill><Book  width={"15px"} /></Badge>
                                 </a>
-                                <UncontrolledTooltip placement='top' target={`complaintListDatatableEdit${row?.challenge[0]?.id}`}>Оролдлого 1</UncontrolledTooltip>
+                                <UncontrolledTooltip placement='top' target={`complaintListDatatableEdit${row?.challenge[0]?.id}`}>Оролдлого 1</UncontrolledTooltip> */}
                                 <a
                                     role="button"
                                     onClick={() => { handleResultModal(row?.challenge[0]

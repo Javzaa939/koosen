@@ -1,5 +1,5 @@
 import os
-import logging
+# import logging
 import json
 import ast
 from openpyxl import load_workbook
@@ -11,17 +11,16 @@ from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 
-from django.core.files.storage import default_storage
+# from django.core.files.storage import default_storage
 from django.utils.translation import gettext as _
-from django.core.files.base import ContentFile
-from django.http import Http404
+# from django.core.files.base import ContentFile
+# from django.http import Http404
 
 from main.utils.function.pagination import CustomPagination
 from main.utils.function.utils import override_get_queryset
 from main.utils.function.utils import has_permission, get_domain_url, _filter_queries, get_teacher_queryset
 from main.utils.file import save_file
 from main.utils.file import remove_folder
-from main.decorators import login_required
 
 from django.db import transaction
 from django.db.models import Sum, Count, Q, Subquery, OuterRef,  Value, CharField, F
@@ -81,14 +80,10 @@ from core.models import (
     Employee,
 )
 
-from elselt.models import (
-    PhysqueUser,
-)
 
 from lms.models import get_image_path
 from lms.models import get_choice_image_path
 
-from elselt.serializer import ElseltUserSerializer
 from elselt.serializer import MentalUserSerializer
 
 from .serializers import LessonStandartSerializer
@@ -1676,7 +1671,6 @@ class ChallengeAllAPIView(
     queryset = Challenge.objects.all()
     serializer_class = ChallengeListSerializer
 
-    @login_required()
     def get(self, request):
 
         challenge = request.query_params.get('challenge')
@@ -1695,7 +1689,6 @@ class ChallengeAllAPIView(
 class ChallengeSelectAPIView(
     generics.GenericAPIView
 ):
-    @login_required()
     def get(self, request):
 
         lesson = ''
@@ -1954,7 +1947,6 @@ class QuestionsAPIView(
     #             return request.send_error('ERR_002')
 
     #         return request.send_info('INF_002')
-    @login_required()
     def put(self, request, pk):
 
         request_data = request.data.dict()
@@ -2223,7 +2215,6 @@ class PsychologicalTestQuestionsAPIView(
     queryset = PsychologicalTestQuestions.objects.all().order_by('id')
     serializer_class = dynamic_serializer(PsychologicalTestQuestions, "__all__")
 
-    @login_required()
     def get(self, request):
         datas = self.list(request).data
         return request.send_data(datas)
@@ -2312,7 +2303,6 @@ class PsychologicalTestQuestionsAPIView(
 
         return request.send_info('INF_001')
 
-    @login_required()
     def put(self, request, pk):
 
         request_data = request.data.dict()
@@ -2492,7 +2482,6 @@ class PsychologicalQuestionTitleListAPIView(APIView):
             question_titles = PsychologicalTestQuestions.objects.filter(created_by=user).values_list("title", flat=True)
         return PsychologicalQuestionTitle.objects.filter(id__in=question_titles)
 
-    @login_required()
     def get(self, request):
         user = request.user
         data = self.get_queryset(user).values("id", "name")
@@ -2513,7 +2502,6 @@ class PsychologicalQuestionTitleAPIView(
     queryset = PsychologicalQuestionTitle.objects.all()
     serializer_class = dynamic_serializer(PsychologicalQuestionTitle, "__all__")
 
-    @login_required()
     def get(self, request, pk=None):
         title_id = request.query_params.get('titleId')
         title_id = int(title_id)
@@ -2563,7 +2551,6 @@ class PsychologicalQuestionTitleAPIView(
         return request.send_data(result)
 
 
-    @login_required()
     def post(self, request):
         request_data = request.data
         question_ids = request.data.pop("questions")
@@ -2580,7 +2567,6 @@ class PsychologicalQuestionTitleAPIView(
         return request.send_info("ERR_001")
 
 
-    @login_required()
     def put(self, request, pk=None):
         request_data = request.data
         question_ids = request.data.pop("questions")
@@ -2600,7 +2586,6 @@ class PsychologicalQuestionTitleAPIView(
         return request.send_info("ERR_001")
 
 
-    @login_required()
     def delete(self, request, pk=None):
         self.destroy(request, pk)
         return request.send_info("INF_003")
@@ -3862,7 +3847,6 @@ class ChallengeApprovePIView(
     filter_backends = [SearchFilter]
     search_fields = ['title', 'start_date', 'end_date', 'lesson__name', 'lesson__code']
 
-    @login_required()
     def get(self, request):
 
         user_id = request.user
@@ -3933,7 +3917,6 @@ class StudentHomeworkListAPIView(
     queryset = Lesson_assignment_student.objects.all().order_by('created_at')
     serializer_class = LessonAssignmentAssigmentListSerializer
 
-    @login_required()
     def get(self, request):
         student = request.query_params.get('student')
         assignment = request.query_params.get('assignment')
@@ -3952,7 +3935,6 @@ class StudentHomeworkListAPIView(
 
         return request.send_data(assignment_list)
 
-    @login_required()
     def put(self, request, pk=None):
         data = request.data
         instance = self.queryset.filter(id=pk).first()
@@ -3991,7 +3973,6 @@ class StudentHomeworkMultiEditAPIView(
     queryset = Lesson_assignment_student.objects.all()
     serializer_class = LessonAssignmentAssigmentSerializer
 
-    @login_required()
     def put(self, request):
         """ Даалгаварт олноор үнэлгээ өгөхөд """
 
@@ -4034,7 +4015,6 @@ class HomeworkStudentsListAPIView(
     queryset = Lesson_assignment_student.objects.all().order_by('created_at')
     serializer_class = LessonAssignmentAssigmentListSerializer
 
-    @login_required()
     def get(self, request):
         lesson = request.query_params.get('lesson')
         assignment = request.query_params.get('assignment')
@@ -4086,7 +4066,6 @@ class LessonsTeacher(
 ):
     ''' Тухайн багшийн зааж байгаа хичээл  '''
 
-    @login_required()
     def get(self, request, pk=None):
         stype = request.query_params.get('stype')
 
@@ -4156,7 +4135,6 @@ class LessonOneApiView(
     queryset = LessonStandart.objects.all()
     serializer_class = LessonStandartSerializer
 
-    @login_required()
     def get(self, request, pk=None):
 
         datas = self.retrieve(request, pk).data
@@ -4316,7 +4294,6 @@ class LessonAllApiView(
     queryset = LessonStandart.objects.all().order_by('name')
     serializer_class = LessonStandartSerializer
 
-    @login_required()
     def get(self, request):
         user_id = request.user
         teacher = Teachers.objects.get(user=user_id)
@@ -4349,7 +4326,6 @@ class LessonMaterialApiView(
     queryset = Lesson_materials.objects.all()
     serializer_class = LessonMaterialSerializer
 
-    @login_required()
     def get(self, request, pk):
 
         self.serializer_class = LessonMaterialListSerializer
@@ -4379,7 +4355,6 @@ class LessonMaterialApiView(
 
         return request.send_data(datas)
 
-    @login_required()
     def post(self, request, pk=None):
         """ pk: Хичээлийн ID
             Файлтай хэсгүүдийг хадгалах хэсэг
@@ -4434,12 +4409,10 @@ class LessonMaterialApiView(
         return request.send_info('INF_001')
 
 
-    @login_required()
     def put(self, request, pk=None):
         # Энд засах үйлдэл хийгдэнэ ирж байгааг датаг харж байгаад хийе
         return request.send_info('INF_002')
 
-    @login_required()
     def delete(self, request, pk=None):
         """ Хичээлийн материал устгах """
 
@@ -4495,7 +4468,6 @@ class LessonMaterialGeneralApiView(
     queryset = Lesson_materials.objects.all()
     serializer_class = LessonMaterialSerializer
 
-    @login_required()
     def post(self, request, pk=None):
 
         data = request.data.dict()
@@ -4562,7 +4534,6 @@ class LessonMaterialAssignmentApiView(
     queryset = Lesson_materials.objects.all()
     serializer_class = LessonMaterialSerializer
 
-    @login_required()
     def post(self, request, pk):
         """
             pk: Хичээлийн ID
@@ -4639,7 +4610,6 @@ class LessonImage(
     queryset = Lesson_to_teacher.objects.all()
     serializer_class = LessonTeacherSerializer
 
-    @login_required()
     def post(self, request, pk=None):
 
         data = request.data.dict()
@@ -4685,7 +4655,6 @@ class LessonMaterialSendApiView(
     queryset = Lesson_materials.objects.all().order_by('created_at', 'week')
     serializer_class = LessonMaterialListSerializer
 
-    @login_required()
     def get(self, request, lesson=None):
         """ Хичээлийн бүр лекцийн материал авах """
 
@@ -4695,7 +4664,6 @@ class LessonMaterialSendApiView(
 
         return request.send_data(all_list)
 
-    @login_required()
     def post(self, request, lesson=None):
 
         # Checked хийсэн ids
@@ -4742,7 +4710,6 @@ class LessonMaterialApproveApiView(
     filter_backends = [SearchFilter]
     search_fields = ['title', 'teacher__first_name', 'end_date', 'teacher__last_name', 'lesson__name', 'lesson__code', 'week']
 
-    @login_required()
     def get(self, request):
 
         user_id = request.user
@@ -5008,7 +4975,6 @@ class QuestionsTitleAPIView(
     queryset = QuestionTitle.objects.all()
     serializer_class = dynamic_serializer(QuestionTitle, "__all__")
 
-    @login_required()
     def get(self, request, pk=None):
 
         # user_id = request.user
@@ -5045,7 +5011,6 @@ class QuestionsTitleAPIView(
         return request.send_data(result)
 
 
-    @login_required()
     def post(self, request):
         request_data = request.data
         question_ids = request.data.pop("questions")
@@ -5061,7 +5026,6 @@ class QuestionsTitleAPIView(
         return request.send_info("ERR_001")
 
 
-    @login_required()
     def put(self, request, pk=None):
         request_data = request.data
         question_ids = request.data.pop("questions")
@@ -5081,7 +5045,6 @@ class QuestionsTitleAPIView(
         return request.send_info("ERR_001")
 
 
-    @login_required()
     def delete(self, request, pk=None):
         self.destroy(request, pk)
         return request.send_info("INF_003")
@@ -5095,7 +5058,6 @@ class QuestionsTitleListAPIView(
     queryset = QuestionTitle.objects.all()
     serializer_class = dynamic_serializer(QuestionTitle, "__all__")
 
-    @login_required()
     def get(self, request,pk):
         teacher = Teachers.objects.filter(id=pk).first()
         lesson = request.query_params.get('lesson')
@@ -5124,7 +5086,6 @@ class TestQuestionsAPIView(
     filter_backends = [SearchFilter]
     search_fields = ['question', 'subject__title']
 
-    @login_required()
     def get(self, request, pk=None):
 
         lesson = request.query_params.get('lesson')
@@ -5149,7 +5110,6 @@ class TestQuestionsAPIView(
 
         return request.send_data(all_list)
 
-    @login_required()
     def put(self, request, pk):
 
         request_data = request.data.dict()
@@ -5227,7 +5187,6 @@ class TestQuestionsAPIView(
                 return request.send_info('INF_002', data)
 
 
-    @login_required()
     def post(self, request):
         # .dict()
         questions = request.POST.getlist('questions')
@@ -5342,7 +5301,7 @@ class TestQuestionsListAPIView(
 
     queryset = ChallengeQuestions.objects.all()
     serializer_class = ChallengeQuestionListSerializer
-    @login_required()
+
     def get(self, request):
         questions_qs = ChallengeQuestions.objects.all()
         ser = dynamic_serializer(ChallengeQuestions, "__all__", 1)
@@ -5358,7 +5317,6 @@ class TeacherExaminationScheduleAPIView(
     queryset = ExamTimeTable.objects.all()
     serializer_class = TeacherExamTimeTableSerializer
 
-    @login_required()
     def get(self, request):
 
         year = request.query_params.get('year')
@@ -5561,6 +5519,8 @@ class TestLessonTeacherApiView(
 
         return request.send_data(return_data)
 
+
+@permission_classes([IsAuthenticated])
 class ChallengeSedevCountAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -5572,7 +5532,6 @@ class ChallengeSedevCountAPIView(
     queryset = ChallengeSedevCount.objects.all()
     serializer_class = ChallengeSedevSerializer
 
-    @login_required()
     def post(self, request):
         data = request.data
         user = request.user
@@ -5605,7 +5564,6 @@ class ChallengeSedevCountAPIView(
                     return request.send_info("INF_001")
         return request.send_error("ERR_003")
 
-    @login_required()
     def delete(self, request, pk=None):
 
         question = ChallengeQuestions.objects.filter(id=pk).first()
@@ -5618,6 +5576,8 @@ class ChallengeSedevCountAPIView(
 
         return request.send_info("INF_003")
 
+
+@permission_classes([IsAuthenticated])
 class ChallengeAddStudentAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -5633,7 +5593,6 @@ class ChallengeAddStudentAPIView(
     filter_backends = [SearchFilter]
     search_fields = ['code', 'first_name', 'last_name']
 
-    @login_required()
     def get(self, request):
         challenge = request.query_params.get('challenge')
         challenge_student_all = Challenge.objects.get(id=challenge).student.all().values_list('id', flat=True)
@@ -5643,7 +5602,6 @@ class ChallengeAddStudentAPIView(
         datas = self.list(request).data
         return request.send_data(datas)
 
-    @login_required()
     def put(self, request):
         data = request.data
         challenge_id = data.get("challenge")
@@ -5675,7 +5633,6 @@ class ChallengeAddStudentAPIView(
             print(e)
             return request.send_error("ERR_002")
 
-    @login_required()
     def delete(self, request, pk, challenge):
         try:
             challenge = Challenge.objects.get(id=challenge)
@@ -5689,6 +5646,8 @@ class ChallengeAddStudentAPIView(
             print(e)
             return request.send_error("ERR_002")
 
+
+@permission_classes([IsAuthenticated])
 class ChallengeQuestionsAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -5696,7 +5655,6 @@ class ChallengeQuestionsAPIView(
     queryset = ChallengeQuestions.objects.all()
     serializer_class = ChallengeQuestionListSerializer
 
-    @login_required()
     def get(self, request):
 
         challenge_id = request.query_params.get('id')
@@ -5715,10 +5673,12 @@ class ChallengeQuestionsAPIView(
         return request.send_data(response_data)
 
 
+@permission_classes([IsAuthenticated])
 class TestQuestionsAllAPIView(
     mixins.RetrieveModelMixin,
     generics.GenericAPIView,
-    mixins.ListModelMixin,):
+    mixins.ListModelMixin,
+):
     "Шалгалтын асуулт"
 
     queryset = ChallengeQuestions.objects.all()
@@ -5734,6 +5694,8 @@ class TestQuestionsAllAPIView(
         data = serializer.data
         return request.send_data(data)
 
+
+@permission_classes([IsAuthenticated])
 class ChallengeDetailApiView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -5746,7 +5708,6 @@ class ChallengeDetailApiView(
     filter_backends = [SearchFilter]
     search_fields = ['code', 'first_name', 'last_name']
 
-    @login_required()
     def get(self, request):
 
         #Тухайн шалгалтын id
@@ -5762,6 +5723,8 @@ class ChallengeDetailApiView(
 
         return request.send_data(student_data)
 
+
+@permission_classes([IsAuthenticated])
 class ChallengeTestDetailApiView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -5770,12 +5733,13 @@ class ChallengeTestDetailApiView(
     queryset = Challenge.objects.all()
     serializer_class = ChallengeDetailSerializer
 
-    @login_required()
     def get(self, request, pk):
 
         test_info = self.retrieve(request, pk).data
         return request.send_data(test_info)
 
+
+# @permission_classes([IsAuthenticated])
 class TestResultShowAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin
@@ -5827,6 +5791,8 @@ class TestResultShowAPIView(
         }
         return request.send_data(return_data)
 
+
+@permission_classes([IsAuthenticated])
 class ChallengeAddInformationAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -5838,12 +5804,10 @@ class ChallengeAddInformationAPIView(
     queryset = Challenge.objects.all().order_by("-created_at")
     serializer_class = ChallengeSerializer
 
-    @login_required()
     def get(self, request, pk=None):
         data = self.retrieve(request, pk).data
         return request.send_data(data)
 
-    @login_required()
     def post(self, request):
         data = request.data
         user = request.user
@@ -5865,7 +5829,6 @@ class ChallengeAddInformationAPIView(
 
         return request.send_info('INF_001')
 
-    @login_required()
     def put(self, request, pk=None):
         data = request.data
         qs = self.queryset.get(id=pk)
@@ -5893,6 +5856,8 @@ class ChallengeAddInformationAPIView(
                 error_fields.append(return_error)
             return request.send_error_valid(error_fields)
 
+
+@permission_classes([IsAuthenticated])
 class ChallengeSearchStudentAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -5903,11 +5868,12 @@ class ChallengeSearchStudentAPIView(
     filter_backends = [SearchFilter]
     search_fields = ['code', 'first_name']
 
-    @login_required()
     def get(self, request):
         datas = self.list(request).data
         return request.send_data(datas)
 
+
+@permission_classes([IsAuthenticated])
 class ChallengeAddKindAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -5918,7 +5884,6 @@ class ChallengeAddKindAPIView(
     queryset = Challenge.objects.all()
     serializer_class = ChallengeSerializer
 
-    @login_required()
     def put(self, request, pk=None):
         user = request.user
 

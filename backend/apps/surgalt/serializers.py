@@ -645,6 +645,7 @@ class ChallengeListSerializer(serializers.ModelSerializer):
     # scopeName = serializers.SerializerMethodField()
     lesson = LessonStandartSerializer()
     is_student = serializers.SerializerMethodField()
+    teacher_name = serializers.CharField(source='created_by.full_name', default='')
 
     # student = StudentSerializer(read_only=True, many=True)
     # group = serializers.SerializerMethodField()
