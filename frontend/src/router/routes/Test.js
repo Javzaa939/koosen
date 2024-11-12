@@ -51,10 +51,10 @@ const TestRoutes = [
         path: '/challenge/test/addstudent/:challenge_id/:lesson_id',
         element: <AddStudent/>
     },
-    {
-        path: 'challenge/detail/:detail_id',
-        element: <Detail/>
-    },
+    // {
+    //     path: 'challenge/detail/:detail_id',
+    //     element: <Detail/>
+    // },
     {
         path: 'challenge/exam_schedule/',
         element: <ExamSchedule/>

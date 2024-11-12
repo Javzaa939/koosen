@@ -127,6 +127,7 @@ from .serializers import TeacherExamTimeTableSerializer
 from core.serializers import TeacherNameSerializer
 from .serializers import QuestionTitleSerializer
 from .serializers import ChallengeSedevSerializer
+from .serializers import ChallengeDetailSerializer,ChallengeStudentsSerializer,StudentChallengeSerializer
 
 from main.utils.function.utils import remove_key_from_dict, fix_format_date, get_domain_url
 from main.utils.function.utils import null_to_none, get_lesson_choice_student, get_active_year_season, json_load
@@ -5732,3 +5733,101 @@ class TestQuestionsAllAPIView(
         serializer = self.serializer_class(questions, many=True)
         data = serializer.data
         return request.send_data(data)
+
+class ChallengeDetailApiView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+):
+    queryset = ChallengeStudents.objects.all().order_by('score')
+    serializer_class = ChallengeStudentsSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['code', 'first_name', 'last_name']
+
+    @login_required()
+    def get(self, request):
+
+        #Тухайн шалгалтын id
+        test_id = request.query_params.get('test_id')
+        #Энэ шалгалтыг өгсөн оюутануудын id-г student_list-д хадгална
+        student_list = self.queryset.filter(challenge=test_id).values_list('student__id', flat=True)
+        #Нийт оюутануудаас шалгалт өгсөн оюутануудыг авна
+        students_qs = Student.objects.filter(id__in=student_list)
+        students_qs = self.filter_queryset(students_qs)
+        #Энийг мэддэг болоод бичнэ. Гэхдээ queryset-ээ serializer руу дамжуулаад энэ qs-ээ тохирсон дата-г аваад байх шиг байна.
+        #Бас context-оор test_id-г дамжуулж байна.
+        student_data = StudentChallengeSerializer(students_qs, many=True, context={'test_id': test_id}).data
+
+        return request.send_data(student_data)
+
+class ChallengeTestDetailApiView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin
+):
+    queryset = Challenge.objects.all()
+    serializer_class = ChallengeDetailSerializer
+
+    @login_required()
+    def get(self, request, pk):
+
+        test_info = self.retrieve(request, pk).data
+        return request.send_data(test_info)
+
+class TestResultShowAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin
+):
+    """Шалгалтын оноо асуулт хариултыг харах API"""
+
+    queryset = ChallengeQuestions.objects.all()
+    serializer_class = ChallengeQuestionListSerializer
+
+    def post(self, request):
+        datas = request.data
+        question_ids = []
+        chosen_choices = []
+        big_data = []
+        return_data = []
+        totalscore = 0
+        if isinstance(datas, str):
+            datas = ast.literal_eval(datas)
+
+        for question_id, choice_id in datas.items():
+            question_ids.append(int(question_id))
+
+            if isinstance(choice_id, list):  # It's a list
+                chosen_choices.append([int(id) for id in choice_id if isinstance(id, int)])
+            else:
+                chosen_choices.append(int(choice_id))
+
+        # Process each question and choice combination
+        for question_id, choice_ids in zip(question_ids, chosen_choices):
+            queryset = ChallengeQuestions.objects.filter(id=question_id).first()
+            if queryset:
+                serializer = self.serializer_class(queryset)
+                data = serializer.data
+
+                if isinstance(choice_ids, list):
+                    # Multiple choices, handle each choice ID
+                    data['chosen_choices'] = [int(id) for id in choice_ids]
+                    # Add scores for each choice, if applicable
+                    for choice_id in choice_ids:
+                        choice_obj = ChallengeQuestions.objects.filter(id=choice_id).first()
+                        if choice_obj and choice_obj.score:
+                            totalscore += choice_obj.score
+                else:
+                    # Single choice
+                    data['chosen_choice'] = int(choice_ids) if choice_ids not in [0, 1] else ('Тийм' if choice_ids == 1 else 'Үгүй')
+                    if data['score']:
+                        totalscore += data['score']
+
+                big_data.append(data)
+
+        return_data = {
+            'question': big_data,
+            'total_score': totalscore
+        }
+        return request.send_data(return_data)

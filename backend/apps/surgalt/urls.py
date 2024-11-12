@@ -141,7 +141,10 @@ urlpatterns = [
     path('depart/list/<int:sub_org>/', SubOrgDepartListAPIView().as_view()),
 
     path('teacher/list/',TestTeacherApiView.as_view()),
-    path('teacher/lesson/list/<int:pk>/',TestLessonTeacherApiView.as_view())
+    path('teacher/lesson/list/<int:pk>/',TestLessonTeacherApiView.as_view()),
+    path('challenge/details/', ChallengeDetailApiView.as_view()),
+    path('challenge/details/one/<int:pk>/', ChallengeTestDetailApiView.as_view()),
+    path('challenge/result/', TestResultShowAPIView.as_view()),
 
 
 ]

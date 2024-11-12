@@ -1482,6 +1482,11 @@ function useApi(isDisplay=false) {
 
 			getQuestionAll: (id) => instance.get(`learning/challenge/questions/${id}/`),
 
+			//Шалгалт өгсөн хүүхдүүдийн дэлгэрэнгүй мэдээлэл
+			getDetailOne: (pk) => instance.get(`learning/challenge/details/one/${pk}/`),
+			getDetail: (page, limit, search, test_id) => instance.get(`learning/challenge/details/?page=${page}&limit=${limit}&search=${search}&test_id=${test_id}`),
+			getTestResult: (cdata) => instance.post(`learning/challenge/result/`,cdata),
+
 			question: {
 				get: (page, limit, lessonId, subjectId, search) =>
 					instance.get(`learning/questions/?page=${page}&limit=${limit}&lesson=${lessonId}&subject=${subjectId}&search=${search}`),

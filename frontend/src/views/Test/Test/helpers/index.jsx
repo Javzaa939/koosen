@@ -78,6 +78,51 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, ha
             minWidth: "10%",
             center: true,
         },
+        {
+            name: <span className='text-center' style={{ marginTop: '3px', marginBottom: '3px' }}>Оролцогчид</span>,
+            selector: (row) => {
+                var is_remove = true
+                var is_send = false
+                var is_edit = true
+                var is_question = true
+
+                var end_date = new Date(row?.endAt)
+                var start_date = new Date(row?.startAt)
+                var today = new Date()
+
+                // Хүсэлт илгээхээс өмнө эхлэх болон дуусах хугацаа
+                if ((start_date <= today && today <= end_date) || row?.send_type) {
+                    is_remove = false
+                }
+
+                // Дуусах хугацаа өнөөдрөөс бага үед л баталгаажуулах хүсэлт илгээнэ
+                if (end_date < today && !row?.send_type) {
+                    is_send = true
+                }
+
+                // Шалгалтыг баталгаажуулах хүсэлт илгээсэн үед засах боломжтой
+                if (row?.send_type) {
+                    is_edit = false
+                }
+
+                return (
+                    <div className="text-center" style={{ width: "auto" }}>
+                        <>
+                            <a
+                                role="button"
+                                onClick={() => { handleShow(row) }}
+                                id={`complaintListDatatableShow${row?.id}`}
+                                className='me-1'
+                                href={`/challenge/detail/${row?.id}/`}
+                            >
+                                <Badge color="light-info"><Book width={"15px"} /></Badge>
+                            </a>
+                            <UncontrolledTooltip placement='top' target={`complaintListDatatableShow${row.id}`} >Дэлгэрэнгүй</UncontrolledTooltip>
+                        </>
+                        </div>)},
+            minWidth: "10%",
+            center: true,
+        },
         // {
         //     name: `${'Илгээсэн төлөв'}`,
         //     selector: (row) => {
