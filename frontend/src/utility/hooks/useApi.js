@@ -1454,7 +1454,7 @@ function useApi(isDisplay=false) {
 				if (challenge) c_challenge = challenge
 				return instance.get(`learning/challenge/all/?challenge=${c_challenge}`)
 			},
-
+			putSelectedTest: (data, pk) => instance.put(`learning/challenge/add/${pk}/`, data),
 			getSelect: (type, lesson) =>
 				instance.get(`learning/challenge/select/?type=${type}&year=${cyear_name}&season=${cseason_id}&lesson=${lesson}`),
 
@@ -1481,6 +1481,14 @@ function useApi(isDisplay=false) {
 			getAddStudent: (page, limit, search,challenge) => instance.get(`learning/challenge/add/student/?page=${page}&limit=${limit}&search=${search}&challenge=${challenge}`),
 
 			getQuestionAll: (id) => instance.get(`learning/challenge/questions/${id}/`),
+			getStudents: (search) => instance.get(`learning/challenge/student/?search=${search}`),
+			putTest: (data) => instance.put(`learning/challenge/add/student/`, data),
+			putTestKind: (data, id) => instance.put(`learning/challenge/add/student/addKind/${id}/?year=${cyear_name}&season=${cseason_id}`, data),
+
+			//Шалгалт өгсөн хүүхдүүдийн дэлгэрэнгүй мэдээлэл
+			getDetailOne: (pk) => instance.get(`learning/challenge/details/one/${pk}/`),
+			getDetail: (page, limit, search, test_id) => instance.get(`learning/challenge/details/?page=${page}&limit=${limit}&search=${search}&test_id=${test_id}`),
+			getTestResult: (cdata) => instance.post(`learning/challenge/result/`,cdata),
 
 			question: {
 				get: (page, limit, lessonId, subjectId, search) =>

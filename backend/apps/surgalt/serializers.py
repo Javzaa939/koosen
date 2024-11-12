@@ -1,4 +1,5 @@
 import os
+import json
 
 from rest_framework import serializers
 
@@ -644,6 +645,7 @@ class ChallengeListSerializer(serializers.ModelSerializer):
     # scopeName = serializers.SerializerMethodField()
     lesson = LessonStandartSerializer()
     is_student = serializers.SerializerMethodField()
+    teacher_name = serializers.CharField(source='created_by.full_name', default='')
 
     # student = StudentSerializer(read_only=True, many=True)
     # group = serializers.SerializerMethodField()
@@ -987,3 +989,80 @@ class ChallengeSedevSerializer(serializers.ModelSerializer):
     class Meta:
         model = ChallengeSedevCount
         fields = '__all__'
+
+class ChallengeDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Challenge
+        fields = ['title', 'start_date', 'end_date', 'duration', 'try_number', 'assess']
+
+class ChallengeStudentsSerializer(serializers.ModelSerializer):
+    student_name = serializers.SerializerMethodField()
+    student_code = serializers.SerializerMethodField()
+    answer_json = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ChallengeStudents
+        fields = ['challenge', 'score', 'take_score', 'answer_json', "tried", "id", "student_name", "student_code", 'answer']
+
+    def get_student_name(self, obj):
+        data = Student.objects.filter(id=obj.student.id).values('first_name').first()
+        name = data.get('first_name')
+
+        return name
+
+    def get_student_code(self, obj):
+        data = Student.objects.filter(id=obj.student.id).values('code').first()
+        code = data.get('code')
+
+        return code
+
+    def get_answer_json(self, obj):
+        try:
+            answer_json = []
+            if obj.answer:
+                answer_json = json.loads(obj.answer)
+
+                # Тестэн доторх асуултууд
+                for question in answer_json:
+                    #Асуултан доторх хариултууд
+                    choices = question.get('choices')
+                    for choice in choices:
+                        # choice дотроо is_right-г үүсгэнэ
+                        choice['is_right'] = False
+                        choice_obj = QuestionChoices.objects.get(id=choice.get('id'))
+
+                        # Оноо байвал зөв хариулт гэж үзнэ
+                        if choice_obj.score != 0:
+                            choice['is_right'] = True
+
+                        choice['score'] = choice_obj.score
+
+            return answer_json
+        except json.JSONDecodeError:
+            return None
+
+class StudentChallengeSerializer(serializers.ModelSerializer):
+
+    challenge = serializers.SerializerMethodField()
+    test_detail = serializers.SerializerMethodField()
+    class Meta:
+        model = Student
+        fields = ["id", "code", "last_name", "first_name", "challenge", "test_detail"]
+
+    def get_challenge(self, obj):
+
+        test_id = self.context.get('test_id')
+
+        challenge_student_qs = ChallengeStudents.objects.filter(challenge=test_id, student=obj).order_by('id')
+        data = ChallengeStudentsSerializer(challenge_student_qs, many=True).data
+
+        return data
+
+    def get_test_detail(self, obj):
+
+        test_id = self.context.get('test_id')
+
+        data_qs = Challenge.objects.filter(id=test_id)
+        result = ChallengeDetailSerializer(data_qs, many=True).data
+
+        return result
