@@ -4393,3 +4393,20 @@ class GraduationWorkQrAPIView(
                     self.queryset.filter(id=graduation_id).update(diplom_qr=image_data)
 
         return request.send_data(not_found_student)
+
+
+# def update(diplom_num, path):
+#     with open(path, 'rb') as f:
+#         image_data = f.read()
+#         print(GraduationWork.objects.filter(diplom_num=diplom_num))
+#         GraduationWork.objects.filter(diplom_num=diplom_num).update(
+#             diplom_qr = image_data
+#         )
+#     return 'success'
+
+# path = '/home/daria/Pictures/viber_image_2024-11-13_10-33-16-539.jpg'
+# diplom_num = '8202400201'
+
+# ocunt = update(diplom_num, path)
+
+# print(ocunt)
