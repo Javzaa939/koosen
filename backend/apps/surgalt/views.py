@@ -5759,31 +5759,32 @@ class TestResultShowAPIView(
         if isinstance(datas, str):
             datas = ast.literal_eval(datas)
 
-        for question_id, choice_id in datas.items():
-            question_ids.append(int(question_id))
+        if datas:
+            for question_id, choice_id in datas.items():
+                question_ids.append(int(question_id))
 
-            if isinstance(choice_id, list):  # It's a list
-                chosen_choices.append([int(id) for id in choice_id if isinstance(id, int)])
-            else:
-                chosen_choices.append(int(choice_id))
-
-        # Process each question and choice combination
-        for question_id, choice_ids in zip(question_ids, chosen_choices):
-            queryset = ChallengeQuestions.objects.filter(id=question_id).first()
-            if queryset:
-                serializer = self.serializer_class(queryset)
-                data = serializer.data
-
-                if isinstance(choice_ids, list):
-                    # Multiple choices, handle each choice ID
-                    data['chosen_choice'] = [int(id) for id in choice_ids]
+                if isinstance(choice_id, list):  # It's a list
+                    chosen_choices.append([int(id) for id in choice_id if isinstance(id, int)])
                 else:
-                    # Single choice
-                    data['chosen_choice'] = int(choice_ids) if choice_ids not in [0, 1] else ('Тийм' if choice_ids == 1 else 'Үгүй')
-                if data['score']:
-                    totalscore += data['score']
+                    chosen_choices.append(int(choice_id))
 
-                big_data.append(data)
+            # Process each question and choice combination
+            for question_id, choice_ids in zip(question_ids, chosen_choices):
+                queryset = ChallengeQuestions.objects.filter(id=question_id).first()
+                if queryset:
+                    serializer = self.serializer_class(queryset)
+                    data = serializer.data
+
+                    if isinstance(choice_ids, list):
+                        # Multiple choices, handle each choice ID
+                        data['chosen_choice'] = [int(id) for id in choice_ids]
+                    else:
+                        # Single choice
+                        data['chosen_choice'] = int(choice_ids) if choice_ids not in [0, 1] else ('Тийм' if choice_ids == 1 else 'Үгүй')
+                    if data['score']:
+                        totalscore += data['score']
+
+                    big_data.append(data)
 
         return_data = {
             'question': big_data,
@@ -5835,11 +5836,7 @@ class ChallengeAddInformationAPIView(
 
         user = request.user
 
-        if 'created_by' in data:
-            data = remove_key_from_dict(data, ['created_by'])
-
-        teacher = get_object_or_404(Teachers, user_id=user, action_status=Teachers.APPROVED)
-        data['created_by'] = teacher.id
+        data['updated_by'] = user.id
 
         serializer = self.get_serializer(qs, data=data, partial=True)
 

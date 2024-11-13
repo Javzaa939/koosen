@@ -3,31 +3,8 @@ import { t } from 'i18next'
 import { Eye, Edit, X, Book, Paperclip, Trash, Trash2, PlusCircle, PlusSquare, Plus, EyeOff } from 'react-feather'
 
 import useModal from "@hooks/useModal"
+import { formatDate } from '@utils'
 import { Badge, UncontrolledTooltip } from 'reactstrap';
-
-function request_flag_color(request_flag) {
-    let color = ''
-    let request_flag_name = ''
-
-    if (request_flag === 1) {
-        color = 'light-info'
-        request_flag_name = 'Илгээсэн'
-    }
-    else if (request_flag === 3) {
-        color = 'light-warning'
-        request_flag_name = 'Цуцалсан'
-    }
-    else if (request_flag === 2) {
-        color = 'light-success'
-        request_flag_name = 'Баталсан'
-    }
-
-    return (
-        <Badge color={color} >
-            {request_flag_name}
-        </Badge>
-    )
-}
 
 export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, handleDelete, handleShow, handleSend, handleEditModal, handleExamModal) {
 
@@ -69,13 +46,13 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, ha
         },
         {
             name: `${'Эхлэх хугацаа'}`,
-            selector: (row) => row?.startAt,
+            selector: (row) => formatDate(row?.start_date, 'YYYY-MM-DD HH:mm:ss'),
             minWidth: "15%",
             center: true,
         },
         {
             name: `${'Дуусах хугацаа'}`,
-            selector: (row) => row?.endAt,
+            selector: (row) => formatDate(row?.end_date, 'YYYY-MM-DD HH:mm:ss'),
             minWidth: "15%",
             center: true,
         },

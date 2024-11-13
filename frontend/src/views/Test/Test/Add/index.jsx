@@ -28,8 +28,8 @@ const Addmodal = ({ open, handleModal, refreshDatas, select_datas, editData }) =
     const { control, handleSubmit, setError, setValue, formState: { errors, title, lesson, duration, description,question_count} } = useForm(validate(validateSchema))
 	const { fetchData } = useLoader({ isFullScreen: true });
 
-    const [endPicker, setEndPicker] = useState(editData?.endAt)
-	const [startPicker, setStartPicker] = useState(editData?.startAt)
+    const [endPicker, setEndPicker] = useState(new Date(editData?.end_date))
+	const [startPicker, setStartPicker] = useState(new Date(editData?.start_date))
 
     const challengeAPI = useApi().challenge
 
@@ -49,8 +49,9 @@ const Addmodal = ({ open, handleModal, refreshDatas, select_datas, editData }) =
 	}, [editData]);
 
     async function onSubmit(cdata) {
-        cdata['start_date'] = new Date(startPicker).toISOString()
-        cdata['end_date'] = new Date(endPicker).toISOString()
+
+        cdata['start_date'] = new Date(startPicker)
+        cdata['end_date'] = new Date(endPicker)
         cdata = convertDefaultValue(cdata)
 
         if (editData !== undefined) {

@@ -81,51 +81,51 @@ export function getColumns (currentPage, rowsPerPage, datas, helpers_data, handl
             selector:  (row, idx) => (
                 <div className="text-center" style={{ width: "auto" }}  >
                     {
-                        datas[0]?.challenge?.length > 1
-                        ?
-                            <>
-                                <a
-                                    role="button"
-                                    onClick={() => { handleDetailModal(row?.challenge[0])} }
-                                    id={`complaintListDatatableEdit${row?.challenge[0]?.id}`}
-                                    className='me-1'
-                                >
-                                    <Badge color="light-success" pill><Book  width={"15px"} /></Badge>
-                                </a>
-                                <UncontrolledTooltip placement='top' target={`complaintListDatatableEdit${row?.challenge[0]?.id}`}>Оролдлого 1</UncontrolledTooltip>
+                        // datas[0]?.challenge?.length > 1
+                        // ?
+                        //     <>
+                        //         <a
+                        //             role="button"
+                        //             onClick={() => { handleDetailModal(row?.challenge[0])} }
+                        //             id={`complaintListDatatableEdit${row?.challenge[0]?.id}`}
+                        //             className='me-1'
+                        //         >
+                        //             <Badge color="light-success" pill><Book  width={"15px"} /></Badge>
+                        //         </a>
+                        //         <UncontrolledTooltip placement='top' target={`complaintListDatatableEdit${row?.challenge[0]?.id}`}>Оролдлого 1</UncontrolledTooltip>
 
-                                <a
-                                    id={`complaintListDatatableDetail${row?.challenge[1]?.id}`}
-                                    className='ms-1'
-                                    onClick={() => handleDetailModal(row?.challenge[1])}
-                                >
-                                    <Badge color="light-info" pill><Book  width={"15px"} /></Badge>
-                                </a>
+                        //         <a
+                        //             id={`complaintListDatatableDetail${row?.challenge[1]?.id}`}
+                        //             className='ms-1'
+                        //             onClick={() => handleDetailModal(row?.challenge[1])}
+                        //         >
+                        //             <Badge color="light-info" pill><Book  width={"15px"} /></Badge>
+                        //         </a>
 
-                                <UncontrolledTooltip placement='top' target={`complaintListDatatableDetail${row?.challenge[1]?.id}`}>Оролдлого 2</UncontrolledTooltip>
-                            </>
-                        :
-                            <>
-                                {/* <a
-                                    role="button"
-                                    onClick={() => { handleDetailModal(row?.challenge[0])} }
-                                    id={`complaintListDatatableEdit${row?.challenge[0]?.id}`}
-                                    className='me-1'
-                                >
-                                    <Badge color="light-success" pill><Book  width={"15px"} /></Badge>
-                                </a>
-                                <UncontrolledTooltip placement='top' target={`complaintListDatatableEdit${row?.challenge[0]?.id}`}>Оролдлого 1</UncontrolledTooltip> */}
-                                <a
-                                    role="button"
-                                    onClick={() => { handleResultModal(row?.challenge[0]
-                                    )} }
-                                    id={`complaintListDatatable${row?.challenge[0]?.id}`}
-                                    className='me-1'
-                                >
-                                    <Badge color="light-info" pill><Eye  width={"15px"} /></Badge>
-                                </a>
-                                <UncontrolledTooltip placement='top' target={`complaintListDatatable${row?.challenge[0]?.id}`}>Харах</UncontrolledTooltip>
-                            </>
+                        //         <UncontrolledTooltip placement='top' target={`complaintListDatatableDetail${row?.challenge[1]?.id}`}>Оролдлого 2</UncontrolledTooltip>
+                        //     </>
+                        // :
+                        <>
+                            {/* <a
+                                role="button"
+                                onClick={() => { handleDetailModal(row?.challenge[0])} }
+                                id={`complaintListDatatableEdit${row?.challenge[0]?.id}`}
+                                className='me-1'
+                            >
+                                <Badge color="light-success" pill><Book  width={"15px"} /></Badge>
+                            </a>
+                            <UncontrolledTooltip placement='top' target={`complaintListDatatableEdit${row?.challenge[0]?.id}`}>Оролдлого 1</UncontrolledTooltip> */}
+                            <a
+                                role="button"
+                                onClick={() => { handleResultModal(row?.challenge[0]
+                                )} }
+                                id={`complaintListDatatable${row?.challenge[0]?.id}`}
+                                className='me-1'
+                            >
+                                <Badge color="light-info" pill><Eye  width={"15px"} /></Badge>
+                            </a>
+                            <UncontrolledTooltip placement='top' target={`complaintListDatatable${row?.challenge[0]?.id}`}>Харах</UncontrolledTooltip>
+                        </>
                     }
                 </div>
             ),
