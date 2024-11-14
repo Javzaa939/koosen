@@ -4593,3 +4593,20 @@ class AnnouncementComment(models.Model):
     user = models.ForeignKey(User, verbose_name='Хэрэглэгч', null=True, on_delete=models.CASCADE)
     comment = models.TextField(verbose_name='Сэтгэгдэл', null=True)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Сэтгэгдэл үлдээсэн хугацаа')
+
+
+class Rule(models.Model):
+    """ Багш ажилчдын дүрэм журам """
+
+    STUDENT = 1
+    TEACHER = 2
+
+    STYPE = (
+        (STUDENT, 'Оюутан'),
+        (TEACHER, 'Багш')
+    )
+    title = models.CharField(max_length=1000, verbose_name='Гарчиг')
+    file = models.FileField(upload_to='rule', verbose_name='Файл')
+    stype = models.IntegerField(choices=STYPE, default=STUDENT)
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Үүсгэсэн хугацаа')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
