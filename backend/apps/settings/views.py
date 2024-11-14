@@ -2046,7 +2046,7 @@ class RuleAPIView(
                 print(error)
 
                 return request.send_error("ERR_002")
-                # request_data['file'] = get_file_full_cdn_url([upload_to, file.name])
+                # request_data['file'] = upload_to + '/' + file.name
 
         instance = self.queryset.model.objects.first()
 

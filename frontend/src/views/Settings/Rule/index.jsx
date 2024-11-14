@@ -41,11 +41,13 @@ export default function Rule() {
         handleSubmit,
         setValue,
         formState: { errors },
+        watch
     } = useForm(validate(validationSchema));
 
     const configApi = useApi().settings.rule
     const { fetchData } = useLoader({})
     const { t } = useTranslation()
+    const file = watch('file')
 
     async function onSubmit(cdata) {
         const datas = convertDefaultValue(cdata)
@@ -64,10 +66,16 @@ export default function Rule() {
     const getData = async () => {
         const { success, data } = await fetchData(configApi.get())
 
-        if (success)
-            for (let key in data?.results)
-                if (data[key] !== null) setValue(key, data[key])
-                else setValue(key, '')
+        if (success) {
+            const data_obj = data?.results[0]
+
+            for (const key in data_obj)
+                if (data_obj[key] !== null) {
+                    if (key === 'stype') {
+                        setValue(key, stype_options.find(item => item.value === data_obj[key]))
+                    } else setValue(key, data_obj[key])
+                }
+        }
     }
 
     useEffect(() => {
@@ -113,13 +121,16 @@ export default function Rule() {
                                     control={control}
                                     name="file"
                                     render={({ field }) =>
-                                        <Input
-                                            name={field.name}
-                                            id={field.name}
-                                            type="file"
-                                            placeholder="Дүрэм журмын файл"
-                                            onChange={(e) => setValue(field.name, e.target.files)}
-                                        />
+                                        <>
+                                            <Input
+                                                name={field.name}
+                                                id={field.name}
+                                                type="file"
+                                                placeholder="Дүрэм журмын файл"
+                                                onChange={(e) => setValue(field.name, e.target.files)}
+                                            />
+                                            {file && typeof file === 'string' && <p>{file.substring(file.lastIndexOf('/') + 1)}</p>}
+                                        </>
                                     }
                                 />
                             </div>
@@ -137,7 +148,7 @@ export default function Rule() {
                                             id={field.name}
                                             classNamePrefix='select'
                                             isClearable
-                                            className={classNames('react-select'/*, { 'is-invalid': errors[field.name] }*/)}
+                                            className={classNames('react-select', { 'is-invalid': errors[field.name] })}
                                             placeholder={t('-- Сонгоно уу --')}
                                             options={stype_options}
                                             styles={ReactSelectStyles}
