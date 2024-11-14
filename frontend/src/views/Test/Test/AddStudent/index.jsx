@@ -90,6 +90,7 @@ function AddStudent() {
     async function getStudents() {
         const { success, data } = await fetchStudents(challengeAPI.getStudents(student_search_value));
         if (success) {
+            console.log(data)
             setStudents(data)
         }
     }
@@ -335,7 +336,7 @@ function AddStudent() {
                                                                 }}
                                                                 styles={ReactSelectStyles}
                                                                 getOptionValue={(option) => option.id}
-                                                                getOptionLabel={(option) => option.name_and_code}
+                                                                getOptionLabel={(option) => `${option.code} ${option.full_name}`}
                                                             />
                                                         );
                                                     }}

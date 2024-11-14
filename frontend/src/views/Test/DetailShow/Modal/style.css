@@ -1,0 +1,9 @@
+
+.green-checkbox {
+    border-color: #28a745; /* Green border color */
+    background-color: #28a745;
+}
+.red-checkbox{
+    border-color:red;
+    background-color: red;
+}

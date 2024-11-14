@@ -3,31 +3,8 @@ import { t } from 'i18next'
 import { Eye, Edit, X, Book, Paperclip, Trash, Trash2, PlusCircle, PlusSquare, Plus, EyeOff } from 'react-feather'
 
 import useModal from "@hooks/useModal"
+import { formatDate } from '@utils'
 import { Badge, UncontrolledTooltip } from 'reactstrap';
-
-function request_flag_color(request_flag) {
-    let color = ''
-    let request_flag_name = ''
-
-    if (request_flag === 1) {
-        color = 'light-info'
-        request_flag_name = 'Илгээсэн'
-    }
-    else if (request_flag === 3) {
-        color = 'light-warning'
-        request_flag_name = 'Цуцалсан'
-    }
-    else if (request_flag === 2) {
-        color = 'light-success'
-        request_flag_name = 'Баталсан'
-    }
-
-    return (
-        <Badge color={color} >
-            {request_flag_name}
-        </Badge>
-    )
-}
 
 export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, handleDelete, handleShow, handleSend, handleEditModal, handleExamModal) {
 
@@ -61,15 +38,22 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, ha
             center: true,
         },
         {
+            name: `${'Багш'}`,
+            selector: (row) => row?.teacher_name,
+            minWidth: "15%",
+            wrap: true,
+            center: true,
+        },
+        {
             name: `${'Эхлэх хугацаа'}`,
-            selector: (row) => row?.startAt,
-            minWidth: "20%",
+            selector: (row) => formatDate(row?.start_date, 'YYYY-MM-DD HH:mm:ss'),
+            minWidth: "15%",
             center: true,
         },
         {
             name: `${'Дуусах хугацаа'}`,
-            selector: (row) => row?.endAt,
-            minWidth: "20%",
+            selector: (row) => formatDate(row?.end_date, 'YYYY-MM-DD HH:mm:ss'),
+            minWidth: "15%",
             center: true,
         },
         {
@@ -91,6 +75,9 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, ha
         {
             name: "Үйлдэл",
             center: true,
+            width:"250px",
+            minWidth:"250px",
+            maxWidth:"250px",
             selector: (row) => {
                 var is_remove = true
                 var is_send = false
@@ -117,7 +104,7 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, ha
                 }
 
                 return (
-                    <div className="text-center" style={{ width: "auto" }}>
+                    <div className="text-center " style={{ width: "auto" }}>
                         <>
                             <a
                                 role="button"
@@ -126,7 +113,7 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, ha
                                 className='me-1'
                                 href={`/challenge/test/addstudent/${row?.id}/${row?.lesson?.id}`}
                             >
-                                <Badge color="light-info"><Book width={"15px"} /></Badge>
+                                <Badge color="light-info"><Book width={"10px"} /></Badge>
                             </a>
                             <UncontrolledTooltip placement='top' target={`complaintListDatatableShow${row.id}`} >Дэлгэрэнгүй</UncontrolledTooltip>
                         </>
@@ -138,7 +125,7 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, ha
                                 className='me-1'
                             // href={`/challenge/funtest/addquestion/${row?.id}`}
                             >
-                                <Badge color="light-success"><Edit width={"15px"} /></Badge>
+                                <Badge color="light-success"><Edit width={"10px"} /></Badge>
                             </a>
                             <UncontrolledTooltip placement='top' target={`complaintListDatatableEdit${row.id}`} >Засах</UncontrolledTooltip>
                         </>
@@ -174,7 +161,7 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, ha
                                 className='me-1'
                                 id={`complaintListDatatableCancel${row?.id}`}
                             >
-                                <Badge color="light-danger" ><Trash2 width={"100px"} /></Badge>
+                                <Badge color="light-danger" ><Trash2 width={"10px"} /></Badge>
                             </a>
                             <UncontrolledTooltip placement='top' target={`complaintListDatatableCancel${row.id}`} >Устгах</UncontrolledTooltip>
                         </>
@@ -183,17 +170,27 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, ha
                                 role="button"
                                 onClick={() => { handleExamModal(row?.id) }}
                                 id={`complaintListDatatableExam${row?.id}`}
+                                className='me-1'
                             >
-                                <Badge color="light-primary" ><Eye width={"20px"} /></Badge>
+                                <Badge color="light-primary" ><Eye width={"10px"} /></Badge>
                             </a>
                             <UncontrolledTooltip placement='top' target={`complaintListDatatableExam${row.id}`} >Шалгалт харах</UncontrolledTooltip>
+                        </>
+                        <>
+                            <a
+                                role="button"
+                                onClick={() => { handleShow(row) }}
+                                id={`complaintResultDetail${row?.id}`}
+                                className='me-1'
+                                href={`/challenge/detail/${row?.id}/`}
+                            >
+                                      <Badge color="secondary"><Paperclip width={"10px"} /></Badge>
+                            </a>
+                            <UncontrolledTooltip placement='top' target={`complaintResultDetail${row.id}`} >Дэлгэрэнгүй</UncontrolledTooltip>
                         </>
                     </div>
                 )
             },
-            wrap: true,
-            minWidth: "10%",
-            center: true,
         },
         // {
         //     name: `${t('Дүн харах')}`,
