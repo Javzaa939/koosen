@@ -22,7 +22,7 @@ from lms.models import StudentGrade, OrgPosition
 from core.models import Permissions
 from core.models import Roles
 
-from main.utils.function.utils import get_week_num_from_date
+from main.utils.function.utils import get_file_full_cdn_url, get_week_num_from_date
 
 # Мэргэжлийн зэргийн serializer
 class ProfessionalDegreeSerializer(serializers.ModelSerializer):
@@ -257,7 +257,7 @@ class RuleSerializer(serializers.ModelSerializer):
 
     def get_file(self, obj):
 
-        return obj.file
+        return get_file_full_cdn_url([obj.file.name])
 
 
 # ---------------------- хэвлэх тохиргоо ----------------------
