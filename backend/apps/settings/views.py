@@ -1,5 +1,6 @@
 
 import json
+import traceback
 from django.db.models import F
 import re
 from rest_framework import mixins
@@ -7,7 +8,7 @@ from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.filters import SearchFilter
 
-from lms.models import Score
+from lms.models import Rule, Score
 from lms.models import Group
 from lms.models import Season
 from lms.models import Student
@@ -35,7 +36,7 @@ from lms.models import PrintSettings
 from lms.models import ScoreRegister
 from lms.models import StudentGrade
 
-from .serializers import ScoreSerailizer
+from .serializers import RuleSerializer, ScoreSerailizer
 from .serializers import SeasonSerailizer
 from .serializers import LearningSerializer
 from .serializers import LessonTypeSerailizer
@@ -67,7 +68,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 
 from main.utils.function.pagination import CustomPagination
-from main.utils.function.utils import has_permission, list_to_dict, get_active_year_season
+from main.utils.function.utils import create_file_in_cdn_silently, get_file_full_cdn_url, has_permission, save_data_with_signals
 from main.decorators import login_required
 from main.utils.function.serializer import post_put_action
 
@@ -1981,3 +1982,86 @@ class YearSeasonListAPIView(
             'year_list': year_list,
             'season_list': season_list
         })
+
+
+@permission_classes([IsAuthenticated])
+class RuleAPIView(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    generics.GenericAPIView
+):
+    """ Дүрэм журмын файл
+    """
+
+    queryset = Rule.objects
+    serializer_class = RuleSerializer
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = [
+        'title',
+    ]
+
+    def get_queryset(self):
+        queryset = self.queryset.all()
+        sorting = self.request.GET.get('sorting')
+
+        # Sort хийх үед ажиллана
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
+
+        return queryset
+
+    @login_required()
+    def get(self, request, pk=None):
+        """ Дүрэм журмын файл жагсаалт
+        """
+
+        list_data = self.list(request, pk).data
+
+        return request.send_data(list_data)
+
+    @login_required()
+    @transaction.atomic
+    def put(self, request, pk=None):
+        """ Дүрэм журмын файл засах
+        """
+
+        upload_to = self.queryset.model._meta.get_field('file').upload_to
+        file = request.FILES.getlist('file')[0] if request.FILES.getlist('file') else None
+        request_data = request.data.dict()
+
+        if file:
+            relative_path, _, error = create_file_in_cdn_silently(upload_to, file)
+
+            if relative_path:
+                request_data['file'] = relative_path
+
+            else:
+                print(error)
+
+                return request.send_error("ERR_002")
+                # request_data['file'] = get_file_full_cdn_url([upload_to, file.name])
+
+        instance = self.queryset.model.objects.first()
+
+        if instance:
+            request_data['id'] = instance.id
+            result = save_data_with_signals(self.queryset.model, self.serializer_class, None, data=request_data)
+
+        else:
+            result = save_data_with_signals(self.queryset.model, self.serializer_class, None, data=request_data)
+
+        print('put', result)
+        instance = result[0]
+
+        if instance:
+
+            return request.send_info("INF_001")
+
+        return request.send_error("ERR_002")

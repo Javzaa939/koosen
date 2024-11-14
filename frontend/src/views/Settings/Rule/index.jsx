@@ -26,10 +26,7 @@ import Select from 'react-select'
 import { useTranslation } from 'react-i18next';
 
 const validationSchema = Yup.object().shape({
-    rule_title: Yup.string()
-        .trim()
-        .required('Хоосон байна'),
-    rule_file: Yup.string()
+    title: Yup.string()
         .trim()
         .required('Хоосон байна'),
 });
@@ -37,6 +34,7 @@ const validationSchema = Yup.object().shape({
 export default function Rule() {
 
     const [edit, setEdit] = useState(false)
+    const [stype_options] = useState([{ label: 'Оюутан', value: 1 }, { label: 'Багш', value: 2 }])
 
     const {
         control,
@@ -45,13 +43,21 @@ export default function Rule() {
         formState: { errors },
     } = useForm(validate(validationSchema));
 
-    const configApi = useApi().hrms.school
+    const configApi = useApi().settings.rule
     const { fetchData } = useLoader({})
     const { t } = useTranslation()
 
     async function onSubmit(cdata) {
         const datas = convertDefaultValue(cdata)
-        const { success } = await fetchData(configApi.put(datas))
+        datas['stype'] = datas['stype'].value
+        const formData = new FormData()
+
+        for (const key in datas) {
+            if (key === 'file') formData.append(key, cdata[key][0], cdata[key][0].name)
+            else formData.append(key, datas[key])
+        }
+
+        const { success } = await fetchData(configApi.put(formData))
         if (success) setEdit(false)
     }
 
@@ -59,7 +65,7 @@ export default function Rule() {
         const { success, data } = await fetchData(configApi.get())
 
         if (success)
-            for (let key in data)
+            for (let key in data?.results)
                 if (data[key] !== null) setValue(key, data[key])
                 else setValue(key, '')
     }
@@ -85,7 +91,7 @@ export default function Rule() {
                                 <Controller
                                     defaultValue=""
                                     control={control}
-                                    name="rule_title"
+                                    name="title"
                                     render={({ field }) => (
                                         <Input
                                             {...field}
@@ -96,7 +102,7 @@ export default function Rule() {
                                         />
                                     )}
                                 />
-                                {errors.rule_title && <FormFeedback className='d-block'>{errors.rule_title.message}</FormFeedback>}
+                                {errors.title && <FormFeedback className='d-block'>{errors.title.message}</FormFeedback>}
                             </div>
                             <div className="mb-2">
                                 <Label className="form-label">
@@ -105,15 +111,16 @@ export default function Rule() {
                                 <Controller
                                     defaultValue=""
                                     control={control}
-                                    name="rule_file"
-                                    render={({ field }) => (
+                                    name="file"
+                                    render={({ field }) =>
                                         <Input
-                                            {...field}
+                                            name={field.name}
                                             id={field.name}
                                             type="file"
                                             placeholder="Дүрэм журмын файл"
+                                            onChange={(e) => setValue(field.name, e.target.files)}
                                         />
-                                    )}
+                                    }
                                 />
                             </div>
                             <div className="mb-2">
@@ -123,16 +130,16 @@ export default function Rule() {
                                 <Controller
                                     defaultValue=""
                                     control={control}
-                                    name="rule_recipient"
+                                    name="stype"
                                     render={({ field }) => (
                                         <Select
                                             {...field}
                                             id={field.name}
                                             classNamePrefix='select'
                                             isClearable
-                                            className={classNames('react-select', { 'is-invalid': errors[field.name] })}
+                                            className={classNames('react-select'/*, { 'is-invalid': errors[field.name] }*/)}
                                             placeholder={t('-- Сонгоно уу --')}
-                                            options={[{ label: 'Оюутан', value: 1 }, { label: 'Багш', value: 2 }]}
+                                            options={stype_options}
                                             styles={ReactSelectStyles}
                                         />
                                     )}
