@@ -4347,7 +4347,7 @@ class GraduationWorkQrAPIView(
         lesson_year, lesson_season = get_active_year_season()
 
         # Төгсөгчдийн мэдээллийг авах
-        students = self.queryset.filter(lesson_year=lesson_year, lesson_season=lesson_season, student__group=group, diplom_qr__isnull=False) \
+        students = self.queryset.filter(lesson_year=lesson_year, lesson_season=lesson_season, student__group=group, diplom_qr__isnull=True) \
                     .annotate(
                         first_name=F('student__first_name'),
                         last_name=F('student__last_name'),
@@ -4361,7 +4361,6 @@ class GraduationWorkQrAPIView(
                         'register',
                         'diplom_num'
                     )
-
         with transaction.atomic():
             for student in students:
                 diplom_num = student.get('diplom_num')
@@ -4378,6 +4377,8 @@ class GraduationWorkQrAPIView(
                 }
 
                 res = requests.post(url, headers=headers, json=data)
+                
+                print(res.status_code)
 
                 # 404 Not Found: Дипломын дугаар буруу эсвэл уг дипломын дугаар үүсээгүй үед
                 if res.status_code == 404:
