@@ -2057,11 +2057,12 @@ class RuleAPIView(
         else:
             result = save_data_with_signals(self.queryset.model, self.serializer_class, None, data=request_data)
 
-        print('put', result)
         instance = result[0]
 
         if instance:
 
             return request.send_info("INF_001")
+
+        print('put', result)
 
         return request.send_error("ERR_002")
