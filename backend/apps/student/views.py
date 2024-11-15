@@ -4347,7 +4347,7 @@ class GraduationWorkQrAPIView(
         lesson_year, lesson_season = get_active_year_season()
 
         # Төгсөгчдийн мэдээллийг авах
-        students = self.queryset.filter(lesson_year=lesson_year, lesson_season=lesson_season, student__group=group, diplom_qr__isnull=True) \
+        students = self.queryset.filter(lesson_year=lesson_year, lesson_season=lesson_season, student__group=group, diplom_qr__isnull=False) \
                     .annotate(
                         first_name=F('student__first_name'),
                         last_name=F('student__last_name'),
@@ -4361,6 +4361,7 @@ class GraduationWorkQrAPIView(
                         'register',
                         'diplom_num'
                     )
+
         with transaction.atomic():
             for student in students:
                 diplom_num = student.get('diplom_num')
@@ -4372,7 +4373,7 @@ class GraduationWorkQrAPIView(
 
                 url = 'https://certify.mn/service/api/v2/certification/qr/generate'
                 headers = {
-                    'x-api-key': '8DUeSVwW.KD31Xiq6cRSPsS45UMzolU6wftmzf3YO',
+                    'x-api-key': '3VYptDWl.ghJVuO8DjJj7ci204tJqmegdowuO0ZXf',
                     'Content-Type': 'application/json'
                 }
 
