@@ -12,7 +12,7 @@ import {
     Col,
 } from 'reactstrap'
 
-import { Edit } from 'react-feather'
+import { Edit, Download } from 'react-feather'
 import { useForm, Controller } from "react-hook-form";
 
 import useApi from '@hooks/useApi';
@@ -129,7 +129,14 @@ export default function Rule() {
                                                 placeholder="Дүрэм журмын файл"
                                                 onChange={(e) => setValue(field.name, e.target.files)}
                                             />
-                                            {file && typeof file === 'string' && <p>{file.substring(file.lastIndexOf('/') + 1)}</p>}
+                                            {file && typeof file === 'string' &&
+                                                <>
+                                                    {file.substring(file.lastIndexOf('/') + 1)}
+                                                    <a href={file} className='ms-1'>
+                                                        <Download type="button" color='#1a75ff' width={'15px'} />
+                                                    </a>
+                                                </>
+                                            }
                                         </>
                                     }
                                 />
