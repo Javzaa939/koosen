@@ -286,13 +286,13 @@ export default function PrintAttachmentEnglish()
             case 'Х':
                 return 'Kh'
             case 'Ц':
-                return 'Ts'
+                return 'TS'
             case 'Ч':
-                return 'Ch'
+                return 'CH'
             case 'Ш':
-                return 'Sh'
+                return 'SH'
             case 'Щ':
-                return 'Sh'
+                return 'SH'
             case 'Ы':
                 return 'I'
             case 'Ь':
@@ -500,7 +500,7 @@ export default function PrintAttachmentEnglish()
                 </div>
                 <div className='fw-bolder d-flex' style={{ fontSize: '11px' }} >
                     <div className='d-flex' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
-                        <span className='fw-normal w-50'>Registration number:</span> <span>{engVseg(printDatas?.student?.register_num[0])}{engVseg(printDatas?.student?.register_num[1])}{printDatas?.student?.register_num.slice(-8)}</span>
+                        <span className='fw-normal w-50'>Registration number:</span> <span className='text-uppercase'>{engVseg(printDatas?.student?.register_num[0])}{engVseg(printDatas?.student?.register_num[1])}{printDatas?.student?.register_num.slice(-8)}</span>
                     </div>
                     {
                         printDatas?.student?.group?.degree?.degree_code !== 'D'
