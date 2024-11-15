@@ -346,7 +346,7 @@ export default function PrintNationalAttachment()
                         printDatas?.student?.group?.degree?.degree_code !== 'D'
                         &&
                         <div style={{ height: '39.3%', writingMode: 'vertical-lr', display: 'flex' }}>
-                            <span className='h-50'>ᠪᠠᠻᠠᠯᠠᠸᠷ ᠤ᠋ᠨ ᠳ᠋ᠤᠭᠠᠷ:</span>
+                            <span className='h-50'>{printDatas?.student?.group?.degree?.degree_code === 'E' ?  'ᠪᠠᠻᠠᠯᠠᠸᠷ ᠤ᠋ᠨ ᠳ᠋ᠤᠭᠠᠷ:' : 'ᠮᠠᢉᠢᠰᠲ᠋ᠷ ᠤ᠋ᠨ ᠳ᠋ᠤᠭᠠᠷ:'}</span>
                             {tooBichih(printDatas?.student?.graduation_work?.back_diplom_num)}
                         </div>
                     }

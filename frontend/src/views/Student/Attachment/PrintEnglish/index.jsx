@@ -506,7 +506,7 @@ export default function PrintAttachmentEnglish()
                         printDatas?.student?.group?.degree?.degree_code !== 'D'
                         &&
                             <div className='d-flex px-1' style={{ width: '33.3%' }} >
-                                <span className='fw-normal w-50'>Diploma Number of Bachelor's Degree:</span> <span className='text-uppercase'>{printDatas?.student?.graduation_work?.back_diplom_num}</span>
+                                <span className='fw-normal w-50'>{`Diploma Number of ${printDatas?.student?.group?.degree?.degree_code == 'E' ? "Bachelor's" : "Master's"} Degree:`}</span> <span className='text-uppercase'>{printDatas?.student?.graduation_work?.back_diplom_num}</span>
                             </div>
                     }
                     <div className={`d-flex ${printDatas?.student?.group?.degree?.degree_code === 'D' ? 'px-1' : 'px-2'}`} style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
