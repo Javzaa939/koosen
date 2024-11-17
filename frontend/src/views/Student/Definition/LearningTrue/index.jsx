@@ -88,31 +88,36 @@ export default function LearningTrue()
                             datas?.status_code == 1
                             ?
                             <div>
-                                <span className="fw-bolder">{datas?.code} </span><span className="fw-bolder text-uppercase">{datas?.last_name}</span> овогтой <span className="fw-bolder text-uppercase">{datas?.first_name}</span> нь тус сургуульд <span className="fw-bolder text-uppercase">{datas?.profession_name}</span> хөтөлбөрөөр <span>{datas?.group_level}</span>-р курст 
-                                <br/>
+                                <span className="fw-bolder">{datas?.code} </span><span className="fw-bolder text-uppercase">{datas?.last_name}</span> овогтой <span className="fw-bolder text-uppercase">{datas?.first_name}</span> нь тус сургуульд <span className="fw-bolder text-uppercase">{datas?.profession_name}</span> <br/> хөтөлбөрөөр <span>{datas?.group_level}</span>-р курст
                                 суралцдаг нь үнэн болохыг тодорхойлов.
                             </div>
                             :
                                 datas?.status_code == 5
                                 ?
                                    <span>
-                                     <span className="text-uppercase">{datas?.code} кодтой {datas?.last_name} овогтой {datas?.first_name} нь тус сургуульд {datas?.profession_name} хөтөлбөрөөр {datas?.group_join_year?.substring(0, 4)}-{datas?.graduation_work?.graduation_year?.substring(0, 4)} оны хооронд суралцаж {datas?.graduation_work?.diplom_num} дипломын дугаартай </span>
-                                     <br/> төгссөн нь үнэн болохыг тодорхойлов.
+                                        <span className="text-uppercase">{datas?.code} кодтой {datas?.last_name} овогтой {datas?.first_name} нь тус сургуульд {datas?.profession_name} хөтөлбөрөөр {datas?.group_join_year?.substring(0, 4)}-{datas?.graduation_work?.graduation_year?.substring(0, 4)} оны хооронд суралцаж <br/> {datas?.graduation_work?.diplom_num} дипломын дугаартай </span>
+                                        төгссөн нь үнэн болохыг тодорхойлов.
                                    </span>
                                 :
-                                    `${datas?.code} кодтой ${datas?.last_name} овогтой ${datas?.first_name} нь тус сургуулиас ${datas?.status_name?.toLowerCase()} нь үнэн болохыг тодорхойлов.`
+                                    <span>
+                                        {datas?.code} кодтой {datas?.last_name} овогтой {datas?.first_name} нь тус сургуулиас {datas?.status_name?.toLowerCase()} нь 
+                                        <br/>
+                                        үнэн болохыг тодорхойлов.
+                                    </span>
                         }
                         </div>
 
-                        <div className="text-center mt-3 text-uppercase mx-auto">
+                        <div className="mt-2 d-flex justify-content-center">
                             {
                                 listArr.map((val, idx) =>
                                 {
                                     return (
-                                        <p key={idx} >
-                                            <span style={{textWrap: 'wrap'}}></span>{val?.position_name}
-                                            <span>: ........................................... /{val?.last_name}&#160;{val?.first_name}/</span>
-                                        </p>
+                                        <div className="d-flex flex-column me-1 mt-50">
+                                            <p key={idx} className="text-uppercase text-end">
+                                                <span style={{textWrap: 'wrap'}} className=" text-uppercase"></span>{val?.position_name}
+                                            </p>
+                                            <span className="text-end">.............................../{val?.last_name?.substring(0, 1)}.{val?.first_name}/</span>
+                                        </div>
                                     )
                                 })
                             }
