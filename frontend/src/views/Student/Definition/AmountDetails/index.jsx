@@ -145,18 +145,18 @@ export default function AmountDetails()
                                 Мэргэжил: <span className="fw-normal">{datas?.student?.group.profession.name}</span>
                             </div>
                             <div className="d-inline-block" style={{width: '30%'}}>
-                                Оюутны овог: <span className="fw-normal">{datas?.student?.last_name}</span>
+                                Оюутны овог: <span className="fw-normal text-uppercase">{datas?.student?.last_name}</span>
                             </div>
                         </div>
                         <div className="fw-bolder mt-0">
                             <div className="d-inline-block" style={{width: '35%'}}>
-                                Оюутны код: <span className="fw-normal">{datas?.student?.code}</span>
+                                Оюутны код: <span className="fw-normal text-uppercase">{datas?.student?.code}</span>
                             </div>
                             <div className="d-inline-block" style={{width: '35%'}}>
                                 Оюутны регистр: <span className="fw-normal">{datas?.student?.register_num}</span>
                             </div>
                             <div className="d-inline-block" style={{width: '30%'}}>
-                                Оюутны нэр: <span className="fw-normal">{datas?.student?.first_name}</span>
+                                Оюутны нэр: <span className="fw-normal text-uppercase">{datas?.student?.first_name}</span>
                             </div>
                         </div>
                         {/* Header */}
@@ -258,7 +258,6 @@ export default function AmountDetails()
                         </table>
                         <div className="fw-bolder mt-1">
                             <div className="d-inline-block" style={{width: '38%'}}>
-                                {/* Чанарын онооны нийлбэр: <span className="fw-normal">{totalChanarHandler(chanars)}</span> */}
                                 Чанарын онооны нийлбэр: <span className="fw-normal">{niit_chanar()}</span>
                             </div>
                             <div className="d-inline-block"  style={{width: '22%'}}>
@@ -272,19 +271,21 @@ export default function AmountDetails()
                             </div>
                         </div>
 
-                        <div className="text-center mt-3 text-uppercase">
-                            {
-                                listArr?.map((val, idx) =>
+                        <div className="mt-2 d-flex justify-content-center">
                                 {
-                                    return (
-                                        <p key={idx} >
-                                            {val?.position_name}: ........................................... {val?.last_name.substring(0, 1)}.{val?.first_name}
-                                        </p>
-                                    )
-                                })
-                            }
-                            {/* Дүн зөвшөөрсөн оюутан: ........................................... {datas?.student?.full_name} */}
-                        </div>
+                                    listArr.map((val, idx) =>
+                                    {
+                                        return (
+                                            <div className="d-flex flex-column me-2 mt-50">
+                                                <p key={idx} className="text-uppercase text-end">
+                                                    <span style={{textWrap: 'wrap'}} className=" text-uppercase"></span>{val?.position_name}
+                                                </p>
+                                                <span className="text-end">.............................../{val?.last_name?.substring(0, 1)}.{val?.first_name}/</span>
+                                            </div>
+                                        )
+                                    })
+                                }
+                            </div>
                     </Row>
                 </>
                 :

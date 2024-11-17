@@ -128,14 +128,17 @@ export default function Sum()
                             </div>
                         </div>
 
-                        <div className="text-center mt-3 text-uppercase">
+                        <div className="mt-3 d-flex justify-content-center">
                             {
                                 listArr.map((val, idx) =>
                                 {
                                     return (
-                                        <p key={idx} >
-                                            {val?.position_name}: ........................................... /{val?.last_name}&#160;{val?.first_name}/
-                                        </p>
+                                        <div className="d-flex flex-column me-2 mt-50">
+                                            <p key={idx} className="text-uppercase ">
+                                                <span style={{textWrap: 'wrap'}} className=" text-uppercase"></span>{val?.position_name}
+                                            </p>
+                                            <span className="text-end">.............................../{val?.last_name?.substring(0, 1)}.{val?.first_name}/</span>
+                                        </div>
                                     )
                                 })
                             }
