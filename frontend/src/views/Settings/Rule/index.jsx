@@ -127,6 +127,7 @@ export default function Rule() {
                                                 id={field.name}
                                                 type="file"
                                                 placeholder="Дүрэм журмын файл"
+                                                accept="application/pdf, application/vnd.ms-excel"
                                                 onChange={(e) => setValue(field.name, e.target.files)}
                                             />
                                             {file && typeof file === 'string' &&
