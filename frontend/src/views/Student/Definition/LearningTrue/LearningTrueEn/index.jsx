@@ -29,7 +29,7 @@ export default function LearningTrueEn()
         'п': 'p', 'р': 'r', 'с': 's', 'т': 't', 'у': 'u', 'ф': 'f', 'х': 'kh', 'ц': 'ts',
         'ч': 'ch', 'ш': 'sh', 'щ': 'sch', 'ъ': '', 'ы': 'i', 'ь': '', 'э': 'e', 'ю': 'yu',
         'я': 'ya', 'ө' : 'u', "ү" : "u",
-      };
+    };
 
        // Loader
     const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
@@ -88,9 +88,9 @@ export default function LearningTrueEn()
             case 'Д':
                 return 'D'
             case 'Е':
-                return 'Ye'
+                return 'YE'
             case 'Ё':
-                return 'Yo'
+                return 'YO'
             case 'Ж':
                 return 'J'
             case 'З':
@@ -126,13 +126,13 @@ export default function LearningTrueEn()
             case 'Ф':
                 return 'F'
             case 'Х':
-                return 'Kh'
+                return 'KH'
             case 'Ц':
-                return 'Ts'
+                return 'TS'
             case 'Ч':
-                return 'Ch'
+                return 'CH'
             case 'Ш':
-                return 'Sh'
+                return 'SH'
             case 'Ы':
                 return 'I'
             case 'Ь':
@@ -140,9 +140,9 @@ export default function LearningTrueEn()
             case 'Э':
                 return 'E'
             case 'Ю':
-                return 'Yu'
+                return 'YU'
             case 'Я':
-                return 'Ya'
+                return 'YA'
             default:
                 break;
         }
@@ -186,7 +186,9 @@ export default function LearningTrueEn()
                             {
                                 datas?.status_code == 1
                                 ?
-                                `This is to confirm that, ${transliterateCyrillicToLatin(datas?.first_name)} ${transliterateCyrillicToLatin(datas?.last_name)} /${engVseg(datas?.register_num[0])}${engVseg(datas?.register_num[1])}${datas?.register_num.slice(-8)}/ is a ${getOrdinal(datas?.group_level)} year student of ${datas?.profession_eng_name} program for the academic year of ${datas?.group_join_year}`
+                                <span>
+                                    This is to confirm that, <span className="text-uppercase">{transliterateCyrillicToLatin(datas?.first_name)} {transliterateCyrillicToLatin(datas?.last_name)}</span> /{engVseg(datas?.register_num[0])}{engVseg(datas?.register_num[1])}{datas?.register_num.slice(-8)}/ is a {getOrdinal(datas?.group_level)} year student of {datas?.profession_eng_name} program for the academic year of {datas?.group_join_year}.
+                                </span>
 
                                 :
                                     datas?.status_code == 5
@@ -199,7 +201,7 @@ export default function LearningTrueEn()
                             }
                             </div>
 
-                            <div className="text-center mt-3 text-uppercase">
+                            {/* <div className="text-center mt-3 text-uppercase">
                                 {
                                     listArr.map((val, idx) =>
                                     {
@@ -207,6 +209,21 @@ export default function LearningTrueEn()
                                             <p key={idx} >
                                                 {val?.position_name_eng}: ........................................... /{val?.last_name_eng?.substring(0, 1)}.{val?.first_name_eng}/
                                             </p>
+                                        )
+                                    })
+                                }
+                            </div> */}
+                            <div className="mt-2 d-flex justify-content-center">
+                                {
+                                    listArr.map((val, idx) =>
+                                    {
+                                        return (
+                                            <div className="d-flex flex-column me-2 mt-50">
+                                                <p key={idx} className="text-uppercase text-end">
+                                                    <span style={{textWrap: 'wrap'}} className=" text-uppercase"></span>{val?.position_name_eng}
+                                                </p>
+                                                <span className="text-end">.............................../{val?.last_name_eng?.substring(0, 1)}.{val?.first_name_eng}/</span>
+                                            </div>
                                         )
                                     })
                                 }
