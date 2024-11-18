@@ -1,6 +1,3 @@
-
-import json
-import traceback
 from django.db.models import F
 import re
 from rest_framework import mixins
@@ -12,7 +9,6 @@ from lms.models import Rule, Score
 from lms.models import Group
 from lms.models import Season
 from lms.models import Student
-from lms.models import PaymentSeasonClosing
 from lms.models import Learning
 from lms.models import LessonType
 from lms.models import LessonType
@@ -25,7 +21,6 @@ from lms.models import AdmissionLesson
 from lms.models import StudentRegister
 from lms.models import ProfessionalDegree
 from lms.models import ProfessionDefinition
-from lms.models import StudentAdmissionScore
 from lms.models import Country
 from lms.models import TimeTable
 from lms.models import DefinitionSignature
@@ -64,11 +59,13 @@ from .serializers import OrgPosition
 from django.db import transaction
 from django.db.models import Max, Q
 
+from django.core.files.uploadedfile import InMemoryUploadedFile
+
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 
 from main.utils.function.pagination import CustomPagination
-from main.utils.function.utils import create_file_in_cdn_silently, get_file_full_cdn_url, has_permission, save_data_with_signals
+from main.utils.function.utils import create_file_in_cdn_silently, has_permission, save_data_with_signals
 from main.decorators import login_required
 from main.utils.function.serializer import post_put_action
 
@@ -2033,28 +2030,35 @@ class RuleAPIView(
         """
 
         upload_to = self.queryset.model._meta.get_field('file').upload_to
-        file = request.FILES.getlist('file')[0] if request.FILES.getlist('file') else None
-        request_data = request.data.dict()
+        file = request.data.get('file')
+        stype = request.data.get('stype')
+        isFileChanged = isinstance(file, InMemoryUploadedFile)
 
-        if file:
+        if file and isFileChanged:
             relative_path, _, error = create_file_in_cdn_silently(upload_to, file)
 
             if relative_path:
-                request_data['file'] = relative_path
+                request.data['file'] = relative_path
 
             else:
                 print(error)
 
-                return request.send_error("ERR_002")
-                # request_data['file'] = upload_to + '/' + file.name
+                # return request.send_error("ERR_002")
+                request.data['file'] = upload_to + '/' + file.name
 
-        instance = self.queryset.model.objects.first()
+        instance = self.queryset.model.objects.filter(stype=stype).first()
+        request_data = request.data.dict()
 
         if instance:
             request_data['id'] = instance.id
+
+            if not isFileChanged:
+                del request_data['file']
+
             result = save_data_with_signals(self.queryset.model, self.serializer_class, None, data=request_data)
 
         else:
+            del request_data['id']
             result = save_data_with_signals(self.queryset.model, self.serializer_class, None, data=request_data)
 
         instance = result[0]
