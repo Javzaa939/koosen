@@ -41,6 +41,11 @@ export default function Rule() {
                 'file-required',
                 t('Хоосон байна'),
                 (value) => (value instanceof FileList && value.length > 0) || (typeof value === 'string' && value.trim() !== '')
+            )
+            .test(
+                'file-format-required',
+                t('Choose PDF or Excel files'),
+                (value) => (typeof value === 'string' && value.trim() !== '') || ['application/pdf', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'].includes(value[0].type)
             ),
         stype: Yup.object({
             value: Yup.number()
@@ -86,12 +91,11 @@ export default function Rule() {
         }
     }
 
-    function fillForm(data_obj, isSwitch=false) {
+    function fillForm(data_obj) {
         for (const key in data_obj)
             if (data_obj[key] !== null) {
-                if (key === 'stype') {
-                    if (!isSwitch) setValue(key, stype_options.find(item => item.value === data_obj[key]))
-                } else setValue(key, data_obj[key])
+                if (key === 'stype') setValue(key, stype_options.find(item => item.value === data_obj[key]))
+                else setValue(key, data_obj[key])
             }
     }
 
@@ -107,10 +111,6 @@ export default function Rule() {
     useEffect(() => {
         getData()
     }, [])
-
-    useEffect(() => {
-        if (data) fillForm(data?.find(item => item.stype === stype.value), true)
-    }, [stype])
 
     return (
         <Row>
@@ -194,6 +194,10 @@ export default function Rule() {
                                                 options={stype_options}
                                                 styles={ReactSelectStyles}
                                                 isDisabled={!edit}
+                                                onChange={(val) => {
+                                                    field.onChange(val)
+                                                    fillForm(data?.find(item => item.stype === val.value))
+                                                }}
                                             />
                                         )}
                                     />

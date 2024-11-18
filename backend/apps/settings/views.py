@@ -2043,8 +2043,8 @@ class RuleAPIView(
             else:
                 print(error)
 
-                # return request.send_error("ERR_002")
-                request.data['file'] = upload_to + '/' + file.name
+                return request.send_error("ERR_002")
+                # request.data['file'] = upload_to + '/' + file.name
 
         instance = self.queryset.model.objects.filter(stype=stype).first()
         request_data = request.data.dict()
@@ -2052,13 +2052,15 @@ class RuleAPIView(
         if instance:
             request_data['id'] = instance.id
 
-            if not isFileChanged:
+            if not isFileChanged and 'file' in request_data:
                 del request_data['file']
 
             result = save_data_with_signals(self.queryset.model, self.serializer_class, None, data=request_data)
 
         else:
-            del request_data['id']
+            if 'id' in request_data:
+                del request_data['id']
+
             result = save_data_with_signals(self.queryset.model, self.serializer_class, None, data=request_data)
 
         instance = result[0]
