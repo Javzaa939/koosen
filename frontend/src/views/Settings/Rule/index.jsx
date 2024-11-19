@@ -271,6 +271,7 @@ export default function Rule() {
                             header: 'title',
                             name: `${t('Гарчиг')}`,
                             selector: (row) => row?.title,
+                            minWidth: '200px'
                         },
                         {
                             header: 'file',
@@ -288,7 +289,7 @@ export default function Rule() {
                             header: 'stype',
                             name: `${t('Зориулж')}`,
                             selector: (row) => stype_options.find(item => item.value === row?.stype)?.label,
-                            maxWidth: '150px'
+                            minWidth: '120px'
                         },
                         {
                             header: 'created_at',
