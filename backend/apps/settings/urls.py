@@ -81,5 +81,6 @@ urlpatterns = [
 
     # Дүрэм журмын файл
     path('rule/', RuleAPIView.as_view()),
+	path('rule/<int:pk>/', RuleAPIView.as_view()),
 
 ]

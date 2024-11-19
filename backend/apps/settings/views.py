@@ -65,7 +65,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 
 from main.utils.function.pagination import CustomPagination
-from main.utils.function.utils import create_file_in_cdn_silently, has_permission, save_data_with_signals
+from main.utils.function.utils import create_file_in_cdn_silently, delete_objects_with_signals, has_permission, save_data_with_signals
 from main.decorators import login_required
 from main.utils.function.serializer import post_put_action
 
@@ -2026,8 +2026,7 @@ class RuleAPIView(
     @login_required()
     @transaction.atomic
     def put(self, request, pk=None):
-        """ Дүрэм журмын файл засах
-        """
+        """ Дүрэм журмын файл засах """
 
         upload_to = self.queryset.model._meta.get_field('file').upload_to
         file = request.data.get('file')
@@ -2072,3 +2071,22 @@ class RuleAPIView(
         print('put', result)
 
         return request.send_error("ERR_002")
+
+    @login_required()
+    # @has_permission(must_permissions=['lms-settings-print-delete'])
+    def delete(self, request, pk=None):
+        """ Дүрэм журмын файл устгах """
+
+        if not pk:
+            print('no pk')
+
+            return request.send_error("ERR_002")
+
+        _, error = delete_objects_with_signals(self.queryset.model, [pk])
+
+        if error:
+            print('delete', error)
+
+            return request.send_error("ERR_002")
+
+        return request.send_info("INF_003")

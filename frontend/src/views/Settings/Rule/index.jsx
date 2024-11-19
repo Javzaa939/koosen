@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import {
     Card,
     Form,
@@ -12,9 +12,10 @@ import {
     Col,
     Row,
     Spinner,
+    Badge,
 } from 'reactstrap'
 
-import { Edit, Download } from 'react-feather'
+import { Edit, Download, Trash2 } from 'react-feather'
 import { useForm, Controller } from "react-hook-form";
 
 import useApi from '@hooks/useApi';
@@ -28,6 +29,8 @@ import Select from 'react-select'
 import { useTranslation } from 'react-i18next';
 import DataTable from 'react-data-table-component';
 import moment from 'moment';
+import useModal from '@src/utility/hooks/useModal';
+import './style.css'
 
 export default function Rule() {
     const { t } = useTranslation()
@@ -45,7 +48,11 @@ export default function Rule() {
             .test(
                 'file-format-required',
                 t('Choose PDF or Excel files'),
-                (value) => (typeof value === 'string' && value.trim() !== '') || ['application/pdf', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'].includes(value[0].type)
+                (value) => (typeof value === 'string' && value.trim() !== '') ||
+                (
+                    value && value.length > 0 &&
+                    ['application/pdf', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'].includes(value[0].type)
+                )
             ),
         stype: Yup.object({
             value: Yup.number()
@@ -60,8 +67,9 @@ export default function Rule() {
         control,
         handleSubmit,
         setValue,
-        formState: { errors },
-        watch
+        formState: { errors, isValid },
+        watch,
+        reset
     } = useForm(validate(validationSchema));
 
     const file = watch('file')
@@ -71,9 +79,11 @@ export default function Rule() {
     const [edit, setEdit] = useState(false)
     const [stype_options] = useState([{ label: t('Оюутан'), value: 1 }, { label: t('Багш'), value: 2 }])
     const [data, setData] = useState([])
+    const [fileInputKey, setFileInputKey] = useState(0); // to reset file input, because regular ways do not work
 
     const configApi = useApi().settings.rule
     const { isLoading, fetchData } = useLoader({})
+    const { showWarning } = useModal()
 
     async function onSubmit(cdata) {
         const formData = new FormData()
@@ -85,25 +95,27 @@ export default function Rule() {
         }
 
         const { success } = await fetchData(configApi.put(formData))
+
         if (success) {
+            reset()
+            setFileInputKey((prevKey) => prevKey + 1);
             setEdit(false)
             getData()
         }
     }
 
-    function fillForm(data_obj) {
-        for (const key in data_obj)
-            if (data_obj[key] !== null) {
-                if (key === 'stype') setValue(key, stype_options.find(item => item.value === data_obj[key]))
-                else setValue(key, data_obj[key])
-            }
+    async function handleDelete(id) {
+        const { success } = await fetchData(configApi.delete(id))
+
+        if (success) {
+            getData()
+        }
     }
 
     const getData = async () => {
         const { success, data } = await fetchData(configApi.get())
 
         if (success) {
-            fillForm(data?.results[0])
             setData(data?.results)
         }
     }
@@ -154,13 +166,13 @@ export default function Rule() {
                                         render={({ field }) =>
                                             <>
                                                 <Input
+                                                    key={fileInputKey}
                                                     name={field.name}
                                                     id={field.name}
                                                     type="file"
                                                     placeholder={t("Дүрэм журмын файл")}
                                                     accept="application/pdf, application/vnd.ms-excel"
-                                                    onChange={(e) => field.onChange(e.target.files)
-                                                    }
+                                                    onChange={(e) => field.onChange(e.target.files)}
                                                 />
                                                 {file && typeof file === 'string' &&
                                                     <>
@@ -194,10 +206,6 @@ export default function Rule() {
                                                 options={stype_options}
                                                 styles={ReactSelectStyles}
                                                 isDisabled={!edit}
-                                                onChange={(val) => {
-                                                    field.onChange(val)
-                                                    fillForm(data?.find(item => item.stype === val.value))
-                                                }}
                                             />
                                         )}
                                     />
@@ -205,9 +213,11 @@ export default function Rule() {
                                 </div>
                                 {
                                     edit &&
-                                    <Button className="me-2" color="primary" type="submit">
-                                        {t('Хадгалах')}
-                                    </Button>
+                                    <>
+                                        <Button className="me-2" color="primary" type="submit" disabled={!isValid}>
+                                            {t('Хадгалах')}
+                                        </Button>
+                                    </>
                                 }
                             </fieldset>
                         </Form>
@@ -230,10 +240,34 @@ export default function Rule() {
                     )}
                     columns={[
                         {
+                            name: <Trash2  width={"15px"} />,
+                            selector:  (row) => (
+                                <a
+                                    role='button'
+                                    className='ms-1'
+                                    onClick={() => showWarning({
+                                        header: {
+                                            title: t(`Дүрэм журмын файл устгах`),
+                                        },
+                                        question: t(`Та энэхүү дүрэм журмын файл устгахдаа итгэлтэй байна уу?`),
+                                        onClick: () => handleDelete(row?.id),
+                                        btnText: t('Устгах'),
+                                    })}
+                                    id={`complaintListDatatableCancel${row?.id}`}
+                                >
+                                    <Badge color="light-danger" pill><Trash2  width={"15px"} /></Badge>
+                                </a>
+                            ),
+                            center: true,
+                            minWidth: "50px",
+                            maxWidth: "50px",
+                        },
+                        {
                             name: "№",
                             selector: (row, index) => index + 1,
                             center: true,
-                            maxWidth: '100px'
+                            minWidth: "50px",
+                            maxWidth: "50px",
                         },
                         {
                             header: 'title',
@@ -250,13 +284,13 @@ export default function Rule() {
                                     </a>
                                     {row?.file.substring(row?.file.lastIndexOf('/') + 1)}
                                 </>,
-                            minWidth: '200px'
+                            minWidth: '250px'
                         },
                         {
                             header: 'stype',
                             name: `${t('Зориулж')}`,
                             selector: (row) => stype_options.find(item => item.value === row?.stype)?.label,
-                            maxWidth: '100px'
+                            maxWidth: '150px'
                         },
                         {
                             header: 'created_at',

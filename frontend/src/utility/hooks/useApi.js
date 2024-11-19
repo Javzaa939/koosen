@@ -347,6 +347,7 @@ function useApi(isDisplay=false) {
 			rule:{
 				get: (limit=10000000, page=1, sort='', search='', school=school_id || '') => instance.get(`/settings/rule/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&schoolId=${school}`),
 				put: (data) => instance.put(`/settings/rule/`, data),
+				delete: (id) => instance.delete(`/settings/rule/${id}/`),
 			},
 		},
 		/** Сургалт */
