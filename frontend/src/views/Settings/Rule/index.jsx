@@ -49,10 +49,10 @@ export default function Rule() {
                 'file-format-required',
                 t('Choose PDF or Excel files'),
                 (value) => (typeof value === 'string' && value.trim() !== '') ||
-                (
-                    value && value.length > 0 &&
-                    ['application/pdf', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'].includes(value[0].type)
-                )
+                    (
+                        value && value.length > 0 &&
+                        ['application/pdf', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'].includes(value[0].type)
+                    )
             ),
         stype: Yup.object({
             value: Yup.number()
@@ -213,11 +213,9 @@ export default function Rule() {
                                 </div>
                                 {
                                     edit &&
-                                    <>
-                                        <Button className="me-2" color="primary" type="submit" disabled={!isValid}>
-                                            {t('Хадгалах')}
-                                        </Button>
-                                    </>
+                                    <Button className="me-2" color="primary" type="submit" disabled={!isValid}>
+                                        {t('Хадгалах')}
+                                    </Button>
                                 }
                             </fieldset>
                         </Form>
@@ -240,8 +238,8 @@ export default function Rule() {
                     )}
                     columns={[
                         {
-                            name: <Trash2  width={"15px"} />,
-                            selector:  (row) => (
+                            name: <Trash2 width={"15px"} />,
+                            selector: (row) => (
                                 <a
                                     role='button'
                                     className='ms-1'
@@ -255,7 +253,7 @@ export default function Rule() {
                                     })}
                                     id={`complaintListDatatableCancel${row?.id}`}
                                 >
-                                    <Badge color="light-danger" pill><Trash2  width={"15px"} /></Badge>
+                                    <Badge color="light-danger" pill><Trash2 width={"15px"} /></Badge>
                                 </a>
                             ),
                             center: true,
