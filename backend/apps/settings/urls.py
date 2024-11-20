@@ -79,4 +79,8 @@ urlpatterns = [
     # Жил болон улирлын жагсаалт
     path('year-season/', YearSeasonListAPIView.as_view()),
 
+    # Дүрэм журмын файл
+    path('rule/', RuleAPIView.as_view()),
+	path('rule/<int:pk>/', RuleAPIView.as_view()),
+
 ]
