@@ -1290,4 +1290,38 @@ permissions = [
         'description' : 'Тэнцсэн элсэгчид цэс унших эрх'
     },
 
+    # --------------------- Суралцагчийн хөтөч ------------------------
+    {
+        'name': 'lms-browser-structure',
+        'description' : 'Их сургуулийн бүтэц зохион байгуулалт цэс унших эрх'
+    },
+    {
+        'name': 'lms-browser-surgalt',
+        'description' : 'Сургалтын хөтөлбөр, хичээлийн хуваарь цэс унших эрх'
+    },
+    {
+        'name': 'lms-browser-rules',
+        'description' : 'Дүрэм журам цэс унших эрх'
+    },
+    {
+        'name': 'lms-browser-hugjil',
+        'description' : 'Суралцагчийн хөгжил унших эрх'
+    },
+    {
+        'name': 'lms-browser-bulan',
+        'description' : 'Сэтгэл зүйн булан унших эрх'
+    },
+    {
+        'name': 'lms-browser-library',
+        'description' : 'Номын сан'
+    },
+    {
+        'name': 'lms-browser-healt',
+        'description' : 'Эрүүл мэнд'
+    },
+    {
+        'name': 'lms-browser-other',
+        'description' : 'Бусад'
+    },
+
 ]

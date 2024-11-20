@@ -25,6 +25,8 @@ import Elselt from './Elselt'
 import PsychologicalTesting from './PsychologicalTesting'
 
 import OnlineLesson from "./OnlineLesson";
+import StudentBrowsers from "./StudentBrowser";
+
 export default [
   ...Calendar,
   ...Elselt,
@@ -51,4 +53,5 @@ export default [
   ...Settings,
   // ...Role,
   // ...Science
+  ...StudentBrowsers,
 ];

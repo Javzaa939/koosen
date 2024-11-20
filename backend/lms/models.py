@@ -4610,3 +4610,42 @@ class Rule(models.Model):
     stype = models.IntegerField(choices=STYPE, default=STUDENT)
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Үүсгэсэн хугацаа')
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+
+
+class Structure(models.Model):
+    """ Их сургуулийн бүтэц зохион байгуулалт """
+
+    title = models.CharField(max_length=1000, verbose_name='Гарчиг')
+    link = models.CharField(max_length=1000, verbose_name='Линк')
+    file = models.FileField(upload_to='structure', verbose_name='Файл')
+    created_user = models.ForeignKey(User, on_delete=models.SET_NULL,related_name='create_user', null=True, verbose_name='Үүсгэсэн хэрэглэгч')
+    updated_user = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='update_user', null=True, verbose_name='Зассан хэрэглэгч')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+class StudentDevelop(models.Model):
+    """ Суралцагчийн хөгжил """
+
+    title = models.CharField(max_length=1000, verbose_name='Гарчиг')
+    link = models.CharField(max_length=1000, verbose_name='Линк', null=True)
+    file = models.FileField(upload_to='structure', verbose_name='Файл')
+    body = models.TextField(verbose_name="Суралцагчийн хөгжлийн хэсэг")
+    created_user = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='cr_user', null=True, verbose_name='Үүсгэсэн хэрэглэгч')
+    updated_user = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='up_user',  null=True, verbose_name='Зассан хэрэглэгч')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+class Library(models.Model):
+    """ Номын сан танилуулга"""
+
+    title = models.CharField(max_length=1000, verbose_name='Гарчиг')
+    body = models.TextField(verbose_name="Мэдээний хэсэг")
+    link = models.CharField(max_length=1000, verbose_name='Линк')
+    file = models.FileField(upload_to='structure', verbose_name='Файл')
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='l_cr_user', null=True, verbose_name='Үүсгэсэн хэрэглэгч')
+    updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='Зассан хэрэглэгч')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)

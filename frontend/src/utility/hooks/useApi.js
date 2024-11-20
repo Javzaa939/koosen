@@ -1958,7 +1958,16 @@ function useApi(isDisplay=false) {
 			get: (limit, page, search, selectedGroup,lesson_id) => instance.get(`online_lesson/lesson_students/?limit=${limit}&page=${page}&search=${search}&group=${selectedGroup}&lesson_id=${lesson_id}`),
 			put: (datas, pk) => instance.put(`online_lesson/lesson_students/${pk}/`, datas),
 			delete: (student, pk) => instance.delete(`online_lesson/lesson_students/${pk}/?student=${student}`)
-		}
+		},
+		// суралцагчийн хөтөч
+		browser: {
+			get: (limit, page, sort, search) => instance.get(`browser/structure/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}`),
+			getOne: (pk) => instance.get(`browser/structure/${pk}/`),
+			post: (data) => instance.post('/browser/structure/', data),
+			put: (data, pk) => instance.put(`browser/structure/${pk}/`, data),
+			delete: (pk) => instance.delete(`browser/structure/${pk}/`),
+			getSalbarData: () => instance.get(`browser/salbar/`),
+		},
 	}
 }
 
