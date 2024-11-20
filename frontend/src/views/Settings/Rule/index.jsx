@@ -56,7 +56,7 @@ export default function Rule() {
             ),
         stype: Yup.object({
             value: Yup.number()
-                .transform(value => (isNaN(value) ? 0 : value))
+                .transform(value => (isNaN(value) ? undefined : value))
                 .required(t('Хоосон байна'))
         })
             .nullable()
