@@ -1,5 +1,3 @@
-
-import json
 from django.db.models import F
 import re
 from rest_framework import mixins
@@ -7,11 +5,10 @@ from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.filters import SearchFilter
 
-from lms.models import Score
+from lms.models import Rule, Score
 from lms.models import Group
 from lms.models import Season
 from lms.models import Student
-from lms.models import PaymentSeasonClosing
 from lms.models import Learning
 from lms.models import LessonType
 from lms.models import LessonType
@@ -24,7 +21,6 @@ from lms.models import AdmissionLesson
 from lms.models import StudentRegister
 from lms.models import ProfessionalDegree
 from lms.models import ProfessionDefinition
-from lms.models import StudentAdmissionScore
 from lms.models import Country
 from lms.models import TimeTable
 from lms.models import DefinitionSignature
@@ -35,7 +31,7 @@ from lms.models import PrintSettings
 from lms.models import ScoreRegister
 from lms.models import StudentGrade
 
-from .serializers import ScoreSerailizer
+from .serializers import RuleSerializer, ScoreSerailizer
 from .serializers import SeasonSerailizer
 from .serializers import LearningSerializer
 from .serializers import LessonTypeSerailizer
@@ -63,11 +59,13 @@ from .serializers import OrgPosition
 from django.db import transaction
 from django.db.models import Max, Q
 
+from django.core.files.uploadedfile import InMemoryUploadedFile
+
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 
 from main.utils.function.pagination import CustomPagination
-from main.utils.function.utils import has_permission, list_to_dict, get_active_year_season
+from main.utils.function.utils import create_file_in_cdn_silently, delete_objects_with_signals, has_permission, save_data_with_signals
 from main.decorators import login_required
 from main.utils.function.serializer import post_put_action
 
@@ -1981,3 +1979,114 @@ class YearSeasonListAPIView(
             'year_list': year_list,
             'season_list': season_list
         })
+
+
+@permission_classes([IsAuthenticated])
+class RuleAPIView(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    generics.GenericAPIView
+):
+    """ Дүрэм журмын файл
+    """
+
+    queryset = Rule.objects
+    serializer_class = RuleSerializer
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = [
+        'title',
+    ]
+
+    def get_queryset(self):
+        queryset = self.queryset.all()
+        sorting = self.request.GET.get('sorting')
+
+        # Sort хийх үед ажиллана
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
+
+        return queryset
+
+    @login_required()
+    def get(self, request, pk=None):
+        """ Дүрэм журмын файл жагсаалт
+        """
+
+        list_data = self.list(request, pk).data
+
+        return request.send_data(list_data)
+
+    @login_required()
+    @transaction.atomic
+    def put(self, request, pk=None):
+        """ Дүрэм журмын файл засах """
+
+        upload_to = self.queryset.model._meta.get_field('file').upload_to
+        file = request.data.get('file')
+        stype = request.data.get('stype')
+        isFileChanged = isinstance(file, InMemoryUploadedFile)
+
+        if file and isFileChanged:
+            relative_path, _, error = create_file_in_cdn_silently(upload_to, file)
+
+            if relative_path:
+                request.data['file'] = relative_path
+
+            else:
+                print(error)
+
+                return request.send_error("ERR_002")
+                # request.data['file'] = upload_to + '/' + file.name
+
+        instance = self.queryset.model.objects.filter(stype=stype).first()
+        request_data = request.data.dict()
+
+        if instance:
+            request_data['id'] = instance.id
+
+            if not isFileChanged and 'file' in request_data:
+                del request_data['file']
+
+            result = save_data_with_signals(self.queryset.model, self.serializer_class, None, data=request_data)
+
+        else:
+            if 'id' in request_data:
+                del request_data['id']
+
+            result = save_data_with_signals(self.queryset.model, self.serializer_class, None, data=request_data)
+
+        instance = result[0]
+
+        if instance:
+
+            return request.send_info("INF_001")
+
+        print('put', result)
+
+        return request.send_error("ERR_002")
+
+    @login_required()
+    # @has_permission(must_permissions=['lms-settings-print-delete'])
+    def delete(self, request, pk=None):
+        """ Дүрэм журмын файл устгах """
+
+        if not pk:
+            print('no pk')
+
+            return request.send_error("ERR_002")
+
+        _, error = delete_objects_with_signals(self.queryset.model, [pk])
+
+        if error:
+            print('delete', error)
+
+            return request.send_error("ERR_002")
+
+        return request.send_info("INF_003")

@@ -3,12 +3,15 @@ import math
 import time
 import cyrtranslit
 import requests
+import traceback
 
 from datetime import date
 
 from random import randint
 from crontab import CronTab
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
+from typing import Dict, Optional
+from rest_framework import serializers
 
 from io import BytesIO
 import PIL.Image as Image
@@ -19,7 +22,7 @@ from django.core.mail import get_connection
 from django.db import connections
 from django.db import transaction
 
-from django.db.models import PositiveIntegerField
+from django.db.models import PositiveIntegerField, Model
 from django.db.models.functions import Cast
 
 from datetime import datetime, timedelta
@@ -1458,3 +1461,242 @@ def unit_static_datas():
     }
 
     return datas
+
+
+def save_data_with_signals(
+        model_class: Model,
+        custom_serializer: Optional[serializers.Serializer]=None,
+        trusted_data: Optional[Dict]=None,
+        **serializer_kwargs: dict
+    ):
+    """
+    if id provided in trusted_data or in data then it will update else create
+
+    Supports (extended serializer.save):
+    1. mass-creating or mass-updating
+    2. signals
+    3. serializer level validation
+    4. serializer autogeneration
+    5. id instead of instance
+    6. exceptions handling
+    7. transaction rollback
+    8. saving without serializer validation
+
+    example calls:
+    1. save_data_with_signals(MyModel, MySerializer, data=request.data)
+    2. save_data_with_signals(MyModel, None, data=request.data)
+
+    :param model_class: model where objects will be created or updated
+    :param custom_serializer: not required. serializer
+    :param trusted_data: data to save without serializer validation. If it is list then indexes should be same as in data
+    :param serializer_kwargs: standart serializer arguments
+
+    returns: tuple of:
+    1. standart return from serializer.save()
+    2. exception string
+    3. serializer.errors
+    """
+
+    instances = None
+    exception = None
+    serializer_errors = None
+
+    if custom_serializer:
+        SerializerClass = custom_serializer
+
+    else:
+        class MyModelSerializer(serializers.ModelSerializer):
+            class Meta:
+                model = model_class
+                fields = '__all__'
+
+        SerializerClass = MyModelSerializer
+
+    try:
+        serializer_validated_data = []
+
+        if serializer_kwargs:
+            serializer = SerializerClass(**serializer_kwargs)
+
+            if serializer.is_valid():
+                if not isinstance(serializer.validated_data, list):
+                    serializer_validated_data = [serializer_kwargs['data']]
+
+            else:
+                serializer_errors = serializer.errors
+
+        if not serializer_errors:
+            if not isinstance(trusted_data, list):
+                trusted_data = [trusted_data]
+
+            any_data = serializer_validated_data if serializer_validated_data else trusted_data if trusted_data else None
+
+            if any_data:
+                instances = []
+
+                with transaction.atomic():
+                    for index, record in enumerate(any_data):
+                        if serializer_validated_data:
+                            if trusted_data[0] != None:
+                                united_data = {**record, **trusted_data[index]}
+
+                            else:
+                                united_data = record
+
+                        else:
+                            united_data = record
+
+                        obj_id = united_data.get('id')
+
+                        if obj_id:
+                            record_obj = model_class.objects.get(id=obj_id)
+
+                            for attr, value in united_data.items():
+                                setattr(record_obj, attr, value)
+
+                        else:
+                            record_obj = model_class(**united_data)
+
+                        record_obj.save()
+                        instances.append(record_obj)
+
+    except Exception as e:
+        traceback.print_exc()
+        exception = e.__str__()
+
+    return instances, exception, serializer_errors
+
+
+def delete_objects_with_signals(model_class: Model, ids: list, **delete_kwargs: dict):
+    """
+    Supports (extended model.delete()):
+    1. mass-removing
+    2. signals
+    3. exceptions handling
+    4. transaction rollback
+
+    :param model_class: model from where objects will be deleted
+    :param ids: id list of objects
+    :param delete_kwargs: standart model.delete() arguments
+
+    returns: tuple of:
+    1. standart returns from model.delete() method in list
+    2. exception string
+    """
+
+    result = []
+    exception = None
+
+    try:
+        objects_to_delete = model_class.objects.filter(id__in=ids)
+
+        with transaction.atomic():
+            for obj in objects_to_delete:
+                result.append(obj.delete(**delete_kwargs))
+
+    except Exception as e:
+        traceback.print_exc()
+        exception = e.__str__()
+
+    return result, exception
+
+
+def get_file_full_cdn_url(url_parts):
+    """
+    builds cdn path that appended with given string list. Uses get_cdn_urls() and settings.MEDIA_URL
+
+    :param url_parts: string list to add at the end, after CDN schema, domain and other static url parts of CDN (e.g. https://example.com/files)
+
+    returns:
+    1. string: combined url
+    """
+
+    file_full_cdn_url = ''
+
+    if url_parts:
+        file_full_cdn_url = urlparse(get_cdn_urls())
+        file_full_cdn_url = f"{file_full_cdn_url.scheme}://{file_full_cdn_url.netloc}"
+        file_full_cdn_url = urljoin(file_full_cdn_url, settings.MEDIA_URL)
+
+        for url_part in url_parts:
+            cleaned_url_part = url_part.lstrip('/')
+            file_full_cdn_url = urljoin(file_full_cdn_url + '/', cleaned_url_part)
+
+    return file_full_cdn_url
+
+
+def create_file_in_cdn_silently(relative_path, file):
+    """
+    Supports:
+    - full path returning
+    - exceptions handling
+
+    :param relative_path: path without schema, domain and other static parts
+    :param file: file like type object
+
+    returns: tuple of:
+    1. string: relative path - standart return from create_file_to_cdn()['full_path'] method
+    2. string: full path
+    3. string: failure message
+    """
+
+    cdn_response = None
+    error = None
+
+    try:
+        cdn_response = create_file_to_cdn(relative_path, file)
+
+    except Exception as e:
+        error = e.__str__()
+
+    cdn_relative_path = None
+
+    """
+    NOTE: full_path from create_file_to_cdn() is not full. e.g. it not contains schema, domain
+    NOTE: column have limit 100 chars so real full path (e.g. with schema and domain) impossible to save. e.g. error: django.db.utils.DataError: value too long for type character varying(100)
+    """
+    if cdn_response and cdn_response.get('full_path'):
+        cdn_relative_path = cdn_response.get('full_path')
+
+    failure = None
+    cdn_full_path = None
+
+    if not cdn_relative_path:
+        failure = (f'File: {file.name}. Path: {relative_path}. Create error: {error}. CDN response: {cdn_response}')
+
+    else:
+        cdn_full_path = get_file_full_cdn_url([relative_path, file.name])
+
+    return cdn_relative_path, cdn_full_path, failure
+
+
+def delete_file_from_cdn_silently(file_path):
+    """
+    Supports:
+    - full path returning
+    - exceptions handling
+
+    :param relative_path: path without schema, domain and other static parts
+    :param file: file like type object
+
+    returns: tuple of:
+    1. string: relative path - standart return from create_file_to_cdn()['full_path'] method
+    2. string: full path
+    3. string: failure message
+    """
+
+    cdn_response = None
+    error = None
+
+    try:
+        cdn_response = remove_file_from_cdn(file_path)
+
+    except Exception as e:
+        error = e.__str__()
+
+    failure = None
+
+    if not cdn_response:
+        failure = (f'File: {file_path}. Delete error: {error}. CDN response: {cdn_response}')
+
+    return False if failure else True, failure

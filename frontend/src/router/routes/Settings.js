@@ -7,6 +7,7 @@ const Mail = lazy(() => import("@views/Settings/Mail"))
 const Permission = lazy(() => import("@views/Settings/Permission"))
 const Role = lazy(() => import("@views/Settings/Role"))
 const Able = lazy(() => import("@views/Settings/Able"))
+const Rule = lazy(() => import("@views/Settings/Rule"))
 
 
 const SettingsRoutes = [
@@ -37,6 +38,10 @@ const SettingsRoutes = [
     {
         path: 'settings/able/',
         element: <Able />
+    },
+    {
+        path: 'settings/rule/',
+        element: <Rule />
     },
 ]
 

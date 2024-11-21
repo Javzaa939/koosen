@@ -46,6 +46,12 @@ export default [
                 icon: <img style={{ marginRight: '10px' }} width={20} height={20} src={ableLogo} />,
                 navLink: "settings/able/"
             },
+            {
+                id: 'settingsLevel18',
+                title: 'Дүрэм журмын файл',
+                icon: <Circle size={8} />,
+                navLink: "settings/rule/"
+            },
         ]
     }
 ]
