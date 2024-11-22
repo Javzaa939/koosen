@@ -2,18 +2,16 @@ import { t } from "i18next"
 import { Fragment, useState, useContext, useEffect } from "react"
 import DataTable from "react-data-table-component"
 import { ChevronDown, Search, Plus } from "react-feather"
-import { Card, CardHeader, CardTitle, Col, Modal, Row, Input, Label, Button, Spinner } from "reactstrap"
+import { Card, CardHeader, CardTitle, Col, Row, Input, Label, Button, Spinner } from "reactstrap"
 import { getPagination } from '@utils'
-// import { getColumns } from './helpers'
 import AuthContext from '@context/AuthContext'
 import SchoolContext from '@context/SchoolContext'
-// import Createmodal from './Add'
 import useApi from "@hooks/useApi"
 import useLoader from '@hooks/useLoader';
 
-// import EditModal from './Edit'
+// import Createmodal from './Add'
+// import { getColumns } from './helpers'
 
-// import Detail from './Detail'
 
 const Time = () => {
 
@@ -24,9 +22,8 @@ const Time = () => {
     //Context
     const { user } = useContext(AuthContext)
     const { school_id } = useContext(SchoolContext)
-    const [edit_modal, setEditModal] = useState(false)
 
-    const [edit_id, setEditID] = useState('')
+    const [edit_id, setEditId] = useState('')
 
     //useState
     const [currentPage, setCurrentPage] = useState(1);
@@ -36,10 +33,8 @@ const Time = () => {
     const [modal, setModal] = useState(false);
     const [searchValue, setSearchValue] = useState("");
     const [sortField, setSort] = useState('')
-    const [ detailModalOpen, setDetailModalOpen ] = useState(false)
-    const [ detailModalData, setDetailModalData ] = useState({})
 
-    const stipendApi = useApi().stipend.register
+    const timeApi = useApi().browser.time
 
     async function getDatas() {
         const page_count = Math.ceil(total_count / rowsPerPage)
@@ -47,7 +42,7 @@ const Time = () => {
         if (page_count < currentPage && page_count != 0) {
             setCurrentPage(page_count)
         }
-        const { success, data } = await allFetch(stipendApi.get(rowsPerPage, currentPage, sortField, searchValue))
+        const { success, data } = await allFetch(timeApi.get(rowsPerPage, currentPage, sortField, searchValue))
         if (success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
@@ -63,16 +58,9 @@ const Time = () => {
 		setModal(!modal)
 	}
 
-    // Дэлгэрэнгүй харах хэсэг
-	async function handleRequestDetail(id, data)
-    {
-		setDetailModalOpen(!detailModalOpen)
-		setDetailModalData(data)
-	}
-
     /* Устгах функц */
 	const handleDelete = async(id) => {
-        const { success } = await fetchData(stipendApi.delete(id))
+        const { success } = await fetchData(timeApi.delete(id))
         if(success)
         {
             getDatas()
@@ -84,10 +72,6 @@ const Time = () => {
         setSearchValue(value)
     }
 
-    async function handleEditModal(id) {
-        setEditModal(!edit_modal)
-        setEditID(id)
-    }
 
 	useEffect(() => {
 		if (searchValue.length == 0) {
@@ -143,7 +127,7 @@ const Time = () => {
                         <Button
                             color='primary'
                             onClick={() => handleModal()}
-                            // disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-stipend-create') ? false : true}
+                            disabled={true}
                         >
                             <Plus size={15} />
                             <span className='align-middle ms-50'>{t('Нэмэх')}</span>
@@ -216,7 +200,7 @@ const Time = () => {
                             </div>
                         )}
                         onSort={handleSort}
-                        // columns={getColumns(currentPage, rowsPerPage, total_count, handleRequestDetail, handleEditModal, handleDelete, user)}
+                        // columns={getColumns(currentPage, rowsPerPage, total_count, handleEditModal, handleDelete, user)}
                         sortIcon={<ChevronDown size={10} />}
                         paginationPerPage={rowsPerPage}
                         paginationDefaultPage={currentPage}
@@ -227,9 +211,7 @@ const Time = () => {
                     />
                 </div>
             </Card>
-            {/* { detailModalOpen && <Detail isOpen={detailModalOpen} handleModal={handleRequestDetail} datas={detailModalData} /> }
-            {modal && <Createmodal open={modal} handleModal={handleModal} refreshDatas={getDatas}/>}
-            {edit_modal && <EditModal open={edit_modal} handleEdit={handleEditModal} edit_id={edit_id} refreshDatas={getDatas}/>} */}
+            {/* {modal && <Createmodal open={modal} handleModal={handleModal} refreshDatas={getDatas}/>} */}
         </Fragment>
     )
 }

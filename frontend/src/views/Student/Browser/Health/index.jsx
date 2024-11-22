@@ -4,16 +4,13 @@ import DataTable from "react-data-table-component"
 import { ChevronDown, Search, Plus } from "react-feather"
 import { Card, CardHeader, CardTitle, Col, Modal, Row, Input, Label, Button, Spinner } from "reactstrap"
 import { getPagination } from '@utils'
-// import { getColumns } from './helpers'
 import AuthContext from '@context/AuthContext'
 import SchoolContext from '@context/SchoolContext'
-// import Createmodal from './Add'
 import useApi from "@hooks/useApi"
 import useLoader from '@hooks/useLoader';
 
-// import EditModal from './Edit'
-
-// import Detail from './Detail'
+import { getColumns } from './helpers'
+import Createmodal from './Add'
 
 const Health = () => {
 
@@ -24,9 +21,8 @@ const Health = () => {
     //Context
     const { user } = useContext(AuthContext)
     const { school_id } = useContext(SchoolContext)
-    const [edit_modal, setEditModal] = useState(false)
 
-    const [edit_id, setEditID] = useState('')
+    const [edit_id, setEditId] = useState('')
 
     //useState
     const [currentPage, setCurrentPage] = useState(1);
@@ -36,10 +32,8 @@ const Health = () => {
     const [modal, setModal] = useState(false);
     const [searchValue, setSearchValue] = useState("");
     const [sortField, setSort] = useState('')
-    const [ detailModalOpen, setDetailModalOpen ] = useState(false)
-    const [ detailModalData, setDetailModalData ] = useState({})
 
-    const stipendApi = useApi().stipend.register
+    const healthApi = useApi().browser.health
 
     async function getDatas() {
         const page_count = Math.ceil(total_count / rowsPerPage)
@@ -47,7 +41,7 @@ const Health = () => {
         if (page_count < currentPage && page_count != 0) {
             setCurrentPage(page_count)
         }
-        const { success, data } = await allFetch(stipendApi.get(rowsPerPage, currentPage, sortField, searchValue))
+        const { success, data } = await allFetch(healthApi.get(rowsPerPage, currentPage, sortField, searchValue))
         if (success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
@@ -58,21 +52,25 @@ const Health = () => {
         getDatas()
     }, [sortField, currentPage, rowsPerPage])
 
-    /* Модал setState функц */
+        /* Нэмэх функц */
 	const handleModal = () => {
 		setModal(!modal)
+		if(modal){
+			setEditId()
+		}
 	}
 
-    // Дэлгэрэнгүй харах хэсэг
-	async function handleRequestDetail(id, data)
-    {
-		setDetailModalOpen(!detailModalOpen)
-		setDetailModalData(data)
-	}
+	// Засах функц
+    function handleUpdateModal(id) {
+		if(id){
+			setEditId(id)
+		}
+		handleModal()
+    }
 
     /* Устгах функц */
 	const handleDelete = async(id) => {
-        const { success } = await fetchData(stipendApi.delete(id))
+        const { success } = await fetchData(healthApi.delete(id))
         if(success)
         {
             getDatas()
@@ -82,11 +80,6 @@ const Health = () => {
     const handleFilter = e => {
         const value = e.target.value.trimStart();
         setSearchValue(value)
-    }
-
-    async function handleEditModal(id) {
-        setEditModal(!edit_modal)
-        setEditID(id)
     }
 
 	useEffect(() => {
@@ -216,7 +209,7 @@ const Health = () => {
                             </div>
                         )}
                         onSort={handleSort}
-                        // columns={getColumns(currentPage, rowsPerPage, total_count, handleRequestDetail, handleEditModal, handleDelete, user)}
+                        columns={getColumns(currentPage, rowsPerPage, total_count, handleUpdateModal, handleDelete, user)}
                         sortIcon={<ChevronDown size={10} />}
                         paginationPerPage={rowsPerPage}
                         paginationDefaultPage={currentPage}
@@ -227,9 +220,7 @@ const Health = () => {
                     />
                 </div>
             </Card>
-            {/* { detailModalOpen && <Detail isOpen={detailModalOpen} handleModal={handleRequestDetail} datas={detailModalData} /> }
-            {modal && <Createmodal open={modal} handleModal={handleModal} refreshDatas={getDatas}/>}
-            {edit_modal && <EditModal open={edit_modal} handleEdit={handleEditModal} edit_id={edit_id} refreshDatas={getDatas}/>} */}
+            {modal && <Createmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} editId={edit_id} handleEditModal={handleUpdateModal}/>}
         </Fragment>
     )
 }

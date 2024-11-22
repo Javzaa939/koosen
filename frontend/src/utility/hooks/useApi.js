@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 
 import SchoolContext from "@context/SchoolContext"
 import ActiveYearContext from '@context/ActiveYearContext'
+import { library } from "@fortawesome/fontawesome-svg-core";
 
 const multiPart = { headers: { 'content-type': 'multipart/form-data' } }
 function getCookie(name) {
@@ -1959,15 +1960,53 @@ function useApi(isDisplay=false) {
 			put: (datas, pk) => instance.put(`online_lesson/lesson_students/${pk}/`, datas),
 			delete: (student, pk) => instance.delete(`online_lesson/lesson_students/${pk}/?student=${student}`)
 		},
+
 		// суралцагчийн хөтөч
 		browser: {
-			get: (limit, page, sort, search) => instance.get(`browser/structure/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}`),
-			getOne: (pk) => instance.get(`browser/structure/${pk}/`),
-			post: (data) => instance.post('/browser/structure/', data),
-			put: (data, pk) => instance.put(`browser/structure/${pk}/`, data),
-			delete: (pk) => instance.delete(`browser/structure/${pk}/`),
+			get: (limit, page, sort, search) => instance.get(`/browser/structure/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}`),
+			getOne: (pk) => instance.get(`/browser/structure/${pk}/`),
+			post: (data) => instance.post(`/browser/structure/`, data),
+			put: (data, pk) => instance.put(`/browser/structure/${pk}/`, data),
+			delete: (pk) => instance.delete(`/browser/structure/${pk}/`),
 			getSalbarData: () => instance.get(`browser/salbar/`),
+
+			// суралцагчийн хөгжил
+			student_develop: {
+				get: (limit, page, sort, search) => instance.get(`/browser/develop/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}`),
+				getOne: (pk) => instance.get(`/browser/develop/${pk}/`),
+				post: (data) => instance.post(`/browser/develop/`, data),
+				put: (data, pk) => instance.put(`/browser/develop/${pk}/`, data),
+				delete: (pk) => instance.delete(`/browser/develop/${pk}/`),
+			},
+
+			// номын сан танилцуулга
+			library: {
+				get: (limit, page, sort, search) => instance.get(`/browser/library/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}`),
+				getOne: (pk) => instance.get(`/browser/library/${pk}/`),
+				post: (data) => instance.post(`/browser/library/`, data),
+				put: (data, pk) => instance.put(`/browser/library/${pk}/`, data),
+				delete: (pk) => instance.delete(`/browser/library/${pk}/`),
+			},
+
+			// сэтгэл зүйн булан
+			psycholocal: {
+				get: (limit, page, sort, search) => instance.get(`/browser/psycholocal/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}`),
+				getOne: (pk) => instance.get(`/browser/psycholocal/${pk}/`),
+				post: (data) => instance.post(`/browser/psycholocal/`, data),
+				put: (data, pk) => instance.put(`/browser/psycholocal/${pk}/`, data),
+				delete: (pk) => instance.delete(`/browser/psycholocal/${pk}/`),
+			},
+
+			// эрүүл мэнд
+			health: {
+				get: (limit, page, sort, search) => instance.get(`/browser/health/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}`),
+				getOne: (pk) => instance.get(`/browser/health/${pk}/`),
+				post: (data) => instance.post(`/browser/health/`, data),
+				put: (data, pk) => instance.put(`/browser/health/${pk}/`, data),
+				delete: (pk) => instance.delete(`/browser/health/${pk}/`),
+			},
 		},
+
 	}
 }
 

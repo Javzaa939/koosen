@@ -3,11 +3,14 @@ import { lazy } from "react";
 const Structure = lazy(() => import("@src/views/Student/Browser/Structure"))
 const Surgalt = lazy(() => import("@src/views/Student/Browser/Surgalt"))
 const Oyutni_hugjil = lazy(() => import("@src/views/Student/Browser/Oyutni_hugjil"))
-const Rules = lazy(() => import("@src/views/Student/Browser/Rules"))
+const Rules = lazy(() => import("@src/views/Student/Browser/Rule"))
 const Psychological = lazy(() => import("@src/views/Student/Browser/Psychological"))
 const Library = lazy(() => import("@src/views/Student/Browser/Library"))
-const Other = lazy(() => import("@src/views/Student/Browser/Other"))
 const Health = lazy(() => import("@src/views/Student/Browser/Health"))
+
+const NewsList = lazy(() => import("@views/Service"))
+const Show = lazy(() => import("@views/Service/Show"))
+
 
 const StudentBrowserRoutes = [
     {
@@ -38,9 +41,14 @@ const StudentBrowserRoutes = [
         path: 'browser/health/',
         element: <Health />
     },
+
     {
-        path: 'browser/other/',
-        element: <Other />
+        path: 'service',
+        element: <NewsList/>
+    },
+    {
+        path: 'service/show/:newsid',
+        element: <Show/>
     },
 ]
 

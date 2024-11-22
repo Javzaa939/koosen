@@ -12,9 +12,6 @@ import useApi from "@hooks/useApi"
 
 import { getColumns } from './helpers'
 import Createmodal from './Add'
-// import EditModal from './Edit'
-
-// import Detail from './Detail'
 
 const Structure = () => {
 
@@ -25,9 +22,8 @@ const Structure = () => {
     //Context
     const { user } = useContext(AuthContext)
     const { school_id } = useContext(SchoolContext)
-    const [edit_modal, setEditModal] = useState(false)
 
-    const [edit_id, setEditID] = useState('')
+    const [editId, setEditId] = useState('')
 
     //useState
     const [currentPage, setCurrentPage] = useState(1);
@@ -37,8 +33,7 @@ const Structure = () => {
     const [modal, setModal] = useState(false);
     const [searchValue, setSearchValue] = useState("");
     const [sortField, setSort] = useState('')
-    const [ detailModalOpen, setDetailModalOpen ] = useState(false)
-    const [ detailModalData, setDetailModalData ] = useState({})
+
 
     const browserApi = useApi().browser
 
@@ -59,13 +54,6 @@ const Structure = () => {
         getDatas()
     }, [sortField, currentPage, rowsPerPage])
 
-    // Дэлгэрэнгүй харах хэсэг
-	async function handleRequestDetail(id, data)
-    {
-		setDetailModalOpen(!detailModalOpen)
-		setDetailModalData(data)
-	}
-
     /* Устгах функц */
 	const handleDelete = async(id) => {
         const { success } = await fetchData(browserApi.delete(id))
@@ -78,17 +66,23 @@ const Structure = () => {
     /* Модал setState функц */
 	const handleModal = () => {
 		setModal(!modal)
+        if(modal){
+			setEditId()
+		}
 	}
+
+    // Засах функц
+    function handleUpdateModal(id) {
+        if(id){
+            setEditId(id)
+        }
+        handleModal()
+    }
+
     const handleFilter = e => {
         const value = e.target.value.trimStart();
         setSearchValue(value)
     }
-
-    async function handleEditModal(id) {
-        setEditModal(!edit_modal)
-        setEditID(id)
-    }
-
 	useEffect(() => {
 		if (searchValue.length == 0) {
 			getDatas();
@@ -216,7 +210,7 @@ const Structure = () => {
                             </div>
                         )}
                         onSort={handleSort}
-                        columns={getColumns(currentPage, rowsPerPage, total_count,handleDelete, handleEditModal, user)}
+                        columns={getColumns(currentPage, rowsPerPage, total_count, handleUpdateModal, handleDelete, user)}
                         sortIcon={<ChevronDown size={10} />}
                         paginationPerPage={rowsPerPage}
                         paginationDefaultPage={currentPage}
@@ -227,9 +221,7 @@ const Structure = () => {
                     />
                 </div>
             </Card>
-            {modal && <Createmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} editId={edit_id}/>}
-            {/* { detailModalOpen && <Detail isOpen={detailModalOpen} handleModal={handleRequestDetail} datas={detailModalData} /> }*/}
-            {/* {edit_modal && <EditModal open={edit_modal} handleEdit={handleEditModal} edit_id={edit_id} refreshDatas={getDatas}/>} */}
+            {modal && <Createmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} editId={editId} handleEditModal={handleUpdateModal}/>}
         </Fragment>
     )
 }

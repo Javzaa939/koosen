@@ -2,7 +2,7 @@ import { t } from "i18next"
 import { Fragment, useState, useContext, useEffect } from "react"
 import DataTable from "react-data-table-component"
 import { ChevronDown, Search, Plus } from "react-feather"
-import { Card, CardHeader, CardTitle, Col, Modal, Row, Input, Label, Button, Spinner } from "reactstrap"
+import { Card, CardHeader, CardTitle, Col, Row, Input, Label, Button, Spinner } from "reactstrap"
 import { getPagination } from '@utils'
 import AuthContext from '@context/AuthContext'
 import SchoolContext from '@context/SchoolContext'
@@ -11,9 +11,6 @@ import useLoader from '@hooks/useLoader';
 
 import Createmodal from './Add'
 import { getColumns } from './helpers'
-// import EditModal from './Edit'
-
-// import Detail from './Detail'
 
 const Oyutni_hugjil = () => {
 
@@ -24,9 +21,8 @@ const Oyutni_hugjil = () => {
     //Context
     const { user } = useContext(AuthContext)
     const { school_id } = useContext(SchoolContext)
-    const [edit_modal, setEditModal] = useState(false)
 
-    const [edit_id, setEditID] = useState('')
+    const [editId, setEditId] = useState('')
 
     //useState
     const [currentPage, setCurrentPage] = useState(1);
@@ -36,10 +32,8 @@ const Oyutni_hugjil = () => {
     const [modal, setModal] = useState(false);
     const [searchValue, setSearchValue] = useState("");
     const [sortField, setSort] = useState('')
-    const [ detailModalOpen, setDetailModalOpen ] = useState(false)
-    const [ detailModalData, setDetailModalData ] = useState({})
 
-    const stipendApi = useApi().stipend.register
+    const studentDevelopApi = useApi().browser.student_develop
 
     async function getDatas() {
         const page_count = Math.ceil(total_count / rowsPerPage)
@@ -47,7 +41,7 @@ const Oyutni_hugjil = () => {
         if (page_count < currentPage && page_count != 0) {
             setCurrentPage(page_count)
         }
-        const { success, data } = await allFetch(stipendApi.get(rowsPerPage, currentPage, sortField, searchValue))
+        const { success, data } = await allFetch(studentDevelopApi.get(rowsPerPage, currentPage, sortField, searchValue))
         if (success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
@@ -58,37 +52,35 @@ const Oyutni_hugjil = () => {
         getDatas()
     }, [sortField, currentPage, rowsPerPage])
 
-    /* Модал setState функц */
-	const handleModal = () => {
-		setModal(!modal)
-	}
-
-    // Дэлгэрэнгүй харах хэсэг
-	async function handleRequestDetail(id, data)
-    {
-		setDetailModalOpen(!detailModalOpen)
-		setDetailModalData(data)
-	}
-
     /* Устгах функц */
-	const handleDelete = async(id) => {
-        const { success } = await fetchData(stipendApi.delete(id))
+    const handleDelete = async(id) => {
+        const { success } = await fetchData(studentDevelopApi.delete(id))
         if(success)
         {
             getDatas()
         }
-	};
+    };
+
+    /* Модал setState функц */
+	const handleModal = () => {
+		setModal(!modal)
+        if(modal){
+			setEditId()
+		}
+	}
+
+    // Засах функц
+    function handleUpdateModal(id) {
+        if(id){
+            setEditId(id)
+        }
+        handleModal()
+    }
 
     const handleFilter = e => {
         const value = e.target.value.trimStart();
         setSearchValue(value)
     }
-
-    async function handleEditModal(id) {
-        setEditModal(!edit_modal)
-        setEditID(id)
-    }
-
 	useEffect(() => {
 		if (searchValue.length == 0) {
 			getDatas();
@@ -216,7 +208,7 @@ const Oyutni_hugjil = () => {
                             </div>
                         )}
                         onSort={handleSort}
-                        columns={getColumns(currentPage, rowsPerPage, total_count, handleRequestDetail, handleEditModal, handleDelete, user)}
+                        columns={getColumns(currentPage, rowsPerPage, total_count, handleUpdateModal, handleDelete, user)}
                         sortIcon={<ChevronDown size={10} />}
                         paginationPerPage={rowsPerPage}
                         paginationDefaultPage={currentPage}
@@ -227,9 +219,7 @@ const Oyutni_hugjil = () => {
                     />
                 </div>
             </Card>
-            {modal && <Createmodal open={modal} handleModal={handleModal} refreshDatas={getDatas}/>}
-            {/* { detailModalOpen && <Detail isOpen={detailModalOpen} handleModal={handleRequestDetail} datas={detailModalData} /> }
-            {edit_modal && <EditModal open={edit_modal} handleEdit={handleEditModal} edit_id={edit_id} refreshDatas={getDatas}/>} */}
+            {modal && <Createmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} editId={editId} handleEditModal={handleUpdateModal}/>}
         </Fragment>
     )
 }

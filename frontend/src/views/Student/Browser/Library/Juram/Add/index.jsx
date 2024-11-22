@@ -20,7 +20,6 @@ import SchoolContext from '@context/SchoolContext'
 import * as Yup from 'yup';
 import { useQuill } from 'react-quilljs';
 import 'quill/dist/quill.snow.css'
-// import '../style.css'
 
 const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}) => {
 
@@ -86,6 +85,7 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
     const getFile = (e, action) => {
         if (action == 'Get') {
             var files = e.target.files
+            console.log("files", files);
             setFile(files[0])
             setFileName(files[0]?.name)
         }
@@ -157,6 +157,7 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
                 if(data === null) return
                 for(let key in data) {
                     if(data[key] !== null && key !== 'file')
+                    // if(data[key] !== null)
                         setValue(key, data[key])
 
                     else setValue(key, '')
@@ -164,9 +165,6 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
                 if (key === 'body' && quill) {
                     quill.pasteHTML(data[key]);
                 }
-                // if(key === 'file'){
-                //     setFileName(data[key])
-                // }
             }
         }
     }
@@ -210,7 +208,7 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
                                         placeholder='гарчиг'
                                         invalid={errors.title && true}
                                     >
-                                    </Input>
+                                    </Input> 
                                 )}
                             />
                             {errors.title && <FormFeedback className='d-block'>{t(errors.title.message)}</FormFeedback>}

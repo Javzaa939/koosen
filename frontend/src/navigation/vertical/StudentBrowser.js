@@ -54,7 +54,7 @@ export default [
                 id: 'b8',
                 title: 'Бусад',
                 icon: <Circle size={8} />,
-                navLink: "browser/other/"
+                navLink: "service/"
             },
         ]
     },

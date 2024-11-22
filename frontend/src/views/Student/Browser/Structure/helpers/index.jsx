@@ -1,13 +1,13 @@
-import { Edit, X } from "react-feather";
+import { Edit, X} from "react-feather";
 
 import { t } from "i18next";
 
 import useModal from '@hooks/useModal';
 
-import { Badge, Button, Input, UncontrolledTooltip } from "reactstrap";
+import { Badge, UncontrolledTooltip } from "reactstrap";
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, datas, handleDelete, handleUpdateModal) {
+export function getColumns (currentPage, rowsPerPage, datas,  handleUpdateModal, handleDelete) {
 
     const page_count = Math.ceil(datas.length / rowsPerPage)
 
@@ -33,17 +33,17 @@ export function getColumns (currentPage, rowsPerPage, datas, handleDelete, handl
 		},
 		{
 			name: `${t('Файл')}`,
-			selector: (row) => row?.file,
+			selector: (row) => <a href={row?.file} className="ms-1">{row?.file.toString().split("/").pop()}</a>,
             sortable: true,
 			minWidth: "80px",
 			center: true
 		},
-		// {
-		// 	name: `${t('Өмнөх хичээлийн жил')}`,
-		// 	selector: (row) => row?.prev_lesson_year,
-		// 	minWidth: "150px",
-		// 	center: true
-		// },
+		{
+			name: `${t('линк')}`,
+			selector: (row) => <a href={row?.link} className="ms-1">{row?.link}</a>,
+			minWidth: "150px",
+			center: true
+		},
 	]
 
 // 	if(Object.keys(user).length > 0 && user.permissions.includes('lms-settings-аctiveyear-update'))
@@ -70,14 +70,13 @@ export function getColumns (currentPage, rowsPerPage, datas, handleDelete, handl
 					<a role="button"
 						onClick={() => showWarning({
 							header: {
-								title: t(`Устгах`),
+								title: t(`${row?.title} устгах`),
 							},
-							question: t(`Та энэ мэдээллийг устгахдаа итгэлтэй байна уу?`),
+							question: t(`Та ${row?.title} мэдээллийг устгахдаа итгэлтэй байна уу?`),
 							onClick: () => handleDelete(row?.id),
 							btnText: t('Устгах'),
 						})}
 						id={`delete${row?.id}`}
-						style={{ pointerEvents: row?.id && `none` }}
 					>
 						<Badge color="light-danger" pill><X width={"100px"} /></Badge>
 					</a>
