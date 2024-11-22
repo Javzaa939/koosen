@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 
-from lms.models import ProfessionalDegree
+from lms.models import ProfessionalDegree, Rule
 from lms.models import Learning
 from lms.models import StudentRegister
 from lms.models import LessonCategory
@@ -22,7 +22,7 @@ from lms.models import StudentGrade, OrgPosition
 from core.models import Permissions
 from core.models import Roles
 
-from main.utils.function.utils import get_week_num_from_date
+from main.utils.function.utils import get_file_full_cdn_url, get_week_num_from_date
 
 # Мэргэжлийн зэргийн serializer
 class ProfessionalDegreeSerializer(serializers.ModelSerializer):
@@ -245,6 +245,21 @@ class RolesListSerializer(serializers.ModelSerializer):
 
         return list(org_pos_ids)
 
+
+# Дүрэм журмын файл
+class RuleSerializer(serializers.ModelSerializer):
+    # to avoid serializer validation because file field is required
+    file = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Rule
+        fields = "__all__"
+
+    def get_file(self, obj):
+
+        return get_file_full_cdn_url([obj.file.name])
+
+
 # ---------------------- хэвлэх тохиргоо ----------------------
 
 class PrintSettingsListSerializer(serializers.ModelSerializer):
@@ -256,6 +271,7 @@ class PrintSettingsListSerializer(serializers.ModelSerializer):
 
     def get_type_name(self, obj):
         return obj.get_types_display()
+
 
 class PrintSettingsSerializer(serializers.ModelSerializer):
 

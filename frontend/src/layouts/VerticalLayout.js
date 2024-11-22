@@ -168,6 +168,9 @@ const VerticalLayout = (props) =>
                         /** Able */
                         // childrenDatas = checkPerm(childrenDatas, menus, true, 'settingsLevel17')
 
+                        /** Дүрэм журмын файл */
+                        childrenDatas = checkPerm(childrenDatas, menus, user.is_superuser, 'settingsLevel18')
+
                         /** ----------------------------- Хичээлийн хуваарь ---------------------------- */
 
                         /** Цагийн хуваарь */
