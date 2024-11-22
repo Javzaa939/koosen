@@ -3,7 +3,7 @@ import { lazy } from "react";
 const Structure = lazy(() => import("@src/views/Student/Browser/Structure"))
 const Surgalt = lazy(() => import("@src/views/Student/Browser/Surgalt"))
 const Oyutni_hugjil = lazy(() => import("@src/views/Student/Browser/Oyutni_hugjil"))
-const Rules = lazy(() => import("@src/views/Student/Browser/Rule"))
+const Rules = lazy(() => import("@views/Settings/Rule"))
 const Psychological = lazy(() => import("@src/views/Student/Browser/Psychological"))
 const Library = lazy(() => import("@src/views/Student/Browser/Library"))
 const Health = lazy(() => import("@src/views/Student/Browser/Health"))

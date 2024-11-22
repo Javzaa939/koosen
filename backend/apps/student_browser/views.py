@@ -26,6 +26,7 @@ from core.models import SubOrgs, Salbars
 from .serializers import StructureSerializer
 from .serializers import StructureListSerializer
 from .serializers import StudentDevelopSerializer
+# from .serializers import StudentDevelopListSerializer
 from .serializers import LibrarySerializer
 from .serializers import StudentPsycholocalSerializer
 from .serializers import HealthSerializer
@@ -159,39 +160,27 @@ class StudentStructureAPIView(
         return request.send_info("INF_003")
 
 class StudentListAPIView(
-    mixins.CreateModelMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
     generics.GenericAPIView
     ):
 
+    ''' Салбар сургуулиар хөтөлбөр харуулав '''
 
-    ''' Сургалтын хөтөлбөр, хичээлийн хуваарь '''
+    def get(self, request):
+        """ Сургалтын хөтөлбөр жагсаалт """
 
-    queryset = Salbars.objects.all()
+        qs_obj = []
+        sub_orgs = SubOrgs.objects.filter(org_id=1).order_by('id')
 
-    filter_backends = [SearchFilter]
-    search_fields = ['title']
+        for sub_org in sub_orgs:
 
-    def get(self, request, pk=None):
-        """ Сургалтын хөтөлбөр, хичээлийн хуваарь жагсаалт """
+            salbar_qs = Salbars.objects.filter(sub_orgs_id=sub_org.id).values('id', 'name')
 
-        # salbar_data = Salbars.objects.filter(org_id=pk).values('sub_orgs', 'name')
-        org_qs = SubOrgs.objects.filter(org_id=pk).values_list("id", "name")
-        print("org_qs", org_qs)
-
-        for qs in org_qs:
-            print("qs", qs)
-            # salbar_key = Salbars.objects.filter(org_id=pk).values_list('sub_orgs', 'sub_orgs__name', 'name')
-            # qs.append(salbar_key)
-
-        salbar_data = Salbars.objects.filter(org_id=pk).values_list('sub_orgs', 'sub_orgs__name', 'name')
-        print("salbar_data", salbar_data)
-
-        datas = list(salbar_data)
-        return request.send_data(datas)
+            qs_obj.append({
+                'sub_org_id': sub_org.id,
+                'sub_org_name': sub_org.name,
+                'salbars': list(salbar_qs)
+            })
+        return request.send_data(qs_obj)
 
 class StudentDevelopAPIView(
     mixins.CreateModelMixin,
@@ -224,7 +213,7 @@ class StudentDevelopAPIView(
 
     def get(self, request, pk=None):
         """  Суралцагчийн хөгжил жагсаалт """
-
+        # self.serializer_class = StudentDevelopListSerializer
         if pk:
             datas = self.retrieve(request, pk).data
             return request.send_data(datas)

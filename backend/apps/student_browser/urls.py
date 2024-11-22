@@ -10,7 +10,7 @@ urlpatterns = [
     path('structure/<int:pk>/', StudentStructureAPIView.as_view()),
 
     # Сургалтын хөтөлбөр
-    path('salbar/<int:pk>/', StudentListAPIView.as_view()),
+    path('salbar/', StudentListAPIView.as_view()),
 
     # Суралцагчын хөгжил
     path('develop/', StudentDevelopAPIView.as_view()),
