@@ -20,7 +20,6 @@ const Addmodal = ({ open, handleModal, refreshDatas, editId }) => {
     const CloseBtn = (
         <X className="cursor-pointer" size={15} onClick={handleModal} />
     )
-
     // ** Hook
     const { control, handleSubmit, formState: { errors }, reset, setError, setValue } = useForm(validate(validateSchema));
 

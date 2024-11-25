@@ -27,6 +27,8 @@ import Test from "./Test"
 import ElseltRoutes from "./Elselt"
 import PsychologicalTestingRoutes from "./PsychologicalTesting"
 import OnlineLessonRoutes from "./OnlineLesson";
+import StudentBrowserRoutes from "./StudentBrowser";
+
 // ** Layouts
 import BlankLayout from "@layouts/BlankLayout"
 import VerticalLayout from "@src/layouts/VerticalLayout"
@@ -76,6 +78,7 @@ const Routes = [
   ...ElseltRoutes,
   ...PsychologicalTestingRoutes,
   ...OnlineLessonRoutes,
+  ...StudentBrowserRoutes,
 ];
 
 const getRouteMeta = (route) => {

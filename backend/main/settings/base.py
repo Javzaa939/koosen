@@ -48,6 +48,7 @@ TIMETABLE = 'timetable/'
 CORRESPOND = 'correspond/'
 ASSIGNMENT = 'assignment/'
 HOMEWORK = 'homework/'
+SRTUCTURE = 'structure/'
 
 MUIS_HR_MEDIA_URL = 'http://hr.utilitysolution.mn/media/'
 

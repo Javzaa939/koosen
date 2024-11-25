@@ -88,7 +88,10 @@ urlpatterns = [
     path('elselt/', include("apps.elselt.urls")),
 
     # Онлайн хичээл
-     path('online_lesson/', include('apps.online_lesson.urls')),
+    path('online_lesson/', include('apps.online_lesson.urls')),
+
+    # Суралцагчийн хөтөч
+    path('browser/', include('apps.student_browser.urls')),
 ]
 
 if settings.DEBUG is False:

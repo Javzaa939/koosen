@@ -61,9 +61,9 @@ const VerticalLayout = (props) =>
             if(Object.keys(user).length > 0) {
                 let newMenu = []
                 navigation.forEach((menus) =>
-                {
-                    if (menus && menus.navChildren && menus.navChildren.length > 0 && user && Object.keys(user).length > 0)
                     {
+                    if (menus && menus.navChildren && menus.navChildren.length > 0 && user && Object.keys(user).length > 0)
+                        {
                         let childrenDatas = []
                         /** ----------------------------- Сургалт ---------------------------- */
 
@@ -365,6 +365,15 @@ const VerticalLayout = (props) =>
                         /** Хичээлийн материал */
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-lesson-material-read', 'onlinelesson2')
 
+                        /** ----------------------------- Суралцагчийн хөтөч цэс ---------------------------- */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-browser-structure-read', 'b1')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-browser-surgalt-read', 'b2')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-browser-rules-read', 'b3')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-browser-hugjil-read', 'b4')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-browser-bulan-read', 'b5')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-browser-library-read', 'b6')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-browser-health-read', 'b7')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-browser-other-read', 'b8')
 
                         let men = {
                             ...menus,
