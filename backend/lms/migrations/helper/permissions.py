@@ -1336,7 +1336,7 @@ permissions = [
     },
     {
         'name': 'lms-browser-hugjil-create',
-        'description' : 'Суралцагчийн хөгжил засах эрх'
+        'description' : 'Суралцагчийн хөгжил шинээр үүсгэх эрх'
     },
     {
         'name': 'lms-browser-hugjil-update',
@@ -1344,7 +1344,7 @@ permissions = [
     },
     {
         'name': 'lms-browser-hugjil-delete',
-        'description' : 'Суралцагчийн хөгжил засах эрх'
+        'description' : 'Суралцагчийн хөгжил устгах эрх'
     },
     # ------------------- Сэтгэл зүйн булан --------------
     {
@@ -1403,18 +1403,6 @@ permissions = [
     {
         'name': 'lms-browser-other-read',
         'description' : 'Бусад унших эрх'
-    },
-    {
-        'name': 'lms-browser-other-create',
-        'description' : 'Бусад шинээр үүсгэх эрх'
-    },
-    {
-        'name': 'lms-browser-other-update',
-        'description' : 'Бусад засах эрх'
-    },
-    {
-        'name': 'lms-browser-other-delete',
-        'description' : 'Бусад устгах эрх'
     },
 
 ]
