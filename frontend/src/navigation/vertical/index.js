@@ -46,7 +46,7 @@ export default [
   // ...TeacherEvaluation,
   // ...Request,
   // ...Order,
-  ...Service,
+  // ...Service,
   ...Print,
   // ...Report,
   ...Test,
