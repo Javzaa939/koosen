@@ -25,7 +25,6 @@ from core.models import SubOrgs, Salbars
 from .serializers import StructureSerializer
 from .serializers import StructureListSerializer
 from .serializers import StudentDevelopSerializer
-# from .serializers import StudentDevelopListSerializer
 from .serializers import LibrarySerializer
 from .serializers import StudentPsycholocalSerializer
 from .serializers import HealthSerializer
@@ -43,7 +42,7 @@ class StudentStructureAPIView(
 ):
     ''' Их сургуулийн бүтэц зохион байгуулалт '''
 
-    queryset = Structure.objects.all()
+    queryset = Structure.objects.all().order_by('-created_at')
     serializer_class = StructureSerializer
 
     pagination_class = CustomPagination
@@ -67,16 +66,15 @@ class StudentStructureAPIView(
     def post(self, request):
         " Их сургуулийн бүтэц зохион байгуулалт нэмэх "
 
-        data = request.data
+        data = request.data.dict()
         data = null_to_none(data)
         created_user = data.get('created_user')
 
         data['created_user']= created_user
 
         file = data.get('file')
-        if file:
-            #  file хадгалах
-            save_file(file, 'structure')
+        if not file:
+            return request.send_error("ERR_002", "Файл заавал оруулна уу.")
 
         serializer = self.get_serializer(data=data)
 
@@ -84,8 +82,7 @@ class StudentStructureAPIView(
             if serializer.is_valid():
                 with transaction.atomic():
                     self.perform_create(serializer)
-                    # if file:
-                    #     data = create_file_to_cdn(settings.STRUCTURE, file)
+
             else:
                 print(serializer.errors)
                 return request.send_error("ERR_002")
@@ -99,23 +96,22 @@ class StudentStructureAPIView(
     @has_permission(must_permissions=['lms-browser-structure-update'])
     def put(self, request, pk=None):
         " Их сургуулийн бүтэц зохион байгуулалт засах "
-
-        request_data = request.data
+        request_data = request.data.dict()
         print("request", request_data)
         file = request_data.get('file')
+
         request_data['updated_user'] = request_data.get('updated_user')
 
         instance = self.get_object()
         old_file = instance.file
-        serializer = self.get_serializer(instance, data=request_data, partial=True)
-
-        # файл хадгалса эсэх
+        serializer = self.get_serializer(instance, data=data, partial=True)
+        # файл хадгалсан эсэх
         if old_file:
             old_file_path = old_file.path
 
             old_file_name = os.path.basename(old_file_path)
-            if file != old_file_name:
-                remove_path = os.path.join(settings.MEDIA_ROOT, str(pk), old_file_name)
+            if file:
+                remove_path = os.path.join(settings.MEDIA_ROOT, old_file_name)
                 remove_folder(remove_path)
 
         if serializer.is_valid(raise_exception=False):

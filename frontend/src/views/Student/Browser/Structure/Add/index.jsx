@@ -1,5 +1,5 @@
 // ** React imports
-import React, { Fragment, useState, useContext, useEffect, useRef } from 'react'
+import React, { Fragment, useState, useContext, useEffect } from 'react'
 
 import { X } from "react-feather";
 
@@ -38,7 +38,6 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
 
     const [File, setFile] = useState(null)
     const [fileName, setFileName] = useState('')
-    const fileInputRef = useRef(null)
     const [error, setFileError] = useState('')
     const [files_name, setFileNames] = useState('')
 
@@ -57,7 +56,7 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
             setFileName(files[0]?.name)
         }
         else {
-            setFile(null)
+            setFile('Хоосон')
             setFileError('Хоосон')
         }
     }
@@ -220,7 +219,7 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
                                 }}
                             />
                             {
-                            File
+                                File
                                 &&
                                 <InputGroupText size="sm">
                                     <X role="button" color="red" size={15} onClick={(e) => getFile(e, 'Delete')}/>

@@ -19,21 +19,10 @@ class StructureSerializer(serializers.ModelSerializer):
 
 
 class StructureListSerializer(serializers.ModelSerializer):
-    # file = serializers.SerializerMethodField()
     class Meta:
         model = Structure
         fields = "__all__"
 
-    # def get_file(self, obj):
-    #     domain = get_domain_url()
-    #     print("domain", domain)
-
-    #     file_path = os.path.join(settings.MEDIA_URL, obj.file)
-    #     print("file_path", file_path)
-
-    #     return_url = '{domain}{path}'.format(domain=domain, path=file_path)
-    #     print("return_url", return_url)
-    #     return return_url
 class StudentDevelopSerializer(serializers.ModelSerializer):
     " Суралцагчийн хөгжил "
     class Meta:
