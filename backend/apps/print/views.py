@@ -188,9 +188,6 @@ class GpaAPIView(
 
     def get(self, request):
 
-        student_ids = []
-        stud_qs = self.queryset.values()
-
         lesson_year = request.query_params.get('lesson_year')
         lesson_season = request.query_params.get('lesson_season')
 
@@ -201,17 +198,9 @@ class GpaAPIView(
         if lesson_season:
             score_qs = score_qs.filter(lesson_season=lesson_season)
 
-        if stud_qs:
-            for qs in stud_qs:
-                student_id = qs.get('id')
+        score_student_ids = score_qs.values_list('student', flat=True)
 
-                score_list = score_qs.filter(student=student_id)
-
-                if not score_list:
-                    student_ids.append(student_id)
-
-        if student_ids:
-            self.queryset = self.queryset.exclude(id__in=student_ids)
+        self.queryset = self.queryset.filter(id__in=score_student_ids)
 
         all_data = self.list(request).data
 
