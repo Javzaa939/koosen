@@ -47,7 +47,7 @@ export function getColumns(currentPage, rowsPerPage, total_count) {
         {
             header: 'full_name',
             name: t("Овог Нэр"),
-            selector: (row) => `${row?.first_name} ${row?.last_name}`,
+            selector: (row) => `${row?.last_name} ${row?.first_name}`,
             sortable: true,
             center: true
         },
