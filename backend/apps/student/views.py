@@ -27,7 +27,7 @@ from main.utils.file import remove_folder, split_root_path
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 from main.utils.function.pagination import CustomPagination
-from main.utils.function.utils import str2bool, has_permission, get_lesson_choice_student, remove_key_from_dict, get_fullName, get_student_score_register, calculate_birthday, null_to_none, bytes_image_encode, get_active_year_season,start_time, json_load, dict_fetchall, unit_static_datas
+from main.utils.function.utils import str2bool, has_permission, get_lesson_choice_student, remove_key_from_dict, get_fullName, get_student_score_register, calculate_birthday, null_to_none, bytes_image_encode, get_active_year_season,start_time, json_load, dict_fetchall, unit_static_datas, undefined_to_none
 # from main.khur.XypClient import citizen_regnum, highschool_regnum
 from main.utils.file import save_file, remove_folder
 from lms.models import Learning, Payment, ProfessionalDegree, Student, StudentAdmissionScore, StudentEducation, StudentLeave, StudentLogin, TimeTable
@@ -4104,6 +4104,32 @@ class StudentDefinitionListLiteAPIView(
 
     filter_backends = [SearchFilter]
     search_fields = ['department__name', 'code', 'first_name', 'last_name', 'register_num']
+
+    def get_queryset(self):
+
+        queryset = self.queryset
+
+        group = self.request.query_params.get('group')
+        profession = self.request.query_params.get("profession")
+        department = self.request.query_params.get("department")
+        status = self.request.query_params.get("status")
+
+        # undefine утгыг none руу хөрвүүлэв
+        group, profession, department = undefined_to_none([group, profession, department])
+
+        if department:
+            queryset = queryset.filter(department=department)
+
+        if profession:
+            queryset = queryset.filter(group__profession_id=profession)
+
+        if group:
+            queryset = queryset.filter(group_id=group)
+
+        if status:
+            queryset = queryset.filter(status=status)
+
+        return queryset
 
     def get(self, request):
         "Оюутны бүртгэл жагсаалт"

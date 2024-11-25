@@ -1159,6 +1159,7 @@ class ScoreRegisterPrintAPIView(
 
         # Бүх year total
         total_kr_count = 0
+        total_skr_count = 0
         total_onoo_count = 0
         total_gpa_scores = 0
         total_gpa_count = 0
@@ -1201,6 +1202,7 @@ class ScoreRegisterPrintAPIView(
                 join_year = eachScore.student.group.join_year
                 degree_name = eachScore.student.group.degree.degree_name
                 full_names = get_fullName(eachScore.student.last_name + " овогтой " + eachScore.student.first_name, False, True )
+
                 # хичээлүүд
                 list_info.append({
                     "lesson_year":eachScore.lesson_year if eachScore.lesson_year else '',
@@ -1213,12 +1215,16 @@ class ScoreRegisterPrintAPIView(
                     "total_scores":total_scores if total_scores else 0,
                     "assessment":assessments if assessments else '',
                     "status_num":status_num if status_num else 0,
-                    "gpa": gpa
+                    "gpa": gpa,
+                    'grade_letter': eachScore.grade_letter.description if eachScore.grade_letter else ''
                 })
 
                 total_kr = total_kr + eachScore.lesson.kredit
                 onoo = onoo + total_scores * eachScore.lesson.kredit
                 total_gpa_scores = total_gpa_scores + (gpa * eachScore.lesson.kredit)
+
+                if eachScore.grade_letter:
+                    total_skr_count = total_skr_count + eachScore.lesson.kredit
 
             # дундаж олох нь
             if onoo != 0:
@@ -1257,8 +1263,13 @@ class ScoreRegisterPrintAPIView(
             # дундаж олох нь
             total_onoo_avg = round(total_onoo_count / total_kr_count, 2)
 
+        estimate_count = total_kr_count - total_skr_count
+        print('estimate_count', estimate_count)
+        print('total_kr_count', total_kr_count)
+        print('total_skr_count', total_skr_count)
+        print('total_gpa_scores', total_gpa_scores)
         if total_gpa_scores != 0.0:
-            niit_gpa = round((total_gpa_scores / total_kr_count), 1)
+            niit_gpa = round((total_gpa_scores / estimate_count), 1)
 
         total.append({
             "all_total":

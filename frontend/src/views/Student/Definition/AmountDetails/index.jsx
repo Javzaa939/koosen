@@ -209,12 +209,22 @@ export default function AmountDetails()
                                                                 <td className="border-dark">
                                                                     {lesson?.exam_score}
                                                                 </td>
-                                                                <td className="border-dark">
-                                                                    {lesson?.total_scores}
-                                                                </td>
-                                                                <td className="border-dark">
-                                                                    {lesson?.assessment}
-                                                                </td>
+                                                                {
+                                                                    lesson?.grade_letter
+                                                                    ?
+                                                                    <td className="border-dark" colSpan={2}>
+                                                                        {lesson?.grade_letter}
+                                                                    </td>
+                                                                    :
+                                                                    <>
+                                                                        <td className="border-dark">
+                                                                            {lesson?.total_scores}
+                                                                        </td>
+                                                                        <td className="border-dark">
+                                                                            {lesson?.assessment}
+                                                                        </td>
+                                                                    </>
+                                                                }
                                                                 <td className="border-dark">
                                                                     {chanarHandler(lesson?.lesson_kr, lesson?.gpa)}
                                                                 </td>
