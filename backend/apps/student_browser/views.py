@@ -1,7 +1,6 @@
 import os
 from rest_framework import mixins
 from rest_framework import generics
-from rest_framework import serializers
 
 from django.db import transaction
 from django.conf import settings
@@ -12,8 +11,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 from main.utils.function.pagination import CustomPagination
 
-from main.utils.function.utils import has_permission, null_to_none, create_file_to_cdn, remove_file_from_cdn, get_file_from_cdn, str2bool
-from main.utils.file import save_file, split_root_path
+from main.utils.function.utils import null_to_none
+from main.utils.file import save_file
 from rest_framework.filters import SearchFilter
 
 from lms.models import Structure
@@ -120,24 +119,7 @@ class StudentStructureAPIView(
                 remove_path = os.path.join(settings.MEDIA_ROOT, str(pk), old_file_name)
                 remove_folder(remove_path)
 
-
-        # Файлыг засах үед хуучин файлыг устгадаг болсон
-        # if instance.file:
-        #     path = split_root_path(instance.file.path)
-        #     remove_file = os.path.join(settings.CDN_MAIN_FOLDER, settings.STRUCTURE, path)
-
-        #     cdn_data = get_file_from_cdn(remove_file)
-        # #     success = cdn_data.get('success')
-
-        #     if success:
-        #         # Хэрвээ cdn дээр тухайн файл үүссэн байвал устгана
-        #         remove_file_from_cdn(remove_file)
-
-    # data = create_file_to_cdn(settings.STRUCTURE, file)
-
         if serializer.is_valid(raise_exception=False):
-
-
             self.perform_update(serializer)
             return request.send_info('INF_002')
         else:
@@ -159,12 +141,12 @@ class StudentStructureAPIView(
         self.destroy(request, pk)
         return request.send_info("INF_003")
 
+
+@permission_classes([IsAuthenticated])
 class StudentListAPIView(
     generics.GenericAPIView
-    ):
-
+):
     ''' Салбар сургуулиар хөтөлбөр харуулав '''
-
     def get(self, request):
         """ Сургалтын хөтөлбөр жагсаалт """
 
@@ -174,7 +156,6 @@ class StudentListAPIView(
         for sub_org in sub_orgs:
 
             salbar_qs = Salbars.objects.filter(sub_orgs_id=sub_org.id).values('id', 'name')
-
             qs_obj.append({
                 'sub_org_id': sub_org.id,
                 'sub_org_name': sub_org.name,
@@ -182,6 +163,8 @@ class StudentListAPIView(
             })
         return request.send_data(qs_obj)
 
+
+@permission_classes([IsAuthenticated])
 class StudentDevelopAPIView(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
@@ -191,6 +174,8 @@ class StudentDevelopAPIView(
     generics.GenericAPIView
 ):
     """ Суралцагчийн хөгжил """
+
+
 
 @permission_classes([IsAuthenticated])
 class StudentDevelopAPIView(
@@ -260,7 +245,6 @@ class StudentDevelopAPIView(
 
         request_data = request.data
         file = request_data.get('file')
-        print("file", file)
 
         instance = self.queryset.filter(id=pk).first()
         old_file = instance.file
@@ -296,6 +280,7 @@ class StudentDevelopAPIView(
 
         self.destroy(request, pk)
         return request.send_info("INF_003")
+
 
 @permission_classes([IsAuthenticated])
 class StudentLibraryAPIView(
@@ -376,9 +361,11 @@ class StudentLibraryAPIView(
 
         self.destroy(request, pk)
         return request.send_info("INF_003")
-    
 
-class StudentPsycholocalAPIView( mixins.CreateModelMixin,
+
+@permission_classes([IsAuthenticated])
+class StudentPsycholocalAPIView(
+    mixins.CreateModelMixin,
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
@@ -456,6 +443,7 @@ class StudentPsycholocalAPIView( mixins.CreateModelMixin,
         return request.send_info("INF_003")
 
 
+@permission_classes([IsAuthenticated])
 class HealthAPIView(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
