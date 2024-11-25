@@ -1292,36 +1292,129 @@ permissions = [
 
     # --------------------- Суралцагчийн хөтөч ------------------------
     {
-        'name': 'lms-browser-structure',
-        'description' : 'Их сургуулийн бүтэц зохион байгуулалт цэс унших эрх'
+        'name': 'lms-browser-structure-read',
+        'description' : 'Их сургуулийн бүтэц зохион байгуулалт унших эрх'
     },
     {
-        'name': 'lms-browser-surgalt',
+        'name' : 'lms-browser-structure-create',
+        'description' : 'Их сургуулийн бүтэц зохион байгуулалт шинээр үүсгэх эрх'
+    },
+    {
+        'name' : 'lms-browser-structure-update',
+        'description' : 'Их сургуулийн бүтэц зохион байгуулалт засах эрх'
+    },
+    {
+        'name' : 'lms-browser-structure-delete',
+        'description' : 'Их сургуулийн бүтэц зохион байгуулалт устгах эрх'
+    },
+    # ---------------- Сургалтын хөтөлбөр, хичээлийн хуваарь -------
+    {
+        'name': 'lms-browser-surgalt-read',
         'description' : 'Сургалтын хөтөлбөр, хичээлийн хуваарь цэс унших эрх'
     },
     {
-        'name': 'lms-browser-rules',
-        'description' : 'Дүрэм журам цэс унших эрх'
+        'name' : 'lms-browser-structure-create',
+        'description' : 'Сургалтын хөтөлбөр, хичээлийн хуваарь шинээр үүсгэх эрх'
     },
     {
-        'name': 'lms-browser-hugjil',
+        'name' : 'lms-browser-structure-update',
+        'description' : 'Сургалтын хөтөлбөр, хичээлийн хуваарь засах эрх'
+    },
+    {
+        'name' : 'lms-browser-structure-delete',
+        'description' : 'Сургалтын хөтөлбөр, хичээлийн хуваарь устгах эрх'
+    },
+    #------------------- Дүрэм журам -----------------------
+    {
+        'name': 'lms-browser-rules-read',
+        'description' : 'Дүрэм журам цэс унших эрх'
+    },
+    # -------------------- Суралцагчийн хөгжил ------------
+    {
+        'name': 'lms-browser-hugjil-read',
         'description' : 'Суралцагчийн хөгжил унших эрх'
     },
     {
-        'name': 'lms-browser-bulan',
+        'name': 'lms-browser-hugjil-create',
+        'description' : 'Суралцагчийн хөгжил засах эрх'
+    },
+    {
+        'name': 'lms-browser-hugjil-update',
+        'description' : 'Суралцагчийн хөгжил засах эрх'
+    },
+    {
+        'name': 'lms-browser-hugjil-delete',
+        'description' : 'Суралцагчийн хөгжил засах эрх'
+    },
+    # ------------------- Сэтгэл зүйн булан --------------
+    {
+        'name': 'lms-browser-bulan-read',
         'description' : 'Сэтгэл зүйн булан унших эрх'
     },
     {
-        'name': 'lms-browser-library',
-        'description' : 'Номын сан'
+        'name': 'lms-browser-bulan-create',
+        'description' : 'Сэтгэл зүйн булан шинээр үүсгэх эрх'
     },
     {
-        'name': 'lms-browser-healt',
-        'description' : 'Эрүүл мэнд'
+        'name': 'lms-browser-bulan-update',
+        'description' : 'Сэтгэл зүйн булан засах эрх'
     },
     {
-        'name': 'lms-browser-other',
-        'description' : 'Бусад'
+        'name': 'lms-browser-bulan-delete',
+        'description' : 'Сэтгэл зүйн булан устгах эрх'
+    },
+    # --------------------- Номын сан ------------
+    {
+        'name': 'lms-browser-library-read',
+        'description' : 'Номын сан унших эрх'
+    },
+    {
+        'name': 'lms-browser-library-create',
+        'description' : 'Номын сан шинээр үүсгэх эрх'
+    },
+    {
+        'name': 'lms-browser-library-update',
+        'description' : 'Номын сан засах эрх'
+    },
+    {
+        'name': 'lms-browser-library-delete',
+        'description' : 'Номын сан устгах эрх'
+    },
+
+    # -------------------- Эрүүл мэнд -------
+    {
+        'name': 'lms-browser-health-read',
+        'description' : 'Эрүүл мэнд унших эрх'
+    },
+    {
+        'name': 'lms-browser-health-create',
+        'description' : 'Эрүүл мэнд шинээр үүсгэх эрх'
+    },
+    {
+        'name': 'lms-browser-health-update',
+        'description' : 'Эрүүл мэнд засах эрх'
+    },
+    {
+        'name': 'lms-browser-health-delete',
+        'description' : 'Эрүүл мэнд устгах эрх'
+    },
+
+    # --------------------- Бусад --------------
+    {
+        'name': 'lms-browser-other-read',
+        'description' : 'Бусад унших эрх'
+    },
+    {
+        'name': 'lms-browser-other-create',
+        'description' : 'Бусад шинээр үүсгэх эрх'
+    },
+    {
+        'name': 'lms-browser-other-update',
+        'description' : 'Бусад засах эрх'
+    },
+    {
+        'name': 'lms-browser-other-delete',
+        'description' : 'Бусад устгах эрх'
     },
 
 ]

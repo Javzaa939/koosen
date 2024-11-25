@@ -365,22 +365,14 @@ const VerticalLayout = (props) =>
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-lesson-material-read', 'onlinelesson2')
 
                         /** ----------------------------- Суралцагчийн хөтөч цэс ---------------------------- */
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-lesson-material-read', 'b1')
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-lesson-material-read', 'b2')
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-lesson-material-read', 'b3')
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-lesson-material-read', 'b4')
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-lesson-material-read', 'b5')
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-lesson-material-read', 'b6')
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-lesson-material-read', 'b7')
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-lesson-material-read', 'b8')
-                        // childrenDatas = checkPerm(childrenDatas, menus, 'lms-browser-taniltsuulga', 'b1')
-                        // childrenDatas = checkPerm(childrenDatas, menus, 'lms-browser-surgalt', 'b2')
-                        // childrenDatas = checkPerm(childrenDatas, menus, 'lms-browser-rules', 'b3')
-                        // childrenDatas = checkPerm(childrenDatas, menus, 'lms-browser-hugjil', 'b4')
-                        // childrenDatas = checkPerm(childrenDatas, menus, 'lms-browser-bulan', 'b5')
-                        // childrenDatas = checkPerm(childrenDatas, menus, 'lms-browser-library', 'b6')
-                        // childrenDatas = checkPerm(childrenDatas, menus, 'lms-browser-healt', 'b7')
-                        // childrenDatas = checkPerm(childrenDatas, menus, 'lms-browser-other', 'b8')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-browser-structure-read', 'b1')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-browser-surgalt-read', 'b2')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-browser-rules-read', 'b3')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-browser-hugjil-read', 'b4')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-browser-bulan-read', 'b5')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-browser-library-read', 'b6')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-browser-health-read', 'b7')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-browser-other-read', 'b8')
 
                         let men = {
                             ...menus,
