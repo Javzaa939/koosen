@@ -102,7 +102,8 @@ class StudentStructureAPIView(
     def put(self, request, pk=None):
         " Их сургуулийн бүтэц зохион байгуулалт засах "
 
-        request_data = request.data
+        request_data = request.data.dict()
+        print("request", request_data)
         file = request_data.get('file')
 
         instance = self.queryset.filter(id=pk).first()
@@ -123,7 +124,23 @@ class StudentStructureAPIView(
             self.perform_update(serializer)
             return request.send_info('INF_002')
         else:
-            return request.send_error_valid(serializer.errors)
+            # return request.send_error_valid(serializer.errors)
+            error_obj = []
+            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
+            for key in serializer.errors:
+                msg = "Хоосон байна"
+
+                return_error = {
+                    "field": key,
+                    "msg": msg
+                }
+
+                error_obj.append(return_error)
+
+            if len(error_obj) > 0:
+                return request.send_error("ERR_003", error_obj)
+
+            return request.send_error("ERR_002")
 
     @has_permission(must_permissions=['lms-browser-structure-delete'])
     def delete(self, request, pk=None):

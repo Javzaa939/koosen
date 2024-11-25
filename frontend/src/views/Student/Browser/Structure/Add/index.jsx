@@ -40,6 +40,7 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
     const [fileName, setFileName] = useState('')
     const fileInputRef = useRef(null)
     const [error, setFileError] = useState('')
+    const [files_name, setFileNames] = useState('')
 
 
 	// Loader
@@ -70,16 +71,18 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
         const formData = new FormData()
 
         if (File) {
-            for (let key in cdata) {
-                formData.append(key, cdata[key])
-            }
-                formData.append('file', File)
-            }
+        for (let key in cdata) {
+            formData.append(key, cdata[key])
+        }
+            formData.append('file', File)
+        }
         else {
             cdata['file'] = File
         }
+
+
         if(editId){
-            const { success, errors } = await fetchData(browserApi.put(File ? formData : cdata, editId))
+            const { success, errors } = await fetchData(browserApi.put(formData, editId))
             if(success) {
                 reset()
                 refreshDatas()
@@ -117,17 +120,14 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
             const { success, data } = await fetchData(browserApi.getOne(editId))
             if(success) {
                 // засах үед дата байх юм бол setValue-р дамжуулан утгыг харуулна
+                setFileNames(data?.file.toString().split("/").pop())
                 if(data === null) return
                 for(let key in data) {
                     if(data[key] !== null && key !== 'file')
-                    // if(data[key] !== null)
                         setValue(key, data[key])
 
                     else setValue(key, '')
                 }
-                // if(key == 'file'){
-                //     setFileName(data[key])
-                // }
             }
         }
 
@@ -233,7 +233,11 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
                             }
                             </InputGroup>
                             {
-                                fileName &&
+                                // editId ?
+                                //     <p className="mb-0" style={{fontSize: '12px'}}>
+                                //         <b className="me-1">Файл нэр: </b>{files_name}
+                                //     </p>
+                                // :
                                     <p className="mb-0" style={{fontSize: '12px'}}>
                                         <b className="me-1">Файл нэр: </b>{fileName}
                                     </p>
