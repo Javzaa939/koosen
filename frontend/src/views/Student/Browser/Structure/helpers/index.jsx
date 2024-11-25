@@ -58,20 +58,19 @@ export function getColumns (currentPage, rowsPerPage, datas,  handleUpdateModal,
 			minWidth: "180px",
 			selector: (row) => (
 				<>
-					{
+					{/* {
 						<a
 							id={`activeYearUpdate${row?.id}`}
 							onClick={
 								() => handleUpdateModal(row?.id)
 							}
 							className="me-50"
-							style={{ pointerEvents: row?.season_type !== 2 && `none` }}
 						>
 
 							<Badge color="light-secondary" pill><Edit  width={"15px"} /></Badge>
 						</a>
 					}
-					<UncontrolledTooltip placement='top' target={`activeYearUpdate${row?.id}`} >Засах</UncontrolledTooltip>
+					<UncontrolledTooltip placement='top' target={`activeYearUpdate${row?.id}`} >Засах</UncontrolledTooltip> */}
 					{	user.permissions.includes('lms-browser-structure-delete') &&
 						<>
 						<a role="button"
