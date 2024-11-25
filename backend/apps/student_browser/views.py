@@ -11,7 +11,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 from main.utils.function.pagination import CustomPagination
 
-from main.utils.function.utils import null_to_none
+from main.utils.function.utils import null_to_none, has_permission
 from main.utils.file import save_file
 from rest_framework.filters import SearchFilter
 
@@ -51,7 +51,7 @@ class StudentStructureAPIView(
     filter_backends = [SearchFilter]
     search_fields = ['title']
 
-    # @has_permission(must_permissions=['lms-service-news-read'])
+    @has_permission(must_permissions=['lms-browser-structure-read'])
     def get(self, request, pk=None):
         """ Их сургуулийн бүтэц зохион байгуулалт жагсаалт """
         self.serializer_class = StructureListSerializer
@@ -63,7 +63,7 @@ class StudentStructureAPIView(
         return_data = self.list(request).data
         return request.send_data(return_data)
 
-    # @has_permission(must_permissions=['lms-service-news-create'])
+    @has_permission(must_permissions=['lms-browser-structure-create'])
     def post(self, request):
         " Их сургуулийн бүтэц зохион байгуулалт нэмэх "
 
@@ -98,7 +98,7 @@ class StudentStructureAPIView(
 
         return request.send_info("INF_001")
 
-    # @has_permission(must_permissions=['lms-service-news-update'])
+    @has_permission(must_permissions=['lms-browser-structure-update'])
     def put(self, request, pk=None):
         " Их сургуулийн бүтэц зохион байгуулалт засах "
 
@@ -125,7 +125,7 @@ class StudentStructureAPIView(
         else:
             return request.send_error_valid(serializer.errors)
 
-    # @has_permission(must_permissions=['lms-service-news-delete'])
+    @has_permission(must_permissions=['lms-browser-structure-delete'])
     def delete(self, request, pk=None):
         """Их сургуулийн бүтэц зохион байгуулалт устгах """
 
@@ -173,19 +173,6 @@ class StudentDevelopAPIView(
     mixins.DestroyModelMixin,
     generics.GenericAPIView
 ):
-    """ Суралцагчийн хөгжил """
-
-
-
-@permission_classes([IsAuthenticated])
-class StudentDevelopAPIView(
-    mixins.CreateModelMixin,
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.UpdateModelMixin,
-    mixins.DestroyModelMixin,
-    generics.GenericAPIView
-):
     '''  Суралцагчийн хөгжил '''
 
     queryset = StudentDevelop.objects.all().order_by('-created_at')
@@ -196,6 +183,8 @@ class StudentDevelopAPIView(
     filter_backends = [SearchFilter]
     search_fields = ['title']
 
+
+    @has_permission(must_permissions=['lms-browser-hugjil-read'])
     def get(self, request, pk=None):
         """  Суралцагчийн хөгжил жагсаалт """
         # self.serializer_class = StudentDevelopListSerializer
@@ -206,6 +195,7 @@ class StudentDevelopAPIView(
         return_data = self.list(request).data
         return request.send_data(return_data)
 
+    @has_permission(must_permissions=['lms-browser-hugjil-create'])
     def post(self, request):
         "  Суралцагчийн хөгжил нэмэх "
 
@@ -239,7 +229,7 @@ class StudentDevelopAPIView(
 
         return request.send_info("INF_001")
 
-
+    @has_permission(must_permissions=['lms-browser-hugjil-update'])
     def put(self, request, pk=None):
         "  Суралцагчийн хөгжил засах "
 
@@ -265,7 +255,7 @@ class StudentDevelopAPIView(
         else:
             return request.send_error_valid(serializer.errors)
 
-
+    @has_permission(must_permissions=['lms-browser-hugjil-delete'])
     def delete(self, request, pk=None):
         """ Суралцагчийн хөгжил устгах """
 
@@ -301,6 +291,7 @@ class StudentLibraryAPIView(
     filter_backends = [SearchFilter]
     search_fields = ['title']
 
+    @has_permission(must_permissions=['lms-browser-library-read'])
     def get(self, request, pk=None):
         """  Номын сан танилуулга жагсаалт """
 
@@ -311,6 +302,7 @@ class StudentLibraryAPIView(
         return_data = self.list(request).data
         return request.send_data(return_data)
 
+    @has_permission(must_permissions=['lms-browser-library-create'])
     def post(self, request):
         "  Номын сан танилуулга нэмэх "
 
@@ -339,7 +331,7 @@ class StudentLibraryAPIView(
 
         return request.send_info("INF_001")
 
-
+    @has_permission(must_permissions=['lms-browser-library-update'])
     def put(self, request, pk=None):
         "  Номын сан танилуулга засах "
 
@@ -355,7 +347,7 @@ class StudentLibraryAPIView(
         else:
             return request.send_error_valid(serializer.errors)
 
-
+    @has_permission(must_permissions=['lms-browser-library-delete'])
     def delete(self, request, pk=None):
         """ Номын сан танилуулга устгах """
 
@@ -382,6 +374,7 @@ class StudentPsycholocalAPIView(
     filter_backends = [SearchFilter]
     search_fields = ['title']
 
+    @has_permission(must_permissions=['lms-browser-bulan-read'])
     def get(self, request, pk=None):
         """  Сэтгэл зүйн булан жагсаалт """
 
@@ -392,6 +385,7 @@ class StudentPsycholocalAPIView(
         return_data = self.list(request).data
         return request.send_data(return_data)
 
+    @has_permission(must_permissions=['lms-browser-bulan-create'])
     def post(self, request):
         " Сэтгэл зүйн булан нэмэх "
 
@@ -420,7 +414,7 @@ class StudentPsycholocalAPIView(
 
         return request.send_info("INF_001")
 
-
+    @has_permission(must_permissions=['lms-browser-bulan-update'])
     def put(self, request, pk=None):
         "  Сэтгэл зүйн булан засах "
 
@@ -435,7 +429,7 @@ class StudentPsycholocalAPIView(
         else:
             return request.send_error_valid(serializer.errors)
 
-
+    @has_permission(must_permissions=['lms-browser-bulan-delete'])
     def delete(self, request, pk=None):
         """ Сэтгэл зүйн булан устгах """
 
@@ -462,6 +456,9 @@ class HealthAPIView(
     filter_backends = [SearchFilter]
     search_fields = ['title']
 
+
+
+    @has_permission(must_permissions=['lms-browser-health-read'])
     def get(self, request, pk=None):
         """  Эрүүл мэнд жагсаалт """
 
@@ -472,6 +469,7 @@ class HealthAPIView(
         return_data = self.list(request).data
         return request.send_data(return_data)
 
+    @has_permission(must_permissions=['lms-browser-health-create'])
     def post(self, request):
         " Эрүүл мэнд нэмэх "
 
@@ -500,7 +498,7 @@ class HealthAPIView(
 
         return request.send_info("INF_001")
 
-
+    @has_permission(must_permissions=['lms-browser-health-update'])
     def put(self, request, pk=None):
         "  Эрүүл мэнд засах "
 
@@ -515,7 +513,7 @@ class HealthAPIView(
         else:
             return request.send_error_valid(serializer.errors)
 
-
+    @has_permission(must_permissions=['lms-browser-health-delete'])
     def delete(self, request, pk=None):
         """ Эрүүл мэнд устгах """
 
