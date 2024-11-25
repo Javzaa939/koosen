@@ -53,7 +53,6 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
     const getFile = (e, action) => {
         if (action == 'Get') {
             var files = e.target.files
-            console.log("files", files);
             setFile(files[0])
             setFileName(files[0]?.name)
         }
@@ -63,7 +62,6 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
         }
     }
 
-
     // Хадгалах
 	async function onSubmit(cdata) {
         cdata = convertDefaultValue(cdata)
@@ -71,18 +69,18 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
         const formData = new FormData()
 
         if (File) {
-        for (let key in cdata) {
-            formData.append(key, cdata[key])
-        }
+            for (let key in cdata) {
+                formData.append(key, cdata[key])
+            }
             formData.append('file', File)
         }
         else {
             cdata['file'] = File
         }
-
+        cdata['updated_user'] = user.id
 
         if(editId){
-            const { success, errors } = await fetchData(browserApi.put(formData, editId))
+            const { success, errors } = await fetchData(browserApi.put(File ? formData : cdata, editId))
             if(success) {
                 reset()
                 refreshDatas()
@@ -97,7 +95,6 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
         }
         else{
             cdata['created_user'] = user.id
-            cdata['updated_user'] = user.id
             const { success, errors } = await postFetch(browserApi.post(formData))
             if(success) {
                 reset()
@@ -222,10 +219,8 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
                                     )
                                 }}
                             />
-                            {error
-                                &&
-                                <FormFeedback className='d-block'>{t(error)}</FormFeedback>}
-                            {File
+                            {
+                            File
                                 &&
                                 <InputGroupText size="sm">
                                     <X role="button" color="red" size={15} onClick={(e) => getFile(e, 'Delete')}/>
@@ -233,11 +228,11 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
                             }
                             </InputGroup>
                             {
-                                // editId ?
-                                //     <p className="mb-0" style={{fontSize: '12px'}}>
-                                //         <b className="me-1">Файл нэр: </b>{files_name}
-                                //     </p>
-                                // :
+                                !fileName ?
+                                    <p className="mb-0" style={{fontSize: '12px'}}>
+                                        <b className="me-1">Файл нэр: </b>{files_name}
+                                    </p>
+                                :
                                     <p className="mb-0" style={{fontSize: '12px'}}>
                                         <b className="me-1">Файл нэр: </b>{fileName}
                                     </p>

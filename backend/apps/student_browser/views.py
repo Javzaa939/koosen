@@ -43,7 +43,7 @@ class StudentStructureAPIView(
 ):
     ''' Их сургуулийн бүтэц зохион байгуулалт '''
 
-    queryset = Structure.objects.all().order_by('-created_at')
+    queryset = Structure.objects.all()
     serializer_class = StructureSerializer
 
     pagination_class = CustomPagination
@@ -70,10 +70,8 @@ class StudentStructureAPIView(
         data = request.data
         data = null_to_none(data)
         created_user = data.get('created_user')
-        updated_user = data.get('updated_user')
 
         data['created_user']= created_user
-        data['updated_user']= updated_user
 
         file = data.get('file')
         if file:
@@ -102,14 +100,14 @@ class StudentStructureAPIView(
     def put(self, request, pk=None):
         " Их сургуулийн бүтэц зохион байгуулалт засах "
 
-        request_data = request.data.dict()
+        request_data = request.data
         print("request", request_data)
         file = request_data.get('file')
+        request_data['updated_user'] = request_data.get('updated_user')
 
-        instance = self.queryset.filter(id=pk).first()
+        instance = self.get_object()
         old_file = instance.file
-
-        serializer = self.get_serializer(instance, data=request_data)
+        serializer = self.get_serializer(instance, data=request_data, partial=True)
 
         # файл хадгалса эсэх
         if old_file:
