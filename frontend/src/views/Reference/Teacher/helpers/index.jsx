@@ -56,6 +56,8 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, h
             selector:  (row) => (
                 <div className="text-center" style={{ width: "auto" }}>
                     {
+						user?.permissions?.includes('lms-reference-teacher-update')
+						&&
                         <>
                             <a role="button"
                                 onClick={() => handleEdit(row)}
@@ -67,6 +69,8 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, h
 						</>
                     }
 					{
+						user?.permissions?.includes('lms-reference-teacher-delete')
+						&&
 						<>
 							<a role="button"
 								className='ms-1'
