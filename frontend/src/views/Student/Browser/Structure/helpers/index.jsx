@@ -1,10 +1,13 @@
 import { Edit, X} from "react-feather";
+import { useContext } from "react"
 
 import { t } from "i18next";
 
 import useModal from '@hooks/useModal';
 
 import { Badge, UncontrolledTooltip } from "reactstrap";
+import AuthContext from '@context/AuthContext'
+
 
 // Хүснэгтийн баганууд
 export function getColumns (currentPage, rowsPerPage, datas,  handleUpdateModal, handleDelete) {
@@ -12,6 +15,8 @@ export function getColumns (currentPage, rowsPerPage, datas,  handleUpdateModal,
     const page_count = Math.ceil(datas.length / rowsPerPage)
 
 	const { showWarning } = useModal()
+    const { user } = useContext(AuthContext)
+
 
     /** Сонгосон хуудасны тоо датаны тооноос их болсон үед хуудаслалт 1-ээс эхлэнэ */
     if (currentPage > page_count) {
