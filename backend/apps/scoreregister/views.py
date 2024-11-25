@@ -1143,7 +1143,7 @@ class ScoreRegisterPrintAPIView(
             lesson_counts = list(lessons_qs)
 
         # тухайн оюутны мэдээлэл дүнгийн мэдээлэл
-        score_qs = self.queryset.filter(student_id=student, is_delete=False).order_by("lesson_year", "lesson_season")
+        score_qs = self.queryset.filter(student_id=student).order_by("lesson_year", "lesson_season")
 
         for qs in score_qs:
             year = ''
@@ -1160,6 +1160,7 @@ class ScoreRegisterPrintAPIView(
         # Бүх year total
         total_kr_count = 0
         total_onoo_count = 0
+        total_gpa_scores = 0
         total_gpa_count = 0
         total_onoo_avg = 0
         niit_gpa = 0
@@ -1182,7 +1183,7 @@ class ScoreRegisterPrintAPIView(
             for eachScore in score_info[key]:
                 assessments = None
                 status_num = None
-                gpa = ''
+                gpa = 0
 
                 total_scores = eachScore.score_total
                 status_num = eachScore.status
@@ -1217,13 +1218,14 @@ class ScoreRegisterPrintAPIView(
 
                 total_kr = total_kr + eachScore.lesson.kredit
                 onoo = onoo + total_scores * eachScore.lesson.kredit
+                total_gpa_scores = total_gpa_scores + (gpa * eachScore.lesson.kredit)
 
             # дундаж олох нь
             if onoo != 0:
                 total_onoo = round(onoo / total_kr, 2)
 
             # нийт kr
-            total_kr_count = total_kr_count+ total_kr
+            total_kr_count = total_kr_count + total_kr
             total_onoo_count = total_onoo_count + onoo
 
             # голч олох нь
@@ -1250,15 +1252,13 @@ class ScoreRegisterPrintAPIView(
             )
 
         # ------------ Бүх жилийн total -----------
-        if (total_kr_count and total_onoo_count)>0:
+        if (total_kr_count and total_onoo_count) > 0:
 
             # дундаж олох нь
             total_onoo_avg = round(total_onoo_count / total_kr_count, 2)
 
-        # gpa
-        total_gpa_count = Score.objects.filter(score_max__gte=total_onoo_avg, score_min__lte=total_onoo_avg).first()
-        if total_gpa_count:
-            niit_gpa = total_gpa_count.gpa
+        if total_gpa_scores != 0.0:
+            niit_gpa = round((total_gpa_scores / total_kr_count), 1)
 
         total.append({
             "all_total":

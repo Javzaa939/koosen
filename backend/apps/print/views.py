@@ -283,7 +283,8 @@ class GroupListAPIView(
 
         all_list = self.list(request).data
         return request.send_data(all_list)
-    
+
+
 @permission_classes([IsAuthenticated])
 class GroupListNoLimitAPIView(
     mixins.ListModelMixin,
