@@ -46,7 +46,7 @@ export function getColumns (currentPage, rowsPerPage, datas,  handleUpdateModal,
 		},
 	]
 
-// 	if(Object.keys(user).length > 0 && user.permissions.includes('lms-settings-аctiveyear-update'))
+	if(Object.keys(user).length > 0 && user.permissions.includes('lms-browser-structure-update'))
 	{
 		var UpdateColumn = {
 			name: `${t('Үйлдэл')}`,
@@ -67,20 +67,24 @@ export function getColumns (currentPage, rowsPerPage, datas,  handleUpdateModal,
 						</a>
 					}
 					<UncontrolledTooltip placement='top' target={`activeYearUpdate${row?.id}`} >Засах</UncontrolledTooltip>
-					<a role="button"
-						onClick={() => showWarning({
-							header: {
-								title: t(`${row?.title} устгах`),
-							},
-							question: t(`Та ${row?.title} мэдээллийг устгахдаа итгэлтэй байна уу?`),
-							onClick: () => handleDelete(row?.id),
-							btnText: t('Устгах'),
-						})}
-						id={`delete${row?.id}`}
-					>
-						<Badge color="light-danger" pill><X width={"100px"} /></Badge>
-					</a>
-					<UncontrolledTooltip placement='top' target={`delete${row?.id}`} >Устгах</UncontrolledTooltip>
+					{	user.permissions.includes('lms-browser-structure-delete') &&
+						<>
+						<a role="button"
+							onClick={() => showWarning({
+								header: {
+									title: t(`${row?.title} устгах`),
+								},
+								question: t(`Та ${row?.title} мэдээллийг устгахдаа итгэлтэй байна уу?`),
+								onClick: () => handleDelete(row?.id),
+								btnText: t('Устгах'),
+							})}
+							id={`delete${row?.id}`}
+						>
+							<Badge color="light-danger" pill><X width={"100px"} /></Badge>
+						</a>
+						<UncontrolledTooltip placement='top' target={`delete${row?.id}`} >Устгах</UncontrolledTooltip>
+						</>
+					}
 				</>
 			),
 			center: true

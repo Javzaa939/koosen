@@ -137,7 +137,7 @@ const Psychological = () => {
                         <Button
                             color='primary'
                             onClick={() => handleModal()}
-                            // disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-stipend-create') ? false : true}
+                            disabled={Object.keys(user).length > 0 && user.permissions.includes('Сэтгэл зүйн булан унших эрх') ? false : true}
                         >
                             <Plus size={15} />
                             <span className='align-middle ms-50'>{t('Нэмэх')}</span>

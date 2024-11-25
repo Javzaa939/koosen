@@ -1313,15 +1313,15 @@ permissions = [
         'description' : 'Сургалтын хөтөлбөр, хичээлийн хуваарь цэс унших эрх'
     },
     {
-        'name' : 'lms-browser-structure-create',
+        'name' : 'lms-browser-surgalt-create',
         'description' : 'Сургалтын хөтөлбөр, хичээлийн хуваарь шинээр үүсгэх эрх'
     },
     {
-        'name' : 'lms-browser-structure-update',
+        'name' : 'lms-browser-surgalt-update',
         'description' : 'Сургалтын хөтөлбөр, хичээлийн хуваарь засах эрх'
     },
     {
-        'name' : 'lms-browser-structure-delete',
+        'name' : 'lms-browser-surgalt-delete',
         'description' : 'Сургалтын хөтөлбөр, хичээлийн хуваарь устгах эрх'
     },
     #------------------- Дүрэм журам -----------------------

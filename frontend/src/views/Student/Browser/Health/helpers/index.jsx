@@ -40,7 +40,7 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 		},
 	]
 
-	// if(Object.keys(user).length > 0 && user.permissions.includes('lms-settings-аctiveyear-update'))
+	if(Object.keys(user).length > 0 && user.permissions.includes('lms-browser-health-update') && user.permissions.includes('lms-browser-health-delete') )
 	{
 		var UpdateColumn = {
 			name: `${t('Үйлдэл')}`,
