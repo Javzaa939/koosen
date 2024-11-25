@@ -47,7 +47,7 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 			minWidth: "180px",
 			selector: (row) => (
 				<>
-					{
+					{/* {
 						<a
 							id={`activeYearUpdate${row?.id}`}
 							onClick={
@@ -58,7 +58,7 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 							<Badge color="light-secondary" pill><Edit  width={"15px"} /></Badge>
 						</a>
 					}
-					<UncontrolledTooltip placement='top' target={`activeYearUpdate${row.id}`} >Засах</UncontrolledTooltip>
+					<UncontrolledTooltip placement='top' target={`activeYearUpdate${row.id}`} >Засах</UncontrolledTooltip> */}
 					<a role="button"
 						onClick={() => showWarning({
 							header: {
