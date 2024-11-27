@@ -1,14 +1,17 @@
-
-import React, { Fragment, useState, useEffect, useContext } from "react"
+import React, { Fragment, useState, useEffect } from "react"
 
 import { Card, CardHeader, CardTitle, Row, Col, Input, Label, Button, ListGroupItem, Spinner } from "reactstrap"
 import { ChevronDown, Plus, Search, Menu, Trash2, Edit } from 'react-feather'
 import { useTranslation } from 'react-i18next'
 import DataTable, { ExpanderComponentProps } from 'react-data-table-component'
+import { useForm, Controller } from "react-hook-form";
 
 import { ReactSortable } from 'react-sortablejs'
 
-import { getPagination } from '@utils'
+import { getPagination, ReactSelectStyles } from '@utils'
+
+import Select from 'react-select'
+import classnames from "classnames";
 
 import useApi from '@hooks/useApi'
 import useLoader from '@hooks/useLoader'
@@ -19,41 +22,73 @@ import '@styles/react/libs/drag-and-drop/drag-and-drop.scss'
 
 import FormModal from "./form"
 import { getColumns, ExpandedComponent } from './helpers'
-import SchoolContext from "@src/utility/context/SchoolContext"
 
-export default function Specification()
-{
+export default function Specification() {
     const default_page = [10, 15, 50, 75, 100]
 
-    const { school_id } = useContext(SchoolContext)
     const { showWarning } = useModal()
     const { t } = useTranslation()
 
+    const { control, setValue, formState: { errors } } = useForm({});
+
     const studentApi = useApi().student
     const signatureApi = useApi().signature
+    const departmentApi = useApi().hrms.department
+    const professionApi = useApi().study.professionDefinition
+    const groupApi = useApi().student.group
+    const settingsApi = useApi().settings.studentRegisterType
+
     const { Loader, isLoading, fetchData } = useLoader({})
     const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({})
 
-    const [ datas, setDatas ] = useState([])
-    // Хуудаслалтын анхны утга
-    const [ currentPage, setCurrentPage ] = useState(1)
-    // Нэг хуудсанд харуулах нийт датаны тоо
-    const [ rowsPerPage, setRowsPerPage ] = useState(10)
-    // Хайлт хийхэд ажиллах хувьсагч
-    const [ searchValue, setSearchValue ] = useState('')
-    // Нийт датаны тоо
-    const [ total_count, setTotalCount ] = useState(1)
-    // Эрэмбэлэлт
-    const [ sortField, setSort ] = useState('')
-    // Form modal
-    const [ formModal, setFormModal ] = useState(false);
-    const [ updateData, setUpdateData ] = useState({})
+    var values = {
+        profession: '',
+        join_year: '',
+        group: '',
+        department: '',
+        degree: '',
+        status: ''
+    }
+    const [select_value, setSelectValue] = useState(values)
 
-    const [ listArr, setListArr ] = useState([])
+    const [datas, setDatas] = useState([])
+    // Хуудаслалтын анхны утга
+    const [currentPage, setCurrentPage] = useState(1)
+    // Нэг хуудсанд харуулах нийт датаны тоо
+    const [rowsPerPage, setRowsPerPage] = useState(10)
+    // Хайлт хийхэд ажиллах хувьсагч
+    const [searchValue, setSearchValue] = useState('')
+    // Нийт датаны тоо
+    const [total_count, setTotalCount] = useState(1)
+    // Эрэмбэлэлт
+    const [sortField, setSort] = useState('')
+    // Form modal
+    const [formModal, setFormModal] = useState(false);
+
+    // Хөтөлбөрөөр хайлт хийх
+    const [department_option, setDepartmentOption] = useState([])
+
+    // Мэргэжлээр хайлт хийх
+    const [profession_option, setProfessionOption] = useState([])
+
+    // Ангиар хайлт хийх
+    const [groupOption, setGroupOption] = useState([])
+    const [status_option, setStatusOption] = useState([])
+
+    const [updateData, setUpdateData] = useState({})
+
+    const [listArr, setListArr] = useState([])
 
     useEffect(
-        () =>
-        {
+        () => {
+            getProfession()
+            getGroup()
+            getDepartmentOption()
+        }, [select_value]
+    )
+
+    useEffect(
+        () => {
             if (searchValue.length == 0) {
                 getDatas();
             } else {
@@ -63,14 +98,14 @@ export default function Specification()
                 return () => clearTimeout(timeoutId);
             }
         },
-        [rowsPerPage, currentPage, sortField, searchValue]
+        [rowsPerPage, currentPage, sortField, searchValue, select_value]
     )
 
     function getAllData()
     {
         Promise.all([
             fetchData(studentApi.getDefinitionLite(rowsPerPage, currentPage, sortField, searchValue)),
-            fetchData(signatureApi.get(1, school_id)),
+            fetchData(signatureApi.get(1)),
         ]).then((values) => {
             setDatas(values[0]?.data?.results)
             setListArr(values[1]?.data)
@@ -123,9 +158,8 @@ export default function Specification()
             setCurrentPage(page_count)
         }
 
-        const { success, data } = await allFetch(studentApi.getDefinitionLite(rowsPerPage, currentPage, sortField, searchValue))
-        if(success)
-        {
+        const { success, data } = await allFetch(studentApi.getDefinitionLite(rowsPerPage, currentPage, sortField, searchValue, select_value?.group, select_value?.profession, select_value?.department, select_value?.status))
+        if (success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
         }
@@ -139,6 +173,42 @@ export default function Specification()
             setListArr(data)
         }
     }
+
+    // Мэргэжлийн жагсаалтын getList функц боловсролын зэргээс хамаарч жагсаалтаа авна. Шаардлагагүй үед хоосон string явуулна.
+    async function getProfession() {
+
+        const { success, data } = await fetchData(professionApi.getList(select_value?.degree, select_value.department, ''))
+        if (success) {
+            setProfessionOption(data)
+        }
+    }
+
+    // Суралцаж буй хэлбэрийн жагсаалт
+    async function getStatus() {
+        const { success, data } = await fetchData(settingsApi.get())
+        if(success) {
+            setStatusOption(data)
+        }
+    }
+
+    // Ангийн жагсаалт авна.
+    async function getGroup() {
+
+        const { success, data } = await fetchData(groupApi.getList(select_value.department, select_value.degree, select_value.profession, select_value.join_year))
+        if (success) {
+            setGroupOption(data)
+        }
+    }
+
+    // Хөтөлбөрийн баг / тэнхимын жагсаалт
+    async function getDepartmentOption() {
+
+        const { success, data } = await fetchData(departmentApi.get())
+        if (success) {
+            setDepartmentOption(data)
+        }
+    }
+
 
     // Нэмэх функц
     function handleModal()
@@ -168,6 +238,7 @@ export default function Specification()
         () =>
         {
             getAllData()
+            getStatus()
         },
         []
     )
@@ -258,6 +329,166 @@ export default function Specification()
                 <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
                     <CardTitle tag='h4'>{t('Тодорхойлолт')}</CardTitle>
                 </CardHeader>
+                <Row className="  mx-0 mt-1 mb-1">
+                    <Col sm={6} lg={3} >
+                        <Label className="form-label" for="department">
+                            {t('Хөтөлбөрийн баг / тэнхим / тэнхим')}
+                        </Label>
+                        <Controller
+                            control={control}
+                            defaultValue=''
+                            name="department"
+                            render={({ field: { value, onChange } }) => {
+                                return (
+                                    <Select
+                                        name="department"
+                                        id="department"
+                                        classNamePrefix='select'
+                                        isClearable
+                                        className={classnames('react-select', { 'is-invalid': errors.department })}
+                                        isLoading={isLoading}
+                                        placeholder={`-- Сонгоно уу --`}
+                                        options={department_option || []}
+                                        value={department_option.find((c) => c.id === value)}
+                                        noOptionsMessage={() => 'Хоосон байна'}
+                                        onChange={(val) => {
+                                            onChange(val?.id || '')
+                                            if (val?.id) {
+                                                setSelectValue(current => {
+                                                    return {
+                                                        ...current,
+                                                        department: val?.id
+                                                    }
+                                                })
+                                            } else {
+                                                setSelectValue(current => {
+                                                    return {
+                                                        ...current,
+                                                        department: ''
+                                                    }
+                                                })
+                                            }
+                                        }}
+                                        styles={ReactSelectStyles}
+                                        getOptionValue={(option) => option.id}
+                                        getOptionLabel={(option) => option.name}
+                                    />
+                                )
+                            }}
+                        ></Controller>
+                    </Col>
+                    <Col sm={6} lg={3}>
+                        <Label className="form-label" for="profession">
+                            {t('Мэргэжил / хөтөлбөр')}
+                        </Label>
+                        <Select
+                            name="profession"
+                            id="profession"
+                            classNamePrefix='select'
+                            isClearable
+                            className={classnames('react-select', { 'is-invalid': errors.profession })}
+                            isLoading={isLoading}
+                            placeholder={`-- Сонгоно уу --`}
+                            options={profession_option || []}
+                            value={profession_option.find((c) => c.id === select_value.profession)}
+                            noOptionsMessage={() => 'Хоосон байна'}
+                            onChange={(val) => {
+                                if (val?.id) {
+                                    setSelectValue(current => {
+                                        return {
+                                            ...current,
+                                            profession: val?.id
+                                        }
+                                    })
+                                } else {
+                                    setSelectValue(current => {
+                                        return {
+                                            ...current,
+                                            profession: ''
+                                        }
+                                    })
+                                }
+                            }}
+                            styles={ReactSelectStyles}
+                            getOptionValue={(option) => option.id}
+                            getOptionLabel={(option) => option.full_name}
+                        />
+                    </Col>
+                    <Col sm={6} lg={3} >
+                        <Label className="form-label" for="group">
+                            {t("Анги / бүлэг")}
+                        </Label>
+                        <Select
+                            name="group"
+                            id="group"
+                            classNamePrefix='select'
+                            isClearable
+                            className={classnames('react-select', { 'is-invalid': errors.group })}
+                            isLoading={isLoading}
+                            placeholder={`-- Сонгоно уу --`}
+                            options={groupOption || []}
+                            value={groupOption.find((c) => c.id === select_value.group)}
+                            noOptionsMessage={() => 'Хоосон байна'}
+                            onChange={(val) => {
+                                if (val?.id) {
+                                    setSelectValue(current => {
+                                        return {
+                                            ...current,
+                                            group: val?.id
+                                        }
+                                    })
+                                } else {
+                                    setSelectValue(current => {
+                                        return {
+                                            ...current,
+                                            group: ''
+                                        }
+                                    })
+                                }
+                            }}
+                            styles={ReactSelectStyles}
+                            getOptionValue={(option) => option.id}
+                            getOptionLabel={(option) => option.name}
+                        />
+                    </Col>
+                    <Col sm={6} md={3} >
+                        <Label className="form-label" for="status">
+                            {t("Төлөв")}
+                        </Label>
+                        <Select
+                            name="status"
+                            id="status"
+                            classNamePrefix='select'
+                            isClearable
+                            className={classnames('react-select')}
+                            isLoading={isLoading}
+                            placeholder={`-- Сонгоно уу --`}
+                            options={status_option || []}
+                            value={status_option.find((c) => c.id === select_value.status)}
+                            noOptionsMessage={() => 'Хоосон байна'}
+                            onChange={(val) => {
+                                if (val?.id) {
+                                    setSelectValue(current => {
+                                        return {
+                                            ...current,
+                                            status: val?.id
+                                        }
+                                    })
+                                } else {
+                                    setSelectValue(current => {
+                                        return {
+                                            ...current,
+                                            status: ''
+                                        }
+                                    })
+                                }
+                            }}
+                            styles={ReactSelectStyles}
+                            getOptionValue={(option) => option.id}
+                            getOptionLabel={(option) => option.name}
+                        />
+                    </Col>
+                </Row>
                 <Row className='justify-content-between mx-0'>
                     <Col className='d-flex align-items-center justify-content-start mt-1' md={6} sm={12}>
                         <Col md={2} sm={3} className='pe-1'>

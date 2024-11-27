@@ -592,6 +592,7 @@ def get_student_score_register(student_id, season='', lesson_year = '',):
     """
 
     total_kr = 0
+    total_skr = 0
     total_score = 0
     average = 0
 
@@ -616,12 +617,15 @@ def get_student_score_register(student_id, season='', lesson_year = '',):
 
         for score_data in stud_score_info:
             score = score_data.score_total
-            total_kr = total_kr + score_data.lesson.kredit
             score_qs = Score.objects.filter(score_max__gte=score, score_min__lte=score).first()
+            total_kr = total_kr + score_data.lesson.kredit
             total_score = total_score + (score_qs.gpa * score_data.lesson.kredit)
+            if score_data.grade_letter:
+                total_skr = total_skr + score_data.lesson.kredit
 
         if total_score != 0.0:
-            average = round((total_score / total_kr), 2)
+            estimate_kr = total_kr - total_skr
+            average = round((total_score / estimate_kr), 2)
 
     return (
     {
@@ -1700,3 +1704,11 @@ def delete_file_from_cdn_silently(file_path):
         failure = (f'File: {file_path}. Delete error: {error}. CDN response: {cdn_response}')
 
     return False if failure else True, failure
+
+
+def undefined_to_none(datas=[]):
+    """ str undefined утгыг None руу хөрвүүлэх """
+    for idx, value in enumerate(datas):
+        if value == 'undefined':
+            datas[idx] = None
+    return datas

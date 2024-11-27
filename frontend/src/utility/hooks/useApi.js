@@ -634,7 +634,7 @@ function useApi(isDisplay=false) {
 				) => instance.get(`/student/info/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&department=${department}&degree=${degree}&profession=${profession}&group=${group}&join_year=${join_year}&schoolId=${school_id}&status=${status}&level=${level}&isPayed=${isPayed}`),
 			getDefinition: (limit, page, sort, search) => instance.get(`/student/definition/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&school=${school_id}`),
 			getGraduate1: (limit, page, sort, search, department, degree, profession, group) => instance.get(`/student/info/graduate1/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&department=${department}&degree=${degree}&profession=${profession}&group=${group}`),
-			getDefinitionLite: (limit, page, sort, search) => instance.get(`/student/definition/lite/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&school=${school_id}`),
+			getDefinitionLite: (limit, page, sort, search, group, profession, department, status='') => instance.get(`/student/definition/lite/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&school=${school_id}&group=${group}&department=${department}&profession=${profession}&status=${status}`),
 			download: ( search, department, degree, profession, group, join_year, status, level) => instance.get(`/student/info/download/?search=${search}&department=${department}&degree=${degree}&profession=${profession}&group=${group}&join_year=${join_year}&schoolId=${school_id}&status=${status}&level=${level}`),
 			getDefinitionStudent: (type, id) => instance.get(`/student/definition/value/?type=${type}&id=${id}`),
 			definition: {
