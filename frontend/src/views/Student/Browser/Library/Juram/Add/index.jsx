@@ -178,7 +178,7 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
             getOneDatas()
         }
     },[open])
-    console.log("err", errors);
+
 	return (
         <Fragment>
             <Modal

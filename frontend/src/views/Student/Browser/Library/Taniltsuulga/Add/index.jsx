@@ -121,7 +121,6 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
         if(editId) {
             const { success, data } = await fetchData(libraryApi.getOne(editId))
             if(success) {
-                console.log("data", data);
                 // засах үед дата байх юм бол setValue-р дамжуулан утгыг харуулна
                 if(data === null) return
                 for(let key in data) {
