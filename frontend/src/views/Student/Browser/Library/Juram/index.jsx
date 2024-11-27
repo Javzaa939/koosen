@@ -2,10 +2,9 @@ import { t } from "i18next"
 import { Fragment, useState, useContext, useEffect } from "react"
 import DataTable from "react-data-table-component"
 import { ChevronDown, Search, Plus } from "react-feather"
-import { Card, CardHeader, CardTitle, Col, Modal, Row, Input, Label, Button, Spinner } from "reactstrap"
+import { Card, CardHeader, CardTitle, Col, Row, Input, Label, Button, Spinner } from "reactstrap"
 import { getPagination } from '@utils'
 import AuthContext from '@context/AuthContext'
-import SchoolContext from '@context/SchoolContext'
 import useApi from "@hooks/useApi"
 import useLoader from '@hooks/useLoader';
 
@@ -20,7 +19,6 @@ const Juram = () => {
 
     //Context
     const { user } = useContext(AuthContext)
-    const { school_id } = useContext(SchoolContext)
 
     //useState
     const [currentPage, setCurrentPage] = useState(1);
@@ -32,7 +30,7 @@ const Juram = () => {
     const [sortField, setSort] = useState('')
     const [edit_id, setEditId] = useState('')
 
-    const libraryApi = useApi().browser.library
+    const rulesApi = useApi().browser.rules
 
     async function getDatas() {
         const page_count = Math.ceil(total_count / rowsPerPage)
@@ -40,7 +38,7 @@ const Juram = () => {
         if (page_count < currentPage && page_count != 0) {
             setCurrentPage(page_count)
         }
-        const { success, data } = await allFetch(libraryApi.get(rowsPerPage, currentPage, sortField, searchValue))
+        const { success, data } = await allFetch(rulesApi.get(rowsPerPage, currentPage, sortField, searchValue))
         if (success) {
             setTotalCount(data?.count)
             setDatas(data?.results)
@@ -66,9 +64,10 @@ const Juram = () => {
 		}
 		handleModal()
     }
+
     /* Устгах функц */
 	const handleDelete = async(id) => {
-        const { success } = await fetchData(libraryApi.delete(id))
+        const { success } = await fetchData(rulesApi.delete(id))
         if(success)
         {
             getDatas()
@@ -134,7 +133,6 @@ const Juram = () => {
                         <Button
                             color='primary'
                             onClick={() => handleModal()}
-                            // disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-stipend-create') ? false : true}
                         >
                             <Plus size={15} />
                             <span className='align-middle ms-50'>{t('Нэмэх')}</span>

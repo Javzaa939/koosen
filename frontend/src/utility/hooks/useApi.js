@@ -1994,6 +1994,14 @@ function useApi(isDisplay=false) {
 				delete: (pk) => instance.delete(`/browser/library/${pk}/`),
 			},
 
+			// журам
+			rules: {
+				get: (limit, page, sort, search) => instance.get(`/browser/rules/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}`),
+				getOne: (pk) => instance.get(`/browser/rules/${pk}/`),
+				post: (data) => instance.post(`/browser/rules/`, data),
+				put: (data, pk) => instance.put(`/browser/rules/${pk}/`, data),
+				delete: (pk) => instance.delete(`/browser/rules/${pk}/`),
+			},
 			// сэтгэл зүйн булан
 			psycholocal: {
 				get: (limit, page, sort, search) => instance.get(`/browser/psycholocal/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}`),

@@ -5,7 +5,6 @@ import { ChevronDown, Search, Plus } from "react-feather"
 import { Card, CardHeader, CardTitle, Col, Modal, Row, Input, Label, Button, Spinner } from "reactstrap"
 import { getPagination } from '@utils'
 import AuthContext from '@context/AuthContext'
-import SchoolContext from '@context/SchoolContext'
 import useLoader from '@hooks/useLoader';
 
 import useApi from "@hooks/useApi"
@@ -21,7 +20,6 @@ const Structure = () => {
 
     //Context
     const { user } = useContext(AuthContext)
-    const { school_id } = useContext(SchoolContext)
 
     const [editId, setEditId] = useState('')
 

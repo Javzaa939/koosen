@@ -1,12 +1,11 @@
 // ** React imports
-import React, { Fragment, useState, useContext, useEffect, useRef } from 'react'
+import React, { Fragment, useState, useContext, useEffect } from 'react'
 
 import { X } from "react-feather";
 
 import { t } from 'i18next';
 
 import useApi from "@hooks/useApi";
-import useToast from "@hooks/useToast";
 import useLoader from "@hooks/useLoader";
 
 import { useForm, Controller } from "react-hook-form";
@@ -16,19 +15,16 @@ import { Row, Col, Form, Modal, Input, Label, Button, ModalBody, ModalHeader, Fo
 import { validate, convertDefaultValue } from "@utils"
 
 import AuthContext from '@context/AuthContext'
-import SchoolContext from '@context/SchoolContext'
 import * as Yup from 'yup';
 import { useQuill } from 'react-quilljs';
 import 'quill/dist/quill.snow.css'
-// import '../style.css'
+import useToast from "@hooks/useToast";
+
 
 const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}) => {
 
     const validateSchema = Yup.object().shape({
 	title: Yup.string()
-		.trim()
-		.required('Хоосон байна'),
-    link: Yup.string()
 		.trim()
 		.required('Хоосон байна'),
 
@@ -66,18 +62,19 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
         readOnly: false,
     });
 
-    const { school_id } = useContext(SchoolContext)
     const { user } = useContext(AuthContext)
     const [File, setFile] = useState(null)
-    const [fileName, setFileName] = useState('')
-    const fileInputRef = useRef(null)
-    const [error, setFileError] = useState('')
+    const [fileName, setFileName] = useState('')        // Шинэ файлийн нэр
+    const [files_name, setFileNames] = useState('')     // Хуучин файлийн нэр
+    const addToast = useToast()
+
+
 
     // ** Hook
     const { control, handleSubmit, reset, setError, formState: { errors }, setValue } = useForm(validate(validateSchema));
 
 	// Loader
-	const { Loader, isLoading, fetchData } = useLoader({});
+	const { fetchData } = useLoader({});
 	const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
 
     // Api
@@ -91,7 +88,7 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
         }
         else {
             setFile(null)
-            setFileError('Хоосон')
+            setFileNames('')
         }
     }
 
@@ -114,6 +111,7 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
 
         cdata['body'] = quill.root.innerHTML
         cdata['created_user'] = user.id
+        cdata['updated_user'] = user.id
 
         if(editId){
             const { success, errors } = await fetchData(studentDevelopApi.put(File ? formData : cdata, editId))
@@ -130,21 +128,30 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
             }
         }
         else{
-            cdata['created_user'] = user.id
-            cdata['updated_user'] = user.id
-            const { success, errors } = await postFetch(studentDevelopApi.post(formData))
-            if(success) {
-                reset()
-                refreshDatas()
-                handleModal()
-            }
-            else {
-                if(errors && Object.keys(errors).length > 0) {
-                    /** Алдааны мессэжийг input дээр харуулна */
-                    for (let key in errors) {
-                        setError(key, { type: 'custom', message: errors[key][0]});
+            if(File){
+
+                const { success, errors } = await postFetch(studentDevelopApi.post(formData))
+                if(success) {
+                    reset()
+                    refreshDatas()
+                    handleModal()
+                }
+                else {
+                    if(errors && Object.keys(errors).length > 0) {
+                        /** Алдааны мессэжийг input дээр харуулна */
+                        for (let key in errors) {
+                            setError(key, { type: 'custom', message: errors[key][0]});
+                        }
                     }
                 }
+            }
+            else{
+                addToast(
+                    {
+                        type: 'warning',
+                        text: 'Та файл оруулна уу !!!'
+                    }
+                )
             }
         }
 	}
@@ -153,6 +160,8 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
         if(editId) {
             const { success, data } = await fetchData(studentDevelopApi.getOne(editId))
             if(success) {
+                setFileNames(data?.file  ? data?.file.toString().split("/").pop() : '')
+
                 // засах үед дата байх юм бол setValue-р дамжуулан утгыг харуулна
                 if(data === null) return
                 for(let key in data) {
@@ -164,9 +173,6 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
                 if (key === 'body' && quill) {
                     quill.pasteHTML(data[key]);
                 }
-                // if(key === 'file'){
-                //     setFileName(data[key])
-                // }
             }
         }
     }
@@ -231,7 +237,7 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
                                         name='link'
                                         bsSize='sm'
                                         id='link'
-                                        placeholder='гарчиг'
+                                        placeholder='линк'
                                         invalid={errors.link && true}
                                     >
                                     </Input>
@@ -239,48 +245,46 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
                             />
                             {errors.link && <FormFeedback className='d-block'>{t(errors.link.message)}</FormFeedback>}
                         </Col>
-                        {
-                            // editId ? ""
-                            // :
-                            <Col md={12}>
-                                <Label for="file">
-                                    {t('Файл')}
-                                </Label>
-                                <InputGroup>
-                                <Controller
-                                    name='file'
-                                    control={control}
-                                    defaultValue=''
-                                    render={({ field }) => {
-                                        return (
-                                            <Input
-                                                {...field}
-                                                id='file'
-                                                type="file"
-                                                bsSize='sm'
-                                                onChange={(e) => getFile(e, 'Get')}
-                                            />
-                                        )
-                                    }}
-                                />
-                                {error
-                                    &&
-                                    <FormFeedback className='d-block'>{t(error)}</FormFeedback>}
-                                {File
-                                    &&
-                                    <InputGroupText size="sm">
-                                        <X role="button" color="red" size={15} onClick={(e) => getFile(e, 'Delete')}/>
-                                    </InputGroupText>
-                                }
-                                </InputGroup>
-                                {
-                                    fileName &&
-                                        <p className="mb-0" style={{fontSize: '12px'}}>
-                                            <b className="me-1">Файл нэр: </b>{fileName}
-                                        </p>
-                                }
-                            </Col>
-                        }
+                        <Col md={12}>
+                            <Label for="file">
+                                {t('Файл')}
+                            </Label>
+                            <InputGroup>
+                            <Controller
+                                name='file'
+                                control={control}
+                                defaultValue=''
+                                render={({ field }) => {
+                                    return (
+                                        <Input
+                                            {...field}
+                                            id='file'
+                                            type="file"
+                                            bsSize='sm'
+                                            onChange={(e) => getFile(e, 'Get')}
+                                        />
+                                    )
+                                }}
+                            />
+                            {
+                                files_name &&
+                                <InputGroupText size="sm">
+                                    <X role="button" color="red" size={15} onClick={(e) => getFile(e, 'Delete')}/>
+                                </InputGroupText>
+                            }
+                            </InputGroup>
+                            {
+                                fileName
+                                ?
+                                    <p className="mb-0" style={{fontSize: '12px'}}>
+                                        <b className="me-1">Файл нэр: </b>{fileName}
+                                    </p>
+                                :
+                                    <p className="mb-0" style={{fontSize: '12px'}}>
+                                        <b className="me-1">Файл нэр: </b>{files_name}
+                                    </p>
+                            }
+                        </Col>
                         <Col md={12} >
                             <Label className='form-label' for='body'>
                                 {t('Танилцуулга байршуулах хэсэг')}

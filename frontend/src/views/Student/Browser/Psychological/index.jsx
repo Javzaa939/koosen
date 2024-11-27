@@ -2,10 +2,9 @@ import { t } from "i18next"
 import { Fragment, useState, useContext, useEffect } from "react"
 import DataTable from "react-data-table-component"
 import { ChevronDown, Search, Plus } from "react-feather"
-import { Card, CardHeader, CardTitle, Col, Modal, Row, Input, Label, Button, Spinner } from "reactstrap"
+import { Card, CardHeader, CardTitle, Col, Row, Input, Label, Button, Spinner } from "reactstrap"
 import { getPagination } from '@utils'
 import AuthContext from '@context/AuthContext'
-import SchoolContext from '@context/SchoolContext'
 import useApi from "@hooks/useApi"
 import useLoader from '@hooks/useLoader';
 
@@ -20,7 +19,6 @@ const Psychological = () => {
 
     //Context
     const { user } = useContext(AuthContext)
-    const { school_id } = useContext(SchoolContext)
 
     const [edit_id, setEditId] = useState('')
 

@@ -32,15 +32,14 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 			center: true,
 		},
 		{
-			name: `${t('Линк')}`,
-			selector: (row) => <a href={row?.link} className="ms-1">{row?.link}</a>,
+			name: `${t('Файл')}`,
+			selector: (row) => <a href={row?.file} className="ms-1">{row?.file ? row?.file.toString().split("/").pop(): ''}</a>,
             sortable: true,
 			minWidth: "80px",
 			center: true
 		},
 	]
 
-	// if(Object.keys(user).length > 0 && user.permissions.includes('lms-settings-аctiveyear-update'))
 	{
 		var UpdateColumn = {
 			name: `${t('Үйлдэл')}`,

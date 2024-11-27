@@ -4613,11 +4613,11 @@ class Rule(models.Model):
 
 
 class Structure(models.Model):
-    """ Их сургуулийн бүтэц зохион байгуулалт """
+    """ Их сургуулийн бүтэц зохион байгуsdлалт """
 
     title = models.CharField(max_length=1000, verbose_name='Гарчиг')
-    link = models.CharField(max_length=1000, verbose_name='Линк')
-    file = models.FileField(upload_to='structure', verbose_name='Файл')
+    link = models.CharField(max_length=1000, verbose_name='Линк', null=True)
+    file = models.FileField(upload_to='structure', verbose_name='Файл', null=True)
     created_user = models.ForeignKey(User, on_delete=models.SET_NULL,related_name='create_user', null=True, verbose_name='Үүсгэсэн хэрэглэгч')
     updated_user = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='update_user', null=True, verbose_name='Зассан хэрэглэгч')
 
@@ -4629,7 +4629,7 @@ class StudentDevelop(models.Model):
 
     title = models.CharField(max_length=1000, verbose_name='Гарчиг')
     link = models.CharField(max_length=1000, verbose_name='Линк', null=True)
-    file = models.FileField(upload_to='develop', verbose_name='Файл')
+    file = models.FileField(upload_to='develop', verbose_name='Файл', null=True)
     body = models.TextField(verbose_name="Суралцагчийн хөгжлийн хэсэг")
     created_user = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='cr_user', null=True, verbose_name='Үүсгэсэн хэрэглэгч')
     updated_user = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='up_user',  null=True, verbose_name='Зассан хэрэглэгч')
@@ -4641,8 +4641,8 @@ class Library(models.Model):
     """ Номын сан танилцуулга"""
 
     title = models.CharField(max_length=1000, verbose_name='Гарчиг')
-    body = models.TextField(verbose_name="Мэдээний хэсэг")
-    link = models.CharField(max_length=1000, verbose_name='Линк')
+    body = models.TextField(verbose_name="Мэдээний хэсэг", null=True)
+    link = models.CharField(max_length=1000, verbose_name='Линк', null=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='l_cr_user', null=True, verbose_name='Үүсгэсэн хэрэглэгч')
     updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='Зассан хэрэглэгч')
 
@@ -4653,8 +4653,8 @@ class StudentPsycholocal(models.Model):
     """ Сэтгэл зүйн булан """
 
     title = models.CharField(max_length=1000, verbose_name='Гарчиг')
-    body = models.TextField(verbose_name="Сэтгэл зүйн булан хэсэг")
-    link = models.CharField(max_length=1000, verbose_name='Линк')
+    body = models.TextField(verbose_name="Сэтгэл зүйн булан хэсэг", null=True)
+    link = models.CharField(max_length=1000, verbose_name='Линк', null=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='p_cr_user', null=True, verbose_name='Үүсгэсэн хэрэглэгч')
     updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='Зассан хэрэглэгч')
 
@@ -4662,10 +4662,10 @@ class StudentPsycholocal(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 class StudentRules(models.Model):
-    """ Сэтгэл зүйн журам """
+    """ Номын сангийн журам """
 
     title = models.CharField(max_length=1000, verbose_name='Гарчиг')
-    file = models.FileField(upload_to='rules', verbose_name='Файл')
+    file = models.FileField(upload_to='rules', verbose_name='Файл', null=True)
 
     created_user = models.ForeignKey(User, on_delete=models.SET_NULL,related_name='lib_user', null=True, verbose_name='Үүсгэсэн хэрэглэгч')
     updated_user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='Зассан хэрэглэгч')
@@ -4678,8 +4678,8 @@ class Health(models.Model):
     """ Эрүүл мэнд """
 
     title = models.CharField(max_length=1000, verbose_name='Гарчиг')
-    body = models.TextField(verbose_name="Эрүүл мэнд хэсэг")
-    link = models.CharField(max_length=1000, verbose_name='Линк')
+    body = models.TextField(verbose_name="Эрүүл мэнд хэсэг", null=True)
+    link = models.CharField(max_length=1000, verbose_name='Линк', null=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='health_user', null=True, verbose_name='Үүсгэсэн хэрэглэгч')
     updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='Зассан хэрэглэгч')
 

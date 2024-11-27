@@ -1,224 +1,202 @@
 import { t } from "i18next"
 import { Fragment, useState, useContext, useEffect } from "react"
-import DataTable from "react-data-table-component"
 import { ChevronDown, Search, Plus } from "react-feather"
-import { Card, CardHeader, CardTitle, Col, Modal, Row, Input, Label, Button, Spinner, CardBody } from "reactstrap"
-import { getPagination } from '@utils'
+import {
+Card,
+CardHeader,
+Row,
+Badge,
+AccordionItem,
+AccordionHeader,
+AccordionBody,
+Accordion,
+TabContent } from "reactstrap"
 import AuthContext from '@context/AuthContext'
 import SchoolContext from '@context/SchoolContext'
 import useApi from "@hooks/useApi"
 import useLoader from '@hooks/useLoader';
+import {ProDetailAccordion} from './Detail'
 
-// import { getColumns } from './helpers'
-// import Createmodal from './Add'
 
 const Surgalt = () => {
 
-     // Loader
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
+    // Loader
+    const { isLoading, fetchData} = useLoader({isFullScreen: true})
 
     //Context
     const { user } = useContext(AuthContext)
     const { school_id } = useContext(SchoolContext)
-    const [edit_modal, setEditModal] = useState(false)
-
-    const [edit_id, setEditId] = useState('')
 
     //useState
-    const [currentPage, setCurrentPage] = useState(1);
-    const [total_count, setTotalCount] = useState(1)
-    const [rowsPerPage, setRowsPerPage] = useState(10)
     const [datas, setDatas] = useState([])
-    const [modal, setModal] = useState(false);
-    const [searchValue, setSearchValue] = useState("");
-    const [sortField, setSort] = useState('')
-    const [ detailModalOpen, setDetailModalOpen ] = useState(false)
-    const [ detailModalData, setDetailModalData ] = useState({})
+    const [dep_option, setDepartmentOption] = useState({})
+    // const salbar_list = [
+    //     {
+    //         name: 'Цагдаагийн сургууль',
+    //         active_id: 1,
+    //         icon: `/images/logos/tsagdaa.png`,
+    //         component: 'ЦС'
+    //     },
+    //     {
+    //         name: 'Онцгой байдлын сургууль',
+    //         active_id: 2,
+    //         icon: `/images/logos/hil.png`,
+    //         component: 'ХАС'
+    //     },
+    //     {
+    //         name: 'Хилийн албаны сургууль',
+    //         active_id: 3,
+    //         icon: `/images/logos/hil.png`,
+    //         component: 'ХАС'
+    //     },
+    //     {
+    //         name: 'Шүүхийн шийдвэр гүйцэтгэлийн албаны сургууль',
+    //         active_id: 4,
+    //         icon: `/images/logos/shuuh.png`,
+    //         component: 'ШШГАС'
+    //     },
+    //     {
+    //         name: 'ШИНЖЛЭН МАГАДЛАХУЙН УХААНЫ СУРГУУЛЬ',
+    //         active_id: 5,
+    //         icon: `/images/logos/shinjlen.png`,
+    //         component: 'ШМИ'
+    //     },
+    //     {
+    //         name: 'АХИСАН ТҮВШНИЙ БОЛОВСРОЛЫН СУРГУУЛЬ',
+    //         active_id: 6,
+    //         icon: `/images/logos/ahisan.png`,
+    //         component: 'АШБС'
+    //     },
+    //     {
+    //         name: 'УДИРДЛАГЫН АКАДЕМИ',
+    //         active_id: 7,
+    //         icon: `/images/logos/udirdlaga.png`,
+    //         component: 'УА'
+    //     },
+    //     {
+    //         name: 'Гадаад хэлний институт',
+    //         active_id: 8,
+    //         icon: `/images/logos/udirdlaga.png`,
+    //         component: 'ГАИ'
+    //     },
+    //     {
+    //         name: 'Биеийн тамир, албаны бэлтгэлийн институт',
+    //         active_id: 9,
+    //         icon: `/images/logos/udirdlaga.png`,
+    //         component: 'БТАБИ'
+    //     },
+    //     {
+    //         name: 'Сургалтын бодлого, төлөвлөлтийн газар',
+    //         active_id: 10,
+    //         icon: `/images/logos/erh.png`,
+    //         component: 'ЭЗНУС'
+    //     },
+    //     {
+    //         name: 'ЭРХ ЗҮЙ, НИЙГМИЙН УХААНЫ СУРГУУЛЬ',
+    //         active_id: 11,
+    //         icon: `/images/logos/erh.png`,
+    //         component: 'ЭЗНУС'
+    //     },
 
-    const stipendApi = useApi().stipend.register
+    //     {
+    //         name: 'Эрдэм шинжилгээний хүрээлэн',
+    //         active_id: 12,
+    //         icon: `/images/logos/ontsgoi.png`,
+    //         component: 'ОБС'
+    //     },
+    //     {
+    //         name: 'Ахлагчийн мэргэжлийн сургалт-үйлдвэрлэлийн төв',
+    //         active_id: 13,
+    //         icon: `/images/logos/amsvt.png`,
+    //         component: 'АМСҮТ'
+    //     },
+        // {
+        //     name: 'АХЛАХ СУРГУУЛЬ',
+        //     active_id: 9,
+        //     icon: `/images/logos/ahlah.png`,
+        //     component: 'АС'
+        // },
+    // ]
+
+    const salbarApi = useApi().browser
 
     async function getDatas() {
-        const page_count = Math.ceil(total_count / rowsPerPage)
 
-        if (page_count < currentPage && page_count != 0) {
-            setCurrentPage(page_count)
-        }
-        const { success, data } = await allFetch(stipendApi.get(rowsPerPage, currentPage, sortField, searchValue))
+        const { success, data } = await fetchData(salbarApi.getSalbarData())
         if (success) {
-            setTotalCount(data?.count)
-            setDatas(data?.results)
+            setDatas(data)
+
         }
     }
-
     useEffect(() => {
         getDatas()
-    }, [sortField, currentPage, rowsPerPage])
-
-    /* Модал setState функц */
-	const handleModal = () => {
-		setModal(!modal)
-	}
-
-
-    /* Устгах функц */
-	const handleDelete = async(id) => {
-        const { success } = await fetchData(stipendApi.delete(id))
-        if(success)
-        {
-            getDatas()
-        }
-	};
-
-    const handleFilter = e => {
-        const value = e.target.value.trimStart();
-        setSearchValue(value)
-    }
-
-	useEffect(() => {
-		if (searchValue.length == 0) {
-			getDatas();
-		} else {
-			const timeoutId = setTimeout(() => {
-				getDatas();
-			}, 600);
-
-			return () => clearTimeout(timeoutId);
-		}
-	}, [searchValue]);
-
-    // Хайх товч дарсан үед ажиллах функц
-    async function handleSearch() {
-        getDatas()
-    }
-
-    // Function to handle per page
-    function handlePerPage(e) {
-        setRowsPerPage(parseInt(e.target.value))
-    }
-
-    // Нийт датаны тоо
-    const default_page = [10, 15, 50, 75, 100]
-
-     // Хуудас солих үед ажиллах хэсэг
-	function handlePagination(page) {
-		setCurrentPage(page.selected + 1);
-	};
-
-    // ** Function to handle per page
-    function handlePerPage(e) {
-        setRowsPerPage(parseInt(e.target.value))
-    }
-
-
-    function handleSort(column, sort) {
-        if(sort === 'asc') {
-            setSort(column.header)
-        } else {
-            setSort('-' + column.header)
-        }
-    }
+    }, [])
 
     return (
         <Fragment>
             <Card>
                 <CardHeader>
-                    {'Хоосон'}
+                    Хоосон
                 </CardHeader>
-                <CardBody>
-                </CardBody>
-            {/* {isLoading && Loader}
-                <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
-                    <CardTitle tag="h4">{t('Сургалтын хөтөлбөр, хичээлийн хуваарь')}</CardTitle>
-                    <div className='d-flex flex-wrap mt-md-0 mt-1'>
-                        <Button
-                            color='primary'
-                            onClick={() => handleModal()}
-                            disabled={true}
-                        >
-                            <Plus size={15} />
-                            <span className='align-middle ms-50'>{t('Нэмэх')}</span>
-                        </Button>
-                    </div>
-                </CardHeader>
-                <Row className='mt-1 d-flex justify-content-between mx-0'>
-                    <Col className='d-flex align-items-center justify-content-start '>
-                        <Col md={2} sm={3} className='pe-1'>
-                            <Input
-                                className='dataTable-select me-1 mb-50'
-                                type='select'
-                                bsSize='sm'
-                                style={{ height: "30px",}}
-                                value={rowsPerPage}
-                                onChange={e => handlePerPage(e)}
-                            >
+            {/* <div className='d-flex flex-column' style={{ minHeight: '100vh' }}>
+            <div className='container-fluid container-md' style={{ flex:1 }}>
+                <div>
+                    <div className=''>
+                        <Row className='m-0 my-3 p-0'>
+                                <div className=''>
                                 {
-                                    default_page.map((page, idx) => (
-                                    <option
-                                        key={idx}
-                                        value={page}
-                                    >
-                                        {page}
-                                    </option>
-                                ))}
-                            </Input>
-                        </Col>
-                        <Col md={10} sm={3}>
-                            <Label for='sort-select'>{t('Хуудсанд харуулах тоо')}</Label>
-                        </Col>
-                    </Col>
-                    <Col className='d-flex align-items-center mobile-datatable-search'>
-                        <Input
-                            className='dataTable-filter mb-50'
-                            type='text'
-                            bsSize='sm'
-                            id='search-input'
-                            placeholder={t('Хайх')}
-                            value={searchValue}
-                            onChange={handleFilter}
-                            onKeyPress={e => e.key === 'Enter' && handleSearch()}
-                        />
-                        <Button
-                            size='sm'
-                            className='ms-50 mb-50'
-                            color='primary'
-                            onClick={handleSearch}
-                        >
-                            <Search size={15} />
-                            <span className='align-middle ms-50'></span>
-                        </Button>
-                    </Col>
-                </Row>
-                <div className="react-dataTable react-dataTable-selectable-rows">
-                    <DataTable
-                        noHeader
-                        paginationServer
-                        pagination
-                        className='react-dataTable'
-                        progressPending={isTableLoading}
-                        progressComponent={
-                            <div className='my-2 d-flex align-items-center justify-content-center'>
-                                <Spinner className='me-1' color="" size='sm'/><h5>Түр хүлээнэ үү...</h5>
-                            </div>
-                        }
-                        noDataComponent={(
-                            <div className="my-2">
-                                <h5>{t('Өгөгдөл байхгүй байна')}</h5>
-                            </div>
-                        )}
-                        onSort={handleSort}
-                        // columns={getColumns(currentPage, rowsPerPage, total_count, handleEditModal, handleDelete, user)}
-                        sortIcon={<ChevronDown size={10} />}
-                        paginationPerPage={rowsPerPage}
-                        paginationDefaultPage={currentPage}
-                        data={datas}
-                        paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
-                        fixedHeader
-                        fixedHeaderScrollHeight='62vh'
-                    />
-                </div> */}
-            </Card>
-            {/* {modal && <Createmodal open={modal} handleModal={handleModal} refreshDatas={getDatas}/>} */}
+                                    datas.map((val, idx) =>
+                                        {
+                                            return (
+                                                <div key={idx}>
+                                                    <div
+                                                        className={`text-wrap d-flex align-items-center p-50 m-25 salbar_item `}
+                                                        style={{ wordWrap:'break-word' }}
+                                                        role='button'
+                                                    >
+                                                        <Accordion open={`accordion${open}`} toggle={() => toggle(idx+1)} key={idx}>
+                                                            <AccordionItem className='m-1 shadow-sm' key={idx+1}>
+                                                                <AccordionHeader targetId={`accordion${idx+1}`}>
+                                                                    <span className='accordion_title_override text-uppercase'>
+                                                                        {val?.sub_org_name}
+                                                                    </span>
+                                                                </AccordionHeader>
+                                                                <AccordionBody accordionId={`accordion${idx+1}`}>
+                                                                </AccordionBody>
+                                                            </AccordionItem>
+                                                        </Accordion>
+                                                        <TabContent className='py-50 d-flex flex-wrap justify-content-center'  id=''>
+                                                            {
+                                                                // isLoading
+                                                                // ?
+                                                                //         <div className='w-100 d-flex justify-content-center align-items-center' style={{ minHeight: '40vh', zIndex: 9999 }}>
+                                                                //             {Loader}
+                                                                //         </div>
+                                                                // :
+                                                                val?.salbars.map((row, key) =>{
+                                                                    return (
+                                                                        <div key={idx}>
+
+                                                                            <span className='text-uppercase' style={{ fontSize: 12, wordBreak: 'break-word' }}>
+                                                                                {row.name}
+                                                                            </span>
+                                                                        </div>
+                                                                    )
+                                                                })
+                                                            }
+                                                        </TabContent>
+                                                    </div>
+                                                </div>
+                                            )
+                                        })
+                                }
+                                </div>
+                        </Row>
+                    </div>
+                </div>
+            </div>
+        </div> */}
+        </Card>
         </Fragment>
     )
 }

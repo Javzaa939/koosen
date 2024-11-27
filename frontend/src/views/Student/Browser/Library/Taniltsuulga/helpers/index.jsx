@@ -32,8 +32,8 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 			center: true,
 		},
 		{
-			name: `${t('Линк')}`,
-			selector: (row) => <a href={row?.link} className="ms-1">{row?.link}</a>,
+			name: `${t('Файл')}`,
+			selector: (row) => <a href={row?.link} className="ms-1">{ row?.link}</a>,
             sortable: true,
 			minWidth: "80px",
 			center: true

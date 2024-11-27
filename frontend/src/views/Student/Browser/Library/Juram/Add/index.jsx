@@ -1,5 +1,5 @@
 // ** React imports
-import React, { Fragment, useState, useContext, useEffect, useRef } from 'react'
+import React, { Fragment, useState, useContext, useEffect } from 'react'
 
 import { X } from "react-feather";
 
@@ -11,15 +11,15 @@ import useLoader from "@hooks/useLoader";
 
 import { useForm, Controller } from "react-hook-form";
 
-import { Row, Col, Form, Modal, Input, Label, Button, ModalBody, ModalHeader, FormFeedback, Spinner, InputGroupText, InputGroup, } from "reactstrap";
+import { Row, Col, Form, Modal, Input, Label, Button, ModalBody, FormFeedback, Spinner, InputGroupText, InputGroup, } from "reactstrap";
 
 import { validate, convertDefaultValue } from "@utils"
 
 import AuthContext from '@context/AuthContext'
-import SchoolContext from '@context/SchoolContext'
 import * as Yup from 'yup';
 import { useQuill } from 'react-quilljs';
 import 'quill/dist/quill.snow.css'
+
 
 const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}) => {
 
@@ -65,33 +65,33 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
         readOnly: false,
     });
 
-    const { school_id } = useContext(SchoolContext)
     const { user } = useContext(AuthContext)
     const [File, setFile] = useState(null)
     const [fileName, setFileName] = useState('')
-    const fileInputRef = useRef(null)
-    const [error, setFileError] = useState('')
+    const [files_name, setFileNames] = useState('')     // Хуучин файлийн нэр
+    const addToast = useToast()
+
 
     // ** Hook
     const { control, handleSubmit, reset, setError, formState: { errors }, setValue } = useForm(validate(validateSchema));
 
 	// Loader
-	const { Loader, isLoading, fetchData } = useLoader({});
+	const { fetchData } = useLoader({});
 	const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
 
     // Api
-    const studentDevelopApi = useApi().browser.student_develop
+    const studentRulesApi = useApi().browser.rules
 
     const getFile = (e, action) => {
         if (action == 'Get') {
             var files = e.target.files
-            console.log("files", files);
             setFile(files[0])
             setFileName(files[0]?.name)
         }
         else {
             setFile(null)
-            setFileError('Хоосон')
+            setFileNames('')
+
         }
     }
 
@@ -112,11 +112,9 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
             cdata['file'] = File
         }
 
-        cdata['body'] = quill.root.innerHTML
-        cdata['created_user'] = user.id
-
         if(editId){
-            const { success, errors } = await fetchData(studentDevelopApi.put(File ? formData : cdata, editId))
+            cdata['updated_user'] = user.id
+            const { success, errors } = await fetchData(studentRulesApi.put(File ? formData : cdata, editId))
             if(success) {
                 reset()
                 refreshDatas()
@@ -130,40 +128,46 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
             }
         }
         else{
-            cdata['created_user'] = user.id
-            cdata['updated_user'] = user.id
-            const { success, errors } = await postFetch(studentDevelopApi.post(formData))
-            if(success) {
-                reset()
-                refreshDatas()
-                handleModal()
-            }
-            else {
-                if(errors && Object.keys(errors).length > 0) {
-                    /** Алдааны мессэжийг input дээр харуулна */
-                    for (let key in errors) {
-                        setError(key, { type: 'custom', message: errors[key][0]});
+            if(File){
+                cdata['created_user'] = user.id
+                const { success, errors } = await postFetch(studentRulesApi.post(formData))
+                if(success) {
+                    reset()
+                    refreshDatas()
+                    handleModal()
+                }
+                else {
+                    if(errors && Object.keys(errors).length > 0) {
+                        /** Алдааны мессэжийг input дээр харуулна */
+                        for (let key in errors) {
+                            setError(key, { type: 'custom', message: errors[key][0]});
+                        }
                     }
                 }
+            }
+            else{
+                addToast(
+                    {
+                        type: 'warning',
+                        text: 'Та файл оруулна уу !!!'
+                    }
+                )
             }
         }
 	}
 
     async function getOneDatas() {
         if(editId) {
-            const { success, data } = await fetchData(studentDevelopApi.getOne(editId))
+            const { success, data } = await fetchData(studentRulesApi.getOne(editId))
             if(success) {
+                setFileNames(data?.file  ? data?.file.toString().split("/").pop() : '')
                 // засах үед дата байх юм бол setValue-р дамжуулан утгыг харуулна
                 if(data === null) return
                 for(let key in data) {
                     if(data[key] !== null && key !== 'file')
-                    // if(data[key] !== null)
                         setValue(key, data[key])
 
                     else setValue(key, '')
-                }
-                if (key === 'body' && quill) {
-                    quill.pasteHTML(data[key]);
                 }
             }
         }
@@ -174,7 +178,7 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
             getOneDatas()
         }
     },[open])
-
+    console.log("err", errors);
 	return (
         <Fragment>
             <Modal
@@ -186,7 +190,7 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
             >
                 <ModalBody className="px-sm-3 pt-50 pb-3">
                     <div className='text-center'>
-                        <h4>{editId ? t('Суралцагчийн хөгжил засах') : t('Суралцагчийн хөгжил нэмэх')}</h4>
+                        <h4>{editId ? t('Журам засах') : t('Журам нэмэх')}</h4>
                     </div>
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
                         <Col md={12}>
@@ -208,98 +212,50 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
                                         placeholder='гарчиг'
                                         invalid={errors.title && true}
                                     >
-                                    </Input> 
+                                    </Input>
                                 )}
                             />
                             {errors.title && <FormFeedback className='d-block'>{t(errors.title.message)}</FormFeedback>}
                         </Col>
                         <Col md={12}>
-                            <Label className="form-label" for="link">
-                                {t('Линк')}
+                            <Label for="file">
+                                {t('Файл')}
                             </Label>
+                            <InputGroup>
                             <Controller
-                                defaultValue=''
+                                name='file'
                                 control={control}
-                                id='link'
-                                name='link'
-                                render={({ field }) => (
-                                    <Input
-                                        {...field}
-                                        type='text'
-                                        name='link'
-                                        bsSize='sm'
-                                        id='link'
-                                        placeholder='гарчиг'
-                                        invalid={errors.link && true}
-                                    >
-                                    </Input>
-                                )}
+                                defaultValue=''
+                                render={({ field }) => {
+                                    return (
+                                        <Input
+                                            {...field}
+                                            id='file'
+                                            type="file"
+                                            bsSize='sm'
+                                            onChange={(e) => getFile(e, 'Get')}
+                                        />
+                                    )
+                                }}
                             />
-                            {errors.link && <FormFeedback className='d-block'>{t(errors.link.message)}</FormFeedback>}
-                        </Col>
-                        {
-                            // editId ? ""
-                            // :
-                            <Col md={12}>
-                                <Label for="file">
-                                    {t('Файл')}
-                                </Label>
-                                <InputGroup>
-                                <Controller
-                                    name='file'
-                                    control={control}
-                                    defaultValue=''
-                                    render={({ field }) => {
-                                        return (
-                                            <Input
-                                                {...field}
-                                                id='file'
-                                                type="file"
-                                                bsSize='sm'
-                                                onChange={(e) => getFile(e, 'Get')}
-                                            />
-                                        )
-                                    }}
-                                />
-                                {error
-                                    &&
-                                    <FormFeedback className='d-block'>{t(error)}</FormFeedback>}
-                                {File
-                                    &&
-                                    <InputGroupText size="sm">
-                                        <X role="button" color="red" size={15} onClick={(e) => getFile(e, 'Delete')}/>
-                                    </InputGroupText>
-                                }
-                                </InputGroup>
-                                {
-                                    fileName &&
+                            {files_name
+                                &&
+                                <InputGroupText size="sm">
+                                    <X role="button" color="red" size={15} onClick={(e) => getFile(e, 'Delete')}/>
+                                </InputGroupText>
+                            }
+                            </InputGroup>
+                            {
+                                    fileName
+                                    ?
                                         <p className="mb-0" style={{fontSize: '12px'}}>
                                             <b className="me-1">Файл нэр: </b>{fileName}
                                         </p>
-                                }
-                            </Col>
-                        }
-                        <Col md={12} >
-                            <Label className='form-label' for='body'>
-                                {t('Танилцуулга байршуулах хэсэг')}
-                            </Label>
-                            <Controller
-                                defaultValue=''
-                                control={control}
-                                id='body'
-                                name='body'
-                                render={({field}) => (
-                                    <div style={{ width: 'auto',}}>
-                                        <div
-                                            {...field}
-                                            name='body'
-                                            id='body'
-                                            ref={quillRef}
-                                        />
-                                    </div>
-                                )}
-                            />
-                            {errors.body && <FormFeedback className='d-block'>{t(errors.body.message)}</FormFeedback>}
+                                    :
+                                        <p className="mb-0" style={{fontSize: '12px'}}>
+                                            <b className="me-1">Файл нэр: </b>{files_name}
+                                        </p>
+                            }
                         </Col>
                         <Col md={12} className="text-center mt-2">
                             <Button className="me-2" color="primary" type="submit" >

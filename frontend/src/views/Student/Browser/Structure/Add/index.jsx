@@ -15,8 +15,9 @@ import { Row, Col, Form, Modal, Input, Label, Button, ModalBody, FormFeedback, S
 import { validate, convertDefaultValue } from "@utils"
 
 import AuthContext from '@context/AuthContext'
-import SchoolContext from '@context/SchoolContext'
 import * as Yup from 'yup';
+import useToast from "@hooks/useToast";
+
 
 const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}) => {
 
@@ -24,26 +25,22 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
 	title: Yup.string()
 		.trim()
 		.required('Хоосон байна'),
-    link: Yup.string()
-		.trim()
-		.required('Хоосон байна'),
 
     });
 
-    const { school_id } = useContext(SchoolContext)
     const { user } = useContext(AuthContext)
 
     // ** Hook
     const { control, handleSubmit, reset, setError, formState: { errors }, setValue } = useForm(validate(validateSchema));
 
     const [File, setFile] = useState(null)
-    const [fileName, setFileName] = useState('')
-    const [error, setFileError] = useState('')
-    const [files_name, setFileNames] = useState('')
+    const [fileName, setFileName] = useState('')        //Шинэ файлийн нэр
+    const [files_name, setFileNames] = useState('')     // Хуучин файлийн нэр
+    const addToast = useToast()
 
 
 	// Loader
-	const { Loader, isLoading, fetchData } = useLoader({});
+	const { fetchData } = useLoader({});
 	const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
 
     // Api
@@ -56,8 +53,8 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
             setFileName(files[0]?.name)
         }
         else {
-            setFile('Хоосон')
-            setFileError('Хоосон')
+            setFile(null)
+            setFileNames('')
         }
     }
 
@@ -75,8 +72,9 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
         }
         else {
             cdata['file'] = File
+            cdata['created_user'] = user.id
+            cdata['updated_user'] = user.id
         }
-        cdata['updated_user'] = user.id
 
         if(editId){
             const { success, errors } = await fetchData(browserApi.put(File ? formData : cdata, editId))
@@ -93,35 +91,42 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
             }
         }
         else{
-            cdata['created_user'] = user.id
-            const { success, errors } = await postFetch(browserApi.post(formData))
-            if(success) {
-                reset()
-                refreshDatas()
-                handleModal()
-            }
-            else {
-                if(errors && Object.keys(errors).length > 0) {
-                    /** Алдааны мессэжийг input дээр харуулна */
-                    for (let key in errors) {
-                        setError(key, { type: 'custom', message: errors[key][0]});
+            if(File){
+                const { success, errors } = await postFetch(browserApi.post(File ? formData : cdata))
+                if(success) {
+                    reset()
+                    refreshDatas()
+                    handleModal()
+                }
+                else {
+                    if(errors && Object.keys(errors).length > 0) {
+                        /** Алдааны мессэжийг input дээр харуулна */
+                        for (let key in errors) {
+                            setError(key, { type: 'custom', message: errors[key][0]});
+                        }
                     }
                 }
             }
+            else{
+                addToast(
+                    {
+                        type: 'warning',
+                        text: 'Та файл оруулна уу !!!'
+                    }
+                )
+            }
         }
 	}
-
     async function getOneDatas() {
         if(editId) {
             const { success, data } = await fetchData(browserApi.getOne(editId))
             if(success) {
                 // засах үед дата байх юм бол setValue-р дамжуулан утгыг харуулна
-                setFileNames(data?.file.toString().split("/").pop())
+                setFileNames(data?.file  ? data?.file.toString().split("/").pop() : '')
                 if(data === null) return
                 for(let key in data) {
                     if(data[key] !== null && key !== 'file')
                         setValue(key, data[key])
-
                     else setValue(key, '')
                 }
             }
@@ -219,7 +224,7 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
                                 }}
                             />
                             {
-                                File
+                                files_name
                                 &&
                                 <InputGroupText size="sm">
                                     <X role="button" color="red" size={15} onClick={(e) => getFile(e, 'Delete')}/>

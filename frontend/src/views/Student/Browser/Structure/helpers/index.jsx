@@ -38,7 +38,7 @@ export function getColumns (currentPage, rowsPerPage, datas,  handleUpdateModal,
 		},
 		{
 			name: `${t('Файл')}`,
-			selector: (row) => <a href={row?.file} className="ms-1">{row?.file.toString().split("/").pop()}</a>,
+			selector: (row) => <a href={row?.file} className="ms-1">{row?.file ? row?.file.toString().split("/").pop() : ''}</a>,
             sortable: true,
 			minWidth: "80px",
 			center: true
@@ -58,7 +58,7 @@ export function getColumns (currentPage, rowsPerPage, datas,  handleUpdateModal,
 			minWidth: "180px",
 			selector: (row) => (
 				<>
-					{/* {
+					{
 						<a
 							id={`activeYearUpdate${row?.id}`}
 							onClick={
@@ -70,7 +70,7 @@ export function getColumns (currentPage, rowsPerPage, datas,  handleUpdateModal,
 							<Badge color="light-secondary" pill><Edit  width={"15px"} /></Badge>
 						</a>
 					}
-					<UncontrolledTooltip placement='top' target={`activeYearUpdate${row?.id}`} >Засах</UncontrolledTooltip> */}
+					<UncontrolledTooltip placement='top' target={`activeYearUpdate${row?.id}`} >Засах</UncontrolledTooltip>
 					{	user.permissions.includes('lms-browser-structure-delete') &&
 						<>
 						<a role="button"

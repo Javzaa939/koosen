@@ -19,15 +19,15 @@ from lms.models import Structure
 from lms.models import StudentDevelop
 from lms.models import Library
 from lms.models import StudentPsycholocal
-from lms.models import Health
+from lms.models import Health, StudentRules
 from core.models import SubOrgs, Salbars
 
 from .serializers import StructureSerializer
-from .serializers import StructureListSerializer
 from .serializers import StudentDevelopSerializer
 from .serializers import LibrarySerializer
 from .serializers import StudentPsycholocalSerializer
 from .serializers import HealthSerializer
+from .serializers import *
 
 
 # ----------------- Их сургуулийн бүтэц зохион байгуулалт ---------------
@@ -53,7 +53,6 @@ class StudentStructureAPIView(
     @has_permission(must_permissions=['lms-browser-structure-read'])
     def get(self, request, pk=None):
         """ Их сургуулийн бүтэц зохион байгуулалт жагсаалт """
-        self.serializer_class = StructureListSerializer
 
         if pk:
             datas = self.retrieve(request, pk).data
@@ -66,7 +65,7 @@ class StudentStructureAPIView(
     def post(self, request):
         " Их сургуулийн бүтэц зохион байгуулалт нэмэх "
 
-        data = request.data.dict()
+        data = request.data
         data = null_to_none(data)
         created_user = data.get('created_user')
 
@@ -96,29 +95,17 @@ class StudentStructureAPIView(
     @has_permission(must_permissions=['lms-browser-structure-update'])
     def put(self, request, pk=None):
         " Их сургуулийн бүтэц зохион байгуулалт засах "
-        request_data = request.data.dict()
-        print("request", request_data)
-        file = request_data.get('file')
 
+        request_data = request.data
         request_data['updated_user'] = request_data.get('updated_user')
 
-        instance = self.get_object()
-        old_file = instance.file
-        serializer = self.get_serializer(instance, data=data, partial=True)
-        # файл хадгалсан эсэх
-        if old_file:
-            old_file_path = old_file.path
-
-            old_file_name = os.path.basename(old_file_path)
-            if file:
-                remove_path = os.path.join(settings.MEDIA_ROOT, old_file_name)
-                remove_folder(remove_path)
+        instance = self.queryset.filter(id=pk).first()
+        serializer = self.get_serializer(instance, data=request_data, partial=True)
 
         if serializer.is_valid(raise_exception=False):
             self.perform_update(serializer)
             return request.send_info('INF_002')
         else:
-            # return request.send_error_valid(serializer.errors)
             error_obj = []
             # Олон алдааны мессэж буцаах бол үүнийг ашиглана
             for key in serializer.errors:
@@ -198,7 +185,7 @@ class StudentDevelopAPIView(
     @has_permission(must_permissions=['lms-browser-hugjil-read'])
     def get(self, request, pk=None):
         """  Суралцагчийн хөгжил жагсаалт """
-        # self.serializer_class = StudentDevelopListSerializer
+
         if pk:
             datas = self.retrieve(request, pk).data
             return request.send_data(datas)
@@ -213,15 +200,12 @@ class StudentDevelopAPIView(
         data = request.data
         data = null_to_none(data)
         created_user = data.get('created_user')
-        updated_user = data.get('updated_user')
 
         data['created_user']= created_user
-        data['updated_user']= updated_user
 
         file = data.get('file')
-        if file:
-            #  file хадгалах
-            save_file(file, 'structure')
+        if not file:
+            return request.send_error("ERR_002", "Файл заавал оруулна уу.")
 
         serializer = self.get_serializer(data=data)
 
@@ -245,21 +229,14 @@ class StudentDevelopAPIView(
         "  Суралцагчийн хөгжил засах "
 
         request_data = request.data
-        file = request_data.get('file')
+
+        # зассан хэрэглэгч
+        updated_user = request_data.get('updated_user')
+        request_data['updated_user']= updated_user
 
         instance = self.queryset.filter(id=pk).first()
-        old_file = instance.file
-
-        if old_file:
-            old_file_path = old_file.path
-            old_file_name = os.path.basename(old_file_path)
-
-            if file != old_file_name:
-                remove_path = os.path.join(settings.MEDIA_ROOT, str(pk), old_file_name)
-                remove_folder(remove_path)
-
         serializer = self.get_serializer(instance, data=request_data)
-        # Хуучин файл хадгалсан эсэх
+
         if serializer.is_valid(raise_exception=False):
             self.perform_update(serializer)
             return request.send_info('INF_002')
@@ -269,15 +246,6 @@ class StudentDevelopAPIView(
     @has_permission(must_permissions=['lms-browser-hugjil-delete'])
     def delete(self, request, pk=None):
         """ Суралцагчийн хөгжил устгах """
-
-        instance = self.queryset.filter(id=pk).first()
-        file_old = instance.file
-        old_file_path = file_old.path
-        old_file_name = os.path.basename(old_file_path)
-
-        if old_file_name:
-            remove_path = os.path.join(settings.MEDIA_ROOT, str(pk), old_file_name)
-            remove_folder(remove_path)
 
         self.destroy(request, pk)
         return request.send_info("INF_003")
@@ -527,6 +495,93 @@ class HealthAPIView(
     @has_permission(must_permissions=['lms-browser-health-delete'])
     def delete(self, request, pk=None):
         """ Эрүүл мэнд устгах """
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
+
+
+
+@permission_classes([IsAuthenticated])
+class StudentRulesAPIView(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    generics.GenericAPIView
+):
+    '''  Номын сангийн журам '''
+
+    queryset = StudentRules.objects.all().order_by('-created_at')
+    serializer_class = StudentRulesSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['title']
+
+
+    def get(self, request, pk=None):
+        """  Номын сангийн журам жагсаалт """
+
+        if pk:
+            datas = self.retrieve(request, pk).data
+            return request.send_data(datas)
+
+        return_data = self.list(request).data
+        return request.send_data(return_data)
+
+    def post(self, request):
+        "  Номын сангийн журам нэмэх "
+
+        data = request.data
+        data = null_to_none(data)
+        created_user = data.get('created_user')
+
+        data['created_user']= created_user
+
+        file = data.get('file')
+        if not file:
+            return request.send_error("ERR_002", "Файл заавал оруулна уу.")
+
+        serializer = self.get_serializer(data=data)
+
+        try:
+            if serializer.is_valid():
+                with transaction.atomic():
+                    self.perform_create(serializer)
+
+            else:
+                print(serializer.errors)
+                return request.send_error("ERR_002")
+
+        except Exception as e:
+            print(e)
+            return request.send_error("ERR_002")
+
+        return request.send_info("INF_001")
+
+    def put(self, request, pk=None):
+        "  Номын сангийн журам засах "
+
+        request_data = request.data
+
+        # зассан хэрэглэгч
+        updated_user = request_data.get('updated_user')
+        request_data['updated_user']= updated_user
+        request_data['created_user']= updated_user
+
+        instance = self.queryset.filter(id=pk).first()
+        serializer = self.get_serializer(instance, data=request_data)
+
+        if serializer.is_valid(raise_exception=False):
+            self.perform_update(serializer)
+            return request.send_info('INF_002')
+        else:
+            return request.send_error_valid(serializer.errors)
+
+    def delete(self, request, pk=None):
+        """ Номын сангийн журам устгах """
 
         self.destroy(request, pk)
         return request.send_info("INF_003")
