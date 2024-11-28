@@ -90,7 +90,6 @@ function AddStudent() {
     async function getStudents() {
         const { success, data } = await fetchStudents(challengeAPI.getStudents(student_search_value));
         if (success) {
-            console.log(data)
             setStudents(data)
         }
     }

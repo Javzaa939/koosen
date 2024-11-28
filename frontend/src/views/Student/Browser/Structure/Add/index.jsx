@@ -52,7 +52,6 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
     const getFile = (e, action) => {
         if (action == 'Get') {
             var files = e.target.files
-            console.log("files", files);
             setFile(files[0])
             setFileName(files[0]?.name)
         }

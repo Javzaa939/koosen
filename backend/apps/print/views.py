@@ -833,6 +833,8 @@ class AdmissionPrintAPIView(
             }
         )
 
+
+@permission_classes([IsAuthenticated])
 class GroupsListFilterWithSubSchoolApiView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -858,6 +860,7 @@ class GroupsListFilterWithSubSchoolApiView(
         return request.send_data(teach_info)
 
 
+@permission_classes([IsAuthenticated])
 class GpaProfessionAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin

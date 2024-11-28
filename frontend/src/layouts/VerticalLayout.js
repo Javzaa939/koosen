@@ -25,14 +25,8 @@ const VerticalLayout = (props) =>
      * @param {String | Boolean} checkPerm User perm-ийн шүүж шалганаа
      * @param {String} idName children-ий шалгах утга
      */
-    console.log(user?.permissions)
     function checkPerm(saveData, menus=[], checkPerm, idName='')
     {
-        if(checkPerm == "lms-student-graduate-read"){
-            // console.log(checkPerm)
-            // console.log(idName)
-            // console.log(menus)
-        }
         // is_superuser гэж шалгаж байгаа бол
         if (typeof checkPerm == 'boolean' && checkPerm)
         {
@@ -416,9 +410,6 @@ const VerticalLayout = (props) =>
         },
         [user]
     )
-    // console.log(user)
-        // console.log(navigation)
-    // console.log(cNavigation)
 
     return (
         <>

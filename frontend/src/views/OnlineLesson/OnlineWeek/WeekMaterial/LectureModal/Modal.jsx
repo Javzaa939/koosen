@@ -18,7 +18,6 @@ import { useTranslation } from 'react-i18next';
 const StudentModal = ({ open, handleModal, studentData, refresh }) => {
     // Translation hook
     const { t } = useTranslation();
-    console.log(studentData)
     const studentApi = useApi().sent_lecture_file;
     const { fetchData } = useLoader({});
 
