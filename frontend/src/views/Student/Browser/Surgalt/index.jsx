@@ -15,7 +15,6 @@ import AuthContext from '@context/AuthContext'
 import SchoolContext from '@context/SchoolContext'
 import useApi from "@hooks/useApi"
 import useLoader from '@hooks/useLoader';
-import {ProDetailAccordion} from './Detail'
 
 
 const Surgalt = () => {
@@ -132,70 +131,74 @@ const Surgalt = () => {
         getDatas()
     }, [])
 
+    const [open, setOpen] = useState('1');
+    const toggle = (id) => {
+        if (open === id) {
+            setOpen();
+        } else {
+            setOpen(id);
+        }
+    };
+
     return (
         <Fragment>
             <Card>
-                <CardHeader>
-                    Хоосон
-                </CardHeader>
-            {/* <div className='d-flex flex-column' style={{ minHeight: '100vh' }}>
-            <div className='container-fluid container-md' style={{ flex:1 }}>
-                <div>
+            <CardHeader>
+                Хоосон
+            </CardHeader>
+            {/* <div className='d-flex flex-content-start' style={{ minHeight: '100vh' }}>
+                <Row className=''>
                     <div className=''>
-                        <Row className='m-0 my-3 p-0'>
-                                <div className=''>
-                                {
-                                    datas.map((val, idx) =>
-                                        {
-                                            return (
-                                                <div key={idx}>
-                                                    <div
-                                                        className={`text-wrap d-flex align-items-center p-50 m-25 salbar_item `}
-                                                        style={{ wordWrap:'break-word' }}
-                                                        role='button'
-                                                    >
-                                                        <Accordion open={`accordion${open}`} toggle={() => toggle(idx+1)} key={idx}>
-                                                            <AccordionItem className='m-1 shadow-sm' key={idx+1}>
-                                                                <AccordionHeader targetId={`accordion${idx+1}`}>
-                                                                    <span className='accordion_title_override text-uppercase'>
-                                                                        {val?.sub_org_name}
-                                                                    </span>
-                                                                </AccordionHeader>
-                                                                <AccordionBody accordionId={`accordion${idx+1}`}>
-                                                                </AccordionBody>
-                                                            </AccordionItem>
-                                                        </Accordion>
-                                                        <TabContent className='py-50 d-flex flex-wrap justify-content-center'  id=''>
-                                                            {
-                                                                // isLoading
-                                                                // ?
-                                                                //         <div className='w-100 d-flex justify-content-center align-items-center' style={{ minHeight: '40vh', zIndex: 9999 }}>
-                                                                //             {Loader}
-                                                                //         </div>
-                                                                // :
-                                                                val?.salbars.map((row, key) =>{
-                                                                    return (
-                                                                        <div key={idx}>
+                        {
+                            datas.map((val, idx) =>
+                            {
+                                return (
+                                    <div key={idx}>
+                                        <div
+                                            className={`text-wrap d-flex align-items-center p-50 m-25 `}
+                                            style={{ wordWrap:'break-word' }}
+                                            role='button'
+                                        >
+                                            <Accordion open={open} toggle={() => toggle(idx+1)} key={idx}>
+                                                <AccordionItem className='m-1 shadow-sm' key={idx+1}>
+                                                    <AccordionHeader targetId={`accordion${idx+1}`}>
+                                                        <span className='accordion_title_override text-uppercase'>
+                                                            {val?.sub_org_name}
+                                                        </span>
+                                                    </AccordionHeader>
+                                                        {
+                                                            val?.salbars.map((row, idx) =>{
+                                                                return (
+                                                                    <div key={idx}>
 
-                                                                            <span className='text-uppercase' style={{ fontSize: 12, wordBreak: 'break-word' }}>
-                                                                                {row.name}
-                                                                            </span>
-                                                                        </div>
-                                                                    )
-                                                                })
-                                                            }
-                                                        </TabContent>
-                                                    </div>
-                                                </div>
-                                            )
-                                        })
-                                }
-                                </div>
-                        </Row>
+                                                                    <Accordion open={`accordion${open}`} toggle={() => toggle(idx+1)} key={idx}>
+                                                                        <AccordionItem className='m-1' key={idx+1}>
+                                                                            <AccordionHeader targetId={`accordion${idx+1}`}>
+                                                                                <span className='accordion_title_override text-uppercase'>
+                                                                                    {row?.name}
+                                                                                </span>
+                                                                            </AccordionHeader>
+                                                                            <AccordionBody accordionId={`accordion${idx+1}`}>
+                                                                            </AccordionBody>
+                                                                        </AccordionItem>
+                                                                    </Accordion>
+                                                                    </div>
+                                                                )
+                                                            })
+                                                        }
+                                                    <TabContent className='py-50 d-flex flex-wrap justify-content-center'  id=''>
+                                                    </TabContent>
+
+                                                </AccordionItem>
+                                            </Accordion>
+                                        </div>
+                                    </div>
+                                )
+                            })
+                        }
                     </div>
-                </div>
-            </div>
-        </div> */}
+                </Row>
+            </div> */}
         </Card>
         </Fragment>
     )

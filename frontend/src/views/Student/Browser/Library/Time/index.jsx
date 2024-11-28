@@ -1,16 +1,16 @@
 import { t } from "i18next"
 import { Fragment, useState, useContext, useEffect } from "react"
 import DataTable from "react-data-table-component"
-import { ChevronDown, Search, Plus } from "react-feather"
-import { Card, CardHeader, CardTitle, Col, Row, Input, Label, Button, Spinner } from "reactstrap"
+import { Edit, Download, Trash2, Trash } from "react-feather"
+import { Card, CardHeader, CardTitle, Col, Row, Input, Label, Button, Spinner, CardBody, Badge, Form, FormFeedback } from "reactstrap"
 import { getPagination } from '@utils'
 import AuthContext from '@context/AuthContext'
-import SchoolContext from '@context/SchoolContext'
 import useApi from "@hooks/useApi"
 import useLoader from '@hooks/useLoader';
-
-// import Createmodal from './Add'
-// import { getColumns } from './helpers'
+import { useForm, Controller } from "react-hook-form";
+import { validate } from '@utils'
+import * as Yup from 'yup';
+import useModal from '@hooks/useModal';
 
 
 const Time = () => {
@@ -21,9 +21,7 @@ const Time = () => {
 
     //Context
     const { user } = useContext(AuthContext)
-    const { school_id } = useContext(SchoolContext)
 
-    const [edit_id, setEditId] = useState('')
 
     //useState
     const [currentPage, setCurrentPage] = useState(1);
@@ -31,32 +29,53 @@ const Time = () => {
     const [rowsPerPage, setRowsPerPage] = useState(10)
     const [datas, setDatas] = useState([])
     const [modal, setModal] = useState(false);
-    const [searchValue, setSearchValue] = useState("");
-    const [sortField, setSort] = useState('')
+
+    const [edit, setEdit] = useState(false)
+    const [fileInputKey, setFileInputKey] = useState(0); // file key
+
+    const validationSchema = Yup.object().shape({
+        title: Yup.string()
+            .trim()
+            .required(t('Хоосон байна')),
+        file: Yup.mixed()
+            .test(
+                'file-required',
+                t('Хоосон байна'),
+                (value) => (value instanceof FileList && value.length > 0) || (typeof value === 'string' && value.trim() !== '')
+            )
+            .test(
+                'file-format-required',
+                t('Choose PDF or Excel files'),
+                (value) => (typeof value === 'string' && value.trim() !== '') ||
+                    (
+                        value && value.length > 0 &&
+                        ['application/pdf', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'].includes(value[0].type)
+                    )
+            ),
+    });
+
+    const {
+        control,
+        handleSubmit,
+        formState: { errors, isValid },
+        watch,
+        reset
+    } = useForm(validate(validationSchema));
+
+    const file = watch('file')
 
     const timeApi = useApi().browser.time
 
     async function getDatas() {
-        const page_count = Math.ceil(total_count / rowsPerPage)
-
-        if (page_count < currentPage && page_count != 0) {
-            setCurrentPage(page_count)
-        }
-        const { success, data } = await allFetch(timeApi.get(rowsPerPage, currentPage, sortField, searchValue))
+        const { success, data } = await allFetch(timeApi.get(rowsPerPage, currentPage))
         if (success) {
-            setTotalCount(data?.count)
             setDatas(data?.results)
         }
     }
 
     useEffect(() => {
         getDatas()
-    }, [sortField, currentPage, rowsPerPage])
-
-    /* Модал setState функц */
-	const handleModal = () => {
-		setModal(!modal)
-	}
+    }, [currentPage, rowsPerPage])
 
     /* Устгах функц */
 	const handleDelete = async(id) => {
@@ -67,152 +86,189 @@ const Time = () => {
         }
 	};
 
-    const handleFilter = e => {
-        const value = e.target.value.trimStart();
-        setSearchValue(value)
-    }
-
-
-	useEffect(() => {
-		if (searchValue.length == 0) {
-			getDatas();
-		} else {
-			const timeoutId = setTimeout(() => {
-				getDatas();
-			}, 600);
-
-			return () => clearTimeout(timeoutId);
-		}
-	}, [searchValue]);
-
-    // Хайх товч дарсан үед ажиллах функц
-    async function handleSearch() {
-        getDatas()
-    }
-
-    // Function to handle per page
-    function handlePerPage(e) {
-        setRowsPerPage(parseInt(e.target.value))
-    }
-
-    // Нийт датаны тоо
-    const default_page = [10, 15, 50, 75, 100]
-
-     // Хуудас солих үед ажиллах хэсэг
+    // Хуудас солих үед ажиллах хэсэг
 	function handlePagination(page) {
 		setCurrentPage(page.selected + 1);
 	};
 
-    // ** Function to handle per page
-    function handlePerPage(e) {
-        setRowsPerPage(parseInt(e.target.value))
-    }
+    // Хадгалах
+	async function onSubmit(cdata) {
 
-
-    function handleSort(column, sort) {
-        if(sort === 'asc') {
-            setSort(column.header)
-        } else {
-            setSort('-' + column.header)
+        const formData = new FormData()
+        for (const key in cdata) {
+            if (key === 'file' && cdata[key] instanceof FileList)
+                formData.append(key, cdata[key][0], cdata[key][0].name)
+            else
+                formData.append(key, cdata[key])
         }
-    }
+        cdata['created_user'] = user.id
+        cdata['updated_user'] = user.id
+
+        const { success, errors } = await fetchData(browserApi.post(formData))
+        if(success) {
+            reset()
+            setFileInputKey((prevKey) => prevKey + 1);
+            setEdit(false)
+            getDatas()
+        }
+        else {
+            if(errors && Object.keys(errors).length > 0) {
+                /** Алдааны мессэжийг input дээр харуулна */
+                for (let key in errors) {
+                    setError(key, { type: 'custom', message: errors[key][0]});
+                }
+            }
+        }
+	}
+
 
     return (
-        <Fragment>
+        <Row>
+        <Col md="4">
             <Card>
-            {isLoading && Loader}
-                <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
-                    <CardTitle tag="h4">{t('Цагийн хуваарь')}</CardTitle>
-                    <div className='d-flex flex-wrap mt-md-0 mt-1'>
-                        <Button
-                            color='primary'
-                            onClick={() => handleModal()}
-                            disabled={true}
-                        >
-                            <Plus size={15} />
-                            <span className='align-middle ms-50'>{t('Нэмэх')}</span>
-                        </Button>
-                    </div>
+                <CardHeader>
+                    <CardTitle>{t('Цагийн хуваарь')}</CardTitle>
+                    <Edit size={20} onClick={() => setEdit(!edit)} />
                 </CardHeader>
-                <Row className='mt-1 d-flex justify-content-between mx-0'>
-                    <Col className='d-flex align-items-center justify-content-start '>
-                        <Col md={2} sm={3} className='pe-1'>
-                            <Input
-                                className='dataTable-select me-1 mb-50'
-                                type='select'
-                                bsSize='sm'
-                                style={{ height: "30px",}}
-                                value={rowsPerPage}
-                                onChange={e => handlePerPage(e)}
-                            >
-                                {
-                                    default_page.map((page, idx) => (
-                                    <option
-                                        key={idx}
-                                        value={page}
-                                    >
-                                        {page}
-                                    </option>
-                                ))}
-                            </Input>
-                        </Col>
-                        <Col md={10} sm={3}>
-                            <Label for='sort-select'>{t('Хуудсанд харуулах тоо')}</Label>
-                        </Col>
-                    </Col>
-                    <Col className='d-flex align-items-center mobile-datatable-search'>
-                        <Input
-                            className='dataTable-filter mb-50'
-                            type='text'
-                            bsSize='sm'
-                            id='search-input'
-                            placeholder={t('Хайх')}
-                            value={searchValue}
-                            onChange={handleFilter}
-                            onKeyPress={e => e.key === 'Enter' && handleSearch()}
-                        />
-                        <Button
-                            size='sm'
-                            className='ms-50 mb-50'
-                            color='primary'
-                            onClick={handleSearch}
-                        >
-                            <Search size={15} />
-                            <span className='align-middle ms-50'></span>
-                        </Button>
-                    </Col>
-                </Row>
-                <div className="react-dataTable react-dataTable-selectable-rows">
-                    <DataTable
-                        noHeader
-                        paginationServer
-                        pagination
-                        className='react-dataTable'
-                        progressPending={isTableLoading}
-                        progressComponent={
-                            <div className='my-2 d-flex align-items-center justify-content-center'>
-                                <Spinner className='me-1' color="" size='sm'/><h5>Түр хүлээнэ үү...</h5>
+                <CardBody>
+                    <Form onSubmit={handleSubmit(onSubmit)}>
+                        <fieldset disabled={!edit}>
+                            <div className="mb-2">
+                                <Label className="form-label">
+                                    {t('Гарчиг')}
+                                </Label>
+                                <Controller
+                                    defaultValue=""
+                                    control={control}
+                                    name="title"
+                                    render={({ field }) => (
+                                        <Input
+                                            {...field}
+                                            id={field.name}
+                                            type="text"
+                                            placeholder={t("Гарчиг")}
+                                            invalid={errors[field.name] && true}
+                                        />
+                                    )}
+                                />
+                                {errors.title && <FormFeedback className='d-block'>{errors.title.message}</FormFeedback>}
                             </div>
-                        }
-                        noDataComponent={(
-                            <div className="my-2">
-                                <h5>{t('Өгөгдөл байхгүй байна')}</h5>
+                            <div className="mb-2">
+                                <Label className="form-label">
+                                    {t('Файл')}
+                                </Label>
+                                <Controller
+                                    defaultValue=""
+                                    control={control}
+                                    name="file"
+                                    render={({ field }) =>
+                                        <>
+                                            <Input
+                                                key={fileInputKey}
+                                                name={field.name}
+                                                id={field.name}
+                                                type="file"
+                                                placeholder={t("файл")}
+                                                accept="application/pdf, application/vnd.ms-excel"
+                                                onChange={(e) => field.onChange(e.target.files)}
+                                            />
+                                            {file && typeof file === 'string' &&
+                                                <>
+                                                    <a href={file} className='me-1'>
+                                                        <Download type="button" color='#1a75ff' width={'15px'} />
+                                                    </a>
+                                                    {file}
+                                                </>
+                                            }
+                                        </>
+                                    }
+                                />
+                                {errors.file && <FormFeedback className='d-block'>{errors.file.message}</FormFeedback>}
                             </div>
-                        )}
-                        onSort={handleSort}
-                        // columns={getColumns(currentPage, rowsPerPage, total_count, handleEditModal, handleDelete, user)}
-                        sortIcon={<ChevronDown size={10} />}
-                        paginationPerPage={rowsPerPage}
-                        paginationDefaultPage={currentPage}
-                        data={datas}
-                        paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
-                        fixedHeader
-                        fixedHeaderScrollHeight='62vh'
-                    />
-                </div>
+                            {
+                                edit &&
+                                // <Button className="me-2" color="primary" type="submit" disabled={!isValid}>
+                                <Button className="me-2" color="primary" type="submit" disabled={true}>
+                                    {t('Хадгалах')}
+                                </Button>
+                            }
+                        </fieldset>
+                    </Form>
+                </CardBody>
             </Card>
-            {/* {modal && <Createmodal open={modal} handleModal={handleModal} refreshDatas={getDatas}/>} */}
-        </Fragment>
+        </Col>
+        <Col md={8}>
+            <DataTable
+                className='react-dataTable'
+                progressPending={isLoading}
+                progressComponent={
+                    <div className='my-2 d-flex align-items-center justify-content-center'>
+                        <Spinner className='me-1' color="" size='sm' /><h5>{t('Түр хүлээнэ үү')}...</h5>
+                    </div>
+                }
+                noDataComponent={(
+                    <div className="my-2">
+                        <h5>{t('Өгөгдөл байхгүй байна')}</h5>
+                    </div>
+                )}
+                paginationPerPage={rowsPerPage}
+                paginationDefaultPage={currentPage}
+                paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
+                columns={[
+                    {
+                        name: <Trash2 width={"15px"} />,
+                        selector: (row) => (
+                            <a
+                                role='button'
+                                className='ms-1'
+                                onClick={() => showWarning({
+                                    header: {
+                                        title: t(`Файл устгах`),
+                                    },
+                                    question: t(`Та ${row?.title} устгахдаа итгэлтэй байна уу?`),
+                                    onClick: () => handleDelete(row?.id),
+                                    btnText: t('Устгах'),
+                                })}
+                                id={`complaintListDatatableCancel${row?.id}`}
+                            >
+                                <Badge color="light-danger" pill><Trash2 width={"15px"} /></Badge>
+                            </a>
+                        ),
+                        center: true,
+                        minWidth: "100px",
+                        maxWidth: "100px",
+                    },
+                    {
+                        name: "№",
+                        selector: (row, index) => index + 1,
+                        center: true,
+                        minWidth: "150px",
+                        maxWidth: "150px",
+                    },
+                    {
+                        header: 'title',
+                        name: `${t('Гарчиг')}`,
+                        selector: (row) => <div className="heightThreeDots" title={row?.title}>{row?.title}</div>,
+                        minWidth: '150px',
+                        maxWidth: '150px',
+                    },
+                    {
+                        header: 'file',
+                        name: `${t('Файл')}`,
+                        selector: (row) =>
+                            <>
+                                <a href={row?.file} className='me-1'>
+                                    <Download type="button" color='#1a75ff' width={'15px'} />
+                                </a>
+                                {row?.file ? decodeURIComponent(row?.file.toString().split("/").pop()): ''}
+                            </>,
+                        minWidth: '300px'
+                    },
+                ]}
+                data={datas}
+            />
+        </Col>
+    </Row>
     )
 }
 export default Time

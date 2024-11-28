@@ -4617,7 +4617,7 @@ class Structure(models.Model):
 
     title = models.CharField(max_length=1000, verbose_name='Гарчиг')
     link = models.CharField(max_length=1000, verbose_name='Линк', null=True)
-    file = models.FileField(upload_to='structure', verbose_name='Файл', null=True)
+    file = models.FileField(upload_to='structure', verbose_name='Файл')
     created_user = models.ForeignKey(User, on_delete=models.SET_NULL,related_name='create_user', null=True, verbose_name='Үүсгэсэн хэрэглэгч')
     updated_user = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='update_user', null=True, verbose_name='Зассан хэрэглэгч')
 
@@ -4629,7 +4629,7 @@ class StudentDevelop(models.Model):
 
     title = models.CharField(max_length=1000, verbose_name='Гарчиг')
     link = models.CharField(max_length=1000, verbose_name='Линк', null=True)
-    file = models.FileField(upload_to='develop', verbose_name='Файл', null=True)
+    file = models.FileField(upload_to='develop', verbose_name='Файл')
     body = models.TextField(verbose_name="Суралцагчийн хөгжлийн хэсэг")
     created_user = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='cr_user', null=True, verbose_name='Үүсгэсэн хэрэглэгч')
     updated_user = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='up_user',  null=True, verbose_name='Зассан хэрэглэгч')
@@ -4665,7 +4665,7 @@ class StudentRules(models.Model):
     """ Номын сангийн журам """
 
     title = models.CharField(max_length=1000, verbose_name='Гарчиг')
-    file = models.FileField(upload_to='rules', verbose_name='Файл', null=True)
+    file = models.FileField(upload_to='rules', verbose_name='Файл')
 
     created_user = models.ForeignKey(User, on_delete=models.SET_NULL,related_name='lib_user', null=True, verbose_name='Үүсгэсэн хэрэглэгч')
     updated_user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='Зассан хэрэглэгч')

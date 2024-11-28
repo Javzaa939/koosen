@@ -28,7 +28,7 @@ urlpatterns = [
     path('health/', HealthAPIView.as_view()),
     path('health/<int:pk>/', HealthAPIView.as_view()),
 
-    # журам
+    # номын сангийн журам
     path('rules/',  StudentRulesAPIView.as_view()),
     path('rules/<int:pk>/',  StudentRulesAPIView.as_view()),
 

@@ -1348,7 +1348,7 @@ def get_cdn_urls():
 
     # Орчиноос шалтгаалж url авах
     if settings.DEBUG:
-        path = 'http://192.168.1.7:8003/cdn/'
+        path = 'http://192.168.1.18:8003/cdn/'
 
     return path
 
@@ -1420,7 +1420,6 @@ def get_file_from_cdn(path):
     cdn_root_folder = settings.CDN_MAIN_FOLDER
     path = path.replace(cdn_root_folder, '')
     cdn_full_path = os.path.join(cdn_root_folder, path)
-
     body = {
         "path": cdn_full_path,
     }

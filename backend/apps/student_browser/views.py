@@ -11,8 +11,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 from main.utils.function.pagination import CustomPagination
 
-from main.utils.function.utils import null_to_none, has_permission
-from main.utils.file import save_file
+from main.utils.function.utils import null_to_none, has_permission, create_file_to_cdn, remove_file_from_cdn, get_file_from_cdn
+from main.utils.file import split_root_path
 from rest_framework.filters import SearchFilter
 
 from lms.models import Structure
@@ -47,16 +47,9 @@ class StudentStructureAPIView(
 
     pagination_class = CustomPagination
 
-    filter_backends = [SearchFilter]
-    search_fields = ['title']
-
     @has_permission(must_permissions=['lms-browser-structure-read'])
     def get(self, request, pk=None):
         """ Их сургуулийн бүтэц зохион байгуулалт жагсаалт """
-
-        if pk:
-            datas = self.retrieve(request, pk).data
-            return request.send_data(datas)
 
         return_data = self.list(request).data
         return request.send_data(return_data)
@@ -74,6 +67,9 @@ class StudentStructureAPIView(
         file = data.get('file')
         if not file:
             return request.send_error("ERR_002", "Файл заавал оруулна уу.")
+        else:
+            # cdn руу хадгалах
+            create_file_to_cdn('structure', file)
 
         serializer = self.get_serializer(data=data)
 
@@ -92,49 +88,19 @@ class StudentStructureAPIView(
 
         return request.send_info("INF_001")
 
-    @has_permission(must_permissions=['lms-browser-structure-update'])
-    def put(self, request, pk=None):
-        " Их сургуулийн бүтэц зохион байгуулалт засах "
-
-        request_data = request.data
-        request_data['updated_user'] = request_data.get('updated_user')
-
-        instance = self.queryset.filter(id=pk).first()
-        serializer = self.get_serializer(instance, data=request_data, partial=True)
-
-        if serializer.is_valid(raise_exception=False):
-            self.perform_update(serializer)
-            return request.send_info('INF_002')
-        else:
-            error_obj = []
-            # Олон алдааны мессэж буцаах бол үүнийг ашиглана
-            for key in serializer.errors:
-                msg = "Хоосон байна"
-
-                return_error = {
-                    "field": key,
-                    "msg": msg
-                }
-
-                error_obj.append(return_error)
-
-            if len(error_obj) > 0:
-                return request.send_error("ERR_003", error_obj)
-
-            return request.send_error("ERR_002")
-
     @has_permission(must_permissions=['lms-browser-structure-delete'])
     def delete(self, request, pk=None):
         """Их сургуулийн бүтэц зохион байгуулалт устгах """
 
         instance = self.queryset.filter(id=pk).first()
-        file_old = instance.file
-        old_file_path = file_old.path
-        old_file_name = os.path.basename(old_file_path)
 
-        if old_file_name:
-            remove_path = os.path.join(settings.MEDIA_ROOT, str(pk), old_file_name)
-            remove_folder(remove_path)
+        if instance.file:
+            file_path = str(instance.file)
+            print("file_path", file_path)
+
+            cdn_file = get_file_from_cdn(file_path)
+            print('cdn_file', cdn_file)
+            remove_file_from_cdn(file_path, is_file=False)
 
         self.destroy(request, pk)
         return request.send_info("INF_003")
@@ -144,7 +110,7 @@ class StudentStructureAPIView(
 class StudentListAPIView(
     generics.GenericAPIView
 ):
-    ''' Салбар сургуулиар хөтөлбөр харуулав '''
+    ''' Салбар сургуулиар хөтөлбөр харуулах '''
     def get(self, request):
         """ Сургалтын хөтөлбөр жагсаалт """
 
@@ -173,22 +139,14 @@ class StudentDevelopAPIView(
 ):
     '''  Суралцагчийн хөгжил '''
 
-    queryset = StudentDevelop.objects.all().order_by('-created_at')
+    queryset = StudentDevelop.objects.all()
     serializer_class = StudentDevelopSerializer
 
     pagination_class = CustomPagination
 
-    filter_backends = [SearchFilter]
-    search_fields = ['title']
-
-
     @has_permission(must_permissions=['lms-browser-hugjil-read'])
     def get(self, request, pk=None):
         """  Суралцагчийн хөгжил жагсаалт """
-
-        if pk:
-            datas = self.retrieve(request, pk).data
-            return request.send_data(datas)
 
         return_data = self.list(request).data
         return request.send_data(return_data)
@@ -206,6 +164,11 @@ class StudentDevelopAPIView(
         file = data.get('file')
         if not file:
             return request.send_error("ERR_002", "Файл заавал оруулна уу.")
+        else:
+            # cdn руу хадгалах
+            create_file_to_cdn('develop', file)
+
+        serializer = self.get_serializer(data=data)
 
         serializer = self.get_serializer(data=data)
 
@@ -246,6 +209,15 @@ class StudentDevelopAPIView(
     @has_permission(must_permissions=['lms-browser-hugjil-delete'])
     def delete(self, request, pk=None):
         """ Суралцагчийн хөгжил устгах """
+        instance = self.queryset.filter(id=pk).first()
+
+        if instance.file:
+            file_path = str(instance.file)
+            print("file_path", file_path)
+
+            cdn_file = get_file_from_cdn(file_path)
+            print('cdn_file', cdn_file)
+            remove_file_from_cdn(file_path, is_file=False)
 
         self.destroy(request, pk)
         return request.send_info("INF_003")
@@ -512,21 +484,13 @@ class StudentRulesAPIView(
 ):
     '''  Номын сангийн журам '''
 
-    queryset = StudentRules.objects.all().order_by('-created_at')
+    queryset = StudentRules.objects.all()
     serializer_class = StudentRulesSerializer
 
     pagination_class = CustomPagination
 
-    filter_backends = [SearchFilter]
-    search_fields = ['title']
-
-
     def get(self, request, pk=None):
         """  Номын сангийн журам жагсаалт """
-
-        if pk:
-            datas = self.retrieve(request, pk).data
-            return request.send_data(datas)
 
         return_data = self.list(request).data
         return request.send_data(return_data)
@@ -543,6 +507,9 @@ class StudentRulesAPIView(
         file = data.get('file')
         if not file:
             return request.send_error("ERR_002", "Файл заавал оруулна уу.")
+        else:
+            # cdn руу хадгалах
+            create_file_to_cdn('rules', file)
 
         serializer = self.get_serializer(data=data)
 
@@ -582,6 +549,17 @@ class StudentRulesAPIView(
 
     def delete(self, request, pk=None):
         """ Номын сангийн журам устгах """
+        instance = self.queryset.filter(id=pk).first()
 
-        self.destroy(request, pk)
+        if instance.file:
+            file_path = str(instance.file)
+            print("file_path", file_path)
+            full_path = 'rules' + (file_path)
+
+            # cdn_file = get_file_from_cdn(settings.)
+            cdn_file = get_file_from_cdn(settings. full_path)
+            print('cdn_file', cdn_file)
+            remove_file_from_cdn(full_path, is_file=True)
+
+        # self.destroy(request, pk)
         return request.send_info("INF_003")
