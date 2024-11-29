@@ -53,7 +53,6 @@ function SignatureModal({ isOpen, handleModal, data, isMon, isTrue=false, isGpa=
         }
 
         if (isScore) {
-            console.log(isScore)
             if (isMon == true) {
                 navigate('/student/amount-details', { state: { data: data, signatureData: selectedSignatures} })
             }

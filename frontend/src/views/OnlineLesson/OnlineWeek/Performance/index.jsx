@@ -122,7 +122,6 @@ function Performance({lesson}) {
 
 	// Суралцаж байгаа оюутнаас нэгийг нь хасах
 	async function handleDelete(id) {
-		console.log(id)
 		const { success} = await fetchData(studentAPi.delete(id, lesson.id));
 		if (success) {
 			getDatas()

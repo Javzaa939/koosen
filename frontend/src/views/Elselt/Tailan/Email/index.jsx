@@ -389,7 +389,6 @@ function Email() {
 										? ''
 										: moment(dateStr).format('YYYY-MM-DD HH:mm')
 								);
-                                console.log(start_date)
 							}}
                             value={start_date}
                             options={{
