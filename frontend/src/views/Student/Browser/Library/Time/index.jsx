@@ -1,7 +1,7 @@
 import { t } from "i18next"
-import { Fragment, useState, useContext, useEffect } from "react"
+import { useState, useContext, useEffect } from "react"
 import DataTable from "react-data-table-component"
-import { Edit, Download, Trash2, Trash } from "react-feather"
+import { Edit, Download, Trash2 } from "react-feather"
 import { Card, CardHeader, CardTitle, Col, Row, Input, Label, Button, Spinner, CardBody, Badge, Form, FormFeedback } from "reactstrap"
 import { getPagination } from '@utils'
 import AuthContext from '@context/AuthContext'
@@ -16,21 +16,19 @@ import useModal from '@hooks/useModal';
 const Time = () => {
 
      // Loader
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
-    const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
+    const { isLoading, fetchData } = useLoader({isFullScreen: true})
 
     //Context
     const { user } = useContext(AuthContext)
-
+    const { showWarning } = useModal()
 
     //useState
     const [currentPage, setCurrentPage] = useState(1);
     const [total_count, setTotalCount] = useState(1)
     const [rowsPerPage, setRowsPerPage] = useState(10)
     const [datas, setDatas] = useState([])
-    const [modal, setModal] = useState(false);
 
-    const [edit, setEdit] = useState(false)
+    const [edit, setEdit] = useState(true)
     const [fileInputKey, setFileInputKey] = useState(0); // file key
 
     const validationSchema = Yup.object().shape({
@@ -45,11 +43,11 @@ const Time = () => {
             )
             .test(
                 'file-format-required',
-                t('Choose PDF or Excel files'),
+                t('Зөвхөн pdf өргөтгөлтэй файл оруулна уу'),
                 (value) => (typeof value === 'string' && value.trim() !== '') ||
                     (
                         value && value.length > 0 &&
-                        ['application/pdf', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'].includes(value[0].type)
+                        ['application/pdf'].includes(value[0].type)
                     )
             ),
     });
@@ -67,15 +65,15 @@ const Time = () => {
     const timeApi = useApi().browser.time
 
     async function getDatas() {
-        const { success, data } = await allFetch(timeApi.get(rowsPerPage, currentPage))
+        const { success, data } = await fetchData(timeApi.get(rowsPerPage, currentPage))
         if (success) {
             setDatas(data?.results)
         }
     }
 
-    useEffect(() => {
-        getDatas()
-    }, [currentPage, rowsPerPage])
+    // useEffect(() => {
+    //     getDatas()
+    // }, [currentPage, rowsPerPage])
 
     /* Устгах функц */
 	const handleDelete = async(id) => {
@@ -169,7 +167,7 @@ const Time = () => {
                                                 id={field.name}
                                                 type="file"
                                                 placeholder={t("файл")}
-                                                accept="application/pdf, application/vnd.ms-excel"
+                                                accept="application/pdf"
                                                 onChange={(e) => field.onChange(e.target.files)}
                                             />
                                             {file && typeof file === 'string' &&
@@ -187,8 +185,7 @@ const Time = () => {
                             </div>
                             {
                                 edit &&
-                                // <Button className="me-2" color="primary" type="submit" disabled={!isValid}>
-                                <Button className="me-2" color="primary" type="submit" disabled={true}>
+                                <Button className="me-2" color="primary" type="submit" disabled={!isValid}>
                                     {t('Хадгалах')}
                                 </Button>
                             }
@@ -223,7 +220,7 @@ const Time = () => {
                                 className='ms-1'
                                 onClick={() => showWarning({
                                     header: {
-                                        title: t(`Файл устгах`),
+                                        title: t(`Цагийн хуваарь устгах`),
                                     },
                                     question: t(`Та ${row?.title} устгахдаа итгэлтэй байна уу?`),
                                     onClick: () => handleDelete(row?.id),

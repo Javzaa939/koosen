@@ -19,15 +19,15 @@ from lms.models import Structure
 from lms.models import StudentDevelop
 from lms.models import Library
 from lms.models import StudentPsycholocal
-from lms.models import Health, StudentRules
+from lms.models import Health, StudentRules, StudentTime
+from lms.models import StudentTime
 from core.models import SubOrgs, Salbars
 
-from .serializers import StructureSerializer
-from .serializers import StudentDevelopSerializer
-from .serializers import LibrarySerializer
-from .serializers import StudentPsycholocalSerializer
-from .serializers import HealthSerializer
 from .serializers import *
+
+from django.core.files.uploadedfile import InMemoryUploadedFile
+from main.utils.function.utils import create_file_in_cdn_silently, delete_objects_with_signals, has_permission, save_data_with_signals
+from urllib.parse import unquote
 
 
 # ----------------- Их сургуулийн бүтэц зохион байгуулалт ---------------
@@ -55,36 +55,37 @@ class StudentStructureAPIView(
         return request.send_data(return_data)
 
     @has_permission(must_permissions=['lms-browser-structure-create'])
-    def post(self, request):
+    def post(self, request, **kwargs ):
         " Их сургуулийн бүтэц зохион байгуулалт нэмэх "
 
         data = request.data
         data = null_to_none(data)
         created_user = data.get('created_user')
-
-        data['created_user']= created_user
-
         file = data.get('file')
+        isFileChanged = isinstance(file, InMemoryUploadedFile)
+
         if not file:
             return request.send_error("ERR_002", "Файл заавал оруулна уу.")
-        else:
-            # cdn руу хадгалах
-            create_file_to_cdn('structure', file)
 
+        if file and isFileChanged:
+            relative_path = create_file_to_cdn('structure', file)
+            print("relative_path:", relative_path)
+
+        data = data.dict()
+        data['created_user']= created_user
+        decoded_path = unquote(relative_path.get('full_path'))
+        data['file'] = decoded_path
+        print("data", data)
         serializer = self.get_serializer(data=data)
+        # serializer = self.serializer_class(data=data)
 
-        try:
+        with transaction.atomic():
+
             if serializer.is_valid():
-                with transaction.atomic():
-                    self.perform_create(serializer)
-
+                self.perform_create(serializer)
             else:
                 print(serializer.errors)
                 return request.send_error("ERR_002")
-
-        except Exception as e:
-            print(e)
-            return request.send_error("ERR_002")
 
         return request.send_info("INF_001")
 
@@ -92,17 +93,19 @@ class StudentStructureAPIView(
     def delete(self, request, pk=None):
         """Их сургуулийн бүтэц зохион байгуулалт устгах """
 
-        instance = self.queryset.filter(id=pk).first()
+        # instance = self.queryset.filter(id=pk).first()
 
-        if instance.file:
-            file_path = str(instance.file)
-            print("file_path", file_path)
+        # if instance.file:
+        #     file_path = str(instance.file)
+        #     print("file_path", file_path)
 
-            cdn_file = get_file_from_cdn(file_path)
-            print('cdn_file', cdn_file)
-            remove_file_from_cdn(file_path, is_file=False)
+        #     # cdn_file = get_file_from_cdn(settings.CDN_MAIN_FOLDER, file_path)
+        #     remove_file = os.path.join(settings.CDN_MAIN_FOLDER, file_path)
 
-        self.destroy(request, pk)
+        #     print('remove_file', remove_file)
+        #     remove_file_from_cdn(remove_file, is_file=True)
+
+        # self.destroy(request, pk)
         return request.send_info("INF_003")
 
 
@@ -170,8 +173,6 @@ class StudentDevelopAPIView(
 
         serializer = self.get_serializer(data=data)
 
-        serializer = self.get_serializer(data=data)
-
         try:
             if serializer.is_valid():
                 with transaction.atomic():
@@ -209,15 +210,6 @@ class StudentDevelopAPIView(
     @has_permission(must_permissions=['lms-browser-hugjil-delete'])
     def delete(self, request, pk=None):
         """ Суралцагчийн хөгжил устгах """
-        instance = self.queryset.filter(id=pk).first()
-
-        if instance.file:
-            file_path = str(instance.file)
-            print("file_path", file_path)
-
-            cdn_file = get_file_from_cdn(file_path)
-            print('cdn_file', cdn_file)
-            remove_file_from_cdn(file_path, is_file=False)
 
         self.destroy(request, pk)
         return request.send_info("INF_003")
@@ -551,15 +543,76 @@ class StudentRulesAPIView(
         """ Номын сангийн журам устгах """
         instance = self.queryset.filter(id=pk).first()
 
-        if instance.file:
-            file_path = str(instance.file)
-            print("file_path", file_path)
-            full_path = 'rules' + (file_path)
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
 
-            # cdn_file = get_file_from_cdn(settings.)
-            cdn_file = get_file_from_cdn(settings. full_path)
-            print('cdn_file', cdn_file)
-            remove_file_from_cdn(full_path, is_file=True)
+@permission_classes([IsAuthenticated])
+class StudentTimeAPIView(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    generics.GenericAPIView
+):
+    ''' номын сангийн цагийн хуваарь '''
+
+    queryset = StudentTime.objects.all().order_by('-created_at')
+    serializer_class = StructureSerializer
+
+    pagination_class = CustomPagination
+
+    def get(self, request, pk=None):
+        """ номын сангийн цагийн хуваарь жагсаалт """
+
+        return_data = self.list(request).data
+        return request.send_data(return_data)
+
+    def post(self, request, **kwargs ):
+        " номын сангийн цагийн хуваарь нэмэх "
+
+        data = request.data
+        data = null_to_none(data)
+        created_user = data.get('created_user')
+        file = data.get('file')
+        isFileChanged = isinstance(file, InMemoryUploadedFile)
+
+        if not file:
+            return request.send_error("ERR_002", "Файл заавал оруулна уу.")
+
+        if file and isFileChanged:
+            relative_path = create_file_to_cdn('structure', file)
+
+        data = data.dict()
+        data['created_user']= created_user
+        decoded_path = unquote(relative_path.get('full_path'))
+        data['file'] = decoded_path
+        serializer = self.get_serializer(data=data)
+
+        with transaction.atomic():
+
+            if serializer.is_valid():
+                self.perform_create(serializer)
+            else:
+                print(serializer.errors)
+                return request.send_error("ERR_002")
+
+        return request.send_info("INF_001")
+
+    def delete(self, request, pk=None):
+        """номын сангийн цагийн хуваарь устгах """
+
+        # instance = self.queryset.filter(id=pk).first()
+
+        # if instance.file:
+        #     file_path = str(instance.file)
+        #     print("file_path", file_path)
+
+        #     # cdn_file = get_file_from_cdn(settings.CDN_MAIN_FOLDER, file_path)
+        #     remove_file = os.path.join(settings.CDN_MAIN_FOLDER, file_path)
+
+        #     print('remove_file', remove_file)
+        #     remove_file_from_cdn(remove_file, is_file=True)
 
         # self.destroy(request, pk)
         return request.send_info("INF_003")

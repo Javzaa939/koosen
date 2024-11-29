@@ -82,20 +82,13 @@ const Oyutni_hugjil = () => {
             )
             .test(
                 'file-format-required',
-                t('Choose PDF or Excel files'),
+                t('Зөвхөн pdf өргөтгөлтэй файл оруулна уу'),
                 (value) => (typeof value === 'string' && value.trim() !== '') ||
                     (
                         value && value.length > 0 &&
                         ['application/pdf'].includes(value[0].type)
                     )
             ),
-        stype: Yup.object({
-            value: Yup.number()
-                .transform(value => (isNaN(value) ? undefined : value))
-                .required(t('Хоосон байна'))
-        })
-            .nullable()
-            .required(t('Хоосон байна'))
     });
 
     const {
@@ -107,7 +100,6 @@ const Oyutni_hugjil = () => {
     } = useForm(validate(validationSchema));
 
     const file = watch('file')
-    console.log( file, 'file')
     const studentDevelopApi = useApi().browser.student_develop
 
     async function getDatas() {
@@ -132,7 +124,6 @@ const Oyutni_hugjil = () => {
 
     // Хадгалах
 	async function onSubmit(cdata) {
-        console.log("cdata", cdata);
         const formData = new FormData()
         for (const key in cdata) {
             if (key === 'file' && cdata[key] instanceof FileList)
@@ -140,10 +131,9 @@ const Oyutni_hugjil = () => {
             else
                 formData.append(key, cdata[key])
         }
-
-        // cdata['body'] = quill.root.innerHTML
-        // cdata['created_user'] = user.id
-        // cdata['updated_user'] = user.id
+        cdata['body'] = quill.root.innerHTML
+        cdata['created_user'] = user.id
+        cdata['updated_user'] = user.id
 
         const { success, errors } = await fetchData(studentDevelopApi.post(formData))
         if(success) {
@@ -167,7 +157,7 @@ const Oyutni_hugjil = () => {
             <Col md="4">
                 <Card>
                     <CardHeader>
-                        <CardTitle>{t('Их сургуулийн бүтэц зохион байгуулалт')}</CardTitle>
+                        <CardTitle>{t('Суралцагчийн хөгжил')}</CardTitle>
                         <Edit size={20} onClick={() => setEdit(!edit)} />
                     </CardHeader>
                     <CardBody>
@@ -226,7 +216,8 @@ const Oyutni_hugjil = () => {
                                             <div style={{ width: 'auto',}}>
                                                 <div
                                                     {...field}
-                                                    id={field.body}
+                                                    name='body'
+                                                    id='body'
                                                     ref={quillRef}
                                                 />
                                             </div>
@@ -300,7 +291,7 @@ const Oyutni_hugjil = () => {
                                     className='ms-1'
                                     onClick={() => showWarning({
                                         header: {
-                                            title: t(`Файл устгах`),
+                                            title: t(`Суралцагчийн хөгжил устгах`),
                                         },
                                         question: t(`Та ${row?.title} устгахдаа итгэлтэй байна уу?`),
                                         onClick: () => handleDelete(row?.id),

@@ -7,6 +7,7 @@ from lms.models import StudentDevelop
 from lms.models import Library
 from lms.models import Health, StudentRules
 from lms.models import StudentPsycholocal
+from lms.models import StudentTime
 
 from django.conf import settings
 from main.utils.function.utils import get_domain_url
@@ -49,4 +50,11 @@ class StudentRulesSerializer(serializers.ModelSerializer):
     "  Номын сангийн журам "
     class Meta:
         model = StudentRules
+        fields = "__all__"
+
+
+class StudentTimeSerializer(serializers.ModelSerializer):
+    "  Номын сангийн цагийн хуваарь"
+    class Meta:
+        model = StudentTime
         fields = "__all__"

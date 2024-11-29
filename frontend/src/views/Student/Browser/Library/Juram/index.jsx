@@ -45,11 +45,11 @@ const Juram = () => {
             )
             .test(
                 'file-format-required',
-                t('Choose PDF or Excel files'),
+                t('Зөвхөн pdf өргөтгөлтэй файл оруулна уу'),
                 (value) => (typeof value === 'string' && value.trim() !== '') ||
                     (
                         value && value.length > 0 &&
-                        ['application/pdf', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'].includes(value[0].type)
+                        ['application/pdf'].includes(value[0].type)
                     )
             ),
     });
@@ -220,7 +220,7 @@ const Juram = () => {
                                     className='ms-1'
                                     onClick={() => showWarning({
                                         header: {
-                                            title: t(`Устгах үйлдэл`),
+                                            title: t(`Журам устгах`),
                                         },
                                         question: t(`Та ${row?.title} устгахдаа итгэлтэй байна уу?`),
                                         onClick: () => handleDelete(row?.id),
@@ -239,15 +239,13 @@ const Juram = () => {
                             name: "№",
                             selector: (row, index) => index + 1,
                             center: true,
-                            minWidth: "150px",
-                            maxWidth: "150px",
+                            minWidth: "50px",
                         },
                         {
                             header: 'title',
                             name: `${t('Гарчиг')}`,
                             selector: (row) => <div className="heightThreeDots" title={row?.title}>{row?.title}</div>,
-                            minWidth: '150px',
-                            maxWidth: '150px',
+                            minWidth: '200px',
                         },
                         {
                             header: 'file',
@@ -259,7 +257,8 @@ const Juram = () => {
                                     </a>
                                     {row?.file ? decodeURIComponent(row?.file.toString().split("/").pop()): ''}
                                 </>,
-                            minWidth: '300px'
+                            minWidth: '300px',
+
                         },
                     ]}
                     data={datas}

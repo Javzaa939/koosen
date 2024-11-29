@@ -4685,3 +4685,16 @@ class Health(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+
+class StudentTime(models.Model):
+    """ Номын сангийн цагийн хуваарь """
+
+    title = models.CharField(max_length=1000, verbose_name='Гарчиг', null=True)
+    file = models.FileField(upload_to='time', verbose_name='Файл', null=True)
+
+    created_user = models.ForeignKey(User, on_delete=models.SET_NULL,related_name='time_user', null=True, verbose_name='Үүсгэсэн хэрэглэгч')
+    updated_user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='Зассан хэрэглэгч')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)

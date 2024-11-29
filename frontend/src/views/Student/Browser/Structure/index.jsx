@@ -11,7 +11,6 @@ import { validate } from '@utils'
 import * as Yup from 'yup';
 import useModal from '@hooks/useModal';
 
-
 import useApi from "@hooks/useApi"
 
 const Structure = () => {
@@ -45,11 +44,11 @@ const Structure = () => {
             )
             .test(
                 'file-format-required',
-                t('Choose PDF or Excel files'),
+                t('Зөвхөн pdf өргөтгөлтэй файл оруулна уу'),
                 (value) => (typeof value === 'string' && value.trim() !== '') ||
                     (
                         value && value.length > 0 &&
-                        ['application/pdf', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'].includes(value[0].type)
+                        ['application/pdf'].includes(value[0].type)
                     )
             ),
     });
@@ -122,7 +121,7 @@ const Structure = () => {
 
     return (
         <Row>
-        <Col md="4">
+            <Col md="4">
                 <Card>
                     <CardHeader>
                         <CardTitle>{t('Их сургуулийн бүтэц зохион байгуулалт')}</CardTitle>
@@ -187,7 +186,7 @@ const Structure = () => {
                                                     id={field.name}
                                                     type="file"
                                                     placeholder={t("файл")}
-                                                    accept="application/pdf, application/vnd.ms-excel"
+                                                    accept="application/pdf"
                                                     onChange={(e) => field.onChange(e.target.files)}
                                                 />
                                                 {file && typeof file === 'string' &&
@@ -240,7 +239,7 @@ const Structure = () => {
                                     className='ms-1'
                                     onClick={() => showWarning({
                                         header: {
-                                            title: t(`Файл устгах`),
+                                            title: t(`Их сургуулийн бүтэц зохион байгуулалт устгах`),
                                         },
                                         question: t(`Та ${row?.title} устгахдаа итгэлтэй байна уу?`),
                                         onClick: () => handleDelete(row?.id),
@@ -272,7 +271,7 @@ const Structure = () => {
                         {
                             name: `${t('линк')}`,
                             selector: (row) => <a href={row?.link} className="ms-1"><div className="heightThreeDots" title={row?.link}>{row?.link}</div></a>,
-                            minWidth: "200px",
+                            minWidth: "250px",
                             center: true
                         },
                         {

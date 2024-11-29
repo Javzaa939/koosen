@@ -2002,6 +2002,16 @@ function useApi(isDisplay=false) {
 				put: (data, pk) => instance.put(`/browser/rules/${pk}/`, data),
 				delete: (pk) => instance.delete(`/browser/rules/${pk}/`),
 			},
+
+			// номын сан цагийн хуваарь
+			time: {
+				get: (limit, page) => instance.get(`/browser/time/?page=${page}&limit=${limit}`),
+				getOne: (pk) => instance.get(`/browser/time/${pk}/`),
+				post: (data) => instance.post(`/browser/time/`, data),
+				put: (data, pk) => instance.put(`/browser/time/${pk}/`, data),
+				delete: (pk) => instance.delete(`/browser/time/${pk}/`),
+			},
+
 			// сэтгэл зүйн булан
 			psycholocal: {
 				get: (limit, page, sort, search) => instance.get(`/browser/psycholocal/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}`),
