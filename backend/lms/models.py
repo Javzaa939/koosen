@@ -4613,7 +4613,7 @@ class Rule(models.Model):
 
 
 class Structure(models.Model):
-    """ Их сургуулийн бүтэц зохион байгуsdлалт """
+    """ Их сургуулийн бүтэц зохион байгуулалт """
 
     title = models.CharField(max_length=1000, verbose_name='Гарчиг')
     link = models.CharField(max_length=1000, verbose_name='Линк', null=True)
