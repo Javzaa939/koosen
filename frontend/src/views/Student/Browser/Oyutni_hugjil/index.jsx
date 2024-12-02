@@ -31,7 +31,7 @@ const Oyutni_hugjil = () => {
     //useState
     const [currentPage, setCurrentPage] = useState(1);
     const [total_count, setTotalCount] = useState(1)
-    const [rowsPerPage, setRowsPerPage] = useState(10)
+    const [rowsPerPage, setRowsPerPage] = useState(100)
 
     const [datas, setDatas] = useState([])
     const [fileInputKey, setFileInputKey] = useState(0); //

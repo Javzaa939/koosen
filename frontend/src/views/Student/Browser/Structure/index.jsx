@@ -26,7 +26,7 @@ const Structure = () => {
     //useState
     const [currentPage, setCurrentPage] = useState(1);
     const [total_count, setTotalCount] = useState(1)
-    const [rowsPerPage, setRowsPerPage] = useState(20)
+    const [rowsPerPage, setRowsPerPage] = useState(200)
 
     const [data, setDatas] = useState([])
     const [edit, setEdit] = useState(false)
