@@ -9,9 +9,6 @@ from lms.models import Health, StudentRules
 from lms.models import StudentPsycholocal
 from lms.models import StudentTime
 
-from django.conf import settings
-from main.utils.function.utils import get_domain_url
-
 class StructureSerializer(serializers.ModelSerializer):
     " Их сургуулийн бүтэц зохион байгуулалт"
     class Meta:

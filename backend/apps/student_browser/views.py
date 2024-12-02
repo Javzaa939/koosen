@@ -11,8 +11,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 from main.utils.function.pagination import CustomPagination
 
-from main.utils.function.utils import null_to_none, has_permission, create_file_to_cdn, remove_file_from_cdn, get_file_from_cdn
-from main.utils.file import split_root_path
+from main.utils.function.utils import null_to_none, has_permission, create_file_to_cdn, remove_file_from_cdn
+from main.utils.file import save_file
 from rest_framework.filters import SearchFilter
 
 from lms.models import Structure
@@ -26,8 +26,6 @@ from core.models import SubOrgs, Salbars
 from .serializers import *
 
 from django.core.files.uploadedfile import InMemoryUploadedFile
-from main.utils.function.utils import create_file_in_cdn_silently, delete_objects_with_signals, has_permission, save_data_with_signals
-from urllib.parse import unquote
 
 
 # ----------------- Их сургуулийн бүтэц зохион байгуулалт ---------------
@@ -63,12 +61,19 @@ class StudentStructureAPIView(
         created_user = data.get('created_user')
         updated_user = data.get('updated_user')
         file = data.get('file')
+        title = data.get('title')
+        link = data.get('link')
         isFileChanged = isinstance(file, InMemoryUploadedFile)
 
         if not file:
             return request.send_error("ERR_002", "Файл заавал оруулна уу.")
 
         if file and isFileChanged:
+
+            # files руу файл хадгалах
+            save_file(file, 'structure')
+
+            # cdn руу хадгалах
             relative_path = create_file_to_cdn('structure', file)
 
             if relative_path:
@@ -76,6 +81,8 @@ class StudentStructureAPIView(
 
             if data:
                 Structure.objects.create(
+                    title=title,
+                    link=link,
                     file=relative_path.get('full_path').split('dxis/')[1],
                     created_user_id=created_user,
                     updated_user_id=updated_user,
@@ -162,16 +169,22 @@ class StudentDevelopAPIView(
         updated_user = data.get('updated_user')
         link = data.get('link')
         body = data.get('body')
-
+        title = data.get('title')
         file = data.get('file')
+
         if not file:
             return request.send_error("ERR_002", "Файл заавал оруулна уу.")
         else:
-            # cdn руу хадгалах
-            relative_path = create_file_to_cdn('develop', file)
+            if file:
 
-            if relative_path:
-                data['file'] = relative_path.get('full_path')
+                # files руу файл хадгалах
+                save_file(file, 'develop')
+
+                # cdn руу хадгалах
+                relative_path = create_file_to_cdn('develop', file)
+
+                if relative_path:
+                    data['file'] = relative_path.get('full_path')
 
         try:
             if data:
@@ -180,6 +193,7 @@ class StudentDevelopAPIView(
                     created_user_id=created_user,
                     link=link,
                     body=body,
+                    title=title,
                     updated_user_id=updated_user,
                 )
         except Exception as e:
@@ -514,18 +528,20 @@ class StudentRulesAPIView(
         if not file:
             return request.send_error("ERR_002", "Файл заавал оруулна уу.")
         else:
+
+            # files руу файл хадгалах
+            save_file(file, 'rules')
+
             # cdn руу хадгалах
             relative_path = create_file_to_cdn('rules', file)
-            if relative_path:
-                request.data['file'] = relative_path.get('full_path').split('dxis/')[1]
 
         try:
-           StudentRules.objects.create(
-            title=title,
-            file=relative_path.get('full_path').split('dxis/')[1],
-            created_user_id=created_user,
-            updated_user_id=updated_user,
-        )
+            StudentRules.objects.create(
+                title=title,
+                file=relative_path.get('full_path').split('dxis/')[1],
+                created_user_id=created_user,
+                updated_user_id=updated_user,
+            )
 
         except Exception as e:
             print(e)
@@ -580,7 +596,7 @@ class StudentTimeAPIView(
 ):
     ''' номын сангийн цагийн хуваарь '''
 
-    queryset = StudentTime.objects.all().order_by('-created_at')
+    queryset = StudentTime.objects.all()
     serializer_class = StructureSerializer
 
     pagination_class = CustomPagination
@@ -597,7 +613,9 @@ class StudentTimeAPIView(
         data = request.data
         data = null_to_none(data)
         created_user = data.get('created_user')
+        updated_user = data.get('updated_user')
         file = data.get('file')
+        title = data.get('title')
         isFileChanged = isinstance(file, InMemoryUploadedFile)
 
         if not file:
@@ -606,18 +624,14 @@ class StudentTimeAPIView(
         if file and isFileChanged:
             relative_path = create_file_to_cdn('structure', file)
 
-        data = data.dict()
-        data['created_user']= created_user
-        decoded_path = unquote(relative_path.get('full_path'))
-        data['file'] = decoded_path
-        serializer = self.get_serializer(data=data)
-
         with transaction.atomic():
-
-            if serializer.is_valid():
-                self.perform_create(serializer)
-            else:
-                print(serializer.errors)
+            if relative_path:
+                StudentTime.objects.create(
+                    file=relative_path.get('full_path').split('dxis/')[1],
+                    title=title,
+                    created_user_id=created_user,
+                    updated_user_id=updated_user
+                )
                 return request.send_error("ERR_002")
 
         return request.send_info("INF_001")
@@ -625,17 +639,18 @@ class StudentTimeAPIView(
     def delete(self, request, pk=None):
         """номын сангийн цагийн хуваарь устгах """
 
-        # instance = self.queryset.filter(id=pk).first()
+        instance = self.queryset.filter(id=pk).first()
+        if instance.file:
+            file_path = str(instance.file)
 
-        # if instance.file:
-        #     file_path = str(instance.file)
-        #     print("file_path", file_path)
+            # files-с файл устгана
+            remove_file = os.path.join(settings.MEDIA_ROOT, file_path)
+            if remove_file:
+                remove_folder(remove_file)
 
-        #     # cdn_file = get_file_from_cdn(settings.CDN_MAIN_FOLDER, file_path)
-        #     remove_file = os.path.join(settings.CDN_MAIN_FOLDER, file_path)
+            # cdn-с файл устгана
+            remove_files = os.path.join(settings.CDN_MAIN_FOLDER, file_path)
+            remove_file_from_cdn(remove_files, is_file=True)
 
-        #     print('remove_file', remove_file)
-        #     remove_file_from_cdn(remove_file, is_file=True)
-
-        # self.destroy(request, pk)
+        self.destroy(request, pk)
         return request.send_info("INF_003")

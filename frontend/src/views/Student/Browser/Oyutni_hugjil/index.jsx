@@ -316,7 +316,7 @@ const Oyutni_hugjil = () => {
                         {
                             header: 'title',
                             name: `${t('Гарчиг')}`,
-                            selector: (row) => <div className="heightThreeDots" title={row?.title}>{row?.title}</div>,
+                            selector: (row) => <a className="sm-1" href={row?.title}>{row?.title}</a>,
                             minWidth: '150px',
                             maxWidth: '150px',
                         },

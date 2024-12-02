@@ -102,7 +102,7 @@ const Time = () => {
         cdata['created_user'] = user.id
         cdata['updated_user'] = user.id
 
-        const { success, errors } = await fetchData(browserApi.post(formData))
+        const { success, errors } = await fetchData(timeApi.post(formData))
         if(success) {
             reset()
             setFileInputKey((prevKey) => prevKey + 1);
