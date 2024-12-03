@@ -3353,23 +3353,39 @@ class ChallengeQuestions(models.Model):
     KIND_BOOLEAN = 3
     KIND_RATING = 4
     KIND_TEXT = 5
+    KIND_SHORT_CHOICE = 6
+    KIND_JISHIH_CHOICE = 7
+    KIND_ESTIMATE_CHOICE = 8
+    KIND_PROJECT_CHOICE = 9
+    KIND_TOVCH_CHOICE = 10
 
     KIND_CHOICES = (
         (KIND_ONE_CHOICE, 'Нэг сонголт'),
+        (KIND_SHORT_CHOICE, 'Богино нөхөх хариулт'),
+        (KIND_JISHIH_CHOICE, 'Харгалзуулах, жиших'),
+        (KIND_ESTIMATE_CHOICE, 'Тооцоолж бодох'),
+        (KIND_PROJECT_CHOICE, 'Төсөл боловсруулах'),
+        (KIND_TOVCH_CHOICE, 'Товч хариулт'),
         (KIND_MULTI_CHOICE, 'Олон сонголт'),
-        (KIND_BOOLEAN, 'Тийм, Үгүй сонголт'),
+        (KIND_BOOLEAN, 'Үнэн, Худлыг олох'),
+        (KIND_TEXT, 'Эссэ бичих'),
         (KIND_RATING, 'Үнэлгээ'),
-        (KIND_TEXT, 'Бичвэр'),
     )
 
     LEVEL_EASY = 1
     LEVEL_NORMAL = 2
     LEVEL_HARD = 3
+    LEVEL_HARD1 = 4
+    LEVEL_HARD2 = 5
+    LEVEL_HARD3 = 6
 
     DIFFICULTY_LEVELS = (
-        (LEVEL_EASY, 'Хөнгөн'),
-        (LEVEL_NORMAL, 'Дунд'),
-        (LEVEL_HARD, 'Хүнд'),
+        (LEVEL_EASY, 'Түвшин-1'),
+        (LEVEL_NORMAL, 'Түвшин-2'),
+        (LEVEL_HARD, 'Түвшин-3'),
+        (LEVEL_HARD1, 'Түвшин-4'),
+        (LEVEL_HARD2, 'Түвшин-5'),
+        (LEVEL_HARD3, 'Түвшин-6')
     )
 
     kind = models.IntegerField(choices=KIND_CHOICES, null=False, blank=False, verbose_name='Асуултын төрөл')
