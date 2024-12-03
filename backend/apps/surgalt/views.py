@@ -4297,13 +4297,12 @@ class LessonAllApiView(
     def get(self, request):
         user_id = request.user
         teacher = Teachers.objects.get(user=user_id)
+        department_id = teacher.salbar.id if teacher.salbar else None
 
-        department_id = teacher.salbar.id
-
-        self.queryset = self.queryset.filter(department=department_id)
+        if teacher.salbar and department_id:
+            self.queryset = self.queryset.filter(department=department_id)
 
         search_teacher = request.query_params.get('teacher')
-
         if search_teacher:
             lesson_teacher_ids = Lesson_to_teacher.objects.filter(teacher=search_teacher).values_list('lesson', flat=True)
             self.queryset = self.queryset.filter(id__in=lesson_teacher_ids)
