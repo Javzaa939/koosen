@@ -3340,6 +3340,7 @@ class QuestionTitle(models.Model):
 
     lesson = models.ForeignKey(LessonStandart, on_delete=models.PROTECT, null=True, verbose_name='Хичээл')
     name = models.CharField(max_length=255, null=True, verbose_name='Сэдвийн нэр')
+    is_season = models.BooleanField(default=False, verbose_name='Улирлын шалгалтын сэдэв эсэх')
     created_at = models.DateTimeField(auto_now=True)
 
 
