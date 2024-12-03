@@ -3342,6 +3342,7 @@ class QuestionTitle(models.Model):
     name = models.CharField(max_length=255, null=True, verbose_name='Сэдвийн нэр')
     is_season = models.BooleanField(default=False, verbose_name='Улирлын шалгалтын сэдэв эсэх')
     created_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(Teachers, on_delete=models.CASCADE, related_name="+", null=True)
 
 
 class ChallengeQuestions(models.Model):
