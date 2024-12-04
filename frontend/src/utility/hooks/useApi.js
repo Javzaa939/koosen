@@ -1455,7 +1455,7 @@ function useApi(isDisplay=false) {
 			get: (page, limit, lesson, type, teacher, search) =>
 				instance.get(`learning/challenge/?page=${page}&limit=${limit}&lesson=${lesson}&type=${type}&teacher=${teacher}&search=${search}`),
 			getTeacherList: (limit, page, sort, search, sub_org, salbar, position="") => instance.get(`/learning/teacher/list/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&sub_org=${sub_org}&salbar=${salbar}&position=${position}`),
-			getTeacherLessonList: (limit, page, sort, search, teacher_id) => instance.get(`/learning/teacher/lesson/list/${teacher_id}/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}`),
+			getTeacherLessonList: (limit, page, sort, search, teacher_id, exam_type=2) => instance.get(`/learning/teacher/lesson/list/${teacher_id}/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&exam_type=${exam_type}`),
 			getAll: (challenge) => {
 				var c_challenge = ''
 				if (challenge) c_challenge = challenge

@@ -5504,7 +5504,8 @@ class TestLessonTeacherApiView(
         if not teacher:
             return request.send_error("ERR_002", "Багш олдсонгүй.")
 
-        obj = ChallengeQuestions.objects.filter(created_by_id=teacher).prefetch_related('title')
+        exam_type = request.query_params.get('exam_type')
+        obj = ChallengeQuestions.objects.filter(created_by_id=teacher).prefetch_related('title').filter(title__is_season=exam_type == '1')
         titles = set()
         for q in obj:
             titles.update(q.title.all())
