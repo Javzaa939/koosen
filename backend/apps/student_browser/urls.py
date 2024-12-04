@@ -28,4 +28,12 @@ urlpatterns = [
     path('health/', HealthAPIView.as_view()),
     path('health/<int:pk>/', HealthAPIView.as_view()),
 
+    # номын сангийн журам
+    path('rules/',  StudentRulesAPIView.as_view()),
+    path('rules/<int:pk>/',  StudentRulesAPIView.as_view()),
+
+    # номын сангийн цагийн хуваарь
+    path('time/',  StudentTimeAPIView.as_view()),
+    path('time/<int:pk>/',  StudentTimeAPIView.as_view()),
+
 ]

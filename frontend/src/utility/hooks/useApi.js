@@ -1969,7 +1969,7 @@ function useApi(isDisplay=false) {
 
 		// суралцагчийн хөтөч
 		browser: {
-			get: (limit, page, sort, search) => instance.get(`/browser/structure/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}`),
+			get: (limit, page) => instance.get(`/browser/structure/?page=${page}&limit=${limit}`),
 			getOne: (pk) => instance.get(`/browser/structure/${pk}/`),
 			post: (data) => instance.post(`/browser/structure/`, data),
 			put: (data, pk) => instance.put(`/browser/structure/${pk}/`, data),
@@ -1978,7 +1978,7 @@ function useApi(isDisplay=false) {
 
 			// суралцагчийн хөгжил
 			student_develop: {
-				get: (limit, page, sort, search) => instance.get(`/browser/develop/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}`),
+				get: (limit, page) => instance.get(`/browser/develop/?page=${page}&limit=${limit}`),
 				getOne: (pk) => instance.get(`/browser/develop/${pk}/`),
 				post: (data) => instance.post(`/browser/develop/`, data),
 				put: (data, pk) => instance.put(`/browser/develop/${pk}/`, data),
@@ -1987,11 +1987,29 @@ function useApi(isDisplay=false) {
 
 			// номын сан танилцуулга
 			library: {
-				get: (limit, page, sort, search) => instance.get(`/browser/library/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}`),
+				get: (limit, page) => instance.get(`/browser/library/?page=${page}&limit=${limit}`),
 				getOne: (pk) => instance.get(`/browser/library/${pk}/`),
 				post: (data) => instance.post(`/browser/library/`, data),
 				put: (data, pk) => instance.put(`/browser/library/${pk}/`, data),
 				delete: (pk) => instance.delete(`/browser/library/${pk}/`),
+			},
+
+			// журам
+			rules: {
+				get: (limit, page) => instance.get(`/browser/rules/?page=${page}&limit=${limit}`),
+				getOne: (pk) => instance.get(`/browser/rules/${pk}/`),
+				post: (data) => instance.post(`/browser/rules/`, data),
+				put: (data, pk) => instance.put(`/browser/rules/${pk}/`, data),
+				delete: (pk) => instance.delete(`/browser/rules/${pk}/`),
+			},
+
+			// номын сан цагийн хуваарь
+			time: {
+				get: (limit, page) => instance.get(`/browser/time/?page=${page}&limit=${limit}`),
+				getOne: (pk) => instance.get(`/browser/time/${pk}/`),
+				post: (data) => instance.post(`/browser/time/`, data),
+				put: (data, pk) => instance.put(`/browser/time/${pk}/`, data),
+				delete: (pk) => instance.delete(`/browser/time/${pk}/`),
 			},
 
 			// сэтгэл зүйн булан

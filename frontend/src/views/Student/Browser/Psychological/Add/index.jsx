@@ -1,12 +1,9 @@
 // ** React imports
-import React, { Fragment, useState, useContext, useEffect, useRef } from 'react'
-
-import { X } from "react-feather";
+import React, { Fragment, useState, useContext, useEffect } from 'react'
 
 import { t } from 'i18next';
 
 import useApi from "@hooks/useApi";
-import useToast from "@hooks/useToast";
 import useLoader from "@hooks/useLoader";
 
 import { useForm, Controller } from "react-hook-form";
@@ -16,7 +13,6 @@ import { Row, Col, Form, Modal, Input, Label, Button, ModalBody, ModalHeader, Fo
 import { validate, convertDefaultValue } from "@utils"
 
 import AuthContext from '@context/AuthContext'
-import SchoolContext from '@context/SchoolContext'
 import * as Yup from 'yup';
 import { useQuill } from 'react-quilljs';
 import 'quill/dist/quill.snow.css'
@@ -25,9 +21,6 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
 
     const validateSchema = Yup.object().shape({
 	title: Yup.string()
-		.trim()
-		.required('Хоосон байна'),
-    link: Yup.string()
 		.trim()
 		.required('Хоосон байна'),
 
@@ -65,14 +58,13 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
         readOnly: false,
     });
 
-    const { school_id } = useContext(SchoolContext)
     const { user } = useContext(AuthContext)
 
     // ** Hook
     const { control, handleSubmit, reset, setError, formState: { errors }, setValue } = useForm(validate(validateSchema));
 
 	// Loader
-	const { Loader, isLoading, fetchData } = useLoader({});
+	const { fetchData } = useLoader({});
 	const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
 
     // Api
@@ -82,10 +74,10 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
 	async function onSubmit(cdata) {
         cdata = convertDefaultValue(cdata)
 
-        cdata['created_user'] = user.id
         cdata['body'] = quill.root.innerHTML
 
         if(editId){
+            cdata['updated_user'] = user.id
             const { success, errors } = await fetchData(psycholocalApi.put(cdata, editId))
             if(success) {
                 reset()
@@ -102,7 +94,6 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
         else
         {
             cdata['created_user'] = user.id
-            cdata['updated_user'] = user.id
             const { success, errors } = await postFetch(psycholocalApi.post(cdata))
             if(success) {
                 reset()

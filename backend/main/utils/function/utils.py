@@ -1403,8 +1403,10 @@ def remove_file_from_cdn(path, is_file=True):
 
     cdn_delete_path = cdn_path + 'delete-file/'
     rsp = requests.delete(cdn_delete_path, json=body)
+    print(rsp.status_code)
     if rsp.status_code != 200:
-        raise Exception('Файл утсгахад алдаа гарсан байна. \n' + rsp.text)
+        # raise Exception('Файл утсгахад алдаа гарсан байна. \n' + rsp.text)
+        return False
     else:
         return True
 
@@ -1420,7 +1422,6 @@ def get_file_from_cdn(path):
     cdn_root_folder = settings.CDN_MAIN_FOLDER
     path = path.replace(cdn_root_folder, '')
     cdn_full_path = os.path.join(cdn_root_folder, path)
-
     body = {
         "path": cdn_full_path,
     }

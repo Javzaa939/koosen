@@ -1,12 +1,10 @@
 // ** React imports
-import React, { Fragment, useState, useContext, useEffect, useRef } from 'react'
+import React, { Fragment, useState, useContext, useEffect } from 'react'
 
-// import '../style.css'
 
 import { t } from 'i18next';
 
 import useApi from "@hooks/useApi";
-import useToast from "@hooks/useToast";
 import useLoader from "@hooks/useLoader";
 
 import { useForm, Controller } from "react-hook-form";
