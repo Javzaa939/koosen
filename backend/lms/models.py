@@ -3498,15 +3498,6 @@ class Challenge(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    # @staticmethod Ашиглагдаж магадгүй
-    # def get_filter(request):
-    #     filters = {}
-    #     org_filter = request.exactly_org_filter
-    #     filters['created_org'] = org_filter.get("org") if org_filter.get("org") else None
-    #     filters['created_sub_org'] = org_filter.get("sub_org") if org_filter.get("sub_org") else None
-    #     filters['created_salbar'] = org_filter.get("salbar") if org_filter.get("salbar") else None
-    #     return filters
-
     @staticmethod
     def get_state_filter(state_name):
         dn = dt.now()
