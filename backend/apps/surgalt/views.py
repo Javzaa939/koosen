@@ -2,6 +2,7 @@ import os
 # import logging
 import json
 import ast
+import traceback
 from openpyxl import load_workbook
 
 from rest_framework import mixins
@@ -4306,8 +4307,8 @@ class LessonAllApiView(
         if search_teacher:
             lesson_teacher_ids = Lesson_to_teacher.objects.filter(teacher=search_teacher).values_list('lesson', flat=True)
             self.queryset = self.queryset.filter(id__in=lesson_teacher_ids)
-
-        all_list = self.list(request).data
+        # to test
+        all_list = self.list(request).data[:10]
 
         return request.send_data(all_list)
 
@@ -5696,6 +5697,20 @@ class TestQuestionsAllAPIView(
 
 
 @permission_classes([IsAuthenticated])
+class TestQuestionsDifficultyLevelsAPIView(
+    generics.GenericAPIView,
+):
+    "Difficulty levels"
+
+    queryset = ChallengeQuestions.objects.all()
+
+    def get(self, request):
+        data = [{'value': key, 'label': label} for key, label in self.queryset.model._meta.get_field('level').choices]
+
+        return request.send_data(data)
+
+
+@permission_classes([IsAuthenticated])
 class ChallengeDetailApiView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -5818,15 +5833,16 @@ class ChallengeAddInformationAPIView(
         lesson_standart_instance = LessonStandart.objects.get(id=lesson_standart_id)
 
         data = remove_key_from_dict(data, ['lesson'])
+        data = remove_key_from_dict(data, ['level'])
 
-        with transaction.atomic():
-            try:
+        try:
+            with transaction.atomic():
                 self.queryset.create(lesson=lesson_standart_instance, created_by=teacher, **data)
 
-            except Exception as e:
-                print(e)
+        except Exception:
+            traceback.print_exc()
 
-                return request.send_error('ERR_002')
+            return request.send_error('ERR_002')
 
         return request.send_info('INF_001')
 

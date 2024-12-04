@@ -1462,6 +1462,7 @@ function useApi(isDisplay=false) {
 				return instance.get(`learning/challenge/all/?challenge=${c_challenge}`)
 			},
 			putSelectedTest: (data, pk) => instance.put(`learning/challenge/add/${pk}/`, data),
+			postTest: (data) => instance.post(`learning/challenge/add/`, data),
 			getSelect: (type, lesson) =>
 				instance.get(`learning/challenge/select/?type=${type}&year=${cyear_name}&season=${cseason_id}&lesson=${lesson}`),
 
@@ -1496,6 +1497,7 @@ function useApi(isDisplay=false) {
 			getDetailOne: (pk) => instance.get(`learning/challenge/details/one/${pk}/`),
 			getDetail: (page, limit, search, test_id) => instance.get(`learning/challenge/details/?page=${page}&limit=${limit}&search=${search}&test_id=${test_id}`),
 			getTestResult: (cdata) => instance.post(`learning/challenge/result/`,cdata),
+			getDifficultyLevels: () => instance.get(`learning/challenge/questions/difficulty_levels/`),
 
 			question: {
 				get: (page, limit, lessonId, subjectId, search) =>
@@ -1536,7 +1538,6 @@ function useApi(isDisplay=false) {
 				},
 				getOneTitle: (id) => instance.get(`learning/questions/title/${id}/`),
 				postExcel:(datas) => instance.post(`learning/questions/excel/` , datas),
-
 
 
 			},

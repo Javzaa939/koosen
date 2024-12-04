@@ -48,6 +48,7 @@ const Test = () => {
     const [teachers, setTeachers] = useState([]);
 
 	const [lessonOption, setLessonOption] = useState([])
+	const [difficultyLevelsOption, setDifficultyLevelsOption] = useState({})
 	const [editData, setEditRowData] = useState()
 	const [examId, setExamModalId] = useState()
 	const [showData, setShowRowData] = useState({})
@@ -87,6 +88,12 @@ const Test = () => {
 		const { success, data } = await getLessonFetchData(teacherLessonApi.getAll(''))
 		if (success) {
 			setLessonOption(data)
+		}
+	}
+	async function getDifficultyLevels() {
+		const { success, data } = await getLessonFetchData(challengeAPI.getDifficultyLevels())
+		if (success) {
+			setDifficultyLevelsOption(data)
 		}
 	}
 
@@ -160,6 +167,7 @@ const Test = () => {
 		() => {
 			getLesson()
 			getTeachers()
+			getDifficultyLevels()
 		},
 		[]
 	)
@@ -356,7 +364,7 @@ const Test = () => {
 							open={modal}
 							handleModal={handleModal}
 							refreshDatas={getDatas}
-							select_datas={lessonOption}
+							select_datas={[lessonOption, difficultyLevelsOption]}
 							editData={editData}
 						/>
                 )}

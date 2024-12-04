@@ -24,12 +24,15 @@ import Flatpickr from 'react-flatpickr';
 import '@styles/react/libs/flatpickr/flatpickr.scss';
 
 const Addmodal = ({ open, handleModal, refreshDatas, select_datas, editData }) => {
+    const lesson_options = select_datas[0]
+    const difficulty_levels_options = select_datas[1]
 
-    const { control, handleSubmit, setError, setValue, formState: { errors, title, lesson, duration, description,question_count} } = useForm(validate(validateSchema))
+    const { control, handleSubmit, setError, setValue, formState: { errors, title, lesson, duration, description,question_count, level} } = useForm(validate(validateSchema))
 	const { fetchData } = useLoader({ isFullScreen: true });
 
     const [endPicker, setEndPicker] = useState(new Date(editData?.end_date))
 	const [startPicker, setStartPicker] = useState(new Date(editData?.start_date))
+    const [questions_options, setQuestionsOptions] = useState([])
 
     const challengeAPI = useApi().challenge
 
@@ -80,6 +83,14 @@ const Addmodal = ({ open, handleModal, refreshDatas, select_datas, editData }) =
             }
         }
 	}
+
+    async function getQuestionsOptions() {
+        // TODO: this function is not completed
+		const { success, data } = await getLessonFetchData(challengeAPI.getQuestionList())
+		if (success) {
+			setQuestionsOptions(data)
+		}
+    }
 
     return (
         <Fragment>
@@ -169,8 +180,8 @@ const Addmodal = ({ open, handleModal, refreshDatas, select_datas, editData }) =
                                             classNamePrefix='select'
                                             className='react-select'
                                             placeholder={t(`-- Сонгоно уу --`)}
-                                            value={select_datas.find((c) => c.id === value)}
-                                            options={select_datas || []}
+                                            value={lesson_options.find((c) => c.id === value)}
+                                            options={lesson_options || []}
                                             noOptionsMessage={() => 'Хоосон байна'}
                                             onChange={(val) => {
                                                 onChange(val?.id || '')
@@ -268,6 +279,62 @@ const Addmodal = ({ open, handleModal, refreshDatas, select_datas, editData }) =
                                 />
                             {question_count}
                             {errors.question_count && <FormFeedback className='d-block'>{t(errors.question_count.message)}</FormFeedback>}
+                        </Col>
+                        <Col md={6} className='mt-50'>
+                            <Label className="form-label">
+                                {t('Курс')}
+                            </Label>
+                                <Controller
+                                    defaultValue=''
+                                    control={control}
+                                    name="level"
+                                    render={({ field }) => (
+                                        <Select
+                                            id={field.name}
+                                            isClearable
+                                            classNamePrefix='select'
+                                            className='react-select'
+                                            placeholder={t(`-- Сонгоно уу --`)}
+                                            options={difficulty_levels_options || []}
+                                            noOptionsMessage={() => 'Хоосон байна'}
+                                            onChange={(val) => {
+                                                field.onChange(val?.value || '')
+                                            }}
+                                            styles={ReactSelectStyles}
+                                        />
+                                    )}
+                                />
+                            {level}
+                            {errors.level && <FormFeedback className='d-block'>{t(errors.level.message)}</FormFeedback>}
+                        </Col>
+                        <Col md={6} className='mt-50'>
+                            <Label className="form-label">
+                                {t('Асуултууд')}
+                            </Label>
+                                <Controller
+                                    defaultValue=''
+                                    control={control}
+                                    name="questions"
+                                    render={({ field }) => (
+                                        <Select
+                                            id={field.name}
+                                            isClearable
+                                            classNamePrefix='select'
+                                            className='react-select'
+                                            placeholder={t(`-- Сонгоно уу --`)}
+                                            options={questions_options || []}
+                                            noOptionsMessage={() => 'Хоосон байна'}
+                                            onChange={(val) => {
+                                                field.onChange(val?.id || '')
+                                            }}
+                                            styles={ReactSelectStyles}
+                                            getOptionValue={(option) => option.id}
+                                            getOptionLabel={(option) => option.name}
+                                        />
+                                    )}
+                                />
+                            {level}
+                            {errors.level && <FormFeedback className='d-block'>{t(errors.level.message)}</FormFeedback>}
                         </Col>
                         <Col md={12} className="text-center mt-2">
                             <Button className='me-2' color="primary" type="submit">
