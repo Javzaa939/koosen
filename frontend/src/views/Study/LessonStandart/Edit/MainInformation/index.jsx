@@ -605,7 +605,7 @@ const MainInformation = ({ getNavigateData }) => {
                         </Col>
                         <Col lg={6} xs={12}>
                             <Label className="form-label  me-1" for="knowledge">
-                                {t('Олгох мэдлэг')}
+                                {t('Эзэмших мэдлэг')}
                             </Label>
                             <Controller
                                 control={control}
@@ -618,7 +618,7 @@ const MainInformation = ({ getNavigateData }) => {
                                         id="knowledge"
                                         type="textarea"
                                         bsSize="sm"
-                                        placeholder={t('Олгох мэдлэг')}
+                                        placeholder={t('Эзэмших мэдлэг')}
                                         invalid={errors.knowledge && true}
                                     />
                                 )}
@@ -627,7 +627,7 @@ const MainInformation = ({ getNavigateData }) => {
                         </Col>
                         <Col lg={6} xs={12}>
                             <Label className="form-label  me-1" for="skill">
-                                {t('Олгох чадвар')}
+                                {t('Эзэмших ур чадвар')}
                             </Label>
                             <Controller
                                 control={control}
@@ -640,7 +640,7 @@ const MainInformation = ({ getNavigateData }) => {
                                         id="skill"
                                         type="textarea"
                                         bsSize="sm"
-                                        placeholder={t('Олгох чадвар')}
+                                        placeholder={t('Эзэмших ур чадвар')}
                                         invalid={errors.skill && true}
                                     />
                                 )}
@@ -649,7 +649,7 @@ const MainInformation = ({ getNavigateData }) => {
                         </Col>
                         <Col lg={6} xs={12}>
                             <Label className="form-label  me-1" for="attitude">
-                                {t('Дадал хандлага')}
+                                {t('Хандлага төлөвшил')}
                             </Label>
                             <Controller
                                 control={control}
@@ -662,7 +662,7 @@ const MainInformation = ({ getNavigateData }) => {
                                         id="attitude"
                                         type="textarea"
                                         bsSize="sm"
-                                        placeholder={t('Дадал хандлага')}
+                                        placeholder={t('Хандлага төлөвшил')}
                                         invalid={errors.attitude && true}
                                     />
                                 )}

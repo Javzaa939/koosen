@@ -445,7 +445,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                         </Col>
                         <Col lg={6} xs={12}>
                             <Label className="form-label  me-1" for="knowledge_skill">
-                                {t('Олгох мэдлэг чадвар')}
+                                {t('Эзэмших мэдлэг чадвар')}
                             </Label>
                             <Controller
                                 control={control}
@@ -458,7 +458,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                         id="knowledge_skill"
                                         type="textarea"
                                         bsSize="sm"
-                                        placeholder={t('Олгох мэдлэг чадвар')}
+                                        placeholder={t('Эзэмших мэдлэг чадвар')}
                                         invalid={errors.knowledge_skill && true}
                                     />
                                 )}
