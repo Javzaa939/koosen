@@ -1348,7 +1348,7 @@ def get_cdn_urls():
 
     # Орчиноос шалтгаалж url авах
     if settings.DEBUG:
-        path = 'http://192.168.1.18:8003/cdn/'
+        path = 'http://192.168.1.7:8003/cdn/'
 
     return path
 
@@ -1403,8 +1403,10 @@ def remove_file_from_cdn(path, is_file=True):
 
     cdn_delete_path = cdn_path + 'delete-file/'
     rsp = requests.delete(cdn_delete_path, json=body)
+    print(rsp.status_code)
     if rsp.status_code != 200:
-        raise Exception('Файл утсгахад алдаа гарсан байна. \n' + rsp.text)
+        # raise Exception('Файл утсгахад алдаа гарсан байна. \n' + rsp.text)
+        return False
     else:
         return True
 
