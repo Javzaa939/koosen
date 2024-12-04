@@ -8,18 +8,10 @@ import lms.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('lms', '0278_remove_studentordersport_teacher_payment_and_more'),
+        ('lms', '0280_remove_studentordersport_teacher_payment_and_more'),
     ]
 
     operations = [
-        migrations.RemoveField(
-            model_name='studentordersport',
-            name='teacher_payment',
-        ),
-        migrations.RemoveField(
-            model_name='calculatedgpaofdiploma',
-            name='lesson',
-        ),
         migrations.AlterField(
             model_name='health',
             name='link',
@@ -29,16 +21,6 @@ class Migration(migrations.Migration):
             model_name='library',
             name='link',
             field=models.CharField(max_length=1000, null=True, verbose_name='Линк'),
-        ),
-        migrations.AlterField(
-            model_name='psychologicalquestionchoices',
-            name='image',
-            field=models.ImageField(blank=True, null=True, upload_to=lms.models.get_choice_image_path, verbose_name='зураг'),
-        ),
-        migrations.AlterField(
-            model_name='psychologicaltestquestions',
-            name='image',
-            field=models.ImageField(blank=True, null=True, upload_to=lms.models.get_image_path, verbose_name='зураг'),
         ),
         migrations.AlterField(
             model_name='structure',
@@ -64,10 +46,5 @@ class Migration(migrations.Migration):
             model_name='studentrules',
             name='file',
             field=models.FileField(null=True, upload_to='rules', verbose_name='Файл'),
-        ),
-        migrations.AddField(
-            model_name='calculatedgpaofdiploma',
-            name='lesson',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to='lms.lessonstandart', verbose_name='Хичээл'),
         ),
     ]

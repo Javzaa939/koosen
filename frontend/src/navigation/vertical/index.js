@@ -17,7 +17,7 @@ import Service from './Service'
 import Credit from './Credit'
 import Survey from './Survey'
 // import TeacherEvaluation from './TeacherEvaluation'
-// import Role from './Role'
+import Role from './Role'
 // import Science from './Science'
 import Statistic from './Statistic'
 import Test from './Test'
@@ -51,7 +51,7 @@ export default [
   // ...Report,
   ...Test,
   ...Settings,
-  // ...Role,
+  ...Role,
   // ...Science
   ...StudentBrowsers,
 ];

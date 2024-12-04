@@ -400,7 +400,7 @@ const VerticalLayout = (props) =>
                         if (menus.id === 'statistic' && !user.permissions?.includes('lms-statistic-read'))  delete newMenu[idx];
 
                         /** Хандах эрх */
-                        if (menus.id === 'role' && !user.permissions?.includes('role-read'))  delete newMenu[idx];
+                        if (menus.id === 'role' && !user.permissions?.includes('lms-role-read'))  delete newMenu[idx];
                     }
                 })
                 setCNavigation(newMenu)
