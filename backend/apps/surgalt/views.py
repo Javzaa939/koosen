@@ -5570,11 +5570,8 @@ class ChallengeSedevCountAPIView(
 
     def post(self, request):
         data = request.data
-        user = request.user
-
         challenge_id = data.get("challenge")
         title = data.get("subject")
-        level = data.get("level_of_question")
         number_of_questions = data.get('number_questions')
         number_of_questions_percentage = data.get("number_questions_percentage")
 
@@ -5584,7 +5581,7 @@ class ChallengeSedevCountAPIView(
                 challenge = Challenge.objects.filter(id=challenge_id).first()
 
                 if challenge and lesson_title:
-                    challenge_questions = ChallengeQuestions.objects.filter(title=lesson_title,level=level,subject__lesson=challenge.lesson)
+                    challenge_questions = ChallengeQuestions.objects.filter(title=lesson_title,level=Challenge.level,subject__lesson=challenge.lesson)
                     random_questions = None
 
                     if number_of_questions:

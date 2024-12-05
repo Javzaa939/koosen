@@ -25,7 +25,6 @@ const AddQuestion = ({ open, handleModal, lesson, refreshDatas, challenge, refre
     const { fetchData } = useLoader({ isFullScreen: true });
 
     const [select_data, setSelectDatas] = useState([])
-    const [difficultyLevelsOption, setDifficultyLevelsOption] = useState([])
 
     const challengeAPI = useApi().challenge.question
     const challengesAPI = useApi().challenge
@@ -36,14 +35,6 @@ const AddQuestion = ({ open, handleModal, lesson, refreshDatas, challenge, refre
             setSelectDatas(data)
         }
     }
-
-	async function getDifficultyLevels() {
-		const { success, data } = await fetchData(challengesAPI.getDifficultyLevels())
-
-        if (success) {
-			setDifficultyLevelsOption(data)
-		}
-	}
 
     useEffect(() => {
         getSelectDatas()
@@ -106,30 +97,6 @@ const AddQuestion = ({ open, handleModal, lesson, refreshDatas, challenge, refre
                                         styles={ReactSelectStyles}
                                         getOptionValue={(option) => option.id}
                                         getOptionLabel={(option) => option.name}
-                                    />
-                                )}
-                            />
-                        </Col>
-                        <Col md={12}>
-                            <Label className="form-label mt-2" for="level_of_question">
-                                {t('Шалгалтын асуултын түвшин')}
-                            </Label>
-                            <Controller
-                                control={control}
-                                defaultValue=''
-                                name="level_of_question"
-                                render={({ field: { value, onChange } }) => (
-                                    <Select
-                                        id="level_of_question"
-                                        name="level_of_question"
-                                        isClearable
-                                        classNamePrefix='select'
-                                        className='react-select'
-                                        placeholder={`-- Сонгоно уу --`}
-                                        options={difficultyLevelsOption || []}
-                                        noOptionsMessage={() => 'Хоосон байна'}
-                                        onChange={(val) => onChange(val?.value || '')}
-                                        styles={ReactSelectStyles}
                                     />
                                 )}
                             />
