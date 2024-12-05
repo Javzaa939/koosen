@@ -210,7 +210,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, select_datas, editData }) =
                                             {...field}
                                             id ="duration"
                                             bsSize="sm"
-                                            placeholder={editData?.duration}
+                                            placeholder={'Үргэлжлэх хугацаа (минутаар)'}
                                             type="number"
                                             invalid={errors.duration && true}
                                         />
@@ -271,7 +271,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, select_datas, editData }) =
                                             {...field}
                                             id ="question_count"
                                             bsSize="sm"
-                                            placeholder={editData?.question_count}
+                                            placeholder={'Асуултын тоо'}
                                             type="number"
                                             invalid={errors.question_count && true}
                                         />
@@ -282,7 +282,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, select_datas, editData }) =
                         </Col>
                         <Col md={6} className='mt-50'>
                             <Label className="form-label">
-                                {t('Курс')}
+                                {t('Түвшин')}
                             </Label>
                                 <Controller
                                     defaultValue=''
