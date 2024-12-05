@@ -236,20 +236,6 @@ function AddStudent() {
                                             <div className='content-header mb-2 mt-1'>
                                                 <h4 className='content-header'>Хамрах хүрээгээ сонгоно уу</h4>
                                             </div>
-                                            <Row className='custom-options-checkable gx-1'>
-                                                {/* <Col md={6}>
-                                                    <Input type='radio' id='all' name='plans' className='custom-option-item-check' onChange={(e) => handleScope(e, 'Хичээлийн хүрээнд')} checked={scope == 'all'} />
-                                                    <Label for='all' className='custom-option-item text-center p-1'>
-                                                        <span className='fw-bolder'>Хичээлийн хүрээнд</span>
-                                                    </Label>
-                                                </Col> */}
-                                                {/* <Col md={6}>
-                                                    <Input type='radio' id='group' name='plans' className='custom-option-item-check ' onChange={(e) => handleScope(e, 'Ангийн хүрээнд')} checked={scope == 'group'} />
-                                                    <Label for='group' className='custom-option-item text-center p-1'>
-                                                        <span className='fw-bolder'>Ангийн хүрээнд</span>
-                                                    </Label>
-                                                </Col> */}
-                                            </Row>
                                             {
                                                 scope === 'group' &&
                                                 <Row className='mt-1'>
@@ -279,7 +265,7 @@ function AddStudent() {
                                                                         }}
                                                                         styles={ReactSelectStyles}
                                                                         getOptionValue={(option) => option.id}
-                                                                        getOptionLabel={(option) => option.name + '(' + option.degree__degree_code + ')'}
+                                                                        getOptionLabel={(option) => option.name}
                                                                     />
                                                                 )
                                                             }}

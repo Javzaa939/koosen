@@ -4135,7 +4135,8 @@ class LessonsTeacher(
 @permission_classes([IsAuthenticated])
 class LessonOneApiView(
     generics.GenericAPIView,
-    mixins.RetrieveModelMixin
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin
 ):
     """ Хичээлийн стандарт мэдээлэл """
 
@@ -4144,7 +4145,14 @@ class LessonOneApiView(
 
     def get(self, request, pk=None):
 
-        datas = self.retrieve(request, pk).data
+        school = request.query_params.get('school')
+        if school:
+            self.queryset = self.queryset.filter(school=school)
+
+        if pk:
+            datas = self.retrieve(request, pk).data
+        else:
+            datas = self.list(request).data
 
         return request.send_data(datas)
 

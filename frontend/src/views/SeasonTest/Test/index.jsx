@@ -85,7 +85,7 @@ const Test = () => {
         }
     }
 	async function getLesson() {
-		const { success, data } = await getLessonFetchData(teacherLessonApi.getAll(''))
+		const { success, data } = await getLessonFetchData(teacherLessonApi.getOne(''))
 		if (success) {
 			setLessonOption(data)
 		}
@@ -223,7 +223,7 @@ const Test = () => {
 							}}
 							styles={ReactSelectStyles}
 							getOptionValue={(option) => option.id}
-							getOptionLabel={(option) => option.name}
+							getOptionLabel={(option) => option.full_name}
 						/>
 					</Col>
 				    <Col md={3} sm={10} className="m-1">

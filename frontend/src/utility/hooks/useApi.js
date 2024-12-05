@@ -464,8 +464,8 @@ function useApi(isDisplay=false) {
 					instance.get(
 						`/learning/lesson/list/?year=${cyear_name}&season=${cseason_id}&stype=${stype}`
 					),
-				getOne: (lessonId) =>
-					instance.get(`/learning/lesson/getone/${lessonId}/`),
+				getOne: (lessonId='') =>
+					instance.get(`/learning/lesson/getone/`),
 
 				/* Тухайн тэнхимийн бүх хичээлийг авах */
 				getAll: (teacherId) =>

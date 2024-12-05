@@ -171,7 +171,7 @@ class LessonStandartSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = LessonStandart
-        fields = "__all__"
+        fields = "id", 'name', 'code', 'full_name'
 
     def get_full_name(self, obj):
         return obj.code_name

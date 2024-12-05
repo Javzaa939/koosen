@@ -118,6 +118,7 @@ urlpatterns = [
     path('lesson/homework/<int:pk>/', StudentHomeworkListAPIView.as_view()),
     path('lesson/assignment/score/', StudentHomeworkMultiEditAPIView.as_view()),
 
+    path('lesson/getone/', LessonOneApiView.as_view()),
     path('lesson/getone/<int:pk>/', LessonOneApiView.as_view()),
 
     path('lesson/getall/', LessonAllApiView.as_view()),

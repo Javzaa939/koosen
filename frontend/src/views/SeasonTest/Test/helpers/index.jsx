@@ -63,27 +63,18 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, h
             wrap:true,
         },
         {
-            name: `${'Шалгалт эхлэх хугацаа'}`,
+            name: `${'Эхлэх хугацаа'}`,
             selector: (row) => row?.startAt,
             minWidth: "100px",
         },
         {
-            name: `${'Шалгалт дуусах хугацаа'}`,
+            name: `${'Дуусах хугацаа'}`,
             selector: (row) => row?.endAt,
             minWidth: "100px",
         },
         {
             name: `${'Хамрах хүрээ'}`,
             selector: (row) => row?.scopeName,
-            minWidth: "100px",
-        },
-        {
-            name: `${'Илгээсэн төлөв'}`,
-            selector: (row) => {
-				if (row?.send_type) {
-					return request_flag_color(row?.send_type)
-				} else ''
-			},
             minWidth: "100px",
         },
 
