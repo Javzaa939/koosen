@@ -5477,6 +5477,7 @@ class TestTeacherApiView(
         position = self.request.query_params.get('position')
         season = self.request.query_params.get('season')
         sorting = self.request.query_params.get('sorting')
+        is_season = self.request.query_params.get('season')
 
         # Бүрэлдэхүүн сургууль
         if sub_org:
@@ -5499,17 +5500,13 @@ class TestTeacherApiView(
 
             queryset = queryset.order_by(sorting)
 
-        challenge_questions_qs = ChallengeQuestions.objects.all()
-
-        # is season or not
-        if season:
-            challenge_questions_qs = challenge_questions_qs.filter(title__is_season=True)
+        if is_season == 'true':
+            title_teachers = QuestionTitle.objects.filter(is_season=True).values_list('created_by', flat=True)
+            queryset = queryset.filter(id__in=title_teachers)
         else:
-            challenge_questions_qs = challenge_questions_qs.filter(title__is_season=False)
-
-        created_questions = challenge_questions_qs.values_list('created_by' , flat = True).distinct()
-
-        queryset = queryset.filter(id__in = created_questions)
+            title_ids = QuestionTitle.objects.filter(is_season=False).values_list('id', flat=True)
+            teacher_ids = ChallengeQuestions.objects.filter(title__in=title_ids).values_list('created_by', flat=True).distinct()
+            queryset = queryset.filter(id__in=teacher_ids)
 
         return queryset
 

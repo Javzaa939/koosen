@@ -76,7 +76,7 @@ export default function Question() {
 		if (page_count < currentPage && page_count != 0) {
 			setCurrentPage(page_count)
 		}
-		const { success, data } = await allFetch(teacherApi.getTeacherList(rowsPerPage, currentPage, sortField, searchValue, school_id, selected_values.department_id, selected_values.position_id, 1))
+		const { success, data } = await allFetch(teacherApi.getTeacherList(rowsPerPage, currentPage, sortField, searchValue, school_id, selected_values.department_id, selected_values.position_id, true))
 		if (success) {
 			setTotalCount(data?.count)
 			setDatas(data?.results)
@@ -124,10 +124,6 @@ export default function Question() {
 			setStep(prev => prev + 1)
 
 		}
-	}
-
-	const handlePrevious = () => {
-		setStep(prev => prev - 1)
 	}
 
 	useEffect(() => {
@@ -182,7 +178,7 @@ export default function Question() {
 			{step === 1 && <Card>
 				{isLoading && Loader}
 				<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
-					<CardTitle tag="h4">{t('Асуулт үүсгэсэн багшийн жагсаалт')}</CardTitle>
+					<CardTitle tag="h4">{t('Асуулт сан багшийн жагсаалт')}</CardTitle>
 				</CardHeader>
 				<Row className="justify-content-between mx-0 mb-1 mt-1">
 					<Col md={3}>
