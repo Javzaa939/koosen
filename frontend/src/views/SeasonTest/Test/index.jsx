@@ -108,7 +108,6 @@ const Test = () => {
 
 	// Засах товч дарах үед ажиллах функц
 	const handleEdit = (row) => {
-		console.log(row)
 		setEditRowData(row)
 		handleEditModal()
 		setIsEdit(!isEdit)
