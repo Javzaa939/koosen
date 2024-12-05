@@ -3490,6 +3490,9 @@ class Challenge(models.Model):
     has_shuffle = models.BooleanField(default=False, verbose_name="Холих эсэх")
     has_choice_shuffle = models.BooleanField(default=False, verbose_name="Сонголтуудыг холих эсэх")
 
+    is_open = models.BooleanField(default=False, verbose_name="Нээлттэй эсэх")
+    level = models.IntegerField(choices=ChallengeQuestions.DIFFICULTY_LEVELS, default=ChallengeQuestions.LEVEL_NORMAL,  verbose_name='Шалгалтын түвшин')
+
     deleted_by = models.ForeignKey(Teachers, on_delete=models.CASCADE, related_name="deleted", null=True, blank=True)
     deleted_at = models.DateTimeField(null=True, blank=True)
 
@@ -4626,7 +4629,7 @@ class Structure(models.Model):
 
     title = models.CharField(max_length=1000, verbose_name='Гарчиг')
     link = models.CharField(max_length=1000, verbose_name='Линк', null=True)
-    file = models.FileField(upload_to='structure', verbose_name='Файл')
+    file = models.FileField(upload_to='structure', verbose_name='Файл', null=True)
     created_user = models.ForeignKey(User, on_delete=models.SET_NULL,related_name='create_user', null=True, verbose_name='Үүсгэсэн хэрэглэгч')
     updated_user = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='update_user', null=True, verbose_name='Зассан хэрэглэгч')
 
@@ -4638,7 +4641,7 @@ class StudentDevelop(models.Model):
 
     title = models.CharField(max_length=1000, verbose_name='Гарчиг')
     link = models.CharField(max_length=1000, verbose_name='Линк', null=True)
-    file = models.FileField(upload_to='develop', verbose_name='Файл')
+    file = models.FileField(upload_to='develop', verbose_name='Файл', null=True)
     body = models.TextField(verbose_name="Суралцагчийн хөгжлийн хэсэг")
     created_user = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='cr_user', null=True, verbose_name='Үүсгэсэн хэрэглэгч')
     updated_user = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='up_user',  null=True, verbose_name='Зассан хэрэглэгч')
@@ -4674,7 +4677,7 @@ class StudentRules(models.Model):
     """ Номын сангийн журам """
 
     title = models.CharField(max_length=1000, verbose_name='Гарчиг')
-    file = models.FileField(upload_to='rules', verbose_name='Файл')
+    file = models.FileField(upload_to='rules', verbose_name='Файл', null=True)
 
     created_user = models.ForeignKey(User, on_delete=models.SET_NULL,related_name='lib_user', null=True, verbose_name='Үүсгэсэн хэрэглэгч')
     updated_user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='Зассан хэрэглэгч')

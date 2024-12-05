@@ -68,7 +68,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 
 		var value = event.target.value ? event.target.value.trim() : ''
 
-        if (["e", "E", "+", "-"].includes(event.key))
+        if (["+", "-"].includes(event.key))
         {
             event.preventDefault()
         }
@@ -170,7 +170,6 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 								bsSize='sm'
 								placeholder={(`Бакалаврын дипломын дугаар`)}
 								defaultValue={row?.back_diplom_num}
-								// disabled={(Object.keys(user).length > 0 && user?.is_superuser) ? false : true}
 								onBlur={focusOut}
 								onFocus={(e) => focusData.current = (e.target.value)}
 								onKeyPress={(e) => {
