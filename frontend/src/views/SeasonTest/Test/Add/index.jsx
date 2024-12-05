@@ -282,6 +282,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, select_datas, editData }) =
                                         className='react-select'
                                         placeholder={t(`-- Сонгоно уу --`)}
                                         options={difficulty_levels_options || []}
+                                        value={difficulty_levels_options?.find((c) => c.value == field.value)}
                                         noOptionsMessage={() => 'Хоосон байна'}
                                         onChange={(val) => {
                                             field.onChange(val?.value || '')
@@ -323,6 +324,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, select_datas, editData }) =
                                         {...field}
                                         id={field.name}
                                         type="checkbox"
+                                        checked={field.value}
                                         className='me-50'
                                     />
                                 )}
@@ -342,12 +344,13 @@ const Addmodal = ({ open, handleModal, refreshDatas, select_datas, editData }) =
                                         {...field}
                                         id={field.name}
                                         type="checkbox"
+                                        checked={field.value}
                                         className='me-50'
                                     />
                                 )}
                             />
                             <Label className="form-label" for="has_shuffle">
-                                {t('Холих эсэх')}
+                                {t('Шалгалтын асуултыг оюутан бүрээр холих эсэх')}
                             </Label>
                             {errors.has_shuffle && <FormFeedback className='d-block'>{t(errors.has_shuffle.message)}</FormFeedback>}
                         </Col>

@@ -84,27 +84,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, h
 			center: true,
 			selector: (row) => {
                 var is_remove = true
-                var is_send = false
                 var is_edit = true
-
-                var end_date = new Date(row?.endAt)
-                var start_date = new Date(row?.startAt)
-                var today = new Date()
-
-                // Хүсэлт илгээхээс өмнө эхлэх болон дуусах хугацаа
-                if ((start_date <= today && today <= end_date) || row?.send_type) {
-                    is_remove = false
-                }
-
-                // Дуусах хугацаа өнөөдрөөс бага үед л баталгаажуулах хүсэлт илгээнэ
-                if (end_date < today && !row?.send_type) {
-                    is_send = true
-                }
-
-                // Шалгалтыг баталгаажуулах хүсэлт илгээсэн үед засах боломжтой
-                if (row?.send_type) {
-                    is_edit = false
-                }
 
                 return (
                     <div className="text-center" style={{ width: "auto" }}>
@@ -133,27 +113,6 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, h
                             </a>
                             <UncontrolledTooltip placement='top' target={`complaintListDatatableShow${row.id}`} >{t('Дэлгэрэнгүй')}</UncontrolledTooltip>
                         </>
-                        {
-                            is_send &&
-                                <>
-                                    <a
-                                        role="button"
-                                        onClick={() => showWarning({
-                                            header: {
-                                                title: `Шалгалт батлуулах`,
-                                            },
-                                            question: `Та "${row?.title}"  шалгалтыг батлуулах хүсэлт илгээж байна?`,
-                                            onClick: () => handleSend(row.id),
-                                            btnText: 'Илгээх',
-                                        })}
-                                        className='me-1'
-                                        id={`complaintListDatatableSend${row?.id}`}
-                                    >
-                                        <Badge color="light-info" pill><i className="fas fa-paper-plane"></i></Badge>
-                                    </a>
-                                    <UncontrolledTooltip placement='top' target={`complaintListDatatableSend${row.id}`}>Илгээх</UncontrolledTooltip>
-                                </>
-                        }
                         {
                             is_remove &&
                                 <>

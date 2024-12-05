@@ -4975,6 +4975,7 @@ class SubOrgDepartListAPIView(
 #         obj = PsychologicalTestQuestions.objects.filter(id=row_data.get('id')).update(question_number=int(row_data.get('question_number')))
 #         print(obj)
 
+@permission_classes([IsAuthenticated])
 class QuestionsTitleAPIView(
     generics.GenericAPIView,
     APIView,
@@ -5063,6 +5064,8 @@ class QuestionsTitleAPIView(
         self.destroy(request, pk)
         return request.send_info("INF_003")
 
+
+@permission_classes([IsAuthenticated])
 class QuestionsTitleListAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -5081,18 +5084,17 @@ class QuestionsTitleListAPIView(
             self.queryset = self.queryset.filter(id__in=list(question_titles))
 
         lesson = request.query_params.get('lesson')
+        season = request.query_params.get('season')
 
         if lesson:
             self.queryset = self.queryset.filter(lesson=lesson)
 
-        season = request.query_params.get('season')
-
-        if season:
-            self.queryset = self.queryset.filter(is_season=True)
+        if season == 'false':
+            question_titles = ChallengeQuestions.objects.filter(created_by=teacher).values_list("title__id", flat=True)
+            data = self.queryset.filter(id__in=list(question_titles)).values("id", "name", 'lesson__name', 'lesson__code')
         else:
-            self.queryset = self.queryset.filter(is_season=False)
-
-        data = self.queryset.values("id", "name", 'lesson__name', 'lesson__code')
+            question_sub = ChallengeQuestions.objects.filter(title=OuterRef('id')).values('title').annotate(count=Count('id')).values('count')
+            data = self.queryset.filter(is_season=True).filter(created_by=teacher).annotate(question_count=Subquery(question_sub)).values("id", "name", 'lesson__name', 'lesson__code', 'lesson__id', 'question_count')
 
         return request.send_data(list(data))
 

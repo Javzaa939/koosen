@@ -49,7 +49,7 @@ const Test = () => {
 
 	const [lessonOption, setLessonOption] = useState([])
 	const [difficultyLevelsOption, setDifficultyLevelsOption] = useState({})
-	const [editData, setEditRowData] = useState()
+	const [editData, setEditRowData] = useState({})
 	const [examId, setExamModalId] = useState()
 	const [showData, setShowRowData] = useState({})
 	const [isEdit, setIsEdit] = useState(false)
@@ -108,6 +108,7 @@ const Test = () => {
 
 	// Засах товч дарах үед ажиллах функц
 	const handleEdit = (row) => {
+		console.log(row)
 		setEditRowData(row)
 		handleEditModal()
 		setIsEdit(!isEdit)
@@ -135,10 +136,8 @@ const Test = () => {
 		setIsEdit(false)
 	};
 
-	const handleEditModal = (row) => {
-		setEditRowData(row)
+	const handleEditModal = () => {
 		setModal(!modal);
-		// setIsEdit(false)
 	};
 
 	const handleExamModal = (id) => {
