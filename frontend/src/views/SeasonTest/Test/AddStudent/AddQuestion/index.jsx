@@ -38,7 +38,6 @@ const AddQuestion = ({ open, handleModal, lesson, refreshDatas, challenge, refre
 
     useEffect(() => {
         getSelectDatas()
-        getDifficultyLevels()
     }, [])
 
     const numberOfQuestions = watch("number_questions");
