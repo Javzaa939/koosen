@@ -76,7 +76,7 @@ export default function Question() {
 		if (page_count < currentPage && page_count != 0) {
 			setCurrentPage(page_count)
 		}
-		const { success, data } = await allFetch(teacherApi.getTeacherList(rowsPerPage, currentPage, sortField, searchValue, school_id, selected_values.department_id, selected_values.position_id))
+		const { success, data } = await allFetch(teacherApi.getTeacherList(rowsPerPage, currentPage, sortField, searchValue, school_id, selected_values.department_id, selected_values.position_id, 1))
 		if (success) {
 			setTotalCount(data?.count)
 			setDatas(data?.results)

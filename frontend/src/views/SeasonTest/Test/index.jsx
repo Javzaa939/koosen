@@ -69,7 +69,7 @@ const Test = () => {
 	const teacherListApi = useApi().hrms.teacher
 
 	async function getDatas() {
-		const { success, data } = await fetchData(challengeAPI.get(currentPage, rowsPerPage, selectedLesson, selectedTime, selectedTeacher, searchValue));
+		const { success, data } = await fetchData(challengeAPI.get(currentPage, rowsPerPage, selectedLesson, selectedTime, selectedTeacher, searchValue, 1));
 
 		if (success) {
 			setDatas(data?.results);
@@ -227,7 +227,7 @@ const Test = () => {
 						/>
 					</Col>
 				    <Col md={3} sm={10} className="m-1">
-						<Label>Багш</Label>
+						<Label>{t('Багш')}</Label>
 						<Select
 							classNamePrefix='select'
 							isClearable
@@ -245,7 +245,6 @@ const Test = () => {
 							getOptionLabel={(option) => option.full_name}
 						/>
 					</Col>
-					
 					<Col md={3} sm={10} className="m-1">
 						<Label className="form-label" for="time">
 							{t('Хугацаагаар')}

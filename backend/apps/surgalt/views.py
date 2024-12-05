@@ -18,7 +18,7 @@ from django.utils.translation import gettext as _
 # from django.http import Http404
 
 from main.utils.function.pagination import CustomPagination
-from main.utils.function.utils import override_get_queryset
+from main.utils.function.utils import override_get_queryset, save_data_with_signals
 from main.utils.function.utils import has_permission, get_domain_url, _filter_queries, get_teacher_queryset
 from main.utils.file import save_file
 from main.utils.file import remove_folder
@@ -1453,6 +1453,7 @@ class ChallengeAPIView(
         lesson = request.query_params.get('lesson')
         time_type = request.query_params.get('type')
         teacher_id = request.query_params.get('teacher')
+        season = request.query_params.get('season')
 
         if teacher_id:
             self.queryset = self.queryset.filter(created_by=teacher_id)
@@ -1464,6 +1465,11 @@ class ChallengeAPIView(
             state_filters = Challenge.get_state_filter(time_type)
 
             self.queryset = self.queryset.filter(**state_filters)
+
+        if season:
+            self.queryset = self.queryset.filter(challenge_type=Challenge.CHALLENGE_TYPE[Challenge.SEMESTR_EXAM][0])
+        else:
+            self.queryset = self.queryset.exclude(challenge_type=Challenge.CHALLENGE_TYPE[Challenge.SEMESTR_EXAM][0])
 
         datas = self.list(request).data
 
@@ -4307,8 +4313,8 @@ class LessonAllApiView(
         if search_teacher:
             lesson_teacher_ids = Lesson_to_teacher.objects.filter(teacher=search_teacher).values_list('lesson', flat=True)
             self.queryset = self.queryset.filter(id__in=lesson_teacher_ids)
-        # to test
-        all_list = self.list(request).data[:10]
+
+        all_list = self.list(request).data
 
         return request.send_data(all_list)
 
@@ -5059,13 +5065,27 @@ class QuestionsTitleListAPIView(
     serializer_class = dynamic_serializer(QuestionTitle, "__all__")
 
     def get(self, request,pk):
-        teacher = Teachers.objects.filter(id=pk).first()
+        teacher = None
+
+        if pk:
+            teacher = Teachers.objects.filter(id=pk).first()
+            question_titles = ChallengeQuestions.objects.filter(created_by=teacher).values_list("title__id", flat=True)
+            self.queryset = self.queryset.filter(id__in=list(question_titles))
+
         lesson = request.query_params.get('lesson')
+
         if lesson:
             self.queryset = self.queryset.filter(lesson=lesson)
 
-        question_titles = ChallengeQuestions.objects.filter(created_by=teacher).values_list("title__id", flat=True)
-        data = self.queryset.filter(id__in=list(question_titles)).values("id", "name", 'lesson__name', 'lesson__code')
+        season = request.query_params.get('season')
+
+        if season:
+            self.queryset = self.queryset.filter(is_season=True)
+        else:
+            self.queryset = self.queryset.filter(is_season=False)
+
+        data = self.queryset.values("id", "name", 'lesson__name', 'lesson__code')
+
         return request.send_data(list(data))
 
 class TestQuestionsAPIView(
@@ -5455,6 +5475,7 @@ class TestTeacherApiView(
         sub_org = self.request.query_params.get('sub_org')
         salbar = self.request.query_params.get('salbar')
         position = self.request.query_params.get('position')
+        season = self.request.query_params.get('season')
         sorting = self.request.query_params.get('sorting')
 
         # Бүрэлдэхүүн сургууль
@@ -5478,7 +5499,16 @@ class TestTeacherApiView(
 
             queryset = queryset.order_by(sorting)
 
-        created_questions = ChallengeQuestions.objects.values_list('created_by' , flat = True).distinct()
+        challenge_questions_qs = ChallengeQuestions.objects.all()
+
+        # is season or not
+        if season:
+            challenge_questions_qs = challenge_questions_qs.filter(title__is_season=True)
+        else:
+            challenge_questions_qs = challenge_questions_qs.filter(title__is_season=False)
+
+        created_questions = challenge_questions_qs.values_list('created_by' , flat = True).distinct()
+
         queryset = queryset.filter(id__in = created_questions)
 
         return queryset
@@ -5550,14 +5580,26 @@ class ChallengeSedevCountAPIView(
 
                 if challenge and lesson_title:
                     challenge_questions = ChallengeQuestions.objects.filter(title=lesson_title,level=level)
+                    random_questions = None
+
                     if number_of_questions:
-                        random_questions = challenge_questions.order_by('?')[:int(number_of_questions)]
+                        if challenge.has_shuffle:
+                            random_questions = challenge_questions.order_by('?')[:int(number_of_questions)]
+                        else:
+                            random_questions = challenge_questions.order_by('id')[:int(number_of_questions)]
                     elif number_of_questions_percentage:
                         total_questions = challenge_questions.count()
                         question_count = int(total_questions * (int(number_of_questions_percentage) /  100))
-                        random_questions = challenge_questions.order_by('?')[:question_count]
+
+                        if challenge.has_shuffle:
+                            random_questions = challenge_questions.order_by('?')[:question_count]
+                        else:
+                            random_questions = challenge_questions.order_by('id')[:question_count]
                     else:
-                        random_questions = challenge_questions
+                        if challenge.has_shuffle:
+                            random_questions = challenge_questions.order_by('?')
+                        else:
+                            random_questions = challenge_questions.order_by('id')
 
                     challenge.questions.add(*random_questions)
                     challenge.save()
@@ -5634,10 +5676,10 @@ class ChallengeAddStudentAPIView(
             print(e)
             return request.send_error("ERR_002")
 
-    def delete(self, request, pk, challenge):
+    def delete(self, request, pk, student):
         try:
-            challenge = Challenge.objects.get(id=challenge)
-            student = Student.objects.get(pk=pk)
+            challenge = Challenge.objects.get(id=pk)
+            student = Student.objects.get(pk=student)
             challenge.student.remove(student)
             challenge.save()
 
@@ -5663,6 +5705,7 @@ class ChallengeQuestionsAPIView(
 
         if challenge_id:
             all_data = challenge.questions.filter(title__lesson=challenge.lesson).all()
+            all_data = challenge.questions.all()
             serializer = self.get_serializer(all_data, many=True)
 
             response_data = {
@@ -5827,17 +5870,16 @@ class ChallengeAddInformationAPIView(
     def post(self, request):
         data = request.data
         user = request.user
+        season = request.query_params.get('season')
         teacher = get_object_or_404(Teachers, user_id=user, action_status=Teachers.APPROVED)
+        data['created_by'] = teacher.id if teacher else None
 
-        lesson_standart_id = data.get('lesson')
-        lesson_standart_instance = LessonStandart.objects.get(id=lesson_standart_id)
-
-        data = remove_key_from_dict(data, ['lesson'])
-        data = remove_key_from_dict(data, ['level'])
+        if season:
+            data['challenge_type'] = Challenge.CHALLENGE_TYPE[Challenge.SEMESTR_EXAM][0]
 
         try:
             with transaction.atomic():
-                self.queryset.create(lesson=lesson_standart_instance, created_by=teacher, **data)
+                save_data_with_signals(self.queryset.model, self.serializer_class, False, None, data=data)
 
         except Exception:
             traceback.print_exc()

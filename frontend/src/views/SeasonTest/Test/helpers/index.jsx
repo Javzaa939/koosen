@@ -131,17 +131,17 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, h
                                 <UncontrolledTooltip placement='top' target={`complaintListDatatableEdit${row.id}`} >Засах</UncontrolledTooltip>
                             </>
                         }
-
-                        <a
-                            role="button"
-                            onClick={() => { handleShow(row)} }
-                            id={`complaintListDatatableShow${row?.id}`}
-                            className='me-1'
-                        >
-                            <Badge color="light-info" pill><Eye  width={"15px"} /></Badge>
-                        </a>
-                        <UncontrolledTooltip placement='top' target={`complaintListDatatableShow${row.id}`} >Харах</UncontrolledTooltip>
-
+                        <>
+                            <a
+                                role="button"
+                                id={`complaintListDatatableShow${row?.id}`}
+                                className='me-1'
+                                href={`/challenge-season/addstudent/${row?.id}/${row?.lesson?.id}`}
+                            >
+                                <Badge color="light-info"><Book width={"10px"} /></Badge>
+                            </a>
+                            <UncontrolledTooltip placement='top' target={`complaintListDatatableShow${row.id}`} >{t('Дэлгэрэнгүй')}</UncontrolledTooltip>
+                        </>
                         {
                             is_send &&
                                 <>
