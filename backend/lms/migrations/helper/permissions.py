@@ -1404,5 +1404,9 @@ permissions = [
         'name': 'lms-browser-other-read',
         'description' : 'Бусад унших эрх'
     },
+    {
+        'name': 'lms-role-read',
+        'description' : 'Хандах эрх'
+    },
 
 ]

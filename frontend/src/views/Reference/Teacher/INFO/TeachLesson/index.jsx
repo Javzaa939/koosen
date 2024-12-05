@@ -23,8 +23,8 @@ export default function TeachLesson({ datas })
                                 <th>Хичээлийн ангилал</th>
                                 <th>Хичээлийн тодорхойлолт</th>
                                 <th>Хичээллэх Хичээлийн зорилго</th>
-                                <th>Олгох мэдлэг</th>
-                                <th>Олгох чадвар</th>
+                                <th>Эзэмших мэдлэг</th>
+                                <th>Эзэмших ур чадвар</th>
                             </tr>
                         </thead>
                         <tbody>

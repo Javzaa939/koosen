@@ -23,7 +23,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='professiondefinition',
             name='knowledge_skill',
-            field=models.TextField(null=True, verbose_name='Олгох мэдлэг чадвар'),
+            field=models.TextField(null=True, verbose_name='Эзэмших мэдлэг чадвар'),
         ),
         migrations.AddField(
             model_name='professiondefinition',
