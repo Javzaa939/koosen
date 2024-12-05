@@ -1,27 +1,26 @@
 // ** React Imports
-import { Fragment, useState, useEffect, useContext } from 'react'
+import { Fragment, useContext, useEffect, useState } from 'react'
 
 import { Controller, useForm } from 'react-hook-form'
 
-import { Row, Col, Card, Input, Label, CardTitle, CardHeader, Spinner, Button, Modal, ModalHeader, ModalBody } from 'reactstrap'
+import { Card, CardHeader, CardTitle, Col, Input, Label, Row, Spinner } from 'reactstrap'
 
-import { ChevronDown, Plus } from 'react-feather'
+import { ChevronDown } from 'react-feather'
 import { useTranslation } from 'react-i18next'
 
 import Select from 'react-select'
 
 import DataTable from 'react-data-table-component'
 
-import useApi from '@hooks/useApi';
-import useLoader from '@hooks/useLoader';
+import useApi from '@hooks/useApi'
+import useLoader from '@hooks/useLoader'
 
-import { getPagination, ReactSelectStyles } from '@utils';
-import AuthContext from '@context/AuthContext'
 import SchoolContext from '@context/SchoolContext'
+import { getPagination, ReactSelectStyles } from '@utils'
 
-import { getColumns } from './helpers';
-import { getColumnsLesson } from './helpers2';
 import EQuestions from '../../Test/EQuestions'
+import SeasonQuestions from './SeasonQuestion'
+import { getColumns } from './helpers'
 
 export default function Question() {
 
@@ -287,56 +286,7 @@ export default function Question() {
 			</Card>}
 			{
 				step === 2 &&
-				<Card>
-					{isLoading && Loader}
-					<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
-						<CardTitle tag="h4">{t('Шалгалтын асуултын сэдвийн мэдээлэл')}</CardTitle>
-						<CardTitle tag="h5">{teacher_name}</CardTitle>
-					</CardHeader>
-					<Row className="justify-content-between mx-0 mb-1 mt-1">
-						<Col md={3}>
-							<Label className="form-label" for="salbar">
-								{t('Хайлт')}
-							</Label>
-							<Input
-								type="text"
-								bsSize="sm"
-								id="search-input"
-								value={searchValue}
-								onChange={handleFilter}
-								placeholder={t("Хайх үг....")}
-							/>
-						</Col>
-					</Row>
-					{isTableLoading ?
-						<div className="my-2 text-center" sm={12}>
-							<Spinner size='sm' />
-							<span className='ms-50'>{t("Түр хүлээнэ үү...")}</span>
-						</div>
-						:
-						<div className="react-dataTable react-dataTable-selectable-rows mx-1">
-							<DataTable
-								noHeader
-								pagination
-								className='react-dataTable'
-								noDataComponent={(
-									<div className="my-2">
-										<h5>Өгөгдөл байхгүй байна.</h5>
-									</div>
-								)}
-								columns={getColumnsLesson(currentPage, rowsPerPage, total_count2, handleDetail)}
-								onSort={handleSort}
-								sortIcon={<ChevronDown size={10} />}
-								paginationPerPage={rowsPerPage}
-								paginationDefaultPage={currentPage}
-								data={lesson_data}
-								paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count2)}
-								fixedHeader
-								fixedHeaderScrollHeight='62vh'
-							/>
-						</div>
-					}
-				</Card>
+				<SeasonQuestions teacher_id={teacher} handleDetail={handleDetail} />
 			}
 			{
 				step === 3 &&

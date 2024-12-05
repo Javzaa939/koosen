@@ -45,6 +45,7 @@ const QuestionsList = ({filterId , teacher_id}) => {
 	const [fileModal , setFileModal] = useState(false);
 
     const [dropdownOpen, setDropdownOpen] = useState(false);
+	const [difficultyLevelsOption, setDifficultyLevelsOption] = useState({})
 
 	// Нэмэх функц
 	const handleModal = () => { setModal(!modal); };
@@ -59,12 +60,20 @@ const QuestionsList = ({filterId , teacher_id}) => {
 
 	// API
 	const questionAPI = useApi().challenge.question
+	const challengeAPI = useApi().challenge
 
 	async function getDatas() {
 		const { success, data } = await fetchData(questionAPI.getByTitle(currentPage, rowsPerPage, searchValue, filterId,teacher_id));
 		if (success) {
 			setDatas(data?.results);
 			setTotalCount(data?.count);
+		}
+	}
+
+	async function getDifficultyLevels() {
+		const { success, data } = await fetchData(challengeAPI.getDifficultyLevels())
+		if (success) {
+			setDifficultyLevelsOption(data)
 		}
 	}
 
@@ -93,6 +102,13 @@ const QuestionsList = ({filterId , teacher_id}) => {
 			}
 
 		}, [searchValue]
+	)
+
+	useEffect(
+		() => {
+			getDifficultyLevels()
+		},
+		[]
 	)
 
 	function handleQuestionEdit(data){
@@ -199,7 +215,8 @@ const QuestionsList = ({filterId , teacher_id}) => {
 								rowsPerPage,
 								total_count,
 								handleDelete,
-								handleQuestionEdit
+								handleQuestionEdit,
+								difficultyLevelsOption
 							)}
 							customStyles={customStyles}
 							paginationPerPage={rowsPerPage}

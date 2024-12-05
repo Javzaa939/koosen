@@ -1,11 +1,10 @@
-import { ArrowDown, ArrowRight, Edit, FileText, Trash } from 'react-feather'
-import { Badge, UncontrolledTooltip } from 'reactstrap';
 import useModal from '@hooks/useModal';
-import { ReactSelectStyles, get_questionype, get_leveltype } from "@utils"
+import { get_questionype } from "@utils";
+import { FileText, Trash } from 'react-feather';
+import { UncontrolledTooltip } from 'reactstrap';
 
-export function getColumns(currentPage, rowsPerPage, total_count, handleDelete, handleQuestionEdit) {
+export function getColumns(currentPage, rowsPerPage, total_count, handleDelete, handleQuestionEdit, difficultyLevelsOption) {
 
-	const questionLevel= get_leveltype()
 	const questionType= get_questionype()
 
 	const page_count = Math.ceil(total_count / rowsPerPage)
@@ -46,7 +45,7 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleDelete, 
 		{
 			name: <div className='' style={{ textWrap: "wrap", textAlign: "center" }}>{`${'Түвшин'}`}</div>,
 			selector: (row) =><>
-				{questionLevel.find(v=>v.id == row.level)?.name}
+				{Array.isArray(difficultyLevelsOption) && difficultyLevelsOption?.find(v=>v.value == row.level)?.label}
 				</>,
 			wrap: true,
 			center: true,
