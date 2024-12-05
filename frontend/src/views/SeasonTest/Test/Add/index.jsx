@@ -94,7 +94,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, select_datas, editData }) =
             >
                 <ModalHeader toggle={handleModal}></ModalHeader>
                 {
-                    editData !== undefined
+                    Object.keys(editData)?.length > 0
                     ?
                         <ModalHeader className='bg-transparent pb-0' cssModule={{'modal-title': 'w-100 text-center'}}>
                             <h4>{t('Шалгалт засах')}</h4>
