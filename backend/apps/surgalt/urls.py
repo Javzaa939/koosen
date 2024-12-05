@@ -62,12 +62,16 @@ urlpatterns = [
     path('challenge/send/<int:pk>/', ChallengeSendAPIView.as_view()),
     path('challenge/approve/', ChallengeApprovePIView.as_view()),
     path('challenge/timetable/', TeacherExaminationScheduleAPIView.as_view()),
+    path('challenge/add/sedev/count/', ChallengeSedevCountAPIView.as_view()),
     path('challenge/add/sedev/count/<int:pk>/', ChallengeSedevCountAPIView.as_view()),
+	path('challenge/add/', ChallengeAddInformationAPIView.as_view()),
     path('challenge/add/<int:pk>/', ChallengeAddInformationAPIView.as_view()),
     path('challenge/add/student/', ChallengeAddStudentAPIView.as_view()),
+	path('challenge/add/student/<int:pk>/<int:student>/', ChallengeAddStudentAPIView.as_view()),
     path('challenge/add/student/addKind/<int:pk>/', ChallengeAddKindAPIView.as_view()),
     path('challenge/add/question/list/', ChallengeQuestionsAPIView.as_view()),
     path('challenge/questions/<int:pk>/', TestQuestionsAllAPIView.as_view()),
+	path('challenge/questions/difficulty_levels/', TestQuestionsDifficultyLevelsAPIView.as_view()),
 
     path('challenge/student/', ChallengeSearchStudentAPIView.as_view()),
 
@@ -114,6 +118,7 @@ urlpatterns = [
     path('lesson/homework/<int:pk>/', StudentHomeworkListAPIView.as_view()),
     path('lesson/assignment/score/', StudentHomeworkMultiEditAPIView.as_view()),
 
+    path('lesson/getone/', LessonOneApiView.as_view()),
     path('lesson/getone/<int:pk>/', LessonOneApiView.as_view()),
 
     path('lesson/getall/', LessonAllApiView.as_view()),

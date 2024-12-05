@@ -29,6 +29,7 @@ from datetime import datetime, timedelta
 from django.db.models import Q
 from django.db.models import CharField
 from django.db.models import DateTimeField
+from django.db.models import ForeignKey
 
 from django.db.models.query import QuerySet
 
@@ -1471,10 +1472,12 @@ def unit_static_datas():
 def save_data_with_signals(
         model_class: Model,
         custom_serializer: Optional[serializers.Serializer]=None,
+        silent=True,
         trusted_data: Optional[Dict]=None,
         **serializer_kwargs: dict
     ):
     """
+    ver. 20241205-2
     if id provided in trusted_data or in data then it will update else create
 
     Supports (extended serializer.save):
@@ -1486,13 +1489,15 @@ def save_data_with_signals(
     6. exceptions handling
     7. transaction rollback
     8. saving without serializer validation
+    9. silent mode switching
 
     example calls:
-    1. save_data_with_signals(MyModel, MySerializer, data=request.data)
-    2. save_data_with_signals(MyModel, None, data=request.data)
+    1. save_data_with_signals(MyModel, MySerializer, None, data=request.data)
+    2. save_data_with_signals(MyModel, None, None, data=request.data)
 
     :param model_class: model where objects will be created or updated
     :param custom_serializer: not required. serializer
+    :param silent: silent mode or raise exception
     :param trusted_data: data to save without serializer validation. If it is list then indexes should be same as in data
     :param serializer_kwargs: standart serializer arguments
 
@@ -1523,7 +1528,7 @@ def save_data_with_signals(
         if serializer_kwargs:
             serializer = SerializerClass(**serializer_kwargs)
 
-            if serializer.is_valid():
+            if serializer.is_valid(raise_exception=not silent):
                 if not isinstance(serializer.validated_data, list):
                     serializer_validated_data = [serializer_kwargs['data']]
 
@@ -1557,23 +1562,38 @@ def save_data_with_signals(
                             record_obj = model_class.objects.get(id=obj_id)
 
                             for attr, value in united_data.items():
-                                setattr(record_obj, attr, value)
+                                if hasattr(record_obj, attr) and isinstance(model_class._meta.get_field(attr), ForeignKey):
+                                    setattr(record_obj, f"{attr}_id", value)
+                                else:
+                                    setattr(record_obj, attr, value)
 
                         else:
-                            record_obj = model_class(**united_data)
+                            united_data_suffixied = united_data.copy()
+
+                            for attr, value in united_data.items():
+                                if isinstance(model_class._meta.get_field(attr), ForeignKey):
+                                    united_data_suffixied[f"{attr}_id"] = value
+                                    del united_data_suffixied[attr]
+
+                            record_obj = model_class(**united_data_suffixied)
 
                         record_obj.save()
                         instances.append(record_obj)
 
     except Exception as e:
-        traceback.print_exc()
-        exception = e.__str__()
+        if silent:
+            traceback.print_exc()
+            exception = e.__str__()
+        else:
+
+            raise
 
     return instances, exception, serializer_errors
 
 
 def delete_objects_with_signals(model_class: Model, ids: list, **delete_kwargs: dict):
     """
+    ver. 20241205
     Supports (extended model.delete()):
     1. mass-removing
     2. signals
@@ -1608,6 +1628,7 @@ def delete_objects_with_signals(model_class: Model, ids: list, **delete_kwargs: 
 
 def get_file_full_cdn_url(url_parts):
     """
+    ver. 20241205
     builds cdn path that appended with given string list. Uses get_cdn_urls() and settings.MEDIA_URL
 
     :param url_parts: string list to add at the end, after CDN schema, domain and other static url parts of CDN (e.g. https://example.com/files)
@@ -1632,6 +1653,7 @@ def get_file_full_cdn_url(url_parts):
 
 def create_file_in_cdn_silently(relative_path, file):
     """
+    ver. 20241205
     Supports:
     - full path returning
     - exceptions handling
@@ -1677,6 +1699,7 @@ def create_file_in_cdn_silently(relative_path, file):
 
 def delete_file_from_cdn_silently(file_path):
     """
+    ver. 20241205
     Supports:
     - full path returning
     - exceptions handling

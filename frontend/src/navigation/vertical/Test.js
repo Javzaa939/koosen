@@ -5,26 +5,58 @@ export default [
         id: 'test',
         title: 'Шалгалт',
         icon: <i className="fas fa-user-check"></i>,
-        navLink: "/challenge",
 		children: [
 			{
-				id: "e-challenge",
-				title: "Асуултын сан",
+				id: "season-challenge",
+				title: "Улирлын шалгалт",
 				icon: <Circle size={8} />,
-				navLink: "challenge/teacher/",
+				children: [
+					{
+						id: "e-challenge",
+						title: "Асуултын сан",
+						icon: <Circle size={8} />,
+						navLink: "challenge-question/",
+					},
+					{
+						id: "testchallenge",
+						title: "Онлайн шалгалт",
+						icon: <Circle size={8} />,
+						navLink: "challenge-season/",
+					},
+				]
 			},
 			{
-				id: "testchallenge",
-				title: "Онлайн шалгалт",
+				id: "just-challenge",
+				title: "Явцын шалгалт",
 				icon: <Circle size={8} />,
-				navLink: "challenge/test/",
+				children: [
+					{
+						id: "e-challenge",
+						title: "Асуултын сан",
+						icon: <Circle size={8} />,
+						navLink: "challenge/teacher/",
+					},
+					{
+						id: "testchallenge",
+						title: "Онлайн шалгалт",
+						icon: <Circle size={8} />,
+						navLink: "challenge/test/",
+					},
+				]
 			},
-			// {
-			// 	id: "exam-timetable",
-			// 	title: "Шалгалтын хуваарь",
-			// 	icon: <Circle size={8} />,
-			// 	navLink: "challenge/exam_schedule/",
-			// },
 		]
     },
+
+	// {
+	// 	id: "e-challenge",
+	// 	title: "Асуултын сан",
+	// 	icon: <Circle size={8} />,
+	// 	navLink: "challenge/teacher/",
+	// },
+	// {
+	// 	id: "testchallenge",
+	// 	title: "Онлайн шалгалт",
+	// 	icon: <Circle size={8} />,
+	// 	navLink: "challenge/test/",
+	// },
 ]

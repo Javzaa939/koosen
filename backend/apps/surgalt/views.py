@@ -2,6 +2,7 @@ import os
 # import logging
 import json
 import ast
+import traceback
 from openpyxl import load_workbook
 
 from rest_framework import mixins
@@ -17,7 +18,7 @@ from django.utils.translation import gettext as _
 # from django.http import Http404
 
 from main.utils.function.pagination import CustomPagination
-from main.utils.function.utils import override_get_queryset
+from main.utils.function.utils import override_get_queryset, save_data_with_signals
 from main.utils.function.utils import has_permission, get_domain_url, _filter_queries, get_teacher_queryset
 from main.utils.file import save_file
 from main.utils.file import remove_folder
@@ -1452,6 +1453,7 @@ class ChallengeAPIView(
         lesson = request.query_params.get('lesson')
         time_type = request.query_params.get('type')
         teacher_id = request.query_params.get('teacher')
+        season = request.query_params.get('season')
 
         if teacher_id:
             self.queryset = self.queryset.filter(created_by=teacher_id)
@@ -1463,6 +1465,11 @@ class ChallengeAPIView(
             state_filters = Challenge.get_state_filter(time_type)
 
             self.queryset = self.queryset.filter(**state_filters)
+
+        if season:
+            self.queryset = self.queryset.filter(challenge_type=Challenge.CHALLENGE_TYPE[Challenge.SEMESTR_EXAM][0])
+        else:
+            self.queryset = self.queryset.exclude(challenge_type=Challenge.CHALLENGE_TYPE[Challenge.SEMESTR_EXAM][0])
 
         datas = self.list(request).data
 
@@ -4128,7 +4135,8 @@ class LessonsTeacher(
 @permission_classes([IsAuthenticated])
 class LessonOneApiView(
     generics.GenericAPIView,
-    mixins.RetrieveModelMixin
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin
 ):
     """ Хичээлийн стандарт мэдээлэл """
 
@@ -4137,7 +4145,14 @@ class LessonOneApiView(
 
     def get(self, request, pk=None):
 
-        datas = self.retrieve(request, pk).data
+        school = request.query_params.get('school')
+        if school:
+            self.queryset = self.queryset.filter(school=school)
+
+        if pk:
+            datas = self.retrieve(request, pk).data
+        else:
+            datas = self.list(request).data
 
         return request.send_data(datas)
 
@@ -4297,13 +4312,12 @@ class LessonAllApiView(
     def get(self, request):
         user_id = request.user
         teacher = Teachers.objects.get(user=user_id)
+        department_id = teacher.salbar.id if teacher.salbar else None
 
-        department_id = teacher.salbar.id
-
-        self.queryset = self.queryset.filter(department=department_id)
+        if teacher.salbar and department_id:
+            self.queryset = self.queryset.filter(department=department_id)
 
         search_teacher = request.query_params.get('teacher')
-
         if search_teacher:
             lesson_teacher_ids = Lesson_to_teacher.objects.filter(teacher=search_teacher).values_list('lesson', flat=True)
             self.queryset = self.queryset.filter(id__in=lesson_teacher_ids)
@@ -4961,6 +4975,7 @@ class SubOrgDepartListAPIView(
 #         obj = PsychologicalTestQuestions.objects.filter(id=row_data.get('id')).update(question_number=int(row_data.get('question_number')))
 #         print(obj)
 
+@permission_classes([IsAuthenticated])
 class QuestionsTitleAPIView(
     generics.GenericAPIView,
     APIView,
@@ -5049,6 +5064,8 @@ class QuestionsTitleAPIView(
         self.destroy(request, pk)
         return request.send_info("INF_003")
 
+
+@permission_classes([IsAuthenticated])
 class QuestionsTitleListAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -5059,13 +5076,26 @@ class QuestionsTitleListAPIView(
     serializer_class = dynamic_serializer(QuestionTitle, "__all__")
 
     def get(self, request,pk):
-        teacher = Teachers.objects.filter(id=pk).first()
+        teacher = None
+
+        if pk:
+            teacher = Teachers.objects.filter(id=pk).first()
+            question_titles = ChallengeQuestions.objects.filter(created_by=teacher).values_list("title__id", flat=True)
+            self.queryset = self.queryset.filter(id__in=list(question_titles))
+
         lesson = request.query_params.get('lesson')
+        season = request.query_params.get('season')
+
         if lesson:
             self.queryset = self.queryset.filter(lesson=lesson)
 
-        question_titles = ChallengeQuestions.objects.filter(created_by=teacher).values_list("title__id", flat=True)
-        data = self.queryset.filter(id__in=list(question_titles)).values("id", "name", 'lesson__name', 'lesson__code')
+        if season == 'false':
+            question_titles = ChallengeQuestions.objects.filter(created_by=teacher).values_list("title__id", flat=True)
+            data = self.queryset.filter(id__in=list(question_titles)).values("id", "name", 'lesson__name', 'lesson__code')
+        else:
+            question_sub = ChallengeQuestions.objects.filter(title=OuterRef('id')).values('title').annotate(count=Count('id')).values('count')
+            data = self.queryset.filter(is_season=True).filter(created_by=teacher).annotate(question_count=Subquery(question_sub)).values("id", "name", 'lesson__name', 'lesson__code', 'lesson__id', 'question_count')
+
         return request.send_data(list(data))
 
 class TestQuestionsAPIView(
@@ -5455,7 +5485,9 @@ class TestTeacherApiView(
         sub_org = self.request.query_params.get('sub_org')
         salbar = self.request.query_params.get('salbar')
         position = self.request.query_params.get('position')
+        season = self.request.query_params.get('season')
         sorting = self.request.query_params.get('sorting')
+        is_season = self.request.query_params.get('season')
 
         # Бүрэлдэхүүн сургууль
         if sub_org:
@@ -5478,8 +5510,13 @@ class TestTeacherApiView(
 
             queryset = queryset.order_by(sorting)
 
-        created_questions = ChallengeQuestions.objects.values_list('created_by' , flat = True).distinct()
-        queryset = queryset.filter(id__in = created_questions)
+        if is_season == 'true':
+            title_teachers = QuestionTitle.objects.filter(is_season=True).values_list('created_by', flat=True)
+            queryset = queryset.filter(id__in=title_teachers)
+        else:
+            title_ids = QuestionTitle.objects.filter(is_season=False).values_list('id', flat=True)
+            teacher_ids = ChallengeQuestions.objects.filter(title__in=title_ids).values_list('created_by', flat=True).distinct()
+            queryset = queryset.filter(id__in=teacher_ids)
 
         return queryset
 
@@ -5505,7 +5542,8 @@ class TestLessonTeacherApiView(
         if not teacher:
             return request.send_error("ERR_002", "Багш олдсонгүй.")
 
-        obj = ChallengeQuestions.objects.filter(created_by_id=teacher).prefetch_related('title')
+        exam_type = request.query_params.get('exam_type')
+        obj = ChallengeQuestions.objects.filter(created_by_id=teacher).prefetch_related('title').filter(title__is_season=exam_type == '1')
         titles = set()
         for q in obj:
             titles.update(q.title.all())
@@ -5534,11 +5572,8 @@ class ChallengeSedevCountAPIView(
 
     def post(self, request):
         data = request.data
-        user = request.user
-
         challenge_id = data.get("challenge")
         title = data.get("subject")
-        level = data.get("level_of_question")
         number_of_questions = data.get('number_questions')
         number_of_questions_percentage = data.get("number_questions_percentage")
 
@@ -5548,15 +5583,32 @@ class ChallengeSedevCountAPIView(
                 challenge = Challenge.objects.filter(id=challenge_id).first()
 
                 if challenge and lesson_title:
-                    challenge_questions = ChallengeQuestions.objects.filter(title=lesson_title,level=level)
+                    challenge_questions = ChallengeQuestions.objects.filter(
+                        title=lesson_title,
+                        level=challenge.level,
+                        title__lesson=challenge.lesson,
+                        title__is_season=(challenge.challenge_type == Challenge.CHALLENGE_TYPE[Challenge.SEMESTR_EXAM][0])
+                    )
+                    random_questions = None
+
                     if number_of_questions:
-                        random_questions = challenge_questions.order_by('?')[:int(number_of_questions)]
+                        if challenge.has_shuffle:
+                            random_questions = challenge_questions.order_by('?')[:int(number_of_questions)]
+                        else:
+                            random_questions = challenge_questions.order_by('id')[:int(number_of_questions)]
                     elif number_of_questions_percentage:
                         total_questions = challenge_questions.count()
                         question_count = int(total_questions * (int(number_of_questions_percentage) /  100))
-                        random_questions = challenge_questions.order_by('?')[:question_count]
+
+                        if challenge.has_shuffle:
+                            random_questions = challenge_questions.order_by('?')[:question_count]
+                        else:
+                            random_questions = challenge_questions.order_by('id')[:question_count]
                     else:
-                        random_questions = challenge_questions
+                        if challenge.has_shuffle:
+                            random_questions = challenge_questions.order_by('?')
+                        else:
+                            random_questions = challenge_questions.order_by('id')
 
                     challenge.questions.add(*random_questions)
                     challenge.save()
@@ -5633,10 +5685,10 @@ class ChallengeAddStudentAPIView(
             print(e)
             return request.send_error("ERR_002")
 
-    def delete(self, request, pk, challenge):
+    def delete(self, request, pk, student):
         try:
-            challenge = Challenge.objects.get(id=challenge)
-            student = Student.objects.get(pk=pk)
+            challenge = Challenge.objects.get(id=pk)
+            student = Student.objects.get(pk=student)
             challenge.student.remove(student)
             challenge.save()
 
@@ -5662,6 +5714,7 @@ class ChallengeQuestionsAPIView(
 
         if challenge_id:
             all_data = challenge.questions.filter(title__lesson=challenge.lesson).all()
+            all_data = challenge.questions.all()
             serializer = self.get_serializer(all_data, many=True)
 
             response_data = {
@@ -5692,6 +5745,20 @@ class TestQuestionsAllAPIView(
 
         serializer = self.serializer_class(questions, many=True)
         data = serializer.data
+        return request.send_data(data)
+
+
+@permission_classes([IsAuthenticated])
+class TestQuestionsDifficultyLevelsAPIView(
+    generics.GenericAPIView,
+):
+    "Difficulty levels"
+
+    queryset = ChallengeQuestions.objects.all()
+
+    def get(self, request):
+        data = [{'value': key, 'label': label} for key, label in self.queryset.model._meta.get_field('level').choices]
+
         return request.send_data(data)
 
 
@@ -5812,21 +5879,21 @@ class ChallengeAddInformationAPIView(
     def post(self, request):
         data = request.data
         user = request.user
+        season = request.query_params.get('season')
         teacher = get_object_or_404(Teachers, user_id=user, action_status=Teachers.APPROVED)
+        data['created_by'] = teacher.id if teacher else None
 
-        lesson_standart_id = data.get('lesson')
-        lesson_standart_instance = LessonStandart.objects.get(id=lesson_standart_id)
+        if season:
+            data['challenge_type'] = Challenge.CHALLENGE_TYPE[Challenge.SEMESTR_EXAM][0]
 
-        data = remove_key_from_dict(data, ['lesson'])
+        try:
+            with transaction.atomic():
+                save_data_with_signals(self.queryset.model, self.serializer_class, False, None, data=data)
 
-        with transaction.atomic():
-            try:
-                self.queryset.create(lesson=lesson_standart_instance, created_by=teacher, **data)
+        except Exception:
+            traceback.print_exc()
 
-            except Exception as e:
-                print(e)
-
-                return request.send_error('ERR_002')
+            return request.send_error('ERR_002')
 
         return request.send_info('INF_001')
 
