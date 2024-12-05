@@ -130,9 +130,7 @@ const Test = () => {
 	// Нэмэх функц
 	const handleModal = () => {
 		setModal(!modal);
-		if (modal) {
-			setEditRowData()
-		}
+		setEditRowData({})
 		setIsEdit(false)
 	};
 

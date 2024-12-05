@@ -30,7 +30,7 @@ const AddQuestion = ({ open, handleModal, lesson, refreshDatas, challenge, refre
     const challengesAPI = useApi().challenge
 
     async function getSelectDatas() {
-        const { success, data } = await fetchData(challengeAPI.getTitle(lesson, undefined, '1'))
+        const { success, data } = await fetchData(challengeAPI.getTitle(lesson, undefined, 'true'))
         if (success) {
             setSelectDatas(data)
         }
@@ -95,7 +95,7 @@ const AddQuestion = ({ open, handleModal, lesson, refreshDatas, challenge, refre
                                         onChange={(val) => onChange(val?.id || '')}
                                         styles={ReactSelectStyles}
                                         getOptionValue={(option) => option.id}
-                                        getOptionLabel={(option) => option.name}
+                                        getOptionLabel={(option) => option.name + '(' + option?.question_count + ')'}
                                     />
                                 )}
                             />

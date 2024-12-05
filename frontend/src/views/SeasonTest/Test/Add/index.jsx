@@ -55,8 +55,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, select_datas, editData }) =
         cdata['start_date'] = new Date(startPicker)
         cdata['end_date'] = new Date(endPicker)
         cdata = convertDefaultValue(cdata)
-
-        if (editData !== undefined) {
+        if (editData !== undefined && Object.keys(editData)?.length > 0) {
             const { success, errors } = await fetchData(challengeAPI.putSelectedTest(cdata, editData?.id))
             if(success) {
                 handleModal()

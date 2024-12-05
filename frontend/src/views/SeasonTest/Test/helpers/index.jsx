@@ -64,17 +64,17 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, h
         },
         {
             name: `${'Эхлэх хугацаа'}`,
-            selector: (row) => row?.startAt,
+            selector: (row) => row?.start_date,
             minWidth: "100px",
         },
         {
             name: `${'Дуусах хугацаа'}`,
-            selector: (row) => row?.endAt,
+            selector: (row) => row?.end_date,
             minWidth: "100px",
         },
         {
-            name: `${'Хамрах хүрээ'}`,
-            selector: (row) => row?.scopeName,
+            name: `${'Түвшин'}`,
+            selector: (row) => row?.level,
             minWidth: "100px",
         },
 
