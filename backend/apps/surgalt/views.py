@@ -5584,7 +5584,7 @@ class ChallengeSedevCountAPIView(
                 challenge = Challenge.objects.filter(id=challenge_id).first()
 
                 if challenge and lesson_title:
-                    challenge_questions = ChallengeQuestions.objects.filter(title=lesson_title,level=level)
+                    challenge_questions = ChallengeQuestions.objects.filter(title=lesson_title,level=level,subject__lesson=challenge.lesson)
                     random_questions = None
 
                     if number_of_questions:

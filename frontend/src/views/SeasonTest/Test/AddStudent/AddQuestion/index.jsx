@@ -25,11 +25,7 @@ const AddQuestion = ({ open, handleModal, lesson, refreshDatas, challenge, refre
     const { fetchData } = useLoader({ isFullScreen: true });
 
     const [select_data, setSelectDatas] = useState([])
-    const levels_data = [
-        { id: 1, name: 'Хөнгөн' },
-        { id: 2, name: 'Дунд' },
-        { id: 3, name: 'Хүнд' }
-    ];
+    const [difficultyLevelsOption, setDifficultyLevelsOption] = useState([])
 
     const challengeAPI = useApi().challenge.question
     const challengesAPI = useApi().challenge
@@ -41,8 +37,17 @@ const AddQuestion = ({ open, handleModal, lesson, refreshDatas, challenge, refre
         }
     }
 
+	async function getDifficultyLevels() {
+		const { success, data } = await fetchData(challengesAPI.getDifficultyLevels())
+
+        if (success) {
+			setDifficultyLevelsOption(data)
+		}
+	}
+
     useEffect(() => {
         getSelectDatas()
+        getDifficultyLevels()
     }, [])
 
     const numberOfQuestions = watch("number_questions");
@@ -121,13 +126,10 @@ const AddQuestion = ({ open, handleModal, lesson, refreshDatas, challenge, refre
                                         classNamePrefix='select'
                                         className='react-select'
                                         placeholder={`-- Сонгоно уу --`}
-                                        options={levels_data || []}
-                                        value={levels_data.find((c) => c.id === value)}
+                                        options={difficultyLevelsOption || []}
                                         noOptionsMessage={() => 'Хоосон байна'}
-                                        onChange={(val) => onChange(val?.id || '')}
+                                        onChange={(val) => onChange(val?.value || '')}
                                         styles={ReactSelectStyles}
-                                        getOptionValue={(option) => option.id}
-                                        getOptionLabel={(option) => option.name}
                                     />
                                 )}
                             />

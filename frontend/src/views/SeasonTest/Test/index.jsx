@@ -84,12 +84,14 @@ const Test = () => {
             setTeachers(data)
         }
     }
+
 	async function getLesson() {
 		const { success, data } = await getLessonFetchData(teacherLessonApi.getOne(''))
 		if (success) {
 			setLessonOption(data)
 		}
 	}
+
 	async function getDifficultyLevels() {
 		const { success, data } = await getLessonFetchData(challengeAPI.getDifficultyLevels())
 		if (success) {
