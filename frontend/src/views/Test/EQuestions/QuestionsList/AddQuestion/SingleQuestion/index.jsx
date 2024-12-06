@@ -1,6 +1,6 @@
 import { FilePlus, MinusCircle, Plus, X } from 'react-feather'
 import { Controller, useFormContext, useFieldArray, useWatch } from 'react-hook-form'
-import { Fragment, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import Select from 'react-select'
 import classnames from "classnames";
 import {
@@ -12,23 +12,24 @@ import {
     UncontrolledTooltip
 } from 'reactstrap'
 
-import { ReactSelectStyles, get_questionype, get_leveltype } from "@utils"
+import { ReactSelectStyles, get_questionype } from "@utils"
 import { useTranslation } from 'react-i18next';
 
 import empty from "@src/assets/images/empty-image.jpg"
 import Answers from './Answers';
+import useLoader from '@src/utility/hooks/useLoader';
+import useApi from '@src/utility/hooks/useApi';
 
 export default function SingleQuestion(props) {
     const { fieldIndex, fieldName, fieldAppend, fieldRemove, } = props
 
     const [qtypeOption, setTypeOption] = useState(get_questionype())
-    const [levelTypeOption, setLevelOption] = useState(get_leveltype())
-
+	const [difficultyLevelsOption, setDifficultyLevelsOption] = useState([])
+	const { fetchData } = useLoader({});
+	const challengeAPI = useApi().challenge
 
     const { control, formState: { errors }, getValues, setError, clearErrors, setValue } = useFormContext()
     const { t } = useTranslation()
-
-
 
     const { fields: fieldsAnswer, remove: removeAnswer, append: appendAnswer } = useFieldArray({
         control,
@@ -63,6 +64,21 @@ export default function SingleQuestion(props) {
         const que = getValues(`${fieldName}[${index}]`)
         fieldAppend(que)
     }
+
+	async function getDifficultyLevels() {
+		const { success, data } = await fetchData(challengeAPI.getDifficultyLevels())
+
+		if (success) {
+			setDifficultyLevelsOption(data)
+		}
+	}
+
+	useEffect(
+		() => {
+			getDifficultyLevels()
+		},
+		[]
+	)
 
     return (
         <>
@@ -198,16 +214,14 @@ export default function SingleQuestion(props) {
                                         classNamePrefix='select'
                                         isClearable
                                         className={classnames('react-select', { 'is-invalid': errors?.[fieldName]?.[fieldIndex]?.['level'] })}
-                                        options={levelTypeOption}
-                                        value={levelTypeOption.find((c) => c.id === value) || ''}
+                                        options={difficultyLevelsOption}
+                                        value={difficultyLevelsOption.find((c) => c.value === value) || ''}
                                         placeholder={'-- Сонгоно уу --'}
                                         noOptionsMessage={() => 'Хоосон байна.'}
                                         onChange={(val) => {
-                                            onChange(val?.id || '')
+                                            onChange(val?.value || '')
                                         }}
                                         styles={ReactSelectStyles}
-                                        getOptionValue={(option) => option.id}
-                                        getOptionLabel={(option) => option.name}
                                     />
                                 )}
                             />

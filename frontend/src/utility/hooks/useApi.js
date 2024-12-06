@@ -1538,6 +1538,7 @@ function useApi(isDisplay=false) {
 				},
 				getByTitle: (page, limit, search, titleId,teacher_id) => instance.get(`learning/questions/title/${teacher_id}/?page=${page}&limit=${limit}&search=${search}&titleId=${titleId}`),
 				getTitle: (lesson='', is_season=false, teacher_id=0) => instance.get(`learning/questions/title/list/${teacher_id}/?lesson=${lesson}&season=${is_season}`),
+				postTitle: (datas) => instance.post(`learning/questions/title/`, datas),
 				postTestQuestions: (data) =>
 					instance.post(`learning/questions/test/?year=${cyear_name}&season=${cseason_id}`, data),
 				getTestList: () => {

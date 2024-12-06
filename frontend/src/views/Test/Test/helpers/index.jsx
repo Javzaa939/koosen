@@ -46,13 +46,13 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleEdit, ha
         },
         {
             name: `${'Эхлэх хугацаа'}`,
-            selector: (row) => formatDate(row?.start_date, 'YYYY-MM-DD HH:mm:ss'),
+            selector: (row) => formatDate(row?.start_date, 'YYYY-MM-DD HH:mm'),
             minWidth: "15%",
             center: true,
         },
         {
             name: `${'Дуусах хугацаа'}`,
-            selector: (row) => formatDate(row?.end_date, 'YYYY-MM-DD HH:mm:ss'),
+            selector: (row) => formatDate(row?.end_date, 'YYYY-MM-DD HH:mm'),
             minWidth: "15%",
             center: true,
         },

@@ -19,7 +19,7 @@ import { ChevronsLeft, PlusCircle } from 'react-feather';
 
 const validateSchema = Yup.object().shape({
     name: Yup.string().trim().required("Хоосон байна"),
-    lesson: Yup.string().required("Хоосон байна")
+    lesson: Yup.string().required("Хоосон байна"),
 });
 
 export default function SeasonQuestions({teacher_id, handleDetail}) {
@@ -35,7 +35,7 @@ export default function SeasonQuestions({teacher_id, handleDetail}) {
     const { fetchData, Loader, isLoading } = useLoader({})
     const { control, handleSubmit, formState: { errors }, setValue } = useForm(validate(validateSchema))
 
-    const lessonApi = useApi().study.lessonStandart
+    const lessonApi = useApi().study.lesson
     const questionAPI = useApi().challenge.question
 
     const handleLessonModal = () => {
@@ -43,7 +43,8 @@ export default function SeasonQuestions({teacher_id, handleDetail}) {
     }
 
     async function getLessons() {
-        const { success, data } = await fetchData(lessonApi.getList())
+        const { success, data } = await fetchData(lessonApi.getOne(''))
+
         if (success) {
             setLessonOption(data)
         }
@@ -51,10 +52,13 @@ export default function SeasonQuestions({teacher_id, handleDetail}) {
 
     async function getDatas() {
         const { success, data } = await fetchData(questionAPI.getTitle('', true, teacher_id))
+
         if (success) {
             setDatas(data)
+
             var groupedData = data.reduce((acc, item) => {
                 const key = `${item.lesson__code}-${item.lesson__name}`;
+
                 if (!acc[key]) {
                     acc[key] = {
                         code: item.lesson__code,
@@ -63,14 +67,16 @@ export default function SeasonQuestions({teacher_id, handleDetail}) {
                         items: []
                     };
                 }
+
                 acc[key].items.push(item);
+
                 return acc;
             }, {});
+
             var result = Object.values(groupedData);
             setLessons(result)
         }
     }
-
 
     useEffect(
         () =>
@@ -95,6 +101,7 @@ export default function SeasonQuestions({teacher_id, handleDetail}) {
     async function onSubmit(datas) {
         datas['is_season'] = true
         const { success, data } = await fetchData(questionAPI.postTitle(datas))
+
         if (success) {
             handleLessonModal()
             getDatas()
@@ -140,9 +147,9 @@ export default function SeasonQuestions({teacher_id, handleDetail}) {
             <Col md={8}>
                 <Card>
                     <CardHeader>
-                        <h6>Асуултын түвшний жагсаалт</h6>
+                        <h6>{t('Асуултын сэдвийн жагсаалт')}</h6>
                         <div>
-                            <Button size='sm' color='primary' onClick={() => handleLessonModal()}>Нэмэх</Button>
+                            <Button size='sm' color='primary' onClick={() => handleLessonModal()}>{t('Нэмэх')}</Button>
                         </div>
                     </CardHeader>
                     <CardBody>
@@ -150,10 +157,10 @@ export default function SeasonQuestions({teacher_id, handleDetail}) {
                             <thead>
                                 <tr>
                                     <th>№</th>
-                                    <th>Хичээлийн нэр</th>
-                                    <th>Сэдвийн нэр</th>
-                                    <th>Асуултын тоо</th>
-                                    <th>Үйлдэл</th>
+                                    <th>{t('Хичээлийн нэр')}</th>
+                                    <th>{t('Сэдвийн нэр')}</th>
+                                    <th>{t('Асуултын тоо')}</th>
+                                    <th>{t('Үйлдэл')}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -168,7 +175,7 @@ export default function SeasonQuestions({teacher_id, handleDetail}) {
                                                 <Badge tag={'a'} color={'light-primary'} id={`add_${idx}`} onClick={() => handleDetail(data?.id)}>
                                                     <PlusCircle/>
                                                 </Badge>
-                                                <UncontrolledTooltip target={`add_${idx}`}>Асуулт нэмэх</UncontrolledTooltip>
+                                                <UncontrolledTooltip target={`add_${idx}`}>{t('Сэдэв нэмэх')}</UncontrolledTooltip>
                                             </td>
                                         </tr>
                                     )
@@ -181,9 +188,30 @@ export default function SeasonQuestions({teacher_id, handleDetail}) {
             {
                 addLessonModal &&
                 <Modal isOpen={addLessonModal} className="modal-dialog-centered modal-sm" >
-                    <ModalHeader toggle={handleLessonModal}>Асуултын түвшин нэмэх</ModalHeader>
+                    <ModalHeader toggle={handleLessonModal}>{('Асуултын сэдэв нэмэх')}</ModalHeader>
                     <ModalBody className="w-100 h-100 ">
                     <Row className='g-1' tag={Form} onSubmit={handleSubmit(onSubmit)}>
+                        <Col md={12}>
+                            <Label className="form-label" for="name">
+                                {t('Сэдвийн нэр')}
+                            </Label>
+                            <Controller
+                                defaultValue=''
+                                control={control}
+                                name="name"
+                                render={({ field }) => (
+                                    <Input
+                                        {...field}
+                                        id={field.name}
+                                        bsSize="sm"
+                                        placeholder={t('Сэдвийн нэр')}
+                                        type="text"
+                                        invalid={errors[field.name] && true}
+                                    />
+                                )}
+                            />
+                            {errors.name && <FormFeedback className='d-block'>{t(errors.name.message)}</FormFeedback>}
+                        </Col>
                         <Col md={12}>
                             <Label className="form-label" for="lesson">
                                 {t('Хичээл')}
@@ -215,41 +243,10 @@ export default function SeasonQuestions({teacher_id, handleDetail}) {
                             />
                             {errors.lesson && <FormFeedback className='d-block'>{t(errors.lesson.message)}</FormFeedback>}
                         </Col>
-                        <Col md={12}>
-                            <Label className="form-label" for="name">
-                                {t('Асуултын түвшин /CLO/')}
-                            </Label>
-                            <Controller
-                                defaultValue=''
-                                control={control}
-                                id="name"
-                                name="name"
-                                render={({ field: { value, onChange } }) => (
-                                    <Select
-                                        name="lesson"
-                                        id="lesson"
-                                        classNamePrefix='select'
-                                        isClearable
-                                        className={classnames('react-select', { 'is-invalid': errors.lesson })}
-                                        placeholder={t(`-- Сонгоно уу --`)}
-                                        options={[] || []}
-                                        value={[].find((c) => c.id === value)}
-                                        noOptionsMessage={() => t('Хоосон байна')}
-                                        onChange={(val) => {
-                                            onChange(val?.id || '')
-                                        }}
-                                        styles={ReactSelectStyles}
-                                        getOptionValue={(option) => option.id}
-                                        getOptionLabel={(option) => option.name}
-                                    />
-                                )}
-                            />
-                            {errors.name && <FormFeedback className='d-block'>{t(errors.name.message)}</FormFeedback>}
-                        </Col>
 
                         <Col md={12}>
-                            <Button type='submit' className='me-1' color='primary' size='sm'>Хадгалах</Button>
-                            <Button color='primary' outline size='sm' onClick={() => { setOpen({ type: false, editId: null }) }}>Буцах</Button>
+                            <Button type='submit' className='me-1' color='primary' size='sm'>{t('Хадгалах')}</Button>
+                            <Button color='primary' outline size='sm' onClick={() => handleLessonModal()}>{t('Буцах')}</Button>
                         </Col>
                     </Row>
 

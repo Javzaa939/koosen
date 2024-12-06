@@ -34,7 +34,7 @@ function request_flag_color(request_flag)
         )
     }
 
-export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, handleDelete, handleShow, handleSend) {
+export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, handleDelete, handleShow, handleSend, difficultyLevelsOption) {
 
     const { showWarning } = useModal()
 
@@ -75,7 +75,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, h
         },
         {
             name: `${'Түвшин'}`,
-            selector: (row) => row?.level,
+            selector: (row) => difficultyLevelsOption.find(item => item.value === row?.level).label,
             minWidth: "100px",
         },
 
@@ -100,7 +100,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, h
                                 >
                                     <Badge color="light-success" pill><Edit  width={"15px"} /></Badge>
                                 </a>
-                                <UncontrolledTooltip placement='top' target={`complaintListDatatableEdit${row.id}`} >Засах</UncontrolledTooltip>
+                                <UncontrolledTooltip placement='top' target={`complaintListDatatableEdit${row.id}`} >{t('Засах')}</UncontrolledTooltip>
                             </>
                         }
                         <>

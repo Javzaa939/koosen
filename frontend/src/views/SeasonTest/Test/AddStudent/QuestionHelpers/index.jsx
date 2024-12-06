@@ -3,7 +3,7 @@ import { Trash2 } from 'react-feather'
 import { Badge } from 'reactstrap';
 import useModal from "@hooks/useModal"
 
-export function getQuestionColumns(currentPage, rowsPerPage, total_count, handleDeleteQuestion) {
+export function getQuestionColumns(currentPage, rowsPerPage, total_count, handleDeleteQuestion, difficultyLevelsOption) {
 
     const { showWarning } = useModal()
 
@@ -22,19 +22,7 @@ export function getQuestionColumns(currentPage, rowsPerPage, total_count, handle
         },
         {
             name: <span className='text-center' style={{ marginTop: '3px', marginBottom: '3px' }}>Асуултын түвшин</span>,
-            selector: (row) => (
-                <div>
-                    {
-                        row?.level === 1
-                            ?
-                            <span>Хөнгөн</span>
-                            : row?.level === 2 ?
-                                <span>Дунд</span>
-                                :
-                                <span>Хүнд</span>
-                    }
-                </div>
-            ),
+            selector: (row) => difficultyLevelsOption.find(item => item.value === row?.level).label,
             minWidth: "15%",
             center: true,
         },

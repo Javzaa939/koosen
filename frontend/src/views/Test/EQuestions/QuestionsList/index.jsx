@@ -45,7 +45,7 @@ const QuestionsList = ({filterId , teacher_id}) => {
 	const [fileModal , setFileModal] = useState(false);
 
     const [dropdownOpen, setDropdownOpen] = useState(false);
-	const [difficultyLevelsOption, setDifficultyLevelsOption] = useState({})
+	const [difficultyLevelsOption, setDifficultyLevelsOption] = useState([])
 
 	// Нэмэх функц
 	const handleModal = () => { setModal(!modal); };

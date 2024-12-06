@@ -223,6 +223,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, select_datas, editData }) =
                                 options={{
                                     enableTime: true,
                                     dateFormat: 'Y-m-d H:i',
+                                    time_24hr: true,
                                 }}
                             />
                             {errors.start_date && <FormFeedback className='d-block'>{t(errors.start_date.message)}</FormFeedback>}
@@ -242,6 +243,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, select_datas, editData }) =
                                 options={{
                                     enableTime: true,
                                     dateFormat: 'Y-m-d H:i',
+                                    time_24hr: true,
                                 }}
                             />
                             {errors.end_date && <FormFeedback className='d-block'>{t(errors.end_date.message)}</FormFeedback>}

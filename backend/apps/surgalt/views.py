@@ -5027,15 +5027,28 @@ class QuestionsTitleAPIView(
 
 
     def post(self, request):
+        user_id = request.user
+        teacher = get_object_or_404(Teachers, user_id=user_id, action_status=Teachers.APPROVED)
+        question_ids = []
         request_data = request.data
-        question_ids = request.data.pop("questions")
+
+        if 'questions' in request_data:
+            question_ids = request_data.pop("questions")
+
+        request_data['created_by'] = teacher.id
         serializer = self.get_serializer(data=request_data)
+
         if serializer.is_valid(raise_exception=False):
             saved_obj =  serializer.save()
-            questions_to_update = ChallengeQuestions.objects.filter(id__in=question_ids)
-            for question in questions_to_update:
-                question.title.add(saved_obj)
+
+            if question_ids:
+                questions_to_update = ChallengeQuestions.objects.filter(id__in=question_ids)
+
+                for question in questions_to_update:
+                    question.title.add(saved_obj)
+
             data = self.serializer_class(saved_obj).data
+
             return request.send_info("INF_001", data)
 
         return request.send_info("ERR_001")
@@ -5077,15 +5090,11 @@ class QuestionsTitleListAPIView(
 
     def get(self, request,pk):
         teacher = None
-        challenge_questions_qs = ChallengeQuestions.objects
-        question_titles = None
 
         # in admin WEB teacher ID not passed (0 passed means falsy value), so may be it supposed to get titles by all teachers
         if pk:
             teacher = Teachers.objects.filter(id=pk).first()
             self.queryset = self.queryset.filter(created_by=teacher)
-            challenge_questions_qs = challenge_questions_qs.filter(created_by=teacher)
-            question_titles = challenge_questions_qs.values_list("title__id", flat=True).distinct()
 
         lesson = request.query_params.get('lesson')
         season = request.query_params.get('season')
@@ -5093,15 +5102,12 @@ class QuestionsTitleListAPIView(
         if lesson:
             self.queryset = self.queryset.filter(lesson=lesson)
 
-        if question_titles:
-            self.queryset = self.queryset.filter(id__in=list(question_titles))
-
         if season == 'false':
             self.queryset = self.queryset.filter(is_season=False)
         else:
             self.queryset = self.queryset.filter(is_season=True)
 
-        question_sub = challenge_questions_qs.filter(title=OuterRef('id')).values('title').annotate(count=Count('id')).values('count')
+        question_sub = ChallengeQuestions.objects.filter(title=OuterRef('id')).values('title').annotate(count=Count('id')).values('count')
         data = self.queryset.annotate(question_count=Subquery(question_sub)).values("id", "name", 'lesson__name', 'lesson__code', 'lesson__id', 'question_count')
 
         return request.send_data(list(data))
