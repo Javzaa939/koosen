@@ -46,17 +46,14 @@ export default function Question() {
 
 	const [datas, setDatas] = useState([]);
 	const [department, setDepartmentData] = useState([]);
-	const [lesson_data, setLessonDatas] = useState([])
 	const [position_option, setOrgPositions] = useState([]);
 	const [selected_values, setSelectValue] = useState(values);
 
-	const [teacher, setTeacher] = useState('')
-	const [teacher_name, setTeacherName] = useState('')
-	const [title_id, setTitleId] = useState('')
+	const [teacherToNextStep, setTeacherToNextStep] = useState('')
+	const [titleToNextStep, setTitleToNextStep] = useState('')
 
 	// Нийт датаны тоо
 	const [total_count, setTotalCount] = useState(1)
-	const [total_count2, setTotalCount2] = useState(2)
 
 	// Loader
 	const { Loader, isLoading, fetchData } = useLoader({});
@@ -82,20 +79,6 @@ export default function Question() {
 		}
 	}
 
-	async function getDatas2(teacher) {
-		const page_count = Math.ceil(total_count / rowsPerPage)
-
-		if (page_count < currentPage && page_count != 0) {
-			setCurrentPage(page_count)
-		}
-		const { success, data } = await allFetch(teacherApi.getTeacherLessonList(rowsPerPage, currentPage, sortField, searchValue, teacher, 1))
-		if (success) {
-			setTotalCount2(data?.count)
-			setTeacherName(data?.name)
-			setLessonDatas(data?.data)
-		}
-	}
-
 	/* Тэнхим дата авах функц */
 	async function getDepartmentOption() {
 		const { success, data } = await fetchData(departmentApi.getSelectSchool())
@@ -114,15 +97,10 @@ export default function Question() {
 
 	// stepper
 	const handleNext = (row) => {
-		setTeacher(row?.id)
-		setStep(prev => prev + 1)
+		setTeacherToNextStep(row?.id)
 	}
 	const handleDetail = (id) => {
-		setTitleId(id)
-		if (title_id) {
-			setStep(prev => prev + 1)
-
-		}
+		setTitleToNextStep(id)
 	}
 
 	useEffect(() => {
@@ -136,11 +114,14 @@ export default function Question() {
 			return () => clearTimeout(timeoutId);
 		}
 	}, [sortField, searchValue, currentPage, school_id])
+
+	// to properly go to next step after synchronizing states values, otherwise states values will may be not updated for next step
 	useEffect(() => {
-		if (teacher) {
-			getDatas2(teacher);
+		// to change step only if step really changed
+		if (teacherToNextStep !== '' || titleToNextStep !== '') {
+			setStep(prev => prev + 1)
 		}
-	}, [teacher])
+	}, [teacherToNextStep, titleToNextStep])
 
 	useEffect(() => {
 		if (selected_values.department_id || selected_values.position_id) {
@@ -286,11 +267,11 @@ export default function Question() {
 			</Card>}
 			{
 				step === 2 &&
-				<SeasonQuestions teacher_id={teacher} handleDetail={handleDetail} />
+				<SeasonQuestions teacher_id={teacherToNextStep} handleDetail={handleDetail} />
 			}
 			{
 				step === 3 &&
-				<EQuestions teacher_id={teacher} title_id={title_id} />
+				<EQuestions teacher_id={teacherToNextStep} title_id={titleToNextStep} is_season={true} />
 			}
 
 		</Fragment>
