@@ -22,7 +22,7 @@ export function getQuestionColumns(currentPage, rowsPerPage, total_count, handle
         },
         {
             name: <span className='text-center' style={{ marginTop: '3px', marginBottom: '3px' }}>Асуултын түвшин</span>,
-            selector: (row) => difficultyLevelsOption.find(item => item.value === row?.level).label,
+            selector: (row) => difficultyLevelsOption.find(item => item.value === row?.level)?.label,
             minWidth: "15%",
             center: true,
         },

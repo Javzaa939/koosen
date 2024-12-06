@@ -75,7 +75,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, h
         },
         {
             name: `${'Түвшин'}`,
-            selector: (row) => difficultyLevelsOption.find(item => item.value === row?.level).label,
+            selector: (row) => difficultyLevelsOption.find(item => item.value === row?.level)?.label,
             minWidth: "100px",
         },
 
