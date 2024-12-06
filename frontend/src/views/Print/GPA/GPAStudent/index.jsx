@@ -14,7 +14,7 @@ import {
     Button,
 } from "reactstrap";
 
-import { ChevronDown, Printer, Search } from "react-feather";
+import { ChevronDown, FileText, Search } from "react-feather";
 
 import { useTranslation } from "react-i18next";
 
@@ -31,6 +31,8 @@ import SchoolContext from "@context/SchoolContext";
 import { getColumns } from "./helpers";
 
 import { getPagination, ReactSelectStyles, generateLessonYear } from "@utils";
+
+import excelDownload from "@src/utility/excelDownload";
 
 const GPAStudent = () => {
     var values = {
@@ -79,7 +81,7 @@ const GPAStudent = () => {
         setSearchValue(value);
     };
 
-    async function getDatas() {
+    async function getDatas() {console.log(1)
         const department = select_value.department;
         const degree = select_value.degree;
         const profession = select_value.profession;
@@ -192,6 +194,10 @@ const GPAStudent = () => {
     }, []);
 
     useEffect(() => {
+        getDatas()
+    }, [currentPage, rowsPerPage]);
+
+    useEffect(() => {
         if (select_value.degree || select_value.department || select_value.group || select_value.profession) {
             getProfessionOption();
             getGroupOption();
@@ -202,9 +208,33 @@ const GPAStudent = () => {
     function handlePerPage(e) {
         setRowsPerPage(
             e.target.value === "Бүгд"
-                ? e.target.value
+                ? 10000000
                 : parseInt(e.target.value)
         );
+    }
+
+    function excelHandler() {
+        const rowInfo = {
+            headers: [
+                '№',
+                'Оюутны код',
+                'Овог нэр',
+                'Багц цаг',
+                'Дүнгийн онооны дундаж',
+                'Голч дүн',
+            ],
+
+            datas: [
+                'index',
+                'code',
+                'full_name',
+                'total_kr',
+                'total_avg',
+                'total_gpa',
+            ]
+        }
+
+        excelDownload(datas, rowInfo, `Голч_дүн-Оюутнаар`)
     }
 
     return (
@@ -214,16 +244,10 @@ const GPAStudent = () => {
                 <div className="d-flex mx-1 justify-content-end">
                     <div>
                         <Button
-                            color="primary"
-                            onClick={() => {
-                                navigate(`/print/gpa/print`, { state: datas });
-                            }}
-                            disabled={datas?.length === 0 && isLoading}
+                            color='primary'
+                            onClick={() => {excelHandler()}}
                         >
-                            <Printer size={15} />
-                            <span className="align-middle ms-50">
-                                {t("Хэвлэх")}
-                            </span>
+                            <FileText size={16}/> {t('Excel татах')}
                         </Button>
                     </div>
                 </div>
