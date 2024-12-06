@@ -4,6 +4,7 @@ import { Eye, Edit, X, Book } from 'react-feather'
 
 import useModal from "@hooks/useModal"
 import { Badge, UncontrolledTooltip } from 'reactstrap';
+import moment from 'moment';
 
 function request_flag_color(request_flag)
     {
@@ -64,13 +65,13 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, h
         },
         {
             name: `${'Эхлэх хугацаа'}`,
-            selector: (row) => row?.start_date,
-            minWidth: "100px",
+            selector: (row) => moment(row?.start_date).format('YYYY-MM-DD HH-mm'),
+            minWidth: "160px",
         },
         {
             name: `${'Дуусах хугацаа'}`,
-            selector: (row) => row?.end_date,
-            minWidth: "100px",
+            selector: (row) => moment(row?.end_date).format('YYYY-MM-DD HH-mm'),
+            minWidth: "160px",
         },
         {
             name: `${'Түвшин'}`,
@@ -135,7 +136,8 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, h
                         }
                     </div>
                 )
-            }
+            },
+            minWidth: "150px",
 		},
         {
             name: `${t('Дүн харах')}`,
