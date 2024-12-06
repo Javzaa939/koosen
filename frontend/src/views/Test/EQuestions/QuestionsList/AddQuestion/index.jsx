@@ -36,7 +36,7 @@ const validateSchema = Yup.object().shape({
 });
 
 export default function AddQuestion(props) {
-    const { open, handleModal, getDatas } = props
+    const { open, handleModal, getDatas, title } = props
 
     const { t } = useTranslation()
 
@@ -80,6 +80,7 @@ export default function AddQuestion(props) {
             }
 
             formData.append("questions", JSON.stringify(qValue))
+            formData.append("title", title)
         })
 
         const { success, data } = await fetchData(questionApi.postTestQuestions(formData))

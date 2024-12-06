@@ -5077,11 +5077,15 @@ class QuestionsTitleListAPIView(
 
     def get(self, request,pk):
         teacher = None
+        challenge_questions_qs = ChallengeQuestions.objects
+        question_titles = None
 
+        # in admin WEB teacher ID not passed (0 passed means falsy value), so may be it supposed to get titles by all teachers
         if pk:
             teacher = Teachers.objects.filter(id=pk).first()
-            question_titles = ChallengeQuestions.objects.filter(created_by=teacher).values_list("title__id", flat=True)
-            self.queryset = self.queryset.filter(id__in=list(question_titles))
+            self.queryset = self.queryset.filter(created_by=teacher)
+            challenge_questions_qs = challenge_questions_qs.filter(created_by=teacher)
+            question_titles = challenge_questions_qs.values_list("title__id", flat=True).distinct()
 
         lesson = request.query_params.get('lesson')
         season = request.query_params.get('season')
@@ -5089,12 +5093,16 @@ class QuestionsTitleListAPIView(
         if lesson:
             self.queryset = self.queryset.filter(lesson=lesson)
 
+        if question_titles:
+            self.queryset = self.queryset.filter(id__in=list(question_titles))
+
         if season == 'false':
-            question_titles = ChallengeQuestions.objects.filter(created_by=teacher).values_list("title__id", flat=True)
-            data = self.queryset.filter(id__in=list(question_titles)).values("id", "name", 'lesson__name', 'lesson__code')
+            self.queryset = self.queryset.filter(is_season=False)
         else:
-            question_sub = ChallengeQuestions.objects.filter(title=OuterRef('id')).values('title').annotate(count=Count('id')).values('count')
-            data = self.queryset.filter(is_season=True).filter(created_by=teacher).annotate(question_count=Subquery(question_sub)).values("id", "name", 'lesson__name', 'lesson__code', 'lesson__id', 'question_count')
+            self.queryset = self.queryset.filter(is_season=True)
+
+        question_sub = challenge_questions_qs.filter(title=OuterRef('id')).values('title').annotate(count=Count('id')).values('count')
+        data = self.queryset.annotate(question_count=Subquery(question_sub)).values("id", "name", 'lesson__name', 'lesson__code', 'lesson__id', 'question_count')
 
         return request.send_data(list(data))
 
@@ -5221,6 +5229,8 @@ class TestQuestionsAPIView(
         # .dict()
         questions = request.POST.getlist('questions')
         files = request.FILES.getlist('files')
+        request_data = request.data.dict()
+        title = request_data.get('title')
 
         user = request.user
         teacher = Teachers.objects.filter(user_id=user).first()
@@ -5262,6 +5272,9 @@ class TestQuestionsAPIView(
                         **question
                     )
 
+                    # Улирлын шалгалтынг хувьд
+                    if title:
+                        question_obj.title.add(QuestionTitle.objects.get(pk=title))
 
                     # Асуултанд зураг байвал хадгалах хэсэг
                     if question_img:
@@ -5322,6 +5335,7 @@ class TestQuestionsAPIView(
                 return request.send_error('ERR_002')
 
         return request.send_info('INF_001')
+
 
 class TestQuestionsListAPIView(
     generics.GenericAPIView,
