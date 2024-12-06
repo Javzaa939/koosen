@@ -22,7 +22,7 @@ const validateSchema = Yup.object().shape({
     lesson: Yup.string().required("Хоосон байна")
 });
 
-export default function SeasonQuestions({teacher, handleDetail}) {
+export default function SeasonQuestions({teacher_id, handleDetail}) {
     const { t } = useTranslation()
     const navigate = useNavigate()
 
@@ -50,7 +50,7 @@ export default function SeasonQuestions({teacher, handleDetail}) {
     }
 
     async function getDatas() {
-        const { success, data } = await fetchData(questionAPI.getTitle('', teacher, true))
+        const { success, data } = await fetchData(questionAPI.getTitle('', true, teacher_id))
         if (success) {
             setDatas(data)
             var groupedData = data.reduce((acc, item) => {
@@ -151,7 +151,7 @@ export default function SeasonQuestions({teacher, handleDetail}) {
                                 <tr>
                                     <th>№</th>
                                     <th>Хичээлийн нэр</th>
-                                    <th>Түвшний нэр /CLO/</th>
+                                    <th>Сэдвийн нэр</th>
                                     <th>Асуултын тоо</th>
                                     <th>Үйлдэл</th>
                                 </tr>

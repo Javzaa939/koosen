@@ -238,6 +238,7 @@ const QuestionsList = ({filterId , teacher_id}) => {
 						open={modal}
 						handleModal={handleModal}
 						getDatas={getDatas}
+						title={filterId}
 					/>
 				)}
 				{editModal && (
