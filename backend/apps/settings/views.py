@@ -2054,13 +2054,13 @@ class RuleAPIView(
             if not isFileChanged and 'file' in request_data:
                 del request_data['file']
 
-            result = save_data_with_signals(self.queryset.model, self.serializer_class, None, data=request_data)
+            result = save_data_with_signals(self.queryset.model, self.serializer_class, True, None, data=request_data)
 
         else:
             if 'id' in request_data:
                 del request_data['id']
 
-            result = save_data_with_signals(self.queryset.model, self.serializer_class, None, data=request_data)
+            result = save_data_with_signals(self.queryset.model, self.serializer_class, True, None, data=request_data)
 
         instance = result[0]
 
