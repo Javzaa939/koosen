@@ -9,6 +9,7 @@ const SeasonTest = lazy(() => import("@views/SeasonTest/Test/"))
 const SeasonTestQuestion = lazy(() => import("@views/SeasonTest/Question/"))
 const AddStudent = lazy(() => import("@views/Test/Test/AddStudent/"))
 const AddStudentSeason = lazy(() => import("@views/SeasonTest/Test/AddStudent/"))
+const TestReport = lazy(() => import("@views/SeasonTest/Report/"))
 
 const ExamSchedule = lazy(() => import("@views/Test/ExamSchedule"))
 const Teacher = lazy(() => import("@views/Test/Teachers"))
@@ -41,6 +42,10 @@ const TestRoutes = [
     {
         path: '/challenge-season/',
         element: <SeasonTest/>
+    },
+    {
+        path: '/challenge-report/',
+        element: <TestReport/>
     },
     {
         path: '/challenge/test/addstudent/:challenge_id/:lesson_id',

@@ -351,6 +351,7 @@ const VerticalLayout = (props) =>
 
                         /** Шалгалт */
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-exam-read', 'testchallenge')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-exam-report-read', 'examreport')
 
 
                         /** ----------------------------- Онлайн хичээл цэс ---------------------------- */

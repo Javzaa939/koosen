@@ -1467,9 +1467,9 @@ class ChallengeAPIView(
             self.queryset = self.queryset.filter(**state_filters)
 
         if season:
-            self.queryset = self.queryset.filter(challenge_type=Challenge.CHALLENGE_TYPE[Challenge.SEMESTR_EXAM][0])
+            self.queryset = self.queryset.filter(challenge_type=Challenge.SEMESTR_EXAM)
         else:
-            self.queryset = self.queryset.exclude(challenge_type=Challenge.CHALLENGE_TYPE[Challenge.SEMESTR_EXAM][0])
+            self.queryset = self.queryset.exclude(challenge_type=Challenge.SEMESTR_EXAM)
 
         datas = self.list(request).data
 
@@ -5898,7 +5898,7 @@ class ChallengeAddInformationAPIView(
         data['created_by'] = teacher.id if teacher else None
 
         if season:
-            data['challenge_type'] = Challenge.CHALLENGE_TYPE[Challenge.SEMESTR_EXAM][0]
+            data['challenge_type'] = Challenge.SEMESTR_EXAM
 
         try:
             with transaction.atomic():
