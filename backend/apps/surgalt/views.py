@@ -1466,10 +1466,10 @@ class ChallengeAPIView(
 
             self.queryset = self.queryset.filter(**state_filters)
 
-        if season:
-            self.queryset = self.queryset.filter(challenge_type=Challenge.CHALLENGE_TYPE[Challenge.SEMESTR_EXAM][0])
+        if season == 'true':
+            self.queryset = self.queryset.filter(challenge_type=Challenge.SEMESTR_EXAM)
         else:
-            self.queryset = self.queryset.exclude(challenge_type=Challenge.CHALLENGE_TYPE[Challenge.SEMESTR_EXAM][0])
+            self.queryset = self.queryset.exclude(challenge_type=Challenge.SEMESTR_EXAM)
 
         datas = self.list(request).data
 
@@ -5607,7 +5607,7 @@ class ChallengeSedevCountAPIView(
                         title=lesson_title,
                         level=challenge.level,
                         title__lesson=challenge.lesson,
-                        title__is_season=(challenge.challenge_type == Challenge.CHALLENGE_TYPE[Challenge.SEMESTR_EXAM][0])
+                        title__is_season=(challenge.challenge_type == Challenge.SEMESTR_EXAM)
                     )
                     random_questions = None
 
@@ -5904,7 +5904,7 @@ class ChallengeAddInformationAPIView(
         data['created_by'] = teacher.id if teacher else None
 
         if season:
-            data['challenge_type'] = Challenge.CHALLENGE_TYPE[Challenge.SEMESTR_EXAM][0]
+            data['challenge_type'] = Challenge.SEMESTR_EXAM
 
         try:
             with transaction.atomic():

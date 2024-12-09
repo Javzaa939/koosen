@@ -235,11 +235,11 @@ function DetailShow(){
 					</CardTitle>
 					<Button
 						tag={Link}
-						to="/challenge/test"
+						to={detailOneDatas?.challenge_type_name === 'Улирлын шалгалт' ? "/challenge-season" : "/challenge/test"}
 						color="primary"
 						className="btn-sm-block"
 					>
-						Буцах
+						{t('Буцах')}
 					</Button>
                 </CardHeader>
 				<Row sm={4} className="mt-2">

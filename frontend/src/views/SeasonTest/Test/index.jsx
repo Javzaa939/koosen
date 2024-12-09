@@ -69,7 +69,7 @@ const Test = () => {
 	const teacherListApi = useApi().hrms.teacher
 
 	async function getDatas() {
-		const { success, data } = await fetchData(challengeAPI.get(currentPage, rowsPerPage, selectedLesson, selectedTime, selectedTeacher, searchValue, 1));
+		const { success, data } = await fetchData(challengeAPI.get(currentPage, rowsPerPage, selectedLesson, selectedTime, selectedTeacher, searchValue, true));
 
 		if (success) {
 			setDatas(data?.results);
