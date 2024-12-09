@@ -24,7 +24,7 @@ from main.utils.file import save_file
 from main.utils.file import remove_folder
 
 from django.db import transaction
-from django.db.models import Sum, Count, Q, Subquery, OuterRef,  Value, CharField, F
+from django.db.models import Sum, Count, Q, Subquery, OuterRef,  Value, CharField, F, Case, When, IntegerField
 from django.db.models.functions import Concat
 
 from django.shortcuts import get_object_or_404
@@ -5774,6 +5774,88 @@ class TestQuestionsDifficultyLevelsAPIView(
         data = [{'value': key, 'label': label} for key, label in self.queryset.model._meta.get_field('level').choices]
 
         return request.send_data(data)
+
+
+@permission_classes([IsAuthenticated])
+class ChallengeReportAPIView(
+    generics.GenericAPIView,
+):
+    "Challenge report"
+
+    queryset = ChallengeStudents.objects
+    serializer_class = ChallengeStudentsSerializer
+
+    def get(self, request):
+        report_type = request.query_params.get('report_type')
+
+        if not report_type:
+
+            return request.send_error('ERR_002')
+
+        datas = None
+        queryset = self.queryset.filter(challenge__challenge_type=Challenge.SEMESTR_EXAM)
+
+        if report_type == '1':
+            exam_results = []
+
+            for obj in queryset:
+                answer_json = None
+                questions = []
+                answers_results = {}
+
+                try:
+                    answer_json = json.loads(obj.answer)
+
+                    for question in answer_json:
+                        choices = question.get('choices')
+                        is_right = False
+
+                        for choice in choices:
+                            choice_obj = QuestionChoices.objects.get(id=choice.get('id'))
+
+                            if choice_obj.score > 0:
+                                is_right = True
+
+                        answers_results = {
+                            [question.get('id')]: is_right
+                        }
+
+                    questions.append(answers_results)
+
+                except json.JSONDecodeError:
+
+                    pass
+
+                exam_results.append({
+                    'exam_id': obj.challenge.id,
+                    'questions': questions,
+                    # TODO: add students
+                })
+
+            exams = queryset.order_by('challenge__title').values('challenge__id', 'challenge__title')
+
+            for item in exams:
+                found = next((x for x in exam_results if x['exam_id'] == item['challenge__id']), None)
+
+                if found:
+                    # TODO: calculate questions reliability value
+                    item['questions_reliability_value'] = ''
+                    value = item['questions_reliability_value']
+
+                    if value <= 20:
+                        item['questions_reliability_name'] = 'Маш хүнд'
+                    elif 21 <= value <= 40:
+                        item['questions_reliability_name'] = 'Хүндэвтэр'
+                    elif 41 <= value <= 60:
+                        item['questions_reliability_name'] = 'Дунд зэрэг'
+                    elif 61 <= value <= 80:
+                        item['questions_reliability_name'] = 'Хялбар'
+                    elif 81 <= value:
+                        item['questions_reliability_name'] = 'Маш хялбар'
+
+            datas = list(exams)
+
+        return request.send_data(datas)
 
 
 @permission_classes([IsAuthenticated])
