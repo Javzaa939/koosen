@@ -23,6 +23,12 @@ export default [
 						icon: <Circle size={8} />,
 						navLink: "challenge-season/",
 					},
+					{
+						id: "examreport",
+						title: "Тайлан",
+						icon: <Circle size={8} />,
+						navLink: "challenge-report/",
+					},
 				]
 			},
 			{

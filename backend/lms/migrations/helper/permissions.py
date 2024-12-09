@@ -1408,5 +1408,8 @@ permissions = [
         'name': 'lms-role-read',
         'description' : 'Хандах эрх'
     },
-
+    {
+        'name': 'lms-exam-report-read',
+        'description' : 'Улирлын шалгалтын тайлан эрх'
+    },
 ]
