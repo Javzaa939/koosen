@@ -81,7 +81,7 @@ const GPAStudent = () => {
         setSearchValue(value);
     };
 
-    async function getDatas() {console.log(1)
+    async function getDatas() {
         const department = select_value.department;
         const degree = select_value.degree;
         const profession = select_value.profession;
