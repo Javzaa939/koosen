@@ -5792,16 +5792,17 @@ class ChallengeReportAPIView(
 
             return request.send_error('ERR_002')
 
-        datas = None
         queryset = self.queryset.filter(challenge__challenge_type=Challenge.SEMESTR_EXAM)
 
         if report_type == '1':
             exam_results = []
 
             for obj in queryset:
+                if not obj.answer:
+
+                    continue
+
                 answer_json = None
-                questions = []
-                answers_results = {}
 
                 try:
                     answer_json = json.loads(obj.answer)
@@ -5816,46 +5817,76 @@ class ChallengeReportAPIView(
                             if choice_obj.score > 0:
                                 is_right = True
 
-                        answers_results = {
-                            [question.get('id')]: is_right
-                        }
-
-                    questions.append(answers_results)
+                            exam_results.append({
+                                'question_id': question.get('id'),
+                                'exam_id': obj.challenge.id,
+                                'student_id': obj.student.id,
+                                'is_answered_right': is_right
+                            })
 
                 except json.JSONDecodeError:
 
                     pass
 
-                exam_results.append({
-                    'exam_id': obj.challenge.id,
-                    'questions': questions,
-                    # TODO: add students
-                })
-
             exams = queryset.order_by('challenge__title').values('challenge__id', 'challenge__title')
 
+            # questions reliability ranges
+            questions_reliability_ranges = {
+                "Маш хүнд": lambda question_reliability: question_reliability <= 20,
+                "Хүндэвтэр": lambda question_reliability: 21 <= question_reliability <= 40,
+                "Дунд зэрэг": lambda question_reliability: 41 <= question_reliability <= 60,
+                "Хялбар": lambda question_reliability: 61 <= question_reliability <= 80,
+                "Маш хялбар": lambda question_reliability: question_reliability >= 81,
+            }
+
+            get_result = []
+
             for item in exams:
-                found = next((x for x in exam_results if x['exam_id'] == item['challenge__id']), None)
+                exam_id = item.get('challenge__id')
 
-                if found:
-                    # TODO: calculate questions reliability value
-                    item['questions_reliability_value'] = ''
-                    value = item['questions_reliability_value']
+                # to get exam results by exam_id
+                filtered_results = [res for res in exam_results if res["exam_id"] == exam_id]
 
-                    if value <= 20:
-                        item['questions_reliability_name'] = 'Маш хүнд'
-                    elif 21 <= value <= 40:
-                        item['questions_reliability_name'] = 'Хүндэвтэр'
-                    elif 41 <= value <= 60:
-                        item['questions_reliability_name'] = 'Дунд зэрэг'
-                    elif 61 <= value <= 80:
-                        item['questions_reliability_name'] = 'Хялбар'
-                    elif 81 <= value:
-                        item['questions_reliability_name'] = 'Маш хялбар'
+                # to collect questions reliability stats
+                question_stats = {}
 
-            datas = list(exams)
+                for res in filtered_results:
+                    question_id = res["question_id"]
 
-        return request.send_data(datas)
+                    if question_id not in question_stats:
+                        question_stats[question_id] = {"correct": 0, "total": 0}
+
+                    question_stats[question_id]["total"] += 1
+
+                    if res["is_answered_right"]:
+                        question_stats[question_id]["correct"] += 1
+
+                # to calculate question reliability
+                questions_reliability = {}
+
+                for question_id, stats in question_stats.items():
+                    if stats["total"] > 0:
+                        question_reliability = (stats["correct"] / stats["total"]) * 100
+                        questions_reliability[question_id] = question_reliability
+
+                # to group questions and their reliabilities by reliability ranges
+                grouped_questions = {key: [] for key in questions_reliability_ranges}
+
+                for question_id, question_reliability in questions_reliability.items():
+                    for range_name, condition in questions_reliability_ranges.items():
+                        if condition(question_reliability):
+                            grouped_questions[range_name].append({"question_id": question_id, "question_reliability": question_reliability})
+
+                            break
+
+                # to build dict for recharts format and for exam filter
+                get_result.append({
+                    "exam_id": exam_id,
+                    "questions_reliabilities": [{"questions_reliability_name": key, "questions": questions, "questions_count": len(questions)} for key, questions in grouped_questions.items()]
+
+                })
+
+        return request.send_data(get_result)
 
 
 @permission_classes([IsAuthenticated])

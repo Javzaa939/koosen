@@ -49,7 +49,7 @@ const List = () => {
 
         const { success, data } = await allFetch(challengeApi.getReport(1))
 
-        if (success) {
+        if (success) {console.log(data)
             setTotalCount(data?.count)
             setDatas(data?.results)
         }
@@ -109,9 +109,9 @@ const List = () => {
                 <ResponsiveContainer>
                     <PieChart width={400} height={400}>
                         <Pie
-                        data={datas}
-                        dataKey='questions_reliability_name'
-                        nameKey='questions_reliability_value'
+                        data={datas?.questions_reliabilities}
+                        dataKey='questions_count'
+                        nameKey='questions_reliability_name'
                         cx="50%"
                         cy="50%"
                         outerRadius={150}
