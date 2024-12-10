@@ -546,19 +546,25 @@ class ProfessionDefinitionAPIView(
                 ss = Profession_SongonKredit.objects.update_or_create(
                     profession_id=profession,
                     lesson_level=LearningPlan.BASIC,
-                    songon_kredit=general_base
+                    defaults={
+                        'songon_kredit': general_base
+                    }
                 )
             if professional_base:
                 ss = Profession_SongonKredit.objects.update_or_create(
                     profession_id=profession,
                     lesson_level=LearningPlan.PROF_BASIC,
-                    songon_kredit=professional_base
+                    defaults={
+                        'songon_kredit': professional_base
+                    }
                 )
             if professional_lesson:
                 ss = Profession_SongonKredit.objects.update_or_create(
                     profession_id=profession,
                     lesson_level=LearningPlan.PROFESSION,
-                    songon_kredit=professional_lesson
+                    defaults={
+                        'songon_kredit': professional_lesson
+                    }
                 )
 
 
