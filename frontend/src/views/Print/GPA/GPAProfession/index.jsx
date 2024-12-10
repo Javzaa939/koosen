@@ -4,7 +4,7 @@ import { Controller, useForm } from 'react-hook-form'
 
 import { Row, Col, Card, Input, Label, CardTitle, CardHeader, Spinner, Button } from 'reactstrap'
 
-import { ChevronDown , Printer, Search} from 'react-feather'
+import { ChevronDown , FileText, Search} from 'react-feather'
 
 import { useTranslation } from 'react-i18next'
 
@@ -19,6 +19,8 @@ import useLoader from '@hooks/useLoader';
 import { getColumns } from './helpers';
 
 import { getPagination, ReactSelectStyles, generateLessonYear, level_option } from '@utils';
+
+import excelDownload from "@src/utility/excelDownload";
 
 const GPAProfession = () => {
 
@@ -136,6 +138,10 @@ const GPAProfession = () => {
         getProfessionOption()
     },[])
 
+    useEffect(() => {
+        getDatas()
+    }, [currentPage, rowsPerPage]);
+
     // ** Function to handle per page
     function handlePerPage(e) {
         setRowsPerPage(parseInt(e.target.value))
@@ -146,6 +152,42 @@ const GPAProfession = () => {
             getDatas();
         }
     };
+
+    function excelHandler() {
+        const rowInfo = {
+            headers: [
+                '№',
+                'Хөтөлбөрийн код',
+                'Хөтөлбөрийн нэр',
+                'Голч дүн',
+                'Голч оноо',
+                'Оюутны тоо',
+                'Түвшин',
+            ],
+
+            datas: [
+                'index',
+                'profession_code',
+                'profession_name',
+                'gpa',
+                'gpa_score',
+                'student_count',
+                'level',
+            ]
+        }
+
+        const datas_copy = datas.map(item => {
+            const item_copy = {...item}
+            if (item_copy.gpa === 0) item_copy.gpa = '0'
+            if (!item_copy.gpa_score) item_copy.gpa_score = '0'
+            if (!item_copy.student_count) item_copy.student_count = '0'
+            if (!item_copy.level) item_copy.level = 'Бүх түвшин'
+
+            return item_copy
+        })
+
+        excelDownload(datas_copy, rowInfo, `Голч_дүн-Хөтөлбөрөөр`)
+    }
 
     return(
         <Fragment>
@@ -164,9 +206,9 @@ const GPAProfession = () => {
                     <div>
                         <Button
                             color='primary'
+                            onClick={() => {excelHandler()}}
                         >
-                        <Printer size={15} />
-                            <span className='align-middle ms-50'>{t('Хэвлэх')}</span>
+                            <FileText size={16}/> {t('Excel татах')}
                         </Button>
                     </div>
                 </div>
