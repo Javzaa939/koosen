@@ -109,7 +109,7 @@ const List = () => {
                 <ResponsiveContainer>
                     <PieChart width={400} height={400}>
                         <Pie
-                        data={datas?.questions_reliabilities}
+                        data={datas?.length ? datas[0].questions_reliabilities : []}
                         dataKey='questions_count'
                         nameKey='questions_reliability_name'
                         cx="50%"
