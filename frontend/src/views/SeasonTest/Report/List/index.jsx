@@ -90,7 +90,7 @@ const List = () => {
             </div>
             {isLoading && Loader}
             <Row>
-                <Col md={3} sm={10} className="m-1">
+                <Col md={3} sm={10}>
                     <Label className="form-label" for="exam">
                         {t('Шалгалт')}
                     </Label>
@@ -112,9 +112,9 @@ const List = () => {
                     />
                 </Col>
             </Row>
-            <div className='recharts-wrapper pie-chart' style={{ height: '600px' }}>
+            <div className='recharts-wrapper pie-chart' style={{ height: '400px' }}>
                 <ResponsiveContainer>
-                    <PieChart width={400} height={400}>
+                    <PieChart width={400}>
                         <Pie
                             data={datas?.length ? datas.find(item => item.exam_id === selectedExam)?.questions_reliabilities : []}
                             dataKey='questions_count'
