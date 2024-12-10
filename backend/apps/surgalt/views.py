@@ -5805,28 +5805,27 @@ class ChallengeReportAPIView(
                 answer_json = None
 
                 try:
-                    answer_json = json.loads(obj.answer)
+                    answer_json = obj.answer.replace("'", '"')
+                    answer_json = json.loads(answer_json)
 
-                    for question in answer_json:
-                        choices = question.get('choices')
-                        is_right = False
+                    for question_id, choice_id in answer_json.items():
+                        choice_obj = QuestionChoices.objects.filter(id=choice_id).values('score','challengequestions__question').first()
 
-                        for choice in choices:
-                            choice_obj = QuestionChoices.objects.get(id=choice.get('id'))
+                        if choice_obj.get('score') > 0:
+                            is_right = True
+                        else:
+                            is_right = False
 
-                            if choice_obj.score > 0:
-                                is_right = True
-
-                            exam_results.append({
-                                'question_id': question.get('id'),
-                                'exam_id': obj.challenge.id,
-                                'student_id': obj.student.id,
-                                'is_answered_right': is_right
-                            })
+                        exam_results.append({
+                            'question_id': question_id,
+                            'exam_id': obj.challenge.id,
+                            'question_text': choice_obj.get('challengequestions__question'),
+                            'is_answered_right': is_right
+                        })
 
                 except json.JSONDecodeError:
-
-                    pass
+                    print('json error in:', obj.id, obj.answer)
+                    traceback.print_exc()
 
             exams = queryset.order_by('challenge__title').values('challenge__id', 'challenge__title')
 
@@ -5854,7 +5853,7 @@ class ChallengeReportAPIView(
                     question_id = res["question_id"]
 
                     if question_id not in question_stats:
-                        question_stats[question_id] = {"correct": 0, "total": 0}
+                        question_stats[question_id] = {"correct": 0, "total": 0, 'question_text': res['question_text']}
 
                     question_stats[question_id]["total"] += 1
 
@@ -5867,15 +5866,22 @@ class ChallengeReportAPIView(
                 for question_id, stats in question_stats.items():
                     if stats["total"] > 0:
                         question_reliability = (stats["correct"] / stats["total"]) * 100
-                        questions_reliability[question_id] = question_reliability
+
+                        questions_reliability[question_id] = {
+                            'question_reliability': question_reliability,
+                            'question_text': stats['question_text']
+                        }
 
                 # to group questions and their reliabilities by reliability ranges
                 grouped_questions = {key: [] for key in questions_reliability_ranges}
 
-                for question_id, question_reliability in questions_reliability.items():
+                for question_id, value in questions_reliability.items():
+                    question_reliability = value['question_reliability']
+
                     for range_name, condition in questions_reliability_ranges.items():
                         if condition(question_reliability):
-                            grouped_questions[range_name].append({"question_id": question_id, "question_reliability": question_reliability})
+                            question_text = questions_reliability[question_id]['question_text']
+                            grouped_questions[range_name].append({"question_id": question_id, 'question_text': question_text, "question_reliability": question_reliability})
 
                             break
 
