@@ -1503,6 +1503,7 @@ function useApi(isDisplay=false) {
 			getDetail: (page, limit, search, test_id) => instance.get(`learning/challenge/details/?page=${page}&limit=${limit}&search=${search}&test_id=${test_id}`),
 			getTestResult: (cdata) => instance.post(`learning/challenge/result/`,cdata),
 			getDifficultyLevels: () => instance.get(`learning/challenge/questions/difficulty_levels/`),
+			getReport: (report_type='') => instance.get(`learning/challenge/report/?report_type=${report_type}`),
 
 			question: {
 				get: (page, limit, lessonId, subjectId, search) =>
