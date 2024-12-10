@@ -60,6 +60,7 @@ function AddStudent() {
     const [modal, setModal] = useState(false);
 
     const [student_search_value, setStudentSearchValue] = useState([]);
+	const [difficultyLevelsOption, setDifficultyLevelsOption] = useState([])
 
     const challengeAPI = useApi().challenge;
     const groupApi = useApi().student.group;
@@ -117,12 +118,21 @@ function AddStudent() {
         }
     };
 
+	async function getDifficultyLevels() {
+		const { success, data } = await fetchData(challengeAPI.getDifficultyLevels())
+
+		if (success) {
+			setDifficultyLevelsOption(data)
+		}
+	}
+
     useEffect(() => {
         getDatas()
     }, [currentPage, rowsPerPage])
 
     useEffect(() => {
         getQuestionTableData()
+        getDifficultyLevels()
     }, [])
 
     useEffect(
@@ -385,6 +395,7 @@ function AddStudent() {
                                     rowsPerPage,
                                     total_count,
                                     handleDeleteQuestion,
+                                    difficultyLevelsOption
                                 )}
                                 paginationPerPage={rowsPerPage}
                                 paginationDefaultPage={currentPage}

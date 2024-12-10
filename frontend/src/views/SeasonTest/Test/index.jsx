@@ -48,7 +48,7 @@ const Test = () => {
     const [teachers, setTeachers] = useState([]);
 
 	const [lessonOption, setLessonOption] = useState([])
-	const [difficultyLevelsOption, setDifficultyLevelsOption] = useState({})
+	const [difficultyLevelsOption, setDifficultyLevelsOption] = useState([])
 	const [editData, setEditRowData] = useState({})
 	const [examId, setExamModalId] = useState()
 	const [showData, setShowRowData] = useState({})
@@ -69,7 +69,7 @@ const Test = () => {
 	const teacherListApi = useApi().hrms.teacher
 
 	async function getDatas() {
-		const { success, data } = await fetchData(challengeAPI.get(currentPage, rowsPerPage, selectedLesson, selectedTime, selectedTeacher, searchValue, 1));
+		const { success, data } = await fetchData(challengeAPI.get(currentPage, rowsPerPage, selectedLesson, selectedTime, selectedTeacher, searchValue, true));
 
 		if (success) {
 			setDatas(data?.results);
@@ -94,6 +94,7 @@ const Test = () => {
 
 	async function getDifficultyLevels() {
 		const { success, data } = await getLessonFetchData(challengeAPI.getDifficultyLevels())
+
 		if (success) {
 			setDifficultyLevelsOption(data)
 		}
@@ -339,8 +340,9 @@ const Test = () => {
 							handleDelete,
 							handleShow,
 							handleSend,
+							difficultyLevelsOption,
 							handleEditModal,
-							handleExamModal
+							handleExamModal,
 						)}
 						paginationPerPage={rowsPerPage}
 						paginationDefaultPage={currentPage}

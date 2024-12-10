@@ -991,9 +991,16 @@ class ChallengeSedevSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ChallengeDetailSerializer(serializers.ModelSerializer):
+    challenge_type_name = serializers.SerializerMethodField()
+
     class Meta:
         model = Challenge
-        fields = ['title', 'start_date', 'end_date', 'duration', 'try_number', 'assess']
+        fields = ['title', 'start_date', 'end_date', 'duration', 'try_number', 'assess', 'challenge_type_name']
+
+    def get_challenge_type_name(self, obj):
+
+        return obj.get_challenge_type_display()
+
 
 class ChallengeStudentsSerializer(serializers.ModelSerializer):
     student_name = serializers.SerializerMethodField()

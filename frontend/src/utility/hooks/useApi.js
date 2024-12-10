@@ -1452,8 +1452,8 @@ function useApi(isDisplay=false) {
 			}
 		},
 		challenge: {
-			get: (page, limit, lesson, type, teacher, search, season='') =>
-				instance.get(`learning/challenge/?page=${page}&limit=${limit}&lesson=${lesson}&type=${type}&teacher=${teacher}&search=${search}&season=${season}`),
+			get: (page, limit, lesson, type, teacher, search, is_season=false) =>
+				instance.get(`learning/challenge/?page=${page}&limit=${limit}&lesson=${lesson}&type=${type}&teacher=${teacher}&search=${search}&season=${is_season}`),
 			getTeacherList: (limit, page, sort, search, sub_org, salbar, position="", is_season=false) => instance.get(`/learning/teacher/list/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&sub_org=${sub_org}&salbar=${salbar}&position=${position}&season=${is_season}`),
 			getTeacherLessonList: (limit, page, sort, search, teacher_id, exam_type=2) => instance.get(`/learning/teacher/lesson/list/${teacher_id}/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&exam_type=${exam_type}`),
 			getAll: (challenge) => {
@@ -1538,6 +1538,7 @@ function useApi(isDisplay=false) {
 				},
 				getByTitle: (page, limit, search, titleId,teacher_id) => instance.get(`learning/questions/title/${teacher_id}/?page=${page}&limit=${limit}&search=${search}&titleId=${titleId}`),
 				getTitle: (lesson='', is_season=false, teacher_id=0) => instance.get(`learning/questions/title/list/${teacher_id}/?lesson=${lesson}&season=${is_season}`),
+				postTitle: (datas) => instance.post(`learning/questions/title/`, datas),
 				postTestQuestions: (data) =>
 					instance.post(`learning/questions/test/?year=${cyear_name}&season=${cseason_id}`, data),
 				getTestList: () => {

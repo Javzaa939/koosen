@@ -1472,7 +1472,7 @@ def unit_static_datas():
 def save_data_with_signals(
         model_class: Model,
         custom_serializer: Optional[serializers.Serializer]=None,
-        silent=True,
+        silent=False,
         trusted_data: Optional[Dict]=None,
         **serializer_kwargs: dict
     ):

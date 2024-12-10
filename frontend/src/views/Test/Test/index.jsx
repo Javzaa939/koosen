@@ -84,7 +84,8 @@ const TestProgram = () => {
         }
     }
 	async function getLesson() {
-		const { success, data } = await getLessonFetchData(teacherLessonApi.get('all'))
+		const { success, data } = await getLessonFetchData(teacherLessonApi.getOne(''))
+
 		if (success) {
 			setLessonOption(data)
 		}

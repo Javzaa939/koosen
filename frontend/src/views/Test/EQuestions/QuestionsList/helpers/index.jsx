@@ -45,7 +45,7 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleDelete, 
 		{
 			name: <div className='' style={{ textWrap: "wrap", textAlign: "center" }}>{`${'Түвшин'}`}</div>,
 			selector: (row) =><>
-				{Array.isArray(difficultyLevelsOption) && difficultyLevelsOption?.find(v=>v.value == row.level)?.label}
+				{difficultyLevelsOption.find(v=>v.value == row.level)?.label}
 				</>,
 			wrap: true,
 			center: true,

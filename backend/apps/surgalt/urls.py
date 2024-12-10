@@ -80,6 +80,7 @@ urlpatterns = [
     path('questions/test/', TestQuestionsAPIView.as_view()),
     path('questions/test/list/', TestQuestionsListAPIView.as_view()),
     path('questions/list/', QuestionsListAPIView.as_view()),
+    path('questions/title/', QuestionsTitleAPIView.as_view()),
     path('questions/title/<int:pk>/', QuestionsTitleAPIView.as_view()),
     path('questions/title/list/<int:pk>/', QuestionsTitleListAPIView.as_view()),
     path('questions/excel/',QuestionExcelAPIView.as_view()),
