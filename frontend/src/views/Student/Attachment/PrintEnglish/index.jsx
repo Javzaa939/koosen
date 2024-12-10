@@ -321,7 +321,7 @@ export default function PrintAttachmentEnglish()
                         <thead className='fw-bolder'>
                             <tr style={{ height: '20px' }}>
                                 <td className='border-dark' style={{ width: '4%' }}  >№</td>
-                                <td className='border-dark' style={{ width: '70%' }}  >Name of subject</td>
+                                <td className='border-dark' style={{ width: '70%' }}  >Name of the subject</td>
                                 <td className='border-dark' style={{ width: '7%' }}  >Cr</td>
                                 <td className='border-dark' style={{ width: '11%' }} >Point</td>
                                 <td className='border-dark' style={{ width: '8%' }} >Grade</td>
@@ -339,7 +339,7 @@ export default function PrintAttachmentEnglish()
                         <thead className='fw-bolder'>
                             <tr style={{ height: '25px' }}>
                                 <td className='border-dark' style={{ width: '4%' }}>№</td>
-                                <td className='border-dark' style={{ width: '70%' }}>Name of subject</td>
+                                <td className='border-dark' style={{ width: '70%' }}>Name of the subject</td>
                                 <td className='border-dark' style={{ width: '7%' }} >Cr</td>
                                 <td className='border-dark' style={{ width: '11%' }} >Point</td>
                                 <td className='border-dark' style={{ width: '8%' }} >Grade</td>
@@ -356,7 +356,7 @@ export default function PrintAttachmentEnglish()
                         <thead className='fw-bolder'>
                             <tr style={{ height: '25px' }}>
                                 <td className='border-dark' style={{ width: '4%' }}  >№</td>
-                                <td className='border-dark' style={{ width: '70%' }}  >Name of subject</td>
+                                <td className='border-dark' style={{ width: '70%' }}  >Name of the subject</td>
                                 <td className='border-dark' style={{ width: '7%' }}  >Cr</td>
                                 <td className='border-dark' style={{ width: '11%' }} >Point</td>
                                 <td className='border-dark' style={{ width: '8%' }} >Grade</td>
@@ -396,7 +396,7 @@ export default function PrintAttachmentEnglish()
                             <thead className='fw-bolder'>
                                  <tr style={{ height: '25px' }}>
                                     <td className='border-dark' style={{ width: '4%' }} >№</td>
-                                    <td className='border-dark' style={{ width: '70%' }} >Name of subject</td>
+                                    <td className='border-dark' style={{ width: '70%' }} >Name of the subject</td>
                                     <td className='border-dark' style={{ width: '7%' }}  >Cr</td>
                                     <td className='border-dark' style={{ width: '11%' }} >Point</td>
                                     <td className='border-dark' style={{ width: '8%' }} >Grade</td>
@@ -414,7 +414,7 @@ export default function PrintAttachmentEnglish()
                             <thead className='fw-bolder'>
                                  <tr style={{ height: '25px' }}>
                                     <td className='border-dark' style={{ width: '4%' }}  >№</td>
-                                    <td className='border-dark' style={{ width: '70%' }}  >Name of subject</td>
+                                    <td className='border-dark' style={{ width: '70%' }}  >Name of the subject</td>
                                     <td className='border-dark' style={{ width: '7%' }}  >Cr</td>
                                     <td className='border-dark' style={{ width: '11%' }} >Point</td>
                                     <td className='border-dark' style={{ width: '8%' }} >Grade</td>
@@ -432,7 +432,7 @@ export default function PrintAttachmentEnglish()
                             <thead className='fw-bolder'>
                                  <tr style={{ height: '25px' }}>
                                     <td className='border-dark' style={{ width: '4%' }}  >№</td>
-                                    <td className='border-dark' style={{ width: '70%' }}  >Name of subject</td>
+                                    <td className='border-dark' style={{ width: '70%' }}  >Name of the subject</td>
                                     <td className='border-dark' style={{ width: '7%' }}  >Cr</td>
                                     <td className='border-dark' style={{ width: '11%' }} >Point</td>
                                     <td className='border-dark' style={{ width: '8%' }} >Grade</td>

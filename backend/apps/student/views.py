@@ -3439,10 +3439,10 @@ class StudentGpaDiplomaValuesAPIView(
                 obj_datas['eng_name'] = 'Education subject'
                 obj_datas['uig_name'] = 'ᠳᠡᢉᠡᠳᠦ ᠪᠣᠯᠪᠠᠰᠤᠷᠠᠯ ᠤ᠋ᠨ ᠰᠠᠭᠤᠷᠢ ᢈᠢᠴᠢᠶᠡᠯ'
             if level == LearningPlan.PROF_BASIC or level == LearningPlan.MAG_PROF_BASIC or level == LearningPlan.DOC_PROF_BASIC:
-                obj_datas['eng_name'] = 'Core'
+                obj_datas['eng_name'] = 'Courses'
                 obj_datas['uig_name'] = 'ᠮᠡᠷᢉᠡᠵᠢᠯ ᠦ᠋ᠨ ᠰᠠᠭᠤᠷᠢ ᢈᠢᠴᠢᠶᠡᠯ'
             if level == LearningPlan.PROFESSION or level == LearningPlan.MAG_PROFESSION or level == LearningPlan.DOC_PROFESSION or level == LearningPlan.QUALIFICATION :
-                obj_datas['eng_name'] = 'Major course'
+                obj_datas['eng_name'] = 'Major courses'
                 obj_datas['uig_name'] = 'ᠮᠡᠷᢉᠡᠵᠢᠯ ᠦ᠋ᠨ ᢈᠢᠴᠢᠶᠡᠯ'
 
             # Дипломын хичээлээр давталт гүйлгэх
