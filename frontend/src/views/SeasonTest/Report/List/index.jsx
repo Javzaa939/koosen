@@ -2,11 +2,14 @@
 import { memo, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
+import Select from 'react-select'
 
 import useApi from '@hooks/useApi'
 import useLoader from '@hooks/useLoader'
 
 import './style.scss'
+import { Col, Label, Row } from 'reactstrap'
+import { ReactSelectStyles } from '@src/utility/Utils'
 
 const List = () => {
     const { t } = useTranslation()
@@ -41,7 +44,7 @@ const List = () => {
                                 {t('Нийт асуултын тоо')} : {data.payload[0]['value']}
                             </span>
                         </div>
-                        {data.payload.map(i => i.payload['questions'].sort((a, b) => b.question_reliability - a.question_reliability).map((question, index)=>
+                        {data.payload.map(i => i.payload['questions'].sort((a, b) => b.question_reliability - a.question_reliability).map((question, index) =>
                             <div key={index}>
                                 <span
                                     className='bullet bullet-sm bullet-bordered me-50'
@@ -64,7 +67,21 @@ const List = () => {
 
     useEffect(() => {
         getDatas()
+        getExams()
     }, [])
+
+    // #region exam selection code
+    const [examOption, setExamOption] = useState([])
+    const [selectedExam, setSelectedExam] = useState('')
+
+    async function getExams() {
+        const { success, data } = await allFetch(challengeApi.get(1, 10000000, '', '', '', '', true))
+
+        if (success) {
+            setExamOption(data?.results)
+        }
+    }
+    // #endregion
 
     return (
         <div className='px-1'>
@@ -72,11 +89,34 @@ const List = () => {
                 {t('Найдвартай байдал')}
             </div>
             {isLoading && Loader}
+            <Row>
+                <Col md={3} sm={10} className="m-1">
+                    <Label className="form-label" for="exam">
+                        {t('Шалгалт')}
+                    </Label>
+                    <Select
+                        id="exam"
+                        name="exam"
+                        isClearable
+                        classNamePrefix='select'
+                        className='react-select'
+                        placeholder={`-- Сонгоно уу --`}
+                        options={examOption || []}
+                        noOptionsMessage={() => 'Хоосон байна'}
+                        onChange={(val) => {
+                            setSelectedExam(val?.id || '')
+                        }}
+                        styles={ReactSelectStyles}
+                        getOptionValue={(option) => option.id}
+                        getOptionLabel={(option) => option.title}
+                    />
+                </Col>
+            </Row>
             <div className='recharts-wrapper pie-chart' style={{ height: '600px' }}>
                 <ResponsiveContainer>
                     <PieChart width={400} height={400}>
                         <Pie
-                            data={datas?.length ? datas[0].questions_reliabilities : []}
+                            data={datas?.length ? datas.find(item => item.exam_id === selectedExam)?.questions_reliabilities : []}
                             dataKey='questions_count'
                             nameKey='questions_reliability_name'
                             cx="50%"
