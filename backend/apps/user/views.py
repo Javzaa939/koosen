@@ -120,7 +120,7 @@ class UserAPILoginView(
 
         user_detail = dict()
         try:
-            user = User.objects.filter(Q(email=email) | Q(username=email)).first()
+            user = User.objects.filter(Q(email__iexact=email) | Q(username__iexact=email)).first()
 
             if not user:
                 access_history_body.update({"user": user_id, "is_logged": is_logged})
