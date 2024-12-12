@@ -17,7 +17,7 @@ const Student  = ({ setMainData, printIsAllTimeType, chosenGroupStudent, setChos
     //Hook
     const { control, formState: { errors } } = useForm({});
     var values = {
-        student: '',
+        group: '',
         lesson_year: '',
         lesson_season: '',
     }
@@ -72,11 +72,11 @@ const Student  = ({ setMainData, printIsAllTimeType, chosenGroupStudent, setChos
 
     /*Жагсаалт дата авах функц */
     async function getStudentLists() {
-        const student = select_value?.student
+        const group = select_value?.group
         const lesson_year = select_value?.lesson_year
         const lesson_season = select_value?.lesson_season
 
-        const { success, data } = await allFetch(getStudentApi.getStudentList(rowsPerPage, currentPage, sortField, searchValue,student, lesson_year, lesson_season, start_value, end_value, chosenGroupStudent))
+        const { success, data } = await allFetch(getStudentApi.getStudentList(rowsPerPage, currentPage, sortField, searchValue,group, lesson_year, lesson_season, start_value, end_value, chosenGroupStudent))
         if (success) {
             setDatas(data?.results)
             setTotalCount(data?.count)

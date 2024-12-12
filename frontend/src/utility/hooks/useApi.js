@@ -1044,8 +1044,8 @@ function useApi(isDisplay=false) {
 
 				getLessonList:(limit, page, sort,search,lesson,lesson_year, lesson_season, group) =>
 					instance.get(`/print/lesson/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson=${lesson}&select_year=${lesson_year}&select_season=${lesson_season}&group=${group}&school=${school_id}`),
-				getStudentList:(limit, page, sort,search,student,lesson_year, lesson_season) =>
-					instance.get(`/print/student/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&student=${student}&select_year=${lesson_year}&select_season=${lesson_season}&school=${school_id}`),
+				getStudentList:(limit, page, sort,search,group,lesson_year, lesson_season) =>
+					instance.get(`/print/student/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&group=${group}&select_year=${lesson_year}&select_season=${lesson_season}&school=${school_id}`),
 			},
 			/** Төгсөлтийн ажил*/
 			graduationwork:{

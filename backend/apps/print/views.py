@@ -589,19 +589,19 @@ class StudentListAPIView(
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['student__code', 'student__first_name','lesson__name', 'exam_score', 'teach_score', 'assessment__assesment']
+    search_fields = ['student__code', 'student__first_name','lesson__name', 'exam_score', 'teach_score', 'assessment__assesment', 'student__last_name', 'student__register_num']
 
     def get_queryset(self):
         queryset = self.queryset
-        student = self.request.query_params.get('student')
+        group = self.request.query_params.get('group')
         select_season = self.request.query_params.get('select_season')
         select_year = self.request.query_params.get('select_year')
         sorting = self.request.query_params.get('sorting')
         school = self.request.query_params.get('school')
 
         # оюутангаар хайлт хийнэ
-        if student:
-            queryset = queryset.filter(student=student)
+        if group:
+            queryset = queryset.filter(student__group=group)
 
         # Сонгогдсон хичээлийн жил улирлаар хайх
         if select_season:
