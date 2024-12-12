@@ -12,13 +12,13 @@ export default [
 				icon: <Circle size={8} />,
 				children: [
 					{
-						id: "e-challenge",
+						id: "season-equistion",
 						title: "Асуултын сан",
 						icon: <Circle size={8} />,
 						navLink: "challenge-question/",
 					},
 					{
-						id: "testchallenge",
+						id: "season-test",
 						title: "Онлайн шалгалт",
 						icon: <Circle size={8} />,
 						navLink: "challenge-season/",
