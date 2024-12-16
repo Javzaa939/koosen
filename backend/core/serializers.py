@@ -447,7 +447,7 @@ class TeacherNameSerializer(serializers.ModelSerializer):
 
     def get_state(self, obj):
         state_name = ''
-        state = Employee.objects.filter(state=Employee.STATE_WORKING).first()
+        state = Employee.objects.filter(user=obj.user).first()
 
         if state:
             state_name = state.state
