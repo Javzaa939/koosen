@@ -3657,8 +3657,9 @@ class StudentDownloadAPIView(
         join_year = self.request.query_params.get('join_year')
         group = self.request.query_params.get('group')
         schoolId = self.request.query_params.get('schoolId')
-        # status = self.request.query_params.get('status')
-        # level = self.request.query_params.get('level')
+        status = self.request.query_params.get('status')
+        level = self.request.query_params.get('level')
+        isPayed = self.request.query_params.get('isPayed')
 
         # сургуулиар хайлт хийх
         if schoolId:
@@ -3684,11 +3685,20 @@ class StudentDownloadAPIView(
         if group:
             queryset = queryset.filter(group_id=group)
 
-        # if status:
-        #     queryset = queryset.filter(status=status)
+        if status:
+            queryset = queryset.filter(status=status)
 
-        # if level:
-        #     queryset = queryset.filter(group__level=level)
+        if level:
+            queryset = queryset.filter(group__level=level)
+
+        if isPayed:
+            payed_status_condition = Q(payment__status=True, payment__dedication=Payment.SYSTEM)
+
+            # "2" is not payed
+            if isPayed == '2':
+                payed_status_condition = ~payed_status_condition
+
+            queryset = queryset.filter(payed_status_condition)
 
         return queryset
 
