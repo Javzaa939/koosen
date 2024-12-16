@@ -403,7 +403,7 @@ export function downloadExcel(download_data, excelColumns, filename='export') {
     // Баганын нэрийг Монгол болгох хэсэг
     let excel_col_keys = []
     keys.forEach(key => {
-        excel_col_keys.push(excelColumns[key])
+      excel_col_keys.push(excelColumns[key])
     })
 
     /* generate worksheet and workbook */
@@ -417,7 +417,7 @@ export function downloadExcel(download_data, excelColumns, filename='export') {
     return writeFile(workbook, filename + '.xlsx')
 }
 
-//string утгыг bool рүү хөрвүүлэх
+// string утгыг bool рүү хөрвүүлэх
 export const stringToBoolean = (stringValue) => {
     if (typeof stringValue == "boolean") {
         return stringValue

@@ -43,7 +43,6 @@ import Addmodal from './Add'
 
 import { useTranslation } from 'react-i18next'
 import { downloadCSV, downloadExcel } from '@utils'
-import { downloadTemplate } from './downLoadExcel'
 import FileModal from '@src/components/FileModal'
 import DetailModal from './DetailModal'
 import { useSkin } from '@src/utility/hooks/useSkin'
@@ -66,6 +65,7 @@ const Register = () => {
         'profession_name': 'Мэргэжил',
         'group_name': 'Анги',
         'group_level': 'Курс',
+        'status_name': 'Суралцаж буй төлөв'
     }
 
     // ** Hook
@@ -291,7 +291,7 @@ const Register = () => {
      async function excelDownload(type) {
         var keys = Object.keys(excelColumns)
 
-        const { success, data } = await fetchData(studentApi.download(searchValue, select_value.department, select_value.degree, select_value.profession, select_value.group, select_value.join_year, select_value?.status, level))
+        const { success, data } = await fetchData(studentApi.download(searchValue, select_value.department, select_value.degree, select_value.profession, select_value.group, select_value.join_year, select_value?.status, level, isPayed))
         if (success) {
             data.forEach((cdata) => {
                 for(let key in cdata) {
