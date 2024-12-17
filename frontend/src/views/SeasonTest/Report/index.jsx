@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Card, Nav, NavItem, NavLink, TabContent } from 'reactstrap'
 import List from './List'
+import List3 from './List3'
 
 export default function Report() {
     const [activeTab, setActiveTab] = useState(0)
@@ -22,6 +23,7 @@ export default function Report() {
             name: 'Тайлан 3',
             icon: 'Activity',
             id: 2,
+            component:<List3/>
         },
         {
             name: 'Тайлан 4',

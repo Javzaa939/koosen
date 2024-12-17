@@ -1504,6 +1504,7 @@ function useApi(isDisplay=false) {
 			getTestResult: (cdata) => instance.post(`learning/challenge/result/`,cdata),
 			getDifficultyLevels: () => instance.get(`learning/challenge/questions/difficulty_levels/`),
 			getReport: (report_type='') => instance.get(`learning/challenge/report/?report_type=${report_type}`),
+			getDetailTable: (page,limit,search,department,group,test_id,student_id) => instance.get(`learning/challenge/details/table/?page=${page}&limit=${limit}&search=${search}&test_id=${test_id}&department=${department}&group=${group}&student_id=${student_id}`),
 
 			question: {
 				get: (page, limit, lessonId, subjectId, search) =>
@@ -1604,8 +1605,10 @@ function useApi(isDisplay=false) {
 				excelResult:(adm) => instance.get(`learning/psychological_test_result_excel/?adm=${adm}`),
 				iqExcelResult:(adm)=>instance.get(`learning/iq_test_result_excel/?adm=${adm}`)
 
-			}
-
+			},
+			report:{
+				get: (test_id) => instance.get(`learning/challenge/report/chart/?school=${school_id}&test=${test_id}`),
+			},
 		},
 
 		// Судалгаа
