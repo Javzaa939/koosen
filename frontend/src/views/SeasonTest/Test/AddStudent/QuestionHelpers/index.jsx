@@ -15,21 +15,33 @@ export function getQuestionColumns(currentPage, rowsPerPage, total_count, handle
 
     const columns = [
         {
-            name: <span title='Онлайн асуулт сан' style={{}}>Онлайн асуулт сан</span>,
-            selector: (row) => <span className='text-center' style={{ marginTop: '3px', marginBottom: '3px' }}>{row?.title}</span>,
-            minWidth: "40%",
+            name: "№",
+			selector: (row, index) => (currentPage-1) * rowsPerPage + index + 1,
+			maxWidth: "30px",
+			center: true,
+        },
+        {
+            name: <span title='Онлайн асуулт сан' style={{}}>Асуулт</span>,
+            selector: (row) => <span className='text-center' style={{ marginTop: '3px', marginBottom: '3px' }}>{row?.question}</span>,
+            minWidth: "38%",
             center: true,
+        },
+        {
+            name: <span title='Онлайн асуулт сан' style={{}}>CLO</span>,
+            selector: (row) => <span className='text-center' style={{ marginTop: '3px', marginBottom: '3px' }}>{row?.title}</span>,
+            center: true,
+            minWidth: "10%",
         },
         {
             name: <span className='text-center' style={{ marginTop: '3px', marginBottom: '3px' }}>Асуултын түвшин</span>,
             selector: (row) => difficultyLevelsOption.find(item => item.value === row?.level)?.label,
-            minWidth: "15%",
+            minWidth: "9%",
             center: true,
         },
         {
             name: <span className='text-center' style={{ marginTop: '3px', marginBottom: '3px' }}>Асуултын оноо</span>,
             selector: (row) => row?.score,
-            minWidth: "15%",
+            minWidth: "13%",
             center: true,
         },
         {

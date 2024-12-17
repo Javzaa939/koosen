@@ -24,6 +24,7 @@ import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
 
 import Addmodal from "./Add";
+import EditModal from "./Edit";
 // import Show from "../Show";
 // import Exam from "./Exam"
 import classNames from "classnames"
@@ -135,13 +136,13 @@ const Test = () => {
 	};
 
 	const handleEditModal = () => {
-		setModal(!modal);
+		setEditModal(!edit_modal);
 	};
 
-	const handleExamModal = (id) => {
-		setExamModalId(id)
-		setExamModal(!examModal);
-	};
+	// const handleExamModal = (id) => {
+	// 	setExamModalId(id)
+	// 	setExamModal(!examModal);
+	// };
 
 	// Хуудас солих үед ажиллах хэсэг
 	const handlePagination = (page) => {
@@ -152,11 +153,11 @@ const Test = () => {
 		setRowsPerPage(parseInt(e.target.value));
 	}
 
-	const handleSend = async (id) => {
-		const { success, data } = await fetchData(challengeAPI.send(id));
-		if (success) {
-		}
-	}
+	// const handleSend = async (id) => {
+	// 	const { success, data } = await fetchData(challengeAPI.send(id));
+	// 	if (success) {
+	// 	}
+	// }
 
 	useEffect(() => {
 		getDatas();
@@ -338,11 +339,6 @@ const Test = () => {
 							total_count,
 							handleEdit,
 							handleDelete,
-							handleShow,
-							handleSend,
-							difficultyLevelsOption,
-							handleEditModal,
-							handleExamModal,
 						)}
 						paginationPerPage={rowsPerPage}
 						paginationDefaultPage={currentPage}
@@ -363,7 +359,14 @@ const Test = () => {
 							open={modal}
 							handleModal={handleModal}
 							refreshDatas={getDatas}
-							select_datas={[lessonOption, difficultyLevelsOption]}
+						/>
+                )}
+				{
+					edit_modal && (
+						<EditModal
+							open={edit_modal}
+							handleModal={handleEditModal}
+							refreshDatas={getDatas}
 							editData={editData}
 						/>
                 )}
@@ -382,21 +385,6 @@ const Test = () => {
 						handleModal={handleExamModal} />
 				} */}
 			</Card>
-			{/* <Card className={'mt-2'}>
-				<CardHeader><div className="d-flex"><HelpCircle size={20} /><h5 className="ms-25 fw-bolder">Тусламж хэсэг</h5></div></CardHeader>
-				<CardBody>
-					<Alert color='primary' className={'p-1 тме1'}>
-						Онлайн шалгалт үүсгэх заавар мэдээлэл хүргэж байна.
-					</Alert>
-					<iframe
-						width="100%"
-						height="500"
-						title='Шалгалт'
-						src={'https://www.youtube.com/embed/mvF55C892uY'}
-						sandbox='allow-same-origin allow-forms allow-popups allow-scripts allow-presentation'
-					/>
-				</CardBody>
-			</Card> */}
 		</Fragment>
 	);
 };
