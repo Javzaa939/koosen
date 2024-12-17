@@ -5814,7 +5814,7 @@ class ChallengeReportAPIView(
         queryset = self.queryset.filter(challenge__challenge_type=Challenge.SEMESTR_EXAM, challenge__id=exam)
         get_result = []
 
-        if report_type == '1':
+        if report_type == 'reliability':
             exam_results = []
 
             for obj in queryset:
@@ -5910,7 +5910,7 @@ class ChallengeReportAPIView(
 
                 })
 
-        elif report_type == '2':
+        elif report_type == 'students':
             self.queryset = queryset
             get_result = self.list(request).data
 

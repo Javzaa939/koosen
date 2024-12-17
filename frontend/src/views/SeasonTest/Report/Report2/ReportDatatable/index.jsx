@@ -1,16 +1,17 @@
 // ** React Imports
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button, Col, Input, Label, Row } from 'reactstrap'
 
 import useApi from '@hooks/useApi'
 
 import { Search } from 'react-feather'
-import ExamFilter from '../helpers/ExamFilter'
-import GenericDataTable from '../helpers/GenericDataTable'
+import ExamFilter from '../../helpers/ExamFilter'
+import GenericDataTable from '../../helpers/GenericDataTable'
 import './style.scss'
+import { calculatePercentage } from '@src/utility/Utils'
 
-export default function ReportDatatable(report) {
+export default function ReportDatatable() {
     // other hooks
     const { t } = useTranslation()
     const challengeApi = useApi().challenge
@@ -24,7 +25,7 @@ export default function ReportDatatable(report) {
     // #region primitives
     const columns = [
         {
-            name: `${t('Оюутнык код')}`,
+            name: `${t('Оюутны код')}`,
             selector: (row) => (<span>{row?.student_code}</span>),
             center: true
         },
@@ -34,13 +35,14 @@ export default function ReportDatatable(report) {
             center: true
         },
         {
-            name: `${t('Оюутны авсан оноо')}`,
-            selector: (row) => (<span>{row?.score}</span>),
+            name: `${t('Оноо')} (%)`,
+            selector: (row) => (<span>{Math.round(calculatePercentage(row?.score, row?.take_score))}</span>),
             center: true
         },
     ]
 
     const default_page = [10, 15, 50, 75, 100]
+    const report = 'students'
     // #endregion
 
     // ** Function to handle per page
@@ -50,19 +52,18 @@ export default function ReportDatatable(report) {
 
     // ** Function to handle filter
     const handleFilter = e => {
-        const value = e.target.value.trimStart();
-        setSearchValue(value)
+        if (selected_exam) {
+            const value = e.target.value.trimStart();
+            setSearchValue(value)
+        }
     }
 
-	async function handleSearch() {
-        if (search_value.length > 0) setRenderToSearch(!render_to_search)
+    async function handleSearch() {
+        if (search_value.length > 0 && selected_exam) setRenderToSearch(!render_to_search)
     }
 
     return (
         <div className='px-1'>
-            <div className='d-flex justify-content-center' style={{ fontWeight: 900, fontSize: 16 }}>
-                {t('by students')}
-            </div>
             <Row>
                 <Col className='d-flex'>
                     <div style={{ width: '219.5px' }} className='me-1'>
@@ -74,27 +75,27 @@ export default function ReportDatatable(report) {
                                 {t('Хайх')}
                             </Label>
                             <div className='d-flex'>
-                            <Input
-                                className='dataTable-filter'
-                                type='text'
-                                bsSize='sm'
-                                id='search-input'
-                                placeholder={t('Хайх')}
-                                value={search_value}
-                                onChange={handleFilter}
-                                onKeyPress={e => e.key === 'Enter' && selected_exam && handleSearch()}
-                                style={{ height: '30px' }}
-                            />
-                            <Button
-                                size='sm'
-                                className='ms-50'
-                                color='primary'
-                                onClick={handleSearch}
-                                style={{ height: '30px' }}
-                                disabled={!selected_exam}
-                            >
-                                <Search size={15} />
-                            </Button>
+                                <Input
+                                    className='dataTable-filter'
+                                    type='text'
+                                    bsSize='sm'
+                                    id='search-input'
+                                    placeholder={t('Хайх')}
+                                    value={search_value}
+                                    onChange={handleFilter}
+                                    onKeyPress={e => e.key === 'Enter' && handleSearch()}
+                                    style={{ height: '30px' }}
+                                />
+                                <Button
+                                    size='sm'
+                                    className='ms-50'
+                                    color='primary'
+                                    onClick={handleSearch}
+                                    style={{ height: '30px' }}
+                                    disabled={!selected_exam}
+                                >
+                                    <Search size={15} />
+                                </Button>
                             </div>
                         </div>
                     </div>
@@ -121,7 +122,7 @@ export default function ReportDatatable(report) {
                             ))
                         }
                     </Input>
-                    <GenericDataTable apiGetFunc={challengeApi.getReport} isApiGetFuncArgsDefault={true} apiGetFuncArgs={[2, selected_exam]} columns={columns} rows_per_page={rows_per_page} search_value={search_value} render_to_search={render_to_search} />
+                    <GenericDataTable apiGetFunc={challengeApi.getReport} isApiGetFuncArgsDefault={true} apiGetFuncArgs={[report, selected_exam]} columns={columns} rows_per_page={rows_per_page} search_value={search_value} render_to_search={render_to_search} />
                 </Col>
             </Row>
         </div>
