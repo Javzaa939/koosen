@@ -43,6 +43,12 @@ export function getColumns(currentPage, rowsPerPage, datas, handleResultModal) {
             wrap: true,
         },
         {
+            name: `${'Авсан оноо'}`,
+            selector: (row) => row?.score,
+            minWidth: "100px",
+            wrap: true,
+        },
+        {
             name: `${'Хувь үнэлгээ'}`,
             selector: (row) => row?.huvi_unelgee,
             minWidth: "100px",

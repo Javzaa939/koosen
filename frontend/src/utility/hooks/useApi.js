@@ -1607,7 +1607,7 @@ function useApi(isDisplay=false) {
 
 			},
 			report:{
-				get: (test_id) => instance.get(`learning/challenge/report/chart/?school=${school_id}&test=${test_id}`),
+				get: (test_id, dep, group) => instance.get(`learning/challenge/report/chart/?school=${school_id}&test=${test_id}&department=${dep}&group=${group}`),
 			},
 		},
 

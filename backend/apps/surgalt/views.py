@@ -5817,7 +5817,6 @@ class ChallengeReportAPIView(
                     continue
 
                 answer_json = None
-
                 try:
                     answer_json = obj.answer.replace("'", '"')
                     answer_json = json.loads(answer_json)
@@ -6144,6 +6143,8 @@ class ChallengeAddKindAPIView(
 
         return request.send_info("INF_002")
 
+
+@permission_classes([IsAuthenticated])
 class ChallengeDetailTableApiView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -6154,7 +6155,7 @@ class ChallengeDetailTableApiView(
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['student__code', 'student__first_name']
+    search_fields = ['student__code', 'student__first_name', 'student__register_num']
 
     def get(self, request):
         self.queryset = self.queryset.filter(challenge__challenge_type=Challenge.SEMESTR_EXAM)
@@ -6166,8 +6167,10 @@ class ChallengeDetailTableApiView(
 
         if test_id:
             self.queryset= self.queryset.filter(challenge=test_id)
+
         if department_id:
             self.queryset = self.queryset.filter(student__department=department_id)
+
         if group_id:
             self.queryset = self.queryset.filter(student__group=group_id)
 
@@ -6185,6 +6188,8 @@ class ChallengeStudentReportAPI(
     def get(self, request):
         school = request.query_params.get('school')
         challenge_id = request.query_params.get('test')
+        department = request.query_params.get('department')
+        group = request.query_params.get('group')
 
         # Initialize the extra filter dictionary
         extra_filter = {}
@@ -6192,6 +6197,12 @@ class ChallengeStudentReportAPI(
         # Add the school filter if provided
         if school:
             extra_filter.update({'student__group__school': school})
+
+        if department:
+            extra_filter.update({'student__group__department': department})
+
+        if group:
+            extra_filter.update({'student__group': group})
 
         # Define grade thresholds
         GRADE_THRESHOLDS = {

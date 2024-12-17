@@ -8,7 +8,6 @@ import useApi from '@hooks/useApi';
 import useLoader from "@hooks/useLoader"
 import VerticalBarChartLoader from "@lms_components/VerticalBarChart";
 
-
 import {
     Chart as ChartJS,
     CategoryScale,
@@ -33,10 +32,20 @@ ChartJS.register(
     ChartDataLabels,
 );
 
+const COLORS = [
+    'rgb(236, 29, 37)',
+    'rgba(153, 102, 255)',
+    'rgba(255, 206, 86)',
+    'rgba(75, 192, 192)',
+    'rgba(54, 162, 235)',
+    'rgba(255, 159, 64)',
+    'rgb(0, 85, 166)',
+]
+
 /**
     @param {} props
 */
-const Chart = ({ test_id = "" }) => {
+const Chart = ({ test_id = "", department, group }) => {
 
     const [gradeCounts, setGradeCounts] = useState({
         male: { A: 0, B: 0, C: 0, D: 0, F: 0 },
@@ -49,8 +58,7 @@ const Chart = ({ test_id = "" }) => {
 
     const getData = useCallback(
         async () => {
-            const { success, data } = await fetchData(studentReportApi.get(test_id)).catch(err => err)
-
+            const { success, data } = await fetchData(studentReportApi.get(test_id, department, group)).catch(err => err)
             if (success) {
                 setGradeCounts(data)
             }
@@ -58,8 +66,10 @@ const Chart = ({ test_id = "" }) => {
     )
 
     useEffect(() => {
-        getData()
-    }, [test_id])
+        if (test_id) {
+            getData()
+        }
+    }, [test_id, department, group])
 
     if (isLoading) {
         return <Card>
@@ -81,9 +91,7 @@ const Chart = ({ test_id = "" }) => {
                     gradeCounts.male.D,
                     gradeCounts.male.F,
                 ],
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1,
+                backgroundColor: 'rgba(153, 102, 255)',
             },
             {
                 label: 'Эмэгтэй сурагчид',
@@ -94,45 +102,55 @@ const Chart = ({ test_id = "" }) => {
                     gradeCounts.female.D,
                     gradeCounts.female.F,
                 ],
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderColor: 'rgba(255, 99, 132, 1)',
-                borderWidth: 1,
+                backgroundColor: 'rgba(255, 206, 86)',
             },
         ],
     };
 
-    const chartOptions = {
-        responsive: true,
-        plugins: {
-            tooltip: {
-                enabled: true,
-            },
+    /** @type {ChartProps} */
+    const opts = {
+        height: "300px",
+        width: "100%",
+        data: {
+            ...chartData
         },
-        scales: {
-            x: {
-                ticks: {
-                    font: {
-                        size: 16,
-                        weight: 'bold',
-                    },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: { duration: 500 },
+            scales: {
+                x: {},
+                y: {
+                    grace: 10
                 },
             },
+            plugins: {
+                datalabels: {
+                    align: "end",
+                    backgroundColor: COLORS[6],
+                    color: "#fff",
+                    offset: 12,
+                    borderRadius: 4,
+                    padding: 6
+                },
+            }
         },
-    };
+    }
+
     return (
         <Row>
             <Col md={12} xs={12}>
                 <Card>
-                    <CardTitle tag="h5">
+                    <CardTitle tag="h6">
                         {t('Тухайн шалгалтыг өгсөн оюутны тоо үсгэн үнэлгээгээр')}
                     </CardTitle>
-                    <CardSubtitle
-                        className="mb-2 text-muted"
-                        tag="h6"
-                    >
-                    </CardSubtitle>
+                        <CardSubtitle
+                            className="mb-2 text-muted"
+                            tag="h6"
+                        >
+                        </CardSubtitle>
                     <CardBody>
-                        <Bar data={chartData} options={chartOptions} />
+                        <Bar {...opts} />
                     </CardBody>
                 </Card>
             </Col>

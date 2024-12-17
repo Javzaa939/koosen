@@ -122,7 +122,7 @@ const List3 = () => {
         <div className='px-1'>
             {
                 dashBoardOpen &&
-                <Chart test_id={select_value.test}/>
+                <Chart test_id={select_value.test} department={select_value?.department} group={select_value?.group}/>
             }
             <div className='d-flex justify-content-end me-2' style={{ fontWeight: 900, fontSize: 16 }}>
                 <Button
