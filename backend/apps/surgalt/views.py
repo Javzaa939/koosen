@@ -5,7 +5,6 @@ import ast
 import traceback
 from openpyxl import load_workbook
 
-from datetime import datetime,timezone
 from rest_framework import mixins
 from rest_framework import generics
 from rest_framework.views import APIView
@@ -20,7 +19,7 @@ from django.utils.translation import gettext as _
 
 from main.utils.function.pagination import CustomPagination
 from main.utils.function.utils import override_get_queryset, save_data_with_signals
-from main.utils.function.utils import has_permission, get_domain_url, _filter_queries, get_teacher_queryset
+from main.utils.function.utils import has_permission, get_domain_url, _filter_queries, get_teacher_queryset, pearson_corel
 from main.utils.file import save_file
 from main.utils.file import remove_folder
 
@@ -72,9 +71,9 @@ from lms.models import (
     PsychologicalQuestionTitle,
     PsychologicalTest,
     AdmissionRegisterProfession,
-    Season,
     QuestionTitle,
     ChallengeSedevCount,
+    Score,
     StudentRegister
 )
 
@@ -6157,6 +6156,164 @@ class ChallengeAddKindAPIView(
 
         return request.send_info("INF_002")
 
+
+@permission_classes([IsAuthenticated])
+class LessonsApiView(
+    generics.GenericAPIView
+):
+
+    def get(self, request):
+
+        dep = request.GET.get('dep')
+        teacher = request.GET.get('teacher')
+
+        extra_filter = {}
+        if dep:
+            extra_filter = {
+                "department": dep,
+            }
+
+        if teacher:
+            teacher_of_lessons_qs = Lesson_to_teacher.objects.filter(teacher=teacher).values_list("lesson", flat=True)
+            extra_filter['id__in'] = teacher_of_lessons_qs
+
+        data = (
+            LessonStandart
+                .objects
+                .filter(
+                    **extra_filter
+                )
+                .values('id', fname=Concat(F("code"), Value(" "), F("name"), output_field=CharField()))
+        )
+        data_list = list(data)
+
+        return request.send_data(data_list)
+
+
+@permission_classes([IsAuthenticated])
+class AnalysisApiView(
+    generics.GenericAPIView
+):
+
+    def get(self, request):
+
+        extra_filters = {}
+
+        year = request.GET.get("year")
+        season = request.GET.get("season")
+        lesson = request.GET.get("lesson")
+        teacher = request.GET.get("teacher")
+
+        assesments = list(
+            Score
+                .objects
+                .values("assesment")
+                .annotate(count=Count("assesment"))
+                .order_by("assesment")
+                .values_list("assesment", flat=True)
+        )
+
+        if year:
+            extra_filters['lesson_year'] = year
+
+        if year:
+            extra_filters['lesson_season'] = season
+
+        if lesson:
+            extra_filters['lesson'] = lesson
+
+        if teacher:
+            extra_filters['teacher'] = teacher
+
+        chart_data = (
+            ScoreRegister
+                .objects
+                .filter(**extra_filters)
+                .values("assessment__assesment")
+                .annotate(
+                    count=Count("assessment__assesment"),
+                )
+                .values('count', name=F("assessment__assesment"))
+        )
+
+        data = {
+            "data": [
+                {
+                    "name": "Багшийн дүн",
+                    "data": list(chart_data)
+                },
+                {
+                    "name": "Дээд дүн",
+                    "data": settings.GPA_ANALYSIS_1_MAX,
+                },
+                {
+                    "name": "Доод дүн",
+                    "data": settings.GPA_ANALYSIS_1_MIN,
+                }
+            ],
+            "names": assesments,
+        }
+
+        return request.send_data(data)
+
+@permission_classes([IsAuthenticated])
+class Analysis2ApiView(
+    generics.GenericAPIView
+):
+
+
+    def get(self, request):
+
+        extra_filters = {}
+
+        dep = request.GET.get('dep')
+        year = request.GET.get("year")
+        season = request.GET.get("season")
+        lesson = request.GET.get("lesson")
+        teacher = request.GET.get("teacher")
+
+        if year:
+            extra_filters['lesson_year'] = year
+
+        if year:
+            extra_filters['lesson_season'] = season
+
+        if lesson:
+            extra_filters['lesson'] = lesson
+
+        if dep:
+            extra_filters['lesson__department'] = dep
+
+        if teacher:
+            extra_filters['teacher'] = teacher
+
+        chart_data = list(
+            ScoreRegister
+                .objects
+                .filter(**extra_filters)
+                .values("teach_score", "exam_score")
+                .annotate(
+                    count=Count("teach_score"),
+                )
+                .values('count', "teach_score", "exam_score")
+        )
+
+        # Filter out None values
+        x = [item['teach_score'] for item in chart_data if item['teach_score'] is not None]
+        y = [item['exam_score'] for item in chart_data if item['exam_score'] is not None]
+
+        r = 0
+        line = []
+        if len(y) > 0 and len(x) > 0:
+            r, line = pearson_corel(x, y)
+
+        data = {
+            "data": chart_data,
+            "r": r,
+            "line": line
+        }
+
+        return request.send_data(data)
 
 @permission_classes([IsAuthenticated])
 class ChallengeDetailTableApiView(

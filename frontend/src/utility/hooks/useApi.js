@@ -369,6 +369,7 @@ function useApi(isDisplay=false) {
 				},
 
 				getListAll: (profession='', search='') => instance.get(`/learning/lessonstandart/list/?profession=${profession}&search=${search}`),
+				getLessonListByTeacher: (profession='', teacher='') => instance.get(`/learning/lessonstandart/list/teacher/?dep=${profession}&teacher=${teacher}`),
 				getOneProfessionList: (profession) => instance.get(`/learning/lessonstandart/list/profession/${profession}/`),
 				get: (limit, page, sort, search, dep_id, category_id) => instance.get(`/learning/lessonstandart/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&department=${dep_id}&category=${category_id}&schoolId=${school_id}`),
 				post: data => instance.post('/learning/lessonstandart/', data),
@@ -1505,6 +1506,9 @@ function useApi(isDisplay=false) {
 			getDifficultyLevels: () => instance.get(`learning/challenge/questions/difficulty_levels/`),
 			getReport: (page=1, limit=10000000, search='', report_type='', exam='', group='') => instance.get(`learning/challenge/report/?page=${page}&limit=${limit}&search=${search}&report_type=${report_type}&exam=${exam}&group=${group}`),
 			getDetailTable: (page,limit,search,department,group,test_id,student_id) => instance.get(`learning/challenge/details/table/?page=${page}&limit=${limit}&search=${search}&test_id=${test_id}&department=${department}&group=${group}&student_id=${student_id}`),
+
+			chart1: (dep, year, season, teacher, lesson) => instance.get(`learning/challenge/analysis/?dep=${dep}&year=${year}&season=${season}&teacher=${teacher}&lesson=${lesson}`),
+			chart2: (dep, year, season, teacher, lesson) => instance.get(`learning/challenge/analysis2/?dep=${dep}&year=${year}&season=${season}&teacher=${teacher}&lesson=${lesson}`),
 
 			question: {
 				get: (page, limit, lessonId, subjectId, search) =>
