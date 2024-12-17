@@ -293,7 +293,7 @@ class TeacherLongListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Teachers
-        fields = ["id", "last_name", "first_name", "salbar", "sub_org", "code", "org_position", "state", "full_name"]
+        fields = ["id", "last_name", "first_name", "salbar", "sub_org", "code", "org_position", "state", "full_name", 'rank_name']
 
 
     def get_code(self, obj):
