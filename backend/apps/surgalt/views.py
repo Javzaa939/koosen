@@ -89,7 +89,7 @@ from lms.models import get_choice_image_path
 
 from elselt.serializer import MentalUserSerializer
 
-from .serializers import LessonStandartSerializer
+from .serializers import ChallengeGroupsSerializer, LessonStandartSerializer
 from .serializers import LessonTitlePlanSerializer
 from .serializers import LessonStandartListSerializer
 from .serializers import LessonStandartSerialzier
@@ -5000,19 +5000,10 @@ class QuestionsTitleAPIView(
 
     def get(self, request, pk=None):
 
-        # user_id = request.user
-        # teacher = get_object_or_404(Teachers, user_id=user_id, action_status=Teachers.APPROVED)
-
-        # if pk:
-        #     data = self.retrieve(request, pk).data
-        #     questions = ChallengeQuestions.objects.filter(title=pk)
-        #     other_questions = ChallengeQuestions.objects.exclude(id__in=questions.values_list('id', flat=True)).values("id", "question", "title__name",  'title__lesson__name', 'title__lesson__code')
-
-        #     questions = questions.values("id", "question", "title__name", 'title__lesson__name', 'title__lesson__code')
-        #     return request.send_data({"title": data, "questions": list(questions), "other_questions": list(other_questions)})
-
         title_id = request.query_params.get('titleId')
         title_id = int(title_id)
+        stype = request.query_params.get('stype')
+        level = request.query_params.get('level')
 
         # # 0  Бүх асуулт
         if title_id == 0:
@@ -5022,6 +5013,11 @@ class QuestionsTitleAPIView(
             challenge_qs = ChallengeQuestions.objects.filter(Q(title__isnull=True))
         else:
             challenge_qs = ChallengeQuestions.objects.filter(title=title_id)
+
+        if stype:
+            challenge_qs = challenge_qs.filter(kind=stype)
+        if level:
+            challenge_qs = challenge_qs.filter(level=level)
 
         ser = dynamic_serializer(ChallengeQuestions, "__all__", 1)
         data = ser(challenge_qs, many=True)
@@ -5793,22 +5789,30 @@ class TestQuestionsDifficultyLevelsAPIView(
 @permission_classes([IsAuthenticated])
 class ChallengeReportAPIView(
     generics.GenericAPIView,
+    mixins.ListModelMixin,
 ):
     "Challenge report"
 
-    queryset = ChallengeStudents.objects
+    queryset = ChallengeStudents.objects.order_by('-score')
     serializer_class = ChallengeStudentsSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['student__code', 'student__first_name']
 
     def get(self, request):
         report_type = request.query_params.get('report_type')
+        exam = request.query_params.get('exam')
 
-        if not report_type:
+        if not report_type or not exam:
 
             return request.send_error('ERR_002')
 
-        queryset = self.queryset.filter(challenge__challenge_type=Challenge.SEMESTR_EXAM)
+        queryset = self.queryset.filter(challenge__challenge_type=Challenge.SEMESTR_EXAM, challenge__id=exam)
+        get_result = []
 
-        if report_type == '1':
+        if report_type == 'reliability':
             exam_results = []
 
             for obj in queryset:
@@ -5850,8 +5854,6 @@ class ChallengeReportAPIView(
                 "Хялбар": lambda question_reliability: 61 <= question_reliability <= 80,
                 "Маш хялбар": lambda question_reliability: question_reliability >= 81,
             }
-
-            get_result = []
 
             for item in exams:
                 exam_id = item.get('challenge__id')
@@ -5904,6 +5906,18 @@ class ChallengeReportAPIView(
                     "questions_reliabilities": [{"questions_reliability_name": key, "questions": questions, "questions_count": len(questions)} for key, questions in grouped_questions.items()]
 
                 })
+
+        elif report_type == 'students':
+            self.queryset = queryset
+            get_result = self.list(request).data
+
+        elif report_type == 'groups':
+            # todo: finish
+            # self.queryset = queryset
+            # self.serializer_class = ChallengeGroupsSerializer
+            # get_result = self.list(request).data
+
+            pass
 
         return request.send_data(get_result)
 
