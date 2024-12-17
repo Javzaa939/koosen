@@ -267,7 +267,7 @@ export default function Question() {
 			</Card>}
 			{
 				step === 2 &&
-				<SeasonQuestions teacher_id={teacherToNextStep} handleDetail={handleDetail} />
+				<SeasonQuestions teacher_id={teacherToNextStep} handleDetail={handleDetail} is_season={true}/>
 			}
 			{
 				step === 3 &&

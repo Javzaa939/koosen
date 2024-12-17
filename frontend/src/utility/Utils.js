@@ -1863,3 +1863,23 @@ export const material_type = () => {
 
 	return options
 }
+
+export const get_levelseasons= () => {
+
+	const datas = []
+	const list = [
+		'Хөнгөн',
+		'Дунд',
+		'Хүнд',
+	]
+
+	list.map((list, idx) => {
+		var data = {
+			id: idx + 1,
+			name: list,
+		}
+
+		datas.push(data)
+	})
+	return datas
+}

@@ -2,6 +2,7 @@ import React, { Fragment, useState, useEffect,  } from "react";
 import { useTranslation } from "react-i18next";
 import { getPagination } from "@utils";
 import { getColumns, customStyles } from "./helpers";
+import { useNavigate } from "react-router-dom";
 import {
 	CardHeader,
 	Card,
@@ -12,26 +13,35 @@ import {
 	Dropdown,
 	DropdownToggle,
 	DropdownMenu,
-	DropdownItem
+	DropdownItem,
+	Col,
+	Label,
+	Row
 } from "reactstrap";
-import {PenTool, UploadCloud, File,Download} from 'react-feather'
+
+import classnames from 'classnames'
+import Select from "react-select"
+
+import {PenTool, UploadCloud, ChevronsLeft,Download} from 'react-feather'
 import { useSkin } from '@src/utility/hooks/useSkin'
 import DataTable from "react-data-table-component";
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
 import AddQuestion from "./AddQuestion";
 
-import { ReactSelectStyles, get_questionype, get_leveltype } from "@utils"
+import { ReactSelectStyles, get_questionype, get_leveltype, get_levelseasons } from "@utils"
+
 import EditModal from "./EditModal";
 import FileModal from "./FileModal"
 
-const QuestionsList = ({filterId , teacher_id}) => {
+const QuestionsList = ({ filterId, season=false, teacher_id }) => {
+
 	const { t } = useTranslation();
 	const { skin } = useSkin()
+	const navigate = useNavigate()
 
 	const { isLoading, fetchData } = useLoader({});
 
-	const default_page = [10, 15, 50, 75, 100];
 	const [datas, setDatas] = useState([]);
 	const [questionDetail, setQuestionDetail] = useState({})
 
@@ -43,9 +53,10 @@ const QuestionsList = ({filterId , teacher_id}) => {
 	const [modal, setModal] = useState(false);
 	const [editModal, setEditModal] = useState(false);
 	const [fileModal , setFileModal] = useState(false);
+	const [stype, setType] = useState('')
+	const [level, setLevel] = useState('')
 
     const [dropdownOpen, setDropdownOpen] = useState(false);
-	const [difficultyLevelsOption, setDifficultyLevelsOption] = useState([])
 
 	// Нэмэх функц
 	const handleModal = () => { setModal(!modal); };
@@ -56,24 +67,14 @@ const QuestionsList = ({filterId , teacher_id}) => {
 
 	const toggle = () => setDropdownOpen((prevState) => !prevState);
 
-
-
 	// API
 	const questionAPI = useApi().challenge.question
-	const challengeAPI = useApi().challenge
 
 	async function getDatas() {
-		const { success, data } = await fetchData(questionAPI.getByTitle(currentPage, rowsPerPage, searchValue, filterId,teacher_id));
+		const { success, data } = await fetchData(questionAPI.getByTitle(currentPage, rowsPerPage, searchValue, filterId, teacher_id, stype, level));
 		if (success) {
 			setDatas(data?.results);
 			setTotalCount(data?.count);
-		}
-	}
-
-	async function getDifficultyLevels() {
-		const { success, data } = await fetchData(challengeAPI.getDifficultyLevels())
-		if (success) {
-			setDifficultyLevelsOption(data)
 		}
 	}
 
@@ -86,7 +87,7 @@ const QuestionsList = ({filterId , teacher_id}) => {
 
 	useEffect(() => {
 		getDatas();
-	}, [currentPage, rowsPerPage, filterId]);
+	}, [currentPage, rowsPerPage, filterId, level, stype]);
 
 
 	// Хуудас солих үед ажиллах хэсэг
@@ -104,13 +105,6 @@ const QuestionsList = ({filterId , teacher_id}) => {
 		}, [searchValue]
 	)
 
-	useEffect(
-		() => {
-			getDifficultyLevels()
-		},
-		[]
-	)
-
 	function handleQuestionEdit(data){
 		setQuestionDetail(data)
 		setEditModal(true)
@@ -118,7 +112,7 @@ const QuestionsList = ({filterId , teacher_id}) => {
 
 	function staticExcelHandler() {
 
-        var excelUrl = '/assets/asuult_zagwar.xlsx'
+        var excelUrl = season ? '/assets/asuult_zagwar.xlsx' : '/assets/asuult_zagwar_2.xlsx'
 
         const link = document.createElement('a');
         link.href = excelUrl;
@@ -139,61 +133,88 @@ const QuestionsList = ({filterId , teacher_id}) => {
 			)}
 			<Card className="m-0">
 				<CardHeader className="py-1">
+					<div role="a"  onClick={() => navigate(-1) } color='primary'>
+						<ChevronsLeft/>Буцах
+					</div>
 					<CardTitle tag={'h5'}>
-						Асуулт
+						Асуултын жагсаалт
 					</CardTitle>
 					<div className="d-flex gap-2">
-					<Dropdown isOpen={dropdownOpen} toggle={toggle}>
-                            <DropdownToggle color={skin === 'light' ? 'dark' : 'light'} className='' caret outline>
-                                <PenTool size={15} />
-                                <span className='align-middle ms-50'>Загвар</span>
-                            </DropdownToggle>
-                            <DropdownMenu >
-                                <DropdownItem header className='text-wrap'>
-                                    Эксэл файлаар асуулт оруулах хэсэг
-                                </DropdownItem>
-                                <DropdownItem divider />
-                                <DropdownItem
-                                    className='w-100'
-                                    onClick={() => staticExcelHandler()}
-                                >
-                                    <Download size={15} />
-                                    <span className='align-middle ms-50'>Татах</span>
-                                </DropdownItem>
-                                <DropdownItem className='w-100' onClick={() => handleFileModal()}>
-                                    <UploadCloud size={15} />
-                                    <span className='align-middle ms-50' >Оруулах</span>
-                                </DropdownItem>
-                            </DropdownMenu>
-                        </Dropdown>
-					<Button
-						color="primary"
-						size="sm"
-						onClick={() => { setModal(true) }}
-					>
-						Нэмэх
-					</Button>
+						{
+							!season
+							&&
+							<>
+								<Dropdown isOpen={dropdownOpen} toggle={toggle}>
+									<DropdownToggle color={skin === 'light' ? 'dark' : 'light'} className='' caret outline>
+										<PenTool size={15} />
+										<span className='align-middle ms-50'>Загвар</span>
+									</DropdownToggle>
+									<DropdownMenu >
+										<DropdownItem header className='text-wrap'>
+											Эксэл файлаар асуулт оруулах хэсэг
+										</DropdownItem>
+										<DropdownItem divider />
+										<DropdownItem
+											className='w-100'
+											onClick={() => staticExcelHandler()}
+										>
+											<Download size={15} />
+											<span className='align-middle ms-50'>Татах</span>
+										</DropdownItem>
+										<DropdownItem className='w-100' onClick={() => handleFileModal()}>
+											<UploadCloud size={15} />
+											<span className='align-middle ms-50' >Оруулах</span>
+										</DropdownItem>
+									</DropdownMenu>
+								</Dropdown>
+								<Button
+									color="primary"
+									size="sm"
+									onClick={() => { setModal(true) }}
+								>
+									Нэмэх
+								</Button>
+							</>
+						}
 					</div>
 				</CardHeader>
 				<CardBody className="p-0 px-1">
-					{/* <div className="p-1">
-						<label className="me-1">Шүүх: </label>
-						<div className="d-flex">
+					<Row className={'mb-1'}>
+						<Col md={3}>
+							<Label>Асуултын төрөл</Label>
 							<Select
 								classNamePrefix='select'
 								className={classnames('react-select',)}
-								options={[]}
+								options={get_questionype()}
 								placeholder={'-- Сонгоно уу --'}
 								noOptionsMessage={() => 'Хоосон байна.'}
+								isClearable
 								onChange={(val) => {
-									console.log(val)
+									setType(val?.id || '')
 								}}
 								styles={ReactSelectStyles}
 								getOptionValue={(option) => option.id}
 								getOptionLabel={(option) => option.name}
 							/>
-						</div>
-					</div> */}
+						</Col>
+						<Col md={3}>
+							<Label>Асуултын түвшин</Label>
+							<Select
+								classNamePrefix='select'
+								className={classnames('react-select',)}
+								options={season == true ? get_leveltype() : get_levelseasons() }
+								placeholder={'-- Сонгоно уу --'}
+								noOptionsMessage={() => 'Хоосон байна.'}
+								onChange={(val) => {
+									setLevel(val?.id || '')
+								}}
+								isClearable
+								styles={ReactSelectStyles}
+								getOptionValue={(option) => option.id}
+								getOptionLabel={(option) => option.name}
+							/>
+						</Col>
+					</Row>
 					<div className="">
 						<DataTable
 							noHeader
@@ -216,7 +237,7 @@ const QuestionsList = ({filterId , teacher_id}) => {
 								total_count,
 								handleDelete,
 								handleQuestionEdit,
-								difficultyLevelsOption
+								season
 							)}
 							customStyles={customStyles}
 							paginationPerPage={rowsPerPage}
@@ -239,6 +260,7 @@ const QuestionsList = ({filterId , teacher_id}) => {
 						handleModal={handleModal}
 						getDatas={getDatas}
 						title={filterId}
+						season={season}
 					/>
 				)}
 				{editModal && (
@@ -247,6 +269,7 @@ const QuestionsList = ({filterId , teacher_id}) => {
 						handleModal={handleEditModal}
 						questionDetail={questionDetail}
 						getDatas={getDatas}
+						season={season}
 					/>
 				)}
 				{fileModal && (
@@ -254,6 +277,8 @@ const QuestionsList = ({filterId , teacher_id}) => {
 						isOpen={fileModal}
 						handleModal={handleFileModal}
 						refreshData={getDatas}
+						title={filterId}
+						season={season}
 					/>
 				)}
 			</Card>
