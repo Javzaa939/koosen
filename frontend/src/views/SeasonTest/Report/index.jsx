@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Card, Nav, NavItem, NavLink, TabContent } from 'reactstrap'
-import List from './List'
+import ReportPieChart from './ReportPieChart'
+import ReportDatatable from './ReportDatatable'
 
 export default function Report() {
     const [activeTab, setActiveTab] = useState(0)
@@ -9,14 +10,15 @@ export default function Report() {
     const button_list = [
         {
             name: 'Тайлан 1',
-            id: 0,
             icon: 'Activity',
-            component: <List />
+            id: 0,
+            component: <ReportPieChart />
         },
         {
             name: 'Тайлан 2',
             icon: 'Activity',
             id: 1,
+            component: <ReportDatatable report='student' />
         },
         {
             name: 'Тайлан 3',
