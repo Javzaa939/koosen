@@ -1,49 +1,103 @@
 // ** React Imports
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { Search } from 'react-feather'
 import { useTranslation } from 'react-i18next'
 import { Button, Col, Input, Label, Row } from 'reactstrap'
 
 import useApi from '@hooks/useApi'
-
-import { Search } from 'react-feather'
-import ExamFilter from '../../helpers/ExamFilter'
-import GenericDataTable from '../../helpers/GenericDataTable'
-import './style.scss'
 import { calculatePercentage } from '@src/utility/Utils'
 
-export default function ReportDatatable() {
+import ExamFilter from '../../helpers/ExamFilter'
+import GenericDataTable from '../../helpers/GenericDataTable'
+import GroupFilter from '../../helpers/GroupFilter'
+import './style.scss'
+
+export default function ReportDatatable({ report }) {
     // other hooks
     const { t } = useTranslation()
     const challengeApi = useApi().challenge
 
-    // states
+    // #region states
     const [selected_exam, setSelectedExam] = useState('')
+    const [selected_group, setSelectedGroup] = useState('')
+
     const [rows_per_page, setRowsPerPage] = useState(10)
     const [search_value, setSearchValue] = useState('')
     const [render_to_search, setRenderToSearch] = useState(false)
+    // #endregion
 
     // #region primitives
-    const columns = [
-        {
-            name: `${t('Оюутны код')}`,
-            selector: (row) => (<span>{row?.student_code}</span>),
-            center: true
-        },
-        {
-            name: `${t('Оюутны нэр')}`,
-            selector: (row) => (<span>{row?.student_name}</span>),
-            center: true
-        },
-        {
-            name: `${t('Оноо')} (%)`,
-            selector: (row) => (<span>{Math.round(calculatePercentage(row?.score, row?.take_score))}</span>),
-            center: true
-        },
-    ]
-
+    const columns = getColumns()
     const default_page = [10, 15, 50, 75, 100]
-    const report = 'students'
     // #endregion
+
+    function getColumns() {
+        switch (report) {
+            case 'students':
+                return [
+                    {
+                        name: `${t('Оюутны код')}`,
+                        selector: (row) => (<span>{row?.student_code}</span>),
+                        center: true
+                    },
+                    {
+                        name: `${t('Оюутны нэр')}`,
+                        selector: (row) => (<span>{row?.student_name}</span>),
+                        center: true
+                    },
+                    {
+                        name: `${t('Оноо')} (%)`,
+                        selector: (row) => (<span>{Math.round(calculatePercentage(row?.score, row?.take_score))}</span>),
+                        center: true
+                    },
+                ]
+            case 'groups':
+                return [
+                    {
+                        name: `${t('Ангийн нэр')}`,
+                        selector: (row) => (<span>{row?.student_code}</span>),
+                        center: true
+                    },
+                    {
+                        name: `${t('Оюутны тоо')}`,
+                        selector: (row) => (<span>{row?.student_name}</span>),
+                        center: true
+                    },
+                    {
+                        name: `${t('A')}`,
+                        selector: (row) => (<span>{ }</span>),
+                        center: true
+                    },
+                    {
+                        name: `${t('B')}`,
+                        selector: (row) => (<span>{ }</span>),
+                        center: true
+                    },
+                    {
+                        name: `${t('C')}`,
+                        selector: (row) => (<span>{ }</span>),
+                        center: true
+                    },
+                    {
+                        name: `${t('D')}`,
+                        selector: (row) => (<span>{ }</span>),
+                        center: true
+                    },
+                    {
+                        name: `${t('E')}`,
+                        selector: (row) => (<span>{ }</span>),
+                        center: true
+                    },
+                    {
+                        name: `${t('F')}`,
+                        selector: (row) => (<span>{ }</span>),
+                        center: true
+                    },
+                ]
+            default:
+                return []
+        }
+    }
 
     // ** Function to handle per page
     function handlePerPage(e) {
@@ -69,36 +123,45 @@ export default function ReportDatatable() {
                     <div style={{ width: '219.5px' }} className='me-1'>
                         <ExamFilter setSelected={setSelectedExam} />
                     </div>
-                    <div className='d-flex'>
-                        <div>
-                            <Label className="form-label" for='search-input'>
-                                {t('Хайх')}
-                            </Label>
-                            <div className='d-flex'>
-                                <Input
-                                    className='dataTable-filter'
-                                    type='text'
-                                    bsSize='sm'
-                                    id='search-input'
-                                    placeholder={t('Хайх')}
-                                    value={search_value}
-                                    onChange={handleFilter}
-                                    onKeyPress={e => e.key === 'Enter' && handleSearch()}
-                                    style={{ height: '30px' }}
-                                />
-                                <Button
-                                    size='sm'
-                                    className='ms-50'
-                                    color='primary'
-                                    onClick={handleSearch}
-                                    style={{ height: '30px' }}
-                                    disabled={!selected_exam}
-                                >
-                                    <Search size={15} />
-                                </Button>
+                    {
+                        report === 'students' &&
+                        <div className='d-flex'>
+                            <div>
+                                <Label className="form-label" for='search-input'>
+                                    {t('Хайх')}
+                                </Label>
+                                <div className='d-flex'>
+                                    <Input
+                                        className='dataTable-filter'
+                                        type='text'
+                                        bsSize='sm'
+                                        id='search-input'
+                                        placeholder={t('Хайх')}
+                                        value={search_value}
+                                        onChange={handleFilter}
+                                        onKeyPress={e => e.key === 'Enter' && handleSearch()}
+                                        style={{ height: '30px' }}
+                                    />
+                                    <Button
+                                        size='sm'
+                                        className='ms-50'
+                                        color='primary'
+                                        onClick={handleSearch}
+                                        style={{ height: '30px' }}
+                                        disabled={!selected_exam}
+                                    >
+                                        <Search size={15} />
+                                    </Button>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    }
+                    {
+                        report === 'groups' &&
+                        <div style={{ width: '219.5px' }} className='me-1'>
+                            <GroupFilter setSelected={setSelectedGroup} />
+                        </div>
+                    }
                 </Col>
             </Row>
             <Row className='mt-1'>
@@ -122,7 +185,7 @@ export default function ReportDatatable() {
                             ))
                         }
                     </Input>
-                    <GenericDataTable apiGetFunc={challengeApi.getReport} isApiGetFuncArgsDefault={true} apiGetFuncArgs={[report, selected_exam]} columns={columns} rows_per_page={rows_per_page} search_value={search_value} render_to_search={render_to_search} />
+                    <GenericDataTable apiGetFunc={challengeApi.getReport} isApiGetFuncArgsDefault={true} apiGetFuncArgs={[report, selected_exam, selected_group]} columns={columns} rows_per_page={rows_per_page} search_value={search_value} render_to_search={render_to_search} />
                 </Col>
             </Row>
         </div>

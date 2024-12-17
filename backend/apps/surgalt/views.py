@@ -87,7 +87,7 @@ from lms.models import get_choice_image_path
 
 from elselt.serializer import MentalUserSerializer
 
-from .serializers import LessonStandartSerializer
+from .serializers import ChallengeGroupsSerializer, LessonStandartSerializer
 from .serializers import LessonTitlePlanSerializer
 from .serializers import LessonStandartListSerializer
 from .serializers import LessonStandartSerialzier
@@ -5913,6 +5913,14 @@ class ChallengeReportAPIView(
         elif report_type == 'students':
             self.queryset = queryset
             get_result = self.list(request).data
+
+        elif report_type == 'groups':
+            # todo: finish
+            # self.queryset = queryset
+            # self.serializer_class = ChallengeGroupsSerializer
+            # get_result = self.list(request).data
+
+            pass
 
         return request.send_data(get_result)
 
