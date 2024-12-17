@@ -1737,6 +1737,14 @@ def undefined_to_none(datas=[]):
             datas[idx] = None
     return datas
 
+def find_linear_regression_line(sum_y, sum_x, s_y, s_x, r, x):
+
+    b = r * (s_y / s_x)
+    a = sum_y - b * sum_x
+    y = a + b * x
+
+    return x, y
+
 def pearson_corel(x, y):
 
     min_x = min(x)

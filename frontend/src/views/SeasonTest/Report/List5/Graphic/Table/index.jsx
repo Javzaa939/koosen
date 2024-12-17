@@ -1,4 +1,5 @@
 import React, { useCallback } from "react";
+import { Table } from "reactstrap";
 
 /**
  * @param {} props
@@ -10,8 +11,9 @@ const AnalysisTable = (props) => {
     const extraData = props?.extra ?? {};
 
     const makeRow = useCallback(() => {
+        var checked_data = chartData?.[0]?.data
         const rows = names.map((name, idx) => {
-            const item = chartData.find((e) => e.name === name);
+            const item = checked_data?.find((e) => e.name?.includes(name));
             return {
                 id: idx + 1,
                 lesson: extraData.lesson,
@@ -50,15 +52,12 @@ const AnalysisTable = (props) => {
 
     return (
         <div style={{ padding: "16px" }}>
-            <h3>Хүснэгтэн байдлаар</h3>
-            <table
-                style={{
-                    width: "100%",
-                    borderCollapse: "collapse",
-                    textAlign: "center",
-                }}
+            <h4>Хүснэгтэн байдлаар</h4>
+            <Table
+                responsive
+                bordered
+                size="sm"
             >
-                {/* Table Header */}
                 <thead>
                     <tr>
                         {columns.map((col) => (
@@ -95,7 +94,7 @@ const AnalysisTable = (props) => {
                         </tr>
                     ))}
                 </tbody>
-            </table>
+            </Table>
         </div>
     );
 };

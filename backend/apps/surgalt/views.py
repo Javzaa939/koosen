@@ -6182,8 +6182,6 @@ class AnalysisApiView(
 
         extra_filters = {}
 
-        dep = request.GET.get('dep')
-
         year = request.GET.get("year")
         season = request.GET.get("season")
         lesson = request.GET.get("lesson")
@@ -6206,9 +6204,6 @@ class AnalysisApiView(
 
         if lesson:
             extra_filters['lesson'] = lesson
-
-        if dep:
-            extra_filters['lesson__department'] = dep
 
         if teacher:
             extra_filters['teacher'] = teacher

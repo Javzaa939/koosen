@@ -53,15 +53,15 @@ const List5 = () => {
         }
     }
 
-    async function getTeachers(dep_id) {
-        const { success, data } = await fetchData(teacherApi.get(dep_id))
+    async function getTeachers(lesson_id) {
+        const { success, data } = await fetchData(teacherApi.getLessonToTeacher(lesson_id))
         if (success) {
             setTeacherOption(data)
         }
     }
 
-    async function getLesson(dep_id, teacher_id) {
-        const { success, data } = await fetchData(lessonApi.getLessonListByTeacher(dep_id, teacher_id))
+    async function getLesson(dep_id) {
+        const { success, data } = await fetchData(lessonApi.getLessonListByTeacher(dep_id))
         if (success) {
             setLessonOption(data)
         }
@@ -82,26 +82,26 @@ const List5 = () => {
 
     useEffect(
         () => {
-            if (select_value.department) {
-                getTeachers(select_value.department)
+            if (select_value.lesson) {
+                getTeachers(select_value.lesson)
             }
             else {
                 getTeachers(0)
             }
         },
-        [select_value.department]
+        [select_value.lesson]
     )
 
     useEffect(
         () => {
-            if (select_value.department && select_value.teacher) {
-                getLesson(select_value.department, select_value.teacher)
+            if (select_value.department) {
+                getLesson(select_value.department)
             }
             else {
                 setLessonOption([])
             }
         },
-        [select_value.department, select_value.teacher]
+        [select_value.department]
     )
 
     useEffect(
@@ -223,43 +223,6 @@ const List5 = () => {
                 </Col>
                 <Col md={3} className='mb-1'>
                     <Label className="form-label" for="teacher">
-                        {t('Заах багш')}
-                    </Label>
-                    <Select
-                        name="teacher"
-                        id="teacher"
-                        classNamePrefix='select'
-                        isClearable
-                        className={classnames('react-select')}
-                        isLoading={isLoading}
-                        placeholder={t('-- Сонгоно уу --')}
-                        options={teacherOption || []}
-                        value={teacherOption.find((c) => c.id === select_value.teacher)}
-                        noOptionsMessage={chooseDep}
-                        onChange={(val) => {
-                            if (val?.id) {
-                                setSelectValue(current => {
-                                    return {
-                                        ...current,
-                                        teacher: val?.id
-                                    }
-                                })
-                            } else {
-                                setSelectValue(current => {
-                                    return {
-                                        ...current,
-                                        teacher: ''
-                                    }
-                                })
-                            }
-                        }}
-                        styles={ReactSelectStyles}
-                        getOptionValue={(option) => option.id}
-                        getOptionLabel={(option) => `${option?.last_name[0]}.${option?.first_name}`}
-                    />
-                </Col>
-                <Col md={3} className='mb-1'>
-                    <Label className="form-label" for="teacher">
                         {t('Хичээл')}
                     </Label>
                     <Select
@@ -293,6 +256,43 @@ const List5 = () => {
                         styles={ReactSelectStyles}
                         getOptionValue={(option) => option.id}
                         getOptionLabel={(option) => option.fname}
+                    />
+                </Col>
+                <Col md={3} className='mb-1'>
+                    <Label className="form-label" for="teacher">
+                        {t('Заах багш')}
+                    </Label>
+                    <Select
+                        name="teacher"
+                        id="teacher"
+                        classNamePrefix='select'
+                        isClearable
+                        className={classnames('react-select')}
+                        isLoading={isLoading}
+                        placeholder={t('-- Сонгоно уу --')}
+                        options={teacherOption || []}
+                        value={teacherOption.find((c) => c.id === select_value.teacher)}
+                        noOptionsMessage={chooseDep}
+                        onChange={(val) => {
+                            if (val?.id) {
+                                setSelectValue(current => {
+                                    return {
+                                        ...current,
+                                        teacher: val?.id
+                                    }
+                                })
+                            } else {
+                                setSelectValue(current => {
+                                    return {
+                                        ...current,
+                                        teacher: ''
+                                    }
+                                })
+                            }
+                        }}
+                        styles={ReactSelectStyles}
+                        getOptionValue={(option) => option.id}
+                        getOptionLabel={(option) => `${option?.last_name[0]}.${option?.first_name}`}
                     />
                 </Col>
                 <Col md={2} className='mt-1'>
