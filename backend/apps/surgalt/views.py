@@ -87,7 +87,7 @@ from lms.models import get_choice_image_path
 
 from elselt.serializer import MentalUserSerializer
 
-from .serializers import LessonStandartSerializer
+from .serializers import ChallengeGroupsSerializer, LessonStandartSerializer
 from .serializers import LessonTitlePlanSerializer
 from .serializers import LessonStandartListSerializer
 from .serializers import LessonStandartSerialzier
@@ -5787,22 +5787,30 @@ class TestQuestionsDifficultyLevelsAPIView(
 @permission_classes([IsAuthenticated])
 class ChallengeReportAPIView(
     generics.GenericAPIView,
+    mixins.ListModelMixin,
 ):
     "Challenge report"
 
-    queryset = ChallengeStudents.objects
+    queryset = ChallengeStudents.objects.order_by('-score')
     serializer_class = ChallengeStudentsSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['student__code', 'student__first_name']
 
     def get(self, request):
         report_type = request.query_params.get('report_type')
+        exam = request.query_params.get('exam')
 
-        if not report_type:
+        if not report_type or not exam:
 
             return request.send_error('ERR_002')
 
-        queryset = self.queryset.filter(challenge__challenge_type=Challenge.SEMESTR_EXAM)
+        queryset = self.queryset.filter(challenge__challenge_type=Challenge.SEMESTR_EXAM, challenge__id=exam)
+        get_result = []
 
-        if report_type == '1':
+        if report_type == 'reliability':
             exam_results = []
 
             for obj in queryset:
@@ -5845,8 +5853,6 @@ class ChallengeReportAPIView(
                 "Хялбар": lambda question_reliability: 61 <= question_reliability <= 80,
                 "Маш хялбар": lambda question_reliability: question_reliability >= 81,
             }
-
-            get_result = []
 
             for item in exams:
                 exam_id = item.get('challenge__id')
@@ -5899,6 +5905,18 @@ class ChallengeReportAPIView(
                     "questions_reliabilities": [{"questions_reliability_name": key, "questions": questions, "questions_count": len(questions)} for key, questions in grouped_questions.items()]
 
                 })
+
+        elif report_type == 'students':
+            self.queryset = queryset
+            get_result = self.list(request).data
+
+        elif report_type == 'groups':
+            # todo: finish
+            # self.queryset = queryset
+            # self.serializer_class = ChallengeGroupsSerializer
+            # get_result = self.list(request).data
+
+            pass
 
         return request.send_data(get_result)
 
