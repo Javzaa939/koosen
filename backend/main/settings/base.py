@@ -56,6 +56,52 @@ GPT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6
 
 ALLOWED_HOSTS = []
 
+GPA_ANALYSIS_1_MIN = [
+    {
+        "count": 5,
+        "name": "A"
+    },
+    {
+        "count": 15,
+        "name": "B"
+    },
+    {
+        "count": 20,
+        "name": "C"
+    },
+    {
+        "count": 10,
+        "name": "D"
+    },
+    {
+        "count": 0,
+        "name": "F"
+    },
+]
+
+GPA_ANALYSIS_1_MAX = [
+    {
+        "count": 25,
+        "name": "A"
+    },
+    {
+        "count": 30,
+        "name": "B"
+    },
+    {
+        "count": 40,
+        "name": "C"
+    },
+    {
+        "count": 34,
+        "name": "D"
+    },
+    {
+        "count": 25,
+        "name": "F"
+    },
+]
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',

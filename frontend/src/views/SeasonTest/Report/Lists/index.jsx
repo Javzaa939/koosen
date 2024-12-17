@@ -1,39 +1,24 @@
 import React, { useState, useEffect } from 'react'
 import { Card, Nav, NavItem, NavLink, TabContent } from 'reactstrap'
-import List from './List'
-import Lists from './Lists'
+import List5 from '../List5'
+import List6 from '../List6'
 
-export default function Report() {
+export default function Lists() {
     const [activeTab, setActiveTab] = useState(0)
     const [component, setComponent] = useState('')
 
     const button_list = [
         {
-            name: 'Тайлан 1',
+            name: 'Дүнгийн шинжилгээ 1',
             id: 0,
             icon: 'Activity',
-            component: <List />
+            component: <List5 />
         },
         {
-            name: 'Тайлан 2',
+            name: 'Дүнгийн шинжилгээ 2',
             icon: 'Activity',
             id: 1,
-        },
-        {
-            name: 'Тайлан 3',
-            icon: 'Activity',
-            id: 2,
-        },
-        {
-            name: 'Тайлан 4',
-            icon: 'Activity',
-            id: 3,
-        },
-        {
-            name: 'Тайлан 5',
-            icon: 'Activity',
-            id: 4,
-            component:<Lists/>
+            component: <List6/>
         },
     ]
 
@@ -51,7 +36,7 @@ export default function Report() {
 
     return (
         <Card>
-            <Nav tabs>
+            <Nav tabs className="d-flex justify-content-center">
             {button_list.map(button => {
                 return(
                     <NavItem key={button?.id}>

@@ -1736,3 +1736,46 @@ def undefined_to_none(datas=[]):
         if value == 'undefined':
             datas[idx] = None
     return datas
+
+def pearson_corel(x, y):
+
+    min_x = min(x)
+    max_x = max(x)
+
+    len_x = len(x)
+    len_y = len(y)
+
+    sum_x = sum(x) / len_x
+    sum_y = sum(y) / len_y
+
+    all_x = 0
+    all_y = 0
+
+    all_x_y = 0
+
+    for item_x in x:
+        all_x = all_x + (abs(item_x - sum_x)) ** 2
+
+    for item_y in y:
+        all_y = all_y + (abs(item_y - sum_y)) ** 2
+
+    for idx in range(0, len_x):
+        item_x = x[idx]
+        item_y = y[idx]
+
+        all_x_y = all_x_y + (item_x - sum_x) * (item_y - sum_y)
+
+    s_x_y = all_x_y / (len_x - 1)
+
+    s_x = math.sqrt((all_x) / (len_x - 1))
+    s_y = math.sqrt((all_y) / (len_y - 1))
+
+    r = all_x_y / math.sqrt((all_x * all_y))
+
+    start_x, start_y = find_linear_regression_line(sum_y, sum_x, s_y, s_x, r, min_x)
+    end_x, end_y = find_linear_regression_line(sum_y, sum_x, s_y, s_x, r, max_x)
+
+    return r, [
+        [start_x, start_y],
+        [end_x, end_y],
+    ]
