@@ -1600,9 +1600,12 @@ export const get_leveltype = () => {
 
 	const datas = []
 	const list = [
-		'Хөнгөн',
-		'Дунд',
-		'Хүнд',
+		'Түвшин-1',
+		'Түвшин-2',
+		'Түвшин-3',
+		'Түвшин-4',
+		'Түвшин-5',
+		'Түвшин-6',
 	]
 
 	list.map((list, idx) => {
@@ -1613,7 +1616,6 @@ export const get_leveltype = () => {
 
 		datas.push(data)
 	})
-
 	return datas
 }
 
