@@ -578,17 +578,24 @@ class TeacherApiView(
     def get_queryset(self):
         "Багшийн мэдээллийг сургууль, Хөтөлбөрийн багаар харуулах "
 
-        queryset = self.queryset
-        teacher_queryset = queryset.all().values_list('user', flat=True)
-        qs_employee_user = Employee.objects.filter(user_id__in=list(teacher_queryset), state=Employee.STATE_WORKING).values_list('user', flat=True)
-        if qs_employee_user:
-            queryset = queryset.filter(user_id__in = list(qs_employee_user))
+        queryset = get_teacher_queryset(False)
 
-        queryset = get_teacher_queryset()
+        # Бүх төвөвтэй багшийн жагсаалт
+        state = self.request.query_params.get('state')
         sub_org = self.request.query_params.get('sub_org')
         salbar = self.request.query_params.get('salbar')
         position = self.request.query_params.get('position')
         sorting = self.request.query_params.get('sorting')
+
+        teacher_queryset = queryset.all().values_list('user', flat=True)
+        qs_employee_user = Employee.objects.filter(user__in=list(teacher_queryset))
+
+        # Төлвөөр хайх
+        if state:
+            state = int(state)
+            qs_employee_user = qs_employee_user.filter(state=state)
+            user_ids = qs_employee_user.values_list('user', flat=True)
+            queryset = queryset.filter(user__in=user_ids)
 
         # Бүрэлдэхүүн сургууль
         if sub_org:
@@ -600,9 +607,9 @@ class TeacherApiView(
 
         # Албан тушаалаар хайх
         if position:
-            user_ids = Employee.objects.filter(org_position=position, state=Employee.STATE_WORKING).values_list('user', flat=True)
-
-            queryset = queryset.filter(user_id__in=user_ids)
+            qs_employee_user = qs_employee_user.filter(org_position=position)
+            user_ids = qs_employee_user.values_list('user', flat=True)
+            queryset = queryset.filter(user__in=user_ids)
 
         # Sort хийх үед ажиллана
         if sorting:
@@ -620,6 +627,7 @@ class TeacherApiView(
         " нийт багшийн жагсаалт"
 
         teach_info = self.list(request).data
+
         return request.send_data(teach_info)
 
 
@@ -1050,7 +1058,6 @@ class EmployeeApiView(
 
         return request.send_info("INF_001")
 
-
     def put(self, request, pk=None):
         datas = request.data
         instance = Teachers.objects.filter(id=pk).first()
@@ -1067,8 +1074,7 @@ class EmployeeApiView(
             return request.send_error_valid(userinfo_serializer.errors)
 
         userinfo_serializer.save()
-
-        employee_obj = Employee.objects.filter(user=user_obj, state=Employee.STATE_WORKING).first()
+        employee_obj = Employee.objects.filter(user=user_obj).first()
         employee_serializer = EmployeeSerializer(employee_obj, data=datas, partial=True)
         if not employee_serializer.is_valid(raise_exception=True):
             return request.send_error_valid(employee_serializer.errors)

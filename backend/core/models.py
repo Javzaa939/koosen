@@ -407,11 +407,15 @@ class Employee(models.Model):
     STATE_WORKING = 1
     STATE_FIRED = 2
     STATE_LEFT = 3
+    STATE_MOVE = 4
+    STATE_RETIRED = 5
 
     STATE = (
         (STATE_WORKING, 'Ажиллаж байгаа'),
-        (STATE_FIRED, 'Халагдсан'),
+        (STATE_FIRED, 'Халагдсан (Чөлөөлөгдсөн)'),
         (STATE_LEFT, 'Гарсан'),
+        (STATE_MOVE, 'Шилжсэн'),
+        (STATE_RETIRED, 'Тэтгэвэрт гарсан'),
     )
 
     WORKER_TYPE_CONTRACT = 1

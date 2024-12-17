@@ -51,6 +51,38 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, h
 			wrap: true,
 		},
 		{
+			header: 'state',
+			name: t("Ажилтны төлөв"),
+			selector: (row) => {
+                return (
+                    row?.state == 1
+                    ?
+                        <Badge color="light-success" pill>
+                            {t('Ажиллаж байгаа')}
+                        </Badge>
+					:
+						row?.state == 5
+						?
+							<Badge color="light-warning" pill>
+								{t('Тэтгэвэрт гарсан')}
+							</Badge>
+						:
+							row?.state == 4
+							?
+								<Badge color="light-warning" pill>
+									{t('Шилжсэн')}
+								</Badge>
+							:
+								<Badge color="light-danger" pill>
+									{t('Чөлөөлөгдсөн')}
+								</Badge>
+                )
+            },
+            sortable: false,
+            center: true,
+            minWidth: '230px'
+        },
+		{
             name: `${t('Үйлдэл')}`,
 
             selector:  (row) => (

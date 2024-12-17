@@ -1818,8 +1818,9 @@ export const get_emp_state = () =>
 {
   const options = [
     { id: 1, name: 'Ажиллаж байгаа' },
-    { id: 2, name: 'Халагдсан' },
-    { id: 3, name: 'Гарсан' },
+    { id: 2, name: 'Чөлөөлөгдсөн' },
+    { id: 4, name: 'Шилжсэн' },
+    { id: 5, name: 'Тэтгэвэрт гарсан' },
   ]
 
   return options
