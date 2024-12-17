@@ -46,8 +46,18 @@ export default function ReportDatatable({ report }) {
                         center: true
                     },
                     {
-                        name: `${t('Оноо')} (%)`,
-                        selector: (row) => (<span>{Math.round(calculatePercentage(row?.score, row?.take_score))}</span>),
+                        name: `${t('Авах оноо')}`,
+                        selector: (row) => (<span>{row?.take_score}</span>),
+                        center: true
+                    },
+                    {
+                        name: `${t('Авсан оноо')}`,
+                        selector: (row) => (<span>{row?.score}</span>),
+                        center: true
+                    },
+                    {
+                        name: `${t('Хувиар')}`,
+                        selector: (row) => (<span>{Math.round(calculatePercentage(row?.score, row?.take_score))}%</span>),
                         center: true
                     },
                 ]

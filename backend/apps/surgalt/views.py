@@ -5795,7 +5795,7 @@ class ChallengeReportAPIView(
 ):
     "Challenge report"
 
-    queryset = ChallengeStudents.objects
+    queryset = ChallengeStudents.objects.order_by('-score')
     serializer_class = ChallengeStudentsSerializer
 
     pagination_class = CustomPagination
