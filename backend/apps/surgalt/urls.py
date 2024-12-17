@@ -62,8 +62,13 @@ urlpatterns = [
     path('challenge/send/<int:pk>/', ChallengeSendAPIView.as_view()),
     path('challenge/approve/', ChallengeApprovePIView.as_view()),
     path('challenge/timetable/', TeacherExaminationScheduleAPIView.as_view()),
+
     path('challenge/add/sedev/count/', ChallengeSedevCountAPIView.as_view()),
     path('challenge/add/sedev/count/<int:pk>/', ChallengeSedevCountAPIView.as_view()),
+
+    path('challenge/add/level/count/', ChallengeLevelCountAPIView.as_view()),
+    path('challenge/add/level/count/<int:pk>/', ChallengeLevelCountAPIView.as_view()),
+
 	path('challenge/add/', ChallengeAddInformationAPIView.as_view()),
     path('challenge/add/<int:pk>/', ChallengeAddInformationAPIView.as_view()),
     path('challenge/add/student/', ChallengeAddStudentAPIView.as_view()),
@@ -84,6 +89,7 @@ urlpatterns = [
     path('questions/title/', QuestionsTitleAPIView.as_view()),
     path('questions/title/<int:pk>/', QuestionsTitleAPIView.as_view()),
     path('questions/title/list/<int:pk>/', QuestionsTitleListAPIView.as_view()),
+    path('questions/level/list/', QuestionsLevelListAPIView.as_view()),
     path('questions/excel/',QuestionExcelAPIView.as_view()),
 
 
@@ -136,6 +142,7 @@ urlpatterns = [
     path('lesson/material/send-material/<int:lesson>/', LessonMaterialSendApiView.as_view()),
 
     path('lesson/approve/', LessonMaterialApproveApiView.as_view()),
+    path('lesson/challenge/', LessonChallengeApiView.as_view()),
 
     path('lesson/editor/image/<int:pk>/', LessonEditorImage.as_view()),
 

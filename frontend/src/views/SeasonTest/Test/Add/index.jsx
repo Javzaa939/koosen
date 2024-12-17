@@ -1,372 +1,115 @@
-import { useState, Fragment, useEffect } from 'react';
-import { useForm, Controller } from "react-hook-form";
-import { convertDefaultValue, ReactSelectStyles, validate } from "@utils";
-import { validateSchema } from "./validationSchema";
-import { t } from 'i18next';
+// ** React Imports
+import { useRef, useState, Fragment } from 'react'
 
+// ** Custom Components
+import Wizard from '@components/wizard'
 import {
 	Modal,
 	ModalHeader,
 	ModalBody,
-    Row,
-    Form,
-    Col,
-    Label,
-    Input,
-    Button,
-    FormFeedback,
 } from "reactstrap";
 
-import Select from 'react-select';
+import { Info, User, X } from 'react-feather'
+
+// ** Steps
+import General from './Steps/General'
+import Students from './Steps/Students';
+
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
-import Flatpickr from 'react-flatpickr';
-import '@styles/react/libs/flatpickr/flatpickr.scss';
 
-const Addmodal = ({ open, handleModal, refreshDatas, select_datas, editData }) => {
-    const lesson_options = select_datas[0]
-    const difficulty_levels_options = select_datas[1]
+import { convertDefaultValue } from "@utils"
 
-    const { control, handleSubmit, setError, setValue, formState: { errors } } = useForm(validate(validateSchema))
-	const { fetchData } = useLoader({ isFullScreen: true });
+const Addmodal = ({ open, handleModal, setEditRowData, refreshDatas }) => {
 
-    const [endPicker, setEndPicker] = useState(new Date(editData?.end_date))
-	const [startPicker, setStartPicker] = useState(new Date(editData?.start_date))
+    // ** Ref
+    const ref = useRef(null)
 
+	const [selectedLesson, setSelectedLesson] = useState('')
+
+    // ** State
+    const [stepper, setStepper] = useState(null)
+
+	const [submitDatas, setSubmitDatas] = useState({})
+
+    // API
     const challengeAPI = useApi().challenge
 
-    useEffect(() => {
-        if(editData && Object.keys(editData).length > 0) {
-            for(let key in editData) {
-                if (editData[key] !== null && editData[key] !== undefined) {
-                    setValue(key, editData[key])
-                } else {
-                    setValue(key, '')
-                }
-                if (key === 'lesson') {
-                    setValue(key, editData[key]?.id || '');
-                }
-            }
-        }
-	}, [editData]);
+    // Loader
+	const { isLoading, fetchData, Loader } = useLoader({ isFullScreen: true });
 
-    async function onSubmit(cdata) {
+    const closeBtn = (
+        <X className="cursor-pointer" size={15} onClick={handleModal} />
+    );
 
-        cdata['start_date'] = new Date(startPicker)
-        cdata['end_date'] = new Date(endPicker)
-        cdata = convertDefaultValue(cdata)
-        if (editData !== undefined && Object.keys(editData)?.length > 0) {
-            const { success, errors } = await fetchData(challengeAPI.putSelectedTest(cdata, editData?.id))
-            if(success) {
-                handleModal()
-                refreshDatas()
-            }
-            else {
-                /** Алдааны мессэжийг input дээр харуулна */
-                for (let key in errors) {
-                    setError(errors[key].field, { type: 'custom', message:  errors[key].msg});
-                }
-            }
-        } else {
-            const { success, error } = await fetchData(challengeAPI.postTest(cdata, 1))
-            if(success) {
-                handleModal()
-                refreshDatas()
-            }
-            else {
-                /** Алдааны мессэжийг input дээр харуулна */
-                for (let key in error) {
-                    setError(error[key].field, { type: 'custom', message:  error[key].msg});
-                }
-            }
+    const onSubmit = async(students) => {
+
+        var cdatas = convertDefaultValue(submitDatas)
+        cdatas['students'] = students
+
+        const { success, data } = await fetchData(challengeAPI.postTest(cdatas, 1))
+        if(success)
+        {
+            handleModal()
+            refreshDatas()
         }
-	}
+
+    }
+
+    const steps = [
+        {
+            id: 'main-information',
+            title: 'Ерөнхий мэдээлэл',
+            subtitle: 'Шалгалтын мэдээлэл',
+            icon: <Info size={18} />,
+            content: <General
+                        stepper={stepper}
+                        setSubmitDatas={setSubmitDatas}
+                        setSelectedLesson={setSelectedLesson}
+                        setEditRowData={setEditRowData}
+                    />
+        },
+        {
+            id: 'student-information',
+            title: 'Шалгалтад оролцогчид',
+            subtitle: 'Оюутны мэдээлэл',
+            icon: <User size={18} />,
+            content: <Students
+                    stepper={stepper}
+                    setSubmitDatas={setSubmitDatas}
+                    onSubmit={onSubmit}
+                    selectedLesson={selectedLesson}
+                    setEditRowData={setEditRowData}
+                />
+        },
+    ]
 
     return (
         <Fragment>
             <Modal
                 isOpen={open}
                 toggle={handleModal}
-                className="modal-dialog-centered modal-lg"
-                contentClassName="pt-0"
-                fade={true}
-                backdrop='static'
+                className='sidebar-xl custom-80'
+                modalClassName='modal-slide-in'
+                contentClassName='pt-0'
             >
-                <ModalHeader toggle={handleModal}></ModalHeader>
-                {
-                    Object.keys(editData)?.length > 0
-                    ?
-                        <ModalHeader className='bg-transparent pb-0' cssModule={{'modal-title': 'w-100 text-center'}}>
-                            <h4>{t('Шалгалт засах')}</h4>
-                        </ModalHeader>
-                    :
-                        <ModalHeader className='bg-transparent pb-0' cssModule={{'modal-title': 'w-100 text-center'}}>
-                            <h4>{t('Шалгалт нэмэх')}</h4>
-                        </ModalHeader>
-                }
-                <ModalBody className="flex-grow-50 mb-3 t-0">
-                    <Row tag={Form} onSubmit={handleSubmit(onSubmit)}>
-                        <Col md={12}>
-                            <Label className="form-label" for="title">
-                                {t('Гарчиг')}
-                            </Label>
-                            <Controller
-                                defaultValue=''
-                                control={control}
-                                id="title"
-                                name="title"
-                                render={({ field }) => (
-                                    <Input
-                                        {...field}
-                                        id="title"
-                                        bsSize="sm"
-                                        placeholder={editData?.title}
-                                        type="text"
-                                        invalid={errors.title && true}
-                                    />
-                                )}
-                            />
-                            {errors.title && <FormFeedback className='d-block'>{t(errors.title.message)}</FormFeedback>}
-                        </Col>
-                        <Col md={12} className='mt-50'>
-                            <Label className="form-label" for="description">
-                                {t('Тайлбар')}
-                            </Label>
-                            <Controller
-                                defaultValue={''}
-                                control={control}
-                                id="description"
-                                name="description"
-                                render={({ field }) => (
-                                    <Input
-                                        {...field}
-                                        id="description"
-                                        bsSize="sm"
-                                        placeholder={editData?.description}
-                                        type="textarea"
-                                        invalid={errors.description && true}
-                                        rows={'5'}
-                                    />
-                                )}
-                            />
-                            {errors.description && <FormFeedback className='d-block'>{t(errors.description.message)}</FormFeedback>}
-                        </Col>
-                        <Col md={6} className='mt-50'>
-                            <Label className="form-label" for="lesson">
-                                {t('Хичээл')}
-                            </Label>
-                            <Controller
-                                control={control}
-                                defaultValue=''
-                                name="lesson"
-                                render={({ field: { value, onChange} }) => {
-                                    return (
-                                        <Select
-                                            id="lesson"
-                                            name="lesson"
-                                            isClearable
-                                            classNamePrefix='select'
-                                            className='react-select'
-                                            placeholder={t(`-- Сонгоно уу --`)}
-                                            value={lesson_options.find((c) => c.id === value)}
-                                            options={lesson_options || []}
-                                            noOptionsMessage={() => 'Хоосон байна'}
-                                            onChange={(val) => {
-                                                onChange(val?.id || '')
-                                            }}
-                                            styles={ReactSelectStyles}
-                                            getOptionValue={(option) => option.id}
-                                            getOptionLabel={(option) => option.code + ' ' + option.name}
-                                        />
-                                    )
-                                }}
-                            ></Controller>
-                            {errors.lesson && <FormFeedback className='d-block'>{t(errors.lesson.message)}</FormFeedback>}
-                        </Col>
-                        <Col md={6} className='mt-50'>
-                            <Label className="form-label" for="duration">
-                                {t('Үргэлжлэх хугацаа (минутаар)')}
-                            </Label>
-                            <Controller
-                                defaultValue=''
-                                control={control}
-                                id="duration"
-                                name="duration"
-                                render={({ field }) => (
-                                    <Input
-                                        {...field}
-                                        id ="duration"
-                                        bsSize="sm"
-                                        placeholder={'Үргэлжлэх хугацаа (минутаар)'}
-                                        type="number"
-                                        invalid={errors.duration && true}
-                                    />
-                                )}
-                            />
-                            {errors.duration && <FormFeedback className='d-block'>{t(errors.duration.message)}</FormFeedback>}
-                        </Col>
-                        <Col md={6} className='mt-50'>
-                            <Label className="form-label" for="start_date">
-                                {t('Эхлэх хугацаа')}
-                            </Label>
-                            <Flatpickr
-                                required
-                                id='start_date'
-                                name='start_date'
-                                className='form-control'
-                                onChange={setStartPicker}
-                                value={startPicker}
-                                style={{height: "30px"}}
-                                options={{
-                                    enableTime: true,
-                                    dateFormat: 'Y-m-d H:i',
-                                    time_24hr: true,
-                                }}
-                            />
-                            {errors.start_date && <FormFeedback className='d-block'>{t(errors.start_date.message)}</FormFeedback>}
-                        </Col>
-                        <Col md={6} className='mt-50'>
-                            <Label className="form-label" for="end_date">
-                                {t('Дуусах хугацаа')}
-                            </Label>
-                            <Flatpickr
-                                required
-                                id='end_date'
-                                name='end_date'
-                                className='form-control'
-                                onChange={setEndPicker}
-                                value={endPicker}
-                                style={{height: "30px"}}
-                                options={{
-                                    enableTime: true,
-                                    dateFormat: 'Y-m-d H:i',
-                                    time_24hr: true,
-                                }}
-                            />
-                            {errors.end_date && <FormFeedback className='d-block'>{t(errors.end_date.message)}</FormFeedback>}
-                        </Col>
-                        <Col md={6} className='mt-50'>
-                            <Label className="form-label" for="question_count">
-                                {t('Асуултын тоо')}
-                            </Label>
-                            <Controller
-                                defaultValue=''
-                                control={control}
-                                id="question_count"
-                                name="question_count"
-                                render={({ field }) => (
-                                    <Input
-                                        {...field}
-                                        id ="question_count"
-                                        bsSize="sm"
-                                        placeholder={'Асуултын тоо'}
-                                        type="number"
-                                        invalid={errors.question_count && true}
-                                    />
-                                )}
-                            />
-                            {errors.question_count && <FormFeedback className='d-block'>{t(errors.question_count.message)}</FormFeedback>}
-                        </Col>
-                        <Col md={6} className='mt-50'>
-                            <Label className="form-label" for="level">
-                                {t('Түвшин')}
-                            </Label>
-                            <Controller
-                                defaultValue=''
-                                control={control}
-                                name="level"
-                                render={({ field }) => (
-                                    <Select
-                                        id={field.name}
-                                        isClearable
-                                        classNamePrefix='select'
-                                        className='react-select'
-                                        placeholder={t(`-- Сонгоно уу --`)}
-                                        options={difficulty_levels_options || []}
-                                        value={difficulty_levels_options?.find((c) => c.value == field.value)}
-                                        noOptionsMessage={() => 'Хоосон байна'}
-                                        onChange={(val) => {
-                                            field.onChange(val?.value || '')
-                                        }}
-                                        styles={ReactSelectStyles}
-                                    />
-                                )}
-                            />
-                            {errors.level && <FormFeedback className='d-block'>{t(errors.level.message)}</FormFeedback>}
-                        </Col>
-                        <Col md={6} className='mt-50'>
-                            <Label className="form-label" for="try_number">
-                                {t('Оролдлогын тоо')}
-                            </Label>
-                            <Controller
-                                defaultValue=''
-                                control={control}
-                                name="try_number"
-                                render={({ field }) => (
-                                    <Input
-                                        {...field}
-                                        id={field.name}
-                                        bsSize="sm"
-                                        placeholder={'Оролдлогын тоо'}
-                                        type="number"
-                                        invalid={errors[field.name] && true}
-                                    />
-                                )}
-                            />
-                            {errors.try_number && <FormFeedback className='d-block'>{t(errors.try_number.message)}</FormFeedback>}
-                        </Col>
-                        <Col md={12} className='mt-50'>
-                            <Controller
-                                control={control}
-                                name="is_open"
-                                defaultValue={false}
-                                render={({ field }) => (
-                                    <Input
-                                        {...field}
-                                        id={field.name}
-                                        type="checkbox"
-                                        checked={field.value}
-                                        className='me-50'
-                                    />
-                                )}
-                            />
-                            <Label className="form-label" for="is_open">
-                                {t('Нээлттэй эсэх')}
-                            </Label>
-                            {errors.is_open && <FormFeedback className='d-block'>{t(errors.is_open.message)}</FormFeedback>}
-                        </Col>
-                        <Col md={12} className='mt-50'>
-                            <Controller
-                                control={control}
-                                name="has_shuffle"
-                                defaultValue={false}
-                                render={({ field }) => (
-                                    <Input
-                                        {...field}
-                                        id={field.name}
-                                        type="checkbox"
-                                        checked={field.value}
-                                        className='me-50'
-                                    />
-                                )}
-                            />
-                            <Label className="form-label" for="has_shuffle">
-                                {t('Шалгалтын асуултыг оюутан бүрээр холих эсэх')}
-                            </Label>
-                            {errors.has_shuffle && <FormFeedback className='d-block'>{t(errors.has_shuffle.message)}</FormFeedback>}
-                        </Col>
-                        <Col md={12} className="text-center mt-2">
-                            <Button className='me-2' color="primary" type="submit">
-                                {t('Хадгалах')}
-                            </Button>
-                            <Button color="secondary" outline type="reset" onClick={handleModal}>
-                                {t('Буцах')}
-                            </Button>
-                        </Col>
-                    </Row>
+                <ModalHeader
+                    className="mb-1"
+                    toggle={handleModal}
+                    close={closeBtn}
+                    tag="div"
+                >
+                    <h5 className="modal-title">{"Шалгалт нэмэх"}</h5>
+                </ModalHeader>
+                <ModalBody className="flex-grow-1">
+                    {isLoading && Loader}
+                    <div className='horizontal-wizard'>
+                        <Wizard instance={el => setStepper(el)} ref={ref} steps={steps} />
+                    </div>
                 </ModalBody>
             </Modal>
         </Fragment>
     )
 }
+
 export default Addmodal

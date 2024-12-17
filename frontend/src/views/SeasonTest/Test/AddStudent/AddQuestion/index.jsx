@@ -30,7 +30,7 @@ const AddQuestion = ({ open, handleModal, lesson, refreshDatas, challenge, refre
     const challengesAPI = useApi().challenge
 
     async function getSelectDatas() {
-        const { success, data } = await fetchData(challengeAPI.getTitle(lesson, true))
+        const { success, data } = await fetchData(challengeAPI.getLevel(lesson))
         if (success) {
             setSelectDatas(data)
         }
@@ -46,7 +46,7 @@ const AddQuestion = ({ open, handleModal, lesson, refreshDatas, challenge, refre
     async function onSubmit(cdata) {
         cdata['challenge'] = challenge;
         cdata = convertDefaultValue(cdata)
-        const { success, error } = await fetchData(challengesAPI.postSedevCount(cdata))
+        const { success, error } = await fetchData(challengesAPI.postLevelCount(cdata))
         if (success) {
             refreshDatas()
             refreshQuestionData()
@@ -75,7 +75,7 @@ const AddQuestion = ({ open, handleModal, lesson, refreshDatas, challenge, refre
                     <Row tag={Form} onSubmit={handleSubmit(onSubmit)}>
                         <Col md={12}>
                             <Label className="form-label" for="subject">
-                                {t('Сэдэв сонгох')}
+                                {t('Түвшин сонгох')}
                             </Label>
                             <Controller
                                 control={control}
@@ -90,12 +90,12 @@ const AddQuestion = ({ open, handleModal, lesson, refreshDatas, challenge, refre
                                         className='react-select'
                                         placeholder={`-- Сонгоно уу --`}
                                         options={select_data || []}
-                                        value={select_data.find((c) => c.id === value)}
+                                        value={select_data.find((c) => c.level === value)}
                                         noOptionsMessage={() => 'Хоосон байна'}
-                                        onChange={(val) => onChange(val?.id || '')}
+                                        onChange={(val) => onChange(val?.level || '')}
                                         styles={ReactSelectStyles}
-                                        getOptionValue={(option) => option.id}
-                                        getOptionLabel={(option) => option.name + '(' + (option?.question_count || 0) + ')'}
+                                        getOptionValue={(option) => option.level}
+                                        getOptionLabel={(option) => option.type_name + ' (' + (option?.question_count || 0) + ')'}
                                     />
                                 )}
                             />

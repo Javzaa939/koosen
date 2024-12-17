@@ -4,18 +4,13 @@ import json
 import ast
 import traceback
 from openpyxl import load_workbook
-
+from core.fns import WithChoices
 from rest_framework import mixins
 from rest_framework import generics
 from rest_framework.views import APIView
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
-
-# from django.core.files.storage import default_storage
-from django.utils.translation import gettext as _
-# from django.core.files.base import ContentFile
-# from django.http import Http404
 
 from main.utils.function.pagination import CustomPagination
 from main.utils.function.utils import override_get_queryset, save_data_with_signals
@@ -24,14 +19,11 @@ from main.utils.file import save_file
 from main.utils.file import remove_folder
 
 from django.db import transaction
-from django.db.models import Sum, Count, Q, Subquery, OuterRef,  Value, CharField, F, Case, When, IntegerField
+from django.db.models import Sum, Count, Q, Subquery, OuterRef,  Value, CharField, F
 from django.db.models.functions import Concat
 
 from django.shortcuts import get_object_or_404
 from django.conf import settings
-
-# from functools import reduce
-# from operator import or_
 
 from elselt.models import ElseltUser
 from elselt.models import MentalUser
@@ -71,9 +63,10 @@ from lms.models import (
     PsychologicalQuestionTitle,
     PsychologicalTest,
     AdmissionRegisterProfession,
-    Season,
+    TeacherScore,
     QuestionTitle,
-    ChallengeSedevCount
+    ChallengeSedevCount,
+    Lesson_teacher_scoretype
 )
 
 from core.models import (
@@ -5114,6 +5107,34 @@ class QuestionsTitleListAPIView(
 
         return request.send_data(list(data))
 
+
+@permission_classes([IsAuthenticated])
+class QuestionsLevelListAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+):
+    """ Шалгалтын түвшнээр групп хийв
+    """
+
+    queryset = QuestionTitle.objects.all().filter(is_season=True)
+    def get(self, request):
+        lesson = request.query_params.get('lesson')
+
+        if lesson:
+            self.queryset = self.queryset.filter(lesson=lesson)
+
+        question_queryset = ChallengeQuestions.objects.filter(title__in=self.queryset)
+        datas = (
+            question_queryset
+            .values('level')
+            .annotate(question_count=Count('id'))
+            .annotate(type_name=WithChoices(ChallengeQuestions.DIFFICULTY_LEVELS, 'level'))
+            .values('type_name', 'question_count', 'level')
+        )
+
+        return request.send_data(list(datas))
+
+
 class TestQuestionsAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
@@ -5589,8 +5610,6 @@ class ChallengeSedevCountAPIView(
     mixins.RetrieveModelMixin,
     mixins.DestroyModelMixin
 ):
-    queryset = ChallengeSedevCount.objects.all()
-    serializer_class = ChallengeSedevSerializer
 
     def post(self, request):
         data = request.data
@@ -5600,43 +5619,43 @@ class ChallengeSedevCountAPIView(
         number_of_questions_percentage = data.get("number_questions_percentage")
 
         if title is not None and challenge_id is not None:
-                lesson_title = QuestionTitle.objects.filter(id=title).first()
+            lesson_title = QuestionTitle.objects.filter(id=title).first()
 
-                challenge = Challenge.objects.filter(id=challenge_id).first()
+            challenge = Challenge.objects.filter(id=challenge_id).first()
 
-                if challenge and lesson_title:
-                    challenge_questions = ChallengeQuestions.objects.filter(
-                        title=lesson_title,
-                        level=challenge.level,
-                        title__lesson=challenge.lesson,
-                        title__is_season=(challenge.challenge_type == Challenge.SEMESTR_EXAM)
-                    )
-                    random_questions = None
+            if challenge and lesson_title:
+                challenge_questions = ChallengeQuestions.objects.filter(
+                    title=lesson_title,
+                    level=challenge.level,
+                    title__lesson=challenge.lesson,
+                    title__is_season=(challenge.challenge_type == Challenge.SEMESTR_EXAM)
+                )
+                random_questions = None
 
-                    if number_of_questions:
-                        if challenge.has_shuffle:
-                            random_questions = challenge_questions.order_by('?')[:int(number_of_questions)]
-                        else:
-                            random_questions = challenge_questions.order_by('id')[:int(number_of_questions)]
-                    elif number_of_questions_percentage:
-                        total_questions = challenge_questions.count()
-                        question_count = int(total_questions * (int(number_of_questions_percentage) /  100))
-
-                        if challenge.has_shuffle:
-                            random_questions = challenge_questions.order_by('?')[:question_count]
-                        else:
-                            random_questions = challenge_questions.order_by('id')[:question_count]
+                if number_of_questions:
+                    if challenge.has_shuffle:
+                        random_questions = challenge_questions.order_by('?')[:int(number_of_questions)]
                     else:
-                        if challenge.has_shuffle:
-                            random_questions = challenge_questions.order_by('?')
-                        else:
-                            random_questions = challenge_questions.order_by('id')
+                        random_questions = challenge_questions.order_by('id')[:int(number_of_questions)]
+                elif number_of_questions_percentage:
+                    total_questions = challenge_questions.count()
+                    question_count = int(total_questions * (int(number_of_questions_percentage) /  100))
 
-                    challenge.questions.add(*random_questions)
-                    challenge.save()
+                    if challenge.has_shuffle:
+                        random_questions = challenge_questions.order_by('?')[:question_count]
+                    else:
+                        random_questions = challenge_questions.order_by('id')[:question_count]
+                else:
+                    if challenge.has_shuffle:
+                        random_questions = challenge_questions.order_by('?')
+                    else:
+                        random_questions = challenge_questions.order_by('id')
 
-                    return request.send_info("INF_001")
-        return request.send_error("ERR_003")
+                challenge.questions.add(*random_questions)
+                challenge.save()
+
+                return request.send_info("INF_001")
+        return request.send_error("ERR_003", 'Шалгалтын сэдэв сонгоно уу.')
 
     def delete(self, request, pk=None):
 
@@ -5646,6 +5665,73 @@ class ChallengeSedevCountAPIView(
             challenges.questions.remove(question)
             question.title.clear()
             question.save()
+            challenges.save()
+
+        return request.send_info("INF_003")
+
+
+@permission_classes([IsAuthenticated])
+class ChallengeLevelCountAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.DestroyModelMixin
+):
+
+    def post(self, request):
+        data = request.data
+        challenge_id = data.get("challenge")
+        level = data.get("subject")
+
+        # Асуулт тоогоор оруулах
+        number_of_questions = data.get('number_questions')
+
+        # Асуулт хувиар оруулах
+        number_of_questions_percentage = data.get("number_questions_percentage")
+
+        if level is not None and challenge_id is not None:
+
+            challenge = Challenge.objects.filter(id=challenge_id).first()
+
+            if challenge and level:
+                challenge_questions = ChallengeQuestions.objects.filter(
+                    level=level,
+                    title__lesson=challenge.lesson,
+                    title__is_season=True
+                )
+                random_questions = None
+
+                if number_of_questions:
+                    random_questions = challenge_questions.order_by('?')[:int(number_of_questions)]
+
+                elif number_of_questions_percentage:
+                    total_questions = challenge_questions.count()
+                    question_count = int(total_questions * (int(number_of_questions_percentage) /  100))
+
+                    # Бодогдож байгаа асуултын тоо 0-ээс бага байх үед
+                    if question_count == 0:
+                        question_count = total_questions
+
+                    random_questions = challenge_questions.order_by('?')[:question_count]
+                else:
+                    random_questions = challenge_questions.order_by('?')
+
+                print(random_questions)
+                challenge.questions.add(*random_questions)
+                challenge.save()
+
+                return request.send_info("INF_001")
+
+        return request.send_error("ERR_003", 'Шалгалтын түвшин сонгоно уу.')
+
+    def delete(self, request, pk=None):
+
+        question = ChallengeQuestions.objects.filter(id=pk).first()
+        challenges = Challenge.objects.filter(questions=question).first()
+        if challenges:
+            challenges.questions.remove(question)
             challenges.save()
 
         return request.send_info("INF_003")
@@ -6024,12 +6110,23 @@ class ChallengeAddInformationAPIView(
         teacher = get_object_or_404(Teachers, user_id=user, action_status=Teachers.APPROVED)
         data['created_by'] = teacher.id if teacher else None
 
+        students = data.get('students')
+        if 'students' in data:
+            del data['students']
+
         if season:
             data['challenge_type'] = Challenge.SEMESTR_EXAM
 
         try:
             with transaction.atomic():
-                save_data_with_signals(self.queryset.model, self.serializer_class, False, None, data=data)
+                saved_data = save_data_with_signals(self.queryset.model, self.serializer_class, False, None, data=data)[0]
+
+                if students and len(students) > 0:
+                    student_datas = Student.objects.filter(id__in=students)
+                    if len(saved_data) > 0:
+                        challenge = saved_data[0]
+                        challenge.student.set(student_datas)
+                        challenge.save()
 
         except Exception:
             traceback.print_exc()
@@ -6071,7 +6168,7 @@ class ChallengeSearchStudentAPIView(
     serializer_class = StudentSerializer
 
     filter_backends = [SearchFilter]
-    search_fields = ['code', 'first_name']
+    search_fields = ['code', 'first_name', 'register_num']
 
     def get(self, request):
         datas = self.list(request).data
@@ -6137,3 +6234,24 @@ class ChallengeAddKindAPIView(
             return request.send_error("ERR_002")
 
         return request.send_info("INF_002")
+
+
+@permission_classes([IsAuthenticated])
+class LessonChallengeApiView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin
+):
+    """ Хичээлийн жагсаалт """
+
+    queryset = LessonStandart.objects.all()
+
+    def get(self, request):
+        lesson_year, lesson_season = get_active_year_season()
+
+        # Тухайн жилийн дүн оруулсан хичээлийн мэдээлэл
+        score_type_ids = TeacherScore.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season).values_list('score_type', flat=True)
+        lesson_ids = Lesson_teacher_scoretype.objects.filter(id__in=score_type_ids).values_list('lesson_teacher__lesson', flat=True)
+
+        data = self.queryset.filter(id__in=lesson_ids).values('id', 'code', 'name')
+
+        return request.send_data(list(data))

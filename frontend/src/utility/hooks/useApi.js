@@ -517,6 +517,9 @@ function useApi(isDisplay=false) {
 
 				postAnswer: (data) =>
 					instance.post(`learning/lesson/approve/`, data),
+
+				getChallenge: () =>
+					instance.get(`learning/lesson/challenge/`),
 			},
 		},
 		/** hrms-ээс */
@@ -995,9 +998,10 @@ function useApi(isDisplay=false) {
 				postImportData: (data) => instance.post(`/score/register/import/`, data),
 
 				putScore: (id, data) => instance.put(`score/register/old/${id}/`, data),
-				refresh: (group) => instance.get(`/score/register/refresh/${group}/`)
+				refresh: (group) => instance.get(`/score/register/refresh/${group}/`),
 				// student: (search, group, lesson, teacher) =>
 				// 	instance.get(`/score/register/student/?search=${search}&lesson=${lesson}&teacher=${teacher}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&group=${group}&school=${school_id}`)
+				challenge: (lesson) => instance.get(`/score/register/challenge/${lesson}/`)
 			},
 
 			rescore:{
@@ -1491,6 +1495,9 @@ function useApi(isDisplay=false) {
 			deleteStudent: (student, challenge) => instance.delete(`learning/challenge/add/student/${challenge}/${student}/`),
 
 			postSedevCount: (data) => instance.post(`learning/challenge/add/sedev/count/`, data),
+			postLevelCount: (data) => instance.post(`learning/challenge/add/level/count/`, data),
+			deleteLevelCount: (pk) => instance.delete(`learning/challenge/add/level/count/${pk}/`),
+
 			deleteQuestion: (pk) => instance.delete(`learning/challenge/add/sedev/count/${pk}/`),
 
 			getQuestionAll: (id) => instance.get(`learning/challenge/questions/${id}/`),
@@ -1539,6 +1546,7 @@ function useApi(isDisplay=false) {
 				},
 				getByTitle: (page, limit, search, titleId, teacher_id, stype='', level='') => instance.get(`learning/questions/title/${teacher_id}/?page=${page}&limit=${limit}&search=${search}&titleId=${titleId}&stype=${stype}&level=${level}`),
 				getTitle: (lesson='', is_season=false, teacher_id=0) => instance.get(`learning/questions/title/list/${teacher_id}/?lesson=${lesson}&season=${is_season}`),
+				getLevel: (lesson='') => instance.get(`learning/questions/level/list/?lesson=${lesson}`),
 				postTitle: (datas) => instance.post(`learning/questions/title/`, datas),
 				postTestQuestions: (data) =>
 					instance.post(`learning/questions/test/?year=${cyear_name}&season=${cseason_id}`, data),

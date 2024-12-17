@@ -587,7 +587,7 @@ class StudentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Student
-        fields = ["id", "code", "last_name", "first_name", "full_name"]
+        fields = ["id", "code", "last_name", "first_name", "full_name", 'register_num']
 
     def get_full_name(self, obj):
 

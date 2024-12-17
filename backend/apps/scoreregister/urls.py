@@ -30,4 +30,5 @@ urlpatterns = [
     path('print/<int:student>/', ScoreRegisterPrintAPIView.as_view()),
 
     path('register/refresh/<int:group>/', ScoreRefreshAPIView.as_view()),
+    path('register/challenge/<int:lesson>/', ScoreRegisterLessonAPIView.as_view()),
 ]

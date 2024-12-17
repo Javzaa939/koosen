@@ -34,7 +34,7 @@ function request_flag_color(request_flag)
         )
     }
 
-export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, handleDelete, handleShow, handleSend, difficultyLevelsOption) {
+export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, handleDelete) {
 
     const { showWarning } = useModal()
 
@@ -72,11 +72,6 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, h
             name: `${'Дуусах хугацаа'}`,
             selector: (row) => moment(row?.end_date).format('YYYY-MM-DD HH-mm'),
             minWidth: "160px",
-        },
-        {
-            name: `${'Түвшин'}`,
-            selector: (row) => difficultyLevelsOption.find(item => item.value === row?.level)?.label,
-            minWidth: "100px",
         },
 
         // Устгах үед шалгалтын эхлэх хугацаа эхлээд дуусах хугацаа болоогүй үед устгах боломжгүй

@@ -28,28 +28,21 @@ import DataTable from "react-data-table-component";
 
 import AddQuestion from "./AddQuestion";
 
-
 function AddStudent() {
 
     const status = []
     const { t } = useTranslation();
 
     const { isLoading, Loader, fetchData } = useLoader({});
-    const { fetchData: fetchSelectData } = useLoader({});
     const { fetchData: fetchQuestion } = useLoader({});
     const { fetchData: fetchStudents } = useLoader({});
     const { control, handleSubmit, setError, formState: { errors }, } = useForm({});
     const { challenge_id, lesson_id } = useParams();
 
-    const [scope, setScope] = useState('group');
-
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(100);
     const [total_count, setTotalCount] = useState(1);
     const [searchValue, setSearchValue] = useState('');
-
-    const [selectedGroups, setSelectedGroups] = useState([]);
-    const [selectOption, setSelectOption] = useState([]);
 
     const [datas, setDatas] = useState([]);
     const [students, setStudents] = useState([]);
@@ -63,7 +56,6 @@ function AddStudent() {
 	const [difficultyLevelsOption, setDifficultyLevelsOption] = useState([])
 
     const challengeAPI = useApi().challenge;
-    const groupApi = useApi().student.group;
 
     async function getDatas() {
 
@@ -74,19 +66,6 @@ function AddStudent() {
         }
     };
 
-    async function getSelects() {
-        const { success, data } = await fetchSelectData(challengeAPI.getSelect(scope, lesson_id))
-        if (success) {
-            setSelectOption(data)
-        }
-    }
-
-    async function getGroups() {
-        const { success, data } = await fetchSelectData(groupApi.getAllList())
-        if (success) {
-            setSelectOption(data)
-        }
-    }
 
     async function getStudents() {
         const { success, data } = await fetchStudents(challengeAPI.getStudents(student_search_value));
@@ -112,7 +91,7 @@ function AddStudent() {
     };
 
     async function handleDeleteQuestion(id) {
-        const { success, data } = await fetchData(challengeAPI.deleteQuestion(id));
+        const { success, data } = await fetchData(challengeAPI.deleteLevelCount(id));
         if (success) {
             getQuestionTableData();
         }
@@ -135,13 +114,6 @@ function AddStudent() {
         getDifficultyLevels()
     }, [])
 
-    useEffect(
-        () => {
-            getGroups()
-
-        },
-        []
-    )
 
     function handleFilter(e) {
         const value = e.target.value.trimStart();
@@ -156,15 +128,6 @@ function AddStudent() {
         getStudents()
     }
 
-    function groupSelect(data) {
-        setSelectedGroups(data);
-    }
-
-    const handleScope = (e, name) => {
-        var id = e.target.id
-        setScope(id)
-    };
-
     const handlePagination = (page) => {
         setCurrentPage(page.selected + 1);
     };
@@ -173,22 +136,6 @@ function AddStudent() {
         setModal(!modal);
     };
 
-    async function onSubmit(cdata) {
-        cdata['groups'] = selectedGroups
-        cdata['scope'] = scope
-        cdata['lesson'] = lesson_id
-        cdata = convertDefaultValue(cdata)
-        const { success, error } = await fetchData(challengeAPI.putTestKind(cdata, challenge_id))
-        if (success) {
-            getDatas()
-        }
-        else {
-            /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in error) {
-                setError(error[key].field, { type: 'custom', message: error[key].msg });
-            }
-        }
-    }
 
     async function onSubmitStudent(cdata) {
         cdata["challenge"] = challenge_id
@@ -223,7 +170,7 @@ function AddStudent() {
     return (
         <Fragment>
             <Row className="mt-2">
-                <Col md={7}>
+                <Col md={5}>
                     <Card xs={4}>
                         <CardHeader className="rounded border d-flex flex-row">
                             <Button
@@ -239,63 +186,7 @@ function AddStudent() {
                             </CardTitle>
                         </CardHeader>
                         <Row className="m-0">
-                            <Col md={7} className="mx-0 p-0">
-                                <Form onSubmit={handleSubmit(onSubmit)}>
-                                    <div className='added-cards mb-0 text-center'>
-                                        <div className={classnames('cardMaster p-1 rounded border')}>
-                                            <div className='content-header mb-2 mt-1'>
-                                                <h4 className='content-header'>Хамрах хүрээгээ сонгоно уу</h4>
-                                            </div>
-                                            {
-                                                scope === 'group' &&
-                                                <Row className='mt-1'>
-                                                    <Col md={12}>
-                                                        <Label className="form-label" for="select">
-                                                            {'Анги сонгох'}
-                                                        </Label>
-                                                        <Controller
-                                                            control={control}
-                                                            defaultValue=''
-                                                            name="select"
-                                                            render={({ field: { value, onChange } }) => {
-                                                                return (
-                                                                    <Select
-                                                                        name="select"
-                                                                        id="select"
-                                                                        classNamePrefix='select'
-                                                                        isClearable
-                                                                        isMulti
-                                                                        className={'react-select'}
-                                                                        isLoading={isLoading}
-                                                                        options={selectOption || []}
-                                                                        placeholder={t('-- Сонгоно уу --')}
-                                                                        noOptionsMessage={() => t('Хоосон байна.')}
-                                                                        onChange={(val) => {
-                                                                            groupSelect(val)
-                                                                        }}
-                                                                        styles={ReactSelectStyles}
-                                                                        getOptionValue={(option) => option.id}
-                                                                        getOptionLabel={(option) => option.name}
-                                                                    />
-                                                                )
-                                                            }}
-                                                        />
-                                                        {errors.select && <FormFeedback className='d-block'>{t(errors.select.message)}</FormFeedback>}
-                                                    </Col>
-                                                </Row>
-                                            }
-                                            <Button
-                                                className="me-0 mt-1"
-                                                color="primary"
-                                                type="submit"
-                                            >
-                                                {t("Хадгалах")}
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </Form>
-                            </Col>
-                            <Col md={5} className="p-0">
+                            <Col md={12} className="p-0">
                                 <Form onSubmit={handleSubmit(onSubmitStudent)}>
                                     <div className='added-cards mb-0'>
                                         <div className={classnames('cardMaster p-1 rounded border')}>
@@ -353,7 +244,7 @@ function AddStudent() {
                         </Row>
                     </Card>
                 </Col>
-                <Col md={5}>
+                <Col md={7}>
                     <Card md={3}>
                         <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
                             <div className="d-flex flex-column">
