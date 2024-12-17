@@ -108,13 +108,23 @@ const Chart = ({ test_id = "" }) => {
                 enabled: true,
             },
         },
+        scales: {
+            x: {
+                ticks: {
+                    font: {
+                        size: 16,
+                        weight: 'bold',
+                    },
+                },
+            },
+        },
     };
     return (
         <Row>
             <Col md={12} xs={12}>
                 <Card>
                     <CardTitle tag="h5">
-                        {t('Тухайн шалгалтыг өгсөн оюутны тоо')}
+                        {t('Тухайн шалгалтыг өгсөн оюутны тоо үсгэн үнэлгээгээр')}
                     </CardTitle>
                     <CardSubtitle
                         className="mb-2 text-muted"
