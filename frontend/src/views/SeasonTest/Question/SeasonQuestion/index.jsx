@@ -22,7 +22,7 @@ const validateSchema = Yup.object().shape({
     lesson: Yup.string().required("Хоосон байна"),
 });
 
-export default function SeasonQuestions({teacher_id, handleDetail}) {
+export default function SeasonQuestions({teacher_id, handleDetail, is_season}) {
     const { t } = useTranslation()
     const navigate = useNavigate()
 

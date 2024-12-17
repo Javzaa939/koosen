@@ -1,43 +1,31 @@
 import React, { useState, useEffect } from 'react'
 import { Card, Nav, NavItem, NavLink, TabContent } from 'reactstrap'
-import Lists from './Lists'
-import List3 from './List3'
-import ReportPieChart from './ReportPieChart'
-import Report2 from './Report2'
+import ReportDatatable from './ReportDatatable'
+import { useTranslation } from 'react-i18next'
 
-export default function Report() {
+export default function Report2() {
     const [activeTab, setActiveTab] = useState(0)
     const [component, setComponent] = useState('')
+    const { t } = useTranslation()
 
     const button_list = [
         {
-            name: 'Тайлан 1',
+            name: t('Оюутнаар'),
             icon: 'Activity',
             id: 0,
-            component: <ReportPieChart key="tab1" />
+            component: <ReportDatatable key="tab1" report='students' />
         },
         {
-            name: 'Тайлан 2',
+            name: t('Ангиар'),
             icon: 'Activity',
             id: 1,
-            component: <Report2 key="tab2" />
+            component: <ReportDatatable key="tab2" report='groups' />
         },
         {
-            name: 'Тайлан 3',
+            name: t('Хөтөлбөрөөр'),
             icon: 'Activity',
             id: 2,
-            component:<List3/>
-        },
-        {
-            name: 'Тайлан 4',
-            icon: 'Activity',
-            id: 3,
-        },
-        {
-            name: 'Тайлан 5',
-            icon: 'Activity',
-            id: 4,
-            component:<Lists/>
+            component: <ReportDatatable key="tab3" report='professions' />
         },
     ]
 

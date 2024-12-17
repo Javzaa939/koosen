@@ -22,7 +22,7 @@ import {
 	FormFeedback,
 } from "reactstrap";
 
-import { validate, convertDefaultValue } from "@utils"
+import { validate, convertDefaultValue, get_emp_state } from "@utils"
 import { t } from 'i18next';
 
 import AuthContext from '@context/AuthContext'
@@ -325,6 +325,38 @@ const AddModal = ({ open, handleModal, refreshDatas, editData}) =>{
                                 )}
                             />
                             {errors.phone_number && <FormFeedback className='d-block'>{errors.phone_number.message}</FormFeedback>}
+                        </Col>
+                        <Col md={12}>
+                            <Label className="form-label" for="state">
+                                {t('Төлөв')}
+                            </Label>
+                            <Controller
+                                control={control}
+                                defaultValue=''
+                                name="state"
+                                render={({ field: { value, onChange} }) => {
+                                    return (
+                                        <Select
+                                            name="state"
+                                            id="state"
+                                            classNamePrefix='select'
+                                            isClearable
+                                            className={classnames('react-select opacity-100', { 'is-invalid': errors.state})}
+                                            placeholder={t('-- Сонгоно уу --')}
+                                            options={get_emp_state() || []}
+                                            value={value && get_emp_state().find((c) => c.id === value)}
+                                            noOptionsMessage={() => t('Хоосон байна.')}
+                                            onChange={(val) => {
+                                                onChange(val?.id || '')
+                                            }}
+                                            styles={ReactSelectStyles}
+                                            getOptionValue={(option) => option.id}
+                                            getOptionLabel={(option) => option.name}
+                                        />
+                                    )
+                                }}
+                            ></Controller>
+                            {errors.state && <FormFeedback className='d-block'>{errors.state.message}</FormFeedback>}
                         </Col>
                         <Col md={12}>
                             <Button className="me-2" color="primary" type="submit" disabled={postLoading}>

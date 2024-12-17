@@ -57,98 +57,102 @@ const EQuestions = ({ teacher_id, title_id, is_season }) => {
     return (
         <Fragment>
             <Row className="g-1 ">
-                <Col lg={4} xxl={3} className="">
-                    <Card className="m-0 mb-1">
-                        <CardHeader className="px-1 py-1">
-                            <Row className="g-50 w-100">
-                                <Col sm={12} className="d-flex justify-content-between p-0">
-                                    <CardTitle className="mb-0" style={{ fontSize: "16px" }}>
+                {
+                    !is_season
+                    &&
+                    <Col lg={4} xxl={3} className="">
+                        <Card className="m-0 mb-1">
+                            <CardHeader className="px-1 py-1">
+                                <Row className="g-50 w-100">
+                                    <Col sm={12} className="d-flex justify-content-between p-0">
+                                        <CardTitle className="mb-0" style={{ fontSize: "16px" }}>
+                                            {
+                                                t('Асуултууд багцлагдсан сэдвүүд')
+                                            }
+                                        </CardTitle>
+                                        <Button className="px-50 py-25" color="primary" outline onClick={() => { setTitleModal({ type: true, editId: null }) }} size="sm">
+                                            <PlusCircle size={16} />
+                                        </Button>
+                                    </Col>
+                                </Row>
+                            </CardHeader>
+                            <CardBody className="p-0 ">
+                                <div className="p-1  d-flex ">
+                                    <ul className="m-0 p-0 w-100" style={{ listStyle: "none", }}>
+                                        <li style={{ textDecoration: "underline" }} className={`p-0 my-25 cursor-pointer ${activeTitle == 0 ? "text-primary fw-bolder" : ""}`}
+                                            onClick={() => setActiveTitle(0)}
+                                        >
+                                            <span>
+                                                Бүх асуултууд
+                                            </span>
+                                            {
+                                                activeTitle == 0 ?
+                                                    <ChevronsRight className="" size={16} />
+                                                    :
+                                                    ''
+                                            }
+                                        </li>
                                         {
-                                            t('Асуултууд багцлагдсан сэдвүүд')
+                                            datas.map((title, idx) => {
+                                                return (
+                                                    <li
+                                                        className={`p-0 my-25  d-flex justify-content-between ${activeTitle == title.id ? "text-primary fw-bolder" : ""}`}
+                                                        key={idx}
+                                                        style={{ textDecoration: "underline" }}
+                                                    >
+                                                        <div className="cursor-pointer" onClick={() => setActiveTitle(title.id)}>
+                                                            <span>
+                                                                {title.name + ' (' + title.lesson__code + ' ' + title.lesson__name + ')'}
+                                                            </span>
+                                                            {
+                                                                activeTitle == title.id ?
+                                                                    <ChevronsRight size={16} />
+                                                                    :
+                                                                    ''
+                                                            }
+                                                        </div>
+                                                        <div className="">
+                                                            <Edit className="text-info cursor-pointer me-50" size={13} onClick={() => { setTitleModal({ type: true, editId: title.id }) }} />
+                                                            <Trash className="text-danger cursor-pointer" size={14} onClick={() => {
+                                                                showWarning({
+                                                                    header: {
+                                                                        title: `Та энэ асуултыг устгахдаа итгэлтэй байна уу ?`,
+                                                                    },
+                                                                    question: title.name,
+                                                                    onClick: () => deleteTitle(title.id),
+                                                                    btnText: 'Устгах',
+                                                                })
+                                                            }} />
+                                                        </div>
+                                                    </li>
+                                                )
+                                            })
                                         }
-                                    </CardTitle>
-                                    <Button className="px-50 py-25" color="primary" outline onClick={() => { setTitleModal({ type: true, editId: null }) }} size="sm">
-                                        <PlusCircle size={16} />
-                                    </Button>
-                                </Col>
-                            </Row>
-                        </CardHeader>
-                        <CardBody className="p-0 ">
-                            <div className="p-1  d-flex ">
-                                <ul className="m-0 p-0 w-100" style={{ listStyle: "none", }}>
-                                    <li style={{ textDecoration: "underline" }} className={`p-0 my-25 cursor-pointer ${activeTitle == 0 ? "text-primary fw-bolder" : ""}`}
-                                        onClick={() => setActiveTitle(0)}
-                                    >
-                                        <span>
-                                            Бүх асуултууд
-                                        </span>
-                                        {
-                                            activeTitle == 0 ?
-                                                <ChevronsRight className="" size={16} />
-                                                :
-                                                ''
-                                        }
-                                    </li>
-                                    {
-                                        datas.map((title, idx) => {
-                                            return (
-                                                <li
-                                                    className={`p-0 my-25  d-flex justify-content-between ${activeTitle == title.id ? "text-primary fw-bolder" : ""}`}
-                                                    key={idx}
-                                                    style={{ textDecoration: "underline" }}
-                                                >
-                                                    <div className="cursor-pointer" onClick={() => setActiveTitle(title.id)}>
-                                                        <span>
-                                                            {title.name + ' (' + title.lesson__code + ' ' + title.lesson__name + ')'}
-                                                        </span>
-                                                        {
-                                                            activeTitle == title.id ?
-                                                                <ChevronsRight size={16} />
-                                                                :
-                                                                ''
-                                                        }
-                                                    </div>
-                                                    <div className="">
-                                                        <Edit className="text-info cursor-pointer me-50" size={13} onClick={() => { setTitleModal({ type: true, editId: title.id }) }} />
-                                                        <Trash className="text-danger cursor-pointer" size={14} onClick={() => {
-                                                            showWarning({
-                                                                header: {
-                                                                    title: `Та энэ асуултыг устгахдаа итгэлтэй байна уу ?`,
-                                                                },
-                                                                question: title.name,
-                                                                onClick: () => deleteTitle(title.id),
-                                                                btnText: 'Устгах',
-                                                            })
-                                                        }} />
-                                                    </div>
-                                                </li>
-                                            )
-                                        })
-                                    }
 
-                                    <li style={{ textDecoration: "underline" }} className={`p-0 my-25 cursor-pointer ${activeTitle == -1 ? "text-primary fw-bolder" : ""}`}
-                                        onClick={() => setActiveTitle(-1)}
-                                    >
-                                        <span>
-                                            Сэдэвт хамаарагдахгүй асуултууд
-                                        </span>
-                                        {
-                                            activeTitle == -1 ?
-                                                <ChevronsRight size={16} />
-                                                :
-                                                ''
-                                        }
-                                    </li>
+                                        <li style={{ textDecoration: "underline" }} className={`p-0 my-25 cursor-pointer ${activeTitle == -1 ? "text-primary fw-bolder" : ""}`}
+                                            onClick={() => setActiveTitle(-1)}
+                                        >
+                                            <span>
+                                                Сэдэвт хамаарагдахгүй асуултууд
+                                            </span>
+                                            {
+                                                activeTitle == -1 ?
+                                                    <ChevronsRight size={16} />
+                                                    :
+                                                    ''
+                                            }
+                                        </li>
 
-                                </ul>
-                            </div>
-                        </CardBody>
-                    </Card>
-                    {/* <Topic lessonId={lessonInfo?.id} lessonName={lessonInfo?.name} /> */}
-                </Col>
+                                    </ul>
+                                </div>
+                            </CardBody>
+                        </Card>
+                        {/* <Topic lessonId={lessonInfo?.id} lessonName={lessonInfo?.name} /> */}
+                    </Col>
+                }
 
-                <Col lg={8} xxl={9}>
-                    <QuestionsList filterId={activeTitle} teacher_id={teacher_id} />
+                <Col lg={is_season ? 12 : 8} xxl={is_season ? 12 : 9}>
+                    <QuestionsList filterId={activeTitle} teacher_id={teacher_id} season={is_season}/>
                 </Col>
 
             </Row>

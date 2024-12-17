@@ -74,6 +74,7 @@ urlpatterns = [
     path('challenge/questions/<int:pk>/', TestQuestionsAllAPIView.as_view()),
 	path('challenge/questions/difficulty_levels/', TestQuestionsDifficultyLevelsAPIView.as_view()),
 	path('challenge/report/', ChallengeReportAPIView.as_view()),
+	path('challenge/report/chart/', ChallengeStudentReportAPI.as_view()),
 
     path('challenge/student/', ChallengeSearchStudentAPIView.as_view()),
 
@@ -159,5 +160,5 @@ urlpatterns = [
 
     path('challenge/analysis/', AnalysisApiView.as_view()),
     path('challenge/analysis2/', Analysis2ApiView.as_view()),
-
+    path('challenge/details/table/', ChallengeDetailTableApiView.as_view()),
 ]

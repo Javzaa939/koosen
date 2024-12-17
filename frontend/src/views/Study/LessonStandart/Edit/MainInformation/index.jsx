@@ -552,7 +552,7 @@ const MainInformation = ({ getNavigateData }) => {
                                             isSearchable={true}
                                             styles={ReactSelectStyles}
                                             getOptionValue={(option) => option.id}
-                                            getOptionLabel={(option) => option.full_name}
+                                            getOptionLabel={(option) => option.full_name + ' ' + option.rank_name}
                                         />
                                     )
                                 }}

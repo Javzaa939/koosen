@@ -511,8 +511,9 @@ def get_primary_db_name():
     return primary_db
 
 
-def get_teacher_queryset():
+def get_teacher_queryset(is_working=True):
     """ Бүх хэрэглэгчдээс багш төлөвтэй хэрэглэгчийг л авах хэсэг
+        is_working - Зөвхөн ажиллаж байгаа ажилтны жагсаалт авах эсэх
         return querysets
     """
 
@@ -522,7 +523,13 @@ def get_teacher_queryset():
     queryset = Teacher.objects.all().filter(action_status=Teacher.APPROVED).order_by('id')
 
     teacher_queryset = queryset.values_list('user', flat=True)
-    qs_employee_user = Employee.objects.filter(user_id__in=list(teacher_queryset), state=Employee.STATE_WORKING).values_list('user', flat=True)
+    qs_employee_user = Employee.objects.filter(user_id__in=list(teacher_queryset))
+
+    if is_working:
+        qs_employee_user = qs_employee_user.filter(state=Employee.STATE_WORKING)
+
+    qs_employee_user = qs_employee_user.values_list('user', flat=True)
+
     if len(qs_employee_user) > 0:
         queryset = queryset.filter(user_id__in = list(qs_employee_user))
         #sub_org__isnull=False  Дараа нь багшийн бүртгэл бүтэн болох үед ажиллана
