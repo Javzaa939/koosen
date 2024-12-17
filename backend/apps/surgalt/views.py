@@ -4998,19 +4998,10 @@ class QuestionsTitleAPIView(
 
     def get(self, request, pk=None):
 
-        # user_id = request.user
-        # teacher = get_object_or_404(Teachers, user_id=user_id, action_status=Teachers.APPROVED)
-
-        # if pk:
-        #     data = self.retrieve(request, pk).data
-        #     questions = ChallengeQuestions.objects.filter(title=pk)
-        #     other_questions = ChallengeQuestions.objects.exclude(id__in=questions.values_list('id', flat=True)).values("id", "question", "title__name",  'title__lesson__name', 'title__lesson__code')
-
-        #     questions = questions.values("id", "question", "title__name", 'title__lesson__name', 'title__lesson__code')
-        #     return request.send_data({"title": data, "questions": list(questions), "other_questions": list(other_questions)})
-
         title_id = request.query_params.get('titleId')
         title_id = int(title_id)
+        stype = request.query_params.get('stype')
+        level = request.query_params.get('level')
 
         # # 0  Бүх асуулт
         if title_id == 0:
@@ -5020,6 +5011,11 @@ class QuestionsTitleAPIView(
             challenge_qs = ChallengeQuestions.objects.filter(Q(title__isnull=True))
         else:
             challenge_qs = ChallengeQuestions.objects.filter(title=title_id)
+
+        if stype:
+            challenge_qs = challenge_qs.filter(kind=stype)
+        if level:
+            challenge_qs = challenge_qs.filter(level=level)
 
         ser = dynamic_serializer(ChallengeQuestions, "__all__", 1)
         data = ser(challenge_qs, many=True)

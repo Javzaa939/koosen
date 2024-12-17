@@ -3,7 +3,7 @@ import { Fragment, useState, useEffect, useContext } from 'react'
 
 import { Controller, useForm } from 'react-hook-form'
 
-import { Row, Col, Card, Input, Label, CardTitle, CardHeader, Spinner, Button, Modal, ModalHeader, ModalBody } from 'reactstrap'
+import { Row, Col, Card, Input, Label, CardTitle, CardHeader, Spinner, Button } from 'reactstrap'
 
 import { ChevronDown, Plus } from 'react-feather'
 import { useTranslation } from 'react-i18next'
@@ -14,8 +14,9 @@ import DataTable from 'react-data-table-component'
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
+import useUpdateEffect from '@hooks/useUpdateEffect'
 
-import { getPagination, ReactSelectStyles } from '@utils';
+import { getPagination, ReactSelectStyles, get_emp_state } from '@utils';
 import AuthContext from '@context/AuthContext'
 import SchoolContext from '@context/SchoolContext'
 
@@ -25,6 +26,7 @@ import AddModal from './Add'
 const Teacher = () => {
 
 	var values = {
+		state: '',
 		position_id: '',
 		department_id: ''
 	}
@@ -70,7 +72,7 @@ const Teacher = () => {
         if (page_count < currentPage && page_count != 0) {
             setCurrentPage(page_count)
         }
-		const { success, data } = await allFetch(teacherApi.getList(rowsPerPage, currentPage, sortField, searchValue, school_id, selected_values.department_id, selected_values.position_id))
+		const { success, data } = await allFetch(teacherApi.getList(rowsPerPage, currentPage, sortField, searchValue, school_id, selected_values.department_id, selected_values.position_id, selected_values.state))
 		if(success) {
 			setTotalCount(data?.count)
             setDatas(data?.results)
@@ -110,10 +112,8 @@ const Teacher = () => {
 		}
 	},[sortField, searchValue, currentPage, school_id])
 
-	useEffect(() => {
-		if (selected_values.department_id || selected_values.position_id) {
-			getDatas();
-		}
+	useUpdateEffect(() => {
+		getDatas();
 	},[selected_values])
 
 	useEffect(() => {
@@ -196,9 +196,11 @@ const Teacher = () => {
 										noOptionsMessage={() => t('Хоосон байна.')}
 										onChange={(val) => {
 											onChange(val?.id || '')
-											setSelectValue({
-												subschool_id: selected_values.subschool_id,
-												department_id: val?.id || ''
+											setSelectValue(current => {
+												return {
+													...current,
+													department_id: val?.id || ''
+												}
 											})
 										}}
 										styles={ReactSelectStyles}
@@ -224,9 +226,11 @@ const Teacher = () => {
 								value={position_option.find((c) => c.id === selected_values.position_id)}
 								noOptionsMessage={() => t('Хоосон байна.')}
 								onChange={(val) => {
-									setSelectValue({
-										department_id: selected_values.department_id,
-										position_id: val?.id || ''
+									setSelectValue(current => {
+										return {
+											...current,
+											position_id: val?.id || ''
+										}
 									})
 								}}
 								styles={ReactSelectStyles}
@@ -234,7 +238,33 @@ const Teacher = () => {
 								getOptionLabel={(option) => option.name}
 							/>
 					</Col>
-					<Col md={3}></Col>
+					<Col md={3}>
+						<Label className="form-label" for="state">
+							{t('Ажилтны төлөв')}
+						</Label>
+							<Select
+								name="state"
+								id="state"
+								classNamePrefix='select'
+								isClearable
+								className='react-select'
+								placeholder={t('-- Сонгоно уу --')}
+								options={get_emp_state() || []}
+								value={get_emp_state().find((c) => c.id === selected_values.state)}
+								noOptionsMessage={() => t('Хоосон байна.')}
+								onChange={(val) => {
+									setSelectValue(current => {
+										return {
+											...current,
+											state: val?.id || ''
+										}
+									})
+								}}
+								styles={ReactSelectStyles}
+								getOptionValue={(option) => option.id}
+								getOptionLabel={(option) => option.name}
+							/>
+					</Col>
 					<Col md={3}>
 						<Label className="form-label" for="salbar">
 							{t('Хайлт')}

@@ -1,10 +1,11 @@
+import { FileText, Trash } from 'react-feather'
+import {  UncontrolledTooltip } from 'reactstrap';
 import useModal from '@hooks/useModal';
-import { get_questionype } from "@utils";
-import { FileText, Trash } from 'react-feather';
-import { UncontrolledTooltip } from 'reactstrap';
+import { get_questionype, get_leveltype, get_levelseasons } from "@utils"
 
-export function getColumns(currentPage, rowsPerPage, total_count, handleDelete, handleQuestionEdit, difficultyLevelsOption) {
+export function getColumns(currentPage, rowsPerPage, total_count, handleDelete, handleQuestionEdit, season) {
 
+	const questionLevel= season == true ? get_leveltype() : get_levelseasons()
 	const questionType= get_questionype()
 
 	const page_count = Math.ceil(total_count / rowsPerPage)
@@ -21,12 +22,6 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleDelete, 
 			width: "30px",
 
 		},
-		// {
-		//     name: <div className='' style={{textWrap: "wrap", textAlign: "center"}}>{`${'Багц асуултын нэр'}`}</div>,
-		//     selector: (row) => row?.name,
-		//     wrap:true,
-		//     center: true,
-		// },
 		{
 			name: <div className='' style={{ textWrap: "wrap", textAlign: "center" }}>{`${'Асуулт'}`}</div>,
 			selector: (row) => row?.question,
@@ -45,7 +40,7 @@ export function getColumns(currentPage, rowsPerPage, total_count, handleDelete, 
 		{
 			name: <div className='' style={{ textWrap: "wrap", textAlign: "center" }}>{`${'Түвшин'}`}</div>,
 			selector: (row) =><>
-				{difficultyLevelsOption.find(v=>v.value == row.level)?.label}
+				{questionLevel.find(v=>v.id == row.level)?.name}
 				</>,
 			wrap: true,
 			center: true,
