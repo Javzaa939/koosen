@@ -7,6 +7,7 @@ urlpatterns = [
     path('lessonstandart/', LessonStandartAPIView.as_view()),
     path('lessonstandart/<int:pk>/', LessonStandartAPIView.as_view()),
     path('lessonstandart/group/<int:group>/', LessonStandartGroupAPIView.as_view()),
+    path('lessonstandart/list/teacher/', LessonsApiView.as_view()),
 
     path('lessonstandart/list/', LessonStandartListAPIView.as_view()),
     path('lessonstandart/list/profession/<int:profession>/', LessonStandartProfessionListAPIView.as_view()),
@@ -78,6 +79,7 @@ urlpatterns = [
     path('challenge/questions/<int:pk>/', TestQuestionsAllAPIView.as_view()),
 	path('challenge/questions/difficulty_levels/', TestQuestionsDifficultyLevelsAPIView.as_view()),
 	path('challenge/report/', ChallengeReportAPIView.as_view()),
+	path('challenge/report/chart/', ChallengeStudentReportAPI.as_view()),
 
     path('challenge/student/', ChallengeSearchStudentAPIView.as_view()),
 
@@ -163,5 +165,7 @@ urlpatterns = [
     path('challenge/details/one/<int:pk>/', ChallengeTestDetailApiView.as_view()),
     path('challenge/result/', TestResultShowAPIView.as_view()),
 
-
+    path('challenge/analysis/', AnalysisApiView.as_view()),
+    path('challenge/analysis2/', Analysis2ApiView.as_view()),
+    path('challenge/details/table/', ChallengeDetailTableApiView.as_view()),
 ]

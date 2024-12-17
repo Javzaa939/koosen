@@ -1,24 +1,26 @@
 // ** React Imports
-import { memo, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
-import Select from 'react-select'
 
 import useApi from '@hooks/useApi'
 import useLoader from '@hooks/useLoader'
 
+import { Col, Row } from 'reactstrap'
+import ExamFilter from '../helpers/ExamFilter'
 import './style.scss'
-import { Col, Label, Row } from 'reactstrap'
-import { ReactSelectStyles } from '@src/utility/Utils'
 
-const List = () => {
-    const { t } = useTranslation()
+export default function ReportPieChart() {
+    // states
+    const [selectedExam, setSelectedExam] = useState('')
     const [datas, setDatas] = useState([])
-    const { isLoading, Loader, fetchData: allFetch } = useLoader({ isFullScreen: true })
+
+    const { t } = useTranslation()
+    const { isLoading, Loader, fetchData } = useLoader({ isFullScreen: true })
     const challengeApi = useApi().challenge
 
     async function getDatas() {
-        const { success, data } = await allFetch(challengeApi.getReport(1))
+        const { success, data } = await fetchData(challengeApi.getReport(1, 10000000, '', 'reliability', selectedExam))
 
         if (success) {
             setDatas(data)
@@ -66,22 +68,8 @@ const List = () => {
     }
 
     useEffect(() => {
-        getDatas()
-        getExams()
-    }, [])
-
-    // #region exam selection code
-    const [examOption, setExamOption] = useState([])
-    const [selectedExam, setSelectedExam] = useState('')
-
-    async function getExams() {
-        const { success, data } = await allFetch(challengeApi.get(1, 10000000, '', '', '', '', true))
-
-        if (success) {
-            setExamOption(data?.results)
-        }
-    }
-    // #endregion
+        if (selectedExam) getDatas()
+    }, [selectedExam])
 
     return (
         <div className='px-1'>
@@ -91,32 +79,14 @@ const List = () => {
             {isLoading && Loader}
             <Row>
                 <Col md={3} sm={10}>
-                    <Label className="form-label" for="exam">
-                        {t('Шалгалт')}
-                    </Label>
-                    <Select
-                        id="exam"
-                        name="exam"
-                        isClearable
-                        classNamePrefix='select'
-                        className='react-select'
-                        placeholder={`-- Сонгоно уу --`}
-                        options={examOption || []}
-                        noOptionsMessage={() => 'Хоосон байна'}
-                        onChange={(val) => {
-                            setSelectedExam(val?.id || '')
-                        }}
-                        styles={ReactSelectStyles}
-                        getOptionValue={(option) => option.id}
-                        getOptionLabel={(option) => option.title}
-                    />
+                    <ExamFilter setSelected={setSelectedExam} />
                 </Col>
             </Row>
             <div className='recharts-wrapper pie-chart' style={{ height: '400px' }}>
                 <ResponsiveContainer>
                     <PieChart width={400}>
                         <Pie
-                            data={datas?.length ? datas.find(item => item.exam_id === selectedExam)?.questions_reliabilities : []}
+                            data={datas?.length ? datas[0].questions_reliabilities : []}
                             dataKey='questions_count'
                             nameKey='questions_reliability_name'
                             cx="50%"
@@ -139,5 +109,3 @@ const List = () => {
         </div>
     )
 }
-
-export default memo(List);

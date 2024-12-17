@@ -511,8 +511,9 @@ def get_primary_db_name():
     return primary_db
 
 
-def get_teacher_queryset():
+def get_teacher_queryset(is_working=True):
     """ Бүх хэрэглэгчдээс багш төлөвтэй хэрэглэгчийг л авах хэсэг
+        is_working - Зөвхөн ажиллаж байгаа ажилтны жагсаалт авах эсэх
         return querysets
     """
 
@@ -522,7 +523,13 @@ def get_teacher_queryset():
     queryset = Teacher.objects.all().filter(action_status=Teacher.APPROVED).order_by('id')
 
     teacher_queryset = queryset.values_list('user', flat=True)
-    qs_employee_user = Employee.objects.filter(user_id__in=list(teacher_queryset), state=Employee.STATE_WORKING).values_list('user', flat=True)
+    qs_employee_user = Employee.objects.filter(user_id__in=list(teacher_queryset))
+
+    if is_working:
+        qs_employee_user = qs_employee_user.filter(state=Employee.STATE_WORKING)
+
+    qs_employee_user = qs_employee_user.values_list('user', flat=True)
+
     if len(qs_employee_user) > 0:
         queryset = queryset.filter(user_id__in = list(qs_employee_user))
         #sub_org__isnull=False  Дараа нь багшийн бүртгэл бүтэн болох үед ажиллана
@@ -1736,3 +1743,54 @@ def undefined_to_none(datas=[]):
         if value == 'undefined':
             datas[idx] = None
     return datas
+
+def find_linear_regression_line(sum_y, sum_x, s_y, s_x, r, x):
+
+    b = r * (s_y / s_x)
+    a = sum_y - b * sum_x
+    y = a + b * x
+
+    return x, y
+
+def pearson_corel(x, y):
+
+    min_x = min(x)
+    max_x = max(x)
+
+    len_x = len(x)
+    len_y = len(y)
+
+    sum_x = sum(x) / len_x
+    sum_y = sum(y) / len_y
+
+    all_x = 0
+    all_y = 0
+
+    all_x_y = 0
+
+    for item_x in x:
+        all_x = all_x + (abs(item_x - sum_x)) ** 2
+
+    for item_y in y:
+        all_y = all_y + (abs(item_y - sum_y)) ** 2
+
+    for idx in range(0, len_x):
+        item_x = x[idx]
+        item_y = y[idx]
+
+        all_x_y = all_x_y + (item_x - sum_x) * (item_y - sum_y)
+
+    s_x_y = all_x_y / (len_x - 1)
+
+    s_x = math.sqrt((all_x) / (len_x - 1))
+    s_y = math.sqrt((all_y) / (len_y - 1))
+
+    r = all_x_y / math.sqrt((all_x * all_y))
+
+    start_x, start_y = find_linear_regression_line(sum_y, sum_x, s_y, s_x, r, min_x)
+    end_x, end_y = find_linear_regression_line(sum_y, sum_x, s_y, s_x, r, max_x)
+
+    return r, [
+        [start_x, start_y],
+        [end_x, end_y],
+    ]

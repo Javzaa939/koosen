@@ -1048,6 +1048,29 @@ class ChallengeStudentsSerializer(serializers.ModelSerializer):
         except json.JSONDecodeError:
             return None
 
+
+class ChallengeGroupsSerializer(serializers.ModelSerializer):
+    group_name = serializers.SerializerMethodField()
+    student_total_count = serializers.SerializerMethodField()
+    student_count_by_assessments = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Challenge
+        fields = ['group_name', 'student_total_count', 'student_count_by_assessments']
+# todo: finish
+    def get_group_name(self, obj):
+
+        return None
+
+    def get_student_total_count(self, obj):
+
+        return None
+
+    def get_student_count_by_assessments(self, obj):
+
+        return None
+
+
 class StudentChallengeSerializer(serializers.ModelSerializer):
 
     challenge = serializers.SerializerMethodField()
@@ -1073,3 +1096,80 @@ class StudentChallengeSerializer(serializers.ModelSerializer):
         result = ChallengeDetailSerializer(data_qs, many=True).data
 
         return result
+
+class ChallengeDetailTableStudentsSerializer(serializers.ModelSerializer):
+    student_name = serializers.SerializerMethodField()
+    student_code = serializers.SerializerMethodField()
+    answer_json = serializers.SerializerMethodField()
+    challenge_name = serializers.CharField(source="challenge.title", read_only=True)
+    usgen_unelgee=serializers.SerializerMethodField()
+    huvi_unelgee=serializers.SerializerMethodField()
+
+    class Meta:
+        model = ChallengeStudents
+        fields = ['challenge', 'score', 'take_score', 'answer_json', "tried", "id", "student_name", "student_code", 'answer','challenge_name','usgen_unelgee','huvi_unelgee']
+
+    def get_student_name(self, obj):
+        data = Student.objects.filter(id=obj.student.id).values('first_name').first()
+        name = data.get('first_name')
+
+        return name
+
+    def get_student_code(self, obj):
+        data = Student.objects.filter(id=obj.student.id).values('code').first()
+        code = data.get('code')
+
+        return code
+
+    def get_answer_json(self, obj):
+        try:
+            answer_json = []
+            if obj.answer:
+                answer_json = json.loads(obj.answer)
+
+                # Тестэн доторх асуултууд
+                for question in answer_json:
+                    #Асуултан доторх хариултууд
+                    choices = question.get('choices')
+                    for choice in choices:
+                        # choice дотроо is_right-г үүсгэнэ
+                        choice['is_right'] = False
+                        choice_obj = QuestionChoices.objects.get(id=choice.get('id'))
+
+                        # Оноо байвал зөв хариулт гэж үзнэ
+                        if choice_obj.score != 0:
+                            choice['is_right'] = True
+
+                        choice['score'] = choice_obj.score
+
+            return answer_json
+        except json.JSONDecodeError:
+            return None
+
+    def get_usgen_unelgee(self,obj):
+
+        if obj.take_score and obj.score:
+
+            percentage = (obj.score / obj.take_score) * 100
+
+            if percentage >= 90:
+                return "A"
+            elif 80 <= percentage < 90:
+                return "B"
+            elif 70 <= percentage < 80:
+                return "C"
+            elif 60 <= percentage < 70:
+                return "D"
+            else:
+                return "F"
+
+        return "Дүн ороогүй"
+
+    def get_huvi_unelgee(self,obj):
+
+        if obj.take_score and obj.score:
+
+            percentage = (obj.score / obj.take_score) * 100
+            return round(percentage, 1)
+
+        return "Дүн ороогүй"

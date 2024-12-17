@@ -14,7 +14,7 @@ from rest_framework.decorators import permission_classes
 
 from main.utils.function.pagination import CustomPagination
 from main.utils.function.utils import override_get_queryset, save_data_with_signals
-from main.utils.function.utils import has_permission, get_domain_url, _filter_queries, get_teacher_queryset
+from main.utils.function.utils import has_permission, get_domain_url, _filter_queries, get_teacher_queryset, pearson_corel
 from main.utils.file import save_file
 from main.utils.file import remove_folder
 
@@ -65,8 +65,10 @@ from lms.models import (
     AdmissionRegisterProfession,
     TeacherScore,
     QuestionTitle,
-    ChallengeSedevCount,
-    Lesson_teacher_scoretype
+    Lesson_teacher_scoretype,
+    QuestionTitle,
+    Score,
+    StudentRegister
 )
 
 from core.models import (
@@ -80,7 +82,7 @@ from lms.models import get_choice_image_path
 
 from elselt.serializer import MentalUserSerializer
 
-from .serializers import LessonStandartSerializer
+from .serializers import ChallengeGroupsSerializer, LessonStandartSerializer
 from .serializers import LessonTitlePlanSerializer
 from .serializers import LessonStandartListSerializer
 from .serializers import LessonStandartSerialzier
@@ -116,7 +118,7 @@ from .serializers import TeacherExamTimeTableSerializer
 from core.serializers import TeacherNameSerializer
 from .serializers import QuestionTitleSerializer
 from .serializers import ChallengeSedevSerializer
-from .serializers import ChallengeDetailSerializer,ChallengeStudentsSerializer,StudentChallengeSerializer
+from .serializers import ChallengeDetailSerializer,ChallengeStudentsSerializer,StudentChallengeSerializer,ChallengeDetailTableStudentsSerializer
 
 from main.utils.function.utils import remove_key_from_dict, fix_format_date, get_domain_url
 from main.utils.function.utils import null_to_none, get_lesson_choice_student, get_active_year_season, json_load
@@ -5873,22 +5875,30 @@ class TestQuestionsDifficultyLevelsAPIView(
 @permission_classes([IsAuthenticated])
 class ChallengeReportAPIView(
     generics.GenericAPIView,
+    mixins.ListModelMixin,
 ):
     "Challenge report"
 
-    queryset = ChallengeStudents.objects
+    queryset = ChallengeStudents.objects.order_by('-score')
     serializer_class = ChallengeStudentsSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['student__code', 'student__first_name']
 
     def get(self, request):
         report_type = request.query_params.get('report_type')
+        exam = request.query_params.get('exam')
 
-        if not report_type:
+        if not report_type or not exam:
 
             return request.send_error('ERR_002')
 
-        queryset = self.queryset.filter(challenge__challenge_type=Challenge.SEMESTR_EXAM)
+        queryset = self.queryset.filter(challenge__challenge_type=Challenge.SEMESTR_EXAM, challenge__id=exam)
+        get_result = []
 
-        if report_type == '1':
+        if report_type == 'reliability':
             exam_results = []
 
             for obj in queryset:
@@ -5897,7 +5907,6 @@ class ChallengeReportAPIView(
                     continue
 
                 answer_json = None
-
                 try:
                     answer_json = obj.answer.replace("'", '"')
                     answer_json = json.loads(answer_json)
@@ -5931,8 +5940,6 @@ class ChallengeReportAPIView(
                 "Хялбар": lambda question_reliability: 61 <= question_reliability <= 80,
                 "Маш хялбар": lambda question_reliability: question_reliability >= 81,
             }
-
-            get_result = []
 
             for item in exams:
                 exam_id = item.get('challenge__id')
@@ -5985,6 +5992,18 @@ class ChallengeReportAPIView(
                     "questions_reliabilities": [{"questions_reliability_name": key, "questions": questions, "questions_count": len(questions)} for key, questions in grouped_questions.items()]
 
                 })
+
+        elif report_type == 'students':
+            self.queryset = queryset
+            get_result = self.list(request).data
+
+        elif report_type == 'groups':
+            # todo: finish
+            # self.queryset = queryset
+            # self.serializer_class = ChallengeGroupsSerializer
+            # get_result = self.list(request).data
+
+            pass
 
         return request.send_data(get_result)
 
@@ -6255,3 +6274,277 @@ class LessonChallengeApiView(
         data = self.queryset.filter(id__in=lesson_ids).values('id', 'code', 'name')
 
         return request.send_data(list(data))
+
+
+@permission_classes([IsAuthenticated])
+class LessonsApiView(
+    generics.GenericAPIView
+):
+
+    def get(self, request):
+
+        dep = request.GET.get('dep')
+        teacher = request.GET.get('teacher')
+
+        extra_filter = {}
+        if dep:
+            extra_filter = {
+                "department": dep,
+            }
+
+        if teacher:
+            teacher_of_lessons_qs = Lesson_to_teacher.objects.filter(teacher=teacher).values_list("lesson", flat=True)
+            extra_filter['id__in'] = teacher_of_lessons_qs
+
+        data = (
+            LessonStandart
+                .objects
+                .filter(
+                    **extra_filter
+                )
+                .values('id', fname=Concat(F("code"), Value(" "), F("name"), output_field=CharField()))
+        )
+        data_list = list(data)
+
+        return request.send_data(data_list)
+
+
+@permission_classes([IsAuthenticated])
+class AnalysisApiView(
+    generics.GenericAPIView
+):
+
+    def get(self, request):
+
+        extra_filters = {}
+
+        year = request.GET.get("year")
+        season = request.GET.get("season")
+        lesson = request.GET.get("lesson")
+        teacher = request.GET.get("teacher")
+
+        assesments = list(
+            Score
+                .objects
+                .values("assesment")
+                .annotate(count=Count("assesment"))
+                .order_by("assesment")
+                .values_list("assesment", flat=True)
+        )
+
+        if year:
+            extra_filters['lesson_year'] = year
+
+        if year:
+            extra_filters['lesson_season'] = season
+
+        if lesson:
+            extra_filters['lesson'] = lesson
+
+        if teacher:
+            extra_filters['teacher'] = teacher
+
+        chart_data = (
+            ScoreRegister
+                .objects
+                .filter(**extra_filters)
+                .values("assessment__assesment")
+                .annotate(
+                    count=Count("assessment__assesment"),
+                )
+                .values('count', name=F("assessment__assesment"))
+        )
+
+        data = {
+            "data": [
+                {
+                    "name": "Багшийн дүн",
+                    "data": list(chart_data)
+                },
+                {
+                    "name": "Дээд дүн",
+                    "data": settings.GPA_ANALYSIS_1_MAX,
+                },
+                {
+                    "name": "Доод дүн",
+                    "data": settings.GPA_ANALYSIS_1_MIN,
+                }
+            ],
+            "names": assesments,
+        }
+
+        return request.send_data(data)
+
+@permission_classes([IsAuthenticated])
+class Analysis2ApiView(
+    generics.GenericAPIView
+):
+
+
+    def get(self, request):
+
+        extra_filters = {}
+
+        dep = request.GET.get('dep')
+        year = request.GET.get("year")
+        season = request.GET.get("season")
+        lesson = request.GET.get("lesson")
+        teacher = request.GET.get("teacher")
+
+        if year:
+            extra_filters['lesson_year'] = year
+
+        if year:
+            extra_filters['lesson_season'] = season
+
+        if lesson:
+            extra_filters['lesson'] = lesson
+
+        if dep:
+            extra_filters['lesson__department'] = dep
+
+        if teacher:
+            extra_filters['teacher'] = teacher
+
+        chart_data = list(
+            ScoreRegister
+                .objects
+                .filter(**extra_filters)
+                .values("teach_score", "exam_score")
+                .annotate(
+                    count=Count("teach_score"),
+                )
+                .values('count', "teach_score", "exam_score")
+        )
+
+        # Filter out None values
+        x = [item['teach_score'] for item in chart_data if item['teach_score'] is not None]
+        y = [item['exam_score'] for item in chart_data if item['exam_score'] is not None]
+
+        r = 0
+        line = []
+        if len(y) > 0 and len(x) > 0:
+            r, line = pearson_corel(x, y)
+
+        data = {
+            "data": chart_data,
+            "r": r,
+            "line": line
+        }
+
+        return request.send_data(data)
+
+@permission_classes([IsAuthenticated])
+class ChallengeDetailTableApiView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+):
+    queryset = ChallengeStudents.objects.all().order_by('-score')
+    serializer_class = ChallengeDetailTableStudentsSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['student__code', 'student__first_name', 'student__register_num']
+
+    def get(self, request):
+        self.queryset = self.queryset.filter(challenge__challenge_type=Challenge.SEMESTR_EXAM)
+
+        #Тухайн шалгалтын id
+        test_id = request.query_params.get('test_id')
+        department_id = request.query_params.get('department')
+        group_id =  request.query_params.get('group')
+
+        if test_id:
+            self.queryset= self.queryset.filter(challenge=test_id)
+
+        if department_id:
+            self.queryset = self.queryset.filter(student__department=department_id)
+
+        if group_id:
+            self.queryset = self.queryset.filter(student__group=group_id)
+
+        datas = self.list(request).data
+
+        return request.send_data(datas)
+
+@permission_classes([IsAuthenticated])
+class ChallengeStudentReportAPI(
+    mixins.ListModelMixin,
+    generics.GenericAPIView,
+):
+
+    ''' Оюутны бүртгэл тайлан '''
+    def get(self, request):
+        school = request.query_params.get('school')
+        challenge_id = request.query_params.get('test')
+        department = request.query_params.get('department')
+        group = request.query_params.get('group')
+
+        # Initialize the extra filter dictionary
+        extra_filter = {}
+
+        # Add the school filter if provided
+        if school:
+            extra_filter.update({'student__group__school': school})
+
+        if department:
+            extra_filter.update({'student__group__department': department})
+
+        if group:
+            extra_filter.update({'student__group': group})
+
+        # Define grade thresholds
+        GRADE_THRESHOLDS = {
+            'A': 90,
+            'B': 80,
+            'C': 70,
+            'D': 60,
+            'F': 0,
+        }
+
+        def get_grade(score, take_score):
+            """Map score to grade based on percentage."""
+            if take_score and score is not None:
+                percentage = (score / take_score) * 100
+                for grade, threshold in GRADE_THRESHOLDS.items():
+                    if percentage >= threshold:
+                        return grade
+            return 'F'
+
+        # Filter students based on challenge type and other filters
+        challenge_filter = {
+            'challenge__challenge_type': Challenge.SEMESTR_EXAM,
+        }
+        if challenge_id:
+            challenge_filter['challenge_id'] = challenge_id
+
+        students = ChallengeStudents.objects.filter(**extra_filter, **challenge_filter)
+
+        # Initialize grade counts by gender
+        grade_counts_by_gender = {
+            'male': {'A': 0, 'B': 0, 'C': 0, 'D': 0, 'F': 0},
+            'female': {'A': 0, 'B': 0, 'C': 0, 'D': 0, 'F': 0},
+        }
+
+        # Count grades for each student
+        for student in students:
+            grade = get_grade(student.score, student.take_score)
+            gender = None
+
+            if student.student.gender == Student.GENDER_MALE:
+                gender = 'male'
+            elif student.student.gender == Student.GENDER_FEMALE:
+                gender = 'female'
+
+            if gender:
+                grade_counts_by_gender[gender][grade] += 1
+
+        # Prepare data for response
+        data = {
+            "male": grade_counts_by_gender['male'],
+            "female": grade_counts_by_gender['female'],
+        }
+
+        return request.send_data(data)
+
