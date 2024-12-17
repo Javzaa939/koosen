@@ -5,6 +5,7 @@ import ast
 import traceback
 from openpyxl import load_workbook
 
+from datetime import datetime,timezone
 from rest_framework import mixins
 from rest_framework import generics
 from rest_framework.views import APIView
@@ -73,7 +74,8 @@ from lms.models import (
     AdmissionRegisterProfession,
     Season,
     QuestionTitle,
-    ChallengeSedevCount
+    ChallengeSedevCount,
+    StudentRegister
 )
 
 from core.models import (
@@ -123,7 +125,7 @@ from .serializers import TeacherExamTimeTableSerializer
 from core.serializers import TeacherNameSerializer
 from .serializers import QuestionTitleSerializer
 from .serializers import ChallengeSedevSerializer
-from .serializers import ChallengeDetailSerializer,ChallengeStudentsSerializer,StudentChallengeSerializer
+from .serializers import ChallengeDetailSerializer,ChallengeStudentsSerializer,StudentChallengeSerializer,ChallengeDetailTableStudentsSerializer
 
 from main.utils.function.utils import remove_key_from_dict, fix_format_date, get_domain_url
 from main.utils.function.utils import null_to_none, get_lesson_choice_student, get_active_year_season, json_load
@@ -5819,7 +5821,6 @@ class ChallengeReportAPIView(
                     continue
 
                 answer_json = None
-
                 try:
                     answer_json = obj.answer.replace("'", '"')
                     answer_json = json.loads(answer_json)
@@ -6155,3 +6156,119 @@ class ChallengeAddKindAPIView(
             return request.send_error("ERR_002")
 
         return request.send_info("INF_002")
+
+
+@permission_classes([IsAuthenticated])
+class ChallengeDetailTableApiView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+):
+    queryset = ChallengeStudents.objects.all().order_by('-score')
+    serializer_class = ChallengeDetailTableStudentsSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['student__code', 'student__first_name', 'student__register_num']
+
+    def get(self, request):
+        self.queryset = self.queryset.filter(challenge__challenge_type=Challenge.SEMESTR_EXAM)
+
+        #Тухайн шалгалтын id
+        test_id = request.query_params.get('test_id')
+        department_id = request.query_params.get('department')
+        group_id =  request.query_params.get('group')
+
+        if test_id:
+            self.queryset= self.queryset.filter(challenge=test_id)
+
+        if department_id:
+            self.queryset = self.queryset.filter(student__department=department_id)
+
+        if group_id:
+            self.queryset = self.queryset.filter(student__group=group_id)
+
+        datas = self.list(request).data
+
+        return request.send_data(datas)
+
+@permission_classes([IsAuthenticated])
+class ChallengeStudentReportAPI(
+    mixins.ListModelMixin,
+    generics.GenericAPIView,
+):
+
+    ''' Оюутны бүртгэл тайлан '''
+    def get(self, request):
+        school = request.query_params.get('school')
+        challenge_id = request.query_params.get('test')
+        department = request.query_params.get('department')
+        group = request.query_params.get('group')
+
+        # Initialize the extra filter dictionary
+        extra_filter = {}
+
+        # Add the school filter if provided
+        if school:
+            extra_filter.update({'student__group__school': school})
+
+        if department:
+            extra_filter.update({'student__group__department': department})
+
+        if group:
+            extra_filter.update({'student__group': group})
+
+        # Define grade thresholds
+        GRADE_THRESHOLDS = {
+            'A': 90,
+            'B': 80,
+            'C': 70,
+            'D': 60,
+            'F': 0,
+        }
+
+        def get_grade(score, take_score):
+            """Map score to grade based on percentage."""
+            if take_score and score is not None:
+                percentage = (score / take_score) * 100
+                for grade, threshold in GRADE_THRESHOLDS.items():
+                    if percentage >= threshold:
+                        return grade
+            return 'F'
+
+        # Filter students based on challenge type and other filters
+        challenge_filter = {
+            'challenge__challenge_type': Challenge.SEMESTR_EXAM,
+        }
+        if challenge_id:
+            challenge_filter['challenge_id'] = challenge_id
+
+        students = ChallengeStudents.objects.filter(**extra_filter, **challenge_filter)
+
+        # Initialize grade counts by gender
+        grade_counts_by_gender = {
+            'male': {'A': 0, 'B': 0, 'C': 0, 'D': 0, 'F': 0},
+            'female': {'A': 0, 'B': 0, 'C': 0, 'D': 0, 'F': 0},
+        }
+
+        # Count grades for each student
+        for student in students:
+            grade = get_grade(student.score, student.take_score)
+            gender = None
+
+            if student.student.gender == Student.GENDER_MALE:
+                gender = 'male'
+            elif student.student.gender == Student.GENDER_FEMALE:
+                gender = 'female'
+
+            if gender:
+                grade_counts_by_gender[gender][grade] += 1
+
+        # Prepare data for response
+        data = {
+            "male": grade_counts_by_gender['male'],
+            "female": grade_counts_by_gender['female'],
+        }
+
+        return request.send_data(data)
+
