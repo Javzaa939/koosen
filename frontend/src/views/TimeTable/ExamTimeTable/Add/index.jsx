@@ -331,7 +331,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                         id="begin_time"
                                         bsSize="sm"
                                         placeholder={t('Эхлэх цаг')}
-                                        type="time"
+                                        type="datetime-local"
                                         invalid={errors.begin_time && true}
                                     />
                                 )}

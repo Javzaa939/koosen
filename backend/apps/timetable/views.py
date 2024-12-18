@@ -1474,7 +1474,6 @@ class ExamTimeTableAPIView(
         school = request_data.get('school')
         teacher = request_data.get('teacher')
         end_time = request_data.get('end_time')
-        exam_date = request_data.get('exam_date')
         begin_time = request_data.get('begin_time')
         lesson_year = request_data.get('lesson_year')
         lesson_season = request_data.get('lesson_season')
@@ -1493,7 +1492,7 @@ class ExamTimeTableAPIView(
                         school=school,
                         lesson_year=lesson_year,
                         lesson_season=lesson_season,
-                        exam_date=exam_date,
+                        begin_date=begin_time,
                     )
 
                 qs_exam_teacher = exam_table_qs.filter(teacher=teacher)
