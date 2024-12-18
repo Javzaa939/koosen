@@ -1114,14 +1114,26 @@ class TimeTable_to_student(models.Model):
 class ExamTimeTable(models.Model):
     """ Шалгалтын хуваарь """
 
+    SORIL = 1
+    AMAN = 2
+    DASGAL = 3
+
+    EXAM_TYPE = (
+        (SORIL, 'Сорил'),
+        (AMAN, 'Аман шалгалт'),
+        (DASGAL, 'Дасгал'),
+    )
+
     lesson_year = models.CharField(max_length=10, verbose_name="Хичээлийн жил")
     lesson_season = models.ForeignKey(Season, on_delete=models.PROTECT, verbose_name="Улирал")
     lesson = models.ForeignKey(LessonStandart, on_delete=models.PROTECT, verbose_name="Хичээл")
     is_online = models.BooleanField(default=False, verbose_name="Онлайн шалгалт эсэх")
+    stype = models.IntegerField(choices=EXAM_TYPE, default=SORIL, verbose_name='Шалгалтын төрөл')
     room = models.ForeignKey(Room, on_delete=models.PROTECT, null=True, verbose_name="Шалгалт авах өрөө")
-    exam_date = models.DateField(null=True, verbose_name="Шалгалт өгөх өдөр")
-    begin_time = models.CharField(max_length=10, null=True, verbose_name="Эхлэх цаг")
-    end_time = models.CharField(max_length=10, null=True, verbose_name="Дуусах цаг")
+    room_name = models.CharField(null=True, verbose_name='Анги танхимийн нэр', max_length=255)
+    begin_date = models.DateTimeField(null=True, verbose_name="Шалгалт эхлэх хугацаа")
+    end_date = models.DateTimeField(null=True, verbose_name="Шалгалт дуусах хугацаа")
+
     teacher = models.ForeignKey(Teachers, on_delete=models.PROTECT, verbose_name="Хянах багш", null=True)
     school = models.ForeignKey(SubOrgs, verbose_name="Сургууль", on_delete=models.PROTECT)
     created_user = models.ForeignKey(User, related_name='ett_cr_user', on_delete=models.SET_NULL, null=True, verbose_name="Бүртгэсэн хэрэглэгч")
