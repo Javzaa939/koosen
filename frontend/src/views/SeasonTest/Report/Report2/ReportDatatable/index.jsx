@@ -65,12 +65,12 @@ export default function ReportDatatable({ report }) {
                 return [
                     {
                         name: `${t('Ангийн нэр')}`,
-                        selector: (row) => (<span>{row?.student_code}</span>),
+                        selector: (row) => (<span>{row?.group_name}</span>),
                         center: true
                     },
                     {
                         name: `${t('Оюутны тоо')}`,
-                        selector: (row) => (<span>{row?.student_name}</span>),
+                        selector: (row) => (<span>{row?.student_count}</span>),
                         center: true
                     },
                     {

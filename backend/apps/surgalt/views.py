@@ -19,7 +19,7 @@ from main.utils.file import save_file
 from main.utils.file import remove_folder
 
 from django.db import transaction
-from django.db.models import Sum, Count, Q, Subquery, OuterRef,  Value, CharField, F
+from django.db.models import Sum, Count, Q, Subquery, OuterRef,  Value, CharField, F, Prefetch
 from django.db.models.functions import Concat
 
 from django.shortcuts import get_object_or_404
@@ -5998,12 +5998,22 @@ class ChallengeReportAPIView(
             get_result = self.list(request).data
 
         elif report_type == 'groups':
-            # todo: finish
-            # self.queryset = queryset
-            # self.serializer_class = ChallengeGroupsSerializer
-            # get_result = self.list(request).data
+            self.queryset = (
+                queryset
+                    .order_by() # to remove above sortings because it conflicts with "group by"
+                    .select_related('student')
+                    .prefetch_related('student__group')
+                    .annotate(
+                        group_name=F('student__group__name'),
+                    )
+                    .values('group_name') # to group students by group_name
+                    .annotate(
+                        student_count=Count('student', distinct=True)
+                    )
+            )
 
-            pass
+            self.serializer_class = ChallengeGroupsSerializer
+            get_result = self.list(request).data
 
         return request.send_data(get_result)
 

@@ -28,14 +28,26 @@ export default function GenericDataTable({ apiGetFunc, apiGetFuncArgs, isApiGetF
 		const { success, data } = await fetchData(apiGetFunc(...args))
 
 		if (success) {
+			let finalData = []
+			let finalCount = 0
+
 			if (isApiGetFuncArgsDefault) {
-				setData(data?.results)
-				setTotalCount(data?.count)
+				finalData = data?.results
+				finalCount = data?.count
+			} else {
+				finalData = data
+				finalCount = data?.length
 			}
-			else {
-				setData(data)
-				setTotalCount(data?.length)
-			}
+
+			setTotalCount(finalCount)
+
+			// to add footer data
+			finalData = [
+				...finalData,
+				{ group_name: "Total", student_count: sumValues(finalData, "student_count") },
+			];
+
+			setData(finalData)
 		}
 	}
 
@@ -47,6 +59,11 @@ export default function GenericDataTable({ apiGetFunc, apiGetFuncArgs, isApiGetF
 	// #region specific code (not generic)
 	useEffect(() => { if (apiGetFuncArgs[1]) getData() }, [apiGetFuncArgs[1]])
 	// #endregion
+
+	// for table footer
+	const sumValues = (data, field) => {
+		return data.reduce((total, item) => total + item[field], 0);
+	};
 
 	return (
 		<DataTable
@@ -81,7 +98,7 @@ function getColumns(current_page, rows_per_page, total_count, columns) {
 	const defaultColumns = [
 		{
 			name: "№",
-			selector: (row, index) => (current_page - 1) * rows_per_page + index + 1,
+			selector: (row, index) => index < total_count ? (current_page - 1) * rows_per_page + index + 1 : '',
 			maxWidth: "30px",
 			center: true
 		}

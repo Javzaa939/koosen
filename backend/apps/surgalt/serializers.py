@@ -1050,21 +1050,13 @@ class ChallengeStudentsSerializer(serializers.ModelSerializer):
 
 
 class ChallengeGroupsSerializer(serializers.ModelSerializer):
-    group_name = serializers.SerializerMethodField()
-    student_total_count = serializers.SerializerMethodField()
+    group_name = serializers.CharField()
+    student_count = serializers.IntegerField()
     student_count_by_assessments = serializers.SerializerMethodField()
 
     class Meta:
-        model = Challenge
-        fields = ['group_name', 'student_total_count', 'student_count_by_assessments']
-# todo: finish
-    def get_group_name(self, obj):
-
-        return None
-
-    def get_student_total_count(self, obj):
-
-        return None
+        model = ChallengeStudents
+        fields = ['group_name', 'student_count', 'student_count_by_assessments']
 
     def get_student_count_by_assessments(self, obj):
 
