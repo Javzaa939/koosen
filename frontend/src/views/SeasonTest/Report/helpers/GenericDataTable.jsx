@@ -41,11 +41,13 @@ export default function GenericDataTable({ apiGetFunc, apiGetFuncArgs, isApiGetF
 
 			setTotalCount(finalCount)
 
+			// #region specific code (not generic)
 			// to add footer data
 			finalData = [
 				...finalData,
 				{ group_name: "Total", student_count: sumValues(finalData, "student_count") },
 			];
+			// #endregion
 
 			setData(finalData)
 		}
@@ -99,7 +101,8 @@ function getColumns(current_page, rows_per_page, total_count, columns) {
 		{
 			name: "№",
 			selector: (row, index) => index < total_count ? (current_page - 1) * rows_per_page + index + 1 : '',
-			maxWidth: "30px",
+			minWidth: '50px',
+			maxWidth: "50px",
 			center: true
 		}
 	]
