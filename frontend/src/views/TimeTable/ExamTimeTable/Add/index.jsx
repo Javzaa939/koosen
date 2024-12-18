@@ -235,12 +235,6 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                             ></Controller>
                             {errors.lesson && <FormFeedback className='d-block'>{t(errors.lesson.message)}</FormFeedback>}
                         </Col>
-
-                            <Col md={6} className='mt-1'>
-                                <Button color='primary' className='mt-1' disabled={!select_value?.lesson} onClick={() => setStudentListView(!student_list_view)}>
-                                    <Eye size="15" className='me-50' />{t('Оюутны жагсаалт')}
-                                </Button>
-                            </Col>
                             <Col md={6}>
                                 <Label className="form-label" for="room">
                                     {t('Шалгалт авах өрөө')}
