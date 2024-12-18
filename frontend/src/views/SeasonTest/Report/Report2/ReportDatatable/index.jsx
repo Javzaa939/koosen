@@ -12,6 +12,13 @@ import GenericDataTable from '../../helpers/GenericDataTable'
 import GroupFilter from '../../helpers/GroupFilter'
 import './style.scss'
 
+/*
+    TODO:
+    - why 6312 group name student count 11 but assesments total count 12 (D=3 F=9)?
+    - group filtering
+    - Хөтөлбөрөөр tab
+    - in database assesments D F are duplicated, so need to add their min max ranges to counting
+*/
 export default function ReportDatatable({ report }) {
     // other hooks
     const { t } = useTranslation()
@@ -76,33 +83,43 @@ export default function ReportDatatable({ report }) {
                         minWidth: '110px'
                     },
                     {
+                        name: `${t('+A')}`,
+                        selector: (row) => (<span>{row?.A2_count}</span>),
+                        center: true
+                    },
+                    {
                         name: `${t('A')}`,
-                        selector: (row) => (<span>{ }</span>),
+                        selector: (row) => (<span>{row?.A_count}</span>),
+                        center: true
+                    },
+                    {
+                        name: `${t('+B')}`,
+                        selector: (row) => (<span>{row?.B2_count}</span>),
                         center: true
                     },
                     {
                         name: `${t('B')}`,
-                        selector: (row) => (<span>{ }</span>),
+                        selector: (row) => (<span>{row?.B_count}</span>),
+                        center: true
+                    },
+                    {
+                        name: `${t('+C')}`,
+                        selector: (row) => (<span>{row?.C2_count}</span>),
                         center: true
                     },
                     {
                         name: `${t('C')}`,
-                        selector: (row) => (<span>{ }</span>),
+                        selector: (row) => (<span>{row?.C_count}</span>),
                         center: true
                     },
                     {
                         name: `${t('D')}`,
-                        selector: (row) => (<span>{ }</span>),
-                        center: true
-                    },
-                    {
-                        name: `${t('E')}`,
-                        selector: (row) => (<span>{ }</span>),
+                        selector: (row) => (<span>{row?.D_count}</span>),
                         center: true
                     },
                     {
                         name: `${t('F')}`,
-                        selector: (row) => (<span>{ }</span>),
+                        selector: (row) => (<span>{row?.F_count}</span>),
                         center: true
                     },
                 ]

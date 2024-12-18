@@ -45,7 +45,18 @@ export default function GenericDataTable({ apiGetFunc, apiGetFuncArgs, isApiGetF
 			// to add footer data
 			finalData = [
 				...finalData,
-				{ group_name: "Total", student_count: sumValues(finalData, "student_count") },
+				{
+					group_name: "Total",
+					student_count: sumValues(finalData, "student_count"),
+					A2_count: sumValues(finalData, "A2_count"),
+					A_count: sumValues(finalData, "A_count"),
+					B2_count: sumValues(finalData, "B2_count"),
+					B_count: sumValues(finalData, "B_count"),
+					C2_count: sumValues(finalData, "C2_count"),
+					C_count: sumValues(finalData, "C_count"),
+					D_count: sumValues(finalData, "D_count"),
+					F_count: sumValues(finalData, "F_count")
+				},
 			];
 			// #endregion
 

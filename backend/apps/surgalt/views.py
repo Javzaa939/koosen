@@ -19,7 +19,7 @@ from main.utils.file import save_file
 from main.utils.file import remove_folder
 
 from django.db import transaction
-from django.db.models import Sum, Count, Q, Subquery, OuterRef,  Value, CharField, F, Prefetch
+from django.db.models import Sum, Count, Q, Subquery, OuterRef,  Value, CharField, F, Case, When, IntegerField, FloatField
 from django.db.models.functions import Concat
 
 from django.shortcuts import get_object_or_404
@@ -5998,6 +5998,19 @@ class ChallengeReportAPIView(
             get_result = self.list(request).data
 
         elif report_type == 'groups':
+            assessments = Score.objects.all().values('score_min','score_max','assesment')
+            assessment_dict = {}
+
+            for assessment in assessments:
+                assesment_value = assessment['assesment']
+                score_min = assessment['score_min']
+                score_max = assessment['score_max']
+
+                assessment_dict[assesment_value] = {
+                    'score_min': score_min,
+                    'score_max': score_max
+                }
+
             self.queryset = (
                 queryset
                     .order_by() # to remove above sortings because it conflicts with "group by"
@@ -6005,10 +6018,87 @@ class ChallengeReportAPIView(
                     .prefetch_related('student__group')
                     .annotate(
                         group_name=F('student__group__name'),
+                        score_percentage=Case(
+                            When(take_score__gt=0, then=(F('score') * 100 / F('take_score'))),
+                            default=Value(0),
+                            output_field=FloatField()
+                        ),
                     )
                     .values('group_name') # to group students by group_name
                     .annotate(
-                        student_count=Count('student', distinct=True)
+                        student_count=Count('student', distinct=True),
+                        A2_count=Count(
+                            Case(
+                                When(
+                                    score_percentage__gte=assessment_dict.get('+A').get('score_min'),
+                                    score_percentage__lte=assessment_dict.get('+A').get('score_max'),
+                                    then=Value(1)),
+                                output_field=IntegerField()
+                            )
+                        ),
+                        A_count=Count(
+                            Case(
+                                When(
+                                    score_percentage__gte=assessment_dict.get('A').get('score_min'),
+                                    score_percentage__lte=assessment_dict.get('A').get('score_max'),
+                                    then=Value(1)),
+                                output_field=IntegerField()
+                            )
+                        ),
+                        B2_count=Count(
+                            Case(
+                                When(
+                                    score_percentage__gte=assessment_dict.get('+B').get('score_min'),
+                                    score_percentage__lte=assessment_dict.get('+B').get('score_max'),
+                                    then=Value(1)),
+                                output_field=IntegerField()
+                            )
+                        ),
+                        B_count=Count(
+                            Case(
+                                When(
+                                    score_percentage__gte=assessment_dict.get('B').get('score_min'),
+                                    score_percentage__lte=assessment_dict.get('B').get('score_max'),
+                                    then=Value(1)),
+                                output_field=IntegerField()
+                            )
+                        ),
+                        C2_count=Count(
+                            Case(
+                                When(
+                                    score_percentage__gte=assessment_dict.get('+C').get('score_min'),
+                                    score_percentage__lte=assessment_dict.get('+C').get('score_max'),
+                                    then=Value(1)),
+                                output_field=IntegerField()
+                            )
+                        ),
+                        C_count=Count(
+                            Case(
+                                When(
+                                    score_percentage__gte=assessment_dict.get('C').get('score_min'),
+                                    score_percentage__lte=assessment_dict.get('C').get('score_max'),
+                                    then=Value(1)),
+                                output_field=IntegerField()
+                            )
+                        ),
+                        D_count=Count(
+                            Case(
+                                When(
+                                    score_percentage__gte=assessment_dict.get('D').get('score_min'),
+                                    score_percentage__lte=assessment_dict.get('D').get('score_max'),
+                                    then=Value(1)),
+                                output_field=IntegerField()
+                            )
+                        ),
+                        F_count=Count(
+                            Case(
+                                When(
+                                    score_percentage__gte=assessment_dict.get('F').get('score_min'),
+                                    score_percentage__lte=assessment_dict.get('F').get('score_max'),
+                                    then=Value(1)),
+                                output_field=IntegerField()
+                            )
+                        )
                     )
             )
 
