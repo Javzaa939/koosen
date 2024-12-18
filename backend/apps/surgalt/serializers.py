@@ -295,7 +295,7 @@ class LessonStandartSerialzier(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = LessonStandart
-        fields = "id", "code", "name", "full_name", 'kredit'
+        fields = "id", "code", "name", "full_name"
 
     def get_full_name(self, obj):
         """ Хичээлийн нэр код нэгтгэх """
