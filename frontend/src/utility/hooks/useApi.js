@@ -891,7 +891,7 @@ function useApi(isDisplay=false) {
 			},
 			// Шалгалтын хуваарь
 			exam:{
-				get: (limit, page, sort, search, group, teacher) => instance.get(`/timetable/examtimetable/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&school=${school_id}&group_id=${group}&teacher=${teacher}`),
+				get: (limit, page, sort, search, type, teacher) => instance.get(`/timetable/examtimetable/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&school=${school_id}&stype=${type}&teacher=${teacher}`),
 				post: data => instance.post('/timetable/examtimetable/', data),
 				getOne: (pk) => instance.get(`/timetable/examtimetable/${pk}/?school=${school_id}`),
 				put: (data, pk) => instance.put(`/timetable/examtimetable/${pk}/`, data),

@@ -4,20 +4,18 @@ import useModal from "@hooks/useModal"
 
 import { Badge, UncontrolledTooltip } from "reactstrap";
 
-import css from '@mstyle/style.module.css'
 import './helperstyle.css'
 // Хүснэгтийн баганууд
 export function getColumns (currentPage, rowsPerPage, datas, handleEditModal,handleDelete, navigate) {
 
 	// const navigate = useNavigate()
 	const { showWarning } = useModal()
-	
 
     const page_count = Math.ceil(datas.length / rowsPerPage)
 
-	function navHandler(row, rowId){
-		navigate(`/timetable/examreport/${rowId}`, { state: row })
-	}
+	// function navHandler(row, rowId){
+	// 	navigate(`/timetable/examreport/${rowId}`, { state: row })
+	// }
 
     /** Сонгосон хуудасны тоо датаны тооноос их болсон үед хуудаслалт 1-ээс эхлэнэ */
     if (currentPage > page_count) {
@@ -49,18 +47,18 @@ export function getColumns (currentPage, rowsPerPage, datas, handleEditModal,han
 		},
 		{
 			header: 'begin_date',
-			name: `${t('Шалгалт авах өдөр')}`,
+			name: `${t('Эхлэх хугацаа')}`,
             cell: (row) => row?.begin_date,
-			minWidth: "80px",
+			minWidth: "100px",
 			sortable: true,
 			wrap: false,
 			center: true
 		},
 		{
 			header: 'end_date',
-			name: `${t('Шалгалт дуусах өдөр')}`,
+			name: `${t('Дуусах хугацаа')}`,
             cell: (row) => row?.end_date,
-			minWidth: "80px",
+			minWidth: "100px",
 			sortable: true,
 			wrap: false,
 			center: true
@@ -68,14 +66,23 @@ export function getColumns (currentPage, rowsPerPage, datas, handleEditModal,han
 		{
 			header: 'teacher',
 			name: `${t('Хянах багш')}`,
-            cell: (row) => row?.teacher_name,
-			minWidth: "180px",
+            cell: (row) => row?.teacher_names,
+			minWidth: "250px",
 			sortable: true,
 			center: true,
 			wrap: true,
 		},
 		{
-			name: `${t('Онлайн шалгалт эсэх')}`,
+			header: 'stype',
+			name: `${t('Шалгалтын төрөл')}`,
+            cell: (row) => row?.stype_name,
+			minWidth: "150px",
+			sortable: true,
+			center: true,
+			wrap: true,
+		},
+		{
+			name: `${t('Онлайн эсэх')}`,
 			selector: (row) => {
 				return (
 					row?.is_online
@@ -90,7 +97,7 @@ export function getColumns (currentPage, rowsPerPage, datas, handleEditModal,han
 				)
 			},
             sortable: true,
-			minWidth: "120px",
+			minWidth: "80px",
 		},
 		{
 			name: `${t('Үйлдэл')}`,
@@ -102,12 +109,12 @@ export function getColumns (currentPage, rowsPerPage, datas, handleEditModal,han
 							id={`requestExamDetail${row.id}`}
 							className='ms-1'
 							onClick={
-								() => handleEditModal(row?.id, row)
+								() => handleEditModal(row)
 							}>
 							<Badge color="light-info" pill><Edit width={"20px"} /></Badge>
 						</a>
 
-					<UncontrolledTooltip placement='top' target={`requestExamDetail${row.id}`} >засах</UncontrolledTooltip>
+					<UncontrolledTooltip placement='top' target={`requestExamDetail${row.id}`} >Засах</UncontrolledTooltip>
 					{
 							<>
 								<a
@@ -129,13 +136,13 @@ export function getColumns (currentPage, rowsPerPage, datas, handleEditModal,han
 								<UncontrolledTooltip placement='top' target={`examDelete${row.id}`} >Устгах</UncontrolledTooltip>
 							</>
 					}
-					{
+					{/* {
 						<>
 							<a className='ms-1'>
 								<Printer width={"15px"} role='button'  onClick={() => {navHandler(row,row.id)}} />
 							</a>
 						</>
-					}
+					} */}
 				</div>
 			),
 		}

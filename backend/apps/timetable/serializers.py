@@ -484,104 +484,114 @@ class ExamTimeTableAllSerializer(serializers.ModelSerializer):
     lesson_name = serializers.CharField(source='lesson.name', default='')
     lesson_code = serializers.CharField(source='lesson.code', default='')
     room_name = serializers.CharField(source='room.full_name', default='')
-    teacher_name = serializers.CharField(source='teacher.full_name', default='')
+    teacher_names = serializers.SerializerMethodField()
+    stype_name = serializers.SerializerMethodField()
 
     class Meta:
         model = ExamTimeTable
         fields = "__all__"
+
+    def get_teacher_names(self, obj):
+        teachers = Teachers.objects.filter(id__in=obj.teacher.values_list('id', flat=True))
+        names = []
+        for teacher in teachers:
+            names.append(teacher.full_name)
+        return ', '.join(names)
+
+    def get_stype_name(self, obj):
+        return obj.get_stype_display()
 
 
 class ExamTimeTableListSerializer(serializers.ModelSerializer):
 
-    lesson = LessonStandartSerialzier(many=False, read_only=True)
-    teacher = TeacherListSerializer(many=False, read_only=True)
-    room = RoomExamListSerializer(many=False, read_only=True)
-    student_list = serializers.SerializerMethodField()
-    student_group_list = serializers.SerializerMethodField()
+    lesson = LessonStandartSerialzier( read_only=True)
+    teacher = TeacherListSerializer(read_only=True, many=True)
+    room = RoomExamListSerializer(read_only=True)
+    # student_list = serializers.SerializerMethodField()
+    # student_group_list = serializers.SerializerMethodField()
 
 
     class Meta:
         model = ExamTimeTable
         fields = "__all__"
 
+    # def get_student_list(self, obj):
 
-    def get_student_list(self, obj):
+    #     request = self.context.get('request')
+    #     school = request.query_params.get('school')
 
-        request = self.context.get('request')
-        school = request.query_params.get('school')
+    #     student_list = []
+    #     status = StudentRegister.objects.filter(name__contains='Суралцаж буй').first()
 
-        student_list = []
-        status = StudentRegister.objects.filter(name__contains='Суралцаж буй').first()
+    #     student_queryset = Exam_to_group.objects.filter(exam_id=obj.id, student__status=status)
+    #     if school:
+    #         student_queryset = student_queryset.filter(group__school=school)
 
-        student_queryset = Exam_to_group.objects.filter(exam_id=obj.id, student__status=status)
-        if school:
-            student_queryset = student_queryset.filter(group__school=school)
+    #     students = student_queryset.values('student', 'student__id', 'student__code', 'student__last_name', 'student__first_name', 'student__group').order_by('student__first_name')
 
-        students = student_queryset.values('student', 'student__id', 'student__code', 'student__last_name', 'student__first_name', 'student__group').order_by('student__first_name')
+    #     if len(students) > 0:
+    #         for student in list(students):
+    #             student_datas = {}
+    #             exam_student = Exam_to_group.objects.filter(exam_id=obj.id, student=student.get('student__id')).first()
 
-        if len(students) > 0:
-            for student in list(students):
-                student_datas = {}
-                exam_student = Exam_to_group.objects.filter(exam_id=obj.id, student=student.get('student__id')).first()
+    #             student_group = student.get('student__group')
+    #             student_id = student.get('student')
+    #             student_datas['code'] = student.get('student__code')
+    #             student_datas['last_name'] = student.get('student__last_name')
+    #             student_datas['first_name'] = student.get('student__first_name')
+    #             student_datas['group'] = student_group
+    #             student_datas['id'] = student.get('student__id')
+    #             student_datas['status'] = exam_student.status
 
-                student_group = student.get('student__group')
-                student_id = student.get('student')
-                student_datas['code'] = student.get('student__code')
-                student_datas['last_name'] = student.get('student__last_name')
-                student_datas['first_name'] = student.get('student__first_name')
-                student_datas['group'] = student_group
-                student_datas['id'] = student.get('student__id')
-                student_datas['status'] = exam_student.status
+    #             exam_score = 0
+    #             teach_score = 0
+    #             result_score = 0
+    #             score = ScoreRegister.objects.filter(student=student_id, lesson_year=obj.lesson_year, lesson_season=obj.lesson_season, lesson=obj.lesson).first()
 
-                exam_score = 0
-                teach_score = 0
-                result_score = 0
-                score = ScoreRegister.objects.filter(student=student_id, lesson_year=obj.lesson_year, lesson_season=obj.lesson_season, lesson=obj.lesson).first()
+    #             if score:
+    #                 exam_score = score.exam_score if score.exam_score else 0
+    #                 teach_score = score.teach_score if score.teach_score else 0
 
-                if score:
-                    exam_score = score.exam_score if score.exam_score else 0
-                    teach_score = score.teach_score if score.teach_score else 0
+    #             student_datas['exam'] = exam_score
+    #             student_datas['teach_score'] = teach_score
+    #             result_score = exam_score + teach_score
+    #             student_datas['result_score'] = result_score
+    #             result_score = round(result_score, 2)
 
-                student_datas['exam'] = exam_score
-                student_datas['teach_score'] = teach_score
-                result_score = exam_score + teach_score
-                student_datas['result_score'] = result_score
-                result_score = round(result_score, 2)
+    #             assessment = Score.objects.filter(score_max__gte=result_score,score_min__lte=result_score).first()
 
-                assessment = Score.objects.filter(score_max__gte=result_score,score_min__lte=result_score).first()
+    #             student_datas['assesment'] = assessment.assesment if assessment else ''
+    #             timetable_group = TimeTable_to_group.objects.filter(group=student_group, timetable__lesson=obj.lesson, timetable__lesson_year=obj.lesson_year, timetable__lesson_season=obj.lesson_season).values_list('timetable', flat=True).distinct('timetable__lesson')
 
-                student_datas['assesment'] = assessment.assesment if assessment else ''
-                timetable_group = TimeTable_to_group.objects.filter(group=student_group, timetable__lesson=obj.lesson, timetable__lesson_year=obj.lesson_year, timetable__lesson_season=obj.lesson_season).values_list('timetable', flat=True).distinct('timetable__lesson')
+    #             if len(timetable_group) > 0:
+    #                 timetable = TimeTable.objects.filter(id__in=timetable_group).first()
+    #                 teacher = Teachers.objects.get(id=timetable.teacher.id)
+    #                 student_datas['teacher_name'] = teacher.full_name if teacher else ''
 
-                if len(timetable_group) > 0:
-                    timetable = TimeTable.objects.filter(id__in=timetable_group).first()
-                    teacher = Teachers.objects.get(id=timetable.teacher.id)
-                    student_datas['teacher_name'] = teacher.full_name if teacher else ''
+    #             student_list.append(student_datas)
 
-                student_list.append(student_datas)
+    #         if len(student_list) > 0:
+    #             student_list = sorted(student_list, key=lambda x: x["result_score"], reverse=True)
 
-            if len(student_list) > 0:
-                student_list = sorted(student_list, key=lambda x: x["result_score"], reverse=True)
+    #     return student_list
 
-        return student_list
+    # def get_student_group_list(self, obj):
 
-    def get_student_group_list(self, obj):
+    #     group_list = list()
+    #     request = self.context.get('request')
+    #     school = request.query_params.get('school')
+    #     group_queryset = Exam_to_group.objects.filter(exam_id=obj.id)
+    #     if school:
+    #         group_queryset = group_queryset.filter(group__school=school)
 
-        group_list = list()
-        request = self.context.get('request')
-        school = request.query_params.get('school')
-        group_queryset = Exam_to_group.objects.filter(exam_id=obj.id)
-        if school:
-            group_queryset = group_queryset.filter(group__school=school)
+    #     groups = group_queryset.values('student__group', 'student__group__name').distinct('student__group')
+    #     for group in list(groups):
+    #         group_list.append({
+    #             'id': group.get('student__group'),
+    #             'name': group.get('student__group__name'),
+    #         })
 
-        groups = group_queryset.values('student__group', 'student__group__name').distinct('student__group')
-        for group in list(groups):
-            group_list.append({
-                'id': group.get('student__group'),
-                'name': group.get('student__group__name'),
-            })
-
-        return group_list
+    #     return group_list
 
 class GroupListSerializer(serializers.ModelSerializer):
     ''' Анги бүлгийн жагсаалт '''

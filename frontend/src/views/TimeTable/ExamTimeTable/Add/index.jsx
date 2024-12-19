@@ -15,7 +15,7 @@ import { useTranslation } from 'react-i18next';
 
 import { useForm, Controller } from "react-hook-form";
 
-import { Eye } from 'react-feather';
+// import { Eye } from 'react-feather';
 
 import { Row, Col, Form, Modal, Input, Label, Button, ModalBody, ModalHeader, FormFeedback, Spinner } from "reactstrap";
 
@@ -27,7 +27,7 @@ import { validateSchema } from '../validateSchema';
 
 import classnames from 'classnames';
 
-const Addmodal = ({ open, handleModal, refreshDatas, handleEdit, editId, edit_data }) => {
+const Addmodal = ({ open, handleModal, refreshDatas, handleEdit, editData }) => {
 
     var values = {
         lesson: '',
@@ -38,7 +38,6 @@ const Addmodal = ({ open, handleModal, refreshDatas, handleEdit, editId, edit_da
     const CloseBtn = (
         <X className="cursor-pointer" size={15} onClick={handleModal} />
     )
-    const addToast = useToast()
 
     const { t } = useTranslation()
 
@@ -48,12 +47,13 @@ const Addmodal = ({ open, handleModal, refreshDatas, handleEdit, editId, edit_da
     const [lesson_option, setLessonOption] = useState([])
     const [teacher_option, setTeacherOption] = useState([])
     const [room_option, setRoomOption] = useState([])
+    const [selectedTeachers, setSelectedTeachers] = useState([])
     const [select_value, setSelectValue] = useState(values)
     const [online_checked, setOnlineChecked] = useState(false)
     const [room_capacity, setRoomCapacity] = useState('')
 
-    const [student_list_view, setStudentListView] = useState(false)
-    const [ studentData, setStudentDatas ] = useState([]);
+    // const [student_list_view, setStudentListView] = useState(false)
+    // const [ studentData, setStudentDatas ] = useState([]);
 
     // ** Hook
     const { control, handleSubmit, formState: { errors }, setError, setValue } = useForm(validate(validateSchema));
@@ -101,31 +101,49 @@ const Addmodal = ({ open, handleModal, refreshDatas, handleEdit, editId, edit_da
     }
 
     // Оюутны жагсаалт
-    const getStudentList = async() => {
-        if(select_value.lesson) {
-            const lessonId = select_value.lesson || ''
+    // const getStudentList = async() => {
+    //     if(select_value.lesson) {
+    //         const lessonId = select_value.lesson || ''
 
-            const { success, data } = await fetchData(examApi.getExamStudent(lessonId, room_capacity))
-            if(success) {
-                const selected_rows = []
-                setStudentDatas(data)
-                if(data) {
-                    for(let i in data) {
-                        if(data[i].selected) {
-                            if(!selected_rows.includes(data[i].id)) {
-                                selected_rows.push(data[i].id)
-                            }
-                        }
+    //         const { success, data } = await fetchData(examApi.getExamStudent(lessonId, room_capacity))
+    //         if(success) {
+    //             const selected_rows = []
+    //             setStudentDatas(data)
+    //             if(data) {
+    //                 for(let i in data) {
+    //                     if(data[i].selected) {
+    //                         if(!selected_rows.includes(data[i].id)) {
+    //                             selected_rows.push(data[i].id)
+    //                         }
+    //                     }
+    //                 }
+    //             }
+    //             setValue('student', selected_rows)
+    //         }
+    //     }
+	// }
+
+    useEffect(
+        () => {
+            if (Object.keys(editData).length > 0) {
+                for (let key in editData) {
+                    setValue(key, editData[key])
+
+                    if(key === 'teacher') {
+                        var values = teacher_option?.filter((e) => editData[key]?.includes(e?.id))
+                        setSelectedTeachers(values)
+                    }
+                    if(key === 'is_online') {
+                        setOnlineChecked(editData[key])
                     }
                 }
-                setValue('student', selected_rows)
             }
-        }
-	}
+        }, [editData, teacher_option]
+    )
 
-    useEffect(() => {
-        getStudentList()
-    },[select_value.lesson, room_capacity])
+    // useEffect(() => {
+    //     getStudentList()
+    // },[select_value.lesson, room_capacity])
 
     function IsOnline(checked) {
         setOnlineChecked(checked)
@@ -134,46 +152,18 @@ const Addmodal = ({ open, handleModal, refreshDatas, handleEdit, editId, edit_da
         }
     }
 
-    useEffect(
-        () =>
-        {
-            getOneData()
-        },
-        [editId]
-    )
-    async function getOneData() {
-        if (editId){
-            const { success, data } = await fetchData(examApi.getOne(editId))
-            if(success) {
-                // засах үед дата байх юм бол setValue-р дамжуулан утгыг харуулна
-                if(data === null) return
-                for(let key in data) {
-
-                    if(data[key] !== null)
-                        setValue(key, data[key])
-
-                    else setValue(key, '')
-
-                    if(key === 'teacher'){
-                        setValue(key, data[key]?.id)
-                    }
-                }
-            }
-        }
-    }
-
     async function onSubmit(cdata) {
         cdata['lesson_year'] = cyear_name
         cdata['lesson_season'] = cseason_id
-        cdata['school'] = school_id
         cdata['is_online'] = online_checked
+        cdata['teacher'] = selectedTeachers?.map((c) => c.id)
 
         if (online_checked) {
             cdata['room'] = null
         }
         cdata = convertDefaultValue(cdata)
-        if (editId){
-            const { success, error } = await postFetch(examApi.put(cdata, editId))
+        if (editData?.id){
+            const { success, error } = await postFetch(examApi.put(cdata, editData?.id))
             if (success) {
                 handleEdit()
                 refreshDatas()
@@ -184,8 +174,9 @@ const Addmodal = ({ open, handleModal, refreshDatas, handleEdit, editId, edit_da
                     setError(error[key].field, { type: 'custom', message: error[key].msg });
                 }
             }
-        }
-        else{
+        }  else {
+            cdata['school'] = school_id
+
             const { success, error } = await postFetch(examApi.post(cdata))
             if (success) {
                 handleModal()
@@ -206,23 +197,23 @@ const Addmodal = ({ open, handleModal, refreshDatas, handleEdit, editId, edit_da
     }, [])
 
     // Шалгалт өгөх оюутнуудын id авах функц
-    function handleSelectedModal(params) {
-        if(studentData) {
-            for (let i in studentData) {
-                if(!params.includes(studentData[i].id)) {
-                    studentData[i].selected = false
-                }
-                else {
-                    studentData[i].selected = true
-                }
-            }
-        }
-        setValue('student', params)
-    }
+    // function handleSelectedModal(params) {
+    //     if(studentData) {
+    //         for (let i in studentData) {
+    //             if(!params.includes(studentData[i].id)) {
+    //                 studentData[i].selected = false
+    //             }
+    //             else {
+    //                 studentData[i].selected = true
+    //             }
+    //         }
+    //     }
+    //     setValue('student', params)
+    // }
 
-    function handleStudentModal() {
-        setStudentListView(false)
-    }
+    // function handleStudentModal() {
+    //     setStudentListView(false)
+    // }
 
     return (
         <Fragment>
@@ -240,7 +231,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, handleEdit, editId, edit_da
                     tag="div"
                 >
                     {
-                        editId ?
+                        Object?.keys(editData)?.length > 0 ?
                             <h5 className="modal-title">{t('Шалгалтын хуваарь засах')}</h5>
                         :
                             <h5 className="modal-title">{t('Шалгалтын хуваарь бүртгэх')}</h5>
@@ -271,11 +262,11 @@ const Addmodal = ({ open, handleModal, refreshDatas, handleEdit, editId, edit_da
                                             noOptionsMessage={() => t('Хоосон байна.')}
                                             onChange={(val) => {
                                                 onChange(val?.id || '')
-                                                setSelectValue({
-                                                    lesson: val?.id || '',
-                                                    teacher: select_value.teacher,
-                                                    class: select_value.class,
-                                                })
+                                                // setSelectValue({
+                                                //     lesson: val?.id || '',
+                                                //     teacher: select_value.teacher,
+                                                //     class: select_value.class,
+                                                // })
                                             }}
                                             styles={ReactSelectStyles}
                                             getOptionValue={(option) => option.id}
@@ -336,7 +327,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, handleEdit, editId, edit_da
                                             onChange={(e) =>
                                                 IsOnline(e.target.checked)
                                             }
-                                            checked={online_checked}
+                                            checked={field.value}
                                         />
                                     )}
                                 />
@@ -460,18 +451,19 @@ const Addmodal = ({ open, handleModal, refreshDatas, handleEdit, editId, edit_da
                                             id="teacher"
                                             classNamePrefix='select'
                                             isClearable
+                                            isMulti
                                             className={classnames('react-select', { 'is-invalid': errors.teacher })}
                                             isLoading={isLoading}
                                             placeholder={t('-- Сонгоно уу --')}
                                             options={teacher_option || []}
-                                            value={value && teacher_option.find((c) => c.id === value)}
+                                            value={selectedTeachers}
                                             noOptionsMessage={() => t('Хоосон байна.')}
                                             onChange={(val) => {
-                                                onChange(val?.id || '')
+                                                setSelectedTeachers(val)
                                             }}
                                             styles={ReactSelectStyles}
                                             getOptionValue={(option) => option.id}
-                                            getOptionLabel={(option) => option.full_name}
+                                            getOptionLabel={(option) => option?.rank_name + ' ' + option.last_name + '.' + option?.first_name}
                                         />
                                     )
                                 }}

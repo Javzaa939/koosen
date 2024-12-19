@@ -4,15 +4,15 @@ export const validateSchema = Yup.object().shape({
 	begin_date: Yup.string()
 		.trim()
 		.required('Хоосон байна'),
-    teacher: Yup.string()
-        .trim()
-		.required('Хоосон байна'),
-	room: Yup.string()
-        .trim()
-		.test('required', 'Хоосон байна', val => {
-			if(document.getElementById('is_online').checked) return true
-			else return val
-		}),
+    // teacher: Yup.string()
+    //     .trim()
+	// 	.required('Хоосон байна'),
+	// room: Yup.string()
+    //     .trim()
+	// 	.test('required', 'Хоосон байна', val => {
+	// 		if(document.getElementById('is_online').checked) return true
+	// 		else return val
+	// 	}),
 	lesson: Yup.string()
         .trim()
 		.required('Хоосон байна'),

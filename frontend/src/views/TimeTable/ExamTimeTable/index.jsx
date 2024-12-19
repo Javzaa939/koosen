@@ -15,14 +15,14 @@ import useLoader from '@hooks/useLoader';
 import AuthContext from '@context/AuthContext'
 import SchoolContext from '@context/SchoolContext'
 import Select from 'react-select'
-import { ReactSelectStyles } from '@utils'
+import { ReactSelectStyles, examType } from '@utils'
 
 import { getPagination } from '@utils'
 
 import { getColumns } from "./helpers"
 
 import Addmodal from './Add'
-import Editmodal from "./Edit"
+// import Editmodal from "./Edit"
 import classNames from "classnames"
 
 const ExamTimeTable = () => {
@@ -47,7 +47,7 @@ const ExamTimeTable = () => {
     // songoson utguud
 
     const [selectedTeacher, setSelectedTeacher] = useState('')
-    const [selectedRoom, setSelectedRoom] = useState('')
+    const [selectedType, setSelectedType] = useState('')
     // const [selectedLesson, setSelectedLesson] = useState('')
 
 
@@ -89,7 +89,7 @@ const ExamTimeTable = () => {
 
     /* Жагсаалт дата авах функц */
     async function getDatas() {
-        const { success, data } = await allFetch(examApi.get(rowsPerPage, currentPage, sortField, searchValue, selectedRoom, selectedTeacher))
+        const { success, data } = await allFetch(examApi.get(rowsPerPage, currentPage, sortField, searchValue, selectedType, selectedTeacher))
         if(success) {
             setDatas(data?.results)
             setTotalCount(data?.count)
@@ -99,7 +99,7 @@ const ExamTimeTable = () => {
     useEffect(() => {
         getTeachers();
         // getRoom();
-        getGroups()
+        // getGroups()
         // getLessonOption()
     },[])
 
@@ -129,12 +129,12 @@ const ExamTimeTable = () => {
     }
 
     // Хичээлийн жагсаалт
-    async function getLessonOption() {
-        const { success, data } = await fetchData(lessonApi.getList())
-        if(success) {
-            setLessons(data)
-        }
-    }
+    // async function getLessonOption() {
+    //     const { success, data } = await fetchData(lessonApi.getList())
+    //     if(success) {
+    //         setLessons(data)
+    //     }
+    // }
 
     useEffect(() => {
 		if (searchValue.length == 0) {
@@ -146,7 +146,7 @@ const ExamTimeTable = () => {
 
 			return () => clearTimeout(timeoutId);
 		}
-	}, [rowsPerPage, currentPage, sortField, searchValue, selectedRoom, selectedTeacher])
+	}, [rowsPerPage, currentPage, sortField, searchValue, selectedType, selectedTeacher])
 
 
     function handleSort(column, sort) {
@@ -176,10 +176,9 @@ const ExamTimeTable = () => {
     };
 
     /** Засах модал */
-    function handleEditModal(id, data) {
-        setEditId(id)
+    function handleEditModal(data) {
+        setEditId(data?.id)
         setEditData(data)
-        setEditModal(!edit_modal)
         handleModal()
     }
 
@@ -216,43 +215,43 @@ const ExamTimeTable = () => {
                 </CardHeader>
                 <Row className='p-1'>
                     <Col md={4}>
-                            <Label>Анги</Label>
-                            <Select
-                                classNamePrefix='select'
-                                isClearable
-                                className={classNames('react-select')}
-                                isLoading={groupLoading}
-                                placeholder={t('-- Сонгоно уу --')}
-                                options={groups || []}
-                                value={groups.find((c) => c.id === selectedRoom)}
-                                noOptionsMessage={() => t('Хоосон байна')}
-                                onChange={(val) => {
-                                    setSelectedRoom(val ? val?.id : '')
-                                }}
-                                styles={ReactSelectStyles}
-                                getOptionValue={(option) => option.id}
-                                getOptionLabel={(option) => option.name}
-                            />
-                        </Col>
-                        <Col md={4}>
-                            <Label>Багш</Label>
-                            <Select
-                                classNamePrefix='select'
-                                isClearable
-                                className={classNames('react-select')}
-                                isLoading={teacherLoading}
-                                placeholder={t('-- Сонгоно уу --')}
-                                options={teachers || []}
-                                value={teachers.find((c) => c.id === selectedTeacher)}
-                                noOptionsMessage={() => t('Хоосон байна')}
-                                onChange={(val) => {
-                                    setSelectedTeacher(val ? val.id : '')
-                                }}
-                                styles={ReactSelectStyles}
-                                getOptionValue={(option) => option.id}
-                                getOptionLabel={(option) => option.full_name}
-                            />
-                        </Col>
+                        <Label>Шалгалтын төрөл</Label>
+                        <Select
+                            classNamePrefix='select'
+                            isClearable
+                            className={classNames('react-select')}
+                            isLoading={groupLoading}
+                            placeholder={t('-- Сонгоно уу --')}
+                            options={examType() || []}
+                            value={examType().find((c) => c.id === selectedType)}
+                            noOptionsMessage={() => t('Хоосон байна')}
+                            onChange={(val) => {
+                                setSelectedType(val ? val?.id : '')
+                            }}
+                            styles={ReactSelectStyles}
+                            getOptionValue={(option) => option.id}
+                            getOptionLabel={(option) => option.name}
+                        />
+                    </Col>
+                    <Col md={4}>
+                        <Label>Хянах багш</Label>
+                        <Select
+                            classNamePrefix='select'
+                            isClearable
+                            className={classNames('react-select')}
+                            isLoading={teacherLoading}
+                            placeholder={t('-- Сонгоно уу --')}
+                            options={teachers || []}
+                            value={teachers.find((c) => c.id === selectedTeacher)}
+                            noOptionsMessage={() => t('Хоосон байна')}
+                            onChange={(val) => {
+                                setSelectedTeacher(val ? val.id : '')
+                            }}
+                            styles={ReactSelectStyles}
+                            getOptionValue={(option) => option.id}
+                            getOptionLabel={(option) => option.rank_name + ' ' + option?.full_name}
+                        />
+                    </Col>
                 </Row>
                 <Row className="justify-content-between mx-0">
                         <Col className='d-flex align-items-center justify-content-start mt-1' md={4} sm={12}>
@@ -354,7 +353,7 @@ const ExamTimeTable = () => {
                                             <Badge color='light-warning' className="p-1"> <AlertCircle/> Уучлаарай илэрц олдсонгүй </Badge>
                                         </div>
                             }
-                {modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} handleEdit={handleEditModal} editId={editId} edit_data={edit_data}/>}
+                {modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} handleEdit={handleEditModal} editId={editId} editData={edit_data}/>}
                 {/* {edit_modal && <Editmodal editId={edit_pay_id} open={edit_modal} handleModal={handleEditModal} refreshDatas={getDatas}/>} */}
             </Card>
         </Fragment>
