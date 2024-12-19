@@ -56,7 +56,8 @@ const ExamTimeTable = () => {
 
     const [searchValue, setSearchValue] = useState("");
 
-    const [edit_pay_id, setEditId] = useState('')
+    const [editId, setEditId] = useState('')
+    const [edit_data, setEditData] = useState('')
 
     const [datas, setDatas] = useState([]);
 
@@ -79,6 +80,7 @@ const ExamTimeTable = () => {
     // Modal
     const [modal, setModal] = useState(false);
     const [edit_modal, setEditModal] = useState(false);
+    console.log("edit_modal", edit_modal);
 
     /* Нэмэх модал setState функц */
     const handleModal = () =>{
@@ -155,6 +157,13 @@ const ExamTimeTable = () => {
         }
     }
 
+    async function handleDelete(id) {
+		const { success, data } = await fetchData(examApi.delete(id));
+		if (success) {
+			getDatas();
+		}
+	}
+
     // Хайлт хийх үед ажиллах хэсэг
     const handleFilter = (e) => {
         const value = e.target.value.trimStart();
@@ -167,9 +176,11 @@ const ExamTimeTable = () => {
     };
 
     /** Засах модал */
-    function handleEditModal(edit_id) {
-        setEditId(edit_id)
+    function handleEditModal(id, data) {
+        setEditId(id)
+        setEditData(data)
         setEditModal(!edit_modal)
+        handleModal()
     }
 
     // ** Function to handle per page
@@ -328,7 +339,7 @@ const ExamTimeTable = () => {
                                                 className='react-dataTable'
                                                 // progressPending={isTableLoading}
                                                 onSort={handleSort}
-                                                columns={getColumns(currentPage, rowsPerPage, datas, handleEditModal, navigate)}
+                                                columns={getColumns(currentPage, rowsPerPage, datas, handleEditModal, handleDelete, navigate)}
                                                 sortIcon={<ChevronDown size={10} />}
                                                 paginationPerPage={rowsPerPage}
                                                 paginationDefaultPage={currentPage}
@@ -343,8 +354,8 @@ const ExamTimeTable = () => {
                                             <Badge color='light-warning' className="p-1"> <AlertCircle/> Уучлаарай илэрц олдсонгүй </Badge>
                                         </div>
                             }
-                {modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas}/>}
-                {edit_modal && <Editmodal editId={edit_pay_id} open={edit_modal} handleModal={handleEditModal} refreshDatas={getDatas}/>}
+                {modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} handleEdit={handleEditModal} editId={editId} edit_data={edit_data}/>}
+                {/* {edit_modal && <Editmodal editId={edit_pay_id} open={edit_modal} handleModal={handleEditModal} refreshDatas={getDatas}/>} */}
             </Card>
         </Fragment>
     )

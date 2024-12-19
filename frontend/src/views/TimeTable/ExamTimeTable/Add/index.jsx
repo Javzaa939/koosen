@@ -23,11 +23,11 @@ import { validate, ReactSelectStyles, convertDefaultValue, examType } from "@uti
 
 import { validateSchema } from '../validateSchema';
 
-import StudentList from "../StudentList";
+// import StudentList from "../StudentList";
 
 import classnames from 'classnames';
 
-const Addmodal = ({ open, handleModal, refreshDatas }) => {
+const Addmodal = ({ open, handleModal, refreshDatas, handleEdit, editId, edit_data }) => {
 
     var values = {
         lesson: '',
@@ -134,6 +134,33 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
         }
     }
 
+    useEffect(
+        () =>
+        {
+            getOneData()
+        },
+        [editId]
+    )
+    async function getOneData() {
+        if (editId){
+            const { success, data } = await fetchData(examApi.getOne(editId))
+            if(success) {
+                // засах үед дата байх юм бол setValue-р дамжуулан утгыг харуулна
+                if(data === null) return
+                for(let key in data) {
+
+                    if(data[key] !== null)
+                        setValue(key, data[key])
+
+                    else setValue(key, '')
+
+                    if(key === 'teacher'){
+                        setValue(key, data[key]?.id)
+                    }
+                }
+            }
+        }
+    }
 
     async function onSubmit(cdata) {
         cdata['lesson_year'] = cyear_name
@@ -145,21 +172,27 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
             cdata['room'] = null
         }
         cdata = convertDefaultValue(cdata)
-        const { success, error } = await postFetch(examApi.post(cdata))
-        if (success) {
-            handleModal()
-            refreshDatas()
-        } else {
-            /** Алдааны мессэжийг input дээр харуулна */
-            for (let key in error) {
-                if(error[key].field === 'student') {
-                    addToast(
-                        {
-                            type: 'warning',
-                            text: error[key].msg
-                        }
-                    )
-                } else {
+        if (editId){
+            const { success, error } = await postFetch(examApi.put(cdata, editId))
+            if (success) {
+                handleEdit()
+                refreshDatas()
+            }
+            else {
+                /** Алдааны мессэжийг input дээр харуулна */
+                for (let key in error) {
+                    setError(error[key].field, { type: 'custom', message: error[key].msg });
+                }
+            }
+        }
+        else{
+            const { success, error } = await postFetch(examApi.post(cdata))
+            if (success) {
+                handleModal()
+                refreshDatas()
+            } else {
+                /** Алдааны мессэжийг input дээр харуулна */
+                for (let key in error) {
                     setError(error[key].field, { type: 'custom', message: error[key].msg });
                 }
             }
@@ -196,9 +229,9 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
             <Modal
                 isOpen={open}
                 toggle={handleModal}
-                className="sidebar-xl"
-                modalClassName="modal-slide-in "
+                className="modal-dialog-centered modal-lg"
                 contentClassName="pt-0"
+                backdrop='static'
             >
                 <ModalHeader
                     className="mb-1"
@@ -206,7 +239,12 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                     close={CloseBtn}
                     tag="div"
                 >
-                    <h5 className="modal-title">{t('Шалгалтын хуваарь бүртгэх')}</h5>
+                    {
+                        editId ?
+                            <h5 className="modal-title">{t('Шалгалтын хуваарь засах')}</h5>
+                        :
+                            <h5 className="modal-title">{t('Шалгалтын хуваарь бүртгэх')}</h5>
+                    }
                 </ModalHeader>
                 <ModalBody className="flex-grow-1">
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
@@ -477,7 +515,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                             ></Controller>
                             {errors.student && <FormFeedback className='d-block'>{errors.student.message}</FormFeedback>}
                         </Col> */}
-                        <Col md={12} className="mt-2">
+                        <Col md={12} className="mt-2 text-center">
                             <Button className="me-2" color="primary" type="submit" disabled={postLoading}>
                                 {postLoading &&<Spinner size='sm' className='me-1'/>}
                                 {t('Хадгалах')}
@@ -487,7 +525,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                             </Button>
                         </Col>
                     </Row>
-                    {
+                    {/* {
                         student_list_view &&
                         <StudentList
                             open={student_list_view}
@@ -497,7 +535,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                             isLoading={isLoading}
                             Loader={Loader}
                         />
-                    }
+                    } */}
                 </ModalBody>
             </Modal>
         </Fragment>
