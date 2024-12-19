@@ -70,9 +70,17 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
 
     // Хичээлийн жагсаалт
     async function getLessonOption() {
-        const { success, data } = await fetchData(lessonApi.getList(school_id))
-        if (success) {
-            setLessonOption(data)
+        if(school_id ==11){
+            const { success, data } = await fetchData(lessonApi.getList())
+            if (success) {
+                setLessonOption(data)
+            }
+        }
+        else{
+            const { success, data } = await fetchData(lessonApi.getList(school_id))
+            if (success) {
+                setLessonOption(data)
+            }
         }
     }
 
