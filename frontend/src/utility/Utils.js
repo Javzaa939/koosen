@@ -1893,3 +1893,24 @@ export const get_levelseasons= () => {
 	})
 	return datas
 }
+
+
+export const examType= () => {
+
+	const datas = []
+	const list = [
+		'Сорил',
+		'Аман шалгалт',
+		'Дасгал',
+	]
+
+	list.map((list, idx) => {
+		var data = {
+			id: idx + 1,
+			name: list,
+		}
+
+		datas.push(data)
+	})
+	return datas
+}

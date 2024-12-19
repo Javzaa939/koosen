@@ -197,22 +197,6 @@ const ExamTimeTable = () => {
                 <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
 					<CardTitle tag="h4">{t('Шалгалтын хуваарь')}</CardTitle>
                     <div className='d-flex flex-wrap mt-md-0 mt-1 '>
-                        <Button
-                            className='me-1'
-                            color='primary' disabled={user && Object.keys(user).length && user.permissions.includes('lms-timetable-exam-create') ? false : true}
-                            onClick={() =>
-                                showWarning({
-                                    header: {
-                                        title: `${t('Шалгалтын хуваарь үүсгэх')}`,
-                                    },
-                                    question: `Тухайн идэвхтэй хичээлийн жил, улиралд үүссэн хичээлийн хуваарьт байгаа бүх хичээлийн дагуу шалгалтын хуваарь үүсэх болно. Шалгалтын хуваарь үүсгэхдээ итгэлтэй байна уу?`,
-                                    onClick: () => createExam(),
-                                    btnText: 'Тийм',
-                                })
-                            }
-                        >
-                            <span className='align-middle ms-50'>{t('Шалгалт үүсгэх')}</span>
-                        </Button>
                         <Button color='primary' disabled={user && Object.keys(user).length && user.permissions.includes('lms-timetable-exam-create')&& school_id ? false : true} onClick={() => handleModal()}>
                             <Plus size={15} />
                             <span className='align-middle ms-50'>{t('Нэмэх')}</span>
