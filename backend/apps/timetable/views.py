@@ -88,11 +88,11 @@ class BuildingAPIView(
         serializer = self.get_serializer(data=request_data)
 
         if serializer.is_valid(raise_exception=False):
-            with transaction.atomic():
-                try:
+            try:
+                with transaction.atomic():
                     self.perform_create(serializer)
-                except Exception:
-                    return request.send_error("ERR_002")
+            except Exception:
+                return request.send_error("ERR_002")
             return request.send_info("INF_001")
         else:
             # Олон алдааны мессэж буцаах бол үүнийг ашиглана
@@ -124,11 +124,11 @@ class BuildingAPIView(
         serializer = self.get_serializer(instance, data=request_data)
 
         if serializer.is_valid(raise_exception=False):
-            with transaction.atomic():
-                try:
+            try:
+                with transaction.atomic():
                     self.perform_update(serializer)
-                except Exception:
-                    return request.send_error("ERR_002")
+            except Exception:
+                return request.send_error("ERR_002")
             return request.send_info("INF_001")
 
         else:
@@ -192,12 +192,12 @@ class RoomAPIView(
         serializer = self.get_serializer(data=request_data)
 
         if serializer.is_valid(raise_exception=False):
-            with transaction.atomic():
-                try:
+            try:
+                with transaction.atomic():
                     self.create(request).data
 
-                except Exception:
-                    return request.send_error("ERR_002")
+            except Exception:
+                return request.send_error("ERR_002")
 
             return request.send_info("INF_001")
         else:
@@ -232,11 +232,11 @@ class RoomAPIView(
         serializer = self.get_serializer(instance, data=request_data)
 
         if serializer.is_valid(raise_exception=False):
-            with transaction.atomic():
-                try:
+            try:
+                with transaction.atomic():
                     self.update(request).data
-                except Exception:
-                    return request.send_error("ERR_002")
+            except Exception:
+                return request.send_error("ERR_002")
         else:
             errors = []
             for key in serializer.errors:
@@ -646,8 +646,8 @@ class TimeTableAPIView(
                                     if len(error_obj) > 0:
                                         return request.send_error("ERR_003", error_obj)
             end_time(st_time, 'Шалгалт хийж дуусах хугацаа')
-            with transaction.atomic():
-                try:
+            try:
+                with transaction.atomic():
                     # Тухайн хичээлийн хуваарьт байгаа багш хичээл холбогдоогүй бол шинээр үүсгэх
                     qs_lesson_teacher = Lesson_to_teacher.objects.filter(lesson=request_data.get('lesson'), teacher=request_data.get('teacher'))
                     if len(qs_lesson_teacher) == 0:
@@ -808,9 +808,9 @@ class TimeTableAPIView(
 
                     end_time(st_time, 'Хадгалах хугацаа')
                     return request.send_info("INF_001")
-                except Exception as e:
-                    print(e)
-                    return request.send_error("ERR_002", "Хичээлийн хуваарь давхцаж байна.")
+            except Exception as e:
+                print(e)
+                return request.send_error("ERR_002", "Хичээлийн хуваарь давхцаж байна.")
         else:
             print(serializer.errors)
             # Олон алдааны мессэж буцаах бол үүнийг ашиглана
@@ -1138,8 +1138,8 @@ class TimeTableAPIView(
                                 if len(error_obj) > 0:
                                     return request.send_error("ERR_003", error_obj)
 
-            with transaction.atomic():
-                try:
+            try:
+                with transaction.atomic():
                     # Тухайн хичээлийн хуваарьт байгаа багш хичээл холбогдоогүй бол шинээр үүсгэх
                     qs_lesson_teacher = Lesson_to_teacher.objects.filter(lesson=request_data.get('lesson'), teacher=request_data.get('teacher'))
 
@@ -1349,9 +1349,9 @@ class TimeTableAPIView(
                             qs_stu.filter(add_flag=True).delete()
 
                     return request.send_info("INF_002")
-                except Exception as e:
-                    print(e)
-                    return request.send_error("ERR_002")
+            except Exception as e:
+                print(e)
+                return request.send_error("ERR_002")
         else:
             error_obj = []
             for key in serializer.errors:
@@ -1626,8 +1626,8 @@ class ExamTimeTableAPIView(
                 if len(error_obj) > 0:
                     return request.send_error("ERR_003", error_obj)
 
-                with transaction.atomic():
-                    try:
+                try:
+                    with transaction.atomic():
                         exam_data = self.create(request).data
 
                         # Шалгалтын хуваарийн хүснэгтийн id
@@ -1651,9 +1651,9 @@ class ExamTimeTableAPIView(
 
                         return request.send_info("INF_001")
 
-                    except Exception as e:
-                        print(e)
-                        return request.send_error("ERR_002", "Шалгалтын хуваарь давхцаж байна.")
+                except Exception as e:
+                    print(e)
+                    return request.send_error("ERR_002", "Шалгалтын хуваарь давхцаж байна.")
 
             else:
                 transaction.savepoint_rollback(sid)
@@ -1820,8 +1820,8 @@ class ExamTimeTableAPIView(
                     if len(error_obj) > 0:
                         return request.send_error("ERR_003", error_obj)
 
-                with transaction.atomic():
-                    try:
+                try:
+                    with transaction.atomic():
                         self.update(request).data
 
                         # Шалгалтын хуваарийн хүснэгтийн id
@@ -1851,8 +1851,8 @@ class ExamTimeTableAPIView(
 
                         return request.send_info("INF_002")
 
-                    except Exception as e:
-                        return request.send_error("ERR_002")
+                except Exception as e:
+                    return request.send_error("ERR_002")
             else:
                 return request.send_error_valid(serializer.errors)
 
@@ -2522,8 +2522,8 @@ class TimeTableNewAPIView(
         datas['lesson_year'] = year
         datas['created_user_id'] = request.user.id
 
-        with transaction.atomic():
-            try:
+        try:
+            with transaction.atomic():
                 table_data, created = self.queryset.update_or_create(
                     lesson=lesson,
                     teacher=teacher,
@@ -2557,10 +2557,10 @@ class TimeTableNewAPIView(
 
                 return request.send_info("INF_001")
 
-            except Exception as e:
-                print(e)
-                print(e)
-                return request.send_error("ERR_002", "Хичээлийн хуваарь давхцаж байна.")
+        except Exception as e:
+            print(e)
+            print(e)
+            return request.send_error("ERR_002", "Хичээлийн хуваарь давхцаж байна.")
 
 
 @permission_classes([IsAuthenticated])
@@ -3083,8 +3083,8 @@ class ExamTimeTableCreateAPIView(
 
         exam_to_group_datas = []
         exam_ids = []
-        with transaction.atomic():
-            try:
+        try:
+            with transaction.atomic():
                 for timetable in timetables:
                     lesson = timetable.get('lesson')
                     create_lesson = timetable.get('school')
@@ -3124,9 +3124,9 @@ class ExamTimeTableCreateAPIView(
                 if len(exam_to_group_datas) > 0:
                     Exam_to_group.objects.bulk_create(exam_to_group_datas)
 
-            except Exception as e:
-                print(e)
-                return request.send_error('ERR_002', 'Хуваарь хадгалахад алдаа гарлаа.')
+        except Exception as e:
+            print(e)
+            return request.send_error('ERR_002', 'Хуваарь хадгалахад алдаа гарлаа.')
 
         return request.send_info('INF_001')
 
