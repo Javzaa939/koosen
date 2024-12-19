@@ -1429,8 +1429,7 @@ class ExamTimeTableAPIView(
 
         # Сургуулиар хайлт хийх
         if school:
-            lesson_ids = TimeTable.objects.filter(school=school, lesson_year=year, lesson_season=season).values_list('lesson', flat=True).distinct('lesson')
-            queryset = queryset.filter(lesson__in=list(lesson_ids))
+            queryset = queryset.filter(school=school)
 
         # Ангиар хайлт хийх
         if group:
@@ -1472,6 +1471,10 @@ class ExamTimeTableAPIView(
         room = request_data.get('room')
         lesson = request_data.get('lesson')
         school = request_data.get('school')
+        
+        print(school)
+        print(school)
+        print(school)
         teacher = request_data.get('teacher')
         end_datetime = request_data.get('end_date')
         begin_datetime = request_data.get('begin_date')
@@ -1564,7 +1567,7 @@ class ExamTimeTableAPIView(
                             error_obj = get_error_obj(msg, 'teacher')
 
                 # Шалгалт авах өрөө давхцаж байгаа эсэхийг шалгана
-                if qs_exam_room:
+                if qs_exam_room and not request_data.get('is_online'):
                     qs_exam_rooms = qs_exam_room.values(
                             'begin_date',
                             'end_date',
@@ -1650,8 +1653,7 @@ class ExamTimeTableAPIView(
 
                 try:
                     with transaction.atomic():
-                        exam_data = self.create(request).data
-
+                        exam_data  = serializer.data
                         # Шалгалтын хуваарийн хүснэгтийн id
                         exam_table_id = exam_data.get('id')
 
