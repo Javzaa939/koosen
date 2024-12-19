@@ -67,8 +67,7 @@ from lms.models import (
     QuestionTitle,
     Lesson_teacher_scoretype,
     QuestionTitle,
-    Score,
-    StudentRegister
+    Score
 )
 
 from core.models import (
@@ -117,7 +116,7 @@ from .serializers import PsychologicalTestParticipantsSerializer
 from .serializers import TeacherExamTimeTableSerializer
 from core.serializers import TeacherNameSerializer
 from .serializers import QuestionTitleSerializer
-from .serializers import ChallengeSedevSerializer
+from .serializers import LessonStandartCreateSerializer
 from .serializers import ChallengeDetailSerializer,ChallengeStudentsSerializer,StudentChallengeSerializer,ChallengeDetailTableStudentsSerializer
 
 from main.utils.function.utils import remove_key_from_dict, fix_format_date, get_domain_url
@@ -181,6 +180,7 @@ class LessonStandartAPIView(
         " хичээлийн стандартын шинээр үүсгэх "
 
         request_data = request.data
+        self.serializer_class = LessonStandartCreateSerializer
         serializer = self.get_serializer(data=request_data)
 
         # transaction savepoint зарлах нь хэрэв алдаа гарвад roll back хийнэ
@@ -194,7 +194,8 @@ class LessonStandartAPIView(
 
             serializer.save()
 
-        except Exception:
+        except Exception as e:
+            print(e)
             return request.send_error("ERR_002")
 
         return request.send_info("INF_001")

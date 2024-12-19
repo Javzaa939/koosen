@@ -19,7 +19,7 @@ import { Eye } from 'react-feather';
 
 import { Row, Col, Form, Modal, Input, Label, Button, ModalBody, ModalHeader, FormFeedback, Spinner } from "reactstrap";
 
-import { validate, ReactSelectStyles, convertDefaultValue } from "@utils"
+import { validate, ReactSelectStyles, convertDefaultValue, examType } from "@utils"
 
 import { validateSchema } from '../validateSchema';
 
@@ -134,11 +134,16 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
         }
     }
 
+
     async function onSubmit(cdata) {
         cdata['lesson_year'] = cyear_name
         cdata['lesson_season'] = cseason_id
         cdata['school'] = school_id
         cdata['is_online'] = online_checked
+
+        if (online_checked) {
+            cdata['room'] = null
+        }
         cdata = convertDefaultValue(cdata)
         const { success, error } = await postFetch(examApi.post(cdata))
         if (success) {
@@ -243,136 +248,164 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                             ></Controller>
                             {errors.lesson && <FormFeedback className='d-block'>{t(errors.lesson.message)}</FormFeedback>}
                         </Col>
-
-                            <Col md={6} className='mt-1'>
-                                <Button color='primary' className='mt-1' disabled={!select_value?.lesson} onClick={() => setStudentListView(!student_list_view)}>
-                                    <Eye size="15" className='me-50' />{t('Оюутны жагсаалт')}
-                                </Button>
-                            </Col>
-                            <Col md={6}>
-                                <Label className="form-label" for="room">
-                                    {t('Шалгалт авах өрөө')}
-                                </Label>
+                        <Col md={6}>
+                            <Label className="form-label" for="stype">
+                                {t('Шалгалт авах төрөл')}
+                            </Label>
+                            <Controller
+                                control={control}
+                                defaultValue=''
+                                name="stype"
+                                render={({ field: { value, onChange } }) => {
+                                    return (
+                                        <Select
+                                            name="stype"
+                                            id="stype"
+                                            classNamePrefix='select'
+                                            isClearable
+                                            className={classnames('react-select', { 'is-invalid': errors.stype })}
+                                            isLoading={isLoading}
+                                            placeholder={t('-- Сонгоно уу --')}
+                                            options={examType() || []}
+                                            value={value && examType().find((c) => c.id === value)}
+                                            noOptionsMessage={() => t('Хоосон байна.')}
+                                            onChange={(val) => {
+                                                onChange(val?.id || '')
+                                            }}
+                                            styles={ReactSelectStyles}
+                                            getOptionValue={(option) => option.id}
+                                            getOptionLabel={(option) => option.name}
+                                        />
+                                    )
+                                }}
+                            >
+                            </Controller>
+                            {errors.stype && <FormFeedback className='d-block'>{t(errors.stype.message)}</FormFeedback>}
+                        </Col>
+                        <Row>
+                            <Col md={6} className="pt-2">
                                 <Controller
                                     control={control}
-                                    defaultValue=''
-                                    name="room"
-                                    render={({ field: { value, onChange } }) => {
-                                        return (
-                                            <Select
-                                                name="room"
-                                                id="room"
-                                                classNamePrefix='select'
-                                                isDisabled={online_checked}
-                                                isClearable
-                                                className={classnames('react-select', { 'is-invalid': errors.room })}
-                                                isLoading={isLoading}
-                                                placeholder={t('-- Сонгоно уу --')}
-                                                options={room_option || []}
-                                                value={value && room_option.find((c) => c.id === value)}
-                                                noOptionsMessage={() => t('Хоосон байна.')}
-                                                onChange={(val) => {
-                                                    onChange(val?.id || '')
-                                                    setRoomCapacity(val?.volume || '')
-                                                }}
-                                                styles={ReactSelectStyles}
-                                                getOptionValue={(option) => option.id}
-                                                getOptionLabel={(option) => option.full_name}
-                                            />
-                                        )
-                                    }}
-                                >
-                                </Controller>
-                                {errors.room && <FormFeedback className='d-block'>{t(errors.room.message)}</FormFeedback>}
+                                    id="is_online"
+                                    name="is_online"
+                                    defaultValue={false}
+                                    render={({ field }) => (
+                                        <Input
+                                            id="is_online"
+                                            type="checkbox"
+                                            className='me-50'
+                                            {...field}
+                                            onChange={(e) =>
+                                                IsOnline(e.target.checked)
+                                            }
+                                            checked={online_checked}
+                                        />
+                                    )}
+                                />
+                                <Label className="form-label" for="is_online">
+                                    {t('Онлайн шалгалт эсэх')}
+                                </Label>
                             </Col>
-                        <Col md={6} className="pt-2">
+                        </Row>
+                        <Col md={6}>
+                            <Label className="form-label" for="room">
+                                {t('Шалгалт авах өрөө')}
+                            </Label>
                             <Controller
                                 control={control}
-                                id="is_online"
-                                name="is_online"
-                                defaultValue={false}
-                                render={({ field }) => (
-                                    <Input
-                                        id="is_online"
-                                        type="checkbox"
-                                        className='me-50'
-                                        {...field}
-                                        onChange={(e) =>
-                                            IsOnline(e.target.checked)
-                                        }
-                                        checked={online_checked}
-                                    />
-                                )}
-                            />
-                            <Label className="form-label" for="is_online">
-                                {t('Онлайн шалгалт эсэх')}
-                            </Label>
+                                defaultValue=''
+                                name="room"
+                                render={({ field: { value, onChange } }) => {
+                                    return (
+                                        <Select
+                                            name="room"
+                                            id="room"
+                                            classNamePrefix='select'
+                                            isDisabled={online_checked}
+                                            isClearable
+                                            className={classnames('react-select', { 'is-invalid': errors.room })}
+                                            isLoading={isLoading}
+                                            placeholder={t('-- Сонгоно уу --')}
+                                            options={room_option || []}
+                                            value={value && room_option.find((c) => c.id === value)}
+                                            noOptionsMessage={() => t('Хоосон байна.')}
+                                            onChange={(val) => {
+                                                onChange(val?.id || '')
+                                                setRoomCapacity(val?.volume || '')
+                                            }}
+                                            styles={ReactSelectStyles}
+                                            getOptionValue={(option) => option.id}
+                                            getOptionLabel={(option) => option.full_name}
+                                        />
+                                    )
+                                }}
+                            >
+                            </Controller>
+                            {errors.room && <FormFeedback className='d-block'>{t(errors.room.message)}</FormFeedback>}
                         </Col>
                         <Col md={6}>
-                            <Label className="form-label" for="exam_date">
-                                {t('Шалгалт авах өдөр')}
+                            <Label className="form-label" for="room_name">
+                                {t('Шалгалт авах анги танхимийн нэр')}
                             </Label>
                             <Controller
                                 defaultValue=''
                                 control={control}
-                                id="exam_date"
-                                name="exam_date"
+                                name="room_name"
                                 render={({ field }) => (
                                     <Input
                                         {...field}
-                                        id="exam_date"
+                                        id={field.name}
+                                        disabled={online_checked}
                                         bsSize="sm"
-                                        placeholder={t('Шалгалт авах өдөр')}
-                                        type="date"
-                                        invalid={errors.exam_date && true}
+                                        placeholder={t('Анги танхимийн нэр')}
+                                        type="text"
+                                        invalid={errors[field.name] && true}
                                     />
                                 )}
                             />
-                            {errors.exam_date && <FormFeedback className='d-block'>{t(errors.exam_date.message)}</FormFeedback>}
+                            {errors.room_name && <FormFeedback className='d-block'>{t(errors.room_name.message)}</FormFeedback>}
                         </Col>
                         <Col md={6}>
-                            <Label className="form-label" for="begin_time">
-                                {t('Эхлэх цаг')}
+                            <Label className="form-label" for="begin_date">
+                                {t('Эхлэх хугацаа')}
                             </Label>
                             <Controller
                                 defaultValue=''
                                 control={control}
-                                id="begin_time"
-                                name="begin_time"
+                                name="begin_date"
                                 render={({ field }) => (
                                     <Input
                                         {...field}
-                                        id="begin_time"
+                                        id={field.name}
                                         bsSize="sm"
-                                        placeholder={t('Эхлэх цаг')}
-                                        type="time"
-                                        invalid={errors.begin_time && true}
+                                        placeholder={t('Эхлэх хугацаа')}
+                                        type="datetime-local"
+                                        invalid={errors[field.name] && true}
                                     />
                                 )}
                             />
-                            {errors.begin_time && <FormFeedback className='d-block'>{t(errors.begin_time.message)}</FormFeedback>}
+                            {errors.begin_date && <FormFeedback className='d-block'>{t(errors.begin_date.message)}</FormFeedback>}
                         </Col>
                         <Col md={6}>
-                            <Label className="form-label" for="end_time">
-                                {t('Дуусах цаг')}
+                            <Label className="form-label" for="end_date">
+                                {t('Дуусах хугацаа')}
                             </Label>
                             <Controller
                                 defaultValue=''
                                 control={control}
-                                id="end_time"
-                                name="end_time"
+                                name="end_date"
                                 render={({ field }) => (
                                     <Input
                                         {...field}
-                                        id="end_time"
+                                        id={field.name}
                                         bsSize="sm"
-                                        placeholder={t('Дуусах цаг')}
-                                        type="time"
-                                        invalid={errors.end_time && true}
+                                        placeholder={t('Дуусах хугацаа')}
+                                        type="datetime-local"
+                                        invalid={errors[field.name] && true}
                                     />
                                 )}
                             />
-                            {errors.end_time && <FormFeedback className='d-block'>{t(errors.end_time.message)}</FormFeedback>}
+                            {errors.end_date && <FormFeedback className='d-block'>{t(errors.end_date.message)}</FormFeedback>}
                         </Col>
                         <Col md={6}>
                             <Label className="form-label" for="teacher">
