@@ -1492,13 +1492,21 @@ class ExamTimeTableAPIView(
 
                 return False
 
-            elif dts == None and dts2 > dte:
+            elif dts == None:
+                if dts2 > dte:
 
-                return False
+                    return False
+                else:
 
-            elif dte == None and dte2 < dts:
+                    return True
 
-                return False
+            elif dte == None:
+                if dte2 < dts:
+
+                    return False
+                else:
+
+                    return True
 
             elif dte2 < dts or dts2 > dte:
 
