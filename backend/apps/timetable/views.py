@@ -1471,10 +1471,7 @@ class ExamTimeTableAPIView(
         room = request_data.get('room')
         lesson = request_data.get('lesson')
         school = request_data.get('school')
-        
-        print(school)
-        print(school)
-        print(school)
+
         teacher = request_data.get('teacher')
         end_datetime = request_data.get('end_date')
         begin_datetime = request_data.get('begin_date')
@@ -1530,9 +1527,9 @@ class ExamTimeTableAPIView(
                         )
                         .exclude(Q(begin_date__gt=end_datetime)|Q(end_date__lt=begin_datetime))
                 )
-
                 qs_exam_teacher = exam_table_qs.filter(teacher=teacher)
                 qs_exam_room = exam_table_qs.filter(room=room)
+
                 qs_exam_lesson = exam_table_qs.filter(lesson=lesson).last()
 
                 # Тухайн хичээлийн жил, улирал, "selected datetime range" шалгалтын хуваарийн жагсаалт
@@ -1653,10 +1650,12 @@ class ExamTimeTableAPIView(
 
                 try:
                     with transaction.atomic():
-                        exam_data  = serializer.data
+                        # exam_data  = serializer.data
+                        exam_data = self.create(request).data
+
                         # Шалгалтын хуваарийн хүснэгтийн id
                         exam_table_id = exam_data.get('id')
-
+                        print('exam_table_id', exam_table_id)
                         if student_data:
                             for student_id in student_data:
 
