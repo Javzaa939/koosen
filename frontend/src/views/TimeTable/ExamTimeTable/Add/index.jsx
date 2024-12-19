@@ -295,70 +295,46 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                             </Label>
                         </Col>
                         <Col md={6}>
-                            <Label className="form-label" for="exam_date">
-                                {t('Шалгалт авах өдөр')}
+                            <Label className="form-label" for="begin_date">
+                                {t('Эхлэх хугацаа')}
                             </Label>
                             <Controller
                                 defaultValue=''
                                 control={control}
-                                id="exam_date"
-                                name="exam_date"
+                                name="begin_date"
                                 render={({ field }) => (
                                     <Input
                                         {...field}
-                                        id="exam_date"
+                                        id={field.name}
                                         bsSize="sm"
-                                        placeholder={t('Шалгалт авах өдөр')}
-                                        type="date"
-                                        invalid={errors.exam_date && true}
-                                    />
-                                )}
-                            />
-                            {errors.exam_date && <FormFeedback className='d-block'>{t(errors.exam_date.message)}</FormFeedback>}
-                        </Col>
-                        <Col md={6}>
-                            <Label className="form-label" for="begin_time">
-                                {t('Эхлэх цаг')}
-                            </Label>
-                            <Controller
-                                defaultValue=''
-                                control={control}
-                                id="begin_time"
-                                name="begin_time"
-                                render={({ field }) => (
-                                    <Input
-                                        {...field}
-                                        id="begin_time"
-                                        bsSize="sm"
-                                        placeholder={t('Эхлэх цаг')}
+                                        placeholder={t('Эхлэх хугацаа')}
                                         type="datetime-local"
-                                        invalid={errors.begin_time && true}
+                                        invalid={errors[field.name] && true}
                                     />
                                 )}
                             />
-                            {errors.begin_time && <FormFeedback className='d-block'>{t(errors.begin_time.message)}</FormFeedback>}
+                            {errors.begin_date && <FormFeedback className='d-block'>{t(errors.begin_date.message)}</FormFeedback>}
                         </Col>
                         <Col md={6}>
-                            <Label className="form-label" for="end_time">
-                                {t('Дуусах цаг')}
+                            <Label className="form-label" for="end_date">
+                                {t('Дуусах хугацаа')}
                             </Label>
                             <Controller
                                 defaultValue=''
                                 control={control}
-                                id="end_time"
-                                name="end_time"
+                                name="end_date"
                                 render={({ field }) => (
                                     <Input
                                         {...field}
-                                        id="end_time"
+                                        id={field.name}
                                         bsSize="sm"
-                                        placeholder={t('Дуусах цаг')}
-                                        type="time"
-                                        invalid={errors.end_time && true}
+                                        placeholder={t('Дуусах хугацаа')}
+                                        type="datetime-local"
+                                        invalid={errors[field.name] && true}
                                     />
                                 )}
                             />
-                            {errors.end_time && <FormFeedback className='d-block'>{t(errors.end_time.message)}</FormFeedback>}
+                            {errors.end_date && <FormFeedback className='d-block'>{t(errors.end_date.message)}</FormFeedback>}
                         </Col>
                         <Col md={6}>
                             <Label className="form-label" for="teacher">

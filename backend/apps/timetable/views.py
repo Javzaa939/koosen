@@ -1,4 +1,5 @@
 import os
+import traceback
 import pandas as pd
 from django.utils import timezone
 from datetime import datetime, timedelta
@@ -1394,7 +1395,7 @@ class ExamTimeTableAPIView(
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['lesson__name', 'room__name', 'exam_date', 'begin_time', 'end_time', 'teacher__first_name', 'teacher__last_name', 'room__volume', 'room__code']
+    search_fields = ['lesson__name', 'room__name', 'begin_time', 'end_time', 'teacher__first_name', 'teacher__last_name', 'room__volume', 'room__code']
 
     def get_queryset(self):
         queryset = self.queryset
@@ -1463,7 +1464,6 @@ class ExamTimeTableAPIView(
 
         error_obj = []
         request_data = request.data
-
         sid = transaction.savepoint()
 
         # Оюутаны жагсаалт
@@ -1473,10 +1473,13 @@ class ExamTimeTableAPIView(
         lesson = request_data.get('lesson')
         school = request_data.get('school')
         teacher = request_data.get('teacher')
-        end_time = request_data.get('end_time')
-        begin_time = request_data.get('begin_time')
+        end_datetime = request_data.get('end_date')
+        begin_datetime = request_data.get('begin_date')
         lesson_year = request_data.get('lesson_year')
         lesson_season = request_data.get('lesson_season')
+
+        begin_datetime = datetime.fromisoformat(begin_datetime)
+        end_datetime = datetime.fromisoformat(end_datetime)
 
         # Group dataнаас оюутан устгах
         if 'student' in request_data:
@@ -1484,29 +1487,44 @@ class ExamTimeTableAPIView(
 
         serializer = self.get_serializer(data=request_data)
 
+        def is_overlapping(dts,dte,dts2,dte2):
+            if dts == None and dte == None:
+
+                return False
+
+            elif dts == None and dts2 > dte:
+
+                return False
+
+            elif dte == None and dte2 < dts:
+
+                return False
+
+            elif dte2 < dts or dts2 > dte:
+
+                return False
+
+            else:
+
+                return True
+
         try:
-
             if serializer.is_valid(raise_exception=False):
-
-                exam_table_qs = ExamTimeTable.objects.filter(
-                        school=school,
-                        lesson_year=lesson_year,
-                        lesson_season=lesson_season,
-                        begin_date=begin_time,
-                    )
+                exam_table_qs = (
+                    ExamTimeTable.objects
+                        .filter(
+                            school=school,
+                            lesson_year=lesson_year,
+                            lesson_season=lesson_season
+                        )
+                        .exclude(Q(begin_date__gt=end_datetime)|Q(end_date__lt=begin_datetime))
+                )
 
                 qs_exam_teacher = exam_table_qs.filter(teacher=teacher)
-
                 qs_exam_room = exam_table_qs.filter(room=room)
+                qs_exam_lesson = exam_table_qs.filter(lesson=lesson).last()
 
-                qs_exam_lesson = ExamTimeTable.objects.filter(
-                        school=school,
-                        lesson_year=lesson_year,
-                        lesson_season=lesson_season,
-                        lesson=lesson
-                    ).last()
-
-                # Тухайн хичээлийн жил, улирал, өдрийн шалгалтын хуваарийн жагсаалт
+                # Тухайн хичээлийн жил, улирал, "selected datetime range" шалгалтын хуваарийн жагсаалт
                 qs_examtimetable_ids = exam_table_qs.values_list(
                         'id',
                         flat=True
@@ -1515,22 +1533,22 @@ class ExamTimeTableAPIView(
                 # Шалгалтыг хянах багшийн хуваарь давхцаж байгаа эсэхийг шалгана
                 if qs_exam_teacher:
                     qs_exam_teacher_times = qs_exam_teacher.values(
-                            'begin_time',
-                            'end_time',
+                            'begin_date',
+                            'end_date',
                             'lesson__name'
                         )
 
                     for teacher in qs_exam_teacher_times:
-                        start = teacher.get('begin_time')
-                        end = teacher.get('end_time')
+                        start = teacher.get('begin_date')
+                        end = teacher.get('end_date')
 
-                        if (start <= begin_time and end >= begin_time) or (start <= end_time and end >= end_time) or (start >= begin_time and end <= end_time):
+                        if is_overlapping(start,end,begin_datetime,end_datetime):
                             lesson = teacher.get('lesson__name')
 
                             msg = "Энэ багш нь {lesson} хичээлийн {exam_date} өдрийн {begin_time}-{end_time} цагийн хооронд шалгалттай байна." \
                                 .format(
                                     lesson=lesson,
-                                    exam_date=exam_date,
+                                    exam_date=start.date(),
                                     begin_time=start,
                                     end_time=end
                                 )
@@ -1540,22 +1558,22 @@ class ExamTimeTableAPIView(
                 # Шалгалт авах өрөө давхцаж байгаа эсэхийг шалгана
                 if qs_exam_room:
                     qs_exam_rooms = qs_exam_room.values(
-                            'begin_time',
-                            'end_time',
+                            'begin_date',
+                            'end_date',
                             'lesson__name'
                         )
 
                     for rooms in qs_exam_rooms:
-                        start = rooms.get('begin_time')
-                        end = rooms.get('end_time')
+                        start = rooms.get('begin_date')
+                        end = rooms.get('end_date')
 
-                        if (start <= begin_time and end >= begin_time) or (start <= end_time and end >= end_time) or (start >= begin_time and end <= end_time):
+                        if is_overlapping(start,end,begin_datetime,end_datetime):
                             lesson = rooms.get('lesson__name')
 
                             msg = "Энэ өрөө нь {exam_date} өдрийн {begin_time}-{end_time} цагийн хооронд {lesson} хичээлийн шалгалттай байна." \
                                 .format(
                                     lesson=lesson,
-                                    exam_date=exam_date,
+                                    exam_date=start.date(),
                                     begin_time=start,
                                     end_time=end
                                 )
@@ -1564,21 +1582,18 @@ class ExamTimeTableAPIView(
 
                 # Оюутаны цаг давхцаж байгаа эсэхийг шалгана
                 if student_data:
-
                     if qs_examtimetable_ids:
                         for exam_timetable_id in qs_examtimetable_ids:
-
                             exam_qs = ExamTimeTable.objects.filter(
                                     pk=exam_timetable_id
                                 ).first()
 
                             lesson = exam_qs.lesson.name
-                            start = exam_qs.begin_time
-                            end = exam_qs.end_time
+                            start = exam_qs.begin_date
+                            end = exam_qs.end_date
                             students = []
 
                             for student_id in student_data:
-
                                 qs = Exam_to_group.objects.filter(
                                         exam=exam_timetable_id,
                                         student=student_id
@@ -1590,13 +1605,13 @@ class ExamTimeTableAPIView(
                                         if student_code not in students:
                                             students.append(student_code)
 
-                                    if (start <= begin_time and end >= begin_time) or (start <= end_time and end >= end_time) or (start >= begin_time and end <= end_time):
+                                    if is_overlapping(start,end,begin_datetime,end_datetime):
                                         if students:
                                             msg = '''{student_code} кодтой {text} {exam_date} өдрийн {begin_time}-{end_time} цагийн хооронд {lesson} хичээлийн шалгалттай байна.''' \
                                                 .format(
                                                     student_code=', '.join(['{}'.format(f) for f in students]),
                                                     lesson=lesson,
-                                                    exam_date=exam_date,
+                                                    exam_date=start.date(),
                                                     begin_time=start,
                                                     end_time=end,
                                                     text='оюутнууд' if len(students) > 1 else 'оюутан'
@@ -1606,17 +1621,15 @@ class ExamTimeTableAPIView(
 
                 # Тухайн хичээлийн шалгалтыг нэг цагт авч буй эсэхийг шалгана
                 if qs_exam_lesson:
-
-                    start = qs_exam_lesson.begin_time
-                    end = qs_exam_lesson.end_time
-                    check_exam_date = qs_exam_lesson.exam_date
+                    start = qs_exam_lesson.begin_date
+                    end = qs_exam_lesson.end_date
                     lesson = qs_exam_lesson.lesson.name
 
-                    if start != begin_time or end != end_time or str(check_exam_date) != exam_date:
+                    if is_overlapping(start,end,begin_datetime,end_datetime):
                         msg = '''{lesson} хичээлийн шалгалт {exam_date} өдрийн {begin_time}-{end_time} цагийн хооронд байна.''' \
                             .format(
                                 lesson=lesson,
-                                exam_date=check_exam_date,
+                                exam_date=start.date(),
                                 begin_time=start,
                                 end_time=end
                             )
@@ -1624,6 +1637,7 @@ class ExamTimeTableAPIView(
                         error_obj = get_error_obj(msg, 'lesson')
 
                 if len(error_obj) > 0:
+
                     return request.send_error("ERR_003", error_obj)
 
                 try:
@@ -1651,15 +1665,20 @@ class ExamTimeTableAPIView(
 
                         return request.send_info("INF_001")
 
-                except Exception as e:
-                    print(e)
+                except Exception:
+                    traceback.print_exc()
+
                     return request.send_error("ERR_002", "Шалгалтын хуваарь давхцаж байна.")
 
             else:
                 transaction.savepoint_rollback(sid)
+                print(serializer.errors)
+
                 return request.send_error_valid(serializer.errors)
 
         except Exception as e:
+            traceback.print_exc()
+
             return request.send_error('ERR_002', e.__str__())
 
     @has_permission(must_permissions=['lms-timetable-exam-update'])
