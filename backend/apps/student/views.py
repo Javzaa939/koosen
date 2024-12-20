@@ -1665,8 +1665,8 @@ class StudentGroupListAPIView(generics.GenericAPIView, mixins.ListModelMixin):
         level = self.request.query_params.get('level')
 
         # Сургууль хайлт
-        if schoolId:
-            queryset = queryset.filter(school_id=schoolId)
+        # if schoolId:
+        #     queryset = queryset.filter(school_id=schoolId)
 
         # Салбар танхим хайлт
         if depId:
