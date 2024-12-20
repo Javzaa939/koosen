@@ -1631,25 +1631,25 @@ class ExamTimeTableAPIView(
                     #                     error_obj = get_error_obj(msg, 'student')
 
                 # Тухайн хичээлийн шалгалтыг нэг цагт авч буй эсэхийг шалгана
-                if qs_exam_lesson:
-                    start = qs_exam_lesson.begin_date
-                    end = qs_exam_lesson.end_date
-                    lesson = qs_exam_lesson.lesson.name
+                # if qs_exam_lesson:
+                #     start = qs_exam_lesson.begin_date
+                #     end = qs_exam_lesson.end_date
+                #     lesson = qs_exam_lesson.lesson.name
 
-                    if is_overlapping(start,end,begin_datetime,end_datetime):
-                        msg = '''{lesson} хичээлийн шалгалт {exam_date} өдрийн {begin_time}-{end_time} цагийн хооронд байна.''' \
-                            .format(
-                                lesson=lesson,
-                                exam_date=start.date(),
-                                begin_time=start,
-                                end_time=end
-                            )
+                #     if is_overlapping(start,end,begin_datetime,end_datetime):
+                #         msg = '''{lesson} хичээлийн шалгалт {exam_date} өдрийн {begin_time}-{end_time} цагийн хооронд байна.''' \
+                #             .format(
+                #                 lesson=lesson,
+                #                 exam_date=start.date(),
+                #                 begin_time=start,
+                #                 end_time=end
+                #             )
 
-                        error_obj = get_error_obj(msg, 'lesson')
+                #         error_obj = get_error_obj(msg, 'lesson')
 
-                if len(error_obj) > 0:
+                # if len(error_obj) > 0:
 
-                    return request.send_error("ERR_003", error_obj)
+                #     return request.send_error("ERR_003", error_obj)
 
                 create_groups = []
                 try:
