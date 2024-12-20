@@ -1539,54 +1539,55 @@ class ExamTimeTableAPIView(
                     ).distinct()
 
                 # Шалгалтыг хянах багшийн хуваарь давхцаж байгаа эсэхийг шалгана
-                if qs_exam_teacher:
-                    qs_exam_teacher_times = qs_exam_teacher.values(
-                            'begin_date',
-                            'end_date',
-                            'lesson__name'
-                        )
+                # NOTE ДХИС хүсэлтээр болиулав
+                # if qs_exam_teacher:
+                #     qs_exam_teacher_times = qs_exam_teacher.values(
+                #             'begin_date',
+                #             'end_date',
+                #             'lesson__name'
+                #         )
 
-                    for teacher in qs_exam_teacher_times:
-                        start = teacher.get('begin_date')
-                        end = teacher.get('end_date')
+                #     for teacher in qs_exam_teacher_times:
+                #         start = teacher.get('begin_date')
+                #         end = teacher.get('end_date')
 
-                        if is_overlapping(start,end,begin_datetime,end_datetime):
-                            lesson = teacher.get('lesson__name')
+                #         if is_overlapping(start,end,begin_datetime,end_datetime):
+                #             lesson = teacher.get('lesson__name')
 
-                            msg = "Энэ багш нь {lesson} хичээлийн {exam_date} өдрийн {begin_time}-{end_time} цагийн хооронд шалгалттай байна." \
-                                .format(
-                                    lesson=lesson,
-                                    exam_date=start.date(),
-                                    begin_time=start,
-                                    end_time=end
-                                )
+                #             msg = "Энэ багш нь {lesson} хичээлийн {exam_date} өдрийн {begin_time}-{end_time} цагийн хооронд шалгалттай байна." \
+                #                 .format(
+                #                     lesson=lesson,
+                #                     exam_date=start.date(),
+                #                     begin_time=start,
+                #                     end_time=end
+                #                 )
 
-                            error_obj = get_error_obj(msg, 'teacher')
+                #             error_obj = get_error_obj(msg, 'teacher')
 
-                # Шалгалт авах өрөө давхцаж байгаа эсэхийг шалгана
-                if qs_exam_room and not request_data.get('is_online'):
-                    qs_exam_rooms = qs_exam_room.values(
-                            'begin_date',
-                            'end_date',
-                            'lesson__name'
-                        )
+                # # Шалгалт авах өрөө давхцаж байгаа эсэхийг шалгана
+                # if qs_exam_room and not request_data.get('is_online'):
+                #     qs_exam_rooms = qs_exam_room.values(
+                #             'begin_date',
+                #             'end_date',
+                #             'lesson__name'
+                #         )
 
-                    for rooms in qs_exam_rooms:
-                        start = rooms.get('begin_date')
-                        end = rooms.get('end_date')
+                #     for rooms in qs_exam_rooms:
+                #         start = rooms.get('begin_date')
+                #         end = rooms.get('end_date')
 
-                        if is_overlapping(start,end,begin_datetime,end_datetime):
-                            lesson = rooms.get('lesson__name')
+                #         if is_overlapping(start,end,begin_datetime,end_datetime):
+                #             lesson = rooms.get('lesson__name')
 
-                            msg = "Энэ өрөө нь {exam_date} өдрийн {begin_time}-{end_time} цагийн хооронд {lesson} хичээлийн шалгалттай байна." \
-                                .format(
-                                    lesson=lesson,
-                                    exam_date=start.date(),
-                                    begin_time=start,
-                                    end_time=end
-                                )
+                #             msg = "Энэ өрөө нь {exam_date} өдрийн {begin_time}-{end_time} цагийн хооронд {lesson} хичээлийн шалгалттай байна." \
+                #                 .format(
+                #                     lesson=lesson,
+                #                     exam_date=start.date(),
+                #                     begin_time=start,
+                #                     end_time=end
+                #                 )
 
-                            error_obj = get_error_obj(msg, 'room')
+                #             error_obj = get_error_obj(msg, 'room')
 
                 # NOTE ангийн шалгалтын хуваарийн давхцлыг шалгах
                 # if groups and qs_examtimetable_ids:
