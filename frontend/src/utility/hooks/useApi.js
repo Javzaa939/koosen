@@ -382,6 +382,7 @@ function useApi(isDisplay=false) {
 				getStudentDiplomaLessons: (selectedStudent) => instance.get(`/learning/lessonstandart/diploma/list/?student=${selectedStudent}`),
 				getType: (pk) => instance.get(`/learning/lessonstandart/type/${pk}/`),
 				getLessonsGroup: (group) => instance.get(`/learning/lessonstandart/group/${group}/`),
+				getExam: () => instance.get(`/learning/lessonstandart/list/exam/`),
 
 				titleplan: {
 					get: (lessonID) => instance.get(`/learning/lessonstandart/titleplan/${lessonID}/`),
@@ -902,6 +903,8 @@ function useApi(isDisplay=false) {
 				// Тухайн хичээлийг үзэж буй оюутнуудын жагсаалт авах api
 				getExamStudent: (lesson, room_capacity, examId='') =>
 					instance.get(`/student/info/lesson/${lesson}/?group_limit=${room_capacity}&schoolId=${school_id}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&exam=${examId}`),
+
+				getList: (is_online='') => instance.get(`/timetable/examtimetable/list/?school=${school_id}&is_online=${is_online}`),
 			},
 			// Дахин шалгалтын бүртгэл
 			re_exam:{
@@ -1505,6 +1508,8 @@ function useApi(isDisplay=false) {
 			getStudents: (search) => instance.get(`learning/challenge/student/?search=${search}`),
 			putTest: (data) => instance.put(`learning/challenge/add/student/`, data),
 			putTestKind: (data, id) => instance.put(`learning/challenge/add/student/addKind/${id}/?year=${cyear_name}&season=${cseason_id}`, data),
+
+			deleteTest: (data) => instance.post(`learning/challenge/add/student/delete/`, data),
 
 			//Шалгалт өгсөн хүүхдүүдийн дэлгэрэнгүй мэдээлэл
 			getDetailOne: (pk) => instance.get(`learning/challenge/details/one/${pk}/`),
