@@ -480,6 +480,7 @@ class RoomExamListSerializer(serializers.ModelSerializer):
 
         return full_name
 
+
 class ExamTimeTableAllSerializer(serializers.ModelSerializer):
     lesson_name = serializers.CharField(source='lesson.name', default='')
     lesson_code = serializers.CharField(source='lesson.code', default='')

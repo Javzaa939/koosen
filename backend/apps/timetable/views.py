@@ -3219,3 +3219,29 @@ class TimeTablePrint(
         }
 
         return request.send_data(return_datas)
+
+
+@permission_classes([IsAuthenticated])
+class ExamTimeTableListAPIView(
+    mixins.ListModelMixin,
+    generics.GenericAPIView
+):
+    """ Шалгалтын хуваарийн жагсаалт """
+
+    queryset = ExamTimeTable.objects.all()
+    serializer_class = ExamTimeTableSerializer
+
+    @has_permission(must_permissions=['lms-timetable-exam-read'])
+    def get(self, request, pk=None):
+        " Шалгалтын хуваарь жагсаалт "
+
+        is_online = self.request.query_params.get("is_online")
+
+        if is_online:
+            is_online = str2bool(is_online)
+            self.queryset = self.queryset.filter(is_online=is_online)
+
+        self.serializer_class = ExamTimeTableAllSerializer
+
+        less_standart_list = self.list(request).data
+        return request.send_data(less_standart_list)

@@ -75,6 +75,7 @@ urlpatterns = [
     path('challenge/add/student/', ChallengeAddStudentAPIView.as_view()),
 	path('challenge/add/student/<int:pk>/<int:student>/', ChallengeAddStudentAPIView.as_view()),
     path('challenge/add/student/addKind/<int:pk>/', ChallengeAddKindAPIView.as_view()),
+    path('challenge/add/student/delete/', ChallengeAddStudentDeleteAPIView.as_view()),
     path('challenge/add/question/list/', ChallengeQuestionsAPIView.as_view()),
     path('challenge/questions/<int:pk>/', TestQuestionsAllAPIView.as_view()),
 	path('challenge/questions/difficulty_levels/', TestQuestionsDifficultyLevelsAPIView.as_view()),

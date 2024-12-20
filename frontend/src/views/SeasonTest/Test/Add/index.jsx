@@ -25,6 +25,7 @@ const Addmodal = ({ open, handleModal, setEditRowData, refreshDatas }) => {
     // ** Ref
     const ref = useRef(null)
 
+    const [errorRows, setErrorRows] = useState({})
 	const [selectedLesson, setSelectedLesson] = useState('')
 
     // ** State
@@ -47,11 +48,14 @@ const Addmodal = ({ open, handleModal, setEditRowData, refreshDatas }) => {
         var cdatas = convertDefaultValue(submitDatas)
         cdatas['students'] = students
 
-        const { success, data } = await fetchData(challengeAPI.postTest(cdatas, 1))
+        const { success, data, errors } = await fetchData(challengeAPI.postTest(cdatas, 1))
         if(success)
         {
             handleModal()
             refreshDatas()
+        } else {
+            setErrorRows(errors)
+
         }
 
     }
@@ -67,6 +71,7 @@ const Addmodal = ({ open, handleModal, setEditRowData, refreshDatas }) => {
                         setSubmitDatas={setSubmitDatas}
                         setSelectedLesson={setSelectedLesson}
                         setEditRowData={setEditRowData}
+                        errorRows={errorRows}
                     />
         },
         {
