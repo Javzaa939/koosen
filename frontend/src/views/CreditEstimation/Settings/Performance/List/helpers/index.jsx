@@ -1,5 +1,5 @@
 import {useContext } from 'react'
-import { Badge,UncontrolledTooltip } from 'reactstrap';
+import { Badge, UncontrolledTooltip } from 'reactstrap';
 
 import { t } from 'i18next';
 

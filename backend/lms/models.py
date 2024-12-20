@@ -1134,7 +1134,7 @@ class ExamTimeTable(models.Model):
     begin_date = models.DateTimeField(null=True, verbose_name="Шалгалт эхлэх хугацаа")
     end_date = models.DateTimeField(null=True, verbose_name="Шалгалт дуусах хугацаа")
 
-    teacher = models.ForeignKey(Teachers, on_delete=models.PROTECT, verbose_name="Хянах багш", null=True)
+    teacher = models.ManyToManyField(Teachers, verbose_name="Хянах багш")
     school = models.ForeignKey(SubOrgs, verbose_name="Сургууль", on_delete=models.PROTECT)
     created_user = models.ForeignKey(User, related_name='ett_cr_user', on_delete=models.SET_NULL, null=True, verbose_name="Бүртгэсэн хэрэглэгч")
     updated_user = models.ForeignKey(User, related_name='ett_up_user', on_delete=models.SET_NULL, null=True, verbose_name="Зассан хэрэглэгч")
