@@ -6579,3 +6579,18 @@ class ChallengeStudentReportAPI(
 
         return request.send_data(data)
 
+
+@permission_classes([IsAuthenticated])
+class LessonStandartExamListAPIView(
+    generics.GenericAPIView
+):
+    """ Хичээлийн стандарт """
+
+    queryset = LessonStandart.objects.all()
+    def get(self, request):
+
+        lesson_year, lesson_season = get_active_year_season()
+        lesson_standarts = TeacherScore.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season).values_list('score_type__lesson_teacher__lesson', flat=True)
+
+        all_data = self.queryset.filter(id__in=lesson_standarts).values('id', 'code', 'name')
+        return request.send_data(list(all_data))

@@ -10,6 +10,7 @@ urlpatterns = [
     path('lessonstandart/list/teacher/', LessonsApiView.as_view()),
 
     path('lessonstandart/list/', LessonStandartListAPIView.as_view()),
+    path('lessonstandart/list/exam/', LessonStandartExamListAPIView.as_view()),
     path('lessonstandart/list/profession/<int:profession>/', LessonStandartProfessionListAPIView.as_view()),
 
     path('lessonstandart/student/list/', LessonStandartStudentListAPIView.as_view()),
