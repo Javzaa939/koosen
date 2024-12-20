@@ -1154,7 +1154,7 @@ class Exam_to_group(models.Model):
     )
     exam = models.ForeignKey(ExamTimeTable, on_delete=models.CASCADE, verbose_name="Шалгалтын хуваарь")
     group = models.ForeignKey(Group, null=True, on_delete=models.PROTECT, verbose_name="Анги")
-    student = models.ForeignKey(Student, on_delete=models.PROTECT, verbose_name="Оюутан")
+    student = models.ForeignKey(Student, on_delete=models.PROTECT, verbose_name="Оюутан", null=True)
     status = models.PositiveIntegerField(choices=EXAM_STATUS, db_index=True, default=ACTIVE, verbose_name="Шалгалтын төлөв")
 
     created_at = models.DateTimeField(auto_now_add=True)

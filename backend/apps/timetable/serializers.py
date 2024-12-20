@@ -485,7 +485,9 @@ class ExamTimeTableAllSerializer(serializers.ModelSerializer):
     lesson_code = serializers.CharField(source='lesson.code', default='')
     room_name = serializers.CharField(source='room.full_name', default='')
     teacher_names = serializers.SerializerMethodField()
+    group_names = serializers.SerializerMethodField()
     stype_name = serializers.SerializerMethodField()
+    group = serializers.SerializerMethodField()
 
     class Meta:
         model = ExamTimeTable
@@ -498,8 +500,17 @@ class ExamTimeTableAllSerializer(serializers.ModelSerializer):
             names.append(teacher.full_name)
         return ', '.join(names)
 
+    def get_group_names(self, obj):
+        groups = Exam_to_group.objects.filter(exam=obj).values_list('group__name', flat=True)
+        return ', '.join(groups)
+
     def get_stype_name(self, obj):
         return obj.get_stype_display()
+
+    def get_group(self, obj):
+        exam_groups = Exam_to_group.objects.filter(exam=obj).values_list('group', flat=True)
+
+        return list(exam_groups)
 
 
 class ExamTimeTableListSerializer(serializers.ModelSerializer):

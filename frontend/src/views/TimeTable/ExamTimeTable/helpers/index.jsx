@@ -73,8 +73,15 @@ export function getColumns (currentPage, rowsPerPage, datas, handleEditModal,han
 			wrap: true,
 		},
 		{
+			name: `${t('Анги дамжаа')}`,
+            cell: (row) => row?.group_names,
+			minWidth: "200px",
+			center: true,
+			wrap: true,
+		},
+		{
 			header: 'stype',
-			name: `${t('Шалгалтын төрөл')}`,
+			name: `${t('Төрөл')}`,
             cell: (row) => row?.stype_name,
 			minWidth: "150px",
 			sortable: true,

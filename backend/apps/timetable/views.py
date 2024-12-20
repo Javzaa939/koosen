@@ -1472,6 +1472,7 @@ class ExamTimeTableAPIView(
         lesson_season = request_data.get('lesson_season')
         end_datetime = request_data.get('end_date')
         begin_datetime = request_data.get('begin_date')
+        groups = request_data.get('group')
 
         begin_datetime = datetime.fromisoformat(begin_datetime)
         end_datetime = datetime.fromisoformat(end_datetime)
@@ -1480,8 +1481,8 @@ class ExamTimeTableAPIView(
         if 'student' in request_data:
             request_data = remove_key_from_dict(request_data, 'student')
 
-        # if 'teacher' in request_data:
-        #     del request_data['teacher']
+        if 'group' in request_data:
+            del request_data['group']
 
         serializer = self.get_serializer(data=request_data)
         def is_overlapping(dts,dte,dts2,dte2):
@@ -1587,44 +1588,46 @@ class ExamTimeTableAPIView(
 
                             error_obj = get_error_obj(msg, 'room')
 
-                # Оюутаны цаг давхцаж байгаа эсэхийг шалгана
-                if student_data:
-                    if qs_examtimetable_ids:
-                        for exam_timetable_id in qs_examtimetable_ids:
-                            exam_qs = ExamTimeTable.objects.filter(
-                                    pk=exam_timetable_id
-                                ).first()
+                # NOTE ангийн шалгалтын хуваарийн давхцлыг шалгах
+                # if groups and qs_examtimetable_ids:
+                    
+                # # Оюутаны цаг давхцаж байгаа эсэхийг шалгана
+                # if student_data and qs_examtimetable_ids:
+                    # for exam_timetable_id in qs_examtimetable_ids:
+                    #     exam_qs = ExamTimeTable.objects.filter(
+                    #             pk=exam_timetable_id
+                    #         ).first()
 
-                            lesson = exam_qs.lesson.name
-                            start = exam_qs.begin_date
-                            end = exam_qs.end_date
-                            students = []
+                    #     lesson = exam_qs.lesson.name
+                    #     start = exam_qs.begin_date
+                    #     end = exam_qs.end_date
+                    #     students = []
 
-                            for student_id in student_data:
-                                qs = Exam_to_group.objects.filter(
-                                        exam=exam_timetable_id,
-                                        student=student_id
-                                    )
+                    #     for student_id in student_data:
+                    #         qs = Exam_to_group.objects.filter(
+                    #                 exam=exam_timetable_id,
+                    #                 student=student_id
+                    #             )
 
-                                if qs:
-                                    for stu in qs:
-                                        student_code = stu.student.code
-                                        if student_code not in students:
-                                            students.append(student_code)
+                    #         if qs:
+                    #             for stu in qs:
+                    #                 student_code = stu.student.code
+                    #                 if student_code not in students:
+                    #                     students.append(student_code)
 
-                                    if is_overlapping(start,end,begin_datetime,end_datetime):
-                                        if students:
-                                            msg = '''{student_code} кодтой {text} {exam_date} өдрийн {begin_time}-{end_time} цагийн хооронд {lesson} хичээлийн шалгалттай байна.''' \
-                                                .format(
-                                                    student_code=', '.join(['{}'.format(f) for f in students]),
-                                                    lesson=lesson,
-                                                    exam_date=start.date(),
-                                                    begin_time=start,
-                                                    end_time=end,
-                                                    text='оюутнууд' if len(students) > 1 else 'оюутан'
-                                                )
+                    #             if is_overlapping(start,end,begin_datetime,end_datetime):
+                    #                 if students:
+                    #                     msg = '''{student_code} кодтой {text} {exam_date} өдрийн {begin_time}-{end_time} цагийн хооронд {lesson} хичээлийн шалгалттай байна.''' \
+                    #                         .format(
+                    #                             student_code=', '.join(['{}'.format(f) for f in students]),
+                    #                             lesson=lesson,
+                    #                             exam_date=start.date(),
+                    #                             begin_time=start,
+                    #                             end_time=end,
+                    #                             text='оюутнууд' if len(students) > 1 else 'оюутан'
+                    #                         )
 
-                                            error_obj = get_error_obj(msg, 'student')
+                    #                     error_obj = get_error_obj(msg, 'student')
 
                 # Тухайн хичээлийн шалгалтыг нэг цагт авч буй эсэхийг шалгана
                 if qs_exam_lesson:
@@ -1647,32 +1650,27 @@ class ExamTimeTableAPIView(
 
                     return request.send_error("ERR_003", error_obj)
 
+                create_groups = []
                 try:
                     with transaction.atomic():
-                        # exam_data  = serializer.data
                         exam_data = self.create(request).data
 
                         # Шалгалтын хуваарийн хүснэгтийн id
                         exam_table_id = exam_data.get('id')
                         # Багшийг олноор нэмэх
                         ExamTimeTable.objects.get(id=exam_table_id).teacher.set(teachers)
-                        if student_data:
-                            for student_id in student_data:
-
-                                qs_timegroup = Exam_to_group.objects.filter(
-                                        exam_id=exam_table_id,
-                                        student=student_id
+                        if groups:
+                            for group in groups:
+                                if not Exam_to_group.objects.filter(exam=exam_table_id, group=group).exists():
+                                    create_groups.append(
+                                        Exam_to_group(
+                                            exam_id=exam_table_id,
+                                            group_id=group
+                                        )
                                     )
+                            Exam_to_group.objects.bulk_create(create_groups)
 
-                                if not qs_timegroup:
-                                    obj = Exam_to_group.objects.create(
-                                        exam_id=exam_table_id,
-                                        student_id=student_id
-                                    )
-
-                            return request.send_info("INF_001")
-
-                        return request.send_info("INF_001")
+                    return request.send_info("INF_001")
 
                 except Exception:
                     traceback.print_exc()

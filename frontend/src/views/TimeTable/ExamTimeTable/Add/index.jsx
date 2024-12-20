@@ -48,12 +48,14 @@ const Addmodal = ({ open, handleModal, refreshDatas, handleEdit, editData }) => 
     const [teacher_option, setTeacherOption] = useState([])
     const [room_option, setRoomOption] = useState([])
     const [selectedTeachers, setSelectedTeachers] = useState([])
+    const [selectedGroups, setSelectedGroups] = useState([])
     const [select_value, setSelectValue] = useState(values)
     const [online_checked, setOnlineChecked] = useState(false)
     const [room_capacity, setRoomCapacity] = useState('')
 
     // const [student_list_view, setStudentListView] = useState(false)
-    // const [ studentData, setStudentDatas ] = useState([]);
+    // const [studentData, setStudentDatas ] = useState([]);
+    const [groupOption, setGroupOption ] = useState([]);
 
     // ** Hook
     const { control, handleSubmit, formState: { errors }, setError, setValue } = useForm(validate(validateSchema));
@@ -67,6 +69,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, handleEdit, editData }) => 
     const lessonApi = useApi().study.lessonStandart
     const roomApi = useApi().timetable.room
     const examApi = useApi().timetable.exam
+    const groupApi = useApi().student.group
 
     // Хичээлийн жагсаалт
     async function getLessonOption() {
@@ -89,6 +92,14 @@ const Addmodal = ({ open, handleModal, refreshDatas, handleEdit, editData }) => 
         const { success, data } = await fetchData(teacherApi.getTeacher(''))
         if (success) {
             setTeacherOption(data)
+        }
+    }
+
+    // Анги бүлгийн жагсаалт
+    async function getGroups() {
+        const { success, data } = await fetchData(groupApi.getList())
+        if (success) {
+            setGroupOption(data)
         }
     }
 
@@ -136,9 +147,13 @@ const Addmodal = ({ open, handleModal, refreshDatas, handleEdit, editData }) => 
                     if(key === 'is_online') {
                         setOnlineChecked(editData[key])
                     }
+                    if(key === 'group') {
+                        var values_group = groupOption?.filter((e) => editData[key]?.includes(e?.id))
+                        setSelectedGroups(values_group)
+                    }
                 }
             }
-        }, [editData, teacher_option]
+        }, [editData, teacher_option, groupOption]
     )
 
     // useEffect(() => {
@@ -157,6 +172,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, handleEdit, editData }) => 
         cdata['lesson_season'] = cseason_id
         cdata['is_online'] = online_checked
         cdata['teacher'] = selectedTeachers?.map((c) => c.id)
+        cdata['group'] = selectedGroups?.map((c) => c.id)
 
         if (online_checked) {
             cdata['room'] = null
@@ -192,6 +208,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, handleEdit, editData }) => 
 
     useEffect(() => {
         getRoom()
+        getGroups()
         getTeachers()
         getLessonOption()
     }, [])
@@ -327,7 +344,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, handleEdit, editData }) => 
                                             onChange={(e) =>
                                                 IsOnline(e.target.checked)
                                             }
-                                            checked={field.value}
+                                            checked={online_checked}
                                         />
                                     )}
                                 />
@@ -464,6 +481,40 @@ const Addmodal = ({ open, handleModal, refreshDatas, handleEdit, editData }) => 
                                             styles={ReactSelectStyles}
                                             getOptionValue={(option) => option.id}
                                             getOptionLabel={(option) => option?.rank_name + ' ' + option.last_name + '.' + option?.first_name}
+                                        />
+                                    )
+                                }}
+                            ></Controller>
+                            {errors.teacher && <FormFeedback className='d-block'>{t(errors.teacher.message)}</FormFeedback>}
+                        </Col>
+                        <Col md={6}>
+                            <Label className="form-label" for="group">
+                                {t('Шалгалт авах анги дамжаа')}
+                            </Label>
+                            <Controller
+                                control={control}
+                                defaultValue=''
+                                name="group"
+                                render={({ field }) => {
+                                    return (
+                                        <Select
+                                            name="group"
+                                            id="group"
+                                            classNamePrefix='select'
+                                            isClearable
+                                            isMulti
+                                            className={classnames('react-select', { 'is-invalid': errors.group })}
+                                            isLoading={isLoading}
+                                            placeholder={t('-- Сонгоно уу --')}
+                                            options={groupOption || []}
+                                            value={selectedGroups}
+                                            noOptionsMessage={() => t('Хоосон байна.')}
+                                            onChange={(val) => {
+                                                setSelectedGroups(val)
+                                            }}
+                                            styles={ReactSelectStyles}
+                                            getOptionValue={(option) => option.id}
+                                            getOptionLabel={(option) => option?.name}
                                         />
                                     )
                                 }}
