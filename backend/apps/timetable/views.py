@@ -1389,13 +1389,13 @@ class ExamTimeTableAPIView(
 ):
     """ Шалгалтын хуваарь """
 
-    queryset = ExamTimeTable.objects.all()
+    queryset = ExamTimeTable.objects.all().order_by('begin_date')
     serializer_class = ExamTimeTableSerializer
 
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['lesson__name', 'room__name',  'teacher__first_name', 'teacher__last_name', 'room__volume', 'room__code']
+    search_fields = ['lesson__name', 'room__name',  'room__code']
 
     def get_queryset(self):
         queryset = self.queryset
@@ -1726,30 +1726,30 @@ class ExamTimeTableAPIView(
         try:
             if serializer.is_valid(raise_exception=False):
                 serializer.save()
-                exam_table_qs = ExamTimeTable.objects.filter(
-                    school=school,
-                    lesson_year=lesson_year,
-                    lesson_season=lesson_season,
-                ).exclude(id=pk)
+                # exam_table_qs = ExamTimeTable.objects.filter(
+                #     school=school,
+                #     lesson_year=lesson_year,
+                #     lesson_season=lesson_season,
+                # ).exclude(id=pk)
 
-                if exam_table_qs:
+                # if exam_table_qs:
 
-                    # qs_exam_teacher = exam_table_qs.filter(teacher__in=teacher)
+                #     # qs_exam_teacher = exam_table_qs.filter(teacher__in=teacher)
 
-                    qs_exam_room = exam_table_qs.filter(room=room).last()
+                #     qs_exam_room = exam_table_qs.filter(room=room).last()
 
-                    qs_exam_lesson = ExamTimeTable.objects.filter(
-                        school=school,
-                        lesson_year=lesson_year,
-                        lesson_season=lesson_season,
-                        lesson=lesson
-                    ).last()
+                #     qs_exam_lesson = ExamTimeTable.objects.filter(
+                #         school=school,
+                #         lesson_year=lesson_year,
+                #         lesson_season=lesson_season,
+                #         lesson=lesson
+                #     ).last()
 
-                    # Тухайн хичээлийн жил, улирал, өдрийн шалгалтын хуваарийн жагсаалт
-                    qs_examtimetable_ids = exam_table_qs.values_list(
-                        'id',
-                        flat=True
-                    ).distinct()
+                #     # Тухайн хичээлийн жил, улирал, өдрийн шалгалтын хуваарийн жагсаалт
+                #     qs_examtimetable_ids = exam_table_qs.values_list(
+                #         'id',
+                #         flat=True
+                #     ).distinct()
 
                     # Шалгалтыг хянах багшийн хуваарь давхцаж байгаа эсэхийг шалгана
                     # NOTE дараа нь давхцалыг шалгана
@@ -1771,86 +1771,88 @@ class ExamTimeTableAPIView(
                     #         error_obj = get_error_obj(msg, 'teacher')
 
                     # Шалгалтын өрөө давхцаж байгаа эсэхийг шалгана
-                    if qs_exam_room:
-                        start = qs_exam_room.begin_time
-                        end = qs_exam_room.end_time
-                        lesson = qs_exam_room.lesson.name
+                    # NOTE давхцал шалгах
+                    # if qs_exam_room:
+                    #     start = qs_exam_room.begin_date
+                    #     end = qs_exam_room.end_date
+                    #     lesson = qs_exam_room.lesson.name
 
-                        if (start <= begin_time and end >= begin_time) or (start <= end_time and end >= end_time) or (start >= begin_time and end <= end_time):
+                    #     if (start <= begin_time and end >= begin_time) or (start <= end_time and end >= end_time) or (start >= begin_time and end <= end_time):
 
-                                msg = "Энэ өрөө нь {exam_date} өдрийн {begin_time}-{end_time} цагийн хооронд {lesson} хичээлийн шалгалттай байна." \
-                                    .format(
-                                        lesson=lesson,
-                                        exam_date=exam_date,
-                                        begin_time=start,
-                                        end_time=end
-                                    )
+                    #             msg = "Энэ өрөө нь {exam_date} өдрийн {begin_time}-{end_time} цагийн хооронд {lesson} хичээлийн шалгалттай байна." \
+                    #                 .format(
+                    #                     lesson=lesson,
+                    #                     exam_date=exam_date,
+                    #                     begin_time=start,
+                    #                     end_time=end
+                    #                 )
 
-                                error_obj = get_error_obj(msg, 'room')
+                    #             error_obj = get_error_obj(msg, 'room')
 
-                    # Оюутаны цаг давхцаж байгаа эсэхийг шалгана
-                    if student_data:
+                    # # Оюутаны цаг давхцаж байгаа эсэхийг шалгана
+                    # if student_data:
 
-                        if qs_examtimetable_ids:
-                            for exam_timetable_id in qs_examtimetable_ids:
+                    #     if qs_examtimetable_ids:
+                    #         for exam_timetable_id in qs_examtimetable_ids:
 
-                                exam_qs = ExamTimeTable.objects.filter(
-                                        pk=exam_timetable_id
-                                    ).first()
+                    #             exam_qs = ExamTimeTable.objects.filter(
+                    #                     pk=exam_timetable_id
+                    #                 ).first()
 
-                                lesson = exam_qs.lesson.name
-                                start = exam_qs.begin_time
-                                end = exam_qs.end_time
-                                students = []
+                    #             lesson = exam_qs.lesson.name
+                    #             start = exam_qs.begin_time
+                    #             end = exam_qs.end_time
+                    #             students = []
 
-                                for student_id in student_data:
-                                    # Шалгалтын хуваарь давхцаж байгаа оюутнуудын мэдээлэл авах
-                                    qs = Exam_to_group.objects.filter(
-                                            exam=exam_timetable_id,
-                                            student=student_id
-                                        )
+                    #             for student_id in student_data:
+                    #                 # Шалгалтын хуваарь давхцаж байгаа оюутнуудын мэдээлэл авах
+                    #                 qs = Exam_to_group.objects.filter(
+                    #                         exam=exam_timetable_id,
+                    #                         student=student_id
+                    #                     )
 
-                                    if qs:
-                                        for stu in qs:
-                                            student_code = stu.student.code
-                                            if student_code not in students:
-                                                students.append(student_code)
+                    #                 if qs:
+                    #                     for stu in qs:
+                    #                         student_code = stu.student.code
+                    #                         if student_code not in students:
+                    #                             students.append(student_code)
 
-                                        if (start <= begin_time and end >= begin_time) or (start <= end_time and end >= end_time) or (start >= begin_time and end <= end_time):
-                                            if students:
-                                                msg = '''{student_code} кодтой {text} {exam_date} өдрийн {begin_time}-{end_time} цагийн хооронд {lesson} хичээлийн шалгалттай байна.''' \
-                                                    .format(
-                                                        student_code=', '.join(['{}'.format(f) for f in students]),
-                                                        lesson=lesson,
-                                                        exam_date=exam_date,
-                                                        begin_time=start,
-                                                        end_time=end,
-                                                        text='оюутнууд' if len(students) > 1 else 'оюутан'
-                                                    )
+                    #                     if (start <= begin_time and end >= begin_time) or (start <= end_time and end >= end_time) or (start >= begin_time and end <= end_time):
+                    #                         if students:
+                    #                             msg = '''{student_code} кодтой {text} {exam_date} өдрийн {begin_time}-{end_time} цагийн хооронд {lesson} хичээлийн шалгалттай байна.''' \
+                    #                                 .format(
+                    #                                     student_code=', '.join(['{}'.format(f) for f in students]),
+                    #                                     lesson=lesson,
+                    #                                     exam_date=exam_date,
+                    #                                     begin_time=start,
+                    #                                     end_time=end,
+                    #                                     text='оюутнууд' if len(students) > 1 else 'оюутан'
+                    #                                 )
 
-                                                error_obj = get_error_obj(msg, 'student')
+                    #                             error_obj = get_error_obj(msg, 'student')
 
                     # Тухайн хичээлийн шалгалтыг нэг цагт авч буй эсэхийг шалгана
-                    if qs_exam_lesson:
+                    # NOTE дараа нь давхал шалгах
+                    # if qs_exam_lesson:
 
-                        start = qs_exam_lesson.begin_time
-                        end = qs_exam_lesson.end_time
-                        check_exam_date = qs_exam_lesson.exam_date
-                        lesson = qs_exam_lesson.lesson.name
+                    #     start = qs_exam_lesson.begin_time
+                    #     end = qs_exam_lesson.end_time
+                    #     check_exam_date = qs_exam_lesson.exam_date
+                    #     lesson = qs_exam_lesson.lesson.name
 
-                        if start != begin_time or end != end_time or str(check_exam_date) != exam_date:
-                            msg = '''{lesson} хичээлийн шалгалт {exam_date} өдрийн {begin_time}-{end_time} цагийн хооронд байна.''' \
-                                .format(
-                                    lesson=lesson,
-                                    exam_date=check_exam_date,
-                                    begin_time=start,
-                                    end_time=end
-                                )
+                    #     if start != begin_time or end != end_time or str(check_exam_date) != exam_date:
+                    #         msg = '''{lesson} хичээлийн шалгалт {exam_date} өдрийн {begin_time}-{end_time} цагийн хооронд байна.''' \
+                    #             .format(
+                    #                 lesson=lesson,
+                    #                 exam_date=check_exam_date,
+                    #                 begin_time=start,
+                    #                 end_time=end
+                    #             )
 
-                            error_obj = get_error_obj(msg, 'lesson')
+                    #         error_obj = get_error_obj(msg, 'lesson')
 
-                    if len(error_obj) > 0:
-                        return request.send_error("ERR_003", error_obj)
+                    # if len(error_obj) > 0:
+                    #     return request.send_error("ERR_003", error_obj)
 
 
                         # Шалгалтын хуваарийн хүснэгтийн id
