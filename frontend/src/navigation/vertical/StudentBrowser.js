@@ -14,12 +14,12 @@ export default [
                 icon: <Circle size={8} />,
                 navLink: "browser/structure/"
             },
-            {
-                id: 'b2',
-                title: 'Сургалтын хөтөлбөр, хичээлийн хуваарь',
-                icon: <Circle size={8} />,
-                navLink: "browser/surgalt/"
-            },
+            // {
+            //     id: 'b2',
+            //     title: 'Сургалтын хөтөлбөр, хичээлийн хуваарь',
+            //     icon: <Circle size={8} />,
+            //     navLink: "browser/surgalt/"
+            // },
             {
                 id: 'b3',
                 title: 'Дүрэм журам',

@@ -4654,7 +4654,7 @@ class StudentDevelop(models.Model):
     title = models.CharField(max_length=1000, verbose_name='Гарчиг')
     link = models.CharField(max_length=1000, verbose_name='Линк', null=True)
     file = models.FileField(upload_to='develop', verbose_name='Файл', null=True)
-    body = models.TextField(verbose_name="Суралцагчийн хөгжлийн хэсэг")
+    # body = models.TextField(verbose_name="Суралцагчийн хөгжлийн хэсэг")
     created_user = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='cr_user', null=True, verbose_name='Үүсгэсэн хэрэглэгч')
     updated_user = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='up_user',  null=True, verbose_name='Зассан хэрэглэгч')
 
@@ -4699,7 +4699,7 @@ class StudentRules(models.Model):
 
 
 class Health(models.Model):
-    """ Эрүүл мэнд """
+    """ Эрүүл мэнд танилцуулга """
 
     title = models.CharField(max_length=1000, verbose_name='Гарчиг')
     body = models.TextField(verbose_name="Эрүүл мэнд хэсэг", null=True)
@@ -4719,6 +4719,19 @@ class StudentTime(models.Model):
 
     created_user = models.ForeignKey(User, on_delete=models.SET_NULL,related_name='time_user', null=True, verbose_name='Үүсгэсэн хэрэглэгч')
     updated_user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='Зассан хэрэглэгч')
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+class HealthHelp(models.Model):
+    """ Эрүүл мэнд зөвлөмж """
+
+    title = models.CharField(max_length=1000, verbose_name='Гарчиг')
+    desc = models.CharField(max_length=1000, verbose_name='Тайлбар', null=True)
+    file = models.FileField(upload_to='healt', verbose_name='Файл', null=True)
+
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='help_user', null=True, verbose_name='Үүсгэсэн хэрэглэгч')
+    updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='Зассан хэрэглэгч')
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

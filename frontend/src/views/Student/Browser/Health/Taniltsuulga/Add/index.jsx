@@ -1,12 +1,10 @@
 // ** React imports
-import React, { Fragment, useState, useContext, useEffect, useRef } from 'react'
+import React, { Fragment, useContext, useEffect } from 'react'
 
-// import '../style.css'
 
 import { t } from 'i18next';
 
 import useApi from "@hooks/useApi";
-import useToast from "@hooks/useToast";
 import useLoader from "@hooks/useLoader";
 
 import { useForm, Controller } from "react-hook-form";
@@ -16,10 +14,8 @@ import { Row, Col, Form, Modal, Input, Label, Button, ModalBody, ModalHeader, Fo
 import { validate, convertDefaultValue } from "@utils"
 
 import AuthContext from '@context/AuthContext'
-import SchoolContext from '@context/SchoolContext'
 import * as Yup from 'yup';
-import { useQuill } from 'react-quilljs';
-import 'quill/dist/quill.snow.css'
+
 
 const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}) => {
 
@@ -33,39 +29,6 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
 
     });
 
-    const [value, setValues] = useState('');
-
-    const {quill, quillRef } = useQuill({
-        modules: {
-            toolbar: [
-                    ['bold', 'italic', 'underline', 'strike'],
-                    [{ align: [] }],
-
-                    [{ list: 'ordered'}, { list: 'bullet' }],
-                    [{ indent: '-1'}, { indent: '+1' }],
-
-                    [{ size: ['small', false, 'large', 'huge'] }],
-                    ['link',],
-
-                    [{ color: [] }, { background: [] }],
-
-                    ['clean'],
-            ],
-        },
-        value: value,
-        theme: 'snow',
-        formats: [
-            'header','bold', 'italic', 'underline', 'strike',
-            'align', 'list', 'indent',
-            'size',
-            'link',
-            'color', 'background',
-            'clean',
-        ],
-        readOnly: false,
-    });
-
-    const { school_id } = useContext(SchoolContext)
     const { user } = useContext(AuthContext)
 
     // ** Hook
@@ -81,9 +44,8 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
     // Хадгалах
 	async function onSubmit(cdata) {
         cdata = convertDefaultValue(cdata)
-
-        cdata['body'] = quill.root.innerHTML
         cdata['created_by'] = user.id
+        cdata['updated_by'] = user.id
 
         if(editId){
             const { success, errors } = await fetchData(healthApi.put(cdata, editId))
@@ -100,8 +62,7 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
             }
         }
         else{
-            cdata['created_by'] = user.id
-            cdata['updated_by'] = user.id
+
             const { success, errors } = await postFetch(healthApi.post(cdata))
             if(success) {
                 reset()
@@ -184,7 +145,7 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
                         </Col>
                         <Col md={12}>
                             <Label className="form-label" for="link">
-                                {t('Линк')}
+                                {t('Тайлбар')}
                             </Label>
                             <Controller
                                 defaultValue=''
@@ -194,39 +155,17 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
                                 render={({ field }) => (
                                     <Input
                                         {...field}
-                                        type='text'
+                                        type='textarea'
                                         name='link'
                                         bsSize='sm'
                                         id='link'
-                                        placeholder='гарчиг'
+                                        placeholder='тайлбар'
                                         invalid={errors.link && true}
                                     >
                                     </Input>
                                 )}
                             />
                             {errors.link && <FormFeedback className='d-block'>{t(errors.link.message)}</FormFeedback>}
-                        </Col>
-                        <Col md={12} >
-                            <Label className='form-label' for='body'>
-                                {t('Танилцуулга байршуулах хэсэг')}
-                            </Label>
-                            <Controller
-                                defaultValue=''
-                                control={control}
-                                id='body'
-                                name='body'
-                                render={({field}) => (
-                                    <div style={{ width: 'auto',}}>
-                                        <div
-                                            {...field}
-                                            name='body'
-                                            id='body'
-                                            ref={quillRef}
-                                        />
-                                    </div>
-                                )}
-                            />
-                            {errors.body && <FormFeedback className='d-block'>{t(errors.body.message)}</FormFeedback>}
                         </Col>
                         <Col md={12} className="text-center mt-2">
                             <Button className="me-2" color="primary" type="submit" >

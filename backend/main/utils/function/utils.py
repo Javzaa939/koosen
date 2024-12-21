@@ -1042,7 +1042,7 @@ def get_domain_url_link():
     if settings.DEBUG is False:
         domain_url = 'https://sis.uia.gov.mn'
     else:
-        domain_url = 'http://192.168.1.7:3001'
+        domain_url = 'http://192.168.1.18:3000'
 
     return domain_url
 
@@ -1356,7 +1356,7 @@ def get_cdn_urls():
 
     # Орчиноос шалтгаалж url авах
     if settings.DEBUG:
-        path = 'http://192.168.1.7:8003/cdn/'
+        path = 'http://192.168.1.18:8000/cdn/'
 
     return path
 
