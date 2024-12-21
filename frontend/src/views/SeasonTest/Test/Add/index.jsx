@@ -27,6 +27,7 @@ const Addmodal = ({ open, handleModal, setEditRowData, refreshDatas }) => {
 
     const [errorRows, setErrorRows] = useState({})
 	const [selectedLesson, setSelectedLesson] = useState('')
+	const [selectExam, setSelectExam] = useState('')
 
     // ** State
     const [stepper, setStepper] = useState(null)
@@ -71,6 +72,7 @@ const Addmodal = ({ open, handleModal, setEditRowData, refreshDatas }) => {
                         setSubmitDatas={setSubmitDatas}
                         setSelectedLesson={setSelectedLesson}
                         setEditRowData={setEditRowData}
+                        setSelectExam={setSelectExam}
                         errorRows={errorRows}
                     />
         },
@@ -85,6 +87,7 @@ const Addmodal = ({ open, handleModal, setEditRowData, refreshDatas }) => {
                     onSubmit={onSubmit}
                     selectedLesson={selectedLesson}
                     setEditRowData={setEditRowData}
+                    selectExam={selectExam}
                 />
         },
     ]

@@ -21,7 +21,7 @@ import useLoader from '@hooks/useLoader';
 import Flatpickr from 'react-flatpickr';
 import '@styles/react/libs/flatpickr/flatpickr.scss';
 
-const General = ({ stepper, setSubmitDatas, setSelectedLesson, editData, setEditRowData, isEdit, errorRows }) => {
+const General = ({ stepper, setSubmitDatas, setSelectedLesson, editData, setEditRowData, isEdit, errorRows, setSelectExam }) => {
     const { t } = useTranslation()
 
     const { control, handleSubmit, setError, setValue, formState: { errors } } = useForm(validate(validateSchema))
@@ -130,6 +130,7 @@ const General = ({ stepper, setSubmitDatas, setSelectedLesson, editData, setEdit
                                         onChange={(val) => {
                                             onChange(val?.id || '')
                                             setSelectedLesson(val?.lesson || '')
+                                            setSelectExam(val?.id || '')
 
                                             setEndPicker(val?.end_date)
                                             setValue("lesson", val?.lesson)

@@ -1005,7 +1005,7 @@ function useApi(isDisplay=false) {
 				refresh: (group) => instance.get(`/score/register/refresh/${group}/`),
 				// student: (search, group, lesson, teacher) =>
 				// 	instance.get(`/score/register/student/?search=${search}&lesson=${lesson}&teacher=${teacher}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&group=${group}&school=${school_id}`)
-				challenge: (lesson) => instance.get(`/score/register/challenge/${lesson}/`)
+				challenge: (lesson, exam) => instance.get(`/score/register/challenge/${lesson}/?exam=${exam}`)
 			},
 
 			rescore:{

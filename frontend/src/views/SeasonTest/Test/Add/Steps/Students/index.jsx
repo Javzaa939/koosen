@@ -5,7 +5,7 @@ import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
 import { ChevronLeft, ChevronRight } from 'react-feather'
 
-export default function Students({stepper, setSubmitDatas, selectedLesson, onSubmit}) {
+export default function Students({stepper, setSubmitDatas, selectedLesson, onSubmit, selectExam}) {
     const [studensOption, setStudents] = useState([]);
     const [challengeStudents, setChallengeStudents] = useState([])
     const [excludeStudents, setExcludeChallengeStudents] = useState([])
@@ -15,7 +15,7 @@ export default function Students({stepper, setSubmitDatas, selectedLesson, onSub
     const scoreApi = useApi().score.register;
 
     async function getStudents() {
-        const { success, data } = await fetchData(scoreApi.challenge(selectedLesson))
+        const { success, data } = await fetchData(scoreApi.challenge(selectedLesson, selectExam))
         if (success) {
             setStudents(data)
         }
@@ -31,7 +31,7 @@ export default function Students({stepper, setSubmitDatas, selectedLesson, onSub
                 setIsAdd(false)
             }
         },
-        [selectedLesson]
+        [selectedLesson, selectExam]
     )
 
     const handleAddStudent = () => {
@@ -72,6 +72,7 @@ export default function Students({stepper, setSubmitDatas, selectedLesson, onSub
                                         <th>Овог</th>
                                         <th>Нэр</th>
                                         <th>Регистр</th>
+                                        <th>Дамжаа</th>
                                         <th>Дүн</th>
                                     </tr>
                                 </thead>
@@ -86,6 +87,7 @@ export default function Students({stepper, setSubmitDatas, selectedLesson, onSub
                                                     <td>{student?.last_name}</td>
                                                     <td>{student?.first_name}</td>
                                                     <td>{student?.register_num}</td>
+                                                    <td>{student?.group_name}</td>
                                                     <td>{student?.total_score}</td>
                                                 </tr>
                                             )
@@ -97,6 +99,7 @@ export default function Students({stepper, setSubmitDatas, selectedLesson, onSub
                                                     <td>{student?.last_name}</td>
                                                     <td>{student?.first_name}</td>
                                                     <td>{student?.register_num}</td>
+                                                    <td>{student?.group_name}</td>
                                                     <td>{student?.total_score}</td>
                                                 </tr>
                                             )
@@ -115,6 +118,7 @@ export default function Students({stepper, setSubmitDatas, selectedLesson, onSub
                                         <th>Овог</th>
                                         <th>Нэр</th>
                                         <th>Регистр</th>
+                                        <th>Дамжаа</th>
                                         <th>Дүн</th>
                                     </tr>
                                 </thead>
@@ -127,6 +131,7 @@ export default function Students({stepper, setSubmitDatas, selectedLesson, onSub
                                                 <td>{student?.last_name}</td>
                                                 <td>{student?.first_name}</td>
                                                 <td>{student?.register_num}</td>
+                                                <td>{student?.group_name}</td>
                                                 <td>{student?.total_score}</td>
                                             </tr>
                                         )
