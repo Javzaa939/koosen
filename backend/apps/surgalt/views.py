@@ -6165,18 +6165,16 @@ class ChallengeAddInformationAPIView(
         try:
             with transaction.atomic():
                 saved_data, exception, serializer_errors = save_data_with_signals(self.queryset.model, self.serializer_class, True, None, data=data)
-
                 if serializer_errors:
                     return request.send_error_valid(serializer_errors)
 
-                saved_data = saved_data[0]
+                # Үүссэн шалгалт
+                challenge = saved_data[0]
 
                 if students and len(students) > 0:
                     student_datas = Student.objects.filter(id__in=students)
-                    if len(saved_data) > 0:
-                        challenge = saved_data[0]
-                        challenge.student.set(student_datas)
-                        challenge.save()
+                    challenge.student.set(student_datas)
+                    challenge.save()
 
         except Exception:
             traceback.print_exc()

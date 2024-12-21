@@ -129,7 +129,7 @@ const General = ({ stepper, setSubmitDatas, setSelectedLesson, editData, setEdit
                                         noOptionsMessage={() => 'Хоосон байна'}
                                         onChange={(val) => {
                                             onChange(val?.id || '')
-                                            setSelectedLesson(val?.id || '')
+                                            setSelectedLesson(val?.lesson || '')
 
                                             setEndPicker(val?.end_date)
                                             setValue("lesson", val?.lesson)
