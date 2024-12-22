@@ -1395,7 +1395,7 @@ class ExamTimeTableAPIView(
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['lesson__name', 'room__name',  'room__code']
+    search_fields = ['lesson__name', 'room__name',  'room__code', 'lesson__code']
 
     def get_queryset(self):
         queryset = self.queryset
@@ -1696,7 +1696,6 @@ class ExamTimeTableAPIView(
         error_obj = []
 
         request_data = request.data
-        print(request_data)
 
         instance = self.get_object()
 
@@ -1716,16 +1715,29 @@ class ExamTimeTableAPIView(
 
         begin_datetime = datetime.fromisoformat(begin_datetime)
         end_datetime = datetime.fromisoformat(end_datetime)
+        groups = request_data.get('group')
+        teachers = request_data.get('teacher')
 
         # Group dataнаас юутан устгах
         if student_data:
             request_data = remove_key_from_dict(request_data, 'student')
 
         serializer = self.get_serializer(instance, data=request_data, partial=True)
-
+        create_groups = []
         try:
             if serializer.is_valid(raise_exception=False):
                 serializer.save()
+                ExamTimeTable.objects.get(id=pk).teacher.set(teachers)
+                if groups:
+                    for group in groups:
+                        if not Exam_to_group.objects.filter(exam=pk, group=group).exists():
+                            create_groups.append(
+                                Exam_to_group(
+                                    exam_id=pk,
+                                    group_id=group
+                                )
+                            )
+                    Exam_to_group.objects.bulk_create(create_groups)
                 # exam_table_qs = ExamTimeTable.objects.filter(
                 #     school=school,
                 #     lesson_year=lesson_year,

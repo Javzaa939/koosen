@@ -35,11 +35,7 @@ const General = ({ stepper, setSubmitDatas, setSelectedLesson, editData, setEdit
     const examTimeTableApi = useApi().timetable.exam
 
     async function onSubmit(cdata) {
-
         delete cdata['exam_timetable']
-
-        cdata['start_date'] = new Date(startPicker)
-        cdata['end_date'] = new Date(endPicker)
         cdata = convertDefaultValue(cdata)
 
         setSubmitDatas(cdata)
@@ -132,9 +128,9 @@ const General = ({ stepper, setSubmitDatas, setSelectedLesson, editData, setEdit
                                             setSelectedLesson(val?.lesson || '')
                                             setSelectExam(val?.id || '')
 
-                                            setEndPicker(val?.end_date)
                                             setValue("lesson", val?.lesson)
-                                            setStartPicker(val?.begin_date)
+                                            setValue("start_date", val?.begin_date)
+                                            setValue("end_date", val?.end_date)
                                         }}
                                         styles={ReactSelectStyles}
                                         getOptionValue={(option) => option.id}
@@ -227,19 +223,20 @@ const General = ({ stepper, setSubmitDatas, setSelectedLesson, editData, setEdit
                         <Label className="form-label" for="start_date">
                             {t('Эхлэх хугацаа')}
                         </Label>
-                        <Flatpickr
-                            required
-                            id='start_date'
-                            name='start_date'
-                            className='form-control'
-                            onChange={setStartPicker}
-                            value={startPicker}
-                            style={{height: "30px"}}
-                            options={{
-                                enableTime: true,
-                                dateFormat: 'Y-m-d H:i',
-                                time_24hr: true,
-                            }}
+                        <Controller
+                            defaultValue=''
+                            control={control}
+                            name="start_date"
+                            render={({ field }) => (
+                                <Input
+                                    {...field}
+                                    id={field.name}
+                                    bsSize="sm"
+                                    placeholder={t('Эхлэх хугацаа')}
+                                    type="datetime-local"
+                                    invalid={errors[field.name] && true}
+                                />
+                            )}
                         />
                         {errors.start_date && <FormFeedback className='d-block'>{t(errors.start_date.message)}</FormFeedback>}
                     </Col>
@@ -247,19 +244,20 @@ const General = ({ stepper, setSubmitDatas, setSelectedLesson, editData, setEdit
                         <Label className="form-label" for="end_date">
                             {t('Дуусах хугацаа')}
                         </Label>
-                        <Flatpickr
-                            required
-                            id='end_date'
-                            name='end_date'
-                            className='form-control'
-                            onChange={setEndPicker}
-                            value={endPicker}
-                            style={{height: "30px"}}
-                            options={{
-                                enableTime: true,
-                                dateFormat: 'Y-m-d H:i',
-                                time_24hr: true,
-                            }}
+                        <Controller
+                            defaultValue=''
+                            control={control}
+                            name="end_date"
+                            render={({ field }) => (
+                                <Input
+                                    {...field}
+                                    id={field.name}
+                                    bsSize="sm"
+                                    placeholder={t('Дуусах хугацаа')}
+                                    type="datetime-local"
+                                    invalid={errors[field.name] && true}
+                                />
+                            )}
                         />
                         {errors.end_date && <FormFeedback className='d-block'>{t(errors.end_date.message)}</FormFeedback>}
                     </Col>
