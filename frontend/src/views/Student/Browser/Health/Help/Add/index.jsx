@@ -30,6 +30,7 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
     });
 
     const [fileInputKey, setFileInputKey] = useState(0); //
+    const [inputFile, setInputFile] = useState('')
     const { user } = useContext(AuthContext)
 
     // ** Hook
@@ -42,7 +43,6 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
     } = useForm(validate(validateSchema));
 
     const file = watch('file')
-
 	// Loader
 	const { fetchData } = useLoader({});
 	const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
@@ -52,17 +52,22 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
 
     // Хадгалах
 	async function onSubmit(cdata) {
-        console.log("cdata",cdata)
-
         cdata = convertDefaultValue(cdata)
         const formData = new FormData()
 
         for (const key in cdata) {
             if (key === 'file' && cdata[key] instanceof FileList)
                 formData.append(key, cdata[key][0], cdata[key][0].name)
-            else
+
+            else if(inputFile){
+
+                formData.append('file', inputFile)
+            } 
+            else {
                 formData.append(key, cdata[key])
+            }
         }
+
         cdata['created_by'] = user.id
         cdata['updated_by'] = user.id
 
@@ -168,7 +173,7 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
                             defaultValue=""
                             control={control}
                             name="file"
-                            render={({ field }) =>
+                            render={({ field }) => 
                                 <>
                                     <Input
                                         key={fileInputKey}
@@ -176,8 +181,10 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
                                         id={field.name}
                                         type="file"
                                         placeholder={t("файл")}
-                                        // accept="application/pdf"
-                                        onChange={(e) => field.onChange(e.target.files)}
+                                        accept="application/pdf"
+                                        onChange={(e) => {
+                                            field.onChange(e.target.files[0])
+                                        }}
                                     />
                                     {file && typeof file === 'string' &&
                                         <>

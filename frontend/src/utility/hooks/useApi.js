@@ -2068,7 +2068,7 @@ function useApi(isDisplay=false) {
 				help:{
 					get: (limit, page, sort, search) => instance.get(`/browser/health/help/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}`),
 					getOne: (pk) => instance.get(`/browser/health/help/${pk}/`),
-					post: (data) => instance.post(`/browser/health/help/`, data),
+					post: (data) => instance.post(`/browser/health/help/`, data, multiPart),
 					put: (data, pk) => instance.put(`/browser/health/help/${pk}/`, data),
 					delete: (pk) => instance.delete(`/browser/health/help/${pk}/`),
 				},

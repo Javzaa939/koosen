@@ -22,9 +22,6 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
 	title: Yup.string()
 		.trim()
 		.required('Хоосон байна'),
-    file: Yup.string()
-		.trim()
-		.required('Хоосон байна'),
 
     });
 
@@ -52,16 +49,14 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
     // Хадгалах
 	async function onSubmit(cdata) {
         cdata = convertDefaultValue(cdata)
-        console.log("f", cdata)
+        // const formData = new FormData()
 
-        const formData = new FormData()
-
-        for (const key in cdata) {
-            if (key === 'file' && cdata[key] instanceof FileList)
-                formData.append(key, cdata[key][0], cdata[key][0].name)
-            else
-                formData.append(key, cdata[key])
-        }
+        // for (const key in cdata) {
+        //     if (key === 'file' && cdata[key] instanceof FileList)
+        //         formData.append(key, cdata[key][0], cdata[key][0].name)
+        //     else
+        //         formData.append(key, cdata[key])
+        // }
         cdata['created_user'] = user.id
         cdata['updated_user'] = user.id
 
@@ -81,7 +76,7 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
         // }
         // else
         {
-            const { success, errors } = await postFetch(libraryApi.post(formData))
+            const { success, errors } = await postFetch(libraryApi.post(cdata))
             if(success) {
                 reset()
                 refreshDatas()
@@ -120,7 +115,7 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
     //         getOneDatas()
     //     }
     // },[open])
-    console.log("fileInputKey", fileInputKey)
+
 	return (    
         <Fragment>
             <Modal
@@ -183,7 +178,7 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
                             />
                             {errors.link && <FormFeedback className='d-block'>{t(errors.link.message)}</FormFeedback>}
                         </Col>
-                        <Col md={12} >
+                        {/* <Col md={12} >
                              <Label className="form-label">
                                 {t('Файл')}
                             </Label>
@@ -200,8 +195,8 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
                                             type="file"
                                             placeholder={t("файл")}
                                             // accept="application/pdf"
-                                            onChange={(e) => field.onChange(e.target.files)}
                                             invalid={errors.file && true}
+                                            onChange={(e) => field.onChange(e.target.files)}
 
                                         />
                                         {file && typeof file === 'string' &&
@@ -216,7 +211,7 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
                                 }
                             />
                             {errors.file && <FormFeedback className='d-block'>{errors.file.message}</FormFeedback>}
-                        </Col>
+                        </Col> */}
                         <Col md={12} className="text-center mt-2">
                             <Button className="me-2" color="primary" type="submit" >
                                 {postLoading &&<Spinner size='sm' className='me-1'/>}
