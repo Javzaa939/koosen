@@ -133,7 +133,7 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
             >
                 <ModalBody className="px-sm-3 pt-50 pb-3">
                     <div className='text-center'>
-                        <h4>{editId ? t('Сэтгэл зүйн булан засах') : t('Сэтгэл зүйн булан нэмэх')}</h4>
+                        <h4>{editId ? t('Сэтгэл зүйн зөвлөмж') : t('Сэтгэл зүйн зөвлөмж')}</h4>
                     </div>
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
                         <Col md={12}>

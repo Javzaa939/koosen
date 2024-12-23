@@ -52,6 +52,8 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
 
     // Хадгалах
 	async function onSubmit(cdata) {
+        console.log("cdata",cdata)
+
         cdata = convertDefaultValue(cdata)
         const formData = new FormData()
 
@@ -63,7 +65,6 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
         }
         cdata['created_by'] = user.id
         cdata['updated_by'] = user.id
-        console.log("formData", formData)
 
         // if(editId){
         //     const { success, errors } = await fetchData(healthApi.put(cdata, editId))
@@ -159,51 +160,47 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
                             />
                             {errors.title && <FormFeedback className='d-block'>{t(errors.title.message)}</FormFeedback>}
                         </Col>
-                        <Col md={12}>
-                            <div className="mt-1 mb-1">
-                                <Label className="form-label">
-                                    {t('Файл')}
-                                </Label>
-                                <Controller
-                                    defaultValue=""
-                                    control={control}
-                                    name="file"
-                                    render={({ field }) =>
+                        <Col md={12} >
+                        <Label className="form-label">
+                            {t('Файл')}
+                        </Label>
+                        <Controller
+                            defaultValue=""
+                            control={control}
+                            name="file"
+                            render={({ field }) =>
+                                <>
+                                    <Input
+                                        key={fileInputKey}
+                                        name={field.name}
+                                        id={field.name}
+                                        type="file"
+                                        placeholder={t("файл")}
+                                        // accept="application/pdf"
+                                        onChange={(e) => field.onChange(e.target.files)}
+                                    />
+                                    {file && typeof file === 'string' &&
                                         <>
-                                            <Input
-                                                key={fileInputKey}
-                                                name={field.name}
-                                                id={field.name}
-                                                type="file"
-                                                placeholder={t("файл")}
-                                                // accept="application/pdf"
-                                                onChange={(e) => field.onChange(e.target.files)}
-                                                invalid={errors.file && true}
-
-                                            />
-                                            {file && typeof file === 'string' &&
-                                                <>
-                                                    <a href={file} className='me-1'>
-                                                        <Download type="button" color='#1a75ff' width={'15px'} />
-                                                    </a>
-                                                    {file}
-                                                </>
-                                            }
+                                            <a href={file} className='me-1'>
+                                                <Download type="button" color='#1a75ff' width={'15px'} />
+                                            </a>
+                                            {file}
                                         </>
                                     }
-                                />
-                                {errors.file && <FormFeedback className='d-block'>{errors.file.message}</FormFeedback>}
-                            </div>
-                        </Col>
-                        <Col md={12} className="text-center mt-2">
-                            <Button className="me-2" color="primary" type="submit" >
-                                {postLoading &&<Spinner size='sm' className='me-1'/>}
-                                {t('Хадгалах')}
-                            </Button>
-                            <Button color="secondary" type="reset" outline  onClick={handleModal}>
-                                {t('Буцах')}
-                            </Button>
-                        </Col>
+                                </>
+                            }
+                        />
+                        {errors.file && <FormFeedback className='d-block'>{errors.file.message}</FormFeedback>}
+                    </Col>
+                    <Col md={12} className="text-center mt-2">
+                        <Button className="me-2" color="primary" type="submit" >
+                            {postLoading &&<Spinner size='sm' className='me-1'/>}
+                            {t('Хадгалах')}
+                        </Button>
+                        <Button color="secondary" type="reset" outline  onClick={handleModal}>
+                            {t('Буцах')}
+                        </Button>
+                    </Col>
                     </Row>
                 </ModalBody>
             </Modal>

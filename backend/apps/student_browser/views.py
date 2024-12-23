@@ -814,7 +814,6 @@ class HealthHelpAPIView(
         updated_user = data.get('updated_user')
         title = data.get('title')
         file = data.get('file')
-        print('data', data)
 
         if not file:
             return request.send_error("ERR_002", "Файл заавал оруулна уу.")
