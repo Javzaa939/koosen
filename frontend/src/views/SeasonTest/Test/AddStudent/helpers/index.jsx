@@ -21,6 +21,12 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleDelete)
 			center: true,
         },
         {
+            name: `${'Дамжаа'}`,
+            selector: (row) => row?.group_name,
+            minWidth: "100px",
+            center: true,
+        },
+        {
             name: `${'Оюутны код'}`,
             selector: (row) => row?.code,
             minWidth: "100px",

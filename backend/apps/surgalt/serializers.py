@@ -591,10 +591,11 @@ class QuestionChoicesSerializer(serializers.ModelSerializer):
 class StudentSerializer(serializers.ModelSerializer):
 
     full_name = serializers.SerializerMethodField()
+    group_name = serializers.CharField(source='group.name', default='')
 
     class Meta:
         model = Student
-        fields = ["id", "code", "last_name", "first_name", "full_name", 'register_num']
+        fields = ["id", "code", "last_name", "first_name", "full_name", 'register_num', 'group_name']
 
     def get_full_name(self, obj):
 
