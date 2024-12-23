@@ -5,7 +5,6 @@ import { Card, Nav, NavItem, NavLink, TabContent } from 'reactstrap'
 import Taniltsuulga from './Taniltsuulga'
 import Help from './Help'
 
-
 function Health() {
 
     const [activeTab, setActiveTab] = useState(0)

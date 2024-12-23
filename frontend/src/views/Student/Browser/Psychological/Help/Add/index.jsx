@@ -1,5 +1,5 @@
 // ** React imports
-import React, { Fragment, useState, useContext, useEffect } from 'react'
+import React, { useState, Fragment, useContext, useEffect } from 'react'
 
 import { t } from 'i18next';
 
@@ -8,14 +8,13 @@ import useLoader from "@hooks/useLoader";
 
 import { useForm, Controller } from "react-hook-form";
 
-import { Row, Col, Form, Modal, Input, Label, Button, ModalBody, ModalHeader, FormFeedback, Spinner, InputGroupText, InputGroup, } from "reactstrap";
+import { Row, Col, Form, Modal, Input, Label, Button, ModalBody, FormFeedback, Spinner} from "reactstrap";
 
 import { validate, convertDefaultValue } from "@utils"
+import { Download } from 'react-feather'
 
 import AuthContext from '@context/AuthContext'
 import * as Yup from 'yup';
-import { useQuill } from 'react-quilljs';
-import 'quill/dist/quill.snow.css'
 
 const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}) => {
 
@@ -23,80 +22,70 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
 	title: Yup.string()
 		.trim()
 		.required('Хоосон байна'),
+    file: Yup.mixed()
+        .test(
+            'file-required',
+            t('Хоосон байна'),
+            (value) => (value instanceof FileList && value.length > 0) || (typeof value === 'string' && value.trim() !== '')
+        )
 
-    });
-
-    const [value, setValues] = useState('');
-
-    const {quill, quillRef } = useQuill({
-        modules: {
-            toolbar: [
-                    ['bold', 'italic', 'underline', 'strike'],
-                    [{ align: [] }],
-
-                    [{ list: 'ordered'}, { list: 'bullet' }],
-                    [{ indent: '-1'}, { indent: '+1' }],
-
-                    [{ size: ['small', false, 'large', 'huge'] }],
-                    ['link',],
-
-                    [{ color: [] }, { background: [] }],
-
-                    ['clean'],
-            ],
-        },
-        value: value,
-        theme: 'snow',
-        formats: [
-            'header','bold', 'italic', 'underline', 'strike',
-            'align', 'list', 'indent',
-            'size',
-            'link',
-            'color', 'background',
-            'clean',
-        ],
-        readOnly: false,
     });
 
     const { user } = useContext(AuthContext)
+    const [fileInputKey, setFileInputKey] = useState(0)
 
     // ** Hook
-    const { control, handleSubmit, reset, setError, formState: { errors }, setValue } = useForm(validate(validateSchema));
+    const {
+        control,
+        handleSubmit,
+        formState: { errors, isValid },
+        watch,
+        reset
+    } = useForm(validate(validateSchema));
+
+    const file = watch('file')
 
 	// Loader
 	const { fetchData } = useLoader({});
 	const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
 
     // Api
-    const psycholocalApi = useApi().browser.psycholocal
+    const psycholocalApi = useApi().browser.psycholocal.help
 
     // Хадгалах
 	async function onSubmit(cdata) {
         cdata = convertDefaultValue(cdata)
 
-        cdata['body'] = quill.root.innerHTML
-
-        if(editId){
-            cdata['updated_user'] = user.id
-            const { success, errors } = await fetchData(psycholocalApi.put(cdata, editId))
-            if(success) {
-                reset()
-                refreshDatas()
-                handleEditModal()
-            }
-            else {
-                /** Алдааны мессэжийг input дээр харуулна */
-                for (let key in errors) {
-                    setError(key, { type: 'custom', message: errors[key][0]});
-                }
-            }
-        }
-        else
+        // if(editId){
+        //     cdata['updated_user'] = user.id
+        //     const { success, errors } = await fetchData(psycholocalApi.put(cdata, editId))
+        //     if(success) {
+        //         reset()
+        //         refreshDatas()
+        //         handleEditModal()
+        //     }
+        //     else {
+        //         /** Алдааны мессэжийг input дээр харуулна */
+        //         for (let key in errors) {
+        //             setError(key, { type: 'custom', message: errors[key][0]});
+        //         }
+        //     }
+        // }
+        // else
         {
+
+            const formData = new FormData()
+            for (const key in cdata) {
+                if (key === 'file' && cdata[key] instanceof FileList)
+                    formData.append(key, cdata[key][0], cdata[key][0].name)
+                else
+                    formData.append(key, cdata[key])
+            }
             cdata['created_user'] = user.id
-            const { success, errors } = await postFetch(psycholocalApi.post(cdata))
+            const { success, errors } = await postFetch(psycholocalApi.post(formData))
             if(success) {
                 reset()
+                setFileInputKey((prevKey) => prevKey + 1);
                 refreshDatas()
                 handleModal()
             }
@@ -171,55 +160,41 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
                             />
                             {errors.title && <FormFeedback className='d-block'>{t(errors.title.message)}</FormFeedback>}
                         </Col>
-                        <Col md={12}>
-                            <Label className="form-label" for="link">
-                                {t('Линк')}
-                            </Label>
-                            <Controller
-                                defaultValue=''
-                                control={control}
-                                id='link'
-                                name='link'
-                                render={({ field }) => (
-                                    <Input
-                                        {...field}
-                                        type='text'
-                                        name='link'
-                                        bsSize='sm'
-                                        id='link'
-                                        placeholder='гарчиг'
-                                        invalid={errors.link && true}
-                                    >
-                                    </Input>
-                                )}
-                            />
-                            {errors.link && <FormFeedback className='d-block'>{t(errors.link.message)}</FormFeedback>}
-                        </Col>
                         <Col md={12} >
-                            <Label className='form-label' for='body'>
-                                {t('Сэтгэл зүйн булан хэсэг')}
+                            <Label className="form-label">
+                                {t('Файл')}
                             </Label>
                             <Controller
-                                defaultValue=''
+                                defaultValue=""
                                 control={control}
-                                id='body'
-                                name='body'
-                                render={({field}) => (
-                                    <div style={{ width: 'auto',}}>
-                                        <div
-                                            {...field}
-                                            name='body'
-                                            id='body'
-                                            ref={quillRef}
+                                name="file"
+                                render={({ field }) =>
+                                    <>
+                                        <Input
+                                            key={fileInputKey}
+                                            name={field.name}
+                                            id={field.name}
+                                            type="file"
+                                            placeholder={t("файл")}
+                                            accept="application/pdf"
+                                            onChange={(e) => field.onChange(e.target.files)}
                                         />
-                                    </div>
-                                )}
+                                        {file && typeof file === 'string' &&
+                                            <>
+                                                <a href={file} className='me-1'>
+                                                    <Download type="button" color='#1a75ff' width={'15px'} />
+                                                </a>
+                                                {file}
+                                            </>
+                                        }
+                                    </>
+                                }
                             />
-                            {errors.body && <FormFeedback className='d-block'>{t(errors.body.message)}</FormFeedback>}
+                            {errors.file && <FormFeedback className='d-block'>{errors.file.message}</FormFeedback>}
                         </Col>
                         <Col md={12} className="text-center mt-2">
                             <Button className="me-2" color="primary" type="submit" >
-                                {postLoading &&<Spinner size='sm' className='me-1'/>}
+                                {postLoading &&<Spinner size='sm' className='me-1' />}
                                 {t('Хадгалах')}
                             </Button>
                             <Button color="secondary" type="reset" outline  onClick={handleModal}>

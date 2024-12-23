@@ -2049,6 +2049,13 @@ function useApi(isDisplay=false) {
 				post: (data) => instance.post(`/browser/psycholocal/`, data),
 				put: (data, pk) => instance.put(`/browser/psycholocal/${pk}/`, data),
 				delete: (pk) => instance.delete(`/browser/psycholocal/${pk}/`),
+				help:{
+					get: (limit, page, sort, search) => instance.get(`/browser/psy/help/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}`),
+					getOne: (pk) => instance.get(`/browser/psy/help/${pk}/`),
+					post: (data) => instance.post(`/browser/psy/help/`, data),
+					put: (data, pk) => instance.put(`/browser/psy/help/${pk}/`, data),
+					delete: (pk) => instance.delete(`/browser/psy/help/${pk}/`),
+				},
 			},
 
 			// эрүүл мэнд

@@ -16,7 +16,7 @@ import * as Yup from 'yup';
 
 const Oyutni_hugjil = () => {
 
-     // Loader
+    // Loader
     const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
 
     //Context

@@ -33,7 +33,7 @@ const Psychological = () => {
     const [searchValue, setSearchValue] = useState("");
     const [sortField, setSort] = useState('')
 
-    const healthApi = useApi().browser.health
+    const healthApi = useApi().browser.psycholocal
 
     async function getDatas() {
         const page_count = Math.ceil(total_count / rowsPerPage)

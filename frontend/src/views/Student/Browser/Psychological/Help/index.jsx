@@ -11,6 +11,7 @@ import useLoader from '@hooks/useLoader';
 
 import { getColumns } from './helpers'
 import Createmodal from './Add'
+import { clippingParents } from "@popperjs/core"
 
 const Psychological = () => {
 
@@ -47,6 +48,7 @@ const Psychological = () => {
             setDatas(data?.results)
         }
     }
+    console.log("data", datas)
 
     useEffect(() => {
         getDatas()
@@ -131,7 +133,7 @@ const Psychological = () => {
             <Card>
             {isLoading && Loader}
                 <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
-                    <CardTitle tag="h4">{t('Танилцуулга')}</CardTitle>
+                    <CardTitle tag="h4">{t('Зөвлөмж')}</CardTitle>
                     <div className='d-flex flex-wrap mt-md-0 mt-1'>
                         <Button
                             color='primary'

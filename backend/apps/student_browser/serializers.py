@@ -8,6 +8,7 @@ from lms.models import Library
 from lms.models import Health, StudentRules
 from lms.models import StudentPsycholocal
 from lms.models import StudentTime
+from lms.models import PsycholocalHelp
 
 class StructureSerializer(serializers.ModelSerializer):
     " Их сургуулийн бүтэц зохион байгуулалт"
@@ -54,4 +55,11 @@ class StudentTimeSerializer(serializers.ModelSerializer):
     "  Номын сангийн цагийн хуваарь"
     class Meta:
         model = StudentTime
+        fields = "__all__"
+    
+
+class PsycholocalHelpSerializer(serializers.ModelSerializer):
+    " Сэтгэл зүйн зөвлөмж "
+    class Meta:
+        model = PsycholocalHelp
         fields = "__all__"

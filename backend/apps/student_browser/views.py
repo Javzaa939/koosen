@@ -654,3 +654,108 @@ class StudentTimeAPIView(
 
         self.destroy(request, pk)
         return request.send_info("INF_003")
+
+
+@permission_classes([IsAuthenticated])
+class StudentPsyHelpAPIView(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    generics.GenericAPIView
+):
+    '''  Сэтгэл зүйн зөвлөмж '''
+
+    queryset = PsycholocalHelp.objects.all()
+    serializer_class = PsycholocalHelpSerializer
+
+    pagination_class = CustomPagination
+
+    @has_permission(must_permissions=['lms-browser-bulan-read'])
+    def get(self, request, pk=None):
+        """  Сэтгэл зүйн зөвлөмж жагсаалт """
+
+        return_data = self.list(request).data
+        return request.send_data(return_data)
+
+    
+    @has_permission(must_permissions=['lms-browser-bulan-create'])
+    def post(self, request):
+        "  Сэтгэл зүйн зөвлөмж нэмэх "
+
+        data = request.data
+        data = null_to_none(data)
+        created_user = data.get('created_user')
+        updated_user = data.get('updated_user')
+        link = data.get('link')
+        title = data.get('title')
+        file = data.get('file')
+
+        if not file:
+            return request.send_error("ERR_002", "Файл заавал оруулна уу.")
+        else:
+            if file:
+
+                # files руу файл хадгалах
+                save_file(file, 'psy_help')
+
+                # cdn руу хадгалах
+                relative_path = create_file_to_cdn('psy_help', file)
+
+                if relative_path:
+                    data['file'] = relative_path.get('full_path')
+
+        try:
+            if data:
+                StudentDevelop.objects.create(
+                    file=relative_path.get('full_path').split('dxis/')[1],
+                    created_user_id=created_user,
+                    link=link,
+                    title=title,
+                    updated_user_id=updated_user,
+                )
+        except Exception as e:
+            print(e)
+            return request.send_error("ERR_002")
+
+        return request.send_info("INF_001")
+
+    @has_permission(must_permissions=['lms-browser-bulan-update'])
+    def put(self, request, pk=None):
+        "  Сэтгэл зүйн зөвлөмж засах "
+
+        request_data = request.data
+
+        # зассан хэрэглэгч
+        updated_user = request_data.get('updated_user')
+        request_data['updated_user']= updated_user
+
+        instance = self.queryset.filter(id=pk).first()
+        serializer = self.get_serializer(instance, data=request_data)
+
+        if serializer.is_valid(raise_exception=False):
+            self.perform_update(serializer)
+            return request.send_info('INF_002')
+        else:
+            return request.send_error_valid(serializer.errors)
+
+    @has_permission(must_permissions=['lms-browser-bulan-delete'])
+    def delete(self, request, pk=None):
+        """ Сэтгэл зүйн зөвлөмж устгах """
+        instance = self.queryset.filter(id=pk).first()
+
+        if instance.file:
+            file_path = str(instance.file)
+
+            # files -с файл устгана
+            remove_file = os.path.join(settings.MEDIA_ROOT, file_path)
+            if remove_file:
+                remove_folder(remove_file)
+
+            # cdn- с файл устгана
+            remove_files = os.path.join(settings.CDN_MAIN_FOLDER, file_path)
+            remove_file_from_cdn(remove_files, is_file=True)
+
+        self.destroy(request, pk)
+        return request.send_info("INF_003")
