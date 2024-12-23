@@ -28,7 +28,7 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 		{
 			name: `${t('Гарчиг')}`,
             cell: (row) => row?.title,
-			minWidth: "80px",
+			minWidth: "200",
 			center: true,
 		},
 		{
@@ -41,7 +41,8 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 					</a>
 					{row?.file ? decodeURIComponent(row?.file.toString().split("/").pop()): ''}
 				</>,
-			minWidth: '300px'
+			minWidth: '200',
+			center: true,
 		},
 	]
 

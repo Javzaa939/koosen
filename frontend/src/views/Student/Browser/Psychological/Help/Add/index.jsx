@@ -176,7 +176,9 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
                                             id={field.name}
                                             type="file"
                                             placeholder={t("файл")}
-                                            accept="application/pdf"
+                                            // accept="application/pdf"
+                                            invalid={errors.file &&true}
+
                                             onChange={(e) => field.onChange(e.target.files)}
                                         />
                                         {file && typeof file === 'string' &&

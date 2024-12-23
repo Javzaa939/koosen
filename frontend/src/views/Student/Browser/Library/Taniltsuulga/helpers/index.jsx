@@ -1,4 +1,4 @@
-import { Edit, X } from "react-feather";
+import { Edit, X,Download }  from 'react-feather'
 
 import { t } from "i18next";
 
@@ -37,18 +37,18 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 			minWidth: "80px",
 			center: true
 		},
-		// {
-		// 	header: 'file',
-		// 	name: `${t('Файл')}`,
-		// 	selector: (row) =>
-		// 		<>
-		// 			<a href={row?.file} className='me-1'>
-		// 				<Download type="button" color='#1a75ff' width={'15px'} />
-		// 			</a>
-		// 			{row?.file ? decodeURIComponent(row?.file.toString().split("/").pop()): ''}
-		// 		</>,
-		// 	minWidth: '300px'
-		// },
+		{
+			header: 'file',
+			name: `${t('Файл')}`,
+			selector: (row) =>
+				<>
+					<a href={row?.file} className='me-1'>
+						<Download type="button" color='#1a75ff' width={'15px'} />
+					</a>
+					{row?.file ? decodeURIComponent(row?.file.toString().split("/").pop()): ''}
+				</>,
+			minWidth: '80px'
+		},
 	]
 
 	if(Object.keys(user).length > 0 && user.permissions.includes('lms-browser-library-update'))

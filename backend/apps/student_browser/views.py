@@ -275,24 +275,34 @@ class StudentLibraryAPIView(
     def post(self, request):
         "  Номын сан танилуулга нэмэх "
 
-        data = request.data
+        data = request.data.dict()
         data = null_to_none(data)
         created_user = data.get('created_user')
         updated_user = data.get('updated_user')
+        title = data.get('title')
+        file = data.get('file')
+        if not file:
+            return request.send_error("ERR_002", "Файл заавал оруулна уу.")
+        
+        if file:
 
-        data['created_user']= created_user
-        data['updated_user']= updated_user
+            # files руу файл хадгалах
+            save_file(file, 'lib')
 
-        serializer = self.get_serializer(data=data)
+            # cdn руу хадгалах
+            relative_path = create_file_to_cdn('lib',file)
+
+            if relative_path:
+                data['file'] = relative_path.get('full_path')
 
         try:
-            if serializer.is_valid():
-                with transaction.atomic():
-                    self.perform_create(serializer)
-
-            else:
-                print(serializer.errors)
-                return request.send_error("ERR_002")
+            if data:
+                Library.objects.create(
+                    file=relative_path.get('full_path').split('dxis/')[1],
+                    created_by_id=created_user,
+                    title=title,
+                    updated_by_id=updated_user,
+                )
         except Exception as e:
             print(e)
             return request.send_error("ERR_002")
@@ -318,6 +328,19 @@ class StudentLibraryAPIView(
     @has_permission(must_permissions=['lms-browser-library-delete'])
     def delete(self, request, pk=None):
         """ Номын сан танилуулга устгах """
+        instance = self.queryset.filter(id=pk).first()
+
+        if instance.file:
+            file_path = str(instance.file)
+
+            # files -с файл устгана
+            remove_file = os.path.join(settings.MEDIA_ROOT, file_path)
+            if remove_file:
+                remove_folder(remove_file)
+
+            # cdn- с файл устгана
+            remove_files = os.path.join(settings.CDN_MAIN_FOLDER, file_path)
+            remove_file_from_cdn(remove_files, is_file=True)
 
         self.destroy(request, pk)
         return request.send_info("INF_003")
@@ -802,7 +825,6 @@ class HealthHelpAPIView(
 
         if not file:
             return request.send_error("ERR_002", "Файл заавал оруулна уу.")
-
         if file:
 
             # files руу файл хадгалах
@@ -817,7 +839,7 @@ class HealthHelpAPIView(
         try:
             if data:
                 HealthHelp.objects.create(
-                    file=file,
+                    file=relative_path.get('full_path').split('dxis/')[1],
                     created_by_id=created_user,
                     title=title,
                     updated_by_id=updated_user,

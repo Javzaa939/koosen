@@ -43,8 +43,8 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
     } = useForm(validate(validateSchema));
 
     const file = watch('file')
+
 	// Loader
-	const { fetchData } = useLoader({});
 	const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
 
     // Api
@@ -56,12 +56,11 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
         const formData = new FormData()
 
         for (const key in cdata) {
-            if (key === 'file' && cdata[key] instanceof FileList)
-                formData.append(key, cdata[key][0], cdata[key][0].name)
-
-            else if(inputFile){
+            if(inputFile){
 
                 formData.append('file', inputFile)
+                formData.append(key, cdata[key])
+
             } 
             else {
                 formData.append(key, cdata[key])
@@ -105,27 +104,27 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
         }
 	}
 
-    async function getOneDatas() {
-        if(editId) {
-            const { success, data } = await fetchData(healthApi.getOne(editId))
-            if(success) {
-                // засах үед дата байх юм бол setValue-р дамжуулан утгыг харуулна
-                if(data === null) return
-                for(let key in data) {
-                    if(data[key] !== null)
-                        setValue(key, data[key])
+    // async function getOneDatas() {
+    //     if(editId) {
+    //         const { success, data } = await fetchData(healthApi.getOne(editId))
+    //         if(success) {
+    //             // засах үед дата байх юм бол setValue-р дамжуулан утгыг харуулна
+    //             if(data === null) return
+    //             for(let key in data) {
+    //                 if(data[key] !== null)
+    //                     setValue(key, data[key])
 
-                    else setValue(key, '')
-                }
-            }
-        }
-    }
+    //                 else setValue(key, '')
+    //             }
+    //         }
+    //     }
+    // }
 
-    useEffect(() => {
-        if(editId){
-            getOneDatas()
-        }
-    },[open])
+    // useEffect(() => {
+    //     if(editId){
+    //         getOneDatas()
+    //     }
+    // },[open])
 
 	return (
         <Fragment>
@@ -173,7 +172,9 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
                             defaultValue=""
                             control={control}
                             name="file"
-                            render={({ field }) => 
+                            render={({ field }) => {
+                                return(
+
                                 <>
                                     <Input
                                         key={fileInputKey}
@@ -181,10 +182,11 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
                                         id={field.name}
                                         type="file"
                                         placeholder={t("файл")}
-                                        accept="application/pdf"
                                         onChange={(e) => {
-                                            field.onChange(e.target.files[0])
+                                            setInputFile(e.target.files[0])
                                         }}
+                                        invalid={errors.file &&true}
+
                                     />
                                     {file && typeof file === 'string' &&
                                         <>
@@ -195,6 +197,8 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
                                         </>
                                     }
                                 </>
+                                )
+                            }
                             }
                         />
                         {errors.file && <FormFeedback className='d-block'>{errors.file.message}</FormFeedback>}

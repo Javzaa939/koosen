@@ -11,9 +11,9 @@ import useLoader from '@hooks/useLoader';
 import { getColumns } from './helpers'
 import Createmodal from './Add'
 
-const Health = () => {
+const Help=() =>{
 
-     // Loader
+    // Loader
     const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
     const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({isFullScreen: true})
 
@@ -222,4 +222,4 @@ const Health = () => {
         </Fragment>
     )
 }
-export default Health
+export default Help
