@@ -58,12 +58,9 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
             if(inputFile){
 
                 formData.append('file', inputFile)
-                formData.append(key, cdata[key])
-
+                
             } 
-            else {
-                formData.append(key, cdata[key])
-            }
+            formData.append(key, cdata[key])
         }
         cdata['created_user'] = user.id
         cdata['updated_user'] = user.id

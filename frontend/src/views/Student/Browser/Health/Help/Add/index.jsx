@@ -23,9 +23,6 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
 	title: Yup.string()
 		.trim()
 		.required('Хоосон байна'),
-    file: Yup.string()
-		.trim()
-		.required('Хоосон байна'),
 
     });
 
@@ -59,12 +56,9 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
             if(inputFile){
 
                 formData.append('file', inputFile)
-                formData.append(key, cdata[key])
 
             } 
-            else {
-                formData.append(key, cdata[key])
-            }
+            formData.append(key, cdata[key])
         }
 
         cdata['created_by'] = user.id
@@ -185,7 +179,6 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
                                         onChange={(e) => {
                                             setInputFile(e.target.files[0])
                                         }}
-                                        invalid={errors.file &&true}
 
                                     />
                                     {file && typeof file === 'string' &&
