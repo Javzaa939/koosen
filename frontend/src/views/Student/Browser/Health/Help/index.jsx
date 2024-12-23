@@ -31,7 +31,7 @@ const Health = () => {
     const [searchValue, setSearchValue] = useState("");
     const [sortField, setSort] = useState('')
 
-    const healthApi = useApi().browser.health
+    const healthApi = useApi().browser.health.help
 
     async function getDatas() {
         const page_count = Math.ceil(total_count / rowsPerPage)
@@ -129,7 +129,7 @@ const Health = () => {
             <Card>
             {isLoading && Loader}
                 <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
-                    <CardTitle tag="h4">{t('Эрүүл мэнд зөвлөмж')}</CardTitle>
+                    <CardTitle tag="h4">{t('Эрүүл мэндийн зөвлөмж')}</CardTitle>
                     <div className='d-flex flex-wrap mt-md-0 mt-1'>
                         <Button
                             color='primary'

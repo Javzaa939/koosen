@@ -55,7 +55,15 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
     // Хадгалах
 	async function onSubmit(cdata) {
         cdata = convertDefaultValue(cdata)
-
+        const formData = new FormData()
+        for (const key in cdata) {
+            if (key === 'file' && cdata[key] instanceof FileList)
+                formData.append(key, cdata[key][0], cdata[key][0].name)
+            else
+                formData.append(key, cdata[key])
+        }
+        cdata['created_user'] = user.id
+        cdata['updated_user'] = user.id
         // if(editId){
         //     cdata['updated_user'] = user.id
         //     const { success, errors } = await fetchData(psycholocalApi.put(cdata, editId))
@@ -74,14 +82,6 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
         // else
         {
 
-            const formData = new FormData()
-            for (const key in cdata) {
-                if (key === 'file' && cdata[key] instanceof FileList)
-                    formData.append(key, cdata[key][0], cdata[key][0].name)
-                else
-                    formData.append(key, cdata[key])
-            }
-            cdata['created_user'] = user.id
             const { success, errors } = await postFetch(psycholocalApi.post(formData))
             if(success) {
                 reset()

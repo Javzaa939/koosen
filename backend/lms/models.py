@@ -4664,6 +4664,7 @@ class Library(models.Model):
     """ Номын сан танилцуулга"""
 
     title = models.CharField(max_length=1000, verbose_name='Гарчиг')
+    file = models.FileField(upload_to='lib', verbose_name='Файл', null=True)
     link = models.CharField(max_length=1000, verbose_name='Линк', null=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='l_cr_user', null=True, verbose_name='Үүсгэсэн хэрэглэгч')
     updated_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, verbose_name='Зассан хэрэглэгч')

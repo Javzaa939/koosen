@@ -1,7 +1,6 @@
 // ** React imports
 import React, { Fragment, useState, useContext, useEffect } from 'react'
 
-
 import { t } from 'i18next';
 
 import useApi from "@hooks/useApi";
@@ -14,10 +13,8 @@ import { Row, Col, Form, Modal, Input, Label, Button, ModalBody, ModalHeader, Fo
 import { validate, convertDefaultValue } from "@utils"
 
 import AuthContext from '@context/AuthContext'
-import SchoolContext from '@context/SchoolContext'
 import * as Yup from 'yup';
-import { useQuill } from 'react-quilljs';
-import 'quill/dist/quill.snow.css'
+import { Download } from 'react-feather'
 
 const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}) => {
 
@@ -25,49 +22,25 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
 	title: Yup.string()
 		.trim()
 		.required('Хоосон байна'),
-    link: Yup.string()
+    file: Yup.string()
 		.trim()
 		.required('Хоосон байна'),
 
     });
 
-    const [value, setValues] = useState('');
-
-    const {quill, quillRef } = useQuill({
-        modules: {
-            toolbar: [
-                    ['bold', 'italic', 'underline', 'strike'],
-                    [{ align: [] }],
-
-                    [{ list: 'ordered'}, { list: 'bullet' }],
-                    [{ indent: '-1'}, { indent: '+1' }],
-
-                    [{ size: ['small', false, 'large', 'huge'] }],
-                    ['link',],
-
-                    [{ color: [] }, { background: [] }],
-
-                    ['clean'],
-            ],
-        },
-        value: value,
-        theme: 'snow',
-        formats: [
-            'header','bold', 'italic', 'underline', 'strike',
-            'align', 'list', 'indent',
-            'size',
-            'link',
-            'color', 'background',
-            'clean',
-        ],
-        readOnly: false,
-    });
-
-    const { school_id } = useContext(SchoolContext)
     const { user } = useContext(AuthContext)
+    const [fileInputKey, setFileInputKey] = useState(0);
 
     // ** Hook
-    const { control, handleSubmit, reset, setError, formState: { errors }, setValue } = useForm(validate(validateSchema));
+    const {
+        control,
+        handleSubmit,
+        formState: { errors, isValid },
+        watch,
+        reset
+    } = useForm(validate(validateSchema));
+
+    const file = watch('file')
 
 	// Loader
 	const { Loader, isLoading, fetchData } = useLoader({});
@@ -79,31 +52,40 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
     // Хадгалах
 	async function onSubmit(cdata) {
         cdata = convertDefaultValue(cdata)
+        console.log("f", cdata)
 
-        cdata['body'] = quill.root.innerHTML
-        cdata['created_by'] = user.id
+        const formData = new FormData()
 
-        if(editId){
-            const { success, errors } = await fetchData(libraryApi.put(cdata, editId))
-            if(success) {
-                reset()
-                refreshDatas()
-                handleEditModal()
-            }
-            else {
-                /** Алдааны мессэжийг input дээр харуулна */
-                for (let key in errors) {
-                    setError(key, { type: 'custom', message: errors[key][0]});
-                }
-            }
+        for (const key in cdata) {
+            if (key === 'file' && cdata[key] instanceof FileList)
+                formData.append(key, cdata[key][0], cdata[key][0].name)
+            else
+                formData.append(key, cdata[key])
         }
-        else{
-            cdata['created_by'] = user.id
-            cdata['updated_by'] = user.id
-            const { success, errors } = await postFetch(libraryApi.post(cdata))
+        cdata['created_user'] = user.id
+        cdata['updated_user'] = user.id
+
+        // if(editId){
+        //     const { success, errors } = await fetchData(libraryApi.put(cdata, editId))
+        //     if(success) {
+        //         reset()
+        //         refreshDatas()
+        //         handleEditModal()
+        //     }
+        //     else {
+        //         /** Алдааны мессэжийг input дээр харуулна */
+        //         for (let key in errors) {
+        //             setError(key, { type: 'custom', message: errors[key][0]});
+        //         }
+        //     }
+        // }
+        // else
+        {
+            const { success, errors } = await postFetch(libraryApi.post(formData))
             if(success) {
                 reset()
                 refreshDatas()
+                setFileInputKey((prevKey) => prevKey + 1);
                 handleModal()
             }
             else {
@@ -117,32 +99,29 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
         }
 	}
 
-    async function getOneDatas() {
-        if(editId) {
-            const { success, data } = await fetchData(libraryApi.getOne(editId))
-            if(success) {
-                // засах үед дата байх юм бол setValue-р дамжуулан утгыг харуулна
-                if(data === null) return
-                for(let key in data) {
-                    if(data[key] !== null)
-                        setValue(key, data[key])
+    // async function getOneDatas() {
+    //     if(editId) {
+    //         const { success, data } = await fetchData(libraryApi.getOne(editId))
+    //         if(success) {
+    //             // засах үед дата байх юм бол setValue-р дамжуулан утгыг харуулна
+    //             if(data === null) return
+    //             for(let key in data) {
+    //                 if(data[key] !== null)
+    //                     setValue(key, data[key])
 
-                    else setValue(key, '')
-                }
-                if (key === 'body' && quill) {
-                    quill.pasteHTML(data[key]);
-                }
-            }
-        }
-    }
+    //                 else setValue(key, '')
+    //             }
+    //         }
+    //     }
+    // }
 
-    useEffect(() => {
-        if(editId){
-            getOneDatas()
-        }
-    },[open])
-
-	return (
+    // useEffect(() => {
+    //     if(editId){
+    //         getOneDatas()
+    //     }
+    // },[open])
+    console.log("fileInputKey", fileInputKey)
+	return (    
         <Fragment>
             <Modal
                 isOpen={open}
@@ -182,7 +161,7 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
                         </Col>
                         <Col md={12}>
                             <Label className="form-label" for="link">
-                                {t('Линк')}
+                                {t('Тайлбар')}
                             </Label>
                             <Controller
                                 defaultValue=''
@@ -192,11 +171,11 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
                                 render={({ field }) => (
                                     <Input
                                         {...field}
-                                        type='text'
+                                        type='textarea'
                                         name='link'
                                         bsSize='sm'
                                         id='link'
-                                        placeholder='гарчиг'
+                                        placeholder='тайлбар'
                                         invalid={errors.link && true}
                                     >
                                     </Input>
@@ -205,26 +184,38 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
                             {errors.link && <FormFeedback className='d-block'>{t(errors.link.message)}</FormFeedback>}
                         </Col>
                         <Col md={12} >
-                            <Label className='form-label' for='body'>
-                                {t('Танилцуулга байршуулах хэсэг')}
+                             <Label className="form-label">
+                                {t('Файл')}
                             </Label>
                             <Controller
-                                defaultValue=''
+                                defaultValue=""
                                 control={control}
-                                id='body'
-                                name='body'
-                                render={({field}) => (
-                                    <div style={{ width: 'auto',}}>
-                                        <div
-                                            {...field}
-                                            name='body'
-                                            id='body'
-                                            ref={quillRef}
+                                name="file"
+                                render={({ field }) =>
+                                    <>
+                                        <Input
+                                            key={fileInputKey}
+                                            name={field.name}
+                                            id={field.name}
+                                            type="file"
+                                            placeholder={t("файл")}
+                                            // accept="application/pdf"
+                                            onChange={(e) => field.onChange(e.target.files)}
+                                            invalid={errors.file && true}
+
                                         />
-                                    </div>
-                                )}
+                                        {file && typeof file === 'string' &&
+                                            <>
+                                                <a href={file} className='me-1'>
+                                                    <Download type="button" color='#1a75ff' width={'15px'} />
+                                                </a>
+                                                {file}
+                                            </>
+                                        }
+                                    </>
+                                }
                             />
-                            {errors.body && <FormFeedback className='d-block'>{t(errors.body.message)}</FormFeedback>}
+                            {errors.file && <FormFeedback className='d-block'>{errors.file.message}</FormFeedback>}
                         </Col>
                         <Col md={12} className="text-center mt-2">
                             <Button className="me-2" color="primary" type="submit" >

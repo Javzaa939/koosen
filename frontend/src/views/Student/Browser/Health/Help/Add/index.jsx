@@ -1,5 +1,5 @@
 // ** React imports
-import React, { Fragment, useContext, useEffect, useRef } from 'react'
+import React, { Fragment, useContext, useEffect, useState } from 'react'
 
 import { t } from 'i18next';
 
@@ -23,49 +23,69 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
 	title: Yup.string()
 		.trim()
 		.required('Хоосон байна'),
-    link: Yup.string()
+    file: Yup.string()
 		.trim()
 		.required('Хоосон байна'),
 
     });
 
+    const [fileInputKey, setFileInputKey] = useState(0); //
     const { user } = useContext(AuthContext)
 
     // ** Hook
-    const { control, handleSubmit, reset, setError, formState: { errors }, setValue } = useForm(validate(validateSchema));
+    const {
+        control,
+        handleSubmit,
+        formState: { errors },
+        watch,
+        reset
+    } = useForm(validate(validateSchema));
+
+    const file = watch('file')
 
 	// Loader
 	const { fetchData } = useLoader({});
 	const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
 
     // Api
-    const healthApi = useApi().browser.health
+    const healthApi = useApi().browser.health.help
 
     // Хадгалах
 	async function onSubmit(cdata) {
         cdata = convertDefaultValue(cdata)
+        const formData = new FormData()
+
+        for (const key in cdata) {
+            if (key === 'file' && cdata[key] instanceof FileList)
+                formData.append(key, cdata[key][0], cdata[key][0].name)
+            else
+                formData.append(key, cdata[key])
+        }
         cdata['created_by'] = user.id
         cdata['updated_by'] = user.id
+        console.log("formData", formData)
 
-        if(editId){
-            const { success, errors } = await fetchData(healthApi.put(cdata, editId))
+        // if(editId){
+        //     const { success, errors } = await fetchData(healthApi.put(cdata, editId))
+        //     if(success) {
+        //         reset()
+        //         refreshDatas()
+        //         handleEditModal()
+        //     }
+        //     else {
+        //         /** Алдааны мессэжийг input дээр харуулна */
+        //         for (let key in errors) {
+        //             setError(key, { type: 'custom', message: errors[key][0]});
+        //         }
+        //     }
+        // }
+        // else
+        {
+            const { success, errors } = await postFetch(healthApi.post(formData))
             if(success) {
                 reset()
                 refreshDatas()
-                handleEditModal()
-            }
-            else {
-                /** Алдааны мессэжийг input дээр харуулна */
-                for (let key in errors) {
-                    setError(key, { type: 'custom', message: errors[key][0]});
-                }
-            }
-        }
-        else{
-            const { success, errors } = await postFetch(healthApi.post(cdata))
-            if(success) {
-                reset()
-                refreshDatas()
+                setFileInputKey((prevKey) => prevKey + 1);
                 handleModal()
             }
             else {
@@ -112,7 +132,7 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
             >
                 <ModalBody className="px-sm-3 pt-50 pb-3">
                     <div className='text-center'>
-                        <h4>{editId ? t('Эрүүл мэнд засах') : t('Эрүүл мэнд нэмэх')}</h4>
+                        <h4>{editId ? t('Эрүүл мэнд зөвлөмж засах') : t('Эрүүл мэнд нэмэх зөвлөмж')}</h4>
                     </div>
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
                         <Col md={12}>
@@ -140,28 +160,40 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
                             {errors.title && <FormFeedback className='d-block'>{t(errors.title.message)}</FormFeedback>}
                         </Col>
                         <Col md={12}>
-                            <Label className="form-label" for="link">
-                                {t('Тайлбар')}
-                            </Label>
-                            <Controller
-                                defaultValue=''
-                                control={control}
-                                id='link'
-                                name='link'
-                                render={({ field }) => (
-                                    <Input
-                                        {...field}
-                                        type='textarea'
-                                        name='link'
-                                        bsSize='sm'
-                                        id='link'
-                                        placeholder='тайлбар'
-                                        invalid={errors.link && true}
-                                    >
-                                    </Input>
-                                )}
-                            />
-                            {errors.link && <FormFeedback className='d-block'>{t(errors.link.message)}</FormFeedback>}
+                            <div className="mt-1 mb-1">
+                                <Label className="form-label">
+                                    {t('Файл')}
+                                </Label>
+                                <Controller
+                                    defaultValue=""
+                                    control={control}
+                                    name="file"
+                                    render={({ field }) =>
+                                        <>
+                                            <Input
+                                                key={fileInputKey}
+                                                name={field.name}
+                                                id={field.name}
+                                                type="file"
+                                                placeholder={t("файл")}
+                                                // accept="application/pdf"
+                                                onChange={(e) => field.onChange(e.target.files)}
+                                                invalid={errors.file && true}
+
+                                            />
+                                            {file && typeof file === 'string' &&
+                                                <>
+                                                    <a href={file} className='me-1'>
+                                                        <Download type="button" color='#1a75ff' width={'15px'} />
+                                                    </a>
+                                                    {file}
+                                                </>
+                                            }
+                                        </>
+                                    }
+                                />
+                                {errors.file && <FormFeedback className='d-block'>{errors.file.message}</FormFeedback>}
+                            </div>
                         </Col>
                         <Col md={12} className="text-center mt-2">
                             <Button className="me-2" color="primary" type="submit" >

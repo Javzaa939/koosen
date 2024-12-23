@@ -131,7 +131,7 @@ const Psychological = () => {
             <Card>
             {isLoading && Loader}
                 <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
-                    <CardTitle tag="h4">{t('Танилцуулга')}</CardTitle>
+                    <CardTitle tag="h4">{t('Сэтгэл зүйн танилцуулга')}</CardTitle>
                     <div className='d-flex flex-wrap mt-md-0 mt-1'>
                         <Button
                             color='primary'

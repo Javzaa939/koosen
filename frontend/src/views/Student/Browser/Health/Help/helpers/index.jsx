@@ -1,4 +1,4 @@
-import { Edit, X } from "react-feather";
+import { Edit, X, Download } from "react-feather";
 
 import { t } from "i18next";
 
@@ -32,11 +32,16 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 			center: true,
 		},
 		{
-			name: `${t('Тайлбар')}`,
-			selector: (row) => <a href={row?.link} className="ms-1">{row?.link}</a>,
-            sortable: true,
-			minWidth: "120px",
-			center: true
+			header: 'file',
+			name: `${t('Файл')}`,
+			selector: (row) =>
+				<>
+					<a href={row?.file} className='me-1'>
+						<Download type="button" color='#1a75ff' width={'15px'} />
+					</a>
+					{row?.file ? decodeURIComponent(row?.file.toString().split("/").pop()): ''}
+				</>,
+			minWidth: '300px'
 		},
 	]
 
@@ -47,7 +52,7 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 			minWidth: "180px",
 			selector: (row) => (
 				<>
-					{
+					{/* {
 						<a
 							id={`activeYearUpdate${row?.id}`}
 							onClick={
@@ -57,22 +62,27 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 						>
 							<Badge color="light-secondary" pill><Edit  width={"15px"} /></Badge>
 						</a>
+					} */}
+					{/* <UncontrolledTooltip placement='top' target={`activeYearUpdate${row.id}`} >Засах</UncontrolledTooltip> */}
+					{
+						user.permissions.includes('lms-browser-library-delete') &&
+						<>
+							<a role="button"
+								onClick={() => showWarning({
+									header: {
+										title: t(`Устгах`),
+									},
+									question: t(`Та энэ мэдээллийг устгахдаа итгэлтэй байна уу?`),
+									onClick: () => handleDelete(row?.id),
+									btnText: t('Устгах'),
+								})}
+								id={`delete${row?.id}`}
+							>
+								<Badge color="light-danger" pill><X width={"100px"} /></Badge>
+							</a>
+							<UncontrolledTooltip placement='top' target={`delete${row.id}`} >Устгах</UncontrolledTooltip>
+						</>
 					}
-					<UncontrolledTooltip placement='top' target={`activeYearUpdate${row.id}`} >Засах</UncontrolledTooltip>
-					<a role="button"
-						onClick={() => showWarning({
-							header: {
-								title: t(`Устгах`),
-							},
-							question: t(`Та энэ мэдээллийг устгахдаа итгэлтэй байна уу?`),
-							onClick: () => handleDelete(row.id),
-							btnText: t('Устгах'),
-						})}
-						id={`delete${row?.id}`}
-					>
-						<Badge color="light-danger" pill><X width={"100px"} /></Badge>
-					</a>
-					<UncontrolledTooltip placement='top' target={`delete${row.id}`} >Устгах</UncontrolledTooltip>
 				</>
 			),
 			center: true

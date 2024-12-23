@@ -32,11 +32,23 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 			center: true,
 		},
 		{
-			name: `${t('Линк')}`,
+			name: `${t('Тайлбар')}`,
 			selector: (row) => <a href={row?.link} className="ms-1">{ row?.link}</a>,
 			minWidth: "80px",
 			center: true
 		},
+		// {
+		// 	header: 'file',
+		// 	name: `${t('Файл')}`,
+		// 	selector: (row) =>
+		// 		<>
+		// 			<a href={row?.file} className='me-1'>
+		// 				<Download type="button" color='#1a75ff' width={'15px'} />
+		// 			</a>
+		// 			{row?.file ? decodeURIComponent(row?.file.toString().split("/").pop()): ''}
+		// 		</>,
+		// 	minWidth: '300px'
+		// },
 	]
 
 	if(Object.keys(user).length > 0 && user.permissions.includes('lms-browser-library-update'))
@@ -46,7 +58,7 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 			minWidth: "180px",
 			selector: (row) => (
 				<>
-					{
+					{/* {
 						<a
 							id={`activeYearUpdate${row?.id}`}
 							onClick={
@@ -57,7 +69,7 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 							<Badge color="light-secondary" pill><Edit  width={"15px"} /></Badge>
 						</a>
 					}
-					<UncontrolledTooltip placement='top' target={`activeYearUpdate${row.id}`} >Засах</UncontrolledTooltip>
+					<UncontrolledTooltip placement='top' target={`activeYearUpdate${row.id}`} >Засах</UncontrolledTooltip> */}
 					{
 						user.permissions.includes('lms-browser-library-delete') &&
 						<>
@@ -67,7 +79,7 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 										title: t(`Устгах`),
 									},
 									question: t(`Та энэ мэдээллийг устгахдаа итгэлтэй байна уу?`),
-									onClick: () => handleDelete(row.id),
+									onClick: () => handleDelete(row?.id),
 									btnText: t('Устгах'),
 								})}
 								id={`delete${row?.id}`}

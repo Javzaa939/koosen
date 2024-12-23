@@ -33,7 +33,7 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 		},
 		{
 			name: `${t('Тайлбар')}`,
-			selector: (row) => <a href={row?.link} className="ms-1">{row?.link}</a>,
+			selector: (row) => row?.link,
             sortable: true,
 			minWidth: "80px",
 			center: true
