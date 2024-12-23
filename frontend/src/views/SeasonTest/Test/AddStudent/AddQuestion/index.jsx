@@ -48,6 +48,7 @@ const AddQuestion = ({ open, handleModal, lesson, refreshDatas, challenge, refre
         cdata = convertDefaultValue(cdata)
         const { success, error } = await fetchData(challengesAPI.postLevelCount(cdata))
         if (success) {
+            handleModal()
             refreshDatas()
             refreshQuestionData()
         }

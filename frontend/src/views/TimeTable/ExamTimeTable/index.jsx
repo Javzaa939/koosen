@@ -15,14 +15,14 @@ import useLoader from '@hooks/useLoader';
 import AuthContext from '@context/AuthContext'
 import SchoolContext from '@context/SchoolContext'
 import Select from 'react-select'
-import { ReactSelectStyles } from '@utils'
+import { ReactSelectStyles, examType } from '@utils'
 
 import { getPagination } from '@utils'
 
 import { getColumns } from "./helpers"
 
 import Addmodal from './Add'
-import Editmodal from "./Edit"
+// import Editmodal from "./Edit"
 import classNames from "classnames"
 
 const ExamTimeTable = () => {
@@ -47,7 +47,7 @@ const ExamTimeTable = () => {
     // songoson utguud
 
     const [selectedTeacher, setSelectedTeacher] = useState('')
-    const [selectedRoom, setSelectedRoom] = useState('')
+    const [selectedType, setSelectedType] = useState('')
     // const [selectedLesson, setSelectedLesson] = useState('')
 
 
@@ -56,7 +56,8 @@ const ExamTimeTable = () => {
 
     const [searchValue, setSearchValue] = useState("");
 
-    const [edit_pay_id, setEditId] = useState('')
+    const [editId, setEditId] = useState('')
+    const [edit_data, setEditData] = useState('')
 
     const [datas, setDatas] = useState([]);
 
@@ -79,6 +80,7 @@ const ExamTimeTable = () => {
     // Modal
     const [modal, setModal] = useState(false);
     const [edit_modal, setEditModal] = useState(false);
+    console.log("edit_modal", edit_modal);
 
     /* Нэмэх модал setState функц */
     const handleModal = () =>{
@@ -87,7 +89,7 @@ const ExamTimeTable = () => {
 
     /* Жагсаалт дата авах функц */
     async function getDatas() {
-        const { success, data } = await allFetch(examApi.get(rowsPerPage, currentPage, sortField, searchValue, selectedRoom, selectedTeacher))
+        const { success, data } = await allFetch(examApi.get(rowsPerPage, currentPage, sortField, searchValue, selectedType, selectedTeacher))
         if(success) {
             setDatas(data?.results)
             setTotalCount(data?.count)
@@ -97,7 +99,7 @@ const ExamTimeTable = () => {
     useEffect(() => {
         getTeachers();
         // getRoom();
-        getGroups()
+        // getGroups()
         // getLessonOption()
     },[])
 
@@ -127,12 +129,12 @@ const ExamTimeTable = () => {
     }
 
     // Хичээлийн жагсаалт
-    async function getLessonOption() {
-        const { success, data } = await fetchData(lessonApi.getList())
-        if(success) {
-            setLessons(data)
-        }
-    }
+    // async function getLessonOption() {
+    //     const { success, data } = await fetchData(lessonApi.getList())
+    //     if(success) {
+    //         setLessons(data)
+    //     }
+    // }
 
     useEffect(() => {
 		if (searchValue.length == 0) {
@@ -144,7 +146,7 @@ const ExamTimeTable = () => {
 
 			return () => clearTimeout(timeoutId);
 		}
-	}, [rowsPerPage, currentPage, sortField, searchValue, selectedRoom, selectedTeacher])
+	}, [rowsPerPage, currentPage, sortField, searchValue, selectedType, selectedTeacher])
 
 
     function handleSort(column, sort) {
@@ -154,6 +156,13 @@ const ExamTimeTable = () => {
             setSort('-' + column.header)
         }
     }
+
+    async function handleDelete(id) {
+		const { success, data } = await fetchData(examApi.delete(id));
+		if (success) {
+			getDatas();
+		}
+	}
 
     // Хайлт хийх үед ажиллах хэсэг
     const handleFilter = (e) => {
@@ -167,9 +176,10 @@ const ExamTimeTable = () => {
     };
 
     /** Засах модал */
-    function handleEditModal(edit_id) {
-        setEditId(edit_id)
-        setEditModal(!edit_modal)
+    function handleEditModal(data) {
+        setEditId(data?.id)
+        setEditData(data)
+        handleModal()
     }
 
     // ** Function to handle per page
@@ -197,22 +207,6 @@ const ExamTimeTable = () => {
                 <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
 					<CardTitle tag="h4">{t('Шалгалтын хуваарь')}</CardTitle>
                     <div className='d-flex flex-wrap mt-md-0 mt-1 '>
-                        <Button
-                            className='me-1'
-                            color='primary' disabled={user && Object.keys(user).length && user.permissions.includes('lms-timetable-exam-create') ? false : true}
-                            onClick={() =>
-                                showWarning({
-                                    header: {
-                                        title: `${t('Шалгалтын хуваарь үүсгэх')}`,
-                                    },
-                                    question: `Тухайн идэвхтэй хичээлийн жил, улиралд үүссэн хичээлийн хуваарьт байгаа бүх хичээлийн дагуу шалгалтын хуваарь үүсэх болно. Шалгалтын хуваарь үүсгэхдээ итгэлтэй байна уу?`,
-                                    onClick: () => createExam(),
-                                    btnText: 'Тийм',
-                                })
-                            }
-                        >
-                            <span className='align-middle ms-50'>{t('Шалгалт үүсгэх')}</span>
-                        </Button>
                         <Button color='primary' disabled={user && Object.keys(user).length && user.permissions.includes('lms-timetable-exam-create')&& school_id ? false : true} onClick={() => handleModal()}>
                             <Plus size={15} />
                             <span className='align-middle ms-50'>{t('Нэмэх')}</span>
@@ -221,43 +215,43 @@ const ExamTimeTable = () => {
                 </CardHeader>
                 <Row className='p-1'>
                     <Col md={4}>
-                            <Label>Анги</Label>
-                            <Select
-                                classNamePrefix='select'
-                                isClearable
-                                className={classNames('react-select')}
-                                isLoading={groupLoading}
-                                placeholder={t('-- Сонгоно уу --')}
-                                options={groups || []}
-                                value={groups.find((c) => c.id === selectedRoom)}
-                                noOptionsMessage={() => t('Хоосон байна')}
-                                onChange={(val) => {
-                                    setSelectedRoom(val ? val?.id : '')
-                                }}
-                                styles={ReactSelectStyles}
-                                getOptionValue={(option) => option.id}
-                                getOptionLabel={(option) => option.name}
-                            />
-                        </Col>
-                        <Col md={4}>
-                            <Label>Багш</Label>
-                            <Select
-                                classNamePrefix='select'
-                                isClearable
-                                className={classNames('react-select')}
-                                isLoading={teacherLoading}
-                                placeholder={t('-- Сонгоно уу --')}
-                                options={teachers || []}
-                                value={teachers.find((c) => c.id === selectedTeacher)}
-                                noOptionsMessage={() => t('Хоосон байна')}
-                                onChange={(val) => {
-                                    setSelectedTeacher(val ? val.id : '')
-                                }}
-                                styles={ReactSelectStyles}
-                                getOptionValue={(option) => option.id}
-                                getOptionLabel={(option) => option.full_name}
-                            />
-                        </Col>
+                        <Label>Шалгалтын төрөл</Label>
+                        <Select
+                            classNamePrefix='select'
+                            isClearable
+                            className={classNames('react-select')}
+                            isLoading={groupLoading}
+                            placeholder={t('-- Сонгоно уу --')}
+                            options={examType() || []}
+                            value={examType().find((c) => c.id === selectedType)}
+                            noOptionsMessage={() => t('Хоосон байна')}
+                            onChange={(val) => {
+                                setSelectedType(val ? val?.id : '')
+                            }}
+                            styles={ReactSelectStyles}
+                            getOptionValue={(option) => option.id}
+                            getOptionLabel={(option) => option.name}
+                        />
+                    </Col>
+                    <Col md={4}>
+                        <Label>Хянах багш</Label>
+                        <Select
+                            classNamePrefix='select'
+                            isClearable
+                            className={classNames('react-select')}
+                            isLoading={teacherLoading}
+                            placeholder={t('-- Сонгоно уу --')}
+                            options={teachers || []}
+                            value={teachers.find((c) => c.id === selectedTeacher)}
+                            noOptionsMessage={() => t('Хоосон байна')}
+                            onChange={(val) => {
+                                setSelectedTeacher(val ? val.id : '')
+                            }}
+                            styles={ReactSelectStyles}
+                            getOptionValue={(option) => option.id}
+                            getOptionLabel={(option) => option.rank_name + ' ' + option?.full_name}
+                        />
+                    </Col>
                 </Row>
                 <Row className="justify-content-between mx-0">
                         <Col className='d-flex align-items-center justify-content-start mt-1' md={4} sm={12}>
@@ -344,7 +338,7 @@ const ExamTimeTable = () => {
                                                 className='react-dataTable'
                                                 // progressPending={isTableLoading}
                                                 onSort={handleSort}
-                                                columns={getColumns(currentPage, rowsPerPage, datas, handleEditModal, navigate)}
+                                                columns={getColumns(currentPage, rowsPerPage, datas, handleEditModal, handleDelete, navigate)}
                                                 sortIcon={<ChevronDown size={10} />}
                                                 paginationPerPage={rowsPerPage}
                                                 paginationDefaultPage={currentPage}
@@ -359,8 +353,8 @@ const ExamTimeTable = () => {
                                             <Badge color='light-warning' className="p-1"> <AlertCircle/> Уучлаарай илэрц олдсонгүй </Badge>
                                         </div>
                             }
-                {modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas}/>}
-                {edit_modal && <Editmodal editId={edit_pay_id} open={edit_modal} handleModal={handleEditModal} refreshDatas={getDatas}/>}
+                {modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} handleEdit={handleEditModal} editId={editId} editData={edit_data}/>}
+                {/* {edit_modal && <Editmodal editId={edit_pay_id} open={edit_modal} handleModal={handleEditModal} refreshDatas={getDatas}/>} */}
             </Card>
         </Fragment>
     )

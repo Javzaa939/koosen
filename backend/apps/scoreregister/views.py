@@ -23,7 +23,7 @@ from lms.models import Exam_repeat
 from lms.models import Lesson_to_teacher
 from lms.models import TeacherScore
 from lms.models import Lesson_teacher_scoretype
-from lms.models import LearningPlan
+from lms.models import LearningPlan, Exam_to_group
 from lms.models import Season, Group, GradeLetter, Country
 from core.models import User
 
@@ -1492,27 +1492,30 @@ class ScoreRegisterLessonAPIView(
         all_students_teach_scores = []
         lesson_year, lesson_season = get_active_year_season()
         lesson_teacher_ids = Lesson_to_teacher.objects.filter(lesson=lesson).values_list('id', flat=True)
+        exam = request.query_params.get('exam')
+
+        group_ids = Exam_to_group.objects.filter(exam=exam).values_list('group', flat=True)
 
         # Багшийн дүнгийн задаргааны төрлүүд
         score_type_ids = Lesson_teacher_scoretype.objects.filter(lesson_teacher__in=lesson_teacher_ids).values_list('id', flat=True)
 
         # Багшийн дүнгийн төрөл бүрт оюутанд өгсөн оноо
-        teach_score_qs = TeacherScore.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season, score_type_id__in=score_type_ids)
+        teach_score_qs = TeacherScore.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season, score_type_id__in=score_type_ids, student__group__in=group_ids)
 
         # Дүнтэй оюутнууд
-        teacher_score_students = teach_score_qs.values('student', 'student__code', 'student__first_name', 'student__last_name', 'student__register_num').distinct('student')
+        teacher_score_students = teach_score_qs.values('student', 'student__code', 'student__first_name', 'student__last_name', 'student__register_num', 'student__group__name').distinct('student')
 
         # Оюутны дүн нэгтэх
         for student in teacher_score_students:
             obj = {}
             scores = teach_score_qs.filter(student=student.get('student')).values_list('score', flat=True)
             total_score = sum(scores) if scores else 0
-
             obj['id'] = student.get('student')
             obj['first_name'] = student.get('student__first_name')
             obj['last_name'] = student.get('student__last_name')
             obj['register_num'] = student.get('student__register_num')
             obj['code'] = student.get('student__code')
+            obj['group_name'] = student.get('student__group__name')
             obj['total_score'] = total_score
             obj['is_fail'] = False
             if total_score < 42:

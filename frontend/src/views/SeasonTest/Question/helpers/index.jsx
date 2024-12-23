@@ -45,6 +45,13 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleNext) {
 			wrap: true,
 		},
 		{
+			name: `${t("Асуулт үүсгэсэн хичээлүүд")}`,
+			selector: (row) => row?.lesson_names,
+			minWidth: "30px",
+			center: true,
+			wrap: true,
+		},
+		{
             name: `${t('Асуултууд')}`,
 
             selector:  (row) => (

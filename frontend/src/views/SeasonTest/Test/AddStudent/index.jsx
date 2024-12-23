@@ -27,11 +27,13 @@ import classnames from "classnames";
 import DataTable from "react-data-table-component";
 
 import AddQuestion from "./AddQuestion";
+import useModal from "@src/utility/hooks/useModal";
 
 function AddStudent() {
 
     const status = []
     const { t } = useTranslation();
+    const { showWarning } = useModal()
 
     const { isLoading, Loader, fetchData } = useLoader({});
     const { fetchData: fetchQuestion } = useLoader({});
@@ -43,9 +45,11 @@ function AddStudent() {
     const [rowsPerPage, setRowsPerPage] = useState(100);
     const [total_count, setTotalCount] = useState(1);
     const [searchValue, setSearchValue] = useState('');
+    const [questionTotalCount, setQuestionTotalCount] = useState(0);
 
     const [datas, setDatas] = useState([]);
     const [students, setStudents] = useState([]);
+    const [selectedRows, setSelectedRows] = useState([])
     const [question_datas, setQuestionData] = useState([]);
     const [question_count, setQuestionCount] = useState('')
     const [challenge_count, setChallengeCount] = useState('')
@@ -66,7 +70,6 @@ function AddStudent() {
         }
     };
 
-
     async function getStudents() {
         const { success, data } = await fetchStudents(challengeAPI.getStudents(student_search_value));
         if (success) {
@@ -80,6 +83,7 @@ function AddStudent() {
             setQuestionCount(data.question_count)
             setChallengeCount(data.challenge_question_count)
             setQuestionData(data.questions)
+            setQuestionTotalCount(data.questions?.length)
         }
     }
 
@@ -94,6 +98,18 @@ function AddStudent() {
         const { success, data } = await fetchData(challengeAPI.deleteLevelCount(id));
         if (success) {
             getQuestionTableData();
+        }
+    };
+
+    async function handleDeleteAll() {
+        let cdatas = {
+            'ids': selectedRows.map((rows) => rows?.id),
+            'challenge_id': challenge_id
+        }
+        const { success, data } = await fetchData(challengeAPI.deleteTest(cdatas));
+        if (success) {
+            getQuestionTableData();
+            setSelectedRows([])
         }
     };
 
@@ -136,6 +152,11 @@ function AddStudent() {
         setModal(!modal);
     };
 
+    function onSelectedRowsChange(state) {
+        var selectedRows = state.selectedRows
+
+        setSelectedRows(selectedRows);
+    }
 
     async function onSubmitStudent(cdata) {
         cdata["challenge"] = challenge_id
@@ -266,6 +287,21 @@ function AddStudent() {
                             </div>
                         </CardHeader>
                         <div className="react-dataTable react-dataTable-selectable-rows mx-50 rounded border my-50">
+                            {
+                                selectedRows?.length > 0 &&
+                                <div className="mb-50">
+                                    <Button color="danger"
+                                        onClick={() => showWarning({
+                                            header: {
+                                                title: `${t('Асуулт устгах')}`,
+                                            },
+                                            question: `Та сонгогдсон асуултуудыг устгахдаа итгэлтэй байна уу?`,
+                                            onClick: () => handleDeleteAll(),
+                                            btnText: 'Устгах',
+                                        })}
+                                    >Устгах ({selectedRows.length})</Button>
+                                </div>
+                            }
                             <DataTable
                                 noHeader
                                 pagination
@@ -284,7 +320,7 @@ function AddStudent() {
                                 columns={getQuestionColumns(
                                     currentPage,
                                     rowsPerPage,
-                                    total_count,
+                                    questionTotalCount,
                                     handleDeleteQuestion,
                                     difficultyLevelsOption
                                 )}
@@ -295,8 +331,10 @@ function AddStudent() {
                                     handlePagination,
                                     currentPage,
                                     rowsPerPage,
-                                    total_count,
+                                    questionTotalCount,
                                 )}
+                                selectableRows
+                                onSelectedRowsChange={(state) => onSelectedRowsChange(state)}
                                 fixedHeader
                                 fixedHeaderScrollHeight="62vh"
                             />

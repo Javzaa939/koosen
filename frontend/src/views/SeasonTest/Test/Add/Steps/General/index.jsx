@@ -21,32 +21,50 @@ import useLoader from '@hooks/useLoader';
 import Flatpickr from 'react-flatpickr';
 import '@styles/react/libs/flatpickr/flatpickr.scss';
 
-const General = ({ stepper, setSubmitDatas, setSelectedLesson, editData, setEditRowData, isEdit }) => {
+const General = ({ stepper, setSubmitDatas, setSelectedLesson, editData, setEditRowData, isEdit, errorRows, setSelectExam }) => {
     const { t } = useTranslation()
 
     const { control, handleSubmit, setError, setValue, formState: { errors } } = useForm(validate(validateSchema))
 	const { fetchData } = useLoader({ isFullScreen: true });
     const [lessonOption, setLessonOption] = useState([])
+    const [timeTableOption, setTimeTableOption] = useState([])
     const [endPicker, setEndPicker] = useState(new Date())
 	const [startPicker, setStartPicker] = useState(new Date())
 
     const teacherLessonApi = useApi().study.lesson
+    const examTimeTableApi = useApi().timetable.exam
 
     async function onSubmit(cdata) {
-
-        cdata['start_date'] = new Date(startPicker)
-        cdata['end_date'] = new Date(endPicker)
+        delete cdata['exam_timetable']
         cdata = convertDefaultValue(cdata)
 
         setSubmitDatas(cdata)
         stepper.next()
 	}
 
+    useEffect(() => {
+        // Алдаа буцаасан байвал ерөнхий мэдээлэл хуудас руу буцна
+        if(errorRows && Object.keys(errorRows)?.length > 0) {
+            /** Алдааны мессэжийг input дээр харуулна */
+            for (let key in errorRows) {
+                setError(key, { type: 'custom', message: errorRows[key][0]});
+            }
+            stepper.previous()
+        }
+    }, [errorRows])
+
     async function getLesson()
     {
-        const { success, data } = await fetchData(teacherLessonApi.getChallenge())
+        const { success, data } = await fetchData(teacherLessonApi.getOne(''))
         if(success) {
             setLessonOption(data)
+        }
+    }
+
+    async function getExamTimeTableDatas() {
+        const { success, data } = await fetchData(examTimeTableApi.getList(true))
+        if(success) {
+            setTimeTableOption(data)
         }
     }
 
@@ -54,6 +72,7 @@ const General = ({ stepper, setSubmitDatas, setSelectedLesson, editData, setEdit
         () =>
         {
             getLesson()
+            getExamTimeTableDatas()
         },
         []
     )
@@ -61,7 +80,7 @@ const General = ({ stepper, setSubmitDatas, setSelectedLesson, editData, setEdit
     return (
         <Fragment>
             <Card className="flex-grow-50 mb-3 t-0">
-                <Row tag={Form} onSubmit={handleSubmit(onSubmit)}>
+                <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
                     <Col md={6}>
                         <Label className="form-label" for="title">
                             {t('Гарчиг')}
@@ -85,6 +104,44 @@ const General = ({ stepper, setSubmitDatas, setSelectedLesson, editData, setEdit
                         {errors.title && <FormFeedback className='d-block'>{t(errors.title.message)}</FormFeedback>}
                     </Col>
                     <Col md={6}>
+                        <Label className="form-label" for="exam_timetable">
+                            {t('Шалгалтын хуваарь')}
+                        </Label>
+                        <Controller
+                            control={control}
+                            defaultValue=''
+                            name="exam_timetable"
+                            render={({ field: { value, onChange} }) => {
+                                return (
+                                    <Select
+                                        id="exam_timetable"
+                                        name="exam_timetable"
+                                        isClearable
+                                        classNamePrefix='select'
+                                        className='react-select'
+                                        placeholder={t(`-- Сонгоно уу --`)}
+                                        value={timeTableOption.find((c) => c.id === value)}
+                                        options={timeTableOption || []}
+                                        noOptionsMessage={() => 'Хоосон байна'}
+                                        onChange={(val) => {
+                                            onChange(val?.id || '')
+                                            setSelectedLesson(val?.lesson || '')
+                                            setSelectExam(val?.id || '')
+
+                                            setValue("lesson", val?.lesson)
+                                            setValue("start_date", val?.begin_date)
+                                            setValue("end_date", val?.end_date)
+                                        }}
+                                        styles={ReactSelectStyles}
+                                        getOptionValue={(option) => option.id}
+                                        getOptionLabel={(option) => option.lesson_code + ' ' + option.lesson_name}
+                                    />
+                                )
+                            }}
+                        ></Controller>
+                        {errors.exam_timetable && <FormFeedback className='d-block'>{t(errors.exam_timetable.message)}</FormFeedback>}
+                    </Col>
+                    <Col md={12}>
                         <Label className="form-label" for="description">
                             {t('Тайлбар')}
                         </Label>
@@ -101,7 +158,7 @@ const General = ({ stepper, setSubmitDatas, setSelectedLesson, editData, setEdit
                                     placeholder={'Тайлбар'}
                                     type="textarea"
                                     invalid={errors.description && true}
-                                    rows={'5'}
+                                    rows={'3'}
                                 />
                             )}
                         />
@@ -166,19 +223,20 @@ const General = ({ stepper, setSubmitDatas, setSelectedLesson, editData, setEdit
                         <Label className="form-label" for="start_date">
                             {t('Эхлэх хугацаа')}
                         </Label>
-                        <Flatpickr
-                            required
-                            id='start_date'
-                            name='start_date'
-                            className='form-control'
-                            onChange={setStartPicker}
-                            value={startPicker}
-                            style={{height: "30px"}}
-                            options={{
-                                enableTime: true,
-                                dateFormat: 'Y-m-d H:i',
-                                time_24hr: true,
-                            }}
+                        <Controller
+                            defaultValue=''
+                            control={control}
+                            name="start_date"
+                            render={({ field }) => (
+                                <Input
+                                    {...field}
+                                    id={field.name}
+                                    bsSize="sm"
+                                    placeholder={t('Эхлэх хугацаа')}
+                                    type="datetime-local"
+                                    invalid={errors[field.name] && true}
+                                />
+                            )}
                         />
                         {errors.start_date && <FormFeedback className='d-block'>{t(errors.start_date.message)}</FormFeedback>}
                     </Col>
@@ -186,19 +244,20 @@ const General = ({ stepper, setSubmitDatas, setSelectedLesson, editData, setEdit
                         <Label className="form-label" for="end_date">
                             {t('Дуусах хугацаа')}
                         </Label>
-                        <Flatpickr
-                            required
-                            id='end_date'
-                            name='end_date'
-                            className='form-control'
-                            onChange={setEndPicker}
-                            value={endPicker}
-                            style={{height: "30px"}}
-                            options={{
-                                enableTime: true,
-                                dateFormat: 'Y-m-d H:i',
-                                time_24hr: true,
-                            }}
+                        <Controller
+                            defaultValue=''
+                            control={control}
+                            name="end_date"
+                            render={({ field }) => (
+                                <Input
+                                    {...field}
+                                    id={field.name}
+                                    bsSize="sm"
+                                    placeholder={t('Дуусах хугацаа')}
+                                    type="datetime-local"
+                                    invalid={errors[field.name] && true}
+                                />
+                            )}
                         />
                         {errors.end_date && <FormFeedback className='d-block'>{t(errors.end_date.message)}</FormFeedback>}
                     </Col>

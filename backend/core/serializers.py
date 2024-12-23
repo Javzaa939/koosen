@@ -1,5 +1,5 @@
 from rest_framework import serializers
-
+from django.db.models import Count
 from core.models import Teachers, Employee
 from core.models import Schools
 from core.models import SubOrgs
@@ -10,7 +10,7 @@ from core.models import BagHoroo
 from core.models import OrgPosition
 from core.models import User
 
-from lms.models import TimeTable
+from lms.models import TimeTable, QuestionTitle, ChallengeQuestions
 from lms.models import LessonStandart
 from lms.models import Country
 from lms.models import Room
@@ -139,7 +139,7 @@ class LessonTeacherListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Teachers
-        fields = ["id", "last_name", "first_name",'full_name']
+        fields = ["id", "last_name", "first_name",'full_name', 'rank_name']
 
     def get_full_name(self, obj):
         """ Багшийн бүтэн нэр авах """
@@ -355,7 +355,7 @@ class TeacherListSchoolFilterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Teachers
-        fields = ["id", "last_name", "first_name", "salbar", "sub_org", "code", "full_name"]
+        fields = ["id", "last_name", "first_name", "salbar", "sub_org", "code", "full_name", 'rank_name']
         # fields = ["id", "last_name", "first_name", "salbar", "sub_org", "code", "org_position", "state", "full_name"]
 
 
@@ -406,10 +406,11 @@ class TeacherNameSerializer(serializers.ModelSerializer):
     state = serializers.SerializerMethodField()
     full_name = serializers.SerializerMethodField()
     phone_number = serializers.SerializerMethodField()
+    lesson_names = serializers.SerializerMethodField()
 
     class Meta:
         model = Teachers
-        fields = ["id", "last_name", "first_name", "salbar", "sub_org", "code", "org_position", "state", "full_name", 'register', 'org_position_name', 'email', 'phone_number', 'register', 'rank_type', 'rank_name', 'rank_rate']
+        fields = ["id", "last_name", "first_name", "salbar", "sub_org", "code", "org_position", "state", "full_name", 'register', 'org_position_name', 'email', 'phone_number', 'register', 'rank_type', 'rank_name', 'rank_rate', 'lesson_names']
 
     def get_email(self, obj):
         return User.objects.get(id=obj.user.id).email
@@ -457,6 +458,18 @@ class TeacherNameSerializer(serializers.ModelSerializer):
         """ Багшийн бүтэн нэр авах """
 
         return obj.full_name
+
+    def get_lesson_names(self, obj):
+        """ Багшийн асуулт үүсгэсэн хичээлүүд"""
+
+        title_ids = QuestionTitle.objects.filter(created_by=obj).values_list('id', flat=True)
+        lessons = (
+            ChallengeQuestions.objects.filter(title__in=title_ids)
+            .annotate(question_count=Count('id'))
+            .filter(question_count__gt=0).values_list('title__lesson__name', flat=True).distinct()
+        )
+        return ', '.join(list(lessons))
+
 
 class EmployeePostSerializer(serializers.ModelSerializer):
     class Meta:

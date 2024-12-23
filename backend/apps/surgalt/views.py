@@ -67,8 +67,7 @@ from lms.models import (
     QuestionTitle,
     Lesson_teacher_scoretype,
     QuestionTitle,
-    Score,
-    StudentRegister
+    Score
 )
 
 from core.models import (
@@ -117,7 +116,7 @@ from .serializers import PsychologicalTestParticipantsSerializer
 from .serializers import TeacherExamTimeTableSerializer
 from core.serializers import TeacherNameSerializer
 from .serializers import QuestionTitleSerializer
-from .serializers import ChallengeSedevSerializer
+from .serializers import LessonStandartCreateSerializer
 from .serializers import ChallengeDetailSerializer,ChallengeStudentsSerializer,StudentChallengeSerializer,ChallengeDetailTableStudentsSerializer
 
 from main.utils.function.utils import remove_key_from_dict, fix_format_date, get_domain_url
@@ -181,6 +180,7 @@ class LessonStandartAPIView(
         " хичээлийн стандартын шинээр үүсгэх "
 
         request_data = request.data
+        self.serializer_class = LessonStandartCreateSerializer
         serializer = self.get_serializer(data=request_data)
 
         # transaction savepoint зарлах нь хэрэв алдаа гарвад roll back хийнэ
@@ -194,7 +194,8 @@ class LessonStandartAPIView(
 
             serializer.save()
 
-        except Exception:
+        except Exception as e:
+            print(e)
             return request.send_error("ERR_002")
 
         return request.send_info("INF_001")
@@ -5709,7 +5710,7 @@ class ChallengeLevelCountAPIView(
                     random_questions = challenge_questions.order_by('?')[:int(number_of_questions)]
 
                 elif number_of_questions_percentage:
-                    total_questions = challenge_questions.count()
+                    total_questions = challenge.question_count or 0
                     question_count = int(total_questions * (int(number_of_questions_percentage) /  100))
 
                     # Бодогдож байгаа асуултын тоо 0-ээс бага байх үед
@@ -5807,6 +5808,31 @@ class ChallengeAddStudentAPIView(
         except Exception as e:
             print(e)
             return request.send_error("ERR_002")
+
+
+@permission_classes([IsAuthenticated])
+class ChallengeAddStudentDeleteAPIView(
+    generics.GenericAPIView,
+):
+    queryset = Challenge.objects.all()
+    serializer_class = ChallengeQuestionListSerializer
+
+    def post(self, request):
+        """
+            Асуултын олноор устгах хэсэг
+        """
+
+        data = request.data
+        deleted_ids = data.get('ids')
+        challenge_id = data.get('challenge_id')
+
+        challenge_qs = Challenge.objects.get(pk=challenge_id)
+        question = ChallengeQuestions.objects.filter(id__in=deleted_ids)
+        if challenge_qs:
+            challenge_qs.questions.remove(*question)
+            challenge_qs.save()
+
+        return request.send_info("INF_003")
 
 
 @permission_classes([IsAuthenticated])
@@ -6238,14 +6264,17 @@ class ChallengeAddInformationAPIView(
 
         try:
             with transaction.atomic():
-                saved_data = save_data_with_signals(self.queryset.model, self.serializer_class, False, None, data=data)[0]
+                saved_data, exception, serializer_errors = save_data_with_signals(self.queryset.model, self.serializer_class, True, None, data=data)
+                if serializer_errors:
+                    return request.send_error_valid(serializer_errors)
+
+                # Үүссэн шалгалт
+                challenge = saved_data[0]
 
                 if students and len(students) > 0:
                     student_datas = Student.objects.filter(id__in=students)
-                    if len(saved_data) > 0:
-                        challenge = saved_data[0]
-                        challenge.student.set(student_datas)
-                        challenge.save()
+                    challenge.student.set(student_datas)
+                    challenge.save()
 
         except Exception:
             traceback.print_exc()
@@ -6648,3 +6677,18 @@ class ChallengeStudentReportAPI(
 
         return request.send_data(data)
 
+
+@permission_classes([IsAuthenticated])
+class LessonStandartExamListAPIView(
+    generics.GenericAPIView
+):
+    """ Хичээлийн стандарт """
+
+    queryset = LessonStandart.objects.all()
+    def get(self, request):
+
+        lesson_year, lesson_season = get_active_year_season()
+        lesson_standarts = TeacherScore.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season).values_list('score_type__lesson_teacher__lesson', flat=True)
+
+        all_data = self.queryset.filter(id__in=lesson_standarts).values('id', 'code', 'name')
+        return request.send_data(list(all_data))

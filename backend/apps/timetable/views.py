@@ -1,4 +1,5 @@
 import os
+import traceback
 import pandas as pd
 from django.utils import timezone
 from datetime import datetime, timedelta
@@ -88,11 +89,11 @@ class BuildingAPIView(
         serializer = self.get_serializer(data=request_data)
 
         if serializer.is_valid(raise_exception=False):
-            with transaction.atomic():
-                try:
+            try:
+                with transaction.atomic():
                     self.perform_create(serializer)
-                except Exception:
-                    return request.send_error("ERR_002")
+            except Exception:
+                return request.send_error("ERR_002")
             return request.send_info("INF_001")
         else:
             # Олон алдааны мессэж буцаах бол үүнийг ашиглана
@@ -124,11 +125,11 @@ class BuildingAPIView(
         serializer = self.get_serializer(instance, data=request_data)
 
         if serializer.is_valid(raise_exception=False):
-            with transaction.atomic():
-                try:
+            try:
+                with transaction.atomic():
                     self.perform_update(serializer)
-                except Exception:
-                    return request.send_error("ERR_002")
+            except Exception:
+                return request.send_error("ERR_002")
             return request.send_info("INF_001")
 
         else:
@@ -192,12 +193,12 @@ class RoomAPIView(
         serializer = self.get_serializer(data=request_data)
 
         if serializer.is_valid(raise_exception=False):
-            with transaction.atomic():
-                try:
+            try:
+                with transaction.atomic():
                     self.create(request).data
 
-                except Exception:
-                    return request.send_error("ERR_002")
+            except Exception:
+                return request.send_error("ERR_002")
 
             return request.send_info("INF_001")
         else:
@@ -232,11 +233,11 @@ class RoomAPIView(
         serializer = self.get_serializer(instance, data=request_data)
 
         if serializer.is_valid(raise_exception=False):
-            with transaction.atomic():
-                try:
+            try:
+                with transaction.atomic():
                     self.update(request).data
-                except Exception:
-                    return request.send_error("ERR_002")
+            except Exception:
+                return request.send_error("ERR_002")
         else:
             errors = []
             for key in serializer.errors:
@@ -646,8 +647,8 @@ class TimeTableAPIView(
                                     if len(error_obj) > 0:
                                         return request.send_error("ERR_003", error_obj)
             end_time(st_time, 'Шалгалт хийж дуусах хугацаа')
-            with transaction.atomic():
-                try:
+            try:
+                with transaction.atomic():
                     # Тухайн хичээлийн хуваарьт байгаа багш хичээл холбогдоогүй бол шинээр үүсгэх
                     qs_lesson_teacher = Lesson_to_teacher.objects.filter(lesson=request_data.get('lesson'), teacher=request_data.get('teacher'))
                     if len(qs_lesson_teacher) == 0:
@@ -808,9 +809,9 @@ class TimeTableAPIView(
 
                     end_time(st_time, 'Хадгалах хугацаа')
                     return request.send_info("INF_001")
-                except Exception as e:
-                    print(e)
-                    return request.send_error("ERR_002", "Хичээлийн хуваарь давхцаж байна.")
+            except Exception as e:
+                print(e)
+                return request.send_error("ERR_002", "Хичээлийн хуваарь давхцаж байна.")
         else:
             print(serializer.errors)
             # Олон алдааны мессэж буцаах бол үүнийг ашиглана
@@ -1138,8 +1139,8 @@ class TimeTableAPIView(
                                 if len(error_obj) > 0:
                                     return request.send_error("ERR_003", error_obj)
 
-            with transaction.atomic():
-                try:
+            try:
+                with transaction.atomic():
                     # Тухайн хичээлийн хуваарьт байгаа багш хичээл холбогдоогүй бол шинээр үүсгэх
                     qs_lesson_teacher = Lesson_to_teacher.objects.filter(lesson=request_data.get('lesson'), teacher=request_data.get('teacher'))
 
@@ -1349,9 +1350,9 @@ class TimeTableAPIView(
                             qs_stu.filter(add_flag=True).delete()
 
                     return request.send_info("INF_002")
-                except Exception as e:
-                    print(e)
-                    return request.send_error("ERR_002")
+            except Exception as e:
+                print(e)
+                return request.send_error("ERR_002")
         else:
             error_obj = []
             for key in serializer.errors:
@@ -1388,20 +1389,20 @@ class ExamTimeTableAPIView(
 ):
     """ Шалгалтын хуваарь """
 
-    queryset = ExamTimeTable.objects.all()
+    queryset = ExamTimeTable.objects.all().order_by('begin_date')
     serializer_class = ExamTimeTableSerializer
 
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['lesson__name', 'room__name', 'exam_date', 'begin_time', 'end_time', 'teacher__first_name', 'teacher__last_name', 'room__volume', 'room__code']
+    search_fields = ['lesson__name', 'room__name',  'room__code', 'lesson__code']
 
     def get_queryset(self):
         queryset = self.queryset
         year, season = get_active_year_season()
 
         day = self.request.query_params.get('day')
-        group = self.request.query_params.get('group_id')
+        stype = self.request.query_params.get('stype')
         lesson = self.request.query_params.get('lesson')
         teacher = self.request.query_params.get('teacher')
         time = self.request.query_params.get('time')
@@ -1419,8 +1420,7 @@ class ExamTimeTableAPIView(
 
         # Багшаар хайлт хийх
         if teacher:
-            lesson_ids = TimeTable.objects.filter(teacher=teacher, lesson_year=year, lesson_season=season).values_list('lesson', flat=True).distinct('lesson')
-            queryset = queryset.filter(lesson__in=lesson_ids)
+            queryset = queryset.filter(teacher__in=[teacher])
 
         # Цагаар хайлт хийх
         if time:
@@ -1428,17 +1428,12 @@ class ExamTimeTableAPIView(
 
         # Сургуулиар хайлт хийх
         if school:
-            lesson_ids = TimeTable.objects.filter(school=school, lesson_year=year, lesson_season=season).values_list('lesson', flat=True).distinct('lesson')
-            queryset = queryset.filter(lesson__in=list(lesson_ids))
+            queryset = queryset.filter(school=school)
 
-        # Ангиар хайлт хийх
-        if group:
-            qs_timetable = Exam_to_group.objects.filter(
-                    group_id=group
-                ) \
-                .values_list('exam', flat=True)
+        # Төрлөөр хайх хайлт хийх
+        if stype:
 
-            queryset = queryset.filter(id__in=list(qs_timetable))
+            queryset = queryset.filter(stype=stype)
 
         return queryset
 
@@ -1463,7 +1458,6 @@ class ExamTimeTableAPIView(
 
         error_obj = []
         request_data = request.data
-
         sid = transaction.savepoint()
 
         # Оюутаны жагсаалт
@@ -1472,195 +1466,227 @@ class ExamTimeTableAPIView(
         room = request_data.get('room')
         lesson = request_data.get('lesson')
         school = request_data.get('school')
-        teacher = request_data.get('teacher')
-        end_time = request_data.get('end_time')
-        exam_date = request_data.get('exam_date')
-        begin_time = request_data.get('begin_time')
+
+        teachers = request_data.get('teacher')
         lesson_year = request_data.get('lesson_year')
         lesson_season = request_data.get('lesson_season')
+        end_datetime = request_data.get('end_date')
+        begin_datetime = request_data.get('begin_date')
+        groups = request_data.get('group')
+
+        begin_datetime = datetime.fromisoformat(begin_datetime)
+        end_datetime = datetime.fromisoformat(end_datetime)
 
         # Group dataнаас оюутан устгах
         if 'student' in request_data:
             request_data = remove_key_from_dict(request_data, 'student')
 
+        if 'group' in request_data:
+            del request_data['group']
+
         serializer = self.get_serializer(data=request_data)
+        def is_overlapping(dts,dte,dts2,dte2):
+            if dts == None and dte == None:
+
+                return False
+
+            elif dts == None:
+                if dts2 > dte:
+
+                    return False
+                else:
+
+                    return True
+
+            elif dte == None:
+                if dte2 < dts:
+
+                    return False
+                else:
+
+                    return True
+
+            elif dte2 < dts or dts2 > dte:
+
+                return False
+
+            else:
+
+                return True
 
         try:
-
             if serializer.is_valid(raise_exception=False):
+                exam_table_qs = (
+                    ExamTimeTable.objects
+                        .filter(
+                            school=school,
+                            lesson_year=lesson_year,
+                            lesson_season=lesson_season
+                        )
+                        .exclude(Q(begin_date__gt=end_datetime)|Q(end_date__lt=begin_datetime))
+                )
 
-                exam_table_qs = ExamTimeTable.objects.filter(
-                        school=school,
-                        lesson_year=lesson_year,
-                        lesson_season=lesson_season,
-                        exam_date=exam_date,
-                    )
-
-                qs_exam_teacher = exam_table_qs.filter(teacher=teacher)
+                qs_exam_teacher = exam_table_qs.filter(teacher__in=teachers)
 
                 qs_exam_room = exam_table_qs.filter(room=room)
 
-                qs_exam_lesson = ExamTimeTable.objects.filter(
-                        school=school,
-                        lesson_year=lesson_year,
-                        lesson_season=lesson_season,
-                        lesson=lesson
-                    ).last()
+                qs_exam_lesson = exam_table_qs.filter(lesson=lesson).last()
 
-                # Тухайн хичээлийн жил, улирал, өдрийн шалгалтын хуваарийн жагсаалт
+                # Тухайн хичээлийн жил, улирал, "selected datetime range" шалгалтын хуваарийн жагсаалт
                 qs_examtimetable_ids = exam_table_qs.values_list(
                         'id',
                         flat=True
                     ).distinct()
 
                 # Шалгалтыг хянах багшийн хуваарь давхцаж байгаа эсэхийг шалгана
-                if qs_exam_teacher:
-                    qs_exam_teacher_times = qs_exam_teacher.values(
-                            'begin_time',
-                            'end_time',
-                            'lesson__name'
-                        )
+                # NOTE ДХИС хүсэлтээр болиулав
+                # if qs_exam_teacher:
+                #     qs_exam_teacher_times = qs_exam_teacher.values(
+                #             'begin_date',
+                #             'end_date',
+                #             'lesson__name'
+                #         )
 
-                    for teacher in qs_exam_teacher_times:
-                        start = teacher.get('begin_time')
-                        end = teacher.get('end_time')
+                #     for teacher in qs_exam_teacher_times:
+                #         start = teacher.get('begin_date')
+                #         end = teacher.get('end_date')
 
-                        if (start <= begin_time and end >= begin_time) or (start <= end_time and end >= end_time) or (start >= begin_time and end <= end_time):
-                            lesson = teacher.get('lesson__name')
+                #         if is_overlapping(start,end,begin_datetime,end_datetime):
+                #             lesson = teacher.get('lesson__name')
 
-                            msg = "Энэ багш нь {lesson} хичээлийн {exam_date} өдрийн {begin_time}-{end_time} цагийн хооронд шалгалттай байна." \
-                                .format(
-                                    lesson=lesson,
-                                    exam_date=exam_date,
-                                    begin_time=start,
-                                    end_time=end
-                                )
+                #             msg = "Энэ багш нь {lesson} хичээлийн {exam_date} өдрийн {begin_time}-{end_time} цагийн хооронд шалгалттай байна." \
+                #                 .format(
+                #                     lesson=lesson,
+                #                     exam_date=start.date(),
+                #                     begin_time=start,
+                #                     end_time=end
+                #                 )
 
-                            error_obj = get_error_obj(msg, 'teacher')
+                #             error_obj = get_error_obj(msg, 'teacher')
 
-                # Шалгалт авах өрөө давхцаж байгаа эсэхийг шалгана
-                if qs_exam_room:
-                    qs_exam_rooms = qs_exam_room.values(
-                            'begin_time',
-                            'end_time',
-                            'lesson__name'
-                        )
+                # # Шалгалт авах өрөө давхцаж байгаа эсэхийг шалгана
+                # if qs_exam_room and not request_data.get('is_online'):
+                #     qs_exam_rooms = qs_exam_room.values(
+                #             'begin_date',
+                #             'end_date',
+                #             'lesson__name'
+                #         )
 
-                    for rooms in qs_exam_rooms:
-                        start = rooms.get('begin_time')
-                        end = rooms.get('end_time')
+                #     for rooms in qs_exam_rooms:
+                #         start = rooms.get('begin_date')
+                #         end = rooms.get('end_date')
 
-                        if (start <= begin_time and end >= begin_time) or (start <= end_time and end >= end_time) or (start >= begin_time and end <= end_time):
-                            lesson = rooms.get('lesson__name')
+                #         if is_overlapping(start,end,begin_datetime,end_datetime):
+                #             lesson = rooms.get('lesson__name')
 
-                            msg = "Энэ өрөө нь {exam_date} өдрийн {begin_time}-{end_time} цагийн хооронд {lesson} хичээлийн шалгалттай байна." \
-                                .format(
-                                    lesson=lesson,
-                                    exam_date=exam_date,
-                                    begin_time=start,
-                                    end_time=end
-                                )
+                #             msg = "Энэ өрөө нь {exam_date} өдрийн {begin_time}-{end_time} цагийн хооронд {lesson} хичээлийн шалгалттай байна." \
+                #                 .format(
+                #                     lesson=lesson,
+                #                     exam_date=start.date(),
+                #                     begin_time=start,
+                #                     end_time=end
+                #                 )
 
-                            error_obj = get_error_obj(msg, 'room')
+                #             error_obj = get_error_obj(msg, 'room')
 
-                # Оюутаны цаг давхцаж байгаа эсэхийг шалгана
-                if student_data:
+                # NOTE ангийн шалгалтын хуваарийн давхцлыг шалгах
+                # if groups and qs_examtimetable_ids:
+                    
+                # # Оюутаны цаг давхцаж байгаа эсэхийг шалгана
+                # if student_data and qs_examtimetable_ids:
+                    # for exam_timetable_id in qs_examtimetable_ids:
+                    #     exam_qs = ExamTimeTable.objects.filter(
+                    #             pk=exam_timetable_id
+                    #         ).first()
 
-                    if qs_examtimetable_ids:
-                        for exam_timetable_id in qs_examtimetable_ids:
+                    #     lesson = exam_qs.lesson.name
+                    #     start = exam_qs.begin_date
+                    #     end = exam_qs.end_date
+                    #     students = []
 
-                            exam_qs = ExamTimeTable.objects.filter(
-                                    pk=exam_timetable_id
-                                ).first()
+                    #     for student_id in student_data:
+                    #         qs = Exam_to_group.objects.filter(
+                    #                 exam=exam_timetable_id,
+                    #                 student=student_id
+                    #             )
 
-                            lesson = exam_qs.lesson.name
-                            start = exam_qs.begin_time
-                            end = exam_qs.end_time
-                            students = []
+                    #         if qs:
+                    #             for stu in qs:
+                    #                 student_code = stu.student.code
+                    #                 if student_code not in students:
+                    #                     students.append(student_code)
 
-                            for student_id in student_data:
+                    #             if is_overlapping(start,end,begin_datetime,end_datetime):
+                    #                 if students:
+                    #                     msg = '''{student_code} кодтой {text} {exam_date} өдрийн {begin_time}-{end_time} цагийн хооронд {lesson} хичээлийн шалгалттай байна.''' \
+                    #                         .format(
+                    #                             student_code=', '.join(['{}'.format(f) for f in students]),
+                    #                             lesson=lesson,
+                    #                             exam_date=start.date(),
+                    #                             begin_time=start,
+                    #                             end_time=end,
+                    #                             text='оюутнууд' if len(students) > 1 else 'оюутан'
+                    #                         )
 
-                                qs = Exam_to_group.objects.filter(
-                                        exam=exam_timetable_id,
-                                        student=student_id
-                                    )
-
-                                if qs:
-                                    for stu in qs:
-                                        student_code = stu.student.code
-                                        if student_code not in students:
-                                            students.append(student_code)
-
-                                    if (start <= begin_time and end >= begin_time) or (start <= end_time and end >= end_time) or (start >= begin_time and end <= end_time):
-                                        if students:
-                                            msg = '''{student_code} кодтой {text} {exam_date} өдрийн {begin_time}-{end_time} цагийн хооронд {lesson} хичээлийн шалгалттай байна.''' \
-                                                .format(
-                                                    student_code=', '.join(['{}'.format(f) for f in students]),
-                                                    lesson=lesson,
-                                                    exam_date=exam_date,
-                                                    begin_time=start,
-                                                    end_time=end,
-                                                    text='оюутнууд' if len(students) > 1 else 'оюутан'
-                                                )
-
-                                            error_obj = get_error_obj(msg, 'student')
+                    #                     error_obj = get_error_obj(msg, 'student')
 
                 # Тухайн хичээлийн шалгалтыг нэг цагт авч буй эсэхийг шалгана
-                if qs_exam_lesson:
+                # if qs_exam_lesson:
+                #     start = qs_exam_lesson.begin_date
+                #     end = qs_exam_lesson.end_date
+                #     lesson = qs_exam_lesson.lesson.name
 
-                    start = qs_exam_lesson.begin_time
-                    end = qs_exam_lesson.end_time
-                    check_exam_date = qs_exam_lesson.exam_date
-                    lesson = qs_exam_lesson.lesson.name
+                #     if is_overlapping(start,end,begin_datetime,end_datetime):
+                #         msg = '''{lesson} хичээлийн шалгалт {exam_date} өдрийн {begin_time}-{end_time} цагийн хооронд байна.''' \
+                #             .format(
+                #                 lesson=lesson,
+                #                 exam_date=start.date(),
+                #                 begin_time=start,
+                #                 end_time=end
+                #             )
 
-                    if start != begin_time or end != end_time or str(check_exam_date) != exam_date:
-                        msg = '''{lesson} хичээлийн шалгалт {exam_date} өдрийн {begin_time}-{end_time} цагийн хооронд байна.''' \
-                            .format(
-                                lesson=lesson,
-                                exam_date=check_exam_date,
-                                begin_time=start,
-                                end_time=end
-                            )
+                #         error_obj = get_error_obj(msg, 'lesson')
 
-                        error_obj = get_error_obj(msg, 'lesson')
+                # if len(error_obj) > 0:
 
-                if len(error_obj) > 0:
-                    return request.send_error("ERR_003", error_obj)
+                #     return request.send_error("ERR_003", error_obj)
 
-                with transaction.atomic():
-                    try:
+                create_groups = []
+                try:
+                    with transaction.atomic():
                         exam_data = self.create(request).data
 
                         # Шалгалтын хуваарийн хүснэгтийн id
                         exam_table_id = exam_data.get('id')
-
-                        if student_data:
-                            for student_id in student_data:
-
-                                qs_timegroup = Exam_to_group.objects.filter(
-                                        exam_id=exam_table_id,
-                                        student=student_id
+                        # Багшийг олноор нэмэх
+                        ExamTimeTable.objects.get(id=exam_table_id).teacher.set(teachers)
+                        if groups:
+                            for group in groups:
+                                if not Exam_to_group.objects.filter(exam=exam_table_id, group=group).exists():
+                                    create_groups.append(
+                                        Exam_to_group(
+                                            exam_id=exam_table_id,
+                                            group_id=group
+                                        )
                                     )
+                            Exam_to_group.objects.bulk_create(create_groups)
 
-                                if not qs_timegroup:
-                                    obj = Exam_to_group.objects.create(
-                                        exam_id=exam_table_id,
-                                        student_id=student_id
-                                    )
+                    return request.send_info("INF_001")
 
-                            return request.send_info("INF_001")
+                except Exception:
+                    traceback.print_exc()
 
-                        return request.send_info("INF_001")
-
-                    except Exception as e:
-                        print(e)
-                        return request.send_error("ERR_002", "Шалгалтын хуваарь давхцаж байна.")
+                    return request.send_error("ERR_002", "Шалгалтын хуваарь давхцаж байна.")
 
             else:
                 transaction.savepoint_rollback(sid)
+                print(serializer.errors)
+
                 return request.send_error_valid(serializer.errors)
 
         except Exception as e:
+            traceback.print_exc()
+
             return request.send_error('ERR_002', e.__str__())
 
     @has_permission(must_permissions=['lms-timetable-exam-update'])
@@ -1679,181 +1705,194 @@ class ExamTimeTableAPIView(
         room = request_data.get('room')
         lesson = request_data.get('lesson')
         school = request_data.get('school')
+
         teacher = request_data.get('teacher')
-        end_time = request_data.get('end_time')
-        is_online = request_data.get('is_online')
-        exam_date = request_data.get('exam_date')
-        begin_time = request_data.get('begin_time')
         lesson_year = request_data.get('lesson_year')
         lesson_season = request_data.get('lesson_season')
+
+        end_datetime = request_data.get('end_date')
+        begin_datetime = request_data.get('begin_date')
+
+        begin_datetime = datetime.fromisoformat(begin_datetime)
+        end_datetime = datetime.fromisoformat(end_datetime)
+        groups = request_data.get('group')
+        teachers = request_data.get('teacher')
 
         # Group dataнаас юутан устгах
         if student_data:
             request_data = remove_key_from_dict(request_data, 'student')
 
-        serializer = self.get_serializer(instance, data=request_data)
-
+        serializer = self.get_serializer(instance, data=request_data, partial=True)
+        create_groups = []
         try:
             if serializer.is_valid(raise_exception=False):
-                exam_table_qs = ExamTimeTable.objects.filter(
-                        school=school,
-                        lesson_year=lesson_year,
-                        lesson_season=lesson_season,
-                        exam_date=exam_date,
-                    ).exclude(id=pk)
+                serializer.save()
+                ExamTimeTable.objects.get(id=pk).teacher.set(teachers)
+                if groups:
+                    for group in groups:
+                        if not Exam_to_group.objects.filter(exam=pk, group=group).exists():
+                            create_groups.append(
+                                Exam_to_group(
+                                    exam_id=pk,
+                                    group_id=group
+                                )
+                            )
+                    Exam_to_group.objects.bulk_create(create_groups)
+                # exam_table_qs = ExamTimeTable.objects.filter(
+                #     school=school,
+                #     lesson_year=lesson_year,
+                #     lesson_season=lesson_season,
+                # ).exclude(id=pk)
 
-                if exam_table_qs:
+                # if exam_table_qs:
 
-                    qs_exam_teacher = exam_table_qs.filter(teacher=teacher).exclude(id=pk).last()
+                #     # qs_exam_teacher = exam_table_qs.filter(teacher__in=teacher)
 
-                    qs_exam_room = exam_table_qs.filter(room=room).exclude(id=pk).last()
+                #     qs_exam_room = exam_table_qs.filter(room=room).last()
 
-                    qs_exam_lesson = ExamTimeTable.objects.filter(
-                            school=school,
-                            lesson_year=lesson_year,
-                            lesson_season=lesson_season,
-                            lesson=lesson
-                        ).exclude(id=pk).last()
+                #     qs_exam_lesson = ExamTimeTable.objects.filter(
+                #         school=school,
+                #         lesson_year=lesson_year,
+                #         lesson_season=lesson_season,
+                #         lesson=lesson
+                #     ).last()
 
-                    # Тухайн хичээлийн жил, улирал, өдрийн шалгалтын хуваарийн жагсаалт
-                    qs_examtimetable_ids = exam_table_qs.values_list(
-                            'id',
-                            flat=True
-                        ).exclude(id=pk).distinct()
+                #     # Тухайн хичээлийн жил, улирал, өдрийн шалгалтын хуваарийн жагсаалт
+                #     qs_examtimetable_ids = exam_table_qs.values_list(
+                #         'id',
+                #         flat=True
+                #     ).distinct()
 
                     # Шалгалтыг хянах багшийн хуваарь давхцаж байгаа эсэхийг шалгана
-                    if qs_exam_teacher:
-                        start = qs_exam_teacher.begin_time
-                        end = qs_exam_teacher.end_time
-                        lesson = qs_exam_teacher.lesson.name
+                    # NOTE дараа нь давхцалыг шалгана
+                    # if qs_exam_teacher:
+                    #     start = qs_exam_teacher.begin_time
+                    #     end = qs_exam_teacher.end_time
+                    #     lesson = qs_exam_teacher.lesson.name
 
-                        if (start <= begin_time and end >= begin_time) or (start <= end_time and end >= end_time) or (start >= begin_time and end <= end_time):
+                    #     if (start <= begin_time and end >= begin_time) or (start <= end_time and end >= end_time) or (start >= begin_time and end <= end_time):
 
-                            msg = "Энэ багш нь {lesson} хичээлийн {exam_date} өдрийн {begin_time}-{end_time} цагийн хооронд шалгалттай байна." \
-                                .format(
-                                    lesson=lesson,
-                                    exam_date=exam_date,
-                                    begin_time=start,
-                                    end_time=end
-                                )
+                    #         msg = "Энэ багш нь {lesson} хичээлийн {exam_date} өдрийн {begin_time}-{end_time} цагийн хооронд шалгалттай байна." \
+                    #             .format(
+                    #                 lesson=lesson,
+                    #                 exam_date=exam_date,
+                    #                 begin_time=start,
+                    #                 end_time=end
+                    #             )
 
-                            error_obj = get_error_obj(msg, 'teacher')
+                    #         error_obj = get_error_obj(msg, 'teacher')
 
                     # Шалгалтын өрөө давхцаж байгаа эсэхийг шалгана
-                    if qs_exam_room:
-                        start = qs_exam_room.begin_time
-                        end = qs_exam_room.end_time
-                        lesson = qs_exam_room.lesson.name
+                    # NOTE давхцал шалгах
+                    # if qs_exam_room:
+                    #     start = qs_exam_room.begin_date
+                    #     end = qs_exam_room.end_date
+                    #     lesson = qs_exam_room.lesson.name
 
-                        if (start <= begin_time and end >= begin_time) or (start <= end_time and end >= end_time) or (start >= begin_time and end <= end_time):
+                    #     if (start <= begin_time and end >= begin_time) or (start <= end_time and end >= end_time) or (start >= begin_time and end <= end_time):
 
-                                msg = "Энэ өрөө нь {exam_date} өдрийн {begin_time}-{end_time} цагийн хооронд {lesson} хичээлийн шалгалттай байна." \
-                                    .format(
-                                        lesson=lesson,
-                                        exam_date=exam_date,
-                                        begin_time=start,
-                                        end_time=end
-                                    )
+                    #             msg = "Энэ өрөө нь {exam_date} өдрийн {begin_time}-{end_time} цагийн хооронд {lesson} хичээлийн шалгалттай байна." \
+                    #                 .format(
+                    #                     lesson=lesson,
+                    #                     exam_date=exam_date,
+                    #                     begin_time=start,
+                    #                     end_time=end
+                    #                 )
 
-                                error_obj = get_error_obj(msg, 'room')
+                    #             error_obj = get_error_obj(msg, 'room')
 
-                    # Оюутаны цаг давхцаж байгаа эсэхийг шалгана
-                    if student_data:
+                    # # Оюутаны цаг давхцаж байгаа эсэхийг шалгана
+                    # if student_data:
 
-                        if qs_examtimetable_ids:
-                            for exam_timetable_id in qs_examtimetable_ids:
+                    #     if qs_examtimetable_ids:
+                    #         for exam_timetable_id in qs_examtimetable_ids:
 
-                                exam_qs = ExamTimeTable.objects.filter(
-                                        pk=exam_timetable_id
-                                    ).first()
+                    #             exam_qs = ExamTimeTable.objects.filter(
+                    #                     pk=exam_timetable_id
+                    #                 ).first()
 
-                                lesson = exam_qs.lesson.name
-                                start = exam_qs.begin_time
-                                end = exam_qs.end_time
-                                students = []
+                    #             lesson = exam_qs.lesson.name
+                    #             start = exam_qs.begin_time
+                    #             end = exam_qs.end_time
+                    #             students = []
 
-                                for student_id in student_data:
-                                    # Шалгалтын хуваарь давхцаж байгаа оюутнуудын мэдээлэл авах
-                                    qs = Exam_to_group.objects.filter(
-                                            exam=exam_timetable_id,
-                                            student=student_id
-                                        )
+                    #             for student_id in student_data:
+                    #                 # Шалгалтын хуваарь давхцаж байгаа оюутнуудын мэдээлэл авах
+                    #                 qs = Exam_to_group.objects.filter(
+                    #                         exam=exam_timetable_id,
+                    #                         student=student_id
+                    #                     )
 
-                                    if qs:
-                                        for stu in qs:
-                                            student_code = stu.student.code
-                                            if student_code not in students:
-                                                students.append(student_code)
+                    #                 if qs:
+                    #                     for stu in qs:
+                    #                         student_code = stu.student.code
+                    #                         if student_code not in students:
+                    #                             students.append(student_code)
 
-                                        if (start <= begin_time and end >= begin_time) or (start <= end_time and end >= end_time) or (start >= begin_time and end <= end_time):
-                                            if students:
-                                                msg = '''{student_code} кодтой {text} {exam_date} өдрийн {begin_time}-{end_time} цагийн хооронд {lesson} хичээлийн шалгалттай байна.''' \
-                                                    .format(
-                                                        student_code=', '.join(['{}'.format(f) for f in students]),
-                                                        lesson=lesson,
-                                                        exam_date=exam_date,
-                                                        begin_time=start,
-                                                        end_time=end,
-                                                        text='оюутнууд' if len(students) > 1 else 'оюутан'
-                                                    )
+                    #                     if (start <= begin_time and end >= begin_time) or (start <= end_time and end >= end_time) or (start >= begin_time and end <= end_time):
+                    #                         if students:
+                    #                             msg = '''{student_code} кодтой {text} {exam_date} өдрийн {begin_time}-{end_time} цагийн хооронд {lesson} хичээлийн шалгалттай байна.''' \
+                    #                                 .format(
+                    #                                     student_code=', '.join(['{}'.format(f) for f in students]),
+                    #                                     lesson=lesson,
+                    #                                     exam_date=exam_date,
+                    #                                     begin_time=start,
+                    #                                     end_time=end,
+                    #                                     text='оюутнууд' if len(students) > 1 else 'оюутан'
+                    #                                 )
 
-                                                error_obj = get_error_obj(msg, 'student')
+                    #                             error_obj = get_error_obj(msg, 'student')
 
                     # Тухайн хичээлийн шалгалтыг нэг цагт авч буй эсэхийг шалгана
-                    if qs_exam_lesson:
+                    # NOTE дараа нь давхал шалгах
+                    # if qs_exam_lesson:
 
-                        start = qs_exam_lesson.begin_time
-                        end = qs_exam_lesson.end_time
-                        check_exam_date = qs_exam_lesson.exam_date
-                        lesson = qs_exam_lesson.lesson.name
+                    #     start = qs_exam_lesson.begin_time
+                    #     end = qs_exam_lesson.end_time
+                    #     check_exam_date = qs_exam_lesson.exam_date
+                    #     lesson = qs_exam_lesson.lesson.name
 
-                        if start != begin_time or end != end_time or str(check_exam_date) != exam_date:
-                            msg = '''{lesson} хичээлийн шалгалт {exam_date} өдрийн {begin_time}-{end_time} цагийн хооронд байна.''' \
-                                .format(
-                                    lesson=lesson,
-                                    exam_date=check_exam_date,
-                                    begin_time=start,
-                                    end_time=end
-                                )
+                    #     if start != begin_time or end != end_time or str(check_exam_date) != exam_date:
+                    #         msg = '''{lesson} хичээлийн шалгалт {exam_date} өдрийн {begin_time}-{end_time} цагийн хооронд байна.''' \
+                    #             .format(
+                    #                 lesson=lesson,
+                    #                 exam_date=check_exam_date,
+                    #                 begin_time=start,
+                    #                 end_time=end
+                    #             )
 
-                            error_obj = get_error_obj(msg, 'lesson')
+                    #         error_obj = get_error_obj(msg, 'lesson')
 
-                    if len(error_obj) > 0:
-                        return request.send_error("ERR_003", error_obj)
+                    # if len(error_obj) > 0:
+                    #     return request.send_error("ERR_003", error_obj)
 
-                with transaction.atomic():
-                    try:
-                        self.update(request).data
 
                         # Шалгалтын хуваарийн хүснэгтийн id
-                        exam_qs = Exam_to_group.objects.filter(exam=pk)
+                        # exam_qs = Exam_to_group.objects.filter(exam=pk)
 
-                        # Хуучин шалгалт өгөх байсан оюутаны жагсаалт
-                        old_student_ids = list(exam_qs.values_list('student', flat=True).distinct())
+                        # # Хуучин шалгалт өгөх байсан оюутаны жагсаалт
+                        # old_student_ids = list(exam_qs.values_list('student', flat=True).distinct())
 
-                        # Зөвхөн оюутан сонгосон бол
-                        if student_data:
-                            for student_id in student_data:
-                                qs_timegroup = exam_qs.filter(student=student_id)
+                        # # Зөвхөн оюутан сонгосон бол
+                        # if student_data:
+                            # for student_id in student_data:
+                            #     qs_timegroup = exam_qs.filter(student=student_id)
 
-                                if not qs_timegroup:
-                                    obj = Exam_to_group.objects.update_or_create(
-                                        exam_id=pk,
-                                        student_id=student_id
-                                    )
+                            #     if not qs_timegroup:
+                            #         obj = Exam_to_group.objects.update_or_create(
+                            #             exam_id=pk,
+                            #             student_id=student_id
+                            #         )
 
-                            for old_student_id in old_student_ids:
-                                if not (old_student_id in student_data):
-                                    qs_student = exam_qs.filter(
-                                            student=old_student_id
-                                        )
-                                    if qs_student:
-                                        qs_student.delete()
+                            # for old_student_id in old_student_ids:
+                            #     if not (old_student_id in student_data):
+                            #         qs_student = exam_qs.filter(
+                            #                 student=old_student_id
+                            #             )
+                            #         if qs_student:
+                            #             qs_student.delete()
 
-                        return request.send_info("INF_002")
-
-                    except Exception as e:
-                        return request.send_error("ERR_002")
+                return request.send_info("INF_002")
             else:
                 return request.send_error_valid(serializer.errors)
 
@@ -2523,8 +2562,8 @@ class TimeTableNewAPIView(
         datas['lesson_year'] = year
         datas['created_user_id'] = request.user.id
 
-        with transaction.atomic():
-            try:
+        try:
+            with transaction.atomic():
                 table_data, created = self.queryset.update_or_create(
                     lesson=lesson,
                     teacher=teacher,
@@ -2558,10 +2597,10 @@ class TimeTableNewAPIView(
 
                 return request.send_info("INF_001")
 
-            except Exception as e:
-                print(e)
-                print(e)
-                return request.send_error("ERR_002", "Хичээлийн хуваарь давхцаж байна.")
+        except Exception as e:
+            print(e)
+            print(e)
+            return request.send_error("ERR_002", "Хичээлийн хуваарь давхцаж байна.")
 
 
 @permission_classes([IsAuthenticated])
@@ -3084,8 +3123,8 @@ class ExamTimeTableCreateAPIView(
 
         exam_to_group_datas = []
         exam_ids = []
-        with transaction.atomic():
-            try:
+        try:
+            with transaction.atomic():
                 for timetable in timetables:
                     lesson = timetable.get('lesson')
                     create_lesson = timetable.get('school')
@@ -3125,9 +3164,9 @@ class ExamTimeTableCreateAPIView(
                 if len(exam_to_group_datas) > 0:
                     Exam_to_group.objects.bulk_create(exam_to_group_datas)
 
-            except Exception as e:
-                print(e)
-                return request.send_error('ERR_002', 'Хуваарь хадгалахад алдаа гарлаа.')
+        except Exception as e:
+            print(e)
+            return request.send_error('ERR_002', 'Хуваарь хадгалахад алдаа гарлаа.')
 
         return request.send_info('INF_001')
 
@@ -3193,3 +3232,29 @@ class TimeTablePrint(
         }
 
         return request.send_data(return_datas)
+
+
+@permission_classes([IsAuthenticated])
+class ExamTimeTableListAPIView(
+    mixins.ListModelMixin,
+    generics.GenericAPIView
+):
+    """ Шалгалтын хуваарийн жагсаалт """
+
+    queryset = ExamTimeTable.objects.all()
+    serializer_class = ExamTimeTableSerializer
+
+    @has_permission(must_permissions=['lms-timetable-exam-read'])
+    def get(self, request, pk=None):
+        " Шалгалтын хуваарь жагсаалт "
+
+        is_online = self.request.query_params.get("is_online")
+
+        if is_online:
+            is_online = str2bool(is_online)
+            self.queryset = self.queryset.filter(is_online=is_online)
+
+        self.serializer_class = ExamTimeTableAllSerializer
+
+        less_standart_list = self.list(request).data
+        return request.send_data(less_standart_list)
