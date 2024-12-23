@@ -12,15 +12,11 @@ import useApi from "@hooks/useApi"
 import useLoader from '@hooks/useLoader';
 import useModal from '@hooks/useModal';
 import * as Yup from 'yup';
-import { getPagination } from '@utils'
-
-import { useQuill } from 'react-quilljs';
-import 'quill/dist/quill.snow.css'
 
 
 const Oyutni_hugjil = () => {
 
-     // Loader
+    // Loader
     const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
 
     //Context
@@ -36,39 +32,6 @@ const Oyutni_hugjil = () => {
     const [datas, setDatas] = useState([])
     const [fileInputKey, setFileInputKey] = useState(0); //
     const [edit, setEdit] = useState(false)
-
-    const [value, setValues] = useState('');
-
-    const {quill, quillRef } = useQuill({
-        modules: {
-            toolbar: [
-                    ['bold', 'italic', 'underline', 'strike'],
-                    [{ align: [] }],
-
-                    [{ list: 'ordered'}, { list: 'bullet' }],
-                    [{ indent: '-1'}, { indent: '+1' }],
-
-                    [{ size: ['small', false, 'large', 'huge'] }],
-                    ['link',],
-
-                    [{ color: [] }, { background: [] }],
-
-                    ['clean'],
-            ],
-        },
-        value: value,
-        theme: 'snow',
-        formats: [
-            'header','bold', 'italic', 'underline', 'strike',
-            'align', 'list', 'indent',
-            'size',
-            'link',
-            'color', 'background',
-            'clean',
-        ],
-        readOnly: false,
-    });
-
 
     const validationSchema = Yup.object().shape({
         title: Yup.string()
@@ -131,7 +94,6 @@ const Oyutni_hugjil = () => {
             else
                 formData.append(key, cdata[key])
         }
-        cdata['body'] = quill.root.innerHTML
         cdata['created_user'] = user.id
         cdata['updated_user'] = user.id
 
@@ -182,48 +144,6 @@ const Oyutni_hugjil = () => {
                                         )}
                                     />
                                     {errors.title && <FormFeedback className='d-block'>{errors.title.message}</FormFeedback>}
-                                </div>
-                                <div className="mb-2">
-                                <Label className="form-label">
-                                        {t('Линк')}
-                                    </Label>
-                                    <Controller
-                                        defaultValue=""
-                                        control={control}
-                                        name="link"
-                                        render={({ field }) => (
-                                            <Input
-                                                {...field}
-                                                id={field.name}
-                                                type="text"
-                                                placeholder={t("Линк")}
-                                                invalid={errors[field.name] && true}
-                                            />
-                                        )}
-                                    />
-                                    {errors.link && <FormFeedback className='d-block'>{errors.link.message}</FormFeedback>}
-                                </div>
-                                <div>
-                                    <Label className='form-label'>
-                                        {t('Танилцуулга байршуулах хэсэг')}
-                                    </Label>
-                                    <Controller
-                                        defaultValue=''
-                                        control={control}
-                                        id='body'
-                                        name='body'
-                                        render={({field}) => (
-                                            <div style={{ width: 'auto',}}>
-                                                <div
-                                                    {...field}
-                                                    name='body'
-                                                    id='body'
-                                                    ref={quillRef}
-                                                />
-                                            </div>
-                                        )}
-                                    />
-                                    {errors.body && <FormFeedback className='d-block'>{t(errors.body.message)}</FormFeedback>}
                                 </div>
                                 <div className="mt-1 mb-1">
                                     <Label className="form-label">
@@ -319,12 +239,6 @@ const Oyutni_hugjil = () => {
                             selector: (row) => <a className="sm-1" href={row?.title}>{row?.title}</a>,
                             minWidth: '150px',
                             maxWidth: '150px',
-                        },
-                        {
-                            name: `${t('link')}`,
-                            selector: (row) => <a href={row?.link} className="ms-1"><div className="heightThreeDots" title={row?.link}>{row?.link}</div></a>,
-                            minWidth: "200px",
-                            center: true
                         },
                         {
                             header: 'file',

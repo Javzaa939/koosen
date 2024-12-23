@@ -1,4 +1,4 @@
-import { Edit, X,Download }  from 'react-feather'
+import { Edit, X, Download } from "react-feather";
 
 import { t } from "i18next";
 
@@ -28,14 +28,8 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 		{
 			name: `${t('Гарчиг')}`,
             cell: (row) => row?.title,
-			minWidth: "80px",
+			minWidth: "200",
 			center: true,
-		},
-		{
-			name: `${t('Тайлбар')}`,
-			selector: (row) => <a href={row?.link} className="ms-1">{ row?.link}</a>,
-			minWidth: "80px",
-			center: true
 		},
 		{
 			header: 'file',
@@ -47,11 +41,12 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 					</a>
 					{row?.file ? decodeURIComponent(row?.file.toString().split("/").pop()): ''}
 				</>,
-			minWidth: '80px'
+			minWidth: '200',
+			center: true,
 		},
 	]
 
-	if(Object.keys(user).length > 0 && user.permissions.includes('lms-browser-library-update'))
+	if(Object.keys(user).length > 0 && user.permissions.includes('lms-browser-health-update') && user.permissions.includes('lms-browser-health-delete') )
 	{
 		var UpdateColumn = {
 			name: `${t('Үйлдэл')}`,
@@ -68,8 +63,8 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 						>
 							<Badge color="light-secondary" pill><Edit  width={"15px"} /></Badge>
 						</a>
-					}
-					<UncontrolledTooltip placement='top' target={`activeYearUpdate${row.id}`} >Засах</UncontrolledTooltip> */}
+					} */}
+					{/* <UncontrolledTooltip placement='top' target={`activeYearUpdate${row.id}`} >Засах</UncontrolledTooltip> */}
 					{
 						user.permissions.includes('lms-browser-library-delete') &&
 						<>

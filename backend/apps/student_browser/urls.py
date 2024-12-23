@@ -24,9 +24,17 @@ urlpatterns = [
     path('psycholocal/', StudentPsycholocalAPIView.as_view()),
     path('psycholocal/<int:pk>/', StudentPsycholocalAPIView.as_view()),
 
+    # Сэтгэл зүйн зөвлөмж
+    path('psy/help/', StudentPsyHelpAPIView.as_view()),
+    path('psy/help/<int:pk>/', StudentPsyHelpAPIView.as_view()),
+
     # Эрүүл мэнд
     path('health/', HealthAPIView.as_view()),
     path('health/<int:pk>/', HealthAPIView.as_view()),
+
+    # Эрүүл мэнд зөвлөмж
+    path('health/help/', HealthHelpAPIView.as_view()),
+    path('health/help/<int:pk>/', HealthHelpAPIView.as_view()),
 
     # номын сангийн журам
     path('rules/',  StudentRulesAPIView.as_view()),

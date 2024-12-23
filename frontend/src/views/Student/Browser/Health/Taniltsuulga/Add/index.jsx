@@ -1,5 +1,6 @@
 // ** React imports
-import React, { Fragment, useState, useContext, useEffect } from 'react'
+import React, { Fragment, useContext, useEffect } from 'react'
+
 
 import { t } from 'i18next';
 
@@ -14,7 +15,7 @@ import { validate, convertDefaultValue } from "@utils"
 
 import AuthContext from '@context/AuthContext'
 import * as Yup from 'yup';
-import { Download } from 'react-feather'
+
 
 const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}) => {
 
@@ -22,70 +23,50 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
 	title: Yup.string()
 		.trim()
 		.required('Хоосон байна'),
-    // file: Yup.string()
-    //     .trim()
-    //     .required('Хоосон байна'),
+    link: Yup.string()
+		.trim()
+		.required('Хоосон байна'),
+
     });
 
     const { user } = useContext(AuthContext)
-    const [fileInputKey, setFileInputKey] = useState(0);
-    const [inputFile, setInputFile] = useState('')
-    
 
     // ** Hook
-    const {
-        control,
-        handleSubmit,
-        formState: { errors, isValid },
-        watch,
-        reset
-    } = useForm(validate(validateSchema));
-
-    const file = watch('file')
+    const { control, handleSubmit, reset, setError, formState: { errors }, setValue } = useForm(validate(validateSchema));
 
 	// Loader
+	const { fetchData } = useLoader({});
 	const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
 
     // Api
-    const libraryApi = useApi().browser.library
+    const healthApi = useApi().browser.health
 
     // Хадгалах
 	async function onSubmit(cdata) {
         cdata = convertDefaultValue(cdata)
-        const formData = new FormData()
+        cdata['created_by'] = user.id
+        cdata['updated_by'] = user.id
 
-        for (const key in cdata) {
-            if(inputFile){
-
-                formData.append('file', inputFile)
-                
-            } 
-            formData.append(key, cdata[key])
-        }
-        cdata['created_user'] = user.id
-        cdata['updated_user'] = user.id
-
-        // if(editId){
-        //     const { success, errors } = await fetchData(libraryApi.put(cdata, editId))
-        //     if(success) {
-        //         reset()
-        //         refreshDatas()
-        //         handleEditModal()
-        //     }
-        //     else {
-        //         /** Алдааны мессэжийг input дээр харуулна */
-        //         for (let key in errors) {
-        //             setError(key, { type: 'custom', message: errors[key][0]});
-        //         }
-        //     }
-        // }
-        // else
-        {
-            const { success, errors } = await postFetch(libraryApi.post(formData))
+        if(editId){
+            const { success, errors } = await fetchData(healthApi.put(cdata, editId))
             if(success) {
                 reset()
                 refreshDatas()
-                setFileInputKey((prevKey) => prevKey + 1);
+                handleEditModal()
+            }
+            else {
+                /** Алдааны мессэжийг input дээр харуулна */
+                for (let key in errors) {
+                    setError(key, { type: 'custom', message: errors[key][0]});
+                }
+            }
+        }
+        else{
+
+            const { success, errors } = await postFetch(healthApi.post(cdata))
+            if(success) {
+                reset()
+                refreshDatas()
                 handleModal()
             }
             else {
@@ -99,29 +80,32 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
         }
 	}
 
-    // async function getOneDatas() {
-    //     if(editId) {
-    //         const { success, data } = await fetchData(libraryApi.getOne(editId))
-    //         if(success) {
-    //             // засах үед дата байх юм бол setValue-р дамжуулан утгыг харуулна
-    //             if(data === null) return
-    //             for(let key in data) {
-    //                 if(data[key] !== null)
-    //                     setValue(key, data[key])
+    async function getOneDatas() {
+        if(editId) {
+            const { success, data } = await fetchData(healthApi.getOne(editId))
+            if(success) {
+                // засах үед дата байх юм бол setValue-р дамжуулан утгыг харуулна
+                if(data === null) return
+                for(let key in data) {
+                    if(data[key] !== null)
+                        setValue(key, data[key])
 
-    //                 else setValue(key, '')
-    //             }
-    //         }
-    //     }
-    // }
+                    else setValue(key, '')
+                }
+                if (key === 'body' && quill) {
+                    quill.pasteHTML(data[key]);
+                }
+            }
+        }
+    }
 
-    // useEffect(() => {
-    //     if(editId){
-    //         getOneDatas()
-    //     }
-    // },[open])
+    useEffect(() => {
+        if(editId){
+            getOneDatas()
+        }
+    },[open])
 
-	return (    
+	return (
         <Fragment>
             <Modal
                 isOpen={open}
@@ -132,7 +116,7 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
             >
                 <ModalBody className="px-sm-3 pt-50 pb-3">
                     <div className='text-center'>
-                        <h4>{editId ? t('Танилцуулга засах') : t('Танилцуулга нэмэх')}</h4>
+                        <h4>{editId ? t('Эрүүл мэнд засах') : t('Эрүүл мэнд нэмэх')}</h4>
                     </div>
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
                         <Col md={12}>
@@ -182,41 +166,6 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
                                 )}
                             />
                             {errors.link && <FormFeedback className='d-block'>{t(errors.link.message)}</FormFeedback>}
-                        </Col>
-                        <Col md={12} >
-                             <Label className="form-label">
-                                {t('Файл')}
-                            </Label>
-                            <Controller
-                                defaultValue=""
-                                control={control}
-                                name="file"
-                                render={({ field }) =>
-                                    <>
-                                        <Input
-                                            key={fileInputKey}
-                                            name={field.name}
-                                            id={field.name}
-                                            type="file"
-                                            placeholder={t("файл")}
-                                            // accept="application/pdf"
-                                            onChange={(e) => {
-                                                setInputFile(e.target.files[0])
-                                            }}
-                                            invalid={errors.file && true}
-                                        />
-                                        {file && typeof file === 'string' &&
-                                            <>
-                                                <a href={file} className='me-1'>
-                                                    <Download type="button" color='#1a75ff' width={'15px'} />
-                                                </a>
-                                                {file}
-                                            </>
-                                        }
-                                    </>
-                                }
-                            />
-                            {errors.file && <FormFeedback className='d-block'>{errors.file.message}</FormFeedback>}
                         </Col>
                         <Col md={12} className="text-center mt-2">
                             <Button className="me-2" color="primary" type="submit" >

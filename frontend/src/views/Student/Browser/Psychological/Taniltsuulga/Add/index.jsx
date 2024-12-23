@@ -1,12 +1,9 @@
 // ** React imports
-import React, { Fragment, useState, useContext, useEffect, useRef } from 'react'
-
-// import '../style.css'
+import React, { Fragment, useState, useContext, useEffect } from 'react'
 
 import { t } from 'i18next';
 
 import useApi from "@hooks/useApi";
-import useToast from "@hooks/useToast";
 import useLoader from "@hooks/useLoader";
 
 import { useForm, Controller } from "react-hook-form";
@@ -16,10 +13,7 @@ import { Row, Col, Form, Modal, Input, Label, Button, ModalBody, ModalHeader, Fo
 import { validate, convertDefaultValue } from "@utils"
 
 import AuthContext from '@context/AuthContext'
-import SchoolContext from '@context/SchoolContext'
 import * as Yup from 'yup';
-import { useQuill } from 'react-quilljs';
-import 'quill/dist/quill.snow.css'
 
 const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}) => {
 
@@ -27,45 +21,9 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
 	title: Yup.string()
 		.trim()
 		.required('Хоосон байна'),
-    link: Yup.string()
-		.trim()
-		.required('Хоосон байна'),
 
     });
 
-    const [value, setValues] = useState('');
-
-    const {quill, quillRef } = useQuill({
-        modules: {
-            toolbar: [
-                    ['bold', 'italic', 'underline', 'strike'],
-                    [{ align: [] }],
-
-                    [{ list: 'ordered'}, { list: 'bullet' }],
-                    [{ indent: '-1'}, { indent: '+1' }],
-
-                    [{ size: ['small', false, 'large', 'huge'] }],
-                    ['link',],
-
-                    [{ color: [] }, { background: [] }],
-
-                    ['clean'],
-            ],
-        },
-        value: value,
-        theme: 'snow',
-        formats: [
-            'header','bold', 'italic', 'underline', 'strike',
-            'align', 'list', 'indent',
-            'size',
-            'link',
-            'color', 'background',
-            'clean',
-        ],
-        readOnly: false,
-    });
-
-    const { school_id } = useContext(SchoolContext)
     const { user } = useContext(AuthContext)
 
     // ** Hook
@@ -76,17 +34,16 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
 	const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
 
     // Api
-    const healthApi = useApi().browser.health
+    const psycholocalApi = useApi().browser.psycholocal
 
     // Хадгалах
 	async function onSubmit(cdata) {
         cdata = convertDefaultValue(cdata)
 
-        cdata['body'] = quill.root.innerHTML
-        cdata['created_by'] = user.id
 
         if(editId){
-            const { success, errors } = await fetchData(healthApi.put(cdata, editId))
+            cdata['updated_user'] = user.id
+            const { success, errors } = await fetchData(psycholocalApi.put(cdata, editId))
             if(success) {
                 reset()
                 refreshDatas()
@@ -99,10 +56,10 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
                 }
             }
         }
-        else{
-            cdata['created_by'] = user.id
-            cdata['updated_by'] = user.id
-            const { success, errors } = await postFetch(healthApi.post(cdata))
+        else
+        {
+            cdata['created_user'] = user.id
+            const { success, errors } = await postFetch(psycholocalApi.post(cdata))
             if(success) {
                 reset()
                 refreshDatas()
@@ -121,7 +78,7 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
 
     async function getOneDatas() {
         if(editId) {
-            const { success, data } = await fetchData(healthApi.getOne(editId))
+            const { success, data } = await fetchData(psycholocalApi.getOne(editId))
             if(success) {
                 // засах үед дата байх юм бол setValue-р дамжуулан утгыг харуулна
                 if(data === null) return
@@ -130,9 +87,6 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
                         setValue(key, data[key])
 
                     else setValue(key, '')
-                }
-                if (key === 'body' && quill) {
-                    quill.pasteHTML(data[key]);
                 }
             }
         }
@@ -155,7 +109,7 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
             >
                 <ModalBody className="px-sm-3 pt-50 pb-3">
                     <div className='text-center'>
-                        <h4>{editId ? t('Эрүүл мэнд засах') : t('Эрүүл мэнд нэмэх')}</h4>
+                        <h4>{editId ? t('Сэтгэл зүйн булан засах') : t('Сэтгэл зүйн булан нэмэх')}</h4>
                     </div>
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
                         <Col md={12}>
@@ -177,14 +131,14 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
                                         placeholder='гарчиг'
                                         invalid={errors.title && true}
                                     >
-                                    </Input>
+                                    </Input> 
                                 )}
                             />
                             {errors.title && <FormFeedback className='d-block'>{t(errors.title.message)}</FormFeedback>}
                         </Col>
                         <Col md={12}>
                             <Label className="form-label" for="link">
-                                {t('Линк')}
+                                {t('Тайлбар')}
                             </Label>
                             <Controller
                                 defaultValue=''
@@ -194,39 +148,17 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
                                 render={({ field }) => (
                                     <Input
                                         {...field}
-                                        type='text'
+                                        type='textarea'
                                         name='link'
                                         bsSize='sm'
                                         id='link'
-                                        placeholder='гарчиг'
+                                        placeholder='тайлбар'
                                         invalid={errors.link && true}
                                     >
                                     </Input>
                                 )}
                             />
                             {errors.link && <FormFeedback className='d-block'>{t(errors.link.message)}</FormFeedback>}
-                        </Col>
-                        <Col md={12} >
-                            <Label className='form-label' for='body'>
-                                {t('Танилцуулга байршуулах хэсэг')}
-                            </Label>
-                            <Controller
-                                defaultValue=''
-                                control={control}
-                                id='body'
-                                name='body'
-                                render={({field}) => (
-                                    <div style={{ width: 'auto',}}>
-                                        <div
-                                            {...field}
-                                            name='body'
-                                            id='body'
-                                            ref={quillRef}
-                                        />
-                                    </div>
-                                )}
-                            />
-                            {errors.body && <FormFeedback className='d-block'>{t(errors.body.message)}</FormFeedback>}
                         </Col>
                         <Col md={12} className="text-center mt-2">
                             <Button className="me-2" color="primary" type="submit" >

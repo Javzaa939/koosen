@@ -71,9 +71,9 @@ const Time = () => {
         }
     }
 
-    // useEffect(() => {
-    //     getDatas()
-    // }, [currentPage, rowsPerPage])
+    useEffect(() => {
+        getDatas()
+    }, [currentPage, rowsPerPage])
 
     /* Устгах функц */
 	const handleDelete = async(id) => {
@@ -246,8 +246,8 @@ const Time = () => {
                         header: 'title',
                         name: `${t('Гарчиг')}`,
                         selector: (row) => <div className="heightThreeDots" title={row?.title}>{row?.title}</div>,
-                        minWidth: '150px',
-                        maxWidth: '150px',
+                        minWidth: '200px',
+                        center: true,
                     },
                     {
                         header: 'file',
@@ -259,7 +259,8 @@ const Time = () => {
                                 </a>
                                 {row?.file ? decodeURIComponent(row?.file.toString().split("/").pop()): ''}
                             </>,
-                        minWidth: '300px'
+                        minWidth: '200px',
+                        center: true,
                     },
                 ]}
                 data={datas}
