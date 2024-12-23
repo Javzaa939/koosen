@@ -5693,16 +5693,19 @@ class ChallengeLevelCountAPIView(
 
         # Асуулт хувиар оруулах
         number_of_questions_percentage = data.get("number_questions_percentage")
+        challenge = Challenge.objects.filter(id=challenge_id).first()
+
+        teacher_ids = TeacherScore.objects.filter(student__in=challenge.student.values_list('id', flat=True)).values_list('score_type__lesson_teacher__teacher', flat=True).distinct()
 
         if level is not None and challenge_id is not None:
 
-            challenge = Challenge.objects.filter(id=challenge_id).first()
 
             if challenge and level:
                 challenge_questions = ChallengeQuestions.objects.filter(
                     level=level,
                     title__lesson=challenge.lesson,
-                    title__is_season=True
+                    title__is_season=True,
+                    title__created_by__in=teacher_ids
                 )
                 random_questions = None
 
