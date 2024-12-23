@@ -70,7 +70,7 @@ export default function GenericDataTable({ apiGetFunc, apiGetFuncArgs, isApiGetF
 	}, [search_value, render_to_search, current_page])
 
 	// #region specific code (not generic)
-	useEffect(() => { if (apiGetFuncArgs[1]) getData() }, [apiGetFuncArgs[1]])
+	useEffect(() => { if (apiGetFuncArgs[1] || apiGetFuncArgs[2]) getData() }, [apiGetFuncArgs[1], apiGetFuncArgs[2]])
 	// #endregion
 
 	// for table footer

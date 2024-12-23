@@ -6027,6 +6027,11 @@ class ChallengeReportAPIView(
             get_result = self.list(request).data
 
         elif report_type == 'groups':
+            group = request.query_params.get('group')
+
+            if group:
+                queryset = queryset.filter(student__group=group)
+
             assessments = Score.objects.all().values('score_min','score_max','assesment')
             assessment_dict = {}
 

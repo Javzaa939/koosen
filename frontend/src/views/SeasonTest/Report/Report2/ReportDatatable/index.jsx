@@ -15,7 +15,6 @@ import './style.scss'
 /*
     TODO:
     - why 6312 group name student count 11 but assesments total count 12 (D=3 F=9)?
-    - group filtering
     - Хөтөлбөрөөр tab
     - in database assesments D F are duplicated, so need to add their min max ranges to counting
 */
