@@ -22,9 +22,9 @@ const CreateModal = ({ open, handleModal, refreshDatas, editId, handleEditModal}
 	title: Yup.string()
 		.trim()
 		.required('Хоосон байна'),
-    file: Yup.string()
-        .trim()
-        .required('Хоосон байна'),
+    // file: Yup.string()
+    //     .trim()
+    //     .required('Хоосон байна'),
     });
 
     const { user } = useContext(AuthContext)
