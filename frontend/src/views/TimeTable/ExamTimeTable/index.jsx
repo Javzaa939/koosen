@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next"
 
 import { AlertCircle, ChevronDown, Plus, Search } from "react-feather"
 
+import { useNavigate } from "react-router-dom"
 import DataTable from "react-data-table-component"
 
 import useApi from '@hooks/useApi';
@@ -32,10 +33,12 @@ import ReactDOM from 'react-dom';
 // #endregion
 
 const ExamTimeTable = () => {
+	const navigate = useNavigate()
+
+    const { t } = useTranslation()
     const { user } = useContext(AuthContext)
     const { school_id } = useContext(SchoolContext)
     const { showWarning } = useModal()
-    const { t } = useTranslation()
 
     // Эрэмбэлэлт
     const [sortField, setSort] = useState('')
