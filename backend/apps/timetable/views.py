@@ -3331,7 +3331,7 @@ class ExamTimeTableScoreListAPIView(
                 # (Авсан оноо * Хувиргах оноо) / авах оноо
                 exam_score = (score * 30) / take_score
 
-                teach_score = TeacherScore.objects.filter(score_type=scoretype, student_id=student, lesson_season=lesson_season, lesson_year=lesson_year)
+                teach_score = TeacherScore.objects.filter(score_type=scoretype, student=student, lesson_season=lesson_season, lesson_year=lesson_year)
 
                 # Дүн орчихсон байвал update хийнэ
                 if teach_score:
@@ -3346,17 +3346,14 @@ class ExamTimeTableScoreListAPIView(
                     teach_score = TeacherScore.objects.create(
                         lesson_year=lesson_year,
                         lesson_season_id=lesson_season,
-                        student_id=student,
+                        student=student,
                         score_type=scoretype,
                         score=float(exam_score) if exam_score else 0
                     )
 
         except Exception as e:
             print('e', e)
-            transaction.savepoint_rollback(sid)
             return request.send_error("ERR_002", "Шалгалтын дүн татахад алдаа гарлаа")
-
-        transaction.savepoint_commit(sid)
 
         challenge_students_ids = challenge_students.values_list("student_id", flat=True)
         teach_score = TeacherScore.objects.filter(score_type=scoretype, student__in=challenge_students_ids, lesson_season=lesson_season, lesson_year=lesson_year)
