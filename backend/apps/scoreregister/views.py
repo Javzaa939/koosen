@@ -28,7 +28,7 @@ from lms.models import LearningPlan, Exam_to_group
 from lms.models import Season, Group, GradeLetter, Country
 from core.models import Employee, Teachers, User
 
-from .serializers import CorrespondSerailizer, StudentListPrintSerializer
+from .serializers import CorrespondSerailizer, TeacherScoreListPrintSerializer
 from .serializers import CorrespondListSerailizer
 from .serializers import ScoreRegisterSerializer
 from .serializers import ReScoreSerializer
@@ -1303,8 +1303,8 @@ class TeacherLessonScorePrint(
     generics.GenericAPIView,
     mixins.ListModelMixin
 ):
-    queryset = Student.objects
-    serializer_class = StudentListPrintSerializer
+    queryset = TeacherScore.objects
+    serializer_class = TeacherScoreListPrintSerializer
 
     # to pass extra complex data to serializer, because annotate() does not support complex data like list, dict, etc
     def get_serializer_context(self):
@@ -1333,26 +1333,16 @@ class TeacherLessonScorePrint(
             return context
 
     def get(self, request):
-        lesson = request.query_params.get('lesson')
-        group = request.query_params.get('group')
-        lesson_year, lesson_season = get_active_year_season()
-        lesson_teachers = Lesson_to_teacher.objects.filter(teacher__action_status=Teachers.APPROVED, lesson=lesson)
-        teacher_score_qs = TeacherScore.objects.filter(score_type__lesson_teacher__in=lesson_teachers).filter(lesson_year=lesson_year, lesson_season=lesson_season)
-        all_student = teacher_score_qs.values_list('student', flat=True)
-        self.queryset = self.queryset.filter(id__in=all_student)
-
-        if group:
-            self.queryset = self.queryset.filter(group=group)
-
         user = request.user
         teacher = get_object_or_404(Teachers, user_id=user, action_status=Teachers.APPROVED)
+        lesson = request.query_params.get('lesson')
+        lesson_year, lesson_season = get_active_year_season()
+        self.queryset = self.queryset.filter(score_type__lesson_teacher__lesson=lesson, lesson_year=lesson_year, lesson_season=lesson_season)
         lesson_kredit = LessonStandart.objects.filter(id=lesson).values_list('kredit', flat=True).first()
         teacher_org_position = Employee.objects.filter(user=user).values_list('org_position__name', flat=True).first()
-        teacher_score_updated_at = teacher_score_qs.values_list('updated_at', flat=True).order_by('updated_at').last()
+        teacher_score_updated_at = self.queryset.values_list('updated_at', flat=True).order_by('updated_at').last()
 
         self.queryset = self.queryset.annotate(
-            lesson_year=Value(lesson_year, output_field=CharField()),
-            lesson_season=Value(Season.objects.filter(id=lesson_season).first().season_name, output_field=CharField()),
             lesson_kredit=Value(lesson_kredit, output_field=FloatField()),
             teacher_name=Value(teacher.full_name, output_field=CharField()),
             teacher_org_position=Value(teacher_org_position, output_field=CharField()),

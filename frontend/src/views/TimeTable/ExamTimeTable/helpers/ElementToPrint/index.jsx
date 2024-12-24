@@ -197,12 +197,12 @@ export default function ElementToPrint({ data_to_print, setElementToPrint, selec
 													<td></td>
 													<td></td>
 													<td></td>
-													<td>{item.teacher_score}</td>
+													<td>{item.teacher_score_type !== 7 && item.teacher_score}</td>
 													<td></td>
 													<td></td>
 													<td></td>
 													<td></td>
-													<td></td>
+													<td>{item.teacher_score_type === 7 && item.teacher_score}</td>
 													<td></td>
 													<td></td>
 												</tr>

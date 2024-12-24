@@ -285,7 +285,7 @@ const ExamTimeTable = () => {
                     dataToPrint['teacher_org_position'] = data[0].teacher_org_position || '',
                     dataToPrint['teacher_name'] = data[0].teacher_name || '',
                     dataToPrint['teacher_score_updated_at'] = moment(data[0].teacher_score_updated_at).format('YYYY-MM-DD HH:mm:ss') || '',
-                    dataToPrint['exam_committee'] = data[0].exam_committee || dataToPrint['exam_committee'],
+                    dataToPrint['exam_committee'] = data[0].exam_committee || [],
                     dataToPrint['lesson_year'] = data[0].lesson_year || '',
                     dataToPrint['lesson_season'] = data[0].lesson_season || '',
                     dataToPrint['lesson_name'] = data[0].lesson_name || '',
@@ -295,6 +295,7 @@ const ExamTimeTable = () => {
                         return {
                             full_name: item.full_name || '',
                             teacher_score: item.score || '',
+                            teacher_score_type: item.score_type || '',
                         }
                     })
 
