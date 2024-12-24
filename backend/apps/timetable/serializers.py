@@ -12,7 +12,7 @@ from lms.models import Student
 from lms.models import Exam_to_group
 from lms.models import ExamTimeTable
 from lms.models import LessonStandart, ScoreRegister, Score, CalculatedGpaOfDiploma, StudentRegister
-from lms.models import Exam_repeat, TeacherCreditVolumePlan, TeacherCreditVolumePlan_group, Teachers, ChallengeStudents
+from lms.models import Exam_repeat, TeacherCreditVolumePlan, TeacherCreditVolumePlan_group, Teachers, ChallengeStudents, TeacherScore
 
 from student.serializers import StudentListSerializer
 from surgalt.serializers import LessonStandartSerialzier
@@ -905,6 +905,26 @@ class ChallengeStudentsSerializer(serializers.ModelSerializer):
         full_name = get_fullName(last_name, first_name, is_strim_first=True)
 
         data['student_name'] = full_name
+        data['student_code'] = instance.student.code
+
+        return data
+
+
+class TeacherScoreStudentsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = TeacherScore
+        fields = ['id', 'score', 'student']
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+
+        first_name = instance.student.first_name
+        last_name = instance.student.last_name
+        full_name = get_fullName(last_name, first_name, is_strim_first=True)
+
+        data['student_name'] = full_name
+        data['take_score'] = instance.score_type.score
         data['student_code'] = instance.student.code
 
         return data

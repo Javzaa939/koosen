@@ -61,7 +61,8 @@ from .serializers import PotokSerializer
 from .serializers import ExamTimeTableAllSerializer
 from .serializers import (
     TimetablePrintSerializer,
-    ChallengeStudentsSerializer
+    ChallengeStudentsSerializer,
+    TeacherScoreStudentsSerializer,
 )
 
 
@@ -3304,8 +3305,8 @@ class ExamTimeTableScoreListAPIView(
             challenge_qs = Challenge.objects.filter(challenge_type=Challenge.SEMESTR_EXAM, lesson=lesson)
             challenge_students = ChallengeStudents.objects.filter(challenge__in=challenge_qs, student__group__in=exam_groups)
 
-            # Шалгалт өгсөн оюутны жагсаалт болон шалгалтын мэдээлэл
-            challenge_student_data = ChallengeStudentsSerializer(challenge_students, many=True).data
+            if challenge_students.count() == 0:
+                return request.send_data([])
 
             scoretype_qs = Lesson_teacher_scoretype.objects.filter(score_type=Lesson_teacher_scoretype.BUSAD, lesson_teacher__lesson=lesson).first()
 
@@ -3314,24 +3315,28 @@ class ExamTimeTableScoreListAPIView(
 
             scoretype = Lesson_teacher_scoretype.objects.filter(lesson_teacher=other_lesson_teacher, score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).first()
 
-            for challenge_student in challenge_student_data:
-                student = challenge_student.get('student')
-                score = challenge_student.get('score')
-                take_score = challenge_student.get('take_score')
+            if not scoretype:
+                scoretype = Lesson_teacher_scoretype.objects.create(
+                    lesson_teacher=other_lesson_teacher,
+                    score_type=Lesson_teacher_scoretype.SHALGALT_ONOO,
+                    score=30
+                )
 
-                if not scoretype:
-                    scoretype = Lesson_teacher_scoretype.objects.create(
-                        lesson_teacher=other_lesson_teacher,
-                        score_type=Lesson_teacher_scoretype.SHALGALT_ONOO,
-                        score=take_score
-                    )
+            for challenge_student in challenge_students:
+                student = challenge_student.student
+                score = challenge_student.score or 0                     # авсан оноо
+                take_score = challenge_student.take_score or 0           # авах оноо
+
+                # 30 оноонд хувилсан
+                # (Авсан оноо * Хувиргах оноо) / авах оноо
+                exam_score = (score * 30) / take_score
 
                 teach_score = TeacherScore.objects.filter(score_type=scoretype, student_id=student, lesson_season=lesson_season, lesson_year=lesson_year)
 
                 # Дүн орчихсон байвал update хийнэ
                 if teach_score:
                     teach_score.update(
-                        score=float(score) if score else 0,
+                        score=float(exam_score) if exam_score else 0,
                         lesson_year=lesson_year,
                         lesson_season=lesson_season
                     )
@@ -3343,7 +3348,7 @@ class ExamTimeTableScoreListAPIView(
                         lesson_season_id=lesson_season,
                         student_id=student,
                         score_type=scoretype,
-                        score=float(score) if score else 0
+                        score=float(exam_score) if exam_score else 0
                     )
 
         except Exception as e:
@@ -3353,7 +3358,8 @@ class ExamTimeTableScoreListAPIView(
 
         transaction.savepoint_commit(sid)
 
-        if len(challenge_student_data) == 0:
-            return request.send_info_msg("INF_021", "Шалгалт өгсөн оюутны мэдээлэл олдсонгүй")
+        challenge_students_ids = challenge_students.values_list("student_id", flat=True)
+        teach_score = TeacherScore.objects.filter(score_type=scoretype, student__in=challenge_students_ids, lesson_season=lesson_season, lesson_year=lesson_year)
+        challenge_student_data = TeacherScoreStudentsSerializer(teach_score, many=True).data
 
         return request.send_info("INF_021", challenge_student_data)
