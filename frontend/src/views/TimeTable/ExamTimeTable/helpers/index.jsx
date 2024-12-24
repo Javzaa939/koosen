@@ -1,4 +1,4 @@
-import { Edit, Printer, XSquare } from 'react-feather'
+import { DownloadCloud, Edit, Printer, XSquare } from 'react-feather'
 import { t } from "i18next";
 import useModal from "@hooks/useModal"
 
@@ -6,7 +6,7 @@ import { Badge, UncontrolledTooltip } from "reactstrap";
 
 import './helperstyle.css'
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, datas, handleEditModal,handleDelete, navigate) {
+export function getColumns (currentPage, rowsPerPage, datas, handleEditModal,handleDelete, navigate, handleDownloadScore, user) {
 
 	// const navigate = useNavigate()
 	const { showWarning } = useModal()
@@ -112,36 +112,59 @@ export function getColumns (currentPage, rowsPerPage, datas, handleEditModal,han
 			minWidth: "50px",
 			selector: (row) => (
 				<div className="text-center" style={{ width: "auto" }}>
-						<a
-							id={`requestExamDetail${row.id}`}
-							className='ms-1'
-							onClick={
-								() => handleEditModal(row)
-							}>
-							<Badge color="light-info" pill><Edit width={"20px"} /></Badge>
-						</a>
+					{
+						// Шалгалт аваад дууссан мөн онлайн шалгалт байгаад сорил төлөвтэй байна
+						row?.stype === 1 && row?.is_online && row?.is_expired && user?.permissions?.includes('lms-timetable-exam-score-download') &&
+						<>
+							<a
+								role="button"
+								className='ms-25'
+								onClick={() => showWarning({
+									header: {
+										title: `Шалгалтын дүн татах`,
+									},
+									question: `Та энэ шалгалтын дүн татахдаа итгэлтэй байна уу?`,
+									onClick: () => handleDownloadScore(row),
+									btnText: 'Дүн татах',
+
+								})}
+								id={`downloadScore${row?.id}`}
+							>
+								<Badge color="light-primary" pill><DownloadCloud width={"20px"} /></Badge>
+							</a>
+							<UncontrolledTooltip placement='top' target={`downloadScore${row.id}`} >Дүн татах</UncontrolledTooltip>
+						</>
+					}
+					<a
+						id={`requestExamDetail${row.id}`}
+						className='ms-25'
+						onClick={
+							() => handleEditModal(row)
+						}>
+						<Badge color="light-info" pill><Edit width={"20px"} /></Badge>
+					</a>
 
 					<UncontrolledTooltip placement='top' target={`requestExamDetail${row.id}`} >Засах</UncontrolledTooltip>
 					{
-							<>
-								<a
-									role="button"
-									className='ms-1'
-									onClick={() => showWarning({
-										header: {
-											title: `Шалгалтын хуваарь устгах`,
-										},
-										question: `Та энэ шалгалтын хуваарь устгахдаа итгэлтэй байна уу?`,
-										onClick: () => handleDelete(row.id),
-										btnText: 'Устгах',
+						<>
+							<a
+								role="button"
+								className='ms-25'
+								onClick={() => showWarning({
+									header: {
+										title: `Шалгалтын хуваарь устгах`,
+									},
+									question: `Та энэ шалгалтын хуваарь устгахдаа итгэлтэй байна уу?`,
+									onClick: () => handleDelete(row.id),
+									btnText: 'Устгах',
 
-									})}
-									id={`examDelete${row?.id}`}
-								>
-									<Badge color="light-danger" pill><XSquare width={"20px"} /></Badge>
-								</a>
-								<UncontrolledTooltip placement='top' target={`examDelete${row.id}`} >Устгах</UncontrolledTooltip>
-							</>
+								})}
+								id={`examDelete${row?.id}`}
+							>
+								<Badge color="light-danger" pill><XSquare width={"20px"} /></Badge>
+							</a>
+							<UncontrolledTooltip placement='top' target={`examDelete${row.id}`} >Устгах</UncontrolledTooltip>
+						</>
 					}
 					{/* {
 						<>
