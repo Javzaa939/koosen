@@ -905,6 +905,8 @@ function useApi(isDisplay=false) {
 					instance.get(`/student/info/lesson/${lesson}/?group_limit=${room_capacity}&schoolId=${school_id}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&exam=${examId}`),
 
 				getList: (is_online='') => instance.get(`/timetable/examtimetable/list/?school=${school_id}&is_online=${is_online}`),
+				getStudentExamScore:(pk, lesson) => instance.put(`/timetable/examtimetable/score/${pk}/?lesson_year=${cyear_name}&lesson_season=${cseason_id}&lesson=${lesson}`),
+
 			},
 			// Дахин шалгалтын бүртгэл
 			re_exam:{

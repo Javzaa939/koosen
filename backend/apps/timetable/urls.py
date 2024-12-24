@@ -48,6 +48,7 @@ urlpatterns = [
     path('examtimetable/create/', ExamTimeTableCreateAPIView.as_view()),
     path('examtimetable/<int:pk>/', ExamTimeTableAPIView.as_view()),
     path('examtimetable/list/', ExamTimeTableListAPIView.as_view()),
+    path('examtimetable/score/<int:pk>/', ExamTimeTableScoreListAPIView.as_view()),
 
     # Дахин шалгалтын бүртгэл
     path('exam_repeat/', Exam_repeatListAPIView.as_view()),

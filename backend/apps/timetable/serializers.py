@@ -1,3 +1,6 @@
+
+from datetime import datetime
+
 from rest_framework import serializers
 from django.db.models import F, Sum
 from lms.models import Room
@@ -9,7 +12,7 @@ from lms.models import Student
 from lms.models import Exam_to_group
 from lms.models import ExamTimeTable
 from lms.models import LessonStandart, ScoreRegister, Score, CalculatedGpaOfDiploma, StudentRegister
-from lms.models import Exam_repeat, TeacherCreditVolumePlan, TeacherCreditVolumePlan_group, Teachers
+from lms.models import Exam_repeat, TeacherCreditVolumePlan, TeacherCreditVolumePlan_group, Teachers, ChallengeStudents, TeacherScore
 
 from student.serializers import StudentListSerializer
 from surgalt.serializers import LessonStandartSerialzier
@@ -490,6 +493,7 @@ class ExamTimeTableAllSerializer(serializers.ModelSerializer):
     stype_name = serializers.SerializerMethodField()
     group = serializers.SerializerMethodField()
     lesson_id = serializers.CharField(source='lesson.id', default='')
+    is_expired = serializers.SerializerMethodField()
 
     class Meta:
         model = ExamTimeTable
@@ -513,6 +517,10 @@ class ExamTimeTableAllSerializer(serializers.ModelSerializer):
         exam_groups = Exam_to_group.objects.filter(exam=obj).values_list('group', flat=True)
 
         return list(exam_groups)
+
+    def get_is_expired(self, obj):
+        is_expired = datetime.now() >= obj.end_date
+        return is_expired
 
 
 class ExamTimeTableListSerializer(serializers.ModelSerializer):
@@ -882,3 +890,42 @@ class TimetablePrintSerializer(serializers.ModelSerializer):
         lesson_name = name + ' ' + '/' + type_name + "/"
 
         return lesson_name
+
+
+class ChallengeStudentsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ChallengeStudents
+        fields = ['id', 'challenge', 'score', 'take_score', 'student']
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+
+        first_name = instance.student.first_name
+        last_name = instance.student.last_name
+        full_name = get_fullName(last_name, first_name, is_strim_first=True)
+
+        data['student_name'] = full_name
+        data['student_code'] = instance.student.code
+
+        return data
+
+
+class TeacherScoreStudentsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = TeacherScore
+        fields = ['id', 'score', 'student']
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+
+        first_name = instance.student.first_name
+        last_name = instance.student.last_name
+        full_name = get_fullName(last_name, first_name, is_strim_first=True)
+
+        data['student_name'] = full_name
+        data['take_score'] = instance.score_type.score
+        data['student_code'] = instance.student.code
+
+        return data

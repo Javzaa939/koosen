@@ -23,6 +23,7 @@ import { getColumns } from "./helpers"
 import Addmodal from './Add'
 // import Editmodal from "./Edit"
 import classNames from "classnames"
+import DownloadScore from "./DownloadScore"
 
 // #region print score info
 import ElementToPrint, { printElement } from "./helpers/ElementToPrint"
@@ -66,6 +67,7 @@ const ExamTimeTable = () => {
 
     // нийт датаны тоо
     const [total_count, setTotalCount] = useState(datas.length || 1)
+    const [ studentData, setStudentDatas ] = useState([]);
 
     // loader
     const { Loader, isLoading, fetchData } = useLoader({})
@@ -92,6 +94,9 @@ const ExamTimeTable = () => {
     const isPrintButtonPressed = useRef(false)
     const [selected_group_names, setSelectedGroupNames] = useState('')
     // #endregion
+    const [downloadModal, setDownloadModal] = useState(false);
+
+    const toggleDownloadModal = () => setDownloadModal(!downloadModal)
 
     /* Нэмэх модал setState функц */
     const handleModal = () =>{
@@ -293,6 +298,23 @@ const ExamTimeTable = () => {
     }
     // #endregion
 
+    // Оюутны жагсаалт
+    const getStudentList = async(rowDatas) => {
+        if(rowDatas?.id) {
+            const lessonId = rowDatas.lesson || ''
+
+            const { success, data } = await fetchData(examApi.getStudentExamScore(rowDatas?.id, lessonId))
+            if(success) {
+                setStudentDatas(data)
+            }
+        }
+	}
+
+    function handleDownloadScore(row) {
+        setDownloadModal(!downloadModal)
+        getStudentList(row)
+    }
+
     return (
         <Fragment>
             <Card>
@@ -432,7 +454,7 @@ const ExamTimeTable = () => {
                                                 className='react-dataTable'
                                                 // progressPending={isTableLoading}
                                                 onSort={handleSort}
-                                                columns={getColumns(currentPage, rowsPerPage, datas, handleEditModal, handleDelete, handlePrint)}
+                                                columns={getColumns(currentPage, rowsPerPage, datas, handleEditModal, handleDelete, navigate, handleDownloadScore, user, handlePrint)}
                                                 sortIcon={<ChevronDown size={10} />}
                                                 paginationPerPage={rowsPerPage}
                                                 paginationDefaultPage={currentPage}
@@ -449,6 +471,7 @@ const ExamTimeTable = () => {
                             }
                 {modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} handleEdit={handleEditModal} editId={editId} editData={edit_data}/>}
                 {/* {edit_modal && <Editmodal editId={edit_pay_id} open={edit_modal} handleModal={handleEditModal} refreshDatas={getDatas}/>} */}
+                {downloadModal && <DownloadScore open={downloadModal} handleModal={() => setDownloadModal(!downloadModal)} studentDatas={studentData} />}
             </Card>
             {/* to avoid parent elements styles conflicts render in body's root */}
             {ReactDOM.createPortal(element_to_print, document.body)}
