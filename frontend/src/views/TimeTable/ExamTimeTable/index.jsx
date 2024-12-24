@@ -24,6 +24,7 @@ import { getColumns } from "./helpers"
 import Addmodal from './Add'
 // import Editmodal from "./Edit"
 import classNames from "classnames"
+import DownloadScore from "./DownloadScore"
 
 const ExamTimeTable = () => {
 	const navigate = useNavigate()
@@ -63,6 +64,7 @@ const ExamTimeTable = () => {
 
     // нийт датаны тоо
     const [total_count, setTotalCount] = useState(datas.length || 1)
+    const [ studentData, setStudentDatas ] = useState([]);
 
     // loader
     const { Loader, isLoading, fetchData } = useLoader({})
@@ -80,7 +82,9 @@ const ExamTimeTable = () => {
     // Modal
     const [modal, setModal] = useState(false);
     const [edit_modal, setEditModal] = useState(false);
-    console.log("edit_modal", edit_modal);
+    const [downloadModal, setDownloadModal] = useState(false);
+
+    const toggleDownloadModal = () => setDownloadModal(!downloadModal)
 
     /* Нэмэх модал setState функц */
     const handleModal = () =>{
@@ -198,6 +202,23 @@ const ExamTimeTable = () => {
         if (success) {
             getDatas()
         }
+    }
+
+    // Оюутны жагсаалт
+    const getStudentList = async(rowDatas) => {
+        if(rowDatas?.id) {
+            const lessonId = rowDatas.lesson || ''
+
+            const { success, data } = await fetchData(examApi.getStudentExamScore(rowDatas?.id, lessonId))
+            if(success) {
+                setStudentDatas(data)
+            }
+        }
+	}
+
+    function handleDownloadScore(row) {
+        setDownloadModal(!downloadModal)
+        getStudentList(row)
     }
 
     return (
@@ -338,7 +359,7 @@ const ExamTimeTable = () => {
                                                 className='react-dataTable'
                                                 // progressPending={isTableLoading}
                                                 onSort={handleSort}
-                                                columns={getColumns(currentPage, rowsPerPage, datas, handleEditModal, handleDelete, navigate)}
+                                                columns={getColumns(currentPage, rowsPerPage, datas, handleEditModal, handleDelete, navigate, handleDownloadScore, user)}
                                                 sortIcon={<ChevronDown size={10} />}
                                                 paginationPerPage={rowsPerPage}
                                                 paginationDefaultPage={currentPage}
@@ -355,6 +376,7 @@ const ExamTimeTable = () => {
                             }
                 {modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} handleEdit={handleEditModal} editId={editId} editData={edit_data}/>}
                 {/* {edit_modal && <Editmodal editId={edit_pay_id} open={edit_modal} handleModal={handleEditModal} refreshDatas={getDatas}/>} */}
+                {downloadModal && <DownloadScore open={downloadModal} handleModal={() => setDownloadModal(!downloadModal)} studentDatas={studentData} />}
             </Card>
         </Fragment>
     )

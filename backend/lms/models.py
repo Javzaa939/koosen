@@ -199,13 +199,16 @@ class Lesson_teacher_scoretype(models.Model):
     BIEDAALT1 = 4
     BIEDAALT2 = 5
     BUSAD = 6
+    SHALGALT_ONOO = 7
+
     SCORE_TYPE = (
         (QUIZ1, "Сорил 1"),
         (QUIZ2, "Сорил 2"),
         (IRTS, "Ирц"),
         (BIEDAALT1, "Бие даалт 1"),
         (BIEDAALT2, "Бие даалт 2"),
-        (BUSAD, "Бусад "),
+        (BUSAD, "Бусад"),
+        (SHALGALT_ONOO, "30 онооны шалгалт"),
     )
 
     lesson_teacher = models.ForeignKey(Lesson_to_teacher, on_delete=models.CASCADE, verbose_name="Хичээл багш")
