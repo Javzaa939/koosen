@@ -254,15 +254,15 @@ export default function ElementToPrint({ data_to_print, setElementToPrint, selec
 										</thead>
 										<tbody>
 											<tr>
-												<td>&nbsp;</td>
-												<td></td>
-												<td></td>
-												<td></td>
-												<td></td>
-												<td></td>
-												<td></td>
-												<td></td>
-												<td></td>
+												<td>{data_to_print?.total_students_count}</td>
+												<td>{data_to_print?.scored_students_count}</td>
+												<td>{data_to_print?.a_students_count}</td>
+												<td>{data_to_print?.b_students_count}</td>
+												<td>{data_to_print?.c_students_count}</td>
+												<td>{data_to_print?.d_students_count}</td>
+												<td>{data_to_print?.f_students_count}</td>
+												<td>{data_to_print?.success}</td>
+												<td>{data_to_print?.quality}</td>
 											</tr>
 										</tbody>
 									</table>

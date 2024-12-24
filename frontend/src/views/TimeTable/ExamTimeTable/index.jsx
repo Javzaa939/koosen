@@ -85,6 +85,7 @@ const ExamTimeTable = () => {
     const scoreApi = useApi().score.print
     const roomApi = useApi().timetable.room
     const groupApi = useApi().print.score
+	const scoreListApi = useApi().settings.score
 
     // Modal
     const [modal, setModal] = useState(false);
@@ -246,53 +247,80 @@ const ExamTimeTable = () => {
         }
     }, [data_to_print])
 
-    async function getDataToPrint(lesson_id, selectedGroupNames) {
-        let dataToPrint = {
-            teacher_org_position: '',
-            teacher_name: '',
-            teacher_score_updated_at: '',
-            exam_committee: [{
-                teacher_org_position: '',
-                teacher_name: '',
-                teacher_score_updated_at: '',
-            }],
-            lesson_year: '',
-            lesson_season: '',
-            quarter: '',
-            lesson_name: '',
-            lesson_credit: '',
-            lesson_students: [{
-                full_name: '',
-                teacher_score: '',
-            }]
+    // to get united ranges without depending on sign "+" and duplicated assesment letters
+    async function getUnitedScoreRanges() {
+        const ranges = {}
+        const { success, data } = await fetchDataToPrint(scoreListApi.get())
+
+        if (success) {
+            for (let i=0; i<data.length; i++) {
+                const item = data[i]
+                const assessment = item.assesment.replace('+','')
+                if (!ranges.hasOwnProperty(assessment)) ranges[assessment] = {}
+
+                if (ranges[assessment].score_min) {
+                    if (ranges[assessment].score_min > item.score_min) {
+                        ranges[assessment].score_min = item.score_min
+                    }
+                } else ranges[assessment]['score_min'] = item.score_min
+
+                if (ranges[assessment].score_max) {
+                    if (ranges[assessment].score_max < item.score_max) {
+                        ranges[assessment].score_max = item.score_max
+                    }
+                } else ranges[assessment]['score_max'] = item.score_max
+            }
         }
 
+        return ranges
+    }
+
+    async function getDataToPrint(lesson_id, selectedGroupNames) {
         if (lesson_id) {
             const { success, data } = await fetchDataToPrint(scoreApi.getByLesson(lesson_id))
 
             if (success) {
                 if (data?.length) {
+                    const dataToPrint = {}
                     dataToPrint['teacher_org_position'] = data[0].teacher_org_position || '',
                     dataToPrint['teacher_name'] = data[0].teacher_name || '',
                     dataToPrint['teacher_score_updated_at'] = moment(data[0].teacher_score_updated_at).format('YYYY-MM-DD HH:mm:ss') || '',
                     dataToPrint['exam_committee'] = data[0].exam_committee || dataToPrint['exam_committee'],
                     dataToPrint['lesson_year'] = data[0].lesson_year || '',
                     dataToPrint['lesson_season'] = data[0].lesson_season || '',
-                    dataToPrint['quarter'] = '1',
                     dataToPrint['lesson_name'] = data[0].lesson_name || '',
                     dataToPrint['lesson_credit'] = data[0].lesson_kredit || '',
+
                     dataToPrint['lesson_students'] = data.map(item => {
                         return {
                             full_name: item.full_name || '',
                             teacher_score: item.score || '',
                         }
                     })
+
+                    // Irts table calculation
+                    dataToPrint['total_students_count'] = data.length
+                    dataToPrint['scored_students_count'] = data.filter(item => item.score).length
+                    const score_ranges = await getUnitedScoreRanges()
+                    dataToPrint['a_students_count'] = data.filter(item => score_ranges.A.score_min <= item.score && item.score <= score_ranges.A.score_max).length
+                    dataToPrint['b_students_count'] = data.filter(item => score_ranges.B.score_min <= item.score && item.score <= score_ranges.B.score_max).length
+                    dataToPrint['c_students_count'] = data.filter(item => score_ranges.C.score_min <= item.score && item.score <= score_ranges.C.score_max).length
+                    dataToPrint['d_students_count'] = data.filter(item => score_ranges.D.score_min <= item.score && item.score <= score_ranges.D.score_max).length
+                    dataToPrint['f_students_count'] = data.filter(item => score_ranges.F.score_min <= item.score && item.score <= score_ranges.F.score_max).length
+
+                    if (dataToPrint['total_students_count']) {
+                        dataToPrint['success'] = (((dataToPrint['a_students_count'] + dataToPrint['b_students_count'] + dataToPrint['c_students_count']) * 100) / dataToPrint['total_students_count']).toFixed(0) + '%'
+                        dataToPrint['quality'] = (((dataToPrint['a_students_count'] + dataToPrint['b_students_count']) * 100) / dataToPrint['total_students_count']).toFixed(0) + '%'
+                    } else {
+                        dataToPrint['success'] = ''
+                        dataToPrint['quality'] = ''
+                    }
+
+                    setDataToPrint(dataToPrint)
+                    setSelectedGroupNames(selectedGroupNames)
                 }
             }
-        } else dataToPrint = null
-
-        setDataToPrint(dataToPrint)
-        setSelectedGroupNames(selectedGroupNames)
+        }
     }
 
     function handlePrint(lesson_id, selectedGroupNames) {
