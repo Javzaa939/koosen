@@ -298,7 +298,7 @@ const ExamTimeTable = () => {
                         }
                     })
 
-                    // Irts table calculation
+                    // #region Irts table calculation
                     dataToPrint['total_students_count'] = data.length
                     dataToPrint['scored_students_count'] = data.filter(item => item.score).length
                     const score_ranges = await getUnitedScoreRanges()
@@ -308,13 +308,14 @@ const ExamTimeTable = () => {
                     dataToPrint['d_students_count'] = data.filter(item => score_ranges.D.score_min <= item.score && item.score <= score_ranges.D.score_max).length
                     dataToPrint['f_students_count'] = data.filter(item => score_ranges.F.score_min <= item.score && item.score <= score_ranges.F.score_max).length
 
-                    if (dataToPrint['total_students_count']) {
+                    if (dataToPrint['total_students_count'] > 0) {
                         dataToPrint['success'] = (((dataToPrint['a_students_count'] + dataToPrint['b_students_count'] + dataToPrint['c_students_count']) * 100) / dataToPrint['total_students_count']).toFixed(0) + '%'
                         dataToPrint['quality'] = (((dataToPrint['a_students_count'] + dataToPrint['b_students_count']) * 100) / dataToPrint['total_students_count']).toFixed(0) + '%'
                     } else {
                         dataToPrint['success'] = ''
                         dataToPrint['quality'] = ''
                     }
+                    // #endregion
 
                     setDataToPrint(dataToPrint)
                     setSelectedGroupNames(selectedGroupNames)
