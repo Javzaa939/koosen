@@ -973,7 +973,8 @@ function useApi(isDisplay=false) {
 		/**Дүнгийн бүртгэл*/
 		score: {
 			print: {
-				get: (studentId, year, season) => instance.get(`/score/print/${studentId}/?year=${year}&season=${season}`)
+				get: (studentId, year, season) => instance.get(`/score/print/${studentId}/?year=${year}&season=${season}`),
+				getByLesson: (lesson_id='') => instance.get(`/score/print/?lesson=${lesson_id}`)
 			},
 			correspond:{
 				get: (limit, page, sort, search) =>

@@ -1914,3 +1914,38 @@ export const examType= () => {
 	})
 	return datas
 }
+
+
+export const convertImageToBase64 = async (url) => {
+
+  return fetch(url)
+      .then((response) => response.blob())
+      .then((blob) => {
+
+          return new Promise((resolve, reject) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result);
+              reader.onerror = reject;
+              reader.readAsDataURL(blob);
+          });
+      });
+};
+
+
+export const replaceImagesWithBase64 = async (container) => {
+  const images = container.querySelectorAll('img');
+
+  for (const img of images) {
+      const src = img.src || img.getAttribute('data-src');
+
+      if (src) {
+          try {
+              const base64 = await convertImageToBase64(src);
+              img.src = base64;
+          } catch (error) {
+              console.error('Image loading error:', src, error);
+          }
+      }
+  }
+};
+

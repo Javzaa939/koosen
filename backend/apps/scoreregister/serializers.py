@@ -1,6 +1,8 @@
+from datetime import datetime
 from rest_framework import serializers
 
-from lms.models import ScoreRegister
+from main.utils.function.utils import get_active_year_season
+from lms.models import Lesson_teacher_scoretype, Lesson_to_teacher, PermissionsOtherInterval, ScoreRegister, TeacherScore
 from lms.models import Student
 from lms.models import Teachers
 from lms.models import Score
@@ -9,7 +11,7 @@ from lms.models import LessonStandart
 from lms.models import Group
 from core.models import SubOrgs
 
-from surgalt.serializers import LessonStandartSerialzier
+from surgalt.serializers import GroupListSerializer, LessonStandartSerialzier
 from settings.serializers import ScoreSerailizer
 from student.serializers import StudentListSerializer
 
@@ -268,3 +270,206 @@ class ScoreRegisterPrintSerializer(serializers.ModelSerializer):
     class Meta:
         model = ScoreRegister
         fields = "__all__"
+
+
+class StudentListPrintSerializer(serializers.ModelSerializer):
+    full_name = serializers.SerializerMethodField()
+    lesson_name = serializers.SerializerMethodField()
+    score = serializers.SerializerMethodField()
+    lesson = serializers.SerializerMethodField()
+    type_score = serializers.SerializerMethodField()
+    insert_time = serializers.SerializerMethodField()
+    total_score = serializers.SerializerMethodField()
+    import_exam_score = serializers.SerializerMethodField()
+    group = GroupListSerializer(many=False)
+    lesson_year = serializers.CharField(read_only=True)
+    lesson_season = serializers.CharField(read_only=True)
+    lesson_kredit = serializers.FloatField(read_only=True)
+    teacher_name = serializers.CharField(read_only=True)
+    teacher_org_position = serializers.CharField(read_only=True)
+    teacher_score_updated_at = serializers.DateTimeField(read_only=True)
+    exam_committee = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Student
+        fields = 'id', "code", 'full_name', 'first_name', 'last_name', 'score', 'lesson_name', 'lesson', 'type_score', 'insert_time', 'total_score', 'import_exam_score', 'group', 'lesson_year', 'lesson_season', 'lesson_kredit', 'teacher_name', 'teacher_org_position', 'teacher_score_updated_at', 'exam_committee'
+
+    def get_full_name(self, obj):
+
+        return obj.full_name()
+
+    def get_lesson_name(self, obj):
+
+        lesson_name = ''
+        request = self.context.get("request")
+
+        lesson = request.query_params.get('lesson')
+
+        if lesson:
+            lesson_obj = LessonStandart.objects.filter(id=lesson).first()
+
+            if lesson_obj:
+                lesson_name = lesson_obj.code_name
+
+        return lesson_name
+
+    def get_lesson(self, obj):
+
+        request = self.context.get("request")
+
+        lesson = request.query_params.get('lesson')
+
+        if lesson:
+            lesson = int(lesson)
+
+        return lesson
+
+    def get_score(self, obj):
+        student = obj.id
+        score = ''
+
+        request = self.context.get("request")
+
+        lesson = request.query_params.get('lesson')
+        year, season = get_active_year_season()
+
+        user = request.user
+        teacher = Teachers.objects.filter(user_id=user).first()
+
+        score_type = request.query_params.get('scoretype')
+
+        if lesson:
+            lesson_teacher = Lesson_to_teacher.objects.filter(lesson=lesson, teacher=teacher).first()
+
+            if score_type:
+                score_type = Lesson_teacher_scoretype.objects.filter(lesson_teacher=lesson_teacher, score_type=score_type).first()
+
+            score_obj_list = TeacherScore.objects.filter(student=student)
+
+            if year:
+                score_obj_list = score_obj_list.filter(lesson_year=year)
+
+            if season:
+                score_obj_list = score_obj_list.filter(lesson_season=season)
+
+            # Дүнгийн задаргааны төрөл
+            if score_type:
+                score_obj_list = score_obj_list.filter(score_type=score_type)
+
+            if score_obj_list:
+                score = score_obj_list.first().score
+
+        return score
+
+    def get_type_score(self, obj):
+        """ Тухайн дүнгийн задаргааны төрлийн дүгнэх оноо """
+
+        score = ''
+
+        request = self.context.get("request")
+
+        lesson = request.query_params.get('lesson')
+
+        user = request.user
+        teacher = Teachers.objects.filter(user_id=user).first()
+
+        score_type = request.query_params.get('scoretype')
+
+        if lesson and score_type:
+
+            lesson_teacher = Lesson_to_teacher.objects.filter(lesson=lesson, teacher=teacher).first()
+            scoretype = Lesson_teacher_scoretype.objects.filter(lesson_teacher=lesson_teacher, score_type=score_type).first()
+
+            # Дүнгийн задаргааны төрөл
+            if scoretype:
+                score = scoretype.score
+
+        return score
+
+    def get_insert_time(self, obj):
+        """ Дүнгийн задаргааны дүн оруулах хугацааг шалгах """
+
+        ptype= ''
+        request = self.context.get("request")
+        score_type = int(request.query_params.get('scoretype')) if request.query_params.get('scoretype') else ''
+
+        insert_time = False
+
+        # Сорил 1
+        if score_type == Lesson_teacher_scoretype.QUIZ1:
+            ptype = PermissionsOtherInterval.QUIZ1
+
+        # Сорил 2
+        elif score_type == Lesson_teacher_scoretype.QUIZ2:
+            ptype = PermissionsOtherInterval.QUIZ2
+
+        elif score_type == Lesson_teacher_scoretype.BUSAD:
+            ptype = PermissionsOtherInterval.TEACHERSCORE
+
+        if ptype:
+            permission_times = PermissionsOtherInterval.objects.filter(permission_type=ptype).last()
+            if permission_times:
+                start  = permission_times.start_date
+                finish_date  = permission_times.finish_date
+
+                today = datetime.now()
+
+                if start <= today and today <= finish_date:
+                    insert_time = True
+
+        return insert_time
+
+    def get_total_score(self, obj):
+        """ Багшаас нийт авсан оноо """
+
+        total_score = 0
+        student = obj.id
+
+        request = self.context.get("request")
+        lesson = request.query_params.get('lesson')
+        year = request.query_params.get('year')
+        season = request.query_params.get('season')
+
+        user = request.user
+        teacher = Teachers.objects.filter(user_id=user).first()
+
+        if lesson:
+
+            lesson_teacher = Lesson_to_teacher.objects.filter(lesson=lesson, teacher=teacher).first()
+            scoretypes = Lesson_teacher_scoretype.objects.filter(lesson_teacher=lesson_teacher).values_list('id', flat=True)
+
+            # Дүнгийн задаргааны төрөл
+            for stype in scoretypes:
+                score_obj = TeacherScore.objects.filter(lesson_year=year, lesson_season=season, student=student, score_type=stype).first()
+
+                if score_obj:
+                    total_score += score_obj.score
+
+        return total_score
+
+    def get_import_exam_score(self, obj):
+        """ Дүнгийн задаргааны дүн оруулах хугацааг шалгах """
+
+        import_exam_score = False
+        request = self.context.get("request")
+
+        lesson = request.query_params.get('lesson')
+        year = request.query_params.get('year')
+        season = request.query_params.get('season')
+
+        user = request.user
+        teacher = Teachers.objects.filter(user_id=user).first()
+
+        score = ScoreRegister.objects.filter(lesson_year=year, lesson_season=season, student=obj.id, lesson=lesson, teacher=teacher).first()
+
+        exam_score = score.exam_score if score else ''
+
+        if exam_score:
+            import_exam_score = True
+
+        return import_exam_score
+
+    def get_exam_committee(self, obj):
+
+        return self.context.get('exam_committee', [])
+

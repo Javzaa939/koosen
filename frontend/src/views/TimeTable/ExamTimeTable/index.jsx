@@ -1,4 +1,4 @@
-import { Fragment, useState, useEffect, useContext } from "react"
+import { Fragment, useState, useEffect, useContext, useRef } from "react"
 
 import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, Spinner, Badge } from "reactstrap"
 
@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next"
 
 import { AlertCircle, ChevronDown, Plus, Search } from "react-feather"
 
-import { useNavigate } from "react-router-dom"
 import DataTable from "react-data-table-component"
 
 import useApi from '@hooks/useApi';
@@ -25,13 +24,17 @@ import Addmodal from './Add'
 // import Editmodal from "./Edit"
 import classNames from "classnames"
 
-const ExamTimeTable = () => {
-	const navigate = useNavigate()
+// #region print score info
+import ElementToPrint, { printElement } from "./helpers/ElementToPrint"
+import moment from "moment"
+import ReactDOM from 'react-dom';
+// #endregion
 
-    const { t } = useTranslation()
+const ExamTimeTable = () => {
     const { user } = useContext(AuthContext)
     const { school_id } = useContext(SchoolContext)
     const { showWarning } = useModal()
+    const { t } = useTranslation()
 
     // Эрэмбэлэлт
     const [sortField, setSort] = useState('')
@@ -69,18 +72,26 @@ const ExamTimeTable = () => {
     const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({})
     const { isLoading: teacherLoading, fetchData: teacherFetch } = useLoader({})
     const { isLoading: groupLoading, fetchData: groupFetch } = useLoader({})
+    const { Loader: dataToPrintLoader, isLoading: dataToPrintIsLoading, fetchData: fetchDataToPrint } = useLoader({})
 
     // Api
     const examApi = useApi().timetable.exam
     const teacherListApi = useApi().hrms.teacher
-    const lessonApi = useApi().study.lessonStandart
+    const scoreApi = useApi().score.print
     const roomApi = useApi().timetable.room
     const groupApi = useApi().print.score
 
     // Modal
     const [modal, setModal] = useState(false);
     const [edit_modal, setEditModal] = useState(false);
-    console.log("edit_modal", edit_modal);
+    // console.log("edit_modal", edit_modal);
+
+    // #region print score info
+    const [element_to_print, setElementToPrint] = useState(null);
+    const [data_to_print, setDataToPrint] = useState(null);
+    const isPrintButtonPressed = useRef(false)
+    const [selected_group_names, setSelectedGroupNames] = useState('')
+    // #endregion
 
     /* Нэмэх модал setState функц */
     const handleModal = () =>{
@@ -200,10 +211,93 @@ const ExamTimeTable = () => {
         }
     }
 
+    // #region print score info
+    useEffect(() => {
+        if (element_to_print) {
+            const group_names_array = selected_group_names?.split(", ")
+            let group_names = ''
+
+            if (group_names_array) {
+                if (group_names_array.length > 0) {
+                    group_names = group_names_array[0]
+                }
+
+                if (group_names_array.length > 1) {
+                    group_names = group_names + ' and more'
+                }
+            }
+
+            printElement('element_to_print', group_names)
+        }
+    }, [element_to_print])
+
+    useEffect(() => {
+        if (isPrintButtonPressed?.current && data_to_print) {
+            setElementToPrint(<ElementToPrint data_to_print={data_to_print} setElementToPrint={setElementToPrint} selectedGroupNames={selected_group_names} />)
+            isPrintButtonPressed.current = false
+        }
+    }, [data_to_print])
+
+    async function getDataToPrint(lesson_id, selectedGroupNames) {
+        let dataToPrint = {
+            teacher_org_position: '',
+            teacher_name: '',
+            teacher_score_updated_at: '',
+            exam_committee: [{
+                teacher_org_position: '',
+                teacher_name: '',
+                teacher_score_updated_at: '',
+            }],
+            lesson_year: '',
+            lesson_season: '',
+            quarter: '',
+            lesson_name: '',
+            lesson_credit: '',
+            lesson_students: [{
+                full_name: '',
+                teacher_score: '',
+            }]
+        }
+
+        if (lesson_id) {
+            const { success, data } = await fetchDataToPrint(scoreApi.getByLesson(lesson_id))
+
+            if (success) {
+                if (data?.length) {
+                    dataToPrint['teacher_org_position'] = data[0].teacher_org_position || '',
+                    dataToPrint['teacher_name'] = data[0].teacher_name || '',
+                    dataToPrint['teacher_score_updated_at'] = moment(data[0].teacher_score_updated_at).format('YYYY-MM-DD HH:mm:ss') || '',
+                    dataToPrint['exam_committee'] = data[0].exam_committee || dataToPrint['exam_committee'],
+                    dataToPrint['lesson_year'] = data[0].lesson_year || '',
+                    dataToPrint['lesson_season'] = data[0].lesson_season || '',
+                    dataToPrint['quarter'] = '1',
+                    dataToPrint['lesson_name'] = data[0].lesson_name || '',
+                    dataToPrint['lesson_credit'] = data[0].lesson_kredit || '',
+                    dataToPrint['lesson_students'] = data.map(item => {
+                        return {
+                            full_name: item.full_name || '',
+                            teacher_score: item.score || '',
+                        }
+                    })
+                }
+            }
+        } else dataToPrint = null
+
+        setDataToPrint(dataToPrint)
+        setSelectedGroupNames(selectedGroupNames)
+    }
+
+    function handlePrint(lesson_id, selectedGroupNames) {
+        getDataToPrint(lesson_id, selectedGroupNames)
+        isPrintButtonPressed.current = true
+    }
+    // #endregion
+
     return (
         <Fragment>
             <Card>
                 {isLoading && Loader}
+                {dataToPrintIsLoading && dataToPrintLoader}
                 <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
 					<CardTitle tag="h4">{t('Шалгалтын хуваарь')}</CardTitle>
                     <div className='d-flex flex-wrap mt-md-0 mt-1 '>
@@ -338,7 +432,7 @@ const ExamTimeTable = () => {
                                                 className='react-dataTable'
                                                 // progressPending={isTableLoading}
                                                 onSort={handleSort}
-                                                columns={getColumns(currentPage, rowsPerPage, datas, handleEditModal, handleDelete, navigate)}
+                                                columns={getColumns(currentPage, rowsPerPage, datas, handleEditModal, handleDelete, handlePrint)}
                                                 sortIcon={<ChevronDown size={10} />}
                                                 paginationPerPage={rowsPerPage}
                                                 paginationDefaultPage={currentPage}
@@ -356,6 +450,8 @@ const ExamTimeTable = () => {
                 {modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} handleEdit={handleEditModal} editId={editId} editData={edit_data}/>}
                 {/* {edit_modal && <Editmodal editId={edit_pay_id} open={edit_modal} handleModal={handleEditModal} refreshDatas={getDatas}/>} */}
             </Card>
+            {/* to avoid parent elements styles conflicts render in body's root */}
+            {ReactDOM.createPortal(element_to_print, document.body)}
         </Fragment>
     )
 }
