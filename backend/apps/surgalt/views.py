@@ -6053,10 +6053,19 @@ class ChallengeReportAPIView(
                 score_min = assessment['score_min']
                 score_max = assessment['score_max']
 
-                assessment_dict[assesment_value] = {
-                    'score_min': score_min,
-                    'score_max': score_max
-                }
+                # to get real min max values if assesment letter has duplications
+                if assesment_value in assessment_dict:
+                    if assessment_dict[assesment_value]['score_min'] > score_min:
+                        assessment_dict[assesment_value]['score_min'] = score_min
+
+                    if assessment_dict[assesment_value]['score_max'] < score_max:
+                        assessment_dict[assesment_value]['score_max'] = score_max
+
+                else:
+                    assessment_dict[assesment_value] = {
+                        'score_min': score_min,
+                        'score_max': score_max
+                    }
 
             queryset = (
                 queryset
