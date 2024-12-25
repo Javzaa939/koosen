@@ -3298,7 +3298,7 @@ class ExamTimeTableScoreListAPIView(
 
             instance = self.get_object()
 
-            # Шалгалт өгөх анги
+            # Шалгалт өгсөн анги
             exam_groups = Exam_to_group.objects.filter(exam=instance).values_list('group', flat=True)
 
             # Онлайнаар шалгалт өгсөн бол энд дүн нь байгаа

@@ -3480,6 +3480,9 @@ class Challenge(models.Model):
 
     #  Хамрах хүрээ нь
     lesson = models.ForeignKey(LessonStandart, on_delete=models.CASCADE, verbose_name="Хичээл", null=True)
+    lesson_year = models.CharField(max_length=20, null=True, verbose_name="Хичээлийн жил")
+    lesson_season = models.ForeignKey(Season, on_delete=models.CASCADE,  null=True)
+
     student = models.ManyToManyField(Student, blank=True, verbose_name="Оюутнууд")
 
     kind = models.IntegerField(choices=KIND_CHOICES, null=False, default=KIND_LESSON, blank=False)

@@ -6152,6 +6152,7 @@ class ChallengeAddInformationAPIView(
         data = request.data
         user = request.user
         season = request.query_params.get('season')
+        lesson_year, lesson_season = get_active_year_season()
         teacher = get_object_or_404(Teachers, user_id=user, action_status=Teachers.APPROVED)
         data['created_by'] = teacher.id if teacher else None
 
@@ -6162,6 +6163,8 @@ class ChallengeAddInformationAPIView(
         if season:
             data['challenge_type'] = Challenge.SEMESTR_EXAM
 
+        data['lesson_season'] = lesson_season
+        data['lesson_year'] = lesson_year
         try:
             with transaction.atomic():
                 saved_data, exception, serializer_errors = save_data_with_signals(self.queryset.model, self.serializer_class, True, None, data=data)
