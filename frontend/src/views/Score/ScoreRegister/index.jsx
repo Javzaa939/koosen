@@ -47,7 +47,7 @@ const ScoreRegister = () => {
 
     const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
 
-    const default_page = [10, 20, 50, 75, 100]
+    const default_page = ['Бүгд', 10, 20, 50, 75, 100]
 
     // Хуудаслалтын анхны утга
     const [currentPage, setCurrentPage] = useState(1)
@@ -201,7 +201,9 @@ const ScoreRegister = () => {
 
     // ** Function to handle per page
     function handlePerPage(e) {
-        setRowsPerPage(parseInt(e.target.value))
+        setRowsPerPage(
+			e.target.value === "Бүгд" ? e.target.value : parseInt(e.target.value)
+		);
     }
 
     // Хайх товч дарсан үед ажиллах функц
@@ -230,7 +232,7 @@ const ScoreRegister = () => {
         <Fragment>
             <Card>
                 <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
-                    <CardTitle tag='h4'>{t('Дүнгийн бүртгэл')}</CardTitle>
+                    <CardTitle tag='h4'>{t('Идэвхтэй улирлын дүнгийн бүртгэл')}</CardTitle>
                 </CardHeader>
                 <Row className="mx-50 gy-1 my-1" sm={12}>
                     <Col md={3} sm={12}>
@@ -417,12 +419,12 @@ const ScoreRegister = () => {
                             </div>
                         )}
                         onSort={handleSort}
-                        columns={getColumns(currentPage, rowsPerPage, total_count, select_value, exam_date, isDadlaga)}
+                        columns={getColumns(currentPage, rowsPerPage === 'Бүгд' ? 1 : rowsPerPage, total_count, select_value, exam_date, isDadlaga)}
                         sortIcon={<ChevronDown size={10} />}
                         paginationPerPage={rowsPerPage}
                         paginationDefaultPage={currentPage}
                         data={datas}
-                        paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
+                        paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage === 'Бүгд' ? total_count : rowsPerPage, total_count)}
                         fixedHeader
                         fixedHeaderScrollHeight='62vh'
                     />

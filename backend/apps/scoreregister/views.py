@@ -742,18 +742,21 @@ class ScoreTeacherDownloadAPIView(
         # Оюутны дүн нэгтэх
         for student_id in teacher_score_students:
             obj = {}
-            scores = teach_score_qs.filter(student=student_id).values_list('score', flat=True)
-            total_score = sum(scores) if scores else 0
+            total_score = teach_score_qs.filter(student=student_id).exclude(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total')
+            exam_score = teach_score_qs.filter(student=student_id).filter(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total')
 
             obj['student'] = student_id
-            obj['total_score'] = total_score
+            obj['teach_score'] = total_score
+            obj['exam_score'] = exam_score
 
             all_students_teach_scores.append(obj)
 
         # Тухайн хуваарь дээр хичээл үзэж байгаа бүх оюутнууд
-        all_student = get_lesson_choice_student(lesson, teacher, school_id, lesson_year, lesson_season, group)
-
-        student_queryset = student_queryset.filter(id__in=all_student)
+        # all_student = get_lesson_choice_student(lesson, teacher, school_id, lesson_year, lesson_season, group)
+        # if all_student:
+        #     student_queryset = student_queryset.filter(id__in=all_student)
+        # else:
+        student_queryset = student_queryset.filter(id__in=teacher_score_students)
 
         # Хичээлийн хуваарьтай бүх оюутнууд
         all_timetable_student_ids = student_queryset.values_list('id', flat=True)
@@ -761,76 +764,100 @@ class ScoreTeacherDownloadAPIView(
         with transaction.atomic():
 
             # Багшийн дүн оруулсан оюутны дүнг үүсгэнэ
+            create_score_students = []
+            update_score_students = []
             for student_teach_score in all_students_teach_scores:
                 student_id = student_teach_score.get('student')
-                student_score_total = student_teach_score.get('total_score')
+                student_teacher_score = student_teach_score.get('teach_score') or 0
+                student_exam_score = student_teach_score.get('exam_score') or 0
 
                 have_score_students.append(student_id)
 
                 # Өмнө нь дүн орсон эсэхийг шалгах
-                student_score = ScoreRegister.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season, student=student_id, lesson=lesson)
+                student_score_have = ScoreRegister.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season, student=student_id, lesson=lesson).first()
 
                 # Үсгэн үнэлгээ
+                student_score_total = student_teacher_score + student_exam_score
                 student_score_total =round(student_score_total, 2)
-                assessment = Score.objects.filter(score_max__gte=student_score_total, score_min__lte=student_score_total).values('id', 'assesment').first()
+                assessment = Score.objects.filter(score_max__gte=student_score_total, score_min__lte=student_score_total).first()
 
                 student = Student.objects.filter(id=student_id).first()
 
                 # Өмнө нь дүн орчихсон байвал update хийнэ
-                if student_score:
-                    student_score.update(
-                        teach_score=student_score_total if student_score_total else 0,
-                        assessment_id=assessment['id'] if assessment else None,
-                        status=ScoreRegister.TEACHER_WEB,
-                    )
+                if student_score_have:
+                    student_score_have.teach_score = student_teacher_score
+                    student_score_have.exam_score = student_exam_score
+                    student_score_have.assessment = assessment
+                    student_score_have.lesson_year = lesson_year
+                    student_score_have.lesson_season = Season.objects.get(id=lesson_season)
+                    student_score_have.status = ScoreRegister.TEACHER_WEB
+                    update_score_students.append(student_score_have)
                 else:
-                    ScoreRegister.objects.create(
-                        lesson_year=lesson_year,
-                        lesson_season_id=lesson_season,
-                        lesson_id=lesson,
-                        student_id=student_id,
-                        teach_score=student_score_total if student_score_total else 0,
-                        teacher_id=teacher,
-                        assessment_id=assessment['id'] if assessment else None,
-                        status=ScoreRegister.TEACHER_WEB,
-                        school=student.school if student else None
+                    create_score_students.append(
+                        ScoreRegister(
+                            lesson_year=lesson_year,
+                            lesson_season=Season.objects.get(id=lesson_season),
+                            lesson_id=lesson,
+                            student_id=student_id,
+                            teach_score=student_teacher_score if student_teacher_score else 0,
+                            exam_score=student_exam_score if student_exam_score else 0,
+                            teacher_id=teacher,
+                            assessment=assessment or None,
+                            status=ScoreRegister.TEACHER_WEB,
+                            school=student.school if student else None
+                        )
                     )
+            ScoreRegister.objects.bulk_create(create_score_students)
+            ScoreRegister.objects.bulk_update(update_score_students, ['teach_score', 'exam_score', 'status', 'assessment', 'lesson_year', 'lesson_season'])
 
             # Дүнгүй оюутнууд
             not_score_students = list(set(all_timetable_student_ids) - set(have_score_students))
 
             # Багшаас дүн аваагүй ч хуваарьт байгаа оюутнуудыг create хийх
             if not_score_students:
+                create_students = []
+                update_students = []
                 for student_id in not_score_students:
                     student_score_total = 0
-                    student_not_score = ScoreRegister.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season, student=student_id, lesson=lesson)
+                    student_teacher_score = student_teach_score.get('teach_score') or 0
+                    student_exam_score = student_teach_score.get('exam_score') or 0
+                    student_not_score = ScoreRegister.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season, student=student_id, lesson=lesson).first()
                     student = Student.objects.filter(id=student_id).first()
 
                     # Үсгэн үнэлгээ
+                    student_score_total = student_teacher_score + student_exam_score
                     student_score_total = round(student_score_total, 2)
-                    assessment = Score.objects.filter(score_max__gte=student_score_total, score_min__lte=student_score_total).values('id', 'assesment').first()
+                    assessment = Score.objects.filter(score_max__gte=student_score_total, score_min__lte=student_score_total).first()
 
                     # Өмнө нь дүн орчихсон байвал update хийнэ
                     if student_not_score:
-                        student_score.update(
-                            teach_score=student_score_total,
-                            assessment_id=assessment['id'] if assessment else None,
-                            status=ScoreRegister.TEACHER_WEB,
-                        )
+                        student_not_score.teach_score = student_teacher_score
+                        student_not_score.exam_score = student_exam_score
+                        student_not_score.assessment = assessment
+                        student_not_score.lesson_year = lesson_year
+                        student_not_score.lesson_season = Season.objects.get(id=lesson_season)
+                        student_not_score.status = ScoreRegister.TEACHER_WEB
+                        update_students.append(student_not_score)
                     else:
-                        ScoreRegister.objects.create(
-                            lesson_year=lesson_year,
-                            lesson_season_id=lesson_season,
-                            lesson_id=lesson,
-                            student_id=student_id,
-                            teach_score=student_score_total if student_score_total else 0,
-                            teacher_id=teacher,
-                            assessment_id=assessment['id'] if assessment else None,
-                            status=ScoreRegister.TEACHER_WEB,
-                            school=student.school if student else None
+                        create_students.append(
+                            ScoreRegister(
+                                lesson_year=lesson_year,
+                                lesson_season=Season.objects.get(id=lesson_season),
+                                lesson_id=lesson,
+                                student_id=student_id,
+                                teach_score=student_teacher_score,
+                                exam_score=student_exam_score,
+                                teacher_id=teacher,
+                                assessment_id=assessment if assessment else None,
+                                status=ScoreRegister.TEACHER_WEB,
+                                school=student.school if student else None
+                            )
                         )
 
-        self.queryset = self.queryset.filter(student__id__in=student_queryset)
+                ScoreRegister.objects.bulk_create(create_students)
+                ScoreRegister.objects.bulk_update(update_students, ['teach_score', 'exam_score', 'status', 'assessment', 'lesson_year', 'lesson_season'])
+
+        self.queryset = self.queryset.filter(student__in=student_queryset, lesson=lesson)
 
         all_list = self.list(request).data
 
