@@ -1,4 +1,4 @@
-import { Fragment, useState, useEffect, useContext } from "react"
+import { Fragment, useState, useEffect, useContext, useRef } from "react"
 
 import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, Spinner, Badge } from "reactstrap"
 
@@ -25,6 +25,12 @@ import Addmodal from './Add'
 // import Editmodal from "./Edit"
 import classNames from "classnames"
 import DownloadScore from "./DownloadScore"
+
+// #region print score info
+import ElementToPrint, { printElement } from "./helpers/ElementToPrint"
+import moment from "moment"
+import ReactDOM from 'react-dom';
+// #endregion
 
 const ExamTimeTable = () => {
 	const navigate = useNavigate()
@@ -71,17 +77,28 @@ const ExamTimeTable = () => {
     const { isLoading: isTableLoading, fetchData: allFetch } = useLoader({})
     const { isLoading: teacherLoading, fetchData: teacherFetch } = useLoader({})
     const { isLoading: groupLoading, fetchData: groupFetch } = useLoader({})
+    const { Loader: dataToPrintLoader, isLoading: dataToPrintIsLoading, fetchData: fetchDataToPrint } = useLoader({})
 
     // Api
     const examApi = useApi().timetable.exam
     const teacherListApi = useApi().hrms.teacher
-    const lessonApi = useApi().study.lessonStandart
+    const scoreApi = useApi().score.print
     const roomApi = useApi().timetable.room
     const groupApi = useApi().print.score
+	const scoreListApi = useApi().settings.score
 
     // Modal
     const [modal, setModal] = useState(false);
     const [edit_modal, setEditModal] = useState(false);
+    // console.log("edit_modal", edit_modal);
+
+    // #region print score info
+    const [element_to_print, setElementToPrint] = useState(null);
+    const [data_to_print, setDataToPrint] = useState(null);
+    const isPrintButtonPressed = useRef(false)
+    const [selected_group_names, setSelectedGroupNames] = useState('')
+    const [united_score_ranges, setUnitedScoreRanges] = useState(null)
+    // #endregion
     const [downloadModal, setDownloadModal] = useState(false);
 
     const toggleDownloadModal = () => setDownloadModal(!downloadModal)
@@ -105,6 +122,7 @@ const ExamTimeTable = () => {
         // getRoom();
         // getGroups()
         // getLessonOption()
+        getUnitedScoreRanges()
     },[])
 
     /* subschool id явуулж Багшийн жагсаалт авах */
@@ -204,6 +222,117 @@ const ExamTimeTable = () => {
         }
     }
 
+    // #region print score info
+    useEffect(() => {
+        if (element_to_print) {
+            const group_names_array = selected_group_names?.split(", ")
+            let group_names = ''
+
+            if (group_names_array) {
+                if (group_names_array.length > 0) {
+                    group_names = group_names_array[0]
+                }
+
+                if (group_names_array.length > 1) {
+                    group_names = group_names + ' and more'
+                }
+            }
+
+            printElement('element_to_print', group_names)
+        }
+    }, [element_to_print])
+
+    useEffect(() => {
+        if (isPrintButtonPressed?.current && data_to_print) {
+            setElementToPrint(<ElementToPrint data_to_print={data_to_print} setElementToPrint={setElementToPrint} selectedGroupNames={selected_group_names} />)
+            isPrintButtonPressed.current = false
+        }
+    }, [data_to_print])
+
+    // to get united ranges without depending on sign "+" and duplicated assesment letters
+    async function getUnitedScoreRanges() {
+        const ranges = {}
+        const { success, data } = await fetchDataToPrint(scoreListApi.get())
+
+        if (success) {
+            for (let i=0; i<data.length; i++) {
+                const item = data[i]
+                const assessment = item.assesment.replace('+','')
+                if (!ranges.hasOwnProperty(assessment)) ranges[assessment] = {}
+
+                if (ranges[assessment].score_min) {
+                    if (ranges[assessment].score_min > item.score_min) {
+                        ranges[assessment].score_min = item.score_min
+                    }
+                } else ranges[assessment]['score_min'] = item.score_min
+
+                if (ranges[assessment].score_max) {
+                    if (ranges[assessment].score_max < item.score_max) {
+                        ranges[assessment].score_max = item.score_max
+                    }
+                } else ranges[assessment]['score_max'] = item.score_max
+            }
+        }
+
+        setUnitedScoreRanges(ranges)
+    }
+
+    async function getDataToPrint(lesson_id, selectedGroupNames) {
+        if (lesson_id) {
+            const { success, data } = await fetchDataToPrint(scoreApi.getByLesson(lesson_id))
+
+            if (success) {
+                if (data?.length) {
+                    const dataToPrint = {}
+                    dataToPrint['teacher_org_position'] = data[0].teacher_org_position || '',
+                    dataToPrint['teacher_name'] = data[0].teacher_name || '',
+                    dataToPrint['teacher_score_updated_at'] = moment(data[0].teacher_score_updated_at).format('YYYY-MM-DD HH:mm:ss') || '',
+                    dataToPrint['exam_committee'] = data[0].exam_committee || [],
+                    dataToPrint['lesson_year'] = data[0].lesson_year || '',
+                    dataToPrint['lesson_season'] = data[0].lesson_season || '',
+                    dataToPrint['lesson_name'] = data[0].lesson_name || '',
+                    dataToPrint['lesson_credit'] = data[0].lesson_kredit || '',
+
+                    dataToPrint['lesson_students'] = data.map(item => {
+                        return {
+                            full_name: item.full_name || '',
+                            teacher_score: item.score || '',
+                            teacher_score_type: item.score_type || '',
+                        }
+                    })
+
+                    // #region Irts table calculation
+                    dataToPrint['total_students_count'] = data.length
+                    dataToPrint['scored_students_count'] = data.filter(item => item.score).length
+                    const score_ranges = united_score_ranges
+                    dataToPrint['a_students_count'] = data.filter(item => score_ranges.A.score_min <= item.score && item.score <= score_ranges.A.score_max).length
+                    dataToPrint['b_students_count'] = data.filter(item => score_ranges.B.score_min <= item.score && item.score <= score_ranges.B.score_max).length
+                    dataToPrint['c_students_count'] = data.filter(item => score_ranges.C.score_min <= item.score && item.score <= score_ranges.C.score_max).length
+                    dataToPrint['d_students_count'] = data.filter(item => score_ranges.D.score_min <= item.score && item.score <= score_ranges.D.score_max).length
+                    dataToPrint['f_students_count'] = data.filter(item => score_ranges.F.score_min <= item.score && item.score <= score_ranges.F.score_max).length
+
+                    if (dataToPrint['total_students_count'] > 0) {
+                        dataToPrint['success'] = (((dataToPrint['a_students_count'] + dataToPrint['b_students_count'] + dataToPrint['c_students_count']) * 100) / dataToPrint['total_students_count']).toFixed(0) + '%'
+                        dataToPrint['quality'] = (((dataToPrint['a_students_count'] + dataToPrint['b_students_count']) * 100) / dataToPrint['total_students_count']).toFixed(0) + '%'
+                    } else {
+                        dataToPrint['success'] = ''
+                        dataToPrint['quality'] = ''
+                    }
+                    // #endregion
+
+                    setDataToPrint(dataToPrint)
+                    setSelectedGroupNames(selectedGroupNames)
+                }
+            }
+        }
+    }
+
+    function handlePrint(lesson_id, selectedGroupNames) {
+        getDataToPrint(lesson_id, selectedGroupNames)
+        isPrintButtonPressed.current = true
+    }
+    // #endregion
+
     // Оюутны жагсаалт
     const getStudentList = async(rowDatas) => {
         if(rowDatas?.id) {
@@ -225,6 +354,7 @@ const ExamTimeTable = () => {
         <Fragment>
             <Card>
                 {isLoading && Loader}
+                {dataToPrintIsLoading && dataToPrintLoader}
                 <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
 					<CardTitle tag="h4">{t('Шалгалтын хуваарь')}</CardTitle>
                     <div className='d-flex flex-wrap mt-md-0 mt-1 '>
@@ -359,7 +489,7 @@ const ExamTimeTable = () => {
                                                 className='react-dataTable'
                                                 // progressPending={isTableLoading}
                                                 onSort={handleSort}
-                                                columns={getColumns(currentPage, rowsPerPage, datas, handleEditModal, handleDelete, navigate, handleDownloadScore, user)}
+                                                columns={getColumns(currentPage, rowsPerPage, datas, handleEditModal, handleDelete, navigate, handleDownloadScore, user, handlePrint)}
                                                 sortIcon={<ChevronDown size={10} />}
                                                 paginationPerPage={rowsPerPage}
                                                 paginationDefaultPage={currentPage}
@@ -378,6 +508,8 @@ const ExamTimeTable = () => {
                 {/* {edit_modal && <Editmodal editId={edit_pay_id} open={edit_modal} handleModal={handleEditModal} refreshDatas={getDatas}/>} */}
                 {downloadModal && <DownloadScore open={downloadModal} handleModal={() => setDownloadModal(!downloadModal)} studentDatas={studentData} />}
             </Card>
+            {/* to avoid parent elements styles conflicts render in body's root */}
+            {ReactDOM.createPortal(element_to_print, document.body)}
         </Fragment>
     )
 }

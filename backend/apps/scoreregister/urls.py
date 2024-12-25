@@ -26,6 +26,9 @@ urlpatterns = [
     path('rescore/student/', ReScoreStudentView.as_view()),
     path('rescore/<int:pk>/', ReScoreAPIView.as_view()),
 
+    # Score info. Shows students list by lesson
+    path('print/', TeacherLessonScorePrint.as_view()),
+
     # дүнгийн тодорхойлолт
     path('print/<int:student>/', ScoreRegisterPrintAPIView.as_view()),
 

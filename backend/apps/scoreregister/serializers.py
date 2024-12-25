@@ -1,6 +1,8 @@
+from datetime import datetime
 from rest_framework import serializers
 
-from lms.models import ScoreRegister
+from main.utils.function.utils import get_active_year_season
+from lms.models import Lesson_teacher_scoretype, Lesson_to_teacher, PermissionsOtherInterval, ScoreRegister, TeacherScore
 from lms.models import Student
 from lms.models import Teachers
 from lms.models import Score
@@ -9,7 +11,7 @@ from lms.models import LessonStandart
 from lms.models import Group
 from core.models import SubOrgs
 
-from surgalt.serializers import LessonStandartSerialzier
+from surgalt.serializers import GroupListSerializer, LessonStandartSerialzier
 from settings.serializers import ScoreSerailizer
 from student.serializers import StudentListSerializer
 
@@ -268,3 +270,54 @@ class ScoreRegisterPrintSerializer(serializers.ModelSerializer):
     class Meta:
         model = ScoreRegister
         fields = "__all__"
+
+
+class TeacherScoreListPrintSerializer(serializers.ModelSerializer):
+    full_name = serializers.SerializerMethodField()
+    lesson_name = serializers.SerializerMethodField()
+    lesson_season = serializers.SerializerMethodField()
+    lesson_kredit = serializers.FloatField(read_only=True)
+    teacher_name = serializers.CharField(read_only=True)
+    teacher_org_position = serializers.CharField(read_only=True)
+    teacher_score_updated_at = serializers.DateTimeField(read_only=True)
+    exam_committee = serializers.SerializerMethodField()
+    score_type = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TeacherScore
+        fields = 'id', 'full_name', 'score', 'lesson_name', 'lesson_year', 'lesson_season', 'lesson_kredit', 'teacher_name', 'teacher_org_position', 'teacher_score_updated_at', 'exam_committee', 'score_type'
+
+    def get_full_name(self, obj):
+
+        return obj.student.full_name()
+
+    def get_lesson_name(self, obj):
+        lesson_name = ''
+
+        if obj.score_type and obj.score_type.lesson_teacher:
+            lesson_obj = obj.score_type.lesson_teacher.lesson
+
+            if lesson_obj:
+                lesson_name = lesson_obj.code_name
+
+        return lesson_name
+
+    def get_exam_committee(self, obj):
+
+        return self.context.get('exam_committee', [])
+
+    def get_score_type(self, obj):
+        score_type = ''
+
+        if obj.score_type:
+            score_type = obj.score_type.score_type
+
+        return score_type
+
+    def get_lesson_season(self, obj):
+        lesson_season = ''
+
+        if obj.lesson_season:
+            lesson_season = obj.lesson_season.season_name
+
+        return lesson_season

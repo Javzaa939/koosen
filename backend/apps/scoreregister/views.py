@@ -1,4 +1,5 @@
 import os
+from django.shortcuts import get_object_or_404
 import openpyxl_dictreader
 
 from datetime import datetime
@@ -7,7 +8,7 @@ from rest_framework import generics
 
 from django.db import transaction
 from django.conf import settings
-from django.db.models import  Count, Q,  Value, CharField
+from django.db.models import  Count, Q,  Value, CharField, FloatField, DateTimeField
 from django.db.models.functions import Concat
 
 from rest_framework.permissions import IsAuthenticated
@@ -15,7 +16,7 @@ from rest_framework.decorators import permission_classes
 
 from main.utils.function.utils import get_lesson_choice_student, has_permission, remove_key_from_dict, get_fullName, get_active_year_season, json_load, calculate_birthday
 from main.utils.file import save_file, remove_folder
-from lms.models import ScoreRegister
+from lms.models import ExamTimeTable, ScoreRegister
 from lms.models import Student
 from lms.models import LessonStandart
 from lms.models import Score
@@ -25,9 +26,9 @@ from lms.models import TeacherScore
 from lms.models import Lesson_teacher_scoretype
 from lms.models import LearningPlan, Exam_to_group
 from lms.models import Season, Group, GradeLetter, Country
-from core.models import User
+from core.models import Employee, Teachers, User
 
-from .serializers import CorrespondSerailizer
+from .serializers import CorrespondSerailizer, TeacherScoreListPrintSerializer
 from .serializers import CorrespondListSerailizer
 from .serializers import ScoreRegisterSerializer
 from .serializers import ReScoreSerializer
@@ -1295,6 +1296,62 @@ class ScoreRegisterPrintAPIView(
         }
 
         return request.send_data(data)
+
+
+@permission_classes([IsAuthenticated])
+class TeacherLessonScorePrint(
+    generics.GenericAPIView,
+    mixins.ListModelMixin
+):
+    queryset = TeacherScore.objects
+    serializer_class = TeacherScoreListPrintSerializer
+
+    # to pass extra complex data to serializer, because annotate() does not support complex data like list, dict, etc
+    def get_serializer_context(self):
+            context = super().get_serializer_context()
+            lesson = self.request.query_params.get('lesson')
+            lesson_year, lesson_season = get_active_year_season()
+            exam_committee = []
+            exam_time_table_qs = ExamTimeTable.objects.filter(lesson_year=lesson_year,lesson_season=lesson_season,lesson=lesson).prefetch_related('teacher')
+            last_exam_time_table = exam_time_table_qs.last()
+
+            if last_exam_time_table:
+                exam_committee_teachers = last_exam_time_table.teacher.all()
+
+                if exam_committee_teachers:
+                    for exam_committee_teacher in exam_committee_teachers:
+                        exam_committee.append(
+                            {
+                                'teacher_org_position': Employee.objects.filter(user=exam_committee_teacher.user.id).values_list('org_position__name', flat=True).first(),
+                                'teacher_name': exam_committee_teacher.full_name,
+                                'teacher_score_updated_at': last_exam_time_table.updated_at.strftime('%Y-%m-%d %H:%M:%S') if last_exam_time_table.updated_at else None
+                            }
+                        )
+
+            context['exam_committee'] = exam_committee
+
+            return context
+
+    def get(self, request):
+        user = request.user
+        teacher = get_object_or_404(Teachers, user_id=user, action_status=Teachers.APPROVED)
+        lesson = request.query_params.get('lesson')
+        lesson_year, lesson_season = get_active_year_season()
+        self.queryset = self.queryset.filter(score_type__lesson_teacher__lesson=lesson, lesson_year=lesson_year, lesson_season=lesson_season)
+        lesson_kredit = LessonStandart.objects.filter(id=lesson).values_list('kredit', flat=True).first()
+        teacher_org_position = Employee.objects.filter(user=user).values_list('org_position__name', flat=True).first()
+        teacher_score_updated_at = self.queryset.values_list('updated_at', flat=True).order_by('updated_at').last()
+
+        self.queryset = self.queryset.annotate(
+            lesson_kredit=Value(lesson_kredit, output_field=FloatField()),
+            teacher_name=Value(teacher.full_name, output_field=CharField()),
+            teacher_org_position=Value(teacher_org_position, output_field=CharField()),
+            teacher_score_updated_at=Value(teacher_score_updated_at, output_field=DateTimeField()),
+        )
+
+        all_list = self.list(request).data
+
+        return request.send_data(all_list)
 
 
 class ScoreOldV2APIView(

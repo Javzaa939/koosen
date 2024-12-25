@@ -492,6 +492,7 @@ class ExamTimeTableAllSerializer(serializers.ModelSerializer):
     group_names = serializers.SerializerMethodField()
     stype_name = serializers.SerializerMethodField()
     group = serializers.SerializerMethodField()
+    lesson_id = serializers.CharField(source='lesson.id', default='')
     is_expired = serializers.SerializerMethodField()
 
     class Meta:

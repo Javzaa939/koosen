@@ -6,7 +6,7 @@ import { Badge, UncontrolledTooltip } from "reactstrap";
 
 import './helperstyle.css'
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, datas, handleEditModal,handleDelete, navigate, handleDownloadScore, user) {
+export function getColumns (currentPage, rowsPerPage, datas, handleEditModal,handleDelete, navigate, handleDownloadScore, user, handlePrint) {
 
 	// const navigate = useNavigate()
 	const { showWarning } = useModal()
@@ -109,7 +109,7 @@ export function getColumns (currentPage, rowsPerPage, datas, handleEditModal,han
 		{
 			name: `${t('Үйлдэл')}`,
 			center: true,
-			minWidth: "50px",
+			minWidth: "140px",
 			selector: (row) => (
 				<div className="text-center" style={{ width: "auto" }}>
 					{
@@ -166,13 +166,14 @@ export function getColumns (currentPage, rowsPerPage, datas, handleEditModal,han
 							<UncontrolledTooltip placement='top' target={`examDelete${row.id}`} >Устгах</UncontrolledTooltip>
 						</>
 					}
-					{/* {
+					{
+						user?.permissions?.includes('lms-timetable-exam-score-download') &&
 						<>
 							<a className='ms-1'>
-								<Printer width={"15px"} role='button'  onClick={() => {navHandler(row,row.id)}} />
+								<Printer width={"15px"} role='button'  onClick={() => {handlePrint(row.lesson_id, row.group_names)}} />
 							</a>
 						</>
-					} */}
+					}
 				</div>
 			),
 		}
