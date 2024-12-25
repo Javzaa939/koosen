@@ -3302,7 +3302,7 @@ class ExamTimeTableScoreListAPIView(
             exam_groups = Exam_to_group.objects.filter(exam=instance).values_list('group', flat=True)
 
             # Онлайнаар шалгалт өгсөн бол энд дүн нь байгаа
-            challenge_qs = Challenge.objects.filter(challenge_type=Challenge.SEMESTR_EXAM, lesson=lesson)
+            challenge_qs = Challenge.objects.filter(challenge_type=Challenge.SEMESTR_EXAM, lesson=lesson, lesson_year=lesson_year, lesson_season=lesson_season)
             challenge_students = ChallengeStudents.objects.filter(challenge__in=challenge_qs, student__group__in=exam_groups)
 
             if challenge_students.count() == 0:
