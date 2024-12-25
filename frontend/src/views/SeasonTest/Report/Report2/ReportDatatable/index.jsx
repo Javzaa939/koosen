@@ -11,11 +11,11 @@ import ExamFilter from '../../helpers/ExamFilter'
 import GenericDataTable from '../../helpers/GenericDataTable'
 import GroupFilter from '../../helpers/GroupFilter'
 import './style.scss'
+import ProfessionFilter from '../../helpers/ProfessionFilter'
 
 /*
     TODO:
     - why 6312 group name student count 11 but assesments total count 12 (D=3 F=9)?
-    - Хөтөлбөрөөр tab
     - in database assesments D F are duplicated, so need to add their min max ranges to counting
 */
 export default function ReportDatatable({ report }) {
@@ -26,6 +26,7 @@ export default function ReportDatatable({ report }) {
     // #region states
     const [selected_exam, setSelectedExam] = useState('')
     const [selected_group, setSelectedGroup] = useState('')
+    const [selected_profession, setSelectedProfession] = useState('')
 
     const [rows_per_page, setRowsPerPage] = useState(10)
     const [search_value, setSearchValue] = useState('')
@@ -67,14 +68,10 @@ export default function ReportDatatable({ report }) {
                         center: true
                     },
                 ]
+            // this is "OR" condition because after first case there is no return or break. To decrease code duplication
             case 'groups':
-                return [
-                    {
-                        name: `${t('Ангийн нэр')}`,
-                        selector: (row) => (<span>{row?.group_name}</span>),
-                        center: true,
-                        minWidth: '110px'
-                    },
+            case 'professions':
+                const genericColumns = [
                     {
                         name: `${t('Оюутны тоо')}`,
                         selector: (row) => (<span>{row?.student_count}</span>),
@@ -122,6 +119,21 @@ export default function ReportDatatable({ report }) {
                         center: true
                     },
                 ]
+
+                if (report === 'groups') genericColumns.unshift({
+                    name: `${t('Ангийн нэр')}`,
+                    selector: (row) => (<span>{row?.group_name}</span>),
+                    center: true,
+                    minWidth: '200px'
+                })
+                else if (report === 'professions') genericColumns.unshift({
+                    name: `${t('Хөтөлбөрийн нэр')}`,
+                    selector: (row) => (<span>{row?.profession_name}</span>),
+                    center: true,
+                    minWidth: '200px'
+                })
+
+                return genericColumns
             default:
                 return []
         }
@@ -190,6 +202,12 @@ export default function ReportDatatable({ report }) {
                             <GroupFilter setSelected={setSelectedGroup} />
                         </div>
                     }
+                    {
+                        report === 'professions' &&
+                        <div style={{ width: '219.5px' }} className='me-1'>
+                            <ProfessionFilter setSelected={setSelectedProfession} />
+                        </div>
+                    }
                 </Col>
             </Row>
             <Row className='mt-1'>
@@ -213,7 +231,7 @@ export default function ReportDatatable({ report }) {
                             ))
                         }
                     </Input>
-                    <GenericDataTable apiGetFunc={challengeApi.getReport} isApiGetFuncArgsDefault={true} apiGetFuncArgs={[report, selected_exam, selected_group]} columns={columns} rows_per_page={rows_per_page} search_value={search_value} render_to_search={render_to_search} />
+                    <GenericDataTable apiGetFunc={challengeApi.getReport} isApiGetFuncArgsDefault={true} apiGetFuncArgs={{report_type: report, exam: selected_exam, group: selected_group, profession: selected_profession}} columns={columns} rows_per_page={rows_per_page} search_value={search_value} render_to_search={render_to_search} />
                 </Col>
             </Row>
         </div>

@@ -81,7 +81,7 @@ from lms.models import get_choice_image_path
 
 from elselt.serializer import MentalUserSerializer
 
-from .serializers import ChallengeGroupsSerializer, LessonStandartSerializer
+from .serializers import ChallengeGroupsSerializer, ChallengeProfessionsSerializer, LessonStandartSerializer
 from .serializers import LessonTitlePlanSerializer
 from .serializers import LessonStandartListSerializer
 from .serializers import LessonStandartSerialzier
@@ -5922,7 +5922,7 @@ class ChallengeReportAPIView(
 
         if not report_type or not exam:
 
-            return request.send_error('ERR_002')
+            return request.send_data(None)
 
         queryset = self.queryset.filter(challenge__challenge_type=Challenge.SEMESTR_EXAM, challenge__id=exam)
         get_result = []
@@ -6026,11 +6026,24 @@ class ChallengeReportAPIView(
             self.queryset = queryset
             get_result = self.list(request).data
 
-        elif report_type == 'groups':
-            group = request.query_params.get('group')
+        elif (
+            report_type == 'groups' or
+            report_type == 'professions'
+        ):
+            group = None
+            profession = None
 
-            if group:
-                queryset = queryset.filter(student__group=group)
+            if report_type == 'groups':
+                group = request.query_params.get('group')
+
+                if group:
+                    queryset = queryset.filter(student__group=group)
+
+            elif report_type == 'professions':
+                profession = request.query_params.get('profession')
+
+                if profession:
+                    queryset = queryset.filter(student__group__profession=profession)
 
             assessments = Score.objects.all().values('score_min','score_max','assesment')
             assessment_dict = {}
@@ -6045,20 +6058,43 @@ class ChallengeReportAPIView(
                     'score_max': score_max
                 }
 
-            self.queryset = (
+            queryset = (
                 queryset
                     .order_by() # to remove above sortings because it conflicts with "group by"
                     .select_related('student')
-                    .prefetch_related('student__group')
-                    .annotate(
-                        group_name=F('student__group__name'),
-                        score_percentage=Case(
-                            When(take_score__gt=0, then=(F('score') * 100 / F('take_score'))),
-                            default=Value(0),
-                            output_field=FloatField()
-                        ),
-                    )
-                    .values('group_name') # to group students by group_name
+            )
+
+            if report_type == 'groups':
+                queryset = (
+                    queryset
+                        .prefetch_related('student__group')
+                        .annotate(
+                            group_name=F('student__group__name'),
+                            score_percentage=Case(
+                                When(take_score__gt=0, then=(F('score') * 100 / F('take_score'))),
+                                default=Value(0),
+                                output_field=FloatField()
+                            ),
+                        )
+                        .values('group_name') # to group students by group_name
+                )
+            elif report_type == 'professions':
+                queryset = (
+                    queryset
+                        .prefetch_related('student__group__profession')
+                        .annotate(
+                            profession_name=F('student__group__profession__name'),
+                            score_percentage=Case(
+                                When(take_score__gt=0, then=(F('score') * 100 / F('take_score'))),
+                                default=Value(0),
+                                output_field=FloatField()
+                            ),
+                        )
+                        .values('profession_name') # to group students by profession_name
+                )
+
+            self.queryset = (
+                queryset
                     .annotate(
                         student_count=Count('student', distinct=True),
                         A2_count=Count(
@@ -6136,7 +6172,11 @@ class ChallengeReportAPIView(
                     )
             )
 
-            self.serializer_class = ChallengeGroupsSerializer
+            if report_type == 'groups':
+                self.serializer_class = ChallengeGroupsSerializer
+            elif report_type == 'professions':
+                self.serializer_class = ChallengeProfessionsSerializer
+
             get_result = self.list(request).data
 
         return request.send_data(get_result)

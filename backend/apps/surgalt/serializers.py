@@ -1074,6 +1074,23 @@ class ChallengeGroupsSerializer(serializers.ModelSerializer):
         fields = ['group_name', 'student_count', 'A_count', 'B_count', 'C_count', 'D_count', 'F_count', 'A2_count', 'B2_count', 'C2_count']
 
 
+class ChallengeProfessionsSerializer(serializers.ModelSerializer):
+    profession_name = serializers.CharField()
+    student_count = serializers.IntegerField()
+    A2_count = serializers.IntegerField()
+    A_count = serializers.IntegerField()
+    B2_count = serializers.IntegerField()
+    B_count = serializers.IntegerField()
+    C2_count = serializers.IntegerField()
+    C_count = serializers.IntegerField()
+    D_count = serializers.IntegerField()
+    F_count = serializers.IntegerField()
+
+    class Meta:
+        model = ChallengeStudents
+        fields = ['profession_name', 'student_count', 'A_count', 'B_count', 'C_count', 'D_count', 'F_count', 'A2_count', 'B2_count', 'C2_count']
+
+
 class StudentChallengeSerializer(serializers.ModelSerializer):
 
     challenge = serializers.SerializerMethodField()

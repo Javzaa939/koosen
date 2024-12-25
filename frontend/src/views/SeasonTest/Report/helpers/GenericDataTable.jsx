@@ -22,12 +22,12 @@ export default function GenericDataTable({ apiGetFunc, apiGetFuncArgs, isApiGetF
 	async function getData() {
 		let args = []
 
-		if (isApiGetFuncArgsDefault) args = [current_page, rows_per_page, search_value, ...apiGetFuncArgs]
+		if (isApiGetFuncArgsDefault) args = { page: current_page, limit: rows_per_page, search: search_value, ...apiGetFuncArgs }
 		else args = apiGetFuncArgs
 
-		const { success, data } = await fetchData(apiGetFunc(...args))
+		const { success, data } = await fetchData(apiGetFunc({ ...args }))
 
-		if (success) {
+		if (success && data) {
 			let finalData = []
 			let finalCount = 0
 
@@ -43,21 +43,27 @@ export default function GenericDataTable({ apiGetFunc, apiGetFuncArgs, isApiGetF
 
 			// #region specific code (not generic)
 			// to add footer data
-			finalData = [
-				...finalData,
-				{
-					group_name: "Total",
-					student_count: sumValues(finalData, "student_count"),
-					A2_count: sumValues(finalData, "A2_count"),
-					A_count: sumValues(finalData, "A_count"),
-					B2_count: sumValues(finalData, "B2_count"),
-					B_count: sumValues(finalData, "B_count"),
-					C2_count: sumValues(finalData, "C2_count"),
-					C_count: sumValues(finalData, "C_count"),
-					D_count: sumValues(finalData, "D_count"),
-					F_count: sumValues(finalData, "F_count")
-				},
-			];
+			if (apiGetFuncArgs.report_type !== 'students') {
+				const footerRow = {}
+
+				// to add first column with according name
+				if (apiGetFuncArgs.report_type === 'groups') {
+					footerRow['group_name'] = "Нийт"
+				} else if (apiGetFuncArgs.report_type === 'professions') {
+					footerRow['profession_name'] = "Нийт"
+				}
+
+				footerRow['student_count'] = sumValues(finalData, "student_count"),
+				footerRow['A2_count'] = sumValues(finalData, "A2_count"),
+				footerRow['A_count'] = sumValues(finalData, "A_count"),
+				footerRow['B2_count'] = sumValues(finalData, "B2_count"),
+				footerRow['B_count'] = sumValues(finalData, "B_count"),
+				footerRow['C2_count'] = sumValues(finalData, "C2_count"),
+				footerRow['C_count'] = sumValues(finalData, "C_count"),
+				footerRow['D_count'] = sumValues(finalData, "D_count"),
+				footerRow['F_count'] = sumValues(finalData, "F_count")
+				finalData.push(footerRow)
+			}
 			// #endregion
 
 			setData(finalData)
@@ -70,7 +76,9 @@ export default function GenericDataTable({ apiGetFunc, apiGetFuncArgs, isApiGetF
 	}, [search_value, render_to_search, current_page])
 
 	// #region specific code (not generic)
-	useEffect(() => { if (apiGetFuncArgs[1] || apiGetFuncArgs[2]) getData() }, [apiGetFuncArgs[1], apiGetFuncArgs[2]])
+	useEffect(() => {
+		if (apiGetFuncArgs) getData()
+	}, [apiGetFuncArgs])
 	// #endregion
 
 	// for table footer
