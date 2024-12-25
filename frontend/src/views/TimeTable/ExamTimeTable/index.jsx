@@ -97,6 +97,7 @@ const ExamTimeTable = () => {
     const [data_to_print, setDataToPrint] = useState(null);
     const isPrintButtonPressed = useRef(false)
     const [selected_group_names, setSelectedGroupNames] = useState('')
+    const [united_score_ranges, setUnitedScoreRanges] = useState(null)
     // #endregion
     const [downloadModal, setDownloadModal] = useState(false);
 
@@ -121,6 +122,7 @@ const ExamTimeTable = () => {
         // getRoom();
         // getGroups()
         // getLessonOption()
+        getUnitedScoreRanges()
     },[])
 
     /* subschool id явуулж Багшийн жагсаалт авах */
@@ -272,7 +274,7 @@ const ExamTimeTable = () => {
             }
         }
 
-        return ranges
+        setUnitedScoreRanges(ranges)
     }
 
     async function getDataToPrint(lesson_id, selectedGroupNames) {
@@ -302,7 +304,7 @@ const ExamTimeTable = () => {
                     // #region Irts table calculation
                     dataToPrint['total_students_count'] = data.length
                     dataToPrint['scored_students_count'] = data.filter(item => item.score).length
-                    const score_ranges = await getUnitedScoreRanges()
+                    const score_ranges = united_score_ranges
                     dataToPrint['a_students_count'] = data.filter(item => score_ranges.A.score_min <= item.score && item.score <= score_ranges.A.score_max).length
                     dataToPrint['b_students_count'] = data.filter(item => score_ranges.B.score_min <= item.score && item.score <= score_ranges.B.score_max).length
                     dataToPrint['c_students_count'] = data.filter(item => score_ranges.C.score_min <= item.score && item.score <= score_ranges.C.score_max).length
