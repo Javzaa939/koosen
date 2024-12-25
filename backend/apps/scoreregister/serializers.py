@@ -1,8 +1,7 @@
-from datetime import datetime
+from django.db.models import Sum
 from rest_framework import serializers
 
-from main.utils.function.utils import get_active_year_season
-from lms.models import Lesson_teacher_scoretype, Lesson_to_teacher, PermissionsOtherInterval, ScoreRegister, TeacherScore
+from lms.models import Lesson_teacher_scoretype, ScoreRegister, TeacherScore
 from lms.models import Student
 from lms.models import Teachers
 from lms.models import Score
@@ -11,7 +10,7 @@ from lms.models import LessonStandart
 from lms.models import Group
 from core.models import SubOrgs
 
-from surgalt.serializers import GroupListSerializer, LessonStandartSerialzier
+from surgalt.serializers import LessonStandartSerialzier
 from settings.serializers import ScoreSerailizer
 from student.serializers import StudentListSerializer
 
@@ -282,10 +281,14 @@ class TeacherScoreListPrintSerializer(serializers.ModelSerializer):
     teacher_score_updated_at = serializers.DateTimeField(read_only=True)
     exam_committee = serializers.SerializerMethodField()
     score_type = serializers.SerializerMethodField()
+    teacher_score = serializers.SerializerMethodField()
+    exam_score = serializers.SerializerMethodField()
+    grade_letter = serializers.SerializerMethodField()
+    total = serializers.SerializerMethodField()
 
     class Meta:
         model = TeacherScore
-        fields = 'id', 'full_name', 'score', 'lesson_name', 'lesson_year', 'lesson_season', 'lesson_kredit', 'teacher_name', 'teacher_org_position', 'teacher_score_updated_at', 'exam_committee', 'score_type'
+        fields = 'id', 'full_name', 'score', 'lesson_name', 'lesson_year', 'lesson_season', 'lesson_kredit', 'teacher_name', 'teacher_org_position', 'teacher_score_updated_at', 'exam_committee', 'score_type', 'teacher_score', 'exam_score', 'grade_letter', 'total'
 
     def get_full_name(self, obj):
 
@@ -321,3 +324,30 @@ class TeacherScoreListPrintSerializer(serializers.ModelSerializer):
             lesson_season = obj.lesson_season.season_name
 
         return lesson_season
+
+    def get_teacher_score(self, obj):
+        score = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson).exclude(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total')
+        return score
+
+    def get_exam_score(self, obj):
+        score = 0
+        score_obj = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson, score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).first()
+        if score_obj:
+            score = score_obj.score
+
+        return score
+
+    def get_grade_letter(self, obj):
+        assessment = ''
+        teacher_score = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson).exclude(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total')
+        total_score = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson).aggregate(total=Sum('score')).get('total')
+        if teacher_score < 42:
+            assessment = 'WF'
+        else:
+            assess = Score.objects.filter(score_max__gte=total_score,score_min__lte=total_score).values('assesment').first()
+            assessment = assess['assesment']
+        return assessment
+
+    def get_total(self, obj):
+        total_score = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson).aggregate(total=Sum('score')).get('total')
+        return total_score

@@ -121,7 +121,7 @@ export default function ElementToPrint({ data_to_print, setElementToPrint, selec
 										<tr>
 											<td>{t('Баталсан')}:</td>
 											<td>{t('Сургалтын бодлого төлөвлөлтийн газрын дарга')}</td>
-											<td></td>
+											<td>{'Б. Мөнхзаяа'}</td>
 											<td></td>
 											<td></td>
 										</tr>
@@ -133,7 +133,7 @@ export default function ElementToPrint({ data_to_print, setElementToPrint, selec
 											<td>{data_to_print?.teacher_score_updated_at}</td>
 										</tr>
 										{
-											data_to_print?.exam_committee.map((item, key)=>
+											data_to_print?.exam_committee?.map((item, key)=>
 												<tr key={key}>
 													<td>{t('Шалгалтын комисс')} -{key + 1}:</td>
 													<td>{item?.teacher_org_position}</td>
@@ -153,16 +153,16 @@ export default function ElementToPrint({ data_to_print, setElementToPrint, selec
 									</tbody>
 								</table>
 								<div className="etp_mt-1 text-uppercase">
-									{`${data_to_print?.lesson_year} ${t('ОНЫ ХИЧЭЭЛИЙН ЖИЛИЙН')} ${data_to_print?.lesson_season} ${t('УЛИРЛЫН')} ${selectedGroupNames}${t('-Р ДАМЖААНЫ СУРАЛЦАГЧДЫН ҮНЭЛГЭЭНИЙ ХУУДАС')}`}
+									{`${data_to_print?.lesson_year} ${t('ОНЫ ХИЧЭЭЛИЙН ЖИЛИЙН')} ${data_to_print?.lesson_season == "Намар" ? 'I' : 'II'} ${t('УЛИРЛЫН')} ${selectedGroupNames}${t('-Р ДАМЖААНЫ СУРАЛЦАГЧДЫН ҮНЭЛГЭЭНИЙ ХУУДАС')}`}
 								</div>
 								<table className="etp_mt-1" style={{ width: '236mm', marginBottom: '2mm' }} align='right'>
 									<tbody>
 										<tr style={{ display: 'flex' }}>
 											<td>{t('Хичээлийн нэр')}:</td>
-											<td className="border-bottom border-dotted" style={{ width: '87mm' }}>{data_to_print?.lesson_name}</td>
+											<td className="border-bottom border-dotted fw-bolder" style={{ width: '87mm' }}>{data_to_print?.lesson_name}</td>
 											<td style={{ flexGrow: 1 }}></td>
 											<td align="right">{t('Авбал зохих багц цаг')}:</td>
-											<td className="border-bottom border-dotted" style={{ width: '15mm' }}>{data_to_print?.lesson_credit}</td>
+											<td className="border-bottom border-dotted fw-bolder" style={{ width: '15mm' }}>{data_to_print?.lesson_credit}</td>
 										</tr>
 									</tbody>
 								</table>
@@ -174,7 +174,7 @@ export default function ElementToPrint({ data_to_print, setElementToPrint, selec
 											<td colSpan={5}>{t('Явцын үнэлгээ')}</td>
 											<td rowSpan={2} style={{ width: '32mm' }}>{t('Суралцагчийн гарын үсэг')}</td>
 											<td colSpan={4}>{t('Шалгалтын үнэлгээ')}</td>
-											<td rowSpan={2} style={{ width: '13mm' }}>{t('Нийи оноо')}</td>
+											<td rowSpan={2} style={{ width: '13mm' }}>{t('Нийт оноо')}</td>
 											<td rowSpan={2} style={{ width: '17mm' }}>{t('Үсгэн үнэлгээ')}</td>
 										</tr>
 										<tr align='center'>
@@ -197,14 +197,14 @@ export default function ElementToPrint({ data_to_print, setElementToPrint, selec
 													<td></td>
 													<td></td>
 													<td></td>
-													<td>{item.teacher_score_type !== 7 && item.teacher_score}</td>
+													<td>{item?.teacher_score}</td>
 													<td></td>
 													<td></td>
 													<td></td>
 													<td></td>
-													<td>{item.teacher_score_type === 7 && item.teacher_score}</td>
-													<td></td>
-													<td></td>
+													<td>{item?.exam_score}</td>
+													<td>{item?.total}</td>
+													<td>{item?.letter}</td>
 												</tr>
 											)
 										}
@@ -273,9 +273,6 @@ export default function ElementToPrint({ data_to_print, setElementToPrint, selec
 											<tr style={{ display: 'flex' }}>
 												<td>{t('Тайлбар')}:</td>
 												<td className="border-bottom border-dotted" style={{ flexGrow: 1 }}></td>
-											</tr>
-											<tr>
-												<td colSpan={2} className="border-bottom border-dotted">&nbsp;</td>
 											</tr>
 										</tbody>
 									</table>

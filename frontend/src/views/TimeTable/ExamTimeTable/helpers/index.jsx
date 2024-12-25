@@ -109,7 +109,7 @@ export function getColumns (currentPage, rowsPerPage, datas, handleEditModal,han
 		{
 			name: `${t('Үйлдэл')}`,
 			center: true,
-			minWidth: "140px",
+			minWidth: "250px",
 			selector: (row) => (
 				<div className="text-center" style={{ width: "auto" }}>
 					{
@@ -170,7 +170,7 @@ export function getColumns (currentPage, rowsPerPage, datas, handleEditModal,han
 						user?.permissions?.includes('lms-timetable-exam-score-download') &&
 						<>
 							<a className='ms-1'>
-								<Printer width={"15px"} role='button'  onClick={() => {handlePrint(row.lesson_id, row.group_names)}} />
+								<Printer width={"15px"} role='button'  onClick={() => {handlePrint(row.id, row.group_names)}} />
 							</a>
 						</>
 					}

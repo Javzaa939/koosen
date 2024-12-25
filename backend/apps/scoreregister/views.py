@@ -1308,38 +1308,46 @@ class TeacherLessonScorePrint(
 
     # to pass extra complex data to serializer, because annotate() does not support complex data like list, dict, etc
     def get_serializer_context(self):
-            context = super().get_serializer_context()
-            lesson = self.request.query_params.get('lesson')
-            lesson_year, lesson_season = get_active_year_season()
-            exam_committee = []
-            exam_time_table_qs = ExamTimeTable.objects.filter(lesson_year=lesson_year,lesson_season=lesson_season,lesson=lesson).prefetch_related('teacher')
-            last_exam_time_table = exam_time_table_qs.last()
+        context = super().get_serializer_context()
+        exam = self.request.query_params.get('exam')
+        exam_committee = []
+        exam_time_table_qs = ExamTimeTable.objects.filter(pk=exam).prefetch_related('teacher')
+        last_exam_time_table = exam_time_table_qs.last()
 
-            if last_exam_time_table:
-                exam_committee_teachers = last_exam_time_table.teacher.all()
+        if last_exam_time_table:
+            exam_committee_teachers = last_exam_time_table.teacher.all()
 
-                if exam_committee_teachers:
-                    for exam_committee_teacher in exam_committee_teachers:
-                        exam_committee.append(
-                            {
-                                'teacher_org_position': Employee.objects.filter(user=exam_committee_teacher.user.id).values_list('org_position__name', flat=True).first(),
-                                'teacher_name': exam_committee_teacher.full_name,
-                                'teacher_score_updated_at': last_exam_time_table.updated_at.strftime('%Y-%m-%d %H:%M:%S') if last_exam_time_table.updated_at else None
-                            }
-                        )
+            if exam_committee_teachers:
+                for exam_committee_teacher in exam_committee_teachers:
+                    exam_committee.append(
+                        {
+                            'teacher_org_position': Employee.objects.filter(user=exam_committee_teacher.user.id).values_list('org_position__name', flat=True).first(),
+                            'teacher_name': exam_committee_teacher.full_name,
+                            'teacher_score_updated_at': last_exam_time_table.updated_at.strftime('%Y-%m-%d %H:%M:%S') if last_exam_time_table.updated_at else None
+                        }
+                    )
 
-            context['exam_committee'] = exam_committee
+        context['exam_committee'] = exam_committee
 
-            return context
+        return context
 
     def get(self, request):
-        user = request.user
-        teacher = get_object_or_404(Teachers, user_id=user, action_status=Teachers.APPROVED)
-        lesson = request.query_params.get('lesson')
+        exam = request.query_params.get('exam')
         lesson_year, lesson_season = get_active_year_season()
-        self.queryset = self.queryset.filter(score_type__lesson_teacher__lesson=lesson, lesson_year=lesson_year, lesson_season=lesson_season)
-        lesson_kredit = LessonStandart.objects.filter(id=lesson).values_list('kredit', flat=True).first()
-        teacher_org_position = Employee.objects.filter(user=user).values_list('org_position__name', flat=True).first()
+
+        # Тухайн шалгалтын хуваариас хичээлийг авах
+        exam_obj = ExamTimeTable.objects.get(pk=exam)
+        group_ids = Exam_to_group.objects.filter(exam=exam).values_list('group', flat=True)
+
+        student_ids = self.queryset.filter(score_type__lesson_teacher__lesson=exam_obj.lesson, lesson_year=lesson_year, lesson_season=lesson_season, student__group__in=group_ids).values_list('id', flat=True).distinct('student')
+        self.queryset = self.queryset.filter(score_type__lesson_teacher__lesson=exam_obj.lesson, lesson_year=lesson_year, lesson_season=lesson_season, id__in=student_ids)
+
+        lesson_kredit = LessonStandart.objects.filter(id=exam_obj.lesson.id).values_list('kredit', flat=True).first()
+
+        # Дүн гаргасан багшийн мэдээлэл
+        teacher_id = self.queryset.filter(student__group__in=group_ids).values_list('score_type__lesson_teacher__teacher', flat=True).first()
+        teacher = Teachers.objects.filter(id=teacher_id).first()
+        teacher_org_position = Employee.objects.filter(user=teacher.user).values_list('org_position__name', flat=True).first()
         teacher_score_updated_at = self.queryset.values_list('updated_at', flat=True).order_by('updated_at').last()
 
         self.queryset = self.queryset.annotate(

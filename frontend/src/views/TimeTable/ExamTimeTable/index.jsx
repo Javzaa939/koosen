@@ -296,8 +296,10 @@ const ExamTimeTable = () => {
                     dataToPrint['lesson_students'] = data.map(item => {
                         return {
                             full_name: item.full_name || '',
-                            teacher_score: item.score || '',
-                            teacher_score_type: item.score_type || '',
+                            teacher_score: item.teacher_score || '',
+                            exam_score: item.exam_score || '',
+                            letter: item.grade_letter || '',
+                            total: item.total || '',
                         }
                     })
 
@@ -305,11 +307,11 @@ const ExamTimeTable = () => {
                     dataToPrint['total_students_count'] = data.length
                     dataToPrint['scored_students_count'] = data.filter(item => item.score).length
                     const score_ranges = united_score_ranges
-                    dataToPrint['a_students_count'] = data.filter(item => score_ranges.A.score_min <= item.score && item.score <= score_ranges.A.score_max).length
-                    dataToPrint['b_students_count'] = data.filter(item => score_ranges.B.score_min <= item.score && item.score <= score_ranges.B.score_max).length
-                    dataToPrint['c_students_count'] = data.filter(item => score_ranges.C.score_min <= item.score && item.score <= score_ranges.C.score_max).length
-                    dataToPrint['d_students_count'] = data.filter(item => score_ranges.D.score_min <= item.score && item.score <= score_ranges.D.score_max).length
-                    dataToPrint['f_students_count'] = data.filter(item => score_ranges.F.score_min <= item.score && item.score <= score_ranges.F.score_max).length
+                    dataToPrint['a_students_count'] = data.filter(item => score_ranges.A.score_min <= item.total && item.total <= score_ranges.A.score_max).length
+                    dataToPrint['b_students_count'] = data.filter(item => score_ranges.B.score_min <= item.total && item.total <= score_ranges.B.score_max).length
+                    dataToPrint['c_students_count'] = data.filter(item => score_ranges.C.score_min <= item.total && item.total <= score_ranges.C.score_max).length
+                    dataToPrint['d_students_count'] = data.filter(item => score_ranges.D.score_min <= item.total && item.total <= score_ranges.D.score_max).length
+                    dataToPrint['f_students_count'] = data.filter(item => score_ranges.F.score_min <= item.total && item.total <= score_ranges.F.score_max).length
 
                     if (dataToPrint['total_students_count'] > 0) {
                         dataToPrint['success'] = (((dataToPrint['a_students_count'] + dataToPrint['b_students_count'] + dataToPrint['c_students_count']) * 100) / dataToPrint['total_students_count']).toFixed(0) + '%'
@@ -327,8 +329,8 @@ const ExamTimeTable = () => {
         }
     }
 
-    function handlePrint(lesson_id, selectedGroupNames) {
-        getDataToPrint(lesson_id, selectedGroupNames)
+    function handlePrint(id, selectedGroupNames) {
+        getDataToPrint(id, selectedGroupNames)
         isPrintButtonPressed.current = true
     }
     // #endregion
