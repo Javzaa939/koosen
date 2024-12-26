@@ -81,7 +81,7 @@ from lms.models import get_choice_image_path
 
 from elselt.serializer import MentalUserSerializer
 
-from .serializers import ChallengeGroupsSerializer, LessonStandartSerializer
+from .serializers import ChallengeGroupsSerializer, ChallengeQuestionsAnswersSerializer, LessonStandartSerializer
 from .serializers import LessonTitlePlanSerializer
 from .serializers import LessonStandartListSerializer
 from .serializers import LessonStandartSerialzier
@@ -5922,39 +5922,49 @@ class ChallengeReportAPIView(
             return request.send_error('ERR_002')
 
         queryset = self.queryset.filter(challenge__challenge_type=Challenge.SEMESTR_EXAM, challenge__id=exam)
+
+        if not queryset:
+
+            return request.send_data(None)
+
         get_result = []
+
+        def parse_answers(json_data):
+            answers = []
+
+            try:
+                answer_json = json_data.replace("'", '"')
+                answer_json = json.loads(answer_json)
+
+                for question_id, choice_id in answer_json.items():
+                    choice_obj = QuestionChoices.objects.filter(id=choice_id).values('score','challengequestions__question').first()
+                    is_right = False
+
+                    if choice_obj.get('score') > 0:
+                        is_right = True
+
+                    answers.append({
+                        'question_id': question_id,
+                        'question_text': choice_obj.get('challengequestions__question'),
+                        'is_answered_right': is_right,
+                        'choice_id': choice_id
+                    })
+
+            except json.JSONDecodeError:
+                print('json error in:', obj.id, obj.answer)
+                traceback.print_exc()
+
+            return answers
 
         if report_type == 'reliability':
             exam_results = []
+            obj = queryset.first()
 
-            for obj in queryset:
-                if not obj.answer:
+            if not obj.answer:
 
-                    continue
+                return request.send_data(None)
 
-                answer_json = None
-
-                try:
-                    answer_json = obj.answer.replace("'", '"')
-                    answer_json = json.loads(answer_json)
-
-                    for question_id, choice_id in answer_json.items():
-                        choice_obj = QuestionChoices.objects.filter(id=choice_id).values('score','challengequestions__question').first()
-
-                        if choice_obj.get('score') > 0:
-                            is_right = True
-                        else:
-                            is_right = False
-
-                        exam_results.append({
-                            'question_id': question_id,
-                            'question_text': choice_obj.get('challengequestions__question'),
-                            'is_answered_right': is_right
-                        })
-
-                except json.JSONDecodeError:
-                    print('json error in:', obj.id, obj.answer)
-                    traceback.print_exc()
+            exam_results = parse_answers(obj.answer)
 
             # questions reliability ranges
             questions_reliability_ranges = {
@@ -5980,45 +5990,60 @@ class ChallengeReportAPIView(
                     question_stats[question_id]["correct"] += 1
 
             # to calculate question reliability
-            questions_reliability = {}
+            questions_reliability = []
 
             for question_id, stats in question_stats.items():
                 if stats["total"] > 0:
                     question_reliability = (stats["correct"] / stats["total"]) * 100
 
-                    questions_reliability[question_id] = {
+                    questions_reliability.append({
+                        'question_id': question_id,
                         'question_reliability': question_reliability,
                         'question_text': stats['question_text']
-                    }
+                    })
 
             # to group questions and their reliabilities by reliability ranges
             grouped_questions = {key: [] for key in questions_reliability_ranges}
 
-            for question_id, value in questions_reliability.items():
-                question_reliability = value['question_reliability']
+            for item in questions_reliability:
+                question_id = item.get('question_id')
+                question_reliability = item.get('question_reliability')
+                question_text = item.get('question_text')
 
                 for range_name, condition in questions_reliability_ranges.items():
                     if condition(question_reliability):
-                        question_text = questions_reliability[question_id]['question_text']
                         grouped_questions[range_name].append({"question_id": question_id, 'question_text': question_text, "question_reliability": question_reliability})
 
                         break
 
-            # to build dict for recharts format and for exam filter
-            questions_reliabilities = []
+            rechart_data = []
             total_questions_count = len(question_stats)
 
             for key, questions in grouped_questions.items():
-                questions_reliabilities.append(
+                # to build dict for recharts format
+                rechart_data.append(
                     {
                         "questions_reliability_name": key,
-                        "questions": questions,
-                        "questions_count": len(questions),
                         "questions_count_percent": (len(questions) * 100 / total_questions_count) if total_questions_count else 0
                     }
                 )
 
-            get_result = questions_reliabilities
+            get_result = rechart_data
+
+        # for datatable with pagination
+        elif report_type == 'dt_reliability':
+            obj = queryset.first()
+
+            if not obj.answer:
+
+                return request.send_data(None)
+
+            answers = parse_answers(obj.answer)
+            choice_ids = [answer['choice_id'] for answer in answers]
+
+            self.queryset = ChallengeQuestions.objects.prefetch_related('choices').filter(choices__id__in=choice_ids).values('question','choices__score','id','choices__id')
+            self.serializer_class = ChallengeQuestionsAnswersSerializer
+            get_result = self.list(request).data
 
         elif report_type == 'students':
             self.queryset = queryset

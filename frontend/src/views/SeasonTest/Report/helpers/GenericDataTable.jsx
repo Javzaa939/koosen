@@ -22,7 +22,7 @@ export default function GenericDataTable({ apiGetFunc, apiGetFuncArgs, isApiGetF
 	async function getData() {
 		let args = []
 
-		if (isApiGetFuncArgsDefault) args = [current_page, rows_per_page, search_value, ...apiGetFuncArgs]
+		if (isApiGetFuncArgsDefault) args = [current_page, rows_per_page, '', search_value, ...apiGetFuncArgs]
 		else args = apiGetFuncArgs
 
 		const { success, data } = await fetchData(apiGetFunc(...args))
