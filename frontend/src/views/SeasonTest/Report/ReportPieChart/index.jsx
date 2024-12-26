@@ -23,7 +23,8 @@ export default function ReportPieChart() {
         const { success, data } = await fetchData(challengeApi.getReport(1, 10000000, '', 'reliability', selectedExam))
 
         if (success) {
-            setDatas(data)
+            const exclude_zero_stat = data.filter(item => item.questions_count_percent > 0)
+            setDatas(exclude_zero_stat)
         }
     }
 
@@ -43,7 +44,7 @@ export default function ReportPieChart() {
                                 }}
                             ></span>
                             <span className='text-capitalize me-75'>
-                                {t('Нийт асуултын тоо')} : {data.payload[0]['value']}
+                                {t('Нийт асуултын тоо')} : {data.payload[0].payload['questions_count']}
                             </span>
                         </div>
                         {data.payload.map(i => i.payload['questions'].sort((a, b) => b.question_reliability - a.question_reliability).map((question, index) =>
@@ -86,14 +87,14 @@ export default function ReportPieChart() {
                 <ResponsiveContainer>
                     <PieChart width={400}>
                         <Pie
-                            data={datas?.length ? datas[0].questions_reliabilities : []}
-                            dataKey='questions_count'
+                            data={datas?.length ? datas : []}
+                            dataKey='questions_count_percent'
                             nameKey='questions_reliability_name'
                             cx="50%"
                             cy="50%"
                             outerRadius={150}
                             fill="#8884d8"
-                            label
+                            label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
                         >
                             <Cell fill='#4287f5' />
                             <Cell fill='#dc8ee6' />
