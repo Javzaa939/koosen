@@ -1438,7 +1438,8 @@ class ExamTimeTableAPIView(
 
         # Сургуулиар хайлт хийх
         if school:
-            queryset = queryset.filter(school=school)
+            exam_ids = Exam_to_group.objects.filter(group__school=school).values_list('exam', flat=True)
+            queryset = queryset.filter(id__in=exam_ids)
 
         # Төрлөөр хайх хайлт хийх
         if stype:
