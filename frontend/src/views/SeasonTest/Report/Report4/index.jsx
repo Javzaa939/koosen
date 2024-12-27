@@ -22,7 +22,7 @@ export default function Report4() {
     // #region primitives
     // #region table controlling
     const default_page = [10, 15, 50, 75, 100]
-    // #endregion
+    // #endregion table controlling
     // #endregion
 
     // #region states
@@ -32,31 +32,44 @@ export default function Report4() {
     // #region table controlling
     const [rows_per_page, setRowsPerPage] = useState(default_page[0])
     const [search_value, setSearchValue] = useState('')
-	const [current_page, setCurrentPage] = useState(1)
-	const [total_count, setTotalCount] = useState(1)
+    const [current_page, setCurrentPage] = useState(1)
+    const [total_count, setTotalCount] = useState(1)
     const [sortField, setSort] = useState('')
-    // #endregion
+    // #endregion table controlling
 
     const [studentsQuestionsTableData, setStudentsQuestionsTableData] = useState(null)
+    const [studentsQuestionsTableAggregatedData, setStudentsQuestionsTableAggregatedData] = useState(null)
     // #endregion
 
     async function getStudentsQuestionsTableData() {
         const { success, data } = await fetchData(challengeApi.getReport(current_page, rows_per_page, sortField, search_value, 'report4', selected_exam, selected_group))
-        console.log(data)
+
         if (success) {
             setStudentsQuestionsTableData(data?.results)
             setTotalCount(data?.count)
         }
     }
 
+    async function getStudentsQuestionsTableAggregatedData() {
+        const { success, data } = await fetchData(challengeApi.getReport('', '', '', '', 'report4-1', selected_exam, selected_group))
+
+        if (success) {
+            setStudentsQuestionsTableAggregatedData(data)
+        }
+    }
+
     useEffect(() => {
-        getStudentsQuestionsTableData()
+        refreshData()
     }, [])
 
+    function refreshData() {
+        getStudentsQuestionsTableData()
+        getStudentsQuestionsTableAggregatedData()
+    }
     // #region table controlling
     function handleSort(column, sort) {
         if (column) {
-            if(sort === 'asc') {
+            if (sort === 'asc') {
                 setSort(column.header)
             } else {
                 setSort('-' + column.header)
@@ -78,15 +91,15 @@ export default function Report4() {
     }
 
     async function handleSearch() {
-        if (search_value.length > 0 && selected_exam) getStudentsQuestionsTableData()
+        if (search_value.length > 0 && selected_exam) refreshData()
     }
 
-	const handlePagination = (page) => {
-		setCurrentPage(page.selected + 1);
-	};
+    const handlePagination = (page) => {
+        setCurrentPage(page.selected + 1);
+    };
 
     useEffect(() => {
-        if (isSkipRender.current) getStudentsQuestionsTableData()
+        if (isSkipRender.current) refreshData()
         else isSkipRender.current = true
     }, [search_value, current_page, sortField, selected_exam, selected_group])
     // #endregion
@@ -102,14 +115,36 @@ export default function Report4() {
                     <div style={{ width: '219.5px' }} className='me-1'>
                         <GroupFilter setSelected={setSelectedGroup} />
                     </div>
-                    <div className='d-flex'>
-                        <div>
-                            <Label className="form-label" for='search-input'>
-                                {t('Хайх')}
-                            </Label>
-                            <div className='d-flex'>
+                </Col>
+            </Row>
+            <Row className='mt-1'>
+                <Col>
+                    <Row>
+                        <Col>
+                            <Input
+                                type='select'
+                                bsSize='sm'
+                                style={{ height: "30px", width: "62px" }}
+                                value={rows_per_page}
+                                onChange={e => handlePerPage(e)}
+                                className='mb-50'
+                            >
+                                {
+                                    default_page.map((page, idx) => (
+                                        <option
+                                            key={idx}
+                                            value={page}
+                                        >
+                                            {page}
+                                        </option>
+                                    ))
+                                }
+                            </Input>
+                        </Col>
+                        <Col>
+                            <div className='d-flex align-items-center justify-content-end'>
                                 <Input
-                                    className='dataTable-filter'
+                                    className='dataTable-filter ms-50'
                                     type='text'
                                     bsSize='sm'
                                     id='search-input'
@@ -130,33 +165,14 @@ export default function Report4() {
                                     <Search size={15} />
                                 </Button>
                             </div>
-                        </div>
-                    </div>
-                </Col>
-            </Row>
-            <Row className='mt-1'>
-                <Col>
-                    <Input
-                        type='select'
-                        bsSize='sm'
-                        style={{ height: "30px", width: "62px" }}
-                        value={rows_per_page}
-                        onChange={e => handlePerPage(e)}
-                        className='mb-50'
-                    >
-                        {
-                            default_page.map((page, idx) => (
-                                <option
-                                    key={idx}
-                                    value={page}
-                                >
-                                    {page}
-                                </option>
-                            ))
-                        }
-                    </Input>
-                    <StudentsQuestionsTable data={studentsQuestionsTableData} handleSort={handleSort} />
-                    {getPagination(handlePagination, current_page, rows_per_page, total_count)()}
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col>
+                            <StudentsQuestionsTable data={studentsQuestionsTableData} aggregatedData={studentsQuestionsTableAggregatedData} handleSort={handleSort} />
+                            {getPagination(handlePagination, current_page, rows_per_page, total_count)()}
+                        </Col>
+                    </Row>
                 </Col>
             </Row>
         </div>

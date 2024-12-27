@@ -81,7 +81,7 @@ from lms.models import get_choice_image_path
 
 from elselt.serializer import MentalUserSerializer
 
-from .serializers import ChallengeGroupsSerializer, LessonStandartSerializer
+from .serializers import ChallengeReport4Serializer, LessonStandartSerializer
 from .serializers import LessonTitlePlanSerializer
 from .serializers import LessonStandartListSerializer
 from .serializers import LessonStandartSerialzier
@@ -5922,7 +5922,43 @@ class ChallengeReportAPIView(
             return request.send_data(None)
 
         queryset = self.queryset.filter(challenge__challenge_type=Challenge.SEMESTR_EXAM, challenge__id=exam)
+        group = request.query_params.get('group')
+
+        if group:
+            queryset = queryset.filter(student__group=group)
+
+        if not queryset:
+
+            return request.send_data(None)
+
         get_result = []
+
+        def parse_answers(json_data):
+            answers = []
+
+            try:
+                answer_json = json_data.replace("'", '"')
+                answer_json = json.loads(answer_json)
+
+                for question_id, choice_id in answer_json.items():
+                    choice_obj = QuestionChoices.objects.filter(id=choice_id).values('score','challengequestions__question').first()
+                    is_right = False
+
+                    if choice_obj.get('score') > 0:
+                        is_right = True
+
+                    answers.append({
+                        'question_id': question_id,
+                        'question_text': choice_obj.get('challengequestions__question'),
+                        'is_answered_right': is_right,
+                        'choice_id': choice_id
+                    })
+
+            except json.JSONDecodeError:
+                print('json error in:', obj.id, obj.answer)
+                traceback.print_exc()
+
+            return answers
 
         if report_type == 'reliability':
             exam_results = []
@@ -6019,10 +6055,6 @@ class ChallengeReportAPIView(
 
                 })
 
-        elif report_type == 'students':
-            self.queryset = queryset
-            get_result = self.list(request).data
-
         elif report_type == 'groups':
             # todo: finish
             # self.queryset = queryset
@@ -6032,6 +6064,41 @@ class ChallengeReportAPIView(
             pass
 
         elif report_type == 'report4':
+            obj = queryset.first()
+
+            if not obj.answer:
+
+                return request.send_data(None)
+
+            answers = parse_answers(obj.answer)
+            self.serializer_class = ChallengeReport4Serializer
+
+        elif report_type == 'report4-1':
+            obj = queryset.first()
+
+            if not obj.answer:
+
+                return request.send_data(None)
+
+            answers = parse_answers(obj.answer)
+
+            get_result = {
+                'questions': answers,
+                'questions_summary': []
+            }
+
+        # for reports where pagination is required
+        if report_type in ['students', 'report4']:
+            sorting = self.request.query_params.get('sorting')
+
+            # Sort хийх үед ажиллана
+            if sorting:
+                if not isinstance(sorting, str):
+                    sorting = str(sorting)
+
+                queryset = queryset.order_by(sorting)
+
+            self.queryset = queryset
             get_result = self.list(request).data
 
         return request.send_data(get_result)

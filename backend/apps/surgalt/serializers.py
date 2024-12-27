@@ -1,5 +1,6 @@
 import os
 import json
+import traceback
 
 from rest_framework import serializers
 
@@ -1057,26 +1058,50 @@ class ChallengeStudentsSerializer(serializers.ModelSerializer):
             return None
 
 
-class ChallengeGroupsSerializer(serializers.ModelSerializer):
-    group_name = serializers.SerializerMethodField()
-    student_total_count = serializers.SerializerMethodField()
-    student_count_by_assessments = serializers.SerializerMethodField()
+class ChallengeReport4Serializer(serializers.ModelSerializer):
+
+    full_name = serializers.SerializerMethodField()
+    answers = serializers.SerializerMethodField()
 
     class Meta:
-        model = Challenge
-        fields = ['group_name', 'student_total_count', 'student_count_by_assessments']
-# todo: finish
-    def get_group_name(self, obj):
+        model = ChallengeStudents
+        fields = 'id', 'full_name', 'answers'
 
-        return None
+    def get_full_name(self, obj):
 
-    def get_student_total_count(self, obj):
+        return obj.student.full_name()
 
-        return None
+    def get_answers(self, obj):
+        def parse_answers(json_data):
+            answers = []
 
-    def get_student_count_by_assessments(self, obj):
+            try:
+                answer_json = json_data.replace("'", '"')
+                answer_json = json.loads(answer_json)
 
-        return None
+                for question_id, choice_id in answer_json.items():
+                    choice_obj = QuestionChoices.objects.filter(id=choice_id).values('score','challengequestions__question').first()
+                    is_right = False
+
+                    if choice_obj.get('score') > 0:
+                        is_right = True
+
+                    answers.append({
+                        'question_id': question_id,
+                        'question_text': choice_obj.get('challengequestions__question'),
+                        'is_answered_right': is_right,
+                        'choice_id': choice_id
+                    })
+
+            except json.JSONDecodeError:
+                print('json error in:', obj.id, obj.answer)
+                traceback.print_exc()
+
+            return answers
+
+        answers = parse_answers(obj.answer)
+
+        return answers
 
 
 class StudentChallengeSerializer(serializers.ModelSerializer):
