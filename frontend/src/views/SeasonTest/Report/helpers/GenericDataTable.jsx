@@ -27,7 +27,7 @@ export default function GenericDataTable({ apiGetFunc, apiGetFuncArgs, isApiGetF
 
 		const { success, data } = await fetchData(apiGetFunc({ ...args }))
 
-		if (success && data) {
+		if (success) {
 			let finalData = []
 			let finalCount = 0
 
@@ -39,32 +39,34 @@ export default function GenericDataTable({ apiGetFunc, apiGetFuncArgs, isApiGetF
 				finalCount = data?.length
 			}
 
-			setTotalCount(finalCount)
+			if (finalData.length) {
+				setTotalCount(finalCount)
 
-			// #region specific code (not generic)
-			// to add footer data
-			if (apiGetFuncArgs.report_type !== 'students') {
-				const footerRow = {}
+				// #region specific code (not generic)
+				// to add footer data
+				if (apiGetFuncArgs.report_type !== 'students') {
+					const footerRow = {}
 
-				// to add first column with according name
-				if (apiGetFuncArgs.report_type === 'groups') {
-					footerRow['group_name'] = "Нийт"
-				} else if (apiGetFuncArgs.report_type === 'professions') {
-					footerRow['profession_name'] = "Нийт"
+					// to add first column with according name
+					if (apiGetFuncArgs.report_type === 'groups') {
+						footerRow['group_name'] = "Нийт"
+					} else if (apiGetFuncArgs.report_type === 'professions') {
+						footerRow['profession_name'] = "Нийт"
+					}
+
+					footerRow['student_count'] = sumValues(finalData, "student_count"),
+					footerRow['A2_count'] = sumValues(finalData, "A2_count"),
+					footerRow['A_count'] = sumValues(finalData, "A_count"),
+					footerRow['B2_count'] = sumValues(finalData, "B2_count"),
+					footerRow['B_count'] = sumValues(finalData, "B_count"),
+					footerRow['C2_count'] = sumValues(finalData, "C2_count"),
+					footerRow['C_count'] = sumValues(finalData, "C_count"),
+					footerRow['D_count'] = sumValues(finalData, "D_count"),
+					footerRow['F_count'] = sumValues(finalData, "F_count")
+					finalData.push(footerRow)
 				}
-
-				footerRow['student_count'] = sumValues(finalData, "student_count"),
-				footerRow['A2_count'] = sumValues(finalData, "A2_count"),
-				footerRow['A_count'] = sumValues(finalData, "A_count"),
-				footerRow['B2_count'] = sumValues(finalData, "B2_count"),
-				footerRow['B_count'] = sumValues(finalData, "B_count"),
-				footerRow['C2_count'] = sumValues(finalData, "C2_count"),
-				footerRow['C_count'] = sumValues(finalData, "C_count"),
-				footerRow['D_count'] = sumValues(finalData, "D_count"),
-				footerRow['F_count'] = sumValues(finalData, "F_count")
-				finalData.push(footerRow)
+				// #endregion
 			}
-			// #endregion
 
 			setData(finalData)
 		}

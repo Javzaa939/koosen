@@ -36,7 +36,11 @@ export default function ReportPieChart() {
     const challengeApi = useApi().challenge
 
     async function getDatas() {
-        const { success, data } = await fetchData(challengeApi.getReport({report_type: 'reliability', exam: selectedExam, group: selected_group}))
+        const { success, data } = await fetchData(challengeApi.getReport({
+            report_type: 'reliability',
+            exam: selected_exam,
+            group: selected_group
+        }))
 
         if (success) {
             setDatas(data?.filter(item => item.questions_count_percent > 0))
@@ -44,7 +48,15 @@ export default function ReportPieChart() {
     }
 
     async function getDataTableDatas() {
-        const { success, data } = await fetchData(challengeApi.getReport(currentPage, rowsPerPage, sortField, searchValue, 'dt_reliability', selected_exam, selected_group))
+        const { success, data } = await fetchData(challengeApi.getReport({
+            page: currentPage,
+            limit: rowsPerPage,
+            sort: sortField,
+            search: searchValue,
+            report_type: 'dt_reliability',
+            exam: selected_exam,
+            group: selected_group
+        }))
 
         if (success) {
             setDataTableDatas(data?.results)
@@ -99,6 +111,19 @@ export default function ReportPieChart() {
 
     // #endregion
 
+    const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, value, index }) => {
+        const RADIAN = Math.PI / 180;
+        const radius = innerRadius + (outerRadius - innerRadius) / 2;
+        const x = cx + radius * Math.cos(-midAngle * RADIAN);
+        const y = cy + radius * Math.sin(-midAngle * RADIAN);
+
+        return (
+            <text x={x} y={y} fill="white" textAnchor="middle" dominantBaseline="central" fontWeight="bold">
+                {`${value.toFixed(0)}%`}
+            </text>
+        );
+    };
+
     return (
         <div className='px-1'>
             <div className='d-flex justify-content-center' style={{ fontWeight: 900, fontSize: 16 }}>
@@ -126,7 +151,8 @@ export default function ReportPieChart() {
                                     cy="50%"
                                     outerRadius={150}
                                     fill="#8884d8"
-                                    label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
+                                    labelLine={false}
+                                    label={renderCustomizedLabel}
                                 >
                                     <Cell fill='#4287f5' />
                                     <Cell fill='#dc8ee6' />
