@@ -5965,6 +5965,23 @@ class ChallengeReportAPIView(
 
             return answers
 
+        def get_question_stats(exam_results):
+            # to collect questions reliability stats
+            question_stats = {}
+
+            for res in exam_results:
+                question_id = res["question_id"]
+
+                if question_id not in question_stats:
+                    question_stats[question_id] = {"correct": 0, "total": 0, 'question_text': res['question_text']}
+
+                question_stats[question_id]["total"] += 1
+
+                if res["is_answered_right"]:
+                    question_stats[question_id]["correct"] += 1
+
+            return question_stats
+
         if report_type == 'reliability':
             exam_results = []
 
@@ -5984,19 +6001,7 @@ class ChallengeReportAPIView(
                 "Маш хялбар": lambda question_reliability: question_reliability >= 81,
             }
 
-            # to collect questions reliability stats
-            question_stats = {}
-
-            for res in exam_results:
-                question_id = res["question_id"]
-
-                if question_id not in question_stats:
-                    question_stats[question_id] = {"correct": 0, "total": 0, 'question_text': res['question_text']}
-
-                question_stats[question_id]["total"] += 1
-
-                if res["is_answered_right"]:
-                    question_stats[question_id]["correct"] += 1
+            question_stats = get_question_stats(exam_results)
 
             # to calculate question reliability
             questions_reliability = []
@@ -6030,12 +6035,10 @@ class ChallengeReportAPIView(
 
             for key, questions in grouped_questions.items():
                 # to build dict for recharts format
-                rechart_data.append(
-                    {
-                        "questions_reliability_name": key,
-                        "questions_count_percent": (len(questions) * 100 / total_questions_count) if total_questions_count else 0
-                    }
-                )
+                rechart_data.append({
+                    "questions_reliability_name": key,
+                    "questions_count_percent": (len(questions) * 100 / total_questions_count) if total_questions_count else 0
+                })
 
             get_result = rechart_data
 
@@ -6221,32 +6224,23 @@ class ChallengeReportAPIView(
                 self.serializer_class = ChallengeProfessionsSerializer
 
         elif report_type == 'report4':
-            answers = []
-
-            for obj in queryset:
-
-                if not obj.answer:
-
-                    return request.send_data(None)
-
-                answers.extend(parse_answers(obj.answer))
-
             self.serializer_class = ChallengeReport4Serializer
 
         elif report_type == 'report4-1':
             answers = []
 
             for obj in queryset:
-
                 if not obj.answer:
 
                     return request.send_data(None)
 
                 answers.extend(parse_answers(obj.answer))
 
+            question_stats = get_question_stats(answers)
+
             get_result = {
                 'questions': answers,
-                'questions_summary': []
+                'questions_summary': question_stats
             }
 
         # for reports where pagination is required

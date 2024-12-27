@@ -55,13 +55,19 @@ export default function StudentsQuestionsTable({ data, aggregatedData, handleSor
 			<tfoot align='center'>
 				<tr>
 					<td colSpan={2}>
-						{t('Нийт')}
+						{t('Нийт (Зөв/Буруу)')}
 					</td>
-					{aggregatedData?.questions_summary?.map((item, key) =>
-						<td key={key}>
-							{item.total_correct} {item.total_wrong}
-						</td>
-					)}
+					{aggregatedData?.questions_summary && Object.keys(aggregatedData?.questions_summary).map((key, ind) => {
+						const item = aggregatedData?.questions_summary[key]
+						const total_correct = item.correct
+						const total_wrong = item.total - item.correct
+
+						return (
+							<td key={ind}>
+								{total_correct}/{total_wrong}
+							</td>
+						)
+					})}
 				</tr>
 			</tfoot>
 		</table>

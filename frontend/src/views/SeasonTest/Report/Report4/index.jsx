@@ -78,6 +78,7 @@ export default function Report4() {
         getStudentsQuestionsTableData()
         getStudentsQuestionsTableAggregatedData()
     }
+
     // #region table controlling
     function handleSort(column, sort) {
         if (column) {
