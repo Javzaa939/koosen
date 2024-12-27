@@ -5969,6 +5969,7 @@ class ChallengeReportAPIView(
                     continue
 
                 answer_json = None
+
                 try:
                     answer_json = obj.answer.replace("'", '"')
                     answer_json = json.loads(answer_json)
@@ -5992,8 +5993,6 @@ class ChallengeReportAPIView(
                     print('json error in:', obj.id, obj.answer)
                     traceback.print_exc()
 
-            exams = queryset.order_by('challenge__title').values('challenge__id', 'challenge__title')
-
             # questions reliability ranges
             questions_reliability_ranges = {
                 "Маш хүнд": lambda question_reliability: question_reliability <= 20,
@@ -6003,57 +6002,54 @@ class ChallengeReportAPIView(
                 "Маш хялбар": lambda question_reliability: question_reliability >= 81,
             }
 
-            for item in exams:
-                exam_id = item.get('challenge__id')
+            # to collect questions reliability stats
+            question_stats = {}
 
-                # to get exam results by exam_id
-                filtered_results = [res for res in exam_results if res["exam_id"] == exam_id]
+            for res in exam_results:
+                question_id = res["question_id"]
 
-                # to collect questions reliability stats
-                question_stats = {}
+                if question_id not in question_stats:
+                    question_stats[question_id] = {"correct": 0, "total": 0, 'question_text': res['question_text']}
 
-                for res in filtered_results:
-                    question_id = res["question_id"]
+                question_stats[question_id]["total"] += 1
 
-                    if question_id not in question_stats:
-                        question_stats[question_id] = {"correct": 0, "total": 0, 'question_text': res['question_text']}
+                if res["is_answered_right"]:
+                    question_stats[question_id]["correct"] += 1
 
-                    question_stats[question_id]["total"] += 1
+            # to calculate question reliability
+            questions_reliability = {}
 
-                    if res["is_answered_right"]:
-                        question_stats[question_id]["correct"] += 1
+            for question_id, stats in question_stats.items():
+                if stats["total"] > 0:
+                    question_reliability = (stats["correct"] / stats["total"]) * 100
 
-                # to calculate question reliability
-                questions_reliability = {}
+                    questions_reliability[question_id] = {
+                        'question_reliability': question_reliability,
+                        'question_text': stats['question_text']
+                    }
 
-                for question_id, stats in question_stats.items():
-                    if stats["total"] > 0:
-                        question_reliability = (stats["correct"] / stats["total"]) * 100
+            # to group questions and their reliabilities by reliability ranges
+            grouped_questions = {key: [] for key in questions_reliability_ranges}
 
-                        questions_reliability[question_id] = {
-                            'question_reliability': question_reliability,
-                            'question_text': stats['question_text']
-                        }
+            for question_id, value in questions_reliability.items():
+                question_reliability = value['question_reliability']
 
-                # to group questions and their reliabilities by reliability ranges
-                grouped_questions = {key: [] for key in questions_reliability_ranges}
+                for range_name, condition in questions_reliability_ranges.items():
+                    if condition(question_reliability):
+                        question_text = questions_reliability[question_id]['question_text']
+                        grouped_questions[range_name].append({"question_id": question_id, 'question_text': question_text, "question_reliability": question_reliability})
 
-                for question_id, value in questions_reliability.items():
-                    question_reliability = value['question_reliability']
+                        break
 
-                    for range_name, condition in questions_reliability_ranges.items():
-                        if condition(question_reliability):
-                            question_text = questions_reliability[question_id]['question_text']
-                            grouped_questions[range_name].append({"question_id": question_id, 'question_text': question_text, "question_reliability": question_reliability})
-
-                            break
-
+            for key, questions in grouped_questions.items():
                 # to build dict for recharts format and for exam filter
-                get_result.append({
-                    "exam_id": exam_id,
-                    "questions_reliabilities": [{"questions_reliability_name": key, "questions": questions, "questions_count": len(questions)} for key, questions in grouped_questions.items()]
-
-                })
+                get_result.append(
+                    {
+                        "questions_reliability_name": key,
+                        "questions": questions,
+                        "questions_count": len(questions)
+                    }
+                )
 
         elif report_type == 'groups':
             # todo: finish
@@ -6064,23 +6060,28 @@ class ChallengeReportAPIView(
             pass
 
         elif report_type == 'report4':
-            obj = queryset.first()
+            answers = []
 
-            if not obj.answer:
+            for obj in queryset:
 
-                return request.send_data(None)
+                if not obj.answer:
 
-            answers = parse_answers(obj.answer)
+                    return request.send_data(None)
+
+                answers.extend(parse_answers(obj.answer))
+
             self.serializer_class = ChallengeReport4Serializer
 
         elif report_type == 'report4-1':
-            obj = queryset.first()
+            answers = []
 
-            if not obj.answer:
+            for obj in queryset:
 
-                return request.send_data(None)
+                if not obj.answer:
 
-            answers = parse_answers(obj.answer)
+                    return request.send_data(None)
+
+                answers.extend(parse_answers(obj.answer))
 
             get_result = {
                 'questions': answers,

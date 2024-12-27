@@ -20,7 +20,7 @@ export default function ReportPieChart() {
     const challengeApi = useApi().challenge
 
     async function getDatas() {
-        const { success, data } = await fetchData(challengeApi.getReport(1, 10000000, '', 'reliability', selectedExam))
+        const { success, data } = await fetchData(challengeApi.getReport(1, 10000000, '', '', 'reliability', selectedExam))
 
         if (success) {
             setDatas(data)
@@ -86,7 +86,7 @@ export default function ReportPieChart() {
                 <ResponsiveContainer>
                     <PieChart width={400}>
                         <Pie
-                            data={datas?.length ? datas[0].questions_reliabilities : []}
+                            data={datas?.length ? datas : []}
                             dataKey='questions_count'
                             nameKey='questions_reliability_name'
                             cx="50%"
