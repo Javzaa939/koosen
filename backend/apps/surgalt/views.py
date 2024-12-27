@@ -5927,6 +5927,11 @@ class ChallengeReportAPIView(
         if group:
             queryset = queryset.filter(student__group=group)
 
+        profession = request.query_params.get('profession')
+
+        if profession:
+            queryset = queryset.filter(student__group__profession=profession)
+
         if not queryset:
 
             return request.send_data(None)
@@ -6057,19 +6062,6 @@ class ChallengeReportAPIView(
         ):
             group = None
             profession = None
-
-            if report_type == 'groups':
-                group = request.query_params.get('group')
-
-                if group:
-                    queryset = queryset.filter(student__group=group)
-
-            elif report_type == 'professions':
-                profession = request.query_params.get('profession')
-
-                if profession:
-                    queryset = queryset.filter(student__group__profession=profession)
-
             assessments = Score.objects.all().values('score_min','score_max','assesment')
             assessment_dict = {}
 
@@ -6112,6 +6104,7 @@ class ChallengeReportAPIView(
                         )
                         .values('group_name') # to group students by group_name
                 )
+
             elif report_type == 'professions':
                 queryset = (
                     queryset
@@ -6127,7 +6120,7 @@ class ChallengeReportAPIView(
                         .values('profession_name') # to group students by profession_name
                 )
 
-            self.queryset = (
+            queryset = (
                 queryset
                     .annotate(
                         student_count=Count('student', distinct=True),
@@ -6211,8 +6204,6 @@ class ChallengeReportAPIView(
             elif report_type == 'professions':
                 self.serializer_class = ChallengeProfessionsSerializer
 
-            get_result = self.list(request).data
-
         elif report_type == 'report4':
             answers = []
 
@@ -6243,7 +6234,7 @@ class ChallengeReportAPIView(
             }
 
         # for reports where pagination is required
-        if report_type in ['students', 'report4']:
+        if report_type in ['students', 'report4', 'groups', 'professions']:
             sorting = self.request.query_params.get('sorting')
 
             # Sort хийх үед ажиллана

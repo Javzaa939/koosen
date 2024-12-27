@@ -42,7 +42,15 @@ export default function Report4() {
     // #endregion
 
     async function getStudentsQuestionsTableData() {
-        const { success, data } = await fetchData(challengeApi.getReport(current_page, rows_per_page, sortField, search_value, 'report4', selected_exam, selected_group))
+        const { success, data } = await fetchData(challengeApi.getReport({
+            page: current_page,
+            limit: rows_per_page,
+            sort: sortField,
+            search: search_value,
+            report_type: 'report4',
+            exam: selected_exam,
+            group: selected_group
+        }))
 
         if (success) {
             setStudentsQuestionsTableData(data?.results)
@@ -51,7 +59,11 @@ export default function Report4() {
     }
 
     async function getStudentsQuestionsTableAggregatedData() {
-        const { success, data } = await fetchData(challengeApi.getReport('', '', '', '', 'report4-1', selected_exam, selected_group))
+        const { success, data } = await fetchData(challengeApi.getReport({
+            report_type: 'report4-1',
+            exam: selected_exam,
+            group: selected_group
+        }))
 
         if (success) {
             setStudentsQuestionsTableAggregatedData(data)
