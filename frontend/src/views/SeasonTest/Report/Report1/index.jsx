@@ -15,7 +15,7 @@ import './style.scss'
 import { getColumns } from './helpers'
 import GroupFilter from '../helpers/GroupFilter'
 
-export default function ReportPieChart() {
+export default function Report1() {
     // states
     const [selected_exam, setSelectedExam] = useState('')
     const [selected_group, setSelectedGroup] = useState('')

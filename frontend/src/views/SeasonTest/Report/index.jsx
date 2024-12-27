@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { Card, Nav, NavItem, NavLink, TabContent } from 'reactstrap'
 import Lists from './Lists'
 import List3 from './List3'
-import ReportPieChart from './ReportPieChart'
+import Report1 from './Report1'
 import Report2 from './Report2'
 import Report4 from './Report4'
 
@@ -15,7 +15,7 @@ export default function Report() {
             name: 'Тайлан 1',
             icon: 'Activity',
             id: 0,
-            component: <ReportPieChart key="tab1" />
+            component: <Report1 key="tab1" />
         },
         {
             name: 'Тайлан 2',
