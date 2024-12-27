@@ -5946,7 +5946,7 @@ class ChallengeReportAPIView(
                 answer_json = json.loads(answer_json)
 
                 for question_id, choice_id in answer_json.items():
-                    choice_obj = QuestionChoices.objects.filter(id=choice_id).values('score','challengequestions__question','challengequestions__title').first()
+                    choice_obj = QuestionChoices.objects.filter(id=choice_id).values('score','challengequestions__question','challengequestions__title__name').first()
                     is_right = False
 
                     if choice_obj.get('score') > 0:
@@ -5957,7 +5957,7 @@ class ChallengeReportAPIView(
                         'question_text': choice_obj.get('challengequestions__question'),
                         'is_answered_right': is_right,
                         'choice_id': choice_id,
-                        'question_title': choice_obj.get('challengequestions__title'),
+                        'question_title': choice_obj.get('challengequestions__title__name'),
                     })
 
             except json.JSONDecodeError:
