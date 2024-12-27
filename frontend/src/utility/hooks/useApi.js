@@ -738,7 +738,8 @@ function useApi(isDisplay=false) {
 					return instance.get(`/student/group/list/?profession=${profession_id}`)
 				},
 
-				getLesson: (id) => instance.get(`/student/group/lesson/${id}/`)
+				getLesson: (id) => instance.get(`/student/group/lesson/${id}/`),
+				getExam: (id) => instance.get(`/student/group/exam/${id}/`)
 			},
 			/** Оюутны гэр бүлийн байдал */
 			family: {

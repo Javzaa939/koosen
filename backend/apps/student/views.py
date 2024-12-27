@@ -4433,6 +4433,18 @@ class GraduationWorkQrAPIView(
         return request.send_data(not_found_student)
 
 
+class TestGroupAPIView(
+    generics.GenericAPIView
+):
+    """ Шалгалтын анги """
+
+    def get(self, request, exam=None):
+
+        group_ids = Exam_to_group.objects.filter(exam=exam).values_list('group', flat=True)
+
+        datas = Group.objects.filter(id__in=group_ids).values('id', 'name')
+        return request.send_data(list(datas))
+
 # def update(diplom_num, path):
 #     with open(path, 'rb') as f:
 #         image_data = f.read()
