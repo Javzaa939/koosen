@@ -6229,21 +6229,23 @@ class ChallengeReportAPIView(
 
         elif report_type == 'report4-1':
             answers = []
+            first_student_answers = []
 
-            for obj in queryset:
+            for index, obj in enumerate(queryset):
                 if not obj.answer:
 
                     return request.send_data(None)
 
                 answers.extend(parse_answers(obj.answer))
 
-                # because we need only one row data for header
-                break
+                if index == 0:
+                    # because we need only one row data for header
+                    first_student_answers = answers.copy()
 
             question_stats = get_question_stats(answers)
 
             get_result = {
-                'questions': answers,
+                'questions': first_student_answers,
                 'questions_summary': question_stats
             }
 
