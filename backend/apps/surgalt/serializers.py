@@ -1058,25 +1058,37 @@ class ChallengeStudentsSerializer(serializers.ModelSerializer):
 
 
 class ChallengeGroupsSerializer(serializers.ModelSerializer):
-    group_name = serializers.SerializerMethodField()
-    student_total_count = serializers.SerializerMethodField()
-    student_count_by_assessments = serializers.SerializerMethodField()
+    group_name = serializers.CharField()
+    student_count = serializers.IntegerField()
+    A2_count = serializers.IntegerField()
+    A_count = serializers.IntegerField()
+    B2_count = serializers.IntegerField()
+    B_count = serializers.IntegerField()
+    C2_count = serializers.IntegerField()
+    C_count = serializers.IntegerField()
+    D_count = serializers.IntegerField()
+    F_count = serializers.IntegerField()
 
     class Meta:
-        model = Challenge
-        fields = ['group_name', 'student_total_count', 'student_count_by_assessments']
-# todo: finish
-    def get_group_name(self, obj):
+        model = ChallengeStudents
+        fields = ['group_name', 'student_count', 'A_count', 'B_count', 'C_count', 'D_count', 'F_count', 'A2_count', 'B2_count', 'C2_count']
 
-        return None
 
-    def get_student_total_count(self, obj):
+class ChallengeProfessionsSerializer(serializers.ModelSerializer):
+    profession_name = serializers.CharField()
+    student_count = serializers.IntegerField()
+    A2_count = serializers.IntegerField()
+    A_count = serializers.IntegerField()
+    B2_count = serializers.IntegerField()
+    B_count = serializers.IntegerField()
+    C2_count = serializers.IntegerField()
+    C_count = serializers.IntegerField()
+    D_count = serializers.IntegerField()
+    F_count = serializers.IntegerField()
 
-        return None
-
-    def get_student_count_by_assessments(self, obj):
-
-        return None
+    class Meta:
+        model = ChallengeStudents
+        fields = ['profession_name', 'student_count', 'A_count', 'B_count', 'C_count', 'D_count', 'F_count', 'A2_count', 'B2_count', 'C2_count']
 
 
 class StudentChallengeSerializer(serializers.ModelSerializer):
