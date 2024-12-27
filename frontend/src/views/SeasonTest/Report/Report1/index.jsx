@@ -1,5 +1,5 @@
 // ** React Imports
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
 import { Button, Col, Input, Label, Row } from 'reactstrap'
@@ -124,6 +124,12 @@ export default function Report1() {
         );
     };
 
+    const groupMemo = useMemo(() => {
+        return (
+            <GroupFilter setSelected={setSelectedGroup} exam_id={selected_exam}/>
+        )
+    }, [selected_exam])
+
     return (
         <div className='px-1'>
             <div className='d-flex justify-content-center' style={{ fontWeight: 900, fontSize: 16 }}>
@@ -135,7 +141,7 @@ export default function Report1() {
                     <ExamFilter setSelected={setSelectedExam} />
                 </Col>
                 <Col md={3} sm={10}>
-                    <GroupFilter setSelected={setSelectedGroup} />
+                    {groupMemo}
                 </Col>
             </Row>
             <Row align='center'>
