@@ -6237,6 +6237,9 @@ class ChallengeReportAPIView(
 
                 answers.extend(parse_answers(obj.answer))
 
+                # because we need only one row data for header
+                break
+
             question_stats = get_question_stats(answers)
 
             get_result = {
