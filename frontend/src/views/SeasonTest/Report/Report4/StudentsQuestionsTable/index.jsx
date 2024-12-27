@@ -27,7 +27,7 @@ export default function StudentsQuestionsTable({ data, aggregatedData, handleSor
 					{aggregatedData?.questions?.map((item, key) =>
 						<td
 							key={key}
-							className={`ctooltip ${get_question_title_color(item.title)}`}
+							className={`ctooltip ${get_question_title_color(item.question_title)}`}
 						>
 							{key + 1}
 							<span className="ctooltiptext bg-primary text-white fw-bold">{item.question_text}</span>
