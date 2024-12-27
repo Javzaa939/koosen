@@ -5922,6 +5922,10 @@ class ChallengeReportAPIView(
             return request.send_data(None)
 
         queryset = self.queryset.filter(challenge__challenge_type=Challenge.SEMESTR_EXAM, challenge__id=exam)
+        group = request.query_params.get('group')
+
+        if group:
+            queryset = queryset.filter(student__group=group)
 
         if not queryset:
 

@@ -13,10 +13,12 @@ import { getPagination } from '@src/utility/Utils'
 import ExamFilter from '../helpers/ExamFilter'
 import './style.scss'
 import { getColumns } from './helpers'
+import GroupFilter from '../helpers/GroupFilter'
 
 export default function ReportPieChart() {
     // states
-    const [selectedExam, setSelectedExam] = useState('')
+    const [selected_exam, setSelectedExam] = useState('')
+    const [selected_group, setSelectedGroup] = useState('')
     const [datas, setDatas] = useState([])
     const [dataTableDatas, setDataTableDatas] = useState([])
 
@@ -34,7 +36,7 @@ export default function ReportPieChart() {
     const challengeApi = useApi().challenge
 
     async function getDatas() {
-        const { success, data } = await fetchData(challengeApi.getReport(1, 10000000, '', '', 'reliability', selectedExam))
+        const { success, data } = await fetchData(challengeApi.getReport(1, 10000000, '', '', 'reliability', selected_exam, selected_group))
 
         if (success) {
             setDatas(data?.filter(item => item.questions_count_percent > 0))
@@ -42,7 +44,7 @@ export default function ReportPieChart() {
     }
 
     async function getDataTableDatas() {
-        const { success, data } = await fetchData(challengeApi.getReport(currentPage, rowsPerPage, sortField, searchValue, 'dt_reliability', selectedExam))
+        const { success, data } = await fetchData(challengeApi.getReport(currentPage, rowsPerPage, sortField, searchValue, 'dt_reliability', selected_exam, selected_group))
 
         if (success) {
             setDataTableDatas(data?.results)
@@ -51,11 +53,11 @@ export default function ReportPieChart() {
     }
 
     useEffect(() => {
-        if (selectedExam) {
+        if (selected_exam) {
             getDatas()
             getDataTableDatas()
         }
-    }, [selectedExam])
+    }, [selected_exam, selected_group])
 
     // #region datatable
     function handlePagination(page) {
@@ -106,6 +108,9 @@ export default function ReportPieChart() {
             <Row>
                 <Col md={3} sm={10}>
                     <ExamFilter setSelected={setSelectedExam} />
+                </Col>
+                <Col md={3} sm={10}>
+                    <GroupFilter setSelected={setSelectedGroup} />
                 </Col>
             </Row>
             <Row align='center'>
