@@ -48,7 +48,7 @@ export default function StudentsQuestionsTable({ data, aggregatedData, handleSor
 						</td>
 						{student?.answers.map((answer, answer_key) =>
 							<td key={answer_key}>
-								{answer?.is_answered_right ? 'X' : 'O'}
+								{answer?.is_answered_right ? <span style={{ color: 'green' }}>O</span> : <span style={{ color: 'red' }}>X</span>}
 							</td>
 						)}
 					</tr>
