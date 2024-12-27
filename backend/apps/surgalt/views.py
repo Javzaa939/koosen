@@ -5962,13 +5962,13 @@ class ChallengeReportAPIView(
 
         if report_type == 'reliability':
             exam_results = []
-            obj = queryset.first()
 
-            if not obj.answer:
+            for obj in queryset:
+                if not obj.answer:
 
-                return request.send_data(None)
+                    return request.send_data(None)
 
-            exam_results = parse_answers(obj.answer)
+                exam_results.extend(parse_answers(obj.answer))
 
             # questions reliability ranges
             questions_reliability_ranges = {
@@ -6036,13 +6036,15 @@ class ChallengeReportAPIView(
 
         # for datatable with pagination
         elif report_type == 'dt_reliability':
-            obj = queryset.first()
+            answers = []
 
-            if not obj.answer:
+            for obj in queryset:
+                if not obj.answer:
 
-                return request.send_data(None)
+                    return request.send_data(None)
 
-            answers = parse_answers(obj.answer)
+                answers.extend(parse_answers(obj.answer))
+
             choice_ids = [answer['choice_id'] for answer in answers]
 
             queryset = (
