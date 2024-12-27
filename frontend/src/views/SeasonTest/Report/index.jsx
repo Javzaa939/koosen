@@ -4,6 +4,7 @@ import Lists from './Lists'
 import List3 from './List3'
 import ReportPieChart from './ReportPieChart'
 import Report2 from './Report2'
+import Report4 from './Report4'
 
 export default function Report() {
     const [activeTab, setActiveTab] = useState(0)
@@ -32,6 +33,7 @@ export default function Report() {
             name: 'Тайлан 4',
             icon: 'Activity',
             id: 3,
+            component: <Report4 key="tab4" />
         },
         {
             name: 'Тайлан 5',

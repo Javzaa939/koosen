@@ -5919,7 +5919,7 @@ class ChallengeReportAPIView(
 
         if not report_type or not exam:
 
-            return request.send_error('ERR_002')
+            return request.send_data(None)
 
         queryset = self.queryset.filter(challenge__challenge_type=Challenge.SEMESTR_EXAM, challenge__id=exam)
         get_result = []
@@ -6030,6 +6030,9 @@ class ChallengeReportAPIView(
             # get_result = self.list(request).data
 
             pass
+
+        elif report_type == 'report4':
+            get_result = self.list(request).data
 
         return request.send_data(get_result)
 
