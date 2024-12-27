@@ -17,61 +17,63 @@ export default function StudentsQuestionsTable({ data, aggregatedData, handleSor
 	const { t } = useTranslation()
 
 	return (
-		<table className='studentsQuestionsTable'>
-			<thead align='center'>
-				<tr>
-					<td>
-						№
-					</td>
-					<td>
-						{t('Оюутан')}
-					</td>
-					{aggregatedData?.questions?.map((item, key) =>
-						<td
-							key={key}
-							className={`ctooltip ${get_question_title_color(item.question_title)}`}
-						>
-							{key + 1}
-							<span className="ctooltiptext bg-primary text-white fw-bold">{item.question_text}</span>
-						</td>
-					)}
-				</tr>
-			</thead>
-			<tbody align='center'>
-				{data?.map((student, student_key) =>
-					<tr key={student_key}>
+		<div style={{ overflow: 'auto' }}>
+			<table className='studentsQuestionsTable'>
+				<thead align='center'>
+					<tr>
 						<td>
-							{student_key + 1}
+							№
 						</td>
-						<td align='left'>
-							{student.full_name}
+						<td>
+							{t('Оюутан')}
 						</td>
-						{student?.answers.map((answer, answer_key) =>
-							<td key={answer_key}>
-								{answer?.is_answered_right ? <span style={{ color: 'green' }}>O</span> : <span style={{ color: 'red' }}>X</span>}
+						{aggregatedData?.questions?.map((item, key) =>
+							<td
+								key={key}
+								className={`ctooltip ${get_question_title_color(item.question_title)}`}
+							>
+								{key + 1}
+								<span className="ctooltiptext bg-primary text-white fw-bold">{item.question_text}</span>
 							</td>
 						)}
 					</tr>
-				)}
-			</tbody>
-			<tfoot align='center'>
-				<tr>
-					<td colSpan={2}>
-						{t('Нийт (Зөв/Буруу)')}
-					</td>
-					{aggregatedData?.questions_summary && Object.keys(aggregatedData?.questions_summary).map((key, ind) => {
-						const item = aggregatedData?.questions_summary[key]
-						const total_correct = item.correct
-						const total_wrong = item.total - item.correct
-
-						return (
-							<td key={ind}>
-								{total_correct}/{total_wrong}
+				</thead>
+				<tbody align='center'>
+					{data?.map((student, student_key) =>
+						<tr key={student_key}>
+							<td>
+								{student_key + 1}
 							</td>
-						)
-					})}
-				</tr>
-			</tfoot>
-		</table>
+							<td align='left'>
+								{student.full_name}
+							</td>
+							{student?.answers.map((answer, answer_key) =>
+								<td key={answer_key}>
+									{answer?.is_answered_right ? <span style={{ color: 'green' }}>O</span> : <span style={{ color: 'red' }}>X</span>}
+								</td>
+							)}
+						</tr>
+					)}
+				</tbody>
+				<tfoot align='center'>
+					<tr>
+						<td colSpan={2}>
+							{t('Нийт (Зөв/Буруу)')}
+						</td>
+						{aggregatedData?.questions_summary && Object.keys(aggregatedData?.questions_summary).map((key, ind) => {
+							const item = aggregatedData?.questions_summary[key]
+							const total_correct = item.correct
+							const total_wrong = item.total - item.correct
+
+							return (
+								<td key={ind}>
+									{total_correct}/{total_wrong}
+								</td>
+							)
+						})}
+					</tr>
+				</tfoot>
+			</table>
+		</div>
 	)
 }
