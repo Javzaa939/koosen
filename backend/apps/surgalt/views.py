@@ -19,7 +19,7 @@ from main.utils.file import save_file
 from main.utils.file import remove_folder
 
 from django.db import transaction
-from django.db.models import Sum, Count, Q, Subquery, OuterRef,  Value, CharField, F
+from django.db.models import Sum, Count, Q, Subquery, OuterRef,  Value, CharField, F, Case, When, IntegerField, FloatField
 from django.db.models.functions import Concat
 
 from django.shortcuts import get_object_or_404
@@ -81,7 +81,7 @@ from lms.models import get_choice_image_path
 
 from elselt.serializer import MentalUserSerializer
 
-from .serializers import ChallengeReport4Serializer, LessonStandartSerializer
+from .serializers import ChallengeGroupsSerializer, ChallengeProfessionsSerializer, LessonStandartSerializer, ChallengeReport4Serializer
 from .serializers import LessonTitlePlanSerializer
 from .serializers import LessonStandartListSerializer
 from .serializers import LessonStandartSerialzier
@@ -6051,13 +6051,167 @@ class ChallengeReportAPIView(
                     }
                 )
 
-        elif report_type == 'groups':
-            # todo: finish
-            # self.queryset = queryset
-            # self.serializer_class = ChallengeGroupsSerializer
-            # get_result = self.list(request).data
+        elif (
+            report_type == 'groups' or
+            report_type == 'professions'
+        ):
+            group = None
+            profession = None
 
-            pass
+            if report_type == 'groups':
+                group = request.query_params.get('group')
+
+                if group:
+                    queryset = queryset.filter(student__group=group)
+
+            elif report_type == 'professions':
+                profession = request.query_params.get('profession')
+
+                if profession:
+                    queryset = queryset.filter(student__group__profession=profession)
+
+            assessments = Score.objects.all().values('score_min','score_max','assesment')
+            assessment_dict = {}
+
+            for assessment in assessments:
+                assesment_value = assessment['assesment']
+                score_min = assessment['score_min']
+                score_max = assessment['score_max']
+
+                # to get real min max values if assesment letter has duplications
+                if assesment_value in assessment_dict:
+                    if assessment_dict[assesment_value]['score_min'] > score_min:
+                        assessment_dict[assesment_value]['score_min'] = score_min
+
+                    if assessment_dict[assesment_value]['score_max'] < score_max:
+                        assessment_dict[assesment_value]['score_max'] = score_max
+
+                else:
+                    assessment_dict[assesment_value] = {
+                        'score_min': score_min,
+                        'score_max': score_max
+                    }
+
+            queryset = (
+                queryset
+                    .order_by() # to remove above sortings because it conflicts with "group by"
+                    .select_related('student')
+            )
+
+            if report_type == 'groups':
+                queryset = (
+                    queryset
+                        .prefetch_related('student__group')
+                        .annotate(
+                            group_name=F('student__group__name'),
+                            score_percentage=Case(
+                                When(take_score__gt=0, then=(F('score') * 100 / F('take_score'))),
+                                default=Value(0),
+                                output_field=FloatField()
+                            ),
+                        )
+                        .values('group_name') # to group students by group_name
+                )
+            elif report_type == 'professions':
+                queryset = (
+                    queryset
+                        .prefetch_related('student__group__profession')
+                        .annotate(
+                            profession_name=F('student__group__profession__name'),
+                            score_percentage=Case(
+                                When(take_score__gt=0, then=(F('score') * 100 / F('take_score'))),
+                                default=Value(0),
+                                output_field=FloatField()
+                            ),
+                        )
+                        .values('profession_name') # to group students by profession_name
+                )
+
+            self.queryset = (
+                queryset
+                    .annotate(
+                        student_count=Count('student', distinct=True),
+                        A2_count=Count(
+                            Case(
+                                When(
+                                    score_percentage__gte=assessment_dict.get('+A').get('score_min'),
+                                    score_percentage__lte=assessment_dict.get('+A').get('score_max'),
+                                    then=Value(1)),
+                                output_field=IntegerField()
+                            )
+                        ),
+                        A_count=Count(
+                            Case(
+                                When(
+                                    score_percentage__gte=assessment_dict.get('A').get('score_min'),
+                                    score_percentage__lte=assessment_dict.get('A').get('score_max'),
+                                    then=Value(1)),
+                                output_field=IntegerField()
+                            )
+                        ),
+                        B2_count=Count(
+                            Case(
+                                When(
+                                    score_percentage__gte=assessment_dict.get('+B').get('score_min'),
+                                    score_percentage__lte=assessment_dict.get('+B').get('score_max'),
+                                    then=Value(1)),
+                                output_field=IntegerField()
+                            )
+                        ),
+                        B_count=Count(
+                            Case(
+                                When(
+                                    score_percentage__gte=assessment_dict.get('B').get('score_min'),
+                                    score_percentage__lte=assessment_dict.get('B').get('score_max'),
+                                    then=Value(1)),
+                                output_field=IntegerField()
+                            )
+                        ),
+                        C2_count=Count(
+                            Case(
+                                When(
+                                    score_percentage__gte=assessment_dict.get('+C').get('score_min'),
+                                    score_percentage__lte=assessment_dict.get('+C').get('score_max'),
+                                    then=Value(1)),
+                                output_field=IntegerField()
+                            )
+                        ),
+                        C_count=Count(
+                            Case(
+                                When(
+                                    score_percentage__gte=assessment_dict.get('C').get('score_min'),
+                                    score_percentage__lte=assessment_dict.get('C').get('score_max'),
+                                    then=Value(1)),
+                                output_field=IntegerField()
+                            )
+                        ),
+                        D_count=Count(
+                            Case(
+                                When(
+                                    score_percentage__gte=assessment_dict.get('D').get('score_min'),
+                                    score_percentage__lte=assessment_dict.get('D').get('score_max'),
+                                    then=Value(1)),
+                                output_field=IntegerField()
+                            )
+                        ),
+                        F_count=Count(
+                            Case(
+                                When(
+                                    score_percentage__gte=assessment_dict.get('F').get('score_min'),
+                                    score_percentage__lte=assessment_dict.get('F').get('score_max'),
+                                    then=Value(1)),
+                                output_field=IntegerField()
+                            )
+                        )
+                    )
+            )
+
+            if report_type == 'groups':
+                self.serializer_class = ChallengeGroupsSerializer
+            elif report_type == 'professions':
+                self.serializer_class = ChallengeProfessionsSerializer
+
+            get_result = self.list(request).data
 
         elif report_type == 'report4':
             answers = []

@@ -20,7 +20,7 @@ export default function ReportPieChart() {
     const challengeApi = useApi().challenge
 
     async function getDatas() {
-        const { success, data } = await fetchData(challengeApi.getReport(1, 10000000, '', '', 'reliability', selectedExam))
+        const { success, data } = await fetchData(challengeApi.getReport({report_type: 'reliability', exam: selectedExam}))
 
         if (success) {
             setDatas(data)
