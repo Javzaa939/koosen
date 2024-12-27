@@ -634,6 +634,18 @@ class ChallengeQuestionListSerializer(serializers.ModelSerializer):
         title_names = [title.name for title in titles]
         return title_names
 
+
+class ChallengeQuestionsAnswersSerializer(serializers.ModelSerializer):
+
+    total_count = serializers.IntegerField()
+    positive_count = serializers.IntegerField()
+    reliability = serializers.FloatField()
+
+    class Meta:
+        model = ChallengeQuestions
+        fields = 'total_count', 'positive_count', 'reliability', 'question', 'id'
+
+
 class ChallengeSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -1033,27 +1045,33 @@ class ChallengeStudentsSerializer(serializers.ModelSerializer):
         return code
 
     def get_answer_json(self, obj):
+        answers = []
+
         try:
-            answer_json = []
             if obj.answer:
-                answer_json = json.loads(obj.answer)
+                answer_json = obj.answer.replace("'", '"')
+                answer_json = json.loads(answer_json)
 
                 # Тестэн доторх асуултууд
-                for question in answer_json:
-                    #Асуултан доторх хариултууд
-                    choices = question.get('choices')
-                    for choice in choices:
-                        # choice дотроо is_right-г үүсгэнэ
-                        choice['is_right'] = False
-                        choice_obj = QuestionChoices.objects.get(id=choice.get('id'))
+                for question_id, choice_id in answer_json.items():
+                    #Асуултан доторх хариулт
+                    choice_obj = QuestionChoices.objects.filter(id=choice_id).values('score','challengequestions__question').first()
 
-                        # Оноо байвал зөв хариулт гэж үзнэ
-                        if choice_obj.score != 0:
-                            choice['is_right'] = True
+                    # choice дотроо is_right-г үүсгэнэ
+                    is_right = False
 
-                        choice['score'] = choice_obj.score
+                    # Оноо байвал зөв хариулт гэж үзнэ
+                    if choice_obj.get('score') > 0:
+                        is_right = True
 
-            return answer_json
+                    answers.append({
+                        'question_id': question_id,
+                        'question_text': choice_obj.get('challengequestions__question'),
+                        'is_answered_right': is_right
+                    })
+
+            return answers
+
         except json.JSONDecodeError:
             return None
 
