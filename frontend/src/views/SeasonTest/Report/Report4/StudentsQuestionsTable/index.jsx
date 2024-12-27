@@ -2,10 +2,10 @@ import './style.scss'
 import { useTranslation } from "react-i18next"
 
 function get_question_title_color(title) {
-	switch (title) {
-		case 'Мэдлэг': return 'qtc1'
-		case 'Чадвар': return 'qtc2'
-		case 'Хандлага': return 'qtc3'
+	switch (title.trim().toLowerCase()) {
+		case 'мэдлэг': return 'qtc1'
+		case 'чадвар': return 'qtc2'
+		case 'хандлага': return 'qtc3'
 		default: return ''
 	}
 }
