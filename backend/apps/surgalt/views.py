@@ -19,7 +19,7 @@ from main.utils.file import save_file
 from main.utils.file import remove_folder
 
 from django.db import transaction
-from django.db.models import Sum, Count, Q, Subquery, OuterRef,  Value, CharField, F
+from django.db.models import Sum, Count, Q, Subquery, OuterRef,  Value, CharField, F, ExpressionWrapper, FloatField
 from django.db.models.functions import Concat
 
 from django.shortcuts import get_object_or_404
@@ -5919,7 +5919,7 @@ class ChallengeReportAPIView(
 
         if not report_type or not exam:
 
-            return request.send_error('ERR_002')
+            return request.send_data(None)
 
         queryset = self.queryset.filter(challenge__challenge_type=Challenge.SEMESTR_EXAM, challenge__id=exam)
 
@@ -6041,13 +6041,25 @@ class ChallengeReportAPIView(
             answers = parse_answers(obj.answer)
             choice_ids = [answer['choice_id'] for answer in answers]
 
-            self.queryset = ChallengeQuestions.objects.prefetch_related('choices').filter(choices__id__in=choice_ids).values('question','choices__score','id','choices__id')
-            self.serializer_class = ChallengeQuestionsAnswersSerializer
-            get_result = self.list(request).data
+            queryset = (
+                ChallengeQuestions.objects
+                    .prefetch_related('choices')
+                    .filter(choices__id__in=choice_ids)
 
-        elif report_type == 'students':
-            self.queryset = queryset
-            get_result = self.list(request).data
+                    # to group by question id
+                    .values('id', 'question')
+                    .annotate(
+                        total_count=Count('choices', distinct=True),
+                        positive_count=Count('choices', filter=Q(choices__score__gt=0), distinct=True),
+                        reliability=ExpressionWrapper(
+                            (F('positive_count') * 100.0) / F('total_count'),
+                            output_field=FloatField()
+                        )
+                    )
+            )
+
+            self.serializer_class = ChallengeQuestionsAnswersSerializer
+            self.search_fields = ['question']
 
         elif report_type == 'groups':
             # todo: finish
@@ -6056,6 +6068,19 @@ class ChallengeReportAPIView(
             # get_result = self.list(request).data
 
             pass
+
+        if report_type in ['students', 'dt_reliability']:
+            sorting = self.request.query_params.get('sorting')
+
+            # Sort хийх үед ажиллана
+            if sorting:
+                if not isinstance(sorting, str):
+                    sorting = str(sorting)
+
+                queryset = queryset.order_by(sorting)
+
+            self.queryset = queryset
+            get_result = self.list(request).data
 
         return request.send_data(get_result)
 

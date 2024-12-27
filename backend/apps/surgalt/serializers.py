@@ -635,13 +635,14 @@ class ChallengeQuestionListSerializer(serializers.ModelSerializer):
 
 
 class ChallengeQuestionsAnswersSerializer(serializers.ModelSerializer):
-    # TODO: finish, fix
-    choices__score = serializers.FloatField()
-    choices__id = serializers.IntegerField()
+
+    total_count = serializers.IntegerField()
+    positive_count = serializers.IntegerField()
+    reliability = serializers.FloatField()
 
     class Meta:
         model = ChallengeQuestions
-        fields = '__all__'
+        fields = 'total_count', 'positive_count', 'reliability', 'question', 'id'
 
 
 class ChallengeSerializer(serializers.ModelSerializer):

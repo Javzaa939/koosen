@@ -1,28 +1,31 @@
 import { t } from "i18next";
 
-export function getColumns (currentPage, rowsPerPage) {
-    const columns = [
+export function getColumns(currentPage, rowsPerPage) {
+	const columns = [
 		{
 			name: "№",
-			selector: (row,index) => (currentPage-1) * rowsPerPage + index + 1,
+			selector: (row, index) => (currentPage - 1) * rowsPerPage + index + 1,
 			minWidth: "80px",
 			maxWidth: "80px",
-			center: true
+			center: true,
+			header: 'id'
 		},
 		{
-			name: t('%'),
-			selector: (row) => row.question_reliability ? row.question_reliability + '%' : '',
+			name: '%',
+			selector: (row) => row.reliability + '%',
 			maxWidth: "80px",
-            sortable: true,
-			center: true
+			sortable: true,
+			center: true,
+			header: 'reliability'
 		},
 		{
 			name: t('Асуулт'),
-			selector: (row) => row.question_text,
-            sortable: true,
+			selector: (row) => row.question,
+			sortable: true,
+			header: 'question'
 		},
 	]
 
-    return columns
+	return columns
 
 }

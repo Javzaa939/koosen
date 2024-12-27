@@ -2,16 +2,16 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
+import { Button, Col, Input, Label, Row } from 'reactstrap'
+import DataTable from 'react-data-table-component'
+import { ChevronDown, Search } from 'react-feather'
 
 import useApi from '@hooks/useApi'
 import useLoader from '@hooks/useLoader'
+import { getPagination } from '@src/utility/Utils'
 
-import { Button, Col, Input, Label, Row } from 'reactstrap'
 import ExamFilter from '../helpers/ExamFilter'
 import './style.scss'
-import DataTable from 'react-data-table-component'
-import { ChevronDown, Search } from 'react-feather'
-import { getPagination } from '@src/utility/Utils'
 import { getColumns } from './helpers'
 
 export default function ReportPieChart() {
@@ -21,12 +21,12 @@ export default function ReportPieChart() {
     const [dataTableDatas, setDataTableDatas] = useState([])
 
     // #region datatable
+    const default_page = [10, 15, 50, 75, 100]
     const [currentPage, setCurrentPage] = useState(1)
-    const [rowsPerPage, setRowsPerPage] = useState(5)
+    const [rowsPerPage, setRowsPerPage] = useState(default_page[0])
     const [searchValue, setSearchValue] = useState('')
     const [total_count, setTotalCount] = useState(1)
     const [sortField, setSort] = useState('')
-    const default_page = [10, 15, 50, 75, 100]
     // #endregion
 
     const { t } = useTranslation()
@@ -43,7 +43,7 @@ export default function ReportPieChart() {
 
     async function getDataTableDatas() {
         const { success, data } = await fetchData(challengeApi.getReport(currentPage, rowsPerPage, sortField, searchValue, 'dt_reliability', selectedExam))
-        console.log(data)
+
         if (success) {
             setDataTableDatas(data?.results)
             setTotalCount(data?.count)
@@ -63,10 +63,12 @@ export default function ReportPieChart() {
     };
 
     function handleSort(column, sort) {
-        if (sort === 'asc') {
-            setSort(column.header)
-        } else {
-            setSort('-' + column.header)
+        if (column) {
+            if (sort === 'asc') {
+                setSort(column.header)
+            } else {
+                setSort('-' + column.header)
+            }
         }
     }
 
@@ -155,7 +157,7 @@ export default function ReportPieChart() {
                                         ))}
                                 </Input>
                             </Col>
-                            <Col>
+                            <Col align='left'>
                                 <Label for='sort-select'>{t('Хуудсанд харуулах тоо')}</Label>
                             </Col>
                         </Col>
