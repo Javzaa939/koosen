@@ -977,7 +977,7 @@ function useApi(isDisplay=false) {
 		score: {
 			print: {
 				get: (studentId, year, season) => instance.get(`/score/print/${studentId}/?year=${year}&season=${season}`),
-				getByLesson: (lesson_id='') => instance.get(`/score/print/?exam=${lesson_id}`)
+				getByLesson: (lesson_id='', data) => instance.put(`/score/print/?exam=${lesson_id}`, data)
 			},
 			correspond:{
 				get: (limit, page, sort, search) =>

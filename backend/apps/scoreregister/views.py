@@ -1358,13 +1358,18 @@ class TeacherLessonScorePrint(
 
         return context
 
-    def get(self, request):
+    def put(self, request):
         exam = request.query_params.get('exam')
         lesson_year, lesson_season = get_active_year_season()
+        group_id = request.data
 
         # Тухайн шалгалтын хуваариас хичээлийг авах
         exam_obj = ExamTimeTable.objects.get(pk=exam)
-        group_ids = Exam_to_group.objects.filter(exam=exam).values_list('group', flat=True)
+        exam_groups = Exam_to_group.objects.filter(exam=exam)
+        if group_id:
+            exam_groups = exam_groups.filter(group=group_id)
+
+        group_ids = exam_groups.values_list('group', flat=True)
 
         student_ids = self.queryset.filter(score_type__lesson_teacher__lesson=exam_obj.lesson, lesson_year=lesson_year, lesson_season=lesson_season, student__group__in=group_ids).values_list('id', flat=True).distinct('student')
         self.queryset = self.queryset.filter(score_type__lesson_teacher__lesson=exam_obj.lesson, lesson_year=lesson_year, lesson_season=lesson_season, id__in=student_ids)
@@ -1373,6 +1378,8 @@ class TeacherLessonScorePrint(
 
         # Дүн гаргасан багшийн мэдээлэл
         teacher_id = self.queryset.filter(student__group__in=group_ids).values_list('score_type__lesson_teacher__teacher', flat=True).first()
+        if not teacher_id:
+            return request.send_error('ERR_002', 'Тухайн анги бүлэгт багшийн дүн шивэгдээгүй байна.')
         teacher = Teachers.objects.filter(id=teacher_id).first()
         teacher_org_position = Employee.objects.filter(user=teacher.user).values_list('org_position__name', flat=True).first()
         teacher_score_updated_at = self.queryset.values_list('updated_at', flat=True).order_by('updated_at').last()

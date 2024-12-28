@@ -494,10 +494,14 @@ class ExamTimeTableAllSerializer(serializers.ModelSerializer):
     group = serializers.SerializerMethodField()
     lesson_id = serializers.CharField(source='lesson.id', default='')
     is_expired = serializers.SerializerMethodField()
-
+    groups = serializers.SerializerMethodField()
     class Meta:
         model = ExamTimeTable
         fields = "__all__"
+
+    def get_groups(self, obj):
+       groups = Exam_to_group.objects.filter(exam=obj).annotate(name=F('group__name')).values('group', 'name')
+       return list(groups)
 
     def get_teacher_names(self, obj):
         teachers = Teachers.objects.filter(id__in=obj.teacher.values_list('id', flat=True))
