@@ -1,32 +1,9 @@
-/* Tooltip container */
-.ctooltip {
-  position: relative;
-}
-
-/* Tooltip text */
 .ctooltiptext {
-  visibility: hidden;
-  width: 400px;
-  background-color: black;
-  color: #fff;
+  max-width: 400px;
   text-align: center;
   border-radius: 5px;
   padding: 5px;
-  position: absolute;
-  z-index: 1;
-  bottom: 125%;
-  /* Position the tooltip above */
-  left: 50%;
-  margin-left: -60px;
-  /* Offset the tooltip */
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-/* Show the tooltip text when hovering over the container */
-.ctooltip:hover .ctooltiptext {
-  visibility: visible;
-  opacity: 1;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .studentsQuestionsTable {
