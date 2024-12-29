@@ -30,7 +30,7 @@ export default function Report4() {
     const [selected_group, setSelectedGroup] = useState('')
 
     // #region table controlling
-    const [rows_per_page, setRowsPerPage] = useState(default_page[0])
+    const [rows_per_page, setRowsPerPage] = useState(default_page[2])
     const [search_value, setSearchValue] = useState('')
     const [current_page, setCurrentPage] = useState(1)
     const [total_count, setTotalCount] = useState(1)

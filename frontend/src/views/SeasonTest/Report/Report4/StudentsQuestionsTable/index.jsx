@@ -36,6 +36,9 @@ export default function StudentsQuestionsTable({ data, aggregatedData, handleSor
 							<span className="ctooltiptext bg-primary text-white fw-bold">{item.question_text}</span>
 						</td>
 					)}
+					<td>
+						{t('Нийт (Зөв)')}
+					</td>
 				</tr>
 			</thead>
 			<tbody align='center'>
@@ -52,6 +55,11 @@ export default function StudentsQuestionsTable({ data, aggregatedData, handleSor
 								{answer?.is_answered_right ? <span style={{ color: 'green' }}>O</span> : <span style={{ color: 'red' }}>X</span>}
 							</td>
 						)}
+						<td>
+							{student?.answers.reduce((acc, answer) => {
+								return answer.is_answered_right ? acc + 1 : acc;
+							}, 0)}
+						</td>
 					</tr>
 				)}
 			</tbody>
@@ -71,6 +79,8 @@ export default function StudentsQuestionsTable({ data, aggregatedData, handleSor
 							</td>
 						)
 					})}
+					<td>
+					</td>
 				</tr>
 			</tfoot>
 		</table>
