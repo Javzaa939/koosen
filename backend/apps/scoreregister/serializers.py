@@ -340,9 +340,12 @@ class TeacherScoreListPrintSerializer(serializers.ModelSerializer):
     def get_grade_letter(self, obj):
         assessment = ''
         teacher_score = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson).exclude(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total')
+        exam_score = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson).filter(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total')
         total_score = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson).aggregate(total=Sum('score')).get('total')
         if teacher_score < 42:
             assessment = 'WF'
+        elif exam_score < 18:
+            assessment = 'W'
         else:
             assess = Score.objects.filter(score_max__gte=total_score,score_min__lte=total_score).values('assesment').first()
             assessment = assess['assesment']
