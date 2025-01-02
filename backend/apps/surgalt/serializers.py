@@ -633,6 +633,18 @@ class ChallengeQuestionListSerializer(serializers.ModelSerializer):
         title_names = [title.name for title in titles]
         return title_names
 
+
+class ChallengeQuestionsAnswersSerializer(serializers.ModelSerializer):
+
+    total_count = serializers.IntegerField()
+    positive_count = serializers.IntegerField()
+    reliability = serializers.FloatField()
+
+    class Meta:
+        model = ChallengeQuestions
+        fields = 'total_count', 'positive_count', 'reliability', 'question', 'id'
+
+
 class ChallengeSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -1032,51 +1044,69 @@ class ChallengeStudentsSerializer(serializers.ModelSerializer):
         return code
 
     def get_answer_json(self, obj):
+        answers = []
+
         try:
-            answer_json = []
             if obj.answer:
-                answer_json = json.loads(obj.answer)
+                answer_json = obj.answer.replace("'", '"')
+                answer_json = json.loads(answer_json)
 
                 # Тестэн доторх асуултууд
-                for question in answer_json:
-                    #Асуултан доторх хариултууд
-                    choices = question.get('choices')
-                    for choice in choices:
-                        # choice дотроо is_right-г үүсгэнэ
-                        choice['is_right'] = False
-                        choice_obj = QuestionChoices.objects.get(id=choice.get('id'))
+                for question_id, choice_id in answer_json.items():
+                    #Асуултан доторх хариулт
+                    choice_obj = QuestionChoices.objects.filter(id=choice_id).values('score','challengequestions__question').first()
 
-                        # Оноо байвал зөв хариулт гэж үзнэ
-                        if choice_obj.score != 0:
-                            choice['is_right'] = True
+                    # choice дотроо is_right-г үүсгэнэ
+                    is_right = False
 
-                        choice['score'] = choice_obj.score
+                    # Оноо байвал зөв хариулт гэж үзнэ
+                    if choice_obj.get('score') > 0:
+                        is_right = True
 
-            return answer_json
+                    answers.append({
+                        'question_id': question_id,
+                        'question_text': choice_obj.get('challengequestions__question'),
+                        'is_answered_right': is_right
+                    })
+
+            return answers
+
         except json.JSONDecodeError:
             return None
 
 
 class ChallengeGroupsSerializer(serializers.ModelSerializer):
-    group_name = serializers.SerializerMethodField()
-    student_total_count = serializers.SerializerMethodField()
-    student_count_by_assessments = serializers.SerializerMethodField()
+    group_name = serializers.CharField()
+    student_count = serializers.IntegerField()
+    A2_count = serializers.IntegerField()
+    A_count = serializers.IntegerField()
+    B2_count = serializers.IntegerField()
+    B_count = serializers.IntegerField()
+    C2_count = serializers.IntegerField()
+    C_count = serializers.IntegerField()
+    D_count = serializers.IntegerField()
+    F_count = serializers.IntegerField()
 
     class Meta:
-        model = Challenge
-        fields = ['group_name', 'student_total_count', 'student_count_by_assessments']
-# todo: finish
-    def get_group_name(self, obj):
+        model = ChallengeStudents
+        fields = ['group_name', 'student_count', 'A_count', 'B_count', 'C_count', 'D_count', 'F_count', 'A2_count', 'B2_count', 'C2_count']
 
-        return None
 
-    def get_student_total_count(self, obj):
+class ChallengeProfessionsSerializer(serializers.ModelSerializer):
+    profession_name = serializers.CharField()
+    student_count = serializers.IntegerField()
+    A2_count = serializers.IntegerField()
+    A_count = serializers.IntegerField()
+    B2_count = serializers.IntegerField()
+    B_count = serializers.IntegerField()
+    C2_count = serializers.IntegerField()
+    C_count = serializers.IntegerField()
+    D_count = serializers.IntegerField()
+    F_count = serializers.IntegerField()
 
-        return None
-
-    def get_student_count_by_assessments(self, obj):
-
-        return None
+    class Meta:
+        model = ChallengeStudents
+        fields = ['profession_name', 'student_count', 'A_count', 'B_count', 'C_count', 'D_count', 'F_count', 'A2_count', 'B2_count', 'C2_count']
 
 
 class StudentChallengeSerializer(serializers.ModelSerializer):

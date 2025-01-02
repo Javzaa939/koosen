@@ -738,7 +738,8 @@ function useApi(isDisplay=false) {
 					return instance.get(`/student/group/list/?profession=${profession_id}`)
 				},
 
-				getLesson: (id) => instance.get(`/student/group/lesson/${id}/`)
+				getLesson: (id) => instance.get(`/student/group/lesson/${id}/`),
+				getExam: (id) => instance.get(`/student/group/exam/${id}/`)
 			},
 			/** Оюутны гэр бүлийн байдал */
 			family: {
@@ -976,7 +977,7 @@ function useApi(isDisplay=false) {
 		score: {
 			print: {
 				get: (studentId, year, season) => instance.get(`/score/print/${studentId}/?year=${year}&season=${season}`),
-				getByLesson: (lesson_id='') => instance.get(`/score/print/?exam=${lesson_id}`)
+				getByLesson: (lesson_id='', data) => instance.put(`/score/print/?exam=${lesson_id}`, data)
 			},
 			correspond:{
 				get: (limit, page, sort, search) =>
@@ -1519,7 +1520,7 @@ function useApi(isDisplay=false) {
 			getDetail: (page, limit, search, test_id) => instance.get(`learning/challenge/details/?page=${page}&limit=${limit}&search=${search}&test_id=${test_id}`),
 			getTestResult: (cdata) => instance.post(`learning/challenge/result/`,cdata),
 			getDifficultyLevels: () => instance.get(`learning/challenge/questions/difficulty_levels/`),
-			getReport: (page=1, limit=10000000, search='', report_type='', exam='', group='') => instance.get(`learning/challenge/report/?page=${page}&limit=${limit}&search=${search}&report_type=${report_type}&exam=${exam}&group=${group}`),
+			getReport: ({page=1, limit=10000000, sort='', search='', report_type='', exam='', group='', profession=''}) => instance.get(`learning/challenge/report/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&report_type=${report_type}&exam=${exam}&group=${group}&profession=${profession}`),
 			getDetailTable: (page,limit,search,department,group,test_id,student_id) => instance.get(`learning/challenge/details/table/?page=${page}&limit=${limit}&search=${search}&test_id=${test_id}&department=${department}&group=${group}&student_id=${student_id}`),
 
 			chart1: (dep, year, season, teacher, lesson) => instance.get(`learning/challenge/analysis/?dep=${dep}&year=${year}&season=${season}&teacher=${teacher}&lesson=${lesson}`),

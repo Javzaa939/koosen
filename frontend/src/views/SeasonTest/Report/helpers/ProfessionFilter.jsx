@@ -7,31 +7,32 @@ import { ReactSelectStyles } from '@src/utility/Utils'
 import useApi from "@src/utility/hooks/useApi"
 import useLoader from "@src/utility/hooks/useLoader"
 
-export default function GroupFilter({setSelected, exam_id}) {
+export default function ProfessionFilter({setSelected}) {
 	// states
 	const [options, setOptions] = useState([])
 
 	// primitive vars
-	const controlName = 'group'
+	const controlName = 'profession'
 
 	// other hooks
     const { t } = useTranslation()
-    const groupApi = useApi().student.group
+    const professionApi = useApi().study.professionDefinition
     const { isLoading, fetchData } = useLoader({})
 
 	async function getOptions() {
-		const { success, data } = await fetchData(groupApi.getExam(exam_id))
+		const { success, data } = await fetchData(professionApi.getList(''))
+
 		if (success) {
 			setOptions(data)
 		}
 	}
 
-	useEffect(() => { if (exam_id) getOptions() }, [exam_id])
+	useEffect(() => { getOptions() }, [])
 
 	return (
 		<>
 			<Label className="form-label" for={controlName}>
-				{t('Анги')}
+				{t('Хөтөлбөр')}
 			</Label>
 			<Select
 				id={controlName}
