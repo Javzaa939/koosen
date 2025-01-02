@@ -486,6 +486,7 @@ const ExamTimeTable = () => {
                                             <DataTable
                                                 noHeader
                                                 pagination
+                                                paginationServer
                                                 className='react-dataTable'
                                                 // progressPending={isTableLoading}
                                                 onSort={handleSort}
