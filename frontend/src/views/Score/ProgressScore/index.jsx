@@ -42,12 +42,12 @@ export default function ProgressScore() {
     }
 
     const { t } = useTranslation()
-	const { school_id } = useContext(SchoolContext)
+    const { school_id } = useContext(SchoolContext)
 
     // ** Hook
     const { control, setValue, formState: { errors } } = useForm({});
 
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
+    const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: true })
 
     const default_page = ['Бүгд', 10, 20, 50, 75, 100]
 
@@ -79,7 +79,7 @@ export default function ProgressScore() {
     // Хичээлийн жагсаалт
     async function getLessonOption() {
         const { success, data } = await fetchData(lessonApi.getList(school_id))
-        if(success) {
+        if (success) {
             setLessonOption(data)
         }
     }
@@ -88,7 +88,7 @@ export default function ProgressScore() {
     async function getGroup() {
         const lesson = select_value.lesson
         const { success, data } = await fetchData(groupApi.get(10000000, 1, '', '', '', '', '', '', '', lesson))
-        if(success) {
+        if (success) {
             setGroupOption(data?.results)
         }
     }
@@ -99,10 +99,9 @@ export default function ProgressScore() {
         const is_fall = select_value.is_fall
         const class_id = select_value.class
 
-        if(lesson)
-        {
+        if (lesson) {
             const { success, data } = await fetchData(scoreApi.get(rowsPerPage, currentPage, sortField, searchValue, class_id, lesson, '', is_fall))
-            if(success) {
+            if (success) {
                 setDatas(data?.datas?.results)
                 setHaveTeachScore(data?.have_teach_score)
                 setTotalCount(data?.datas?.count)
@@ -115,11 +114,10 @@ export default function ProgressScore() {
 
     useEffect(() => {
         getDatas()
-    },[select_value, rowsPerPage, currentPage, sortField])
+    }, [select_value, rowsPerPage, currentPage, sortField])
 
     useEffect(
-        () =>
-        {
+        () => {
             getLessonOption()
             getGroup()
         },
@@ -133,7 +131,7 @@ export default function ProgressScore() {
     }
 
     function handleSort(column, sort) {
-        if(sort === 'asc') {
+        if (sort === 'asc') {
             setSort(column.header)
         } else {
             setSort('-' + column.header)
@@ -141,15 +139,15 @@ export default function ProgressScore() {
     }
 
     // Хуудас солих үед ажиллах хэсэг
-	function handlePagination(page) {
-		setCurrentPage(page.selected + 1);
-	};
+    function handlePagination(page) {
+        setCurrentPage(page.selected + 1);
+    };
 
     // ** Function to handle per page
     function handlePerPage(e) {
         setRowsPerPage(
-			e.target.value === "Бүгд" ? e.target.value : parseInt(e.target.value)
-		);
+            e.target.value === "Бүгд" ? e.target.value : parseInt(e.target.value)
+        );
     }
 
     // Хайх товч дарсан үед ажиллах функц
@@ -162,7 +160,7 @@ export default function ProgressScore() {
         if (!searchValue) {
             getDatas()
         }
-    },[searchValue])
+    }, [searchValue])
 
     return (
         <Fragment>
@@ -179,7 +177,7 @@ export default function ProgressScore() {
                             control={control}
                             defaultValue=''
                             name="lesson"
-                            render={({ field: { value, onChange} }) => {
+                            render={({ field: { value, onChange } }) => {
                                 return (
                                     <Select
                                         name="lesson"
@@ -218,7 +216,7 @@ export default function ProgressScore() {
                             control={control}
                             defaultValue=''
                             name="class"
-                            render={({ field: { value, onChange} }) => {
+                            render={({ field: { value, onChange } }) => {
                                 return (
                                     <Select
                                         name="class"
@@ -255,7 +253,7 @@ export default function ProgressScore() {
                             control={control}
                             defaultValue=''
                             name="is_fall"
-                            render={({ field: { value, onChange, ...rest} }) => {
+                            render={({ field: { value, onChange, ...rest } }) => {
                                 return (
                                     <Select
                                         {...rest}
@@ -266,8 +264,8 @@ export default function ProgressScore() {
                                         isLoading={isLoading}
                                         placeholder={t('-- Сонгоно уу --')}
                                         options={[
-                                            {value: true, label: t('Тийм')},
-                                            {value: false, label: t('Үгүй')}
+                                            { value: true, label: t('Тийм') },
+                                            { value: false, label: t('Үгүй') }
                                         ]}
                                         noOptionsMessage={() => t('Хоосон байна.')}
                                         onChange={(val) => {
@@ -305,7 +303,7 @@ export default function ProgressScore() {
                                         >
                                             {page}
                                         </option>
-                                ))}
+                                    ))}
                             </Input>
                         </Col>
                         <Col md={10} sm={3}>
@@ -341,7 +339,7 @@ export default function ProgressScore() {
                         progressPending={isLoading}
                         progressComponent={
                             <div className='my-2 d-flex align-items-center justify-content-center'>
-                                <Spinner className='me-1' color="" size='sm'/><h5>{t('Түр хүлээнэ үү')}...</h5>
+                                <Spinner className='me-1' color="" size='sm' /><h5>{t('Түр хүлээнэ үү')}...</h5>
                             </div>
                         }
                         noDataComponent={(
