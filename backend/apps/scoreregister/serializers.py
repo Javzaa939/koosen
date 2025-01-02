@@ -342,6 +342,8 @@ class TeacherScoreListPrintSerializer(serializers.ModelSerializer):
         teacher_score = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson).exclude(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total')
         exam_score = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson).filter(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total')
         total_score = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson).aggregate(total=Sum('score')).get('total')
+        if not exam_score:
+            return ''
         if teacher_score < 42:
             assessment = 'WF'
         elif exam_score < 18:
