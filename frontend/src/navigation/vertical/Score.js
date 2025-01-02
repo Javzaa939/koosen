@@ -31,6 +31,12 @@ export default [
                 title: 'Өмнөх улирлын дүн',
                 icon: <Circle size={8} />,
                 navLink: "score/preview-score/"
+            },
+            {
+                id: 'score5',
+                title: 'Явцын оноо',
+                icon: <Circle size={8} />,
+                navLink: "score/progress-score/"
             }
         ]
     }
