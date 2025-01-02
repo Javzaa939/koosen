@@ -171,7 +171,7 @@ export default function ReportPieChart() {
                         </ResponsiveContainer>
                     </div>
                 </Col>
-                <Col className='mt-1'>
+                <Col className='mt-1' md={6}>
                     <Row className='justify-content-between mx-0'>
                         <Col className='d-flex align-items-center justify-content-start'>
                             <Col sm={3} md={6} lg={4} className='pe-1'>
