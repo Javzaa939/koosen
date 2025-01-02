@@ -181,8 +181,8 @@ class Lesson_to_teacher(models.Model):
     def file_directory_path(instance, filename):
         return '{0}/{1}/{2}'.format(settings.LESSON_TEACHER, instance.id, filename)
 
-    lesson = models.ForeignKey(LessonStandart, on_delete=models.CASCADE, verbose_name="Хичээл")
-    teacher = models.ForeignKey(Teachers, on_delete=models.CASCADE, verbose_name="Багш")
+    lesson = models.ForeignKey(LessonStandart, on_delete=models.PROTECT, verbose_name="Хичээл")
+    teacher = models.ForeignKey(Teachers, on_delete=models.PROTECT, verbose_name="Багш")
     file = models.FileField(upload_to=file_directory_path, max_length=255, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
