@@ -1,5 +1,5 @@
 // ** React Imports
-import { Fragment, useState, useEffect } from 'react'
+import { Fragment, useState, useEffect, useContext } from 'react'
 
 import {
     Row,
@@ -17,7 +17,7 @@ import { useTranslation } from 'react-i18next'
 
 import Select from 'react-select'
 
-import { ChevronDown, Download, Search } from 'react-feather'
+import { ChevronDown, Search } from 'react-feather'
 
 import { useForm, Controller } from "react-hook-form";
 
@@ -29,6 +29,7 @@ import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
 
 import { getPagination, ReactSelectStyles } from '@utils'
+import SchoolContext from '@src/utility/context/SchoolContext'
 
 import { getColumns } from './helpers'
 
@@ -41,6 +42,7 @@ export default function ProgressScore() {
     }
 
     const { t } = useTranslation()
+	const { school_id } = useContext(SchoolContext)
 
     // ** Hook
     const { control, setValue, formState: { errors } } = useForm({});
@@ -66,74 +68,40 @@ export default function ProgressScore() {
 
     const [datas, setDatas] = useState([])
     const [lesson_option, setLessonOption] = useState([])
-    const [teacher_option, setTeacherOption] = useState([])
     const [group_option, setGroupOption] = useState([])
-    const [teach_score, setHaveTeachScore] = useState(false)
-    const [isDadlaga, setIsDadlaga] = useState(false)
-
     const [select_value, setSelectValue] = useState(values)
-
-    const [valid_date, setValidDate] = useState(false)
-    const [exam_date, setExamDate] = useState(false)
 
     // API
     const groupApi = useApi().student.group
-    const teacherApi = useApi().hrms.teacher
     const lessonApi = useApi().study.lessonStandart
     const scoreApi = useApi().score.register
-    const permissionApi = useApi().role.check
 
     // Хичээлийн жагсаалт
     async function getLessonOption() {
-        const { success, data } = await fetchData(lessonApi.getList())
+        const { success, data } = await fetchData(lessonApi.getList(school_id))
         if(success) {
             setLessonOption(data)
         }
     }
 
-    // Багшийн жагсаалт
-    async function getTeacher() {
-        const lesson_id = select_value.lesson
-        const { success, data } = await fetchData(teacherApi.getTeacher(lesson_id))
-        if(success) {
-            setTeacherOption(data)
-        }
-    }
-
     // Анги бүлгийн жагсаалт
     async function getGroup() {
-        const teacher = select_value.teacher
-        const { success, data } = await fetchData(groupApi.getGroup(teacher))
+        const lesson = select_value.lesson
+        const { success, data } = await fetchData(groupApi.get(10000000, 1, '', '', '', '', '', '', '', lesson))
         if(success) {
-            setGroupOption(data)
-        }
-    }
-
-    // Хугацаа шалгах
-    async function getTime() {
-        const { success, data } = await fetchData(permissionApi.get(7))
-        if(success) {
-            setValidDate(data)
-        }
-    }
-
-    // Хугацаа шалгах
-    async function getScoreEnter() {
-        const { success, data } = await fetchData(permissionApi.get(2))
-        if(success) {
-            setExamDate(data)
+            setGroupOption(data?.results)
         }
     }
 
     // Дүнгийн жагсаалт
     async function getDatas() {
         const lesson = select_value.lesson
-        const teacher = select_value.teacher
+        const is_fall = select_value.is_fall
         const class_id = select_value.class
 
-        if(lesson && teacher)
+        if(lesson)
         {
-            const { success, data } = await fetchData(scoreApi.get(rowsPerPage, currentPage, sortField, searchValue, class_id, lesson, teacher))
+            const { success, data } = await fetchData(scoreApi.get(rowsPerPage, currentPage, sortField, searchValue, class_id, lesson, '', is_fall))
             if(success) {
                 setDatas(data?.datas?.results)
                 setHaveTeachScore(data?.have_teach_score)
@@ -145,7 +113,6 @@ export default function ProgressScore() {
         }
     }
 
-
     useEffect(() => {
         getDatas()
     },[select_value, rowsPerPage, currentPage, sortField])
@@ -154,30 +121,9 @@ export default function ProgressScore() {
         () =>
         {
             getLessonOption()
-            getTime()
-            getScoreEnter()
+            getGroup()
         },
-        []
-    )
-
-    useEffect(
-        () =>
-        {
-            if (select_value?.lesson) {
-                getTeacher()
-            }
-        },
-        [select_value?.lesson]
-    )
-
-    useEffect(
-        () =>
-        {
-            if (select_value?.teacher) {
-                getGroup()
-            }
-        },
-        [select_value?.teacher]
+        [school_id]
     )
 
     // ** Function to handle filter
@@ -218,21 +164,11 @@ export default function ProgressScore() {
         }
     },[searchValue])
 
-    async function handleTeacherDownload() {
-        if (select_value.lesson && select_value.teacher) {
-            const { success, data } = await fetchData(scoreApi.download(select_value.lesson, select_value.teacher, select_value.class))
-            if(success)
-            {
-                setDatas(data)
-            }
-        }
-    }
-
     return (
         <Fragment>
             <Card>
                 <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
-                    <CardTitle tag='h4'>{t('Идэвхтэй улирлын дүнгийн бүртгэл')}</CardTitle>
+                    <CardTitle tag='h4'>{t('Явцын оноо')}</CardTitle>
                 </CardHeader>
                 <Row className="mx-50 gy-1 my-1" sm={12}>
                     <Col md={3} sm={12}>
@@ -265,44 +201,6 @@ export default function ProgressScore() {
                                             })
                                             setValue('teacher', '')
                                             setIsDadlaga(val?.is_dadlaga)
-                                        }}
-                                        styles={ReactSelectStyles}
-                                        getOptionValue={(option) => option.id}
-                                        getOptionLabel={(option) => option.full_name}
-                                    />
-                                )
-                            }}
-                        ></Controller>
-                    </Col>
-                    <Col md={3} sm={12}>
-                        <Label className="form-label" for="teacher">
-                            {t('Багш')}
-                        </Label>
-                        <Controller
-                            control={control}
-                            defaultValue=''
-                            name="teacher"
-                            render={({ field: { value, onChange} }) => {
-                                return (
-                                    <Select
-                                        name="teacher"
-                                        id="teacher"
-                                        classNamePrefix='select'
-                                        isClearable
-                                        className={classnames('react-select', { 'is-invalid': errors.teacher })}
-                                        isLoading={isLoading}
-                                        placeholder={t('-- Сонгоно уу --')}
-                                        options={teacher_option || []}
-                                        value={value && teacher_option.find((c) => c.id === value)}
-                                        noOptionsMessage={() => t('Хоосон байна.')}
-                                        onChange={(val) => {
-                                            onChange(val?.id || '')
-                                            setSelectValue({
-                                                lesson: select_value.lesson,
-                                                teacher: val?.id || '',
-                                                class: '',
-                                            })
-                                            setValue('class', '')
                                         }}
                                         styles={ReactSelectStyles}
                                         getOptionValue={(option) => option.id}
@@ -349,8 +247,43 @@ export default function ProgressScore() {
                             }}
                         ></Controller>
                     </Col>
-                    <Col md={3} sm={12} className='d-flex justify-content-start align-items-center'>
-                        <Button size='sm' color='primary' className='mt-2' onClick={handleTeacherDownload} disabled={!valid_date}><Download size={15} className='me-1'/>Багшийн дүн татах</Button>
+                    <Col md={3} sm={12}>
+                        <Label className="form-label" for="is_fall">
+                            {t('Хичээлд унасан эсэх')}
+                        </Label>
+                        <Controller
+                            control={control}
+                            defaultValue=''
+                            name="is_fall"
+                            render={({ field: { value, onChange, ...rest} }) => {
+                                return (
+                                    <Select
+                                        {...rest}
+                                        id={rest.name}
+                                        classNamePrefix='select'
+                                        isClearable
+                                        className={classnames('react-select', { 'is-invalid': errors[rest.name] })}
+                                        isLoading={isLoading}
+                                        placeholder={t('-- Сонгоно уу --')}
+                                        options={[
+                                            {value: true, label: t('Тийм')},
+                                            {value: false, label: t('Үгүй')}
+                                        ]}
+                                        noOptionsMessage={() => t('Хоосон байна.')}
+                                        onChange={(val) => {
+                                            onChange(val?.value || '')
+                                            setSelectValue({
+                                                lesson: select_value.lesson,
+                                                is_fall: val?.value || '',
+                                                class: '',
+                                            })
+                                            setValue('class', '')
+                                        }}
+                                        styles={ReactSelectStyles}
+                                    />
+                                )
+                            }}
+                        ></Controller>
                     </Col>
                 </Row>
                 <Row className='justify-content-between mx-0'>
@@ -403,14 +336,12 @@ export default function ProgressScore() {
                 </Row>
                 <div className='react-dataTable react-dataTable-selectable-rows'>
                     <DataTable
-                        noHeader
                         pagination
-                        paginationServer
                         className='react-dataTable'
                         progressPending={isLoading}
                         progressComponent={
                             <div className='my-2 d-flex align-items-center justify-content-center'>
-                                <Spinner className='me-1' color="" size='sm'/><h5>Түр хүлээнэ үү...</h5>
+                                <Spinner className='me-1' color="" size='sm'/><h5>{t('Түр хүлээнэ үү')}...</h5>
                             </div>
                         }
                         noDataComponent={(
@@ -419,7 +350,7 @@ export default function ProgressScore() {
                             </div>
                         )}
                         onSort={handleSort}
-                        columns={getColumns(currentPage, rowsPerPage === 'Бүгд' ? 1 : rowsPerPage, total_count, select_value, exam_date, isDadlaga)}
+                        columns={getColumns(currentPage, rowsPerPage === 'Бүгд' ? 1 : rowsPerPage, total_count)}
                         sortIcon={<ChevronDown size={10} />}
                         paginationPerPage={rowsPerPage}
                         paginationDefaultPage={currentPage}
