@@ -31,13 +31,13 @@ import useLoader from '@hooks/useLoader';
 import { getPagination, ReactSelectStyles } from '@utils'
 import SchoolContext from '@src/utility/context/SchoolContext'
 
-import { getColumns } from './helpers'
+import { getColumns, getFooter } from './helpers'
 
 export default function ProgressScore() {
 
     var values = {
         lesson: '',
-        teacher: '',
+        is_fall: '',
         class: '',
     }
 
@@ -103,7 +103,6 @@ export default function ProgressScore() {
             const { success, data } = await fetchData(scoreApi.get(rowsPerPage, currentPage, sortField, searchValue, class_id, lesson, '', is_fall))
             if (success) {
                 setDatas(data?.datas?.results)
-                setHaveTeachScore(data?.have_teach_score)
                 setTotalCount(data?.datas?.count)
             }
         } else {
@@ -146,7 +145,7 @@ export default function ProgressScore() {
     // ** Function to handle per page
     function handlePerPage(e) {
         setRowsPerPage(
-            e.target.value === "Бүгд" ? e.target.value : parseInt(e.target.value)
+            e.target.value === "Бүгд" ? total_count : parseInt(e.target.value)
         );
     }
 
@@ -193,12 +192,9 @@ export default function ProgressScore() {
                                         onChange={(val) => {
                                             onChange(val?.id || '')
                                             setSelectValue({
+                                                ...select_value,
                                                 lesson: val?.id || '',
-                                                teacher: '',
-                                                class: '',
                                             })
-                                            setValue('teacher', '')
-                                            setIsDadlaga(val?.is_dadlaga)
                                         }}
                                         styles={ReactSelectStyles}
                                         getOptionValue={(option) => option.id}
@@ -232,8 +228,7 @@ export default function ProgressScore() {
                                         onChange={(val) => {
                                             onChange(val?.id || '')
                                             setSelectValue({
-                                                lesson: select_value.lesson,
-                                                teacher: select_value.teacher,
+                                                ...select_value,
                                                 class: val?.id || '',
                                             })
                                         }}
@@ -271,11 +266,9 @@ export default function ProgressScore() {
                                         onChange={(val) => {
                                             onChange(val?.value || '')
                                             setSelectValue({
-                                                lesson: select_value.lesson,
+                                                ...select_value,
                                                 is_fall: val?.value || '',
-                                                class: '',
                                             })
-                                            setValue('class', '')
                                         }}
                                         styles={ReactSelectStyles}
                                     />
@@ -334,6 +327,7 @@ export default function ProgressScore() {
                 </Row>
                 <div className='react-dataTable react-dataTable-selectable-rows'>
                     <DataTable
+                        paginationServer
                         pagination
                         className='react-dataTable'
                         progressPending={isLoading}
@@ -348,12 +342,21 @@ export default function ProgressScore() {
                             </div>
                         )}
                         onSort={handleSort}
-                        columns={getColumns(currentPage, rowsPerPage === 'Бүгд' ? 1 : rowsPerPage, total_count)}
+                        columns={getColumns(currentPage, rowsPerPage === 'Бүгд' ? total_count : rowsPerPage, total_count)}
                         sortIcon={<ChevronDown size={10} />}
                         paginationPerPage={rowsPerPage}
                         paginationDefaultPage={currentPage}
+                        paginationTotalRows={total_count}
+                        paginationRowsPerPageOptions={default_page}
                         data={datas}
-                        paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage === 'Бүгд' ? total_count : rowsPerPage, total_count)}
+                        paginationComponent={
+                            (props) =>
+                                <>
+                                    {getFooter(datas)}
+                                    {/* props.rowsPerPage not updating so rowsPerPage is used directly */}
+                                    {getPagination(handlePagination, props.currentPage, rowsPerPage === 'Бүгд' ? props.rowCount : rowsPerPage, props.rowCount)()}
+                                </>
+                        }
                         fixedHeader
                         fixedHeaderScrollHeight='62vh'
                     />

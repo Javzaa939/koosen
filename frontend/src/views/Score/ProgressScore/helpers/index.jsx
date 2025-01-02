@@ -1,4 +1,6 @@
 import { t } from 'i18next'
+import { Col, Row } from 'reactstrap'
+import '../style.scss'
 
 // Хүснэгтийн баганууд
 export function getColumns(currentPage, rowsPerPage, total_count) {
@@ -17,17 +19,9 @@ export function getColumns(currentPage, rowsPerPage, total_count) {
 			center: true
 		},
 		{
-			header: 'student_code',
-			name: `${t('Оюутны код')}`,
-			selector: (row) => row?.student?.code,
-			sortable: true,
-			minWidth: "80px",
-			center: true,
-		},
-		{
 			header: 'student',
 			name: `${t('Оюутны нэр')}`,
-			selector: (row) => row?.student?.last_name + '  ' + row?.student?.first_name,
+			selector: (row) => row?.student?.full_name,
 			sortable: true,
 			wrap: true,
 			left: true,
@@ -62,4 +56,37 @@ export function getColumns(currentPage, rowsPerPage, total_count) {
 	]
 
 	return columns
+}
+
+export function getFooter(data) {
+	const counts = data.reduce((acc, item) => {
+		const key = item.assessment.assesment;
+		acc[key] = (acc[key] || 0) + 1;
+		return acc;
+	}, {});
+
+	return (
+		<div className='react-dataTable'>
+			<div className='rdt_TableHead'>
+				<Row className='m-0 p-1 cborder clight rdt_TableHeadRow' align='center'>
+					{Object.entries(counts).map(([key, value]) =>
+						<Col className='p-0 rdt_TableCol'>
+							<div className='rdt_TableCol_Sortable'>
+								{key}
+							</div>
+						</Col>
+					)}
+				</Row>
+			</div>
+			<div className='rdt_TableBody'>
+				<Row className='m-0 p-1 cborder clight rdt_TableRow' align='center'>
+					{Object.entries(counts).map(([key, value]) =>
+						<Col className='p-0'>
+							{value}
+						</Col>
+					)}
+				</Row>
+			</div>
+		</div>
+	)
 }

@@ -649,7 +649,7 @@ class ScoreRegisterListAPIView(
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['student__code', 'student__first_name', 'student__last_name']
+    search_fields = ['student__code', 'student__first_name', 'student__last_name', 'student__register_num']
 
     @has_permission(must_permissions=['lms-score-register-read'])
     def get(self, request, pk=None):
@@ -676,15 +676,17 @@ class ScoreRegisterListAPIView(
 
         all_list = self.list(request).data
 
-        # Багш хичээл холболт
-        lesson_teacher = Lesson_to_teacher.objects.filter(lesson=lesson, teacher=teacher).first()
+        if teacher:
+            # Багш хичээл холболт
+            lesson_teacher = Lesson_to_teacher.objects.filter(lesson=lesson, teacher=teacher).first()
 
-        # Багшийн дүнгийн задаргааны төрлүүд
-        score_type_ids = Lesson_teacher_scoretype.objects.filter(lesson_teacher=lesson_teacher).values_list('id', flat=True)
+            # Багшийн дүнгийн задаргааны төрлүүд
+            score_type_ids = Lesson_teacher_scoretype.objects.filter(lesson_teacher=lesson_teacher).values_list('id', flat=True)
 
-        teach_score_qs = TeacherScore.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season, score_type_id__in=score_type_ids)
-        if teach_score_qs:
-            have_teach_score = True
+            teach_score_qs = TeacherScore.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season, score_type_id__in=score_type_ids)
+
+            if teach_score_qs:
+                have_teach_score = True
 
         return_datas = {
             'datas': all_list,
