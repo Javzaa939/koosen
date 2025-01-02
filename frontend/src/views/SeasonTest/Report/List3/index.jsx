@@ -86,7 +86,9 @@ const List3 = () => {
     }, [select_value?.test])
 
     useEffect(() => {
-        getDatas()
+        if (select_value?.test) {
+            getDatas()
+        }
     }, [select_value, currentPage, rowsPerPage])
 
     // #region exam selection code
