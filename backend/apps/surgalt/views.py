@@ -67,7 +67,8 @@ from lms.models import (
     QuestionTitle,
     Lesson_teacher_scoretype,
     QuestionTitle,
-    Score
+    Score,
+    CalculatedGpaOfDiploma
 )
 
 from core.models import (
@@ -216,15 +217,28 @@ class LessonStandartAPIView(
             if not serializer.is_valid(raise_exception=False):
                 return request.send_error_valid(serializer.errors)
 
+            teacher_ids = [teacher.get('id') for teacher in teachers_data]
+            old_teacher_ids = Lesson_to_teacher.objects.filter(lesson=pk).values_list('teacher', flat=True)
+
+            # Шинээр нэмэгдсэн багш
+            add_ids = [item for item in teacher_ids if item not in old_teacher_ids]
+
+            # Хуучин багшийг хасах
+            remove_ids = [item for item in old_teacher_ids if item not in teacher_ids]
+
+            old_teacher_qs = Lesson_to_teacher.objects.filter(lesson=pk)
             if teachers_data:
-                old_teacher_qs = Lesson_to_teacher.objects.filter(lesson=pk)
-                old_teacher_qs.delete()
-                for teacher in teachers_data:
-                    teacher_id = teacher.get('id')
+                if len(remove_ids) > 0:
+                    old_teacher_qs = old_teacher_qs.filter(teacher__in=remove_ids).delete()
+
+                # Шинээр нэмж байгаа бүрээр нь нэмэх
+                for teacher_id in add_ids:
                     Lesson_to_teacher.objects.update_or_create(
                         lesson_id=pk,
                         teacher_id=teacher_id
                     )
+            else:
+                old_teacher_qs.delete()
 
             serializer.save()
 
@@ -248,9 +262,29 @@ class LessonStandartAPIView(
 
         score = ScoreRegister.objects.filter(lesson=pk)
 
-        if learn_plan or timetable or score or examtimetable or examrepeat:
-            return request.send_error("ERR_002", "Тухайн хичээлийг устгах боломжгүй байна.")
+        lesson_to_teacher = Lesson_to_teacher.objects.filter(lesson=pk)
+        diplom_lesson = CalculatedGpaOfDiploma.objects.filter(lesson=pk)
 
+        if learn_plan:
+            learn_plan.delete()
+
+        if timetable:
+            timetable.delete()
+
+        if examtimetable:
+            examtimetable.delete()
+
+        if examrepeat:
+            examrepeat.delete()
+
+        if len(lesson_to_teacher) > 0:
+            return request.send_error("ERR_002", "Тухайн хичээлд холбогдсон багшийн мэдээлэлтэй холбогдосон устгах боломжгүй байна.")
+
+        if len(score) > 0:
+            return request.send_error("ERR_002", "Тухайн хичээлд холбогдсон дүнгийн мэдээлэл байгаа устгах боломжгүй байна.")
+
+        if len(diplom_lesson) > 0:
+            return request.send_error("ERR_002", "Тухайн хичээл нь төгсөлтийн ажилтай холбогдсон учраас устгах боломжгүй байна.")
         self.destroy(request, pk)
         return request.send_info("INF_003")
 

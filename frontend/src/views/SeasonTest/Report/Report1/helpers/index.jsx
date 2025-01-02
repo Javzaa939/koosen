@@ -12,7 +12,7 @@ export function getColumns(currentPage, rowsPerPage) {
 		},
 		{
 			name: '%',
-			selector: (row) => row.reliability + '%',
+			selector: (row) => Number(row.reliability).toFixed(0) + '%',
 			maxWidth: "80px",
 			sortable: true,
 			center: true,
