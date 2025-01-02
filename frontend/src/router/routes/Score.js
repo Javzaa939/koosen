@@ -33,10 +33,7 @@ const Score = [
     },
     {
         path: 'score/progress-score/',
-        element: <ProgressScore />,
-        meta: {
-            layout: 'blank'
-        }
+        element: <ProgressScore />
     }
 ]
 
