@@ -67,7 +67,8 @@ from lms.models import (
     QuestionTitle,
     Lesson_teacher_scoretype,
     QuestionTitle,
-    Score
+    Score,
+    CalculatedGpaOfDiploma
 )
 
 from core.models import (
@@ -248,9 +249,29 @@ class LessonStandartAPIView(
 
         score = ScoreRegister.objects.filter(lesson=pk)
 
-        if learn_plan or timetable or score or examtimetable or examrepeat:
-            return request.send_error("ERR_002", "Тухайн хичээлийг устгах боломжгүй байна.")
+        lesson_to_teacher = Lesson_to_teacher.objects.filter(lesson=pk)
+        diplom_lesson = CalculatedGpaOfDiploma.objects.filter(lesson=pk)
 
+        if learn_plan:
+            learn_plan.delete()
+
+        if timetable:
+            timetable.delete()
+
+        if examtimetable:
+            examtimetable.delete()
+
+        if examrepeat:
+            examrepeat.delete()
+
+        if len(lesson_to_teacher) > 0:
+            return request.send_error("ERR_002", "Тухайн хичээлд холбогдсон багшийн мэдээлэлтэй холбогдосон устгах боломжгүй байна.")
+
+        if len(score) > 0:
+            return request.send_error("ERR_002", "Тухайн хичээлд холбогдсон дүнгийн мэдээлэл байгаа устгах боломжгүй байна.")
+
+        if len(diplom_lesson) > 0:
+            return request.send_error("ERR_002", "Тухайн хичээл нь төгсөлтийн ажилтай холбогдсон учраас устгах боломжгүй байна.")
         self.destroy(request, pk)
         return request.send_info("INF_003")
 
