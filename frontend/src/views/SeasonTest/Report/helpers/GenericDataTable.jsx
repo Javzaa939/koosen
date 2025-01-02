@@ -39,7 +39,7 @@ export default function GenericDataTable({ apiGetFunc, apiGetFuncArgs, isApiGetF
 				finalCount = data?.length
 			}
 
-			if (finalData.length) {
+			if (finalData?.length) {
 				setTotalCount(finalCount)
 
 				// #region specific code (not generic)
