@@ -335,7 +335,7 @@ class TeacherScoreListPrintSerializer(serializers.ModelSerializer):
         if score_obj:
             score = score_obj.score
 
-        return score
+        return round(score, 1)
 
     def get_grade_letter(self, obj):
         assessment = ''
