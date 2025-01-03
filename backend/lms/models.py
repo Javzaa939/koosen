@@ -3540,7 +3540,7 @@ class ChallengeStudents(models.Model):
     """ Шалгалтад оролцогчид """
 
 
-    challenge = models.ForeignKey(Challenge, on_delete=models.CASCADE)
+    challenge = models.ForeignKey(Challenge, on_delete=models.PROTECT)
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
 
     tried = models.BooleanField(default=False, verbose_name='Оюутны оролдлогын тоо дүүрсэн эсэх')

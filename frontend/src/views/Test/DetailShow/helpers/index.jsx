@@ -40,6 +40,12 @@ export function getColumns (currentPage, rowsPerPage, datas, helpers_data, handl
             wrap:true,
         },
         {
+            name: `${'Анги'}`,
+            selector: (row) => row?.group?.name,
+            minWidth: "150px",
+            wrap:true,
+        },
+        {
             name: `${'Нийт оноо'}`,
             selector: (row) => row?.challenge[0]?.take_score,
             minWidth: "100px",
