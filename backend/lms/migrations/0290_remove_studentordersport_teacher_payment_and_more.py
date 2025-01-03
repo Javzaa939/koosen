@@ -16,5 +16,10 @@ class Migration(migrations.Migration):
             model_name='accesshistorylms',
             name='student',
             field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='lms.studentlogin', verbose_name='Оюутан'),
-        )
+        ),
+         migrations.AlterField(
+            model_name='challengestudents',
+            name='challenge',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='lms.challenge'),
+        ),
     ]
