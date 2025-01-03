@@ -209,6 +209,7 @@ class LessonStandartAPIView(
         request_data = request.data
         teachers_data = request.data.get("teachers")
         instance = self.get_object()
+        self.serializer_class = LessonStandartCreateSerializer
 
         try:
             instance = self.get_object()
@@ -217,30 +218,31 @@ class LessonStandartAPIView(
             if not serializer.is_valid(raise_exception=False):
                 return request.send_error_valid(serializer.errors)
 
-            teacher_ids = [teacher.get('id') for teacher in teachers_data]
-            old_teacher_ids = Lesson_to_teacher.objects.filter(lesson=pk).values_list('teacher', flat=True)
-
-            # Шинээр нэмэгдсэн багш
-            add_ids = [item for item in teacher_ids if item not in old_teacher_ids]
-
-            # Хуучин багшийг хасах
-            remove_ids = [item for item in old_teacher_ids if item not in teacher_ids]
-
-            old_teacher_qs = Lesson_to_teacher.objects.filter(lesson=pk)
-            if teachers_data:
-                if len(remove_ids) > 0:
-                    old_teacher_qs = old_teacher_qs.filter(teacher__in=remove_ids).delete()
-
-                # Шинээр нэмж байгаа бүрээр нь нэмэх
-                for teacher_id in add_ids:
-                    Lesson_to_teacher.objects.update_or_create(
-                        lesson_id=pk,
-                        teacher_id=teacher_id
-                    )
-            else:
-                old_teacher_qs.delete()
-
             serializer.save()
+            try:
+                teacher_ids = [teacher.get('id') for teacher in teachers_data]
+                old_teacher_ids = Lesson_to_teacher.objects.filter(lesson=pk).values_list('teacher', flat=True)
+
+                # Шинээр нэмэгдсэн багш
+                add_ids = [item for item in teacher_ids if item not in old_teacher_ids]
+
+                # Хуучин багшийг хасах
+                remove_ids = [item for item in old_teacher_ids if item not in teacher_ids]
+
+                old_teacher_qs = Lesson_to_teacher.objects.filter(lesson=pk)
+                if remove_ids and add_ids:
+                    if len(remove_ids) > 0:
+                        old_teacher_qs = old_teacher_qs.filter(teacher__in=remove_ids).delete()
+
+                    # Шинээр нэмж байгаа бүрээр нь нэмэх
+                    for teacher_id in add_ids:
+                        Lesson_to_teacher.objects.update_or_create(
+                            lesson_id=pk,
+                            teacher_id=teacher_id
+                        )
+            except Exception as e:
+                print(e)
+                return request.send_info("INF_002", 'Багшийн системд дүн оруулсан учраас устгах боломжгүй')
 
             return request.send_info("INF_002")
 
