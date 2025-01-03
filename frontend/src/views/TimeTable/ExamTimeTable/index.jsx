@@ -1,6 +1,6 @@
 import { Fragment, useState, useEffect, useContext, useRef } from "react"
 
-import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, Spinner, Badge } from "reactstrap"
+import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, Spinner, Badge, Modal, ModalHeader, ModalBody } from "reactstrap"
 
 import { useTranslation } from "react-i18next"
 
@@ -55,6 +55,8 @@ const ExamTimeTable = () => {
 
     const [selectedTeacher, setSelectedTeacher] = useState('')
     const [selectedType, setSelectedType] = useState('')
+    const [grouupId, setGroupId] = useState('')
+    const [selectedIds, setSelectedIds] = useState({})
     // const [selectedLesson, setSelectedLesson] = useState('')
 
 
@@ -89,7 +91,7 @@ const ExamTimeTable = () => {
 
     // Modal
     const [modal, setModal] = useState(false);
-    const [edit_modal, setEditModal] = useState(false);
+    const [groupModal, setGroupModal] = useState(false);
     // console.log("edit_modal", edit_modal);
 
     // #region print score info
@@ -277,9 +279,9 @@ const ExamTimeTable = () => {
         setUnitedScoreRanges(ranges)
     }
 
-    async function getDataToPrint(lesson_id, selectedGroupNames) {
+    async function getDataToPrint(lesson_id, selectedGroupNames, group_id) {
         if (lesson_id) {
-            const { success, data } = await fetchDataToPrint(scoreApi.getByLesson(lesson_id))
+            const { success, data } = await fetchDataToPrint(scoreApi.getByLesson(lesson_id, group_id))
 
             if (success) {
                 if (data?.length) {
@@ -296,8 +298,10 @@ const ExamTimeTable = () => {
                     dataToPrint['lesson_students'] = data.map(item => {
                         return {
                             full_name: item.full_name || '',
-                            teacher_score: item.score || '',
-                            teacher_score_type: item.score_type || '',
+                            teacher_score: item.teacher_score || '',
+                            exam_score: item.exam_score || '',
+                            letter: item.grade_letter || '',
+                            total: item.total || '',
                         }
                     })
 
@@ -305,11 +309,11 @@ const ExamTimeTable = () => {
                     dataToPrint['total_students_count'] = data.length
                     dataToPrint['scored_students_count'] = data.filter(item => item.score).length
                     const score_ranges = united_score_ranges
-                    dataToPrint['a_students_count'] = data.filter(item => score_ranges.A.score_min <= item.score && item.score <= score_ranges.A.score_max).length
-                    dataToPrint['b_students_count'] = data.filter(item => score_ranges.B.score_min <= item.score && item.score <= score_ranges.B.score_max).length
-                    dataToPrint['c_students_count'] = data.filter(item => score_ranges.C.score_min <= item.score && item.score <= score_ranges.C.score_max).length
-                    dataToPrint['d_students_count'] = data.filter(item => score_ranges.D.score_min <= item.score && item.score <= score_ranges.D.score_max).length
-                    dataToPrint['f_students_count'] = data.filter(item => score_ranges.F.score_min <= item.score && item.score <= score_ranges.F.score_max).length
+                    dataToPrint['a_students_count'] = data.filter(item => score_ranges.A.score_min <= item.total && item.total <= score_ranges.A.score_max).length
+                    dataToPrint['b_students_count'] = data.filter(item => score_ranges.B.score_min <= item.total && item.total <= score_ranges.B.score_max).length
+                    dataToPrint['c_students_count'] = data.filter(item => score_ranges.C.score_min <= item.total && item.total <= score_ranges.C.score_max).length
+                    dataToPrint['d_students_count'] = data.filter(item => score_ranges.D.score_min <= item.total && item.total <= score_ranges.D.score_max).length
+                    dataToPrint['f_students_count'] = data.filter(item => score_ranges.F.score_min <= item.total && item.total <= score_ranges.F.score_max).length
 
                     if (dataToPrint['total_students_count'] > 0) {
                         dataToPrint['success'] = (((dataToPrint['a_students_count'] + dataToPrint['b_students_count'] + dataToPrint['c_students_count']) * 100) / dataToPrint['total_students_count']).toFixed(0) + '%'
@@ -327,9 +331,14 @@ const ExamTimeTable = () => {
         }
     }
 
-    function handlePrint(lesson_id, selectedGroupNames) {
-        getDataToPrint(lesson_id, selectedGroupNames)
+    function handlePrint(id, selectedGroupNames, group_id='') {
+        getDataToPrint(id, selectedGroupNames, group_id)
         isPrintButtonPressed.current = true
+    }
+
+    function handleGroupPrint(row) {
+        handleGroupModal()
+        setEditData(row)
     }
     // #endregion
 
@@ -348,6 +357,12 @@ const ExamTimeTable = () => {
     function handleDownloadScore(row) {
         setDownloadModal(!downloadModal)
         getStudentList(row)
+    }
+
+    const handleGroupModal = () => {
+        setGroupModal(!groupModal)
+        setSelectedIds({})
+        setGroupId('')
     }
 
     return (
@@ -481,7 +496,6 @@ const ExamTimeTable = () => {
                             </div>
                         :
                                 datas.length > 0 ?
-
                                         <div className="react-dataTable react-dataTable-selectable-rows" id="datatableLeftTwoRightOne">
                                             <DataTable
                                                 noHeader
@@ -490,7 +504,7 @@ const ExamTimeTable = () => {
                                                 className='react-dataTable'
                                                 // progressPending={isTableLoading}
                                                 onSort={handleSort}
-                                                columns={getColumns(currentPage, rowsPerPage, datas, handleEditModal, handleDelete, navigate, handleDownloadScore, user, handlePrint)}
+                                                columns={getColumns(currentPage, rowsPerPage, datas, handleEditModal, handleDelete, navigate, handleDownloadScore, user, handleGroupPrint)}
                                                 sortIcon={<ChevronDown size={10} />}
                                                 paginationPerPage={rowsPerPage}
                                                 paginationDefaultPage={currentPage}
@@ -511,6 +525,37 @@ const ExamTimeTable = () => {
             </Card>
             {/* to avoid parent elements styles conflicts render in body's root */}
             {ReactDOM.createPortal(element_to_print, document.body)}
+            <Modal
+                isOpen={groupModal}
+                toggle={handleGroupModal}
+                size="sm"
+                className="modal-dialog-centered"
+            >
+                <ModalHeader toggle={handleGroupModal}>{'Анги дамжаа сонгох'}</ModalHeader>
+                <ModalBody>
+                    <Label>Дамжаа сонгох</Label>
+                    <Select
+                        classNamePrefix='select'
+                        isClearable
+                        className={classNames('react-select')}
+                        placeholder={t('-- Сонгоно уу --')}
+                        options={edit_data?.groups || []}
+                        value={edit_data?.groups?.find((e) => e.id == grouupId)}
+                        noOptionsMessage={() => t('Хоосон байна')}
+                        onChange={(val) => {
+                            setSelectedIds(val)
+                            setGroupId(val?.group)
+                        }}
+                        styles={ReactSelectStyles}
+                        getOptionValue={(option) => option?.group}
+                        getOptionLabel={(option) => option.name}
+                    />
+                    <div className="mt-1">
+                        <Button color="primary" className="me-1" disabled={!grouupId} onClick={() => handlePrint(edit_data?.id, selectedIds?.name, selectedIds?.group)}>Сонгоод хэвлэх</Button>
+                        <Button color="primary" onClick={() => handlePrint(edit_data?.id, edit_data?.group_names)}>Шууд хэвлэх</Button>
+                    </div>
+                </ModalBody>
+            </Modal>
         </Fragment>
     )
 }

@@ -68,7 +68,7 @@ const List3 = () => {
     }
 
     async function getGroup() {
-        const { success, data } = await allFetch(groupApi.getList())
+        const { success, data } = await allFetch(groupApi.getExam(select_value?.test))
         if (success) {
             setGroup(data)
         }
@@ -76,12 +76,19 @@ const List3 = () => {
 
     useEffect(() => {
         getDepartmentOption()
-        getGroup()
         getExams()
     }, [])
 
     useEffect(() => {
-        getDatas()
+        if (select_value?.test) {
+            getGroup()
+        }
+    }, [select_value?.test])
+
+    useEffect(() => {
+        if (select_value?.test) {
+            getDatas()
+        }
     }, [select_value, currentPage, rowsPerPage])
 
     // #region exam selection code
@@ -162,7 +169,7 @@ const List3 = () => {
                         getOptionLabel={(option) => option.title}
                     />
                 </Col>
-                <Col md={3} sm={10}>
+                {/* <Col md={3} sm={10}>
                     <Label className="form-label" for="department">
                         {t('Хөтөлбөрийн баг')}
                     </Label>
@@ -188,7 +195,7 @@ const List3 = () => {
                         getOptionValue={(option) => option.id}
                         getOptionLabel={(option) => option.name}
                     />
-                </Col>
+                </Col> */}
                 <Col md={3} sm={10}>
                     <Label className="form-label" for="group">
                         {t("Анги")}

@@ -19,7 +19,7 @@ from main.utils.file import save_file
 from main.utils.file import remove_folder
 
 from django.db import transaction
-from django.db.models import Sum, Count, Q, Subquery, OuterRef,  Value, CharField, F
+from django.db.models import Sum, Count, Q, Subquery, OuterRef,  Value, CharField, F, Case, When, IntegerField, FloatField, ExpressionWrapper
 from django.db.models.functions import Concat
 
 from django.shortcuts import get_object_or_404
@@ -67,7 +67,8 @@ from lms.models import (
     QuestionTitle,
     Lesson_teacher_scoretype,
     QuestionTitle,
-    Score
+    Score,
+    CalculatedGpaOfDiploma
 )
 
 from core.models import (
@@ -81,7 +82,7 @@ from lms.models import get_choice_image_path
 
 from elselt.serializer import MentalUserSerializer
 
-from .serializers import ChallengeGroupsSerializer, LessonStandartSerializer
+from .serializers import ChallengeGroupsSerializer, ChallengeProfessionsSerializer, LessonStandartSerializer, ChallengeQuestionsAnswersSerializer, ChallengeReport4Serializer
 from .serializers import LessonTitlePlanSerializer
 from .serializers import LessonStandartListSerializer
 from .serializers import LessonStandartSerialzier
@@ -216,15 +217,28 @@ class LessonStandartAPIView(
             if not serializer.is_valid(raise_exception=False):
                 return request.send_error_valid(serializer.errors)
 
+            teacher_ids = [teacher.get('id') for teacher in teachers_data]
+            old_teacher_ids = Lesson_to_teacher.objects.filter(lesson=pk).values_list('teacher', flat=True)
+
+            # Шинээр нэмэгдсэн багш
+            add_ids = [item for item in teacher_ids if item not in old_teacher_ids]
+
+            # Хуучин багшийг хасах
+            remove_ids = [item for item in old_teacher_ids if item not in teacher_ids]
+
+            old_teacher_qs = Lesson_to_teacher.objects.filter(lesson=pk)
             if teachers_data:
-                old_teacher_qs = Lesson_to_teacher.objects.filter(lesson=pk)
-                old_teacher_qs.delete()
-                for teacher in teachers_data:
-                    teacher_id = teacher.get('id')
+                if len(remove_ids) > 0:
+                    old_teacher_qs = old_teacher_qs.filter(teacher__in=remove_ids).delete()
+
+                # Шинээр нэмж байгаа бүрээр нь нэмэх
+                for teacher_id in add_ids:
                     Lesson_to_teacher.objects.update_or_create(
                         lesson_id=pk,
                         teacher_id=teacher_id
                     )
+            else:
+                old_teacher_qs.delete()
 
             serializer.save()
 
@@ -248,9 +262,29 @@ class LessonStandartAPIView(
 
         score = ScoreRegister.objects.filter(lesson=pk)
 
-        if learn_plan or timetable or score or examtimetable or examrepeat:
-            return request.send_error("ERR_002", "Тухайн хичээлийг устгах боломжгүй байна.")
+        lesson_to_teacher = Lesson_to_teacher.objects.filter(lesson=pk)
+        diplom_lesson = CalculatedGpaOfDiploma.objects.filter(lesson=pk)
 
+        if learn_plan:
+            learn_plan.delete()
+
+        if timetable:
+            timetable.delete()
+
+        if examtimetable:
+            examtimetable.delete()
+
+        if examrepeat:
+            examrepeat.delete()
+
+        if len(lesson_to_teacher) > 0:
+            return request.send_error("ERR_002", "Тухайн хичээлд холбогдсон багшийн мэдээлэлтэй холбогдосон устгах боломжгүй байна.")
+
+        if len(score) > 0:
+            return request.send_error("ERR_002", "Тухайн хичээлд холбогдсон дүнгийн мэдээлэл байгаа устгах боломжгүй байна.")
+
+        if len(diplom_lesson) > 0:
+            return request.send_error("ERR_002", "Тухайн хичээл нь төгсөлтийн ажилтай холбогдсон учраас устгах боломжгүй байна.")
         self.destroy(request, pk)
         return request.send_info("INF_003")
 
@@ -5695,19 +5729,16 @@ class ChallengeLevelCountAPIView(
         number_of_questions_percentage = data.get("number_questions_percentage")
         challenge = Challenge.objects.filter(id=challenge_id).first()
 
-        teacher_ids = TeacherScore.objects.filter(student__in=challenge.student.values_list('id', flat=True)).values_list('score_type__lesson_teacher__teacher', flat=True).distinct()
-
+        # NOTE Яг яахаа үл мэднэ
+        # teacher_ids = TeacherScore.objects.filter(score_type__lesson_teacher__lesson=challenge.lesson, student__in=challenge.student.values_list('id', flat=True)).values_list('score_type__lesson_teacher__teacher', flat=True).distinct()
         if level is not None and challenge_id is not None:
-
-
             if challenge and level:
                 challenge_questions = ChallengeQuestions.objects.filter(
                     level=level,
                     title__lesson=challenge.lesson,
                     title__is_season=True,
-                    title__created_by__in=teacher_ids
+                    # title__created_by__in=teacher_ids
                 )
-                random_questions = None
 
                 if number_of_questions:
                     random_questions = challenge_questions.order_by('?')[:int(number_of_questions)]
@@ -5922,10 +5953,69 @@ class ChallengeReportAPIView(
 
         if not report_type or not exam:
 
-            return request.send_error('ERR_002')
+            return request.send_data(None)
 
         queryset = self.queryset.filter(challenge__challenge_type=Challenge.SEMESTR_EXAM, challenge__id=exam)
+        group = request.query_params.get('group')
+
+        if group:
+            queryset = queryset.filter(student__group=group)
+
+        profession = request.query_params.get('profession')
+
+        if profession:
+            queryset = queryset.filter(student__group__profession=profession)
+
+        if not queryset:
+
+            return request.send_data(None)
+
         get_result = []
+
+        def parse_answers(json_data):
+            answers = []
+
+            try:
+                answer_json = json_data.replace("'", '"')
+                answer_json = json.loads(answer_json)
+
+                for question_id, choice_id in answer_json.items():
+                    choice_obj = QuestionChoices.objects.filter(id=choice_id).values('score','challengequestions__question','challengequestions__title__name').first()
+                    is_right = False
+
+                    if choice_obj.get('score') > 0:
+                        is_right = True
+
+                    answers.append({
+                        'question_id': question_id,
+                        'question_text': choice_obj.get('challengequestions__question'),
+                        'is_answered_right': is_right,
+                        'choice_id': choice_id,
+                        'question_title': choice_obj.get('challengequestions__title__name'),
+                    })
+
+            except json.JSONDecodeError:
+                print('json error in:', obj.id, obj.answer)
+                traceback.print_exc()
+
+            return answers
+
+        def get_question_stats(exam_results):
+            # to collect questions reliability stats
+            question_stats = {}
+
+            for res in exam_results:
+                question_id = res["question_id"]
+
+                if question_id not in question_stats:
+                    question_stats[question_id] = {"correct": 0, "total": 0, 'question_text': res['question_text']}
+
+                question_stats[question_id]["total"] += 1
+
+                if res["is_answered_right"]:
+                    question_stats[question_id]["correct"] += 1
+
+            return question_stats
 
         if report_type == 'reliability':
             exam_results = []
@@ -5933,33 +6023,9 @@ class ChallengeReportAPIView(
             for obj in queryset:
                 if not obj.answer:
 
-                    continue
+                    return request.send_data(None)
 
-                answer_json = None
-                try:
-                    answer_json = obj.answer.replace("'", '"')
-                    answer_json = json.loads(answer_json)
-
-                    for question_id, choice_id in answer_json.items():
-                        choice_obj = QuestionChoices.objects.filter(id=choice_id).values('score','challengequestions__question').first()
-
-                        if choice_obj.get('score') > 0:
-                            is_right = True
-                        else:
-                            is_right = False
-
-                        exam_results.append({
-                            'question_id': question_id,
-                            'exam_id': obj.challenge.id,
-                            'question_text': choice_obj.get('challengequestions__question'),
-                            'is_answered_right': is_right
-                        })
-
-                except json.JSONDecodeError:
-                    print('json error in:', obj.id, obj.answer)
-                    traceback.print_exc()
-
-            exams = queryset.order_by('challenge__title').values('challenge__id', 'challenge__title')
+                exam_results.extend(parse_answers(obj.answer))
 
             # questions reliability ranges
             questions_reliability_ranges = {
@@ -5970,69 +6036,266 @@ class ChallengeReportAPIView(
                 "Маш хялбар": lambda question_reliability: question_reliability >= 81,
             }
 
-            for item in exams:
-                exam_id = item.get('challenge__id')
+            question_stats = get_question_stats(exam_results)
 
-                # to get exam results by exam_id
-                filtered_results = [res for res in exam_results if res["exam_id"] == exam_id]
+            # to calculate question reliability
+            questions_reliability = []
 
-                # to collect questions reliability stats
-                question_stats = {}
+            for question_id, stats in question_stats.items():
+                if stats["total"] > 0:
+                    question_reliability = (stats["correct"] / stats["total"]) * 100
 
-                for res in filtered_results:
-                    question_id = res["question_id"]
+                    questions_reliability.append({
+                        'question_id': question_id,
+                        'question_reliability': question_reliability,
+                        'question_text': stats['question_text']
+                    })
 
-                    if question_id not in question_stats:
-                        question_stats[question_id] = {"correct": 0, "total": 0, 'question_text': res['question_text']}
+            # to group questions and their reliabilities by reliability ranges
+            grouped_questions = {key: [] for key in questions_reliability_ranges}
 
-                    question_stats[question_id]["total"] += 1
+            for item in questions_reliability:
+                question_id = item.get('question_id')
+                question_reliability = item.get('question_reliability')
+                question_text = item.get('question_text')
 
-                    if res["is_answered_right"]:
-                        question_stats[question_id]["correct"] += 1
+                for range_name, condition in questions_reliability_ranges.items():
+                    if condition(question_reliability):
+                        grouped_questions[range_name].append({"question_id": question_id, 'question_text': question_text, "question_reliability": question_reliability})
 
-                # to calculate question reliability
-                questions_reliability = {}
+                        break
 
-                for question_id, stats in question_stats.items():
-                    if stats["total"] > 0:
-                        question_reliability = (stats["correct"] / stats["total"]) * 100
+            rechart_data = []
+            total_questions_count = len(question_stats)
 
-                        questions_reliability[question_id] = {
-                            'question_reliability': question_reliability,
-                            'question_text': stats['question_text']
-                        }
-
-                # to group questions and their reliabilities by reliability ranges
-                grouped_questions = {key: [] for key in questions_reliability_ranges}
-
-                for question_id, value in questions_reliability.items():
-                    question_reliability = value['question_reliability']
-
-                    for range_name, condition in questions_reliability_ranges.items():
-                        if condition(question_reliability):
-                            question_text = questions_reliability[question_id]['question_text']
-                            grouped_questions[range_name].append({"question_id": question_id, 'question_text': question_text, "question_reliability": question_reliability})
-
-                            break
-
-                # to build dict for recharts format and for exam filter
-                get_result.append({
-                    "exam_id": exam_id,
-                    "questions_reliabilities": [{"questions_reliability_name": key, "questions": questions, "questions_count": len(questions)} for key, questions in grouped_questions.items()]
-
+            for key, questions in grouped_questions.items():
+                # to build dict for recharts format
+                rechart_data.append({
+                    "questions_reliability_name": key,
+                    "questions_count_percent": (len(questions) * 100 / total_questions_count) if total_questions_count else 0
                 })
 
-        elif report_type == 'students':
+            get_result = rechart_data
+
+        # for datatable with pagination
+        elif report_type == 'dt_reliability':
+            answers = []
+
+            for obj in queryset:
+                if not obj.answer:
+
+                    return request.send_data(None)
+
+                answers.extend(parse_answers(obj.answer))
+
+            choice_ids = [answer['choice_id'] for answer in answers]
+
+            queryset = (
+                ChallengeQuestions.objects
+                    .prefetch_related('choices')
+                    .filter(choices__id__in=choice_ids)
+
+                    # to group by question id
+                    .values('id', 'question')
+                    .annotate(
+                        total_count=Count('choices', distinct=True),
+                        positive_count=Count('choices', filter=Q(choices__score__gt=0), distinct=True),
+                        reliability=ExpressionWrapper(
+                            (F('positive_count') * 100.0) / F('total_count'),
+                            output_field=FloatField()
+                        )
+                    )
+            )
+
+            self.serializer_class = ChallengeQuestionsAnswersSerializer
+            self.search_fields = ['question']
+
+        elif (
+            report_type == 'groups' or
+            report_type == 'professions'
+        ):
+            group = None
+            profession = None
+            assessments = Score.objects.all().values('score_min','score_max','assesment')
+            assessment_dict = {}
+
+            for assessment in assessments:
+                assesment_value = assessment['assesment']
+                score_min = assessment['score_min']
+                score_max = assessment['score_max']
+
+                # to get real min max values if assesment letter has duplications
+                if assesment_value in assessment_dict:
+                    if assessment_dict[assesment_value]['score_min'] > score_min:
+                        assessment_dict[assesment_value]['score_min'] = score_min
+
+                    if assessment_dict[assesment_value]['score_max'] < score_max:
+                        assessment_dict[assesment_value]['score_max'] = score_max
+
+                else:
+                    assessment_dict[assesment_value] = {
+                        'score_min': score_min,
+                        'score_max': score_max
+                    }
+
+            queryset = (
+                queryset
+                    .order_by() # to remove above sortings because it conflicts with "group by"
+                    .select_related('student')
+            )
+
+            if report_type == 'groups':
+                queryset = (
+                    queryset
+                        .prefetch_related('student__group')
+                        .annotate(
+                            group_name=F('student__group__name'),
+                            score_percentage=Case(
+                                When(take_score__gt=0, then=(F('score') * 100 / F('take_score'))),
+                                default=Value(0),
+                                output_field=FloatField()
+                            ),
+                        )
+                        .values('group_name') # to group students by group_name
+                )
+
+            elif report_type == 'professions':
+                queryset = (
+                    queryset
+                        .prefetch_related('student__group__profession')
+                        .annotate(
+                            profession_name=F('student__group__profession__name'),
+                            score_percentage=Case(
+                                When(take_score__gt=0, then=(F('score') * 100 / F('take_score'))),
+                                default=Value(0),
+                                output_field=FloatField()
+                            ),
+                        )
+                        .values('profession_name') # to group students by profession_name
+                )
+
+            queryset = (
+                queryset
+                    .annotate(
+                        student_count=Count('student', distinct=True),
+                        A2_count=Count(
+                            Case(
+                                When(
+                                    score_percentage__gte=assessment_dict.get('+A').get('score_min'),
+                                    score_percentage__lte=assessment_dict.get('+A').get('score_max'),
+                                    then=Value(1)),
+                                output_field=IntegerField()
+                            )
+                        ),
+                        A_count=Count(
+                            Case(
+                                When(
+                                    score_percentage__gte=assessment_dict.get('A').get('score_min'),
+                                    score_percentage__lte=assessment_dict.get('A').get('score_max'),
+                                    then=Value(1)),
+                                output_field=IntegerField()
+                            )
+                        ),
+                        B2_count=Count(
+                            Case(
+                                When(
+                                    score_percentage__gte=assessment_dict.get('+B').get('score_min'),
+                                    score_percentage__lte=assessment_dict.get('+B').get('score_max'),
+                                    then=Value(1)),
+                                output_field=IntegerField()
+                            )
+                        ),
+                        B_count=Count(
+                            Case(
+                                When(
+                                    score_percentage__gte=assessment_dict.get('B').get('score_min'),
+                                    score_percentage__lte=assessment_dict.get('B').get('score_max'),
+                                    then=Value(1)),
+                                output_field=IntegerField()
+                            )
+                        ),
+                        C2_count=Count(
+                            Case(
+                                When(
+                                    score_percentage__gte=assessment_dict.get('+C').get('score_min'),
+                                    score_percentage__lte=assessment_dict.get('+C').get('score_max'),
+                                    then=Value(1)),
+                                output_field=IntegerField()
+                            )
+                        ),
+                        C_count=Count(
+                            Case(
+                                When(
+                                    score_percentage__gte=assessment_dict.get('C').get('score_min'),
+                                    score_percentage__lte=assessment_dict.get('C').get('score_max'),
+                                    then=Value(1)),
+                                output_field=IntegerField()
+                            )
+                        ),
+                        D_count=Count(
+                            Case(
+                                When(
+                                    score_percentage__gte=assessment_dict.get('D').get('score_min'),
+                                    score_percentage__lte=assessment_dict.get('D').get('score_max'),
+                                    then=Value(1)),
+                                output_field=IntegerField()
+                            )
+                        ),
+                        F_count=Count(
+                            Case(
+                                When(
+                                    score_percentage__gte=assessment_dict.get('F').get('score_min'),
+                                    score_percentage__lte=assessment_dict.get('F').get('score_max'),
+                                    then=Value(1)),
+                                output_field=IntegerField()
+                            )
+                        )
+                    )
+            )
+
+            if report_type == 'groups':
+                self.serializer_class = ChallengeGroupsSerializer
+            elif report_type == 'professions':
+                self.serializer_class = ChallengeProfessionsSerializer
+
+        elif report_type == 'report4':
+            self.serializer_class = ChallengeReport4Serializer
+
+        elif report_type == 'report4-1':
+            answers = []
+            first_student_answers = []
+
+            for index, obj in enumerate(queryset):
+                if not obj.answer:
+
+                    return request.send_data(None)
+
+                answers.extend(parse_answers(obj.answer))
+
+                if index == 0:
+                    # because we need only one row data for header
+                    first_student_answers = answers.copy()
+
+            question_stats = get_question_stats(answers)
+
+            get_result = {
+                'questions': first_student_answers,
+                'questions_summary': question_stats
+            }
+
+        # for reports where pagination is required
+        if report_type in ['students', 'dt_reliability', 'report4', 'groups', 'professions']:
+            sorting = self.request.query_params.get('sorting')
+
+            # Sort хийх үед ажиллана
+            if sorting:
+                if not isinstance(sorting, str):
+                    sorting = str(sorting)
+
+                queryset = queryset.order_by(sorting)
+
             self.queryset = queryset
             get_result = self.list(request).data
-
-        elif report_type == 'groups':
-            # todo: finish
-            # self.queryset = queryset
-            # self.serializer_class = ChallengeGroupsSerializer
-            # get_result = self.list(request).data
-
-            pass
 
         return request.send_data(get_result)
 
@@ -6155,6 +6418,7 @@ class ChallengeAddInformationAPIView(
         data = request.data
         user = request.user
         season = request.query_params.get('season')
+        lesson_year, lesson_season = get_active_year_season()
         teacher = get_object_or_404(Teachers, user_id=user, action_status=Teachers.APPROVED)
         data['created_by'] = teacher.id if teacher else None
 
@@ -6165,6 +6429,8 @@ class ChallengeAddInformationAPIView(
         if season:
             data['challenge_type'] = Challenge.SEMESTR_EXAM
 
+        data['lesson_season'] = lesson_season
+        data['lesson_year'] = lesson_year
         try:
             with transaction.atomic():
                 saved_data, exception, serializer_errors = save_data_with_signals(self.queryset.model, self.serializer_class, True, None, data=data)

@@ -22,20 +22,53 @@ export default function GenericDataTable({ apiGetFunc, apiGetFuncArgs, isApiGetF
 	async function getData() {
 		let args = []
 
-		if (isApiGetFuncArgsDefault) args = [current_page, rows_per_page, search_value, ...apiGetFuncArgs]
+		if (isApiGetFuncArgsDefault) args = { page: current_page, limit: rows_per_page, search: search_value, ...apiGetFuncArgs }
 		else args = apiGetFuncArgs
 
-		const { success, data } = await fetchData(apiGetFunc(...args))
+		const { success, data } = await fetchData(apiGetFunc({ ...args }))
 
 		if (success) {
+			let finalData = []
+			let finalCount = 0
+
 			if (isApiGetFuncArgsDefault) {
-				setData(data?.results)
-				setTotalCount(data?.count)
+				finalData = data?.results
+				finalCount = data?.count
+			} else {
+				finalData = data
+				finalCount = data?.length
 			}
-			else {
-				setData(data)
-				setTotalCount(data?.length)
+
+			if (finalData?.length) {
+				setTotalCount(finalCount)
+
+				// #region specific code (not generic)
+				// to add footer data
+				if (apiGetFuncArgs.report_type !== 'students') {
+					const footerRow = {}
+
+					// to add first column with according name
+					if (apiGetFuncArgs.report_type === 'groups') {
+						footerRow['group_name'] = "Нийт"
+					} else if (apiGetFuncArgs.report_type === 'professions') {
+						footerRow['profession_name'] = "Нийт"
+					}
+
+					footerRow['student_count'] = sumValues(finalData, "student_count"),
+					footerRow['A2_count'] = sumValues(finalData, "A2_count"),
+					footerRow['A_count'] = sumValues(finalData, "A_count"),
+					footerRow['B2_count'] = sumValues(finalData, "B2_count"),
+					footerRow['B_count'] = sumValues(finalData, "B_count"),
+					footerRow['C2_count'] = sumValues(finalData, "C2_count"),
+					footerRow['C_count'] = sumValues(finalData, "C_count"),
+					footerRow['D_count'] = sumValues(finalData, "D_count"),
+					footerRow['F_count'] = sumValues(finalData, "F_count")
+					finalData.push(footerRow)
+				}
+				// #endregion
 			}
+
+			setData(finalData)
 		}
 	}
 
@@ -45,8 +78,15 @@ export default function GenericDataTable({ apiGetFunc, apiGetFuncArgs, isApiGetF
 	}, [search_value, render_to_search, current_page])
 
 	// #region specific code (not generic)
-	useEffect(() => { if (apiGetFuncArgs[1]) getData() }, [apiGetFuncArgs[1]])
+	useEffect(() => {
+		if (apiGetFuncArgs) getData()
+	}, [apiGetFuncArgs])
 	// #endregion
+
+	// for table footer
+	const sumValues = (data, field) => {
+		return data.reduce((total, item) => total + item[field], 0);
+	};
 
 	return (
 		<DataTable
@@ -81,8 +121,9 @@ function getColumns(current_page, rows_per_page, total_count, columns) {
 	const defaultColumns = [
 		{
 			name: "№",
-			selector: (row, index) => (current_page - 1) * rows_per_page + index + 1,
-			maxWidth: "30px",
+			selector: (row, index) => index < total_count ? (current_page - 1) * rows_per_page + index + 1 : '',
+			minWidth: '50px',
+			maxWidth: "50px",
 			center: true
 		}
 	]

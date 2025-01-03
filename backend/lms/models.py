@@ -181,8 +181,8 @@ class Lesson_to_teacher(models.Model):
     def file_directory_path(instance, filename):
         return '{0}/{1}/{2}'.format(settings.LESSON_TEACHER, instance.id, filename)
 
-    lesson = models.ForeignKey(LessonStandart, on_delete=models.CASCADE, verbose_name="Хичээл")
-    teacher = models.ForeignKey(Teachers, on_delete=models.CASCADE, verbose_name="Багш")
+    lesson = models.ForeignKey(LessonStandart, on_delete=models.PROTECT, verbose_name="Хичээл")
+    teacher = models.ForeignKey(Teachers, on_delete=models.PROTECT, verbose_name="Багш")
     file = models.FileField(upload_to=file_directory_path, max_length=255, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
@@ -211,7 +211,7 @@ class Lesson_teacher_scoretype(models.Model):
         (SHALGALT_ONOO, "30 онооны шалгалт"),
     )
 
-    lesson_teacher = models.ForeignKey(Lesson_to_teacher, on_delete=models.CASCADE, verbose_name="Хичээл багш")
+    lesson_teacher = models.ForeignKey(Lesson_to_teacher, on_delete=models.PROTECT, verbose_name="Хичээл багш")
     score_type = models.PositiveIntegerField(choices=SCORE_TYPE, db_index=True, default=BUSAD, verbose_name="Дүгнэх хэлбэр")
     score = models.FloatField(verbose_name="Дүгнэх хэлбэрт харгалзах багшийн оноо")
 
@@ -2840,7 +2840,7 @@ class TeacherScore(models.Model):
     lesson_season = models.ForeignKey(Season, on_delete=models.SET_NULL, null=True, verbose_name='Улирал')
 
     score = models.FloatField(verbose_name='Багшийн дүн')
-    score_type = models.ForeignKey(Lesson_teacher_scoretype, on_delete=models.CASCADE)
+    score_type = models.ForeignKey(Lesson_teacher_scoretype, on_delete=models.PROTECT)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -3480,6 +3480,9 @@ class Challenge(models.Model):
 
     #  Хамрах хүрээ нь
     lesson = models.ForeignKey(LessonStandart, on_delete=models.CASCADE, verbose_name="Хичээл", null=True)
+    lesson_year = models.CharField(max_length=20, null=True, verbose_name="Хичээлийн жил")
+    lesson_season = models.ForeignKey(Season, on_delete=models.CASCADE,  null=True)
+
     student = models.ManyToManyField(Student, blank=True, verbose_name="Оюутнууд")
 
     kind = models.IntegerField(choices=KIND_CHOICES, null=False, default=KIND_LESSON, blank=False)
