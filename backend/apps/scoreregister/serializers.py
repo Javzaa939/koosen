@@ -362,4 +362,4 @@ class TeacherScoreListPrintSerializer(serializers.ModelSerializer):
             total_score = 0
         elif exam_score and exam_score < 18:
             total_score = 0
-        return total_score
+        return round(total_score, 1)
