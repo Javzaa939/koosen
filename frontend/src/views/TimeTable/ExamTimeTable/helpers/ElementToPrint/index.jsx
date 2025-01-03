@@ -2,7 +2,6 @@ import { replaceImagesWithBase64 } from "@utils";
 import { useTranslation } from "react-i18next";
 import image_iso from "./assets/iso.png"
 import image_logo from "./assets/logo.png"
-import './style.scss'
 
 export async function printElement(elementToPrintId, groupName) {
 	let elementToPrint = document.getElementById(elementToPrintId)
@@ -30,7 +29,7 @@ export default function ElementToPrint({ data_to_print, setElementToPrint, selec
 				{
 					`
 						@media print {
-							html[dir] body {
+							html[dir] body, html body {
 								background: #fff;
 							}
 
@@ -43,18 +42,26 @@ export default function ElementToPrint({ data_to_print, setElementToPrint, selec
 								min-height: 210mm;
 								font-family: "Times New Roman";
 								font-size: 11pt;
+								color: #000000;
 
 								/* to avoid cropping when browser margins used (may be bug) */
 								padding-right: 1px;
 							}
 
-							.mainTable {
+							/* to avoid other pages global style effects ([dir] usually used on other pages) */
+							[dir] .override_global_styles tr,[dir] .override_global_styles th,[dir] .override_global_styles td,.override_global_styles tr,.override_global_styles th,.override_global_styles td {
 								padding: 0;
+								border: 0;
 							}
 
-							.mainTable td {
+							[dir] .mainTable td,.mainTable td {
 								padding-left: 2mm;
 								padding-right: 2mm;
+								border: 1px solid #000000;
+							}
+
+							[dir] .etp_borderless td,.etp_borderless td {
+								border: 0;
 							}
 
 							@page {
@@ -70,13 +77,13 @@ export default function ElementToPrint({ data_to_print, setElementToPrint, selec
 				}
 			</style>
 
-			<div id={elementToPrintId}>
+			<div id={elementToPrintId} className="override_global_styles">
 				<table style={{ width: '100%' }}>
 					<thead>
 						<tr>
 							<td className="mainTable">
 								<div style={{ paddingLeft: '2mm', paddingRight: '2mm', paddingBottom: '5mm', width: '100%' }}>
-									<table className={`table-bordered`} style={{ width: '100%' }}>
+									<table style={{ width: '100%' }}>
 										<thead>
 											<tr>
 												<td align='center' rowSpan={2} style={{ width: '20mm' }}>
@@ -108,7 +115,7 @@ export default function ElementToPrint({ data_to_print, setElementToPrint, selec
 						<tr>
 							<td align='center' className="mainTable">
 								{t('Баримт бичгийн хяналт, баталгаажуулалт')}
-								<table className={`table-bordered`} style={{ width: '100%' }}>
+								<table style={{ width: '100%' }}>
 									<thead>
 										<tr align="center">
 											<td style={{ width: '45mm' }}>{t('Гүйцэтгэл')}:</td>
@@ -156,18 +163,18 @@ export default function ElementToPrint({ data_to_print, setElementToPrint, selec
 								<div className="etp_mt-1 text-uppercase">
 									{`${data_to_print?.lesson_year} ${t('ОНЫ ХИЧЭЭЛИЙН ЖИЛИЙН')} ${data_to_print?.lesson_season} ${t('УЛИРЛЫН')} ${selectedGroupNames}${t('-Р ДАМЖААНЫ СУРАЛЦАГЧДЫН ҮНЭЛГЭЭНИЙ ХУУДАС')}`}
 								</div>
-								<table className="etp_mt-1" style={{ width: '236mm', marginBottom: '2mm' }} align='right'>
+								<table className="etp_mt-1 etp_borderless" style={{ width: '236mm', marginBottom: '2mm' }} align='right'>
 									<tbody>
 										<tr style={{ display: 'flex' }}>
 											<td>{t('Хичээлийн нэр')}:</td>
-											<td className="border-bottom border-dotted" style={{ width: '87mm' }}>{data_to_print?.lesson_name}</td>
+											<td className="border-bottom border-dotted">{data_to_print?.lesson_name}</td>
 											<td style={{ flexGrow: 1 }}></td>
 											<td align="right">{t('Авбал зохих багц цаг')}:</td>
 											<td className="border-bottom border-dotted" style={{ width: '15mm' }}>{data_to_print?.lesson_credit}</td>
 										</tr>
 									</tbody>
 								</table>
-								<table className={`table-bordered`} style={{ width: '100%' }}>
+								<table style={{ width: '100%' }}>
 									<tbody>
 										<tr align='center'>
 											<td rowSpan={2} style={{ width: '9mm' }}>{t('№')}</td>
@@ -212,7 +219,7 @@ export default function ElementToPrint({ data_to_print, setElementToPrint, selec
 									</tbody>
 								</table>
 								<div className="etp_mt-1" style={{ paddingLeft: '2mm', paddingRight: '2mm', width: '100%', display: 'flex', justifyContent: 'space-between' }}>
-									<table className={`table-bordered`} style={{ width: '120mm' }}>
+									<table style={{ width: '120mm' }}>
 										<thead>
 											<tr align='center'>
 												<td rowSpan={2} style={{ width: '40mm' }}>{t('Нийт суралцагчдын тоо')}</td>
@@ -235,7 +242,7 @@ export default function ElementToPrint({ data_to_print, setElementToPrint, selec
 											</tr>
 										</tbody>
 									</table>
-									<table className={`table-bordered`} style={{ width: '160mm' }}>
+									<table style={{ width: '160mm' }}>
 										<thead align='center'>
 											<tr>
 												<td colSpan={2}>{t('Суралцагчдын ирц')}</td>
@@ -269,7 +276,7 @@ export default function ElementToPrint({ data_to_print, setElementToPrint, selec
 									</table>
 								</div>
 								<div style={{ paddingLeft: '6mm', paddingRight: '6mm', width: '100%' }}>
-									<table className="etp_mt-1" style={{ width: '100%' }}>
+									<table className="etp_mt-1 etp_borderless" style={{ width: '100%' }}>
 										<tbody>
 											<tr style={{ display: 'flex' }}>
 												<td>{t('Тайлбар')}:</td>
