@@ -6329,7 +6329,7 @@ class ChallengeDetailApiView(
         for student in student_data:
             challenge_student = ChallengeStudents.objects.filter(student__id=student['id'], challenge=test_id).first()
             if challenge_student:
-                student['is_not_exam_failed'] = challenge_student.score >= 18 
+                student['is_not_exam_failed'] = (challenge_student.score or 0) >= 18
 
         return request.send_data(student_data)
 

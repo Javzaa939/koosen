@@ -220,7 +220,7 @@ function DetailShow(){
 	)
 
 	const filteredData = showNotFailedOnly 
-		? datas.filter(item => item.is_not_exam_failed === false)
+		? datas.filter(item => typeof item.challenge[0]?.score === 'number' && item.challenge[0]?.score < 18)
 		: datas;
 
 	return (
