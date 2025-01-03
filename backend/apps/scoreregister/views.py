@@ -1326,7 +1326,7 @@ class ScoreRegisterPrintAPIView(
 
 
 @permission_classes([IsAuthenticated])
-class TeacherLessonScorePrint(
+class TeacherLessonScorePrintAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin
 ):

@@ -2,6 +2,7 @@ import { replaceImagesWithBase64 } from "@utils";
 import { useTranslation } from "react-i18next";
 import image_iso from "./assets/iso.png"
 import image_logo from "./assets/logo.png"
+import './style.scss'
 
 export async function printElement(elementToPrintId, groupName) {
 	let elementToPrint = document.getElementById(elementToPrintId)
