@@ -60,7 +60,7 @@ export function getColumns(currentPage, rowsPerPage, total_count) {
 			center: true,
 		},
 		{
-			header: 'exam_score',
+			header: 'assessment',
 			name: `${t('Үсгэн үнэлгээ')}`,
 			selector: (row) => row?.assessment,
 			maxWidth: "180px",
