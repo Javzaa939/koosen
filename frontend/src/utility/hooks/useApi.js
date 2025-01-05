@@ -720,7 +720,7 @@ function useApi(isDisplay=false) {
 					return instance.get(`/student/group/list/?department=${depart_id}&degree=${degree_id}&profession=${profession_id}&join_year=${join_year}&schoolId=${school_id}&level=${level}`)
 				},
 				getEditList: (pk) => instance.get(`/student/group/list/${pk}/`),
-				get: (limit, page, sort, search, only_study, department, degree, profession, join_year, lesson) => instance.get(`/student/group/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&salbar=${department}&degree=${degree}&profession=${profession}&join=${join_year}&school=${school_id}&study=${only_study}&lesson=${lesson}`),
+				get: (limit, page, sort, search, only_study, department, degree, profession, join_year) => instance.get(`/student/group/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&salbar=${department}&degree=${degree}&profession=${profession}&join=${join_year}&school=${school_id}&study=${only_study}`),
 				post: data => instance.post('/student/group/', data),
 				getOne: (pk) => instance.get(`/student/group/one/${pk}/`),
 				put: (data, pk) => instance.put(`/student/group/one/${pk}/`, data),
@@ -990,8 +990,8 @@ function useApi(isDisplay=false) {
 			},
 
 			register:{
-				get: ( limit, page, sort, search, group, lesson, teacher, is_fall='') =>
-					instance.get(`/score/register/list/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson=${lesson}&teacher=${teacher}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&group=${group}&school=${school_id}&is_fall=${is_fall}`),
+				get: ( limit, page, sort, search, group, lesson, teacher) =>
+					instance.get(`/score/register/list/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson=${lesson}&teacher=${teacher}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&group=${group}&school=${school_id}`),
 
 				post: data => instance.post('/score/register/', data),
 
