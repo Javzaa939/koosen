@@ -649,7 +649,7 @@ class ScoreRegisterListAPIView(
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['student__code', 'student__first_name', 'student__last_name', 'student__register_num']
+    search_fields = ['student__code', 'student__first_name', 'student__last_name']
 
     @has_permission(must_permissions=['lms-score-register-read'])
     def get(self, request, pk=None):
@@ -1405,7 +1405,6 @@ class TeacherScoreAPIView(
 
 @permission_classes([IsAuthenticated])
 class TeacherLessonScorePrintAPIView(
-
     generics.GenericAPIView,
     mixins.ListModelMixin
 ):
