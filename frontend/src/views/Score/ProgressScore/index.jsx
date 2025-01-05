@@ -67,6 +67,7 @@ export default function ProgressScore() {
     const [sortField, setSort] = useState('')
 
     const [datas, setDatas] = useState([])
+    const [totalDatas, setTotalDatas] = useState([])
     const [lesson_option, setLessonOption] = useState([])
     const [group_option, setGroupOption] = useState([])
     const [select_value, setSelectValue] = useState(values)
@@ -74,7 +75,7 @@ export default function ProgressScore() {
     // API
     const groupApi = useApi().student.group
     const lessonApi = useApi().study.lessonStandart
-    const scoreApi = useApi().score.register
+    const teacherScoreApi = useApi().score.teacherScore
 
     // Хичээлийн жагсаалт
     async function getLessonOption() {
@@ -100,20 +101,51 @@ export default function ProgressScore() {
         const class_id = select_value.class
 
         if (lesson) {
-            const { success, data } = await fetchData(scoreApi.get(rowsPerPage, currentPage, sortField, searchValue, class_id, lesson, '', is_fall))
+            const { success, data } = await fetchData(teacherScoreApi.get({
+                limit: rowsPerPage,
+                page: currentPage,
+                sort: sortField,
+                search: searchValue,
+                lesson: lesson,
+                group: class_id,
+                is_fall: is_fall
+            }))
+
             if (success) {
-                setDatas(data?.datas?.results)
-                setTotalCount(data?.datas?.count)
+                setDatas(data?.results)
+                setTotalCount(data?.count)
             }
         } else {
             setDatas([])
-            setGroupOption([])
+        }
+    }
+
+    async function getTotalDatas() {
+        const lesson = select_value.lesson
+        const is_fall = select_value.is_fall
+        const class_id = select_value.class
+
+        if (lesson) {
+            const { success, data } = await fetchData(teacherScoreApi.get({
+                lesson: lesson,
+                group: class_id,
+                is_fall: is_fall
+            }))
+
+            if (success) {
+                setTotalDatas(data?.results)
+            }
         }
     }
 
     useEffect(() => {
         getDatas()
-    }, [select_value, rowsPerPage, currentPage, sortField])
+    }, [rowsPerPage, currentPage, sortField])
+
+    useEffect(() => {
+        getDatas()
+        getTotalDatas()
+    }, [select_value])
 
     useEffect(
         () => {
@@ -351,11 +383,11 @@ export default function ProgressScore() {
                         data={datas}
                         paginationComponent={
                             (props) =>
-                                <>
-                                    {getFooter(datas)}
+                                <Fragment key={1}>
+                                    {getFooter(totalDatas)}
                                     {/* props.rowsPerPage not updating so rowsPerPage is used directly */}
                                     {getPagination(handlePagination, props.currentPage, rowsPerPage === 'Бүгд' ? props.rowCount : rowsPerPage, props.rowCount)()}
-                                </>
+                                </Fragment>
                         }
                         fixedHeader
                         fixedHeaderScrollHeight='62vh'

@@ -271,6 +271,23 @@ class ScoreRegisterPrintSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class TeacherScoreSerializer(serializers.ModelSerializer):
+    student_code = serializers.CharField(read_only=True)
+    student_full_name = serializers.SerializerMethodField()
+    group_name = serializers.CharField(read_only=True)
+    teach_score = serializers.FloatField(read_only=True)
+    exam_score = serializers.FloatField(read_only=True)
+    assessment = serializers.CharField(read_only=True)
+
+    class Meta:
+        model = TeacherScore
+        fields = "student_code", "student_full_name", "group_name", "teach_score", "exam_score", "assessment"
+
+    def get_student_full_name(self, obj):
+
+        return obj.student.full_name()
+
+
 class TeacherScoreListPrintSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
     lesson_name = serializers.SerializerMethodField()

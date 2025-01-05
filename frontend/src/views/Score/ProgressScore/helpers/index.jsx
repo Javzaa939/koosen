@@ -15,21 +15,30 @@ export function getColumns(currentPage, rowsPerPage, total_count) {
 		{
 			name: "№",
 			selector: (row, index) => (currentPage - 1) * rowsPerPage + index + 1,
-			maxWidth: "30px",
+			minWidth: "30px",
+			maxWidth: "70px",
 			center: true
 		},
 		{
-			header: 'student',
-			name: `${t('Оюутны нэр')}`,
-			selector: (row) => row?.student?.full_name,
+			header: 'student_code',
+			name: `${t('Оюутны код')}`,
+			selector: (row) => row?.student_code,
 			sortable: true,
 			wrap: true,
 			left: true,
 		},
 		{
-			header: 'group',
+			header: 'student__first_name',
+			name: `${t('Оюутны нэр')}`,
+			selector: (row) => row?.student_full_name,
+			sortable: true,
+			wrap: true,
+			left: true,
+		},
+		{
+			header: 'group_name',
 			name: `${t('Ангийн нэр')}`,
-			selector: (row) => row?.student?.group?.name,
+			selector: (row) => row?.group_name,
 			sortable: true,
 			wrap: true,
 			left: true,
@@ -38,6 +47,7 @@ export function getColumns(currentPage, rowsPerPage, total_count) {
 			header: 'teach_score',
 			name: `${t('Багшийн оноо')}`,
 			selector: (row) => row?.teach_score,
+			maxWidth: "180px",
 			sortable: true,
 			center: true,
 		},
@@ -45,12 +55,16 @@ export function getColumns(currentPage, rowsPerPage, total_count) {
 			header: 'exam_score',
 			name: `${t('Шалгалтын оноо')}`,
 			selector: (row) => row?.exam_score,
+			maxWidth: "180px",
 			sortable: true,
 			center: true,
 		},
 		{
+			header: 'exam_score',
 			name: `${t('Үсгэн үнэлгээ')}`,
-			selector: (row) => <p id={`assessment${row.lesson}${row?.id}`}>{row?.assessment?.assesment}</p>,
+			selector: (row) => row?.assessment,
+			maxWidth: "180px",
+			sortable: true,
 			center: true,
 		},
 	]
@@ -60,17 +74,26 @@ export function getColumns(currentPage, rowsPerPage, total_count) {
 
 export function getFooter(data) {
 	const counts = data.reduce((acc, item) => {
-		const key = item.assessment.assesment;
+		const key = item.assessment;
 		acc[key] = (acc[key] || 0) + 1;
+
 		return acc;
 	}, {});
+
+	const sortedCounts = Object.keys(counts)
+		.sort()
+		.reduce((acc, key) => {
+			acc[key] = counts[key];
+
+			return acc;
+		}, {});
 
 	return (
 		<div className='react-dataTable'>
 			<div className='rdt_TableHead'>
 				<Row className='m-0 p-1 cborder clight rdt_TableHeadRow' align='center'>
-					{Object.entries(counts).map(([key, value]) =>
-						<Col className='p-0 rdt_TableCol'>
+					{Object.entries(sortedCounts).map(([key, value], index) =>
+						<Col key={index} className='p-0 rdt_TableCol'>
 							<div className='rdt_TableCol_Sortable'>
 								{key}
 							</div>
@@ -80,7 +103,7 @@ export function getFooter(data) {
 			</div>
 			<div className='rdt_TableBody'>
 				<Row className='m-0 p-1 cborder clight rdt_TableRow' align='center'>
-					{Object.entries(counts).map(([key, value]) =>
+					{Object.entries(sortedCounts).map(([key, value]) =>
 						<Col className='p-0'>
 							{value}
 						</Col>

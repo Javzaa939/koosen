@@ -1021,6 +1021,11 @@ function useApi(isDisplay=false) {
 
 				// Тухайн оюутаны хичээлийн дүнг харуулах
 				student:(search, status, lesson_id) => instance.get(`/score/rescore/student/?search=${search}&status=${status}&lesson=${lesson_id}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&school=${school_id}`),
+			},
+
+			// based on TeacherScore model
+			teacherScore: {
+				get: ({limit=10000000, page=1, sort='', search='', school=school_id || '', lesson='', group='', is_fall=''}) => instance.get(`/score/teacher-score/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&school=${school}&lesson=${lesson}&group=${group}&isFall=${is_fall}`),
 			}
 		},
 		/*Хэвлэх*/
