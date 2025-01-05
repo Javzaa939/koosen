@@ -67,7 +67,8 @@ from lms.models import (
     QuestionTitle,
     Lesson_teacher_scoretype,
     QuestionTitle,
-    Score
+    Score,
+    CalculatedGpaOfDiploma
 )
 
 from core.models import (
@@ -81,7 +82,7 @@ from lms.models import get_choice_image_path
 
 from elselt.serializer import MentalUserSerializer
 
-from .serializers import ChallengeGroupsSerializer, ChallengeProfessionsSerializer, LessonStandartSerializer, ChallengeQuestionsAnswersSerializer
+from .serializers import ChallengeGroupsSerializer, ChallengeProfessionsSerializer, LessonStandartSerializer, ChallengeQuestionsAnswersSerializer, ChallengeReport4Serializer
 from .serializers import LessonTitlePlanSerializer
 from .serializers import LessonStandartListSerializer
 from .serializers import LessonStandartSerialzier
@@ -208,6 +209,7 @@ class LessonStandartAPIView(
         request_data = request.data
         teachers_data = request.data.get("teachers")
         instance = self.get_object()
+        self.serializer_class = LessonStandartCreateSerializer
 
         try:
             instance = self.get_object()
@@ -216,17 +218,31 @@ class LessonStandartAPIView(
             if not serializer.is_valid(raise_exception=False):
                 return request.send_error_valid(serializer.errors)
 
-            if teachers_data:
-                old_teacher_qs = Lesson_to_teacher.objects.filter(lesson=pk)
-                old_teacher_qs.delete()
-                for teacher in teachers_data:
-                    teacher_id = teacher.get('id')
-                    Lesson_to_teacher.objects.update_or_create(
-                        lesson_id=pk,
-                        teacher_id=teacher_id
-                    )
-
             serializer.save()
+            try:
+                teacher_ids = [teacher.get('id') for teacher in teachers_data]
+                old_teacher_ids = Lesson_to_teacher.objects.filter(lesson=pk).values_list('teacher', flat=True)
+
+                # Шинээр нэмэгдсэн багш
+                add_ids = [item for item in teacher_ids if item not in old_teacher_ids]
+
+                # Хуучин багшийг хасах
+                remove_ids = [item for item in old_teacher_ids if item not in teacher_ids]
+
+                old_teacher_qs = Lesson_to_teacher.objects.filter(lesson=pk)
+                if remove_ids and add_ids:
+                    if len(remove_ids) > 0:
+                        old_teacher_qs = old_teacher_qs.filter(teacher__in=remove_ids).delete()
+
+                    # Шинээр нэмж байгаа бүрээр нь нэмэх
+                    for teacher_id in add_ids:
+                        Lesson_to_teacher.objects.update_or_create(
+                            lesson_id=pk,
+                            teacher_id=teacher_id
+                        )
+            except Exception as e:
+                print(e)
+                return request.send_info("INF_002", 'Багшийн системд дүн оруулсан учраас устгах боломжгүй')
 
             return request.send_info("INF_002")
 
@@ -248,9 +264,29 @@ class LessonStandartAPIView(
 
         score = ScoreRegister.objects.filter(lesson=pk)
 
-        if learn_plan or timetable or score or examtimetable or examrepeat:
-            return request.send_error("ERR_002", "Тухайн хичээлийг устгах боломжгүй байна.")
+        lesson_to_teacher = Lesson_to_teacher.objects.filter(lesson=pk)
+        diplom_lesson = CalculatedGpaOfDiploma.objects.filter(lesson=pk)
 
+        if learn_plan:
+            learn_plan.delete()
+
+        if timetable:
+            timetable.delete()
+
+        if examtimetable:
+            examtimetable.delete()
+
+        if examrepeat:
+            examrepeat.delete()
+
+        if len(lesson_to_teacher) > 0:
+            return request.send_error("ERR_002", "Тухайн хичээлд холбогдсон багшийн мэдээлэлтэй холбогдосон устгах боломжгүй байна.")
+
+        if len(score) > 0:
+            return request.send_error("ERR_002", "Тухайн хичээлд холбогдсон дүнгийн мэдээлэл байгаа устгах боломжгүй байна.")
+
+        if len(diplom_lesson) > 0:
+            return request.send_error("ERR_002", "Тухайн хичээл нь төгсөлтийн ажилтай холбогдсон учраас устгах боломжгүй байна.")
         self.destroy(request, pk)
         return request.send_info("INF_003")
 
@@ -5927,6 +5963,11 @@ class ChallengeReportAPIView(
         if group:
             queryset = queryset.filter(student__group=group)
 
+        profession = request.query_params.get('profession')
+
+        if profession:
+            queryset = queryset.filter(student__group__profession=profession)
+
         if not queryset:
 
             return request.send_data(None)
@@ -5941,7 +5982,7 @@ class ChallengeReportAPIView(
                 answer_json = json.loads(answer_json)
 
                 for question_id, choice_id in answer_json.items():
-                    choice_obj = QuestionChoices.objects.filter(id=choice_id).values('score','challengequestions__question').first()
+                    choice_obj = QuestionChoices.objects.filter(id=choice_id).values('score','challengequestions__question','challengequestions__title__name').first()
                     is_right = False
 
                     if choice_obj.get('score') > 0:
@@ -5951,7 +5992,8 @@ class ChallengeReportAPIView(
                         'question_id': question_id,
                         'question_text': choice_obj.get('challengequestions__question'),
                         'is_answered_right': is_right,
-                        'choice_id': choice_id
+                        'choice_id': choice_id,
+                        'question_title': choice_obj.get('challengequestions__title__name'),
                     })
 
             except json.JSONDecodeError:
@@ -5959,6 +6001,23 @@ class ChallengeReportAPIView(
                 traceback.print_exc()
 
             return answers
+
+        def get_question_stats(exam_results):
+            # to collect questions reliability stats
+            question_stats = {}
+
+            for res in exam_results:
+                question_id = res["question_id"]
+
+                if question_id not in question_stats:
+                    question_stats[question_id] = {"correct": 0, "total": 0, 'question_text': res['question_text']}
+
+                question_stats[question_id]["total"] += 1
+
+                if res["is_answered_right"]:
+                    question_stats[question_id]["correct"] += 1
+
+            return question_stats
 
         if report_type == 'reliability':
             exam_results = []
@@ -5979,19 +6038,7 @@ class ChallengeReportAPIView(
                 "Маш хялбар": lambda question_reliability: question_reliability >= 81,
             }
 
-            # to collect questions reliability stats
-            question_stats = {}
-
-            for res in exam_results:
-                question_id = res["question_id"]
-
-                if question_id not in question_stats:
-                    question_stats[question_id] = {"correct": 0, "total": 0, 'question_text': res['question_text']}
-
-                question_stats[question_id]["total"] += 1
-
-                if res["is_answered_right"]:
-                    question_stats[question_id]["correct"] += 1
+            question_stats = get_question_stats(exam_results)
 
             # to calculate question reliability
             questions_reliability = []
@@ -6025,12 +6072,10 @@ class ChallengeReportAPIView(
 
             for key, questions in grouped_questions.items():
                 # to build dict for recharts format
-                rechart_data.append(
-                    {
-                        "questions_reliability_name": key,
-                        "questions_count_percent": (len(questions) * 100 / total_questions_count) if total_questions_count else 0
-                    }
-                )
+                rechart_data.append({
+                    "questions_reliability_name": key,
+                    "questions_count_percent": (len(questions) * 100 / total_questions_count) if total_questions_count else 0
+                })
 
             get_result = rechart_data
 
@@ -6073,19 +6118,6 @@ class ChallengeReportAPIView(
         ):
             group = None
             profession = None
-
-            if report_type == 'groups':
-                group = request.query_params.get('group')
-
-                if group:
-                    queryset = queryset.filter(student__group=group)
-
-            elif report_type == 'professions':
-                profession = request.query_params.get('profession')
-
-                if profession:
-                    queryset = queryset.filter(student__group__profession=profession)
-
             assessments = Score.objects.all().values('score_min','score_max','assesment')
             assessment_dict = {}
 
@@ -6128,6 +6160,7 @@ class ChallengeReportAPIView(
                         )
                         .values('group_name') # to group students by group_name
                 )
+
             elif report_type == 'professions':
                 queryset = (
                     queryset
@@ -6143,7 +6176,7 @@ class ChallengeReportAPIView(
                         .values('profession_name') # to group students by profession_name
                 )
 
-            self.queryset = (
+            queryset = (
                 queryset
                     .annotate(
                         student_count=Count('student', distinct=True),
@@ -6227,9 +6260,33 @@ class ChallengeReportAPIView(
             elif report_type == 'professions':
                 self.serializer_class = ChallengeProfessionsSerializer
 
-            get_result = self.list(request).data
+        elif report_type == 'report4':
+            self.serializer_class = ChallengeReport4Serializer
 
-        if report_type in ['students', 'dt_reliability']:
+        elif report_type == 'report4-1':
+            answers = []
+            first_student_answers = []
+
+            for index, obj in enumerate(queryset):
+                if not obj.answer:
+
+                    return request.send_data(None)
+
+                answers.extend(parse_answers(obj.answer))
+
+                if index == 0:
+                    # because we need only one row data for header
+                    first_student_answers = answers.copy()
+
+            question_stats = get_question_stats(answers)
+
+            get_result = {
+                'questions': first_student_answers,
+                'questions_summary': question_stats
+            }
+
+        # for reports where pagination is required
+        if report_type in ['students', 'dt_reliability', 'report4', 'groups', 'professions']:
             sorting = self.request.query_params.get('sorting')
 
             # Sort хийх үед ажиллана
