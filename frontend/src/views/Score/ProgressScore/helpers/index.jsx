@@ -103,8 +103,8 @@ export function getFooter(data) {
 			</div>
 			<div className='rdt_TableBody'>
 				<Row className='m-0 p-1 cborder clight rdt_TableRow' align='center'>
-					{Object.entries(sortedCounts).map(([key, value]) =>
-						<Col className='p-0'>
+					{Object.entries(sortedCounts).map(([key, value], index) =>
+						<Col key={index} className='p-0'>
 							{value}
 						</Col>
 					)}

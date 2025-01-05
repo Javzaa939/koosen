@@ -383,11 +383,11 @@ export default function ProgressScore() {
                         data={datas}
                         paginationComponent={
                             (props) =>
-                                <Fragment key={1}>
+                                <>
                                     {getFooter(totalDatas)}
                                     {/* props.rowsPerPage not updating so rowsPerPage is used directly */}
                                     {getPagination(handlePagination, props.currentPage, rowsPerPage === 'Бүгд' ? props.rowCount : rowsPerPage, props.rowCount)()}
-                                </Fragment>
+                                </>
                         }
                         fixedHeader
                         fixedHeaderScrollHeight='62vh'
