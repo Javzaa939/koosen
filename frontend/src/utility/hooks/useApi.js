@@ -350,6 +350,15 @@ function useApi(isDisplay=false) {
 				put: (data) => instance.put(`/settings/rule/`, data),
 				delete: (id) => instance.delete(`/settings/rule/${id}/`),
 			},
+
+			/* Дүнгийн үсгэн үнэлгээ тохиргоо */
+			gradeletter:{
+				get: () => instance.get(`/settings/grade/`),
+				post: data => instance.post(`/settings/grade/`, data),
+				getOne: (pk) => instance.get(`/settings/grade/${pk}/`),
+				put: (data, pk) => instance.put(`/settings/grade/${pk}/`, data),
+				delete: (id) => instance.delete(`/settings/grade/${id}/`),
+			},
 		},
 		/** Сургалт */
 		study: {

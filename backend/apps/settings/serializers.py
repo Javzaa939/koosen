@@ -18,6 +18,7 @@ from lms.models import Country
 from lms.models import DefinitionSignature
 from lms.models import PrintSettings
 from lms.models import StudentGrade, OrgPosition
+from lms.models import GradeLetter
 
 from core.models import Permissions
 from core.models import Roles
@@ -284,4 +285,11 @@ class StudentGradeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = StudentGrade
+        fields = "__all__"
+
+class GradeLetterSerializer(serializers.ModelSerializer):
+    """ Дүнгийн үсгэн үнэлгээ """
+
+    class Meta:
+        model = GradeLetter
         fields = "__all__"
