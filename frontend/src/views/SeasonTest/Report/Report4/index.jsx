@@ -126,7 +126,7 @@ export default function Report4() {
                         <ExamFilter setSelected={setSelectedExam} />
                     </div>
                     <div style={{ width: '219.5px' }} className='me-1'>
-                        <GroupFilter setSelected={setSelectedGroup} />
+                        <GroupFilter setSelected={setSelectedGroup} exam_id={selected_exam}/>
                     </div>
                 </Col>
             </Row>

@@ -194,7 +194,7 @@ export default function ReportDatatable({ report }) {
                     {
                         report === 'groups' &&
                         <div style={{ width: '219.5px' }} className='me-1'>
-                            <GroupFilter setSelected={setSelectedGroup} />
+                            <GroupFilter setSelected={setSelectedGroup} exam_id={selected_exam} />
                         </div>
                     }
                     {
