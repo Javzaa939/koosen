@@ -5957,15 +5957,6 @@ class ChallengeReportAPIView(
             return request.send_data(None)
 
         queryset = self.queryset.filter(challenge__challenge_type=Challenge.SEMESTR_EXAM, challenge__id=exam)
-        sorting = self.request.query_params.get('sorting')
-
-        # Sort хийх үед ажиллана
-        if sorting:
-            if not isinstance(sorting, str):
-                sorting = str(sorting)
-
-            queryset = queryset.order_by(sorting)
-
         group = request.query_params.get('group')
 
         if group:
@@ -6033,6 +6024,7 @@ class ChallengeReportAPIView(
 
             return question_stats
 
+        # report 1 is reliability
         if report_type == 'reliability':
             exam_results = []
 
@@ -6301,6 +6293,15 @@ class ChallengeReportAPIView(
 
         # for reports where pagination is required
         if report_type in ['students', 'dt_reliability', 'report4', 'groups', 'professions']:
+            sorting = self.request.query_params.get('sorting')
+
+            # Sort хийх үед ажиллана
+            if sorting:
+                if not isinstance(sorting, str):
+                    sorting = str(sorting)
+
+                queryset = queryset.order_by(sorting)
+
             self.queryset = queryset
             get_result = self.list(request).data
 
