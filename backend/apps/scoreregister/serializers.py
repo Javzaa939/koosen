@@ -326,7 +326,12 @@ class TeacherScoreListPrintSerializer(serializers.ModelSerializer):
         return lesson_season
 
     def get_teacher_score(self, obj):
-        score = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson, score_type__lesson_teacher=obj.score_type.lesson_teacher).exclude(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total')
+        teach_qs = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson, score_type__lesson_teacher=obj.score_type.lesson_teacher)
+        if len(teach_qs) == 1:
+            teach_qs = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson)
+
+        score = teach_qs.exclude(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total')
+
         return score
 
     def get_exam_score(self, obj):
@@ -339,11 +344,16 @@ class TeacherScoreListPrintSerializer(serializers.ModelSerializer):
 
     def get_grade_letter(self, obj):
         assessment = ''
-        teacher_score = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson, score_type__lesson_teacher=obj.score_type.lesson_teacher).exclude(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total') or 0
+        teach_qs = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson, score_type__lesson_teacher=obj.score_type.lesson_teacher)
+        if len(teach_qs) == 1:
+            teach_qs = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson)
+
+        teacher_score = teach_qs.exclude(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total') or 0
         exam_score = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson).filter(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total') or 0
-        total_score = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson, score_type__lesson_teacher=obj.score_type.lesson_teacher).aggregate(total=Sum('score')).get('total') or 0
+        total_score = teach_qs.aggregate(total=Sum('score')).get('total') or 0
         if not exam_score:
-            return ''
+            return 'W'
+
         if teacher_score < 42:
             assessment = 'WF'
         elif exam_score < 18:
@@ -354,7 +364,10 @@ class TeacherScoreListPrintSerializer(serializers.ModelSerializer):
         return assessment
 
     def get_total(self, obj):
-        total_score = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson, score_type__lesson_teacher=obj.score_type.lesson_teacher).aggregate(total=Sum('score')).get('total') or 0
+        teach_qs = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson, score_type__lesson_teacher=obj.score_type.lesson_teacher)
+        if len(teach_qs) == 1:
+            teach_qs = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson)
+        total_score = teach_qs.aggregate(total=Sum('score')).get('total') or 0
         teacher_score = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson).exclude(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total') or 0
         exam_score = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson, score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total') or 0
 
