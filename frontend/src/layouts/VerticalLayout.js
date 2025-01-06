@@ -191,6 +191,9 @@ const VerticalLayout = (props) =>
                         /** Өмнөх улирлын дүн */
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-score-restudy-read', 'score4')
 
+                        /** Явцын оноо */
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-score-read', 'score5')
+
                         /** ----------------------------- Сургалтын төлбөр ---------------------------- */
 
                         /** Төлбөрийн тохиргоо */

@@ -8,7 +8,7 @@ from rest_framework import generics
 
 from django.db import transaction
 from django.conf import settings
-from django.db.models import  Count, Q,  Value, CharField, FloatField, DateTimeField
+from django.db.models import  Count, Q,  Value, CharField, FloatField, DateTimeField, F
 from django.db.models.functions import Concat
 
 from rest_framework.permissions import IsAuthenticated
@@ -28,7 +28,7 @@ from lms.models import LearningPlan, Exam_to_group
 from lms.models import Season, Group, GradeLetter, Country
 from core.models import Employee, Teachers, User
 
-from .serializers import CorrespondSerailizer, TeacherScoreListPrintSerializer
+from .serializers import CorrespondSerailizer, TeacherScoreListPrintSerializer, TeacherScoreSerializer
 from .serializers import CorrespondListSerailizer
 from .serializers import ScoreRegisterSerializer
 from .serializers import ReScoreSerializer
@@ -676,15 +676,17 @@ class ScoreRegisterListAPIView(
 
         all_list = self.list(request).data
 
-        # Багш хичээл холболт
-        lesson_teacher = Lesson_to_teacher.objects.filter(lesson=lesson, teacher=teacher).first()
+        if teacher:
+            # Багш хичээл холболт
+            lesson_teacher = Lesson_to_teacher.objects.filter(lesson=lesson, teacher=teacher).first()
 
-        # Багшийн дүнгийн задаргааны төрлүүд
-        score_type_ids = Lesson_teacher_scoretype.objects.filter(lesson_teacher=lesson_teacher).values_list('id', flat=True)
+            # Багшийн дүнгийн задаргааны төрлүүд
+            score_type_ids = Lesson_teacher_scoretype.objects.filter(lesson_teacher=lesson_teacher).values_list('id', flat=True)
 
-        teach_score_qs = TeacherScore.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season, score_type_id__in=score_type_ids)
-        if teach_score_qs:
-            have_teach_score = True
+            teach_score_qs = TeacherScore.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season, score_type_id__in=score_type_ids)
+
+            if teach_score_qs:
+                have_teach_score = True
 
         return_datas = {
             'datas': all_list,
@@ -1323,6 +1325,80 @@ class ScoreRegisterPrintAPIView(
         }
 
         return request.send_data(data)
+
+
+@permission_classes([IsAuthenticated])
+class TeacherScoreAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin
+):
+    queryset = TeacherScore.objects
+    serializer_class = TeacherScoreSerializer
+
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['student__code', 'student__register_num', 'student__first_name']
+
+    def get(self,request):
+        # to join scoreregister with teacherscore in sql level NOTE don't need to join scoreregister just teacherscore
+        # self.queryset = self.queryset.filter(
+        #     Q(
+        #         Q(student__group__profession__department__isnull=False, student__scoreregister__school=F('student__group__profession__department__sub_orgs')) |
+        #         Q(student__group__profession__department__isnull=True, student__scoreregister__school=F('student__group__profession__school'))
+        #     ),
+        #     student__scoreregister__is_delete=False,
+        #     student__scoreregister__lesson_year=F('lesson_year'),
+        #     student__scoreregister__lesson_season=F('lesson_season'),
+        #     student__scoreregister__lesson=F('score_type__lesson_teacher__lesson')
+        # )
+
+        lesson_year, lesson_season = get_active_year_season()
+        self.queryset = self.queryset.filter(lesson_year=lesson_year, lesson_season=lesson_season)
+        school_id = self.request.query_params.get('school')
+
+        if school_id:
+            self.queryset = self.queryset.filter(
+                Q(student__group__profession__department__isnull=False, student__group__profession__department__sub_orgs=school_id) |
+                Q(student__group__profession__department__isnull=True, student__group__profession__school=school_id)
+            )
+
+        lesson = self.request.query_params.get('lesson')
+        teacher = self.request.query_params.get('teacher')
+
+        if lesson:
+            self.queryset = self.queryset.filter(score_type__lesson_teacher__lesson=lesson)
+
+        if teacher:
+            self.queryset = self.queryset.filter(score_type__lesson_teacher__teacher=teacher)
+
+        group = self.request.query_params.get('group')
+
+        if group:
+            self.queryset = self.queryset.filter(student__group=group)
+
+        is_fall = self.request.query_params.get('isFall')
+
+        if is_fall == 'true':
+            self.queryset = self.queryset.filter(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).filter(score__lt=18)
+
+        # to select fields to display
+        self.queryset = self.queryset.annotate(
+            student_code=F('student__code'),
+            group_name=F('student__group__name'),
+        )
+
+        sorting = self.request.query_params.get('sorting')
+
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            self.queryset = self.queryset.order_by(sorting)
+
+        all_list = self.list(request).data
+
+        return request.send_data(all_list)
 
 
 @permission_classes([IsAuthenticated])

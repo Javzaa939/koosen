@@ -5,6 +5,7 @@ const Correspond = lazy(() => import("@views/Score/Correspond"))
 const RepeatExam = lazy(() => import("@views/Score/RepeatExam"))
 const GradeList = lazy(() => import("@views/Score/GradeList"))
 const PrintScore = lazy(() => import("@views/Score/GradeList/PrintScore"))
+const ProgressScore = lazy(() => import("@views/Score/ProgressScore"))
 
 const Score = [
     {
@@ -29,6 +30,10 @@ const Score = [
         meta: {
             layout: 'blank'
         }
+    },
+    {
+        path: 'score/progress-score/',
+        element: <ProgressScore />
     }
 ]
 

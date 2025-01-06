@@ -271,6 +271,50 @@ class ScoreRegisterPrintSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class TeacherScoreSerializer(serializers.ModelSerializer):
+    student_code = serializers.CharField(read_only=True)
+    student_full_name = serializers.SerializerMethodField()
+    group_name = serializers.CharField(read_only=True)
+    teach_score = serializers.SerializerMethodField()
+    exam_score = serializers.SerializerMethodField()
+    assessment = serializers.SerializerMethodField()
+
+    class Meta:
+        model = TeacherScore
+        fields = "student_code", "student_full_name", "group_name", "teach_score", "exam_score", "assessment"
+
+    def get_student_full_name(self, obj):
+
+        return obj.student.full_name()
+
+    def get_teach_score(self, obj):
+        score = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson, score_type__lesson_teacher=obj.score_type.lesson_teacher).exclude(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total')
+        return score
+
+    def get_exam_score(self, obj):
+        score = 0
+        score_obj = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson, score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).first()
+        if score_obj:
+            score = score_obj.score
+
+        return round(score, 1)
+
+    def get_assessment(self, obj):
+        assessment = ''
+        teacher_score = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson, score_type__lesson_teacher=obj.score_type.lesson_teacher).exclude(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total') or 0
+        exam_score = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson).filter(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total') or 0
+        total_score = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson, score_type__lesson_teacher=obj.score_type.lesson_teacher).aggregate(total=Sum('score')).get('total') or 0
+        if not exam_score:
+            return 'W'
+        if teacher_score < 42:
+            assessment = 'WF'
+        elif exam_score < 18:
+            assessment = 'W'
+        else:
+            assess = Score.objects.filter(score_max__gte=total_score,score_min__lte=total_score).values('assesment').first()
+            assessment = assess['assesment']
+        return assessment
+
 class TeacherScoreListPrintSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
     lesson_name = serializers.SerializerMethodField()
@@ -353,7 +397,6 @@ class TeacherScoreListPrintSerializer(serializers.ModelSerializer):
         total_score = teach_qs.aggregate(total=Sum('score')).get('total') or 0
         if not exam_score:
             return 'W'
-
         if teacher_score < 42:
             assessment = 'WF'
         elif exam_score < 18:
