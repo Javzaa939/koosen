@@ -5982,33 +5982,36 @@ class ChallengeReportAPIView(
 
         get_result = []
 
-        def parse_answers(json_data):
+        def parse_answers(json_data, challenge_id):
             answers = []
 
             try:
-                answer_json = json_data.replace("'", '"')
-                answer_json = json.loads(answer_json)
+                answer_json = json.loads(json_data.replace("'", '"'))
+                questions = ChallengeQuestions.objects.filter(challenge__id=challenge_id).order_by('id')
 
-                # to sort by question_id to make order same as in "Асуулт нэмэх" section of "/challenge-season/addstudent/id1/id2" page
-                sorted_answers = sorted(answer_json.items(), key=lambda item: int(item[0]))
+                if not questions:
 
-                for question_id, choice_id in sorted_answers:
-                    choice_obj = QuestionChoices.objects.filter(id=choice_id).values('score','challengequestions__question','challengequestions__title__name').first()
+                    return None
+
+                for question in questions:
+                    choice_id = answer_json.get(str(question.id))
                     is_right = False
 
-                    if choice_obj.get('score') > 0:
-                        is_right = True
+                    if choice_id:
+                        choice_obj = QuestionChoices.objects.get(id=choice_id)
+
+                        if choice_obj.score > 0:
+                            is_right = True
 
                     answers.append({
-                        'question_id': question_id,
-                        'question_text': choice_obj.get('challengequestions__question'),
+                        'question_id': question.id,
+                        'question_text': question.question,
                         'is_answered_right': is_right,
                         'choice_id': choice_id,
-                        'question_title': choice_obj.get('challengequestions__title__name'),
+                        'question_title': question.title.name,
                     })
 
-            except json.JSONDecodeError:
-                print('json error in:', obj.id, obj.answer)
+            except Exception:
                 traceback.print_exc()
 
             return answers
@@ -6038,7 +6041,7 @@ class ChallengeReportAPIView(
 
                     return request.send_data(None)
 
-                exam_results.extend(parse_answers(obj.answer))
+                exam_results.extend(parse_answers(obj.answer, obj.challenge.id))
 
             # questions reliability ranges
             questions_reliability_ranges = {
@@ -6099,7 +6102,7 @@ class ChallengeReportAPIView(
 
                     return request.send_data(None)
 
-                answers.extend(parse_answers(obj.answer))
+                answers.extend(parse_answers(obj.answer, obj.challenge.id))
 
             choice_ids = [answer['choice_id'] for answer in answers]
 
@@ -6283,7 +6286,7 @@ class ChallengeReportAPIView(
 
                     return request.send_data(None)
 
-                answers.extend(parse_answers(obj.answer))
+                answers.extend(parse_answers(obj.answer, obj.challenge.id))
 
                 if index == 0:
                     # because we need only one row data for header

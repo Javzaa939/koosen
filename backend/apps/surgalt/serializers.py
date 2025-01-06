@@ -1090,34 +1090,39 @@ class ChallengeReport4Serializer(serializers.ModelSerializer):
         return obj.student.full_name()
 
     def get_answers(self, obj):
-        def parse_answers(json_data):
+        def parse_answers(json_data, challenge_id):
             answers = []
 
             try:
-                answer_json = json_data.replace("'", '"')
-                answer_json = json.loads(answer_json)
+                answer_json = json.loads(json_data.replace("'", '"'))
+                questions = ChallengeQuestions.objects.filter(challenge__id=challenge_id).order_by('id')
 
-                for question_id, choice_id in answer_json.items():
-                    choice_obj = QuestionChoices.objects.filter(id=choice_id).values('score','challengequestions__question').first()
+                if not questions:
+
+                    return None
+
+                for question in questions:
+                    choice_id = answer_json.get(str(question.id))
                     is_right = False
 
-                    if choice_obj.get('score') > 0:
-                        is_right = True
+                    if choice_id:
+                        choice_obj = QuestionChoices.objects.get(id=choice_id)
+
+                        if choice_obj.score > 0:
+                            is_right = True
 
                     answers.append({
-                        'question_id': question_id,
-                        'question_text': choice_obj.get('challengequestions__question'),
+                        'question_id': question.id,
                         'is_answered_right': is_right,
-                        'choice_id': choice_id
+                        'question_title': question.title.name,
                     })
 
-            except json.JSONDecodeError:
-                print('json error in:', obj.id, obj.answer)
+            except Exception:
                 traceback.print_exc()
 
             return answers
 
-        answers = parse_answers(obj.answer)
+        answers = parse_answers(obj.answer, obj.challenge.id)
 
         return answers
 
