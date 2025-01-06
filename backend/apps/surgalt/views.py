@@ -5885,8 +5885,7 @@ class ChallengeQuestionsAPIView(
         challenge = Challenge.objects.filter(id=challenge_id).first()
 
         if challenge_id:
-            all_data = challenge.questions.filter(title__lesson=challenge.lesson).all()
-            all_data = challenge.questions.all()
+            all_data = challenge.questions.filter(title__lesson=challenge.lesson).all().order_by('id')
             serializer = self.get_serializer(all_data, many=True)
 
             response_data = {
@@ -5958,6 +5957,15 @@ class ChallengeReportAPIView(
             return request.send_data(None)
 
         queryset = self.queryset.filter(challenge__challenge_type=Challenge.SEMESTR_EXAM, challenge__id=exam)
+        sorting = self.request.query_params.get('sorting')
+
+        # Sort хийх үед ажиллана
+        if sorting:
+            if not isinstance(sorting, str):
+                sorting = str(sorting)
+
+            queryset = queryset.order_by(sorting)
+
         group = request.query_params.get('group')
 
         if group:
@@ -5981,7 +5989,10 @@ class ChallengeReportAPIView(
                 answer_json = json_data.replace("'", '"')
                 answer_json = json.loads(answer_json)
 
-                for question_id, choice_id in answer_json.items():
+                # to sort by question_id to make order same as in "Асуулт нэмэх" section of "/challenge-season/addstudent/id1/id2" page
+                sorted_answers = sorted(answer_json.items(), key=lambda item: int(item[0]))
+
+                for question_id, choice_id in sorted_answers:
                     choice_obj = QuestionChoices.objects.filter(id=choice_id).values('score','challengequestions__question','challengequestions__title__name').first()
                     is_right = False
 
@@ -6287,15 +6298,6 @@ class ChallengeReportAPIView(
 
         # for reports where pagination is required
         if report_type in ['students', 'dt_reliability', 'report4', 'groups', 'professions']:
-            sorting = self.request.query_params.get('sorting')
-
-            # Sort хийх үед ажиллана
-            if sorting:
-                if not isinstance(sorting, str):
-                    sorting = str(sorting)
-
-                queryset = queryset.order_by(sorting)
-
             self.queryset = queryset
             get_result = self.list(request).data
 
