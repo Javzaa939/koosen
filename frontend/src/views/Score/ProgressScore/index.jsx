@@ -39,6 +39,7 @@ export default function ProgressScore() {
         lesson: '',
         is_fall: '',
         class: '',
+        teacher: '',
     }
 
     const { t } = useTranslation()
@@ -69,6 +70,7 @@ export default function ProgressScore() {
     const [datas, setDatas] = useState([])
     const [totalDatas, setTotalDatas] = useState([])
     const [lesson_option, setLessonOption] = useState([])
+    const [teach_option, setTeacherOption] = useState([])
     const [group_option, setGroupOption] = useState([])
     const [select_value, setSelectValue] = useState(values)
 
@@ -76,12 +78,20 @@ export default function ProgressScore() {
     const groupApi = useApi().student.group
     const lessonApi = useApi().study.lessonStandart
     const teacherScoreApi = useApi().score.teacherScore
+    const coreApi = useApi().hrms.teacher
 
     // Хичээлийн жагсаалт
     async function getLessonOption() {
         const { success, data } = await fetchData(lessonApi.getList(school_id))
         if (success) {
             setLessonOption(data)
+        }
+    }
+
+    async function getTeacherOption() {
+        const { success, data } = await fetchData(coreApi.getLessonToTeacher(select_value?.lesson))
+        if (success) {
+            setTeacherOption(data)
         }
     }
 
@@ -155,6 +165,10 @@ export default function ProgressScore() {
         [school_id]
     )
 
+    useEffect(() => {
+        getTeacherOption()
+    }, [select_value?.lesson])
+
     // ** Function to handle filter
     const handleFilter = e => {
         const value = e.target.value.trimStart();
@@ -226,6 +240,42 @@ export default function ProgressScore() {
                                             setSelectValue({
                                                 ...select_value,
                                                 lesson: val?.id || '',
+                                            })
+                                        }}
+                                        styles={ReactSelectStyles}
+                                        getOptionValue={(option) => option.id}
+                                        getOptionLabel={(option) => option.full_name}
+                                    />
+                                )
+                            }}
+                        ></Controller>
+                    </Col>
+                    <Col md={3} sm={12}>
+                        <Label className="form-label" for="teacher">
+                            {t('Багш')}
+                        </Label>
+                        <Controller
+                            control={control}
+                            defaultValue=''
+                            name="teacher"
+                            render={({ field: { value, onChange } }) => {
+                                return (
+                                    <Select
+                                        name="teacher"
+                                        id="teacher"
+                                        classNamePrefix='select'
+                                        isClearable
+                                        className={classnames('react-select', { 'is-invalid': errors.teacher })}
+                                        isLoading={isLoading}
+                                        placeholder={t('-- Сонгоно уу --')}
+                                        options={teach_option || []}
+                                        value={teach_option.find((c) => c.id === value)}
+                                        noOptionsMessage={() => t('Хоосон байна.')}
+                                        onChange={(val) => {
+                                            onChange(val?.id || '')
+                                            setSelectValue({
+                                                ...select_value,
+                                                teacher: val?.id || '',
                                             })
                                         }}
                                         styles={ReactSelectStyles}

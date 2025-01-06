@@ -1341,17 +1341,17 @@ class TeacherScoreAPIView(
     search_fields = ['student__code', 'student__register_num', 'student__first_name']
 
     def get(self,request):
-        # to join scoreregister with teacherscore in sql level
-        self.queryset = self.queryset.filter(
-            Q(
-                Q(student__group__profession__department__isnull=False, student__scoreregister__school=F('student__group__profession__department__sub_orgs')) |
-                Q(student__group__profession__department__isnull=True, student__scoreregister__school=F('student__group__profession__school'))
-            ),
-            student__scoreregister__is_delete=False,
-            student__scoreregister__lesson_year=F('lesson_year'),
-            student__scoreregister__lesson_season=F('lesson_season'),
-            student__scoreregister__lesson=F('score_type__lesson_teacher__lesson')
-        )
+        # to join scoreregister with teacherscore in sql level NOTE don't need to join scoreregister just teacherscore
+        # self.queryset = self.queryset.filter(
+        #     Q(
+        #         Q(student__group__profession__department__isnull=False, student__scoreregister__school=F('student__group__profession__department__sub_orgs')) |
+        #         Q(student__group__profession__department__isnull=True, student__scoreregister__school=F('student__group__profession__school'))
+        #     ),
+        #     student__scoreregister__is_delete=False,
+        #     student__scoreregister__lesson_year=F('lesson_year'),
+        #     student__scoreregister__lesson_season=F('lesson_season'),
+        #     student__scoreregister__lesson=F('score_type__lesson_teacher__lesson')
+        # )
 
         lesson_year, lesson_season = get_active_year_season()
         self.queryset = self.queryset.filter(lesson_year=lesson_year, lesson_season=lesson_season)
@@ -1364,9 +1364,13 @@ class TeacherScoreAPIView(
             )
 
         lesson = self.request.query_params.get('lesson')
+        teacher = self.request.query_params.get('teacher')
 
         if lesson:
             self.queryset = self.queryset.filter(score_type__lesson_teacher__lesson=lesson)
+
+        if teacher:
+            self.queryset = self.queryset.filter(score_type__lesson_teacher__teacher=teacher)
 
         group = self.request.query_params.get('group')
 
@@ -1376,18 +1380,12 @@ class TeacherScoreAPIView(
         is_fall = self.request.query_params.get('isFall')
 
         if is_fall == 'true':
-            self.queryset = self.queryset.filter(
-                student__scoreregister__teach_score__lt=42,
-                student__scoreregister__exam_score__lt=18,
-            )
+            self.queryset = self.queryset.filter(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).filter(score__lt=18)
 
         # to select fields to display
         self.queryset = self.queryset.annotate(
             student_code=F('student__code'),
             group_name=F('student__group__name'),
-            teach_score=F('student__scoreregister__teach_score'),
-            exam_score=F('student__scoreregister__exam_score'),
-            assessment=F('student__scoreregister__assessment__assesment'),
         )
 
         sorting = self.request.query_params.get('sorting')
