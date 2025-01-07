@@ -1418,7 +1418,7 @@ class TeacherLessonScorePrintAPIView(
         exam = self.request.query_params.get('exam')
         exam_committee = []
         exam_time_table_qs = ExamTimeTable.objects.filter(pk=exam).prefetch_related('teacher')
-        last_exam_time_table = exam_time_table_qs.last()
+        last_exam_time_table = exam_time_table_qs.first()
 
         if last_exam_time_table:
             exam_committee_teachers = last_exam_time_table.teacher.all()
@@ -1459,6 +1459,7 @@ class TeacherLessonScorePrintAPIView(
         teacher_id = self.queryset.filter(student__group__in=group_ids).values_list('score_type__lesson_teacher__teacher', flat=True).first()
         if not teacher_id:
             return request.send_error('ERR_002', 'Тухайн анги бүлэгт багшийн дүн шивэгдээгүй байна.')
+
         teacher = Teachers.objects.filter(id=teacher_id).first()
         teacher_org_position = Employee.objects.filter(user=teacher.user).values_list('org_position__name', flat=True).first()
         teacher_score_updated_at = self.queryset.values_list('updated_at', flat=True).order_by('updated_at').last()
