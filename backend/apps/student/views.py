@@ -54,7 +54,7 @@ from lms.models import Season
 from lms.models import CalculatedGpaOfDiploma
 from lms.models import StudentRegister
 from lms.models import LessonStandart
-from lms.models import StudentViz
+from lms.models import StudentViz, ChallengeStudents
 from lms.models import SystemSettings
 from lms.models import PaymentBeginBalance
 from lms.models import Country, ProfessionAverageScore, AttachmentConfig, ProfessionDefinition
@@ -4440,7 +4440,7 @@ class TestGroupAPIView(
 
     def get(self, request, exam=None):
 
-        group_ids = Exam_to_group.objects.filter(exam=exam).values_list('group', flat=True)
+        group_ids = ChallengeStudents.objects.filter(challenge=exam).values_list('student__group', flat=True).distinct()
 
         datas = Group.objects.filter(id__in=group_ids).values('id', 'name')
         return request.send_data(list(datas))

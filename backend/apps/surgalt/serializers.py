@@ -10,6 +10,8 @@ from django.conf import settings
 
 from datetime import datetime
 
+from apps import surgalt
+from main.utils.function.utils import remove_key_from_dict
 from core.fns import WithChoices
 
 from elselt.models import ElseltUser
@@ -637,13 +639,15 @@ class ChallengeQuestionListSerializer(serializers.ModelSerializer):
 
 class ChallengeQuestionsAnswersSerializer(serializers.ModelSerializer):
 
-    total_count = serializers.IntegerField()
-    positive_count = serializers.IntegerField()
-    reliability = serializers.FloatField()
+    reliability = serializers.SerializerMethodField()
 
     class Meta:
         model = ChallengeQuestions
-        fields = 'total_count', 'positive_count', 'reliability', 'question', 'id'
+        fields = 'reliability', 'question', 'id'
+
+    def get_reliability(self, obj):
+
+        return getattr(obj, 'reliability', 0)
 
 
 class ChallengeSerializer(serializers.ModelSerializer):
@@ -1090,34 +1094,10 @@ class ChallengeReport4Serializer(serializers.ModelSerializer):
         return obj.student.full_name()
 
     def get_answers(self, obj):
-        def parse_answers(json_data):
-            answers = []
+        answers = surgalt.views.ChallengeReportAPIView.parse_answers(obj.answer, obj.challenge.id)
 
-            try:
-                answer_json = json_data.replace("'", '"')
-                answer_json = json.loads(answer_json)
-
-                for question_id, choice_id in answer_json.items():
-                    choice_obj = QuestionChoices.objects.filter(id=choice_id).values('score','challengequestions__question').first()
-                    is_right = False
-
-                    if choice_obj.get('score') > 0:
-                        is_right = True
-
-                    answers.append({
-                        'question_id': question_id,
-                        'question_text': choice_obj.get('challengequestions__question'),
-                        'is_answered_right': is_right,
-                        'choice_id': choice_id
-                    })
-
-            except json.JSONDecodeError:
-                print('json error in:', obj.id, obj.answer)
-                traceback.print_exc()
-
-            return answers
-
-        answers = parse_answers(obj.answer)
+        for answer in answers:
+            remove_key_from_dict(answer, ['question_text', 'choice_id'])
 
         return answers
 
