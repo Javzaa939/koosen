@@ -15,7 +15,7 @@ export default function UpdateChallengeStudentsScoreButton() {
 	const { isLoading, Loader, fetchData } = useLoader({})
 
 	const [showModal, setShowModal] = useState(false)
-    const [selected_exam, setSelectedExam] = useState('')
+	const [selected_exam, setSelectedExam] = useState('')
 
 	async function handleUpdateCorrectAnswersScores() {
 		const { success, data } = await fetchData(challengeApi.updateChallengeStudentsScore({
@@ -72,7 +72,7 @@ export default function UpdateChallengeStudentsScoreButton() {
 						<AlertCircle size={15} color='#fb8500' />
 						<span className='ms-1'>{t('Болих товч дарах үед дүнгийн үнэлгээ шинэчлэх хадгалагдахгүй байхыг анхаарна уу')}</span>
 					</div>
-                    <ExamFilter setSelected={setSelectedExam} />
+					<ExamFilter setSelected={setSelectedExam} />
 					<div className='my-1 d-flex justify-content-between'>
 						<Button
 							className="me-2  justify-content-start"
