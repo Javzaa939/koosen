@@ -19,7 +19,7 @@ from main.utils.file import save_file
 from main.utils.file import remove_folder
 
 from django.db import transaction
-from django.db.models import Sum, Count, Q, Subquery, OuterRef,  Value, CharField, F, Case, When, IntegerField, FloatField, ExpressionWrapper
+from django.db.models import Sum, Count, Q, Subquery, OuterRef,  Value, CharField, F, Case, When, IntegerField, FloatField, Max
 from django.db.models.functions import Concat
 
 from django.shortcuts import get_object_or_404
@@ -5954,14 +5954,23 @@ class ChallengeReportAPIView(
 
         try:
             answer_json = json.loads(json_data.replace("'", '"'))
-            questions = ChallengeQuestions.objects.filter(challenge__id=challenge_id).order_by('id')
+
+            # to get last title because title field is manytomany type
+            questions = (
+                ChallengeQuestions.objects
+                .filter(challenge__id=challenge_id)
+                .order_by('id')
+                .annotate(last_title_id=Max('title__id'))
+                .filter(title__id=F('last_title_id'))
+                .values('id', 'question', 'title__name')
+            )
 
             if not questions:
 
                 return None
 
             for question in questions:
-                choice_id = answer_json.get(str(question.id))
+                choice_id = answer_json.get(str(question.get('id')))
                 is_right = False
 
                 if choice_id:
@@ -5971,11 +5980,11 @@ class ChallengeReportAPIView(
                         is_right = True
 
                 answers.append({
-                    'question_id': question.id,
-                    'question_text': question.question,
+                    'question_id': question.get('id'),
+                    'question_text': question.get('question'),
                     'is_answered_right': is_right,
                     'choice_id': choice_id,
-                    'question_title': question.title.name,
+                    'question_title': question.get('title__name'),
                 })
 
         except Exception:

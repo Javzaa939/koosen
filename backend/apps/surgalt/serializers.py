@@ -1097,7 +1097,7 @@ class ChallengeReport4Serializer(serializers.ModelSerializer):
         answers = surgalt.views.ChallengeReportAPIView.parse_answers(obj.answer, obj.challenge.id)
 
         for answer in answers:
-            remove_key_from_dict(answer, ['question_text', 'choice_id'])
+            remove_key_from_dict(answer, ['question_text', 'choice_id', 'question_title'])
 
         return answers
 
