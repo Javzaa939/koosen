@@ -155,7 +155,7 @@ const Addmodal = ({ open, handleModal, refreshDatas ,editId}) => {
                                         id="description"
                                         bsSize="sm"
                                         placeholder={t('Тайлбар')}
-                                        type="text"
+                                        type="textarea"
                                         invalid={errors.description && true}
                                     />
                                 )}
