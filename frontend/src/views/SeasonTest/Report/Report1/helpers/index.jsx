@@ -8,15 +8,12 @@ export function getColumns(currentPage, rowsPerPage) {
 			minWidth: "80px",
 			maxWidth: "80px",
 			center: true,
-			header: 'id'
 		},
 		{
 			name: '%',
 			selector: (row) => Number(row.reliability).toFixed(0) + '%',
 			maxWidth: "80px",
-			sortable: true,
 			center: true,
-			header: 'reliability'
 		},
 		{
 			name: t('Асуулт'),

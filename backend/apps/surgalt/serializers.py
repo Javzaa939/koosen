@@ -10,6 +10,8 @@ from django.conf import settings
 
 from datetime import datetime
 
+from apps import surgalt
+from main.utils.function.utils import remove_key_from_dict
 from core.fns import WithChoices
 
 from elselt.models import ElseltUser
@@ -637,13 +639,15 @@ class ChallengeQuestionListSerializer(serializers.ModelSerializer):
 
 class ChallengeQuestionsAnswersSerializer(serializers.ModelSerializer):
 
-    total_count = serializers.IntegerField()
-    positive_count = serializers.IntegerField()
-    reliability = serializers.FloatField()
+    reliability = serializers.SerializerMethodField()
 
     class Meta:
         model = ChallengeQuestions
-        fields = 'total_count', 'positive_count', 'reliability', 'question', 'id'
+        fields = 'reliability', 'question', 'id'
+
+    def get_reliability(self, obj):
+
+        return getattr(obj, 'reliability', 0)
 
 
 class ChallengeSerializer(serializers.ModelSerializer):
@@ -1090,39 +1094,10 @@ class ChallengeReport4Serializer(serializers.ModelSerializer):
         return obj.student.full_name()
 
     def get_answers(self, obj):
-        def parse_answers(json_data, challenge_id):
-            answers = []
+        answers = surgalt.views.ChallengeReportAPIView.parse_answers(obj.answer, obj.challenge.id)
 
-            try:
-                answer_json = json.loads(json_data.replace("'", '"'))
-                questions = ChallengeQuestions.objects.filter(challenge__id=challenge_id).order_by('id')
-
-                if not questions:
-
-                    return None
-
-                for question in questions:
-                    choice_id = answer_json.get(str(question.id))
-                    is_right = False
-
-                    if choice_id:
-                        choice_obj = QuestionChoices.objects.get(id=choice_id)
-
-                        if choice_obj.score > 0:
-                            is_right = True
-
-                    answers.append({
-                        'question_id': question.id,
-                        'is_answered_right': is_right,
-                        'question_title': question.title.name,
-                    })
-
-            except Exception:
-                traceback.print_exc()
-
-            return answers
-
-        answers = parse_answers(obj.answer, obj.challenge.id)
+        for answer in answers:
+            remove_key_from_dict(answer, ['question_text', 'choice_id'])
 
         return answers
 

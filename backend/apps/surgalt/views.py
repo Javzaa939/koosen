@@ -5948,13 +5948,67 @@ class ChallengeReportAPIView(
     filter_backends = [SearchFilter]
     search_fields = ['student__code', 'student__first_name']
 
-    def get(self, request):
+    @staticmethod
+    def parse_answers(json_data, challenge_id):
+        answers = []
+
+        try:
+            answer_json = json.loads(json_data.replace("'", '"'))
+            questions = ChallengeQuestions.objects.filter(challenge__id=challenge_id).order_by('id')
+
+            if not questions:
+
+                return None
+
+            for question in questions:
+                choice_id = answer_json.get(str(question.id))
+                is_right = False
+
+                if choice_id:
+                    choice_obj = QuestionChoices.objects.get(id=choice_id)
+
+                    if choice_obj.score > 0:
+                        is_right = True
+
+                answers.append({
+                    'question_id': question.id,
+                    'question_text': question.question,
+                    'is_answered_right': is_right,
+                    'choice_id': choice_id,
+                    'question_title': question.title.name,
+                })
+
+        except Exception:
+            traceback.print_exc()
+
+        return answers
+
+    @staticmethod
+    def get_question_stats(exam_results):
+        # to collect questions reliability stats
+        question_stats = {}
+
+        for res in exam_results:
+            question_id = res["question_id"]
+
+            if question_id not in question_stats:
+                question_stats[question_id] = {"correct": 0, "total": 0, 'question_text': res['question_text']}
+
+            question_stats[question_id]["total"] += 1
+
+            if res["is_answered_right"]:
+                question_stats[question_id]["correct"] += 1
+
+        return question_stats
+
+    def get_queryset(self):
+        request = self.request
         report_type = request.query_params.get('report_type')
         exam = request.query_params.get('exam')
 
         if not report_type or not exam:
 
-            return request.send_data(None)
+            return None
 
         queryset = self.queryset.filter(challenge__challenge_type=Challenge.SEMESTR_EXAM, challenge__id=exam)
         group = request.query_params.get('group')
@@ -5967,163 +6021,32 @@ class ChallengeReportAPIView(
         if profession:
             queryset = queryset.filter(student__group__profession=profession)
 
-        if not queryset:
-
-            return request.send_data(None)
-
-        get_result = []
-
-        def parse_answers(json_data, challenge_id):
-            answers = []
-
-            try:
-                answer_json = json.loads(json_data.replace("'", '"'))
-                questions = ChallengeQuestions.objects.filter(challenge__id=challenge_id).order_by('id')
-
-                if not questions:
-
-                    return None
-
-                for question in questions:
-                    choice_id = answer_json.get(str(question.id))
-                    is_right = False
-
-                    if choice_id:
-                        choice_obj = QuestionChoices.objects.get(id=choice_id)
-
-                        if choice_obj.score > 0:
-                            is_right = True
-
-                    answers.append({
-                        'question_id': question.id,
-                        'question_text': question.question,
-                        'is_answered_right': is_right,
-                        'choice_id': choice_id,
-                        'question_title': question.title.name,
-                    })
-
-            except Exception:
-                traceback.print_exc()
-
-            return answers
-
-        def get_question_stats(exam_results):
-            # to collect questions reliability stats
-            question_stats = {}
-
-            for res in exam_results:
-                question_id = res["question_id"]
-
-                if question_id not in question_stats:
-                    question_stats[question_id] = {"correct": 0, "total": 0, 'question_text': res['question_text']}
-
-                question_stats[question_id]["total"] += 1
-
-                if res["is_answered_right"]:
-                    question_stats[question_id]["correct"] += 1
-
-            return question_stats
-
-        # report 1 is reliability
-        if report_type == 'reliability':
-            exam_results = []
-
-            for obj in queryset:
-                if not obj.answer:
-
-                    return request.send_data(None)
-
-                exam_results.extend(parse_answers(obj.answer, obj.challenge.id))
-
-            # questions reliability ranges
-            questions_reliability_ranges = {
-                "Маш хүнд": lambda question_reliability: question_reliability <= 20,
-                "Хүндэвтэр": lambda question_reliability: 21 <= question_reliability <= 40,
-                "Дунд зэрэг": lambda question_reliability: 41 <= question_reliability <= 60,
-                "Хялбар": lambda question_reliability: 61 <= question_reliability <= 80,
-                "Маш хялбар": lambda question_reliability: question_reliability >= 81,
-            }
-
-            question_stats = get_question_stats(exam_results)
-
-            # to calculate question reliability
-            questions_reliability = []
-
-            for question_id, stats in question_stats.items():
-                if stats["total"] > 0:
-                    question_reliability = (stats["correct"] / stats["total"]) * 100
-
-                    questions_reliability.append({
-                        'question_id': question_id,
-                        'question_reliability': question_reliability,
-                        'question_text': stats['question_text']
-                    })
-
-            # to group questions and their reliabilities by reliability ranges
-            grouped_questions = {key: [] for key in questions_reliability_ranges}
-
-            for item in questions_reliability:
-                question_id = item.get('question_id')
-                question_reliability = item.get('question_reliability')
-                question_text = item.get('question_text')
-
-                for range_name, condition in questions_reliability_ranges.items():
-                    if condition(question_reliability):
-                        grouped_questions[range_name].append({"question_id": question_id, 'question_text': question_text, "question_reliability": question_reliability})
-
-                        break
-
-            rechart_data = []
-            total_questions_count = len(question_stats)
-
-            for key, questions in grouped_questions.items():
-                # to build dict for recharts format
-                rechart_data.append({
-                    "questions_reliability_name": key,
-                    "questions_count_percent": (len(questions) * 100 / total_questions_count) if total_questions_count else 0
-                })
-
-            get_result = rechart_data
-
-        # for datatable with pagination
-        elif report_type == 'dt_reliability':
+        # report1. for datatable with pagination
+        if report_type == 'dt_reliability':
             answers = []
 
             for obj in queryset:
                 if not obj.answer:
 
-                    return request.send_data(None)
+                    continue
 
-                answers.extend(parse_answers(obj.answer, obj.challenge.id))
+                answers.extend(self.parse_answers(obj.answer, obj.challenge.id))
 
-            choice_ids = [answer['choice_id'] for answer in answers]
+            answers_stats = self.get_question_stats(answers)
+            questions_qs = ChallengeQuestions.objects.filter(challenge__id=exam)
 
-            queryset = (
-                ChallengeQuestions.objects
-                    .prefetch_related('choices')
-                    .filter(choices__id__in=choice_ids)
+            for question_obj in questions_qs:
+                stats = answers_stats.get(question_obj.id)
 
-                    # to group by question id
-                    .values('id', 'question')
-                    .annotate(
-                        total_count=Count('choices', distinct=True),
-                        positive_count=Count('choices', filter=Q(choices__score__gt=0), distinct=True),
-                        reliability=ExpressionWrapper(
-                            (F('positive_count') * 100.0) / F('total_count'),
-                            output_field=FloatField()
-                        )
-                    )
-            )
+                if stats:
+                    question_obj.reliability = ((stats['correct'] * 100) / stats['total']) if stats['total'] > 0 else 0
 
-            self.serializer_class = ChallengeQuestionsAnswersSerializer
-            self.search_fields = ['question']
+            queryset = questions_qs
 
         elif (
             report_type == 'groups' or
             report_type == 'professions'
         ):
-            group = None
-            profession = None
             assessments = Score.objects.all().values('score_min','score_max','assesment')
             assessment_dict = {}
 
@@ -6261,36 +6184,6 @@ class ChallengeReportAPIView(
                     )
             )
 
-            if report_type == 'groups':
-                self.serializer_class = ChallengeGroupsSerializer
-            elif report_type == 'professions':
-                self.serializer_class = ChallengeProfessionsSerializer
-
-        elif report_type == 'report4':
-            self.serializer_class = ChallengeReport4Serializer
-
-        elif report_type == 'report4-1':
-            answers = []
-            first_student_answers = []
-
-            for index, obj in enumerate(queryset):
-                if not obj.answer:
-
-                    return request.send_data(None)
-
-                answers.extend(parse_answers(obj.answer, obj.challenge.id))
-
-                if index == 0:
-                    # because we need only one row data for header
-                    first_student_answers = answers.copy()
-
-            question_stats = get_question_stats(answers)
-
-            get_result = {
-                'questions': first_student_answers,
-                'questions_summary': question_stats
-            }
-
         # for reports where pagination is required
         if report_type in ['students', 'dt_reliability', 'report4', 'groups', 'professions']:
             sorting = self.request.query_params.get('sorting')
@@ -6302,7 +6195,116 @@ class ChallengeReportAPIView(
 
                 queryset = queryset.order_by(sorting)
 
-            self.queryset = queryset
+        return queryset
+
+    def get(self, request):
+        queryset = self.get_queryset()
+        report_type = request.query_params.get('report_type')
+        get_result = []
+
+        if not queryset:
+
+            return request.send_data(None)
+
+        # report1. reliability
+        if report_type == 'reliability':
+            exam_results = []
+
+            for obj in queryset:
+                if not obj.answer:
+
+                    continue
+
+                exam_results.extend(self.parse_answers(obj.answer, obj.challenge.id))
+
+            # questions reliability ranges
+            questions_reliability_ranges = {
+                "Маш хүнд": lambda question_reliability: question_reliability <= 20,
+                "Хүндэвтэр": lambda question_reliability: 21 <= question_reliability <= 40,
+                "Дунд зэрэг": lambda question_reliability: 41 <= question_reliability <= 60,
+                "Хялбар": lambda question_reliability: 61 <= question_reliability <= 80,
+                "Маш хялбар": lambda question_reliability: question_reliability >= 81,
+            }
+
+            question_stats = self.get_question_stats(exam_results)
+
+            # to calculate question reliability
+            questions_reliability = []
+
+            for question_id, stats in question_stats.items():
+                if stats["total"] > 0:
+                    question_reliability = (stats["correct"] / stats["total"]) * 100
+
+                    questions_reliability.append({
+                        'question_id': question_id,
+                        'question_reliability': question_reliability,
+                        'question_text': stats['question_text']
+                    })
+
+            # to group questions and their reliabilities by reliability ranges
+            grouped_questions = {key: [] for key in questions_reliability_ranges}
+
+            for item in questions_reliability:
+                question_id = item.get('question_id')
+                question_reliability = item.get('question_reliability')
+                question_text = item.get('question_text')
+
+                for range_name, condition in questions_reliability_ranges.items():
+                    if condition(question_reliability):
+                        grouped_questions[range_name].append({"question_id": question_id, 'question_text': question_text, "question_reliability": question_reliability})
+
+                        break
+
+            rechart_data = []
+            total_questions_count = len(question_stats)
+
+            for key, questions in grouped_questions.items():
+                # to build dict for recharts format
+                rechart_data.append({
+                    "questions_reliability_name": key,
+                    "questions_count_percent": (len(questions) * 100 / total_questions_count) if total_questions_count else 0
+                })
+
+            get_result = rechart_data
+
+        # report1. for datatable with pagination
+        elif report_type == 'dt_reliability':
+            self.serializer_class = ChallengeQuestionsAnswersSerializer
+            self.search_fields = ['question']
+
+        elif report_type == 'groups':
+            self.serializer_class = ChallengeGroupsSerializer
+
+        elif report_type == 'professions':
+            self.serializer_class = ChallengeProfessionsSerializer
+
+        elif report_type == 'report4':
+            self.serializer_class = ChallengeReport4Serializer
+
+        elif report_type == 'report4-1':
+            answers = []
+            first_student_answers = []
+
+            for index, obj in enumerate(queryset):
+                if not obj.answer:
+
+                    continue
+
+                answers.extend(self.parse_answers(obj.answer, obj.challenge.id))
+
+                if index == 0:
+                    # because we need only one row data for header
+                    first_student_answers = answers.copy()
+
+            question_stats = self.get_question_stats(answers)
+
+            get_result = {
+                'questions': first_student_answers,
+                'questions_summary': question_stats
+            }
+
+        # for reports where pagination is required
+        if report_type in ['students', 'dt_reliability', 'report4', 'groups', 'professions']:
             get_result = self.list(request).data
 
         return request.send_data(get_result)
