@@ -30,6 +30,7 @@ from lms.models import AdmissionBottomScore
 from lms.models import PrintSettings
 from lms.models import ScoreRegister
 from lms.models import StudentGrade
+from lms.models import GradeLetter
 
 from .serializers import RuleSerializer, ScoreSerailizer
 from .serializers import SeasonSerailizer
@@ -54,6 +55,7 @@ from .serializers import RolesListSerializer
 from .serializers import PrintSettingsListSerializer
 from .serializers import PrintSettingsSerializer
 from .serializers import OrgPosition
+from .serializers import GradeLetterSerializer
 
 
 from django.db import transaction
@@ -2089,4 +2091,46 @@ class RuleAPIView(
 
             return request.send_error("ERR_002")
 
+        return request.send_info("INF_003")
+
+@permission_classes([IsAuthenticated])
+class GradeLetterAPIView(
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    generics.GenericAPIView,
+):
+
+    queryset = GradeLetter.objects
+    serializer_class = GradeLetterSerializer
+
+    def get(self, request, pk=None):
+        """ Дүнгийн үсгэн үнэлгээ жагсаалт """
+        if pk:
+            data = self.retrieve(request, pk).data
+            return request.send_data(data)
+
+        grade_list = list(GradeLetter.objects.order_by('-created_at').values('id', 'letter', 'description'))
+        return request.send_data(grade_list)
+
+    @login_required()
+    @transaction.atomic
+    def post(self, request):
+        """ Дүнгийн үсгэн үнэлгээ шинээр үүсгэх """
+
+        return post_put_action(self, request, 'post', request.data)
+
+    @login_required()
+    @transaction.atomic
+    def put(self, request, pk=None):
+        "Дүнгийн үсгэн үнэлгээ засах"
+
+
+        return post_put_action(self, request, 'put', request.data, pk)
+
+    def delete(self, request, pk=None):
+        "Дүнгийн үсгэн үнэлгээ устгах "
+
+        self.destroy(request, pk)
         return request.send_info("INF_003")

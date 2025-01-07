@@ -83,4 +83,8 @@ urlpatterns = [
     path('rule/', RuleAPIView.as_view()),
 	path('rule/<int:pk>/', RuleAPIView.as_view()),
 
+    # Дүнгийн үсгэн үнэлгээ
+    path('grade/', GradeLetterAPIView.as_view()),
+    path('grade/<int:pk>/', GradeLetterAPIView.as_view()),
+
 ]

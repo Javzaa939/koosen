@@ -10,6 +10,7 @@ import LessonCategory from '../LessonCategory'
 import LessonGroup from '../LessonGroup'
 import Score from '../Score'
 import AdmissionLesson from '../AdmissionLesson'
+import UsgenUnelgee from '../UsgenUnelgee'
 
 function Student() {
 
@@ -64,6 +65,12 @@ function Student() {
             icon: 'Activity',
             id: 7,
             component: <AdmissionLesson />
+        },
+        {
+            name: 'Үсгэн үнэлгээ',
+            icon: 'Activity',
+            id: 8,
+            component: <UsgenUnelgee />
         },
     ]
 
