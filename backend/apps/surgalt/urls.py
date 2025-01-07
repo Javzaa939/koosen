@@ -80,7 +80,7 @@ urlpatterns = [
     path('challenge/add/question/list/', ChallengeQuestionsAPIView.as_view()),
     path('challenge/questions/<int:pk>/', TestQuestionsAllAPIView.as_view()),
 	path('challenge/questions/difficulty_levels/', TestQuestionsDifficultyLevelsAPIView.as_view()),
-	path('challenge/students-scores/', ChallengeStudentsScoresAPIView.as_view()),
+	path('challenge/students-score/', ChallengeStudentsScoreAPIView.as_view()),
 	path('challenge/report/', ChallengeReportAPIView.as_view()),
 	path('challenge/report/chart/', ChallengeStudentReportAPI.as_view()),
 

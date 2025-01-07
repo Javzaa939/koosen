@@ -5,7 +5,7 @@ import List3 from './List3'
 import Report1 from './Report1'
 import Report2 from './Report2'
 import Report4 from './Report4'
-import UpdateChallengeStudentsScoreButton from './UpdateChallengeStudentsScoresButton'
+import UpdateChallengeStudentsScoreButton from './UpdateChallengeStudentsScoreButton'
 
 export default function Report() {
     const [activeTab, setActiveTab] = useState(0)

@@ -5934,7 +5934,7 @@ class TestQuestionsDifficultyLevelsAPIView(
 
 
 @permission_classes([IsAuthenticated])
-class ChallengeStudentsScoresAPIView(
+class ChallengeStudentsScoreAPIView(
     generics.GenericAPIView,
 ):
 

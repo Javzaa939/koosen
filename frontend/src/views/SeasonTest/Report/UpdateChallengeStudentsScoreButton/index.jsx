@@ -5,7 +5,7 @@ import { RefreshCcw } from 'react-feather'
 import useModal from '@src/utility/hooks/useModal'
 import useApi from '@src/utility/hooks/useApi'
 import useLoader from "@src/utility/hooks/useLoader";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import ExamFilter from "../helpers/ExamFilter";
 
 export default function UpdateChallengeStudentsScoreButton() {
