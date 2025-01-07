@@ -5934,6 +5934,18 @@ class TestQuestionsDifficultyLevelsAPIView(
 
 
 @permission_classes([IsAuthenticated])
+class ChallengeStudentsScoresAPIView(
+    generics.GenericAPIView,
+):
+
+    @has_permission(must_permissions=['lms-exam-update'])
+    def put(self, request):
+        data = request.data
+        return request.send_data(data)
+        return request.send_error("ERR_002")
+
+
+@permission_classes([IsAuthenticated])
 class ChallengeReportAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin,
