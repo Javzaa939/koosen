@@ -1,11 +1,12 @@
 import { AlertCircle, X } from "react-feather";
-import { Button, Modal, ModalBody, ModalHeader, Row } from "reactstrap";
+import { Button, Modal, ModalBody, ModalHeader } from "reactstrap";
 import { useTranslation } from 'react-i18next'
 import { RefreshCcw } from 'react-feather'
 import useModal from '@src/utility/hooks/useModal'
 import useApi from '@src/utility/hooks/useApi'
 import useLoader from "@src/utility/hooks/useLoader";
 import { useState } from "react";
+import { Table } from 'reactstrap'
 import ExamFilter from "../helpers/ExamFilter";
 
 export default function UpdateChallengeStudentsScoreButton() {
@@ -16,15 +17,15 @@ export default function UpdateChallengeStudentsScoreButton() {
 
 	const [showModal, setShowModal] = useState(false)
 	const [selected_exam, setSelectedExam] = useState('')
+	const [updateCorrectAnswersScoreResult, setUpdateCorrectAnswersScoreResult] = useState({})
 
-	async function handleUpdateCorrectAnswersScores() {
+	async function handleUpdateCorrectAnswersScore() {
 		const { success, data } = await fetchData(challengeApi.updateChallengeStudentsScore({
 			exam: selected_exam
 		}))
 
 		if (success) {
-			console.log('updateChallengeStudentsScore results: ', data)
-			handleModal()
+			setUpdateCorrectAnswersScoreResult(data)
 		}
 	}
 
@@ -34,6 +35,7 @@ export default function UpdateChallengeStudentsScoreButton() {
 		// on modal close
 		if (showModal) {
 			setSelectedExam('')
+			setUpdateCorrectAnswersScoreResult({})
 		}
 	}
 
@@ -86,7 +88,7 @@ export default function UpdateChallengeStudentsScoreButton() {
 										title: t(`Дүнгийн үнэлгээ шинэчлэх`),
 									},
 									question: t(`Та дүнгийн үнэлгээ шинэчлэхдээ итгэлтэй байна уу?`),
-									onClick: () => handleUpdateCorrectAnswersScores(),
+									onClick: () => handleUpdateCorrectAnswersScore(),
 									btnText: t('Шинэчлэх'),
 								})
 							}
@@ -94,6 +96,72 @@ export default function UpdateChallengeStudentsScoreButton() {
 							{t('Шинэчлэх')}
 						</Button>
 					</div>
+					{Object.entries(updateCorrectAnswersScoreResult).map(([key, value], index)=>{
+						if (key === 'ChallengeStudents') {
+							return (
+								<div key={index}>
+									<h5 style={{textAlign: 'center'}}>{key.replace('ChallengeStudents','Шалгалтад оролцогчид')}</h5>
+									<Table size='sm' responsive>
+										<thead>
+											<tr>
+												<th rowSpan={2}>№</th>
+												<th rowSpan={2}>{t('Оюутны код')}</th>
+												<th colSpan={2}>{t('Оюутны авсан оноо')}</th>
+												<th colSpan={2}>{t('Оюутны авах оноо')}</th>
+												<th colSpan={2}>{t('Оюутны оролдлогын тоо дүүрсэн эсэх')}</th>
+											</tr>
+											<tr>
+												<th>{t('Өмнө')}</th>
+												<th>{t('Дараа')}</th>
+												<th>{t('Өмнө')}</th>
+												<th>{t('Дараа')}</th>
+												<th>{t('Өмнө')}</th>
+												<th>{t('Дараа')}</th>
+											</tr>
+										</thead>
+										<tbody>
+										{Object.entries(value).map(([key2, value2], index2)=>{
+											const score = value2?.score
+											const take_score = value2?.take_score
+											const tried = value2?.tried
+
+											return (
+												<tr key={index2}>
+													<td>
+														{index2 + 1}
+													</td>
+													<td title={key2.split('-')[0]}>
+														{key2.split('-')[1]}
+													</td>
+													<td>
+														{score?.old}
+													</td>
+													<td>
+														{score?.new}
+													</td>
+													<td>
+														{take_score?.old}
+													</td>
+													<td>
+														{take_score?.new}
+													</td>
+													<td>
+														{tried?.old}
+													</td>
+													<td>
+														{tried?.new}
+													</td>
+												</tr>
+											)
+										})}
+										</tbody>
+									</Table>
+								</div>
+							)
+						} else {
+							return <></>
+						}
+					})}
 				</ModalBody>
 			</Modal>
 		</>
