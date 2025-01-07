@@ -1,6 +1,6 @@
 // ** React Imports
 import { useEffect, useRef, useState } from 'react'
-import { Search } from 'react-feather'
+import { Printer, Search } from 'react-feather'
 import { useTranslation } from 'react-i18next'
 import { Button, Col, Input, Label, Row } from 'reactstrap'
 
@@ -11,6 +11,7 @@ import useLoader from '@src/utility/hooks/useLoader'
 import StudentsQuestionsTable from './StudentsQuestionsTable'
 import GroupFilter from '../helpers/GroupFilter'
 import ExamFilter from '../helpers/ExamFilter'
+import { stableStylesPrintElement } from '../helpers'
 
 export default function Report4() {
     // other hooks
@@ -126,8 +127,19 @@ export default function Report4() {
                         <ExamFilter setSelected={setSelectedExam} />
                     </div>
                     <div style={{ width: '219.5px' }} className='me-1'>
-                        <GroupFilter setSelected={setSelectedGroup} exam_id={selected_exam}/>
+                        <GroupFilter setSelected={setSelectedGroup} exam_id={selected_exam} />
                     </div>
+                </Col>
+                <Col className='text-end'>
+                    <Button
+                        className='ms-1'
+                        color='primary'
+                        size='sm'
+                        onClick={() => stableStylesPrintElement('element_to_print')}
+                    >
+                        <Printer size={15} />
+                        <span className='align-middle ms-50'>{t('Хэвлэх')}</span>
+                    </Button>
                 </Col>
             </Row>
             <Row className='mt-1'>
