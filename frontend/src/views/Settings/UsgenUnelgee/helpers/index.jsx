@@ -32,10 +32,18 @@ export function getColumns (currentPage, rowsPerPage, datas, handleUpdateModal, 
 			center: true
 		},
 		{
+			name: `${t('Товч утга')}`,
+			selector: (row) => row?.tovch,
+            sortable: true,
+			minWidth: "280px",
+			center: true
+		},
+		{
 			name: `${t('Тайлбар')}`,
 			selector: (row) => row?.description,
             sortable: true,
 			minWidth: "280px",
+			wrap: true,
 			center: true
 		},
 	]

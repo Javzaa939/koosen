@@ -394,9 +394,15 @@ class TeacherScoreListPrintSerializer(serializers.ModelSerializer):
 
         teacher_score = teach_qs.exclude(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total') or 0
         exam_score = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson).filter(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total') or 0
+        exam_obj = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson).filter(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).first()
         total_score = teach_qs.aggregate(total=Sum('score')).get('total') or 0
         if not exam_score:
             return 'W'
+
+        # Үсгэн үнэлгээ авсан бол
+        if exam_obj.grade_letter:
+            return exam_obj.grade_letter.letter or ''
+
         if teacher_score < 42:
             assessment = 'WF'
         elif exam_score < 18:

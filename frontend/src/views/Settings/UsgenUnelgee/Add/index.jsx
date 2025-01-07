@@ -119,6 +119,28 @@ const Addmodal = ({ open, handleModal, refreshDatas ,editId}) => {
                             {errors.letter && <FormFeedback className='d-block'>{t(errors.letter.message)}</FormFeedback>}
                         </Col>
                         <Col md={12}>
+                            <Label className="form-label" for="tovch">
+                                {t('Товч утга')}
+                            </Label>
+                            <Controller
+                                defaultValue=''
+                                control={control}
+                                id="tovch"
+                                name="tovch"
+                                render={({ field }) => (
+                                    <Input
+                                        {...field}
+                                        id="tovch"
+                                        bsSize="sm"
+                                        placeholder={t('Тайлбар')}
+                                        type="text"
+                                        invalid={errors.tovch && true}
+                                    />
+                                )}
+                            />
+                            {errors.tovch && <FormFeedback className='d-block'>{t(errors.tovch.message)}</FormFeedback>}
+                        </Col>
+                        <Col md={12}>
                             <Label className="form-label" for="description">
                                 {t('Тайлбар')}
                             </Label>

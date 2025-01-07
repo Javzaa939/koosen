@@ -2111,7 +2111,7 @@ class GradeLetterAPIView(
             data = self.retrieve(request, pk).data
             return request.send_data(data)
 
-        grade_list = list(GradeLetter.objects.order_by('-created_at').values('id', 'letter', 'description'))
+        grade_list = list(GradeLetter.objects.order_by('-created_at').values('id', 'letter', 'description', 'tovch'))
         return request.send_data(grade_list)
 
     @login_required()

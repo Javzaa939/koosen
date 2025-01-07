@@ -1196,7 +1196,8 @@ class GradeLetter(models.Model):
     """ Дүнгийн үсгэн үнэлгээ """
 
     letter = models.CharField(max_length=10, verbose_name="Үсгэн тэмдэглэгээ")
-    description = models.CharField(max_length=300, verbose_name="Тайлбар")
+    description = models.TextField(verbose_name="Тайлбар")
+    tovch = models.CharField(verbose_name="Товч утга", max_length=500, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
