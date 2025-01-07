@@ -2841,6 +2841,7 @@ class TeacherScore(models.Model):
 
     score = models.FloatField(verbose_name='Багшийн дүн')
     score_type = models.ForeignKey(Lesson_teacher_scoretype, on_delete=models.PROTECT)
+    grade_letter = models.ForeignKey(GradeLetter, on_delete=models.SET_NULL, null=True, verbose_name="Үсгэн үнэлгээ")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
