@@ -99,9 +99,13 @@ export default function ProgressScore() {
     // Анги бүлгийн жагсаалт
     async function getGroup() {
         const lesson = select_value.lesson
-        const { success, data } = await fetchData(groupApi.get(10000000, 1, '', '', '', '', '', '', '', lesson))
-        if (success) {
-            setGroupOption(data?.results)
+
+        if (lesson) {
+            const { success, data } = await fetchData(groupApi.getLessonFromExamToGroup({id: lesson}))
+
+            if (success) {
+                setGroupOption(data)
+            }
         }
     }
 
@@ -168,6 +172,7 @@ export default function ProgressScore() {
 
     useEffect(() => {
         getTeacherOption()
+        getGroup()
     }, [select_value?.lesson])
 
     // ** Function to handle filter

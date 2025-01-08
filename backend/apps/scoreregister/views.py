@@ -1401,6 +1401,7 @@ class TeacherLessonScorePrintAPIView(
     serializer_class = TeacherScoreListPrintSerializer
 
     # to pass extra complex data to serializer, because annotate() does not support complex data like list, dict, etc
+    # and because it call sql query only 1 time instead of serializer way that calls sql query on every row. Therefore database will be slowed down very hard if for example calling queryset.filter() (and any other similar calls) is made inside serializer
     def get_serializer_context(self):
         context = super().get_serializer_context()
         exam = self.request.query_params.get('exam')
