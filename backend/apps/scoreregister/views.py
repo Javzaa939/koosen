@@ -1450,17 +1450,24 @@ class TeacherLessonScorePrintAPIView(
 
         group_ids = exam_groups.values_list('group', flat=True)
 
-        student_ids = self.queryset.filter(score_type__lesson_teacher__lesson=exam_obj.lesson, lesson_year=lesson_year, lesson_season=lesson_season, student__group__in=group_ids).values_list('id', flat=True).distinct('student')
-        self.queryset = self.queryset.filter(score_type__lesson_teacher__lesson=exam_obj.lesson, lesson_year=lesson_year, lesson_season=lesson_season, id__in=student_ids)
-
-        lesson_kredit = LessonStandart.objects.filter(id=exam_obj.lesson.id).values_list('kredit', flat=True).first()
+        self.queryset = self.queryset.filter(score_type__lesson_teacher__lesson=exam_obj.lesson, lesson_year=lesson_year, lesson_season=lesson_season)
+        if len(group_ids) > 0:
+            self.queryset = self.queryset.filter(student__group__in=group_ids)
+        else:
+            self.queryset = self.queryset.filter(score__gt=0)
 
         # Дүн гаргасан багшийн мэдээлэл
-        teacher_id = self.queryset.filter(student__group__in=group_ids).values_list('score_type__lesson_teacher__teacher', flat=True).first()
+        teacher_id = self.queryset.values_list('score_type__lesson_teacher__teacher', flat=True).first()
         if not teacher_id:
             return request.send_error('ERR_002', 'Тухайн анги бүлэгт багшийн дүн шивэгдээгүй байна.')
 
         teacher = Teachers.objects.filter(id=teacher_id).first()
+
+        student_ids = self.queryset.values_list('id', flat=True).distinct('student')
+        self.queryset = self.queryset.filter(score_type__lesson_teacher__lesson=exam_obj.lesson, lesson_year=lesson_year, lesson_season=lesson_season, id__in=student_ids)
+
+        lesson_kredit = LessonStandart.objects.filter(id=exam_obj.lesson.id).values_list('kredit', flat=True).first()
+
         teacher_org_position = Employee.objects.filter(user=teacher.user).values_list('org_position__name', flat=True).first()
         teacher_score_updated_at = self.queryset.values_list('updated_at', flat=True).order_by('updated_at').last()
 
