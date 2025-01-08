@@ -99,7 +99,7 @@ export function getFooter(data) {
 	return (
 		<div className='react-dataTable'>
 			<div className='rdt_TableHead'>
-				<Row className='m-0 p-1 cborder clight rdt_TableHeadRow' align='center'>
+				<Row className='m-0 p-1 s-ps-cborder s-ps-clight rdt_TableHeadRow' align='center'>
 					{Object.entries(sortedCounts).map(([key, value], index) =>
 						<Col key={index} className='p-0 rdt_TableCol'>
 							<div className='rdt_TableCol_Sortable'>
@@ -110,7 +110,7 @@ export function getFooter(data) {
 				</Row>
 			</div>
 			<div className='rdt_TableBody'>
-				<Row className='m-0 p-1 cborder clight rdt_TableRow' align='center'>
+				<Row className='m-0 p-1 s-ps-cborder s-ps-clight rdt_TableRow' align='center'>
 					{Object.entries(sortedCounts).map(([key, value], index) =>
 						<Col key={index} className='p-0'>
 							{value}
