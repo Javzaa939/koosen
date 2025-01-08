@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import './style.scss'
 import { useTranslation } from "react-i18next"
 import ReactDOM from "react-dom";
 
@@ -35,7 +34,42 @@ export default function StudentsQuestionsTable({ data, aggregatedData, handleSor
 	const hideTooltip = () => setVisible(false);
 
 	return (
-		<div style={{ overflow: 'auto' }}>
+		<div id='element_to_print' style={{ overflow: 'auto' }}>
+			{/* to define styles directly on page (e.g. without importing scss file) to keep styles only in current page to avoid unexpected styles effects on other pages */}
+			<style>{`
+				.ctooltiptext {
+					max-width: 400px;
+					text-align: center;
+					border-radius: 5px;
+					padding: 5px;
+					box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+				}
+
+				.studentsQuestionsTable {
+					width: 100%;
+					border: 1px solid black;
+					border-collapse: collapse;
+					font-family: "Times New Roman";
+					font-size: 11pt;
+				}
+
+				.studentsQuestionsTable td {
+					border: 1px solid black;
+					padding: 2px 6px;
+				}
+
+				.qtc1 {
+					color: #fc7676;
+				}
+
+				.qtc2 {
+					color: #9dd241;
+				}
+
+				.qtc3 {
+					color: #4a87ff;
+				}
+			`}</style>
 			<table className='studentsQuestionsTable'>
 				<thead align='center'>
 					<tr>
