@@ -23,6 +23,7 @@ import useLoader from "@hooks/useLoader";
 
 import DetailModal from './Detail';
 import ResultModal from "./Modal";
+import UpdateChallengeStudentsScoreButton from "./components/UpdateChallengeStudentsScoreButton";
 
 export function excelDownLoad(datas, STATE_LIST) {
 	const mainData = datas.map((data, idx) => {
@@ -222,14 +223,17 @@ function DetailShow(){
 		<Fragment>
 			<Card>
                 <CardHeader className="border-bottom d-flex flex-row-reverse">
-					<Button
-						color="primary"
-						outline
-						className="btn-sm-block"
-						onClick={() => excelDownLoad(datas)}
-					>
-						<Download size={15} className="me-50"/> Үр дүн татах
-					</Button>
+					<div>
+						<UpdateChallengeStudentsScoreButton />
+						<Button
+							color="primary"
+							outline
+							className="btn-sm-block ms-1"
+							onClick={() => excelDownLoad(datas)}
+						>
+							<Download size={15} className="me-50"/> Үр дүн татах
+						</Button>
+					</div>
                     <CardTitle tag="h4" className="mx-2">
 						{t("Шалгалт өгсөн оюутнуудын дэлгэрэнгүй мэдээлэл")}
 					</CardTitle>

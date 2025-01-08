@@ -5,7 +5,6 @@ import List3 from './List3'
 import Report1 from './Report1'
 import Report2 from './Report2'
 import Report4 from './Report4'
-import UpdateChallengeStudentsScoreButton from './UpdateChallengeStudentsScoreButton'
 
 export default function Report() {
     const [activeTab, setActiveTab] = useState(0)
@@ -57,25 +56,22 @@ export default function Report() {
     },[activeTab])
 
     return (
-        <>
-            <UpdateChallengeStudentsScoreButton />
-            <Card>
-                <Nav tabs>
-                {button_list.map(button => {
-                    return(
-                        <NavItem key={button?.id}>
-                            <NavLink active={activeTab === button?.id} onClick={() => toggleTab(button?.id)}>
-                                <span className='fw-bold'>{button?.name}</span>
-                            </NavLink>
-                        </NavItem>
-                )})}
-                </Nav>
-                <TabContent className='py-50' activeTab={activeTab} >
-                    {
-                        component && component
-                    }
-                </TabContent>
-            </Card>
-        </>
+        <Card>
+            <Nav tabs>
+            {button_list.map(button => {
+                return(
+                    <NavItem key={button?.id}>
+                        <NavLink active={activeTab === button?.id} onClick={() => toggleTab(button?.id)}>
+                            <span className='fw-bold'>{button?.name}</span>
+                        </NavLink>
+                    </NavItem>
+            )})}
+            </Nav>
+            <TabContent className='py-50' activeTab={activeTab} >
+                {
+                    component && component
+                }
+            </TabContent>
+        </Card>
     )
 }

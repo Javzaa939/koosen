@@ -7,7 +7,7 @@ import useApi from '@src/utility/hooks/useApi'
 import useLoader from "@src/utility/hooks/useLoader";
 import { useState } from "react";
 import { Table } from 'reactstrap'
-import ExamFilter from "../helpers/ExamFilter";
+import ExamFilter from "../ExamFilter";
 
 export default function UpdateChallengeStudentsScoreButton() {
 	const { t } = useTranslation()
@@ -45,16 +45,13 @@ export default function UpdateChallengeStudentsScoreButton() {
 
 	return (
 		<>
-			<div style={{ textAlign: 'right' }}>
-				<Button
-					color='primary'
-					className='mb-1'
-					onClick={handleModal}
-				>
-					<RefreshCcw size={15} />
-					<span className='align-middle ms-50'>{t('Үнэлгээ шинэчлэх')}</span>
-				</Button>
-			</div>
+			<Button
+				color='primary'
+				onClick={handleModal}
+			>
+				<RefreshCcw size={15} />
+				<span className='align-middle ms-50'>{t('Үнэлгээ шинэчлэх')}</span>
+			</Button>
 			<Modal
 				isOpen={showModal}
 				toggle={handleModal}
