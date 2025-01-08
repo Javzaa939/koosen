@@ -49,7 +49,7 @@ export default function ProgressScore() {
     const { control, setValue, formState: { errors } } = useForm({});
 
     const { isLoading, fetchData } = useLoader({ isFullScreen: true })
-    const { isLoading: totalDatasIsLoading, totalDatasfetchData } = useLoader({ isFullScreen: true })
+    const { isLoading: totalDatasIsLoading, fetchData: totalDatasfetchData } = useLoader({ isFullScreen: true })
 
     const default_page = ['Бүгд', 10, 20, 50, 75, 100]
 
