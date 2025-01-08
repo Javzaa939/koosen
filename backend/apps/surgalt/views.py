@@ -5955,9 +5955,6 @@ class ChallengeStudentsScoreAPIView(
         challenge_qs = Challenge.objects.filter(id=exam).first()
 
         if challenge_qs.question_count != question_count_actual:
-            challenge_qs.question_count = question_count_actual
-            challenge_qs.save()
-
             changed_values['Challenge'] = {
                 'question_count': {
                     'old': challenge_qs.question_count,
@@ -5965,19 +5962,22 @@ class ChallengeStudentsScoreAPIView(
                 }
             }
 
+            challenge_qs.question_count = question_count_actual
+            challenge_qs.save()
+
         changed_values['ChallengeStudents'] = {}
 
         for challenge_student in challenge_students_qs:
             changed_values['ChallengeStudents'][f'{challenge_student.id}-{challenge_student.student.code}'] = {}
 
             if challenge_student.take_score != question_count_actual:
-                # to get total possible score. 1 question counted as 1 point of score (may be summary of values of "QuestionChoices,score" field should be used instead, i am not sure)
-                challenge_student.take_score = question_count_actual
-
                 changed_values['ChallengeStudents'][f'{challenge_student.id}-{challenge_student.student.code}']['take_score'] = {
                     'old': challenge_student.take_score,
                     'new': question_count_actual
                 }
+
+                # to get total possible score. 1 question counted as 1 point of score (may be summary of values of "QuestionChoices,score" field should be used instead, i am not sure)
+                challenge_student.take_score = question_count_actual
 
             # region score update code
             if not challenge_student.answer:
@@ -5994,23 +5994,29 @@ class ChallengeStudentsScoreAPIView(
             # to detect attempt. attempt counted only if any choice was given (i am not sure is it correct detect way or not)
             if answers_choices:
                 if challenge_student.tried != True:
-                    challenge_student.tried = True
-
                     changed_values['ChallengeStudents'][f'{challenge_student.id}-{challenge_student.student.code}']['tried'] = {
                         'old': challenge_student.tried,
                         'new': True
                     }
 
+                    challenge_student.tried = True
+
             # to get correct answers count. any value of "QuestionChoices,score" greater than 0 counted as 1 point of score (may be summary of values of "QuestionChoices,score" field should be used instead, i am not sure)
             score = QuestionChoices.objects.filter(id__in=answers_choices, score__gt=0).count()
 
             if challenge_student.score != score:
-                challenge_student.score = score
+                changed_values['ChallengeStudents'][f'{challenge_student.id}-{challenge_student.student.code}']['old_score'] = {
+                    'old': challenge_student.old_score,
+                    'new': challenge_student.score
+                }
 
                 changed_values['ChallengeStudents'][f'{challenge_student.id}-{challenge_student.student.code}']['score'] = {
                     'old': challenge_student.score,
                     'new': score
                 }
+
+                challenge_student.old_score = challenge_student.score
+                challenge_student.score = score
             # endregion
 
             challenge_student.save()
