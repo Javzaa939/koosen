@@ -1,6 +1,6 @@
 // ** React Imports
 import { useEffect, useRef, useState } from 'react'
-import { Search } from 'react-feather'
+import { Printer, Search } from 'react-feather'
 import { useTranslation } from 'react-i18next'
 import { Button, Col, Input, Label, Row } from 'reactstrap'
 
@@ -11,6 +11,7 @@ import useLoader from '@src/utility/hooks/useLoader'
 import StudentsQuestionsTable from './StudentsQuestionsTable'
 import GroupFilter from '../helpers/GroupFilter'
 import ExamFilter from '../helpers/ExamFilter'
+import { stableStylesPrintElement } from '../helpers'
 
 export default function Report4() {
     // other hooks
@@ -21,7 +22,7 @@ export default function Report4() {
 
     // #region primitives
     // #region table controlling
-    const default_page = [10, 15, 50, 75, 100]
+    const default_page = ['Бүгд', 25, 50, 75, 100]
     // #endregion table controlling
     // #endregion
 
@@ -92,7 +93,7 @@ export default function Report4() {
 
     // ** Function to handle per page
     function handlePerPage(e) {
-        setRowsPerPage(parseInt(e.target.value))
+        setRowsPerPage(e.target.value === "Бүгд" ? total_count : parseInt(e.target.value))
     }
 
     // ** Function to handle filter
@@ -114,7 +115,7 @@ export default function Report4() {
     useEffect(() => {
         if (isSkipRender.current) refreshData()
         else isSkipRender.current = true
-    }, [search_value, current_page, sortField, selected_exam, selected_group])
+    }, [search_value, current_page, sortField, selected_exam, selected_group, rows_per_page])
     // #endregion
 
     return (
@@ -126,8 +127,19 @@ export default function Report4() {
                         <ExamFilter setSelected={setSelectedExam} />
                     </div>
                     <div style={{ width: '219.5px' }} className='me-1'>
-                        <GroupFilter setSelected={setSelectedGroup} exam_id={selected_exam}/>
+                        <GroupFilter setSelected={setSelectedGroup} exam_id={selected_exam} />
                     </div>
+                </Col>
+                <Col className='text-end'>
+                    <Button
+                        className='ms-1'
+                        color='primary'
+                        size='sm'
+                        onClick={() => stableStylesPrintElement('element_to_print')}
+                    >
+                        <Printer size={15} />
+                        <span className='align-middle ms-50'>{t('Хэвлэх')}</span>
+                    </Button>
                 </Col>
             </Row>
             <Row className='mt-1'>
@@ -137,7 +149,7 @@ export default function Report4() {
                             <Input
                                 type='select'
                                 bsSize='sm'
-                                style={{ height: "30px", width: "62px" }}
+                                style={{ height: "30px", width: "75px" }}
                                 value={rows_per_page}
                                 onChange={e => handlePerPage(e)}
                                 className='mb-50'
