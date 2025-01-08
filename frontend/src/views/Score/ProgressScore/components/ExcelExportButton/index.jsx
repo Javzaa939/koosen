@@ -1,24 +1,26 @@
 import excelDownload from "@src/utility/excelDownload";
 import useToast from "@src/utility/hooks/useToast";
-import { downloadCSV, transliterate } from "@src/utility/Utils";
-import { Download, FileText, Grid } from "react-feather";
-import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledButtonDropdown } from "reactstrap";
+import { transliterate } from "@src/utility/Utils";
+import { FileText } from "react-feather";
+import { useTranslation } from "react-i18next";
+import { Button } from "reactstrap";
 
 export default function ExcelExportButton({ data }) {
+	const addToast = useToast()
+    const { t } = useTranslation()
+
 	const page_name = 'Явцын_оноо'
 
 	const excelColumns = {
 		'index': '№',
-		'student_code': 'Оюутны код',
-		'student_full_name': 'Оюутны нэр',
+		'student_code': t('Оюутны код'),
+		'student_full_name': t('Оюутны нэр'),
 		'group_name': "Ангийн нэр",
-		'teacher_name': 'Багшийн нэр',
-		'teach_score': 'Багшийн оноо',
-		'exam_score': 'Шалгалтын оноо',
-		'assessment': 'Үсгэн үнэлгээ',
+		'teacher_name': t('Багшийн нэр'),
+		'teach_score': t('Багшийн оноо'),
+		'exam_score': t('Шалгалтын оноо'),
+		'assessment': t('Үсгэн үнэлгээ'),
 	}
-
-	const addToast = useToast()
 
 	function excelHandler(cdatas) {
 		const rowInfo = {
@@ -29,7 +31,7 @@ export default function ExcelExportButton({ data }) {
 		excelDownload(cdatas, rowInfo, transliterate(page_name))
 	}
 
-	async function excelAllDownload(type) {
+	async function excelAllDownload() {
 		var keys = Object.keys(excelColumns)
 
 		if (data) {
@@ -41,38 +43,22 @@ export default function ExcelExportButton({ data }) {
 				}
 			})
 
-			if (type === 'excel') {
-				excelHandler(data)
-			} else if (type === 'csv') {
-				downloadCSV([data], excelColumns, page_name)
-			}
+			excelHandler(data)
 
 		} else {
 			addToast({
-				text: "Файл татахад алдаа гарлаа",
+				text: t("Файл татахад алдаа гарлаа"),
 				type: "warning"
 			})
 		}
 	}
 
 	return (
-		<div className='d-flex flex-wrap mt-md-0'>
-			<UncontrolledButtonDropdown>
-				<DropdownToggle color='secondary' className='m-50' caret outline>
-					<Download size={15} />
-					<span className='align-middle ms-50'>Export</span>
-				</DropdownToggle>
-				<DropdownMenu>
-					<DropdownItem className='w-100' onClick={() => excelAllDownload('csv')}>
-						<FileText size={15} />
-						<span className='align-middle ms-50'>CSV</span>
-					</DropdownItem>
-					<DropdownItem className='w-100' onClick={() => excelAllDownload('excel')}>
-						<Grid size={15} />
-						<span className='align-middle ms-50' >Excel</span>
-					</DropdownItem>
-				</DropdownMenu>
-			</UncontrolledButtonDropdown>
-		</div>
+		<Button
+			color='primary'
+			onClick={() => { excelAllDownload() }}
+		>
+			<FileText size={16} /> {t('Excel татах')}
+		</Button>
 	)
 }
