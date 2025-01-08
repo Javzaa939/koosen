@@ -32,6 +32,7 @@ import { getPagination, ReactSelectStyles } from '@utils'
 import SchoolContext from '@src/utility/context/SchoolContext'
 
 import { getColumns, getFooter } from './helpers'
+import ExcelExportButton from './components/ExcelExportButton'
 
 export default function ProgressScore() {
 
@@ -218,6 +219,7 @@ export default function ProgressScore() {
             <Card>
                 <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
                     <CardTitle tag='h4'>{t('Явцын оноо')}</CardTitle>
+                    <ExcelExportButton data={datas} />
                 </CardHeader>
                 <Row className="mx-50 gy-1 my-1" sm={12}>
                     <Col md={3} sm={12}>
