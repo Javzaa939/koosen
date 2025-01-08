@@ -44,6 +44,14 @@ export function getColumns(currentPage, rowsPerPage, total_count) {
 			left: true,
 		},
 		{
+			header: 'teacher_name',
+			name: `${t('Багшийн нэр')}`,
+			selector: (row) => row?.teacher_name,
+			sortable: true,
+			wrap: true,
+			left: true,
+		},
+		{
 			header: 'teach_score',
 			name: `${t('Багшийн оноо')}`,
 			selector: (row) => row?.teach_score,

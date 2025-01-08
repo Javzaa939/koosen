@@ -278,10 +278,11 @@ class TeacherScoreSerializer(serializers.ModelSerializer):
     teach_score = serializers.SerializerMethodField()
     exam_score = serializers.SerializerMethodField()
     assessment = serializers.SerializerMethodField()
+    teacher_name = serializers.SerializerMethodField()
 
     class Meta:
         model = TeacherScore
-        fields = "student_code", "student_full_name", "group_name", "teach_score", "exam_score", "assessment"
+        fields = "student_code", "student_full_name", "group_name", "teach_score", "exam_score", "assessment", "teacher_name"
 
     def get_student_full_name(self, obj):
 
@@ -314,6 +315,10 @@ class TeacherScoreSerializer(serializers.ModelSerializer):
             assess = Score.objects.filter(score_max__gte=total_score,score_min__lte=total_score).values('assesment').first()
             assessment = assess['assesment']
         return assessment
+
+    def get_teacher_name(self, obj):
+
+        return obj.score_type.lesson_teacher.teacher.full_name
 
 class TeacherScoreListPrintSerializer(serializers.ModelSerializer):
     full_name = serializers.SerializerMethodField()
