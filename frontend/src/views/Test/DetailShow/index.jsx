@@ -224,7 +224,7 @@ function DetailShow(){
 			<Card>
                 <CardHeader className="border-bottom d-flex flex-row-reverse">
 					<div>
-						<UpdateChallengeStudentsScoreButton />
+						<UpdateChallengeStudentsScoreButton selected_exam={detid} />
 						<Button
 							color="primary"
 							outline
