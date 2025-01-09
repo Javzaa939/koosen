@@ -400,7 +400,8 @@ class TeacherScoreListPrintSerializer(serializers.ModelSerializer):
         teacher_score = teach_qs.exclude(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total') or 0
         exam_score = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson).filter(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total') or 0
         exam_obj = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson).filter(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).first()
-        total_score = teach_qs.aggregate(total=Sum('score')).get('total') or 0
+
+        total_score = teacher_score + exam_score
         if not exam_score:
             return 'W'
 
