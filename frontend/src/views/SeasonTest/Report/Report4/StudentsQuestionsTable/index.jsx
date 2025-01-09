@@ -90,7 +90,7 @@ export default function StudentsQuestionsTable({ data, aggregatedData, handleSor
 							</td>
 						)}
 						<td>
-							{t('Нийт (Зөв)')}
+							{t('Зөв')}
 						</td>
 					</tr>
 				</thead>
@@ -119,7 +119,7 @@ export default function StudentsQuestionsTable({ data, aggregatedData, handleSor
 				<tfoot align='center'>
 					<tr>
 						<td colSpan={2}>
-							{t('Нийт (Зөв/Буруу)')}
+							{t('Зөв/Буруу')}
 						</td>
 						{aggregatedData?.questions_summary && Object.keys(aggregatedData?.questions_summary).map((key, ind) => {
 							const item = aggregatedData?.questions_summary[key]
