@@ -230,7 +230,7 @@ class LessonStandartAPIView(
                 remove_ids = [item for item in old_teacher_ids if item not in teacher_ids]
 
                 old_teacher_qs = Lesson_to_teacher.objects.filter(lesson=pk)
-                if remove_ids and add_ids:
+                if remove_ids or add_ids:
                     if len(remove_ids) > 0:
                         old_teacher_qs = old_teacher_qs.filter(teacher__in=remove_ids).delete()
 
