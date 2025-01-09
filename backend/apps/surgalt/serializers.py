@@ -1065,12 +1065,12 @@ class ChallengeStudentsSerializer(serializers.ModelSerializer):
                     is_right = False
 
                     # Оноо байвал зөв хариулт гэж үзнэ
-                    if choice_obj.get('score') > 0:
+                    if choice_obj and choice_obj.get('score') > 0:
                         is_right = True
 
                     answers.append({
                         'question_id': question_id,
-                        'question_text': choice_obj.get('challengequestions__question'),
+                        'question_text': choice_obj.get('challengequestions__question') if choice_obj else '',
                         'is_answered_right': is_right
                     })
 
