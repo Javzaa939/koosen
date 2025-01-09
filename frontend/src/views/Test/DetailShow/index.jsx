@@ -145,6 +145,7 @@ function DetailShow(){
 	const [helpers_data, setHelpersData] = useState([]);
 	const [modal_data, setModalData] = useState([]);
 	const [resultData, setResultData] = useState([]);
+	const [showNotFailedOnly, setShowNotFailedOnly] = useState(false);
 
 
     const default_page = ['Бүгд', 10, 15, 50, 75, 100];
@@ -219,6 +220,10 @@ function DetailShow(){
         [searchValue]
 	)
 
+	const filteredData = showNotFailedOnly 
+		? datas.filter(item => typeof item.challenge[0]?.score === 'number' && item.challenge[0]?.score < 18)
+		: datas;
+
 	return (
 		<Fragment>
 			<Card>
@@ -282,10 +287,10 @@ function DetailShow(){
 						</Col>
 					</Col>
 				</Row>
-                <Row className="justify-content-between mx-0 mt-1 mb-1" sm={9}>
+                <Row className="justify-content-between aling-items-center mx-0 mt-1 mb-1" sm={9}>
 					<Col
 						className="d-flex align-items-center justify-content-start"
-						md={6}
+						md={5}
 						sm={12}
 					>
 						<Col lg={2} md={3} sm={4} xs={5} className="pe-1">
@@ -313,6 +318,17 @@ function DetailShow(){
 								{t("Хуудсанд харуулах тоо")}
 							</Label>
 						</Col>
+					</Col>
+					<Col md={3} className="d-flex align-items-center">
+						<Input
+							type="checkbox" 
+							id="under18Filter"
+							checked={showNotFailedOnly}
+							onChange={(e) => setShowNotFailedOnly(e.target.checked)}
+						/>
+						<Label className="" for="under18Filter" style={{ marginLeft: '5px' , marginTop: '5px'}}>
+							{t('Шалгалтанд унасан эсэх')}
+						</Label>
 					</Col>
                     <Col className='d-flex align-items-end mobile-datatable-search '>
 						<Input
@@ -362,7 +378,7 @@ function DetailShow(){
 						)}
 						paginationPerPage={rowsPerPage}
 						paginationDefaultPage={currentPage}
-						data={datas}
+						data={filteredData}
                         paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count, searchValue, datas)}
 						fixedHeader
 						fixedHeaderScrollHeight="62vh"
