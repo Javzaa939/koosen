@@ -87,17 +87,17 @@ export default function UpdateChallengeStudentsScoreButton({ selected_exam }) {
 											<tr>
 												<th rowSpan={2}>№</th>
 												<th rowSpan={2}>{t('Оюутны код')}</th>
-												<th colSpan={2}>{t('Оюутны авсан оноо')}</th>
-												<th colSpan={2}>{t('Оюутны авах оноо')}</th>
-												<th colSpan={2}>{t('Оюутны оролдлогын тоо дүүрсэн эсэх')}</th>
+												<th colSpan={2}>{t('Өмнөх оноо')}</th>
+												<th colSpan={2}>{t('Шинэчлэгдсэн оноо')}</th>
+												{/* <th colSpan={2}>{t('Оюутны оролдлогын тоо дүүрсэн эсэх')}</th>  Шаардлагатай үед ашиглана */}
 											</tr>
 											<tr>
-												<th>{t('Өмнө')}</th>
-												<th>{t('Дараа')}</th>
-												<th>{t('Өмнө')}</th>
-												<th>{t('Дараа')}</th>
-												<th>{t('Өмнө')}</th>
-												<th>{t('Дараа')}</th>
+												<th>{t('Авсан')}</th>
+												<th>{t('Авах')}</th>
+												<th>{t('Авсан')}</th>
+												<th>{t('Авах')}</th>
+												{/* <th>{t('Авсан')}</th>
+												<th>{t('Авах')}</th> */}
 											</tr>
 										</thead>
 										<tbody>
@@ -118,20 +118,20 @@ export default function UpdateChallengeStudentsScoreButton({ selected_exam }) {
 														{score?.old}
 													</td>
 													<td>
-														{score?.new}
+														{take_score?.old}
 													</td>
 													<td>
-														{take_score?.old}
+														{score?.new}
 													</td>
 													<td>
 														{take_score?.new}
 													</td>
-													<td>
+													{/* <td>
 														{tried?.old}
 													</td>
 													<td>
 														{tried?.new}
-													</td>
+													</td> */}
 												</tr>
 											)
 										})}
