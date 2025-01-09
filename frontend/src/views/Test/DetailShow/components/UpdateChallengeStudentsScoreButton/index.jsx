@@ -7,16 +7,14 @@ import useApi from '@src/utility/hooks/useApi'
 import useLoader from "@src/utility/hooks/useLoader";
 import { useState } from "react";
 import { Table } from 'reactstrap'
-import ExamFilter from "../ExamFilter";
 
-export default function UpdateChallengeStudentsScoreButton() {
+export default function UpdateChallengeStudentsScoreButton({ selected_exam }) {
 	const { t } = useTranslation()
 	const { showWarning } = useModal()
 	const challengeApi = useApi().challenge
 	const { isLoading, Loader, fetchData } = useLoader({})
 
 	const [showModal, setShowModal] = useState(false)
-	const [selected_exam, setSelectedExam] = useState('')
 	const [updateCorrectAnswersScoreResult, setUpdateCorrectAnswersScoreResult] = useState({})
 
 	async function handleUpdateCorrectAnswersScore() {
@@ -26,6 +24,7 @@ export default function UpdateChallengeStudentsScoreButton() {
 
 		if (success) {
 			setUpdateCorrectAnswersScoreResult(data)
+			handleModal()
 		}
 	}
 
@@ -34,7 +33,6 @@ export default function UpdateChallengeStudentsScoreButton() {
 
 		// on modal close
 		if (showModal) {
-			setSelectedExam('')
 			setUpdateCorrectAnswersScoreResult({})
 		}
 	}
@@ -46,11 +44,23 @@ export default function UpdateChallengeStudentsScoreButton() {
 	return (
 		<>
 			<Button
-				color='primary'
-				onClick={handleModal}
+				color="primary"
+				outline
+				className="btn-sm-block ms-1"
+				disabled={!selected_exam || isLoading}
+				onClick={() =>
+					showWarning({
+						header: {
+							title: t(`Онооны шинэчлэлт`),
+						},
+						question: t(`Та шинэчлэгдсэн оноонд итгэж байна уу?`),
+						onClick: () => handleUpdateCorrectAnswersScore(),
+						btnText: t('Шинэчлэх'),
+					})
+				}
 			>
 				<RefreshCcw size={15} />
-				<span className='align-middle ms-50'>{t('Үнэлгээ шинэчлэх')}</span>
+				<span className='align-middle ms-50'>{t('Онооны шинэчлэх')}</span>
 			</Button>
 			<Modal
 				isOpen={showModal}
@@ -62,37 +72,11 @@ export default function UpdateChallengeStudentsScoreButton() {
 					tag="div"
 					className="justify-content-between"
 				>
-					<h5>{t('Дүнгийн үнэлгээ шинэчлэх')}</h5>
+					<h5>{t('Өөрчлөгдсөн өгөгдлүүд')}</h5>
 				</ModalHeader>
 				<ModalBody>
 					{isLoading && Loader}
 
-					<div className='mb-1'>
-						<AlertCircle size={15} color='#fb8500' />
-						<span className='ms-1'>{t('Болих товч дарах үед дүнгийн үнэлгээ шинэчлэх хадгалагдахгүй байхыг анхаарна уу')}</span>
-					</div>
-					<ExamFilter setSelected={setSelectedExam} />
-					<div className='my-1 d-flex justify-content-between'>
-						<Button
-							className="me-2  justify-content-start"
-							color="primary"
-							type="submit"
-							disabled={!selected_exam || isLoading}
-							size='sm'
-							onClick={() =>
-								showWarning({
-									header: {
-										title: t(`Дүнгийн үнэлгээ шинэчлэх`),
-									},
-									question: t(`Та дүнгийн үнэлгээ шинэчлэхдээ итгэлтэй байна уу?`),
-									onClick: () => handleUpdateCorrectAnswersScore(),
-									btnText: t('Шинэчлэх'),
-								})
-							}
-						>
-							{t('Шинэчлэх')}
-						</Button>
-					</div>
 					{Object.entries(updateCorrectAnswersScoreResult).map(([key, value], index)=>{
 						if (key === 'ChallengeStudents') {
 							return (
