@@ -32,6 +32,7 @@ import { getPagination, ReactSelectStyles } from '@utils'
 import SchoolContext from '@src/utility/context/SchoolContext'
 
 import { getColumns, getFooter } from './helpers'
+import ExcelExportButton from './components/ExcelExportButton'
 
 export default function ProgressScore() {
 
@@ -48,7 +49,8 @@ export default function ProgressScore() {
     // ** Hook
     const { control, setValue, formState: { errors } } = useForm({});
 
-    const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: true })
+    const { isLoading, fetchData } = useLoader({ isFullScreen: true })
+    const { isLoading: totalDatasIsLoading, fetchData: totalDatasfetchData } = useLoader({ isFullScreen: true })
 
     const default_page = ['Бүгд', 10, 20, 50, 75, 100]
 
@@ -98,9 +100,13 @@ export default function ProgressScore() {
     // Анги бүлгийн жагсаалт
     async function getGroup() {
         const lesson = select_value.lesson
-        const { success, data } = await fetchData(groupApi.get(10000000, 1, '', '', '', '', '', '', '', lesson))
-        if (success) {
-            setGroupOption(data?.results)
+
+        if (lesson) {
+            const { success, data } = await fetchData(groupApi.getLessonFromExamToGroup({id: lesson}))
+
+            if (success) {
+                setGroupOption(data)
+            }
         }
     }
 
@@ -136,7 +142,7 @@ export default function ProgressScore() {
         const class_id = select_value.class
 
         if (lesson) {
-            const { success, data } = await fetchData(teacherScoreApi.get({
+            const { success, data } = await totalDatasfetchData(teacherScoreApi.get({
                 lesson: lesson,
                 group: class_id,
                 is_fall: is_fall
@@ -167,6 +173,7 @@ export default function ProgressScore() {
 
     useEffect(() => {
         getTeacherOption()
+        getGroup()
     }, [select_value?.lesson])
 
     // ** Function to handle filter
@@ -212,6 +219,7 @@ export default function ProgressScore() {
             <Card>
                 <CardHeader className='flex-md-row flex-column align-md-items-center align-items-start border-bottom'>
                     <CardTitle tag='h4'>{t('Явцын оноо')}</CardTitle>
+                    <ExcelExportButton data={datas} />
                 </CardHeader>
                 <Row className="mx-50 gy-1 my-1" sm={12}>
                     <Col md={3} sm={12}>
@@ -412,7 +420,7 @@ export default function ProgressScore() {
                         paginationServer
                         pagination
                         className='react-dataTable'
-                        progressPending={isLoading}
+                        progressPending={isLoading || totalDatasIsLoading}
                         progressComponent={
                             <div className='my-2 d-flex align-items-center justify-content-center'>
                                 <Spinner className='me-1' color="" size='sm' /><h5>{t('Түр хүлээнэ үү')}...</h5>

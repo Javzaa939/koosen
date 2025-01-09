@@ -1341,18 +1341,6 @@ class TeacherScoreAPIView(
     search_fields = ['student__code', 'student__register_num', 'student__first_name']
 
     def get(self,request):
-        # to join scoreregister with teacherscore in sql level NOTE don't need to join scoreregister just teacherscore
-        # self.queryset = self.queryset.filter(
-        #     Q(
-        #         Q(student__group__profession__department__isnull=False, student__scoreregister__school=F('student__group__profession__department__sub_orgs')) |
-        #         Q(student__group__profession__department__isnull=True, student__scoreregister__school=F('student__group__profession__school'))
-        #     ),
-        #     student__scoreregister__is_delete=False,
-        #     student__scoreregister__lesson_year=F('lesson_year'),
-        #     student__scoreregister__lesson_season=F('lesson_season'),
-        #     student__scoreregister__lesson=F('score_type__lesson_teacher__lesson')
-        # )
-
         lesson_year, lesson_season = get_active_year_season()
         self.queryset = self.queryset.filter(lesson_year=lesson_year, lesson_season=lesson_season)
         school_id = self.request.query_params.get('school')
@@ -1413,6 +1401,7 @@ class TeacherLessonScorePrintAPIView(
     serializer_class = TeacherScoreListPrintSerializer
 
     # to pass extra complex data to serializer, because annotate() does not support complex data like list, dict, etc
+    # and because it call sql query only 1 time instead of serializer way that calls sql query on every row. Therefore database will be slowed down very hard if for example calling queryset.filter() (and any other similar calls) is made inside serializer
     def get_serializer_context(self):
         context = super().get_serializer_context()
         exam = self.request.query_params.get('exam')

@@ -4460,3 +4460,16 @@ class TestGroupAPIView(
 # ocunt = update(diplom_num, path)
 
 # print(ocunt)
+
+
+class ExamToGroupGroupLessonAPIView(
+    generics.GenericAPIView
+):
+    """ Шалгалтын анги. To take group list """
+
+    def get(self, request, lesson=None):
+        # NOTE exam_to_group has not data for some lessons sometimes. For example: lesson id = 1075 (if TeacherScore.score_type.lesson_teacher.lesson.id=1075 then TeacherScore.Student.group.name exist but exam_to_group__exam__lesson=1075 not exist
+        datas = Group.objects.filter(exam_to_group__exam__lesson=lesson).values('id', 'name')
+
+        return request.send_data(list(datas))
+

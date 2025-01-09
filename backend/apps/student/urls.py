@@ -70,6 +70,7 @@ urlpatterns = [
     path('group/timetable/<int:lesson>/', GroupTimetableAPIView.as_view()),
     path('group/lesson/<int:group>/', GroupLessonAPIView.as_view()),
     path('group/exam/<int:exam>/', TestGroupAPIView.as_view()),
+    path('group/exam-to-group/lesson/<int:lesson>/', ExamToGroupGroupLessonAPIView.as_view()),
 
     # Оюутны чөлөөний бүртгэл
     path('leave/', StudentLeaveAPIView.as_view()),
