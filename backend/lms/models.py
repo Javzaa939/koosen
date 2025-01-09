@@ -3554,6 +3554,7 @@ class ChallengeStudents(models.Model):
 
     score = models.FloatField(null=True, verbose_name='Оюутны авсан оноо')
     take_score = models.FloatField(null=True, verbose_name='Оюутны авах оноо')
+    old_score = models.FloatField(null=True, verbose_name='Хуучин оюутны авсан оноо')
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -1524,6 +1524,7 @@ function useApi(isDisplay=false) {
 
 			getQuestionAll: (id) => instance.get(`learning/challenge/questions/${id}/`),
 			getStudents: (search) => instance.get(`learning/challenge/student/?search=${search}`),
+			updateChallengeStudentsScore: ({exam=''}) => instance.put(`learning/challenge/students-score/`, exam),
 			putTest: (data) => instance.put(`learning/challenge/add/student/`, data),
 			putTestKind: (data, id) => instance.put(`learning/challenge/add/student/addKind/${id}/?year=${cyear_name}&season=${cseason_id}`, data),
 

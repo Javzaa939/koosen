@@ -230,7 +230,7 @@ class LessonStandartAPIView(
                 remove_ids = [item for item in old_teacher_ids if item not in teacher_ids]
 
                 old_teacher_qs = Lesson_to_teacher.objects.filter(lesson=pk)
-                if remove_ids and add_ids:
+                if remove_ids or add_ids:
                     if len(remove_ids) > 0:
                         old_teacher_qs = old_teacher_qs.filter(teacher__in=remove_ids).delete()
 
@@ -5931,6 +5931,97 @@ class TestQuestionsDifficultyLevelsAPIView(
         data = [{'value': key, 'label': label} for key, label in self.queryset.model._meta.get_field('level').choices]
 
         return request.send_data(data)
+
+
+@permission_classes([IsAuthenticated])
+class ChallengeStudentsScoreAPIView(
+    generics.GenericAPIView,
+):
+
+    @has_permission(must_permissions=['lms-exam-update'])
+    def put(self, request):
+        data = request.data
+        exam = data
+
+        if not exam:
+
+            return request.send_error("ERR_002")
+
+        challenge_students_qs = ChallengeStudents.objects.filter(challenge=exam)
+        question_count_actual = ChallengeQuestions.objects.filter(challenge__id=exam).count()
+        changed_values = {}
+
+        # to update question count field (i am not sure why this field needed) if questions collection is changed. For example: to calculate proper percents values in reports (if this field is used)
+        challenge_qs = Challenge.objects.filter(id=exam).first()
+
+        if challenge_qs.question_count != question_count_actual:
+            changed_values['Challenge'] = {
+                'question_count': {
+                    'old': challenge_qs.question_count,
+                    'new': question_count_actual
+                }
+            }
+
+            challenge_qs.question_count = question_count_actual
+            challenge_qs.save()
+
+        changed_values['ChallengeStudents'] = {}
+
+        for challenge_student in challenge_students_qs:
+            changed_values['ChallengeStudents'][f'{challenge_student.id}-{challenge_student.student.code}'] = {}
+
+            if challenge_student.take_score != question_count_actual:
+                changed_values['ChallengeStudents'][f'{challenge_student.id}-{challenge_student.student.code}']['take_score'] = {
+                    'old': challenge_student.take_score,
+                    'new': question_count_actual
+                }
+
+                # to get total possible score. 1 question counted as 1 point of score (may be summary of values of "QuestionChoices,score" field should be used instead, i am not sure)
+                challenge_student.take_score = question_count_actual
+
+            # region score update code
+            if not challenge_student.answer:
+
+                continue
+
+            answers = json.loads(challenge_student.answer.replace("'", '"'))
+            answers_choices = []
+
+            # to optimize database usage by avoiding sql queries in loop. to do it collect all ids first and make single sql query later
+            for value in answers.values():
+                answers_choices.append(value)
+
+            # to detect attempt. attempt counted only if any choice was given (i am not sure is it correct detect way or not)
+            if answers_choices:
+                if challenge_student.tried != True:
+                    changed_values['ChallengeStudents'][f'{challenge_student.id}-{challenge_student.student.code}']['tried'] = {
+                        'old': challenge_student.tried,
+                        'new': True
+                    }
+
+                    challenge_student.tried = True
+
+            # to get correct answers count. any value of "QuestionChoices,score" greater than 0 counted as 1 point of score (may be summary of values of "QuestionChoices,score" field should be used instead, i am not sure)
+            score = QuestionChoices.objects.filter(id__in=answers_choices, score__gt=0).count()
+
+            if challenge_student.score != score:
+                changed_values['ChallengeStudents'][f'{challenge_student.id}-{challenge_student.student.code}']['old_score'] = {
+                    'old': challenge_student.old_score,
+                    'new': challenge_student.score
+                }
+
+                changed_values['ChallengeStudents'][f'{challenge_student.id}-{challenge_student.student.code}']['score'] = {
+                    'old': challenge_student.score,
+                    'new': score
+                }
+
+                challenge_student.old_score = challenge_student.score
+                challenge_student.score = score
+            # endregion
+
+            challenge_student.save()
+
+        return request.send_data(changed_values)
 
 
 @permission_classes([IsAuthenticated])
