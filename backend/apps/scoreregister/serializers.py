@@ -420,11 +420,12 @@ class TeacherScoreListPrintSerializer(serializers.ModelSerializer):
     def get_total(self, obj):
         teach_qs = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson)
         if len(teach_qs) > 2:
-            teach_qs = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson, score_type__lesson_teacher=obj.score_type.lesson_teacher, )
+            teach_qs = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson, score_type__lesson_teacher=obj.score_type.lesson_teacher)
 
-        total_score = teach_qs.aggregate(total=Sum('score')).get('total') or 0
-        teacher_score = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson).exclude(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total') or 0
+        teacher_score =teach_qs.exclude(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total') or 0
         exam_score = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson, score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total') or 0
+
+        total_score = teacher_score + exam_score
 
         if teacher_score and teacher_score < 42:
             total_score = 0
