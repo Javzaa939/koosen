@@ -148,14 +148,12 @@ export default function ReportDatatable({ report }) {
 
     // ** Function to handle filter
     const handleFilter = e => {
-        if (selected_exam) {
-            const value = e.target.value.trimStart();
-            setSearchValue(value)
-        }
+        const value = e.target.value.trimStart();
+        setSearchValue(value)
     }
 
     async function handleSearch() {
-        if (search_value.length > 0 && selected_exam) setRenderToSearch(!render_to_search)
+        if (search_value.length > 0) setRenderToSearch(!render_to_search)
     }
 
     return (
@@ -205,7 +203,6 @@ export default function ReportDatatable({ report }) {
                                         color='primary'
                                         onClick={handleSearch}
                                         style={{ height: '30px' }}
-                                        disabled={!selected_exam}
                                     >
                                         <Search size={15} />
                                     </Button>
