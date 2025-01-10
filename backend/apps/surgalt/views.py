@@ -6031,13 +6031,9 @@ class ChallengeReportAPIView(
 ):
     "Challenge report"
 
-    queryset = ChallengeStudents.objects.order_by('-score')
-    serializer_class = ChallengeReport2StudentsSerializer
-
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['student__code', 'student__first_name']
 
     @staticmethod
     def parse_answers(json_data, challenge_id):
@@ -6123,20 +6119,29 @@ class ChallengeReportAPIView(
             return None
 
         lesson_year, lesson_season = get_active_year_season()
-        queryset = self.queryset.filter(
-            challenge__lesson_year=lesson_year,
-            challenge__lesson_season=lesson_season,
-            challenge__challenge_type=Challenge.SEMESTR_EXAM
-        )
 
-        exam = request.query_params.get('exam')
+        if report_type == 'students':
+            # TODO: add frontend fields: scored_lesson_count, success_, failed_
+            queryset = TeacherScore.objects.filter(
+                lesson_year=lesson_year,
+                lesson_season=lesson_season,
+            )
 
-        if exam:
-            queryset = queryset.filter(challenge=exam)
+        else:
+            queryset = ChallengeStudents.objects.order_by('-score').filter(
+                challenge__lesson_year=lesson_year,
+                challenge__lesson_season=lesson_season,
+                challenge__challenge_type=Challenge.SEMESTR_EXAM
+            )
 
-        elif report_type != 'students':
+            exam = request.query_params.get('exam')
 
-            return None
+            if exam:
+                queryset = queryset.filter(challenge=exam)
+
+            else:
+
+                return None
 
         group = request.query_params.get('group')
 
@@ -6169,12 +6174,6 @@ class ChallengeReportAPIView(
                     question_obj.reliability = ((stats['correct'] * 100) / stats['total']) if stats['total'] > 0 else 0
 
             queryset = questions_qs
-
-        elif report_type in ['students']:
-            # TODO: add: scored_lesson_count, success_, failed_
-            # queryset = TeacherScore.filter(
-            # )
-            pass
 
         elif (
             report_type == 'groups' or
@@ -6404,6 +6403,10 @@ class ChallengeReportAPIView(
         elif report_type == 'dt_reliability':
             self.serializer_class = ChallengeQuestionsAnswersSerializer
             self.search_fields = ['question']
+
+        elif report_type == 'students':
+            self.serializer_class = ChallengeReport2StudentsSerializer
+            self.search_fields = ['student__code', 'student__first_name']
 
         elif report_type == 'groups':
             self.serializer_class = ChallengeGroupsSerializer
