@@ -6164,6 +6164,9 @@ class ChallengeReportAPIView(
 
             queryset = questions_qs
 
+        elif report_type in ['students']:
+            queryset = queryset
+
         elif (
             report_type == 'groups' or
             report_type == 'professions'

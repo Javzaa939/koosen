@@ -38,11 +38,6 @@ export default function ReportDatatable({ report }) {
             case 'students':
                 return [
                     {
-                        name: `${t('Оюутны код')}`,
-                        selector: (row) => (<span>{row?.student_code}</span>),
-                        center: true
-                    },
-                    {
                         name: `${t('Оюутны овог')}`,
                         selector: (row) => (<span>{row?.student_last_name}</span>),
                         center: true
@@ -53,19 +48,26 @@ export default function ReportDatatable({ report }) {
                         center: true
                     },
                     {
-                        name: `${t('Авах оноо')}`,
-                        selector: (row) => (<span>{row?.take_score}</span>),
+                        name: `${t('Оюутны код')}`,
+                        selector: (row) => (<span>{row?.student_code}</span>),
                         center: true
                     },
                     {
-                        name: `${t('Авсан оноо')}`,
-                        selector: (row) => (<span>{row?.score}</span>),
+                        name: `${t('Хичээлийн тоо')}`,
+                        selector: (row) => (<span>{row?.scored_lesson_count}</span>),
                         center: true
                     },
                     {
-                        name: `${t('Хувиар')}`,
-                        selector: (row) => (<span>{Math.round(calculatePercentage(row?.score, row?.take_score))}%</span>),
-                        center: true
+                        name: `${t('Хичээлд амжилттай давсан тоо')}`,
+                        selector: (row) => (<span>{row?.success_scored_lesson_count}</span>),
+                        center: true,
+                        minWidth: '240px'
+                    },
+                    {
+                        name: `${t('Хичээлд унасан тоо')}`,
+                        selector: (row) => (<span>{row?.failed_scored_lesson_count}</span>),
+                        center: true,
+                        minWidth: '200px'
                     },
                 ]
             // this is "OR" condition because after first case there is no return or break. To decrease code duplication
