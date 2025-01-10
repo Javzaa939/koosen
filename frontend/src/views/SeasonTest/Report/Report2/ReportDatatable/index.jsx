@@ -65,9 +65,17 @@ export default function ReportDatatable({ report }) {
                     },
                     {
                         name: `${t('Хичээлд унасан тоо')}`,
-                        selector: (row) => (<span>{row?.failed_scored_lesson_count}</span>),
                         center: true,
-                        minWidth: '200px'
+                        minWidth: '200px',
+                        cell: row => (
+                            row?.failed_scored_lesson_count >= 3
+                                ?
+                                <div style={{ color: '#ff0000' }}>
+                                    {row?.failed_scored_lesson_count}
+                                </div>
+                                :
+                                <span>{row?.failed_scored_lesson_count}</span>
+                        ),
                     },
                 ]
             // this is "OR" condition because after first case there is no return or break. To decrease code duplication
