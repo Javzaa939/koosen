@@ -6119,6 +6119,7 @@ class ChallengeReportAPIView(
             return None
 
         lesson_year, lesson_season = get_active_year_season()
+        queryset = None
 
         if report_type == 'students':
             # TODO: add frontend fields: scored_lesson_count, success_, failed_
