@@ -1602,7 +1602,7 @@ class ExamTimeTableAPIView(
 
                 # NOTE ангийн шалгалтын хуваарийн давхцлыг шалгах
                 # if groups and qs_examtimetable_ids:
-                    
+
                 # # Оюутаны цаг давхцаж байгаа эсэхийг шалгана
                 # if student_data and qs_examtimetable_ids:
                     # for exam_timetable_id in qs_examtimetable_ids:
@@ -1740,6 +1740,10 @@ class ExamTimeTableAPIView(
                 serializer.save()
                 ExamTimeTable.objects.get(id=pk).teacher.set(teachers)
                 if groups:
+                    current_groups = Exam_to_group.objects.filter(exam=pk)
+                    groups_to_delete = current_groups.exclude(group_id__in=groups)
+                    groups_to_delete.delete()
+
                     for group in groups:
                         if not Exam_to_group.objects.filter(exam=pk, group=group).exists():
                             create_groups.append(
