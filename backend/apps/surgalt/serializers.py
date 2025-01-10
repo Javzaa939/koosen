@@ -16,7 +16,7 @@ from core.fns import WithChoices
 
 from elselt.models import ElseltUser
 
-from lms.models import LessonStandart
+from lms.models import LessonStandart, TeacherScore
 from lms.models import Lesson_title_plan
 from lms.models import LessonCategory
 from lms.models import ProfessionalDegree
@@ -1086,7 +1086,7 @@ class ChallengeReport2StudentsSerializer(serializers.ModelSerializer):
     student_code = serializers.SerializerMethodField()
 
     class Meta:
-        model = ChallengeStudents
+        model = TeacherScore
         fields = ["student_first_name", "student_last_name", "student_code"]
 
     def get_student_first_name(self, obj):
@@ -1098,10 +1098,8 @@ class ChallengeReport2StudentsSerializer(serializers.ModelSerializer):
         return obj.student.last_name
 
     def get_student_code(self, obj):
-        data = Student.objects.filter(id=obj.student.id).values('code').first()
-        code = data.get('code')
 
-        return code
+        return obj.student.code
 
 
 class ChallengeReport4Serializer(serializers.ModelSerializer):
