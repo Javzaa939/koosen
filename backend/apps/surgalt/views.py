@@ -6073,8 +6073,8 @@ class ChallengeReportAPIView(
 
                 if choice_id:
                     # to process boolean values. because sometimes question('id') has boolean value and sometimes it has choice_id (integer) value
-                    if choice_id == True or choice_id == False:
-                        is_right = choice_id
+                    if choice_id == True:
+                        is_right = True
 
                     else:
                         choice_obj = QuestionChoices.objects.get(id=choice_id)
