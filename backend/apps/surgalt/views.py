@@ -6122,7 +6122,13 @@ class ChallengeReportAPIView(
 
             return None
 
-        queryset = self.queryset.filter(challenge__challenge_type=Challenge.SEMESTR_EXAM)
+        lesson_year, lesson_season = get_active_year_season()
+        queryset = self.queryset.filter(
+            challenge__lesson_year=lesson_year,
+            challenge__lesson_season=lesson_season,
+            challenge__challenge_type=Challenge.SEMESTR_EXAM
+        )
+
         exam = request.query_params.get('exam')
 
         if exam:
@@ -6165,7 +6171,10 @@ class ChallengeReportAPIView(
             queryset = questions_qs
 
         elif report_type in ['students']:
-            queryset = queryset
+            # TODO: add: scored_lesson_count, success_, failed_
+            # queryset = TeacherScore.filter(
+            # )
+            pass
 
         elif (
             report_type == 'groups' or
