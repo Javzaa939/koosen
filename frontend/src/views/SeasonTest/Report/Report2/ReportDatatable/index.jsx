@@ -155,9 +155,24 @@ export default function ReportDatatable({ report }) {
         <div className='px-1'>
             <Row>
                 <Col className='d-flex'>
-                    <div style={{ width: '219.5px' }} className='me-1'>
-                        <ExamFilter setSelected={setSelectedExam} />
-                    </div>
+                    {
+                        report !== 'students' &&
+                        <div style={{ width: '219.5px' }} className='me-1'>
+                            <ExamFilter setSelected={setSelectedExam} />
+                        </div>
+                    }
+                    {
+                        ['professions', 'students'].includes(report) &&
+                        <div style={{ width: '219.5px' }} className='me-1'>
+                            <ProfessionFilter setSelected={setSelectedProfession} />
+                        </div>
+                    }
+                    {
+                        ['groups', 'students'].includes(report) &&
+                        <div style={{ width: '219.5px' }} className='me-1'>
+                            <GroupFilter setSelected={setSelectedGroup} exam_id={selected_exam} />
+                        </div>
+                    }
                     {
                         report === 'students' &&
                         <div className='d-flex'>
@@ -189,18 +204,6 @@ export default function ReportDatatable({ report }) {
                                     </Button>
                                 </div>
                             </div>
-                        </div>
-                    }
-                    {
-                        report === 'groups' &&
-                        <div style={{ width: '219.5px' }} className='me-1'>
-                            <GroupFilter setSelected={setSelectedGroup} exam_id={selected_exam} />
-                        </div>
-                    }
-                    {
-                        report === 'professions' &&
-                        <div style={{ width: '219.5px' }} className='me-1'>
-                            <ProfessionFilter setSelected={setSelectedProfession} />
                         </div>
                     }
                 </Col>
