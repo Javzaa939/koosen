@@ -1084,11 +1084,10 @@ class ChallengeReport2StudentsSerializer(serializers.ModelSerializer):
     student_first_name = serializers.SerializerMethodField()
     student_last_name = serializers.SerializerMethodField()
     student_code = serializers.SerializerMethodField()
-    answer_json = serializers.SerializerMethodField()
 
     class Meta:
         model = ChallengeStudents
-        fields = ['challenge', 'score', 'take_score', 'answer_json', "tried", "id", "student_first_name", "student_last_name", "student_code", 'answer']
+        fields = ["student_first_name", "student_last_name", "student_code"]
 
     def get_student_first_name(self, obj):
 
