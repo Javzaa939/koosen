@@ -6047,8 +6047,8 @@ class ChallengeReportAPIView(
             json_data = json_data.replace("'", '"')
 
             # for json.loads() to make correct JSON standart (true, false, и null). E.g. True False not standart so error occurs (wrong case)
-            json_data = json_data.replace('": True,', '": true,')
-            json_data = json_data.replace('": False,', '": false,')
+            json_data = json_data.replace('": True', '": true')
+            json_data = json_data.replace('": False', '": false')
 
             answer_json = json.loads(json_data)
             # print('json_data no error in data: ', json_data)
@@ -6072,10 +6072,15 @@ class ChallengeReportAPIView(
                 is_right = False
 
                 if choice_id:
-                    choice_obj = QuestionChoices.objects.get(id=choice_id)
+                    # to process boolean values. because sometimes question('id') has boolean value and sometimes it has choice_id (integer) value
+                    if choice_id == True or choice_id == False:
+                        is_right = choice_id
 
-                    if choice_obj.score > 0:
-                        is_right = True
+                    else:
+                        choice_obj = QuestionChoices.objects.get(id=choice_id)
+
+                        if choice_obj.score > 0:
+                            is_right = True
 
                 answers.append({
                     'question_id': question.get('id'),
