@@ -6072,7 +6072,7 @@ class ChallengeReportAPIView(
                 is_right = False
 
                 if choice_id:
-                    # to process boolean values. because sometimes question('id') has boolean value and sometimes it has choice_id (integer) value
+                    # to process boolean values. because sometimes answer_json.get(<id>) has boolean value and sometimes it has choice_id (integer) value
                     if choice_id == True:
                         is_right = True
 
