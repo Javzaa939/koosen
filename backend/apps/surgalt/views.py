@@ -82,7 +82,7 @@ from lms.models import get_choice_image_path
 
 from elselt.serializer import MentalUserSerializer
 
-from .serializers import ChallengeGroupsSerializer, ChallengeProfessionsSerializer, LessonStandartSerializer, ChallengeQuestionsAnswersSerializer, ChallengeReport4Serializer
+from .serializers import ChallengeGroupsSerializer, ChallengeProfessionsSerializer, ChallengeReport2StudentsSerializer, LessonStandartSerializer, ChallengeQuestionsAnswersSerializer, ChallengeReport4Serializer
 from .serializers import LessonTitlePlanSerializer
 from .serializers import LessonStandartListSerializer
 from .serializers import LessonStandartSerialzier
@@ -6032,7 +6032,7 @@ class ChallengeReportAPIView(
     "Challenge report"
 
     queryset = ChallengeStudents.objects.order_by('-score')
-    serializer_class = ChallengeStudentsSerializer
+    serializer_class = ChallengeReport2StudentsSerializer
 
     pagination_class = CustomPagination
 

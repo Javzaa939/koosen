@@ -1028,6 +1028,59 @@ class ChallengeDetailSerializer(serializers.ModelSerializer):
 
 
 class ChallengeStudentsSerializer(serializers.ModelSerializer):
+    student_name = serializers.SerializerMethodField()
+    student_code = serializers.SerializerMethodField()
+    answer_json = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ChallengeStudents
+        fields = ['challenge', 'score', 'take_score', 'answer_json', "tried", "id", "student_name", "student_code", 'answer']
+
+    def get_student_name(self, obj):
+        data = Student.objects.filter(id=obj.student.id).values('first_name').first()
+        name = data.get('first_name')
+
+        return name
+
+    def get_student_code(self, obj):
+        data = Student.objects.filter(id=obj.student.id).values('code').first()
+        code = data.get('code')
+
+        return code
+
+    def get_answer_json(self, obj):
+        answers = []
+
+        try:
+            if obj.answer:
+                answer_json = obj.answer.replace("'", '"')
+                answer_json = json.loads(answer_json)
+
+                # Тестэн доторх асуултууд
+                for question_id, choice_id in answer_json.items():
+                    #Асуултан доторх хариулт
+                    choice_obj = QuestionChoices.objects.filter(id=choice_id).values('score','challengequestions__question').first()
+
+                    # choice дотроо is_right-г үүсгэнэ
+                    is_right = False
+
+                    # Оноо байвал зөв хариулт гэж үзнэ
+                    if choice_obj and choice_obj.get('score') > 0:
+                        is_right = True
+
+                    answers.append({
+                        'question_id': question_id,
+                        'question_text': choice_obj.get('challengequestions__question') if choice_obj else '',
+                        'is_answered_right': is_right
+                    })
+
+            return answers
+
+        except json.JSONDecodeError:
+            return None
+
+
+class ChallengeReport2StudentsSerializer(serializers.ModelSerializer):
     student_first_name = serializers.SerializerMethodField()
     student_last_name = serializers.SerializerMethodField()
     student_code = serializers.SerializerMethodField()
