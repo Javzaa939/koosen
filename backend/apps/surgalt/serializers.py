@@ -1028,19 +1028,22 @@ class ChallengeDetailSerializer(serializers.ModelSerializer):
 
 
 class ChallengeStudentsSerializer(serializers.ModelSerializer):
-    student_name = serializers.SerializerMethodField()
+    student_first_name = serializers.SerializerMethodField()
+    student_last_name = serializers.SerializerMethodField()
     student_code = serializers.SerializerMethodField()
     answer_json = serializers.SerializerMethodField()
 
     class Meta:
         model = ChallengeStudents
-        fields = ['challenge', 'score', 'take_score', 'answer_json', "tried", "id", "student_name", "student_code", 'answer']
+        fields = ['challenge', 'score', 'take_score', 'answer_json', "tried", "id", "student_first_name", "student_last_name", "student_code", 'answer']
 
-    def get_student_name(self, obj):
-        data = Student.objects.filter(id=obj.student.id).values('first_name').first()
-        name = data.get('first_name')
+    def get_student_first_name(self, obj):
 
-        return name
+        return obj.student.first_name
+
+    def get_student_last_name(self, obj):
+
+        return obj.student.last_name
 
     def get_student_code(self, obj):
         data = Student.objects.filter(id=obj.student.id).values('code').first()

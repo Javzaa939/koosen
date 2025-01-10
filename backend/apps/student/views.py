@@ -4438,11 +4438,21 @@ class TestGroupAPIView(
 ):
     """ Шалгалтын анги """
 
-    def get(self, request, exam=None):
+    def get(self, request):
+        exam = request.query_params.get('exam')
+        is_show_all = request.query_params.get('isShowAll')
+        group_ids = ChallengeStudents.objects
 
-        group_ids = ChallengeStudents.objects.filter(challenge=exam).values_list('student__group', flat=True).distinct()
+        if exam:
+            group_ids = group_ids.filter(challenge=exam)
 
+        elif is_show_all != 'true':
+
+            return request.send_data(None)
+
+        group_ids = group_ids.values_list('student__group', flat=True).distinct()
         datas = Group.objects.filter(id__in=group_ids).values('id', 'name')
+
         return request.send_data(list(datas))
 
 # def update(diplom_num, path):

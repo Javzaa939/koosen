@@ -43,8 +43,13 @@ export default function ReportDatatable({ report }) {
                         center: true
                     },
                     {
+                        name: `${t('Оюутны овог')}`,
+                        selector: (row) => (<span>{row?.student_last_name}</span>),
+                        center: true
+                    },
+                    {
                         name: `${t('Оюутны нэр')}`,
-                        selector: (row) => (<span>{row?.student_name}</span>),
+                        selector: (row) => (<span>{row?.student_first_name}</span>),
                         center: true
                     },
                     {
@@ -170,7 +175,7 @@ export default function ReportDatatable({ report }) {
                     {
                         ['groups', 'students'].includes(report) &&
                         <div style={{ width: '219.5px' }} className='me-1'>
-                            <GroupFilter setSelected={setSelectedGroup} exam_id={selected_exam} />
+                            <GroupFilter setSelected={setSelectedGroup} exam_id={selected_exam} isShowAll={report === 'students' ? 'true' : 'false'} />
                         </div>
                     }
                     {

@@ -6117,13 +6117,21 @@ class ChallengeReportAPIView(
     def get_queryset(self):
         request = self.request
         report_type = request.query_params.get('report_type')
-        exam = request.query_params.get('exam')
 
-        if not report_type or not exam:
+        if not report_type:
 
             return None
 
-        queryset = self.queryset.filter(challenge__challenge_type=Challenge.SEMESTR_EXAM, challenge=exam)
+        queryset = self.queryset.filter(challenge__challenge_type=Challenge.SEMESTR_EXAM)
+        exam = request.query_params.get('exam')
+
+        if exam:
+            queryset = queryset.filter(challenge=exam)
+
+        elif report_type != 'students':
+
+            return None
+
         group = request.query_params.get('group')
 
         if group:
