@@ -6122,7 +6122,6 @@ class ChallengeReportAPIView(
         queryset = None
 
         if report_type == 'students':
-            # TODO: add frontend fields: scored_lesson_count, success_, failed_
             queryset = TeacherScore.objects.filter(
                 lesson_year=lesson_year,
                 lesson_season=lesson_season,
@@ -6130,7 +6129,7 @@ class ChallengeReportAPIView(
             ).select_related(
                 'score_type__lesson_teacher'
 
-            # this is group by part of sql query
+            # this is "group by" part of sql query
             ).values(
                 'student__first_name', 'student__last_name', 'student__code'
 
