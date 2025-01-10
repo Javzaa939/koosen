@@ -6044,7 +6044,14 @@ class ChallengeReportAPIView(
         answers = []
 
         try:
-            answer_json = json.loads(json_data.replace("'", '"'))
+            json_data = json_data.replace("'", '"')
+
+            # for json.loads() to make correct JSON standart (true, false, и null). E.g. True False not standart so error occurs (wrong case)
+            json_data = json_data.replace('": True,', '": true,')
+            json_data = json_data.replace('": False,', '": false,')
+
+            answer_json = json.loads(json_data)
+            # print('json_data no error in data: ', json_data)
 
             # to get last title because title field is manytomany type
             questions = (
@@ -6080,6 +6087,7 @@ class ChallengeReportAPIView(
 
         except Exception:
             traceback.print_exc()
+            print('json_data error in data: ', json_data)
 
         return answers
 
