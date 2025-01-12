@@ -6124,40 +6124,45 @@ class ChallengeReportAPIView(
         if report_type == 'students':
             queryset = TeacherScore.objects.filter(
                 lesson_year=lesson_year,
-                lesson_season=lesson_season,
+                lesson_season_id=lesson_season,
                 score__gt=0
-            ).select_related(
-                'score_type__lesson_teacher'
 
             # this is "group by" part of sql query
             ).values(
                 'student__first_name', 'student__last_name', 'student__code'
 
             ).annotate(
-                scored_lesson_count = Count('*'),
+                # scored_lesson_count = Count('score_type__lesson_teacher__lesson_id', distinct=True),
+                exam_type_scored_lesson_count = Count(
+                    Case(
+                        When(
+                            score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO,
+                            then='score_type__lesson_teacher__lesson_id'
+                        )
+                    ),
+                    distinct=True
+                ),
                 success_scored_lesson_count=Count(
                     Case(
                         When(
-                            score__gte=18, score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO,
-                            then=1
-                        ),
-                        output_field=IntegerField(),
-                    )
+                            Q(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO) &
+                            Q(score__gte=18),
+                            then='score_type__lesson_teacher__lesson_id'
+                        )
+                    ),
+                    distinct=True
                 ),
                 failed_scored_lesson_count=Count(
                     Case(
                         When(
-                            Q(
-                                Q(score__lt=18, score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO)|
-                                Q(score__isnull=True, score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO)|
-                                ~Q(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO)
-                            ),
-                            then=1
-                        ),
-                        output_field=IntegerField(),
-                    )
+                            Q(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO) &
+                            ~Q(score__gte=18),
+                            then='score_type__lesson_teacher__lesson_id'
+                        )
+                    ),
+                    distinct=True
                 )
-            ).order_by('-scored_lesson_count')
+            ).order_by('-failed_scored_lesson_count')
 
         else:
             queryset = ChallengeStudents.objects.order_by('-score').filter(

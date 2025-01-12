@@ -54,7 +54,7 @@ export default function ReportDatatable({ report }) {
                     },
                     {
                         name: `${t('Хичээлийн тоо')}`,
-                        selector: (row) => (<span>{row?.scored_lesson_count}</span>),
+                        selector: (row) => (<span>{row?.exam_type_scored_lesson_count} {/*({row?.scored_lesson_count})*/}</span>),
                         center: true
                     },
                     {

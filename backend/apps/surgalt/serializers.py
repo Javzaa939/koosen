@@ -1085,12 +1085,13 @@ class ChallengeReport2StudentsSerializer(serializers.ModelSerializer):
     student_last_name = serializers.SerializerMethodField()
     student_code = serializers.SerializerMethodField()
     scored_lesson_count = serializers.IntegerField()
+    exam_type_scored_lesson_count = serializers.IntegerField()
     success_scored_lesson_count = serializers.IntegerField()
     failed_scored_lesson_count = serializers.IntegerField()
 
     class Meta:
         model = TeacherScore
-        fields = ["student_first_name", "student_last_name", "student_code", "scored_lesson_count", "success_scored_lesson_count", "failed_scored_lesson_count"]
+        fields = ["student_first_name", "student_last_name", "student_code", "exam_type_scored_lesson_count", "scored_lesson_count", "success_scored_lesson_count", "failed_scored_lesson_count"]
 
     def get_student_first_name(self, obj):
 
