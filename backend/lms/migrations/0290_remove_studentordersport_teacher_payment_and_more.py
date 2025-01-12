@@ -2,7 +2,7 @@
 
 from django.db import migrations, models
 import django.db.models.deletion
-import lms.models
+
 
 
 class Migration(migrations.Migration):
@@ -12,11 +12,6 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AddField(
-            model_name='accesshistorylms',
-            name='student',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='lms.studentlogin', verbose_name='Оюутан'),
-        ),
          migrations.AlterField(
             model_name='challengestudents',
             name='challenge',
