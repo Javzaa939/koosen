@@ -6132,7 +6132,7 @@ class ChallengeReportAPIView(
                 'student__first_name', 'student__last_name', 'student__code'
 
             ).annotate(
-                # scored_lesson_count = Count('score_type__lesson_teacher__lesson_id', distinct=True),
+                scored_lesson_count = Count('score_type__lesson_teacher__lesson_id', distinct=True),
                 exam_type_scored_lesson_count = Count(
                     Case(
                         When(
