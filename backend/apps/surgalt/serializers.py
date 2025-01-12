@@ -1081,9 +1081,9 @@ class ChallengeStudentsSerializer(serializers.ModelSerializer):
 
 
 class ChallengeReport2StudentsSerializer(serializers.ModelSerializer):
-    student_first_name = serializers.SerializerMethodField()
-    student_last_name = serializers.SerializerMethodField()
-    student_code = serializers.SerializerMethodField()
+    student_first_name = serializers.CharField()
+    student_last_name = serializers.CharField()
+    student_code = serializers.CharField()
     scored_lesson_count = serializers.IntegerField()
     exam_type_scored_lesson_count = serializers.IntegerField()
     success_scored_lesson_count = serializers.IntegerField()
@@ -1093,17 +1093,19 @@ class ChallengeReport2StudentsSerializer(serializers.ModelSerializer):
         model = TeacherScore
         fields = ["student_first_name", "student_last_name", "student_code", "exam_type_scored_lesson_count", "scored_lesson_count", "success_scored_lesson_count", "failed_scored_lesson_count"]
 
-    def get_student_first_name(self, obj):
 
-        return obj.get('student__first_name')
+class ChallengeReport2StudentsDetailSerializer(serializers.ModelSerializer):
+    student_first_name = serializers.CharField()
+    student_last_name = serializers.CharField()
+    student_code = serializers.CharField()
+    lesson_name = serializers.CharField()
+    teacher_first_name = serializers.CharField()
+    teacher_last_name = serializers.CharField()
+    lesson_teacher_score_type = serializers.CharField()
 
-    def get_student_last_name(self, obj):
-
-        return obj.get('student__last_name')
-
-    def get_student_code(self, obj):
-
-        return obj.get('student__code')
+    class Meta:
+        model = TeacherScore
+        fields = ["student_first_name", "student_last_name", "student_code", "score", "lesson_name", "teacher_first_name", "teacher_last_name", "lesson_teacher_score_type"]
 
 
 class ChallengeReport4Serializer(serializers.ModelSerializer):
