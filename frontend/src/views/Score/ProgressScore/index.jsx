@@ -124,7 +124,8 @@ export default function ProgressScore() {
                 search: searchValue,
                 lesson: lesson,
                 group: class_id,
-                is_fall: is_fall
+                is_fall: is_fall,
+                teacher: select_value?.teacher
             }))
 
             if (success) {
