@@ -6063,10 +6063,6 @@ class ChallengeReportAPIView(
                 .values('id', 'question', 'title__name')
             )
 
-            if not questions:
-
-                return None
-
             for question in questions:
                 choice_id = answer_json.get(str(question.get('id')))
                 is_right = False
