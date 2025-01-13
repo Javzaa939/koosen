@@ -39,19 +39,19 @@ export default function LessonsModal({ open, handleModal, student, group, profes
             minWidth: '300px'
         },
         {
+            name: `${t('Багшийн дүн')}`,
+            selector: (row) => (<span>{Number(row?.teach_score).toFixed(1)}</span>),
+            center: true,
+            header: 'teach_score',
+            sortable: true
+        },
+        {
             name: `${t('Шалгалтын дүн')}`,
             selector: (row) => (<span>{Number(row?.exam_score).toFixed(1)}</span>),
             center: true,
             header: 'exam_score',
             sortable: true,
             minWidth: '200px'
-        },
-        {
-            name: `${t('Багшийн дүн')}`,
-            selector: (row) => (<span>{Number(row?.teach_score).toFixed(1)}</span>),
-            center: true,
-            header: 'teach_score',
-            sortable: true
         },
         {
             name: `${t('Шалгалтын багшийн нэр')}`,
