@@ -349,7 +349,6 @@ const ExamTimeTable = () => {
 
             const { success, data } = await fetchData(examApi.getStudentExamScore(rowDatas?.id, lessonId))
             if(success) {
-                console.log('D62342014', data)
                 setStudentDatas(data)
             }
         }
