@@ -1,5 +1,5 @@
 // ** React Imports
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Search } from 'react-feather'
 import { useTranslation } from 'react-i18next'
 import { Button, Col, Input, Label, Row } from 'reactstrap'
@@ -30,6 +30,7 @@ export default function ReportDatatable({ report }) {
 
     const [isShowLessonsDetail, setIsShowLessonsDetail] = useState(false)
     const [studentId, setStudentId] = useState(null)
+    const [apiGetFuncArgs, setApiGetFuncArgs] = useState(null)
     // #endregion
 
     // #region primitives
@@ -193,6 +194,11 @@ export default function ReportDatatable({ report }) {
         setStudentId(student_id)
     }
 
+    // to not rerender generic datatable if data not changed
+    useEffect(()=>{
+        setApiGetFuncArgs({ report_type: report, exam: selected_exam, group: selected_group, profession: selected_profession })
+    },[report, selected_exam, selected_group, selected_profession])
+
     return (
         <>
             <div className='px-1'>
@@ -271,7 +277,7 @@ export default function ReportDatatable({ report }) {
                                 ))
                             }
                         </Input>
-                        <GenericDataTable apiGetFunc={challengeApi.getReport} isApiGetFuncArgsDefault={true} apiGetFuncArgs={{ report_type: report, exam: selected_exam, group: selected_group, profession: selected_profession }} columns={columns} rows_per_page={rows_per_page} search_value={search_value} render_to_search={render_to_search} />
+                        <GenericDataTable apiGetFunc={challengeApi.getReport} isApiGetFuncArgsDefault={true} apiGetFuncArgs={apiGetFuncArgs} columns={columns} rows_per_page={rows_per_page} search_value={search_value} render_to_search={render_to_search} />
                     </Col>
                 </Row>
             </div>
