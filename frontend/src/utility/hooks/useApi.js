@@ -748,7 +748,7 @@ function useApi(isDisplay=false) {
 				},
 
 				getLesson: (id) => instance.get(`/student/group/lesson/${id}/`),
-				getExam: (id) => instance.get(`/student/group/exam/${id}/`),
+				getExam: (id='', isShowAll='') => instance.get(`/student/group/exam/?exam=${id}&isShowAll=${isShowAll}`),
 				getLessonFromExamToGroup: ({id=''}) => instance.get(`/student/group/exam-to-group/lesson/${id}/`)
 			},
 			/** Оюутны гэр бүлийн байдал */
@@ -1536,7 +1536,7 @@ function useApi(isDisplay=false) {
 			getDetail: (page, limit, search, test_id) => instance.get(`learning/challenge/details/?page=${page}&limit=${limit}&search=${search}&test_id=${test_id}`),
 			getTestResult: (cdata) => instance.post(`learning/challenge/result/`,cdata),
 			getDifficultyLevels: () => instance.get(`learning/challenge/questions/difficulty_levels/`),
-			getReport: ({page=1, limit=10000000, sort='', search='', report_type='', exam='', group='', profession=''}) => instance.get(`learning/challenge/report/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&report_type=${report_type}&exam=${exam}&group=${group}&profession=${profession}`),
+			getReport: ({page=1, limit=10000000, sort='', search='', report_type='', exam='', group='', profession='', student=''}) => instance.get(`learning/challenge/report/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&report_type=${report_type}&exam=${exam}&group=${group}&profession=${profession}&student=${student}`),
 			getDetailTable: (page,limit,search,department,group,test_id,student_id) => instance.get(`learning/challenge/details/table/?page=${page}&limit=${limit}&search=${search}&test_id=${test_id}&department=${department}&group=${group}&student_id=${student_id}`),
 
 			chart1: (dep, year, season, teacher, lesson) => instance.get(`learning/challenge/analysis/?dep=${dep}&year=${year}&season=${season}&teacher=${teacher}&lesson=${lesson}`),

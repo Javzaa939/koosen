@@ -16,7 +16,7 @@ from core.fns import WithChoices
 
 from elselt.models import ElseltUser
 
-from lms.models import LessonStandart
+from lms.models import LessonStandart, TeacherScore
 from lms.models import Lesson_title_plan
 from lms.models import LessonCategory
 from lms.models import ProfessionalDegree
@@ -1078,6 +1078,38 @@ class ChallengeStudentsSerializer(serializers.ModelSerializer):
 
         except json.JSONDecodeError:
             return None
+
+
+class ChallengeReport2StudentsSerializer(serializers.ModelSerializer):
+    student_idnum = serializers.IntegerField()
+    student_first_name = serializers.CharField()
+    student_last_name = serializers.CharField()
+    student_code = serializers.CharField()
+    scored_lesson_count = serializers.IntegerField()
+    exam_type_scored_lesson_count = serializers.IntegerField()
+    success_scored_lesson_count = serializers.IntegerField()
+    failed_scored_lesson_count = serializers.IntegerField()
+
+    class Meta:
+        model = TeacherScore
+        fields = ["student_idnum", "student_first_name", "student_last_name", "student_code", "exam_type_scored_lesson_count", "scored_lesson_count", "success_scored_lesson_count", "failed_scored_lesson_count"]
+
+
+class ChallengeReport2StudentsDetailSerializer(serializers.ModelSerializer):
+    student_first_name = serializers.CharField()
+    student_last_name = serializers.CharField()
+    student_code = serializers.CharField()
+    lesson_name = serializers.CharField()
+    exam_score = serializers.FloatField()
+    exam_teacher_first_name = serializers.CharField()
+    exam_teacher_last_name = serializers.CharField()
+    teach_score = serializers.FloatField()
+    teach_teacher_first_name = serializers.CharField()
+    teach_teacher_last_name = serializers.CharField()
+
+    class Meta:
+        model = TeacherScore
+        fields = ["student_first_name", "student_last_name", "student_code", "lesson_name", "exam_score", "exam_teacher_first_name", "exam_teacher_last_name", "teach_score", "teach_teacher_first_name", "teach_teacher_last_name"]
 
 
 class ChallengeReport4Serializer(serializers.ModelSerializer):

@@ -82,7 +82,7 @@ from lms.models import get_choice_image_path
 
 from elselt.serializer import MentalUserSerializer
 
-from .serializers import ChallengeGroupsSerializer, ChallengeProfessionsSerializer, LessonStandartSerializer, ChallengeQuestionsAnswersSerializer, ChallengeReport4Serializer
+from .serializers import ChallengeGroupsSerializer, ChallengeProfessionsSerializer, ChallengeReport2StudentsDetailSerializer, ChallengeReport2StudentsSerializer, LessonStandartSerializer, ChallengeQuestionsAnswersSerializer, ChallengeReport4Serializer
 from .serializers import LessonTitlePlanSerializer
 from .serializers import LessonStandartListSerializer
 from .serializers import LessonStandartSerialzier
@@ -6031,13 +6031,9 @@ class ChallengeReportAPIView(
 ):
     "Challenge report"
 
-    queryset = ChallengeStudents.objects.order_by('-score')
-    serializer_class = ChallengeStudentsSerializer
-
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['student__code', 'student__first_name']
 
     @staticmethod
     def parse_answers(json_data, challenge_id):
@@ -6113,13 +6109,131 @@ class ChallengeReportAPIView(
     def get_queryset(self):
         request = self.request
         report_type = request.query_params.get('report_type')
-        exam = request.query_params.get('exam')
 
-        if not report_type or not exam:
+        if not report_type:
 
             return None
 
-        queryset = self.queryset.filter(challenge__challenge_type=Challenge.SEMESTR_EXAM, challenge=exam)
+        lesson_year, lesson_season = get_active_year_season()
+        queryset = None
+
+        if report_type in ['students', 'students_detail']:
+            queryset = TeacherScore.objects.filter(
+                lesson_year=lesson_year,
+                lesson_season_id=lesson_season,
+                score__gt=0
+            )
+
+        if report_type == 'students':
+            queryset = (
+
+                # this is "group by" part of sql query
+                queryset.values(
+                    student_idnum=F('student_id'),
+                    student_first_name=F('student__first_name'),
+                    student_last_name=F('student__last_name'),
+                    student_code=F('student__code')
+
+                ).annotate(
+                    scored_lesson_count = Count('score_type__lesson_teacher__lesson_id', distinct=True),
+                    exam_type_scored_lesson_count = Count(
+                        Case(
+                            When(
+                                score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO,
+                                then='score_type__lesson_teacher__lesson_id'
+                            )
+                        ),
+                        distinct=True
+                    ),
+                    success_scored_lesson_count=Count(
+                        Case(
+                            When(
+                                Q(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO) &
+                                Q(score__gte=18),
+                                then='score_type__lesson_teacher__lesson_id'
+                            )
+                        ),
+                        distinct=True
+                    ),
+                    failed_scored_lesson_count=Count(
+                        Case(
+                            When(
+                                Q(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO) &
+                                ~Q(score__gte=18),
+                                then='score_type__lesson_teacher__lesson_id'
+                            )
+                        ),
+                        distinct=True
+                    )
+                ).order_by('-failed_scored_lesson_count')
+            )
+
+        elif report_type == 'students_detail':
+            student_id = request.query_params.get('student')
+
+            if student_id:
+                queryset = (
+                    queryset.filter(student_id=student_id).values(
+                        student_first_name=F('student__first_name'),
+                        student_last_name=F('student__last_name'),
+                        student_code=F('student__code'),
+                        lesson_name=F('score_type__lesson_teacher__lesson__name')
+                    ).annotate(
+                        exam_score = Max(Case(
+                            When(
+                                score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO,
+                                then='score'
+                            ))
+                        ),
+                        exam_teacher_first_name = Max(Case(
+                            When(
+                                score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO,
+                                then='score_type__lesson_teacher__teacher__first_name'
+                            ))
+                        ),
+                        exam_teacher_last_name = Max(Case(
+                            When(
+                                score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO,
+                                then='score_type__lesson_teacher__teacher__last_name'
+                            ))
+                        ),
+                        teach_score = Max(Case(
+                            When(
+                                score_type__score_type=Lesson_teacher_scoretype.BUSAD,
+                                then='score'
+                            ))
+                        ),
+                        teach_teacher_first_name = Max(Case(
+                            When(
+                                score_type__score_type=Lesson_teacher_scoretype.BUSAD,
+                                then='score_type__lesson_teacher__teacher__first_name'
+                            ))
+                        ),
+                        teach_teacher_last_name = Max(Case(
+                            When(
+                                score_type__score_type=Lesson_teacher_scoretype.BUSAD,
+                                then='score_type__lesson_teacher__teacher__last_name'
+                            ))
+                        ),
+                    ).order_by('-exam_score')
+                )
+
+        else:
+            queryset = ChallengeStudents.objects.order_by('-score').filter(
+                challenge__lesson_year=lesson_year,
+                challenge__lesson_season=lesson_season,
+                challenge__challenge_type=Challenge.SEMESTR_EXAM
+            )
+
+            exam = request.query_params.get('exam')
+
+            if exam:
+                queryset = queryset.filter(challenge=exam)
+
+            else:
+
+                return None
+
         group = request.query_params.get('group')
 
         if group:
@@ -6294,7 +6408,7 @@ class ChallengeReportAPIView(
             )
 
         # for reports where pagination is required
-        if report_type in ['students', 'dt_reliability', 'report4', 'groups', 'professions']:
+        if report_type in ['students', 'students_detail', 'dt_reliability', 'report4', 'groups', 'professions']:
             sorting = self.request.query_params.get('sorting')
 
             # Sort хийх үед ажиллана
@@ -6376,14 +6490,27 @@ class ChallengeReportAPIView(
 
             get_result = rechart_data
 
-        # report1. for datatable with pagination
+        # region for datatable with pagination
+        # report1
         elif report_type == 'dt_reliability':
             self.serializer_class = ChallengeQuestionsAnswersSerializer
             self.search_fields = ['question']
 
+        # region report2 students
+        elif report_type == 'students':
+            self.serializer_class = ChallengeReport2StudentsSerializer
+            self.search_fields = ['student__code', 'student__first_name']
+
+        elif report_type == 'students_detail':
+            self.serializer_class = ChallengeReport2StudentsDetailSerializer
+            self.search_fields = ['lesson__code', 'lesson__name']
+        # endregion report2 students
+
+        # report2 groups
         elif report_type == 'groups':
             self.serializer_class = ChallengeGroupsSerializer
 
+        # report2 professions
         elif report_type == 'professions':
             self.serializer_class = ChallengeProfessionsSerializer
 
@@ -6412,9 +6539,9 @@ class ChallengeReportAPIView(
                 'questions_summary': question_stats
             }
 
-        # for reports where pagination is required
-        if report_type in ['students', 'dt_reliability', 'report4', 'groups', 'professions']:
+        if report_type in ['students', 'students_detail', 'dt_reliability', 'report4', 'groups', 'professions']:
             get_result = self.list(request).data
+        # endregion for datatable with pagination
 
         return request.send_data(get_result)
 

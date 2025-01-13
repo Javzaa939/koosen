@@ -7,7 +7,7 @@ import { ReactSelectStyles } from '@src/utility/Utils'
 import useApi from "@src/utility/hooks/useApi"
 import useLoader from "@src/utility/hooks/useLoader"
 
-export default function GroupFilter({setSelected, exam_id}) {
+export default function GroupFilter({setSelected, exam_id, isShowAll}) {
 	// states
 	const [options, setOptions] = useState([])
 
@@ -20,13 +20,13 @@ export default function GroupFilter({setSelected, exam_id}) {
     const { isLoading, fetchData } = useLoader({})
 
 	async function getOptions() {
-		const { success, data } = await fetchData(groupApi.getExam(exam_id))
+		const { success, data } = await fetchData(groupApi.getExam(exam_id, isShowAll))
 		if (success) {
 			setOptions(data)
 		}
 	}
 
-	useEffect(() => { if (exam_id) getOptions() }, [exam_id])
+	useEffect(() => { getOptions() }, [exam_id])
 
 	return (
 		<>
