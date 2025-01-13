@@ -4259,6 +4259,7 @@ class AccessHistoryLms(models.Model):
     )
 
     user = models.ForeignKey(User,on_delete=models.CASCADE, null=True, blank=True, verbose_name="Хэрэглэгч")
+    student = models.ForeignKey(StudentLogin,on_delete=models.CASCADE, null=True, blank=True, verbose_name="Оюутан")
     system_type = models.PositiveIntegerField(choices=SYSTEM_TYPE, db_index=True, null=False, verbose_name="Нэвтэрсэн системийн нэр")
     device_type = models.PositiveIntegerField(choices=DEVICE_TYPE, db_index=True, null=False, verbose_name="Нэвтэрсэн төхөөрөмжийн төрөл")
     device_name = models.CharField(max_length=50, null=True, blank=True, verbose_name="Нэвтэрсэн төхөөрөмжийн нэр")

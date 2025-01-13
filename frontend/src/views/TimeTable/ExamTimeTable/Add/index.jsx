@@ -13,7 +13,7 @@ import Select from 'react-select'
 
 import { useTranslation } from 'react-i18next';
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, useWatch } from "react-hook-form";
 
 // import { Eye } from 'react-feather';
 
@@ -55,14 +55,21 @@ const Addmodal = ({ open, handleModal, refreshDatas, handleEdit, editData }) => 
 
     // const [student_list_view, setStudentListView] = useState(false)
     // const [studentData, setStudentDatas ] = useState([]);
-    const [groupOption, setGroupOption ] = useState([]);
+    const [groupOption, setGroupOption] = useState([]);
 
     // ** Hook
     const { control, handleSubmit, formState: { errors }, setError, setValue } = useForm(validate(validateSchema));
 
+    const stypeValue = useWatch({
+        control,
+        name: "stype",
+    });
+
+    const beginDate = useWatch({ control, name: 'begin_date' });
+
     // Loader
-    const { Loader, isLoading, fetchData } = useLoader({ isSmall:true });
-	const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
+    const { Loader, isLoading, fetchData } = useLoader({ isSmall: true });
+    const { isLoading: postLoading, fetchData: postFetch } = useLoader({});
 
     // Api
     const teacherApi = useApi().hrms.teacher
@@ -73,13 +80,13 @@ const Addmodal = ({ open, handleModal, refreshDatas, handleEdit, editData }) => 
 
     // Хичээлийн жагсаалт
     async function getLessonOption() {
-        if(school_id ==11){
+        if (school_id == 11) {
             const { success, data } = await fetchData(lessonApi.getExam())
             if (success) {
                 setLessonOption(data)
             }
         }
-        else{
+        else {
             const { success, data } = await fetchData(lessonApi.getList(school_id))
             if (success) {
                 setLessonOption(data)
@@ -132,7 +139,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, handleEdit, editData }) => 
     //             setValue('student', selected_rows)
     //         }
     //     }
-	// }
+    // }
 
     useEffect(
         () => {
@@ -140,14 +147,14 @@ const Addmodal = ({ open, handleModal, refreshDatas, handleEdit, editData }) => 
                 for (let key in editData) {
                     setValue(key, editData[key])
 
-                    if(key === 'teacher') {
+                    if (key === 'teacher') {
                         var values = teacher_option?.filter((e) => editData[key]?.includes(e?.id))
                         setSelectedTeachers(values)
                     }
-                    if(key === 'is_online') {
+                    if (key === 'is_online') {
                         setOnlineChecked(editData[key])
                     }
-                    if(key === 'group') {
+                    if (key === 'group') {
                         var values_group = groupOption?.filter((e) => editData[key]?.includes(e?.id))
                         setSelectedGroups(values_group)
                     }
@@ -162,7 +169,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, handleEdit, editData }) => 
 
     function IsOnline(checked) {
         setOnlineChecked(checked)
-        if(checked) {
+        if (checked) {
             setValue('room', '')
         }
     }
@@ -178,7 +185,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, handleEdit, editData }) => 
             cdata['room'] = null
         }
         cdata = convertDefaultValue(cdata)
-        if (editData?.id){
+        if (editData?.id) {
             const { success, error } = await postFetch(examApi.put(cdata, editData?.id))
             if (success) {
                 handleEdit()
@@ -190,7 +197,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, handleEdit, editData }) => 
                     setError(error[key].field, { type: 'custom', message: error[key].msg });
                 }
             }
-        }  else {
+        } else {
             cdata['school'] = school_id
 
             const { success, error } = await postFetch(examApi.post(cdata))
@@ -205,6 +212,25 @@ const Addmodal = ({ open, handleModal, refreshDatas, handleEdit, editData }) => 
             }
         }
     }
+
+    useEffect(() => {
+        if (beginDate) {
+            const beginDateObj = new Date(beginDate);
+            beginDateObj.setHours(8, 0, 0, 0);
+            const formattedBeginDate = beginDateObj.toLocaleString('sv-SE').slice(0, 16);
+
+            setValue('begin_date', formattedBeginDate);
+        }
+
+        if (stypeValue === 2 && beginDate) {
+            const beginDateObj = new Date(beginDate);
+
+            beginDateObj.setHours(17, 0, 0, 0);
+            const formattedEndDate = beginDateObj.toLocaleString('sv-SE').slice(0, 16);
+
+            setValue('end_date', formattedEndDate);
+        }
+    }, [beginDate, stypeValue, setValue]);
 
     useEffect(() => {
         getRoom()
@@ -250,7 +276,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, handleEdit, editData }) => 
                     {
                         Object?.keys(editData)?.length > 0 ?
                             <h5 className="modal-title">{t('Шалгалтын хуваарь засах')}</h5>
-                        :
+                            :
                             <h5 className="modal-title">{t('Шалгалтын хуваарь бүртгэх')}</h5>
                     }
                 </ModalHeader>
@@ -447,6 +473,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, handleEdit, editData }) => 
                                         bsSize="sm"
                                         placeholder={t('Дуусах хугацаа')}
                                         type="datetime-local"
+                                        readOnly={stypeValue === 2}
                                         invalid={errors[field.name] && true}
                                     />
                                 )}
@@ -560,7 +587,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, handleEdit, editData }) => 
                         </Col> */}
                         <Col md={12} className="mt-2 text-center">
                             <Button className="me-2" color="primary" type="submit" disabled={postLoading}>
-                                {postLoading &&<Spinner size='sm' className='me-1'/>}
+                                {postLoading && <Spinner size='sm' className='me-1' />}
                                 {t('Хадгалах')}
                             </Button>
                             <Button color="secondary" type="reset" outline onClick={handleModal}>
