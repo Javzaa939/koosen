@@ -54,7 +54,7 @@ export default function LessonsModal({ open, handleModal, student, group, profes
             minWidth: '200px'
         },
         {
-            name: `${t('Шалгалтын багшийн нэр')}`,
+            name: `${t('Хянасан багш')}`,
             selector: (row) => (<span>{row?.exam_teacher_last_name} {row?.exam_teacher_first_name}</span>),
             center: true,
             header: 'exam_teacher_first_name',
@@ -62,7 +62,7 @@ export default function LessonsModal({ open, handleModal, student, group, profes
             minWidth: '200px'
         },
         {
-            name: `${t('Бусад дүгнэх хэлбэрийн багшийн нэр')}`,
+            name: `${t('Явц дүгнэсэн багш')}`,
             selector: (row) => (<span>{row?.teach_teacher_last_name} {row?.teach_teacher_first_name}</span>),
             center: true,
             header: 'teach_teacher_first_name',

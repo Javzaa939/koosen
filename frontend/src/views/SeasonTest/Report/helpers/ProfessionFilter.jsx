@@ -48,7 +48,7 @@ export default function ProfessionFilter({setSelected}) {
 				}}
 				styles={ReactSelectStyles}
 				getOptionValue={(option) => option.id}
-				getOptionLabel={(option) => option.name}
+				getOptionLabel={(option) => option.name + ' ' + option.code}
 				isLoading={isLoading}
 			/>
 		</>
