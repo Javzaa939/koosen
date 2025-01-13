@@ -15,6 +15,7 @@ import {
 	Col,
 	Input,
 	Label,
+	Alert,
 } from "reactstrap";
 
 import DataTable from "react-data-table-component";
@@ -286,6 +287,12 @@ function DetailShow(){
 							{detailOneDatas.assess === 1 ? 'Хамгийн өндөр оноо' : 'Дундаж оноо'}
 						</Col>
 					</Col>
+				</Row>
+				<Row className="mx-0">
+					<Alert color="primary" className="p-1">
+						Хэрвээ шалгалтын оноо шинэчлэсэн тохиолдолд
+						Шалгалтын хуваарь цэсний ДҮН ТАТАХ товч дээр дарж дүнг шинэчлэснээр оюутны ШАЛГАЛТЫН ОНОО шинэчлэгдэхийг анхаарна уу!!!
+					</Alert>
 				</Row>
                 <Row className="justify-content-between aling-items-center mx-0 mt-1 mb-1" sm={9}>
 					<Col
