@@ -6060,8 +6060,7 @@ class ChallengeReportAPIView(
             )
 
             if not questions:
-
-                return None
+                return answers
 
             for question in questions:
                 choice_id = answer_json.get(str(question.get('id')))
@@ -6225,10 +6224,13 @@ class ChallengeReportAPIView(
             answers = []
 
             for obj in queryset:
+                print('obj', obj)
                 if not obj.answer:
 
                     continue
-
+                
+                print(obj.answer)
+                print(obj.challenge.id)
                 answers.extend(self.parse_answers(obj.answer, obj.challenge.id))
 
             answers_stats = self.get_question_stats(answers)
@@ -6413,7 +6415,8 @@ class ChallengeReportAPIView(
                 if not obj.answer:
 
                     continue
-
+                
+                print(self.parse_answers(obj.answer, obj.challenge.id))
                 exam_results.extend(self.parse_answers(obj.answer, obj.challenge.id))
 
             # questions reliability ranges
