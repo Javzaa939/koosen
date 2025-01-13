@@ -52,7 +52,7 @@ export function getColumns (currentPage, rowsPerPage, datas, helpers_data, handl
             wrap:true,
         },
         {
-            name: `${'Авсан оноо'}`,
+            name: `${'Авсан оноо1'}`,
             selector: (row, idx) => {
                 var student_score =  0
                 if(row?.challenge?.length > 1 && helpers_data?.assess === AVG_SCORE){

@@ -65,9 +65,9 @@ export default function ReportDatatable({ report }) {
                     },
                     {
                         name: `${t('Хичээлийн тоо')}`,
-                        selector: (row) => (<span>{row?.exam_type_scored_lesson_count} {/*({row?.scored_lesson_count})*/}</span>),
+                        selector: (row) => (<span>{row?.scored_lesson_count} {/*({row?.scored_lesson_count})*/}</span>),
                         center: true,
-                        header: 'exam_type_scored_lesson_count',
+                        header: 'scored_lesson_count',
                         sortable: true
                     },
                     {
@@ -219,7 +219,7 @@ export default function ReportDatatable({ report }) {
                         {
                             ['groups', 'students'].includes(report) &&
                             <div style={{ width: '219.5px' }} className='me-1'>
-                                <GroupFilter setSelected={setSelectedGroup} exam_id={selected_exam} isShowAll={report === 'students' ? 'true' : 'false'} />
+                                <GroupFilter setSelected={setSelectedGroup} exam_id={selected_exam} profession={selected_profession} isShowAll={report === 'students' ? 'true' : 'false'} />
                             </div>
                         }
                         {
