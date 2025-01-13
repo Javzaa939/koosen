@@ -6173,22 +6173,49 @@ class ChallengeReportAPIView(
 
             if student_id:
                 queryset = (
-                    queryset.filter(student_id=student_id)
-                    .values(
-                        'score',
+                    queryset.filter(student_id=student_id).values(
                         student_first_name=F('student__first_name'),
                         student_last_name=F('student__last_name'),
                         student_code=F('student__code'),
-                        lesson_name=F('score_type__lesson_teacher__lesson__name'),
-                        teacher_first_name=F('score_type__lesson_teacher__teacher__first_name'),
-                        teacher_last_name=F('score_type__lesson_teacher__teacher__last_name'),
-                        lesson_teacher_score_type=Case(
-                            *[When(score_type__score_type=k, then=Value(v)) for k, v in Lesson_teacher_scoretype.SCORE_TYPE],
-                            default=Value(None),
-                            output_field=CharField()
-                        )
-                    )
-                    .order_by('-score')
+                        lesson_name=F('score_type__lesson_teacher__lesson__name')
+                    ).annotate(
+                        exam_score = Max(Case(
+                            When(
+                                score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO,
+                                then='score'
+                            ))
+                        ),
+                        exam_teacher_first_name = Max(Case(
+                            When(
+                                score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO,
+                                then='score_type__lesson_teacher__teacher__first_name'
+                            ))
+                        ),
+                        exam_teacher_last_name = Max(Case(
+                            When(
+                                score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO,
+                                then='score_type__lesson_teacher__teacher__last_name'
+                            ))
+                        ),
+                        teach_score = Max(Case(
+                            When(
+                                score_type__score_type=Lesson_teacher_scoretype.BUSAD,
+                                then='score'
+                            ))
+                        ),
+                        teach_teacher_first_name = Max(Case(
+                            When(
+                                score_type__score_type=Lesson_teacher_scoretype.BUSAD,
+                                then='score_type__lesson_teacher__teacher__first_name'
+                            ))
+                        ),
+                        teach_teacher_last_name = Max(Case(
+                            When(
+                                score_type__score_type=Lesson_teacher_scoretype.BUSAD,
+                                then='score_type__lesson_teacher__teacher__last_name'
+                            ))
+                        ),
+                    ).order_by('-exam_score')
                 )
 
         else:

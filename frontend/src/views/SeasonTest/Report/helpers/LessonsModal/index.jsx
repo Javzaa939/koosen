@@ -39,33 +39,33 @@ export default function LessonsModal({ open, handleModal, student, group, profes
             minWidth: '300px'
         },
         {
-            name: `${t('Дүгнэх хэлбэр')}`,
-            selector: (row) => (<span>{row?.lesson_teacher_score_type}</span>),
+            name: `${t('Шалгалтын дүн')}`,
+            selector: (row) => (<span>{Number(row?.exam_score).toFixed(1)}</span>),
             center: true,
-            header: 'lesson_teacher_score_type',
+            header: 'exam_score',
             sortable: true,
             minWidth: '200px'
         },
         {
             name: `${t('Багшийн дүн')}`,
-            selector: (row) => (<span>{Number(row?.score).toFixed(1)}</span>),
+            selector: (row) => (<span>{Number(row?.teach_score).toFixed(1)}</span>),
             center: true,
-            header: 'score',
+            header: 'teach_score',
             sortable: true
         },
         {
-            name: `${t('Багшийн нэр')}`,
-            selector: (row) => (<span>{row?.teacher_first_name}</span>),
+            name: `${t('Шалгалтын багшийн нэр')}`,
+            selector: (row) => (<span>{row?.exam_teacher_first_name} {row?.exam_teacher_last_name}</span>),
             center: true,
-            header: 'teacher_first_name',
+            header: 'exam_teacher_first_name',
             sortable: true,
             minWidth: '200px'
         },
         {
-            name: `${t('Багшийн овог')}`,
-            selector: (row) => (<span>{row?.teacher_last_name}</span>),
+            name: `${t('Бусад дүгнэх хэлбэрийн багшийн нэр')}`,
+            selector: (row) => (<span>{row?.teach_teacher_first_name} {row?.teach_teacher_last_name}</span>),
             center: true,
-            header: 'teacher_last_name',
+            header: 'teach_teacher_first_name',
             sortable: true,
             minWidth: '200px'
         },

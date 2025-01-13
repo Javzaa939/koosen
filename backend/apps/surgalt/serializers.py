@@ -1100,13 +1100,16 @@ class ChallengeReport2StudentsDetailSerializer(serializers.ModelSerializer):
     student_last_name = serializers.CharField()
     student_code = serializers.CharField()
     lesson_name = serializers.CharField()
-    teacher_first_name = serializers.CharField()
-    teacher_last_name = serializers.CharField()
-    lesson_teacher_score_type = serializers.CharField()
+    exam_score = serializers.FloatField()
+    exam_teacher_first_name = serializers.CharField()
+    exam_teacher_last_name = serializers.CharField()
+    teach_score = serializers.FloatField()
+    teach_teacher_first_name = serializers.CharField()
+    teach_teacher_last_name = serializers.CharField()
 
     class Meta:
         model = TeacherScore
-        fields = ["student_first_name", "student_last_name", "student_code", "score", "lesson_name", "teacher_first_name", "teacher_last_name", "lesson_teacher_score_type"]
+        fields = ["student_first_name", "student_last_name", "student_code", "lesson_name", "exam_score", "exam_teacher_first_name", "exam_teacher_last_name", "teach_score", "teach_teacher_first_name", "teach_teacher_last_name"]
 
 
 class ChallengeReport4Serializer(serializers.ModelSerializer):
