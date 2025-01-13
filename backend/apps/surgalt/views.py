@@ -6155,16 +6155,7 @@ class ChallengeReportAPIView(
                         ),
                         distinct=True
                     ),
-                    failed_scored_lesson_count=Count(
-                        Case(
-                            When(
-                                Q(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO) &
-                                ~Q(score__gte=18),
-                                then='score_type__lesson_teacher__lesson_id'
-                            )
-                        ),
-                        distinct=True
-                    )
+                    failed_scored_lesson_count=F('scored_lesson_count') - F('success_scored_lesson_count')
                 ).order_by('-failed_scored_lesson_count')
             )
 
@@ -6182,8 +6173,10 @@ class ChallengeReportAPIView(
                         exam_score = Max(Case(
                             When(
                                 score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO,
-                                then='score'
-                            ))
+                                then='score',
+                            ),
+                                default=Value(0), output_field=FloatField(),
+                            )
                         ),
                         exam_teacher_first_name = Max(Case(
                             When(

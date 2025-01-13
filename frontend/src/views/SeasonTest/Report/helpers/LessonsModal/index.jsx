@@ -54,16 +54,16 @@ export default function LessonsModal({ open, handleModal, student, group, profes
             minWidth: '200px'
         },
         {
-            name: `${t('Шалгалтын багшийн нэр')}`,
-            selector: (row) => (<span>{row?.exam_teacher_first_name} {row?.exam_teacher_last_name}</span>),
+            name: `${t('Хянасан багш')}`,
+            selector: (row) => (<span>{row?.exam_teacher_last_name} {row?.exam_teacher_first_name}</span>),
             center: true,
             header: 'exam_teacher_first_name',
             sortable: true,
             minWidth: '200px'
         },
         {
-            name: `${t('Бусад дүгнэх хэлбэрийн багшийн нэр')}`,
-            selector: (row) => (<span>{row?.teach_teacher_first_name} {row?.teach_teacher_last_name}</span>),
+            name: `${t('Явц дүгнэсэн багш')}`,
+            selector: (row) => (<span>{row?.teach_teacher_last_name} {row?.teach_teacher_first_name}</span>),
             center: true,
             header: 'teach_teacher_first_name',
             sortable: true,
@@ -73,6 +73,16 @@ export default function LessonsModal({ open, handleModal, student, group, profes
 
     const default_page = ['Бүгд', 10, 20, 50, 75, 100]
     // #endregion
+
+    const conditionalRowStyles = [
+        {
+            when: row => (!row?.exam_score || row?.exam_score < 18),
+            style: {
+                backgroundColor: 'rgba(242, 38, 19, 0.8)',
+                color: 'dark',
+            },
+        },
+    ];
 
     // ** Function to handle per page
     function handlePerPage(e) {
@@ -115,7 +125,7 @@ export default function LessonsModal({ open, handleModal, student, group, profes
                                     ))
                                 }
                             </Input>
-                            <GenericDataTable apiGetFunc={challengeApi.getReport} isApiGetFuncArgsDefault={true} apiGetFuncArgs={{ report_type: 'students_detail', group: group, profession: profession, student: student }} columns={columns} rows_per_page={rows_per_page} search_value={search_value} render_to_search={render_to_search} />
+                            <GenericDataTable apiGetFunc={challengeApi.getReport} isApiGetFuncArgsDefault={true} apiGetFuncArgs={{ report_type: 'students_detail', group: group, profession: profession, student: student }} columns={columns} rows_per_page={rows_per_page} search_value={search_value} render_to_search={render_to_search} conditionalRowStyles={conditionalRowStyles} />
                         </Col>
                     </Row>
                 </ModalBody>
