@@ -24,7 +24,7 @@ export default function ReportDatatable({ report }) {
     const [selected_group, setSelectedGroup] = useState('')
     const [selected_profession, setSelectedProfession] = useState('')
 
-    const [rows_per_page, setRowsPerPage] = useState(10)
+    const [rows_per_page, setRowsPerPage] = useState(50)
     const [search_value, setSearchValue] = useState('')
     const [render_to_search, setRenderToSearch] = useState(false)
 
