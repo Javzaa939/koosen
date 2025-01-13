@@ -6059,10 +6059,6 @@ class ChallengeReportAPIView(
                 .values('id', 'question', 'title__name')
             )
 
-            if not questions:
-
-                return None
-
             for question in questions:
                 choice_id = answer_json.get(str(question.get('id')))
                 is_right = False
@@ -6133,6 +6129,7 @@ class ChallengeReportAPIView(
 
                 # this is "group by" part of sql query
                 queryset.values(
+                    student_idnum=F('student_id'),
                     student_first_name=F('student__first_name'),
                     student_last_name=F('student__last_name'),
                     student_code=F('student__code')
@@ -6188,7 +6185,7 @@ class ChallengeReportAPIView(
                         lesson_teacher_score_type=Case(
                             *[When(score_type__score_type=k, then=Value(v)) for k, v in Lesson_teacher_scoretype.SCORE_TYPE],
                             default=Value(None),
-                            output_field=IntegerField()
+                            output_field=CharField()
                         )
                     )
                     .order_by('-score')

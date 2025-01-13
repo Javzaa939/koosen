@@ -12,6 +12,7 @@ import GenericDataTable from '../../helpers/GenericDataTable'
 import GroupFilter from '../../helpers/GroupFilter'
 import './style.scss'
 import ProfessionFilter from '../../helpers/ProfessionFilter'
+import LessonsModal from '../../helpers/LessonsModal'
 
 export default function ReportDatatable({ report }) {
     // other hooks
@@ -26,11 +27,14 @@ export default function ReportDatatable({ report }) {
     const [rows_per_page, setRowsPerPage] = useState(10)
     const [search_value, setSearchValue] = useState('')
     const [render_to_search, setRenderToSearch] = useState(false)
+
+    const [isShowLessonsDetail, setIsShowLessonsDetail] = useState(false)
+    const [studentId, setStudentId] = useState(null)
     // #endregion
 
     // #region primitives
     const columns = getColumns()
-    const default_page = [10, 15, 50, 75, 100]
+    const default_page = ['Бүгд', 10, 20, 50, 75, 100]
     // #endregion
 
     function getColumns() {
@@ -38,34 +42,46 @@ export default function ReportDatatable({ report }) {
             case 'students':
                 return [
                     {
-                        name: `${t('Оюутны овог')}`,
-                        selector: (row) => (<span>{row?.student_last_name}</span>),
-                        center: true
-                    },
-                    {
                         name: `${t('Оюутны нэр')}`,
                         selector: (row) => (<span>{row?.student_first_name}</span>),
-                        center: true
+                        center: true,
+                        header: 'student_first_name',
+                        sortable: true
+                    },
+                    {
+                        name: `${t('Оюутны овог')}`,
+                        selector: (row) => (<span>{row?.student_last_name}</span>),
+                        center: true,
+                        header: 'student_last_name',
+                        sortable: true
                     },
                     {
                         name: `${t('Оюутны код')}`,
                         selector: (row) => (<span>{row?.student_code}</span>),
-                        center: true
+                        center: true,
+                        header: 'student_code',
+                        sortable: true
                     },
                     {
                         name: `${t('Хичээлийн тоо')}`,
                         selector: (row) => (<span>{row?.exam_type_scored_lesson_count} {/*({row?.scored_lesson_count})*/}</span>),
-                        center: true
+                        center: true,
+                        header: 'exam_type_scored_lesson_count',
+                        sortable: true
                     },
                     {
                         name: `${t('Хичээлд амжилттай давсан тоо')}`,
                         selector: (row) => (<span>{row?.success_scored_lesson_count}</span>),
                         center: true,
-                        minWidth: '240px'
+                        minWidth: '240px',
+                        header: 'success_scored_lesson_count',
+                        sortable: true
                     },
                     {
                         name: `${t('Хичээлд унасан тоо')}`,
                         center: true,
+                        header: 'failed_scored_lesson_count',
+                        sortable: true,
                         minWidth: '200px',
                         cell: row => (
                             row?.failed_scored_lesson_count >= 3
@@ -76,6 +92,14 @@ export default function ReportDatatable({ report }) {
                                 :
                                 <span>{row?.failed_scored_lesson_count}</span>
                         ),
+                    },
+                    {
+                        name: t("Дэлгэрэнгүй"),
+                        selector: (row) => (
+                            <Button size='sm' onClick={() => handleLessonsDetail(row?.student_idnum)} color='primary'>{t("Дэлгэрэнгүй")}</Button>
+                        ),
+                        minWidth: "180px",
+                        center: true
                     },
                 ]
             // this is "OR" condition because after first case there is no return or break. To decrease code duplication
@@ -151,7 +175,7 @@ export default function ReportDatatable({ report }) {
 
     // ** Function to handle per page
     function handlePerPage(e) {
-        setRowsPerPage(parseInt(e.target.value))
+        setRowsPerPage(e.target.value === 'Бүгд' ? 10000000 : parseInt(e.target.value))
     }
 
     // ** Function to handle filter
@@ -164,86 +188,97 @@ export default function ReportDatatable({ report }) {
         if (search_value.length > 0) setRenderToSearch(!render_to_search)
     }
 
+    const handleLessonsDetail = (student_id) => {
+        setIsShowLessonsDetail(!isShowLessonsDetail)
+        setStudentId(student_id)
+    }
+
     return (
-        <div className='px-1'>
-            <Row>
-                <Col className='d-flex'>
-                    {
-                        report !== 'students' &&
-                        <div style={{ width: '219.5px' }} className='me-1'>
-                            <ExamFilter setSelected={setSelectedExam} />
-                        </div>
-                    }
-                    {
-                        ['professions', 'students'].includes(report) &&
-                        <div style={{ width: '219.5px' }} className='me-1'>
-                            <ProfessionFilter setSelected={setSelectedProfession} />
-                        </div>
-                    }
-                    {
-                        ['groups', 'students'].includes(report) &&
-                        <div style={{ width: '219.5px' }} className='me-1'>
-                            <GroupFilter setSelected={setSelectedGroup} exam_id={selected_exam} isShowAll={report === 'students' ? 'true' : 'false'} />
-                        </div>
-                    }
-                    {
-                        report === 'students' &&
-                        <div className='d-flex'>
-                            <div>
-                                <Label className="form-label" for='search-input'>
-                                    {t('Хайх')}
-                                </Label>
-                                <div className='d-flex'>
-                                    <Input
-                                        className='dataTable-filter'
-                                        type='text'
-                                        bsSize='sm'
-                                        id='search-input'
-                                        placeholder={t('Хайх')}
-                                        value={search_value}
-                                        onChange={handleFilter}
-                                        onKeyPress={e => e.key === 'Enter' && handleSearch()}
-                                        style={{ height: '30px' }}
-                                    />
-                                    <Button
-                                        size='sm'
-                                        className='ms-50'
-                                        color='primary'
-                                        onClick={handleSearch}
-                                        style={{ height: '30px' }}
-                                    >
-                                        <Search size={15} />
-                                    </Button>
+        <>
+            <div className='px-1'>
+                <Row>
+                    <Col className='d-flex'>
+                        {
+                            report !== 'students' &&
+                            <div style={{ width: '219.5px' }} className='me-1'>
+                                <ExamFilter setSelected={setSelectedExam} />
+                            </div>
+                        }
+                        {
+                            ['professions', 'students'].includes(report) &&
+                            <div style={{ width: '219.5px' }} className='me-1'>
+                                <ProfessionFilter setSelected={setSelectedProfession} />
+                            </div>
+                        }
+                        {
+                            ['groups', 'students'].includes(report) &&
+                            <div style={{ width: '219.5px' }} className='me-1'>
+                                <GroupFilter setSelected={setSelectedGroup} exam_id={selected_exam} isShowAll={report === 'students' ? 'true' : 'false'} />
+                            </div>
+                        }
+                        {
+                            report === 'students' &&
+                            <div className='d-flex'>
+                                <div>
+                                    <Label className="form-label" for='search-input'>
+                                        {t('Хайх')}
+                                    </Label>
+                                    <div className='d-flex'>
+                                        <Input
+                                            className='dataTable-filter'
+                                            type='text'
+                                            bsSize='sm'
+                                            id='search-input'
+                                            placeholder={t('Хайх')}
+                                            value={search_value}
+                                            onChange={handleFilter}
+                                            onKeyPress={e => e.key === 'Enter' && handleSearch()}
+                                            style={{ height: '30px' }}
+                                        />
+                                        <Button
+                                            size='sm'
+                                            className='ms-50'
+                                            color='primary'
+                                            onClick={handleSearch}
+                                            style={{ height: '30px' }}
+                                        >
+                                            <Search size={15} />
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    }
-                </Col>
-            </Row>
-            <Row className='mt-1'>
-                <Col>
-                    <Input
-                        type='select'
-                        bsSize='sm'
-                        style={{ height: "30px", width: "62px" }}
-                        value={rows_per_page}
-                        onChange={e => handlePerPage(e)}
-                        className='mb-50'
-                    >
-                        {
-                            default_page.map((page, idx) => (
-                                <option
-                                    key={idx}
-                                    value={page}
-                                >
-                                    {page}
-                                </option>
-                            ))
                         }
-                    </Input>
-                    <GenericDataTable apiGetFunc={challengeApi.getReport} isApiGetFuncArgsDefault={true} apiGetFuncArgs={{report_type: report, exam: selected_exam, group: selected_group, profession: selected_profession}} columns={columns} rows_per_page={rows_per_page} search_value={search_value} render_to_search={render_to_search} />
-                </Col>
-            </Row>
-        </div>
+                    </Col>
+                </Row>
+                <Row className='mt-1'>
+                    <Col>
+                        <Input
+                            type='select'
+                            bsSize='sm'
+                            style={{ height: "30px", width: "62px" }}
+                            value={rows_per_page}
+                            onChange={e => handlePerPage(e)}
+                            className='mb-50'
+                        >
+                            {
+                                default_page.map((page, idx) => (
+                                    <option
+                                        key={idx}
+                                        value={page}
+                                    >
+                                        {page}
+                                    </option>
+                                ))
+                            }
+                        </Input>
+                        <GenericDataTable apiGetFunc={challengeApi.getReport} isApiGetFuncArgsDefault={true} apiGetFuncArgs={{ report_type: report, exam: selected_exam, group: selected_group, profession: selected_profession }} columns={columns} rows_per_page={rows_per_page} search_value={search_value} render_to_search={render_to_search} />
+                    </Col>
+                </Row>
+            </div>
+            {
+                isShowLessonsDetail &&
+                <LessonsModal open={isShowLessonsDetail} handleModal={handleLessonsDetail} student={studentId} group={selected_group} profession={selected_profession} />
+            }
+        </>
     )
 }
