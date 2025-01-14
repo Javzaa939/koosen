@@ -15,7 +15,7 @@ import useApi from "@hooks/useApi";
 
 import GenericDataTable from '../GenericDataTable';
 
-export default function LessonsModal({ open, handleModal, student, group, profession}) {
+export default function LessonsModal({ open, handleModal, student, group, profession, rowData}) {
     // other hooks
     const { t } = useTranslation()
 
@@ -104,6 +104,7 @@ export default function LessonsModal({ open, handleModal, student, group, profes
             <Modal isOpen={open} toggle={handleModal} className="modal-dialog-centered modal-xl">
                 <ModalHeader className='bg-transparent pb-0' toggle={handleModal}></ModalHeader>
                 <ModalBody className="px-sm-3 pt-50 pb-3">
+                    <h5>{rowData?.student_code + ' ' + rowData?.student_first_name}</h5>
                     <Row className='mt-1'>
                         <Col>
                             <Input

@@ -6121,7 +6121,6 @@ class ChallengeReportAPIView(
             queryset = TeacherScore.objects.filter(
                 lesson_year=lesson_year,
                 lesson_season_id=lesson_season,
-                score__gt=0
             )
 
         if report_type == 'students':
@@ -6135,12 +6134,12 @@ class ChallengeReportAPIView(
                     student_code=F('student__code')
 
                 ).annotate(
-                    scored_lesson_count = Count('score_type__lesson_teacher__lesson_id', distinct=True),
+                    scored_lesson_count = Count('score_type__lesson_teacher__lesson__name', distinct=True),
                     exam_type_scored_lesson_count = Count(
                         Case(
                             When(
                                 score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO,
-                                then='score_type__lesson_teacher__lesson_id'
+                                then='score_type__lesson_teacher__lesson__name'
                             )
                         ),
                         distinct=True
@@ -6150,7 +6149,7 @@ class ChallengeReportAPIView(
                             When(
                                 Q(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO) &
                                 Q(score__gte=18),
-                                then='score_type__lesson_teacher__lesson_id'
+                                then='score_type__lesson_teacher__lesson__name'
                             )
                         ),
                         distinct=True

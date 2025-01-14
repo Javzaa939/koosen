@@ -31,6 +31,7 @@ export default function ReportDatatable({ report }) {
     const [isShowLessonsDetail, setIsShowLessonsDetail] = useState(false)
     const [studentId, setStudentId] = useState(null)
     const [apiGetFuncArgs, setApiGetFuncArgs] = useState(null)
+    const [rowData, setRowData] = useState({})
     // #endregion
 
     // #region primitives
@@ -97,7 +98,7 @@ export default function ReportDatatable({ report }) {
                     {
                         name: t("Дэлгэрэнгүй"),
                         selector: (row) => (
-                            <Button size='sm' onClick={() => handleLessonsDetail(row?.student_idnum)} color='primary'>{t("Дэлгэрэнгүй")}</Button>
+                            <Button size='sm' onClick={() => handleLessonsDetail(row?.student_idnum, row)} color='primary'>{t("Дэлгэрэнгүй")}</Button>
                         ),
                         minWidth: "180px",
                         center: true
@@ -189,9 +190,10 @@ export default function ReportDatatable({ report }) {
         if (search_value.length > 0) setRenderToSearch(!render_to_search)
     }
 
-    const handleLessonsDetail = (student_id) => {
+    const handleLessonsDetail = (student_id, row) => {
         setIsShowLessonsDetail(!isShowLessonsDetail)
         setStudentId(student_id)
+        setRowData(row)
     }
 
     // to not rerender generic datatable if data not changed
@@ -283,7 +285,7 @@ export default function ReportDatatable({ report }) {
             </div>
             {
                 isShowLessonsDetail &&
-                <LessonsModal open={isShowLessonsDetail} handleModal={handleLessonsDetail} student={studentId} group={selected_group} profession={selected_profession} />
+                <LessonsModal open={isShowLessonsDetail} handleModal={handleLessonsDetail} student={studentId} group={selected_group} profession={selected_profession} rowData={rowData}/>
             }
         </>
     )
