@@ -3,6 +3,7 @@ import traceback
 import pandas as pd
 from django.utils import timezone
 from datetime import datetime, timedelta
+import json
 
 from rest_framework import mixins
 from rest_framework import generics
@@ -39,6 +40,7 @@ from lms.models import SystemSettings
 from lms.models import LearningPlan
 from lms.models import TeacherCreditVolumePlan
 from lms.models import TeacherCreditVolumePlan_group
+from lms.models import Exam_to_student
 from lms.models import (
     Challenge,
     TeacherScore,
@@ -64,7 +66,7 @@ from .serializers import (
     ChallengeStudentsSerializer,
     TeacherScoreStudentsSerializer,
 )
-
+from surgalt.serializers import ChallengeListSerializer
 
 @permission_classes([IsAuthenticated])
 class BuildingAPIView(
@@ -1970,118 +1972,64 @@ class Exam_repeatListAPIView(
     @transaction.atomic
     def post(self, request):
         " Дахин шалгалт өгөх бүртгэл шинээр үүсгэх "
+        self.serializer_class = Exam_repeatSerializer
 
-        data = request.data
-        lesson = data.get('lesson')
-        student = data.get('student')
-        status = data.get('status')
-        lesson_year = data.get('lesson_year')
-        lesson_season = data.get('lesson_season')
-        serializer = self.get_serializer(data=data)
+        request_data = request.data
+        students = request_data.get('students')
+        teachers = request_data.get('teacher')
 
-        sid = transaction.savepoint()
+        if students:
+            request_data = remove_key_from_dict(request_data,'students')
 
+        create_students = []
+        serializer = self.get_serializer(data=request_data)
         try:
-            serializer = self.serializer_class(data=data, many=False)
-            if not serializer.is_valid():
-                transaction.savepoint_rollback(sid)
+            if serializer.is_valid(raise_exception=False):
+                try:
+                    with transaction.atomic():
+                        exam_instance = serializer.save()
+
+                        # Шалгалтын хуваарийн хүснэгтийн id
+                        exam_table_id = exam_instance.id
+                        # Багшийг олноор нэмэх
+                        Exam_repeat.objects.get(id=exam_table_id).teacher.set(teachers)
+                        if students:
+                            for student in students:
+                                if not Exam_to_student.objects.filter(exam=exam_table_id, student=student).exists():
+                                    create_students.append(
+                                        Exam_to_student(
+                                            exam_id=exam_table_id,
+                                            student_id=student
+                                        )
+                                    )
+                            Exam_to_student.objects.bulk_create(create_students)
+
+                    return request.send_info("INF_001")
+
+                except Exception:
+                    traceback.print_exc()
+
+                    return request.send_error("ERR_002", "Шалгалтын хуваарь давхцаж байна.")
+            else:
+                print(serializer.errors)
+
                 return request.send_error_valid(serializer.errors)
 
-            score_qs = ScoreRegister.objects.filter(
-                student=student,
-                lesson=lesson,
-                is_delete=False
-            ).exclude(lesson_year=lesson_year,lesson_season=lesson_season).first()
+        except Exception as e:
+            traceback.print_exc()
 
-            # ---------------- Шууд тооцох шалгалт ---------------
-            if int(status) == Exam_repeat.ALLOW_EXAM and score_qs:
-                lesson_name = score_qs.lesson.name
-                msg = "'{lesson_name}' хичээлийг өмнө нь үзсэн учир шууд тооцох шалгалтыг өгөх боломжгүй".format(lesson_name=lesson_name)
-
-                return request.send_error("ERR_002", msg)
-
-            # --------------- Нөхөн шалгалт ----------------
-            if int(status) == Exam_repeat.REPLACE_EXAM:
-                if score_qs:
-                    exam_score = score_qs.exam_score
-                    lesson_name = score_qs.lesson.name
-
-                    if exam_score:
-                        msg = "'{lesson_name}' хичээлийн шалгалтын оноо '{score}' байгаа учир нөхөн шалгалтыг өгөх боломжгүй" \
-                            .format(
-                                lesson_name=lesson_name,
-                                score=exam_score
-                            )
-
-                        return request.send_error("ERR_002", msg)
-
-                else:
-                    return request.send_error("ERR_002", "Тухайн хичээл дээр нөхөн шалгалт өгөх боломжгүй байна")
-
-            # --------------- Дүн ахиулах шалгалт ----------------
-            if int(status) == Exam_repeat.UPGRADE_SCORE and not score_qs:
-
-                return request.send_error("ERR_002", "Дүн ахиулах шалгалтыг зөвхөн өмнө нь хичээлийг үзсэн үед өгөх боломжтой.")
-
-            self.create(request).data
-
-        except Exception:
-            return request.send_error("ERR_002")
-
-        return request.send_info("INF_001")
+            return request.send_error('ERR_002', e.__str__())
 
     @transaction.atomic
     def put(self, request, pk=None):
         " Дахин шалгалт өгөх бүртгэл шинээр үүсгэх "
 
         request_data = request.data
-        lesson = request_data.get('lesson')
-        student = request_data.get('student')
-        status = request_data.get('status')
-        lesson_year = request_data.get('lesson_year')
-        lesson_season = request_data.get('lesson_season')
         instance = self.get_object()
 
         serializer = self.get_serializer(instance, data=request_data)
 
         try:
-            if not serializer.is_valid(raise_exception=False):
-                return request.send_error_valid(serializer.errors)
-
-            score_qs = ScoreRegister.objects.filter(
-                    student=student,
-                    lesson=lesson,
-                    is_delete=False,
-                ).exclude(lesson_year=lesson_year,lesson_season=lesson_season).first()
-
-            # ---------------- Шууд тооцох шалгалт ---------------
-            if int(status) == Exam_repeat.ALLOW_EXAM and score_qs:
-                lesson_name = score_qs.lesson.name
-                msg = "'{lesson_name}' хичээлийг өмнө нь үзсэн учир шууд тооцох шалгалтыг өгөх боломжгүй".format(lesson_name=lesson_name)
-
-                return request.send_error("ERR_002", msg)
-
-            # --------------- Нөхөн шалгалт ----------------
-            if int(status) == Exam_repeat.REPLACE_EXAM:
-                if score_qs:
-                    exam_score = score_qs.exam_score
-                    lesson_name = score_qs.lesson.name
-
-                    if exam_score:
-                        msg = "'{lesson_name}' хичээлийн шалгалтын оноо '{score}' байгаа учир нөхөн шалгалтыг өгөх боломжгүй" \
-                            .format(
-                                lesson_name=lesson_name,
-                                score=exam_score
-                            )
-
-                        return request.send_error("ERR_002", msg)
-                else:
-                    return request.send_error("ERR_002", "Тухайн хичээл дээр нөхөн шалгалт өгөх боломжгүй байна")
-
-            # --------------- Дүн ахиулах шалгалт ----------------
-            if int(status) == Exam_repeat.UPGRADE_SCORE and not score_qs:
-                return request.send_error("ERR_002", "Дүн ахиулах шалгалтыг зөвхөн өмнө нь хичээлийг үзсэн үед өгөх боломжтой.")
-
             self.update(request).data
 
         except Exception as e:
@@ -2096,14 +2044,17 @@ class Exam_repeatListAPIView(
         exam_qs = self.queryset.filter(id=pk).first()
         if exam_qs:
             lesson = exam_qs.lesson
-            student = exam_qs.student
             status = exam_qs.status
+            id = exam_qs.id
             lesson_year = exam_qs.lesson_year
             lesson_season = exam_qs.lesson_season
+            students = Exam_to_student.objects.filter(exam=id).values_list('student',flat=True)
 
-            score_qs = ScoreRegister.objects.filter(lesson=lesson,student=student,status=int(status)+4,lesson_year=lesson_year,lesson_season=lesson_season,is_delete=False)
+            score_qs = ScoreRegister.objects.filter(lesson=lesson,student_id__in=students,status=int(status)+4,lesson_year=lesson_year,lesson_season=lesson_season,is_delete=False)
             if score_qs:
                 return request.send_error("ERR_003", 'Энэ шалгалтын дүн нь орсон тул устгах боломжгүй.')
+
+            Exam_to_student.objects.filter(exam=id).delete()
 
         self.destroy(request, pk)
         return request.send_info("INF_003")
@@ -3367,3 +3318,73 @@ class ExamTimeTableScoreListAPIView(
         challenge_student_data = TeacherScoreStudentsSerializer(teach_score, many=True).data
 
         return request.send_info("INF_021", challenge_student_data)
+
+@permission_classes([IsAuthenticated])
+class Exam_repeatTestListAPIView(
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    generics.GenericAPIView
+):
+    queryset = Challenge.objects.all()
+
+    def get(self, request, pk=None):
+        self.serializer_class = ChallengeListSerializer
+
+        if pk:
+            queryset = self.queryset.filter(lesson=pk)
+            repeat = self.serializer_class(queryset,many=True).data
+            return request.send_data(repeat)
+
+        all_result = self.list(request).data
+        return request.send_data(all_result)
+
+@permission_classes([IsAuthenticated])
+class ExamrepeatStudentsAPIView(
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    generics.GenericAPIView
+):
+    def get(self , request, pk=None):
+        if pk:
+            students = Exam_to_student.objects.filter(exam=pk).select_related('student')
+
+            datas = [
+                {
+                    "student_id": obj.student.id,
+                    "code": obj.student.code,
+                    "student_name": f"{obj.student.code}-{obj.student.last_name[0]}.{obj.student.first_name}",
+                }
+                for obj in students
+            ]
+            return request.send_data(datas)
+
+        return request.send_error("ERR_004")
+
+    def post(self, request):
+        data = request.data
+        try:
+            students_below_18 = ChallengeStudents.objects.filter(
+                Q(score__lt=18) | Q(score__isnull=True),
+                challenge_id__in=data
+            ).select_related('student')
+
+            datas = [
+                {
+                    "student_id": obj.student.id,
+                    "code": obj.student.code,
+                    "student_name": f"{obj.student.code}-{obj.student.last_name[0]}.{obj.student.first_name} ({obj.score if obj.score is not None else 'Шалгалт өгөөгүй'})",
+                    "challenge_id": obj.challenge.id,
+                    "challenge_name": obj.challenge.title,
+                }
+                for obj in students_below_18
+            ]
+            return request.send_data(datas)
+
+        except Exception as e:
+            return request.send_error(f"An error occurred: {str(e)}")

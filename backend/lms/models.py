@@ -1164,6 +1164,17 @@ class Exam_to_group(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
 class Exam_repeat(models.Model):
+    """ Шалгалтын хуваарь """
+
+    SORIL = 1
+    AMAN = 2
+    DASGAL = 3
+
+    EXAM_TYPE = (
+        (SORIL, 'Сорил'),
+        (AMAN, 'Аман шалгалт'),
+        (DASGAL, 'Дасгал'),
+    )
 
     REPLACE_EXAM = 1
     ALLOW_EXAM = 2
@@ -1176,14 +1187,39 @@ class Exam_repeat(models.Model):
         (UPGRADE_SCORE, 'Дүн ахиулах шалгалт'),
         (OTHER, 'Бусад'),
     )
-    student = models.ForeignKey(Student, on_delete=models.PROTECT, verbose_name='Оюутан')
+
     lesson_year = models.CharField(max_length=10, verbose_name="Хичээлийн жил")
     lesson_season = models.ForeignKey(Season, on_delete=models.PROTECT, verbose_name="Улирал")
     lesson = models.ForeignKey(LessonStandart, on_delete=models.PROTECT, verbose_name="Хичээл")
+    is_online = models.BooleanField(default=False, verbose_name="Онлайн шалгалт эсэх")
+    stype = models.IntegerField(choices=EXAM_TYPE, default=SORIL, verbose_name='Шалгалтын төрөл')
     status = models.PositiveIntegerField(choices=EXAM_STATUS, db_index=True, default=OTHER, verbose_name="Шалгалтын төлөв")
+    room = models.ForeignKey(Room, on_delete=models.PROTECT, null=True, verbose_name="Шалгалт авах өрөө")
+    room_name = models.CharField(null=True, verbose_name='Анги танхимийн нэр', max_length=255)
+    begin_date = models.DateTimeField(null=True, verbose_name="Шалгалт эхлэх хугацаа")
+    end_date = models.DateTimeField(null=True, verbose_name="Шалгалт дуусах хугацаа")
+
+    teacher = models.ManyToManyField(Teachers, verbose_name="Хянах багш")
     school = models.ForeignKey(SubOrgs, on_delete=models.SET_NULL, null=True, verbose_name="Сургууль")
     created_user = models.ForeignKey(User, related_name='er_cr_user', on_delete=models.SET_NULL, null=True, verbose_name="Бүртгэсэн хэрэглэгч")
     updated_user = models.ForeignKey(User, related_name='er_up_user', on_delete=models.SET_NULL, null=True, verbose_name="Зассан хэрэглэгч")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+class Exam_to_student(models.Model):
+    """ Дахин шалгалт өгөх о """
+
+    ACTIVE = 1
+    INACTIVE = 2
+
+    EXAM_STATUS = (
+        (ACTIVE, 'Шалгалт өгөх'),
+        (INACTIVE, 'Шалгалтаас хасагдсан'),
+    )
+    exam = models.ForeignKey(Exam_repeat, on_delete=models.CASCADE, verbose_name="Шалгалтын хуваарь")
+    student = models.ForeignKey(Student, on_delete=models.PROTECT, verbose_name="Оюутан", null=True)
+    status = models.PositiveIntegerField(choices=EXAM_STATUS, db_index=True, default=ACTIVE, verbose_name="Шалгалтын төлөв")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
