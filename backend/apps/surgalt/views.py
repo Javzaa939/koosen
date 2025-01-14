@@ -6117,10 +6117,13 @@ class ChallengeReportAPIView(
         lesson_year, lesson_season = get_active_year_season()
         queryset = None
 
+        lesson_ids = ExamTimeTable.objects.filter(lesson_year=lesson_year, lesson_season_id=lesson_season).values_list('lesson', flat=True)
         if report_type in ['students', 'students_detail']:
             queryset = TeacherScore.objects.filter(
                 lesson_year=lesson_year,
                 lesson_season_id=lesson_season,
+                score__gt=0,
+                score_type__lesson_teacher__lesson__in=lesson_ids
             )
 
         if report_type == 'students':
@@ -6160,10 +6163,11 @@ class ChallengeReportAPIView(
 
         elif report_type == 'students_detail':
             student_id = request.query_params.get('student')
+            lesson_ids = ExamTimeTable.objects.filter(lesson_year=lesson_year, lesson_season_id=lesson_season).values_list('lesson', flat=True)
 
             if student_id:
                 queryset = (
-                    queryset.filter(student_id=student_id).values(
+                    queryset.filter(student_id=student_id, score_type__lesson_teacher__lesson__in=lesson_ids).values(
                         student_first_name=F('student__first_name'),
                         student_last_name=F('student__last_name'),
                         student_code=F('student__code'),
