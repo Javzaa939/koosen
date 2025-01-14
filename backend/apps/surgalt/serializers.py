@@ -1059,6 +1059,11 @@ class ChallengeStudentsSerializer(serializers.ModelSerializer):
                 # Тестэн доторх асуултууд
                 for question_id, choice_id in answer_json.items():
                     #Асуултан доторх хариулт
+
+                    # NOTE: choice_id нь array ирээд алдаа гараад байсан учир энэ нөхцлийг бичив. javzaa bichsen
+                    if choice_id and isinstance(choice_id, list):
+                        choice_id = choice_id[0]
+
                     choice_obj = QuestionChoices.objects.filter(id=choice_id).values('score','challengequestions__question').first()
 
                     # choice дотроо is_right-г үүсгэнэ
