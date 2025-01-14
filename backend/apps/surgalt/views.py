@@ -1492,6 +1492,10 @@ class ChallengeAPIView(
         time_type = request.query_params.get('type')
         teacher_id = request.query_params.get('teacher')
         season = request.query_params.get('season')
+        school = request.query_params.get('school')
+
+        if school:
+            self.queryset = self.queryset.filter(lesson__school=school)
 
         if teacher_id:
             self.queryset = self.queryset.filter(created_by=teacher_id)
@@ -6109,6 +6113,7 @@ class ChallengeReportAPIView(
     def get_queryset(self):
         request = self.request
         report_type = request.query_params.get('report_type')
+        school_id = request.query_params.get('school')
 
         if not report_type:
 
@@ -6117,7 +6122,11 @@ class ChallengeReportAPIView(
         lesson_year, lesson_season = get_active_year_season()
         queryset = None
 
-        lesson_ids = ExamTimeTable.objects.filter(lesson_year=lesson_year, lesson_season_id=lesson_season).values_list('lesson', flat=True)
+        exam_qs = ExamTimeTable.objects.filter(lesson_year=lesson_year, lesson_season_id=lesson_season)
+        if school_id:
+            exam_qs = exam_qs.filter(lesson__school=school_id)
+
+        lesson_ids = exam_qs.values_list('lesson', flat=True)
         if report_type in ['students', 'students_detail']:
             queryset = TeacherScore.objects.filter(
                 lesson_year=lesson_year,
