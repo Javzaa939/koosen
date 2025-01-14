@@ -71,6 +71,7 @@ urlpatterns = [
     path('group/lesson/<int:group>/', GroupLessonAPIView.as_view()),
     path('group/exam/', TestGroupAPIView.as_view()),
     path('group/exam-to-group/lesson/<int:lesson>/', ExamToGroupGroupLessonAPIView.as_view()),
+    path('group/teacherscore/', GroupByTeacherScoreAPIView.as_view()),
 
     # Оюутны чөлөөний бүртгэл
     path('leave/', StudentLeaveAPIView.as_view()),

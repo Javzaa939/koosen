@@ -749,7 +749,8 @@ function useApi(isDisplay=false) {
 
 				getLesson: (id) => instance.get(`/student/group/lesson/${id}/`),
 				getExam: (id='', isShowAll='', profession='') => instance.get(`/student/group/exam/?exam=${id}&isShowAll=${isShowAll}&profession=${profession}`),
-				getLessonFromExamToGroup: ({id=''}) => instance.get(`/student/group/exam-to-group/lesson/${id}/`)
+				getLessonFromExamToGroup: ({id=''}) => instance.get(`/student/group/exam-to-group/lesson/${id}/`),
+				getGroupByTeacherScore: (profession='') => instance.get(`/student/group/teacherscore/?profession=${profession}`),
 			},
 			/** Оюутны гэр бүлийн байдал */
 			family: {

@@ -13,6 +13,7 @@ import GroupFilter from '../../helpers/GroupFilter'
 import './style.scss'
 import ProfessionFilter from '../../helpers/ProfessionFilter'
 import LessonsModal from '../../helpers/LessonsModal'
+import TeacherScoreGroupFilter from '../../helpers/TeacherScoreGroupFilter'
 
 export default function ReportDatatable({ report }) {
     // other hooks
@@ -219,7 +220,13 @@ export default function ReportDatatable({ report }) {
                             </div>
                         }
                         {
-                            ['groups', 'students'].includes(report) &&
+                            ['students'].includes(report) &&
+                            <div style={{ width: '219.5px' }} className='me-1'>
+                                <TeacherScoreGroupFilter setSelected={setSelectedGroup} profession={selected_profession} />
+                            </div>
+                        }
+                        {
+                            ['groups'].includes(report) &&
                             <div style={{ width: '219.5px' }} className='me-1'>
                                 <GroupFilter setSelected={setSelectedGroup} exam_id={selected_exam} profession={selected_profession} isShowAll={report === 'students' ? 'true' : 'false'} />
                             </div>

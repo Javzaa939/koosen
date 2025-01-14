@@ -334,10 +334,11 @@ class TeacherScoreListPrintSerializer(serializers.ModelSerializer):
     exam_score = serializers.SerializerMethodField()
     grade_letter = serializers.SerializerMethodField()
     total = serializers.SerializerMethodField()
+    is_exam = serializers.SerializerMethodField()
 
     class Meta:
         model = TeacherScore
-        fields = 'id', 'full_name', 'score', 'lesson_name', 'lesson_year', 'lesson_season', 'lesson_kredit', 'teacher_name', 'teacher_org_position', 'teacher_score_updated_at', 'exam_committee', 'score_type', 'teacher_score', 'exam_score', 'grade_letter', 'total'
+        fields = 'id', 'full_name', 'score', 'lesson_name', 'lesson_year', 'lesson_season', 'lesson_kredit', 'teacher_name', 'teacher_org_position', 'teacher_score_updated_at', 'exam_committee', 'score_type', 'teacher_score', 'exam_score', 'grade_letter', 'total', 'is_exam'
 
     def get_full_name(self, obj):
 
@@ -390,6 +391,15 @@ class TeacherScoreListPrintSerializer(serializers.ModelSerializer):
             score = score_obj.score
 
         return round(score, 1)
+
+    def get_is_exam(self, obj):
+        """ Шалгалт өгсөн эсэх """
+
+        is_exam = False
+        if TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson, score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).exists():
+            is_exam = True
+
+        return is_exam
 
     def get_grade_letter(self, obj):
         assessment = ''
