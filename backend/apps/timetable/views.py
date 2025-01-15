@@ -19,7 +19,7 @@ from main.utils.function.utils import has_permission, get_error_obj, get_fullNam
 from django.db import transaction
 from django.conf import settings
 from django.db import connection
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Case, When,F
 
 from core.models import Employee, Teachers, SubOrgs
 from lms.models import Room
@@ -3379,16 +3379,36 @@ class ExamrepeatStudentsAPIView(
             groups = Exam_to_group.objects.filter(exam__in=data).values_list('group_id',flat=True)
             student_ids = Student.objects.filter(group_id__in=groups).values_list('id',flat=True)
 
+            exam_qs = ExamTimeTable.objects.values_list('lesson',flat=True)
+
+            # Нийт 3 аас илүү хичээл дээр унасан сурагчид
+            exclude_qs = TeacherScore.objects.filter(score__gt=0,student_id__in=student_ids,score_type__lesson_teacher__lesson__in=exam_qs).values('student_id').annotate(
+                    scored_lesson_count=Count('score_type__lesson_teacher__lesson__name', distinct=True),
+                    success_scored_lesson_count=Count(
+                        Case(
+                            When(
+                                Q(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO) &
+                                Q(score__gte=18),
+                                then='score_type__lesson_teacher__lesson__name'
+                            )
+                        ),
+                        distinct=True
+                    ),
+                    failed_scored_lesson_count=F('scored_lesson_count') - F('success_scored_lesson_count')
+                    ).filter(failed_scored_lesson_count__gte=3).values_list('student_id',flat=True)
+
+            excluded_student_ids = list(exclude_qs)
+
             queryset = TeacherScore.objects.filter(
                 Q(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO) &
-                Q(score__lte=18),
+                (Q(score__lt=18) | Q(score__isnull=True)),
                 score_type__lesson_teacher__lesson=pk,
                 student_id__in=student_ids
-            )
-            failed_scores = queryset.values('student_id', 'student__first_name','student__last_name','student__code','score','student__group__name','student__group__profession__name').annotate(fail_count=Count('id')).filter(fail_count__lt=3).order_by('score')
-            failed_scores_list = list(failed_scores)
+            ).exclude(student_id__in=excluded_student_ids)
 
-            return request.send_data(failed_scores_list)
+            return_list = queryset.values('student_id', 'student__first_name','student__last_name','student__code','score','student__group__name','student__group__profession__name').order_by('score')
+
+            return request.send_data(list(return_list))
         except Exception as e:
             return request.send_error(f"An error occurred: {str(e)}")
 
