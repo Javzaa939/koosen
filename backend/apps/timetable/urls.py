@@ -56,5 +56,6 @@ urlpatterns = [
     path('exam_repeat/list_exam/students/', ExamrepeatStudentsAPIView.as_view()),
     path('exam_repeat/list_exam/students/<int:pk>/', ExamrepeatStudentsAPIView.as_view()),
     path('exam_repeat/<int:pk>/', Exam_repeatListAPIView.as_view()),
-    path('exam_repeat/score/<int:student>/<int:lesson>/', ExamRepeatStudentScoreListAPIView.as_view())
+    path('exam_repeat/score/<int:student>/<int:lesson>/', ExamRepeatStudentScoreListAPIView.as_view()),
+    path('exam_repeat/score/<int:pk>/', ExamRepeatTimeTableScoreListAPIView.as_view()),
 ]

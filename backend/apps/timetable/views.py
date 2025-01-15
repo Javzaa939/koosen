@@ -1939,11 +1939,12 @@ class Exam_repeatListAPIView(
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
-    search_fields = ['student__code', 'student__last_name', 'student__first_name','lesson__name', 'lesson__code']
+    search_fields = ['lesson__name', 'lesson__code', 'teacher__first_name','teacher__last_name']
 
     def get_queryset(self):
         queryset = self.queryset
         status = self.request.query_params.get('status')
+        teacher = self.request.query_params.get('teacher')
         lesson_year = self.request.query_params.get('lesson_year')
         lesson_season = self.request.query_params.get('lesson_season')
 
@@ -1955,6 +1956,9 @@ class Exam_repeatListAPIView(
 
         if status:
             queryset = queryset.filter(status=status)
+
+        if teacher:
+            queryset = queryset.filter(teacher=teacher)
 
         return queryset
 
@@ -3388,3 +3392,96 @@ class ExamrepeatStudentsAPIView(
 
         except Exception as e:
             return request.send_error(f"An error occurred: {str(e)}")
+
+@permission_classes([IsAuthenticated])
+class ExamRepeatTimeTableScoreListAPIView(
+    mixins.ListModelMixin,
+    generics.GenericAPIView
+):
+    """ Шалгалтын дүн татах """
+
+    queryset = Exam_repeat.objects.all()
+    serializer_class = ExamTimeTableSerializer
+
+    @has_permission(must_permissions=['lms-timetable-exam-score-download'])
+    @transaction.atomic()
+    def put(self, request, pk=None):
+        """
+            pk- Exam-repeat id
+        """
+
+        sid = transaction.savepoint()
+        challenge_student_data = list()
+
+        try:
+
+            lesson = self.request.query_params.get("lesson")
+            lesson_year = self.request.query_params.get("lesson_year")
+            lesson_season = self.request.query_params.get("lesson_season")
+
+            instance = self.get_object()
+
+            # Шалгалт өгсөн сурагчид
+            exam_students = Exam_to_student.objects.filter(exam=instance).values_list('student', flat=True)
+
+            # Онлайнаар шалгалт өгсөн бол энд дүн нь байгаа
+            challenge_qs = Challenge.objects.filter(challenge_type=Challenge.SEMESTR_EXAM, lesson=lesson, lesson_year=lesson_year, lesson_season=lesson_season)
+            challenge_students = ChallengeStudents.objects.filter(challenge__in=challenge_qs, student__in=exam_students)
+
+            if challenge_students.count() == 0:
+                return request.send_data([])
+
+            scoretype_qs = Lesson_teacher_scoretype.objects.filter(score_type=Lesson_teacher_scoretype.BUSAD, lesson_teacher__lesson=lesson).first()
+
+            # 70-н оноо оруулсан багш
+            other_lesson_teacher = scoretype_qs.lesson_teacher if scoretype_qs else None
+
+            scoretype = Lesson_teacher_scoretype.objects.filter(lesson_teacher=other_lesson_teacher, score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).first()
+
+            if not scoretype:
+                scoretype = Lesson_teacher_scoretype.objects.create(
+                    lesson_teacher=other_lesson_teacher,
+                    score_type=Lesson_teacher_scoretype.SHALGALT_ONOO,
+                    score=30
+                )
+
+            for challenge_student in challenge_students:
+                student = challenge_student.student
+                score = challenge_student.score or 0                     # авсан оноо
+                take_score = challenge_student.take_score or 0           # авах оноо
+
+                exam_score = 0
+                if score != 0:
+                    # 30 оноонд хувилсан
+                    # (Авсан оноо * Хувиргах оноо) / авах оноо
+                    exam_score = (score * 30) / take_score
+
+                teach_score = TeacherScore.objects.filter(score_type=scoretype, student=student, lesson_season=lesson_season, lesson_year=lesson_year)
+
+                # Дүн орчихсон байвал update хийнэ
+                if teach_score:
+                    teach_score.update(
+                        score=float(exam_score) if exam_score else 0,
+                        lesson_year=lesson_year,
+                        lesson_season=lesson_season
+                    )
+
+                    teach_score = teach_score.first()
+                else:
+                    teach_score = TeacherScore.objects.create(
+                        lesson_year=lesson_year,
+                        lesson_season_id=lesson_season,
+                        student=student,
+                        score_type=scoretype,
+                        score=float(exam_score) if exam_score else 0
+                    )
+
+        except Exception as e:
+            print('e', e)
+            return request.send_error("ERR_002", "Шалгалтын дүн татахад алдаа гарлаа")
+
+        challenge_students_ids = challenge_students.values_list("student_id", flat=True)
+        teach_score = TeacherScore.objects.filter(score_type=scoretype, student__in=challenge_students_ids, lesson_season=lesson_season, lesson_year=lesson_year)
+        challenge_student_data = TeacherScoreStudentsSerializer(teach_score, many=True).data
+
+        return request.send_info("INF_021", challenge_student_data)

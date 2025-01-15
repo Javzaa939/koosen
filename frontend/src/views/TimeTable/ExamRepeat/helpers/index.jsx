@@ -5,7 +5,7 @@ import useModal from "@hooks/useModal"
 import { Badge, UncontrolledTooltip } from "reactstrap";
 
 // Хүснэгтийн баганууд
-export function getColumns (currentPage, rowsPerPage, datas, handleEditModal,handleDelete,  user) {
+export function getColumns (currentPage, rowsPerPage, datas, handleEditModal,handleDelete,  user, handlePrint,handleDownloadScore) {
 
 	const { showWarning } = useModal()
 
@@ -108,6 +108,29 @@ export function getColumns (currentPage, rowsPerPage, datas, handleEditModal,han
 			minWidth: "250px",
 			selector: (row) => (
 				<div className="text-center" style={{ width: "auto" }}>
+					{
+						// Шалгалт аваад дууссан мөн онлайн шалгалт байгаад сорил төлөвтэй байна
+						row?.stype === 1 && row?.is_online && row?.is_expired && user?.permissions?.includes('lms-timetable-exam-score-download') &&
+						<>
+							<a
+								role="button"
+								className='ms-25'
+								onClick={() => showWarning({
+									header: {
+										title: `Шалгалтын дүн татах`,
+									},
+									question: `Та энэ шалгалтын дүн татахдаа итгэлтэй байна уу?`,
+									onClick: () => handleDownloadScore(row),
+									btnText: 'Дүн татах',
+
+								})}
+								id={`downloadScore${row?.id}`}
+							>
+								<Badge color="light-primary" pill><DownloadCloud width={"20px"} /></Badge>
+							</a>
+							<UncontrolledTooltip placement='top' target={`downloadScore${row.id}`} >Дүн татах</UncontrolledTooltip>
+						</>
+					}
 					<a
 						id={`requestExamDetail${row.id}`}
 						className='ms-25'
@@ -137,6 +160,14 @@ export function getColumns (currentPage, rowsPerPage, datas, handleEditModal,han
 								<Badge color="light-danger" pill><XSquare width={"20px"} /></Badge>
 							</a>
 							<UncontrolledTooltip placement='top' target={`examDelete${row.id}`} >Устгах</UncontrolledTooltip>
+						</>
+					}
+					{
+						user?.permissions?.includes('lms-timetable-exam-score-download') &&
+						<>
+							<a className='ms-1'>
+								<Printer width={"15px"} role='button'  onClick={() => {handlePrint(row?.id , row?.selected_students)}} />
+							</a>
 						</>
 					}
 				</div>

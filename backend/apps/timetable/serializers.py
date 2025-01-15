@@ -10,6 +10,7 @@ from lms.models import TimeTable_to_group, TimeTable_to_student
 from lms.models import Group
 from lms.models import Student
 from lms.models import Exam_to_group
+from lms.models import Exam_to_student
 from lms.models import ExamTimeTable
 from lms.models import LessonStandart, ScoreRegister, Score, CalculatedGpaOfDiploma, StudentRegister
 from lms.models import Exam_repeat, TeacherCreditVolumePlan, TeacherCreditVolumePlan_group, Teachers, ChallengeStudents, TeacherScore
@@ -800,6 +801,8 @@ class Exam_repeatLiseSerializer(serializers.ModelSerializer):
     teacher_names = serializers.SerializerMethodField()
     stype_name = serializers.SerializerMethodField(read_only=True)
     status_name = serializers.SerializerMethodField(read_only=True)
+    selected_students = serializers.SerializerMethodField()
+    is_expired = serializers.SerializerMethodField()
 
     class Meta:
         model = Exam_repeat
@@ -820,6 +823,15 @@ class Exam_repeatLiseSerializer(serializers.ModelSerializer):
 
     def get_lesson_name(self,obj):
         return f'{obj.lesson.code} {obj.lesson.name}'
+
+    def get_selected_students(self, obj):
+        students = Exam_to_student.objects.filter(exam=obj.id).values_list('student_id', flat=True)
+        return list(students)
+
+    def get_is_expired(self, obj):
+        is_expired = datetime.now() >= obj.end_date
+
+        return is_expired
 
 class StudentScoreListSerializer(serializers.ModelSerializer):
     assessment = serializers.CharField(source="assessment.assesment", default='')

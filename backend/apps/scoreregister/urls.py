@@ -28,6 +28,7 @@ urlpatterns = [
 
     # Score info. Shows students list by lesson. Print button in "Цагийн хуваарь/Шалгалтын хуваарь" page
     path('print/', TeacherLessonScorePrintAPIView.as_view()),
+    path('print/re_exam/', ReExamTeacherLessonScorePrintAPIView.as_view()),
 
     # дүнгийн тодорхойлолт
     path('print/<int:student>/', ScoreRegisterPrintAPIView.as_view()),

@@ -921,8 +921,8 @@ function useApi(isDisplay=false) {
 			},
 			// Дахин шалгалтын бүртгэл
 			re_exam:{
-				get:(limit, page, sort, search, status) =>
-					instance.get(`/timetable/exam_repeat/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&status=${status}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&school=${school_id}`),
+				get:(limit, page, sort, search, status,teacher) =>
+					instance.get(`/timetable/exam_repeat/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&status=${status}&teacher=${teacher}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&school=${school_id}`),
 				post: data => instance.post('/timetable/exam_repeat/', data),
 				getOne: (pk) => instance.get(`/timetable/exam_repeat/${pk}/`),
 				put: (data, pk) => instance.put(`/timetable/exam_repeat/${pk}/`, data),
@@ -930,6 +930,7 @@ function useApi(isDisplay=false) {
 				getExamsList: (pk) => instance.get(`/timetable/exam_repeat/list_exam/${pk}/`),
 				getExamStudent: (cdata) => instance.post(`/timetable/exam_repeat/list_exam/students/`,cdata),
 				getExamStudentList: (pk) => instance.get(`/timetable/exam_repeat/list_exam/students/${pk}/`,),
+				getStudentExamScore:(pk, lesson) => instance.put(`/timetable/exam_repeat/score/${pk}/?lesson_year=${cyear_name}&lesson_season=${cseason_id}&lesson=${lesson}`),
 
 				// Тухайн оюутаны хичээлийн дүнг харуулах
 				getStudentLessonScore:(student, lesson) => instance.get(`/timetable/exam_repeat/score/${student}/${lesson}/?lesson_year=${cyear_name}&lesson_season=${cseason_id}`),
@@ -990,7 +991,8 @@ function useApi(isDisplay=false) {
 		score: {
 			print: {
 				get: (studentId, year, season) => instance.get(`/score/print/${studentId}/?year=${year}&season=${season}`),
-				getByLesson: (lesson_id='', data) => instance.put(`/score/print/?exam=${lesson_id}`, data)
+				getByLesson: (lesson_id='', data) => instance.put(`/score/print/?exam=${lesson_id}`, data),
+				getByReExam: (lesson_id='', data) => instance.put(`/score/print/re_exam/?exam=${lesson_id}`, data)
 			},
 			correspond:{
 				get: (limit, page, sort, search) =>
