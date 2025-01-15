@@ -796,26 +796,30 @@ class Exam_repeatSerializer(serializers.ModelSerializer):
 
 # Дахин шалгалтын жагсаалт
 class Exam_repeatLiseSerializer(serializers.ModelSerializer):
-    student = StudentListSerializer(many=False)
-    lesson = LessonStandartSerialzier(many=False)
+    lesson_name = serializers.SerializerMethodField()
+    teacher_names = serializers.SerializerMethodField()
+    stype_name = serializers.SerializerMethodField(read_only=True)
     status_name = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Exam_repeat
         fields = "__all__"
 
+    def get_stype_name(self, obj):
+        return obj.get_stype_display()
+
+    def get_teacher_names(self, obj):
+            teachers = Teachers.objects.filter(id__in=obj.teacher.values_list('id', flat=True))
+            names = []
+            for teacher in teachers:
+                names.append(teacher.full_name)
+            return ', '.join(names)
+
     def get_status_name(self, obj):
-        status_id = obj.status
-        status_name = ''
+        return obj.get_status_display()
 
-        status_list = dict(self.fields['status'].choices)
-        if status_list:
-            for key, value in status_list.items():
-                if key == status_id:
-                    status_name = value
-
-        return status_name
-
+    def get_lesson_name(self,obj):
+        return f'{obj.lesson.code} {obj.lesson.name}'
 
 class StudentScoreListSerializer(serializers.ModelSerializer):
     assessment = serializers.CharField(source="assessment.assesment", default='')
