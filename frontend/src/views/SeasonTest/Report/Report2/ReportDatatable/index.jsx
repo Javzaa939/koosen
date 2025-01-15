@@ -13,6 +13,7 @@ import GroupFilter from '../../helpers/GroupFilter'
 import './style.scss'
 import ProfessionFilter from '../../helpers/ProfessionFilter'
 import LessonsModal from '../../helpers/LessonsModal'
+import TeacherScoreGroupFilter from '../../helpers/TeacherScoreGroupFilter'
 
 export default function ReportDatatable({ report }) {
     // other hooks
@@ -31,6 +32,7 @@ export default function ReportDatatable({ report }) {
     const [isShowLessonsDetail, setIsShowLessonsDetail] = useState(false)
     const [studentId, setStudentId] = useState(null)
     const [apiGetFuncArgs, setApiGetFuncArgs] = useState(null)
+    const [rowData, setRowData] = useState({})
     // #endregion
 
     // #region primitives
@@ -65,9 +67,9 @@ export default function ReportDatatable({ report }) {
                     },
                     {
                         name: `${t('Хичээлийн тоо')}`,
-                        selector: (row) => (<span>{row?.exam_type_scored_lesson_count} {/*({row?.scored_lesson_count})*/}</span>),
+                        selector: (row) => (<span>{row?.scored_lesson_count} {/*({row?.scored_lesson_count})*/}</span>),
                         center: true,
-                        header: 'exam_type_scored_lesson_count',
+                        header: 'scored_lesson_count',
                         sortable: true
                     },
                     {
@@ -97,7 +99,7 @@ export default function ReportDatatable({ report }) {
                     {
                         name: t("Дэлгэрэнгүй"),
                         selector: (row) => (
-                            <Button size='sm' onClick={() => handleLessonsDetail(row?.student_idnum)} color='primary'>{t("Дэлгэрэнгүй")}</Button>
+                            <Button size='sm' onClick={() => handleLessonsDetail(row?.student_idnum, row)} color='primary'>{t("Дэлгэрэнгүй")}</Button>
                         ),
                         minWidth: "180px",
                         center: true
@@ -189,9 +191,10 @@ export default function ReportDatatable({ report }) {
         if (search_value.length > 0) setRenderToSearch(!render_to_search)
     }
 
-    const handleLessonsDetail = (student_id) => {
+    const handleLessonsDetail = (student_id, row) => {
         setIsShowLessonsDetail(!isShowLessonsDetail)
         setStudentId(student_id)
+        setRowData(row)
     }
 
     // to not rerender generic datatable if data not changed
@@ -217,9 +220,15 @@ export default function ReportDatatable({ report }) {
                             </div>
                         }
                         {
-                            ['groups', 'students'].includes(report) &&
+                            ['students'].includes(report) &&
                             <div style={{ width: '219.5px' }} className='me-1'>
-                                <GroupFilter setSelected={setSelectedGroup} exam_id={selected_exam} isShowAll={report === 'students' ? 'true' : 'false'} />
+                                <TeacherScoreGroupFilter setSelected={setSelectedGroup} profession={selected_profession} />
+                            </div>
+                        }
+                        {
+                            ['groups'].includes(report) &&
+                            <div style={{ width: '219.5px' }} className='me-1'>
+                                <GroupFilter setSelected={setSelectedGroup} exam_id={selected_exam} profession={selected_profession} isShowAll={report === 'students' ? 'true' : 'false'} />
                             </div>
                         }
                         {
@@ -283,7 +292,7 @@ export default function ReportDatatable({ report }) {
             </div>
             {
                 isShowLessonsDetail &&
-                <LessonsModal open={isShowLessonsDetail} handleModal={handleLessonsDetail} student={studentId} group={selected_group} profession={selected_profession} />
+                <LessonsModal open={isShowLessonsDetail} handleModal={handleLessonsDetail} student={studentId} group={selected_group} profession={selected_profession} rowData={rowData}/>
             }
         </>
     )

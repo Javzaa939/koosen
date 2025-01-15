@@ -41,7 +41,7 @@ from lms.models import TimeTable_to_student
 from lms.models import GraduationWork
 from lms.models import StudentLeave
 from lms.models import ExamTimeTable
-from lms.models import Exam_to_group, PaymentSettings
+from lms.models import Exam_to_group, PaymentSettings, TeacherScore
 from lms.models import ScoreRegister, PaymentEstimate
 from lms.models import Score
 from lms.models import Employee
@@ -4441,6 +4441,7 @@ class TestGroupAPIView(
     def get(self, request):
         exam = request.query_params.get('exam')
         is_show_all = request.query_params.get('isShowAll')
+        profession = request.query_params.get('profession')
         group_ids = ChallengeStudents.objects
 
         if exam:
@@ -4451,7 +4452,33 @@ class TestGroupAPIView(
             return request.send_data(None)
 
         group_ids = group_ids.values_list('student__group', flat=True).distinct()
-        datas = Group.objects.filter(id__in=group_ids).values('id', 'name')
+
+        group_qs = Group.objects.filter(id__in=group_ids)
+
+        if profession:
+            group_qs = group_qs.filter(profession=profession)
+
+        datas = group_qs.values('id', 'name')
+
+        return request.send_data(list(datas))
+
+
+class GroupByTeacherScoreAPIView(
+    generics.GenericAPIView
+):
+    """ Дүн нь гарсан хүүхдээс ангийн жагсаалт авах """
+
+    def get(self, request):
+        profession = request.query_params.get('profession')
+
+        group_ids = TeacherScore.objects.values_list('student__group', flat=True).distinct()
+
+        group_qs = Group.objects.filter(id__in=group_ids)
+
+        if profession:
+            group_qs = group_qs.filter(profession=profession)
+
+        datas = group_qs.values('id', 'name')
 
         return request.send_data(list(datas))
 

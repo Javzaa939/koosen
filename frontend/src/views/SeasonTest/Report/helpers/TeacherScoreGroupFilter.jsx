@@ -7,7 +7,9 @@ import { ReactSelectStyles } from '@src/utility/Utils'
 import useApi from "@src/utility/hooks/useApi"
 import useLoader from "@src/utility/hooks/useLoader"
 
-export default function GroupFilter({setSelected, exam_id, isShowAll, profession=''}) {
+export default function TeacherScoreGroupFilter({ setSelected, profession=''}) {
+	/** Дүн нь гарсан ангийн жагсаалт */
+
 	// states
 	const [options, setOptions] = useState([])
 
@@ -20,13 +22,13 @@ export default function GroupFilter({setSelected, exam_id, isShowAll, profession
     const { isLoading, fetchData } = useLoader({})
 
 	async function getOptions() {
-		const { success, data } = await fetchData(groupApi.getExam(exam_id, isShowAll, profession))
+		const { success, data } = await fetchData(groupApi.getGroupByTeacherScore(profession))
 		if (success) {
 			setOptions(data)
 		}
 	}
 
-	useEffect(() => { getOptions() }, [exam_id, profession])
+	useEffect(() => { getOptions() }, [profession])
 
 	return (
 		<>

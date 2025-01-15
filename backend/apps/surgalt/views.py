@@ -1492,6 +1492,10 @@ class ChallengeAPIView(
         time_type = request.query_params.get('type')
         teacher_id = request.query_params.get('teacher')
         season = request.query_params.get('season')
+        school = request.query_params.get('school')
+
+        if school:
+            self.queryset = self.queryset.filter(lesson__school=school)
 
         if teacher_id:
             self.queryset = self.queryset.filter(created_by=teacher_id)
@@ -6109,6 +6113,7 @@ class ChallengeReportAPIView(
     def get_queryset(self):
         request = self.request
         report_type = request.query_params.get('report_type')
+        school_id = request.query_params.get('school')
 
         if not report_type:
 
@@ -6117,11 +6122,17 @@ class ChallengeReportAPIView(
         lesson_year, lesson_season = get_active_year_season()
         queryset = None
 
+        exam_qs = ExamTimeTable.objects.filter(lesson_year=lesson_year, lesson_season_id=lesson_season)
+        if school_id:
+            exam_qs = exam_qs.filter(lesson__school=school_id)
+
+        lesson_ids = exam_qs.values_list('lesson', flat=True)
         if report_type in ['students', 'students_detail']:
             queryset = TeacherScore.objects.filter(
                 lesson_year=lesson_year,
                 lesson_season_id=lesson_season,
-                score__gt=0
+                score__gt=0,
+                score_type__lesson_teacher__lesson__in=lesson_ids
             )
 
         if report_type == 'students':
@@ -6135,12 +6146,12 @@ class ChallengeReportAPIView(
                     student_code=F('student__code')
 
                 ).annotate(
-                    scored_lesson_count = Count('score_type__lesson_teacher__lesson_id', distinct=True),
+                    scored_lesson_count = Count('score_type__lesson_teacher__lesson__name', distinct=True),
                     exam_type_scored_lesson_count = Count(
                         Case(
                             When(
                                 score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO,
-                                then='score_type__lesson_teacher__lesson_id'
+                                then='score_type__lesson_teacher__lesson__name'
                             )
                         ),
                         distinct=True
@@ -6150,30 +6161,22 @@ class ChallengeReportAPIView(
                             When(
                                 Q(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO) &
                                 Q(score__gte=18),
-                                then='score_type__lesson_teacher__lesson_id'
+                                then='score_type__lesson_teacher__lesson__name'
                             )
                         ),
                         distinct=True
                     ),
-                    failed_scored_lesson_count=Count(
-                        Case(
-                            When(
-                                Q(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO) &
-                                ~Q(score__gte=18),
-                                then='score_type__lesson_teacher__lesson_id'
-                            )
-                        ),
-                        distinct=True
-                    )
+                    failed_scored_lesson_count=F('scored_lesson_count') - F('success_scored_lesson_count')
                 ).order_by('-failed_scored_lesson_count')
             )
 
         elif report_type == 'students_detail':
             student_id = request.query_params.get('student')
+            lesson_ids = ExamTimeTable.objects.filter(lesson_year=lesson_year, lesson_season_id=lesson_season).values_list('lesson', flat=True)
 
             if student_id:
                 queryset = (
-                    queryset.filter(student_id=student_id).values(
+                    queryset.filter(student_id=student_id, score_type__lesson_teacher__lesson__in=lesson_ids).values(
                         student_first_name=F('student__first_name'),
                         student_last_name=F('student__last_name'),
                         student_code=F('student__code'),
@@ -6182,8 +6185,10 @@ class ChallengeReportAPIView(
                         exam_score = Max(Case(
                             When(
                                 score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO,
-                                then='score'
-                            ))
+                                then='score',
+                            ),
+                                default=Value(0), output_field=FloatField(),
+                            )
                         ),
                         exam_teacher_first_name = Max(Case(
                             When(

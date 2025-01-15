@@ -396,31 +396,29 @@ const AddModal = ({ open, handleModal, refreshDatas, handleEdit, editData, editI
                             />
                             {errors.status && <FormFeedback className=''>{t(errors.status.message)}</FormFeedback>}
                         </Col>
-                        <Row>
-                            <Col md={6} className="pt-2">
-                                <Controller
-                                    control={control}
-                                    id="is_online"
-                                    name="is_online"
-                                    defaultValue={false}
-                                    render={({ field }) => (
-                                        <Input
-                                            id="is_online"
-                                            type="checkbox"
-                                            className='me-50'
-                                            {...field}
-                                            onChange={(e) =>
-                                                IsOnline(e.target.checked)
-                                            }
-                                            checked={online_checked}
-                                        />
-                                    )}
-                                />
-                                <Label className="form-label" for="is_online">
-                                    {t('Онлайн шалгалт эсэх')}
-                                </Label>
-                            </Col>
-                        </Row>
+                        <Col md={6} className="pt-2">
+                            <Controller
+                                control={control}
+                                id="is_online"
+                                name="is_online"
+                                defaultValue={false}
+                                render={({ field }) => (
+                                    <Input
+                                        id="is_online"
+                                        type="checkbox"
+                                        className='me-50'
+                                        {...field}
+                                        onChange={(e) =>
+                                            IsOnline(e.target.checked)
+                                        }
+                                        checked={online_checked}
+                                    />
+                                )}
+                            />
+                            <Label className="form-label" for="is_online">
+                                {t('Онлайн шалгалт эсэх')}
+                            </Label>
+                        </Col>
                         <Col md={6}>
                             <Label className="form-label" for="stype">
                                 {t('Шалгалт авах төрөл')}
@@ -514,6 +512,40 @@ const AddModal = ({ open, handleModal, refreshDatas, handleEdit, editData, editI
                             {errors.room_name && <FormFeedback className='d-block'>{t(errors.room_name.message)}</FormFeedback>}
                         </Col>
                         <Col md={6}>
+                            <Label className="form-label" for="teacher">
+                                {t('Хянах багш')}
+                            </Label>
+                            <Controller
+                                control={control}
+                                defaultValue=''
+                                name="teacher"
+                                render={({ field: { value, onChange } }) => {
+                                    return (
+                                        <Select
+                                            name="teacher"
+                                            id="teacher"
+                                            classNamePrefix='select'
+                                            isClearable
+                                            isMulti
+                                            className={classnames('react-select', { 'is-invalid': errors.teacher })}
+                                            isLoading={isLoading}
+                                            placeholder={t('-- Сонгоно уу --')}
+                                            options={teacher_option || []}
+                                            value={selectedTeachers}
+                                            noOptionsMessage={() => t('Хоосон байна.')}
+                                            onChange={(val) => {
+                                                setSelectedTeachers(val)
+                                            }}
+                                            styles={ReactSelectStyles}
+                                            getOptionValue={(option) => option.id}
+                                            getOptionLabel={(option) => option?.rank_name + ' ' + option.last_name + '.' + option?.first_name}
+                                        />
+                                    )
+                                }}
+                            ></Controller>
+                            {errors.teacher && <FormFeedback className='d-block'>{t(errors.teacher.message)}</FormFeedback>}
+                        </Col>
+                        <Col md={6}>
                             <Label className="form-label" for="begin_date">
                                 {t('Эхлэх хугацаа')}
                             </Label>
@@ -556,40 +588,7 @@ const AddModal = ({ open, handleModal, refreshDatas, handleEdit, editData, editI
                             />
                             {errors.end_date && <FormFeedback className='d-block'>{t(errors.end_date.message)}</FormFeedback>}
                         </Col>
-                        <Col md={6}>
-                            <Label className="form-label" for="teacher">
-                                {t('Хянах багш')}
-                            </Label>
-                            <Controller
-                                control={control}
-                                defaultValue=''
-                                name="teacher"
-                                render={({ field: { value, onChange } }) => {
-                                    return (
-                                        <Select
-                                            name="teacher"
-                                            id="teacher"
-                                            classNamePrefix='select'
-                                            isClearable
-                                            isMulti
-                                            className={classnames('react-select', { 'is-invalid': errors.teacher })}
-                                            isLoading={isLoading}
-                                            placeholder={t('-- Сонгоно уу --')}
-                                            options={teacher_option || []}
-                                            value={selectedTeachers}
-                                            noOptionsMessage={() => t('Хоосон байна.')}
-                                            onChange={(val) => {
-                                                setSelectedTeachers(val)
-                                            }}
-                                            styles={ReactSelectStyles}
-                                            getOptionValue={(option) => option.id}
-                                            getOptionLabel={(option) => option?.rank_name + ' ' + option.last_name + '.' + option?.first_name}
-                                        />
-                                    )
-                                }}
-                            ></Controller>
-                            {errors.teacher && <FormFeedback className='d-block'>{t(errors.teacher.message)}</FormFeedback>}
-                        </Col>
+                        
                         <Card style={{ maxHeight: '300px', overflowY: 'auto' }}>
                             <CardBody>
                                 <CardTitle tag="h5">Дахин шалгалт өгөх сурагчид</CardTitle>
@@ -601,7 +600,7 @@ const AddModal = ({ open, handleModal, refreshDatas, handleEdit, editData, editI
                                                     <ListGroupItem key={index} className="d-flex justify-content-between">
                                                         <div className="d-flex justify-content-between w-100">
                                                             <div className="flex-column">
-                                                                {student.student_name}
+                                                                {index + 1}. {student.student_name}
                                                             </div>
                                                             <div className="flex-column">
                                                                 {student.challenge_name}
@@ -617,7 +616,7 @@ const AddModal = ({ open, handleModal, refreshDatas, handleEdit, editData, editI
                                                     <ListGroupItem key={index} className="d-flex justify-content-between">
                                                         <div className="d-flex justify-content-between w-100">
                                                             <div className="flex-column">
-                                                                {student.student_name}
+                                                                {index + 1}. {student.student_name}
                                                             </div>
                                                             <div className="flex-column">
                                                                 {student.challenge_name}

@@ -6,7 +6,7 @@ import { ChevronDown } from "react-feather"
 import { useTranslation } from "react-i18next"
 import { Spinner } from "reactstrap"
 
-export default function GenericDataTable({ apiGetFunc, apiGetFuncArgs, isApiGetFuncArgsDefault, columns, rows_per_page, search_value, render_to_search }) {
+export default function GenericDataTable({ apiGetFunc, apiGetFuncArgs, isApiGetFuncArgsDefault, columns, rows_per_page, search_value, render_to_search, conditionalRowStyles={} }) {
 	// states
 	const [current_page, setCurrentPage] = useState(1)
 	const [total_count, setTotalCount] = useState(1)
@@ -115,6 +115,7 @@ export default function GenericDataTable({ apiGetFunc, apiGetFuncArgs, isApiGetF
 					<Spinner className='me-1' color="" size='sm' /><h5>{t('Түр хүлээнэ үү')}...</h5>
 				</div>
 			}
+			conditionalRowStyles={conditionalRowStyles}
 			noDataComponent={(
 				<div className="my-2">
 					<h5>{t('Өгөгдөл байхгүй байна')}</h5>
