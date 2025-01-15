@@ -287,7 +287,7 @@ export default function ExamRepeat() {
         <Fragment>
             <Card>
                 <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
-                    <CardTitle tag="h4">{t('Давтан шалгалт')}</CardTitle>
+                    <CardTitle tag="h4">{t('Давтан шалгалтын хуваарь')}</CardTitle>
                     <div className='d-flex flex-wrap mt-md-0 mt-1'>
                         <Button color='primary' disabled={Object.keys(user).length > 0 && user.permissions.includes('lms-timetable-examrepeat-create') ? false : true} onClick={() => handleModal()}>
                             <Plus size={15} />

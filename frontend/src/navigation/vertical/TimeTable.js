@@ -24,7 +24,7 @@ export default [
             },
             {
                 id: 'timetable5',
-                title: 'Дахин шалгалт',
+                title: 'Давтан шалгалт',
                 icon: <Circle size={8} />,
                 navLink: "timetable/exam-re"
             }
