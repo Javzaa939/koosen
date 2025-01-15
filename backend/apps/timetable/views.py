@@ -19,7 +19,7 @@ from main.utils.function.utils import has_permission, get_error_obj, get_fullNam
 from django.db import transaction
 from django.conf import settings
 from django.db import connection
-from django.db.models import Q
+from django.db.models import Q, Count
 
 from core.models import Employee, Teachers, SubOrgs
 from lms.models import Room
@@ -3332,13 +3332,14 @@ class Exam_repeatTestListAPIView(
     mixins.ListModelMixin,
     generics.GenericAPIView
 ):
-    queryset = Challenge.objects.all()
+    queryset = ExamTimeTable.objects.all()
 
     def get(self, request, pk=None):
-        self.serializer_class = ChallengeListSerializer
+        self.serializer_class = ExamTimeTableListSerializer
+        lesson_year, lesson_season = get_active_year_season()
 
         if pk:
-            queryset = self.queryset.filter(lesson=pk)
+            queryset = self.queryset.filter(lesson=pk,lesson_year=lesson_year,lesson_season=lesson_season)
             repeat = self.serializer_class(queryset,many=True).data
             return request.send_data(repeat)
 
@@ -3363,6 +3364,7 @@ class ExamrepeatStudentsAPIView(
                     "student_id": obj.student.id,
                     "code": obj.student.code,
                     "student_name": f"{obj.student.code}-{obj.student.last_name[0]}.{obj.student.first_name}",
+                    "group_name":f"{obj.student.group.profession.name} - {obj.student.group.name}"
                 }
                 for obj in students
             ]
@@ -3370,26 +3372,23 @@ class ExamrepeatStudentsAPIView(
 
         return request.send_error("ERR_004")
 
-    def post(self, request):
+    def post(self, request,pk=None):
         data = request.data
+
         try:
-            students_below_18 = ChallengeStudents.objects.filter(
-                Q(score__lt=18) | Q(score__isnull=True),
-                challenge_id__in=data
-            ).select_related('student')
+            groups = Exam_to_group.objects.filter(exam__in=data).values_list('group_id',flat=True)
+            student_ids = Student.objects.filter(group_id__in=groups).values_list('id',flat=True)
 
-            datas = [
-                {
-                    "student_id": obj.student.id,
-                    "code": obj.student.code,
-                    "student_name": f"{obj.student.code}-{obj.student.last_name[0]}.{obj.student.first_name} ({obj.score if obj.score is not None else 'Шалгалт өгөөгүй'})",
-                    "challenge_id": obj.challenge.id,
-                    "challenge_name": obj.challenge.title,
-                }
-                for obj in students_below_18
-            ]
-            return request.send_data(datas)
+            queryset = TeacherScore.objects.filter(
+                Q(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO) &
+                Q(score__lte=18),
+                score_type__lesson_teacher__lesson=pk,
+                student_id__in=student_ids
+            )
+            failed_scores = queryset.values('student_id', 'student__first_name','student__last_name','student__code','score','student__group__name','student__group__profession__name').annotate(fail_count=Count('id')).filter(fail_count__lt=3).order_by('score')
+            failed_scores_list = list(failed_scores)
 
+            return request.send_data(failed_scores_list)
         except Exception as e:
             return request.send_error(f"An error occurred: {str(e)}")
 

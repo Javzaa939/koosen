@@ -88,8 +88,12 @@ export default function ExamRepeat() {
 
     /** Засах модал */
     function handleEditModal(data) {
-        setEditId(data?.id)
-        setEditData(data)
+        setEditId(null)
+        setEditData([])
+        if(data){
+            setEditId(data?.id)
+            setEditData(data)
+        }
         handleModal()
     }
 

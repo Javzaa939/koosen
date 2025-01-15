@@ -117,7 +117,7 @@ const AddModal = ({ open, handleModal, refreshDatas, handleEdit, editData, editI
     // Test жагсаалт
     async function getStudents() {
         if (selectedTest) {
-            const { success, data } = await fetchData(examApi.getExamStudent(selectedTest))
+            const { success, data } = await fetchData(examApi.getExamStudent(selectedTest, select_value.lesson))
             if (success) {
                 setStudentDatas(data)
             }
@@ -264,14 +264,26 @@ const AddModal = ({ open, handleModal, refreshDatas, handleEdit, editData, editI
         <Fragment>
             <Modal
                 isOpen={open}
-                toggle={handleModal}
+                toggle={() => {
+                    if (editData?.id) {
+                        handleEdit();
+                    } else {
+                        handleModal();
+                    }
+                }}
                 className="modal-dialog-centered modal-xl"
                 contentClassName="pt-0"
                 backdrop='static'
             >
                 <ModalHeader
                     className="mb-1"
-                    toggle={handleModal}
+                    toggle={() => {
+                        if (editData?.id) {
+                            handleEdit();
+                        } else {
+                            handleModal();
+                        }
+                    }}
                     close={CloseBtn}
                     tag="div"
                 >
@@ -347,12 +359,13 @@ const AddModal = ({ open, handleModal, refreshDatas, handleEdit, editData, editI
                                                     onChange={(selected) => {
                                                         const selectedIds = selected ? selected.map((option) => option.id) : [];
                                                         onChange(selectedIds);
-                                                        console.log(selectedIds)
                                                         setSelectedTest(selectedIds);
                                                     }}
                                                     styles={ReactSelectStyles}
                                                     getOptionValue={(option) => option.id}
-                                                    getOptionLabel={(option) => option.title}
+                                                    getOptionLabel={(option) => {
+                                                        return `${option.teacher.map((teacher) => teacher.full_name).join(", ")} (${option.begin_date} - ${option.end_date})`;
+                                                    }}
                                                 />
                                             )
                                         }}
@@ -588,54 +601,96 @@ const AddModal = ({ open, handleModal, refreshDatas, handleEdit, editData, editI
                             />
                             {errors.end_date && <FormFeedback className='d-block'>{t(errors.end_date.message)}</FormFeedback>}
                         </Col>
-                        
+
                         <Card style={{ maxHeight: '300px', overflowY: 'auto' }}>
                             <CardBody>
                                 <CardTitle tag="h5">Дахин шалгалт өгөх сурагчид</CardTitle>
                                 {studentData && studentData.length > 0 && (
-                                    <Row>
-                                        <Col md={6}>
-                                            <ListGroup>
-                                                {studentData.filter((_, index) => index % 2 === 0).map((student, index) => (
-                                                    <ListGroupItem key={index} className="d-flex justify-content-between">
-                                                        <div className="d-flex justify-content-between w-100">
-                                                            <div className="flex-column">
-                                                                {index + 1}. {student.student_name}
+                                    editId ? (
+                                        <Row>
+                                            <Col md={6}>
+                                                <ListGroup>
+                                                    {studentData.filter((_, index) => index % 2 === 0).map((student, index) => (
+                                                        <ListGroupItem key={index} className="d-flex justify-content-between">
+                                                            <div className="d-flex justify-content-between w-100">
+                                                                <div className="flex-column">
+                                                                    {index + 1}. {student.student_name}
+                                                                </div>
+                                                                <div className="flex-column">{student.group_name}</div>
                                                             </div>
-                                                            <div className="flex-column">
-                                                                {student.challenge_name}
+                                                        </ListGroupItem>
+                                                    ))}
+                                                </ListGroup>
+                                            </Col>
+                                            <Col md={6}>
+                                                <ListGroup>
+                                                    {studentData.filter((_, index) => index % 2 !== 0).map((student, index) => (
+                                                        <ListGroupItem key={index} className="d-flex justify-content-between">
+                                                            <div className="d-flex justify-content-between w-100">
+                                                                <div className="flex-column">
+                                                                    {index + 1}. {student.student_name}
+                                                                </div>
+                                                                <div className="flex-column">{student.group_name}</div>
                                                             </div>
-                                                        </div>
-                                                    </ListGroupItem>
-                                                ))}
-                                            </ListGroup>
-                                        </Col>
-                                        <Col md={6}>
-                                            <ListGroup>
-                                                {studentData.filter((_, index) => index % 2 !== 0).map((student, index) => (
-                                                    <ListGroupItem key={index} className="d-flex justify-content-between">
-                                                        <div className="d-flex justify-content-between w-100">
-                                                            <div className="flex-column">
-                                                                {index + 1}. {student.student_name}
+                                                        </ListGroupItem>
+                                                    ))}
+                                                </ListGroup>
+                                            </Col>
+                                        </Row>
+                                    ) : (
+                                        <Row>
+                                            <Col md={6}>
+                                                <ListGroup>
+                                                    {studentData.filter((_, index) => index % 2 === 0).map((student, index) => (
+                                                        <ListGroupItem key={index} className="d-flex justify-content-between">
+                                                            <div className="d-flex justify-content-between w-100">
+                                                                <div className="flex-column">
+                                                                    {index + 1}. {student.student__code} - {student.student__last_name[0]}.{student.student__first_name}
+                                                                    ({student.student__group__name} - {student.student__group__profession__name})
+                                                                </div>
+                                                                <div className="flex-column">
+                                                                    {student.score.toFixed(1)}
+                                                                </div>
                                                             </div>
-                                                            <div className="flex-column">
-                                                                {student.challenge_name}
+                                                        </ListGroupItem>
+                                                    ))}
+                                                </ListGroup>
+                                            </Col>
+                                            <Col md={6}>
+                                                <ListGroup>
+                                                    {studentData.filter((_, index) => index % 2 !== 0).map((student, index) => (
+                                                        <ListGroupItem key={index} className="d-flex justify-content-between">
+                                                            <div className="d-flex justify-content-between w-100">
+                                                                <div className="flex-column">
+                                                                    {index + 1}. {student.student__code} - {student.student__last_name[0]}.{student.student__first_name}
+                                                                    ({student.student__group__name} - {student.student__group__profession__name})
+                                                                </div>
+                                                                <div className="flex-column">
+                                                                    {student.score.toFixed(1)}
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                    </ListGroupItem>
-                                                ))}
-                                            </ListGroup>
-                                        </Col>
-                                    </Row>
+                                                        </ListGroupItem>
+                                                    ))}
+                                                </ListGroup>
+                                            </Col>
+                                        </Row>
+                                    )
                                 )}
                             </CardBody>
+
                         </Card>
                         <Col md={12} className="mt-2 text-center">
                             <Button className="me-2" color="primary" type="submit" disabled={postLoading}>
                                 {postLoading && <Spinner size='sm' className='me-1' />}
                                 {t('Хадгалах')}
                             </Button>
-                            <Button color="secondary" type="reset" outline onClick={handleModal}>
+                            <Button color="secondary" type="reset" outline onClick={() => {
+                                if (editData?.id) {
+                                    handleEdit();
+                                } else {
+                                    handleModal();
+                                }
+                            }}>
                                 {t('Буцах')}
                             </Button>
                         </Col>
@@ -643,7 +698,7 @@ const AddModal = ({ open, handleModal, refreshDatas, handleEdit, editData, editI
 
                 </ModalBody>
             </Modal>
-        </Fragment>
+        </Fragment >
     );
 };
 export default AddModal;

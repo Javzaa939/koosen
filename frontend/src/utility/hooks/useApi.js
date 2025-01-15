@@ -929,7 +929,7 @@ function useApi(isDisplay=false) {
 				put: (data, pk) => instance.put(`/timetable/exam_repeat/${pk}/`, data),
 				delete: (pk) => instance.delete(`/timetable/exam_repeat/${pk}/`),
 				getExamsList: (pk) => instance.get(`/timetable/exam_repeat/list_exam/${pk}/`),
-				getExamStudent: (cdata) => instance.post(`/timetable/exam_repeat/list_exam/students/`,cdata),
+				getExamStudent: (cdata,lesson) => instance.post(`/timetable/exam_repeat/list_exam/students/${lesson}/`,cdata),
 				getExamStudentList: (pk) => instance.get(`/timetable/exam_repeat/list_exam/students/${pk}/`,),
 				getStudentExamScore:(pk, lesson) => instance.put(`/timetable/exam_repeat/score/${pk}/?lesson_year=${cyear_name}&lesson_season=${cseason_id}&lesson=${lesson}`),
 
