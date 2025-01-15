@@ -39,6 +39,7 @@ from lms.models import (
     LearningPlan,
     ScoreRegister,
     ExamTimeTable,
+    Exam_to_group,
     LessonStandart,
     Lesson_title_plan,
     Lesson_to_teacher,
@@ -6125,7 +6126,8 @@ class ChallengeReportAPIView(
 
         exam_qs = ExamTimeTable.objects.filter(lesson_year=lesson_year, lesson_season_id=lesson_season)
         if school_id:
-            exam_qs = exam_qs.filter(lesson__school=school_id)
+            exam_ids = Exam_to_group.objects.filter(exam__lesson_year=lesson_year, exam__lesson_season=lesson_season, group__school=school_id).values_list('exam', flat=True)
+            exam_qs = exam_qs.filter(id__in=exam_ids)
 
         lesson_ids = exam_qs.values_list('lesson', flat=True)
         if report_type in ['students', 'students_detail']:
