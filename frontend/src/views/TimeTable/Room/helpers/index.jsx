@@ -31,22 +31,9 @@ export function getColumns (currentPage, rowsPerPage, datas, handleDelete, editM
 			minWidth: "80px",
 		},
 		{
-			name: `${t('Сургуулийн нэр')}`,
-			selector: (row) => row?.school?.name,
-			sortable: true,
-			minWidth: "80px",
-		},
-		{
 			name: `${t('Өрөөний дугаар')}`,
 			header: 'code',
 			cell: (row) => (row?.code),
-			minWidth: "80px",
-			sortable: true,
-			center: true
-		},
-		{
-			name: `${t('Өрөөний нэр')}`,
-            cell: (row) => row?.name,
 			minWidth: "80px",
 			sortable: true,
 			center: true

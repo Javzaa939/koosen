@@ -92,7 +92,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                 <ModalBody className="flex-grow-1">
                 {(isLoading || postLoading) && Loader }
                 <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
-                        <Col md={12}>
+                        {/* <Col md={12}>
                             <Label className="form-label" for="school">
                                 {t('Сургууль')}
                             </Label>
@@ -122,7 +122,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                 )}
                             />
                             {errors.school && <FormFeedback className='d-block'>{t(errors.school.message)}</FormFeedback>}
-                        </Col>
+                        </Col> */}
                         <Col md={12}>
                             <Label className="form-label" for="building">
                                 {t('Хичээлийн байр')}
@@ -174,7 +174,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                             />
                             {errors.code && <FormFeedback className='d-block'>{t(errors.code.message)}</FormFeedback>}
                         </Col>
-                        <Col md={12}>
+                        {/* <Col md={12}>
                             <Label className="form-label" for="name">
                                 {t('Өрөөний нэр')}
                             </Label>
@@ -195,7 +195,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                 )}
                             />
                             {errors.name && <FormFeedback className='d-block'>{t(errors.name.message)}</FormFeedback>}
-                        </Col>
+                        </Col> */}
                         <Col md={12}>
                             <Label className="form-label" for="type">
                                 {t('Өрөөний төрөл')}

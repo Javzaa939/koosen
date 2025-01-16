@@ -73,7 +73,7 @@ export const RoomAdd = ( { handleModal} ) => {
 
     return (
         <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
-            <Col md={6}>
+            {/* <Col md={6}>
                 <Label className="form-label" for="school">
                     {t('Сургууль')}
                 </Label>
@@ -103,7 +103,7 @@ export const RoomAdd = ( { handleModal} ) => {
                     )}
                 />
                 {errors.school && <FormFeedback className='d-block'>{t(errors.school.message)}</FormFeedback>}
-            </Col>
+            </Col> */}
             <Col md={6}>
                 <Label className="form-label" for="building">
                     {t('Хичээлийн байр')}
@@ -155,7 +155,7 @@ export const RoomAdd = ( { handleModal} ) => {
                 />
                 {errors.code && <FormFeedback className='d-block'>{t(errors.code.message)}</FormFeedback>}
             </Col>
-            <Col md={6}>
+            {/* <Col md={6}>
                 <Label className="form-label" for="name">
                     {t('Өрөөний нэр')}
                 </Label>
@@ -176,7 +176,7 @@ export const RoomAdd = ( { handleModal} ) => {
                     )}
                 />
                 {errors.name && <FormFeedback className='d-block'>{t(errors.name.message)}</FormFeedback>}
-            </Col>
+            </Col> */}
             <Col md={6}>
                 <Label className="form-label" for="type">
                     {t('Өрөөний төрөл')}

@@ -41,10 +41,9 @@ const EditModal = ({ open, handleModal, room_id, refreshDatas }) => {
     const { t } = useTranslation()
     const [typeOption, setType] = useState([])
     const [buildingOption, setBuilding] = useState([])
-    const [schoolOption, setSchoolOption] =useState([])
+    // const [schoolOption, setSchoolOption] =useState([])
 
     const { user } = useContext(AuthContext)
-
 
     const [is_valid, setValid] = useState(true)
 
@@ -64,12 +63,12 @@ const EditModal = ({ open, handleModal, room_id, refreshDatas }) => {
         }
     }
 
-    async function getSchools() {
-        const { success, data } = await fetchData(schoolApi.get())
-        if(success) {
-            setSchoolOption(data)
-        }
-    }
+    // async function getSchools() {
+    //     const { success, data } = await fetchData(schoolApi.get())
+    //     if(success) {
+    //         setSchoolOption(data)
+    //     }
+    // }
 
     useEffect(() => {
         if(Object.keys(user).length > 0 && user.permissions.includes('lms-timetable-room-update')) {
@@ -77,29 +76,29 @@ const EditModal = ({ open, handleModal, room_id, refreshDatas }) => {
         }
     },[user])
 
-    async function getDatas() {
-        if(room_id) {
-            const { success, data } = await fetchData(roomApi.getOne(room_id))
-            if(success) {
-                // засах үед дата байх юм бол setValue-р дамжуулан утгыг харуулна
-                if(data === null) return
-                for(let key in data) {
-                    if(data[key] !== null)
-                        setValue(key, data[key])
-                    else setValue(key,'')
+    // async function getDatas() {
+    //     if(room_id) {
+    //         const { success, data } = await fetchData(roomApi.getOne(room_id))
+    //         if(success) {
+    //             // засах үед дата байх юм бол setValue-р дамжуулан утгыг харуулна
+    //             if(data === null) return
+    //             for(let key in data) {
+    //                 if(data[key] !== null)
+    //                     setValue(key, data[key])
+    //                 else setValue(key,'')
 
-                    if(key === 'school' || key === 'building') {
-                        setValue(key, data[key]?.id)
-                    }
-                }
-            }
-        }
-    }
+    //                 if(key === 'school' || key === 'building') {
+    //                     setValue(key, data[key]?.id)
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
 
     function getAll() {
         Promise.all([
             fetchData(roomApi.getOne(room_id)),
-            fetchData(schoolApi.get()),
+            // fetchData(schoolApi.get()),
             fetchData(buildingApi.get())
         ]).then((values) => {
             if (values[0]?.data) {
@@ -115,8 +114,8 @@ const EditModal = ({ open, handleModal, room_id, refreshDatas }) => {
                     }
                 }
             }
-            setSchoolOption(values[1].data)
-            setBuilding(values[2].data)
+            // setSchoolOption(values[1].data)
+            setBuilding(values[1].data)
         })
     }
 
@@ -151,7 +150,7 @@ const EditModal = ({ open, handleModal, room_id, refreshDatas }) => {
                         <h4>{t('Өрөөний мэдээлэл засах')}</h4>
                     </div>
                     <Row tag={Form} className="gy-1" onSubmit={handleSubmit(onSubmit)}>
-                         <Col  lg={6} xs={12}>
+                         {/* <Col  lg={6} xs={12}>
                             <Label className="form-label" for="school">
                                 {t('Сургууль')}
                             </Label>
@@ -183,7 +182,7 @@ const EditModal = ({ open, handleModal, room_id, refreshDatas }) => {
                                 }}
                             ></Controller>
                              {errors.school && <FormFeedback className='d-block'>{t(errors.school.message)}</FormFeedback>}
-                        </Col>
+                        </Col> */}
                         <Col  lg={6} xs={12}>
                             <Label className="form-label" for="building">
                                 {t('Хичээлийн байр')}
@@ -240,7 +239,7 @@ const EditModal = ({ open, handleModal, room_id, refreshDatas }) => {
                             />
                             {errors.code && <FormFeedback className='d-block'>{t(errors.code.message)}</FormFeedback>}
                         </Col>
-                        <Col lg={6} xs={12}>
+                        {/* <Col lg={6} xs={12}>
                             <Label className="form-label" for="name">
                                 {t('Өрөөний нэр')}
                             </Label>
@@ -262,7 +261,7 @@ const EditModal = ({ open, handleModal, room_id, refreshDatas }) => {
                                 )}
                             />
                             {errors.name && <FormFeedback className='d-block'>{t(errors.name.message)}</FormFeedback>}
-                        </Col>
+                        </Col> */}
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="type">
                                 {t('Өрөөний төрөл')}
