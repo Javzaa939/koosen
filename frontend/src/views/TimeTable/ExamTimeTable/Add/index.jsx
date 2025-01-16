@@ -198,7 +198,6 @@ const Addmodal = ({ open, handleModal, refreshDatas, handleEdit, editData }) => 
                 }
             }
         } else {
-            cdata['school'] = school_id
 
             const { success, error } = await postFetch(examApi.post(cdata))
             if (success) {
@@ -214,21 +213,23 @@ const Addmodal = ({ open, handleModal, refreshDatas, handleEdit, editData }) => 
     }
 
     useEffect(() => {
-        if (beginDate) {
-            const beginDateObj = new Date(beginDate);
-            beginDateObj.setHours(8, 0, 0, 0);
-            const formattedBeginDate = beginDateObj.toLocaleString('sv-SE').slice(0, 16);
+        if (stypeValue == 2) {
+            if (beginDate) {
+                const beginDateObj = new Date(beginDate);
+                beginDateObj.setHours(8, 0, 0, 0);
+                const formattedBeginDate = beginDateObj.toLocaleString('sv-SE').slice(0, 16);
 
-            setValue('begin_date', formattedBeginDate);
-        }
+                setValue('begin_date', formattedBeginDate);
+            }
 
-        if (stypeValue === 2 && beginDate) {
-            const beginDateObj = new Date(beginDate);
+            if (stypeValue === 2 && beginDate) {
+                const beginDateObj = new Date(beginDate);
 
-            beginDateObj.setHours(17, 0, 0, 0);
-            const formattedEndDate = beginDateObj.toLocaleString('sv-SE').slice(0, 16);
+                beginDateObj.setHours(13, 0, 0, 0);
+                const formattedEndDate = beginDateObj.toLocaleString('sv-SE').slice(0, 16);
 
-            setValue('end_date', formattedEndDate);
+                setValue('end_date', formattedEndDate);
+            }
         }
     }, [beginDate, stypeValue, setValue]);
 

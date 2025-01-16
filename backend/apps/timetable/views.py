@@ -1464,15 +1464,15 @@ class ExamTimeTableAPIView(
         sid = transaction.savepoint()
 
         # Оюутаны жагсаалт
-        student_data = request_data.get('student')
+        # student_data = request_data.get('student')
 
-        room = request_data.get('room')
-        lesson = request_data.get('lesson')
-        school = request_data.get('school')
+        # room = request_data.get('room')
+        # lesson = request_data.get('lesson')
+        # school = request_data.get('school')
 
         teachers = request_data.get('teacher')
-        lesson_year = request_data.get('lesson_year')
-        lesson_season = request_data.get('lesson_season')
+        # lesson_year = request_data.get('lesson_year')
+        # lesson_season = request_data.get('lesson_season')
         end_datetime = request_data.get('end_date')
         begin_datetime = request_data.get('begin_date')
         groups = request_data.get('group')
@@ -1517,29 +1517,32 @@ class ExamTimeTableAPIView(
 
                 return True
 
+        school = Group.objects.filter(id__in=groups).values_list('school', flat=True).first()
+        request_data['school'] = school
+
         try:
             if serializer.is_valid(raise_exception=False):
-                exam_table_qs = (
-                    ExamTimeTable.objects
-                        .filter(
-                            school=school,
-                            lesson_year=lesson_year,
-                            lesson_season=lesson_season
-                        )
-                        .exclude(Q(begin_date__gt=end_datetime)|Q(end_date__lt=begin_datetime))
-                )
+                # exam_table_qs = (
+                #     ExamTimeTable.objects
+                #         .filter(
+                #             school=school,
+                #             lesson_year=lesson_year,
+                #             lesson_season=lesson_season
+                #         )
+                #         .exclude(Q(begin_date__gt=end_datetime)|Q(end_date__lt=begin_datetime))
+                # )
 
-                qs_exam_teacher = exam_table_qs.filter(teacher__in=teachers)
+                # qs_exam_teacher = exam_table_qs.filter(teacher__in=teachers)
 
-                qs_exam_room = exam_table_qs.filter(room=room)
+                # qs_exam_room = exam_table_qs.filter(room=room)
 
-                qs_exam_lesson = exam_table_qs.filter(lesson=lesson).last()
+                # qs_exam_lesson = exam_table_qs.filter(lesson=lesson).last()
 
-                # Тухайн хичээлийн жил, улирал, "selected datetime range" шалгалтын хуваарийн жагсаалт
-                qs_examtimetable_ids = exam_table_qs.values_list(
-                        'id',
-                        flat=True
-                    ).distinct()
+                # # Тухайн хичээлийн жил, улирал, "selected datetime range" шалгалтын хуваарийн жагсаалт
+                # qs_examtimetable_ids = exam_table_qs.values_list(
+                #         'id',
+                #         flat=True
+                #     ).distinct()
 
                 # Шалгалтыг хянах багшийн хуваарь давхцаж байгаа эсэхийг шалгана
                 # NOTE ДХИС хүсэлтээр болиулав
@@ -1977,6 +1980,7 @@ class Exam_repeatListAPIView(
 
         create_students = []
         serializer = self.get_serializer(data=request_data)
+
         try:
             if serializer.is_valid(raise_exception=False):
                 try:
