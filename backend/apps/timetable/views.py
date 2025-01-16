@@ -205,13 +205,7 @@ class RoomAPIView(
         serializer = self.get_serializer(data=request_data)
 
         if serializer.is_valid(raise_exception=False):
-            try:
-                with transaction.atomic():
-                    self.create(request).data
-
-            except Exception:
-                return request.send_error("ERR_002")
-
+            self.create(request).data
             return request.send_info("INF_001")
         else:
             # Олон алдааны мессэж буцаах бол үүнийг ашиглана
@@ -220,10 +214,6 @@ class RoomAPIView(
                 msg = "Хоосон байна"
                 if key == 'code':
                     msg = "Код давхцаж байна"
-
-                if key == 'non_field_errors':
-                    msg = "Өрөөний дугаар давхцаж байна"
-                    key = 'code'
 
                 return_error = {
                     "field": key,

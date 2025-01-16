@@ -934,7 +934,7 @@ class Room(models.Model):
         (ROOM_OTHER, 'Бусад'),
     )
     code = models.CharField(max_length=20, verbose_name='Өрөөний дугаар')
-    name = models.CharField(max_length=100, verbose_name='Өрөөний нэр')
+    name = models.CharField(max_length=100, verbose_name='Өрөөний нэр', null=True)
     description = models.CharField(max_length=100, null=True, verbose_name='Тайлбар')
     type = models.PositiveIntegerField(choices=ROOM_TYPE, db_index=True, default=ROOM_LECT, verbose_name="Өрөөний төрөл", null=True)
     volume = models.IntegerField(null=True, verbose_name="Өрөөний багтаамж")
