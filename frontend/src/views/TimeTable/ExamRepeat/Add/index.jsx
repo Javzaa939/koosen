@@ -82,17 +82,9 @@ const AddModal = ({ open, handleModal, refreshDatas, handleEdit, editData, editI
 
     // Хичээлийн жагсаалт
     async function getLessonOption() {
-        if (school_id == 11) {
-            const { success, data } = await fetchData(lessonApi.getExam())
-            if (success) {
-                setLessonOption(data)
-            }
-        }
-        else {
-            const { success, data } = await fetchData(lessonApi.getList())
-            if (success) {
-                setLessonOption(data)
-            }
+        const { success, data } = await fetchData(lessonApi.getExam())
+        if (success) {
+            setLessonOption(data)
         }
     }
 
