@@ -4408,12 +4408,11 @@ class GraduationWorkQrAPIView(
 
                 url = 'https://certify.mn/service/api/v2/certification/qr/generate'
                 headers = {
-                    'x-api-key': '3VYptDWl.ghJVuO8DjJj7ci204tJqmegdowuO0ZXf',
+                    'x-api-key': 'W4v9v0kh.FWraUyyqplDMnTlf6bW1guik3dVC5LoD',
                     'Content-Type': 'application/json'
                 }
 
                 res = requests.post(url, headers=headers, json=data)
-                
                 print(res.status_code)
 
                 # 404 Not Found: Дипломын дугаар буруу эсвэл уг дипломын дугаар үүсээгүй үед
