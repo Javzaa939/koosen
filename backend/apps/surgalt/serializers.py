@@ -1090,6 +1090,7 @@ class ChallengeReport2StudentsSerializer(serializers.ModelSerializer):
     student_first_name = serializers.CharField()
     student_last_name = serializers.CharField()
     student_code = serializers.CharField()
+    group_name = serializers.CharField()
     scored_lesson_count = serializers.IntegerField()
     exam_type_scored_lesson_count = serializers.IntegerField()
     success_scored_lesson_count = serializers.IntegerField()
@@ -1097,7 +1098,7 @@ class ChallengeReport2StudentsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TeacherScore
-        fields = ["student_idnum", "student_first_name", "student_last_name", "student_code", "exam_type_scored_lesson_count", "scored_lesson_count", "success_scored_lesson_count", "failed_scored_lesson_count"]
+        fields = ["student_idnum", "student_first_name", "student_last_name", "student_code", "exam_type_scored_lesson_count", "scored_lesson_count", "success_scored_lesson_count", "failed_scored_lesson_count", 'group_name']
 
 
 class ChallengeReport2StudentsDetailSerializer(serializers.ModelSerializer):

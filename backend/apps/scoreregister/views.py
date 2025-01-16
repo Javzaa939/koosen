@@ -21,6 +21,7 @@ from lms.models import Student
 from lms.models import LessonStandart
 from lms.models import Score
 from lms.models import Exam_repeat
+from lms.models import Exam_to_student
 from lms.models import Lesson_to_teacher
 from lms.models import TeacherScore
 from lms.models import Lesson_teacher_scoretype
@@ -1700,3 +1701,83 @@ class ScoreRegisterLessonAPIView(
 
         sorted_scores = sorted(all_students_teach_scores, key=lambda x: x['total_score'], reverse=True)
         return request.send_data(sorted_scores)
+
+@permission_classes([IsAuthenticated])
+class ReExamTeacherLessonScorePrintAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin
+):
+    queryset = TeacherScore.objects
+    serializer_class = TeacherScoreListPrintSerializer
+
+    # to pass extra complex data to serializer, because annotate() does not support complex data like list, dict, etc
+    # and because it call sql query only 1 time instead of serializer way that calls sql query on every row. Therefore database will be slowed down very hard if for example calling queryset.filter() (and any other similar calls) is made inside serializer
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        exam = self.request.query_params.get('exam')
+        exam_committee = []
+        exam_time_table_qs = Exam_repeat.objects.filter(pk=exam).prefetch_related('teacher')
+        last_exam_time_table = exam_time_table_qs.first()
+
+        if last_exam_time_table:
+            exam_committee_teachers = last_exam_time_table.teacher.all()
+
+            if exam_committee_teachers:
+                for exam_committee_teacher in exam_committee_teachers:
+                    exam_committee.append(
+                        {
+                            'teacher_org_position': Employee.objects.filter(user=exam_committee_teacher.user.id).values_list('org_position__name', flat=True).first(),
+                            'teacher_name': exam_committee_teacher.full_name,
+                            'teacher_score_updated_at': last_exam_time_table.updated_at.strftime('%Y-%m-%d %H:%M:%S') if last_exam_time_table.updated_at else None
+                        }
+                    )
+
+        context['exam_committee'] = exam_committee
+
+        return context
+
+    def put(self, request):
+        exam = request.query_params.get('exam')
+        lesson_year, lesson_season = get_active_year_season()
+        student_ids = request.data
+
+        # Тухайн дахин шалгалтын хуваариас хичээлийг авах
+        exam_obj = Exam_repeat.objects.get(pk=exam)
+        exam_students = Exam_to_student.objects.filter(exam=exam)
+        if student_ids:
+            exam_students = exam_students.filter(student_id__in=student_ids)
+
+        student_ids = exam_students.values_list('student', flat=True)
+
+        self.queryset = self.queryset.filter(score_type__lesson_teacher__lesson=exam_obj.lesson, lesson_year=lesson_year, lesson_season=lesson_season)
+        if len(student_ids) > 0:
+            self.queryset = self.queryset.filter(student__in=student_ids)
+        else:
+            self.queryset = self.queryset.filter(score__gt=0)
+
+        # Дүн гаргасан багшийн мэдээлэл
+        teacher_id = self.queryset.values_list('score_type__lesson_teacher__teacher', flat=True).first()
+        if not teacher_id:
+            return request.send_error('ERR_002', 'Тухайн анги бүлэгт багшийн дүн шивэгдээгүй байна.')
+
+        teacher = Teachers.objects.filter(id=teacher_id).first()
+
+        student_ids = self.queryset.values_list('id', flat=True).distinct('student')
+        self.queryset = self.queryset.filter(score_type__lesson_teacher__lesson=exam_obj.lesson, lesson_year=lesson_year, lesson_season=lesson_season, id__in=student_ids)
+
+        lesson_kredit = LessonStandart.objects.filter(id=exam_obj.lesson.id).values_list('kredit', flat=True).first()
+
+        teacher_org_position = Employee.objects.filter(user=teacher.user).values_list('org_position__name', flat=True).first()
+        teacher_score_updated_at = self.queryset.values_list('updated_at', flat=True).order_by('updated_at').last()
+
+        self.queryset = self.queryset.annotate(
+            lesson_kredit=Value(lesson_kredit, output_field=FloatField()),
+            teacher_name=Value(teacher.full_name, output_field=CharField()),
+            teacher_org_position=Value(teacher_org_position, output_field=CharField()),
+            teacher_score_updated_at=Value(teacher_score_updated_at, output_field=DateTimeField()),
+        )
+
+        all_list = self.list(request).data
+        print(all_list)
+
+        return request.send_data(all_list)

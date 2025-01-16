@@ -6146,7 +6146,8 @@ class ChallengeReportAPIView(
                     student_idnum=F('student_id'),
                     student_first_name=F('student__first_name'),
                     student_last_name=F('student__last_name'),
-                    student_code=F('student__code')
+                    student_code=F('student__code'),
+                    group_name=F('student__group__name')
 
                 ).annotate(
                     scored_lesson_count = Count('score_type__lesson_teacher__lesson__name', distinct=True),

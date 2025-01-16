@@ -45,6 +45,13 @@ export default function ReportDatatable({ report }) {
             case 'students':
                 return [
                     {
+                        name: `${t('Ангийн нэр')}`,
+                        selector: (row) => (<span>{row?.group_name}</span>),
+                        center: true,
+                        header: 'group_name',
+                        sortable: true
+                    },
+                    {
                         name: `${t('Оюутны нэр')}`,
                         selector: (row) => (<span>{row?.student_first_name}</span>),
                         center: true,
