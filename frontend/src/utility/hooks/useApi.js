@@ -932,7 +932,7 @@ function useApi(isDisplay=false) {
 				getExamStudent: (cdata,lesson) => instance.post(`/timetable/exam_repeat/list_exam/students/${lesson}/`,cdata),
 				getExamStudentList: (pk) => instance.get(`/timetable/exam_repeat/list_exam/students/${pk}/`,),
 				getStudentExamScore:(pk, lesson) => instance.put(`/timetable/exam_repeat/score/${pk}/?lesson_year=${cyear_name}&lesson_season=${cseason_id}&lesson=${lesson}`),
-
+				postOneStudent:(pk,student) => instance.post(`/timetable/exam_repeat/list_exam/one_student/${pk}/`,student),
 				// Тухайн оюутаны хичээлийн дүнг харуулах
 				getStudentLessonScore:(student, lesson) => instance.get(`/timetable/exam_repeat/score/${student}/${lesson}/?lesson_year=${cyear_name}&lesson_season=${cseason_id}`),
 			}
