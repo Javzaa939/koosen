@@ -201,7 +201,7 @@ export default function PrintNationalAttachment()
         switch (vseg?.toUpperCase())
         {
             case 'А':
-                return 'ᠠ'
+                return 'ᠠ‍'
             case 'Б':
                 return 'ᠪ'
             case 'В':
