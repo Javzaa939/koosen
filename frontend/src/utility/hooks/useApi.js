@@ -1041,7 +1041,7 @@ function useApi(isDisplay=false) {
 
 			// based on TeacherScore model
 			teacherScore: {
-				get: ({limit=10000000, page=1, sort='', search='', school=school_id || '', lesson='', group='', is_fall='', teacher=''}) => instance.get(`/score/teacher-score/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&school=${school}&lesson=${lesson}&group=${group}&isFall=${is_fall}&teacher=${teacher}`),
+				get: ({limit=10000000, page=1, sort='', search='', school=school_id || '', lesson='', is_fall='', data}) => instance.put(`/score/teacher-score/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&school=${school}&lesson=${lesson}&isFall=${is_fall}`, data),
 			}
 		},
 		/*Хэвлэх*/

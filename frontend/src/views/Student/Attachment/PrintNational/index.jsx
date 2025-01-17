@@ -195,7 +195,7 @@ export default function PrintNationalAttachment()
         if (too) {
             too = too?.toString()?.replace('/', '')
         }
-        return ( <span style={{ fontFamily: 'CMSUB', fontSize: '14px' }} className='mt-1'>{too}</span> )
+        return ( <span style={{ fontFamily: 'CMSUB', fontSize: '14px' }}>{too}</span> )
     }
 
     /* Крилл үсгийг уйгаржин руу хөрвүүлэх */

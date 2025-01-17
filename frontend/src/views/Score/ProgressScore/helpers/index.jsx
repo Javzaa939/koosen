@@ -68,6 +68,12 @@ export function getColumns(currentPage, rowsPerPage, total_count) {
 			center: true,
 		},
 		{
+			name: `${t('Нийт')}`,
+			selector: (row) => (row?.exam_score + row?.teach_score) ,
+			maxWidth: "180px",
+			center: true,
+		},
+		{
 			header: 'assessment',
 			name: `${t('Үсгэн үнэлгээ')}`,
 			selector: (row) => row?.assessment,

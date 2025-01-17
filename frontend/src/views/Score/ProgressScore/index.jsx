@@ -75,6 +75,8 @@ export default function ProgressScore() {
     const [teach_option, setTeacherOption] = useState([])
     const [group_option, setGroupOption] = useState([])
     const [select_value, setSelectValue] = useState(values)
+    const [teachers, setTeachers] = useState([])
+    const [groups, setGroups] = useState([])
 
     // API
     const groupApi = useApi().student.group
@@ -114,7 +116,10 @@ export default function ProgressScore() {
     async function getDatas() {
         const lesson = select_value.lesson
         const is_fall = select_value.is_fall
-        const class_id = select_value.class
+        var cdata = {
+            groups: groups?.map((c) => c.id),
+            teachers: teachers?.map((c) => c.id)
+        }
 
         if (lesson) {
             const { success, data } = await fetchData(teacherScoreApi.get({
@@ -123,9 +128,8 @@ export default function ProgressScore() {
                 sort: sortField,
                 search: searchValue,
                 lesson: lesson,
-                group: class_id,
                 is_fall: is_fall,
-                teacher: select_value?.teacher
+                data: cdata
             }))
 
             if (success) {
@@ -163,7 +167,7 @@ export default function ProgressScore() {
     useEffect(() => {
         getDatas()
         getTotalDatas()
-    }, [select_value])
+    }, [select_value, groups, teachers])
 
     useEffect(
         () => {
@@ -275,18 +279,15 @@ export default function ProgressScore() {
                                         id="teacher"
                                         classNamePrefix='select'
                                         isClearable
+                                        isMulti
                                         className={classnames('react-select', { 'is-invalid': errors.teacher })}
                                         isLoading={isLoading}
                                         placeholder={t('-- Сонгоно уу --')}
                                         options={teach_option || []}
-                                        value={teach_option.find((c) => c.id === value)}
+                                        value={teachers}
                                         noOptionsMessage={() => t('Хоосон байна.')}
                                         onChange={(val) => {
-                                            onChange(val?.id || '')
-                                            setSelectValue({
-                                                ...select_value,
-                                                teacher: val?.id || '',
-                                            })
+                                            setTeachers(val)
                                         }}
                                         styles={ReactSelectStyles}
                                         getOptionValue={(option) => option.id}
@@ -311,18 +312,15 @@ export default function ProgressScore() {
                                         id="class"
                                         classNamePrefix='select'
                                         isClearable
+                                        isMulti
                                         className={classnames('react-select', { 'is-invalid': errors.class })}
                                         isLoading={isLoading}
                                         placeholder={t('-- Сонгоно уу --')}
                                         options={group_option || []}
-                                        value={value && group_option.find((c) => c.confirm_year === value)}
+                                        value={groups}
                                         noOptionsMessage={() => t('Хоосон байна.')}
                                         onChange={(val) => {
-                                            onChange(val?.id || '')
-                                            setSelectValue({
-                                                ...select_value,
-                                                class: val?.id || '',
-                                            })
+                                            setGroups(val)
                                         }}
                                         styles={ReactSelectStyles}
                                         getOptionValue={(option) => option.id}

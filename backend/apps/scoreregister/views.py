@@ -1341,10 +1341,13 @@ class TeacherScoreAPIView(
     filter_backends = [SearchFilter]
     search_fields = ['student__code', 'student__register_num', 'student__first_name']
 
-    def get(self, request):
+    def put(self, request):
         lesson_year, lesson_season = get_active_year_season()
         self.queryset = self.queryset.filter(lesson_year=lesson_year, lesson_season=lesson_season)
         school_id = self.request.query_params.get('school')
+        data = request.data
+        groups = data.get('groups')
+        teachers = data.get('teachers')
 
         if school_id:
             self.queryset = self.queryset.filter(
@@ -1353,18 +1356,15 @@ class TeacherScoreAPIView(
             )
 
         lesson = self.request.query_params.get('lesson')
-        teacher = self.request.query_params.get('teacher')
 
         if lesson:
             self.queryset = self.queryset.filter(score_type__lesson_teacher__lesson=lesson)
 
-        if teacher:
-            self.queryset = self.queryset.filter(score_type__lesson_teacher__teacher=teacher)
+        if teachers:
+            self.queryset = self.queryset.filter(score_type__lesson_teacher__teacher__in=teachers)
 
-        group = self.request.query_params.get('group')
-
-        if group:
-            self.queryset = self.queryset.filter(student__group=group)
+        if groups:
+            self.queryset = self.queryset.filter(student__group__in=groups)
 
         is_fall = self.request.query_params.get('isFall')
 
