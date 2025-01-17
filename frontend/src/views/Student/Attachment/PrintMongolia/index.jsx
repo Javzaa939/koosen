@@ -430,7 +430,7 @@ export default function PrintAttachmentMongolia()
                         printDatas?.student?.group?.degree?.degree_code !== 'D'
                         &&
                         <div className='d-flex px-1' style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }}>
-                            <span className='fw-normal w-50'>Өмнөх зэргийн дипломын дугаар:</span> <span className='text-uppercase'>{printDatas?.student?.graduation_work?.back_diplom_num}</span>
+                            <span className='fw-normal w-50'>Өмнөх боловсролын дипломын дугаар:</span> <span className='text-uppercase'>{printDatas?.student?.graduation_work?.back_diplom_num}</span>
                         </div>
                     }
                     <div className={`d-flex ${printDatas?.student?.group?.degree?.degree_code === 'D' ? 'px-1' : 'px-2'}`} style={{ width: printDatas?.student?.group?.degree?.degree_code === 'D' && printDatas?.student?.eysh_score ? '25%' : '33.3%' }} >
@@ -451,7 +451,7 @@ export default function PrintAttachmentMongolia()
                         <div className='d-flex' style={{ width:  '33.3%' }} >
                         </div>
                         <div className='d-flex px-1' style={{ width:  '50%' }}>
-                            <span className='fw-normal w-50'>Өмнөх зэргийн дипломын дугаар:</span> <span className='text-uppercase'>{printDatas?.student?.graduation_work?.back_diplom_num}</span>
+                            <span className='fw-normal w-50'>Өмнөх боловсролын дипломын дугаар:</span> <span className='text-uppercase'>{printDatas?.student?.graduation_work?.back_diplom_num}</span>
                         </div>
                     </div>
                 }

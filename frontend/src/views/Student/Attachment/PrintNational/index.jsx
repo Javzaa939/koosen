@@ -287,7 +287,7 @@ export default function PrintNationalAttachment()
                 style={{ fontFamily: 'mongolianScript'}}
             >
 
-                <div style={{ height: printDatas?.isCenter ? '98%' : '49.5%', marginLeft: '210px' }}  className={`${printDatas.isCenter ? 'center-table' : 'not-center-table' }`} >
+                <div style={{ height: printDatas?.isCenter ? '98%' : '49.5%', marginLeft: '215px' }}  className={`${printDatas.isCenter ? 'center-table' : 'not-center-table' }`} >
                     <table id='table1' className='text-center w-100 d-none' style={{ writingMode: 'vertical-lr', marginBottom: '1px', height: '100%' }} >
                         <thead>
                             <tr style={{ fontSize: '9px' }} >
@@ -303,7 +303,7 @@ export default function PrintNationalAttachment()
                     </table>
                 </div>
 
-                <div style={{ height: printDatas?.isCenter ? '98%' : '49.5%', marginLeft: '210px' }} className={`${printDatas.isCenter ? 'center-table' : 'not-center-table' }`} >
+                <div style={{ height: printDatas?.isCenter ? '98%' : '49.5%', marginLeft: '215px' }} className={`${printDatas.isCenter ? 'center-table' : 'not-center-table' }`} >
                     <table id='table2' className='text-center w-100 d-none' style={{ writingMode: 'vertical-lr', marginBottom: '1px', height: '100%' }} >
                         <thead>
                             <tr style={{ fontSize: '9px' }} >
@@ -466,7 +466,7 @@ export default function PrintNationalAttachment()
                         {printDatas?.student?.graduation_work?.back_diplom_num && printDatas?.student?.group?.degree?.degree_code === 'D'
                         &&
                         <div style={{ height: '40%', writingMode: 'vertical-lr', display: 'flex' }}>
-                            <span className='h-50'>ᠪᠠᠻᠠᠯᠠᠸᠷ ᠤ᠋ᠨ ᠳ᠋ᠤᠭᠠᠷ:</span>
+                            <span className='h-50'>ᠡᠮᠦᠨᠡᢈᠢ ᠪᠣᠯᠪᠠᠰᠤᠷᠠᠯ ᠤ᠋ᠨ ᠳ᠋ᠢᠫᠯᠣᠮ ᠤ᠋ᠨ ᠳ᠋ᠤᠭᠠᠷ:</span>
                             {tooBichih(printDatas?.student?.graduation_work?.back_diplom_num)}
                         </div>
                         }

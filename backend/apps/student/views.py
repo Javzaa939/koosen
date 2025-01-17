@@ -2680,7 +2680,7 @@ class GraduationWorkImportAPIView(
             eysh_score = row.get('ЭШ-ийн шалгалтын оноо')
             secondary_school = row.get('Өмнөх шатны боловсролын үнэлгээний дундаж оноо')
             shalgalt_onoo = row.get('Дипломын ажлын оноо')
-            back_diplom_num = row.get('Өмнөх зэргийн дипломын дугаар')
+            back_diplom_num = row.get('Өмнөх боловсролын дипломын дугаар')
 
             student_obj = Student.objects.get(code=student_code)
             with transaction.atomic():

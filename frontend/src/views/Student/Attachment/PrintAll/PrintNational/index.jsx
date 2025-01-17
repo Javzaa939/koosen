@@ -192,7 +192,10 @@ export default function PrintNationalAttachment()
 
     function tooBichih(too)
     {
-        return ( <span style={{ fontFamily: 'CMSUB', fontSize: '14px' }}>{too}</span> )
+        if (too) {
+            too = too?.toString()?.replace('/', '')
+        }
+        return ( <span style={{ fontFamily: 'CMSUB', fontSize: '14px' }} className='mt-1'>{too}</span> )
     }
 
     /* Крилл үсгийг уйгаржин руу хөрвүүлэх */
@@ -374,7 +377,7 @@ export default function PrintNationalAttachment()
                         {printDatas?.student?.graduation_work?.back_diplom_num && printDatas?.student?.group?.degree?.degree_code === 'D'
                         &&
                         <div style={{ height: '40%', writingMode: 'vertical-lr', display: 'flex' }}>
-                            <span className='h-50'>ᠪᠠᠻᠠᠯᠠᠸᠷ ᠤ᠋ᠨ ᠳ᠋ᠤᠭᠠᠷ:</span>
+                            <span className='h-50'>ᠡᠮᠦᠨᠡᢈᠢ ᠪᠣᠯᠪᠠᠰᠤᠷᠠᠯ ᠤ᠋ᠨ ᠳ᠋ᠢᠫᠯᠣᠮ ᠤ᠋ᠨ ᠳ᠋ᠤᠭᠠᠷ:</span>
                             {tooBichih(printDatas?.student?.graduation_work?.back_diplom_num)}
                         </div>
                         }
@@ -385,8 +388,8 @@ export default function PrintNationalAttachment()
 
             <div
                 ref={body1SectionRef}
-                className={`h-100 p-0 d-flex py-1 flex-column justify-content-between align-items-start position-relative ${isPageBreak && 'page-break'} ms-1`}
-                style={{ fontFamily: 'mongolianScript', flex: 1, left: printDatas?.student?.group?.degree?.degree_code !== 'D' ? '25px' : '' }}
+                className={`h-100 p-0 d-flex py-1 flex-column justify-content-between align-items-start position-relative ${isPageBreak && 'page-break'} ms-2`}
+                style={{ fontFamily: 'mongolianScript', flex: 1, left: printDatas?.student?.group?.degree?.degree_code !== 'D' ? '30px' : '' }}
             >
                 <div style={{ height: printDatas?.isCenter ? '98%' : '49.5%' }}  className={`${printDatas.isCenter ? 'center-table' : 'not-center-table' }`} >
                     <table id='tableNational1' className='text-center w-100 d-none parent_table' style={{ writingMode: 'vertical-lr', marginBottom: '1px', height: '100%' }} >
