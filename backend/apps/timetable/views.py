@@ -3393,6 +3393,20 @@ class ExamrepeatStudentsAPIView(
 
             excluded_student_ids = list(exclude_qs)
 
+            excluded_students = TeacherScore.objects.filter(
+                Q(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO),
+                student_id__in=excluded_student_ids,
+                score_type__lesson_teacher__lesson=pk
+            ).values(
+                'student_id',
+                'student__first_name',
+                'student__last_name',
+                'student__code',
+                'score',
+                'student__group__name',
+                'student__group__profession__name'
+            ).distinct('student_id')
+
             queryset = TeacherScore.objects.filter(
                 Q(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO) &
                 (Q(score__lt=18) | Q(score__isnull=True)),
@@ -3401,8 +3415,12 @@ class ExamrepeatStudentsAPIView(
             ).exclude(student_id__in=excluded_student_ids)
 
             return_list = queryset.values('student_id', 'student__first_name','student__last_name','student__code','score','student__group__name','student__group__profession__name').order_by('score')
+            response_data = {
+                "included_students": list(return_list),
+                "excluded_students": list(excluded_students),
+            }
 
-            return request.send_data(list(return_list))
+            return request.send_data(response_data)
         except Exception as e:
             return request.send_error(f"An error occurred: {str(e)}")
 
@@ -3498,3 +3516,24 @@ class ExamRepeatTimeTableScoreListAPIView(
         challenge_student_data = TeacherScoreStudentsSerializer(teach_score, many=True).data
 
         return request.send_info("INF_021", challenge_student_data)
+
+@permission_classes([IsAuthenticated])
+class ExamrepeatAddStudentAPIView(
+    mixins.CreateModelMixin,
+    mixins.UpdateModelMixin,
+    mixins.DestroyModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.ListModelMixin,
+    generics.GenericAPIView
+):
+    def post(self, request,pk=None):
+        student_id = request.data
+        if Exam_to_student.objects.filter(exam=pk, student_id=student_id).exists():
+            return request.send_error("ERR_002","Тухайн оюутан шалгалт өгөх оюутан дотор байна")
+
+        obj = Exam_to_student(
+            exam_id=pk,
+            student_id=student_id
+        )
+        obj.save()
+        return request.send_info("INF_003")

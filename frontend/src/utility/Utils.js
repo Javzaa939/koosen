@@ -675,7 +675,7 @@ export const get_EXAM_STATUS = () => {
   const list = [
       'Нөхөн шалгалт',
       'Шууд тооцох шалгалт',
-      'Дүн ахиулах шалгалт'
+      'Давтан шалгалт'
   ]
   list.map((list, idx) => {
     var data ={id: idx+1, name:list}
