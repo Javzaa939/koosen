@@ -192,6 +192,9 @@ export default function PrintNationalAttachment()
 
     function tooBichih(too)
     {
+        if (too) {
+            too = too?.toString()?.replace('/', '')
+        }
         return ( <span style={{ fontFamily: 'CMSUB', fontSize: '14px' }} className='mt-1'>{too}</span> )
     }
 

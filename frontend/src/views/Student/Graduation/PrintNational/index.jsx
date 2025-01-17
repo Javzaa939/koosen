@@ -87,7 +87,7 @@ export default function PrintNational()
     {
         let slash = text?.split('/')
 
-        return <><span>ᠠ/</span><span style={{ fontFamily: 'CMSUB', fontSize: '25px' }}>{slash?.length > 0 ? slash[1] : text}</span></>
+        return <><span> ᠠ‍ /</span><span style={{ fontFamily: 'CMSUB', fontSize: '25px' }}>{slash?.length > 0 ? slash[1] : text}</span></>
     }
 
     function dugeerUg(too)
