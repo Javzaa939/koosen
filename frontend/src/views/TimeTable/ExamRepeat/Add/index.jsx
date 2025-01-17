@@ -716,7 +716,7 @@ const AddModal = ({ open, handleModal, refreshDatas, handleEdit, editData, editI
                                         <>
                                             {studentData?.excluded_students && studentData.excluded_students.length > 0 && (
                                                 <Card key="excluded-card">
-                                                    <CardHeader><strong>Шалгалтанд оролцохгүй суралцагчид</strong></CardHeader>
+                                                    <CardHeader className='py-0'><strong>Шалгалтанд оролцохгүй суралцагчид</strong></CardHeader>
                                                     <CardBody>
                                                         <Row>
                                                             <Col md={6}>
@@ -761,7 +761,7 @@ const AddModal = ({ open, handleModal, refreshDatas, handleEdit, editData, editI
                                             )}
                                             {studentData?.included_students && studentData.included_students.length > 0 && (
                                                 <Card key="included-card">
-                                                    <CardHeader><strong>Шалгалтанд оролцох суралцагчид</strong></CardHeader>
+                                                    <CardHeader className='py-0'><strong>Шалгалтанд оролцох суралцагчид</strong></CardHeader>
                                                     <CardBody>
                                                         <Row>
                                                             <Col md={6}>
