@@ -1341,7 +1341,7 @@ class TeacherScoreAPIView(
     filter_backends = [SearchFilter]
     search_fields = ['student__code', 'student__register_num', 'student__first_name']
 
-    def get(self,request):
+    def get(self, request):
         lesson_year, lesson_season = get_active_year_season()
         self.queryset = self.queryset.filter(lesson_year=lesson_year, lesson_season=lesson_season)
         school_id = self.request.query_params.get('school')
@@ -1369,7 +1369,9 @@ class TeacherScoreAPIView(
         is_fall = self.request.query_params.get('isFall')
 
         if is_fall == 'true':
-            self.queryset = self.queryset.filter(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).filter(score__lt=18)
+            self.queryset = self.queryset.filter(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO, score__lt=18)
+        elif is_fall == 'false':
+            self.queryset = self.queryset.filter(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO, score__gte=18)
 
         # to select fields to display
         self.queryset = self.queryset.annotate(

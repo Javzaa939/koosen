@@ -358,7 +358,7 @@ const AddModal = ({ open, handleModal, refreshDatas, handleEdit, editData, editI
                                                     styles={ReactSelectStyles}
                                                     getOptionValue={(option) => option.id}
                                                     getOptionLabel={(option) => {
-                                                        return `${option.teacher.map((teacher) => teacher.full_name).join(", ")} (${option.begin_date} - ${option.end_date})`;
+                                                        return `${option?.lesson?.code + ' ' + option?.lesson?.name} (${option.begin_date} - ${option.end_date})`;
                                                     }}
                                                 />
                                             )

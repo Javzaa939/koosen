@@ -84,7 +84,7 @@ export default function ProgressScore() {
 
     // Хичээлийн жагсаалт
     async function getLessonOption() {
-        const { success, data } = await fetchData(lessonApi.getList(school_id))
+        const { success, data } = await fetchData(lessonApi.getList(''))
         if (success) {
             setLessonOption(data)
         }
@@ -356,10 +356,10 @@ export default function ProgressScore() {
                                         ]}
                                         noOptionsMessage={() => t('Хоосон байна.')}
                                         onChange={(val) => {
-                                            onChange(val?.value || '')
+                                            onChange(val?.value)
                                             setSelectValue({
                                                 ...select_value,
-                                                is_fall: val?.value || '',
+                                                is_fall: val?.value,
                                             })
                                         }}
                                         styles={ReactSelectStyles}
