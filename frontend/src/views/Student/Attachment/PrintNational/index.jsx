@@ -192,7 +192,7 @@ export default function PrintNationalAttachment()
 
     function tooBichih(too)
     {
-        return ( <span style={{ fontFamily: 'CMSUB', fontSize: '14px' }}>{too}</span> )
+        return ( <span style={{ fontFamily: 'CMSUB', fontSize: '14px' }} className='mt-1'>{too}</span> )
     }
 
     /* Крилл үсгийг уйгаржин руу хөрвүүлэх */
@@ -432,10 +432,10 @@ export default function PrintNationalAttachment()
                         {uigVseg(printDatas?.student?.register_num[0])} {uigVseg(printDatas?.student?.register_num[1])}  &nbsp;{tooBichih(printDatas?.student?.register_num.slice(-8))}
                     </div>
                     {
-                        printDatas?.student?.group?.degree?.degree_code !== 'D'
+                        printDatas?.student?.group?.degree?.degree_code !== 'D' ||  printDatas?.student?.group?.degree?.degree_code !== 'C'
                         &&
                         <div style={{ height: '39.3%', writingMode: 'vertical-lr', display: 'flex' }}>
-                            <span className='h-50'>{printDatas?.student?.group?.degree?.degree_code === 'E' ?  'ᠪᠠᠻᠠᠯᠠᠸᠷ ᠤ᠋ᠨ ᠳ᠋ᠤᠭᠠᠷ:' : 'ᠮᠠᢉᠢᠰᠲ᠋ᠷ ᠤ᠋ᠨ ᠳ᠋ᠤᠭᠠᠷ:'}</span>
+                            <span className='h-50 me-1'>{'ᠡᠮᠦᠨᠡᢈᠢ ᠪᠣᠯᠪᠠᠰᠤᠷᠠᠯ ᠤ᠋ᠨ ᠳ᠋ᠢᠫᠯᠣᠮ ᠤ᠋ᠨ ᠳ᠋ᠤᠭᠠᠷ: '}</span>
                             {tooBichih(printDatas?.student?.graduation_work?.back_diplom_num)}
                         </div>
                     }
