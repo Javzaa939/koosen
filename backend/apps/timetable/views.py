@@ -1977,6 +1977,8 @@ class Exam_repeatListAPIView(
 
         if students:
             request_data = remove_key_from_dict(request_data,'students')
+        else:
+            return request.send_error("ERR_001", "Сурагчгүй шалгалт авах боломжгүй")
 
         create_students = []
         serializer = self.get_serializer(data=request_data)
@@ -3395,6 +3397,7 @@ class ExamrepeatStudentsAPIView(
 
             excluded_students = TeacherScore.objects.filter(
                 Q(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO),
+                (Q(score__lt=18) | Q(score__isnull=True)),
                 student_id__in=excluded_student_ids,
                 score_type__lesson_teacher__lesson=pk
             ).values(

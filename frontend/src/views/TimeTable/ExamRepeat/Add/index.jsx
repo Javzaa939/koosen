@@ -112,11 +112,14 @@ const AddModal = ({ open, handleModal, refreshDatas, handleEdit, editData, editI
 
     // Test жагсаалт
     async function getStudents() {
-        if (selectedTest) {
+        if (selectedTest && selectedTest.length > 0) {
             const { success, data } = await fetchData(examApi.getExamStudent(selectedTest, select_value.lesson))
             if (success) {
                 setStudentDatas(data)
             }
+        }
+        else{
+            setStudentDatas([])
         }
     }
 
@@ -223,7 +226,7 @@ const AddModal = ({ open, handleModal, refreshDatas, handleEdit, editData, editI
                 }
             }
         } else {
-            cdata['students'] = studentData?.map((c) => c.student_id)
+            cdata['students'] = studentData?.included_students.map((c) => c.student_id)
             cdata['school'] = school_id
 
             const { success, error } = await postFetch(examApi.post(cdata))
@@ -417,7 +420,6 @@ const AddModal = ({ open, handleModal, refreshDatas, handleEdit, editData, editI
                                             noOptionsMessage={() => t('Хоосон байна')}
                                             onChange={(val) => {
                                                 onChange(val?.id || '')
-                                                setIsPop(false)
                                             }}
                                             styles={ReactSelectStyles}
                                             getOptionValue={(option) => option.id}
