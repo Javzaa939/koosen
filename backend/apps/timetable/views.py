@@ -19,7 +19,7 @@ from main.utils.function.utils import has_permission, get_error_obj, get_fullNam
 from django.db import transaction
 from django.conf import settings
 from django.db import connection
-from django.db.models import Q, Count, Case, When,F, Max, FloatField, Value, IntegerField, CharField, BigIntegerField
+from django.db.models import Q, Count, Case, When,F, Max, FloatField, Value, IntegerField, Exists, OuterRef
 
 from core.models import Employee, Teachers, SubOrgs
 from lms.models import Room
@@ -3390,11 +3390,14 @@ class ExamrepeatStudentsAPIView(
             groups = Exam_to_group.objects.filter(exam__in=data).values_list('group_id',flat=True)
             student_ids = Student.objects.filter(group_id__in=groups).values_list('id',flat=True)
 
-            exam_qs = ExamTimeTable.objects.values_list('lesson',flat=True)
+            exam_qs = ExamTimeTable.objects.values_list('lesson', flat=True)
 
             # Нийт 3 аас илүү хичээл дээр унасан сурагчид
-            exclude_qs = TeacherScore.objects.filter(score__gt=0,student_id__in=student_ids,score_type__lesson_teacher__lesson__in=exam_qs).values('student_id').annotate(
+            exclude_qs = TeacherScore.objects.filter(score__gt=0, student_id__in=student_ids, score_type__lesson_teacher__lesson__in=exam_qs).values('student_id').annotate(
                     scored_lesson_count=Count('score_type__lesson_teacher__lesson__name', distinct=True),
+                    is_fail=Exists(
+                        TeacherScore.objects.filter(score_type__lesson_teacher__lesson=pk, student=OuterRef('student'), score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO, score__lt=18)
+                    ),
                     success_scored_lesson_count=Count(
                         Case(
                             When(
@@ -3406,7 +3409,9 @@ class ExamrepeatStudentsAPIView(
                         distinct=True
                     ),
                     failed_scored_lesson_count=F('scored_lesson_count') - F('success_scored_lesson_count')
-                    ).filter(failed_scored_lesson_count__gte=3).values_list('student_id',flat=True)
+                    ).filter(failed_scored_lesson_count__gte=3, is_fail=True)
+
+            exclude_qs = exclude_qs.values_list('student_id', flat=True)
 
             excluded_student_ids = list(exclude_qs)
 
@@ -3425,90 +3430,51 @@ class ExamrepeatStudentsAPIView(
                 'student__group__profession__name'
             ).distinct('student_id')
 
-            # queryset = (
-            #     TeacherScore.objects
-            #     .filter(score_type__lesson_teacher__lesson=pk)
-            #     .annotate(
-            #         # Annotate exam_score with a conditional maximum score
-            #         exam_score=Max(
-            #             Case(
-            #                 When(
-            #                     score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO,
-            #                     score_type__lesson_teacher__lesson=pk,
-            #                     then=F('score'),
-            #                 ),
-            #                 default=Value(0),
-            #                 output_field=FloatField(),
-            #             )
-            #         ),
-            #         # Annotate stype based on exam_score and other conditions
-            #         stype=Case(
-            #             When(
-            #                 Q(exam_score=0) & Q(score_type__score_type=~Lesson_teacher_scoretype.SHALGALT_ONOO),
-            #                 score_type__lesson_teacher__lesson=pk,
-            #                 then=Value(Lesson_teacher_scoretype.SHALGALT_ONOO),
-            #             ),
-            #             default=F('score_type__score_type'),
-            #             output_field=IntegerField(),
-            #         ),
-            #         lesson=Case(
-            #             When(
-            #                 Q(exam_score=0) & Q(score_type__score_type=~Lesson_teacher_scoretype.SHALGALT_ONOO),
-            #                 score_type__lesson_teacher__lesson=pk,
-            #                 then=F('score_type__lesson_teacher__lesson'),
-            #             ),
-            #             default=F('score_type__lesson_teacher__lesson'),
-            #             output_field=BigIntegerField(),
-            #         ),
-            #     )
-            #     .filter(
-            #         stype=Lesson_teacher_scoretype.SHALGALT_ONOO,
-            #         exam_score__lt=18,
-            #         student_id__in=student_ids,
-            #     )
-            # )
-            
             queryset = (
                 TeacherScore.objects
-                .filter(score_type__lesson_teacher__lesson=pk)
+                .filter(
+                    score_type__lesson_teacher__lesson=pk
+                )
                 .annotate(
-                    # Annotate exam_score with a conditional maximum score
-                    exam_score=Max(
+                    is_exam=Exists(
+                        TeacherScore.objects.filter(score_type__lesson_teacher__lesson=pk, student=OuterRef('student'), score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO)
+                    ),
+                    exam_score=(
                         Case(
                             When(
-                                score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO,
-                                score_type__lesson_teacher__lesson=pk,
-                                then=F('score'),
+                                is_exam=True,
+                                then='score',
                             ),
-                            default=Value(0),
-                            output_field=FloatField(),
+                            When(
+                                is_exam=False,
+                                then=Value(0),
+                            ),
+                            default=Value(1001), output_field=FloatField(),
                         )
                     ),
-                    # Annotate stype based on exam_score and other conditions
-                    stype=Case(
-                        When(
-                            Q(exam_score=0) & Q(score_type__score_type=~Lesson_teacher_scoretype.SHALGALT_ONOO),
-                            score_type__lesson_teacher__lesson=pk,
-                            then=Value(Lesson_teacher_scoretype.SHALGALT_ONOO),
-                        ),
-                        default=F('score_type__score_type'),
-                        output_field=IntegerField(),
-                    ),
-                    lesson=Case(
-                        When(
-                            Q(exam_score=0) & Q(score_type__score_type=~Lesson_teacher_scoretype.SHALGALT_ONOO),
-                            score_type__lesson_teacher__lesson=pk,
-                            then=F('score_type__lesson_teacher__lesson'),
-                        ),
-                        default=F('score_type__lesson_teacher__lesson'),
-                        output_field=BigIntegerField(),
+                    stype=(
+                        Case(
+                            When(
+                                is_exam=True,
+                                then='score_type__score_type',
+                            ),
+                            When(
+                                is_exam=False,
+                                then=Value(Lesson_teacher_scoretype.SHALGALT_ONOO),
+                            ),
+                            default=Value(8), output_field=IntegerField(),
+                        )
                     ),
                 )
                 .filter(
-                    Q(exam_score=0) | Q(exam_score__isnull=True),  # Students without exam_score
+                    Q(
+                        Q(is_exam=False) |
+                        Q(is_exam=True, score__lt=18)
+                    ),
                     stype=Lesson_teacher_scoretype.SHALGALT_ONOO,  # Optional: filter specific type
                     student_id__in=student_ids,  # Filter by student IDs
                 )
+                .exclude(student_id__in=excluded_student_ids)
             )
 
             return_list = queryset.values('student_id', 'student__first_name','student__last_name','student__code','score','student__group__name','student__group__profession__name').order_by('score')
