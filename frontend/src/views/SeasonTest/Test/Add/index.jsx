@@ -28,6 +28,7 @@ const Addmodal = ({ open, handleModal, setEditRowData, refreshDatas }) => {
     const [errorRows, setErrorRows] = useState({})
 	const [selectedLesson, setSelectedLesson] = useState('')
 	const [selectExam, setSelectExam] = useState('')
+	const [selectRepeat, setSelectRepeat] = useState('')
 
     // ** State
     const [stepper, setStepper] = useState(null)
@@ -74,6 +75,7 @@ const Addmodal = ({ open, handleModal, setEditRowData, refreshDatas }) => {
                         setEditRowData={setEditRowData}
                         setSelectExam={setSelectExam}
                         errorRows={errorRows}
+                        setSelectRepeat={setSelectRepeat}
                     />
         },
         {
@@ -88,6 +90,7 @@ const Addmodal = ({ open, handleModal, setEditRowData, refreshDatas }) => {
                     selectedLesson={selectedLesson}
                     setEditRowData={setEditRowData}
                     selectExam={selectExam}
+                    is_repeat={selectRepeat}
                 />
         },
     ]

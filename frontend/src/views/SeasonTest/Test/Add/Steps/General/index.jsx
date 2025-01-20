@@ -21,7 +21,7 @@ import useLoader from '@hooks/useLoader';
 import Flatpickr from 'react-flatpickr';
 import '@styles/react/libs/flatpickr/flatpickr.scss';
 
-const General = ({ stepper, setSubmitDatas, setSelectedLesson, editData, setEditRowData, isEdit, errorRows, setSelectExam }) => {
+const General = ({ stepper, setSubmitDatas, setSelectedLesson, editData, setEditRowData, isEdit, errorRows, setSelectExam, setSelectRepeat }) => {
     const { t } = useTranslation()
 
     const { control, handleSubmit, setError, setValue, getValues, formState: { errors } } = useForm(validate(validateSchema))
@@ -66,7 +66,6 @@ const General = ({ stepper, setSubmitDatas, setSelectedLesson, editData, setEdit
         if (isRepeat) {
             const { success, data } = await fetchData(reApi.getList())
             if(success) {
-                console.log(data)
                 setTimeTableOption(data)
             }
         } else {
@@ -129,7 +128,12 @@ const General = ({ stepper, setSubmitDatas, setSelectedLesson, editData, setEdit
                                     {...field}
                                     id={field.name}
                                     type="checkbox"
-                                    onChange={(e) => setIsRepeat(e.target.checked)}
+                                    onChange={
+                                        (e) => {
+                                            setIsRepeat(e.target.checked)
+                                            setSelectRepeat(e.target.checked)
+                                        }
+                                    }
                                     checked={field.value || isRepeat}
                                     className='me-50'
                                 />
@@ -171,7 +175,7 @@ const General = ({ stepper, setSubmitDatas, setSelectedLesson, editData, setEdit
                                         }}
                                         styles={ReactSelectStyles}
                                         getOptionValue={(option) => option.id}
-                                        getOptionLabel={(option) => option.lesson_code + ' ' + option.lesson_name}
+                                        getOptionLabel={(option) => isRepeat ? option.lesson_name : option.lesson_code + ' ' + option.lesson_name}
                                     />
                                 )
                             }}
