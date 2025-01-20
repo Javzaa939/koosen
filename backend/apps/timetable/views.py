@@ -3539,4 +3539,4 @@ class ExamrepeatAddStudentAPIView(
             student_id=student_id
         )
         obj.save()
-        return request.send_info("INF_003")
+        return request.send_info("INF_022")

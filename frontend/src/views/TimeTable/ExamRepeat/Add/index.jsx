@@ -1,11 +1,10 @@
 // ** React imports
 import React, { Fragment, useContext, useState, useEffect } from 'react'
 
-import { X } from "react-feather";
+import { MinusCircle, PlusCircle, X } from "react-feather";
 
 import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
-import useToast from "@hooks/useToast"
 import SchoolContext from "@context/SchoolContext"
 import ActiveYearContext from "@context/ActiveYearContext"
 
@@ -17,7 +16,7 @@ import { useForm, Controller, useWatch } from "react-hook-form";
 
 // import { Eye } from 'react-feather';
 
-import { Row, Col, Form, Modal, Input, Label, Button, ModalBody, ModalHeader, FormFeedback, Spinner, Card, CardTitle, CardBody, ListGroup, ListGroupItem, CardText, CardHeader } from "reactstrap";
+import { Row, Col, Form, Modal, Input, Label, Button, ModalBody, ModalHeader, FormFeedback, Spinner, Card, CardTitle, CardBody, ListGroup, ListGroupItem, Table, CardHeader, Badge } from "reactstrap";
 
 import { validate, ReactSelectStyles, convertDefaultValue, examType, get_EXAM_STATUS } from "@utils"
 
@@ -192,10 +191,6 @@ const AddModal = ({ open, handleModal, refreshDatas, handleEdit, editData, editI
         }, [editData, teacher_option, groupOption]
     )
 
-    // useEffect(() => {
-    //     getStudentList()
-    // },[select_value.lesson, room_capacity])
-
     function IsOnline(checked) {
         setOnlineChecked(checked)
         if (checked) {
@@ -279,8 +274,47 @@ const AddModal = ({ open, handleModal, refreshDatas, handleEdit, editData, editI
 
     useEffect(() => {
         getStudents()
-    }, [selectedTest])
+    }, [selectedTest, editId])
 
+    const handleAdd = (data, is_add) => {
+        // Clone arrays to avoid mutating the original state
+        const added_students = [...studentData?.included_students];
+        const excluded_students = [...studentData?.excluded_students];
+
+        if (is_add) {
+            // Add student to included_students
+            const updated_included = [...added_students, data];
+
+            // Remove student from excluded_students
+            const find_index = excluded_students.findIndex(e => e?.student__code === data?.student__code);
+            if (find_index > -1) {
+                excluded_students.splice(find_index, 1);
+            }
+
+            // Update state
+            setStudentDatas({
+                ...studentData,
+                excluded_students,
+                included_students: updated_included,
+            });
+        } else {
+            // Add student to excluded_students
+            const updated_excluded = [...excluded_students, data];
+
+            // Remove student from included_students
+            const find_index = added_students.findIndex(e => e?.student__code === data?.student__code);
+            if (find_index > -1) {
+                added_students.splice(find_index, 1);
+            }
+
+            // Update state
+            setStudentDatas({
+                ...studentData,
+                excluded_students: updated_excluded,
+                included_students: added_students,
+            });
+        }
+    };
 
     return (
         <Fragment>
@@ -355,7 +389,7 @@ const AddModal = ({ open, handleModal, refreshDatas, handleEdit, editData, editI
                             {errors.lesson && <FormFeedback className='d-block'>{t(errors.lesson.message)}</FormFeedback>}
                         </Col>
                         {
-                            !editData && (
+                            !editId && (
                                 <Col md={6}>
                                     <Label className="form-label" for="exam">
                                         {t('Шалгалт')}
@@ -625,7 +659,7 @@ const AddModal = ({ open, handleModal, refreshDatas, handleEdit, editData, editI
                         {
                             editId && (
                                 <Col md={6} className='d-flex gap-5'>
-                                    <Col md={10}>
+                                    <Col md={9}>
                                         <Label className="form-label" for="student">
                                             {t('Оюутан нэмэх')}
                                         </Label>
@@ -663,153 +697,125 @@ const AddModal = ({ open, handleModal, refreshDatas, handleEdit, editData, editI
                                             }}
                                         />
                                     </Col>
-                                    <Col md={12}>
-                                    <Button
-                                        className="me-0 mt-1 text-end"
-                                        color="primary"
-                                        size='xl'
-                                        onClick={onSubmitStudent}
-                                    >
-                                        {t("Нэмэх")}
-                                    </Button>
+                                    <Col md={3}>
+                                        <Button
+                                            className="mt-2"
+                                            color="primary"
+                                            size='sm'
+                                            onClick={onSubmitStudent}
+                                        >
+                                            {t("Нэмэх")}
+                                        </Button>
                                     </Col>
                                 </Col>
                             )
                         }
 
                         <Card style={{ maxHeight: '300px', overflowY: 'auto' }}>
-                            <CardBody>
+                            <CardBody tag={Row}>
                                 <CardTitle tag="h5">Дахин шалгалт өгөх суралцагчид</CardTitle>
-                                {studentData && (
-                                    editId ? (
+                                {
+                                    !editId
+                                    ?
                                         <Row>
                                             <Col md={6}>
-                                                <ListGroup>
-                                                    {studentData.filter((_, index) => index % 2 === 0).map((student, index) => (
-                                                        <ListGroupItem key={index} className="d-flex justify-content-between">
-                                                            <div className="d-flex justify-content-between w-100">
-                                                                <div className="flex-column">
-                                                                    {index + 1}. {student.student_name}
-                                                                </div>
-                                                                <div className="flex-column">{student.group_name}</div>
-                                                            </div>
-                                                        </ListGroupItem>
-                                                    ))}
-                                                </ListGroup>
+                                                <CardHeader className='py-0'><strong>Шалгалтанд оролцох суралцагчид</strong>({studentData?.included_students?.length})</CardHeader>
+                                                <CardBody>
+                                                    <Table bordered size='sm'>
+                                                        <thead>
+                                                            <tr>
+                                                                <th>№</th>
+                                                                <th>Хөтөлбөр анги</th>
+                                                                <th>Оюутан</th>
+                                                                <th>Оноо</th>
+                                                                <th>Хасах</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {
+                                                                studentData?.included_students?.map((student, originalIndex) => (
+                                                                    <tr>
+                                                                        <td>{originalIndex + 1}</td>
+                                                                        <td>{student?.student__group__profession__name} - {student?.student__group__name}</td>
+                                                                        <td>{student?.student__code} - {student?.student__last_name[0]}.{student?.student__first_name}</td>
+                                                                        <td>{student?.score?.toFixed(1)}</td>
+                                                                        <td>
+                                                                            <Badge color='light-primary' tag={'a'} onClick={(e) => handleAdd(student, false)}>
+                                                                                <MinusCircle size={15}/>
+                                                                            </Badge>
+                                                                        </td>
+                                                                    </tr>
+                                                                ))
+                                                            }
+                                                        </tbody>
+                                                    </Table>
+                                                </CardBody>
                                             </Col>
                                             <Col md={6}>
-                                                <ListGroup>
-                                                    {studentData.filter((_, index) => index % 2 !== 0).map((student, index) => (
-                                                        <ListGroupItem key={index} className="d-flex justify-content-between">
-                                                            <div className="d-flex justify-content-between w-100">
-                                                                <div className="flex-column">
-                                                                    {index + 1}. {student.student_name}
-                                                                </div>
-                                                                <div className="flex-column">{student.group_name}</div>
-                                                            </div>
-                                                        </ListGroupItem>
-                                                    ))}
-                                                </ListGroup>
+                                                <CardHeader className='py-0'><strong>Шалгалтанд оролцохгүй суралцагчид</strong>({studentData?.excluded_students?.length})</CardHeader>
+                                                <CardBody>
+                                                    <Table bordered size='sm'>
+                                                        <thead>
+                                                            <tr>
+                                                                <th>№</th>
+                                                                <th>Хөтөлбөр анги</th>
+                                                                <th>Оюутан</th>
+                                                                <th>Оноо</th>
+                                                                <th>Нэмэх</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {
+                                                                studentData?.excluded_students?.map((student, originalIndex) => (
+                                                                    <tr>
+                                                                        <td>{originalIndex + 1}</td>
+                                                                        <td>{student?.student__group__profession__name} - {student?.student__group__name}</td>
+                                                                        <td>{student?.student__code} - {student?.student__last_name[0]}.{student?.student__first_name}</td>
+                                                                        <td>{student?.score?.toFixed(1)}</td>
+                                                                        <td>
+                                                                            <Badge color='light-primary' tag={'a'} onClick={(e) => handleAdd(student, true)}>
+                                                                                <PlusCircle size={15}/>
+                                                                            </Badge>
+                                                                        </td>
+                                                                    </tr>
+                                                                ))
+                                                            }
+                                                        </tbody>
+                                                    </Table>
+                                                </CardBody>
                                             </Col>
                                         </Row>
-                                    ) : (
-                                        <>
-                                            {studentData?.excluded_students && studentData.excluded_students.length > 0 && (
-                                                <Card key="excluded-card">
-                                                    <CardHeader className='py-0'><strong>Шалгалтанд оролцохгүй суралцагчид</strong></CardHeader>
-                                                    <CardBody>
-                                                        <Row>
-                                                            <Col md={6}>
-                                                                <ListGroup>
-                                                                    {studentData.excluded_students
-                                                                        .filter((_, index) => index % 2 === 0)
-                                                                        .map((student, originalIndex) => (
-                                                                            <ListGroupItem key={`excluded-even-${originalIndex}`} className="d-flex justify-content-between">
-                                                                                <div className="d-flex justify-content-between w-100">
-                                                                                    <div className="flex-column">
-                                                                                        {originalIndex * 2 + 1}. {student.student__code} - {student.student__last_name[0]}.{student.student__first_name} ({student.student__group__name} - {student.student__group__profession__name})
-                                                                                    </div>
-                                                                                    <div className="flex-column">
-                                                                                        {student.score?.toFixed(1) || 'N/A'}
-                                                                                    </div>
-                                                                                </div>
-                                                                            </ListGroupItem>
-                                                                        ))}
-                                                                </ListGroup>
-                                                            </Col>
-                                                            <Col md={6}>
-                                                                <ListGroup>
-                                                                    {studentData.excluded_students
-                                                                        .filter((_, index) => index % 2 !== 0)
-                                                                        .map((student, originalIndex) => (
-                                                                            <ListGroupItem key={`excluded-odd-${originalIndex}`} className="d-flex justify-content-between">
-                                                                                <div className="d-flex justify-content-between w-100">
-                                                                                    <div className="flex-column">
-                                                                                        {originalIndex * 2 + 2}. {student.student__code} - {student.student__last_name[0]}.{student.student__first_name} ({student.student__group__name} - {student.student__group__profession__name})
-                                                                                    </div>
-                                                                                    <div className="flex-column">
-                                                                                        {student.score?.toFixed(1) || 'N/A'}
-                                                                                    </div>
-                                                                                </div>
-                                                                            </ListGroupItem>
-                                                                        ))}
-                                                                </ListGroup>
-                                                            </Col>
-                                                        </Row>
-                                                    </CardBody>
-                                                </Card>
-                                            )}
-                                            {studentData?.included_students && studentData.included_students.length > 0 && (
-                                                <Card key="included-card">
-                                                    <CardHeader className='py-0'><strong>Шалгалтанд оролцох суралцагчид</strong></CardHeader>
-                                                    <CardBody>
-                                                        <Row>
-                                                            <Col md={6}>
-                                                                <ListGroup>
-                                                                    {studentData.included_students
-                                                                        .filter((_, index) => index % 2 === 0)
-                                                                        .map((student, originalIndex) => (
-                                                                            <ListGroupItem key={`included-even-${originalIndex}`} className="d-flex justify-content-between">
-                                                                                <div className="d-flex justify-content-between w-100">
-                                                                                    <div className="flex-column">
-                                                                                        {originalIndex * 2 + 1}. {student.student__code} - {student.student__last_name[0]}.{student.student__first_name} ({student.student__group__name} - {student.student__group__profession__name})
-                                                                                    </div>
-                                                                                    <div className="flex-column">
-                                                                                        {student.score?.toFixed(1) || 'N/A'}
-                                                                                    </div>
-                                                                                </div>
-                                                                            </ListGroupItem>
-                                                                        ))}
-                                                                </ListGroup>
-                                                            </Col>
-                                                            <Col md={6}>
-                                                                <ListGroup>
-                                                                    {studentData.included_students
-                                                                        .filter((_, index) => index % 2 !== 0)
-                                                                        .map((student, originalIndex) => (
-                                                                            <ListGroupItem key={`included-odd-${originalIndex}`} className="d-flex justify-content-between">
-                                                                                <div className="d-flex justify-content-between w-100">
-                                                                                    <div className="flex-column">
-                                                                                        {originalIndex * 2 + 2}. {student.student__code} - {student.student__last_name[0]}.{student.student__first_name} ({student.student__group__name} - {student.student__group__profession__name})
-                                                                                    </div>
-                                                                                    <div className="flex-column">
-                                                                                        {student.score?.toFixed(1) || 'N/A'}
-                                                                                    </div>
-                                                                                </div>
-                                                                            </ListGroupItem>
-                                                                        ))}
-                                                                </ListGroup>
-                                                            </Col>
-                                                        </Row>
-                                                    </CardBody>
-                                                </Card>
-                                            )}
-                                        </>
+                                    :
+                                    <Row>
+                                        <Col md={12}>
+                                            <CardHeader className='py-0'><strong>Шалгалтанд оролцох суралцагчид</strong>({studentData?.length})</CardHeader>
+                                            <CardBody>
+                                                <Table bordered size='sm'>
+                                                    <thead>
+                                                        <tr>
+                                                            <th>№</th>
+                                                            <th>Хөтөлбөр анги</th>
+                                                            <th>Оюутан</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {
+                                                            studentData?.map((student, originalIndex) => (
+                                                                <tr>
+                                                                    <td>{originalIndex + 1}</td>
+                                                                    <td>{student.group_name}</td>
+                                                                    <td>{student.student_name}</td>
+                                                                </tr>
+                                                            ))
+                                                        }
+                                                    </tbody>
+                                                </Table>
+                                            </CardBody>
+                                        </Col>
+                                    </Row>
 
-                                    )
-                                )}
+                                }
                             </CardBody>
-
                         </Card>
                         <Col md={12} className="mt-2 text-center">
                             <Button className="me-2" color="primary" type="submit" disabled={postLoading}>

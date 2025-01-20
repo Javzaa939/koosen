@@ -1184,7 +1184,7 @@ class Exam_repeat(models.Model):
     EXAM_STATUS = (
         (REPLACE_EXAM, 'Нөхөн шалгалт'),
         (ALLOW_EXAM, 'Шууд тооцох шалгалт'),
-        (UPGRADE_SCORE, 'Дүн ахиулах шалгалт'),
+        (UPGRADE_SCORE, 'Давтан шалгалт'),
         (OTHER, 'Бусад'),
     )
 
