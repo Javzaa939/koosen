@@ -6685,6 +6685,12 @@ class ChallengeAddInformationAPIView(
         teacher = get_object_or_404(Teachers, user_id=user, action_status=Teachers.APPROVED)
         data['created_by'] = teacher.id if teacher else None
 
+        if 'is_repeat' in data:
+            if data['is_repeat'] == 'true':
+                data['is_repeat'] = True
+            else:
+                data['is_repeat'] = False
+
         students = data.get('students')
         if 'students' in data:
             del data['students']
