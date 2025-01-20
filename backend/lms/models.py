@@ -3545,6 +3545,7 @@ class Challenge(models.Model):
 
     has_shuffle = models.BooleanField(default=False, verbose_name="Холих эсэх")
     has_choice_shuffle = models.BooleanField(default=False, verbose_name="Сонголтуудыг холих эсэх")
+    is_repeat = models.BooleanField(default=False, verbose_name="Давтан шалгалт эсэх")
 
     is_open = models.BooleanField(default=False, verbose_name="Нээлттэй эсэх")
     level = models.IntegerField(choices=ChallengeQuestions.DIFFICULTY_LEVELS, default=ChallengeQuestions.LEVEL_NORMAL,  verbose_name='Шалгалтын түвшин')
