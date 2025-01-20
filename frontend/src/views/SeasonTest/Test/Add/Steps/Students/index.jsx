@@ -57,7 +57,7 @@ export default function Students({stepper, setSubmitDatas, selectedLesson, onSub
             <CardBody>
                 <Row>
                     {
-                        is_repeat
+                        !is_repeat
                         ?
                             <Col md={12}>
                                 <Alert className='p-1' color="primary">
