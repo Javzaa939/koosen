@@ -3474,7 +3474,7 @@ class ExamRepeatTimeTableScoreListAPIView(
             exam_students = Exam_to_student.objects.filter(exam=instance).values_list('student', flat=True)
 
             # Онлайнаар шалгалт өгсөн бол энд дүн нь байгаа
-            challenge_qs = Challenge.objects.filter(challenge_type=Challenge.SEMESTR_EXAM, lesson=lesson, lesson_year=lesson_year, lesson_season=lesson_season)
+            challenge_qs = Challenge.objects.filter(challenge_type=Challenge.SEMESTR_EXAM, lesson=lesson, lesson_year=lesson_year, lesson_season=lesson_season, is_repeat=True)
             challenge_students = ChallengeStudents.objects.filter(challenge__in=challenge_qs, student__in=exam_students)
 
             if challenge_students.count() == 0:
@@ -3486,7 +3486,6 @@ class ExamRepeatTimeTableScoreListAPIView(
             other_lesson_teacher = scoretype_qs.lesson_teacher if scoretype_qs else None
 
             scoretype = Lesson_teacher_scoretype.objects.filter(lesson_teacher=other_lesson_teacher, score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).first()
-
             if not scoretype:
                 scoretype = Lesson_teacher_scoretype.objects.create(
                     lesson_teacher=other_lesson_teacher,

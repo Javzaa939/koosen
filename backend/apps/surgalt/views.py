@@ -241,6 +241,7 @@ class LessonStandartAPIView(
                             lesson_id=pk,
                             teacher_id=teacher_id
                         )
+
             except Exception as e:
                 print(e)
                 return request.send_info("INF_002", 'Багшийн системд дүн оруулсан учраас устгах боломжгүй')

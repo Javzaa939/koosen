@@ -110,7 +110,7 @@ export function getColumns (currentPage, rowsPerPage, datas, handleEditModal,han
 				<div className="text-center" style={{ width: "auto" }}>
 					{
 						// Шалгалт аваад дууссан мөн онлайн шалгалт байгаад сорил төлөвтэй байна
-						row?.stype === 1 && row?.is_online && row?.is_expired && user?.permissions?.includes('lms-timetable-exam-score-download') &&
+						row?.stype === 1 && row?.is_online  && user?.permissions?.includes('lms-timetable-exam-score-download') &&
 						<>
 							<a
 								role="button"
