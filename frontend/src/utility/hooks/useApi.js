@@ -924,11 +924,12 @@ function useApi(isDisplay=false) {
 			re_exam:{
 				get:(limit, page, sort, search, status,teacher) =>
 					instance.get(`/timetable/exam_repeat/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&status=${status}&teacher=${teacher}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&school=${school_id}`),
+				getList: () => instance.get(`/timetable/exam_repeat/list/`),
+				getExamsList: (pk) => instance.get(`/timetable/exam_repeat/list_exam/${pk}/`),
 				post: data => instance.post('/timetable/exam_repeat/', data),
 				getOne: (pk) => instance.get(`/timetable/exam_repeat/${pk}/`),
 				put: (data, pk) => instance.put(`/timetable/exam_repeat/${pk}/`, data),
 				delete: (pk) => instance.delete(`/timetable/exam_repeat/${pk}/`),
-				getExamsList: (pk) => instance.get(`/timetable/exam_repeat/list_exam/${pk}/`),
 				getExamStudent: (cdata,lesson) => instance.post(`/timetable/exam_repeat/list_exam/students/${lesson}/`,cdata),
 				getExamStudentList: (pk) => instance.get(`/timetable/exam_repeat/list_exam/students/${pk}/`,),
 				getStudentExamScore:(pk, lesson) => instance.put(`/timetable/exam_repeat/score/${pk}/?lesson_year=${cyear_name}&lesson_season=${cseason_id}&lesson=${lesson}`),

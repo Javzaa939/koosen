@@ -24,15 +24,16 @@ import '@styles/react/libs/flatpickr/flatpickr.scss';
 const General = ({ stepper, setSubmitDatas, setSelectedLesson, editData, setEditRowData, isEdit, errorRows, setSelectExam }) => {
     const { t } = useTranslation()
 
-    const { control, handleSubmit, setError, setValue, formState: { errors } } = useForm(validate(validateSchema))
+    const { control, handleSubmit, setError, setValue, getValues, formState: { errors } } = useForm(validate(validateSchema))
 	const { fetchData } = useLoader({ isFullScreen: true });
     const [lessonOption, setLessonOption] = useState([])
     const [timeTableOption, setTimeTableOption] = useState([])
-    const [endPicker, setEndPicker] = useState(new Date())
+    const [isRepeat, setIsRepeat] = useState(false)
 	const [startPicker, setStartPicker] = useState(new Date())
 
     const teacherLessonApi = useApi().study.lesson
     const examTimeTableApi = useApi().timetable.exam
+    const reApi = useApi().timetable.re_exam
 
     async function onSubmit(cdata) {
         delete cdata['exam_timetable']
@@ -62,9 +63,17 @@ const General = ({ stepper, setSubmitDatas, setSelectedLesson, editData, setEdit
     }
 
     async function getExamTimeTableDatas() {
-        const { success, data } = await fetchData(examTimeTableApi.getList(true))
-        if(success) {
-            setTimeTableOption(data)
+        if (isRepeat) {
+            const { success, data } = await fetchData(reApi.getList())
+            if(success) {
+                console.log(data)
+                setTimeTableOption(data)
+            }
+        } else {
+            const { success, data } = await fetchData(examTimeTableApi.getList(true))
+            if(success) {
+                setTimeTableOption(data)
+            }
         }
     }
 
@@ -72,9 +81,16 @@ const General = ({ stepper, setSubmitDatas, setSelectedLesson, editData, setEdit
         () =>
         {
             getLesson()
-            getExamTimeTableDatas()
         },
         []
+    )
+
+    useEffect(
+        () =>
+        {
+            getExamTimeTableDatas()
+        },
+        [isRepeat]
     )
 
     return (
@@ -102,6 +118,27 @@ const General = ({ stepper, setSubmitDatas, setSelectedLesson, editData, setEdit
                             )}
                         />
                         {errors.title && <FormFeedback className='d-block'>{t(errors.title.message)}</FormFeedback>}
+                    </Col>
+                    <Col md={6} className='mt-3'>
+                        <Controller
+                            control={control}
+                            name="is_repeat"
+                            defaultValue={false}
+                            render={({ field }) => (
+                                <Input
+                                    {...field}
+                                    id={field.name}
+                                    type="checkbox"
+                                    onChange={(e) => setIsRepeat(e.target.checked)}
+                                    checked={field.value || isRepeat}
+                                    className='me-50'
+                                />
+                            )}
+                        />
+                        <Label className="form-label" for="is_repeat">
+                            {t('Давтан шалгалт эсэх')}
+                        </Label>
+                        {errors.is_repeat && <FormFeedback className='d-block'>{t(errors.is_repeat.message)}</FormFeedback>}
                     </Col>
                     <Col md={6}>
                         <Label className="form-label" for="exam_timetable">

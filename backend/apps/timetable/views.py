@@ -19,7 +19,7 @@ from main.utils.function.utils import has_permission, get_error_obj, get_fullNam
 from django.db import transaction
 from django.conf import settings
 from django.db import connection
-from django.db.models import Q, Count, Case, When,F
+from django.db.models import Q, Count, Case, When,F, Max, FloatField, Value, IntegerField, CharField, BigIntegerField
 
 from core.models import Employee, Teachers, SubOrgs
 from lms.models import Room
@@ -1955,7 +1955,6 @@ class Exam_repeatListAPIView(
 
         return queryset
 
-    @has_permission(must_permissions=['lms-stipend-read'])
     def get(self, request, pk=None):
         self.serializer_class = Exam_repeatLiseSerializer
 
@@ -2058,6 +2057,21 @@ class Exam_repeatListAPIView(
 
         self.destroy(request, pk)
         return request.send_info("INF_003")
+
+
+class ExamListAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin
+):
+
+    queryset = Exam_repeat.objects.all()
+    serializer_class = Exam_repeatLiseSerializer
+    def get(self, request, pk=None):
+
+        lesson_year, lesson_season = get_active_year_season()
+        self.queryset = self.queryset.filter(lesson_year=lesson_year, lesson_season=lesson_season)
+        all_result = self.list(request).data
+        return request.send_data(all_result)
 
 
 class ExamRepeatStudentScoreListAPIView(
@@ -3334,8 +3348,9 @@ class Exam_repeatTestListAPIView(
         self.serializer_class = ExamTimeTableListSerializer
         lesson_year, lesson_season = get_active_year_season()
 
+        queryset = self.queryset.filter(lesson_year=lesson_year,lesson_season=lesson_season)
         if pk:
-            queryset = self.queryset.filter(lesson=pk,lesson_year=lesson_year,lesson_season=lesson_season)
+            queryset = self.queryset.filter(lesson=pk)
             repeat = self.serializer_class(queryset,many=True).data
             return request.send_data(repeat)
 
@@ -3410,12 +3425,91 @@ class ExamrepeatStudentsAPIView(
                 'student__group__profession__name'
             ).distinct('student_id')
 
-            queryset = TeacherScore.objects.filter(
-                Q(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO) &
-                (Q(score__lt=18) | Q(score__isnull=True)),
-                score_type__lesson_teacher__lesson=pk,
-                student_id__in=student_ids
-            ).exclude(student_id__in=excluded_student_ids)
+            # queryset = (
+            #     TeacherScore.objects
+            #     .filter(score_type__lesson_teacher__lesson=pk)
+            #     .annotate(
+            #         # Annotate exam_score with a conditional maximum score
+            #         exam_score=Max(
+            #             Case(
+            #                 When(
+            #                     score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO,
+            #                     score_type__lesson_teacher__lesson=pk,
+            #                     then=F('score'),
+            #                 ),
+            #                 default=Value(0),
+            #                 output_field=FloatField(),
+            #             )
+            #         ),
+            #         # Annotate stype based on exam_score and other conditions
+            #         stype=Case(
+            #             When(
+            #                 Q(exam_score=0) & Q(score_type__score_type=~Lesson_teacher_scoretype.SHALGALT_ONOO),
+            #                 score_type__lesson_teacher__lesson=pk,
+            #                 then=Value(Lesson_teacher_scoretype.SHALGALT_ONOO),
+            #             ),
+            #             default=F('score_type__score_type'),
+            #             output_field=IntegerField(),
+            #         ),
+            #         lesson=Case(
+            #             When(
+            #                 Q(exam_score=0) & Q(score_type__score_type=~Lesson_teacher_scoretype.SHALGALT_ONOO),
+            #                 score_type__lesson_teacher__lesson=pk,
+            #                 then=F('score_type__lesson_teacher__lesson'),
+            #             ),
+            #             default=F('score_type__lesson_teacher__lesson'),
+            #             output_field=BigIntegerField(),
+            #         ),
+            #     )
+            #     .filter(
+            #         stype=Lesson_teacher_scoretype.SHALGALT_ONOO,
+            #         exam_score__lt=18,
+            #         student_id__in=student_ids,
+            #     )
+            # )
+            
+            queryset = (
+                TeacherScore.objects
+                .filter(score_type__lesson_teacher__lesson=pk)
+                .annotate(
+                    # Annotate exam_score with a conditional maximum score
+                    exam_score=Max(
+                        Case(
+                            When(
+                                score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO,
+                                score_type__lesson_teacher__lesson=pk,
+                                then=F('score'),
+                            ),
+                            default=Value(0),
+                            output_field=FloatField(),
+                        )
+                    ),
+                    # Annotate stype based on exam_score and other conditions
+                    stype=Case(
+                        When(
+                            Q(exam_score=0) & Q(score_type__score_type=~Lesson_teacher_scoretype.SHALGALT_ONOO),
+                            score_type__lesson_teacher__lesson=pk,
+                            then=Value(Lesson_teacher_scoretype.SHALGALT_ONOO),
+                        ),
+                        default=F('score_type__score_type'),
+                        output_field=IntegerField(),
+                    ),
+                    lesson=Case(
+                        When(
+                            Q(exam_score=0) & Q(score_type__score_type=~Lesson_teacher_scoretype.SHALGALT_ONOO),
+                            score_type__lesson_teacher__lesson=pk,
+                            then=F('score_type__lesson_teacher__lesson'),
+                        ),
+                        default=F('score_type__lesson_teacher__lesson'),
+                        output_field=BigIntegerField(),
+                    ),
+                )
+                .filter(
+                    Q(exam_score=0) | Q(exam_score__isnull=True),  # Students without exam_score
+                    stype=Lesson_teacher_scoretype.SHALGALT_ONOO,  # Optional: filter specific type
+                    student_id__in=student_ids,  # Filter by student IDs
+                )
+            )
 
             return_list = queryset.values('student_id', 'student__first_name','student__last_name','student__code','score','student__group__name','student__group__profession__name').order_by('score')
             response_data = {
@@ -3425,7 +3519,7 @@ class ExamrepeatStudentsAPIView(
 
             return request.send_data(response_data)
         except Exception as e:
-            return request.send_error(f"An error occurred: {str(e)}")
+            return request.send_error('ERR_002', f"An error occurred: {str(e)}")
 
 @permission_classes([IsAuthenticated])
 class ExamRepeatTimeTableScoreListAPIView(
