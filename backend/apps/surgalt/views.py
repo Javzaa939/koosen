@@ -1702,6 +1702,8 @@ class ChallengeAPIView(
 
             # Шалгалтад хариулсан сурагчид
             challenge_students = ChallengeStudents.objects.filter(challenge=challenge_obj)
+            if challenge_students:
+                challenge_students.delete()
 
             self.destroy(request, pk)
 
