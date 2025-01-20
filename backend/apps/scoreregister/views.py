@@ -1672,7 +1672,7 @@ class ScoreRegisterLessonAPIView(
         lesson_teacher_ids = Lesson_to_teacher.objects.filter(lesson=lesson).values_list('id', flat=True)
         exam = request.query_params.get('exam')
         is_repeat = request.query_params.get('is_repeat')
-        if is_repeat:
+        if is_repeat == 'true':
             teacher_score_students = Exam_to_student.objects.filter(exam=exam).values('student', 'student__code', 'student__first_name', 'student__last_name', 'student__register_num', 'student__group__name').distinct('student')
             for student in teacher_score_students:
                 obj = {}
