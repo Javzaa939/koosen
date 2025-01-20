@@ -5,7 +5,7 @@ import useApi from "@hooks/useApi";
 import useLoader from "@hooks/useLoader";
 import { ChevronLeft, ChevronRight } from 'react-feather'
 
-export default function Students({stepper, setSubmitDatas, selectedLesson, onSubmit, selectExam}) {
+export default function Students({stepper, setSubmitDatas, selectedLesson, onSubmit, selectExam, is_repeat=false}) {
     const [studensOption, setStudents] = useState([]);
     const [challengeStudents, setChallengeStudents] = useState([])
     const [excludeStudents, setExcludeChallengeStudents] = useState([])
@@ -15,7 +15,7 @@ export default function Students({stepper, setSubmitDatas, selectedLesson, onSub
     const scoreApi = useApi().score.register;
 
     async function getStudents() {
-        const { success, data } = await fetchData(scoreApi.challenge(selectedLesson, selectExam))
+        const { success, data } = await fetchData(scoreApi.challenge(selectedLesson, selectExam, is_repeat))
         if (success) {
             setStudents(data)
         }
@@ -35,17 +35,20 @@ export default function Students({stepper, setSubmitDatas, selectedLesson, onSub
     )
 
     const handleAddStudent = () => {
-        var data = studensOption?.filter((c) => c.total_score >= 42)
-        var exclude_data = studensOption?.filter((c) => c.total_score <= 42)
-        setChallengeStudents(data)
-        setExcludeChallengeStudents(exclude_data)
-        setIsAdd(!isAdd)
+        if (is_repeat) {
+            setChallengeStudents(studensOption)
+            setExcludeChallengeStudents([])
+        } else {
+            var data = studensOption?.filter((c) => c.total_score >= 42)
+            var exclude_data = studensOption?.filter((c) => c.total_score <= 42)
+            setChallengeStudents(data)
+            setExcludeChallengeStudents(exclude_data)
+            setIsAdd(!isAdd)
+        }
     }
 
     const handleSubmit = () => {
-
         var students = challengeStudents?.map((c) => c.id)
-
         onSubmit(students)
     }
 
@@ -53,93 +56,131 @@ export default function Students({stepper, setSubmitDatas, selectedLesson, onSub
         <Card>
             <CardBody>
                 <Row>
-                    <Col md={12}>
-                        <Alert className='p-1' color="primary">
-                            <p className="text-primary">
-                                42-иос доош дүнтэй суралцагчид шалгалтад орох боломжгүй.
-                            </p>
-                        </Alert>
-                        <div className="d-flex justify-content-between mb-1">
-                            <h5>Шалгалтнаас дүнгээр хасагдаж байгаа жагсаалт ({isAdd ? excludeStudents?.length : studensOption?.length})</h5>
-                            <Button size="sm" color="primary" onClick={() => handleAddStudent()}>Шалгалт руу нэмэх</Button>
-                        </div>
-                        <div style={{maxHeight: '500px', overflow: 'auto'}}>
-                            <Table responsive color="primary" bordered>
-                                <thead>
-                                    <tr>
-                                        <th>№</th>
-                                        <th>Код</th>
-                                        <th>Овог</th>
-                                        <th>Нэр</th>
-                                        <th>Регистр</th>
-                                        <th>Дамжаа</th>
-                                        <th>Дүн</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {
-                                        isAdd
-                                        ?
-                                            excludeStudents?.map((student, idx) =>
-                                                <tr key={idx}>
-                                                    <td>{idx + 1}</td>
-                                                    <td>{student?.code}</td>
-                                                    <td>{student?.last_name}</td>
-                                                    <td>{student?.first_name}</td>
-                                                    <td>{student?.register_num}</td>
-                                                    <td>{student?.group_name}</td>
-                                                    <td>{student?.total_score}</td>
-                                                </tr>
-                                            )
-                                        :
-                                            studensOption?.map((student, idx) =>
-                                                <tr key={idx}>
-                                                    <td>{idx + 1}</td>
-                                                    <td>{student?.code}</td>
-                                                    <td>{student?.last_name}</td>
-                                                    <td>{student?.first_name}</td>
-                                                    <td>{student?.register_num}</td>
-                                                    <td>{student?.group_name}</td>
-                                                    <td>{student?.total_score}</td>
-                                                </tr>
-                                            )
-                                    }
-                                </tbody>
-                            </Table>
-                        </div>
-                        <hr/>
-                        <h5>Шалгалтанд орох  оюутны жагсаалт ({challengeStudents?.length})</h5>
-                        <div style={{maxHeight: '500px', overflow: 'auto'}}>
-                            <Table responsive color="primary" bordered>
-                                <thead>
-                                    <tr>
-                                        <th>№</th>
-                                        <th>Код</th>
-                                        <th>Овог</th>
-                                        <th>Нэр</th>
-                                        <th>Регистр</th>
-                                        <th>Дамжаа</th>
-                                        <th>Дүн</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {
-                                        challengeStudents?.map((student, idx) =>
-                                            <tr key={idx}>
-                                                <td>{idx + 1}</td>
-                                                <td>{student?.code}</td>
-                                                <td>{student?.last_name}</td>
-                                                <td>{student?.first_name}</td>
-                                                <td>{student?.register_num}</td>
-                                                <td>{student?.group_name}</td>
-                                                <td>{student?.total_score}</td>
+                    {
+                        is_repeat
+                        ?
+                            <Col md={12}>
+                                <Alert className='p-1' color="primary">
+                                    <p className="text-primary">
+                                        42-иос доош дүнтэй суралцагчид шалгалтад орох боломжгүй.
+                                    </p>
+                                </Alert>
+                                <div className="d-flex justify-content-between mb-1">
+                                    <h5>Шалгалтнаас дүнгээр хасагдаж байгаа жагсаалт ({isAdd ? excludeStudents?.length : studensOption?.length})</h5>
+                                    <Button size="sm" color="primary" onClick={() => handleAddStudent()}>Шалгалт руу нэмэх</Button>
+                                </div>
+                                <div style={{maxHeight: '500px', overflow: 'auto'}}>
+                                    <Table responsive color="primary" bordered>
+                                        <thead>
+                                            <tr>
+                                                <th>№</th>
+                                                <th>Код</th>
+                                                <th>Овог</th>
+                                                <th>Нэр</th>
+                                                <th>Регистр</th>
+                                                <th>Дамжаа</th>
+                                                <th>Дүн</th>
                                             </tr>
-                                        )
-                                    }
-                                </tbody>
-                            </Table>
-                        </div>
-                    </Col>
+                                        </thead>
+                                        <tbody>
+                                            {
+                                                isAdd
+                                                ?
+                                                    excludeStudents?.map((student, idx) =>
+                                                        <tr key={idx}>
+                                                            <td>{idx + 1}</td>
+                                                            <td>{student?.code}</td>
+                                                            <td>{student?.last_name}</td>
+                                                            <td>{student?.first_name}</td>
+                                                            <td>{student?.register_num}</td>
+                                                            <td>{student?.group_name}</td>
+                                                            <td>{student?.total_score}</td>
+                                                        </tr>
+                                                    )
+                                                :
+                                                    studensOption?.map((student, idx) =>
+                                                        <tr key={idx}>
+                                                            <td>{idx + 1}</td>
+                                                            <td>{student?.code}</td>
+                                                            <td>{student?.last_name}</td>
+                                                            <td>{student?.first_name}</td>
+                                                            <td>{student?.register_num}</td>
+                                                            <td>{student?.group_name}</td>
+                                                            <td>{student?.total_score}</td>
+                                                        </tr>
+                                                    )
+                                            }
+                                        </tbody>
+                                    </Table>
+                                </div>
+                                <hr/>
+                                <h5>Шалгалтанд орох  оюутны жагсаалт ({challengeStudents?.length})</h5>
+                                <div style={{maxHeight: '500px', overflow: 'auto'}}>
+                                    <Table responsive color="primary" bordered>
+                                        <thead>
+                                            <tr>
+                                                <th>№</th>
+                                                <th>Код</th>
+                                                <th>Овог</th>
+                                                <th>Нэр</th>
+                                                <th>Регистр</th>
+                                                <th>Дамжаа</th>
+                                                <th>Дүн</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {
+                                                challengeStudents?.map((student, idx) =>
+                                                    <tr key={idx}>
+                                                        <td>{idx + 1}</td>
+                                                        <td>{student?.code}</td>
+                                                        <td>{student?.last_name}</td>
+                                                        <td>{student?.first_name}</td>
+                                                        <td>{student?.register_num}</td>
+                                                        <td>{student?.group_name}</td>
+                                                        <td>{student?.total_score}</td>
+                                                    </tr>
+                                                )
+                                            }
+                                        </tbody>
+                                    </Table>
+                                </div>
+                            </Col>
+                        :
+                            <Col md={12}>
+                                <h5>Шалгалтанд орох  оюутны жагсаалт ({challengeStudents?.length})</h5>
+                                <div style={{maxHeight: '500px', overflow: 'auto'}}>
+                                    <Table responsive color="primary" bordered>
+                                        <thead>
+                                            <tr>
+                                                <th>№</th>
+                                                <th>Код</th>
+                                                <th>Овог</th>
+                                                <th>Нэр</th>
+                                                <th>Регистр</th>
+                                                <th>Дамжаа</th>
+                                                <th>Дүн</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {
+                                                challengeStudents?.map((student, idx) =>
+                                                    <tr key={idx}>
+                                                        <td>{idx + 1}</td>
+                                                        <td>{student?.code}</td>
+                                                        <td>{student?.last_name}</td>
+                                                        <td>{student?.first_name}</td>
+                                                        <td>{student?.register_num}</td>
+                                                        <td>{student?.group_name}</td>
+                                                        <td>{student?.total_score}</td>
+                                                    </tr>
+                                                )
+                                            }
+                                        </tbody>
+                                    </Table>
+                                </div>
+                            </Col>
+                    }
                     <Col md={12} className='d-flex justify-content-between mt-3 mb-1'>
                         <Button color='secondary' className='btn-prev' outline onClick={() => stepper.previous()}>
                             <ChevronLeft size={14} className='align-middle me-sm-25 me-0'></ChevronLeft>
