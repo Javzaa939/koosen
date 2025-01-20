@@ -49,6 +49,7 @@ const Addmodal = ({ open, handleModal, setEditRowData, refreshDatas }) => {
 
         var cdatas = convertDefaultValue(submitDatas)
         cdatas['students'] = students
+        cdatas['is_repeat'] = selectRepeat
 
         const { success, data, errors } = await fetchData(challengeAPI.postTest(cdatas, 1))
         if(success)

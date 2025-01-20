@@ -3521,6 +3521,8 @@ class ExamRepeatTimeTableScoreListAPIView(
             # Онлайнаар шалгалт өгсөн бол энд дүн нь байгаа
             challenge_qs = Challenge.objects.filter(challenge_type=Challenge.SEMESTR_EXAM, lesson=lesson, lesson_year=lesson_year, lesson_season=lesson_season, is_repeat=True)
             challenge_students = ChallengeStudents.objects.filter(challenge__in=challenge_qs, student__in=exam_students)
+            print(challenge_students)
+            print(challenge_qs)
 
             if challenge_students.count() == 0:
                 return request.send_data([])
