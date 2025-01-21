@@ -17,7 +17,11 @@ export default function Students({stepper, setSubmitDatas, selectedLesson, onSub
     async function getStudents() {
         const { success, data } = await fetchData(scoreApi.challenge(selectedLesson, selectExam, is_repeat))
         if (success) {
-            setStudents(data)
+            if (is_repeat) {
+                setChallengeStudents(data)
+            } else {
+                setStudents(data)
+            }
         }
     }
 
@@ -148,7 +152,9 @@ export default function Students({stepper, setSubmitDatas, selectedLesson, onSub
                             </Col>
                         :
                             <Col md={12}>
-                                <h5>Шалгалтанд орох  оюутны жагсаалт ({studensOption?.length})</h5>
+                                <div className="d-flex justify-content-between mb-1">
+                                    <h5>Шалгалтнаас орох оюутны ({challengeStudents?.length})</h5>
+                                </div>
                                 <div style={{maxHeight: '500px', overflow: 'auto'}}>
                                     <Table responsive color="primary" bordered>
                                         <thead>
@@ -164,7 +170,7 @@ export default function Students({stepper, setSubmitDatas, selectedLesson, onSub
                                         </thead>
                                         <tbody>
                                             {
-                                                studensOption?.map((student, idx) =>
+                                                challengeStudents?.map((student, idx) =>
                                                     <tr key={idx}>
                                                         <td>{idx + 1}</td>
                                                         <td>{student?.code}</td>
