@@ -148,7 +148,7 @@ export default function Students({stepper, setSubmitDatas, selectedLesson, onSub
                             </Col>
                         :
                             <Col md={12}>
-                                <h5>Шалгалтанд орох  оюутны жагсаалт ({challengeStudents?.length})</h5>
+                                <h5>Шалгалтанд орох  оюутны жагсаалт ({studensOption?.length})</h5>
                                 <div style={{maxHeight: '500px', overflow: 'auto'}}>
                                     <Table responsive color="primary" bordered>
                                         <thead>
@@ -164,7 +164,7 @@ export default function Students({stepper, setSubmitDatas, selectedLesson, onSub
                                         </thead>
                                         <tbody>
                                             {
-                                                challengeStudents?.map((student, idx) =>
+                                                studensOption?.map((student, idx) =>
                                                     <tr key={idx}>
                                                         <td>{idx + 1}</td>
                                                         <td>{student?.code}</td>
