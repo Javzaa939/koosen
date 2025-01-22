@@ -5748,7 +5748,6 @@ class ChallengeLevelCountAPIView(
                     level=level,
                     title__lesson=challenge.lesson,
                     title__is_season=True,
-                    # title__created_by__in=teacher_ids
                 )
 
                 if number_of_questions:
@@ -5766,7 +5765,6 @@ class ChallengeLevelCountAPIView(
                 else:
                     random_questions = challenge_questions.order_by('?')
 
-                print(random_questions)
                 challenge.questions.add(*random_questions)
                 challenge.save()
 
@@ -5894,7 +5892,7 @@ class ChallengeQuestionsAPIView(
         challenge = Challenge.objects.filter(id=challenge_id).first()
 
         if challenge_id:
-            all_data = challenge.questions.filter(title__lesson=challenge.lesson).all().order_by('id')
+            all_data = challenge.questions.all().order_by('id')
             serializer = self.get_serializer(all_data, many=True)
 
             response_data = {
