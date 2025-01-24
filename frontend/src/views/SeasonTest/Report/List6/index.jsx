@@ -60,8 +60,8 @@ const List5 = () => {
         }
     }
 
-    async function getLesson(dep_id) {
-        const { success, data } = await fetchData(lessonApi.getLessonListByTeacher(dep_id))
+    async function getLesson() {
+        const { success, data } = await fetchData(lessonApi.getExam())
         if (success) {
             setLessonOption(data)
         }
@@ -94,14 +94,9 @@ const List5 = () => {
 
     useEffect(
         () => {
-            if (select_value.department) {
-                getLesson(select_value.department)
-            }
-            else {
-                setLessonOption([])
-            }
+            getLesson()
         },
-        [select_value.department]
+        []
     )
 
     useEffect(
@@ -120,7 +115,7 @@ const List5 = () => {
         <div className='px-1'>
             {isLoading && Loader}
             <Row>
-                <Col md={3}>
+                {/* <Col md={3}>
                     <Label className="form-label" for="department">
                         {t('Хөтөлбөрийн баг')}
                     </Label>
@@ -146,7 +141,7 @@ const List5 = () => {
                         getOptionValue={(option) => option.id}
                         getOptionLabel={(option) => option.name}
                     />
-                </Col>
+                </Col> */}
                 <Col md={3} className='mb-1 ms-1'>
                     <Label className="form-label me-1" for="building">
                         {t('Хичээлийн жил')}
@@ -235,7 +230,7 @@ const List5 = () => {
                         placeholder={t('-- Сонгоно уу --')}
                         options={lessonOption || []}
                         value={lessonOption.find((c) => c.id === select_value.lesson)}
-                        noOptionsMessage={chooseDep}
+                        noOptionsMessage={() => t('Хоосон байна')}
                         onChange={(val) => {
                             if (val?.id) {
                                 setSelectValue(current => {
@@ -255,7 +250,7 @@ const List5 = () => {
                         }}
                         styles={ReactSelectStyles}
                         getOptionValue={(option) => option.id}
-                        getOptionLabel={(option) => option.fname}
+                        getOptionLabel={(option) => option.code + ' ' + option?.name}
                     />
                 </Col>
                 <Col md={3} className='mb-1'>
@@ -272,7 +267,7 @@ const List5 = () => {
                         placeholder={t('-- Сонгоно уу --')}
                         options={teacherOption || []}
                         value={teacherOption.find((c) => c.id === select_value.teacher)}
-                        noOptionsMessage={chooseDep}
+                        noOptionsMessage={() => t('Хоосон байна')}
                         onChange={(val) => {
                             if (val?.id) {
                                 setSelectValue(current => {
@@ -315,7 +310,7 @@ const List5 = () => {
                         {
                             "dep": departmentOption?.find(e => e.id === select_value.department)?.name,
                             "teacher": teacherOption?.find(e => e.id === select_value.teacher)?.first_name,
-                            "lesson": lessonOption?.find(e => e.id === select_value.lesson)?.fname,
+                            "lesson": lessonOption?.find(e => e.id === select_value.lesson)?.name,
                             "year": select_value?.lesson_year,
                             "season": season_option?.find(e => e.id === select_value.season)?.season_name,
                         }

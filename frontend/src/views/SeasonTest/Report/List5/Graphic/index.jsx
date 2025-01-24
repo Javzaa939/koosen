@@ -50,6 +50,7 @@ const Graphic = (props) =>
 
             // багшийн дүн хайж олж нийлбэрийг нь олох
             const total = newData[TEACHER_IDX].data.reduce((total, current) => total += current.count, 0)
+            console.log(total)
 
             const test = newData.map(
                 (item, pidx) =>
@@ -80,7 +81,6 @@ const Graphic = (props) =>
 
     const fixedData = fixData(data)
     console.log(props.extra)
-
     return (
         <>
             <Card sx={{ mb: 3 }}>
