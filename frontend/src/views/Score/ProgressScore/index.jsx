@@ -141,6 +141,7 @@ export default function ProgressScore() {
         }
     }
 
+    // to show values in footer from total data
     async function getTotalDatas() {
         const lesson = select_value.lesson
         const is_fall = select_value.is_fall
@@ -166,7 +167,9 @@ export default function ProgressScore() {
 
     useEffect(() => {
         getDatas()
-        getTotalDatas()
+
+        // to show values in footer from total data
+        // getTotalDatas()
     }, [select_value, groups, teachers])
 
     useEffect(
@@ -432,7 +435,7 @@ export default function ProgressScore() {
                             </div>
                         )}
                         onSort={handleSort}
-                        columns={getColumns(currentPage, rowsPerPage === 'Бүгд' ? total_count : rowsPerPage, total_count)}
+                        columns={getColumns(currentPage, rowsPerPage, total_count)}
                         sortIcon={<ChevronDown size={10} />}
                         paginationPerPage={rowsPerPage}
                         paginationDefaultPage={currentPage}
@@ -442,9 +445,12 @@ export default function ProgressScore() {
                         paginationComponent={
                             (props) =>
                                 <>
+                                    {/* if total data is needed to display then just replace datas to totalDatas
                                     {getFooter(totalDatas)}
+                                    */}
+                                    {getFooter(datas)}
                                     {/* props.rowsPerPage not updating so rowsPerPage is used directly */}
-                                    {getPagination(handlePagination, props.currentPage, rowsPerPage === 'Бүгд' ? props.rowCount : rowsPerPage, props.rowCount)()}
+                                    {getPagination(handlePagination, props.currentPage, rowsPerPage, props.rowCount)()}
                                 </>
                         }
                         fixedHeader
