@@ -432,7 +432,7 @@ export default function ProgressScore() {
                             </div>
                         )}
                         onSort={handleSort}
-                        columns={getColumns(currentPage, rowsPerPage === 'Бүгд' ? total_count : rowsPerPage, total_count)}
+                        columns={getColumns(currentPage, rowsPerPage, total_count)}
                         sortIcon={<ChevronDown size={10} />}
                         paginationPerPage={rowsPerPage}
                         paginationDefaultPage={currentPage}
@@ -444,7 +444,7 @@ export default function ProgressScore() {
                                 <>
                                     {getFooter(totalDatas)}
                                     {/* props.rowsPerPage not updating so rowsPerPage is used directly */}
-                                    {getPagination(handlePagination, props.currentPage, rowsPerPage === 'Бүгд' ? props.rowCount : rowsPerPage, props.rowCount)()}
+                                    {getPagination(handlePagination, props.currentPage, rowsPerPage, props.rowCount)()}
                                 </>
                         }
                         fixedHeader
