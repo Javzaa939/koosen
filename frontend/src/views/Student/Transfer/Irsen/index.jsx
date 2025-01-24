@@ -44,7 +44,7 @@ const Irsen = () => {
     const navigate = useNavigate();
 
     var start_date =  new Date()
-    var end_day = new Date().getDate() - 7;
+    var end_day = new Date().getDate() - 60;
     start_date.setDate(end_day)
 
     const [startPicker, setStartPicker] = useState(formatDate(start_date))

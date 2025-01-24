@@ -23,6 +23,7 @@ from rest_framework.filters import SearchFilter
 from main.utils.function.pagination import CustomPagination
 from main.utils.function.utils import remove_key_from_dict, json_load, json_dumps, override_get_queryset, str2bool, null_to_none
 from main.utils.file import remove_folder
+import json
 
 from lms.models import Complaint_Answer
 from lms.models import Complaint_unit
@@ -46,7 +47,7 @@ from lms.models import LeaveRequest_Answer
 from core.models import OrgPosition
 
 from lms.models import StudentRoutingSlip
-from lms.models import RoutingSlip_Answer
+from lms.models import RoutingSlip_Answer, Payment
 
 from .serializers import ComplaintUnitSerializer
 from .serializers import ComplaintUnitListSerializer
@@ -374,6 +375,12 @@ class CorrespondAPIView(
 
         errors = []
         request_data = request.data
+        student = request_data.get('student')
+
+        # өөр сургуулиас орж ирж байгаа оюутан бол
+        if student is None:
+            request_data = remove_key_from_dict(request_data, 'student')
+
 
         file = request.data.get('file')
 
@@ -397,8 +404,18 @@ class CorrespondAPIView(
                     c_obj = get_object_or_404(StudentCorrespondScore, id=c_id)
 
                     for c_lesson in c_lessons:
+                        # улирлын list болгов
+                        seasons = json.loads(c_lesson.get('season'))
+
+                        if isinstance(seasons, int):
+                            c_lesson['season'] = seasons if seasons else 1
+                        if isinstance(seasons, list):
+                            c_lesson['season'] = seasons[0] if seasons[0] else 1
+
                         c_lesson['correspond_id'] = c_obj.id
-                        c_lesson['season'] = c_lesson.get('season') if c_lesson.get('season') else 1
+
+                        if 'id' in c_lesson:
+                            del c_lesson['id']
 
                         StudentCorrespondLessons.objects.update_or_create(
                             correspond = c_obj,
@@ -614,7 +631,7 @@ class CorrespondAnswerAPIView(
         allow_lesson_ids = request_data.get('c_lesson_ids')
 
         menu_id = request.query_params.get('menu')
-
+        print("menu_id", menu_id)
         c_menu_list = get_menu_unit(menu_id)
 
         for i , menu in enumerate(c_menu_list):
@@ -1056,16 +1073,18 @@ class CorrespondApprove(
     def post(self, request, pk):
 
         request_data = request.data
-
+        print("request_data", request_data)
         group = request_data.get('group')
         code = request_data.get('code')
+        print("group", group)
+        print("code", code)
         correspond = get_object_or_404(StudentCorrespondScore, id=pk)
         group_obj = get_object_or_404(Group, pk=group)
-
+        payment = {}
         school = group_obj.school
 
         try:
-            # Тухайн оюутанд анги код шинээр бүртгэж байгаа хэсэг
+            # Тухайн оюутанд хуучин анги код шинээр бүртгэж байгаа хэсэг
             if group and code:
                 correspond.student_code = code
                 correspond.student_group = group_obj
@@ -1073,11 +1092,12 @@ class CorrespondApprove(
             else:
                 # TODO errors буцаана
                 return request.send_error('ERR_002', )
-
+            print("pk", pk)
             main_datas = StudentCorrespondScore.objects.filter(id=pk).values('first_name', 'last_name', 'register_num', 'phone', 'student_group', 'student_code')
 
             # Оюутан суралцаж буй төлөвт шилжүүлэх
-            qs_register_status = StudentRegister.objects.filter(name__iexact='Суралцаж буй').last()
+            # qs_register_status = StudentRegister.objects.filter(name__iexact='Суралцаж буй').last()
+            qs_register_status = StudentRegister.objects.filter(name__iexact='Шилжсэн').last()
 
             for data in main_datas:
                 c_code = data.get('student_code')
@@ -1092,12 +1112,25 @@ class CorrespondApprove(
                 data = remove_key_from_dict(data, ['student_group', 'student_code'])
 
             # Оюутны мэдээллийг шинэчлэх болон үүсгэх хэсэг хуучин оюутан байвал ангийг нь сольж байгаа
-            obj, created = Student.objects.update_or_create(
-                code=code,
-                defaults={
+            if not Student.objects.filter(code=c_code):
+
+                obj, new = Student.objects.create(
+                    code=code,
+                    defaults={
+                        **main_datas[0]
+                    }
+                )
+            else:
+                obj, old = Student.objects.filter(code=code).update(
                     **main_datas[0]
-                }
-            )
+                )
+
+            # төлбөр
+            payment = Payment.objects.filter(student=obj).first()
+            if payment:
+                payment.student=obj
+                payment.save()
+
 
             # Оюутан үүсгээд дүйцүүлэлтийн хэсэгт оюутанг үүсгээд хадгалах
             correspond.student = obj

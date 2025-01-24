@@ -13,6 +13,7 @@ import { Button, Table, Input, Badge, FormFeedback } from 'reactstrap';
 import { ReactSelectStyles } from "@utils"
 
 function TableRows({ rowsData, deleteTableRows, handleChange, lessonOption, isDisabled, isSolved, isAllow,  oldLessonOption, editId }) {
+    console.log('isAllow', isAllow)
     return(
         rowsData.map((data, idx)=>{
             const { correspond_lesson_id, correspond_kredit, learn_lesson, learn_kredit, score, season, is_allow }= data
@@ -125,7 +126,8 @@ function TableRows({ rowsData, deleteTableRows, handleChange, lessonOption, isDi
                                     type='checkbox'
                                     name='is_allow'
                                     id='is_allow'
-                                    disabled={!isAllow ? true : false}
+                                    // id={`is_allow_${idx}`}
+                                    // disabled={!isAllow ? true : false}
                                     defaultChecked={is_allow}
                                     onChange={(e) =>
                                         handleChange(idx, e.target.checked, e.target.name)
@@ -156,8 +158,8 @@ const AddTable = (props) => {
         isDisabled,
         isSolved,
         isDetail,
-        allowIds,
-        setIds,
+        // allowIds,
+        //setIds
         isAllow,
         oldLessonOption,
         addRow,
@@ -166,6 +168,8 @@ const AddTable = (props) => {
 
     const { user } = useContext(AuthContext)
     const [error, setError] = useState(false)
+
+    const [allowIds, setIds] = useState([])
 
     const tableHeader = useMemo(() => {
         return (
@@ -191,7 +195,7 @@ const AddTable = (props) => {
                     {t('Дүн')}
                 </th>
                 {
-                    user && Object.keys(user).length > 0 && user.permissions.includes('lms-request-correspond-delete') && isSolved
+                    user && Object.keys(user).length > 0 && user.permissions.includes('lms-request-correspond-delete')
                     ?
                         <th className='text-center'>{t('Батлах')}</th>
                     :
@@ -204,14 +208,16 @@ const AddTable = (props) => {
     function handleItemChanged(idx, value, name) {
 
         const rowsInput = [...datas];
-
         rowsInput[idx][name] = value;
+        console.log('safeAllowIds', allowIds)
 
         if (isSolved && name === 'is_allow') {
-            var id = rowsInput[idx].id
+            var id = rowsInput[idx]?.id
+
             if (value) {
                 setIds([...allowIds, id]);
-            } else {
+            }
+            else {
                 setIds(allowIds.filter(item => item !== id));
             }
         }

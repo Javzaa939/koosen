@@ -92,7 +92,13 @@ const Add = ({ open, handleModal, refreshDatas, datas, editId, isSolved }) => {
         cdata['lesson_season'] = cseason_id
         cdata['lessons'] = JSON.stringify(corresDatas)
         cdata['file_name'] = fileName
-        cdata['student'] = datas?.id ? datas?.id : null
+
+        // сургууль хооронд шилжиж мэргэжил солих үед
+        if (datas?.id)
+            {
+                cdata['student'] = datas?.id
+            }
+            cdata['student_group']= groupId
 
         cdata = convertDefaultValue(cdata)
 
@@ -143,6 +149,7 @@ const Add = ({ open, handleModal, refreshDatas, datas, editId, isSolved }) => {
 
         // Дүйцсэн хичээлүүд
         var corres_lesson = datas.filter((c) => { if (c.score && c.learn_lesson) return c  })
+        // Дүйцээгүй хичээлүүд
         var not_corres_lesson = datas.filter((c) => { if (!c.learn_lesson) return c  })
         setCorresDatas([...corres_lesson])
         setNotCorresDatas([...not_corres_lesson])
@@ -170,11 +177,11 @@ const Add = ({ open, handleModal, refreshDatas, datas, editId, isSolved }) => {
         }
     }
 
-    useEffect(() => {
-        if (Object.keys(user).length > 0 && !user.permissions.includes('lms-request-correspond-update')) {
-            setDisabled(true)
-        }
-    }, [user])
+    // useEffect(() => {
+    //     if (Object.keys(user).length > 0 && !user.permissions.includes('lms-request-correspond-update')) {
+    //         setDisabled(true)
+    //     }
+    // }, [user])
 
     useEffect(() => {
         if (Object.keys(datas).length > 0) {
@@ -615,7 +622,7 @@ const Add = ({ open, handleModal, refreshDatas, datas, editId, isSolved }) => {
                                         {
                                             notCorresDatas.map((c, cidx) =>
                                                 <li key={cidx}>
-                                                    {c.name}
+                                                    {c.full_name}
                                                 </li>
                                             )
                                         }
