@@ -302,6 +302,26 @@ const EditModal = ({ open, handleModal, refreshDatas, editData }) => {
                         <Col md={12} className='mt-50'>
                             <Controller
                                 control={control}
+                                name="is_repeat"
+                                defaultValue={false}
+                                render={({ field }) => (
+                                    <Input
+                                        {...field}
+                                        id={field.name}
+                                        type="checkbox"
+                                        checked={field.value}
+                                        className='me-50'
+                                    />
+                                )}
+                            />
+                            <Label className="form-label" for="is_repeat">
+                                {t('Давтан эсэх')}
+                            </Label>
+                            {errors.is_repeat && <FormFeedback className='d-block'>{t(errors.is_repeat.message)}</FormFeedback>}
+                        </Col>
+                        <Col md={12} className='mt-50'>
+                            <Controller
+                                control={control}
                                 name="has_shuffle"
                                 defaultValue={false}
                                 render={({ field }) => (
