@@ -1,7 +1,7 @@
 // ** React Imports
 import { memo, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
+// import { Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts'
 import Select from 'react-select'
 
 import useApi from '@hooks/useApi'
@@ -39,12 +39,12 @@ const List5 = () => {
     const [yearOption, setYear] = useState([])
     const [select_value, setSelectValue] = useState(values);
 
-    async function getDepartmentOption() {
-        const { success, data } = await fetchData(departmentApi.get())
-        if (success) {
-            setDepartmentOption(data)
-        }
-    }
+    // async function getDepartmentOption() {
+    //     const { success, data } = await fetchData(departmentApi.get())
+    //     if (success) {
+    //         setDepartmentOption(data)
+    //     }
+    // }
 
     async function getSeasonOption() {
         const { success, data } = await fetchData(seasonApi.get())
@@ -60,8 +60,8 @@ const List5 = () => {
         }
     }
 
-    async function getLesson(dep_id) {
-        const { success, data } = await fetchData(lessonApi.getLessonListByTeacher(dep_id))
+    async function getLesson() {
+        const { success, data } = await fetchData(lessonApi.getExam())
         if (success) {
             setLessonOption(data)
         }
@@ -75,9 +75,8 @@ const List5 = () => {
     }
 
     useEffect(() => {
-        getDepartmentOption()
+        // getDepartmentOption()
         getSeasonOption()
-
     }, [])
 
     useEffect(
@@ -94,14 +93,9 @@ const List5 = () => {
 
     useEffect(
         () => {
-            if (select_value.department) {
-                getLesson(select_value.department)
-            }
-            else {
-                setLessonOption([])
-            }
+            getLesson()
         },
-        [select_value.department]
+        []
     )
 
     useEffect(
@@ -111,16 +105,12 @@ const List5 = () => {
         []
     )
 
-    function chooseDep() {
-        if (!select_value.department) { return (<div>Тэнхим сонгоно уу.</div>) }
-        else { return (<div>Хоосон байна</div>) }
-    }
 
     return (
         <div className='px-1'>
             {isLoading && Loader}
             <Row>
-                <Col md={3}>
+                {/* <Col md={3}>
                     <Label className="form-label" for="department">
                         {t('Хөтөлбөрийн баг')}
                     </Label>
@@ -146,7 +136,7 @@ const List5 = () => {
                         getOptionValue={(option) => option.id}
                         getOptionLabel={(option) => option.name}
                     />
-                </Col>
+                </Col> */}
                 <Col md={3} className='mb-1 ms-1'>
                     <Label className="form-label me-1" for="building">
                         {t('Хичээлийн жил')}
@@ -198,7 +188,7 @@ const List5 = () => {
                         placeholder={t('-- Сонгоно уу --')}
                         options={season_option || []}
                         value={season_option.find((c) => c.id === select_value.season)}
-                        noOptionsMessage={() => 'Хоосон байна'}
+                        noOptionsMessage={() => t('Хоосон байна')}
                         onChange={(val) => {
                             if (val?.id) {
                                 setSelectValue(current => {
@@ -235,7 +225,7 @@ const List5 = () => {
                         placeholder={t('-- Сонгоно уу --')}
                         options={lessonOption || []}
                         value={lessonOption.find((c) => c.id === select_value.lesson)}
-                        noOptionsMessage={chooseDep}
+                        noOptionsMessage={() => t('Хоосон байна')}
                         onChange={(val) => {
                             if (val?.id) {
                                 setSelectValue(current => {
@@ -255,7 +245,7 @@ const List5 = () => {
                         }}
                         styles={ReactSelectStyles}
                         getOptionValue={(option) => option.id}
-                        getOptionLabel={(option) => option.fname}
+                        getOptionLabel={(option) => option.code + ' ' + option?.name}
                     />
                 </Col>
                 <Col md={3} className='mb-1'>
@@ -272,7 +262,7 @@ const List5 = () => {
                         placeholder={t('-- Сонгоно уу --')}
                         options={teacherOption || []}
                         value={teacherOption.find((c) => c.id === select_value.teacher)}
-                        noOptionsMessage={chooseDep}
+                        noOptionsMessage={() => t('Хоосон байна')}
                         onChange={(val) => {
                             if (val?.id) {
                                 setSelectValue(current => {
@@ -295,7 +285,6 @@ const List5 = () => {
                         getOptionLabel={(option) => `${option?.last_name[0]}.${option?.first_name}`}
                     />
                 </Col>
-                
                 <Col md={2} className='mt-1'>
                     <Button
                         disabled={!(select_value.lesson && select_value.teacher)}
@@ -314,9 +303,8 @@ const List5 = () => {
                     loading={graLoading}
                     extra={
                         {
-                            "dep": departmentOption?.find(e => e.id === select_value.department)?.name,
                             "teacher": teacherOption?.find(e => e.id === select_value.teacher)?.first_name,
-                            "lesson": lessonOption?.find(e => e.id === select_value.lesson)?.fname,
+                            "lesson": lessonOption?.find(e => e.id === select_value.lesson)?.name,
                             "year": select_value?.lesson_year,
                             "season": season_option?.find(e => e.id === select_value.season)?.season_name,
                         }

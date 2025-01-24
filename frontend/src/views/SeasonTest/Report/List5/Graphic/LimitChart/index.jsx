@@ -68,8 +68,8 @@ const LimitChart = (props) => {
                         ),
                         fill: false,
                         grouped: true,
-                        backgroundColor: COLORS[idx === TEACHER_IDX ? 1 : 7],
-                        borderColor: COLORS[idx === TEACHER_IDX ? 1 : 7],
+                        backgroundColor: COLORS[idx === TEACHER_IDX ? 1 : idx === 1 ? 5 : 7],
+                        borderColor: COLORS[idx === TEACHER_IDX ? 1 : idx === 1 ? 5 : 7],
                         skipNull: false, // null байгаа датаг харуулахгүй
                         type: "line",
                     }

@@ -49,7 +49,18 @@ const Graphic = (props) =>
             const newData = [...data.data]
 
             // багшийн дүн хайж олж нийлбэрийг нь олох
-            const total = newData[TEACHER_IDX].data.reduce((total, current) => total += current.count, 0)
+            let total = {}
+            const teach_scores = newData[TEACHER_IDX].data
+
+            teach_scores.forEach(item => {
+                if (!total.hasOwnProperty(item.assessment)) {
+                    total[item.assessment] = teach_scores.reduce((sum, current) => {
+                        if (current.assessment === item.assessment) sum++
+
+                        return sum
+                    }, 0)
+                }
+            })
 
             const test = newData.map(
                 (item, pidx) =>
@@ -59,12 +70,16 @@ const Graphic = (props) =>
                         "data": item.data.map(
                             (inside, idx) =>
                             {
-                                return {
-                                    "count": inside.count,
-                                    "name": inside.name,
-                                    "percent": TEACHER_IDX === pidx ? (inside.count * 100 / total).toFixed(2) : inside.count,
-                                    "realPercent": TEACHER_IDX === pidx ? (inside.count * 100 / total) : inside.count,
+                                const percent = total[inside.assessment] * 100 / teach_scores.length
+
+                                const res = {
+                                    "count": TEACHER_IDX === pidx ? total[inside.assessment] : inside.count,
+                                    "name": TEACHER_IDX === pidx ? inside.assessment : inside.name,
+                                    "percent": TEACHER_IDX === pidx ? percent.toFixed(2) : inside.count,
+                                    "realPercent": TEACHER_IDX === pidx ? percent : inside.count,
                                 }
+                                // console.log('wwwww',res)
+                                return res
                             }
                         )
                     }
@@ -79,8 +94,7 @@ const Graphic = (props) =>
     )
 
     const fixedData = fixData(data)
-    console.log(props.extra)
-
+    // console.log(props.extra)
     return (
         <>
             <Card sx={{ mb: 3 }}>
