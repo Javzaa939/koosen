@@ -405,7 +405,7 @@ class TeacherScoreListPrintSerializer(serializers.ModelSerializer):
         assessment = ''
         teach_qs = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson)
         if len(teach_qs) > 2:
-            teach_qs = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson, score_type__lesson_teacher=obj.score_type.lesson_teacher)
+            teach_qs = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson, score_type__lesson_teacher=obj.score_type.lesson_teacher, score_type__score_type=Lesson_teacher_scoretype.BUSAD)
 
         teacher_score = teach_qs.exclude(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total') or 0
         exam_score = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson).filter(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total') or 0
@@ -425,15 +425,15 @@ class TeacherScoreListPrintSerializer(serializers.ModelSerializer):
             assessment = 'W'
         else:
             assess = Score.objects.filter(score_max__gte=total_score,score_min__lte=total_score).values('assesment').first()
-            assessment = assess['assesment']
+            assessment = assess['assesment'] if assess else ''
         return assessment
 
     def get_total(self, obj):
         teach_qs = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson)
         if len(teach_qs) > 2:
-            teach_qs = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson, score_type__lesson_teacher=obj.score_type.lesson_teacher)
+            teach_qs = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson, score_type__lesson_teacher=obj.score_type.lesson_teacher, score_type__score_type=Lesson_teacher_scoretype.BUSAD)
 
-        teacher_score =teach_qs.exclude(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total') or 0
+        teacher_score = teach_qs.exclude(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total')
         exam_score = TeacherScore.objects.filter(student=obj.student, score_type__lesson_teacher__lesson=obj.score_type.lesson_teacher.lesson, score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total') or 0
 
         total_score = teacher_score + exam_score
@@ -442,4 +442,5 @@ class TeacherScoreListPrintSerializer(serializers.ModelSerializer):
             total_score = 0
         elif exam_score and exam_score < 18:
             total_score = 0
+
         return round(total_score, 1)
