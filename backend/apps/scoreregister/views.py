@@ -8,7 +8,7 @@ from rest_framework import generics
 
 from django.db import transaction
 from django.conf import settings
-from django.db.models import  Count, Q,  Value, CharField, FloatField, DateTimeField, F
+from django.db.models import  Count, Q,  Value, CharField, FloatField, DateTimeField, F, Subquery, OuterRef
 from django.db.models.functions import Concat
 
 from rest_framework.permissions import IsAuthenticated
@@ -16,7 +16,7 @@ from rest_framework.decorators import permission_classes
 
 from main.utils.function.utils import get_lesson_choice_student, has_permission, remove_key_from_dict, get_fullName, get_active_year_season, json_load, calculate_birthday
 from main.utils.file import save_file, remove_folder
-from lms.models import ExamTimeTable, ScoreRegister
+from lms.models import Challenge, ChallengeStudents, ExamTimeTable, ScoreRegister
 from lms.models import Student
 from lms.models import LessonStandart
 from lms.models import Score
@@ -1333,6 +1333,8 @@ class TeacherScoreAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin
 ):
+    """ Явцын оноо """
+
     queryset = TeacherScore.objects
     serializer_class = TeacherScoreSerializer
 
@@ -1390,6 +1392,42 @@ class TeacherScoreAPIView(
         all_list = self.list(request).data
 
         return request.send_data(all_list)
+
+
+@permission_classes([IsAuthenticated])
+class TeacherScoreReportSchoolAPIView(
+    generics.GenericAPIView
+):
+    """ Явцын дүн тайлан """
+
+    @has_permission(must_permissions=['lms-score-read'])
+    def get(self, request):
+        lesson_year, lesson_season = get_active_year_season()
+
+        queryset = TeacherScore.objects.filter(
+            lesson_year=lesson_year,
+            lesson_season=lesson_season,
+
+            score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO,
+            score_type__lesson_teacher__lesson__in=Subquery(
+                Lesson_to_teacher.objects.filter(
+                    lesson=OuterRef('score_type__lesson_teacher__lesson')
+                )[:1].values_list('lesson',flat=True)
+            ),
+
+            student__in=ChallengeStudents.objects.filter(
+                challenge__lesson_year=lesson_year,
+                challenge__lesson_season=lesson_season,
+                challenge__challenge_type=Challenge.SEMESTR_EXAM,
+                # challenge__is_repeat=True # i am not sure is this required here or not
+            ).values_list('student',flat=True)
+        )[:100].values('student__school').annotate(
+            student_count=Count('*')
+        ).values(school=F('student__school__name'),student_count=F('student_count'))
+
+        response = list(queryset)
+
+        return request.send_data(response)
 
 
 @permission_classes([IsAuthenticated])

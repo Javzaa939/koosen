@@ -1,4 +1,4 @@
-import { Fragment, useState, useEffect, useContext, useRef } from "react"
+import { Fragment, useState, useEffect, useContext } from "react"
 
 import { Row, Col, Card, Input, Label, Button, CardTitle, CardHeader, Spinner, Badge, Modal, ModalHeader, ModalBody } from "reactstrap"
 
@@ -27,9 +27,9 @@ import classNames from "classnames"
 import DownloadScore from "./DownloadScore"
 
 // #region print score info
-import ElementToPrint, { printElement } from "./helpers/ElementToPrint"
+import ElementToPrint from "./helpers/ElementToPrint"
 import moment from "moment"
-import ReactDOM from 'react-dom';
+import { stableStylesPrintElement } from "@src/utility/Utils"
 // #endregion
 
 const ExamTimeTable = () => {
@@ -94,12 +94,12 @@ const ExamTimeTable = () => {
     const [groupModal, setGroupModal] = useState(false);
 
     // #region print score info
-    const [element_to_print, setElementToPrint] = useState(null);
     const [data_to_print, setDataToPrint] = useState(null);
-    const isPrintButtonPressed = useRef(false)
     const [selected_group_names, setSelectedGroupNames] = useState('')
     const [united_score_ranges, setUnitedScoreRanges] = useState(null)
+    const elementToPrintId = 'element_to_print'
     // #endregion
+
     const [downloadModal, setDownloadModal] = useState(false);
 
     const toggleDownloadModal = () => setDownloadModal(!downloadModal)
@@ -224,32 +224,6 @@ const ExamTimeTable = () => {
     }
 
     // #region print score info
-    useEffect(() => {
-        if (element_to_print) {
-            const group_names_array = selected_group_names?.split(", ")
-            let group_names = ''
-
-            if (group_names_array) {
-                if (group_names_array.length > 0) {
-                    group_names = group_names_array[0]
-                }
-
-                if (group_names_array.length > 1) {
-                    group_names = group_names + ' and more'
-                }
-            }
-
-            printElement('element_to_print', group_names)
-        }
-    }, [element_to_print])
-
-    useEffect(() => {
-        if (isPrintButtonPressed?.current && data_to_print) {
-            setElementToPrint(<ElementToPrint data_to_print={data_to_print} setElementToPrint={setElementToPrint} selectedGroupNames={selected_group_names} />)
-            isPrintButtonPressed.current = false
-        }
-    }, [data_to_print])
-
     // to get united ranges without depending on sign "+" and duplicated assesment letters
     async function getUnitedScoreRanges() {
         const ranges = {}
@@ -326,14 +300,75 @@ const ExamTimeTable = () => {
 
                     setDataToPrint(dataToPrint)
                     setSelectedGroupNames(selectedGroupNames)
+
+                    return selectedGroupNames
                 }
             }
         }
     }
 
-    function handlePrint(id, selectedGroupNames, group_id='') {
-        getDataToPrint(id, selectedGroupNames, group_id)
-        isPrintButtonPressed.current = true
+    async function handlePrint(id, selectedGroupNames, group_id='') {
+        await getDataToPrint(id, selectedGroupNames, group_id)
+
+        // #region to build group names
+        const group_names_array = selectedGroupNames?.split(", ")
+        let group_names = ''
+
+        if (group_names_array) {
+            if (group_names_array.length > 1) {
+                group_names = group_names + ' and more'
+            } else {
+                group_names = group_names_array[0]
+            }
+        }
+
+        if (!group_names) group_names = 'Print'
+        else group_names = `${group_names}-дүн`
+        // #endregion to build group names
+
+        const printStyles = `
+            body {
+                margin: 0;
+            }
+
+            div {
+                box-sizing: border-box;
+            }
+
+            #${elementToPrintId} {
+                font-family: "Times New Roman";
+                font-size: 11pt;
+            }
+
+            #${elementToPrintId} table {
+                font-size: 11pt;
+                border-collapse: collapse;
+            }
+
+            #${elementToPrintId} td {
+                vertical-align: top;
+            }
+
+            .mainTable td {
+                padding-left: 2mm;
+                padding-right: 2mm;
+                border: 1px solid #000000;
+            }
+
+            .etp_borderless td {
+                border: 0;
+            }
+
+            .etp_mt-1 {
+                margin-top: 5mm;
+            }
+        `
+
+        stableStylesPrintElement({
+            elementId: elementToPrintId,
+            windowTitle: group_names,
+            printStyles: printStyles
+        })
     }
 
     function handleGroupPrint(row) {
@@ -523,8 +558,6 @@ const ExamTimeTable = () => {
                 {/* {edit_modal && <Editmodal editId={edit_pay_id} open={edit_modal} handleModal={handleEditModal} refreshDatas={getDatas}/>} */}
                 {downloadModal && <DownloadScore open={downloadModal} handleModal={() => setDownloadModal(!downloadModal)} studentDatas={studentData} />}
             </Card>
-            {/* to avoid parent elements styles conflicts render in body's root */}
-            {ReactDOM.createPortal(element_to_print, document.body)}
             <Modal
                 isOpen={groupModal}
                 toggle={handleGroupModal}
@@ -553,6 +586,9 @@ const ExamTimeTable = () => {
                     <div className="mt-1">
                         <Button color="primary" className="me-1" disabled={!grouupId} onClick={() => handlePrint(edit_data?.id, selectedIds?.name, selectedIds?.group)}>Сонгоод хэвлэх</Button>
                         <Button color="primary" onClick={() => handlePrint(edit_data?.id, edit_data?.group_names)}>Шууд хэвлэх</Button>
+                    </div>
+                    <div style={{ display: 'none' }}>
+                        <ElementToPrint data_to_print={data_to_print} selectedGroupNames={selected_group_names} elementToPrintId={elementToPrintId} />
                     </div>
                 </ModalBody>
             </Modal>

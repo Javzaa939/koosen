@@ -36,5 +36,9 @@ urlpatterns = [
     path('register/refresh/<int:group>/', ScoreRefreshAPIView.as_view()),
     path('register/challenge/<int:lesson>/', ScoreRegisterLessonAPIView.as_view()),
 
+    # Явцын оноо
     path('teacher-score/', TeacherScoreAPIView.as_view()),
+
+    # Явцын дүн тайлан
+	path('teacher-score/report/school/', TeacherScoreReportSchoolAPIView.as_view()),
 ]

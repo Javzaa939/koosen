@@ -3,7 +3,7 @@ import ChartBySchool from "../../components/ChartBySchool";
 import TableByClass from "../../components/TableByClass";
 import TableBySchool from "../../components/TableBySchool";
 
-export default function SeasonExamReport() {
+export default function SemesterExamReport() {
 	return (
 		<>
 			<ChartBySchool />

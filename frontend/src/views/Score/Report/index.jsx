@@ -3,21 +3,21 @@ import { useTranslation } from "react-i18next";
 import { Col, Row, Card, Nav, NavItem, NavLink, TabContent } from "reactstrap";
 
 import SummaryCount from "./components/SummaryCount";
-import SeasonExamReport from './tabs/SeasonExamReport';
+import SemesterExamReport from './tabs/SemesterExamReport';
 import ReExamReport from './tabs/ReExamReport';
 
-export default function ProgressScoreReport() {
+export default function Report() {
 	const { t } = useTranslation()
 
 	const [activeTab, setActiveTab] = useState(0)
-	const [component, setComponent] = useState('')
+	const [component, setComponent] = useState(<></>)
 
 	const button_list = [
 		{
 			name: t('Улирлын шалгалт'),
 			id: 0,
 			icon: 'Activity',
-			component: <SeasonExamReport key={0} />
+			component: <SemesterExamReport key={0} />
 		},
 		{
 			name: t('Давтан шалгалт'),
