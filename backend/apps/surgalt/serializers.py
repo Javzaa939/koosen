@@ -1232,6 +1232,9 @@ class ChallengeDetailTableStudentsSerializer(serializers.ModelSerializer):
 
                 # Тестэн доторх асуултууд
                 for question in answer_json:
+                    if not isinstance(question, dict):
+                        return answer_json
+
                     #Асуултан доторх хариултууд
                     choices = question.get('choices')
                     for choice in choices:
