@@ -1,28 +1,11 @@
-import {  Bar, ChartProps, Line } from 'react-chartjs-2';
-import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend
-} from 'chart.js';
+import {  Bar, ChartProps} from 'react-chartjs-2';
+import { Chart, registerables } from 'chart.js';
+
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+Chart.register(...registerables, ChartDataLabels);
 
 import { COLORS, HOR_LABEL, TEACHER_IDX } from "@utility/consts";
 
-ChartJS.register(CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    BarElement,
-    Title,
-    Tooltip,
-    ChartDataLabels,
-    Legend);
 
 /**
     @param {} props

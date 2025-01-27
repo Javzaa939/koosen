@@ -137,7 +137,7 @@ const List5 = () => {
                         getOptionLabel={(option) => option.name}
                     />
                 </Col> */}
-                <Col md={3} className='mb-1 ms-1'>
+                <Col md={3} className=''>
                     <Label className="form-label me-1" for="building">
                         {t('Хичээлийн жил')}
                     </Label>
@@ -174,7 +174,7 @@ const List5 = () => {
                         getOptionLabel={(option) => option.name}
                     />
                 </Col>
-                <Col sm={6} md={2} xs={12}>
+                <Col sm={12} md={3} xs={12}>
                     <Label className="form-label" for="season">
                         {t('Улирал')}
                     </Label>
