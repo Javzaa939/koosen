@@ -1783,7 +1783,6 @@ def pearson_corel(x, y):
 
         all_x_y = all_x_y + (item_x - sum_x) * (item_y - sum_y)
 
-    # s_x_y = all_x_y / (len_x - 1)
     if all_x != 0 and all_y != 0:
         s_x = math.sqrt((all_x) / (len_x - 1))
         s_y = math.sqrt((all_y) / (len_y - 1))

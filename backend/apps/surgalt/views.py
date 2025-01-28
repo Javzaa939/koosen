@@ -6906,8 +6906,8 @@ class AnalysisApiView(
         if lesson:
             extra_filters['score_type__lesson_teacher__lesson'] = lesson
 
-        if teacher:
-            extra_filters['score_type__lesson_teacher__teacher'] = teacher
+        # if teacher:
+        #     extra_filters['score_type__lesson_teacher__teacher'] = teacher
 
         chart_data = (
             TeacherScore
@@ -6983,8 +6983,8 @@ class Analysis2ApiView(
         if dep:
             extra_filters['student__group__department'] = dep
 
-        if teacher:
-            extra_filters['score_type__lesson_teacher__teacher'] = teacher
+        # if teacher:
+        #     extra_filters['score_type__lesson_teacher__teacher'] = teacher
 
 
         chart_data = list(
