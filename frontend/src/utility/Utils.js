@@ -2005,7 +2005,6 @@ export async function stableStylesPrintElement({ elementId, windowTitle = t('Ð¥Ñ
   }
 }
 
-
 // to get short name like LMS from learning management system
 export function getAbbreviation(name) {
   const words = name.split(' ');
