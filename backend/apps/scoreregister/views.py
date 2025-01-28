@@ -1459,7 +1459,7 @@ class TeacherScoreReportSchoolAPIView(
                 default=Value(False)
             ),
 
-        )[:100].values(
+        ).values(
             'student',
             'score',
             'school_name',

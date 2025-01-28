@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Card, CardBody, CardTitle } from "reactstrap";
 import { Bar, BarChart, CartesianGrid, LabelList, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
-export default function ChartByAnyField({ isLoading, subSchoolChartData, mainSchoolData, level2_key1, level2_key2, level1_key, chartTitle }) {
+export default function ChartByAnyField({ isLoading, getSubSchoolData = () => null, examTypeData, scoreRanges, subSchoolChartData, mainSchoolData, level2_key1, level2_key2, level1_key, chartTitle }) {
 	const { t } = useTranslation()
 	const [datas, setDatas] = useState({})
 
@@ -14,11 +14,13 @@ export default function ChartByAnyField({ isLoading, subSchoolChartData, mainSch
 		const level2_key1_name = level2_key1[0]
 		const level2_key2_name = level2_key2[0]
 
+		const data = subSchoolChartData ? subSchoolChartData : getSubSchoolData(examTypeData, level1_key, level2_key1, level2_key2, scoreRanges)?.counts
+
 		// to add main school stats
 		const main_school_name = Object.keys(mainSchoolData)[0]
-		subSchoolChartData[main_school_name] = mainSchoolData[main_school_name]
+		data[main_school_name] = mainSchoolData[main_school_name]
 
-		const result = Object.entries(subSchoolChartData).map(([key, value]) => ({
+		const result = Object.entries(data).map(([key, value]) => ({
 			[level1_key_name]: key === main_school_name ? main_school_name : getAbbreviation(key),
 			[level2_key1_name]: value[level2_key1_name],
 			[level2_key2_name]: value[level2_key2_name],
@@ -97,14 +99,14 @@ export default function ChartByAnyField({ isLoading, subSchoolChartData, mainSch
 										<LabelList
 											dataKey={level2_key1[0]}
 											position="top"
-											formatter={(value) => isNaN(value) ? '0%' : `${parseFloat(value.toFixed(2))}%`}
+											formatter={(value) => isNaN(value) ? '0%' : `${value}%`}
 										/>
 									</Bar>
 									<Bar dataKey={level2_key2[0]} name={level2_key2[1]} fill='rgb(32, 148, 41)' radius={[50, 50, 0, 0]}>
 										<LabelList
 											dataKey={level2_key2[0]}
 											position="top"
-											formatter={(value) => isNaN(value) ? '0%' : `${parseFloat(value.toFixed(2))}%`}
+											formatter={(value) => isNaN(value) ? '0%' : `${value}%`}
 										/>
 									</Bar>
 								</BarChart>

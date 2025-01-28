@@ -16,11 +16,14 @@ export default function SemesterExamReport({ data, scoreRanges, isLoading, examT
 	const d_students_count = examTypeData.filter(item => scoreRanges.D.score_min <= item.score && item.score <= scoreRanges.D.score_max).length
 	const f_students_count = examTypeData.filter(item => scoreRanges.F.score_min <= item.score && item.score <= scoreRanges.F.score_max).length
 
-	counts[main_school_name][level2_key1_name] = ((f_students_count + b_students_count) * 100) / students_count
+	counts[main_school_name][level2_key1_name] = ((a_students_count + b_students_count) * 100) / students_count
 	counts[main_school_name][level2_key2_name] = ((a_students_count + b_students_count + c_students_count) * 100) / students_count
 
 	if (isNaN(counts[main_school_name][level2_key1_name])) counts[main_school_name][level2_key1_name] = 0
 	if (isNaN(counts[main_school_name][level2_key2_name])) counts[main_school_name][level2_key2_name] = 0
+
+	counts[main_school_name][level2_key1_name] = parseFloat(counts[main_school_name][level2_key1_name].toFixed(2))
+	counts[main_school_name][level2_key2_name] = parseFloat(counts[main_school_name][level2_key2_name].toFixed(2))
 
 	const mainSchoolData = {
 		[main_school_name]: {
@@ -35,20 +38,30 @@ export default function SemesterExamReport({ data, scoreRanges, isLoading, examT
 		}
 	}
 
-	const { counts: subSchoolChartData, subSchoolData } = getSubSchoolData(examTypeData, level2_key1, level2_key2, scoreRanges)
+	const { counts: subSchoolChartData, subSchoolData } = getSubSchoolData(examTypeData, undefined, level2_key1, level2_key2, scoreRanges)
 
 	return (
 		<>
 			<ChartByAnyField isLoading={isLoading} subSchoolChartData={subSchoolChartData} mainSchoolData={counts} level2_key1={level2_key1} level2_key2={level2_key2} level1_key={['school_name']} chartTitle={'Бүрэлдэхүүн сургууль, институт'} />
 			<TableBySchool isLoading={isLoading} subSchoolData={subSchoolData} mainSchoolData={mainSchoolData} />
-			<ChartByAnyField isLoading={isLoading} subSchoolChartData={subSchoolChartData} mainSchoolData={counts} level2_key1={level2_key1} level2_key2={level2_key2} level1_key={['group_level']} chartTitle={'Дамжаа (Их сургууль)'} />
-			<TableByClass scoreRanges={scoreRanges} isLoading={isLoading} examTypeData={examTypeData} />
+			<ChartByAnyField
+				isLoading={isLoading}
+				getSubSchoolData={getSubSchoolData}
+				examTypeData={examTypeData}
+				scoreRanges={scoreRanges}
+				mainSchoolData={counts}
+				level2_key1={level2_key1}
+				level2_key2={level2_key2}
+				level1_key={['group_level']}
+				chartTitle={'Дамжаа (Их сургууль)'}
+			/>
+			<TableByClass scoreRanges={scoreRanges} isLoading={isLoading} examTypeData={examTypeData} level2_key1={level2_key1} level2_key2={level2_key2} />
 		</>
 	)
 }
 
-function getSubSchoolData(data, level2_key1, level2_key2, scoreRanges) {
-	const level1_key_name = 'school_name'
+function getSubSchoolData(data, level1_key=['school_name'], level2_key1, level2_key2, scoreRanges) {
+	const level1_key_name = level1_key[0]
 	const level2_key1_name = level2_key1[0]
 	const level2_key2_name = level2_key2[0]
 	const subSchoolData = {}
@@ -67,11 +80,14 @@ function getSubSchoolData(data, level2_key1, level2_key2, scoreRanges) {
 			const d_students_count = level1KeyData.filter(item => scoreRanges.D.score_min <= item.score && item.score <= scoreRanges.D.score_max).length
 			const f_students_count = level1KeyData.filter(item => scoreRanges.F.score_min <= item.score && item.score <= scoreRanges.F.score_max).length
 
-			acc[level1_key_value][level2_key1_name] = ((f_students_count + b_students_count) * 100) / students_count
+			acc[level1_key_value][level2_key1_name] = ((a_students_count + b_students_count) * 100) / students_count
 			acc[level1_key_value][level2_key2_name] = ((a_students_count + b_students_count + c_students_count) * 100) / students_count
 
 			if (isNaN(acc[level1_key_value][level2_key1_name])) acc[level1_key_value][level2_key1_name] = 0
 			if (isNaN(acc[level1_key_value][level2_key2_name])) acc[level1_key_value][level2_key2_name] = 0
+
+			acc[level1_key_value][level2_key1_name] = parseFloat(acc[level1_key_value][level2_key1_name].toFixed(2))
+			acc[level1_key_value][level2_key2_name] = parseFloat(acc[level1_key_value][level2_key2_name].toFixed(2))
 
 			subSchoolData[level1_key_value] = {
 				[level2_key1_name]: acc[level1_key_value][level2_key1_name],
