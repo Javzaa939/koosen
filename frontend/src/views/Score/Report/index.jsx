@@ -4,7 +4,7 @@ import { Col, Row, Card, Nav, NavItem, NavLink, TabContent } from "reactstrap";
 
 import SummaryCount from "./components/SummaryCount";
 import SemesterExamReport from './tabs/SemesterExamReport';
-import ReExamReport from './tabs/ReExamReport';
+import useGeneralData from './utils';
 
 export default function Report() {
 	const { t } = useTranslation()
@@ -12,18 +12,20 @@ export default function Report() {
 	const [activeTab, setActiveTab] = useState(0)
 	const [component, setComponent] = useState(<></>)
 
+	const { datas, united_score_ranges, isLoading, level2_key1, level2_key2, main_school_name } = useGeneralData();
+
 	const button_list = [
 		{
 			name: t('Улирлын шалгалт'),
 			id: 0,
 			icon: 'Activity',
-			component: <SemesterExamReport key={0} />
+			component: <SemesterExamReport key={0} data={datas} scoreRanges={united_score_ranges} isLoading={isLoading} level2_key1={level2_key1} level2_key2={level2_key2} main_school_name={main_school_name} />
 		},
 		{
 			name: t('Давтан шалгалт'),
 			icon: 'Activity',
 			id: 1,
-			component: <ReExamReport key={1} />
+			component: <SemesterExamReport key={1} data={datas} scoreRanges={united_score_ranges} isLoading={isLoading} level2_key1={level2_key1} level2_key2={level2_key2} main_school_name={main_school_name} examType={'reExam'} />
 		},
 	]
 
@@ -37,7 +39,7 @@ export default function Report() {
 	useEffect(() => {
 		var check = button_list.find(menus => menus.id == activeTab)
 		setComponent(check.component)
-	}, [activeTab])
+	}, [activeTab, datas])
 
 	return (
 		<>
@@ -45,7 +47,7 @@ export default function Report() {
 				<Col sm={6} md={5} lg={4}>
 					<SummaryCount
 						title={t('Давхардсан тоогоор нийт шалгалтад хамрагдсан суралцагчийн тоо')}
-						count={123}
+						count={datas.length}
 					/>
 				</Col>
 			</Row>

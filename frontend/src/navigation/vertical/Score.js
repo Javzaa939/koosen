@@ -42,7 +42,7 @@ export default [
                 id: 'score6',
                 title: 'Явцын дүн тайлан',
                 icon: <Circle size={8} />,
-                navLink: "score/progress-score-report/"
+                navLink: "score/report/"
             }
         ]
     }

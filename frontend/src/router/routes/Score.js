@@ -37,7 +37,7 @@ const Score = [
         element: <ProgressScore />
     },
     {
-        path: 'score/progress-score-report/',
+        path: 'score/report/',
         element: <Report />
     }
 ]

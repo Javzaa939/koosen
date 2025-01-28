@@ -8,8 +8,8 @@ from rest_framework import generics
 
 from django.db import transaction
 from django.conf import settings
-from django.db.models import  Count, Q,  Value, CharField, FloatField, DateTimeField, F, Subquery, OuterRef
-from django.db.models.functions import Concat
+from django.db.models import  Count, Q,  Value, CharField, FloatField, DateTimeField, F, Subquery, OuterRef, Case, When
+from django.db.models.functions import Concat, Cast
 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
@@ -1404,26 +1404,71 @@ class TeacherScoreReportSchoolAPIView(
     def get(self, request):
         lesson_year, lesson_season = get_active_year_season()
 
+        # to generate score_type names conditions
+        score_type_conditions = [
+            When(score_type__score_type=score_type_item[0], then=Value(score_type_item[1]))
+            for score_type_item in Lesson_teacher_scoretype.SCORE_TYPE
+        ]
+
+        # region to mark reExamed students
+        students_qs = ChallengeStudents.objects.filter(
+            challenge__lesson_year=lesson_year,
+            challenge__lesson_season=lesson_season,
+            challenge__challenge_type=Challenge.SEMESTR_EXAM
+        ).values('student','challenge__is_repeat')
+
+        students_with_repeat = [item['student'] for item in students_qs if item['challenge__is_repeat']]
+        # endregion
+
+        all_students = [item['student'] for item in students_qs]
+
         queryset = TeacherScore.objects.filter(
             lesson_year=lesson_year,
             lesson_season=lesson_season,
+            score__gt=0,
 
             score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO,
+
             score_type__lesson_teacher__lesson__in=Subquery(
+                # i am not sure but seems like for one lesson only first record with first teacher is required because in other places it is always used like this
                 Lesson_to_teacher.objects.filter(
                     lesson=OuterRef('score_type__lesson_teacher__lesson')
                 )[:1].values_list('lesson',flat=True)
             ),
 
-            student__in=ChallengeStudents.objects.filter(
-                challenge__lesson_year=lesson_year,
-                challenge__lesson_season=lesson_season,
-                challenge__challenge_type=Challenge.SEMESTR_EXAM,
-                # challenge__is_repeat=True # i am not sure is this required here or not
-            ).values_list('student',flat=True)
-        )[:100].values('student__school').annotate(
-            student_count=Count('*')
-        ).values(school=F('student__school__name'),student_count=F('student_count'))
+            student__in=all_students
+
+        ).annotate(
+            school_name=Case(
+                When(student__group__profession__department__isnull=False, then=F('student__group__profession__department__sub_orgs__name')),
+                default=F('student__group__profession__school__name')
+            ),
+
+            group_level=F('student__group__level'),
+            group_name=F('student__group__name'),
+            lesson_name=F('score_type__lesson_teacher__lesson__name'),
+
+            score_type_name=Case(
+                *score_type_conditions,
+                default=Cast(F('score_type__score_type'), CharField()),
+                output_field=CharField()
+            ),
+
+            is_repeat=Case(
+                When(student__in=students_with_repeat, then=Value(True)),
+                default=Value(False)
+            ),
+
+        )[:100].values(
+            'student',
+            'score',
+            'school_name',
+            'group_level',
+            'group_name',
+            'lesson_name',
+            'score_type_name',
+            'is_repeat'
+        )
 
         response = list(queryset)
 
