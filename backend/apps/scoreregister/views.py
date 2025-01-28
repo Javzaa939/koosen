@@ -1333,6 +1333,8 @@ class TeacherScoreAPIView(
     generics.GenericAPIView,
     mixins.ListModelMixin
 ):
+    """ Явцын оноо """
+
     queryset = TeacherScore.objects
     serializer_class = TeacherScoreSerializer
 
@@ -1378,9 +1380,6 @@ class TeacherScoreAPIView(
             student_code=F('student__code'),
             group_name=F('student__group__name'),
         )
-
-        student_ids = self.queryset.filter(score_type__lesson_teacher__lesson=lesson, lesson_year=lesson_year, lesson_season=lesson_season).values_list('id', flat=True).distinct('student')
-        self.queryset = self.queryset.filter(score_type__lesson_teacher__lesson=lesson, lesson_year=lesson_year, lesson_season=lesson_season, id__in=student_ids)
 
         sorting = self.request.query_params.get('sorting')
 
