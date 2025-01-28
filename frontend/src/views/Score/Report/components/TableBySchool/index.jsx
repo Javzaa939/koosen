@@ -28,6 +28,11 @@ export default function TableBySchool({ isLoading, subSchoolData, mainSchoolData
 
 									.s-r-tbs-table th, .s-r-tbs-table td {
 										border: 1px solid black;
+										padding: 8px;
+									}
+
+									.s-r-tbs-table th {
+										background-color: rgb(243, 242, 247)
 									}
 								`}
 							</style>

@@ -63,16 +63,21 @@ export default function TableByClass({ scoreRanges, isLoading, examTypeData, lev
 						<div style={{ overflow: 'auto' }}>
 							<style>
 								{`
-									.s-r-tbs-table {
+									.s-r-tbc-table {
 										border: 1px solid black;
 									}
 
-									.s-r-tbs-table th, .s-r-tbs-table td {
+									.s-r-tbc-table th, .s-r-tbc-table td {
 										border: 1px solid black;
+										padding: 8px;
+									}
+
+									.s-r-tbc-table th {
+										background-color: rgb(243, 242, 247)
 									}
 								`}
 							</style>
-							<table className="s-r-tbs-table" style={{ width: '100%' }}>
+							<table className="s-r-tbc-table" style={{ width: '100%' }}>
 								<thead>
 									<tr>
 										<th>
