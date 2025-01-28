@@ -19,22 +19,74 @@ export default function SemesterExamReport({ data, scoreRanges, isLoading, examT
 	counts[main_school_name][level2_key1_name] = ((f_students_count + b_students_count) * 100) / students_count
 	counts[main_school_name][level2_key2_name] = ((a_students_count + b_students_count + c_students_count) * 100) / students_count
 
+	if (isNaN(counts[main_school_name][level2_key1_name])) counts[main_school_name][level2_key1_name] = 0
+	if (isNaN(counts[main_school_name][level2_key2_name])) counts[main_school_name][level2_key2_name] = 0
+
 	const mainSchoolData = {
-		success_quality: counts,
-		all: students_count,
-		a: a_students_count,
-		b: b_students_count,
-		c: c_students_count,
-		d: d_students_count,
-		f: f_students_count,
+		[main_school_name]: {
+			[level2_key1_name]: counts[main_school_name][level2_key1_name],
+			[level2_key2_name]: counts[main_school_name][level2_key2_name],
+			all: students_count,
+			a: a_students_count,
+			b: b_students_count,
+			c: c_students_count,
+			d: d_students_count,
+			f: f_students_count,
+		}
 	}
+
+	const { counts: subSchoolChartData, subSchoolData } = getSubSchoolData(examTypeData, level2_key1, level2_key2, scoreRanges)
 
 	return (
 		<>
-			<ChartByAnyField scoreRanges={scoreRanges} isLoading={isLoading} examTypeData={examTypeData} mainSchoolData={counts} level2_key1={level2_key1} level2_key2={level2_key2} level1_key={['school_name']} chartTitle={'Бүрэлдэхүүн сургууль, институт'} />
-			<TableBySchool scoreRanges={scoreRanges} isLoading={isLoading} examTypeData={examTypeData} mainSchoolData={mainSchoolData} />
-			<ChartByAnyField scoreRanges={scoreRanges} isLoading={isLoading} examTypeData={examTypeData} mainSchoolData={counts} level2_key1={level2_key1} level2_key2={level2_key2} level1_key={['group_level']} chartTitle={'Дамжаа (Их сургууль)'} />
-			{/* <TableByClass scoreRanges={scoreRanges} isLoading={isLoading} examTypeData={examTypeData} /> */}
+			<ChartByAnyField isLoading={isLoading} subSchoolChartData={subSchoolChartData} mainSchoolData={counts} level2_key1={level2_key1} level2_key2={level2_key2} level1_key={['school_name']} chartTitle={'Бүрэлдэхүүн сургууль, институт'} />
+			<TableBySchool isLoading={isLoading} subSchoolData={subSchoolData} mainSchoolData={mainSchoolData} />
+			<ChartByAnyField isLoading={isLoading} subSchoolChartData={subSchoolChartData} mainSchoolData={counts} level2_key1={level2_key1} level2_key2={level2_key2} level1_key={['group_level']} chartTitle={'Дамжаа (Их сургууль)'} />
+			<TableByClass scoreRanges={scoreRanges} isLoading={isLoading} examTypeData={examTypeData} />
 		</>
 	)
+}
+
+function getSubSchoolData(data, level2_key1, level2_key2, scoreRanges) {
+	const level1_key_name = 'school_name'
+	const level2_key1_name = level2_key1[0]
+	const level2_key2_name = level2_key2[0]
+	const subSchoolData = {}
+
+	const counts = data.reduce((acc, student) => {
+		const level1_key_value = student[level1_key_name]
+
+		if (!acc[level1_key_value]) {
+			acc[level1_key_value] = { [level2_key1_name]: 0, [level2_key2_name]: 0 }
+			const level1KeyData = data.filter(item => item[level1_key_name] === level1_key_value)
+
+			const students_count = level1KeyData.length
+			const a_students_count = level1KeyData.filter(item => scoreRanges.A.score_min <= item.score && item.score <= scoreRanges.A.score_max).length
+			const b_students_count = level1KeyData.filter(item => scoreRanges.B.score_min <= item.score && item.score <= scoreRanges.B.score_max).length
+			const c_students_count = level1KeyData.filter(item => scoreRanges.C.score_min <= item.score && item.score <= scoreRanges.C.score_max).length
+			const d_students_count = level1KeyData.filter(item => scoreRanges.D.score_min <= item.score && item.score <= scoreRanges.D.score_max).length
+			const f_students_count = level1KeyData.filter(item => scoreRanges.F.score_min <= item.score && item.score <= scoreRanges.F.score_max).length
+
+			acc[level1_key_value][level2_key1_name] = ((f_students_count + b_students_count) * 100) / students_count
+			acc[level1_key_value][level2_key2_name] = ((a_students_count + b_students_count + c_students_count) * 100) / students_count
+
+			if (isNaN(acc[level1_key_value][level2_key1_name])) acc[level1_key_value][level2_key1_name] = 0
+			if (isNaN(acc[level1_key_value][level2_key2_name])) acc[level1_key_value][level2_key2_name] = 0
+
+			subSchoolData[level1_key_value] = {
+				[level2_key1_name]: acc[level1_key_value][level2_key1_name],
+				[level2_key2_name]: acc[level1_key_value][level2_key2_name],
+				all: students_count,
+				a: a_students_count,
+				b: b_students_count,
+				c: c_students_count,
+				d: d_students_count,
+				f: f_students_count,
+			}
+		}
+
+		return acc;
+	}, {});
+
+	return { counts, subSchoolData }
 }
