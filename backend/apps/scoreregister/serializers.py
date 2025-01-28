@@ -416,7 +416,7 @@ class TeacherScoreListPrintSerializer(serializers.ModelSerializer):
             return 'W'
 
         # Үсгэн үнэлгээ авсан бол
-        if exam_obj.grade_letter:
+        if exam_obj.grade_letter and teacher_score < 60:
             return exam_obj.grade_letter.letter or ''
 
         if teacher_score < 42:
