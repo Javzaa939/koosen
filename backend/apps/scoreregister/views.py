@@ -1416,7 +1416,7 @@ class TeacherScoreReportSchoolAPIView(
             for exan_type_item in ExamTimeTable.EXAM_TYPE
         ]
 
-        # NOTE why it is needed? it is not real total count. i think it is weird but i did as you said: i use Lesson_teacher_scoretype.SHALGALT_ONOO to get total count so far
+        # NOTE why it is needed? it is not real total count. i think it is weird but i did as you said so far: i use Lesson_teacher_scoretype.SHALGALT_ONOO to get total count
         # total_count = TeacherScore.objects.filter(
         #     lesson_year=lesson_year,
         #     lesson_season=lesson_season,
@@ -1485,7 +1485,7 @@ class TeacherScoreReportSchoolAPIView(
             'exam_type_name',
             'is_repeat'
         )
-        print(queryset.query)
+        # print(queryset.query)
 
         response = list(queryset)
 
