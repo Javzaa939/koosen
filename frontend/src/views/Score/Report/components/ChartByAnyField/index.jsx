@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Card, CardBody, CardTitle } from "reactstrap";
 import { Bar, BarChart, CartesianGrid, LabelList, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
-export default function ChartByAnyField({ isLoading, getSubSchoolData = () => null, examTypeData, scoreRanges, subSchoolChartData, mainSchoolData, level2_key1, level2_key2, level1_key, chartTitle }) {
+export default function ChartByAnyField({ isLoading, subSchoolChartData, mainSchoolData, level2_key1, level2_key2, level1_key, chartTitle }) {
 	const { t } = useTranslation()
 	const [datas, setDatas] = useState([])
 
@@ -13,8 +13,7 @@ export default function ChartByAnyField({ isLoading, getSubSchoolData = () => nu
 		const level1_key_name = level1_key[0]
 		const level2_key1_name = level2_key1[0]
 		const level2_key2_name = level2_key2[0]
-
-		const data = subSchoolChartData ? subSchoolChartData : getSubSchoolData(examTypeData, level1_key, level2_key1, level2_key2, scoreRanges)?.counts
+		const data = subSchoolChartData
 
 		// to add main school stats
 		const main_school_name = Object.keys(mainSchoolData)[0]

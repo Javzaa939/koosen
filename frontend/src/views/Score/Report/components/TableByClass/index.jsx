@@ -20,11 +20,11 @@ export default function TableByClass({ scoreRanges, isLoading, examTypeData, lev
 			const level1KeyData = data.filter(item => `${item[level1_key_names[0]]}=_+${item[level1_key_names[1]]}=_+${item[level1_key_names[2]]}` === level1_key_value)
 
 			const students_count = level1KeyData.length
-			const a_students_count = level1KeyData.filter(item => scoreRanges.A.score_min <= item.score && item.score <= scoreRanges.A.score_max).length
-			const b_students_count = level1KeyData.filter(item => scoreRanges.B.score_min <= item.score && item.score <= scoreRanges.B.score_max).length
-			const c_students_count = level1KeyData.filter(item => scoreRanges.C.score_min <= item.score && item.score <= scoreRanges.C.score_max).length
-			const d_students_count = level1KeyData.filter(item => scoreRanges.D.score_min <= item.score && item.score <= scoreRanges.D.score_max).length
-			const f_students_count = level1KeyData.filter(item => scoreRanges.F.score_min <= item.score && item.score <= scoreRanges.F.score_max).length
+			const a_students_count = level1KeyData.filter(item => scoreRanges.A.score_min <= item.total_score && item.total_score <= scoreRanges.A.score_max).length
+			const b_students_count = level1KeyData.filter(item => scoreRanges.B.score_min <= item.total_score && item.total_score <= scoreRanges.B.score_max).length
+			const c_students_count = level1KeyData.filter(item => scoreRanges.C.score_min <= item.total_score && item.total_score <= scoreRanges.C.score_max).length
+			const d_students_count = level1KeyData.filter(item => scoreRanges.D.score_min <= item.total_score && item.total_score <= scoreRanges.D.score_max).length
+			const f_students_count = level1KeyData.filter(item => scoreRanges.F.score_min <= item.total_score && item.total_score <= scoreRanges.F.score_max).length
 
 			acc[level1_key_value][level2_key1_name] = ((a_students_count + b_students_count) * 100) / students_count
 			acc[level1_key_value][level2_key2_name] = ((a_students_count + b_students_count + c_students_count) * 100) / students_count

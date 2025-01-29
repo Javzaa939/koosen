@@ -1474,10 +1474,22 @@ class TeacherScoreReportSchoolAPIView(
                 )[:1]
             ),
 
+            total_score=Subquery(
+                # to get score i copied this way from TeacherScoreSerializer.get_assessment(). It is weird for me but it is used in TeacherScoreSerializer.get_assessment() so maybe it is okey
+                TeacherScore.objects.filter(
+                    student=OuterRef('student'),
+                    score_type__lesson_teacher__lesson=OuterRef('score_type__lesson_teacher__lesson')
+                ).values(
+                    'student',
+                    'score_type__lesson_teacher__lesson'
+                ).annotate(
+                    total=Sum('score')
+                )[:1].values('total')
+            )
         ).values(
             'score_type_name',
             'student',
-            'score',
+            'total_score',
             'school_name',
             'group_level',
             'group_name',
