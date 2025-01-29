@@ -10,7 +10,7 @@ export default function TableByClass({ scoreRanges, isLoading, examTypeData, lev
 	const level2_key3_name = 'F дүгнэгдсан суралцагчийн хувь'
 	const classLessonTypeData = {}
 	const data = examTypeData
-	// const summaryRow = 
+	const summaryRow = { a: 0, b: 0, c: 0, d: 0, f: 0, all: 0 }
 
 	const counts = data.reduce((acc, student) => {
 		const level1_key_value = `${student[level1_key_names[0]]}=_+${student[level1_key_names[1]]}=_+${student[level1_key_names[2]]}`
@@ -120,6 +120,12 @@ export default function TableByClass({ scoreRanges, isLoading, examTypeData, lev
 											const group = classLessonTypeKeyArray[0]
 											const lesson = classLessonTypeKeyArray[1]
 											const exam_type = classLessonTypeKeyArray[2]
+											summaryRow.all += classLessonType.all
+											summaryRow.a += classLessonType.a
+											summaryRow.b += classLessonType.b
+											summaryRow.c += classLessonType.c
+											summaryRow.d += classLessonType.d
+											summaryRow.f += classLessonType.f
 
 											return (
 												<tr key={ind}>
@@ -166,38 +172,38 @@ export default function TableByClass({ scoreRanges, isLoading, examTypeData, lev
 											)
 										})
 									}
-									{/* <tr>
+									<tr>
 										<td colSpan={4}>
 											{t('Нийт')}
 										</td>
 										<td>
-											{classLessonType.all}
+											{summaryRow.all}
 										</td>
 										<td>
-											{classLessonType.a}
+											{summaryRow.a}
 										</td>
 										<td>
-											{classLessonType.b}
+											{summaryRow.b}
 										</td>
 										<td>
-											{classLessonType.c}
+											{summaryRow.c}
 										</td>
 										<td>
-											{classLessonType.d}
+											{summaryRow.d}
 										</td>
 										<td>
-											{classLessonType.f}
+											{summaryRow.f}
 										</td>
 										<td>
-											{classLessonType.success}
+											{getSuccess(summaryRow.a, summaryRow.b, summaryRow.c, summaryRow.all)}
 										</td>
 										<td>
-											{classLessonType.quality}
+											{getQuality(summaryRow.a, summaryRow.b, summaryRow.all)}
 										</td>
 										<td>
-											{classLessonType[level2_key3_name]}
+											{getFPercent(summaryRow.f, summaryRow.all)}
 										</td>
-									</tr> */}
+									</tr>
 								</tbody>
 							</table>
 						</div>
@@ -205,4 +211,16 @@ export default function TableByClass({ scoreRanges, isLoading, examTypeData, lev
 			</CardBody>
 		</Card>
 	)
+}
+
+function getSuccess(a, b, c, all) {
+	return parseFloat((((a + b + c) * 100) / all).toFixed(2))
+}
+
+function getQuality(a, b, all) {
+	return parseFloat((((a + b) * 100) / all).toFixed(2))
+}
+
+function getFPercent(f, all) {
+	return parseFloat(((f * 100) / all).toFixed(2))
 }
