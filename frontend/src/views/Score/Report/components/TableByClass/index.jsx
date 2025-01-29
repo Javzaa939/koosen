@@ -214,13 +214,19 @@ export default function TableByClass({ scoreRanges, isLoading, examTypeData, lev
 }
 
 function getSuccess(a, b, c, all) {
-	return parseFloat((((a + b + c) * 100) / all).toFixed(2))
+	const result = parseFloat((((a + b + c) * 100) / all).toFixed(2))
+
+	return isNaN(result) ? 0 : result
 }
 
 function getQuality(a, b, all) {
-	return parseFloat((((a + b) * 100) / all).toFixed(2))
+	const result = parseFloat((((a + b) * 100) / all).toFixed(2))
+
+	return isNaN(result) ? 0 : result
 }
 
 function getFPercent(f, all) {
-	return parseFloat(((f * 100) / all).toFixed(2))
+	const result = parseFloat(((f * 100) / all).toFixed(2))
+
+	return isNaN(result) ? 0 : result
 }
