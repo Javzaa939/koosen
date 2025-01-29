@@ -4,7 +4,7 @@ import { Card, CardBody, CardTitle } from "reactstrap";
 
 export default function TableByClass({ scoreRanges, isLoading, examTypeData, level2_key1, level2_key2 }) {
 	const { t } = useTranslation()
-	const level1_key_names = ['group_name', 'lesson_name', 'score_type_name']
+	const level1_key_names = ['group_name', 'lesson_name', 'exam_type_name']
 	const level2_key1_name = level2_key1[0]
 	const level2_key2_name = level2_key2[0]
 	const level2_key3_name = 'F дүгнэгдсан суралцагчийн хувь'
@@ -119,7 +119,7 @@ export default function TableByClass({ scoreRanges, isLoading, examTypeData, lev
 											const classLessonTypeKeyArray = key.split('=_+')
 											const group = classLessonTypeKeyArray[0]
 											const lesson = classLessonTypeKeyArray[1]
-											const score_type = classLessonTypeKeyArray[2]
+											const exam_type = classLessonTypeKeyArray[2]
 
 											return (
 												<tr key={ind}>
@@ -133,7 +133,7 @@ export default function TableByClass({ scoreRanges, isLoading, examTypeData, lev
 														{lesson}
 													</td>
 													<td>
-														{score_type}
+														{exam_type === 'null' ? '' : exam_type}
 													</td>
 													<td>
 														{classLessonType.all}

@@ -8,7 +8,7 @@ from rest_framework import generics
 
 from django.db import transaction
 from django.conf import settings
-from django.db.models import  Count, Q,  Value, CharField, FloatField, DateTimeField, F, Subquery, OuterRef, Case, When
+from django.db.models import  Count, Q,  Value, CharField, FloatField, DateTimeField, F, Subquery, OuterRef, Case, When, Exists
 from django.db.models.functions import Concat, Cast
 
 from rest_framework.permissions import IsAuthenticated
@@ -1404,41 +1404,40 @@ class TeacherScoreReportSchoolAPIView(
     def get(self, request):
         lesson_year, lesson_season = get_active_year_season()
 
-        # to generate score_type names conditions
+        # to generate score_type names conditions for total count by Lesson_teacher_scoretype.SHALGALT_ONOO
         score_type_conditions = [
             When(score_type__score_type=score_type_item[0], then=Value(score_type_item[1]))
             for score_type_item in Lesson_teacher_scoretype.SCORE_TYPE
         ]
 
-        # region to mark reExamed students
-        students_qs = ChallengeStudents.objects.filter(
-            challenge__lesson_year=lesson_year,
-            challenge__lesson_season=lesson_season,
-            challenge__challenge_type=Challenge.SEMESTR_EXAM
-        ).values('student','challenge__is_repeat')
+        # to generate conditions to get exam type names
+        exam_type_conditions = [
+            When(stype=exan_type_item[0], then=Value(exan_type_item[1]))
+            for exan_type_item in ExamTimeTable.EXAM_TYPE
+        ]
 
-        students_with_repeat = [item['student'] for item in students_qs if item['challenge__is_repeat']]
-        # endregion
+        # NOTE why it is needed? it is not real total count. i think it is weird but i did as you said: i use Lesson_teacher_scoretype.SHALGALT_ONOO to get total count so far
+        # total_count = TeacherScore.objects.filter(
+        #     lesson_year=lesson_year,
+        #     lesson_season=lesson_season,
+        #     score__isnull=False,
+        #     score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO,
+        # ).count()
 
-        all_students = [item['student'] for item in students_qs]
+        # print(total_count)
 
         queryset = TeacherScore.objects.filter(
             lesson_year=lesson_year,
             lesson_season=lesson_season,
-            score__gt=0,
-
-            score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO,
-
-            score_type__lesson_teacher__lesson__in=Subquery(
-                # i am not sure but seems like for one lesson only first record with first teacher is required because in other places it is always used like this
-                Lesson_to_teacher.objects.filter(
-                    lesson=OuterRef('score_type__lesson_teacher__lesson')
-                )[:1].values_list('lesson',flat=True)
-            ),
-
-            student__in=all_students
+            score__isnull=False,
 
         ).annotate(
+            score_type_name=Case(
+                *score_type_conditions,
+                default=Cast(F('score_type__score_type'), CharField()),
+                output_field=CharField()
+            ),
+
             school_name=Case(
                 When(student__group__profession__department__isnull=False, then=F('student__group__profession__department__sub_orgs__name')),
                 default=F('student__group__profession__school__name')
@@ -1448,27 +1447,45 @@ class TeacherScoreReportSchoolAPIView(
             group_name=F('student__group__name'),
             lesson_name=F('score_type__lesson_teacher__lesson__name'),
 
-            score_type_name=Case(
-                *score_type_conditions,
-                default=Cast(F('score_type__score_type'), CharField()),
-                output_field=CharField()
-            ),
 
-            is_repeat=Case(
-                When(student__in=students_with_repeat, then=Value(True)),
-                default=Value(False)
+            exam_type_name=Subquery(ExamTimeTable.objects.filter(
+                lesson_year=OuterRef('lesson_year'),
+                lesson_season=OuterRef('lesson_season'),
+                lesson=OuterRef('score_type__lesson_teacher__lesson'),
+                exam_to_group__student=OuterRef('student'),
+
+            )[:1].annotate(
+                exam_type_name=Case(
+                    *exam_type_conditions,
+                    default=Cast(F('stype'), CharField()),
+                    output_field=CharField()
+                )
+            ).values('exam_type_name')),
+
+
+            is_repeat=Exists(
+                Exam_repeat.objects.filter(
+                    lesson_year=OuterRef('lesson_year'),
+                    lesson_season=OuterRef('lesson_season'),
+                    status=Exam_repeat.UPGRADE_SCORE,
+                    lesson=OuterRef('score_type__lesson_teacher__lesson'),
+                    exam_to_student__student=OuterRef('student'),
+
+                )[:1]
             ),
 
         ).values(
+            'score_type_name',
             'student',
             'score',
             'school_name',
             'group_level',
             'group_name',
             'lesson_name',
-            'score_type_name',
+            'exam_type_name',
             'is_repeat'
         )
+        print(queryset.query)
 
         response = list(queryset)
 

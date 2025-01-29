@@ -47,7 +47,7 @@ export default function Report() {
 				<Col sm={6} md={5} lg={4}>
 					<SummaryCount
 						title={t('Давхардсан тоогоор нийт шалгалтад хамрагдсан суралцагчийн тоо')}
-						count={datas.length}
+						count={datas.filter(item => item.score_type_name === '30 онооны шалгалт').length}
 					/>
 				</Col>
 			</Row>
