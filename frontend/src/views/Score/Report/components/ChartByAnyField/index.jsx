@@ -7,7 +7,7 @@ import { Bar, BarChart, CartesianGrid, LabelList, Legend, ResponsiveContainer, T
 
 export default function ChartByAnyField({ isLoading, getSubSchoolData = () => null, examTypeData, scoreRanges, subSchoolChartData, mainSchoolData, level2_key1, level2_key2, level1_key, chartTitle }) {
 	const { t } = useTranslation()
-	const [datas, setDatas] = useState({})
+	const [datas, setDatas] = useState([])
 
 	function toChartFormat() {
 		const level1_key_name = level1_key[0]
