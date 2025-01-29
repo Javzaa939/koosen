@@ -12,7 +12,7 @@ export default function Report() {
 	const [activeTab, setActiveTab] = useState(0)
 	const [component, setComponent] = useState(<></>)
 
-	const { datas, united_score_ranges, isLoading, level2_key1, level2_key2, main_school_name } = useGeneralData();
+	const { datas, united_score_ranges, isLoading, Loader, level2_key1, level2_key2, main_school_name } = useGeneralData();
 
 	const button_list = [
 		{
@@ -65,7 +65,7 @@ export default function Report() {
 				</Nav>
 				<TabContent className='py-50' activeTab={activeTab} >
 					{
-						component && component
+						isLoading ? Loader : component && component
 					}
 				</TabContent>
 			</Card>

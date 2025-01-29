@@ -7,7 +7,7 @@ export default function useGeneralData() {
 	const level2_key2 = ['success', 'Амжилт']
 	const main_school_name = 'Их сургууль'
 
-	const { isLoading, fetchData } = useLoader({})
+	const { isLoading, Loader, fetchData } = useLoader({})
 
 	// api
 	const teacherScoreReportApi = useApi().score.teacherScore
@@ -61,5 +61,5 @@ export default function useGeneralData() {
 		if (united_score_ranges) getData()
 	}, [united_score_ranges])
 
-	return { datas, united_score_ranges, isLoading, level2_key1, level2_key2, main_school_name }
+	return { datas, united_score_ranges, isLoading, Loader, level2_key1, level2_key2, main_school_name }
 }
