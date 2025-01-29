@@ -38,4 +38,7 @@ urlpatterns = [
 
     # Явцын оноо
     path('teacher-score/', TeacherScoreAPIView.as_view()),
+
+    # Явцын дүн тайлан
+	path('teacher-score/report/school/', TeacherScoreReportSchoolAPIView.as_view()),
 ]

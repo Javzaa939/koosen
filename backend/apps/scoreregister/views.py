@@ -8,15 +8,15 @@ from rest_framework import generics
 
 from django.db import transaction
 from django.conf import settings
-from django.db.models import  Count, Q,  Value, CharField, FloatField, DateTimeField, F
-from django.db.models.functions import Concat
+from django.db.models import  Count, Q,  Value, CharField, FloatField, DateTimeField, F, Subquery, OuterRef, Case, When, Exists
+from django.db.models.functions import Concat, Cast
 
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes
 
 from main.utils.function.utils import get_lesson_choice_student, has_permission, remove_key_from_dict, get_fullName, get_active_year_season, json_load, calculate_birthday
 from main.utils.file import save_file, remove_folder
-from lms.models import ExamTimeTable, ScoreRegister
+from lms.models import Challenge, ChallengeStudents, ExamTimeTable, ScoreRegister
 from lms.models import Student
 from lms.models import LessonStandart
 from lms.models import Score
@@ -1392,6 +1392,116 @@ class TeacherScoreAPIView(
         all_list = self.list(request).data
 
         return request.send_data(all_list)
+
+
+@permission_classes([IsAuthenticated])
+class TeacherScoreReportSchoolAPIView(
+    generics.GenericAPIView
+):
+    """ Явцын дүн тайлан """
+
+    @has_permission(must_permissions=['lms-score-read'])
+    def get(self, request):
+        lesson_year, lesson_season = get_active_year_season()
+
+        # to generate score_type names conditions for total count by Lesson_teacher_scoretype.SHALGALT_ONOO
+        score_type_conditions = [
+            When(score_type__score_type=score_type_item[0], then=Value(score_type_item[1]))
+            for score_type_item in Lesson_teacher_scoretype.SCORE_TYPE
+        ]
+
+        # to generate conditions to get exam type names
+        exam_type_conditions = [
+            When(stype=exan_type_item[0], then=Value(exan_type_item[1]))
+            for exan_type_item in ExamTimeTable.EXAM_TYPE
+        ]
+
+        # NOTE why it is needed? it is not real total count. i think it is weird but i did as you said so far: i use Lesson_teacher_scoretype.SHALGALT_ONOO to get total count
+        # total_count = TeacherScore.objects.filter(
+        #     lesson_year=lesson_year,
+        #     lesson_season=lesson_season,
+        #     score__isnull=False,
+        #     score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO,
+        # ).count()
+
+        # print(total_count)
+
+        queryset = TeacherScore.objects.filter(
+            lesson_year=lesson_year,
+            lesson_season=lesson_season,
+            score__isnull=False,
+
+        ).annotate(
+            score_type_name=Case(
+                *score_type_conditions,
+                default=Cast(F('score_type__score_type'), CharField()),
+                output_field=CharField()
+            ),
+
+            school_name=Case(
+                When(student__group__profession__department__isnull=False, then=F('student__group__profession__department__sub_orgs__name')),
+                default=F('student__group__profession__school__name')
+            ),
+
+            group_level=F('student__group__level'),
+            group_name=F('student__group__name'),
+            lesson_name=F('score_type__lesson_teacher__lesson__name'),
+
+
+            exam_type_name=Subquery(ExamTimeTable.objects.filter(
+                lesson_year=OuterRef('lesson_year'),
+                lesson_season=OuterRef('lesson_season'),
+                lesson=OuterRef('score_type__lesson_teacher__lesson'),
+                exam_to_group__student=OuterRef('student'),
+
+            )[:1].annotate(
+                exam_type_name=Case(
+                    *exam_type_conditions,
+                    default=Cast(F('stype'), CharField()),
+                    output_field=CharField()
+                )
+            ).values('exam_type_name')),
+
+
+            is_repeat=Exists(
+                Exam_repeat.objects.filter(
+                    lesson_year=OuterRef('lesson_year'),
+                    lesson_season=OuterRef('lesson_season'),
+                    status=Exam_repeat.UPGRADE_SCORE,
+                    lesson=OuterRef('score_type__lesson_teacher__lesson'),
+                    exam_to_student__student=OuterRef('student'),
+
+                )[:1]
+            ),
+
+            total_score=Subquery(
+                # to get score i copied this way from TeacherScoreSerializer.get_assessment(). It is weird for me but it is used in TeacherScoreSerializer.get_assessment() so maybe it is okey
+                TeacherScore.objects.filter(
+                    student=OuterRef('student'),
+                    score_type__lesson_teacher__lesson=OuterRef('score_type__lesson_teacher__lesson')
+                ).values(
+                    'student',
+                    'score_type__lesson_teacher__lesson'
+                ).annotate(
+                    total=Sum('score')
+                )[:1].values('total')
+            )
+        ).values(
+            'score_type_name',
+            'student',
+            'total_score',
+            'school_name',
+            'group_level',
+            'group_name',
+            'lesson_name',
+            'exam_type_name',
+            'is_repeat'
+        )
+        # print(queryset.query)
+
+        response = list(queryset)
+
+        return request.send_data(response)
 
 
 @permission_classes([IsAuthenticated])
