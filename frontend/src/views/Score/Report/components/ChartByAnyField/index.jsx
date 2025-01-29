@@ -36,7 +36,7 @@ export default function ChartByAnyField({ isLoading, getSubSchoolData = () => nu
 					<p className='fw-bold mb-0'>{data.label}</p>
 					<hr />
 					<div className='active'>
-						<div className='d-flex align-items-center'>
+						{/* <div className='d-flex align-items-center'>
 							<span
 								className='bullet bullet-sm bullet-bordered me-50'
 								style={{
@@ -46,7 +46,7 @@ export default function ChartByAnyField({ isLoading, getSubSchoolData = () => nu
 							<span className='text-capitalize me-75'>
 								Нийт : {data?.payload?.map(i => i.payload[i.dataKey]).reduce((accumulator, currentValue) => accumulator + currentValue)}
 							</span>
-						</div>
+						</div> */}
 						{data.payload.map(i => {
 							return (
 								<div className='d-flex align-items-center' key={i.dataKey}>
