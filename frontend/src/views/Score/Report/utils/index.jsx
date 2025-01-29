@@ -58,7 +58,7 @@ export default function useGeneralData() {
 	}, [])
 
 	useEffect(() => {
-		getData()
+		if (united_score_ranges) getData()
 	}, [united_score_ranges])
 
 	return { datas, united_score_ranges, isLoading, level2_key1, level2_key2, main_school_name }
