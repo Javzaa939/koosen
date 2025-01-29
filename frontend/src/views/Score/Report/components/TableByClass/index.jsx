@@ -10,6 +10,7 @@ export default function TableByClass({ scoreRanges, isLoading, examTypeData, lev
 	const level2_key3_name = 'F дүгнэгдсан суралцагчийн хувь'
 	const classLessonTypeData = {}
 	const data = examTypeData
+	// const summaryRow = 
 
 	const counts = data.reduce((acc, student) => {
 		const level1_key_value = `${student[level1_key_names[0]]}=_+${student[level1_key_names[1]]}=_+${student[level1_key_names[2]]}`
@@ -32,6 +33,10 @@ export default function TableByClass({ scoreRanges, isLoading, examTypeData, lev
 			if (isNaN(acc[level1_key_value][level2_key1_name])) acc[level1_key_value][level2_key1_name] = 0
 			if (isNaN(acc[level1_key_value][level2_key2_name])) acc[level1_key_value][level2_key2_name] = 0
 			if (isNaN(acc[level1_key_value][level2_key3_name])) acc[level1_key_value][level2_key3_name] = 0
+
+			acc[level1_key_value][level2_key1_name] = parseFloat(acc[level1_key_value][level2_key1_name].toFixed(2))
+			acc[level1_key_value][level2_key2_name] = parseFloat(acc[level1_key_value][level2_key2_name].toFixed(2))
+			acc[level1_key_value][level2_key3_name] = parseFloat(acc[level1_key_value][level2_key3_name].toFixed(2))
 
 			classLessonTypeData[level1_key_value] = {
 				[level2_key1_name]: acc[level1_key_value][level2_key1_name],
@@ -161,6 +166,38 @@ export default function TableByClass({ scoreRanges, isLoading, examTypeData, lev
 											)
 										})
 									}
+									{/* <tr>
+										<td colSpan={4}>
+											{t('Нийт')}
+										</td>
+										<td>
+											{classLessonType.all}
+										</td>
+										<td>
+											{classLessonType.a}
+										</td>
+										<td>
+											{classLessonType.b}
+										</td>
+										<td>
+											{classLessonType.c}
+										</td>
+										<td>
+											{classLessonType.d}
+										</td>
+										<td>
+											{classLessonType.f}
+										</td>
+										<td>
+											{classLessonType.success}
+										</td>
+										<td>
+											{classLessonType.quality}
+										</td>
+										<td>
+											{classLessonType[level2_key3_name]}
+										</td>
+									</tr> */}
 								</tbody>
 							</table>
 						</div>
