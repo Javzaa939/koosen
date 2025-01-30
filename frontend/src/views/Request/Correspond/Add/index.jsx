@@ -66,6 +66,7 @@ const Add = ({ open, handleModal, refreshDatas, datas, editId, isSolved }) => {
     const correspondApi = useApi().request.correspond
     const groupApi = useApi().student.group
     const studentApi = useApi().student
+    const approveApi = useApi().request.correspond
 
     function getAll() {
         Promise.all(
@@ -92,6 +93,7 @@ const Add = ({ open, handleModal, refreshDatas, datas, editId, isSolved }) => {
         cdata['lesson_season'] = cseason_id
         cdata['lessons'] = JSON.stringify(corresDatas)
         cdata['file_name'] = fileName
+        cdata['correspond_type'] = typeId
 
         // сургууль хооронд шилжиж мэргэжил солих үед
         if (datas?.id)
@@ -177,11 +179,30 @@ const Add = ({ open, handleModal, refreshDatas, datas, editId, isSolved }) => {
         }
     }
 
-    // useEffect(() => {
-    //     if (Object.keys(user).length > 0 && !user.permissions.includes('lms-request-correspond-update')) {
-    //         setDisabled(true)
-    //     }
-    // }, [user])
+    // Арга зүйч дүйцүүлэлт батлах
+    async function handleApprove(row) {
+        var data = {}
+        data['group'] = datas?.group
+        data['code'] = datas?.code
+
+        // дүйцүүлэлт хийсэн хичээлүүдийг батлах
+        var item = row.filter((c) => c.id).map((c) => c.id);
+        data['allow_lesson_ids'] = item
+        if (datas?.corres_id && editId){
+            const { success } = await fetchData(approveApi.postApprove(datas?.corres_id, data))
+            if(success)
+            {
+                refreshDatas()
+            }
+
+        }
+    }
+
+    useEffect(() => {
+        if (Object.keys(user).length > 0 && !user.permissions.includes('lms-request-correspond-update')) {
+            setDisabled(true)
+        }
+    }, [user])
 
     useEffect(() => {
         if (Object.keys(datas).length > 0) {
@@ -207,7 +228,7 @@ const Add = ({ open, handleModal, refreshDatas, datas, editId, isSolved }) => {
                     setValue('student_group', datas[key]?.id)
                 }
                 if (key === 'correspond_type') {
-                    setTypeId(datas[key])
+                    // setTypeId(datas[key])
                     setValue('correspond_type', datas[key])
                 }
 
@@ -221,6 +242,10 @@ const Add = ({ open, handleModal, refreshDatas, datas, editId, isSolved }) => {
                     setValue('profession', datas[key]?.profession?.id)
                     setValue('group', datas[key]?.id)
                     setGroupId(datas[key]?.id)
+                }
+
+                if (key === 'phone') {
+                    setValue('phone', datas[key])
                 }
             }
         }
@@ -270,6 +295,7 @@ const Add = ({ open, handleModal, refreshDatas, datas, editId, isSolved }) => {
                 className="sidebar-xl hr-register"
                 modalClassName="modal-slide-in "
                 contentClassName="pt-0"
+                backdrop='static'
                 style={{ width: '1000px'}}
             >
                 <ModalHeader
@@ -581,7 +607,7 @@ const Add = ({ open, handleModal, refreshDatas, datas, editId, isSolved }) => {
                             {errors.group && <FormFeedback className='d-block'>{errors.group.message}</FormFeedback>}
                         </Col>
                         <Col md={12} sm={12} className='mt-1'>
-                            <AddTable datas={rowDatas} setDatas={setRowDatas} lessonOption={lessonOption} isDisabled={isDisabled} isSolved={isSolved} oldLessonOption={oldLessonOption} addRow={addRow} editId={editId}/>
+                            <AddTable datas={rowDatas} setDatas={setRowDatas} lessonOption={lessonOption} isDisabled={isDisabled} isSolved={isSolved} oldLessonOption={oldLessonOption} addRow={addRow} editId={editId} handleApprove={handleApprove}/>
                         </Col>
                         {
                             corresDatas.length > 0 && !editId

@@ -511,6 +511,14 @@ class CorrespondAPIView(
                         new_lesson_ids.append(c_lesson_id)
                         c_lesson_lesson = c_lesson.get('correspond_lesson_id')
 
+                        # улирлын list болгов
+                        seasons = json.loads(c_lesson.get('season'))
+
+                        if isinstance(seasons, int):
+                            c_lesson['season'] = seasons if seasons else 1
+                        if isinstance(seasons, list):
+                            c_lesson['season'] = seasons[0] if seasons[0] else 1
+
                         lesson = get_object_or_404(LessonStandart, id=c_lesson_lesson)
 
                         c_lesson['correspond'] = instance
@@ -1070,17 +1078,18 @@ class CorrespondApprove(
     """ Дүнгийн дүйцүүлэлтийн хүсэлт сүүлийн байдлаар батлах хэсэг """
 
     @transaction.atomic
-    def post(self, request, pk):
+    def post(self, request, pk=None):
 
         request_data = request.data
-        print("request_data", request_data)
+
         group = request_data.get('group')
         code = request_data.get('code')
-        print("group", group)
-        print("code", code)
-        correspond = get_object_or_404(StudentCorrespondScore, id=pk)
+
+        # батлагдсан хичээлүүд
+        allow_lesson_ids = request_data.get('allow_lesson_ids')
+
+        correspond = get_object_or_404(StudentCorrespondScore, pk=pk)
         group_obj = get_object_or_404(Group, pk=group)
-        payment = {}
         school = group_obj.school
 
         try:
@@ -1089,14 +1098,14 @@ class CorrespondApprove(
                 correspond.student_code = code
                 correspond.student_group = group_obj
                 correspond.save()
+
             else:
                 # TODO errors буцаана
-                return request.send_error('ERR_002', )
-            print("pk", pk)
+                return request.send_error('ERR_002', "Дүйцүүлэлт бүртгэгдээгүй")
+
             main_datas = StudentCorrespondScore.objects.filter(id=pk).values('first_name', 'last_name', 'register_num', 'phone', 'student_group', 'student_code')
 
             # Оюутан суралцаж буй төлөвт шилжүүлэх
-            # qs_register_status = StudentRegister.objects.filter(name__iexact='Суралцаж буй').last()
             qs_register_status = StudentRegister.objects.filter(name__iexact='Шилжсэн').last()
 
             for data in main_datas:
@@ -1112,25 +1121,12 @@ class CorrespondApprove(
                 data = remove_key_from_dict(data, ['student_group', 'student_code'])
 
             # Оюутны мэдээллийг шинэчлэх болон үүсгэх хэсэг хуучин оюутан байвал ангийг нь сольж байгаа
-            if not Student.objects.filter(code=c_code):
-
-                obj, new = Student.objects.create(
-                    code=code,
-                    defaults={
-                        **main_datas[0]
-                    }
-                )
-            else:
-                obj, old = Student.objects.filter(code=code).update(
+            obj, created = Student.objects.update_or_create(
+                code= code,
+                defaults={
                     **main_datas[0]
-                )
-
-            # төлбөр
-            payment = Payment.objects.filter(student=obj).first()
-            if payment:
-                payment.student=obj
-                payment.save()
-
+                }
+            )
 
             # Оюутан үүсгээд дүйцүүлэлтийн хэсэгт оюутанг үүсгээд хадгалах
             correspond.student = obj
@@ -1169,12 +1165,18 @@ class CorrespondApprove(
             correspond.is_solved = StudentRequestTutor.ALLOW
             correspond.save()
 
+            # Хичээлийг дүйцүүлэлт батлав
+            if allow_lesson_ids:
+                for ids in allow_lesson_ids:
+                    lesson = StudentCorrespondLessons.objects.filter(id=ids).update(is_allow=True)
+
         except Exception as e:
             print(e)
-            return request.send_error('ERR_002', )
+            return request.send_error('ERR_002', "Дүйцүүлэлт шалгаж үзнэ үү?" )
 
 
-        return request.send_info('INF_001')
+        return request.send_info('INF_001', 'Амжилттай батлагдлаа')
+
 class LeaveAPIView(
     generics.GenericAPIView,
     mixins.CreateModelMixin,

@@ -3796,8 +3796,11 @@ class StudentArrivedApproveAPIView(
         group_obj = Group.objects.get(pk=group)
 
         new_code = generate_student_code(group_obj.school.id, group)
+        # суралцах төрөл
+        new_status = StudentRegister.objects.filter(name__iexact='Суралцаж буй').first()
 
         datas['code'] = new_code
+        datas['status'] = new_status
         # datas['group'] = group_obj
         # datas['school'] = group_obj.school
         # datas['department'] = group_obj.department

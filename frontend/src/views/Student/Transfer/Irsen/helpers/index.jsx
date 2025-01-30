@@ -108,7 +108,9 @@ export function getColumns (currentPage, rowsPerPage, total_count, UpdateModal, 
 				crow['now_group'] = row?.group
 				crow['corres_type'] = row?.corres_type
 				return (
-					<div role="button" onClick={ () => { handleOpenModal(crow) }} >
+					<div role="button" onClick={ () => { handleOpenModal(crow) }}
+					style={{ cursor: row?.is_solved === 3 ? "not-allowed" : "pointer", opacity: row?.is_solved === 3 ? 0.5 : 1}}
+					>
 						<Badge color="light-success" pill><PlusCircle width={"15px"}/></Badge>
 					</div>
 				)
