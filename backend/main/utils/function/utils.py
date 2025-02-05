@@ -1767,6 +1767,9 @@ def pearson_corel(x, y):
     all_y = 0
 
     all_x_y = 0
+    r = 0
+    s_x = 0
+    s_y = 0
 
     for item_x in x:
         all_x = all_x + (abs(item_x - sum_x)) ** 2
@@ -1780,12 +1783,11 @@ def pearson_corel(x, y):
 
         all_x_y = all_x_y + (item_x - sum_x) * (item_y - sum_y)
 
-    s_x_y = all_x_y / (len_x - 1)
+    if all_x != 0 and all_y != 0:
+        s_x = math.sqrt((all_x) / (len_x - 1))
+        s_y = math.sqrt((all_y) / (len_y - 1))
 
-    s_x = math.sqrt((all_x) / (len_x - 1))
-    s_y = math.sqrt((all_y) / (len_y - 1))
-
-    r = all_x_y / math.sqrt((all_x * all_y))
+        r = all_x_y / math.sqrt((all_x * all_y))
 
     start_x, start_y = find_linear_regression_line(sum_y, sum_x, s_y, s_x, r, min_x)
     end_x, end_y = find_linear_regression_line(sum_y, sum_x, s_y, s_x, r, max_x)

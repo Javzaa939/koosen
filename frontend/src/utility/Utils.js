@@ -1978,3 +1978,37 @@ export const transliterate = (text) => {
 	return result;
 };
 
+
+// to print from new browser tab (or window) to avoid unstable styles from other pages that can be keeped in browser while changing pages without full page reloading
+export async function stableStylesPrintElement({ elementId, windowTitle = t('Хэвлэх'), printStyles = '' }) {
+  if (!elementId) return null
+
+  // to open new window as detached as modal (not new tab)
+  const printWindow = window.open('', '', `width=${window.innerWidth},height=${window.innerHeight}`)
+  const element = document.getElementById(elementId)
+
+  if (element) {
+    // to display images in browser print preview window, because browser print preview window not display them sometimes, e.g. if they are not loading before browser print() function, I guess...
+    await replaceImagesWithBase64(element)
+
+    const content = element.outerHTML
+
+    // to add html code
+    printWindow.document.write('<html><head>')
+    printWindow.document.write(`<title>${windowTitle}</title>`)
+    printWindow.document.write(`<style>${printStyles}</style>`)
+    printWindow.document.write('</head><body>')
+    printWindow.document.write(content)
+    printWindow.document.write('</body></html>')
+
+    printWindow.print()
+  }
+}
+
+// to get short name like LMS from learning management system
+export function getAbbreviation(name) {
+  const words = name.split(' ');
+  const abbreviation = words.map(word => word.charAt(0).toUpperCase()).join('');
+
+  return abbreviation;
+}

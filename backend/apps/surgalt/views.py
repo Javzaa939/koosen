@@ -19,7 +19,7 @@ from main.utils.file import save_file
 from main.utils.file import remove_folder
 
 from django.db import transaction
-from django.db.models import Sum, Count, Q, Subquery, OuterRef,  Value, CharField, F, Case, When, IntegerField, FloatField, Max
+from django.db.models import Sum, Count, Q, Subquery, OuterRef,  Value, CharField, F, Case, When, IntegerField, FloatField, Max, Exists
 from django.db.models.functions import Concat
 
 from django.shortcuts import get_object_or_404
@@ -6904,21 +6904,36 @@ class AnalysisApiView(
             extra_filters['lesson_season'] = season
 
         if lesson:
-            extra_filters['lesson'] = lesson
+            extra_filters['score_type__lesson_teacher__lesson'] = lesson
 
-        if teacher:
-            extra_filters['teacher'] = teacher
+        # if teacher:
+        #     extra_filters['score_type__lesson_teacher__teacher'] = teacher
 
         chart_data = (
-            ScoreRegister
+            TeacherScore
                 .objects
                 .filter(**extra_filters)
-                .values("assessment__assesment")
                 .annotate(
-                    count=Count("assessment__assesment"),
+                    total_score=Subquery(
+                        TeacherScore.objects.filter(**extra_filters)
+                        .filter(student=OuterRef('student'))
+                        .values('student')
+                        .annotate(total=Sum('score'))
+                        .values('total')
+                    )
                 )
-                .values('count', name=F("assessment__assesment"))
+                .annotate(
+                    assessment=Subquery(
+                        Score.objects.filter(score_max__gte=OuterRef('total_score'), score_min__lte=OuterRef('total_score')).values('assesment')[:1]
+                    )
+                )
+                .values("assessment", 'total_score')
+                # .annotate(
+                #     count=Count("assessment"),
+                # )
+                # .values('assessment', 'count')
         )
+        print(chart_data)
 
         data = {
             "data": [
@@ -6963,18 +6978,45 @@ class Analysis2ApiView(
             extra_filters['lesson_season'] = season
 
         if lesson:
-            extra_filters['lesson'] = lesson
+            extra_filters['score_type__lesson_teacher__lesson'] = lesson
 
         if dep:
-            extra_filters['lesson__department'] = dep
+            extra_filters['student__group__department'] = dep
 
-        if teacher:
-            extra_filters['teacher'] = teacher
+        # if teacher:
+        #     extra_filters['score_type__lesson_teacher__teacher'] = teacher
+
 
         chart_data = list(
-            ScoreRegister
+            TeacherScore
                 .objects
                 .filter(**extra_filters)
+                .annotate(
+                    is_exam=Exists(
+                        TeacherScore.objects.filter(score_type__lesson_teacher__lesson=lesson, student=OuterRef('student'), score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO)
+                    ),
+                    exam_score=(
+                        Case(
+                            When(
+                                is_exam=True,
+                                then='score',
+                            ),
+                            When(
+                                is_exam=False,
+                                then=Value(0),
+                            ),
+                            default=Value(1001), output_field=IntegerField(),
+                        )
+                    ),
+                    teach_score=Subquery(
+                        TeacherScore.objects.filter(**extra_filters)
+                        .filter(student=OuterRef('student'))
+                        .exclude(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO)
+                        .values('student')
+                        .annotate(total=Sum('score'))
+                        .values('total')
+                    )
+                )
                 .values("teach_score", "exam_score")
                 .annotate(
                     count=Count("teach_score"),

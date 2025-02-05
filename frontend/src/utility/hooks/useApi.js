@@ -380,6 +380,7 @@ function useApi(isDisplay=false) {
 				getListAll: (profession='', search='') => instance.get(`/learning/lessonstandart/list/?profession=${profession}&search=${search}`),
 				getLessonListByTeacher: (profession='', teacher='') => instance.get(`/learning/lessonstandart/list/teacher/?dep=${profession}&teacher=${teacher}`),
 				getOneProfessionList: (profession) => instance.get(`/learning/lessonstandart/list/profession/${profession}/`),
+
 				get: (limit, page, sort, search, dep_id, category_id) => instance.get(`/learning/lessonstandart/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&department=${dep_id}&category=${category_id}&schoolId=${school_id}`),
 				post: data => instance.post('/learning/lessonstandart/', data),
 				put: (data, pk) => instance.put(`/learning/lessonstandart/${pk}/`, data),
@@ -1043,6 +1044,7 @@ function useApi(isDisplay=false) {
 			// based on TeacherScore model
 			teacherScore: {
 				get: ({limit=10000000, page=1, sort='', search='', school=school_id || '', lesson='', is_fall='', data}) => instance.put(`/score/teacher-score/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&school=${school}&lesson=${lesson}&isFall=${is_fall}`, data),
+				getReportSchool: () => instance.get(`/score/teacher-score/report/school/`),
 			},
 
 			teacher: {
@@ -1050,7 +1052,7 @@ function useApi(isDisplay=false) {
 					instance.get(`/score/register/teacher/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson=${lesson}&teacher=${teacher}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&group=${group}&school=${school_id}`),
 				post: data => instance.post('/score/register/teacher/', data),
 				getStudentData:(lesson, teacher, group) => instance.get(`/score/student/list/?teacher=${teacher}&lesson=${lesson}&group=${group}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&school=${school_id}`),
-			}
+			},
 		},
 		/*Хэвлэх*/
 		print:{

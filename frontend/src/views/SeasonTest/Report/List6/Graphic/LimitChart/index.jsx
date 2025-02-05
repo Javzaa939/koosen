@@ -1,30 +1,10 @@
-import {  Bar, ChartProps, Scatter } from 'react-chartjs-2';
-import {
-    Chart as ChartJS,
-    LinearScale,
-    PointElement,
-    LineElement,
-    LogarithmicScale,
-    TimeScale,
-    CategoryScale,
-    Tooltip,
-    Legend,
-} from 'chart.js';
+import { ChartProps, Scatter } from 'react-chartjs-2';
+import { Chart, registerables } from 'chart.js';
+
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+Chart.register(...registerables, ChartDataLabels);
 
-import { COLORS, HOR_LABEL, TEACHER_IDX } from "@utility/consts";
-
-ChartJS.register(
-    LinearScale,
-    PointElement,
-    LogarithmicScale,
-    CategoryScale,
-    TimeScale,
-    LineElement,
-    Tooltip,
-    Legend,
-    ChartDataLabels,
-);
+import { COLORS, HOR_LABEL } from "@utility/consts";
 
 /**
     @param {} props

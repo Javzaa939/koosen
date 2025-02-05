@@ -1,28 +1,11 @@
-import {  Bar, ChartProps, Line } from 'react-chartjs-2';
-import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    PointElement,
-    LineElement,
-    Title,
-    Tooltip,
-    Legend
-} from 'chart.js';
+import {  Bar, ChartProps} from 'react-chartjs-2';
+import { Chart, registerables } from 'chart.js';
+
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+Chart.register(...registerables, ChartDataLabels);
 
 import { COLORS, HOR_LABEL, TEACHER_IDX } from "@utility/consts";
 
-ChartJS.register(CategoryScale,
-    LinearScale,
-    PointElement,
-    LineElement,
-    BarElement,
-    Title,
-    Tooltip,
-    ChartDataLabels,
-    Legend);
 
 /**
     @param {} props
@@ -68,8 +51,8 @@ const LimitChart = (props) => {
                         ),
                         fill: false,
                         grouped: true,
-                        backgroundColor: COLORS[idx === TEACHER_IDX ? 1 : 7],
-                        borderColor: COLORS[idx === TEACHER_IDX ? 1 : 7],
+                        backgroundColor: COLORS[idx === TEACHER_IDX ? 1 : idx === 1 ? 5 : 7],
+                        borderColor: COLORS[idx === TEACHER_IDX ? 1 : idx === 1 ? 5 : 7],
                         skipNull: false, // null байгаа датаг харуулахгүй
                         type: "line",
                     }

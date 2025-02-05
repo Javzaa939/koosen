@@ -58,7 +58,7 @@ ALLOWED_HOSTS = []
 
 GPA_ANALYSIS_1_MIN = [
     {
-        "count": 5,
+        "count": 0,
         "name": "A"
     },
     {
@@ -70,7 +70,7 @@ GPA_ANALYSIS_1_MIN = [
         "name": "C"
     },
     {
-        "count": 10,
+        "count": 15,
         "name": "D"
     },
     {
@@ -93,7 +93,7 @@ GPA_ANALYSIS_1_MAX = [
         "name": "C"
     },
     {
-        "count": 34,
+        "count": 30,
         "name": "D"
     },
     {
