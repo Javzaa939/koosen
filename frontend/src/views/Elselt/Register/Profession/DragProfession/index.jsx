@@ -334,7 +334,6 @@ const DragProfession = ({ cdatas }) => {
                                                 defaultValue={item?.state}
                                                 menuPortalTarget={document.body}
                                                 value={shalguurs.find((c) => c.id === item.state)}
-                                                placeholder={t(`-- Сонгоно уу --`)}
                                                 options={shalguurs || []}
                                                 noOptionsMessage={() => t('Хоосон байна')}
                                                 onChange={(val) => {

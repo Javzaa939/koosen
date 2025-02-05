@@ -37,4 +37,6 @@ urlpatterns = [
     path('register/challenge/<int:lesson>/', ScoreRegisterLessonAPIView.as_view()),
 
     path('teacher-score/', TeacherScoreAPIView.as_view()),
+    path('register/teacher/', TeacherScoreRegisterListAPIView.as_view()),
+    path('student/list/', TeacherScoreStudentListAPIView.as_view()),
 ]

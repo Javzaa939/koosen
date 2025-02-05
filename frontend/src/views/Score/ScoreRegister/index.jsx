@@ -1,5 +1,5 @@
 // ** React Imports
-import { Fragment, useState, useEffect } from 'react'
+import { Fragment, useState, useEffect, useContext } from 'react'
 
 import {
     Row,
@@ -17,7 +17,7 @@ import { useTranslation } from 'react-i18next'
 
 import Select from 'react-select'
 
-import { ChevronDown, Download, Search } from 'react-feather'
+import { ChevronDown, Download, Search, HelpCircle } from 'react-feather'
 
 import { useForm, Controller } from "react-hook-form";
 
@@ -27,10 +27,12 @@ import classnames from "classnames";
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
+import SchoolContext from '@context/SchoolContext'
 
 import { getPagination, ReactSelectStyles } from '@utils'
 
 import { getColumns } from './helpers'
+import DetailModal from './DetailModal'
 
 const ScoreRegister = () => {
 
@@ -40,20 +42,36 @@ const ScoreRegister = () => {
         class: '',
     }
 
+    const customStyles = {
+        headCells: {
+            style: {
+                justifyContent: 'center',
+                textAlign: 'center',
+            },
+        },
+        cells: {
+            style: {
+                justifyContent: 'flex-start',
+            },
+        },
+    };
+
     const { t } = useTranslation()
+
+    const { school_id } = useContext(SchoolContext)
 
     // ** Hook
     const { control, setValue, formState: { errors } } = useForm({});
 
-    const { Loader, isLoading, fetchData } = useLoader({isFullScreen: true})
+    const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: true })
 
-    const default_page = ['Бүгд', 10, 20, 50, 75, 100]
+    const default_page = [10, 20, 50, 75, 100]
 
     // Хуудаслалтын анхны утга
     const [currentPage, setCurrentPage] = useState(1)
 
     // Нэг хуудсанд харуулах нийт датаны тоо
-    const [rowsPerPage, setRowsPerPage] = useState(20)
+    const [rowsPerPage, setRowsPerPage] = useState(10)
 
     // Хайлт хийхэд ажиллах хувьсагч
     const [searchValue, setSearchValue] = useState('')
@@ -68,43 +86,44 @@ const ScoreRegister = () => {
     const [lesson_option, setLessonOption] = useState([])
     const [teacher_option, setTeacherOption] = useState([])
     const [group_option, setGroupOption] = useState([])
-    const [teach_score, setHaveTeachScore] = useState(false)
+    const [detail_modal, setDetailModal] = useState(false)
+    const [detail_data, setDetailModalData] = useState([])
     const [isDadlaga, setIsDadlaga] = useState(false)
 
     const [select_value, setSelectValue] = useState(values)
 
     const [valid_date, setValidDate] = useState(false)
     const [exam_date, setExamDate] = useState(false)
+    const [selectedDatas, setSelectedData] = useState([]);
+    const [toggledClearRows, setToggleClearRows] = useState(false);
 
     // API
-    const groupApi = useApi().student.group
+    const groupApi = useApi().print.score
     const teacherApi = useApi().hrms.teacher
     const lessonApi = useApi().study.lessonStandart
-    const scoreApi = useApi().score.register
+    const scoreApi = useApi().score.teacher
     const permissionApi = useApi().role.check
 
     // Хичээлийн жагсаалт
     async function getLessonOption() {
         const { success, data } = await fetchData(lessonApi.getList())
-        if(success) {
+        if (success) {
             setLessonOption(data)
         }
     }
 
     // Багшийн жагсаалт
     async function getTeacher() {
-        const lesson_id = select_value.lesson
-        const { success, data } = await fetchData(teacherApi.getTeacher(lesson_id))
-        if(success) {
+        const { success, data } = await fetchData(teacherApi.getSchoolFilter(school_id))
+        if (success) {
             setTeacherOption(data)
         }
     }
 
     // Анги бүлгийн жагсаалт
     async function getGroup() {
-        const teacher = select_value.teacher
-        const { success, data } = await fetchData(groupApi.getGroup(teacher))
-        if(success) {
+        const { success, data } = await fetchData(groupApi.getGroupList(school_id))
+        if (success) {
             setGroupOption(data)
         }
     }
@@ -112,7 +131,7 @@ const ScoreRegister = () => {
     // Хугацаа шалгах
     async function getTime() {
         const { success, data } = await fetchData(permissionApi.get(7))
-        if(success) {
+        if (success) {
             setValidDate(data)
         }
     }
@@ -120,64 +139,34 @@ const ScoreRegister = () => {
     // Хугацаа шалгах
     async function getScoreEnter() {
         const { success, data } = await fetchData(permissionApi.get(2))
-        if(success) {
+        if (success) {
             setExamDate(data)
         }
     }
 
     // Дүнгийн жагсаалт
     async function getDatas() {
-        const lesson = select_value.lesson
-        const teacher = select_value.teacher
-        const class_id = select_value.class
-
-        if(lesson && teacher)
-        {
-            const { success, data } = await fetchData(scoreApi.get(rowsPerPage, currentPage, sortField, searchValue, class_id, lesson, teacher))
-            if(success) {
-                setDatas(data?.datas?.results)
-                setHaveTeachScore(data?.have_teach_score)
-                setTotalCount(data?.datas?.count)
-            }
-        } else {
-            setDatas([])
-            setGroupOption([])
+        const { success, data } = await fetchData(scoreApi.get(rowsPerPage, currentPage, sortField, searchValue, select_value.class, select_value.lesson, select_value.teacher))
+        if (success) {
+            setDatas(data?.results)
+            setTotalCount(data?.count)
         }
-    }
 
+    }
 
     useEffect(() => {
         getDatas()
-    },[select_value, rowsPerPage, currentPage, sortField])
+    }, [select_value, rowsPerPage, currentPage, sortField])
 
     useEffect(
-        () =>
-        {
+        () => {
             getLessonOption()
             getTime()
             getScoreEnter()
+            getTeacher()
+            getGroup()
         },
         []
-    )
-
-    useEffect(
-        () =>
-        {
-            if (select_value?.lesson) {
-                getTeacher()
-            }
-        },
-        [select_value?.lesson]
-    )
-
-    useEffect(
-        () =>
-        {
-            if (select_value?.teacher) {
-                getGroup()
-            }
-        },
-        [select_value?.teacher]
     )
 
     // ** Function to handle filter
@@ -187,7 +176,7 @@ const ScoreRegister = () => {
     }
 
     function handleSort(column, sort) {
-        if(sort === 'asc') {
+        if (sort === 'asc') {
             setSort(column.header)
         } else {
             setSort('-' + column.header)
@@ -195,15 +184,13 @@ const ScoreRegister = () => {
     }
 
     // Хуудас солих үед ажиллах хэсэг
-	function handlePagination(page) {
-		setCurrentPage(page.selected + 1);
-	};
+    function handlePagination(page) {
+        setCurrentPage(page.selected + 1);
+    };
 
     // ** Function to handle per page
     function handlePerPage(e) {
-        setRowsPerPage(
-			e.target.value === "Бүгд" ? e.target.value : parseInt(e.target.value)
-		);
+        setRowsPerPage(parseInt(e.target.value))
     }
 
     // Хайх товч дарсан үед ажиллах функц
@@ -216,16 +203,36 @@ const ScoreRegister = () => {
         if (!searchValue) {
             getDatas()
         }
-    },[searchValue])
+    }, [searchValue])
 
     async function handleTeacherDownload() {
-        if (select_value.lesson && select_value.teacher) {
-            const { success, data } = await fetchData(scoreApi.download(select_value.lesson, select_value.teacher, select_value.class))
-            if(success)
-            {
-                setDatas(data)
+        if (selectedDatas) {
+            const { success, data } = await fetchData(scoreApi.post(selectedDatas))
+            if (success) {
+                handleClearRows()
+                getDatas()
             }
         }
+    }
+
+    const handleClearRows = () => {
+        setToggleClearRows(!toggledClearRows);
+      }
+
+    const handleChange = ({ selectedRows }) => {
+        const selectedData = selectedRows.map(row => ({
+            lesson: row?.lesson?.id,
+            group: row?.group?.id,
+            teacher: row?.teacher?.id,
+            date: row?.date
+        }));
+
+        setSelectedData(selectedData)
+    };
+
+    function handleDetailModal(data) {
+        setDetailModal(!detail_modal)
+        setDetailModalData(data)
     }
 
     return (
@@ -243,7 +250,7 @@ const ScoreRegister = () => {
                             control={control}
                             defaultValue=''
                             name="lesson"
-                            render={({ field: { value, onChange} }) => {
+                            render={({ field: { value, onChange } }) => {
                                 return (
                                     <Select
                                         name="lesson"
@@ -282,7 +289,7 @@ const ScoreRegister = () => {
                             control={control}
                             defaultValue=''
                             name="teacher"
-                            render={({ field: { value, onChange} }) => {
+                            render={({ field: { value, onChange } }) => {
                                 return (
                                     <Select
                                         name="teacher"
@@ -320,7 +327,7 @@ const ScoreRegister = () => {
                             control={control}
                             defaultValue=''
                             name="class"
-                            render={({ field: { value, onChange} }) => {
+                            render={({ field: { value, onChange } }) => {
                                 return (
                                     <Select
                                         name="class"
@@ -350,7 +357,14 @@ const ScoreRegister = () => {
                         ></Controller>
                     </Col>
                     <Col md={3} sm={12} className='d-flex justify-content-start align-items-center'>
-                        <Button size='sm' color='primary' className='mt-2' onClick={handleTeacherDownload} disabled={!valid_date}><Download size={15} className='me-1'/>Багшийн дүн татах</Button>
+                        <Button size='sm' color='primary' className='mt-2' onClick={handleTeacherDownload} disabled={!(selectedDatas && selectedDatas.length > 0)}  ><Download size={15} className='me-1' />Багшийн дүн татах</Button>
+                        <a href='https://drive.google.com/file/d/1eeuuD1bJxZjmqrc_sCuAg4i0OHQyGCoc/view?usp=sharing' target="_blank">
+                            <Button color='primary' container className='mx-1 mt-2' size='sm'>
+                                <HelpCircle size={15} />
+                                <span className='align-middle ms-50'>{t('Заавар')}</span>
+
+                            </Button>
+                        </a>
                     </Col>
                 </Row>
                 <Row className='justify-content-between mx-0'>
@@ -372,7 +386,7 @@ const ScoreRegister = () => {
                                         >
                                             {page}
                                         </option>
-                                ))}
+                                    ))}
                             </Input>
                         </Col>
                         <Col md={10} sm={3}>
@@ -401,7 +415,7 @@ const ScoreRegister = () => {
                         </Button>
                     </Col>
                 </Row>
-                <div className='react-dataTable react-dataTable-selectable-rows'>
+                <div className='react-dataTable react-dataTable-selectable-rows' id="datatableLeftOneRightOne">
                     <DataTable
                         noHeader
                         pagination
@@ -410,7 +424,7 @@ const ScoreRegister = () => {
                         progressPending={isLoading}
                         progressComponent={
                             <div className='my-2 d-flex align-items-center justify-content-center'>
-                                <Spinner className='me-1' color="" size='sm'/><h5>Түр хүлээнэ үү...</h5>
+                                <Spinner className='me-1' color="" size='sm' /><h5>Түр хүлээнэ үү...</h5>
                             </div>
                         }
                         noDataComponent={(
@@ -419,17 +433,23 @@ const ScoreRegister = () => {
                             </div>
                         )}
                         onSort={handleSort}
-                        columns={getColumns(currentPage, rowsPerPage === 'Бүгд' ? 1 : rowsPerPage, total_count, select_value, exam_date, isDadlaga)}
+                        highlightOnHover={true}
+                        columns={getColumns(currentPage, rowsPerPage, total_count, select_value, exam_date, isDadlaga, handleDetailModal)}
                         sortIcon={<ChevronDown size={10} />}
                         paginationPerPage={rowsPerPage}
+                        selectableRows
+                        onSelectedRowsChange={handleChange}
                         paginationDefaultPage={currentPage}
                         data={datas}
-                        paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage === 'Бүгд' ? total_count : rowsPerPage, total_count)}
+                        paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
                         fixedHeader
                         fixedHeaderScrollHeight='62vh'
+                        customStyles={customStyles}
+                        clearSelectedRows={toggledClearRows}
                     />
                 </div>
             </Card>
+            {detail_modal && <DetailModal open={detail_modal} handleModal={handleDetailModal} datas={detail_data} />}
         </Fragment>
     )
 };
