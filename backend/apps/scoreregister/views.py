@@ -1953,7 +1953,8 @@ class TeacherScoreRegisterListAPIView(
         if school:
             self.queryset = self.queryset.filter(student__group__school=school)
 
-        grouped_queryset = self.queryset.values(
+        dictinct_ids = self.queryset.filter(score_type__score_type=Lesson_teacher_scoretype.BUSAD).distinct('score_type__lesson_teacher__lesson', 'score_type__lesson_teacher__teacher').values_list('id', flat=True)
+        grouped_queryset = self.queryset.filter(id__in=dictinct_ids).values(
             'score_type__lesson_teacher__lesson',
             'score_type__lesson_teacher__teacher',
             'student__group',
@@ -2003,10 +2004,10 @@ class TeacherScoreRegisterListAPIView(
                 return request.send_error("ERR_001","Хоосон сонголт")
 
             # Багш хичээл холболт
-            lesson_teacher = Lesson_to_teacher.objects.filter(lesson=lesson, teacher=teacher).first()
+            lesson_teacher = Lesson_to_teacher.objects.filter(lesson=lesson)
 
             # Багшийн дүнгийн задаргааны төрлүүд
-            score_type_ids = Lesson_teacher_scoretype.objects.filter(lesson_teacher=lesson_teacher).values_list('id', flat=True)
+            score_type_ids = Lesson_teacher_scoretype.objects.filter(lesson_teacher__in=lesson_teacher).values_list('id', flat=True)
 
             # Багшийн дүнгийн төрөл бүрт оюутанд өгсөн оноо
             teach_score_qs = TeacherScore.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season, score_type_id__in=score_type_ids)
@@ -2038,7 +2039,7 @@ class TeacherScoreRegisterListAPIView(
 
                 obj['student'] = student_id
                 obj['teach_score'] = total_score
-                obj['exam_score'] = exam_score
+                obj['exam_score'] = round(exam_score)
                 obj['grade_letter'] = grade_letter
 
                 all_students_teach_scores.append(obj)

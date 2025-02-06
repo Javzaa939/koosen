@@ -164,9 +164,15 @@ const ScoreRegister = () => {
             getTime()
             getScoreEnter()
             getTeacher()
-            getGroup()
         },
         []
+    )
+
+    useEffect(
+        () => {
+            getGroup()
+        },
+        [school_id]
     )
 
     // ** Function to handle filter

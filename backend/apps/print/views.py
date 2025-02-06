@@ -867,17 +867,13 @@ class GroupsListFilterWithSubSchoolApiView(
 
     def get(self, request):
         school = self.request.query_params.get('school')
-        self.queryset = self.queryset.exclude(school=True) # Аль нэг салбар сургуульд хамаардаггүй багш нарыг "аних филтэр"
+        self.queryset = self.queryset.exclude(is_finish=True)
 
         if school:
             self.queryset = self.queryset.filter(school=school)
 
-            final_data = self.list(request).data
-            return request.send_data(final_data)
-
-        teach_info = self.list(request).data
-
-        return request.send_data(teach_info)
+        final_data = self.list(request).data
+        return request.send_data(final_data)
 
 
 @permission_classes([IsAuthenticated])
