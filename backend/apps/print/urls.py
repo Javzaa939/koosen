@@ -18,6 +18,7 @@ urlpatterns = [
 
     # анги дүн
     path('groupnolimit/', GroupListNoLimitAPIView.as_view()),
+    path('groupnolimit/all/', GroupListNoLimitAllAPIView.as_view()),
 
     # Ангийн жагсаалт
     path('groupsubschool/', GroupsListFilterWithSubSchoolApiView.as_view()),

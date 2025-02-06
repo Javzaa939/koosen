@@ -43,6 +43,12 @@ export default [
                 title: 'Явцын дүн тайлан',
                 icon: <Circle size={8} />,
                 navLink: "score/report/"
+            },
+            {
+                id: 'score7',
+                title: 'Дүнгийн нэгдсэн тайлан',
+                icon: <Circle size={8} />,
+                navLink: "score/report/all/"
             }
         ]
     }
