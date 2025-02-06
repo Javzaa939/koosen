@@ -1904,7 +1904,6 @@ class ReExamTeacherLessonScorePrintAPIView(
         )
 
         all_list = self.list(request).data
-        print(all_list)
 
         return request.send_data(all_list)
 
@@ -1926,6 +1925,7 @@ class TeacherScoreRegisterListAPIView(
         teacher = request.query_params.get('teacher')
         lesson = request.query_params.get('lesson')
         group = request.query_params.get('group')
+        school = request.query_params.get('school')
 
         lesson_year, lesson_season = get_active_year_season()
 
@@ -1949,6 +1949,9 @@ class TeacherScoreRegisterListAPIView(
 
         if group:
             self.queryset = self.queryset.filter(student__group=group)
+
+        if school:
+            self.queryset = self.queryset.filter(student__group__school=school)
 
         grouped_queryset = self.queryset.values(
             'score_type__lesson_teacher__lesson',
@@ -2029,7 +2032,7 @@ class TeacherScoreRegisterListAPIView(
             # Оюутны дүн нэгтэх
             for student_id in teacher_score_students:
                 obj = {}
-                total_score = teach_score_qs.filter(student=student_id).exclude(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total')
+                total_score = teach_score_qs.filter(student=student_id).filter(score_type__score_type__in=[Lesson_teacher_scoretype.BUSAD, Lesson_teacher_scoretype.QUIZ1]).aggregate(total=Sum('score')).get('total')
                 exam_score = teach_score_qs.filter(student=student_id).filter(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total')
                 grade_letter = teach_score_qs.filter(student=student_id).values_list('grade_letter', flat=True).first()
 
@@ -2120,6 +2123,7 @@ class TeacherScoreStudentListAPIView(
         teacher = request.query_params.get('teacher')
         lesson = request.query_params.get('lesson')
         group = request.query_params.get('group')
+        school = request.query_params.get('school')
 
         lesson_year, lesson_season = get_active_year_season()
 
@@ -2133,6 +2137,9 @@ class TeacherScoreStudentListAPIView(
 
         if group:
             self.queryset = self.queryset.filter(student__group=group)
+
+        if school:
+            self.queryset = self.queryset.filter(student__group__school=school)
 
         grouped_scores = self.queryset.values('student').annotate(total=Sum('score'))
 
