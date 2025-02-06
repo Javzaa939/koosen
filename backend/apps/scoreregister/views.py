@@ -2142,7 +2142,7 @@ class TeacherScoreStudentListAPIView(
             grouped_data.append({
                 'student_id': student.id,
                 'student_name': f"{student.last_name[0]}. {student.first_name} ({student.code})",
-                'total_score': score['total'],
+                'total_score': round(score['total'], 2),
             })
 
 
