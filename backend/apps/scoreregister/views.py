@@ -1907,3 +1907,243 @@ class ReExamTeacherLessonScorePrintAPIView(
         print(all_list)
 
         return request.send_data(all_list)
+
+@permission_classes([IsAuthenticated])
+class TeacherScoreRegisterListAPIView(
+    mixins.ListModelMixin,
+    generics.GenericAPIView
+):
+    """ дүн crud """
+
+    queryset = TeacherScore.objects.all()
+
+    pagination_class = CustomPagination
+
+    @has_permission(must_permissions=['lms-score-register-read'])
+    def get(self, request, pk=None):
+        """ дүн жагсаалт """
+
+        teacher = request.query_params.get('teacher')
+        lesson = request.query_params.get('lesson')
+        group = request.query_params.get('group')
+
+        lesson_year, lesson_season = get_active_year_season()
+
+        query = request.query_params.get('search', '')
+        if query:
+            self.queryset = self.queryset.filter(
+                Q(score_type__lesson_teacher__lesson__name__icontains=query) |
+                Q(score_type__lesson_teacher__lesson__code__icontains=query) |
+                Q(score_type__lesson_teacher__teacher__first_name__icontains=query) |
+                Q(score_type__lesson_teacher__teacher__last_name__icontains=query) |
+                Q(student__group__name__icontains=query)
+            )
+
+        self.queryset = self.queryset.filter(lesson_year=lesson_year, lesson_season=lesson_season)
+
+        if teacher:
+            self.queryset = self.queryset.filter(score_type__lesson_teacher__teacher=teacher)
+
+        if lesson:
+            self.queryset = self.queryset.filter(score_type__lesson_teacher__lesson=lesson)
+
+        if group:
+            self.queryset = self.queryset.filter(student__group=group)
+
+        grouped_queryset = self.queryset.values(
+            'score_type__lesson_teacher__lesson',
+            'score_type__lesson_teacher__teacher',
+            'student__group',
+            'is_approved',
+            'approved_date',
+        ).annotate(
+            student_count=Count('student'),
+        )
+
+        page = self.paginate_queryset(grouped_queryset)
+        if page is not None:
+            result = [
+                {
+                    'lesson': LessonStandart.objects.filter(id=item['score_type__lesson_teacher__lesson']).values('code','name','id').first(),
+                    'teacher': Teachers.objects.filter(id=item['score_type__lesson_teacher__teacher']).values('first_name','last_name','id').first(),
+                    'group': Group.objects.filter(id=item['student__group']).values('name','id').first(),
+                    'student_count': item['student_count'],
+                    'is_approved':item['is_approved'],
+                    'approved_date': item['approved_date'].date() if isinstance(item['approved_date'], datetime) else datetime.today().date(),
+                }
+                for item in page
+            ]
+            paginated_response = self.get_paginated_response(result)
+
+            return request.send_data(paginated_response.data)
+
+    def post(self, request):
+
+        student_queryset = Student.objects.all()
+
+        data = request.data
+
+        school_id = self.request.query_params.get('school')
+
+        lesson_year, lesson_season = get_active_year_season()
+
+
+        for item in data:
+            all_students_teach_scores = []
+            have_score_students = []
+
+            teacher = item['teacher']
+            lesson = item['lesson']
+            group = item['group']
+
+            if not teacher and not lesson:
+                return request.send_error("ERR_001","Хоосон сонголт")
+
+            # Багш хичээл холболт
+            lesson_teacher = Lesson_to_teacher.objects.filter(lesson=lesson, teacher=teacher).first()
+
+            # Багшийн дүнгийн задаргааны төрлүүд
+            score_type_ids = Lesson_teacher_scoretype.objects.filter(lesson_teacher=lesson_teacher).values_list('id', flat=True)
+
+            # Багшийн дүнгийн төрөл бүрт оюутанд өгсөн оноо
+            teach_score_qs = TeacherScore.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season, score_type_id__in=score_type_ids)
+
+            # Анги байвал тухайн ангийн оюутны дүнг татна.
+            if group:
+                teach_score_qs = teach_score_qs.filter(student__group=group)
+
+            # Тухайн хичээлийн жилд дүн оруулсан хичээлүүд биш бол
+            check_score_qs = TeacherScore.objects.filter(student__group=group, lesson_year=lesson_year, lesson_season=lesson_season)
+            checked_lesson_ids = check_score_qs.values_list('score_type__lesson_teacher__lesson', flat=True).distinct()
+            if lesson not in list(checked_lesson_ids):
+                continue
+
+            teach_score_qs.update(
+                is_approved=True,
+                approved_date=datetime.now()
+            )
+
+            # Дүнтэй оюутнууд
+            teacher_score_students = teach_score_qs.values_list('student', flat=True).distinct('student')
+
+            # Оюутны дүн нэгтэх
+            for student_id in teacher_score_students:
+                obj = {}
+                total_score = teach_score_qs.filter(student=student_id).exclude(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total')
+                exam_score = teach_score_qs.filter(student=student_id).filter(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total')
+                grade_letter = teach_score_qs.filter(student=student_id).values_list('grade_letter', flat=True).first()
+
+                obj['student'] = student_id
+                obj['teach_score'] = total_score
+                obj['exam_score'] = exam_score
+                obj['grade_letter'] = grade_letter
+
+                all_students_teach_scores.append(obj)
+
+            # Тухайн хуваарь дээр хичээл үзэж байгаа бүх оюутнууд
+            all_student = get_lesson_choice_student(lesson, teacher, school_id, lesson_year, lesson_season, group)
+
+            student_queryset = student_queryset.filter(id__in=all_student)
+
+            # Хичээлийн хуваарьтай бүх оюутнууд
+            all_timetable_student_ids = student_queryset.values_list('id', flat=True)
+
+            with transaction.atomic():
+
+                # Багшийн дүн оруулсан оюутны дүнг үүсгэнэ
+                for student_teach_score in all_students_teach_scores:
+                    student_id = student_teach_score.get('student')
+                    student_teacher_score = student_teach_score.get('teach_score') or 0
+                    student_exam_score = student_teach_score.get('exam_score') or 0
+                    grade_letter = student_teach_score.get('grade_letter') or None
+
+                    have_score_students.append(student_id)
+
+                    # Өмнө нь дүн орсон эсэхийг шалгах
+                    student_score = ScoreRegister.objects.filter(lesson_year=lesson_year, student=student_id, lesson=lesson)
+
+                    # Үсгэн үнэлгээ
+                    student_score_total = student_teacher_score + student_exam_score
+                    student_score_total = round(student_score_total, 2)
+                    assessment = Score.objects.filter(score_max__gte=student_score_total, score_min__lte=student_score_total).values('id', 'assesment').first()
+
+                    student = Student.objects.filter(id=student_id).first()
+
+                    # Өмнө нь дүн орчихсон байвал update хийнэ
+                    if student_score:
+                         student_score.update(
+                            teach_score=student_teacher_score if student_teacher_score else 0,
+                            exam_score=student_exam_score if student_exam_score else 0,
+                            assessment_id=assessment['id'] if assessment else None,
+                            grade_letter=GradeLetter.objects.get(pk=grade_letter) if grade_letter else None,
+                            status=ScoreRegister.TEACHER_WEB,
+                        )
+                    else:
+                        ScoreRegister.objects.create(
+                            lesson_year=lesson_year,
+                            lesson_season_id=lesson_season,
+                            lesson_id=lesson,
+                            student_id=student_id,
+                            grade_letter=GradeLetter.objects.get(pk=grade_letter) if grade_letter else None,
+                            teach_score=student_teacher_score if student_teacher_score else 0,
+                            exam_score=student_exam_score if student_exam_score else 0,
+                            teacher_id=teacher,
+                            assessment_id=assessment['id'] if assessment else None,
+                            status=ScoreRegister.TEACHER_WEB,
+                            school=student.school if student else None
+                        )
+
+                # Дүнгүй оюутнууд
+                not_score_students = list(set(all_timetable_student_ids) - set(have_score_students))
+
+                # Багшаас дүн аваагүй ч хуваарьт байгаа оюутнуудыг create хийх
+                if not_score_students:
+                    # OTU дээр нэг удаа буруу дүн татсанаас болж бичигдсэн код
+                    delete_students = ScoreRegister.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season, student__in=not_score_students, lesson=lesson)
+                    if len(delete_students) > 0:
+                        delete_students.delete()
+
+        return request.send_info("INF_001")
+
+@permission_classes([IsAuthenticated])
+class TeacherScoreStudentListAPIView(
+    mixins.ListModelMixin,
+    generics.GenericAPIView
+):
+    """ дүн crud """
+
+    queryset = TeacherScore.objects.all()
+
+    def get(self, request, pk=None):
+        " дүн жагсаалт "
+
+        teacher = request.query_params.get('teacher')
+        lesson = request.query_params.get('lesson')
+        group = request.query_params.get('group')
+
+        lesson_year, lesson_season = get_active_year_season()
+
+        self.queryset = self.queryset.filter(lesson_year=lesson_year, lesson_season=lesson_season)
+
+        if teacher:
+            self.queryset = self.queryset.filter(score_type__lesson_teacher__teacher=teacher)
+
+        if lesson:
+            self.queryset = self.queryset.filter(score_type__lesson_teacher__lesson=lesson)
+
+        if group:
+            self.queryset = self.queryset.filter(student__group=group)
+
+        grouped_scores = self.queryset.values('student').annotate(total=Sum('score'))
+
+        grouped_data = []
+        for score in grouped_scores:
+            student = Student.objects.get(id=score['student'])
+            grouped_data.append({
+                'student_id': student.id,
+                'student_name': f"{student.last_name[0]}. {student.first_name} ({student.code})",
+                'total_score': round(score['total'], 2),
+            })
+
+
+        return request.send_data(grouped_data)

@@ -2880,6 +2880,13 @@ class TeacherScore(models.Model):
     score_type = models.ForeignKey(Lesson_teacher_scoretype, on_delete=models.PROTECT)
     grade_letter = models.ForeignKey(GradeLetter, on_delete=models.SET_NULL, null=True, verbose_name="Үсгэн үнэлгээ")
 
+    is_approved = models.BooleanField(default=False, verbose_name="Баталгаажсан эсэх")
+    approved_date =models.DateTimeField(null=True, blank=True, verbose_name="Баталгаажсан огноо")
+
+    created_user = models.ForeignKey(User, related_name='user_cr_user', on_delete=models.SET_NULL, null=True, verbose_name="Бүртгэсэн хэрэглэгч")
+    updated_user = models.ForeignKey(User, related_name='user_up_user', on_delete=models.SET_NULL, null=True, verbose_name="Зассан хэрэглэгч")
+
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

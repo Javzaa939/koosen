@@ -28,7 +28,7 @@ export default [
             },
             {
                 id: 'score4',
-                title: 'Өмнөх улирлын дүн',
+                title: 'Дүнгийн нэгтгэл',
                 icon: <Circle size={8} />,
                 navLink: "score/preview-score/"
             },

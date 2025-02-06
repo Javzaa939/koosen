@@ -1045,7 +1045,14 @@ function useApi(isDisplay=false) {
 			teacherScore: {
 				get: ({limit=10000000, page=1, sort='', search='', school=school_id || '', lesson='', is_fall='', data}) => instance.put(`/score/teacher-score/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&school=${school}&lesson=${lesson}&isFall=${is_fall}`, data),
 				getReportSchool: () => instance.get(`/score/teacher-score/report/school/`),
-			}
+			},
+
+			teacher: {
+				get: ( limit, page, sort, search, group, lesson, teacher) =>
+					instance.get(`/score/register/teacher/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&lesson=${lesson}&teacher=${teacher}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&group=${group}&school=${school_id}`),
+				post: data => instance.post('/score/register/teacher/', data),
+				getStudentData:(lesson, teacher, group) => instance.get(`/score/student/list/?teacher=${teacher}&lesson=${lesson}&group=${group}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&school=${school_id}`),
+			},
 		},
 		/*Хэвлэх*/
 		print:{
