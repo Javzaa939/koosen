@@ -2130,8 +2130,8 @@ class TeacherScoreStudentListAPIView(
 
         self.queryset = self.queryset.filter(lesson_year=lesson_year, lesson_season=lesson_season)
 
-        if teacher:
-            self.queryset = self.queryset.filter(score_type__lesson_teacher__teacher=teacher)
+        # if teacher:
+        #     self.queryset = self.queryset.filter(score_type__lesson_teacher__teacher=teacher)
 
         if lesson:
             self.queryset = self.queryset.filter(score_type__lesson_teacher__lesson=lesson)
