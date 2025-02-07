@@ -27,6 +27,7 @@ export default function PrintNationalAttachment()
     const [ datas, setDatas ] = useState([])
     // const rowSum = tableRowCount?.reduce((partialSum, a) => partialSum + a, 0);
     const [ tableRowCount, setTableRowCount ] = useState([])
+    const [ tableRowData, setRowData ] = useState({})
     const [ rowSum, setRowSum ] = useState(0)
 
     const [width, setWidth] = useState(
@@ -52,6 +53,7 @@ export default function PrintNationalAttachment()
             setTableRowCount(values[2]?.data?.row_count ? values[2]?.data?.row_count : [])
             var sum_count = values[2]?.data?.row_count?.reduce((partialSum, a) => partialSum + a, 0);
             setRowSum(sum_count)
+            setRowData(values[2]?.data)
         })
     }
 
@@ -391,7 +393,7 @@ export default function PrintNationalAttachment()
                 className={`h-100 p-0 d-flex py-1 flex-column justify-content-between align-items-start position-relative ${isPageBreak && 'page-break'} ms-2`}
                 style={{ fontFamily: 'mongolianScript', flex: 1, left: printDatas?.student?.group?.degree?.degree_code !== 'D' ? '30px' : '' }}
             >
-                <div style={{ height: printDatas?.isCenter ? '98%' : '49.5%' }}  className={`${printDatas.isCenter ? 'center-table' : 'not-center-table' }`} >
+                <div style={{ height: tableRowData?.is_center ? '98%' : '49.5%' }}  className={`${tableRowData?.is_center ? 'center-table' : 'not-center-table' }`} >
                     <table id='tableNational1' className='text-center w-100 d-none parent_table' style={{ writingMode: 'vertical-lr', marginBottom: '1px', height: '100%' }} >
                         <thead>
                             <tr style={{ fontSize: '9px' }} >
@@ -407,7 +409,7 @@ export default function PrintNationalAttachment()
                     </table>
                 </div>
 
-                <div style={{ height: printDatas?.isCenter ? '98%' : '49.5%' }} className={`${printDatas.isCenter ? 'center-table' : 'not-center-table' }`} >
+                <div style={{ height: tableRowData?.is_center ? '98%' : '49.5%' }} className={`${tableRowData?.is_center ? 'center-table' : 'not-center-table' }`} >
                     <table id='tableNational2' className='text-center w-100 d-none parent_table' style={{ writingMode: 'vertical-lr', marginBottom: '1px', height: '100%' }} >
                         <thead>
                             <tr style={{ fontSize: '9px' }} >

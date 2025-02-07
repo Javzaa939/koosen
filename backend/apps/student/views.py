@@ -2576,16 +2576,11 @@ class GraduationWorkAPIView(
     def post(self, request):
         " Төгсөлтийн ажил шинээр үүсгэх "
 
-        # transaction savepoint зарлах нь хэрэв алдаа гарвад roll back хийнэ
-        sid = transaction.savepoint()
-
         data = request.data
         lesson_ids = data['lesson']
+        if 'lesson' in data:
+            del data['lesson']
 
-        if lesson_ids and None in lesson_ids:
-            return request.send_error('ERR_002', 'Дипломын хичээл сонгоно уу')
-
-        del data['lesson']
         student = data.get("student")
 
         graduate_info = self.queryset.filter(student=student)
@@ -2595,12 +2590,12 @@ class GraduationWorkAPIView(
         try:
             serializer = self.serializer_class(data=data, many=False)
             if not serializer.is_valid():
-                transaction.savepoint_rollback(sid)
                 return request.send_error_valid(serializer.errors)
 
             created_qs = self.create(request).data
-            created_qs = self.queryset.get(id=created_qs.get("id"))
-            created_qs.lesson.add(*lesson_ids)
+            if lesson_ids:
+                created_qs = self.queryset.get(id=created_qs.get("id"))
+                created_qs.lesson.add(*lesson_ids)
 
         except Exception as e:
             print(e)

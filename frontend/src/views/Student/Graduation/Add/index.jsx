@@ -150,7 +150,7 @@ const Createmodal = ({ open, handleModal, refreshDatas, select_value }) => {
         cdata['lesson_season'] = cseason_id
         cdata['lesson_type'] = radio === 'diploma' ? 1 : 2
 
-        let selectLesson_ids = radio === 'diploma' ? selectLessonIds ? [selectLessonIds] : [] : selectLessonIds
+        let selectLesson_ids = radio === 'diploma' ? selectLessonIds : []
         let allSelectLessonIds = []
 
         for (let selectLessonId of selectLesson_ids)
