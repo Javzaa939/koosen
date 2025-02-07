@@ -298,8 +298,8 @@ class GroupListNoLimitAPIView(
         if lesson_season:
             qs = qs.filter(lesson_season=lesson_season)
 
-        score_qs = qs.filter(student__group=group, is_delete=False).distinct('student')
-        group_lessons = qs.filter(student__group=group, is_delete=False).distinct('lesson').values_list('lesson', flat=True)
+        score_qs = qs.filter(student__group=group, is_delete=False, student__status__name__icontains='Суралцаж буй').distinct('student')
+        group_lessons = qs.filter(student__group=group, is_delete=False, student__status__name__icontains='Суралцаж буй').distinct('lesson').values_list('lesson', flat=True)
 
         all_data = []
         result_datas = []
