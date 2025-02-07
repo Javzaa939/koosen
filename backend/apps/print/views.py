@@ -1,7 +1,7 @@
 from datetime import datetime
 from dateutil import parser
 from django.db import transaction
-from django.db.models import F, Subquery, OuterRef, Count, Value, CharField
+from django.db.models import F, Subquery, OuterRef, Count, Value, CharField,Q
 from django.db.models.functions import Substr,Concat
 from collections import defaultdict
 
@@ -9,6 +9,7 @@ from lms.models import Student, TimeTable_to_group, TimeTable_to_student
 from lms.models import TimeTable
 from lms.models import GraduationWork
 from lms.models import ScoreRegister
+from lms.models import StudentRegister
 from lms.models import GradeLetter
 from lms.models import LessonStandart, Season
 from lms.models import Group, Score, ProfessionDefinition, CalculatedGpaOfDiploma
@@ -1057,6 +1058,11 @@ class GroupListNoLimitAllAPIView(
 
     @has_permission(must_permissions=['lms-print-score-read'])
     def get(self, request):
+
+        status = StudentRegister.objects.filter(Q(Q(name__contains='Суралцаж буй') | Q(code=1))).first()
+
+        if status:
+            self.queryset = self.queryset.filter(student__status=status)
 
         chosen_year = request.query_params.getlist('lesson_year')
         chosen_season = request.query_params.get('lesson_season')

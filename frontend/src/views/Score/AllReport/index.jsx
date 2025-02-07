@@ -474,7 +474,7 @@ console.log(select_value.lesson_year)
                 <CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
                     <CardTitle tag="h4">{t('Дүнгийн нэгдсэн тайлан')}</CardTitle>
                 </CardHeader>
-                <Row className='mx-0 mt-50'>
+                <Row className='mx-0 mt-50 ps-1'>
                     <Col md={2}>
                         <Label className="form-label" for="profession">
                             {t('Хөтөлбөр')}
