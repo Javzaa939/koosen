@@ -2033,8 +2033,8 @@ class TeacherScoreRegisterListAPIView(
             # Оюутны дүн нэгтэх
             for student_id in teacher_score_students:
                 obj = {}
-                total_score = teach_score_qs.filter(student=student_id).filter(score_type__score_type__in=[Lesson_teacher_scoretype.BUSAD, Lesson_teacher_scoretype.QUIZ1]).aggregate(total=Sum('score')).get('total')
-                exam_score = teach_score_qs.filter(student=student_id).filter(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total')
+                total_score = teach_score_qs.filter(student=student_id).filter(score_type__score_type__in=[Lesson_teacher_scoretype.BUSAD, Lesson_teacher_scoretype.QUIZ1]).aggregate(total=Sum('score')).get('total') or 0
+                exam_score = teach_score_qs.filter(student=student_id).filter(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total') or 0
                 grade_letter = teach_score_qs.filter(student=student_id).values_list('grade_letter', flat=True).first()
 
                 obj['student'] = student_id
