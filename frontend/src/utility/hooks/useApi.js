@@ -1079,12 +1079,12 @@ function useApi(isDisplay=false) {
 					instance.get(`/print/group/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&department=${department}&group=${group}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&school=${school_id}&is_season=${radio}&chosen_year=${chosenYear}&chosen_season=${chosenSeason}&lesson=${chosenLesson}`),
 				getListNoLimit:(group, radio, chosenYear, chosenSeason) =>
 					instance.get(`/print/groupnolimit/?group=${group}&lesson_year=${cyear_name}&lesson_season=${cseason_id}&is_season=${radio}&chosen_year=${chosenYear}&chosen_season=${chosenSeason}`),
-				getPrint:(profession,group,lesson_year) => {
+				getPrint:(profession,group,lesson_year,lesson_season) => {
 					var years = ''
 					for(var i of lesson_year) {
 						years += `&lesson_year=${i}`
 					}
-					return instance.get(`/print/groupnolimit/all/?profession=${profession}&group=${group}${years}`)
+					return instance.get(`/print/groupnolimit/all/?profession=${profession}&season=${lesson_season}&group=${group}${years}`)
 				},
 
 				// Ангийн жагсаалт авах api

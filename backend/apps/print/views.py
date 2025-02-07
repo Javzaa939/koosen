@@ -1059,10 +1059,16 @@ class GroupListNoLimitAllAPIView(
     def get(self, request):
 
         chosen_year = request.query_params.getlist('lesson_year')
+        chosen_season = request.query_params.get('lesson_season')
         profession = request.query_params.get('profession')
 
         if chosen_year:
             self.queryset = self.queryset.filter(lesson_year__in=chosen_year)
+
+        if chosen_season:
+            self.queryset = self.queryset.filter(lesson_season=lesson_season)
+
+        profession_name = ''
 
         group = request.query_params.get('group') # 45
         qs = self.queryset.annotate(
@@ -1094,7 +1100,9 @@ class GroupListNoLimitAllAPIView(
         seasons = []
 
         group_name = Group.objects.filter(id=group).values('name').first().get('name', '')
-        proession_name = ProfessionDefinition.objects.filter(id=profession).values('name').first().get('name','')
+
+        if profession:
+            profession_name = ProfessionDefinition.objects.filter(id=profession).values('name').first().get('name','')
 
         # region to count "assessment", "grade_letter" columns
         assessment_dict = {
@@ -1343,8 +1351,8 @@ class GroupListNoLimitAllAPIView(
                                 total_kr = total_kr + kredit
 
                         # Голч оноо, голч дүн
-                        total_gpa = round(total_gpa_onoo / total_kr_with_assessments, 1)
-                        avg_score = round(total_score_onoo / total_kr_with_assessments, 1)
+                        total_gpa = round(total_gpa_onoo / total_kr_with_assessments, 1) if total_kr_with_assessments != 0 else 0
+                        avg_score = round(total_score_onoo / total_kr_with_assessments, 1) if total_kr_with_assessments != 0 else 0
 
                 # Сурагчын бодогдсон мэдээллийг үндсэн хүснэгт рүү нэгтгэх хэсэг
                 before_lessons_data.append(
@@ -1705,7 +1713,7 @@ class GroupListNoLimitAllAPIView(
             'seasons': seasons_list,
             'datas': merged_rows,
             'lessons_length': sum(year_season["count"] for year_season in seasons_list),
-            'group_name':proession_name + ' ' +  group_name
+            'group_name':profession_name + ' ' +  group_name
         }
 
         return request.send_data(dataz)

@@ -30,6 +30,7 @@ const AllReport = () => {
         profession: '',
         lesson_year: '',
         group: '',
+        lesson_season: ''
     }
 
     const { t } = useTranslation()
@@ -104,7 +105,7 @@ const AllReport = () => {
     }, [datas]);
 
     async function getDatas() {
-        const { success, data } = await allFetch(getListApi.getPrint(select_value.profession, select_value.group, select_value.lesson_year))
+        const { success, data } = await allFetch(getListApi.getPrint(select_value.profession, select_value.group, select_value.lesson_year, select_value.lesson_season))
         if (success && data?.datas.length > 0) {
             var one_data = data?.datas[0]
             var headers = []
@@ -465,7 +466,7 @@ const AllReport = () => {
         worksheet['B3'].v = datas?.group_name ? `Анги бүлгийн нэр: ${datas?.group_name}` : ''
         writeFile(workbook, 'Ангийн нийт дүн.xlsx');
     }
-
+console.log(select_value.lesson_year)
     return (
         <Fragment>
             <Card>
@@ -474,7 +475,7 @@ const AllReport = () => {
                     <CardTitle tag="h4">{t('Дүнгийн нэгдсэн тайлан')}</CardTitle>
                 </CardHeader>
                 <Row className='mx-0 mt-50'>
-                    <Col md={3}>
+                    <Col md={2}>
                         <Label className="form-label" for="profession">
                             {t('Хөтөлбөр')}
                         </Label>
@@ -548,7 +549,7 @@ const AllReport = () => {
                             getOptionLabel={(option) => option.name}
                         />
                     </Col>
-                    <Col sm={6} md={3} className='mb-1 ms-1'>
+                    <Col sm={6} md={2} className='mb-1 ms-1'>
                         <Label className="form-label me-1" for="building">
                             {t('Хичээлийн жил')}
                         </Label>
@@ -582,9 +583,46 @@ const AllReport = () => {
                             getOptionLabel={(option) => option.name}
                         />
                     </Col>
+                    <Col sm={6} md={2} className='mb-1 ms-1'>
+                        <Label className="form-label me-1" for="building">
+                            {t('Хичээлийн улирал')}
+                        </Label>
+                        <Select
+                            name="lesson_season"
+                            id="lesson_season"
+                            classNamePrefix='select'
+                            isClearable
+                            className={'react-select'}
+                            isLoading={isLoading}
+                            options={yearOption || []}
+                            placeholder={t('-- Сонгоно уу --')}
+                            noOptionsMessage={() => t('Хоосон байна')}
+                            styles={ReactSelectStyles}
+                            value={seasons.find((e) => e.id === select_value.lesson_season)}
+                            onChange={(val) => {
+                                if (val?.id) {
+                                    setSelectValue(current => {
+                                        return {
+                                            ...current,
+                                            lesson_season: val?.id
+                                        }
+                                    })
+                                } else {
+                                    setSelectValue(current => {
+                                        return {
+                                            ...current,
+                                            lessons_season: ''
+                                        }
+                                    })
+                                }
+                            }}
+                            getOptionValue={(option) => option.id}
+                            getOptionLabel={(option) => option.name}
+                        />
+                    </Col>
                     <Col sm={6} md={3} className='d-flex gap-5 py-1 ms-3'>
-                        <Button color="primary" onClick={() => getDatas()} disabled={!(select_value.group && select_value.lesson_year && select_value.profession)}><FileText size={20} /> Сонгох</Button>
-                        <Button color="primary" onClick={() => convertV2()} disabled={datas.length === 0}><FileText size={20} /> Excel Татах</Button>
+                        <Button color="primary" onClick={() => getDatas()} size='sm' disabled={!(select_value.group && select_value.lesson_year)}><FileText size={20} /> Хайх</Button>
+                        <Button color="primary" onClick={() => convertV2()} size='sm' disabled={datas.length === 0}><FileText size={20} /> Excel Татах</Button>
                     </Col>
                 </Row>
                 {
