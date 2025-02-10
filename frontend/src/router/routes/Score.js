@@ -42,7 +42,7 @@ const Score = [
         element: <Report />
     },
     {
-        path: 'score/report/all/',
+        path: 'score/all/',
         element: <AllReport />
     },
 ]

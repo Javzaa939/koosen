@@ -28,28 +28,28 @@ export default [
             },
             {
                 id: 'score4',
-                title: 'Дүнгийн нэгтгэл',
+                title: 'Нийт дүн',
                 icon: <Circle size={8} />,
                 navLink: "score/preview-score/"
             },
             {
                 id: 'score5',
+                title: 'Дүнгийн нэгдсэн тайлан',
+                icon: <Circle size={8} />,
+                navLink: "score/all/"
+            },
+            {
+                id: 'score6',
                 title: 'Явцын оноо',
                 icon: <Circle size={8} />,
                 navLink: "score/progress-score/"
             },
             {
-                id: 'score6',
+                id: 'score7',
                 title: 'Явцын дүн тайлан',
                 icon: <Circle size={8} />,
                 navLink: "score/report/"
             },
-            {
-                id: 'score7',
-                title: 'Дүнгийн нэгдсэн тайлан',
-                icon: <Circle size={8} />,
-                navLink: "score/report/all/"
-            }
         ]
     }
 ]

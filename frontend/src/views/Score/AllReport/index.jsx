@@ -550,7 +550,7 @@ console.log(select_value.lesson_year)
                         />
                     </Col>
                     <Col sm={6} md={2} className='mb-1 ms-1'>
-                        <Label className="form-label me-1" for="building">
+                        <Label className="form-label me-1" for="lesson_year">
                             {t('Хичээлийн жил')}
                         </Label>
                         <Select
@@ -584,7 +584,7 @@ console.log(select_value.lesson_year)
                         />
                     </Col>
                     <Col sm={6} md={2} className='mb-1 ms-1'>
-                        <Label className="form-label me-1" for="building">
+                        <Label className="form-label me-1" for="lesson_season">
                             {t('Хичээлийн улирал')}
                         </Label>
                         <Select
@@ -594,7 +594,7 @@ console.log(select_value.lesson_year)
                             isClearable
                             className={'react-select'}
                             isLoading={isLoading}
-                            options={yearOption || []}
+                            options={seasons || []}
                             placeholder={t('-- Сонгоно уу --')}
                             noOptionsMessage={() => t('Хоосон байна')}
                             styles={ReactSelectStyles}
@@ -617,12 +617,12 @@ console.log(select_value.lesson_year)
                                 }
                             }}
                             getOptionValue={(option) => option.id}
-                            getOptionLabel={(option) => option.name}
+                            getOptionLabel={(option) => option.season_name}
                         />
                     </Col>
                     <Col sm={6} md={3} className='d-flex gap-5 py-1 ms-3'>
-                        <Button color="primary" onClick={() => getDatas()} size='sm' disabled={!(select_value.group && select_value.lesson_year)}><FileText size={20} /> Хайх</Button>
-                        <Button color="primary" onClick={() => convertV2()} size='sm' disabled={datas.length === 0}><FileText size={20} /> Excel Татах</Button>
+                        <Button color="primary" onClick={() => getDatas()} size='sm' disabled={!(select_value.group && select_value.lesson_year)}><FileText size={15} /> Хайх</Button>
+                        <Button color="primary" onClick={() => convertV2()} size='sm' disabled={datas.length === 0}><FileText size={15} /> Excel Татах</Button>
                     </Col>
                 </Row>
                 {
