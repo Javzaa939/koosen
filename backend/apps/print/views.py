@@ -1153,7 +1153,7 @@ class GroupListNoLimitAllAPIView(
 
         # region to count "grade_letter" column in right side
         # region to specify order to sort
-        order = ["TC","W","E","R","CR","S"]
+        order = ["WF","W","E","R","CR","S"]
         order_map = {value: index for index, value in enumerate(order)}
 
         # to place unspecified values at the end
@@ -1331,9 +1331,9 @@ class GroupListNoLimitAllAPIView(
                                     if score['grade_letter__letter'] != 'S':
                                         chanar = 0
                                         total_kr_with_assessments += kredit
-                                        score_qs = Score.objects.filter(score_max__gte=total, score_min__lte=total).first()
-                                        if score_qs:
-                                            chanar = kredit * score_qs.gpa
+                                        score_assessment_qs = Score.objects.filter(score_max__gte=total, score_min__lte=total).first()
+                                        if score_assessment_qs:
+                                            chanar = kredit * score_assessment_qs.gpa
 
                                         total_score = total * kredit
 
@@ -1503,110 +1503,38 @@ class GroupListNoLimitAllAPIView(
         # endregion
 
         # region footer rows
-        if False or True:
-            footer_rows = []
-            col_count = 0
+        footer_rows = []
+        col_count = 0
 
-            # Хичээл болгоны үнэлгээний нийлбэрийг мөр дата хэлбэрээр үндсэн хүснэгт рүү оруулах хэсэг
-            for lesson_year in lesson_years:
-                for lesson_season in lesson_seasons:
-                    ys_full_name = f'{lesson_year}-{lesson_season}'
+        # Хичээл болгоны үнэлгээний нийлбэрийг мөр дата хэлбэрээр үндсэн хүснэгт рүү оруулах хэсэг
+        for lesson_year in lesson_years:
+            for lesson_season in lesson_seasons:
+                ys_full_name = f'{lesson_year}-{lesson_season}'
 
-                    for lesson_ind, lesson in enumerate(group_lessons):
-                        # Хичээлийн нэрийг хайж авах хэсэг
-                        lesson_standart = lesson_qs.filter(id=lesson).first()
-                        lesson_standart_name = lesson_standart__code_name(lesson_standart["code"], lesson_standart["name"]) if lesson_standart else ""
+                for lesson_ind, lesson in enumerate(group_lessons):
+                    # Хичээлийн нэрийг хайж авах хэсэг
+                    lesson_standart = lesson_qs.filter(id=lesson).first()
+                    lesson_standart_name = lesson_standart__code_name(lesson_standart["code"], lesson_standart["name"]) if lesson_standart else ""
 
-                        # region to skip columns without any value
-                        is_all_assessments_empty = True
+                    # region to skip columns without any value
+                    is_all_assessments_empty = True
 
-                        for assessment_key in assessment_dict:
-                            if assessment_lesson_list[lesson_ind][assessment_key][lesson_year][lesson_season] == "-" or assessment_lesson_list[lesson_ind][assessment_key][lesson_year][lesson_season] > 0:
-                                is_all_assessments_empty = False
-                        # endregion
+                    for assessment_key in assessment_dict:
+                        if assessment_lesson_list[lesson_ind][assessment_key][lesson_year][lesson_season] == "-" or assessment_lesson_list[lesson_ind][assessment_key][lesson_year][lesson_season] > 0:
+                            is_all_assessments_empty = False
+                    # endregion
 
-                        if not is_all_assessments_empty:
-                            col_count += 1
-                            total_students_count = 0
-                            next_rows_start_index = 0
+                    if not is_all_assessments_empty:
+                        col_count += 1
+                        total_students_count = 0
+                        next_rows_start_index = 0
 
-                            # to add assessment rows
-                            for row_ind, key in enumerate(assessment_dict):
-                                # to add first columns
-                                if col_count == 1 and row_ind >= len(footer_rows):
-                                    footer_rows.append({
-                                        'Овог': key,
-                                        'Нэр':'',
-                                        'Оюутны код':'',
-                                        'Регистерийн дугаар':''
-                                    })
-
-                                # to add lesson columns
-                                footer_rows[row_ind].update({
-                                    f'{ys_full_name}_-_-_{lesson_standart_name}': assessment_lesson_list[lesson_ind][key][lesson_year][lesson_season],
-                                    'Судалсан кр': '',
-                                    'Тооцсон кр': '',
-                                    'A+': '',
-                                    'A': '',
-                                    'B+': '',
-                                    'B': '',
-                                    'C+': '',
-                                    'C': '',
-                                    'D': '',
-                                    'F': '',
-                                    **{letter: '' for letter in grade_letters_list},
-                                    'Хичээлийн тоо': '',
-                                    'Амжилт': '',
-                                    'Чанар': '',
-                                })
-
-                                if assessment_lesson_list[lesson_ind][key][lesson_year][lesson_season] != '-':
-                                    total_students_count += assessment_lesson_list[lesson_ind][key][lesson_year][lesson_season]
-
-                                next_rows_start_index += 1
-
-                            # to add grade_letter rows
-                            for grade_letter in grade_letters_list:
-                                row_ind = next_rows_start_index
-
-                                # to add first columns
-                                if col_count == 1 and row_ind >= len(footer_rows):
-                                    footer_rows.append({
-                                        'Овог': grade_letter,
-                                        'Нэр':'',
-                                        'Оюутны код':'',
-                                        'Регистерийн дугаар':''
-                                    })
-
-                                # to add lesson columns
-                                footer_rows[row_ind].update({
-                                    f'{ys_full_name}_-_-_{lesson_standart_name}': grade_letter_lesson_list[lesson_ind][grade_letter][lesson_year][lesson_season],
-                                    'Судалсан кр': '',
-                                    'Тооцсон кр': '',
-                                    'A+': '',
-                                    'A': '',
-                                    'B+': '',
-                                    'B': '',
-                                    'C+': '',
-                                    'C': '',
-                                    'D': '',
-                                    'F': '',
-                                    **{letter: '' for letter in grade_letters_list},
-                                    'Хичээлийн тоо': '',
-                                    'Амжилт': '',
-                                    'Чанар': '',
-                                })
-
-                                total_students_count += grade_letter_lesson_list[lesson_ind][grade_letter][lesson_year][lesson_season]
-                                next_rows_start_index += 1
-
-                            # region to add total assessed and graded student count row
-                            row_ind = next_rows_start_index
-
+                        # to add assessment rows
+                        for row_ind, key in enumerate(assessment_dict):
                             # to add first columns
                             if col_count == 1 and row_ind >= len(footer_rows):
                                 footer_rows.append({
-                                    'Овог': 'Дүгнэгдсэн оюутны тоо',
+                                    'Овог': key,
                                     'Нэр':'',
                                     'Оюутны код':'',
                                     'Регистерийн дугаар':''
@@ -1614,7 +1542,7 @@ class GroupListNoLimitAllAPIView(
 
                             # to add lesson columns
                             footer_rows[row_ind].update({
-                                f'{ys_full_name}_-_-_{lesson_standart_name}': total_students_count,
+                                f'{ys_full_name}_-_-_{lesson_standart_name}': assessment_lesson_list[lesson_ind][key][lesson_year][lesson_season],
                                 'Судалсан кр': '',
                                 'Тооцсон кр': '',
                                 'A+': '',
@@ -1631,101 +1559,171 @@ class GroupListNoLimitAllAPIView(
                                 'Чанар': '',
                             })
 
+                            if assessment_lesson_list[lesson_ind][key][lesson_year][lesson_season] != '-':
+                                total_students_count += assessment_lesson_list[lesson_ind][key][lesson_year][lesson_season]
+
                             next_rows_start_index += 1
-                            # endregion
 
-                            # to add success and quality rows
-                            replaced_hyphen_a = assessment_lesson_list[lesson_ind]['A'][lesson_year][lesson_season] if assessment_lesson_list[lesson_ind]['A'][lesson_year][lesson_season] != '-' else 0
-                            replaced_hyphen_a2 = assessment_lesson_list[lesson_ind]['A+'][lesson_year][lesson_season] if assessment_lesson_list[lesson_ind]['A+'][lesson_year][lesson_season] != '-' else 0
-                            replaced_hyphen_b = assessment_lesson_list[lesson_ind]['B'][lesson_year][lesson_season] if assessment_lesson_list[lesson_ind]['B'][lesson_year][lesson_season] != '-' else 0
-                            replaced_hyphen_b2 = assessment_lesson_list[lesson_ind]['B+'][lesson_year][lesson_season] if assessment_lesson_list[lesson_ind]['B+'][lesson_year][lesson_season] != '-' else 0
-                            replaced_hyphen_c = assessment_lesson_list[lesson_ind]['C'][lesson_year][lesson_season] if assessment_lesson_list[lesson_ind]['C'][lesson_year][lesson_season] != '-' else 0
-                            replaced_hyphen_c2 = assessment_lesson_list[lesson_ind]['C+'][lesson_year][lesson_season] if assessment_lesson_list[lesson_ind]['C+'][lesson_year][lesson_season] != '-' else 0
-                            replaced_hyphen_d = assessment_lesson_list[lesson_ind]['D'][lesson_year][lesson_season] if assessment_lesson_list[lesson_ind]['D'][lesson_year][lesson_season] != '-' else 0
-                            a = replaced_hyphen_a + replaced_hyphen_a2
-                            b = replaced_hyphen_b + replaced_hyphen_b2
-                            c = replaced_hyphen_c + replaced_hyphen_c2
-                            d = replaced_hyphen_d
-
-                            # region to add success row
+                        # to add grade_letter rows
+                        for grade_letter in grade_letters_list:
                             row_ind = next_rows_start_index
 
                             # to add first columns
                             if col_count == 1 and row_ind >= len(footer_rows):
                                 footer_rows.append({
-                                    'Овог': 'Амжилт',
+                                    'Овог': grade_letter,
                                     'Нэр':'',
                                     'Оюутны код':'',
                                     'Регистерийн дугаар':''
                                 })
 
-                            success = f"{round((((a + b + c + d) * 100) / total_students_count), 1):.1f}%" if total_students_count else '-'
-
                             # to add lesson columns
                             footer_rows[row_ind].update({
-                                f'{ys_full_name}_-_-_{lesson_standart_name}': success
+                                f'{ys_full_name}_-_-_{lesson_standart_name}': grade_letter_lesson_list[lesson_ind][grade_letter][lesson_year][lesson_season],
+                                'Судалсан кр': '',
+                                'Тооцсон кр': '',
+                                'A+': '',
+                                'A': '',
+                                'B+': '',
+                                'B': '',
+                                'C+': '',
+                                'C': '',
+                                'D': '',
+                                'F': '',
+                                **{letter: '' for letter in grade_letters_list},
+                                'Хичээлийн тоо': '',
+                                'Амжилт': '',
+                                'Чанар': '',
                             })
 
-                            # to add last columns
-                            if col_count == 1:
-                                footer_rows[row_ind].update({
-                                    'Судалсан кр': '',
-                                    'Тооцсон кр': '',
-                                    'A+': '',
-                                    'A': '',
-                                    'B+': '',
-                                    'B': '',
-                                    'C+': '',
-                                    'C': '',
-                                    'D': '',
-                                    'F': '',
-                                    **{letter: '' for letter in grade_letters_list},
-                                    'Хичээлийн тоо': '',
-                                    'Амжилт': '',
-                                    'Чанар': '',
-                                })
-
+                            total_students_count += grade_letter_lesson_list[lesson_ind][grade_letter][lesson_year][lesson_season]
                             next_rows_start_index += 1
-                            # endregion
 
-                            # region to add quality row
-                            row_ind = next_rows_start_index
+                        # region to add total assessed and graded student count row
+                        row_ind = next_rows_start_index
 
-                            # to add first columns
-                            if col_count == 1 and row_ind >= len(footer_rows):
-                                footer_rows.append({
-                                    'Овог': 'Чанар',
-                                    'Нэр':'',
-                                    'Оюутны код':'',
+                        # to add first columns
+                        if col_count == 1 and row_ind >= len(footer_rows):
+                            footer_rows.append({
+                                'Овог': 'Дүгнэгдсэн оюутны тоо',
+                                'Нэр':'',
+                                'Оюутны код':'',
                                 'Регистерийн дугаар':''
-                                })
-
-                            quality = f"{round((((a + b) * 100) / total_students_count), 1):.1f}%" if total_students_count else '-'
-
-                            # to add lesson columns
-                            footer_rows[row_ind].update({
-                                f'{ys_full_name}_-_-_{lesson_standart_name}': quality
                             })
 
-                            # to add last columns
-                            if col_count == 1:
-                                footer_rows[row_ind].update({
-                                    'Судалсан кр': '',
-                                    'Тооцсон кр': '',
-                                    'A+': '',
-                                    'A': '',
-                                    'B+': '',
-                                    'B': '',
-                                    'C+': '',
-                                    'C': '',
-                                    'D': '',
-                                    'F': '',
-                                    **{letter: '' for letter in grade_letters_list},
-                                    'Хичээлийн тоо': '',
-                                    'Амжилт': '',
-                                    'Чанар': '',
-                                })
-                                    # endregion
+                        # to add lesson columns
+                        footer_rows[row_ind].update({
+                            f'{ys_full_name}_-_-_{lesson_standart_name}': total_students_count,
+                            'Судалсан кр': '',
+                            'Тооцсон кр': '',
+                            'A+': '',
+                            'A': '',
+                            'B+': '',
+                            'B': '',
+                            'C+': '',
+                            'C': '',
+                            'D': '',
+                            'F': '',
+                            **{letter: '' for letter in grade_letters_list},
+                            'Хичээлийн тоо': '',
+                            'Амжилт': '',
+                            'Чанар': '',
+                        })
+
+                        next_rows_start_index += 1
+                        # endregion
+
+                        # to add success and quality rows
+                        replaced_hyphen_a = assessment_lesson_list[lesson_ind]['A'][lesson_year][lesson_season] if assessment_lesson_list[lesson_ind]['A'][lesson_year][lesson_season] != '-' else 0
+                        replaced_hyphen_a2 = assessment_lesson_list[lesson_ind]['A+'][lesson_year][lesson_season] if assessment_lesson_list[lesson_ind]['A+'][lesson_year][lesson_season] != '-' else 0
+                        replaced_hyphen_b = assessment_lesson_list[lesson_ind]['B'][lesson_year][lesson_season] if assessment_lesson_list[lesson_ind]['B'][lesson_year][lesson_season] != '-' else 0
+                        replaced_hyphen_b2 = assessment_lesson_list[lesson_ind]['B+'][lesson_year][lesson_season] if assessment_lesson_list[lesson_ind]['B+'][lesson_year][lesson_season] != '-' else 0
+                        replaced_hyphen_c = assessment_lesson_list[lesson_ind]['C'][lesson_year][lesson_season] if assessment_lesson_list[lesson_ind]['C'][lesson_year][lesson_season] != '-' else 0
+                        replaced_hyphen_c2 = assessment_lesson_list[lesson_ind]['C+'][lesson_year][lesson_season] if assessment_lesson_list[lesson_ind]['C+'][lesson_year][lesson_season] != '-' else 0
+                        replaced_hyphen_d = assessment_lesson_list[lesson_ind]['D'][lesson_year][lesson_season] if assessment_lesson_list[lesson_ind]['D'][lesson_year][lesson_season] != '-' else 0
+                        a = replaced_hyphen_a + replaced_hyphen_a2
+                        b = replaced_hyphen_b + replaced_hyphen_b2
+                        c = replaced_hyphen_c + replaced_hyphen_c2
+                        d = replaced_hyphen_d
+
+                        # region to add success row
+                        row_ind = next_rows_start_index
+
+                        # to add first columns
+                        if col_count == 1 and row_ind >= len(footer_rows):
+                            footer_rows.append({
+                                'Овог': 'Амжилт',
+                                'Нэр':'',
+                                'Оюутны код':'',
+                                'Регистерийн дугаар':''
+                            })
+
+                        success = f"{round((((a + b + c + d) * 100) / total_students_count), 1):.1f}%" if total_students_count else '-'
+
+                        # to add lesson columns
+                        footer_rows[row_ind].update({
+                            f'{ys_full_name}_-_-_{lesson_standart_name}': success
+                        })
+
+                        # to add last columns
+                        if col_count == 1:
+                            footer_rows[row_ind].update({
+                                'Судалсан кр': '',
+                                'Тооцсон кр': '',
+                                'A+': '',
+                                'A': '',
+                                'B+': '',
+                                'B': '',
+                                'C+': '',
+                                'C': '',
+                                'D': '',
+                                'F': '',
+                                **{letter: '' for letter in grade_letters_list},
+                                'Хичээлийн тоо': '',
+                                'Амжилт': '',
+                                'Чанар': '',
+                            })
+
+                        next_rows_start_index += 1
+                        # endregion
+
+                        # region to add quality row
+                        row_ind = next_rows_start_index
+
+                        # to add first columns
+                        if col_count == 1 and row_ind >= len(footer_rows):
+                            footer_rows.append({
+                                'Овог': 'Чанар',
+                                'Нэр':'',
+                                'Оюутны код':'',
+                            'Регистерийн дугаар':''
+                            })
+
+                        quality = f"{round((((a + b) * 100) / total_students_count), 1):.1f}%" if total_students_count else '-'
+
+                        # to add lesson columns
+                        footer_rows[row_ind].update({
+                            f'{ys_full_name}_-_-_{lesson_standart_name}': quality
+                        })
+
+                        # to add last columns
+                        if col_count == 1:
+                            footer_rows[row_ind].update({
+                                'Судалсан кр': '',
+                                'Тооцсон кр': '',
+                                'A+': '',
+                                'A': '',
+                                'B+': '',
+                                'B': '',
+                                'C+': '',
+                                'C': '',
+                                'D': '',
+                                'F': '',
+                                **{letter: '' for letter in grade_letters_list},
+                                'Хичээлийн тоо': '',
+                                'Амжилт': '',
+                                'Чанар': '',
+                            })
         # endregion
 
         # to merge all rows data

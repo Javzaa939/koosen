@@ -767,7 +767,7 @@ def get_week_num_from_date(current_date=datetime.today().strftime('%Y-%m-%d')):
 
     weeks = get_16week_start_date()
 
-    weekNum = ''
+    weekNum = 0
 
     for week in weeks:
         start_date =  datetime.strptime(week.get('start_date'), '%Y-%m-%d')
