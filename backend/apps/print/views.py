@@ -1,13 +1,16 @@
 from datetime import datetime
 from dateutil import parser
 from django.db import transaction
-from django.db.models import F, Subquery, OuterRef, Count
-from django.db.models.functions import Substr
+from django.db.models import F, Subquery, OuterRef, Count, Value, CharField,Q
+from django.db.models.functions import Substr,Concat
+from collections import defaultdict
 
 from lms.models import Student, TimeTable_to_group, TimeTable_to_student
 from lms.models import TimeTable
 from lms.models import GraduationWork
 from lms.models import ScoreRegister
+from lms.models import StudentRegister
+from lms.models import GradeLetter
 from lms.models import LessonStandart, Season
 from lms.models import Group, Score, ProfessionDefinition, CalculatedGpaOfDiploma
 from lms.models import ProfessionAverageScore, AdmissionIndicator
@@ -1058,3 +1061,681 @@ class GpaProfessionAPIView(
                 return request.send_error('ERR_001', 'Алдаа гарлаа')
 
         return request.send_data([])
+
+@permission_classes([IsAuthenticated])
+class GroupListNoLimitAllAPIView(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    generics.GenericAPIView,
+):
+    """Ангийн дүнгийн жагсаалт"""
+
+    queryset = ScoreRegister.objects.all().select_related("student", "student__group", "lesson", "lesson_season", "assessment", "grade_letter").values("student__last_name", "student__first_name", "student__code", "student__id", "lesson__kredit", "lesson_year", "lesson_season", "lesson_season__season_name", "teach_score", "exam_score", "lesson__code", "lesson__name", "assessment__assesment", "grade_letter__letter","student__register_num")
+
+    @has_permission(must_permissions=['lms-print-score-read'])
+    def get(self, request):
+
+        status = StudentRegister.objects.filter(Q(Q(name__contains='Суралцаж буй') | Q(code=1))).first()
+
+        if status:
+            self.queryset = self.queryset.filter(student__status=status)
+
+        chosen_year = request.query_params.getlist('lesson_year')
+        chosen_season = request.query_params.get('lesson_season')
+        profession = request.query_params.get('profession')
+
+        if chosen_year:
+            self.queryset = self.queryset.filter(lesson_year__in=chosen_year)
+
+        if chosen_season:
+            self.queryset = self.queryset.filter(lesson_season=lesson_season)
+
+        profession_name = ''
+
+        group = request.query_params.get('group') # 45
+        qs = self.queryset.annotate(
+            season=Concat(("lesson_year"), Value("-"), F("lesson_season__season_name"), output_field=CharField()),
+        ).order_by('season')
+        lesson_qs = LessonStandart.objects.all().values("id", "code", "name", "kredit")
+
+        self.queryset = (
+            self.queryset
+            .filter(
+                student__group=group,
+                is_delete=False
+            )
+            .annotate(
+                season=Concat(("lesson_year"), Value("-"), F("lesson_season"), output_field=CharField()),
+            )
+        )
+
+        score_qs = self.queryset.distinct('student')
+        # group_lessons = self.queryset.filter(lesson__in=[1984]).distinct('lesson').values_list('lesson', flat=True)
+        group_lessons = self.queryset.distinct('lesson').values_list('lesson', flat=True)
+        lesson_years = self.queryset.distinct('lesson_year').values_list('lesson_year', flat=True)
+        lesson_seasons = self.queryset.distinct('lesson_season').values_list('lesson_season', flat=True)
+
+        before_lessons_data = []
+        lessons_data = []
+        after_lessons_data = []
+        kredits = {}
+        seasons = []
+
+        group_name = Group.objects.filter(id=group).values('name').first().get('name', '')
+
+        if profession:
+            profession_name = ProfessionDefinition.objects.filter(id=profession).values('name').first().get('name','')
+
+        # region to count "assessment", "grade_letter" columns
+        assessment_dict = {
+            "A+": 0,
+            "A": 0,
+            "B+": 0,
+            "B": 0,
+            "C+": 0,
+            "C": 0,
+            "D": 0,
+            "F": 0
+        }
+
+        assessment_dict_rows_blank = {
+            "A+": {},
+            "A": {},
+            "B+": {},
+            "B": {},
+            "C+": {},
+            "C": {},
+            "D": {},
+            "F": {}
+        }
+
+        assessment_lesson_list = []
+
+        # region to count "grade_letter" column in right side
+        # region to specify order to sort
+        order = ["TC","W","E","R","CR","S"]
+        order_map = {value: index for index, value in enumerate(order)}
+
+        # to place unspecified values at the end
+        default_index = len(order)
+        # endregion to specify order to sort
+
+        grade_letters_list = GradeLetter.objects.values_list('letter', flat=True)
+        grade_letters_list = sorted(grade_letters_list, key=lambda x: order_map.get(x, default_index))
+
+        # to remove other letters that not specified in order
+        grade_letters_list = [item for item in grade_letters_list if item in order]
+
+        grade_letters_dict = {letter: 0 for letter in grade_letters_list}
+        grade_letter_dict_rows_blank = {letter: {} for letter in grade_letters_list}
+        grade_letter_lesson_list = []
+        # endregion
+
+        id = 0
+
+        # Хичээлүүдийн үнэлгээний нийлбэрийг хадгалах dict-н хүснэгт бэлдэх нь
+        while id < len(group_lessons):
+            # to make new address in memory with copy() (and further copy() calls). Otherwise it will be always just replacing previous values so lessons will have same values
+            assessment_dict_rows = assessment_dict_rows_blank.copy()
+            grade_letter_dict_rows = grade_letter_dict_rows_blank.copy()
+
+            for lesson_year in lesson_years:
+                # region to count assessments
+                if not lesson_year in assessment_dict_rows['A+']:
+                    assessment_dict_rows['A+'] = assessment_dict_rows['A+'].copy()
+                    assessment_dict_rows['A+'][lesson_year] = {}
+
+                if not lesson_year in assessment_dict_rows['A']:
+                    assessment_dict_rows['A'] = assessment_dict_rows['A'].copy()
+                    assessment_dict_rows['A'][lesson_year] = {}
+
+                if not lesson_year in assessment_dict_rows['B+']:
+                    assessment_dict_rows['B+'] = assessment_dict_rows['B+'].copy()
+                    assessment_dict_rows['B+'][lesson_year] = {}
+
+                if not lesson_year in assessment_dict_rows['B']:
+                    assessment_dict_rows['B'] = assessment_dict_rows['B'].copy()
+                    assessment_dict_rows['B'][lesson_year] = {}
+
+                if not lesson_year in assessment_dict_rows['C+']:
+                    assessment_dict_rows['C+'] = assessment_dict_rows['C+'].copy()
+                    assessment_dict_rows['C+'][lesson_year] = {}
+
+                if not lesson_year in assessment_dict_rows['C']:
+                    assessment_dict_rows['C'] = assessment_dict_rows['C'].copy()
+                    assessment_dict_rows['C'][lesson_year] = {}
+
+                if not lesson_year in assessment_dict_rows['D']:
+                    assessment_dict_rows['D'] = assessment_dict_rows['D'].copy()
+                    assessment_dict_rows['D'][lesson_year] = {}
+
+                if not lesson_year in assessment_dict_rows['F']:
+                    assessment_dict_rows['F'] = assessment_dict_rows['F'].copy()
+                    assessment_dict_rows['F'][lesson_year] = {}
+                # endregion
+
+                # to count grade letters
+                for key in grade_letter_dict_rows:
+                    if not lesson_year in grade_letter_dict_rows[key]:
+                        grade_letter_dict_rows[key] = grade_letter_dict_rows[key].copy()
+                        grade_letter_dict_rows[key][lesson_year] = {}
+
+                for lesson_season in lesson_seasons:
+                    # to count assessments
+                    assessment_dict_rows['A+'][lesson_year][lesson_season] = 0
+                    assessment_dict_rows['A'][lesson_year][lesson_season] = 0
+                    assessment_dict_rows['B+'][lesson_year][lesson_season] = 0
+                    assessment_dict_rows['B'][lesson_year][lesson_season] = 0
+                    assessment_dict_rows['C+'][lesson_year][lesson_season] = 0
+                    assessment_dict_rows['C'][lesson_year][lesson_season] = 0
+                    assessment_dict_rows['D'][lesson_year][lesson_season] = 0
+                    assessment_dict_rows['F'][lesson_year][lesson_season] = 0
+
+                    # to count grade letters
+                    for key in grade_letter_dict_rows:
+                        grade_letter_dict_rows[key][lesson_year][lesson_season] = 0
+
+            assessment_lesson_list.append(assessment_dict_rows)
+            grade_letter_lesson_list.append(grade_letter_dict_rows)
+            id += 1
+        # endregion
+
+        def replace_hyphen_to_zero(dict_input):
+            result = {}
+
+            for key, value in dict_input.items():
+                if value == '-':
+                    result[key] = 0
+                else:
+                    result[key] = value
+
+            return result
+
+        # Сурагчаар гүйлгэх нь
+        for group_list in score_qs:
+            if group_list['student__id'] in [2271] or True:
+                lessons = {}
+
+                # to count "assessment" columns
+                assessment_counts_dict = assessment_dict.copy()
+
+                # to count "grade_letter" columns
+                grade_letter_counts_dict = grade_letters_dict.copy()
+
+                # судалсан кр column
+                total_kr = 0
+
+                # тооцсон кр column
+                total_kr_with_assessments = 0
+
+                # Голч дүн, голч оноо олох нийлбэр
+                total_gpa_onoo = 0
+                total_score_onoo = 0
+
+                # Голч дүн, голч оноо
+                total_gpa = 0
+                avg_score = 0
+
+                # to get column "Хичээлийн тоо"
+                letters_sum = 0
+
+                for lesson_year in lesson_years:
+                    for lesson_season in lesson_seasons:
+                        lesson_standart = None
+                        ys_full_name = f'{lesson_year}-{lesson_season}'
+
+                        # Хичээлээр гүйлгэх нь
+                        for id, lesson in enumerate(group_lessons):
+                            # Сурагчын id болон хичээлээр хайх хэсэг
+                            score = self.queryset.filter(student=group_list["student__id"], lesson=lesson, lesson_year=lesson_year, lesson_season=lesson_season).first()
+
+                            # score байхгүй үед
+                            if not score:
+                                lesson_standart = lesson_qs.filter(id=lesson).first()
+                                lesson_standart_name = lesson_standart__code_name(lesson_standart["code"], lesson_standart["name"]) if lesson_standart else None
+
+                                if not lesson_standart:
+                                    continue
+
+                                # Хичээлийн кредит авах хэсэг
+                                kredit = lesson_standart["kredit"]
+
+                                # Хичээлийн нэр авах хэсэг
+                                lesson_name = lesson_standart_name
+
+                                # Хичээлийн дүн авах хэсэг
+                                total = '-'
+
+                            else:
+                                # Хичээлийн кредит авах хэсэг
+                                kredit = score["lesson__kredit"]
+
+                                # Хичээлийн нэр авах хэсэг
+                                lesson_name = lesson_standart__code_name(score["lesson__code"], score["lesson__name"])
+
+                                # Хичээлийн дүн авах хэсэг
+                                total = score_register__score_total(score["teach_score"], score["exam_score"])
+
+                                # Сурагчын хичээлүүдийн үнэлгээний нийлбэр дүнг бодох хэсэг
+                                if score["assessment__assesment"] and score["assessment__assesment"] in assessment_dict:
+                                    assessment_letter = score["assessment__assesment"]
+                                    assessment_counts_dict[assessment_letter] += 1
+
+                                    # to avoid "TypeError: can only concatenate str (not "int") to str" because some of previous students have not assessment. To change '-' back to 0 for math operations
+                                    if assessment_lesson_list[id][assessment_letter][lesson_year][lesson_season] == '-':
+                                        assessment_lesson_list[id][assessment_letter][lesson_year][lesson_season] = 0
+
+                                    assessment_lesson_list[id][assessment_letter][lesson_year][lesson_season] += 1
+
+                                    # to get "toocson kr" value. In definition document 0 (zero) score not counted so it skipped here too
+                                    if score['grade_letter__letter'] != 'S':
+                                        chanar = 0
+                                        total_kr_with_assessments += kredit
+                                        score_qs = Score.objects.filter(score_max__gte=total, score_min__lte=total).first()
+                                        if score_qs:
+                                            chanar = kredit * score_qs.gpa
+
+                                        total_score = total * kredit
+
+                                        total_gpa_onoo += chanar
+                                        total_score_onoo += total_score
+
+                                    # to get column "Хичээлийн тоо"
+                                    letters_sum += 1
+
+                                else:
+                                    # to set "-" for one of any assessment in rows summary (footer) because some scoreregister record has teach or exam score but has not assessment. to not ruin excel formatting because it (sign "-") indicate that this lesson should be included in data
+                                    if assessment_lesson_list[id]['F'][lesson_year][lesson_season] == 0:
+                                        assessment_lesson_list[id]['F'][lesson_year][lesson_season] = '-'
+
+                                # to get grade letter count
+                                if score['grade_letter__letter'] and score["assessment__assesment"] in grade_letters_dict:
+                                    grade_letter = score['grade_letter__letter']
+                                    grade_letter_counts_dict[grade_letter] += 1
+                                    grade_letter_lesson_list[id][grade_letter][lesson_year][lesson_season] += 1
+
+                                    # to get column "Хичээлийн тоо"
+                                    if grade_letter != 'S':
+                                        letters_sum += 1
+
+                            # to fill "-" if previously key was added else to not fill and to not add key
+                            if (
+                                (f'{ys_full_name}_-_-_{lesson_name}' in lessons and not score) or
+                                score
+                            ):
+                                if f'{ys_full_name}_-_-_{lesson_name}' not in kredits:
+                                    kredits[f'{ys_full_name}_-_-_{lesson_name}'] = kredit
+
+                                # Хичээлийн нэрний дагуу дүнг оруулах хэсэг
+                                lessons[f'{ys_full_name}_-_-_{lesson_name}'] = total
+
+                                # нийт кр
+                                total_kr = total_kr + kredit
+
+                        # Голч оноо, голч дүн
+                        total_gpa = round(total_gpa_onoo / total_kr_with_assessments, 1) if total_kr_with_assessments != 0 else 0
+                        avg_score = round(total_score_onoo / total_kr_with_assessments, 1) if total_kr_with_assessments != 0 else 0
+
+                # Сурагчын бодогдсон мэдээллийг үндсэн хүснэгт рүү нэгтгэх хэсэг
+                before_lessons_data.append(
+                    {
+                        'Овог': group_list["student__last_name"],
+                        'Нэр':group_list["student__first_name"],
+                        'Оюутны код':group_list["student__code"],
+                        'Регистерийн дугаар':group_list["student__register_num"]
+                    }
+                )
+
+                lessons_data.append(lessons)
+
+                # to get columns "Амжилт", "Чанар"
+                replaced_hyphen = replace_hyphen_to_zero(assessment_counts_dict)
+                a = replaced_hyphen['A+'] + replaced_hyphen['A']
+                b = replaced_hyphen['B+'] + replaced_hyphen['B']
+                c = replaced_hyphen['C+'] + replaced_hyphen['C']
+                d = replaced_hyphen['D']
+
+                # to get column "Амжилт"
+                success = f"{round((((a + b + c + d) * 100) / letters_sum), 1):.1f}%" if letters_sum else '-'
+
+                # to get column "Чанар"
+                quality = f"{round((((a + b) * 100) / letters_sum), 1):.1f}%" if letters_sum else '-'
+
+                after_lessons_data.append(
+                    {
+                        'Судалсан кр': total_kr,
+                        'Тооцсон кр': total_kr_with_assessments,
+                        'Голч оноо': avg_score,
+                        'Голч дүн': total_gpa,
+                        'A+': assessment_counts_dict['A+'],
+                        'A': assessment_counts_dict['A'],
+                        'B+': assessment_counts_dict['B+'],
+                        'B': assessment_counts_dict['B'],
+                        'C+': assessment_counts_dict['C+'],
+                        'C': assessment_counts_dict['C'],
+                        'D': assessment_counts_dict['D'],
+                        'F': assessment_counts_dict['F'],
+                        **grade_letter_counts_dict,
+                        'Хичээлийн тоо': letters_sum,
+                        'Амжилт': success,
+                        'Чанар': quality,
+                    }
+                )
+
+        # to collect all year+season+lesson names
+        all_keys = kredits.keys()
+
+        # to sort by year+season+lesson names lessons and year+season columns. should be same to merge excel cells properly
+        is_united_sort_direction_reverse = False
+
+        # to sort by year+season+lesson names lessons columns
+        all_keys = sorted(all_keys, reverse=is_united_sort_direction_reverse)
+
+        # region to get seasons with its' lessons count for excel year-season cells merging
+        seasons_list = []
+        ys_dict = defaultdict(int)
+
+        for key in all_keys:
+            ys = key.split('_-_-_')[0]
+            ys_dict[ys] += 1
+
+        for ys, count in ys_dict.items():
+            seasons_list.append({
+                'season': ys,
+                'count': count,
+            })
+        # endregion
+
+        # region kredits row
+        before_kredits_data = [{
+            'Овог': 'Кредит',
+            'Нэр':'',
+            'Оюутны код':'',
+            'Регистерийн дугаар':''
+        }]
+
+        # to make same order as in all_keys of year+season+lesson names, because kredits fields are not sorted
+        kredits_data = [dict(sorted(kredits.items(), key=lambda x: all_keys.index(x[0])))]
+
+        after_kredits_data = [{
+            'Судалсан кр': '',
+            'Тооцсон кр': '',
+            'Голч оноо': '',
+            'Голч дүн': '',
+            'A+': '',
+            'A': '',
+            'B+': '',
+            'B': '',
+            'C+': '',
+            'C': '',
+            'D': '',
+            'F': '',
+            **{letter: '' for letter in grade_letters_list},
+            'Хичээлийн тоо': '',
+            'Амжилт': '',
+            'Чанар': '',
+        }]
+
+        # to merge lists for excel columns
+        for dict1, dict2, dict3 in zip(before_kredits_data, kredits_data, after_kredits_data):
+            dict1.update(dict2)
+            dict1.update(dict3)
+
+        all_kredits_rows = before_kredits_data
+        # endregion
+
+        # region students data row
+        # to add lack year+season+lesson names if student has not them and to fill empty cells by "-"
+        for item in lessons_data:
+            for key in all_keys:
+                if key not in item:
+                    item[key] = "-"
+
+            # to make same order as in all_keys of year+season+lesson names after adding new key because new key always adding in to the end of dict
+            item = dict(sorted(item.items(), key=lambda x: all_keys.index(x[0])))
+
+        # to merge lists for excel columns
+        for dict1, dict2, dict3 in zip(before_lessons_data, lessons_data, after_lessons_data):
+            dict1.update(dict2)
+            dict1.update(dict3)
+
+        all_lessons_rows = before_lessons_data
+        # endregion
+
+        # region footer rows
+        if False or True:
+            footer_rows = []
+            col_count = 0
+
+            # Хичээл болгоны үнэлгээний нийлбэрийг мөр дата хэлбэрээр үндсэн хүснэгт рүү оруулах хэсэг
+            for lesson_year in lesson_years:
+                for lesson_season in lesson_seasons:
+                    ys_full_name = f'{lesson_year}-{lesson_season}'
+
+                    for lesson_ind, lesson in enumerate(group_lessons):
+                        # Хичээлийн нэрийг хайж авах хэсэг
+                        lesson_standart = lesson_qs.filter(id=lesson).first()
+                        lesson_standart_name = lesson_standart__code_name(lesson_standart["code"], lesson_standart["name"]) if lesson_standart else ""
+
+                        # region to skip columns without any value
+                        is_all_assessments_empty = True
+
+                        for assessment_key in assessment_dict:
+                            if assessment_lesson_list[lesson_ind][assessment_key][lesson_year][lesson_season] == "-" or assessment_lesson_list[lesson_ind][assessment_key][lesson_year][lesson_season] > 0:
+                                is_all_assessments_empty = False
+                        # endregion
+
+                        if not is_all_assessments_empty:
+                            col_count += 1
+                            total_students_count = 0
+                            next_rows_start_index = 0
+
+                            # to add assessment rows
+                            for row_ind, key in enumerate(assessment_dict):
+                                # to add first columns
+                                if col_count == 1 and row_ind >= len(footer_rows):
+                                    footer_rows.append({
+                                        'Овог': key,
+                                        'Нэр':'',
+                                        'Оюутны код':'',
+                                        'Регистерийн дугаар':''
+                                    })
+
+                                # to add lesson columns
+                                footer_rows[row_ind].update({
+                                    f'{ys_full_name}_-_-_{lesson_standart_name}': assessment_lesson_list[lesson_ind][key][lesson_year][lesson_season],
+                                    'Судалсан кр': '',
+                                    'Тооцсон кр': '',
+                                    'A+': '',
+                                    'A': '',
+                                    'B+': '',
+                                    'B': '',
+                                    'C+': '',
+                                    'C': '',
+                                    'D': '',
+                                    'F': '',
+                                    **{letter: '' for letter in grade_letters_list},
+                                    'Хичээлийн тоо': '',
+                                    'Амжилт': '',
+                                    'Чанар': '',
+                                })
+
+                                if assessment_lesson_list[lesson_ind][key][lesson_year][lesson_season] != '-':
+                                    total_students_count += assessment_lesson_list[lesson_ind][key][lesson_year][lesson_season]
+
+                                next_rows_start_index += 1
+
+                            # to add grade_letter rows
+                            for grade_letter in grade_letters_list:
+                                row_ind = next_rows_start_index
+
+                                # to add first columns
+                                if col_count == 1 and row_ind >= len(footer_rows):
+                                    footer_rows.append({
+                                        'Овог': grade_letter,
+                                        'Нэр':'',
+                                        'Оюутны код':'',
+                                        'Регистерийн дугаар':''
+                                    })
+
+                                # to add lesson columns
+                                footer_rows[row_ind].update({
+                                    f'{ys_full_name}_-_-_{lesson_standart_name}': grade_letter_lesson_list[lesson_ind][grade_letter][lesson_year][lesson_season],
+                                    'Судалсан кр': '',
+                                    'Тооцсон кр': '',
+                                    'A+': '',
+                                    'A': '',
+                                    'B+': '',
+                                    'B': '',
+                                    'C+': '',
+                                    'C': '',
+                                    'D': '',
+                                    'F': '',
+                                    **{letter: '' for letter in grade_letters_list},
+                                    'Хичээлийн тоо': '',
+                                    'Амжилт': '',
+                                    'Чанар': '',
+                                })
+
+                                total_students_count += grade_letter_lesson_list[lesson_ind][grade_letter][lesson_year][lesson_season]
+                                next_rows_start_index += 1
+
+                            # region to add total assessed and graded student count row
+                            row_ind = next_rows_start_index
+
+                            # to add first columns
+                            if col_count == 1 and row_ind >= len(footer_rows):
+                                footer_rows.append({
+                                    'Овог': 'Дүгнэгдсэн оюутны тоо',
+                                    'Нэр':'',
+                                    'Оюутны код':'',
+                                    'Регистерийн дугаар':''
+                                })
+
+                            # to add lesson columns
+                            footer_rows[row_ind].update({
+                                f'{ys_full_name}_-_-_{lesson_standart_name}': total_students_count,
+                                'Судалсан кр': '',
+                                'Тооцсон кр': '',
+                                'A+': '',
+                                'A': '',
+                                'B+': '',
+                                'B': '',
+                                'C+': '',
+                                'C': '',
+                                'D': '',
+                                'F': '',
+                                **{letter: '' for letter in grade_letters_list},
+                                'Хичээлийн тоо': '',
+                                'Амжилт': '',
+                                'Чанар': '',
+                            })
+
+                            next_rows_start_index += 1
+                            # endregion
+
+                            # to add success and quality rows
+                            replaced_hyphen_a = assessment_lesson_list[lesson_ind]['A'][lesson_year][lesson_season] if assessment_lesson_list[lesson_ind]['A'][lesson_year][lesson_season] != '-' else 0
+                            replaced_hyphen_a2 = assessment_lesson_list[lesson_ind]['A+'][lesson_year][lesson_season] if assessment_lesson_list[lesson_ind]['A+'][lesson_year][lesson_season] != '-' else 0
+                            replaced_hyphen_b = assessment_lesson_list[lesson_ind]['B'][lesson_year][lesson_season] if assessment_lesson_list[lesson_ind]['B'][lesson_year][lesson_season] != '-' else 0
+                            replaced_hyphen_b2 = assessment_lesson_list[lesson_ind]['B+'][lesson_year][lesson_season] if assessment_lesson_list[lesson_ind]['B+'][lesson_year][lesson_season] != '-' else 0
+                            replaced_hyphen_c = assessment_lesson_list[lesson_ind]['C'][lesson_year][lesson_season] if assessment_lesson_list[lesson_ind]['C'][lesson_year][lesson_season] != '-' else 0
+                            replaced_hyphen_c2 = assessment_lesson_list[lesson_ind]['C+'][lesson_year][lesson_season] if assessment_lesson_list[lesson_ind]['C+'][lesson_year][lesson_season] != '-' else 0
+                            replaced_hyphen_d = assessment_lesson_list[lesson_ind]['D'][lesson_year][lesson_season] if assessment_lesson_list[lesson_ind]['D'][lesson_year][lesson_season] != '-' else 0
+                            a = replaced_hyphen_a + replaced_hyphen_a2
+                            b = replaced_hyphen_b + replaced_hyphen_b2
+                            c = replaced_hyphen_c + replaced_hyphen_c2
+                            d = replaced_hyphen_d
+
+                            # region to add success row
+                            row_ind = next_rows_start_index
+
+                            # to add first columns
+                            if col_count == 1 and row_ind >= len(footer_rows):
+                                footer_rows.append({
+                                    'Овог': 'Амжилт',
+                                    'Нэр':'',
+                                    'Оюутны код':'',
+                                    'Регистерийн дугаар':''
+                                })
+
+                            success = f"{round((((a + b + c + d) * 100) / total_students_count), 1):.1f}%" if total_students_count else '-'
+
+                            # to add lesson columns
+                            footer_rows[row_ind].update({
+                                f'{ys_full_name}_-_-_{lesson_standart_name}': success
+                            })
+
+                            # to add last columns
+                            if col_count == 1:
+                                footer_rows[row_ind].update({
+                                    'Судалсан кр': '',
+                                    'Тооцсон кр': '',
+                                    'A+': '',
+                                    'A': '',
+                                    'B+': '',
+                                    'B': '',
+                                    'C+': '',
+                                    'C': '',
+                                    'D': '',
+                                    'F': '',
+                                    **{letter: '' for letter in grade_letters_list},
+                                    'Хичээлийн тоо': '',
+                                    'Амжилт': '',
+                                    'Чанар': '',
+                                })
+
+                            next_rows_start_index += 1
+                            # endregion
+
+                            # region to add quality row
+                            row_ind = next_rows_start_index
+
+                            # to add first columns
+                            if col_count == 1 and row_ind >= len(footer_rows):
+                                footer_rows.append({
+                                    'Овог': 'Чанар',
+                                    'Нэр':'',
+                                    'Оюутны код':'',
+                                'Регистерийн дугаар':''
+                                })
+
+                            quality = f"{round((((a + b) * 100) / total_students_count), 1):.1f}%" if total_students_count else '-'
+
+                            # to add lesson columns
+                            footer_rows[row_ind].update({
+                                f'{ys_full_name}_-_-_{lesson_standart_name}': quality
+                            })
+
+                            # to add last columns
+                            if col_count == 1:
+                                footer_rows[row_ind].update({
+                                    'Судалсан кр': '',
+                                    'Тооцсон кр': '',
+                                    'A+': '',
+                                    'A': '',
+                                    'B+': '',
+                                    'B': '',
+                                    'C+': '',
+                                    'C': '',
+                                    'D': '',
+                                    'F': '',
+                                    **{letter: '' for letter in grade_letters_list},
+                                    'Хичээлийн тоо': '',
+                                    'Амжилт': '',
+                                    'Чанар': '',
+                                })
+                                    # endregion
+        # endregion
+
+        # to merge all rows data
+        merged_rows = all_kredits_rows + all_lessons_rows + footer_rows
+
+        dataz = {
+            'seasons': seasons_list,
+            'datas': merged_rows,
+            'lessons_length': sum(year_season["count"] for year_season in seasons_list),
+            'group_name':profession_name + ' ' +  group_name
+        }
+
+        return request.send_data(dataz)

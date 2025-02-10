@@ -7,6 +7,7 @@ const GradeList = lazy(() => import("@views/Score/GradeList"))
 const PrintScore = lazy(() => import("@views/Score/GradeList/PrintScore"))
 const ProgressScore = lazy(() => import("@views/Score/ProgressScore"))
 const Report = lazy(() => import("@src/views/Score/Report"))
+const AllReport = lazy(() => import("@src/views/Score/AllReport"))
 
 const Score = [
     {
@@ -39,7 +40,11 @@ const Score = [
     {
         path: 'score/report/',
         element: <Report />
-    }
+    },
+    {
+        path: 'score/all/',
+        element: <AllReport />
+    },
 ]
 
 export default Score
