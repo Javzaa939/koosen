@@ -25,6 +25,7 @@ import '@styles/react/libs/flatpickr/flatpickr.scss'
 export default function ConfigModal({ openModal, handleModal, datas, calculatedDatas, }) {
     const { t } = useTranslation()
     const [ printValue, setPrintValue ] = useState("")
+    const [ isCenter, setIsCenter ] = useState(false)
     const [ configRowcount, setConfigRowCount ] = useState([])
     const [ errorMessage, setErrorMessage ] = useState('')
     const [ picker, setPicker ] = useState(new Date())
@@ -44,8 +45,8 @@ export default function ConfigModal({ openModal, handleModal, datas, calculatedD
                 setPicker(give_date)
             }
 
-            if (data?.is_center && document.getElementById(`isCenter`)) {
-                document.getElementById(`isCenter`).checked = true
+            if (data?.is_center) {
+                setIsCenter(data?.is_center)
             }
             if (data?.is_lastname && document.getElementById(`isLastNameOvog`)) {
                 document.getElementById(`isLastNameOvog`).checked = true
@@ -107,7 +108,8 @@ export default function ConfigModal({ openModal, handleModal, datas, calculatedD
             'row_count': JSON.stringify(configRowcount),
             'give_date': formatDate(picker),
             'is_lastname': document.getElementById('isLastNameOvog') ? document.getElementById('isLastNameOvog')?.checked : false,
-            'is_center': document.getElementById('isCenter') ? document.getElementById('isCenter')?.checked : false,
+            'is_center': isCenter,
+
         }
         const { success } = await fetchData(studentApi.postConfig(cdata))
         if (success) {
@@ -303,9 +305,11 @@ export default function ConfigModal({ openModal, handleModal, datas, calculatedD
                                             type='checkbox'
                                             name='isCenter'
                                             id='isCenter'
+                                            checked={isCenter}
+                                            onChange={(e) => setIsCenter(e.target.checked)}
                                         />
                                         <Label className="form-label ms-50" for="isCenter">
-                                            {t('Голлуулах эсэх')}
+                                            {t('Уйгаржин голлуулах эсэх')}
                                         </Label>
                                     </Col>
                             }

@@ -285,7 +285,7 @@ class GroupListNoLimitAPIView(
 ):
     """Ангийн дүнгийн жагсаалт"""
 
-    queryset = ScoreRegister.objects.all().select_related("student", "student__group", "lesson", "lesson_season", "assessment").values("student__last_name", "student__first_name", "student__code", "student__id", "lesson__kredit", "lesson_year", "lesson_season", "lesson_season__season_name", "teach_score", "exam_score", "lesson__code", "lesson__name", "assessment__assesment")
+    queryset = ScoreRegister.objects.all().select_related("student", "student__group", "lesson", "lesson_season", "assessment").values("student__last_name", "student__first_name", 'student__register_num', "student__code", "student__id", "lesson__kredit", "lesson_year", "lesson_season", "lesson_season__season_name", "teach_score", "exam_score", "lesson__code", "lesson__name", "assessment__assesment")
 
     @has_permission(must_permissions=['lms-print-score-read'])
     def get(self, request):
@@ -293,8 +293,17 @@ class GroupListNoLimitAPIView(
         group = request.query_params.get('group') # 45
         qs = self.queryset
         lesson_qs = LessonStandart.objects.all().values("id", "code", "name", "kredit")
-        score_qs = qs.filter(student__group=group, is_delete=False).distinct('student')
-        group_lessons = qs.filter(student__group=group, is_delete=False).distinct('lesson').values_list('lesson', flat=True)
+        lesson_year = self.request.query_params.get('lesson_year')
+        lesson_season = self.request.query_params.get('lesson_season')
+        if lesson_year:
+            qs = qs.filter(lesson_year=lesson_year)
+
+        if lesson_season:
+            qs = qs.filter(lesson_season=lesson_season)
+
+        score_qs = qs.filter(student__group=group, is_delete=False, student__status__name__icontains='Суралцаж буй').distinct('student')
+        group_lessons = qs.filter(student__group=group, is_delete=False, student__status__name__icontains='Суралцаж буй').distinct('lesson').values_list('lesson', flat=True)
+
         all_data = []
         result_datas = []
         grade_lesson_list = []
@@ -320,7 +329,7 @@ class GroupListNoLimitAPIView(
         for group_list in score_qs:
             # Сурагчдын бүтэн нэрийг авах хэсэг
             full_name = student__full_name(group_list["student__last_name"], group_list["student__first_name"])
-            code_name = group_list["student__code"] + '-' + full_name
+            register = group_list["student__register_num"]
 
             # Хэрэгтэй хувьсагчдыг зарлах хэсэг
             lessons = {}
@@ -449,7 +458,10 @@ class GroupListNoLimitAPIView(
             # Сурагчын бодогдсон мэдээллийг үндсэн хүснэгт рүү нэгтгэх хэсэг
             all_data.append(
                 {
-                    'Овог/нэр': code_name,
+                    'Код': group_list["student__code"],
+                    'Овог': group_list["student__last_name"],
+                    'Нэр': group_list["student__first_name"],
+                    'Регистр': register,
                     **lessons,
                     'A': grade_dict['A'],
                     'B': grade_dict['B'],
@@ -478,7 +490,10 @@ class GroupListNoLimitAPIView(
 
             all_data.append(
                 {
-                    'Овог/нэр': key,
+                    'Код': key,
+                    'Овог': '',
+                    'Нэр': '',
+                    'Регистр': '',
                     **lessons,
                     'A': '',
                     'B': '',
@@ -501,7 +516,10 @@ class GroupListNoLimitAPIView(
 
         all_data.append(
             {
-                'Овог/нэр': 'Дундаж оноо',
+                'Код': 'Дундаж оноо',
+                'Овог': '',
+                'Нэр': '',
+                'Регистр': '',
                 **lesson_avg_scores,
                 'A': '',
                 'B': '',
@@ -513,7 +531,10 @@ class GroupListNoLimitAPIView(
 
         all_data.append(
             {
-                'Овог/нэр': 'Нийт оюутан оноо',
+                'Код': 'Дундаж оноо',
+                'Овог': '',
+                'Нэр': '',
+                'Регистр': '',
                 **total_students,
                 'A': '',
                 'B': '',
@@ -525,7 +546,6 @@ class GroupListNoLimitAPIView(
         merged_datas = result_datas + all_data
 
         return request.send_data(merged_datas)
-
 
 
 @permission_classes([IsAuthenticated])
@@ -850,17 +870,13 @@ class GroupsListFilterWithSubSchoolApiView(
 
     def get(self, request):
         school = self.request.query_params.get('school')
-        self.queryset = self.queryset.exclude(school=True) # Аль нэг салбар сургуульд хамаардаггүй багш нарыг "аних филтэр"
+        self.queryset = self.queryset.exclude(is_finish=True)
 
         if school:
             self.queryset = self.queryset.filter(school=school)
 
-            final_data = self.list(request).data
-            return request.send_data(final_data)
-
-        teach_info = self.list(request).data
-
-        return request.send_data(teach_info)
+        final_data = self.list(request).data
+        return request.send_data(final_data)
 
 
 @permission_classes([IsAuthenticated])
