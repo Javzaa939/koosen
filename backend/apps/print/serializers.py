@@ -21,18 +21,18 @@ class ScoreRegisterSerializer(serializers.ModelSerializer):
     lesson_season = SeasonSerailizer(many=False)
     assessment = serializers.SerializerMethodField()
     grade_letter_desc = serializers.CharField(source='grade_letter.description', default='')
+    gpa = serializers.CharField(source="assessment.gpa", default='')
+    assessment_word = serializers.CharField(source="assessment.assesment", default='')
 
     class Meta:
         model = ScoreRegister
-        fields = "id", "student", "lesson","teacher","teach_score", "exam_score", "score_total" , "assessment" ,"volume_kr", "lesson_year", "lesson_season", 'grade_letter_desc'
+        fields = "id", "student", "lesson","teacher","teach_score", "exam_score", "score_total" , "assessment" ,"volume_kr", "lesson_year", "lesson_season", 'grade_letter_desc', 'gpa', 'assessment_word'
 
     def get_volume_kr(self, obj):
         lesson_id = obj.lesson.id
 
         prof_vol = LessonStandart.objects.get(id=lesson_id).kredit
         return prof_vol
-
-
 
     def get_assessment(self, obj):
         " Үнэлгээ "

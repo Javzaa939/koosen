@@ -139,6 +139,9 @@ const GradeList = () => {
     const [ lessonOption, setLessonOption ] = useState([])
     const [ studentOption, setStudentOption ] = useState([])
 
+    const [isPrintLesson, setIsPrintLesson] = useState(false)
+    const [lessonSelectValue, setLessonSelectValue] = useState({})
+
     const [detailDatas, setDetailDatas] = useState({})
     const [pmodal, setPmodal] = useState()
     const [errorDatas, setErrorDatas] = useState({})
@@ -158,13 +161,15 @@ const GradeList = () => {
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const togglev2 = () => setDropdownOpen((prevState) => !prevState);
 
-    const { Loader, isLoading, fetchData } = useLoader({})
+    const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: true })
+    const { isLoading: isLessonLoading, fetchData: fetchLessonDownloadData } = useLoader({ isFullScreen: true })
     const { showWarning } = useModal()
 
     const scoreApi = useApi().score.register
     const lessonApi = useApi().study.lessonStandart
     const settingsApi = useApi().activeYearAndSeason
     const groupApi = useApi().student.group
+    const lessonListApi = useApi().print.score
 
     const nav_menus = [
         {
@@ -175,7 +180,7 @@ const GradeList = () => {
         {
             active_id: KIND_HICHEEL,
             name: t('Хичээл'),
-            component: <Lesson setMainData={setMainData} setChosenGroup={setChosenGroup}/>
+            component: <Lesson setLessonSelectValue={setLessonSelectValue} setChosenGroup={setChosenGroup}/>
         },
         {
             active_id: KIND_OYUTAN,
@@ -471,10 +476,106 @@ const GradeList = () => {
         return writeFile(workbook,'oyutan_dvn.xlsx')
     }
 
+    // Хичээл excel-р хэвлэх
+    function excelLesson(printDatas, file_name="Хичээлийн голч") {
+
+        var dataz = printDatas.map((data, idx) => {
+            return(
+                {
+                    "№": idx + 1,
+                    "Код": data?.student?.code || '',
+                    "Овог": data?.student?.last_name || '',
+                    "Нэр": data?.student?.first_name || '',
+                    "РД": data?.student?.register_num || '',
+                    'Хичээлийн нэр': data?.lesson?.name || '',
+                    'Кредит': data?.volume_kr || '',
+                    'Дүнгийн хувь': data?.score_total || '',
+                    'Үсгэн үнэлгээ': data?.assessment_word || '',
+                    'Голч дүн': data?.gpa || '',
+                }
+            )
+        })
+
+        const staticCells = [
+            "№",
+            "Код",
+            "Овог",
+            "Нэр",
+            "РД",
+            'Хичээлийн нэр',
+            'Кредит',
+            'Дүнгийн хувь',
+            'Үсгэн үнэлгээ',
+            'Голч дүн',
+        ]
+
+        const worksheet = utils.json_to_sheet(dataz);
+        const workbook = utils.book_new();
+        utils.book_append_sheet(workbook, worksheet, "Sheet1");
+
+
+        utils.sheet_add_aoa(worksheet, [staticCells], { origin: "A1" });
+
+        const normalCells = {
+            border: {
+                top: { style: "thin", color: { rgb: "000000" } },
+                bottom: { style: "thin", color: { rgb: "000000" } },
+                left: { style: "thin", color: { rgb: "000000" } },
+                right: { style: "thin", color: { rgb: "000000" } }
+            },
+            font:{
+                sz:10
+            },
+            alignment: {
+                horizontal: 'center',
+                vertical: 'center',
+                wrapText: true
+            },
+        };
+
+        const startRow = 0;
+        const endRow = printDatas.length + 1;
+        const startCol = 0;
+        const endCol = 11;
+
+        for (let row = startRow; row <= endRow; row++) {
+            for (let col = startCol; col <= endCol; col++) {
+              const cellAddress = utils.encode_cell({ r: row, c: col });
+
+                if (!worksheet[cellAddress]) {
+                    worksheet[cellAddress] = {};
+                }
+
+              worksheet[cellAddress].s = normalCells
+            }
+        }
+
+        worksheet["!cols"] = [{ wch: dataz.length > 100 ? 3 : 2 }, { wch: 15 }, { wch: 15 }, { wch: 20 }, {wch: 20}, {wch: 40}  ];
+
+        worksheet["!rows"] = [
+            { hpx: 40 },
+        ];
+
+        file_name = file_name?.replaceAll(" ", "_")
+        return writeFile(workbook, `${file_name}_хичээлийн_голч.xlsx`)
+    }
 
     async function handleRefresh() {
         const { success, data } = await fetchData(scoreApi.refresh(chosenGroup))
         if (success) {
+        }
+    }
+
+    // Хичээлийн excel-р хэвлэх жагсаалт
+    async function getLessonDatas() {
+        const lesson = lessonSelectValue?.lesson
+        const lesson_year = lessonSelectValue?.lesson_year
+        const lesson_season = lessonSelectValue?.season
+        const group = lessonSelectValue?.group
+
+        const { success, data } = await fetchLessonDownloadData(lessonListApi.getLessonList(lessonSelectValue.rowsPerPage, lessonSelectValue.currentPage, '', lessonSelectValue.searchValue, lesson, lesson_year, lesson_season, group, lessonSelectValue.teacher))
+        if (success) {
+            excelLesson(data?.results, lessonSelectValue?.lesson_name)
         }
     }
 
@@ -520,9 +621,9 @@ const GradeList = () => {
                                     <DropdownItem
                                         onClick={() => {
                                             active === KIND_ANGI ? excelAngi()
-                                                : 
+                                                :
                                             active === KIND_HICHEEL ? console.log("hicheel")
-                                                : 
+                                                :
                                             active === KIND_OYUTAN && excelOyutan();
                                         }}
                                     >
@@ -540,18 +641,34 @@ const GradeList = () => {
                                     </DropdownItem>
                                 </DropdownMenu>
                             </Dropdown>
-                            <Button
-                                color='primary'
-                                className='m-50'
-                                onClick={() => modalToggler()}
-                                disabled={!chosenGroup}
-                            >
-                                <Printer size={15} />
-                                <span className='align-middle ms-50'>{t('Хэвлэх')}</span>
-                            </Button>
+                            {
+                                active === KIND_HICHEEL
+                                ?
+                                    <Button
+                                        color='primary'
+                                        className='m-50'
+                                        onClick={() => {
+                                            getLessonDatas()
+                                        }}
+                                        disabled={!lessonSelectValue?.lesson || isLessonLoading}
+                                    >
+                                        <FileText size={15} />
+                                        <span className='align-middle ms-50'>{t('Excel татах')}</span>
+                                    </Button>
+                                :
+                                    <Button
+                                        color='primary'
+                                        className='m-50'
+                                        onClick={() => modalToggler()}
+                                        disabled={!chosenGroup}
+                                    >
+                                        <Printer size={15} />
+                                        <span className='align-middle ms-50'>{t('Хэвлэх')}</span>
+                                    </Button>
+                            }
                         </div>
                 </CardHeader>
-                {isLoading && Loader}
+                {(isLoading || isLessonLoading) && Loader}
                 <Nav tabs>
                     {
                         nav_menus.map((menu, idx) => {

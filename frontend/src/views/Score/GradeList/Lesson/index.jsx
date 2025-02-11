@@ -30,14 +30,15 @@ import { getPagination, generateLessonYear} from '@utils'
 import SchoolContext from "@context/SchoolContext"
 import { getColumns } from './helpers'
 
-const Lesson = () => {
+const Lesson = ({ setLessonSelectValue }) => {
 
     var values = {
         lesson: '',
         lesson_year: '',
         season: '',
         group: '',
-        teacher: ''
+        teacher: '',
+        lesson_name: '',
     }
 
     // ** Hook
@@ -120,6 +121,18 @@ const Lesson = () => {
         },
         [rowsPerPage, currentPage, sortField, searchValue, select_value, school_id]
     )
+
+    useEffect(() => {
+        let searchDatas = {
+            ...select_value,
+            rowsPerPage: total_count,
+            searchValue: searchValue,
+            currentPage: currentPage
+        }
+
+        setLessonSelectValue(searchDatas)
+    }, [currentPage, searchValue, total_count, select_value])
+
     useEffect(
         () =>
         {
@@ -211,14 +224,16 @@ const Lesson = () => {
                                     setSelectValue(current => {
                                         return {
                                             ...current,
-                                            lesson: val?.id
+                                            lesson: val?.id,
+                                            lesson_name: val?.name || ''
                                         }
                                     })
                                 } else {
                                     setSelectValue(current => {
                                         return {
                                             ...current,
-                                            lesson: ''
+                                            lesson: '',
+                                            lesson_name: ''
                                         }
                                     })
                                 }
