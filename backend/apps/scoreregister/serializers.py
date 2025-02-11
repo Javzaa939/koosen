@@ -313,7 +313,7 @@ class TeacherScoreSerializer(serializers.ModelSerializer):
             assessment = 'W'
         else:
             assess = Score.objects.filter(score_max__gte=total_score,score_min__lte=total_score).values('assesment').first()
-            assessment = assess['assesment']
+            assessment = assess['assesment'] if assess else ''
         return assessment
 
     def get_teacher_name(self, obj):
