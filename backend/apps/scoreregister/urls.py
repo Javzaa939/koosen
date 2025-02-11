@@ -8,6 +8,9 @@ urlpatterns = [
     path('register/', ScoreRegisterAPIView.as_view()),
     path('register/<int:pk>/', ScoreRegisterAPIView.as_view()),
 
+    # Багшийн татсан дүн устгах
+    path('register/delete/', ScoreRegisterDeleteAPIView.as_view()),
+
     path('register/list/', ScoreRegisterListAPIView.as_view()),
     path('register/download/', ScoreTeacherDownloadAPIView.as_view()),
     path('register/old/', ScoreOldAPIView.as_view()),

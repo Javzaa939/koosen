@@ -190,6 +190,59 @@ class ScoreRegisterAPIView(
         self.destroy(request, pk)
         return request.send_info("INF_003")
 
+
+@permission_classes([IsAuthenticated])
+class ScoreRegisterDeleteAPIView(
+    mixins.ListModelMixin,
+    generics.GenericAPIView
+):
+    """ дүн crud """
+
+    queryset = ScoreRegister.objects.all()
+
+    # Баталгаажсан дүн буцаах
+    def post(self, request):
+
+        data = request.data
+
+        lesson_year, lesson_season = get_active_year_season()
+
+        teacher = data.get('teacher_id')
+        lesson = data.get('lesson_id')
+        group = data.get('group_id')
+
+        if not teacher and not lesson:
+            return request.send_error("ERR_001", "Хоосон сонголт")
+
+        student_score_qs = ScoreRegister.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season, lesson=lesson, status=ScoreRegister.TEACHER_WEB, teacher=teacher, student__group=group)
+
+        # Татагдсан дүнг устгана
+        if student_score_qs.exists():
+            student_score_qs.delete()
+
+        # Багш хичээл холболт
+        lesson_teacher = Lesson_to_teacher.objects.filter(lesson=lesson, teacher=teacher).first()
+
+        # Багшийн дүнгийн задаргааны төрлүүд
+        score_type_ids = Lesson_teacher_scoretype.objects.filter(lesson_teacher=lesson_teacher).values_list('id', flat=True)
+
+        # Багшийн дүнгийн төрөл бүрт оюутанд өгсөн оноо
+        teach_score_qs = TeacherScore.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season, score_type_id__in=score_type_ids)
+
+        # Анги байвал тухайн ангийн оюутны дүнг татна.
+        if group:
+            teach_score_qs = teach_score_qs.filter(student__group=group)
+
+        # Баталгаажсан төлвийг болиулна
+        if teach_score_qs.exists():
+            teach_score_qs.update(
+                is_approved=False,
+                approved_date=None,
+            )
+
+        return request.send_info("INF_026")
+
+
 class ScoreRegisterStudentView(
     mixins.ListModelMixin,
     generics.GenericAPIView

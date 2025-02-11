@@ -103,6 +103,7 @@ const ScoreRegister = () => {
     const lessonApi = useApi().study.lessonStandart
     const scoreApi = useApi().score.teacher
     const permissionApi = useApi().role.check
+    const scoreRegisterApi = useApi().score.register
 
     // Хичээлийн жагсаалт
     async function getLessonOption() {
@@ -239,6 +240,19 @@ const ScoreRegister = () => {
     function handleDetailModal(data) {
         setDetailModal(!detail_modal)
         setDetailModalData(data)
+    }
+
+    async function handleDeleteModal(rowData) {
+        let cdatas = {
+            'group_id': rowData?.group?.id,
+            'lesson_id': rowData?.lesson?.id,
+            'teacher_id': rowData?.teacher?.id,
+        }
+
+        const { success } = await fetchData(scoreRegisterApi.deleteScoreRegister(cdatas))
+        if(success) {
+            getDatas()
+        }
     }
 
     return (
@@ -440,7 +454,7 @@ const ScoreRegister = () => {
                         )}
                         onSort={handleSort}
                         highlightOnHover={true}
-                        columns={getColumns(currentPage, rowsPerPage, total_count, select_value, exam_date, isDadlaga, handleDetailModal)}
+                        columns={getColumns(currentPage, rowsPerPage, total_count, select_value, exam_date, isDadlaga, handleDetailModal, handleDeleteModal)}
                         sortIcon={<ChevronDown size={10} />}
                         paginationPerPage={rowsPerPage}
                         selectableRows

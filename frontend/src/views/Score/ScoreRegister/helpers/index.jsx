@@ -2,13 +2,16 @@ import { useContext, useState, useRef } from 'react'
 import { UncontrolledTooltip, Badge } from 'reactstrap'
 import { Eye } from 'react-feather'
 import { t } from 'i18next'
+import { FaUndo } from 'react-icons/fa'
+import useModal from '@hooks/useModal'
 
 import AuthContext from "@context/AuthContext"
 
 // Хүснэгтийн баганууд
-export function getColumns(currentPage, rowsPerPage, total_count, select_value, exam_date, isDadlaga, handleDetailModal) {
+export function getColumns(currentPage, rowsPerPage, total_count, select_value, exam_date, isDadlaga, handleDetailModal, handleDeleteModal) {
 
 	const { user } = useContext(AuthContext)
+	const { showWarning } = useModal()
 
 	const columns = [
 		{
@@ -68,7 +71,7 @@ export function getColumns(currentPage, rowsPerPage, total_count, select_value, 
 	if (Object.keys(user).length > 0) {
 		var delete_column = {
 			name: t("Үйлдэл"),
-			width: "100px",
+			width: "200px",
 			center: true,
 			selector: (row) => (
 				<div className="text-center" style={{ width: "auto" }}>
@@ -80,6 +83,26 @@ export function getColumns(currentPage, rowsPerPage, total_count, select_value, 
 						<Badge color="light-success" pill><Eye width={"15px"} /></Badge>
 					</a>
 					<UncontrolledTooltip placement='top' target={`complaintListDatatableEdit${row?.id}`} >Дэлгэрэнгүй</UncontrolledTooltip>
+					{
+						row?.is_approved
+						&&
+						<>
+							<a role="button"
+								onClick={() => showWarning({
+									header: {
+										title: `${t('Баталгаажуулсан дүн устгах')}`,
+									},
+									question: `Та "${row?.group?.name}" ангийн "${row?.lesson?.name}" хичээлийн баталгаажуулсан дүнг буцаахдаа итгэлтэй байна уу?`,
+									onClick: () => handleDeleteModal(row),
+									btnText: 'Буцаах',
+								})}
+								id={`Undo${row?.id}`}
+								className="me-1"
+							>
+								<Badge color="light-danger" pill><FaUndo width={"15px"} /></Badge>
+							</a>
+						</>
+					}
 				</div>
 			),
 		}
