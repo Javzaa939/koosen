@@ -61,8 +61,8 @@ const Class = ({ setMainData, setChosenGroup, setFileName, yearAndSeason, printV
 
     const [select_value, setSelectValue] = useState(values)
 
-    const [chosenYear, setChosenYear] = useState(null)
-    const [chosenSeason, setChosenSeason] = useState(null)
+    const [chosenYear, setChosenYear] = useState('')
+    const [chosenSeason, setChosenSeason] = useState('')
 
     const { school_id } = useContext(SchoolContext)
 
@@ -167,13 +167,13 @@ const Class = ({ setMainData, setChosenGroup, setFileName, yearAndSeason, printV
             if (!radio)
             {
                 printValues.current = {
-                    'chosenYear': null,
-                    'chosenSeason': null,
+                    'chosenYear': '',
+                    'chosenSeason': '',
                     'group': false,
                 }
 
-                setChosenYear(null)
-                setChosenSeason(null)
+                setChosenYear('')
+                setChosenSeason('')
             }
         },
         [radio]

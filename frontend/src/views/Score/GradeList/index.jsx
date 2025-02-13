@@ -119,8 +119,8 @@ const GradeList = () => {
     const { t } = useTranslation()
 
     const printValues = useRef({
-        'chosenYear': null,
-        'chosenSeason': null,
+        'chosenYear': '',
+        'chosenSeason': '',
         'group': false,
     })
 
@@ -139,7 +139,7 @@ const GradeList = () => {
     const [ lessonOption, setLessonOption ] = useState([])
     const [ studentOption, setStudentOption ] = useState([])
 
-    const [isPrintLesson, setIsPrintLesson] = useState(false)
+    // const [isPrintLesson, setIsPrintLesson] = useState(false)
     const [lessonSelectValue, setLessonSelectValue] = useState({})
 
     const [detailDatas, setDetailDatas] = useState({})
