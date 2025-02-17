@@ -492,7 +492,6 @@ class GroupListNoLimitAPIView(
                 for lesson_season in lesson_seasons:
                     lesson_standart = None
                     ys_full_name = f'{lesson_year}-{lesson_season}'
-
                     # Хичээлээр гүйлгэх нь
                     for id, lesson in enumerate(group_lessons):
                         # Сурагчын id болон хичээлээр хайх хэсэг
@@ -524,7 +523,6 @@ class GroupListNoLimitAPIView(
 
                             # Хичээлийн дүн авах хэсэг
                             total = score_register__score_total(score["teach_score"], score["exam_score"])
-
                             # Сурагчын хичээлүүдийн үнэлгээний нийлбэр дүнг бодох хэсэг
                             if score["assessment__assesment"] and score["assessment__assesment"] in assessment_dict:
                                 assessment_letter = score["assessment__assesment"]
@@ -538,7 +536,6 @@ class GroupListNoLimitAPIView(
 
                                 # to get "toocson kr" value. In definition document 0 (zero) score not counted so it skipped here too
                                 if score['grade_letter__letter'] != 'S':
-                                    chanar = 0
                                     total_kr_with_assessments += kredit
                                     assess_qs = Score.objects.filter(score_max__gte=total, score_min__lte=total).first()
                                     if assess_qs:
@@ -957,7 +954,6 @@ class GroupListNoLimitAPIView(
             'lessons_length': sum(year_season["count"] for year_season in seasons_list),
             'group_name': group_name
         }
-        print(dataz)
 
         return request.send_data(dataz)
 
