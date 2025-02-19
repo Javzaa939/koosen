@@ -150,7 +150,7 @@ export default function Report4() {
                                 type='select'
                                 bsSize='sm'
                                 style={{ height: "30px", width: "75px" }}
-                                value={rows_per_page}
+                                value={rows_per_page === total_count ? 'Бүгд' : rows_per_page}
                                 onChange={e => handlePerPage(e)}
                                 className='mb-50'
                             >
