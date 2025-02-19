@@ -111,7 +111,7 @@ export default function LessonsModal({ open, handleModal, student, group, profes
                                 type='select'
                                 bsSize='sm'
                                 style={{ height: "30px", width: "80px" }}
-                                value={rows_per_page}
+                                value={rows_per_page === 10000000 ? 'Бүгд' : rows_per_page}
                                 onChange={e => handlePerPage(e)}
                                 className='mb-50'
                             >

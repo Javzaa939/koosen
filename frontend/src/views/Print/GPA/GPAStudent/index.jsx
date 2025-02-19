@@ -208,7 +208,7 @@ const GPAStudent = () => {
     function handlePerPage(e) {
         setRowsPerPage(
             e.target.value === "Бүгд"
-                ? 10000000
+                ? total_count
                 : parseInt(e.target.value)
         );
     }
@@ -561,7 +561,7 @@ const GPAStudent = () => {
                                 type="select"
                                 bsSize="sm"
                                 style={{ height: "30px" }}
-                                value={rowsPerPage}
+                                value={rowsPerPage === total_count ? 'Бүгд' : rowsPerPage}
                                 onChange={(e) => handlePerPage(e)}
                             >
                                 {default_page.map((page, idx) => (
