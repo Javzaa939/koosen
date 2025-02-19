@@ -155,7 +155,7 @@ const AllReport = () => {
         const key_prefix = [blank(), ...data]?.map((data, vidx) => (
             {
                 ' ': '',
-                '№': (vidx === 0 || vidx === 1 || !data['Нэр'] || !data['Оюутны код']) ? '' : vidx - 1,
+                '№': (vidx === 0 || vidx === 1 || !data['Нэр'] || !data['Оюутны код']) || !data['Регистрийн дугаар'] ? '' : vidx - 1,
                 ...data
             }
         ));
@@ -233,6 +233,19 @@ const AllReport = () => {
         notRotatedTextStyle.alignment = { ...notRotatedTextStyle.alignment }
         notRotatedTextStyle.alignment.textRotation = 0
 
+        const footerBorder = {
+            border: {
+                top: { style: "thin", color: { rgb: "000000" } },
+                bottom: { style: "thin", color: { rgb: "ffffff" } },
+                left: { style: "thin", color: { rgb: "ffffff" } },
+                right: { style: "thin", color: { rgb: "ffffff" } },
+                wrapText: true
+            },
+            font: {
+                sz: 10
+            }
+        };
+
         const bottomBorder = {
             border: {
                 top: { style: "thin", color: { rgb: "ffffff" } },
@@ -248,12 +261,26 @@ const AllReport = () => {
 
         };
 
+        // const rightBorder = {
+        //     border: {
+        //         top: { style: "thin", color: { rgb: "ffffff" } },
+        //         bottom: { style: "thin", color: { rgb: "ffffff" } },
+        //         left: { style: "thin", color: { rgb: "ffffff" } },
+        //         right: { style: "thin", color: { rgb: "0000000" } },
+        //         wrapText: true
+        //     },
+        //     font: {
+        //         sz: 10,
+        //         italic: true
+        //     }
+
+        // };
         // #endregion
 
         const columns_count_prefix = prefix.length - keys.length // columns: '', '№'
-        const columns_count_before_lessons_after_prefix = 4 // columns: ovog, ner, oyutny kod, register
+        const columns_count_before_lessons_after_prefix = 4 // columns: ovog, ner, oyutny kod, rd
         const columns_count_lessons = datas?.lessons_length // columns: lessons
-        const columns_count_kr = 2 // columns: sudalsan, toocson
+        const columns_count_kr = 4 // columns: sudalsan, toocson
         const columns_count_assessments = 8 // columns: assessment letters
         const columns_count_grades = 6 // columns: grade letters
         const columns_count_letters_sum = 1 // columns: Хичээлийн тоо
@@ -311,11 +338,23 @@ const AllReport = () => {
                     col >= columns_count_before_letters_sum && col <= columns_count_before_letters_sum + columns_count_quality_success
                 ) worksheet[cellNum].s = notRotatedTextStyle
 
-
                 // to style rest cells
                 else worksheet[cellNum].s = numberCellStyle
             }
         }
+
+        // const fRow = HEADER_HEIGHT;
+        // const fendRow = HEADER_HEIGHT + data?.length;
+
+        // for (let row = fRow; row <= fendRow; row++) {
+        //     const cellNum = utils.encode_cell({ r: row, c: 0 });
+
+        //     if (!worksheet[cellNum]) {
+        //         worksheet[cellNum] = {};
+        //     }
+
+        //     worksheet[cellNum].s = rightBorder;
+        // }
 
         // #region to merge cells
         const seasonHeaderMerge = datas?.seasons && datas?.seasons.length > 0
@@ -355,7 +394,6 @@ const AllReport = () => {
                     }
                 }
 
-
                 return {
                     s: {
                         r: HEADER_HEIGHT,
@@ -370,7 +408,22 @@ const AllReport = () => {
                 };
             })
             : [];
+        // const lessonsMerge = Array.from({ length: datas?.lessons_length }, (_, vidx) => {
+        //     return(
+        //         {
+        //             s: {
+        //                 r: HEADER_HEIGHT,
+        //                 c: 5 + vidx
+        //             },
+        //             e: {
+        //                 r: HEADER_HEIGHT + 1,
+        //                 c: 5 + vidx,
+        //             }
+        //         }
+        //     )
+        // })
 
+        // to set last columns merge options that after lesson names columns
         const last_columns = Array.from({
             length: (
                 columns_count_kr +
@@ -382,7 +435,7 @@ const AllReport = () => {
         }, (value, index) => {
             return ({
                 s: { r: HEADER_HEIGHT, c: columns_count_before_kr + index },
-                e: { r: HEADER_HEIGHT + 3, c: columns_count_before_kr + index }
+                e: { r: HEADER_HEIGHT + 2, c: columns_count_before_kr + index }
             })
         })
 
@@ -446,7 +499,6 @@ const AllReport = () => {
             { wch: 15 },
             { wch: 15 },
             { wch: 15 }, // fifth column
-            { wch: 15 }, // sixth column
             ...phaseZeroCells,
             ...phaseTwoCells,
             ...letters_sum_col
@@ -461,12 +513,11 @@ const AllReport = () => {
             { hpx: 10 }, // season names are here
             { hpx: 150 }, // fifth row. rotated lesson names are here
         ];
-        // #endregion
 
         worksheet['B3'].v = datas?.group_name ? `Анги бүлгийн нэр: ${datas?.group_name}` : ''
         writeFile(workbook, 'Ангийн нийт дүн.xlsx');
     }
-console.log(select_value.lesson_year)
+
     return (
         <Fragment>
             <Card>
