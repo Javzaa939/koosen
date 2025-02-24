@@ -278,7 +278,7 @@ export default function ReportDatatable({ report }) {
                             type='select'
                             bsSize='sm'
                             style={{ height: "30px", width: "62px" }}
-                            value={rows_per_page}
+                            value={rows_per_page === 10000000 ? 'Бүгд' : rows_per_page}
                             onChange={e => handlePerPage(e)}
                             className='mb-50'
                         >

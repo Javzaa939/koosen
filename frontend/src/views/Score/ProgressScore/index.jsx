@@ -378,7 +378,7 @@ export default function ProgressScore() {
                                 type='select'
                                 bsSize='sm'
                                 style={{ height: "30px" }}
-                                value={rowsPerPage}
+                                value={rowsPerPage === total_count ? 'Бүгд' : rowsPerPage}
                                 onChange={e => handlePerPage(e)}
                             >
                                 {
