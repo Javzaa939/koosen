@@ -960,7 +960,7 @@ class ScoreOldAPIView(
             first_name = splitted_name[0]
             last_name = splitted_name[-1]
 
-            student = Student.objects.filter(Q(Q(code=student_code) | Q(first_name=first_name, last_name=last_name))).first()
+            student = Student.objects.filter(code__iexact=student_code).first()
 
             # Оюутны код таарахгүй байхгүй үед
             if not student:
@@ -1681,7 +1681,7 @@ class ScoreOldV2APIView(
                 continue  # Шаардлагатай өгөгдлүүдийн аль нэг нь дутуу байвал алгасна
 
             # Оюутан гэсэн модел дотроос нэр болон кодын ашиглан тухайн оюутныг олно
-            student = Student.objects.filter(Q(code__iexact=student_code) | Q(first_name__iexact=student_first_name, last_name__iexact=student_last_name)).first()
+            student = Student.objects.filter(Q(code__iexact=student_code) | Q(register_num__iexact=register)).first()
 
             # Хэрвээ оюутан олдохгүй бол
             if student is None:
