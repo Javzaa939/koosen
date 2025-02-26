@@ -152,10 +152,7 @@ const Class = ({ setMainData, setChosenGroup, setFileName, yearAndSeason, printV
             }
             else
             {
-                if (chosenYear && chosenSeason)
-                {
-                    getDatas();
-                }
+                getDatas();
             }
         },
         [rowsPerPage, currentPage, sortField, searchValue, select_value, school_id, radio, chosenYear, chosenSeason]
@@ -183,7 +180,6 @@ const Class = ({ setMainData, setChosenGroup, setFileName, yearAndSeason, printV
     useEffect(() => {
         getDepartment()
         getLesson()
-        setChosenGroup()
     },[])
 
     useEffect(
@@ -248,7 +244,7 @@ const Class = ({ setMainData, setChosenGroup, setFileName, yearAndSeason, printV
                                     <td>#</td>
                                     <th>Улирал</th>
                                 </tr>
-                                {datas.map((row, idx) => (
+                                {datas?.map((row, idx) => (
                                     <tr key={`tr${idx}`}>
                                         <td>{idx + 1}</td>
                                         <td>{row?.student?.first_name}</td>
@@ -284,7 +280,6 @@ const Class = ({ setMainData, setChosenGroup, setFileName, yearAndSeason, printV
                                 setSelectValue(current => {
                                     return {
                                         ...current,
-                                        group: '',
                                         department: val?.id || '',
                                     }
                                 })
@@ -307,7 +302,7 @@ const Class = ({ setMainData, setChosenGroup, setFileName, yearAndSeason, printV
                             isLoading={isLoading}
                             placeholder={t('-- Сонгоно уу --')}
                             options={groupOption || []}
-                            value={select_value.group && groupOption.find((c) => c.id === select_value.group)}
+                            value={groupOption.find((c) => c.id === select_value.group)}
                             noOptionsMessage={() => t('Хоосон байна.')}
                             onChange={(val) => {
                                 setSelectValue(current => {
@@ -349,7 +344,7 @@ const Class = ({ setMainData, setChosenGroup, setFileName, yearAndSeason, printV
                             }}
                             styles={ReactSelectStyles}
                             getOptionValue={(option) => option.id}
-                            getOptionLabel={(option) => option.code + '' + option.name}
+                            getOptionLabel={(option) => option.name}
                         />
                     </Col>
                     <Col md={3} className="datatable-search-text  d-flex align-items-end mt-2">
@@ -397,11 +392,13 @@ const Class = ({ setMainData, setChosenGroup, setFileName, yearAndSeason, printV
                                     className={classnames('react-select')}
                                     isLoading={isLoading}
                                     placeholder={t('-- Сонгоно уу --')}
-                                    options={yearAndSeason?.year_list ? yearAndSeason?.year_list.map(year => ({ label: year, value: year })) : []}
+                                    isMulti
+                                    options={yearAndSeason?.year_list ? yearAndSeason?.year_list?.map(year => ({ label: year, value: year })) : []}
                                     noOptionsMessage={() => t('Хоосон байна.')}
                                     onChange={(val) => {
-                                        setChosenYear(val.value)
-                                        printValues.current['chosenYear'] = val.value
+                                        const selectedYears = val.map(option => option.value);
+                                        setChosenYear(selectedYears)
+                                        printValues.current['chosenYear'] = selectedYears
                                     }}
                                     styles={ReactSelectStyles}
                                 />
@@ -416,12 +413,14 @@ const Class = ({ setMainData, setChosenGroup, setFileName, yearAndSeason, printV
                                     classNamePrefix='select'
                                     className={classnames('react-select')}
                                     isLoading={isLoading}
+                                    isMulti
                                     placeholder={t('-- Сонгоно уу --')}
                                     options={yearAndSeason?.season_list || []}
                                     noOptionsMessage={() => t('Хоосон байна.')}
                                     onChange={(val) => {
-                                        setChosenSeason(val.id)
-                                        printValues.current['chosenSeason'] = val.id
+                                        const selectedSeason = val.map(option => option.id);
+                                        setChosenSeason(selectedSeason)
+                                        printValues.current['chosenSeason'] = selectedSeason
                                     }}
                                     styles={ReactSelectStyles}
                                     getOptionValue={(option) => option.id}
