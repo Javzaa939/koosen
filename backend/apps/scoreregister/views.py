@@ -2136,6 +2136,8 @@ class TeacherScoreRegisterListAPIView(
                                 assessment_id=assessment['id'] if assessment else None,
                                 grade_letter=GradeLetter.objects.get(pk=grade_letter) if grade_letter else None,
                                 status=ScoreRegister.TEACHER_WEB,
+                                lesson_year=lesson_year,
+                                lesson_season=Season.objects.get(id=lesson_season),
                             )
                         else:
                             ScoreRegister.objects.create(
