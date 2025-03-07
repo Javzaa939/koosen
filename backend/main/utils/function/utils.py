@@ -628,7 +628,7 @@ def get_student_score_register(student_id, season='', lesson_year = '',):
             score_qs = Score.objects.filter(score_max__gte=score, score_min__lte=score).first()
             total_kr = total_kr + score_data.lesson.kredit
             total_score = total_score + (score_qs.gpa * score_data.lesson.kredit)
-            if score_data.grade_letter:
+            if score_data.grade_letter and score_data.grade_letter.letter == 'S':
                 total_skr = total_skr + score_data.lesson.kredit
 
         if total_score != 0.0:
