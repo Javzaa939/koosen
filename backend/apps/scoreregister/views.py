@@ -2044,7 +2044,6 @@ class TeacherScoreRegisterListAPIView(
 
         lesson_year, lesson_season = get_active_year_season()
 
-
         for item in data:
             all_students_teach_scores = []
             have_score_students = []
@@ -2117,7 +2116,10 @@ class TeacherScoreRegisterListAPIView(
                     have_score_students.append(student_id)
 
                     # Өмнө нь дүн орсон эсэхийг шалгах
-                    student_score = ScoreRegister.objects.filter(lesson_year=lesson_year, student=student_id, lesson=lesson)
+                    student_score = ScoreRegister.objects.filter(student=student_id, lesson=lesson)
+
+                    # Хэрвээ арга зүйч гараас дүн оруулсан бол өөрчлөхгүй.
+                    not_update_score = ScoreRegister.objects.filter(student=student_id, lesson=lesson, status=ScoreRegister.START_SYSTEM_SCORE)
 
                     # Үсгэн үнэлгээ
                     student_score_total = student_teacher_score + student_exam_score
@@ -2125,40 +2127,30 @@ class TeacherScoreRegisterListAPIView(
                     assessment = Score.objects.filter(score_max__gte=student_score_total, score_min__lte=student_score_total).values('id', 'assesment').first()
 
                     student = Student.objects.filter(id=student_id).first()
-
-                    # Өмнө нь дүн орчихсон байвал update хийнэ
-                    if student_score:
-                         student_score.update(
-                            teach_score=student_teacher_score if student_teacher_score else 0,
-                            exam_score=student_exam_score if student_exam_score else 0,
-                            assessment_id=assessment['id'] if assessment else None,
-                            grade_letter=GradeLetter.objects.get(pk=grade_letter) if grade_letter else None,
-                            status=ScoreRegister.TEACHER_WEB,
-                        )
-                    else:
-                        ScoreRegister.objects.create(
-                            lesson_year=lesson_year,
-                            lesson_season_id=lesson_season,
-                            lesson_id=lesson,
-                            student_id=student_id,
-                            grade_letter=GradeLetter.objects.get(pk=grade_letter) if grade_letter else None,
-                            teach_score=student_teacher_score if student_teacher_score else 0,
-                            exam_score=student_exam_score if student_exam_score else 0,
-                            teacher_id=teacher,
-                            assessment_id=assessment['id'] if assessment else None,
-                            status=ScoreRegister.TEACHER_WEB,
-                            school=student.school if student else None
-                        )
-
-                # Дүнгүй оюутнууд
-                not_score_students = list(set(all_timetable_student_ids) - set(have_score_students))
-
-                # Багшаас дүн аваагүй ч хуваарьт байгаа оюутнуудыг create хийх
-                if not_score_students:
-                    # OTU дээр нэг удаа буруу дүн татсанаас болж бичигдсэн код
-                    delete_students = ScoreRegister.objects.filter(lesson_year=lesson_year, lesson_season=lesson_season, student__in=not_score_students, lesson=lesson)
-                    if len(delete_students) > 0:
-                        delete_students.delete()
+                    if not not_update_score:
+                        # Өмнө нь дүн орчихсон байвал update хийнэ
+                        if student_score:
+                            student_score.update(
+                                teach_score=student_teacher_score if student_teacher_score else 0,
+                                exam_score=student_exam_score if student_exam_score else 0,
+                                assessment_id=assessment['id'] if assessment else None,
+                                grade_letter=GradeLetter.objects.get(pk=grade_letter) if grade_letter else None,
+                                status=ScoreRegister.TEACHER_WEB,
+                            )
+                        else:
+                            ScoreRegister.objects.create(
+                                lesson_year=lesson_year,
+                                lesson_season_id=lesson_season,
+                                lesson_id=lesson,
+                                student_id=student_id,
+                                grade_letter=GradeLetter.objects.get(pk=grade_letter) if grade_letter else None,
+                                teach_score=student_teacher_score if student_teacher_score else 0,
+                                exam_score=student_exam_score if student_exam_score else 0,
+                                teacher_id=teacher,
+                                assessment_id=assessment['id'] if assessment else None,
+                                status=ScoreRegister.TEACHER_WEB,
+                                school=student.school if student else None
+                            )
 
         return request.send_info("INF_001")
 
