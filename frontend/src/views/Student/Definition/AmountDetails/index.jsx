@@ -212,7 +212,7 @@ export default function AmountDetails()
                                                                 {
                                                                     lesson?.grade_letter
                                                                     ?
-                                                                    <td className="border-dark" colSpan={2}>
+                                                                    <td className="border-dark" colSpan={3}>
                                                                         {lesson?.grade_letter}
                                                                     </td>
                                                                     :
@@ -223,11 +223,11 @@ export default function AmountDetails()
                                                                         <td className="border-dark">
                                                                             {lesson?.assessment}
                                                                         </td>
+                                                                        <td className="border-dark">
+                                                                            {chanarHandler(lesson?.lesson_kr, lesson?.gpa)}
+                                                                        </td>
                                                                     </>
                                                                 }
-                                                                <td className="border-dark">
-                                                                    {chanarHandler(lesson?.lesson_kr, lesson?.gpa)}
-                                                                </td>
                                                             </tr>
                                                         :
                                                             <tr key={lidx}>

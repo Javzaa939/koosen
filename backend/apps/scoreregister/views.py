@@ -1304,11 +1304,12 @@ class ScoreRegisterPrintAPIView(
                 })
 
                 total_kr = total_kr + eachScore.lesson.kredit
-                onoo = onoo + total_scores * eachScore.lesson.kredit
-                total_gpa_scores = total_gpa_scores + (gpa * eachScore.lesson.kredit)
 
-                if eachScore.grade_letter:
+                if eachScore.grade_letter and eachScore.grade_letter.letter == 'S':
                     total_skr_count = total_skr_count + eachScore.lesson.kredit
+                else:
+                    onoo = onoo + total_scores * eachScore.lesson.kredit
+                    total_gpa_scores = total_gpa_scores + (gpa * eachScore.lesson.kredit)
 
             # дундаж олох нь
             if onoo != 0:
