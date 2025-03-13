@@ -5144,6 +5144,8 @@ class QuestionsTitleListAPIView(
 
         if lesson:
             self.queryset = self.queryset.filter(lesson=lesson)
+        
+        print(self.queryset)
 
         if season == 'false':
             self.queryset = self.queryset.filter(is_season=False)

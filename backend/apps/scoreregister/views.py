@@ -1300,7 +1300,7 @@ class ScoreRegisterPrintAPIView(
                     "assessment":assessments if assessments else '',
                     "status_num":status_num if status_num else 0,
                     "gpa": gpa,
-                    'grade_letter': eachScore.grade_letter.description if eachScore.grade_letter else ''
+                    'grade_letter': eachScore.grade_letter.letter if eachScore.grade_letter else ''
                 })
 
                 total_kr = total_kr + eachScore.lesson.kredit
@@ -2089,6 +2089,10 @@ class TeacherScoreRegisterListAPIView(
                 total_score = teach_score_qs.filter(student=student_id).filter(score_type__score_type__in=[Lesson_teacher_scoretype.BUSAD, Lesson_teacher_scoretype.QUIZ1]).aggregate(total=Sum('score')).get('total') or 0
                 exam_score = teach_score_qs.filter(student=student_id).filter(score_type__score_type=Lesson_teacher_scoretype.SHALGALT_ONOO).aggregate(total=Sum('score')).get('total') or 0
                 grade_letter = teach_score_qs.filter(student=student_id).values_list('grade_letter', flat=True).first()
+
+                if round(exam_score) < 18:
+                    grade_letter = GradeLetter.objects.filter(letter='W').values_list('id', flat=True).first()
+                    exam_score = 0
 
                 obj['student'] = student_id
                 obj['teach_score'] = total_score
