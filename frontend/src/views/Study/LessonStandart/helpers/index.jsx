@@ -93,7 +93,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 							<a role="button" onClick={() => { handleScoreEdit(row)}} id={`groupScoreEdit${row?.id}`} className="me-1">
 								<Badge color="light-secondary" pill><Edit2  width={"15px"}/></Badge>
 							</a>
-							<UncontrolledTooltip placement='top' target={`groupScoreEdit${row.id}`} >Дүн засах</UncontrolledTooltip>
+							<UncontrolledTooltip placement='top' target={`groupScoreEdit${row.id}`} >Дүн шилжүүлэх</UncontrolledTooltip>
 						</>
 					}
 
