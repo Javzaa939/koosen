@@ -41,6 +41,7 @@ import { getColumns } from './helpers'
 
 import Addmodal from './Add'
 import excelDownload from '@src/utility/excelDownload'
+import GroupEditScore from './GroupEditScore'
 
 const LessonStandart = () => {
 
@@ -81,6 +82,8 @@ const LessonStandart = () => {
     const [lessonCategory_option, setLessonCategory_option] = useState ([])
     const [dep_id, setDepId] = useState('')
     const [category_id, setCategoryId] = useState('')
+    const [isEditScore, setIsEditScore] = useState(false)
+    const [rowData, setRowData] = useState({})
 
     // Apib
     const lessonStandartApi = useApi().study.lessonStandart
@@ -151,6 +154,11 @@ const LessonStandart = () => {
     const editModal = (id) => {
         /** NOTE Засах гэж буй хичээлийн стандартын id-г авна */
         navigate(`/study/lessonStandart/${id}/?searchValue=${searchValue}`)
+    }
+
+    function handleScoreEdit(rowData) {
+        setIsEditScore(!isEditScore)
+        setRowData(rowData)
     }
 
     // ** Function to handle filter
@@ -375,7 +383,7 @@ const LessonStandart = () => {
                         )}
                         onSort={handleSort}
                         sortIcon={<ChevronDown size={10} />}
-                        columns={getColumns(currentPage, rowsPerPage, total_count, editModal, handleDelete, user)}
+                        columns={getColumns(currentPage, rowsPerPage, total_count, editModal, handleDelete, user, handleScoreEdit)}
                         paginationPerPage={rowsPerPage}
                         paginationDefaultPage={currentPage}
                         paginationComponent={getPagination(handlePagination, currentPage, rowsPerPage, total_count)}
@@ -386,6 +394,10 @@ const LessonStandart = () => {
                 </div>
             </Card>
             {modal && <Addmodal open={modal} handleModal={handleModal} refreshDatas={getDatas} />}
+            {
+                isEditScore &&
+                <GroupEditScore open={isEditScore} handleModal={() => {setIsEditScore(!isEditScore), setRowData({})}} dep_id={dep_id} rowData={rowData} />
+            }
         </Fragment>
     )
 }

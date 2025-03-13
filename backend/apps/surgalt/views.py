@@ -7170,3 +7170,160 @@ class LessonStandartExamListAPIView(
 
         all_data = self.queryset.filter(id__in=lesson_standarts).values('id', 'code', 'name')
         return request.send_data(list(all_data))
+
+
+
+@permission_classes([IsAuthenticated])
+class LessonStandartGroupScoreAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin
+):
+    """ Дүн гарсан ангийн хичээлийг шинэчлэх """
+
+    queryset = LessonStandart.objects.all()
+    serializer_class = LessonStandartSerializer
+
+    def get(self, request, pk=None):
+
+        filters = dict()
+
+        level = request.query_params.get('level')
+
+        if level and level != '7':
+            filters['level'] = level
+
+        score_req = ScoreRegister.objects.filter(lesson=pk)
+
+        group_ids = score_req.values_list('student__group_id', flat=True)
+
+        count_qs = (
+            score_req
+            .filter(
+                Q(student__group=OuterRef('pk')),
+                Q(
+                    Q(student__status__name__icontains='Суралцаж буй') |
+                    Q(student__status__name__icontains='Суралцаж байгаа')
+                ),
+            )
+            .values('student__group')
+            .order_by('student__group')
+            .annotate(
+                totals=Count('student__group')
+            )
+            .values('totals')
+        )
+
+        group_datas = (
+            Group
+            .objects
+            .filter(pk__in=group_ids, **filters)
+            .annotate(
+                active_student_count=Subquery(count_qs),
+            )
+            .filter(active_student_count__gt=0)
+        )
+
+        return_datas = {
+            "groups": list(group_datas.values('id', 'name', 'active_student_count', 'level')) if group_datas.exists() else [],
+            "levels": list(group_datas.values_list('level', flat=True).distinct()) if group_datas.exists() else [],
+        }
+
+        return request.send_data(return_datas)
+
+    @transaction.atomic()
+    def put(self, request, pk=None):
+
+        data = request.data
+        groups = data.get('group')
+        cources = data.get('cources')
+        new_lesson = data.get('lesson')
+
+        filters = dict()
+        level_filters = Q()
+
+        print(groups)
+
+        if groups:
+            filters['student__group__id__in'] = groups
+
+        if cources:
+            for cource in cources:
+                level_filters |= Q(student__group__level=cource)
+
+        try:
+            score_register_qs = (
+                ScoreRegister
+                .objects
+                .filter(
+                    Q(
+                        lesson=pk,
+                        **filters
+                    ),
+                    level_filters
+                )
+            )
+
+            if score_register_qs.exists():
+                user = request.user
+                score_register_qs.update(
+                    lesson=new_lesson,
+                    updated_user=user
+                )
+
+            return request.send_info("INF_002", score_register_qs.count())
+
+        except Exception as e:
+            return request.send_error("ERR_002", e.__str__())
+
+
+@permission_classes([IsAuthenticated])
+class LessonSearchAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin
+):
+    queryset = LessonStandart.objects
+    serializer_class = LessonStandartSerialzier
+
+    def get(self, request):
+        """ Оюутны жагсаалт
+        """
+        school = request.query_params.get('school')
+        state = request.query_params.get('state')
+
+        if state == '2':
+            qs_start = (int(state) - 2) * 10
+            qs_filter = int(state) * 10
+        else:
+            qs_start = (int(state) - 1) * 10
+            qs_filter = int(state) * 10
+
+        if school:
+            self.queryset = self.queryset.filter(school=school)
+
+        self.queryset = self.queryset.order_by('id')[qs_start:qs_filter]
+        return_datas = self.list(request).data
+
+        return request.send_data(return_datas)
+
+
+@permission_classes([IsAuthenticated])
+class LessonSearchStudentAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin
+):
+    queryset = LessonStandart.objects
+    serializer_class = LessonStandartSerialzier
+    filter_backends = [SearchFilter]
+    search_fields = ['code', 'name']
+    def get(self, request):
+        """ Оюутны жагсаалт
+        """
+        school = request.query_params.get('school')
+        search = request.query_params.get('search')
+
+        if school:
+            self.queryset = self.queryset.filter(Q(school=school))
+
+        return_datas = self.list(request).data
+
+        return request.send_data(return_datas)

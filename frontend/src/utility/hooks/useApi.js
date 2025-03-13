@@ -399,7 +399,13 @@ function useApi(isDisplay=false) {
 					post: data => instance.post('/learning/lessonstandart/titleplan/', data),
 					put: (data, pk,lessonID) => instance.put(`/learning/lessonstandart/titleplan/${lessonID}/${pk}/`, data),
 					getOne: (lessonID) => instance.get(`/learning/lessonstandart/titleplan/${lessonID}/`),
-				}
+				},
+				getGroup: (lesson, cource) => instance.get(`/learning/lessonstandart/group/score/${lesson}/?level=${cource}`),
+				updateGroupScore: (lesson, data) => instance.put(`/learning/lessonstandart/group/score/${lesson}/`, data),
+				getSearchList: (search, school_id = '') => instance.get(`learning/lessonstandart/search/?sSschool=${school_id}&search=${search}`),
+				getSelectLessons: (state, school_id = '', is_active='') => instance.get(`learning/lessonstandart/select_bottom/?state=${state}&is_active=${is_active}&school_id=${school_id}`),
+
+
 			},
 			/** Хичээлийн тодорхойлолт */
 			professionDefinition: {

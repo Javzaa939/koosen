@@ -23,6 +23,9 @@ urlpatterns = [
     path('lessonstandart/titleplan/<int:lessonID>/', LessonTitlePlanAPIView.as_view()),
     path('lessonstandart/titleplan/<int:lessonID>/<int:pk>/', LessonTitlePlanAPIView.as_view()),
 
+    path('lessonstandart/select_bottom/', LessonSearchAPIView.as_view()),
+    path('lessonstandart/search/', LessonSearchStudentAPIView.as_view()),
+
     # Мэргэжлийн тодорхойлолт
     path('profession/', ProfessionDefinitionAPIView.as_view()),
     path('profession/<int:pk>/', ProfessionDefinitionAPIView.as_view()),
@@ -171,4 +174,7 @@ urlpatterns = [
     path('challenge/analysis/', AnalysisApiView.as_view()),
     path('challenge/analysis2/', Analysis2ApiView.as_view()),
     path('challenge/details/table/', ChallengeDetailTableApiView.as_view()),
+
+    path('lessonstandart/group/score/<int:pk>/', LessonStandartGroupScoreAPIView.as_view()),
+    path('lessonstandart/group/score/', LessonStandartGroupScoreAPIView.as_view()),
 ]
