@@ -520,6 +520,10 @@ class GroupListNoLimitAPIView(
 
                             # Хичээлийн нэр авах хэсэг
                             lesson_name = lesson_standart__code_name(score["lesson__code"], score["lesson__name"])
+                            # Шалгалтадаа унасан гэж үзнэ
+                            if score["exam_score"] < 18:
+                                score["assessment__assesment"]  = 'F'
+                                score["exam_score"] = 0
 
                             # Хичээлийн дүн авах хэсэг
                             total = score_register__score_total(score["teach_score"], score["exam_score"])
@@ -1722,6 +1726,11 @@ class GroupListNoLimitAllAPIView(
 
                                 # Хичээлийн нэр авах хэсэг
                                 lesson_name = lesson_standart__code_name(score["lesson__code"], score["lesson__name"])
+
+                                # Шалгалтадаа унасан гэж үзнэ
+                                if score["exam_score"] < 18:
+                                    score["assessment__assesment"]  = 'F'
+                                    score["exam_score"] = 0
 
                                 # Хичээлийн дүн авах хэсэг
                                 total = score_register__score_total(score["teach_score"], score["exam_score"])
