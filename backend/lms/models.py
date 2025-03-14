@@ -4533,6 +4533,84 @@ class LessonMaterial(models.Model):
     created_at = models.DateTimeField(auto_created=True, verbose_name='Үүсгэсэн огноо')
 
 
+
+
+class HomeWork(models.Model):
+    """ Гэрийн даалгавар """
+
+    description = models.TextField(verbose_name='Тайлбар')
+    start_date = models.DateTimeField(verbose_name='Эхлэх хугацаа', null=True)
+    end_date = models.DateTimeField(verbose_name='Дуусах хугацаа', null=True)
+    score = models.FloatField(verbose_name='Дүгнэх огноо', null=True)
+    file = models.FileField(verbose_name='Гэрийн даалгаварт хавсаргах файл', null=True,  upload_to='homework')
+    created_user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Материал оруулсан хэрэглэгч')
+    created_at = models.DateTimeField(auto_created=True, verbose_name='Үүсгэсэн огноо')
+
+
+class Seminar(models.Model):
+    """ Семинарын даалгавар """
+
+    description = models.TextField(verbose_name='Тайлбар')
+    start_date = models.DateTimeField(verbose_name='Эхлэх хугацаа', null=True)
+    end_date = models.DateTimeField(verbose_name='Дуусах хугацаа', null=True)
+    score = models.FloatField(verbose_name='Дүгнэх огноо', null=True)
+    file = models.FileField(verbose_name='Семинарт хавсаргах файл', null=True,  upload_to='homework')
+    created_user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Семинар оруулсан хэрэглэгч')
+    created_at = models.DateTimeField(auto_created=True, verbose_name='Үүсгэсэн огноо')
+
+
+class SeminarStudent(models.Model):
+    """ Семинарын оюутнууд"""
+
+    SEND = 1
+    CHECKED = 2
+
+    ASSIGNMENT_TYPE = (
+        (SEND, 'Илгээсэн'),
+        (CHECKED, 'Дүгнэгдсэн'),
+    )
+
+    homework = models.ForeignKey(Seminar, on_delete=models.CASCADE, verbose_name="Гэрийн даалгавар")
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, verbose_name="Оюутан")
+    status = models.IntegerField(choices=ASSIGNMENT_TYPE, db_index=True, default=SEND, verbose_name="Даалгаврын төрөл", null=True)
+    score = models.FloatField(verbose_name='Дүгнэгдсэн оноо', null=True)
+    score_comment = models.TextField(verbose_name='Дүгнэх үеинй тайлбар', null=True)
+    send_file = models.FileField(verbose_name='Илгээсэн файл', upload_to='seminar', null=True)
+    description = models.TextField(verbose_name='Тайлбар', null=True)
+    created_at = models.DateTimeField(auto_now=True, verbose_name='Үүсгэсэн огноо')
+
+
+
+class HomeWorkStudent(models.Model):
+    """ Гэрийн даалгавар оюутнууд"""
+
+    SEND = 1
+    CHECKED = 2
+
+    ASSIGNMENT_TYPE = (
+        (SEND, 'Илгээсэн'),
+        (CHECKED, 'Дүгнэгдсэн'),
+    )
+
+    homework = models.ForeignKey(HomeWork, on_delete=models.CASCADE, verbose_name="Гэрийн даалгавар")
+    student = models.ForeignKey(Student, on_delete=models.CASCADE, verbose_name="Оюутан")
+    status = models.IntegerField(choices=ASSIGNMENT_TYPE, db_index=True, default=SEND, verbose_name="Даалгаврын төрөл", null=True)
+    score = models.FloatField(verbose_name='Дүгнэгдсэн оноо', null=True)
+    score_comment = models.TextField(verbose_name='Дүгнэх үеинй тайлбар', null=True)
+    send_file = models.FileField(verbose_name='Илгээсэн файл', upload_to='homework', null=True)
+    description = models.TextField(verbose_name='Тайлбар', null=True)
+    created_at = models.DateTimeField(auto_now=True, verbose_name='Үүсгэсэн огноо')
+
+
+class WeekMaterials(models.Model):
+    """ Тухайн 7 хоногт оруулах файлууд """
+
+    is_leks = models.BooleanField(default=True, verbose_name='Лекц эсэх')
+    description = models.TextField(verbose_name='Тайлбар')
+    material = models.ForeignKey(LessonMaterial, on_delete=models.CASCADE, verbose_name='Хичээлийн материал')
+    created_at = models.DateTimeField(auto_now=True)
+
+
 class OnlineLesson(models.Model):
     """ Цахим хичээл """
 
@@ -4580,9 +4658,85 @@ class OnlineSubInfo(models.Model):
     file_type = models.IntegerField(choices=MATERIAL_TYPE, default=TEXT, verbose_name='Материалын төрөл')
     text = models.TextField(null=True, verbose_name='ТEXT төрлийн мэдээлэл')
     file = models.FileField(null=True, verbose_name='ФАЙЛ төрлийн мэдээлэл')
-    # quiz = models.ForeignKey(QuezChallenge, verbose_name='Цахим сургалтын сорил шалгалт')
-    is_finish = models.BooleanField(default=False, verbose_name='Хичээлийг дууссан эсэх')
+    quiz = models.ForeignKey(QuezQuestions, on_delete=models.CASCADE, verbose_name='Цахим сургалтын сорил шалгалт')
 
+
+class OnlineWeek(models.Model):
+    """ Цахим хичээлийн 7 хоног """
+
+    LEKTS_SHOW = 1
+    CHALLENGE = 2
+    HOMEWORK = 3
+    SHOW_TYPE = (
+        (LEKTS_SHOW, "Лекц үзснээр тооцох"),
+        (CHALLENGE, "Шалгалт үзсэнээр"),
+        (HOMEWORK, "Гэрийн даалгавар, семинар ажил хийснээр")
+    )
+
+    week_number = models.IntegerField(verbose_name='7 хоногийн дугаар')
+    start_date = models.DateTimeField(null=True, verbose_name='Тухайн хичээлийн эхлэх хугацаа')
+    end_date = models.DateTimeField(null=True, verbose_name='Тухайн хичээлийн дуусах хугацаа')
+    is_lock = models.BooleanField(verbose_name='Өмнөх 7 хоногийн хичээлээс хамаарах')
+    before_week = models.ForeignKey("self", null=True, on_delete=models.CASCADE, verbose_name='Хамаарах өмнөх 7 хоног')
+    showed_type = models.IntegerField(choices=SHOW_TYPE, default=CHALLENGE, verbose_name='Хичээл үзсэнээр тооцох төрөл')
+    challenge = models.ForeignKey(Challenge, on_delete=models.SET_NULL, null=True, verbose_name='7 хоногийн шалгалт')
+    homework = models.ForeignKey(HomeWork, on_delete=models.SET_NULL, null=True, verbose_name='Гэрийн даалгавар')
+    challenge_check_score = models.FloatField(null=True, verbose_name='Шалгалтаар тооцох оноо')
+
+    description = models.CharField(verbose_name='Тайлбар', max_length=1000, null=True)
+    lekts_file = models.FileField(verbose_name='Лекцийн материал', null=True)
+    materials = models.ManyToManyField(WeekMaterials, verbose_name='Тухайн 7 хоногийн материалууд')
+
+    work_type = models.IntegerField(choices=HomeWorkStudent.ASSIGNMENT_TYPE, db_index=True, default=HomeWorkStudent.CHECKED, verbose_name="Даалгаврын тооцох төрөл", null=True)
+
+    created_user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Үүсгэсэн хэрэглэгч', null=True)
+    created_at = models.DateTimeField(auto_now=True)
+
+
+class OnlineWeekStudent(models.Model):
+    """ Оюутны лекцийн материал хадгалах хэсэг """
+    SEND = 1
+    CHECKED = 2
+
+    ASSIGNMENT_TYPE = (
+        (SEND, 'Илгээсэн'),
+        (CHECKED, 'Дүгнэгдсэн'),
+    )
+    week = models.ForeignKey(OnlineWeek, verbose_name='7 хоног', on_delete=models.CASCADE)
+    student = models.ForeignKey(Student, verbose_name='Оюутан', on_delete=models.CASCADE)
+    lekts_file = models.FileField(upload_to='student_lekts', verbose_name='Лекцийн материал хөтөлсөн зураг', null=True)
+    status = models.IntegerField(choices=ASSIGNMENT_TYPE, db_index=True, default=SEND, verbose_name="Лекцийн материал төрөл", null=True)
+    created_at = models.DateTimeField(auto_now=True, verbose_name='Үүсгэсэн огноо')
+
+
+class BiyDaalt(models.Model):
+    """ Бие даалт """
+
+    guidelines = models.TextField(verbose_name='Удирдамж', null=True)
+    check_week = models.ForeignKey(OnlineWeek, verbose_name='Шалгах 7 хоног', on_delete=models.CASCADE)
+    score = models.FloatField(verbose_name='Дүгнэх огноо', null=True)
+    file = models.FileField(verbose_name='Хавсаргах файл', null=True,  upload_to='biydaalt')
+
+    created_user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Бие даалт оруулсан хэрэглэгч')
+    created_at = models.DateTimeField(auto_created=True, verbose_name='Үүсгэсэн огноо')
+
+
+class BiyDaaltStudent(models.Model):
+    """ Бие даалт """
+
+    SEND = 1
+    CHECKED = 2
+
+    ASSIGNMENT_TYPE = (
+        (SEND, 'Илгээсэн'),
+        (CHECKED, 'Дүгнэгдсэн'),
+    )
+
+    biydaalt = models.ForeignKey(BiyDaalt, verbose_name='7 хоног', on_delete=models.CASCADE)
+    student = models.ForeignKey(Student, verbose_name='Оюутан', on_delete=models.CASCADE)
+    file = models.FileField(upload_to='student_biydaalt', verbose_name='Оюутны илгээсэн файл', null=True)
+    status = models.IntegerField(choices=ASSIGNMENT_TYPE, db_index=True, default=SEND, verbose_name="Бие даалтын төрөл", null=True)
+    created_at = models.DateTimeField(auto_now=True, verbose_name='Үүсгэсэн огноо')
 
 
 class Announcement(models.Model):
