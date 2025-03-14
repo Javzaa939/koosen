@@ -38,7 +38,7 @@ import { validateSchema } from '../../validateSchema';
 const MainInformation = ({ getNavigateData }) => {
 
     // ** Hook
-    const { control, handleSubmit, reset, setError, setValue, formState: { errors } } = useForm(validate(validateSchema));
+    const { control, handleSubmit, reset, setError, setValue, formState: { errors } } = useForm();
 
     const [category_option, setCategoryOption] = useState([])
     const [school_option, setSchoolOption] = useState([])
