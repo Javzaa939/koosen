@@ -4611,7 +4611,7 @@ class WeekMaterials(models.Model):
     created_at = models.DateTimeField(auto_now=True)
 
 
-class OnlineLesson(models.Model):
+class ELearn(models.Model):
     """ Цахим хичээл """
 
     lesson = models.ForeignKey(LessonStandart, on_delete=models.CASCADE, verbose_name='Хичээл', null=True)
@@ -4633,6 +4633,7 @@ class OnlineLesson(models.Model):
 
 
 class OnlineInfo(models.Model):
+    elearn = models.ForeignKey(ELearn, on_delete=models.CASCADE, verbose_name='Цахим хичээл', null=True)
     title = models.TextField(null=True, verbose_name='Хичээлийн нэр гарчиг')
     related_info = models.ForeignKey("self", null=True, on_delete=models.CASCADE, verbose_name='Өмнөх хичээлээс хамаарах эсэх')
 
@@ -4691,6 +4692,33 @@ class OnlineWeek(models.Model):
 
     created_user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Үүсгэсэн хэрэглэгч', null=True)
     created_at = models.DateTimeField(auto_now=True)
+
+
+class OnlineLesson(models.Model):
+    """ Цахим хичээл """
+
+    WEEK = 1
+    DATE = 2
+
+    CREATE_TYPE = (
+        (WEEK, "Долоо хоног"),
+        (DATE, "Хугацаагаар"),
+    )
+
+    lesson = models.ForeignKey(LessonStandart, on_delete=models.CASCADE, verbose_name='Хичээл', null=True)
+    teacher = models.ForeignKey(Teachers, on_delete=models.CASCADE, verbose_name='Багш', null=True)
+    create_type = models.IntegerField(choices=CREATE_TYPE, default=WEEK, verbose_name='Үүсгэх төрөл')
+    students = models.ManyToManyField(Student, verbose_name='Хичээл үзэх оюутнууд')
+    total_score = models.FloatField(verbose_name='Нийт үнэлэх оноо', null=True)
+    start_date = models.DateTimeField(null=True, verbose_name='Эхлэх хугацаа')
+    end_date = models.DateTimeField(null=True, verbose_name='Дуусах хугацаа')
+    is_end_exam = models.BooleanField(default=True, verbose_name='Төгсөлтийн шалгалттай эсэх')
+    is_certificate = models.BooleanField(default=False, verbose_name='Сертификаттай эсэх')
+    plan = models.TextField(verbose_name='Сургалтын төлөвлөгөө', null=True)
+    weeks = models.ManyToManyField(OnlineWeek, blank=True, verbose_name='7 хоногууд')
+
+    created_user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Үүсгэсэн хэрэглэгч', null=True)
+    created_at = models.DateTimeField(auto_now=True, null=True)
 
 
 class OnlineWeekStudent(models.Model):
