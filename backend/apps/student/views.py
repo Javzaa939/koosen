@@ -551,7 +551,6 @@ class StudentRegisterAPIView(
                 # Оюутны код давхцаж байвал
                 student_code = generate_student_code(school_id, group)
 
-            print(student_code)
             data['code'] = student_code
 
         if 'gender' in data and not data.get('gender'):
@@ -562,9 +561,19 @@ class StudentRegisterAPIView(
         try:
             serializer = self.serializer_class(data=data, many=False)
             if not serializer.is_valid():
-                print(serializer.errors)
+                error_obj = []
                 transaction.savepoint_rollback(sid)
-                return request.send_error_valid(serializer.errors)
+                for key in serializer.errors:
+
+                    return_error = {
+                        "field": key,
+                        "msg": serializer.errors[key]
+                    }
+
+                    error_obj.append(return_error)
+
+                if len(error_obj) > 0:
+                    return request.send_error("ERR_003", error_obj)
 
             # Оюутан бүртгүүлэх үед оюутны нэвтрэх нэр нууц үгийг хадгалах хэсэг
             password = regnum[-8:]

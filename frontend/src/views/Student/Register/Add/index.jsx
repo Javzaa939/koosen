@@ -363,6 +363,7 @@ const Addmodal = ({ open, handleModal, refreshDatas }) => {
                                     />
                                 )}
                             />
+                            {errors.code && <FormFeedback className='d-block'>{errors.code.message}</FormFeedback>}
                         </Col>
                         <Col lg={6} xs={12}>
                             <Label className="form-label" for="family_name">
