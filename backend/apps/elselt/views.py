@@ -33,6 +33,7 @@ from main.utils.function.utils import (
     send_message_gmobile,
     send_message_mobicom,
     calculate_birthday,
+    str2bool
 )
 
 from main.utils.function.pagination import CustomPagination
@@ -129,6 +130,15 @@ class ElseltApiView(
     pagination_class = CustomPagination
 
     def get(self, request):
+        join_year = request.query_params.get('lesson_year')
+        is_store = request.query_params.get('is_store')
+
+        if join_year:
+            self.queryset = self.queryset.filter(lesson_year=join_year)
+
+        if is_store:
+            self.queryset = self.queryset.filter(is_store=str2bool(is_store))
+
         datas = self.list(request).data
         return request.send_data(datas)
 
@@ -181,7 +191,7 @@ class ElseltProfession(
 ):
     """ Элсэлтийн мэргэжил """
 
-    queryset = AdmissionRegisterProfession.objects.all()
+    queryset = AdmissionRegisterProfession.objects.all().filter(admission__is_store=False)
     serializer_class = AdmissionProfessionSerializer
 
     def get(self, request):
@@ -296,7 +306,7 @@ class ElseltActiveListProfession(
 ):
     """ Идэвхитэй элсэлтийн мэргэжил """
 
-    queryset = AdmissionRegisterProfession.objects.all()
+    queryset = AdmissionRegisterProfession.objects.all().filter(admission__is_store=False)
     serializer_class = AdmissionActiveProfession
 
     def get(self, request):
@@ -457,7 +467,7 @@ class AdmissionUserInfoAPIView(
     mixins.RetrieveModelMixin,
 ):
 
-    queryset = AdmissionUserProfession.objects.all().order_by('created_at')
+    queryset = AdmissionUserProfession.objects.all().order_by('created_at').filter(profession__admission__is_store=False)
 
     serializer_class = AdmissionUserInfoSerializer
     pagination_class = CustomPagination
@@ -613,7 +623,7 @@ class AdmissionUserAllChange(
     mixins.UpdateModelMixin
 ):
 
-    queryset = AdmissionUserProfession.objects.all()
+    queryset = AdmissionUserProfession.objects.all().filter(profession__admission__is_store=False)
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
@@ -661,7 +671,7 @@ class AdmissionUserEmailAPIView(
     mixins.ListModelMixin
 ):
 
-    queryset = EmailInfo.objects.all().order_by('send_date')
+    queryset = EmailInfo.objects.all().order_by('send_date').filter(user__admissionuserprofession__profession__admission__is_store=False)
     serializer_class = EmailInfoSerializer
 
     pagination_class = CustomPagination
@@ -818,7 +828,7 @@ class AdmissionYearAPIView(
     mixins.ListModelMixin,
 ):
 
-    queryset = AdmissionRegister.objects.all()
+    queryset = AdmissionRegister.objects.all().filter(is_store=False)
     serializer_class = AdmissionSerializer
 
     def get(self, request):
@@ -831,7 +841,7 @@ class AdmissionYearActiveAPIView(
     mixins.ListModelMixin,
 ):
 
-    queryset = AdmissionRegister.objects.all()
+    queryset = AdmissionRegister.objects.all().filter(is_store=False)
     serializer_class = AdmissionSerializer
 
     def get(self, request):
@@ -865,7 +875,7 @@ class DashboardAPIView(
 ):
     """ Дашбоард мэдээлэл """
 
-    queryset = AdmissionUserProfession.objects.all()
+    queryset = AdmissionUserProfession.objects.all().filter(profession__admission__is_store=False)
     def get(self, request):
         elselt = request.query_params.get('elselt')
 
@@ -923,7 +933,7 @@ class DashboardExcelAPIView(
 ):
     """ Дашбоард тайлан """
 
-    queryset = AdmissionUserProfession.objects.all()
+    queryset = AdmissionUserProfession.objects.all().filter(profession__admission__is_store=False)
 
     def get(self, request):
         # Profession Definition-ний id-г хадгална
@@ -1191,7 +1201,7 @@ class ElseltHealthAnhanShat(
     mixins.DestroyModelMixin
 ):
 
-    queryset = AdmissionUserProfession.objects.all()
+    queryset = AdmissionUserProfession.objects.all().filter(profession__admission__is_store=False)
 
     serializer_class = HealthUserDataSerializer
     pagination_class = CustomPagination
@@ -1393,7 +1403,7 @@ class ElseltHealthProfessional(
     mixins.DestroyModelMixin
 ):
 
-    queryset = HealthUser.objects.all().order_by('created_at')
+    queryset = HealthUser.objects.all().order_by('created_at').filter(user__admissionuserprofession__profession__admission__is_store=False)
 
     serializer_class = HealthUpUserInfoSerializer
     pagination_class = CustomPagination
@@ -1579,7 +1589,7 @@ class ElseltHealthPhysical(
     mixins.DestroyModelMixin
 ):
 
-    queryset = AdmissionUserProfession.objects.all().order_by('created_at')
+    queryset = AdmissionUserProfession.objects.all().order_by('created_at').filter(profession__admission__is_store=False)
 
     serializer_class = HealthPhysicalUserInfoSerializer
     physique_serializer_class = PhysqueUserSerializer
@@ -1966,7 +1976,7 @@ class ElseltStateApprove(
 ):
     """ Элсэгч бүх шалгуурыг даваад тэнцсэн """
 
-    queryset = AdmissionUserProfession.objects.all()
+    queryset = AdmissionUserProfession.objects.all().filter(profession__admission__is_store=False)
     serializer_class = ElseltApproveSerializer
 
     pagination_class = CustomPagination
@@ -2387,7 +2397,7 @@ class AdmissionUserMessageAPIView(
     mixins.ListModelMixin
 ):
 
-    queryset = MessageInfo.objects.all().order_by('send_date')
+    queryset = MessageInfo.objects.all().order_by('send_date').filter(user__admissionuserprofession__profession__admission__is_store=False)
     serializer_class = MessageInfoSerializer
 
     pagination_class = CustomPagination
@@ -2538,7 +2548,7 @@ class AdmissionJusticeListAPIView(
     mixins.RetrieveModelMixin,
 ):
 
-    queryset = AdmissionUserProfession.objects.all().order_by('created_at')
+    queryset = AdmissionUserProfession.objects.all().order_by('created_at').filter(profession__admission__is_store=False)
 
     serializer_class = AdmissionUserInfoSerializer
     pagination_class = CustomPagination
@@ -2646,7 +2656,7 @@ class ConversationUserSerializerAPIView(
     mixins.RetrieveModelMixin,
     mixins.DestroyModelMixin):
 
-    queryset = AdmissionUserProfession.objects.all().order_by('created_at')
+    queryset = AdmissionUserProfession.objects.all().order_by('created_at').filter(profession__admission__is_store=False)
     serializer_class = ConversationUserInfoSerializer
 
     pagination_class = CustomPagination
@@ -2771,7 +2781,7 @@ class ArmyUserSerializerAPView(
     mixins.RetrieveModelMixin,
     mixins.DestroyModelMixin):
 
-    queryset = AdmissionUserProfession.objects.all().order_by('created_at')
+    queryset = AdmissionUserProfession.objects.all().order_by('created_at').filter(profession__admission__is_store=False)
     serializer_class = ArmyUserInfoSerializer
 
     pagination_class = CustomPagination
@@ -2888,7 +2898,7 @@ class LogSerializerAPView(
     mixins.RetrieveModelMixin
     ):
 
-    queryset = StateChangeLog.objects.all()
+    queryset = StateChangeLog.objects.all().filter(user__admissionuserprofession__profession__admission__is_store=False)
     serializer_class = StateChangeLogInfoSerializer
 
     pagination_class = CustomPagination
@@ -3756,7 +3766,7 @@ class EyeshOrderUserInfoAPIView(
 ):
     """ Элсэгчийн ЭЕШ ийн оноо жагсаалт харуулах """
 
-    queryset = AdmissionUserProfession.objects.all().order_by('order_no')
+    queryset = AdmissionUserProfession.objects.all().order_by('order_no').filter(profession__admission__is_store=False)
 
     serializer_class = EyeshOrderUserInfoSerializer
     pagination_class = CustomPagination
@@ -3858,7 +3868,7 @@ class ElseltMHBExamAPIView(
 ):
     """ Элсэгчийн МХ оноо жагсаалт харуулах """
 
-    queryset = AdmissionUserProfession.objects.all().order_by('-score_avg')
+    queryset = AdmissionUserProfession.objects.all().order_by('-score_avg').filter(profession__admission__is_store=False)
 
     serializer_class = EyeshOrderUserInfoSerializer
     pagination_class = CustomPagination
@@ -4012,7 +4022,7 @@ class AdmissionUserProfessionAPIView(
 ):
     """ Мэргэжлээр нь элсэгчдийг авах """
 
-    queryset = AdmissionUserProfession.objects.all()
+    queryset = AdmissionUserProfession.objects.all().filter(profession__admission__is_store=False)
     def get(self, request):
         profession = request.query_params.get('profession')
 

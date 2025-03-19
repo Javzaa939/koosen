@@ -405,7 +405,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
                                 )}
                             ></Controller>
                         </Col>
-                        <Col md={12} sm={12}>
+                        <Col md={6} sm={12}>
                             <Label className="" for='admission_juram'>
                                 Элсэлтийн журам
                             </Label>
@@ -466,6 +466,29 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
                                     )
                                 }}
                             />
+                        </Col>
+                        <Col md={6}>
+                            <Controller
+                                defaultValue={false}
+                                control={control}
+                                id='is_store'
+                                name='is_store'
+                                render={({ field }) => {
+                                    return (
+                                        <Input
+                                            {...field}
+                                            checked={field.value}
+                                            className='me-50'
+                                            type='checkbox'
+                                            name='is_store'
+                                            id='is_store'
+                                        />
+                                    )
+                                }}
+                            />
+                            <Label className='form-label' for='is_store'>
+                                {t('Өмнөх элсэлт рүү шилжүүлэх эсэх')}
+                            </Label>
                         </Col>
                         <Col md={12} className="mt-2">
                             <Button className="me-2" color="primary" type="submit" disabled={postLoading}>
