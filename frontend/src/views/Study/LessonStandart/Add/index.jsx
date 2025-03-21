@@ -35,7 +35,7 @@ import { t } from 'i18next';
 import AuthContext from '@context/AuthContext'
 import SchoolContext from "@context/SchoolContext"
 
-import { validateSchema } from '../validateSchema';
+import { validateSchema } from './validateSchema';
 
 const Addmodal = ({ open, handleModal, refreshDatas }) => {
 
