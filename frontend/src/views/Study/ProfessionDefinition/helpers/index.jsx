@@ -88,7 +88,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 		{
 			header: 'groups',
 			name: `${t('Бүртгэлтэй дамжаа')}`,
-			selector: (row) => <span title={row?.groups.join(', ')}>{row?.groups.join(', ')}</span>,
+			selector: (row) => <span title={row?.groups?.join(', ')}>{row?.groups?.join(', ')}</span>,
 			minWidth: "450px",
 			maxWidth: "400px",
 			left: true,

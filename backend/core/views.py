@@ -1314,6 +1314,8 @@ class AbleWorkerAPIView(
 ):
     def get(self, request):
         dep_datas = []
+        count = 0
+        employee = None
 
         def find_data_from_list_by_key(list, key, value):
             return next(filter(lambda x: x[key] == value, list), None)
@@ -1332,118 +1334,146 @@ class AbleWorkerAPIView(
 
         dep_url = 'https://uia.able.mn/insight.php/?a=ableApi&tsk=getDeps&key=uia'
         dep_rsp = requests.get(url=dep_url, headers=header)
-        if dep_rsp.status_code == 200:
-            dep_datas = dep_rsp.json()
 
-        if rsp.status_code == 200:
-            datas = rsp.json()
-            count = 0
-            in_count = 0
-            create_datas = []
-            for data in datas:
-                reg_number = data.get('reg_number')
-                last_name = data.get('last_name')
-                first_name = data.get('first_name')
-                position_name = data.get('app_name')
+        try:
+            if dep_rsp.status_code == 200:
+                dep_datas = dep_rsp.json()
 
-                rank_type = data.get('rank_type')
-                rank_name = data.get('rank_name')
-                rank_rate = data.get('rank_rate')
+            if rsp.status_code == 200:
+                datas = rsp.json()
+                count = 0
+                in_count = 0
+                create_datas = []
+                for data in datas:
+                    reg_number = data.get('reg_number')
+                    last_name = data.get('last_name')
+                    first_name = data.get('first_name')
+                    position_name = data.get('app_name')
 
-                personal_mail = data.get('personal_mail')
-                subschool_id = data.get('com_id')
-                dep_id = data.get('dep_id')
-                edu_rank = data.get('edu_rank')
+                    rank_type = data.get('rank_type')
+                    rank_name = data.get('rank_name')
+                    rank_rate = data.get('rank_rate')
 
-                teacher = Teachers.objects.filter(Q(Q(register=reg_number) | Q(user__email__iexact=personal_mail))).first()
-                position = OrgPosition.objects.filter(name__iexact=position_name).first()
-                data['org_position'] = position.id if position else None
+                    personal_mail = data.get('personal_mail')
+                    subschool_id = data.get('com_id')
+                    dep_id = data.get('dep_id')
+                    edu_rank = data.get('edu_rank')
 
-                if teacher:
-                    in_count += 1
-                    teacher.rank_name = rank_name
-                    teacher.rank_type = rank_type
-                    teacher.rank_rate = rank_rate
-                    teacher.save()
+                    teacher = Teachers.objects.filter(Q(Q(register=reg_number) | Q(user__email__iexact=personal_mail))).first()
+                    position = OrgPosition.objects.filter(name__iexact=position_name).first()
+                    data['org_position'] = position.id if position else None
 
-                    employee = Employee.objects.filter(user=teacher.user).first()
-                    employee.org_position = position
-                    employee.save()
-                else:
-                    def check_field(field, value):
-                        if not data.get(field):
-                            data[field] = value
+                    if teacher:
+                        in_count += 1
+                        teacher.rank_name = rank_name
+                        teacher.rank_type = rank_type
+                        teacher.rank_rate = rank_rate
+                        teacher.save()
 
-                    check_field('body_height', 0)
-                    check_field('body_weight', 0)
-                    check_field('emdd_number', None)
-                    check_field('hudul_number', None)
-                    check_field('ndd_number', None)
-                    check_field("home_phone", 0)
-                    check_field("register_code", None)
+                        employee = Employee.objects.filter(user=teacher.user).first()
 
-                    data['register_code'] = data.get('id_number')
-                    data['password'] = reg_number[-8:]
-                    data['email'] = personal_mail
-                    data['register'] = reg_number
+                        if not employee:
+                            data['register_code'] = data.get('id_number')
+                            data['user'] = teacher.user.id
 
-                    school_data = find_data_from_list_by_key(dep_datas, 'id', subschool_id)
-                    if school_data:
-                        name = school_data['name']
-                        school = SubOrgs.objects.filter(name__iexact=name).first()
-                        data['sub_org'] = school.id if school else None
-                        sub_list = school_data['subs']
-                        sub_data = find_data_from_list_by_key(sub_list, 'id', dep_id)
-                        if sub_data:
-                            salbar_obj = Salbars.objects.filter(sub_orgs=school, name__iexact=sub_data['name']).first()
-                            if salbar_obj:
-                                data['salbar'] = salbar_obj.id
+                            # register_code ягаадч юм давхцаад байгааг ингэж шийдсэн
+                            if Employee.objects.filter(register_code=data.get('id_number')).exists():
+                                data['register_code'] = data.get('app_id')
+
+                            employee_serializer = EmployeeSerializer(data=data)
+                            if not employee_serializer.is_valid(raise_exception=True):
+                                print('Employee үүсч чадсангүй 1')
+                                break
+
+                            employee_serializer.save()
+
+                        else:
+                            employee.org_position = position if position else None
+
+                            employee.save()
+                    else:
+                        def check_field(field, value):
+                            if not data.get(field):
+                                data[field] = value
+
+                        check_field('body_height', 0)
+                        check_field('body_weight', 0)
+                        check_field('emdd_number', None)
+                        check_field('hudul_number', None)
+                        check_field('ndd_number', None)
+                        check_field("home_phone", 0)
+                        check_field("register_code", None)
+
+                        data['password'] = reg_number[-8:]
+                        data['email'] = personal_mail
+                        data['register'] = reg_number
+                        data['register_code'] = data.get('id_number')
+
+                        school_data = find_data_from_list_by_key(dep_datas, 'id', subschool_id)
+                        if school_data:
+                            name = school_data['name']
+                            school = SubOrgs.objects.filter(name__iexact=name).first()
+                            data['sub_org'] = school.id if school else None
+                            sub_list = school_data['subs']
+                            sub_data = find_data_from_list_by_key(sub_list, 'id', dep_id)
+                            if sub_data:
+                                salbar_obj = Salbars.objects.filter(sub_orgs=school, name__iexact=sub_data['name']).first()
+                                if salbar_obj:
+                                    data['salbar'] = salbar_obj.id
+                                else:
+                                    data['salbar'] = None
                             else:
                                 data['salbar'] = None
-                        else:
-                            data['salbar'] = None
 
-                    # User моделийн датаг эхлэээд үүсгэнэ
-                    user_serializer = UserRegisterSerializer(
-                        data=data,
-                    )
+                        # User моделийн датаг эхлэээд үүсгэнэ
+                        user_serializer = UserRegisterSerializer(
+                            data=data,
+                        )
 
-                    if not user_serializer.is_valid():
-                        print('User үүсч чадсангүй')
-                        break
+                        if not user_serializer.is_valid():
+                            print('User үүсч чадсангүй')
+                            break
 
-                    user = user_serializer.save()
-                    data['user'] = str(user.id)
-                    data['birthday'], data['gender'] = calculate_birthday(reg_number)
-                    data['action_status_type'] = Teachers.ACTION_TYPE_ALL
-                    data['action_status'] = Teachers.APPROVED
+                        user = user_serializer.save()
+                        data['user'] = str(user.id)
+                        data['birthday'], data['gender'] = calculate_birthday(reg_number)
+                        data['action_status_type'] = Teachers.ACTION_TYPE_ALL
+                        data['action_status'] = Teachers.APPROVED
 
-                    userinfo_serializer = UserInfoSerializer(
-                        data=data,
-                    )
+                        userinfo_serializer = UserInfoSerializer(
+                            data=data,
+                        )
 
-                    if not userinfo_serializer.is_valid():
-                        print('UserInfo үүсч чадсангүй')
-                        break
-                    userinfo_serializer.save()
+                        if not userinfo_serializer.is_valid():
+                            print('UserInfo үүсч чадсангүй')
+                            break
+                        userinfo_serializer.save()
 
-                    if 'worker_type' in data:
-                        data['worker_type'] = Employee.WORKER_TYPE_EMPLOYEE
+                        if 'worker_type' in data:
+                            data['worker_type'] = Employee.WORKER_TYPE_EMPLOYEE
 
-                    level = get_key_from_name(edu_rank)
-                    if level:
-                        data['education_level'] = level
+                        level = get_key_from_name(edu_rank)
+                        if level:
+                            data['education_level'] = level
 
-                    employee_serializer = EmployeeSerializer(data=data)
-                    if not employee_serializer.is_valid(raise_exception=True):
-                        print('Employee үүсч чадсангүй')
-                        break
+                        # register_code ягаадч юм давхцаад байгааг ингэж шийдсэн
+                        if Employee.objects.filter(register_code=data.get('id_number')).exists():
+                            data['register_code'] = data.get('app_id')
 
-                    employee_serializer.save()
-                    count += 1
-                    print('Амжилттай үүслээ', count)
+                        employee_serializer = EmployeeSerializer(data=data)
+                        if not employee_serializer.is_valid(raise_exception=True):
+                            print('Employee үүсч чадсангүй')
+                            break
 
-            return_datas = {
-                'new': count,
-            }
+                        employee_serializer.save()
+                        count += 1
+                        print('Амжилттай үүслээ', count)
+
+        except Exception as e:
+            print('e', e)
+            return request.send_error("ERR_002", "Able-с мэдээлэл татахад алдаа гарлаа")
+
+        return_datas = {
+            'new': count,
+        }
         return request.send_info('INF_020', return_datas)
