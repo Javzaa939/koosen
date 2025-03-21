@@ -224,6 +224,7 @@ class ProfessionDefinitionListSerializer(serializers.ModelSerializer):
     professional_base = serializers.FloatField()
     professional_lesson = serializers.FloatField()
     admission_lesson = serializers.SerializerMethodField()
+    groups = serializers.SerializerMethodField()
     gen_direct_type_name = serializers.CharField(source="get_gen_direct_type_display", read_only=True)
 
     class Meta:
@@ -234,6 +235,11 @@ class ProfessionDefinitionListSerializer(serializers.ModelSerializer):
 
         profId = obj.id
         adm_obj = AdmissionBottomScore.objects.filter(profession_id=profId).annotate(type_name=WithChoices(AdmissionBottomScore.SCORE_TYPE, 'score_type'), lesson_name=F('admission_lesson__lesson_name')).values()
+        return list(adm_obj)
+
+    def get_groups(self, obj):
+
+        adm_obj = Group.objects.filter(profession=obj).values_list('name', flat=True)
         return list(adm_obj)
 
 
