@@ -4633,9 +4633,10 @@ class ELearn(models.Model):
 
 
 class OnlineInfo(models.Model):
+    """ Тухайн цахим хичээлд хамаарах бүлэг"""
     elearn = models.ForeignKey(ELearn, on_delete=models.CASCADE, verbose_name='Цахим хичээл', null=True)
     title = models.TextField(null=True, verbose_name='Хичээлийн нэр гарчиг')
-    related_info = models.ForeignKey("self", null=True, on_delete=models.CASCADE, verbose_name='Өмнөх хичээлээс хамаарах эсэх')
+    related_info = models.ForeignKey("self", null=True, on_delete=models.CASCADE, verbose_name='Өмнөх бүлгээс хамаарах эсэх')
 
 
 class OnlineSubInfo(models.Model):
