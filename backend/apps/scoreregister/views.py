@@ -1303,7 +1303,7 @@ class ScoreRegisterPrintAPIView(
                     'grade_letter': eachScore.grade_letter.letter if eachScore.grade_letter else ''
                 })
 
-                total_kr = total_kr + eachScore.lesson.kredit
+                total_kr = total_kr + (eachScore.lesson.kredit if eachScore.lesson.kredit else 0)
 
                 if eachScore.grade_letter and eachScore.grade_letter.letter == 'S':
                     total_skr_count = total_skr_count + eachScore.lesson.kredit

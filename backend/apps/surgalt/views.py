@@ -145,11 +145,7 @@ class LessonStandartAPIView(
         'code',
         'name',
         'name_eng',
-        'name_uig',
-        'kredit',
-        'category__category_name',
-        'definition',
-        'department__name'
+        'name_uig'
     ]
 
     @has_permission(must_permissions=['lms-study-lessonstandart-read'])

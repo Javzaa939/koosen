@@ -139,7 +139,7 @@ class LessonStandartListSerializer(serializers.ModelSerializer):
 
         teacher_name = ''
         teacher_list = []
-        teacher_ids = Lesson_to_teacher.objects.filter(lesson_id=obj.id).values_list('teacher_id', flat=True)
+        teacher_ids = Lesson_to_teacher.objects.filter(lesson_id=obj.id).values_list('teacher', flat=True)
         if len(teacher_ids) > 0:
             for teacher_id in teacher_ids:
                 full_name = ""
