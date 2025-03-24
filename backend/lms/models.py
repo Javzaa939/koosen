@@ -4447,6 +4447,73 @@ class AttachmentConfig(models.Model):
 
 
 # ----------------------------------------------- Цахим сургалт ----------------------------------------------------------------------------------------------
+class QuezChoices(models.Model):
+    """Цахим сургалтын асуултын сонголтууд """
+
+    choices = models.CharField(verbose_name="Сонголт", max_length=1000, null=False, blank=False)
+    image = models.ImageField(upload_to=get_choice_image_path, null=True, blank=True, verbose_name='зураг')
+
+    score = models.FloatField(default=0, verbose_name='Зөв хариултын оноо')
+
+    created_by = models.ForeignKey(Teachers, on_delete=models.CASCADE, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+
+class QuezQuestions(models.Model):
+    """ Цахим сургалтын асуулт """
+
+
+    KIND_ONE_CHOICE = 1
+    KIND_MULTI_CHOICE = 2
+    KIND_BOOLEAN = 3
+    KIND_RATING = 4
+    KIND_TEXT = 5
+    KIND_SHORT_CHOICE = 6
+    KIND_JISHIH_CHOICE = 7
+    KIND_ESTIMATE_CHOICE = 8
+    KIND_PROJECT_CHOICE = 9
+    KIND_TOVCH_CHOICE = 10
+
+    KIND_CHOICES = (
+        (KIND_ONE_CHOICE, 'Нэг сонголт'),
+        (KIND_SHORT_CHOICE, 'Богино нөхөх хариулт'),
+        (KIND_JISHIH_CHOICE, 'Харгалзуулах, жиших'),
+        (KIND_ESTIMATE_CHOICE, 'Тооцоолж бодох'),
+        (KIND_PROJECT_CHOICE, 'Төсөл боловсруулах'),
+        (KIND_TOVCH_CHOICE, 'Товч хариулт'),
+        (KIND_MULTI_CHOICE, 'Олон сонголт'),
+        (KIND_BOOLEAN, 'Үнэн, Худлыг олох'),
+        (KIND_TEXT, 'Эссэ бичих'),
+        (KIND_RATING, 'Үнэлгээ'),
+    )
+
+    kind = models.IntegerField(choices=KIND_CHOICES, null=False, blank=False, verbose_name='Асуултын төрөл')
+    question = models.CharField(max_length=1000, null=False, blank=False, verbose_name="Асуулт")
+
+    image = models.ImageField(upload_to=get_image_path, null=True, blank=True, verbose_name='зураг')
+
+    score = models.FloatField(verbose_name="Асуултын оноо", null=True)
+    yes_or_no = models.PositiveIntegerField(null=True, verbose_name='Тийм үгүй асуултны хариулт хадгалах хэсэг') # 1 0 хадгалах
+
+    # KIND_RATING үед
+    rating_max_count = models.IntegerField(default=0, verbose_name="Үнэлгээний дээд тоо", null=True, blank=True)
+    low_rating_word = models.CharField(max_length=100, verbose_name="Доод үнэлгээг илэрхийлэх үг")
+    high_rating_word = models.CharField(max_length=100, verbose_name="Дээд үнэлгээг илэрхийлэх үг")
+
+    # KIND_MULTI_CHOICE үед
+    max_choice_count = models.IntegerField(default=0, verbose_name="Сонголтын хязгаар", null=True, blank=True)
+
+    # KIND_ONE_CHOICE болон KIND_MULTI_CHOICE үед
+    choices = models.ManyToManyField(QuezChoices)
+
+    created_by = models.ForeignKey(Teachers, on_delete=models.CASCADE, related_name="+")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+
 class LessonMaterial(models.Model):
     """ Хичээлийн материал """
 
@@ -4466,6 +4533,8 @@ class LessonMaterial(models.Model):
     material_type = models.IntegerField(choices=MATERIAL_TYPE, default=FILE, verbose_name='Материалын төрөл')
     path = models.FileField(verbose_name='Файлуудын замыг хадгалах хэсэг', upload_to='efile')
     created_at = models.DateTimeField(auto_created=True, verbose_name='Үүсгэсэн огноо')
+
+
 
 
 class HomeWork(models.Model):
@@ -4544,6 +4613,58 @@ class WeekMaterials(models.Model):
     created_at = models.DateTimeField(auto_now=True)
 
 
+class ELearn(models.Model):
+    """ Цахим хичээл """
+
+    lesson = models.ForeignKey(LessonStandart, on_delete=models.CASCADE, verbose_name='Хичээл', null=True)
+    title = models.TextField(null=True, verbose_name='Хичээлийн нэр гарчиг')
+
+    teacher = models.ForeignKey(Teachers, on_delete=models.CASCADE, verbose_name='Багш', null=True)
+    image = models.FileField(upload_to='online', verbose_name='Зураг', null=True)
+
+    students = models.ManyToManyField(Student, verbose_name='Хичээл үзэх оюутнууд')
+
+    start_date = models.DateTimeField(null=True, verbose_name='Эхлэх хугацаа')
+    end_date = models.DateTimeField(null=True, verbose_name='Дуусах хугацаа')
+
+    is_end_exam = models.BooleanField(default=True, verbose_name='Төгсөлтийн шалгалттай эсэх')
+    is_certificate = models.BooleanField(default=False, verbose_name='Сертификаттай эсэх')
+
+    created_user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Үүсгэсэн хэрэглэгч', null=True)
+    created_at = models.DateTimeField(auto_now=True, null=True)
+
+
+class OnlineInfo(models.Model):
+    """ Тухайн цахим хичээлд хамаарах бүлэг"""
+    elearn = models.ForeignKey(ELearn, on_delete=models.CASCADE, verbose_name='Цахим хичээл', null=True)
+    title = models.TextField(null=True, verbose_name='Хичээлийн нэр гарчиг')
+    related_info = models.ForeignKey("self", null=True, on_delete=models.CASCADE, verbose_name='Өмнөх бүлгээс хамаарах эсэх')
+
+
+class OnlineSubInfo(models.Model):
+    """ Цахим хичээлийн хэсгүүд """
+
+    PDF = 1
+    VIDEO = 2
+    TEXT = 3
+    AUDIO = 4
+    QUIZ = 5
+
+    MATERIAL_TYPE = (
+        (PDF, "PDF"),
+        (VIDEO, "Video хичээл"),
+        (TEXT, "TEXT"),
+        (QUIZ, "Шалгалт"),
+    )
+
+    parent_title = models.ForeignKey(OnlineInfo, verbose_name='Parent', on_delete=models.CASCADE)
+    title = models.CharField(null=True, verbose_name='Хичээлийн нэр гарчиг', max_length=500)
+    file_type = models.IntegerField(choices=MATERIAL_TYPE, default=TEXT, verbose_name='Материалын төрөл')
+    text = models.TextField(null=True, verbose_name='ТEXT төрлийн мэдээлэл')
+    file = models.FileField(null=True, verbose_name='ФАЙЛ төрлийн мэдээлэл')
+    quiz = models.ForeignKey(QuezQuestions, on_delete=models.CASCADE, verbose_name='Цахим сургалтын сорил шалгалт')
+
+
 class OnlineWeek(models.Model):
     """ Цахим хичээлийн 7 хоног """
 
@@ -4576,6 +4697,49 @@ class OnlineWeek(models.Model):
     created_at = models.DateTimeField(auto_now=True)
 
 
+class OnlineLesson(models.Model):
+    """ Цахим хичээл """
+
+    WEEK = 1
+    DATE = 2
+
+    CREATE_TYPE = (
+        (WEEK, "Долоо хоног"),
+        (DATE, "Хугацаагаар"),
+    )
+
+    lesson = models.ForeignKey(LessonStandart, on_delete=models.CASCADE, verbose_name='Хичээл', null=True)
+    teacher = models.ForeignKey(Teachers, on_delete=models.CASCADE, verbose_name='Багш', null=True)
+    create_type = models.IntegerField(choices=CREATE_TYPE, default=WEEK, verbose_name='Үүсгэх төрөл')
+    students = models.ManyToManyField(Student, verbose_name='Хичээл үзэх оюутнууд')
+    total_score = models.FloatField(verbose_name='Нийт үнэлэх оноо', null=True)
+    start_date = models.DateTimeField(null=True, verbose_name='Эхлэх хугацаа')
+    end_date = models.DateTimeField(null=True, verbose_name='Дуусах хугацаа')
+    is_end_exam = models.BooleanField(default=True, verbose_name='Төгсөлтийн шалгалттай эсэх')
+    is_certificate = models.BooleanField(default=False, verbose_name='Сертификаттай эсэх')
+    plan = models.TextField(verbose_name='Сургалтын төлөвлөгөө', null=True)
+    weeks = models.ManyToManyField(OnlineWeek, blank=True, verbose_name='7 хоногууд')
+
+    created_user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Үүсгэсэн хэрэглэгч', null=True)
+    created_at = models.DateTimeField(auto_now=True, null=True)
+
+
+class OnlineWeekStudent(models.Model):
+    """ Оюутны лекцийн материал хадгалах хэсэг """
+    SEND = 1
+    CHECKED = 2
+
+    ASSIGNMENT_TYPE = (
+        (SEND, 'Илгээсэн'),
+        (CHECKED, 'Дүгнэгдсэн'),
+    )
+    week = models.ForeignKey(OnlineWeek, verbose_name='7 хоног', on_delete=models.CASCADE)
+    student = models.ForeignKey(Student, verbose_name='Оюутан', on_delete=models.CASCADE)
+    lekts_file = models.FileField(upload_to='student_lekts', verbose_name='Лекцийн материал хөтөлсөн зураг', null=True)
+    status = models.IntegerField(choices=ASSIGNMENT_TYPE, db_index=True, default=SEND, verbose_name="Лекцийн материал төрөл", null=True)
+    created_at = models.DateTimeField(auto_now=True, verbose_name='Үүсгэсэн огноо')
+
+
 class BiyDaalt(models.Model):
     """ Бие даалт """
 
@@ -4606,50 +4770,6 @@ class BiyDaaltStudent(models.Model):
     created_at = models.DateTimeField(auto_now=True, verbose_name='Үүсгэсэн огноо')
 
 
-class OnlineLesson(models.Model):
-    """ Цахим хичээл """
-
-    WEEK = 1
-    DATE = 2
-
-    CREATE_TYPE = (
-        (WEEK, "Долоо хоног"),
-        (DATE, "Хугацаагаар"),
-    )
-
-    lesson = models.ForeignKey(LessonStandart, on_delete=models.CASCADE, verbose_name='Хичээл')
-    teacher = models.ForeignKey(Teachers, on_delete=models.CASCADE, verbose_name='Багш', null=True)
-    create_type = models.IntegerField(choices=CREATE_TYPE, default=WEEK, verbose_name='Үүсгэх төрөл')
-    students = models.ManyToManyField(Student, verbose_name='Хичээл үзэх оюутнууд')
-    total_score = models.FloatField(verbose_name='Нийт үнэлэх оноо')
-    start_date = models.DateTimeField(null=True, verbose_name='Эхлэх хугацаа')
-    end_date = models.DateTimeField(null=True, verbose_name='Дуусах хугацаа')
-    is_end_exam = models.BooleanField(default=True, verbose_name='Төгсөлтийн шалгалттай эсэх')
-    is_certificate = models.BooleanField(default=False, verbose_name='Сертификаттай эсэх')
-    plan = models.TextField(verbose_name='Сургалтын төлөвлөгөө', null=True)
-    weeks = models.ManyToManyField(OnlineWeek, blank=True, verbose_name='7 хоногууд')
-
-    created_user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Үүсгэсэн хэрэглэгч', null=True)
-    created_at = models.DateTimeField(auto_now=True, null=True)
-
-
-class OnlineWeekStudent(models.Model):
-    """ Оюутны лекцийн материал хадгалах хэсэг """
-    SEND = 1
-    CHECKED = 2
-
-    ASSIGNMENT_TYPE = (
-        (SEND, 'Илгээсэн'),
-        (CHECKED, 'Дүгнэгдсэн'),
-    )
-    week = models.ForeignKey(OnlineWeek, verbose_name='7 хоног', on_delete=models.CASCADE)
-    student = models.ForeignKey(Student, verbose_name='Оюутан', on_delete=models.CASCADE)
-    lekts_file = models.FileField(upload_to='student_lekts', verbose_name='Лекцийн материал хөтөлсөн зураг', null=True)
-    status = models.IntegerField(choices=ASSIGNMENT_TYPE, db_index=True, default=SEND, verbose_name="Лекцийн материал төрөл", null=True)
-    created_at = models.DateTimeField(auto_now=True, verbose_name='Үүсгэсэн огноо')
-
-
-
 class Announcement(models.Model):
     """ Зарлал"""
 
@@ -4675,6 +4795,8 @@ class AnnouncementComment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='Сэтгэгдэл үлдээсэн хугацаа')
 
 
+
+# ----------------------------------------------------------Суралцагчийн хөтөч -------------------------------------------------------------------------
 class Rule(models.Model):
     """ Багш ажилчдын дүрэм журам """
 
@@ -4704,6 +4826,7 @@ class Structure(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+
 class StudentDevelop(models.Model):
     """ Суралцагчийн хөгжил """
 
@@ -4715,6 +4838,7 @@ class StudentDevelop(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
 
 class Library(models.Model):
     """ Номын сан танилцуулга"""
