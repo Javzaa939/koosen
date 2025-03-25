@@ -1412,6 +1412,7 @@ class Payment(models.Model):
     SPORT = 3
     GYM = 4
     SYSTEM = 5
+    ADMISSION = 6
 
     PAYMENT_FOR = (
         (STUDY, "Сургалтын төлбөр"),
@@ -1419,10 +1420,12 @@ class Payment(models.Model):
         (SPORT, "Заалны түрээс"),
         (GYM, "Фитнесийн төлбөр"),
         (SYSTEM, "Програм ашигласны төлбөр"),
+        (ADMISSION, "Элсэлтийн хураамж"),
     )
 
     user = models.ForeignKey(User, on_delete=models.PROTECT, null=True)
     student = models.ForeignKey(Student, on_delete=models.PROTECT, null=True)
+    admission = models.ForeignKey(to='elselt.ElseltUser', on_delete=models.PROTECT, null=True)
 
     total_amount = models.FloatField(null=True)
     kind = models.PositiveIntegerField(choices=KIND_CHOICES, db_index=True, null=True)
