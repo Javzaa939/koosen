@@ -133,7 +133,7 @@ class LessonStandartListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = LessonStandart
-        fields = "__all__"
+        fields = "code", 'name', 'department', 'category', 'teachers', 'id'
 
     def get_teachers(self, obj):
 
@@ -159,6 +159,7 @@ class LessonStandartListSerializer(serializers.ModelSerializer):
                     teacher_list.append({'id': teacher_id, 'name': full_name})
                     teacher_name = teacher_name + ', ' if teacher_name else ''
                     teacher_name += full_name
+
 
         datas = {
             'teachers': teacher_list,

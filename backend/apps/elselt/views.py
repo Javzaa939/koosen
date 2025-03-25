@@ -191,7 +191,7 @@ class ElseltProfession(
 ):
     """ Элсэлтийн мэргэжил """
 
-    queryset = AdmissionRegisterProfession.objects.all().filter(admission__is_store=False)
+    queryset = AdmissionRegisterProfession.objects.all()
     serializer_class = AdmissionProfessionSerializer
 
     def get(self, request):
