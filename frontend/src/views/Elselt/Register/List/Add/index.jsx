@@ -90,6 +90,7 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
         cdata['end_date'] =  moment(endPicker).format('YYYY-MM-DD HH:mm:ss')
 
         cdata = convertDefaultValue(cdata)
+        cdata["payment"] = cdata?.payment || 0
 
         const formData = new FormData()
 
@@ -139,8 +140,11 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
         {
             if (Object.keys(editData).length > 0) {
                 for(let key in editData) {
-                    if(editData[key] !== null)
+                    if(editData[key] !== null) {
                         setValue(key, editData[key])
+
+                        if(key === 'payment') setValue(key, editData[key] || 0)
+                    }
                     else setValue(key,'')
 
                     if (key === 'degrees') {
@@ -405,6 +409,50 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
                                 )}
                             ></Controller>
                         </Col>
+                        <Col md={6}>
+                            <Label className="form-label" for="payment">
+                                {t('Тухайн элсэлтийн хураамж')}
+                            </Label>
+                            <Controller
+                                control={control}
+                                defaultValue={0}
+                                name="payment"
+                                render={({ field }) => (
+                                    <Input
+                                        id='payment'
+                                        placeholder='Тухайн элсэлтийн хураамж ₮'
+                                        {...field}
+                                        bsSize="sm"
+                                        type='number'
+                                        invalid={errors?.payment && true}
+                                    />
+                                )}
+                            ></Controller>
+                            {errors.payment && <FormFeedback className='d-block'>{errors.payment.message}</FormFeedback>}
+                        </Col>
+                        <Col md={6} className="mt-3">
+                            <Controller
+                                defaultValue={false}
+                                control={control}
+                                id='is_store'
+                                name='is_store'
+                                render={({ field }) => {
+                                    return (
+                                        <Input
+                                            {...field}
+                                            checked={field.value}
+                                            className='me-50'
+                                            type='checkbox'
+                                            name='is_store'
+                                            id='is_store'
+                                        />
+                                    )
+                                }}
+                            />
+                            <Label className='form-label' for='is_store'>
+                                {t('Өмнөх элсэлт рүү шилжүүлэх эсэх')}
+                            </Label>
+                        </Col>
                         <Col md={6} sm={12}>
                             <Label className="" for='admission_juram'>
                                 Элсэлтийн журам
@@ -467,35 +515,12 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
                                 }}
                             />
                         </Col>
-                        <Col md={6}>
-                            <Controller
-                                defaultValue={false}
-                                control={control}
-                                id='is_store'
-                                name='is_store'
-                                render={({ field }) => {
-                                    return (
-                                        <Input
-                                            {...field}
-                                            checked={field.value}
-                                            className='me-50'
-                                            type='checkbox'
-                                            name='is_store'
-                                            id='is_store'
-                                        />
-                                    )
-                                }}
-                            />
-                            <Label className='form-label' for='is_store'>
-                                {t('Өмнөх элсэлт рүү шилжүүлэх эсэх')}
-                            </Label>
-                        </Col>
-                        <Col md={12} className="mt-2">
+                        <Col md={12} className="mt-2 text-center">
                             <Button className="me-2" color="primary" type="submit" disabled={postLoading}>
                                 {postLoading &&<Spinner size='sm' className='me-1'/>}
                                 {t('Хадгалах')}
                             </Button>
-                            <Button color="secondary">
+                            <Button color="secondary" onClick={handleModal}>
                                 {t('Буцах')}
                             </Button>
                         </Col>

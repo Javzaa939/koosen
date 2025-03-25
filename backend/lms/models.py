@@ -4171,6 +4171,7 @@ class AdmissionRegister(models.Model):
     end_date = models.DateTimeField(verbose_name="Дуусах хугацаа")
     is_active = models.BooleanField(default=False, verbose_name='Идэвхтэй эсэх')
     is_store = models.BooleanField(default=False, verbose_name='Нөөцлөх эсэх')
+    payment = models.IntegerField(default=0, verbose_name='Элсэлтийн хураамж')
 
     home_description = models.CharField(max_length=5000, null=True, verbose_name='Нүүр хуудасны харуулах тайлбар')
     alert_description = models.CharField(max_length=5000, null=True, verbose_name='Тухайн элсэлтэд зориулаад санамж')
