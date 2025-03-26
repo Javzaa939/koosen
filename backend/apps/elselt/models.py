@@ -6,7 +6,9 @@ from lms.models import (
     AdmissionRegisterProfession,
     User,
     PsychologicalTest,
-    AdmissionIndicator
+    AdmissionIndicator,
+    SumDuureg,
+    BagHoroo
 )
 class ElseltUser(models.Model):
 
@@ -14,22 +16,33 @@ class ElseltUser(models.Model):
         db_table = 'elselt_user'
         managed = False
 
+    username = models.CharField(
+        max_length=255,
+        unique=True,
+        verbose_name='username'
+    )
     first_name = models.CharField(max_length=150, blank=True, verbose_name='Нэр')
     last_name = models.CharField(max_length=150, blank=True, verbose_name='Овог')
     code=models.CharField(max_length=200, verbose_name="Бүртгэлийн дугаар", default="")
     password=models.CharField(max_length=200, verbose_name="Нууц үг", default="")
     register = models.CharField(max_length=20, verbose_name="Регистрийн дугаар")
-    email = models.CharField(max_length=254, unique=True, blank=False, null=True, verbose_name="И-мэйл", error_messages={ "unique": "И-мэйл давхцсан байна" })
+    email = models.CharField(max_length=254, blank=False, null=True, verbose_name="И-мэйл", error_messages={ "unique": "И-мэйл давхцсан байна" })
     mobile = models.CharField(max_length=30, verbose_name="Өөрийн утасны дугаар", default="")
     parent_mobile = models.CharField(max_length=30, verbose_name="Шаардлагатай үед холбоо барих утас", default="")
-    image = models.ImageField(upload_to='elselt', null=True, verbose_name='Хэрэглэгчийн зураг')
+    image = models.BinaryField(null=True, verbose_name='Оюутны зураг base64')
+
+    # Харьяалал
     aimag = models.ForeignKey(AimagHot, on_delete=models.CASCADE, null=True, verbose_name='Үндсэн захиргаа - Аймаг/хот')
+    soum = models.ForeignKey(SumDuureg, on_delete=models.CASCADE, null=True, verbose_name='Үндсэн захиргаа - Сум/дүүрэг')
+    bag = models.ForeignKey(BagHoroo, on_delete=models.CASCADE, null=True, verbose_name='Үндсэн захиргаа - Баг/хороо')
+    address_detail = models.CharField(max_length=500, verbose_name="Хаягийн дэлгэрэнгүй", null=True)
+
     is_payment = models.BooleanField(default=False, verbose_name="Бүртгэлийн хураамж төлсөн эсэх")
     justice_file = models.FileField(upload_to='justice/', null=True, verbose_name='Ял шийтгэлийн сервис файл Emongolia')
 
     created = models.DateTimeField(auto_now_add=True, null=True, verbose_name='Огноо')
 
-    USERNAME_FIELD = 'email'
+    USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = []
 
     @property

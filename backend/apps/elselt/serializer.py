@@ -119,7 +119,7 @@ class ElseltUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ElseltUser
-        exclude = ['password']
+        exclude = ['password', 'image']
 
 
 class UserScoreSerializer(serializers.ModelSerializer):
