@@ -330,7 +330,7 @@ function Details() {
                                             </div>
                                         </div>
                                         <div className='mt-2'>
-                                            {/* <div className='p-50 d-flex align-items-center'>
+                                            <div className='p-50 d-flex align-items-center'>
                                                 <span className='text_prefixer me-50'>Эссэ бичсэн файл:</span>
                                                 {
                                                     datas?.userinfo?.esse_pdf ?
@@ -342,7 +342,7 @@ function Details() {
                                                         Файл байхгүй
                                                     </span>
                                                 }
-                                            </div> */}
+                                            </div>
                                             <div className='p-50 d-flex align-items-center'>
                                                 <span className='text_prefixer me-50'>Судалгааны ажил файл:</span>
                                                 {
