@@ -79,19 +79,19 @@ class AdmissionProfessionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_shalguur_ids(self, obj):
-        value_ids = AdmissionIndicator.objects.filter(admission_prof=obj).values_list('value', flat=True)
+        value_ids = AdmissionIndicator.objects.filter(admission_prof=obj, admission_prof__admission__is_store=False).values_list('value', flat=True)
 
         return list(value_ids)
 
     def get_nas(self, obj):
-        indicator = AdmissionIndicator.objects.filter(admission_prof=obj, value=AdmissionIndicator.NAS).first()
+        indicator = AdmissionIndicator.objects.filter(admission_prof=obj, value=AdmissionIndicator.NAS, admission_prof__admission__is_store=False).first()
         return {
             'limit_min': indicator.limit_min if indicator else '',
             'limit_mах': indicator.limit_mах if indicator else '',
         }
 
     def get_hynalt_too(self, obj):
-        indicator = AdmissionIndicator.objects.filter(admission_prof=obj, value=AdmissionIndicator.XYANALTIIN_TOO).first()
+        indicator = AdmissionIndicator.objects.filter(admission_prof=obj, value=AdmissionIndicator.XYANALTIIN_TOO, admission_prof__admission__is_store=False).first()
         hynalt_too = AdmissionXyanaltToo.objects.filter(indicator=indicator).first()
         return {
             'norm_all': hynalt_too.norm_all if hynalt_too else '',

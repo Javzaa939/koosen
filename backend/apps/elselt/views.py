@@ -453,8 +453,8 @@ class ProfessionShalguur(
                             indicator=obj,
                             defaults={
                                 'norm_all': hynaltToo.get('norm_all'),
-                                'norm1': hynaltToo.get('norm1') if hynaltToo.get('norm1') else 0,
-                                'norm2': hynaltToo.get('norm2') if hynaltToo.get('norm2') else 0,
+                                'norm1': hynaltToo.get('norm1') if hynaltToo.get('norm1') else None,
+                                'norm2': hynaltToo.get('norm2') if hynaltToo.get('norm2') else None,
                                 'is_gender': True if hynaltToo.get('norm2') and hynaltToo.get('norm1') else False
                             }
                         )
