@@ -5,7 +5,7 @@ export default [
         id: 'test',
         title: 'Шалгалт',
         icon: <i className="fas fa-user-check"></i>,
-		children: [
+		navChildren: [
 			{
 				id: "season-challenge",
 				title: "Улирлын шалгалт",
