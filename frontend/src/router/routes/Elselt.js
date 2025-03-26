@@ -18,6 +18,8 @@ const InterView = lazy(() => import("@views/Elselt/InterView"))
 const FieldPreparation = lazy(()=>import("@views/Elselt/FieldPreparation"))
 const MXB = lazy(()=>import("@views/Elselt/MXB"))
 const Log = lazy(()=>import("@views/Elselt/Log"))
+const Payment = lazy(()=>import("@views/Elselt/Payment"))
+
 const ElseltRoutes = [
     {
         path: 'elselt/ylshiitgel/',
@@ -86,6 +88,10 @@ const ElseltRoutes = [
     {
         path: 'elselt/mhb-exam',
         element: <MXB />
+    },
+    {
+        path: 'elselt/payment/',
+        element: <Payment />
     },
 ]
 

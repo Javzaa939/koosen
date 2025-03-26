@@ -85,5 +85,12 @@ urlpatterns = [
 
     # Хөтөлбөр,Төлөв лог жагсаалт
     path('log/',LogSerializerAPView.as_view()),
+
+    # Элсэлтийн бүртгэлийн жагсаалт
+    path('admission/list/', AdmissionRegisterAPIView().as_view()),
+
+    # Элсэлтийн төлбөр төлөлтийн жагсаалт
+    path('payment/', AdmissionPaymentAPIView().as_view()),
+    path('payment/<int:pk>/', AdmissionPaymentAPIView().as_view()),
 ]
 

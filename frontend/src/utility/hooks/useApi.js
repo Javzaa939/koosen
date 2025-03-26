@@ -1856,6 +1856,7 @@ function useApi(isDisplay=false) {
 			put: (data, id) => instance.put(`/elselt/${id}/`, data),
 			delete: (id) => instance.delete(`/elselt/${id}/`),
 			putFirst: (id, data) => instance.put(`/elselt/first/${id}/`, data),
+			getAdmissionList: () => instance.get(`elselt/admission/list/?lesson_year=${cyear_name}`),
 			profession: {
 				get: (elselt_id) => instance.get(`/elselt/profession/?elselt=${elselt_id}`),
 				post: (data) => instance.post('/elselt/profession/', data),
@@ -1874,6 +1875,10 @@ function useApi(isDisplay=false) {
 						instance.put(`/elselt/sysinfo/${id}/`, data)
 					:
 						instance.post(`/elselt/sysinfo/`, data),
+			},
+			admissionpayment: {
+				get: (limit, page, sort, search, admission, profession_id, dedication, degree) => instance.get(`/elselt/payment/?page=${page}&limit=${limit}&sorting=${sort}&search=${search}&admission=${admission}&profession_id=${profession_id}&dedication=${dedication}&degree=${degree}`),
+				getOne: (pk) => instance.get(`/elselt/payment/${pk}/`),
 			},
 			admissionuserdata: {
 				get: (limit, page, sort, search, lesson_year_id, profession_id, unit1_id, gender, state, gpa_state, age_state, justice_state='', is_justice='', now_state='', start_date, end_date) =>

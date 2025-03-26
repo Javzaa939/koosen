@@ -1,5 +1,6 @@
 import os
 import uuid
+import json
 
 from datetime import datetime as dt
 
@@ -1451,6 +1452,22 @@ class Payment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    @property
+    def qpay_total_amount(self):
+        qpay_payment_total = 0
+
+        paid_rsp = self.paid_rsp
+
+        if paid_rsp:
+            paid_rsp = json.loads(paid_rsp)
+
+            rows = paid_rsp.get('rows') if paid_rsp else None
+
+            for row in rows:
+                payment_amount = row.get('payment_amount') or 0
+                qpay_payment_total += float(payment_amount)
+
+        return qpay_payment_total
 
 class StudentOnlinePayment(models.Model):
     """ Онлайн төлөлтийн мэдээлэл оюутны"""

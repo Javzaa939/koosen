@@ -126,7 +126,7 @@ class UserInfo(models.Model):
         (STATE_EDIT, 'ЗАССАН'),
     )
 
-    user = models.ForeignKey(ElseltUser, on_delete=models.CASCADE, verbose_name='Хэрэглэгч')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='Хэрэглэгч')
     graduate_school = models.CharField(max_length=1000, null=True, verbose_name='Төгссөн сургууль')
     graduate_school_year = models.IntegerField(null=True, verbose_name='Төгссөн он')
     graduate_profession = models.CharField(max_length=1000, null=True, verbose_name='Төгссөн мэргэжил')
@@ -136,15 +136,14 @@ class UserInfo(models.Model):
     work_organization = models.CharField(max_length=1000, null=True, verbose_name='Ажиллаж байгаа байгууллагын нэр')
     work_heltes = models.CharField(max_length=1000, null=True, verbose_name='Хэлтэс газар')
     position_name = models.CharField(max_length=1000, null=True, verbose_name='Албан тушаал')
-
     gpa = models.FloatField(null=True, verbose_name='Голч дүн')
-    gpa_state = models.PositiveIntegerField(choices=STATE, db_index=True, null=False, default=STATE_CORRECT, verbose_name="Голчийн мэдээлэл зассан төлөв")
-
+    gpa_state = models.PositiveIntegerField(choices=STATE, db_index=True, null=False, default=STATE_CORRECT, verbose_name="Тэнцсэн элсэгчийн төлөв")
     graduate_pdf = models.FileField(upload_to='diplom/', null=True, verbose_name='Төгссөн тушаал/ архивын лавлагаа хавсаргах')
     esse_pdf = models.FileField(upload_to='diplom/', null=True, verbose_name='Эссэ бичсэн файлаа хавсаргах')
     ndsh_file = models.FileField(upload_to='ndsh/', null=True, verbose_name='НД-ын шимтгэл төлөлтийн лавлагаа файл')
     other_file = models.FileField(upload_to='other/', null=True, verbose_name='Бусад файл')
     invention_file = models.FileField(upload_to='invention/', null=True, verbose_name='Бүтээлийн жагсаалт файл')
+    anket_file = models.FileField(upload_to='anket/', null=True, verbose_name='Албан хаагчийн анкет')
     info_description = models.TextField(null=True, verbose_name='Мэдээллийг шалгаад үлдээх тайлбар')
 
 

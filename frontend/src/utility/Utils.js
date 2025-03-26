@@ -228,51 +228,21 @@ export const Next = () => {
  * @param {Array} filteredData Хайлтын дагуух дата
  * @param {String} rowsPerPage Хуудсанд харуулах датаны лимит
  * @param {String} total_count Нийт датаны тоо
+ * @param {Component} footer  Хөлийн дүн харуулах бол component дамжуулна
 */
-export function getPagination(handlePagination, pageNo, rowsPerPage, total_count, searchValue='', filteredData='') {
-    const page_count = Math.ceil(total_count / rowsPerPage)
-    var filtered_page_count = 1
-    if(searchValue && searchValue.length) {
-      filtered_page_count = Math.ceil(filteredData.length / rowsPerPage)
-    }
-    if (pageNo > page_count) {
-      pageNo = 1
-    }
-    const CustomPagination = () => (
-      <div className="d-flex align-items-center justify-content-end flex-wrap mt-1">
-			<Label className="mx-2 text-wrap">
-				{
-					searchValue && searchValue.length
-					?
-						<>
-							Дэлгэцэнд: {(pageNo - 1) * rowsPerPage + 1} - {
-								rowsPerPage != -1
-									?
-									((pageNo) * rowsPerPage > filteredData.length)
-										?
-										filteredData.length
-										:
-										(pageNo) * rowsPerPage
-									:
-									filteredData.length
-							} Нийт: {filteredData.length} бичлэг
-						</>
-					:
-						<>
-							Дэлгэцэнд: {(pageNo - 1) * rowsPerPage + 1} - {
-								rowsPerPage != -1
-									?
-									((pageNo) * rowsPerPage > total_count)
-										?
-										total_count
-										:
-										(pageNo) * rowsPerPage
-									:
-									total_count
-							} Нийт: {total_count} бичлэг
-						</>
-				}
-			</Label>
+export function getPagination(handlePagination, pageNo, rowsPerPage, total_count, searchValue='', filteredData='', footer='') {
+  const page_count = Math.ceil(total_count / rowsPerPage)
+  var filtered_page_count = 1
+  if(searchValue && searchValue.length) {
+    filtered_page_count = Math.ceil(filteredData.length / rowsPerPage)
+  }
+  const CustomPagination = () => (
+    <>
+      {footer ? footer : null}
+      <div className="d-flex align-items-center justify-content-end ">
+        <Label className="flex-shrink-0 mx-2">
+            Дэлгэцэнд: {(pageNo-1) * rowsPerPage + 1} - {rowsPerPage != -1 ? ((pageNo) * rowsPerPage > total_count) ? total_count : (pageNo) * rowsPerPage : total_count} Нийт: {total_count} бичлэг
+        </Label>
         <ReactPaginate
           previousLabel={<Previous size={15} />}
           nextLabel={<Next size={15} />}
@@ -304,8 +274,9 @@ export function getPagination(handlePagination, pageNo, rowsPerPage, total_count
           containerClassName={'pagination react-paginate pagination-sm justify-content-end pe-1 mt-1'}
         />
       </div>
-    )
-    return CustomPagination
+    </>
+  )
+  return CustomPagination
 }
 
 /** form data-гийн field-ийн утга хоосон байвал null болгоно.
