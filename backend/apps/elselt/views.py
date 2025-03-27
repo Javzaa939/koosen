@@ -13,6 +13,7 @@ from rest_framework.filters import SearchFilter
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 from django.db import transaction
+from django.db import models
 from django.db.models import F, Subquery, OuterRef, Count, Q, Sum, Exists
 from django.db.models import Value, Case, When, IntegerField
 from django.db.models.functions import Substr, Cast
@@ -33,7 +34,8 @@ from main.utils.function.utils import (
     send_message_gmobile,
     send_message_mobicom,
     calculate_birthday,
-    str2bool
+    str2bool,
+    get_user_permissions
 )
 
 from main.utils.function.pagination import CustomPagination
@@ -60,6 +62,7 @@ from lms.models import (
     AdmissionLesson,
     AdmissionBottomScore,
     StudentAdmissionScore,
+    Payment
 )
 
 from core.models import Employee
@@ -95,6 +98,7 @@ from .serializer import (
     EyeshOrderUserInfoSerializer,
     ElseltEyeshSerializer,
     UserScoreSerializer,
+    AdmissionPaymentSerializer
 )
 
 from elselt.models import (
@@ -449,8 +453,8 @@ class ProfessionShalguur(
                             indicator=obj,
                             defaults={
                                 'norm_all': hynaltToo.get('norm_all'),
-                                'norm1': hynaltToo.get('norm1') if hynaltToo.get('norm1') else 0,
-                                'norm2': hynaltToo.get('norm2') if hynaltToo.get('norm2') else 0,
+                                'norm1': hynaltToo.get('norm1') if hynaltToo.get('norm1') else None,
+                                'norm2': hynaltToo.get('norm2') if hynaltToo.get('norm2') else None,
                                 'is_gender': True if hynaltToo.get('norm2') and hynaltToo.get('norm1') else False
                             }
                         )
@@ -4031,3 +4035,119 @@ class AdmissionUserProfessionAPIView(
 
         datas = ElseltUser.objects.filter(id__in=user_ids).annotate(gender=(Substr('register', 9, 1))).values('id', 'first_name', 'last_name', 'register', 'gender')
         return request.send_data(list(datas))
+
+
+@permission_classes([IsAuthenticated])
+class AdmissionRegisterAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+):
+
+    """ Элсэлтийн жагсаалт """
+
+    queryset = AdmissionRegister.objects.all().filter(is_store=False)
+    serializer_class = AdmissionSerializer
+
+    def get(self, request):
+
+        # lesson_year = request.query_params.get("lesson_year")
+
+        # self.queryset = self.queryset.filter(lesson_year=lesson_year)
+
+        all_data = self.list(request).data
+
+        return request.send_data(all_data)
+
+
+
+@permission_classes([IsAuthenticated])
+class AdmissionPaymentAPIView(
+    generics.GenericAPIView,
+    mixins.ListModelMixin,
+):
+
+    queryset = Payment.objects.filter(status=True, dedication=Payment.ADMISSION)
+    serializer_class = AdmissionPaymentSerializer
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['admission__first_name', 'admission__register', 'admission__email', 'admission__code', 'payed_date']
+
+    def get(self, request):
+        # user = request.user
+        # permissions = get_user_permissions(user)
+
+        filters = dict()
+
+        # Элсэлт
+        admission = request.query_params.get('admission')
+
+        # Элссэн мэргэжил
+        professionregister_id = request.query_params.get('profession_id')
+        dedication = request.query_params.get('dedication')
+        degree = request.query_params.get('degree')
+
+        if admission:
+            filters['admission'] = admission
+
+        if professionregister_id:
+            filters['register_id'] = professionregister_id
+
+        if dedication:
+            filters['dedication'] = dedication
+
+        filter_profession_qs = AdmissionUserProfession.objects.all().filter(profession__admission__is_store=False)
+        if degree:
+            filter_profession_qs = filter_profession_qs.filter(profession__profession__degree__degree_code=degree)
+
+        user_ids = filter_profession_qs.values_list('user', flat=True)
+        # if not user.is_superuser:
+        #     # Магистр докторын элсэгчдийг харуулна.
+        #     if 'lms-elselt-graduate-read' in permissions:
+        #         filter_profession_qs = filter_profession_qs.filter(profession__profession__degree__degree_code__in=['F', 'E'])
+
+        #     # Бакалавр, дэд бакалавр  элсэгчдийг харуулна.
+        #     if 'lms-elselt-bachelor-read' in permissions:
+        #         filter_profession_qs = filter_profession_qs.filter(profession__profession__degree__degree_code__in=['C', 'D'])
+
+            # user_ids = filter_profession_qs.values_list('user', flat=True)
+
+        profession_qs = AdmissionUserProfession.objects.filter(user=OuterRef('user')).annotate(profession_name=F("profession__profession__name"), admission=F("profession__admission"), register_id=F("profession_id")).values('profession_name', 'admission', 'register_id')[:1]
+
+        self.queryset = (
+            self.queryset
+            .annotate(
+                register_id=Subquery(profession_qs.values('register_id')),
+                profession_name=Subquery(profession_qs.values('profession_name')),
+            )
+        )
+
+        self.queryset = self.queryset.filter(admission__in=user_ids)
+        if filters:
+            self.queryset = self.queryset.filter(**filters)
+
+        all_data = self.list(request).data
+
+        all_payment_qs = (
+            self.queryset
+            .annotate(
+                total_qpay_transaction_amount=models.expressions.RawSQL(
+                    """
+                        (jsonb_extract_path_text(paid_rsp::jsonb, 'rows')::jsonb->0->>'payment_amount')::float
+                    """,
+                    []
+                )
+            )
+            .aggregate(
+                tuluh_dun=models.Sum('total_amount'),
+                tulsun_dun=models.Sum('total_qpay_transaction_amount')
+            )
+        )
+
+        print(all_data)
+        return_datas = {
+            'footer': all_payment_qs,
+            **all_data,
+        }
+
+        return request.send_data(return_datas)

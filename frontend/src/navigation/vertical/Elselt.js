@@ -32,6 +32,12 @@ export default [
                 navLink: "elselt/user"
             },
             {
+                id: 'elselt3_01',
+                title: 'Төлбөр төлөлт',
+                icon: <Circle size={8} />,
+                navLink: "elselt/payment"
+            },
+            {
                 id: 'elselt3_1',
                 title: 'Сэтгэлзүйн ярилцлага',
                 icon: <Circle size={8} />,

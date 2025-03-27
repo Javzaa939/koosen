@@ -1,5 +1,6 @@
 import os
 import uuid
+import json
 
 from datetime import datetime as dt
 
@@ -1412,6 +1413,7 @@ class Payment(models.Model):
     SPORT = 3
     GYM = 4
     SYSTEM = 5
+    ADMISSION = 6
 
     PAYMENT_FOR = (
         (STUDY, "Сургалтын төлбөр"),
@@ -1419,10 +1421,12 @@ class Payment(models.Model):
         (SPORT, "Заалны түрээс"),
         (GYM, "Фитнесийн төлбөр"),
         (SYSTEM, "Програм ашигласны төлбөр"),
+        (ADMISSION, "Элсэлтийн хураамж"),
     )
 
     user = models.ForeignKey(User, on_delete=models.PROTECT, null=True)
     student = models.ForeignKey(Student, on_delete=models.PROTECT, null=True)
+    admission = models.ForeignKey(to='elselt.ElseltUser', on_delete=models.PROTECT, null=True)
 
     total_amount = models.FloatField(null=True)
     kind = models.PositiveIntegerField(choices=KIND_CHOICES, db_index=True, null=True)
@@ -1448,6 +1452,22 @@ class Payment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    @property
+    def qpay_total_amount(self):
+        qpay_payment_total = 0
+
+        paid_rsp = self.paid_rsp
+
+        if paid_rsp:
+            paid_rsp = json.loads(paid_rsp)
+
+            rows = paid_rsp.get('rows') if paid_rsp else None
+
+            for row in rows:
+                payment_amount = row.get('payment_amount') or 0
+                qpay_payment_total += float(payment_amount)
+
+        return qpay_payment_total
 
 class StudentOnlinePayment(models.Model):
     """ Онлайн төлөлтийн мэдээлэл оюутны"""
@@ -4168,6 +4188,7 @@ class AdmissionRegister(models.Model):
     end_date = models.DateTimeField(verbose_name="Дуусах хугацаа")
     is_active = models.BooleanField(default=False, verbose_name='Идэвхтэй эсэх')
     is_store = models.BooleanField(default=False, verbose_name='Нөөцлөх эсэх')
+    payment = models.IntegerField(default=0, verbose_name='Элсэлтийн хураамж')
 
     home_description = models.CharField(max_length=5000, null=True, verbose_name='Нүүр хуудасны харуулах тайлбар')
     alert_description = models.CharField(max_length=5000, null=True, verbose_name='Тухайн элсэлтэд зориулаад санамж')
@@ -4322,11 +4343,11 @@ class StudentGrade(models.Model):
     """ Хичээлийн улирлын үндсэн дүн """
 
     student = models.ForeignKey(Student, on_delete=models.CASCADE, verbose_name="Оюутан", null=True)
-    score = models.ForeignKey(Score, on_delete=models.CASCADE, verbose_name="Дүнгийн бүртгэл", null=True)
     lesson_year = models.CharField(max_length=20, null=True, verbose_name="Хичээлийн жил")
     lesson_season = models.ForeignKey(Season, on_delete=models.CASCADE, related_name="Улирал", null=True)
     credit = models.FloatField(verbose_name="Улирлын цуглуулсан нийт кредит")
-    average = models.FloatField(verbose_name="Улирлын дундаж")
+    average = models.FloatField(verbose_name="Улирлын дундаж оноо",  null=True)
+    gpa = models.FloatField(verbose_name="Улирлын голч дүн",  null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

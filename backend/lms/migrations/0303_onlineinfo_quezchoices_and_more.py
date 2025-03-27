@@ -8,7 +8,7 @@ import lms.models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('lms', '0302_remove_studentordersport_teacher_payment_and_more'),
+        ('lms', '0303_remove_studentordersport_teacher_payment_and_more'),
     ]
 
     operations = [

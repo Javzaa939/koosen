@@ -72,17 +72,17 @@ function Elsegch({scope}){
         if(searchValue.length > 0) getDatas();
     }
 
-    useEffect(() => { // Хайлтийн хэсэг хоосон болох үед анхны датаг дуудна
-        if (searchValue.length == 0) {
-            getDatas();
-        } else {
-            const timeoutId = setTimeout(() => {
-                getDatas();
-            }, 600);
+    // useEffect(() => { // Хайлтийн хэсэг хоосон болох үед анхны датаг дуудна
+    //     if (searchValue.length == 0) {
+    //         getDatas();
+    //     } else {
+    //         const timeoutId = setTimeout(() => {
+    //             getDatas();
+    //         }, 600);
 
-            return () => clearTimeout(timeoutId);
-        }
-    }, [searchValue]);
+    //         return () => clearTimeout(timeoutId);
+    //     }
+    // }, [searchValue]);
     //----------END----------//
 
     //----------Хуудаслалт болон sort-ийн функцууд----------//
@@ -104,9 +104,9 @@ function Elsegch({scope}){
     //----------END----------//
 
     //----------UseEffect----------//
-    useEffect(() => {
-        getDatas()
-    },[rowsPerPage, currentPage])
+    // useEffect(() => {
+    //     getDatas()
+    // },[rowsPerPage, currentPage])
     //----------END----------//
 
     return(

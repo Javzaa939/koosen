@@ -15,7 +15,8 @@ from lms.models import  (
     Student,
     AimagHot,
     SumDuureg,
-    ProfessionDefinition
+    ProfessionDefinition,
+    Payment
 )
 
 from elselt.models import (
@@ -78,19 +79,19 @@ class AdmissionProfessionSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_shalguur_ids(self, obj):
-        value_ids = AdmissionIndicator.objects.filter(admission_prof=obj).values_list('value', flat=True)
+        value_ids = AdmissionIndicator.objects.filter(admission_prof=obj, admission_prof__admission__is_store=False).values_list('value', flat=True)
 
         return list(value_ids)
 
     def get_nas(self, obj):
-        indicator = AdmissionIndicator.objects.filter(admission_prof=obj, value=AdmissionIndicator.NAS).first()
+        indicator = AdmissionIndicator.objects.filter(admission_prof=obj, value=AdmissionIndicator.NAS, admission_prof__admission__is_store=False).first()
         return {
             'limit_min': indicator.limit_min if indicator else '',
             'limit_mах': indicator.limit_mах if indicator else '',
         }
 
     def get_hynalt_too(self, obj):
-        indicator = AdmissionIndicator.objects.filter(admission_prof=obj, value=AdmissionIndicator.XYANALTIIN_TOO).first()
+        indicator = AdmissionIndicator.objects.filter(admission_prof=obj, value=AdmissionIndicator.XYANALTIIN_TOO, admission_prof__admission__is_store=False).first()
         hynalt_too = AdmissionXyanaltToo.objects.filter(indicator=indicator).first()
         return {
             'norm_all': hynalt_too.norm_all if hynalt_too else '',
@@ -119,7 +120,7 @@ class ElseltUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ElseltUser
-        exclude = ['password']
+        exclude = ['password', 'image']
 
 
 class UserScoreSerializer(serializers.ModelSerializer):
@@ -1213,3 +1214,39 @@ class EyeshOrderUserInfoSerializer(serializers.ModelSerializer):
         userinfo=UserinfoSerializer(data).data
 
         return userinfo
+
+
+
+class AdmissionPaymentSerializer(serializers.ModelSerializer):
+
+    full_name = serializers.CharField(source='admission.full_name', default='', read_only=True)
+    register = serializers.CharField(source='admission.register', default='', read_only=True)
+    state = serializers.SerializerMethodField()
+    profession_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Payment
+        fields = [
+            'full_name', 'profession_name', 'admission', 'id', 'register',
+            'total_amount', 'payed_date', 'state', 'qpay_total_amount'
+        ]
+
+    def get_state(self, obj):
+        admission = AdmissionUserProfession.objects.filter(user=obj.admission).first()
+        state = 0
+        if admission:
+            state = admission.profession.state
+        return state
+
+    def get_profession_name(self, obj):
+        profession_list = list()
+        admission_professions = AdmissionUserProfession.objects.filter(user=obj.admission)
+
+        for admission in admission_professions:
+            profession = admission.profession if admission else None
+
+            if profession:
+                profession_name = f"{profession.profession.name} {profession.profession.degree.degree_code}"
+                profession_list.append(f"{profession_name}")
+
+        return profession_list

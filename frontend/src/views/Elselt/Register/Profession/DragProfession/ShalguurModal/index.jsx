@@ -216,7 +216,7 @@ const ShalguurModal = ({ open, handleModal, refreshDatas, admission_data }) => {
                                                 <Input
                                                     type='number'
                                                     bsSize='sm'
-                                                    value={hynaltToo.norm_all || ''}
+                                                    value={hynaltToo.norm_all}
                                                     onChange={(e) => setHynaltToo(current => {
                                                         return {
                                                             ...current,
@@ -231,7 +231,7 @@ const ShalguurModal = ({ open, handleModal, refreshDatas, admission_data }) => {
                                                 <Input
                                                     type='number'
                                                     bsSize='sm'
-                                                    value={hynaltToo.norm1 || ''}
+                                                    value={hynaltToo.norm1}
                                                     placeholder='Эрэгтэй тоо'
                                                     onChange={(e) => setHynaltToo(current => {
                                                         return {
@@ -247,7 +247,7 @@ const ShalguurModal = ({ open, handleModal, refreshDatas, admission_data }) => {
                                                     type='number'
                                                     bsSize='sm'
                                                     placeholder='Эмэгтэй тоо'
-                                                    value={hynaltToo.norm2 || ''}
+                                                    value={hynaltToo.norm2}
                                                     onChange={(e) => setHynaltToo(current => {
                                                         return {
                                                             ...current,
