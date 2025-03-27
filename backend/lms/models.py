@@ -4622,7 +4622,7 @@ class ELearn(models.Model):
     teacher = models.ForeignKey(Teachers, on_delete=models.CASCADE, verbose_name='Багш', null=True)
     image = models.FileField(upload_to='online', verbose_name='Зураг', null=True)
 
-    students = models.ManyToManyField(Student, verbose_name='Хичээл үзэх оюутнууд')
+    students = models.ManyToManyField(Student, null=True, blank=True, verbose_name='Хичээл үзэх оюутнууд')
 
     start_date = models.DateTimeField(null=True, verbose_name='Эхлэх хугацаа')
     end_date = models.DateTimeField(null=True, verbose_name='Дуусах хугацаа')

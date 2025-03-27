@@ -6,7 +6,7 @@ from rest_framework import serializers
 
 from student.serializers import StudentSimpleListSerializer
 from core.serializers import TeachersSerializer
-from lms.models import OnlineLesson,Challenge, LessonMaterial, OnlineWeek , Announcement, HomeWork,  HomeWorkStudent, OnlineWeekStudent, Student, WeekMaterials
+from lms.models import OnlineLesson,Challenge, LessonMaterial, OnlineWeek , Announcement, HomeWork,  HomeWorkStudent, OnlineWeekStudent, Student, WeekMaterials, ELearn
 from core.models import Teachers
 
 from main.utils.file import split_root_path
@@ -356,3 +356,10 @@ class LectureStudentSerializer(serializers.ModelSerializer):
 
     def get_send_file(self,obj):
         return settings.CDN_FILE_URL + str(obj.lekts_file)
+
+
+class ELearnSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = ELearn
+        fields = "__all__"

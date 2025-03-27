@@ -16,7 +16,7 @@ from django.db import transaction
 from django.db.models import F, Q
 
 from lms.models import (
-    Group, LessonStandart, OnlineLesson, LessonMaterial, OnlineWeek, Announcement, HomeWork , HomeWorkStudent, Challenge, Student, OnlineWeekStudent
+    Group, LessonStandart, OnlineLesson, LessonMaterial, OnlineWeek, Announcement, HomeWork , HomeWorkStudent, Challenge, Student, OnlineWeekStudent, ELearn
 )
 from .serializers import (
     OnlineLessonSerializer,
@@ -26,7 +26,8 @@ from .serializers import (
     HomeWorkSerializer,
     HomeWorkStudentSerializer,
     LectureStudentSerializer,
-    StudentSerializer
+    StudentSerializer,
+    ELearnSerializer
 )
 
 from core.models import (
@@ -809,3 +810,62 @@ class SummarizeLessonMaterialAPIView(
             OnlineWeekStudent.objects.filter(week_id=pk,student_id__in=user_ids).update(status=OnlineWeekStudent.CHECKED)
 
         return request.send_info("INF_002")
+
+class RemoteLessonAPIView(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    generics.GenericAPIView
+):
+    '''Зайн сургалтын api'''
+
+    # def get(self,request,pk=None):
+    #     print('irjinoo')
+
+    #     return request.send_info("INF_002")
+
+    # def post(self,request,pk=None):
+    #     print('irjinoo')
+
+    #     return request.send_info("INF_002")
+
+
+
+    queryset = ELearn.objects.all()
+    serializer_class = ELearnSerializer
+
+    def get(self,request,pk=None):
+
+        # self.queryset = self.queryset.filter(user=request.user).distinct('user')
+        serializer = self.list(request).data
+
+        print('irjinnn')
+        return request.send_data(serializer)
+
+    # @parser_classes([MultiPartParser])
+    def post(self, request):
+        print('irjinoo')
+        serializer = self.get_serializer(data=request.data)
+        # print(serializer,'asdd')
+
+        if serializer.is_valid():
+            print('valid')
+        file = request.FILES.get('path')
+        print(request.data,'flll')
+        print(file,'file')
+
+        # lesson_id = request.data.get('lesson')
+
+        # # Retrieve the actual LessonStandart instance
+        # try:
+        #     lesson = LessonStandart.objects.get(id=lesson_id)
+        # except LessonStandart.DoesNotExist:
+        #     return request.send_info("INF_002", error="LessonStandart with given ID does not exist")
+
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid(raise_exception=False):
+            self.perform_create(serializer)
+
+        else:
+            return request.send_error_valid(serializer.errors)
+        return request.send_info("INF_001")

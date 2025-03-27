@@ -45,4 +45,7 @@ urlpatterns = [
     path('lesson_students/<int:pk>/', LessonStudentsAPIView.as_view()),
 
     path('test/<int:pk>/',OnlineLessonTestAPIView.as_view()),
+
+    path('remote/',RemoteLessonAPIView.as_view()),
+
 ]

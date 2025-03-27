@@ -40,6 +40,7 @@ import PublicRoute from "@components/routes/PublicRoute"
 
 // ** Utils
 import { isObjEmpty } from "@utils"
+import RemoteRoutes from "./RemoteLesson"
 
 const getLayout = {
   blank: <BlankLayout />,
@@ -79,6 +80,7 @@ const Routes = [
   ...PsychologicalTestingRoutes,
   ...OnlineLessonRoutes,
   ...StudentBrowserRoutes,
+  ...RemoteRoutes,
 ];
 
 const getRouteMeta = (route) => {

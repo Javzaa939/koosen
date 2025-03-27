@@ -2058,6 +2058,11 @@ function useApi(isDisplay=false) {
 			put: (datas, pk) => instance.put(`online_lesson/lesson_students/${pk}/`, datas),
 			delete: (student, pk) => instance.delete(`online_lesson/lesson_students/${pk}/?student=${student}`)
 		},
+		// Зайн сургалт
+		remote:{
+			get: (limit, page, search) => instance.get(`online_lesson/remote/?limit=${limit}&page=${page}&search=${search}`),
+			post : (data) => instance.post(`online_lesson/remote/`,data),
+		},
 
 		// суралцагчийн хөтөч
 		browser: {
