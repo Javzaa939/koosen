@@ -52,17 +52,4 @@ export default [
 			},
 		]
     },
-
-	// {
-	// 	id: "e-challenge",
-	// 	title: "Асуултын сан",
-	// 	icon: <Circle size={8} />,
-	// 	navLink: "challenge/teacher/",
-	// },
-	// {
-	// 	id: "testchallenge",
-	// 	title: "Онлайн шалгалт",
-	// 	icon: <Circle size={8} />,
-	// 	navLink: "challenge/test/",
-	// },
 ]

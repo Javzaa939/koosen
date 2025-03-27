@@ -45,7 +45,6 @@ const VerticalLayout = (props) =>
                 saveData = [...saveData, ...navChildren]
             }
         }
-
         return saveData
     }
 
@@ -56,7 +55,7 @@ const VerticalLayout = (props) =>
                 let newMenu = []
                 navigation.forEach((menus) =>
                     {
-                    if (menus && menus.navChildren && menus.navChildren.length > 0 && user && Object.keys(user).length > 0)
+                    if (menus && menus?.navChildren && menus?.navChildren.length > 0 && user && Object.keys(user).length > 0)
                         {
                         let childrenDatas = []
                         /** ----------------------------- Сургалт ---------------------------- */
@@ -358,12 +357,12 @@ const VerticalLayout = (props) =>
                         /** Шалгалтын асуулт */
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-exam-question-read', 'e-challenge')
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-season-question-read', 'season-equistion')
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-season-exam-read', 'season-test')
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-season-report-read', 'examreport')
-
                         /** Шалгалт */
-                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-exam-read', 'testchallenge')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-exam-read', 'just-challenge')
+                        childrenDatas = checkPerm(childrenDatas, menus, 'lms-season-exam-read', 'season-challenge')
+
                         childrenDatas = checkPerm(childrenDatas, menus, 'lms-exam-report-read', 'examreport')
+
 
 
                         /** ----------------------------- Онлайн хичээл цэс ---------------------------- */

@@ -20,12 +20,6 @@ export default [
                 icon: <Circle size={8} />,
                 navLink: "study/profession-definition/"
             },
-            // {
-            //     id: 'study3',
-            //     title: 'Сургалтын төлөвлөгөө',
-            //     icon: <Circle size={8} />,
-            //     navLink: "study/plan/"
-            // },
         ]
     }
 ]
