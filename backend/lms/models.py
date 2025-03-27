@@ -4343,11 +4343,11 @@ class StudentGrade(models.Model):
     """ Хичээлийн улирлын үндсэн дүн """
 
     student = models.ForeignKey(Student, on_delete=models.CASCADE, verbose_name="Оюутан", null=True)
-    score = models.ForeignKey(Score, on_delete=models.CASCADE, verbose_name="Дүнгийн бүртгэл", null=True)
     lesson_year = models.CharField(max_length=20, null=True, verbose_name="Хичээлийн жил")
     lesson_season = models.ForeignKey(Season, on_delete=models.CASCADE, related_name="Улирал", null=True)
     credit = models.FloatField(verbose_name="Улирлын цуглуулсан нийт кредит")
-    average = models.FloatField(verbose_name="Улирлын дундаж")
+    average = models.FloatField(verbose_name="Улирлын дундаж оноо",  null=True)
+    gpa = models.FloatField(verbose_name="Улирлын голч дүн",  null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
