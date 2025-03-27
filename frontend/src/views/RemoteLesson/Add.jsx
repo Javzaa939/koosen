@@ -99,7 +99,7 @@ const Add = ({ isOpen, handleModal, refreshDatas }) => {
         formData.append('image', featurefile)
 
         setIsLoading(true)
-        const { success, error } = await fetchData(remoteApi.post(formData))
+        const { success, errors } = await fetchData(remoteApi.post(formData))
         if(success) {
             // reset()
             // refreshDatas()
@@ -109,8 +109,8 @@ const Add = ({ isOpen, handleModal, refreshDatas }) => {
         else {
             setIsLoading(false)
             /** Алдааны мессеж */
-            for (let key in error) {
-                setError(error[key].field, { type: 'custom', message: error[key].msg});
+            for (let key in errors) {
+                setError(key, { type: 'custom', message: errors[key][0]});
             }
         }
     }
