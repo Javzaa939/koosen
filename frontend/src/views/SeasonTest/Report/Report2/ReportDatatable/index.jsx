@@ -1,11 +1,10 @@
 // ** React Imports
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { Search } from 'react-feather'
 import { useTranslation } from 'react-i18next'
 import { Button, Col, Input, Label, Row } from 'reactstrap'
 
 import useApi from '@hooks/useApi'
-import { calculatePercentage } from '@src/utility/Utils'
 
 import ExamFilter from '../../helpers/ExamFilter'
 import GenericDataTable from '../../helpers/GenericDataTable'
@@ -24,6 +23,8 @@ export default function ReportDatatable({ report }) {
     const [selected_exam, setSelectedExam] = useState('')
     const [selected_group, setSelectedGroup] = useState('')
     const [selected_profession, setSelectedProfession] = useState('')
+    const [selected_year, setSelectedYear] = useState('')
+    const [selected_season, setSelectedSeason] = useState('')
 
     const [rows_per_page, setRowsPerPage] = useState(50)
     const [search_value, setSearchValue] = useState('')
@@ -206,73 +207,48 @@ export default function ReportDatatable({ report }) {
 
     // to not rerender generic datatable if data not changed
     useEffect(()=>{
-        setApiGetFuncArgs({ report_type: report, exam: selected_exam, group: selected_group, profession: selected_profession })
-    },[report, selected_exam, selected_group, selected_profession])
+        setApiGetFuncArgs({ report_type: report, exam: selected_exam, group: selected_group, profession: selected_profession, lesson_year: selected_year, lesson_season: selected_season })
+    },[report, selected_exam, selected_group, selected_profession, selected_season, selected_year])
+
+    const examMemo = useMemo(() => {
+        return (
+            <ExamFilter setSelected={setSelectedExam} setSelectedYear={setSelectedYear} setSelectedSeason={setSelectedSeason} selected_year={selected_year} selected_season={selected_season}/>
+        )
+    }, [selected_year, selected_season])
 
     return (
         <>
             <div className='px-1'>
                 <Row>
-                    <Col className='d-flex'>
-                        {
-                            report !== 'students' &&
-                            <div style={{ width: '219.5px' }} className='me-1'>
-                                <ExamFilter setSelected={setSelectedExam} />
-                            </div>
-                        }
+                    {
+                        examMemo
+                    }
+                    <Col md={3}>
                         {
                             ['professions', 'students'].includes(report) &&
-                            <div style={{ width: '219.5px' }} className='me-1'>
+                            <div  className='me-1'>
                                 <ProfessionFilter setSelected={setSelectedProfession} />
                             </div>
                         }
+                    </Col>
+                    <Col md={3}>
                         {
                             ['students'].includes(report) &&
-                            <div style={{ width: '219.5px' }} className='me-1'>
+                            <div  className='me-1'>
                                 <TeacherScoreGroupFilter setSelected={setSelectedGroup} profession={selected_profession} />
                             </div>
                         }
+                    </Col>
+                    <Col md={3}>
                         {
                             ['groups'].includes(report) &&
-                            <div style={{ width: '219.5px' }} className='me-1'>
+                            <div  className='me-1'>
                                 <GroupFilter setSelected={setSelectedGroup} exam_id={selected_exam} profession={selected_profession} isShowAll={report === 'students' ? 'true' : 'false'} />
-                            </div>
-                        }
-                        {
-                            report === 'students' &&
-                            <div className='d-flex'>
-                                <div>
-                                    <Label className="form-label" for='search-input'>
-                                        {t('Хайх')}
-                                    </Label>
-                                    <div className='d-flex'>
-                                        <Input
-                                            className='dataTable-filter'
-                                            type='text'
-                                            bsSize='sm'
-                                            id='search-input'
-                                            placeholder={t('Хайх')}
-                                            value={search_value}
-                                            onChange={handleFilter}
-                                            onKeyPress={e => e.key === 'Enter' && handleSearch()}
-                                            style={{ height: '30px' }}
-                                        />
-                                        <Button
-                                            size='sm'
-                                            className='ms-50'
-                                            color='primary'
-                                            onClick={handleSearch}
-                                            style={{ height: '30px' }}
-                                        >
-                                            <Search size={15} />
-                                        </Button>
-                                    </div>
-                                </div>
                             </div>
                         }
                     </Col>
                 </Row>
-                <Row className='mt-1'>
+                <Row className='mt-1 d-flex'>
                     <Col>
                         <Input
                             type='select'
@@ -280,7 +256,7 @@ export default function ReportDatatable({ report }) {
                             style={{ height: "30px", width: "62px" }}
                             value={rows_per_page === 10000000 ? 'Бүгд' : rows_per_page}
                             onChange={e => handlePerPage(e)}
-                            className='mb-50'
+                            className='mb-50 mt-2'
                         >
                             {
                                 default_page.map((page, idx) => (
@@ -293,9 +269,43 @@ export default function ReportDatatable({ report }) {
                                 ))
                             }
                         </Input>
-                        <GenericDataTable apiGetFunc={challengeApi.getReport} isApiGetFuncArgsDefault={true} apiGetFuncArgs={apiGetFuncArgs} columns={columns} rows_per_page={rows_per_page} search_value={search_value} render_to_search={render_to_search} />
+                    </Col>
+                    <Col className='d-flex justify-content-end'>
+                        {
+                            report === 'students' &&
+                                <div className='d-flex mb-1'>
+                                    <div>
+                                        <Label className="form-label" for='search-input'>
+                                            {t('Хайх')}
+                                        </Label>
+                                        <div className='d-flex'>
+                                            <Input
+                                                className='dataTable-filter'
+                                                type='text'
+                                                bsSize='sm'
+                                                id='search-input'
+                                                placeholder={t('Хайх')}
+                                                value={search_value}
+                                                onChange={handleFilter}
+                                                onKeyPress={e => e.key === 'Enter' && handleSearch()}
+                                                style={{ height: '30px' }}
+                                            />
+                                            <Button
+                                                size='sm'
+                                                className='ms-50'
+                                                color='primary'
+                                                onClick={handleSearch}
+                                                style={{ height: '30px' }}
+                                            >
+                                                <Search size={15} />
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </div>
+                        }
                     </Col>
                 </Row>
+                <GenericDataTable apiGetFunc={challengeApi.getReport} isApiGetFuncArgsDefault={true} apiGetFuncArgs={apiGetFuncArgs} columns={columns} rows_per_page={rows_per_page} search_value={search_value} render_to_search={render_to_search} />
             </div>
             {
                 isShowLessonsDetail &&

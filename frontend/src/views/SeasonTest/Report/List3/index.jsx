@@ -1,5 +1,5 @@
 // ** React Imports
-import { memo, useEffect, useState } from 'react'
+import { memo, useEffect, useState, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import Select from 'react-select'
 
@@ -17,7 +17,7 @@ import DataTable from "react-data-table-component";
 import classnames from "classnames";
 import ResultModal from '@src/views/Test/DetailShow/Modal'
 import Chart from './Chart'
-
+import ExamFilter from '../helpers/ExamFilter'
 
 const List3 = () => {
     const { t } = useTranslation()
@@ -31,6 +31,10 @@ const List3 = () => {
     const [total_count, setTotalCount] = useState(1);
     const [resultModal, setResultModal] = useState(false)
     const [resultData, setResultData] = useState([]);
+
+    const [selected_exam, setSelectedExam] = useState('')
+    const [selected_year, setSelectedYear] = useState('')
+    const [selected_season, setSelectedSeason] = useState('')
 
     const challengeApi = useApi().challenge
     const departmentApi = useApi().hrms.department
@@ -53,7 +57,7 @@ const List3 = () => {
     const toggleDashboard = () => setDashBoardOpen((prevState) => !prevState)
 
     async function getDatas() {
-        const { success, data } = await allFetch(challengeApi.getDetailTable(currentPage, rowsPerPage, searchValue, select_value.department, select_value.group, select_value.test, select_value.student))
+        const { success, data } = await allFetch(challengeApi.getDetailTable(currentPage, rowsPerPage, searchValue, select_value.department, select_value.group, selected_exam, select_value.student, selected_season, selected_year))
         if (success) {
             setDatas(data?.results);
             setTotalCount(data?.count);
@@ -68,7 +72,7 @@ const List3 = () => {
     }
 
     async function getGroup() {
-        const { success, data } = await allFetch(groupApi.getExam(select_value?.test))
+        const { success, data } = await allFetch(groupApi.getExam(selected_exam))
         if (success) {
             setGroup(data)
         }
@@ -76,32 +80,19 @@ const List3 = () => {
 
     useEffect(() => {
         getDepartmentOption()
-        getExams()
     }, [])
 
     useEffect(() => {
-        if (select_value?.test) {
+        if (selected_exam) {
             getGroup()
         }
-    }, [select_value?.test])
+    }, [selected_exam])
 
     useEffect(() => {
-        if (select_value?.test) {
+        if (selected_exam) {
             getDatas()
         }
-    }, [select_value, currentPage, rowsPerPage])
-
-    // #region exam selection code
-    const [examOption, setExamOption] = useState([])
-
-    async function getExams() {
-        const { success, data } = await allFetch(challengeApi.get(1, 10000000, '', '', '', '', true))
-
-        if (success) {
-            setExamOption(data?.results)
-        }
-    }
-    // #endregion
+    }, [select_value, currentPage, rowsPerPage, selected_exam])
 
     const handlePagination = (page) => {
         setCurrentPage(page.selected + 1);
@@ -125,6 +116,12 @@ const List3 = () => {
         setResultModal(!resultModal)
     }
 
+    const examMemo = useMemo(() => {
+        return (
+            <ExamFilter setSelected={setSelectedExam} setSelectedYear={setSelectedYear} setSelectedSeason={setSelectedSeason} selected_year={selected_year} selected_season={selected_season}/>
+        )
+    }, [selected_year, selected_season])
+
     return (
         <div className='px-1'>
             {
@@ -143,32 +140,7 @@ const List3 = () => {
             </div>
             {isLoading && Loader}
             <Row>
-                <Col md={3} sm={10}>
-                    <Label className="form-label" for="exam">
-                        {t('Шалгалт')}
-                    </Label>
-                    <Select
-                        id="exam"
-                        name="exam"
-                        isClearable
-                        classNamePrefix='select'
-                        className='react-select'
-                        placeholder={`-- Сонгоно уу --`}
-                        options={examOption || []}
-                        noOptionsMessage={() => 'Хоосон байна'}
-                        onChange={(val) => {
-                            setSelectValue(current => {
-                                return {
-                                    ...current,
-                                    test: val?.id || '',
-                                }
-                            })
-                        }}
-                        styles={ReactSelectStyles}
-                        getOptionValue={(option) => option.id}
-                        getOptionLabel={(option) => option.title}
-                    />
-                </Col>
+                {examMemo}
                 {/* <Col md={3} sm={10}>
                     <Label className="form-label" for="department">
                         {t('Хөтөлбөрийн баг')}

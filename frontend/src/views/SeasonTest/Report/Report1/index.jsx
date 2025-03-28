@@ -18,6 +18,8 @@ import GroupFilter from '../helpers/GroupFilter'
 export default function Report1() {
     // states
     const [selected_exam, setSelectedExam] = useState('')
+    const [selected_year, setSelectedYear] = useState('')
+    const [selected_season, setSelectedSeason] = useState('')
     const [selected_group, setSelectedGroup] = useState('')
     const [datas, setDatas] = useState([])
     const [dataTableDatas, setDataTableDatas] = useState([])
@@ -29,6 +31,7 @@ export default function Report1() {
     const [searchValue, setSearchValue] = useState('')
     const [total_count, setTotalCount] = useState(1)
     const [sortField, setSort] = useState('')
+
     // #endregion
 
     const { t } = useTranslation()
@@ -39,7 +42,9 @@ export default function Report1() {
         const { success, data } = await fetchData(challengeApi.getReport({
             report_type: 'reliability',
             exam: selected_exam,
-            group: selected_group
+            group: selected_group,
+            lesson_season: selected_season,
+            lesson_year: selected_year
         }))
 
         if (success) {
@@ -65,11 +70,11 @@ export default function Report1() {
     }
 
     useEffect(() => {
-        if (selected_exam) {
+        if (selected_exam && selected_year && selected_season) {
             getDatas()
             getDataTableDatas()
         }
-    }, [selected_exam, selected_group])
+    }, [selected_exam, selected_group, selected_year, selected_season])
 
     // #region datatable
     function handlePagination(page) {
@@ -100,13 +105,15 @@ export default function Report1() {
     }
 
     useEffect(() => {
-        if (!searchValue) {
+        if (!searchValue && selected_year && selected_season) {
             getDataTableDatas()
         }
     }, [searchValue])
 
     useEffect(() => {
-        getDataTableDatas()
+        if(selected_year && selected_season) {
+            getDataTableDatas()
+        }
     }, [sortField, currentPage, rowsPerPage])
 
     // #endregion
@@ -130,6 +137,12 @@ export default function Report1() {
         )
     }, [selected_exam])
 
+    const examMemo = useMemo(() => {
+        return (
+            <ExamFilter setSelected={setSelectedExam} setSelectedYear={setSelectedYear} setSelectedSeason={setSelectedSeason} selected_year={selected_year} selected_season={selected_season}/>
+        )
+    }, [selected_year, selected_season])
+
     return (
         <div className='px-1'>
             <div className='d-flex justify-content-center' style={{ fontWeight: 900, fontSize: 16 }}>
@@ -137,9 +150,9 @@ export default function Report1() {
             </div>
             {isLoading && Loader}
             <Row>
-                <Col md={3} sm={10}>
-                    <ExamFilter setSelected={setSelectedExam} />
-                </Col>
+                <>
+                    {examMemo}
+                </>
                 <Col md={3} sm={10}>
                     {groupMemo}
                 </Col>
