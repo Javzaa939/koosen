@@ -7,7 +7,7 @@ from rest_framework import serializers
 from student.serializers import StudentSimpleListSerializer
 from core.serializers import TeachersSerializer
 from lms.models import OnlineLesson,Challenge, LessonMaterial, OnlineWeek , Announcement, HomeWork,  HomeWorkStudent, OnlineWeekStudent, Student, WeekMaterials, ELearn
-from core.models import Teachers
+from core.models import Teachers, SubOrgs
 
 from main.utils.file import split_root_path
 from main.utils.function.utils import get_file_from_cdn
@@ -358,7 +358,27 @@ class LectureStudentSerializer(serializers.ModelSerializer):
         return settings.CDN_FILE_URL + str(obj.lekts_file)
 
 
+class SubOrgSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = SubOrgs
+        fields = ['name']
+
+class TeacherSerializer(serializers.ModelSerializer):
+
+    full_name = serializers.SerializerMethodField()
+    sub_org = SubOrgSerializer(read_only=True)
+
+    class Meta:
+        model = Teachers
+        fields = '__all__'
+
+    def get_full_name(self, obj):
+        return obj.full_name
+
 class ELearnSerializer(serializers.ModelSerializer):
+
+    teacher_info = TeacherSerializer(source='teacher', read_only=True)
 
     class Meta:
         model = ELearn

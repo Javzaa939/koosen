@@ -36,7 +36,6 @@ const Add = ({ isOpen, handleModal, refreshDatas }) => {
 
     const { isLoading, fetchData } = useLoader({})
 
-    const [selectWeekendIds, setWeekIds] = useState([])
     const [is_loading, setIsLoading] = useState(false)
     const [lesson_option, setLessonOption] = useState([])
     const [select_value, setSelectValue] = useState(values)
@@ -45,17 +44,13 @@ const Add = ({ isOpen, handleModal, refreshDatas }) => {
     const [featurefile, setFeaturedImg] = useState('')
     const [image_old, setImageOld] = useState('')
 
-    const [is_valid, setValid] = useState(true)
-
     const handleDeleteImage = () => {
         setFeaturedImg('')
         setImageOld('')
     }
 
     const clickLogoImage = () => {
-        console.log('click')
         var logoInput = document.getElementById(`image`)
-        console.log('input,', logoInput)
         logoInput.click()
     }
 
@@ -92,7 +87,7 @@ const Add = ({ isOpen, handleModal, refreshDatas }) => {
 
         const formData = new FormData()
 
-        cdata['teacher'] = selectedTeachers.map((c) => c.id)
+        // cdata['teacher'] = selectedTeachers?.id
         for (let key in cdata) {
             formData.append(key, cdata[key])
         }
@@ -102,7 +97,7 @@ const Add = ({ isOpen, handleModal, refreshDatas }) => {
         const { success, errors } = await fetchData(remoteApi.post(formData))
         if(success) {
             // reset()
-            // refreshDatas()
+            refreshDatas()
             // handleModal()
             setIsLoading(false)
         }
@@ -204,7 +199,7 @@ const Add = ({ isOpen, handleModal, refreshDatas }) => {
                                             id="teacher"
                                             classNamePrefix='select'
                                             isClearable
-                                            isMulti
+                                            // isMulti
                                             className={classnames('react-select', { 'is-invalid': errors.teacher })}
                                             isLoading={isLoading}
                                             placeholder={t('-- Сонгоно уу --')}
@@ -212,7 +207,7 @@ const Add = ({ isOpen, handleModal, refreshDatas }) => {
                                             value={selectedTeachers}
                                             noOptionsMessage={() => t('Хоосон байна.')}
                                             onChange={(val) => {
-                                                setSelectedTeachers(val)
+                                                onChange(val?.id || '')
                                             }}
                                             styles={ReactSelectStyles}
                                             getOptionValue={(option) => option.id}

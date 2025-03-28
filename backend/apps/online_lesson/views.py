@@ -815,54 +815,29 @@ class RemoteLessonAPIView(
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
     mixins.DestroyModelMixin,
+    mixins.RetrieveModelMixin,
     generics.GenericAPIView
 ):
     '''Зайн сургалтын api'''
 
-    # def get(self,request,pk=None):
-    #     print('irjinoo')
-
-    #     return request.send_info("INF_002")
-
-    # def post(self,request,pk=None):
-    #     print('irjinoo')
-
-    #     return request.send_info("INF_002")
-
-
-
     queryset = ELearn.objects.all()
     serializer_class = ELearnSerializer
-
+    pagination_class = CustomPagination
+    filter_backends = [SearchFilter]
+    search_fields = ['lesson__name', 'lesson__code', 'teacher__first_name', 'title']
     def get(self,request,pk=None):
 
-        # self.queryset = self.queryset.filter(user=request.user).distinct('user')
+        if pk:
+            datas = self.retrieve(request, pk).data
+            return request.send_data(datas)
+
         serializer = self.list(request).data
 
-        print('irjinnn')
         return request.send_data(serializer)
 
-    # @parser_classes([MultiPartParser])
     def post(self, request):
-        print('irjinoo')
         serializer = self.get_serializer(data=request.data)
-        # print(serializer,'asdd')
 
-        if serializer.is_valid():
-            print('valid')
-        file = request.FILES.get('path')
-        print(request.data,'flll')
-        print(file,'file')
-
-        # lesson_id = request.data.get('lesson')
-
-        # # Retrieve the actual LessonStandart instance
-        # try:
-        #     lesson = LessonStandart.objects.get(id=lesson_id)
-        # except LessonStandart.DoesNotExist:
-        #     return request.send_info("INF_002", error="LessonStandart with given ID does not exist")
-
-        serializer = self.get_serializer(data=request.data)
         if serializer.is_valid(raise_exception=False):
             self.perform_create(serializer)
 

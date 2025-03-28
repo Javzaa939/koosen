@@ -2066,6 +2066,7 @@ function useApi(isDisplay=false) {
 		// Зайн сургалт
 		remote:{
 			get: (limit, page, search) => instance.get(`online_lesson/remote/?limit=${limit}&page=${page}&search=${search}`),
+			getOne: (id) => instance.get(`online_lesson/remote/${id}/`),
 			post : (data) => instance.post(`online_lesson/remote/`,data),
 		},
 
