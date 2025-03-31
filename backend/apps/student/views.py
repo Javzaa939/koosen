@@ -3796,8 +3796,9 @@ class StudentArrivedApproveAPIView(
         group_obj = Group.objects.get(pk=group)
 
         new_code = generate_student_code(group_obj.school.id, group)
+
         # суралцах төрөл
-        new_status = StudentRegister.objects.filter(name__iexact='Суралцаж буй').first()
+        new_status = StudentRegister.objects.filter(code=1).first()
 
         datas['code'] = new_code
         datas['status'] = new_status
@@ -3810,33 +3811,38 @@ class StudentArrivedApproveAPIView(
 
         with transaction.atomic():
             try:
-                new_student = Student.objects.create(
-                    **datas
-                )
+                if not movement_obj.student_new:
 
-                new_student.group = group_obj
-                new_student.department = group_obj.department
-                new_student.school = group_obj.school
-                new_student.save()
+                    new_student = Student.objects.create(
+                        **datas
+                    )
 
-                movement_obj.group = group_obj
-                movement_obj.student_new = new_student
-                movement_obj.save()
+                    new_student.group = group_obj
+                    new_student.department = group_obj.department
+                    new_student.school = group_obj.school
+                    new_student.save()
 
-                year, season = get_active_year_season()
+                    movement_obj.group = group_obj
+                    movement_obj.student_new = new_student
+                    movement_obj.save()
 
-                create_datas = {}
-                # Төлбөрийн мэдээлэл шилжүүлэх
-                cdatas = PaymentBeginBalance.objects.filter(student=old_student, lesson_year=year, lesson_season=season).first()
-                if cdatas:
-                    first_balance = cdatas.first_balance
+                    year, season = get_active_year_season()
 
-                    create_datas['student'] = new_student
-                    create_datas['lesson_year'] = year
-                    create_datas['lesson_year'] = season
-                    create_datas['first_balance'] = first_balance
+                    create_datas = {}
+                    # Төлбөрийн мэдээлэл шилжүүлэх
+                    cdatas = PaymentBeginBalance.objects.filter(student=old_student, lesson_year=year, lesson_season=season).first()
+                    if cdatas:
+                        first_balance = cdatas.first_balance
 
-                    PaymentBeginBalance.objects.create(**create_datas)
+                        create_datas['student'] = new_student
+                        create_datas['lesson_year'] = year
+                        create_datas['lesson_year'] = season
+                        create_datas['first_balance'] = first_balance
+
+                        PaymentBeginBalance.objects.create(**create_datas)
+                else:
+                    movement_obj.student_new.status = new_status
+                    movement_obj.student_new.save()
 
             except Exception as e:
                 return request.send_error('ERR_002', e.__str__())

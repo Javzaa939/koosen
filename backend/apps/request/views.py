@@ -1122,7 +1122,7 @@ class CorrespondApprove(
 
             # Оюутны мэдээллийг шинэчлэх болон үүсгэх хэсэг хуучин оюутан байвал ангийг нь сольж байгаа
             obj, created = Student.objects.update_or_create(
-                code= code,
+                code=code,
                 defaults={
                     **main_datas[0]
                 }
