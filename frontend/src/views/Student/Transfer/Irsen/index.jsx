@@ -44,7 +44,7 @@ const Irsen = () => {
     const navigate = useNavigate();
 
     var start_date =  new Date()
-    var end_day = new Date().getDate() - 7;
+    var end_day = new Date().getDate() - 60;
     start_date.setDate(end_day)
 
     const [startPicker, setStartPicker] = useState(formatDate(start_date))
@@ -76,7 +76,7 @@ const Irsen = () => {
     const [sortField, setSort] = useState('')
 
 
-    const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: true })
+    const { Loader, isLoading, fetchData } = useLoader({ isFullScreen: false })
 
     const studentmovementApi = useApi().student.arrived
     // const studentOneApi = useApi().student
@@ -99,6 +99,7 @@ const Irsen = () => {
             setDatas(data?.results)
         }
     }
+    console.log("iii", datas)
 
     // ** Function to handle filter
     const handleFilter = e => {

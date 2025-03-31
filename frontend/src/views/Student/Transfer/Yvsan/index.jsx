@@ -189,7 +189,7 @@ const Yvsan  = () => {
                         </Button>
                         <Button
                             color='primary'
-                            disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-student-movement-create') && school_id)  ? false : true}
+                            // disabled={Object.keys(user).length > 0 && (user.permissions.includes('lms-student-movement-create') && school_id)  ? false : true}
                             onClick={() => handleModal()}>
                             <Plus size={15} />
                             <span className='align-middle ms-50'>{t('Нэмэх')}</span>

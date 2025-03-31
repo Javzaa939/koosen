@@ -1317,7 +1317,7 @@ function useApi(isDisplay=false) {
 
 				postAnswer: (data, menu) => instance.post(`/request/correspond/answer/?menu=${menu}`, data),
 				getAnswer: (pk) => instance.get(`/request/correspond/answer/${pk}/`),
-				// БМА батлах
+				// Араг зүйч батлах
 				postApprove: (pk, data) => instance.post(`/request/correspond/approve/${pk}/`, data)
 			},
 			/** Олон нийтийн ажилд оролцох хүсэлтийн шийдвэр */

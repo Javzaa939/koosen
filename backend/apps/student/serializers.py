@@ -352,6 +352,7 @@ class StudentMovementListSerializer(serializers.ModelSerializer):
     last_name = serializers.CharField(source='student.last_name', default='')
     corres_type = serializers.SerializerMethodField()
     is_solved = serializers.SerializerMethodField()
+    correspond_type = serializers.SerializerMethodField()
 
     group = GroupInfoSerializer(many=False)
     pro_name = serializers.CharField(source='group.profession.name', default='')
@@ -416,6 +417,21 @@ class StudentMovementListSerializer(serializers.ModelSerializer):
         code_name = code + " " + full_name
 
         return code_name
+
+    def correspond_type(self, obj):
+        "Дүйцүүлэлтийн төрөл"
+
+        data = {}
+        corr_obj = StudentCorrespondScore.objects.filter(student=obj.student.id).first()
+        typeId = corr_obj.correspond_type
+
+        lesson_is_allow = StudentCorrespondLessons.objects.filter(correspond=corr_obj).first().is_allow
+        data ={
+            'typeId':typeId,
+            'is_allow':lesson_is_allow
+        }
+        return data
+
 
 # --------------------- Ангийн бүртгэл ----------------------
 

@@ -116,7 +116,7 @@ const UpdateModal = ({ open, handleUpdate, refreshDatas, editDatas, editId }) =>
 
 	return (
         <Fragment>
-            <Modal isOpen={open} toggle={handleUpdate} className="modal-dialog-centered modal-sm" onClosed={handleUpdate}>
+            <Modal isOpen={open} toggle={handleUpdate} className="modal-dialog-centered modal-sm" onClosed={handleUpdate} backdrop='static'>
                 <ModalHeader className='bg-transparent pb-0' toggle={handleUpdate} ></ModalHeader>
                 <ModalBody className="px-sm-3 pt-30 pb-3">
                     <div className='text-center'>
