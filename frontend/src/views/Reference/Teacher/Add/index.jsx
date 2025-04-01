@@ -30,7 +30,31 @@ import SchoolContext from "@context/SchoolContext"
 
 import { validateSchema } from './validateSchema';
 
-const AddModal = ({ open, handleModal, refreshDatas, editData}) =>{
+const AddModal = ({ open, handleModal, refreshDatas, editData}) => {
+
+    const rank_type_option = [
+        {
+            'id': 1,
+            'name': 'Дадлагажигч багш',
+        },
+        {
+            'id': 2,
+            'name': 'Багш',
+        },
+        {
+            'id': 3,
+            'name': 'Ахлах багш',
+        },
+        {
+            'id': 4,
+            'name': 'Дэд профессор',
+        },
+        {
+            'id': 5,
+            'name': 'Профессор',
+        }
+    ]
+
     const CloseBtn = (
         <X className="cursor-pointer" size={15} onClick={handleModal} />
     )
@@ -183,6 +207,38 @@ const AddModal = ({ open, handleModal, refreshDatas, editData}) =>{
                                 }}
                             ></Controller>
                             {errors.salbar && <FormFeedback className='d-block'>{errors.salbar.message}</FormFeedback>}
+                        </Col>
+                        <Col md={12}>
+                            <Label className="form-label" for="teacher_rank_type">
+                                {t('Албан тушаалын зэрэглэл')}
+                            </Label>
+                            <Controller
+                                control={control}
+                                defaultValue=''
+                                name="teacher_rank_type"
+                                render={({ field: { value, onChange} }) => {
+                                    return (
+                                        <Select
+                                            name="teacher_rank_type"
+                                            id="teacher_rank_type"
+                                            classNamePrefix='select'
+                                            isClearable
+                                            className={classnames('react-select opacity-100', { 'is-invalid': errors.teacher_rank_type})}
+                                            placeholder={t('-- Сонгоно уу --')}
+                                            options={rank_type_option || []}
+                                            value={value && rank_type_option.find((c) => c.id === value)}
+                                            noOptionsMessage={() => t('Хоосон байна.')}
+                                            onChange={(val) => {
+                                                onChange(val?.id || '')
+                                            }}
+                                            styles={ReactSelectStyles}
+                                            getOptionValue={(option) => option.id}
+                                            getOptionLabel={(option) => option.name}
+                                        />
+                                    )
+                                }}
+                            ></Controller>
+                            {errors.teacher_rank_type && <FormFeedback className='d-block'>{errors.teacher_rank_type.message}</FormFeedback>}
                         </Col>
                          <Col md={12}>
                             <Label className="form-label" for="org_position">
