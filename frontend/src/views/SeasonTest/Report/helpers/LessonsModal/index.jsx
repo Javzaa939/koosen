@@ -15,7 +15,7 @@ import useApi from "@hooks/useApi";
 
 import GenericDataTable from '../GenericDataTable';
 
-export default function LessonsModal({ open, handleModal, student, group, profession, rowData}) {
+export default function LessonsModal({ open, handleModal, student, group, profession, rowData, selected_season='', selected_year='' }) {
     // other hooks
     const { t } = useTranslation()
 
@@ -126,7 +126,7 @@ export default function LessonsModal({ open, handleModal, student, group, profes
                                     ))
                                 }
                             </Input>
-                            <GenericDataTable apiGetFunc={challengeApi.getReport} isApiGetFuncArgsDefault={true} apiGetFuncArgs={{ report_type: 'students_detail', group: group, profession: profession, student: student }} columns={columns} rows_per_page={rows_per_page} search_value={search_value} render_to_search={render_to_search} conditionalRowStyles={conditionalRowStyles} />
+                            <GenericDataTable apiGetFunc={challengeApi.getReport} isApiGetFuncArgsDefault={true} apiGetFuncArgs={{ report_type: 'students_detail', group: group, profession: profession, student: student, lesson_season: selected_season, lesson_year: selected_year }} columns={columns} rows_per_page={rows_per_page} search_value={search_value} render_to_search={render_to_search} conditionalRowStyles={conditionalRowStyles} />
                         </Col>
                     </Row>
                 </ModalBody>

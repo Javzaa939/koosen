@@ -309,7 +309,7 @@ export default function ReportDatatable({ report }) {
             </div>
             {
                 isShowLessonsDetail &&
-                <LessonsModal open={isShowLessonsDetail} handleModal={handleLessonsDetail} student={studentId} group={selected_group} profession={selected_profession} rowData={rowData}/>
+                <LessonsModal open={isShowLessonsDetail} handleModal={handleLessonsDetail} student={studentId} group={selected_group} profession={selected_profession} rowData={rowData} selected_year={selected_year} selected_season={selected_season} />
             }
         </>
     )
