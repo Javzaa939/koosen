@@ -128,9 +128,9 @@ export function getColumns (currentPage, rowsPerPage, total_count, handleEdit, h
 								role="button"
 								onClick={() => showWarning({
 									header: {
-										title: t(`Оюутны нууц үг`),
+										title: t(`Багшийн нууц үг`),
 									},
-									question: t(`Оюутны нууц үг сэргээх үү?`),
+									question: t(`Багшийн нууц үг сэргээх үү?`),
 									onClick: () => changePassModal(row?.id)
 								})}
 								id={`complaintListDatatableEditPass${row?.id}`}

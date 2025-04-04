@@ -1,5 +1,5 @@
 import React, { Fragment, useState, useEffect, useContext } from "react";
-import { getPagination, get_questiontimetype, ReactSelectStyles } from "@utils";
+import { getPagination, get_questiontimetype, ReactSelectStyles, generateLessonYear } from "@utils";
 import { useTranslation } from "react-i18next";
 import { getColumns } from "./helpers";
 import { Plus, HelpCircle, Search } from "react-feather";
@@ -46,6 +46,12 @@ const Test = () => {
 	const [selectedLesson, setSelectedLesson] = useState('')
 	const [selectedTime, setSelectedTime] = useState('progressing')
 	const [selectedTeacher, setSelectedTeacher] = useState('')
+
+	const [selected_year, setSelectedYear] = useState('')
+    const [selected_season, setSelectedSeason] = useState('')
+	const [yearOption, setYear] = useState([])
+	const [seasonOption, setSeasonOption] = useState([]);
+
     const [teachers, setTeachers] = useState([]);
 
 	const [lessonOption, setLessonOption] = useState([])
@@ -68,9 +74,10 @@ const Test = () => {
 	const challengeAPI = useApi().challenge
 	const teacherLessonApi = useApi().study.lesson
 	const teacherListApi = useApi().hrms.teacher
+	const seasonApi = useApi().settings.season
 
 	async function getDatas() {
-		const { success, data } = await fetchData(challengeAPI.get(currentPage, rowsPerPage, selectedLesson, selectedTime, selectedTeacher, searchValue, true));
+		const { success, data } = await fetchData(challengeAPI.get(currentPage, rowsPerPage, selectedLesson, selectedTime, selectedTeacher, searchValue, true, selected_year, selected_season));
 
 		if (success) {
 			setDatas(data?.results);
@@ -107,6 +114,13 @@ const Test = () => {
 			getDatas();
 		}
 	}
+
+	async function getSeasonOption() {
+        const { success, data } = await fetchData(seasonApi.get());
+        if (success) {
+            setSeasonOption(data);
+        }
+    }
 
 	// Засах товч дарах үед ажиллах функц
 	const handleEdit = (row) => {
@@ -159,9 +173,16 @@ const Test = () => {
 	// 	}
 	// }
 
+	useEffect(
+		() => {
+			setYear(generateLessonYear(10)),
+			getSeasonOption()
+		}, []
+	)
+
 	useEffect(() => {
 		getDatas();
-	}, [currentPage, rowsPerPage, selectedLesson, selectedTime, selectedTeacher]);
+	}, [currentPage, rowsPerPage, selectedLesson, selectedTime, selectedTeacher, selected_season, selected_year]);
 
 	useEffect(
 		() => {
@@ -204,8 +225,52 @@ const Test = () => {
 						</Button>
 					</div>
 				</CardHeader>
-				<Row>
-                    <Col md={3} sm={10} className="m-1">
+				<Row className="m-1">
+					<Col md={3} sm={10}>
+						<Label className="form-label" for={'lesson_year'}>
+							{t('Хичээлийн жил')}
+						</Label>
+						<Select
+							id={'lesson_year'}
+							name={'lesson_year'}
+							isClearable
+							classNamePrefix='select'
+							className='react-select'
+							placeholder={t(`-- Сонгоно уу --`)}
+							options={yearOption || []}
+							noOptionsMessage={() => t('Хоосон байна')}
+							onChange={(val) => {
+								setSelectedYear(val?.id || '')
+							}}
+							styles={ReactSelectStyles}
+							getOptionValue={(option) => option.id}
+							getOptionLabel={(option) => option.name}
+							isLoading={isLoading}
+						/>
+					</Col>
+					<Col md={3} sm={12}>
+						<Label className="form-label" for={'lesson_season'}>
+							{t('Хичээлийн улирал')}
+						</Label>
+						<Select
+							id={'lesson_season'}
+							name={'lesson_season'}
+							isClearable
+							classNamePrefix='select'
+							className='react-select'
+							placeholder={t(`-- Сонгоно уу --`)}
+							options={seasonOption || []}
+							noOptionsMessage={() => t('Хоосон байна')}
+							onChange={(val) => {
+								setSelectedSeason(val?.id || '')
+							}}
+							styles={ReactSelectStyles}
+							getOptionValue={(option) => option.id}
+							getOptionLabel={(option) => option.season_name}
+							isLoading={isLoading}
+						/>
+					</Col>
+                    <Col md={3} sm={10}>
 						<Label className="form-label" for="lesson">
 							{t('Хичээл')}
 						</Label>
@@ -226,7 +291,7 @@ const Test = () => {
 							getOptionLabel={(option) => option.full_name}
 						/>
 					</Col>
-				    <Col md={3} sm={10} className="m-1">
+				    <Col md={3} sm={10}>
 						<Label>{t('Багш')}</Label>
 						<Select
 							classNamePrefix='select'
@@ -245,7 +310,7 @@ const Test = () => {
 							getOptionLabel={(option) => option.full_name}
 						/>
 					</Col>
-					<Col md={3} sm={10} className="m-1">
+					<Col md={3} sm={10}>
 						<Label className="form-label" for="time">
 							{t('Хугацаагаар')}
 						</Label>

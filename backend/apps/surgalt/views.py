@@ -1491,6 +1491,14 @@ class ChallengeAPIView(
         teacher_id = request.query_params.get('teacher')
         season = request.query_params.get('season')
         school = request.query_params.get('school')
+        lesson_year = request.query_params.get('lesson_year')
+        lesson_season = request.query_params.get('lesson_season')
+
+        if lesson_year:
+            self.queryset = self.queryset.filter(lesson_year=lesson_year)
+
+        if lesson_season:
+            self.queryset = self.queryset.filter(lesson_season=lesson_season)
 
         if school:
             school_ids = self.queryset.filter(student__school=school).values_list('id', flat=True)
@@ -6115,12 +6123,14 @@ class ChallengeReportAPIView(
         request = self.request
         report_type = request.query_params.get('report_type')
         school_id = request.query_params.get('school')
+        lesson_year = request.query_params.get('lesson_year')
+        lesson_season = request.query_params.get('lesson_season')
 
         if not report_type:
 
             return None
 
-        lesson_year, lesson_season = get_active_year_season()
+        # lesson_year, lesson_season = get_active_year_season()
         queryset = None
 
         exam_qs = ExamTimeTable.objects.filter(lesson_year=lesson_year, lesson_season_id=lesson_season)
@@ -6343,8 +6353,8 @@ class ChallengeReportAPIView(
                         A2_count=Count(
                             Case(
                                 When(
-                                    score_percentage__gte=assessment_dict.get('+A').get('score_min'),
-                                    score_percentage__lte=assessment_dict.get('+A').get('score_max'),
+                                    score_percentage__gte=assessment_dict.get('A+').get('score_min'),
+                                    score_percentage__lte=assessment_dict.get('A+').get('score_max'),
                                     then=Value(1)),
                                 output_field=IntegerField()
                             )
@@ -6361,8 +6371,8 @@ class ChallengeReportAPIView(
                         B2_count=Count(
                             Case(
                                 When(
-                                    score_percentage__gte=assessment_dict.get('+B').get('score_min'),
-                                    score_percentage__lte=assessment_dict.get('+B').get('score_max'),
+                                    score_percentage__gte=assessment_dict.get('B+').get('score_min'),
+                                    score_percentage__lte=assessment_dict.get('B+').get('score_max'),
                                     then=Value(1)),
                                 output_field=IntegerField()
                             )
@@ -6379,8 +6389,8 @@ class ChallengeReportAPIView(
                         C2_count=Count(
                             Case(
                                 When(
-                                    score_percentage__gte=assessment_dict.get('+C').get('score_min'),
-                                    score_percentage__lte=assessment_dict.get('+C').get('score_max'),
+                                    score_percentage__gte=assessment_dict.get('C+').get('score_min'),
+                                    score_percentage__lte=assessment_dict.get('C+').get('score_max'),
                                     then=Value(1)),
                                 output_field=IntegerField()
                             )

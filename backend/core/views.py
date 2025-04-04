@@ -1060,6 +1060,12 @@ class EmployeeApiView(
 
     def put(self, request, pk=None):
         datas = request.data
+        salbar = datas.get('salbar')
+        if salbar:
+            salbar_obj = Salbars.objects.filter(id=salbar).first()
+            sub_org = salbar_obj.sub_orgs
+            datas['sub_org'] = sub_org.id
+
         instance = Teachers.objects.filter(id=pk).first()
         user_obj = User.objects.get(id=instance.user.id)
         user_serializer = UserSerializer(user_obj, data=request.data, partial=True)

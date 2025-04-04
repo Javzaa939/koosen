@@ -461,10 +461,19 @@ class PermissionOtherAPIView(
         if year and season:
             self.queryset = self.queryset.filter(lesson_year=year, lesson_season=season)
 
-        serializer = self.get_serializer(instance, data=request_data)
-        if serializer.is_valid(raise_exception=True):
-            self.update(request, pk)
+        serializer = self.get_serializer(instance, data=request_data, partial=True)
 
+        if 'permission_type_name' in request_data:
+            request_data['permission_type_name']
+
+        if 'department_name' in request_data:
+            request_data['department_name']
+
+        if 'user_name' in request_data:
+            request_data['user_name']
+
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
         else:
             for key in serializer.errors:
                 return_error = {
@@ -478,6 +487,7 @@ class PermissionOtherAPIView(
                 return request.send_error("ERR_003", errors)
 
         return request.send_info("INF_002")
+
 
     @has_permission(must_permissions=['lms-role-other-delete'])
     def delete(self, request, pk=None):

@@ -1,5 +1,5 @@
 // ** React Imports
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useMemo } from 'react'
 import { Printer, Search } from 'react-feather'
 import { useTranslation } from 'react-i18next'
 import { Button, Col, Input, Label, Row } from 'reactstrap'
@@ -29,6 +29,8 @@ export default function Report4() {
     // #region states
     const [selected_exam, setSelectedExam] = useState('')
     const [selected_group, setSelectedGroup] = useState('')
+    const [selected_year, setSelectedYear] = useState('')
+    const [selected_season, setSelectedSeason] = useState('')
 
     // #region table controlling
     const [rows_per_page, setRowsPerPage] = useState(default_page[0])
@@ -50,7 +52,9 @@ export default function Report4() {
             search: search_value,
             report_type: 'report4',
             exam: selected_exam,
-            group: selected_group
+            group: selected_group,
+            lesson_year: selected_year,
+            lesson_season: selected_season
         }))
 
         if (success) {
@@ -63,7 +67,9 @@ export default function Report4() {
         const { success, data } = await fetchData(challengeApi.getReport({
             report_type: 'report4-1',
             exam: selected_exam,
-            group: selected_group
+            group: selected_group,
+            lesson_year: selected_year,
+            lesson_season: selected_season
         }))
 
         if (success) {
@@ -76,8 +82,10 @@ export default function Report4() {
     }, [])
 
     function refreshData() {
-        getStudentsQuestionsTableData()
-        getStudentsQuestionsTableAggregatedData()
+        if (selected_season && selected_year) {
+            getStudentsQuestionsTableData()
+            getStudentsQuestionsTableAggregatedData()
+        }
     }
 
     // #region table controlling
@@ -118,14 +126,18 @@ export default function Report4() {
     }, [search_value, current_page, sortField, selected_exam, selected_group, rows_per_page])
     // #endregion
 
+    const examMemo = useMemo(() => {
+        return (
+            <ExamFilter setSelected={setSelectedExam} setSelectedYear={setSelectedYear} setSelectedSeason={setSelectedSeason} selected_year={selected_year} selected_season={selected_season}/>
+        )
+    }, [selected_year, selected_season])
+
     return (
         <div className='px-1'>
             {isLoading && Loader}
             <Row>
+                {examMemo}
                 <Col className='d-flex'>
-                    <div style={{ width: '219.5px' }} className='me-1'>
-                        <ExamFilter setSelected={setSelectedExam} />
-                    </div>
                     <div style={{ width: '219.5px' }} className='me-1'>
                         <GroupFilter setSelected={setSelectedGroup} exam_id={selected_exam} />
                     </div>

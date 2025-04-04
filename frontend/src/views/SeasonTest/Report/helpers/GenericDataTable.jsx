@@ -89,7 +89,7 @@ export default function GenericDataTable({ apiGetFunc, apiGetFuncArgs, isApiGetF
 
 	// #region specific code (not generic)
 	useEffect(() => {
-		if (apiGetFuncArgs) getData()
+		if (apiGetFuncArgs && apiGetFuncArgs.lesson_year && apiGetFuncArgs.lesson_season) getData()
 	}, [apiGetFuncArgs])
 	// #endregion
 
