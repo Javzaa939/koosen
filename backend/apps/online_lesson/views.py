@@ -861,7 +861,7 @@ class RemoteLessonAPIView(
                 online_info_data_item_instances = []
 
                 for online_info_data_item_ind, online_info_data_item in enumerate(online_info_data):
-                    online_info_data_item['elearn'] = elearn_instance
+                    online_info_data_item['elearn'] = elearn_instance.id
 
                     if online_info_data_item_instances:
                         online_info_data_item['related_info'] = online_info_data_item_instances[online_info_data_item_ind - 1]
@@ -874,7 +874,7 @@ class RemoteLessonAPIView(
                     online_sub_info_data_item_instances = []
 
                     for online_sub_info_data_item in online_sub_info_data:
-                        online_sub_info_data_item['parent_title'] = online_info_data_item_instance
+                        online_sub_info_data_item['parent_title'] = online_info_data_item_instance.id
 
                         quez_questions_data = online_sub_info_data_item.pop('quezQuestions')
                         self.queryset = OnlineSubInfo.objects

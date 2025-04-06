@@ -4683,7 +4683,7 @@ class OnlineSubInfo(models.Model):
     file_type = models.IntegerField(choices=MATERIAL_TYPE, default=TEXT, verbose_name='Материалын төрөл')
     text = models.TextField(null=True, verbose_name='ТEXT төрлийн мэдээлэл')
     file = models.FileField(null=True, verbose_name='ФАЙЛ төрлийн мэдээлэл')
-    quiz = models.ManyToManyField(QuezQuestions, verbose_name='Цахим сургалтын сорил шалгалт')
+    quiz = models.ManyToManyField(QuezQuestions, null=True, verbose_name='Цахим сургалтын сорил шалгалт')
 
 
 class OnlineWeek(models.Model):
