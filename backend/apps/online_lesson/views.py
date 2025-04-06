@@ -847,6 +847,7 @@ class RemoteLessonAPIView(
             online_info_serializer = dynamic_serializer(OnlineInfo, "__all__", 0)
             online_sub_info_serializer = dynamic_serializer(OnlineSubInfo, "__all__", 0)
             quez_questions_serializer = dynamic_serializer(QuezQuestions, "__all__", 0)
+            quez_choices_serializer = dynamic_serializer(QuezChoices, "__all__", 0)
 
             teacher_instance = Teachers.objects.filter(user_id=request.user.id).first()
 
@@ -886,7 +887,7 @@ class RemoteLessonAPIView(
                             quez_questions_data_item_instances = []
 
                             for quez_questions_data_item in quez_questions_data:
-                                quez_questions_data_item['created_by'] = teacher_instance
+                                quez_questions_data_item['created_by'] = teacher_instance.id
 
                                 quez_choices_data = quez_questions_data_item.pop('quezChoices')
                                 self.queryset = QuezQuestions.objects
@@ -896,10 +897,10 @@ class RemoteLessonAPIView(
                                 quez_choices_data_item_instances = []
 
                                 for quez_choices_data_item in quez_choices_data:
-                                    quez_choices_data_item['created_by'] = teacher_instance
+                                    quez_choices_data_item['created_by'] = teacher_instance.id
 
                                     self.queryset = QuezChoices.objects
-                                    self.serializer_class = quez_questions_serializer
+                                    self.serializer_class = quez_choices_serializer
                                     quez_choices_data_item_instance = self.create(request, quez_choices_data_item)
                                     quez_choices_data_item_instances.append(quez_choices_data_item_instance)
 

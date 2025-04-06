@@ -4520,14 +4520,14 @@ class QuezQuestions(models.Model):
 
     # KIND_RATING үед
     rating_max_count = models.IntegerField(default=0, verbose_name="Үнэлгээний дээд тоо", null=True, blank=True)
-    low_rating_word = models.CharField(max_length=100, verbose_name="Доод үнэлгээг илэрхийлэх үг")
-    high_rating_word = models.CharField(max_length=100, verbose_name="Дээд үнэлгээг илэрхийлэх үг")
+    low_rating_word = models.CharField(max_length=100, verbose_name="Доод үнэлгээг илэрхийлэх үг", null=True)
+    high_rating_word = models.CharField(max_length=100, verbose_name="Дээд үнэлгээг илэрхийлэх үг", null=True)
 
     # KIND_MULTI_CHOICE үед
     max_choice_count = models.IntegerField(default=0, verbose_name="Сонголтын хязгаар", null=True, blank=True)
 
     # KIND_ONE_CHOICE болон KIND_MULTI_CHOICE үед
-    choices = models.ManyToManyField(QuezChoices)
+    choices = models.ManyToManyField(QuezChoices, null=True)
 
     created_by = models.ForeignKey(Teachers, on_delete=models.CASCADE, related_name="+")
     created_at = models.DateTimeField(auto_now_add=True)
