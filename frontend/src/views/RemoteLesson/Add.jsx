@@ -23,10 +23,6 @@ import { getPagination } from '@src/utility/Utils';
 
 const Add = ({ isOpen, handleModal, refreshDatas }) => {
 
-    var values = {
-        lesson: '',
-        teacher: '',
-    }
     const { t } = useTranslation()
 
     const closeBtn = (
@@ -34,14 +30,12 @@ const Add = ({ isOpen, handleModal, refreshDatas }) => {
     )
 
     // ** Hook
-    const { control, handleSubmit, formState: { errors }, reset, setError, watch } = useForm(validate(validateSchema));
+    const { control, handleSubmit, formState: { errors }, reset, setError, watch, getValues } = useForm(validate(validateSchema));
 
     const { isLoading, fetchData } = useLoader({})
 
     const [is_loading, setIsLoading] = useState(false)
     const [lesson_option, setLessonOption] = useState([])
-    const [select_value, setSelectValue] = useState(values)
-    const [selectedTeachers, setSelectedTeachers] = useState([])
     const [teacher_option, setTeacherOption] = useState([])
     const [featurefile, setFeaturedImg] = useState('')
     const [image_old, setImageOld] = useState('')
@@ -84,14 +78,14 @@ const Add = ({ isOpen, handleModal, refreshDatas }) => {
         getTeachers()
     }, [])
 
-    async function onSubmit(cdata) {
+    async function onSubmit(cdata) {//console.log(cdata,'submit')
         cdata = convertDefaultValue(cdata)
 
         const formData = new FormData()
 
-        // cdata['teacher'] = selectedTeachers?.id
         for (let key in cdata) {
-            formData.append(key, cdata[key])
+            if (key === 'onlineInfo') formData.append(key, JSON.stringify(cdata[key]))
+            else formData.append(key, cdata[key])
         }
         formData.append('image', featurefile)
 
@@ -127,8 +121,8 @@ const Add = ({ isOpen, handleModal, refreshDatas }) => {
     // #region modal page
     const [modalPage, setModalPage] = useState(1)
 
-    function handleNextModalPage(page) {
-		const newPage = page.selected + 1
+    function handleModalPage(pageFromReactPagination, simplePage) {
+        let newPage = simplePage ? simplePage : pageFromReactPagination.selected + 1
 		setModalPage(newPage)
     }
     // #endregion
@@ -161,7 +155,7 @@ const Add = ({ isOpen, handleModal, refreshDatas }) => {
                     <Row tag={Form} className='gy-1' onSubmit={handleSubmit(onSubmit)}>
                         <Col md={12}>
                             <div className='modal-pages-pagination'>
-                                {getPagination(handleNextModalPage, modalPage, 1, 3)()}
+                                {getPagination(handleModalPage, modalPage, 1, 2)()}
                             </div>
                             <ModalPages
                                 t={t}
@@ -169,15 +163,14 @@ const Add = ({ isOpen, handleModal, refreshDatas }) => {
                                 errors={errors}
                                 isLoading={isLoading}
                                 lesson_option={lesson_option}
-                                setSelectValue={setSelectValue}
                                 teacher_option={teacher_option}
-                                selectedTeachers={selectedTeachers}
                                 handleDeleteImage={handleDeleteImage}
                                 image_old={image_old}
                                 clickLogoImage={clickLogoImage}
                                 onChange={onChange}
-                                handleNextModalPage={handleNextModalPage}
+                                handleModalPage={handleModalPage}
                                 modalPage={modalPage}
+                                getValues={getValues}
                             />
                         </Col>
                         <Col md={12} className="mt-2">

@@ -19,8 +19,6 @@ import { convertDefaultValue, validate, ReactSelectStyles, get_day } from '@util
 import empty from "@src/assets/images/empty-image.jpg"
 import Elearn from './components/Elearn';
 import OnlineInfo from './components/OnlineInfo';
-import OnlineSubInfo from './components/OnlineSubInfo';
-import QuezQuestions from './components/QuezQuestions';
 
 
 export default function ModalPages({
@@ -29,38 +27,33 @@ export default function ModalPages({
 	errors,
 	isLoading,
 	lesson_option,
-	setSelectValue,
 	teacher_option,
-	selectedTeachers,
 	handleDeleteImage,
 	image_old,
 	clickLogoImage,
 	onChange,
-	handleNextModalPage,
-	modalPage
+	handleModalPage,
+	modalPage,
+	getValues
 }) {
 	return (
-		<>
-			{
-			modalPage === 1
-				?
-				<Elearn
-					t={t}
-					control={control}
-					errors={errors}
-					isLoading={isLoading}
-					lesson_option={lesson_option}
-					setSelectValue={setSelectValue}
-					teacher_option={teacher_option}
-					selectedTeachers={selectedTeachers}
-					handleDeleteImage={handleDeleteImage}
-					image_old={image_old}
-					clickLogoImage={clickLogoImage}
-					onChange={onChange}
-					handleNextModalPage={handleNextModalPage}
-				/>
-				:
-				modalPage === 2
+		modalPage === 1
+			?
+			<Elearn
+				t={t}
+				control={control}
+				errors={errors}
+				isLoading={isLoading}
+				lesson_option={lesson_option}
+				teacher_option={teacher_option}
+				handleDeleteImage={handleDeleteImage}
+				image_old={image_old}
+				clickLogoImage={clickLogoImage}
+				onChange={onChange}
+				handleModalPage={handleModalPage}
+			/>
+			:
+			modalPage === 2
 				?
 				<OnlineInfo
 					t={t}
@@ -68,54 +61,15 @@ export default function ModalPages({
 					errors={errors}
 					isLoading={isLoading}
 					lesson_option={lesson_option}
-					setSelectValue={setSelectValue}
 					teacher_option={teacher_option}
-					selectedTeachers={selectedTeachers}
 					handleDeleteImage={handleDeleteImage}
 					image_old={image_old}
 					clickLogoImage={clickLogoImage}
 					onChange={onChange}
-					handleNextModalPage={handleNextModalPage}
-				/>
-				:
-				modalPage === 3
-				?
-				<OnlineSubInfo
-					t={t}
-					control={control}
-					errors={errors}
-					isLoading={isLoading}
-					lesson_option={lesson_option}
-					setSelectValue={setSelectValue}
-					teacher_option={teacher_option}
-					selectedTeachers={selectedTeachers}
-					handleDeleteImage={handleDeleteImage}
-					image_old={image_old}
-					clickLogoImage={clickLogoImage}
-					onChange={onChange}
-					handleNextModalPage={handleNextModalPage}
-				/>
-				:
-				modalPage === 4
-				?
-				<QuezQuestions
-					t={t}
-					control={control}
-					errors={errors}
-					isLoading={isLoading}
-					lesson_option={lesson_option}
-					setSelectValue={setSelectValue}
-					teacher_option={teacher_option}
-					selectedTeachers={selectedTeachers}
-					handleDeleteImage={handleDeleteImage}
-					image_old={image_old}
-					clickLogoImage={clickLogoImage}
-					onChange={onChange}
-					handleNextModalPage={handleNextModalPage}
+					handleModalPage={handleModalPage}
+					getValues={getValues}
 				/>
 				:
 				<></>
-			}
-		</>
 	)
 }

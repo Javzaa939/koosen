@@ -26,14 +26,12 @@ export default function Elearn({
 	errors,
 	isLoading,
 	lesson_option,
-	setSelectValue,
 	teacher_option,
-	selectedTeachers,
 	handleDeleteImage,
 	image_old,
 	clickLogoImage,
 	onChange,
-	handleNextModalPage
+	handleModalPage
 }) {
 	return (
 		<Row>
@@ -60,9 +58,6 @@ export default function Elearn({
 								noOptionsMessage={() => t('Хоосон байна.')}
 								onChange={(val) => {
 									onChange(val?.id || '')
-									setSelectValue({
-										lesson: val?.id || '',
-									})
 								}}
 								styles={ReactSelectStyles}
 								getOptionValue={(option) => option.id}
@@ -93,7 +88,7 @@ export default function Elearn({
 								isLoading={isLoading}
 								placeholder={t('-- Сонгоно уу --')}
 								options={teacher_option || []}
-								value={selectedTeachers}
+								value={value && teacher_option.find((c) => c.id === value)}
 								noOptionsMessage={() => t('Хоосон байна.')}
 								onChange={(val) => {
 									onChange(val?.id || '')
@@ -269,7 +264,7 @@ export default function Elearn({
 				{errors.description && <FormFeedback className='d-block'>{t(errors.description.message)}</FormFeedback>}
 			</Col> */}
 			<Col md={12} className="mt-50">
-				<Button color="primary" size='sm' className="mt-2" onClick={() => handleNextModalPage(null)}>
+				<Button color="primary" size='sm' className="mt-2" onClick={() => handleModalPage(null, 2)}>
 					{t('Бүлэг нэмэх')}
 				</Button>
 			</Col>

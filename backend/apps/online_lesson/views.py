@@ -1,4 +1,6 @@
+import json
 import os
+import traceback
 from rest_framework import generics, mixins
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
@@ -7,7 +9,9 @@ from rest_framework.decorators import permission_classes
 from rest_framework.decorators import parser_classes
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 
+from main.utils.function.serializer import dynamic_serializer
 from main.utils.function.pagination import CustomPagination
 from django.shortcuts import get_object_or_404
 from django.conf import settings
@@ -16,7 +20,7 @@ from django.db import transaction
 from django.db.models import F, Q
 
 from lms.models import (
-    Group, LessonStandart, OnlineLesson, LessonMaterial, OnlineWeek, Announcement, HomeWork , HomeWorkStudent, Challenge, Student, OnlineWeekStudent, ELearn
+    Group, LessonStandart, OnlineInfo, OnlineLesson, LessonMaterial, OnlineWeek, Announcement, HomeWork , HomeWorkStudent, Challenge, Student, OnlineWeekStudent, ELearn, OnlineSubInfo, QuezQuestions, QuezChoices
 )
 from .serializers import (
     OnlineLessonSerializer,
@@ -282,8 +286,6 @@ class OnlineWeekAPIView(
         return request.send_info("INF_003")
 
 
-
-
 @permission_classes([IsAuthenticated])
 class HomeWorkAPIView(
     mixins.ListModelMixin,
@@ -445,7 +447,6 @@ class SentHomeWorkAPIView(
         return self.destroy(request, *args, **kwargs)
 
 
-
 @permission_classes([IsAuthenticated])
 class OnlineLessonDetailAPIView(
     mixins.RetrieveModelMixin,
@@ -598,7 +599,6 @@ class LessonListAPIView(
 
     def delete(self, request, pk=None):
         return request.send_info("INF_003")
-
 
 
 class getAllGroups(mixins.ListModelMixin,
@@ -823,24 +823,94 @@ class RemoteLessonAPIView(
     queryset = ELearn.objects.all()
     serializer_class = ELearnSerializer
     pagination_class = CustomPagination
+
     filter_backends = [SearchFilter]
     search_fields = ['lesson__name', 'lesson__code', 'teacher__first_name', 'title']
-    def get(self,request,pk=None):
 
+    def create(self, request, data):
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return serializer.instance
+
+    def get(self,request,pk=None):
         if pk:
             datas = self.retrieve(request, pk).data
             return request.send_data(datas)
-
         serializer = self.list(request).data
-
         return request.send_data(serializer)
 
     def post(self, request):
-        serializer = self.get_serializer(data=request.data)
+        # print(request.data)
 
-        if serializer.is_valid(raise_exception=False):
-            self.perform_create(serializer)
+        try:
+            online_info_serializer = dynamic_serializer(OnlineInfo, "__all__", 0)
+            online_sub_info_serializer = dynamic_serializer(OnlineSubInfo, "__all__", 0)
+            quez_questions_serializer = dynamic_serializer(QuezQuestions, "__all__", 0)
 
-        else:
-            return request.send_error_valid(serializer.errors)
+            teacher_instance = Teachers.objects.filter(user_id=request.user.id).first()
+
+            with transaction.atomic():
+                # to keep "querydict-formdata" type to save files correctly ".dict()" not used and ".copy()" used instead
+                elearn_data = request.data.copy()
+                del elearn_data['onlineInfo']
+                elearn_instance = self.create(request, elearn_data)
+
+                online_info_data = json.loads(request.data.dict().pop('onlineInfo'))
+
+                online_info_data_item_instances = []
+
+                for online_info_data_item_ind, online_info_data_item in enumerate(online_info_data):
+                    online_info_data_item['elearn'] = elearn_instance
+
+                    if online_info_data_item_instances:
+                        online_info_data_item['related_info'] = online_info_data_item_instances[online_info_data_item_ind - 1]
+
+                    online_sub_info_data = online_info_data_item.pop('onlineSubInfo')
+                    self.queryset = OnlineInfo.objects
+                    self.serializer_class = online_info_serializer
+                    online_info_data_item_instance = self.create(request, online_info_data_item)
+                    online_info_data_item_instances.append(online_info_data_item_instance)
+                    online_sub_info_data_item_instances = []
+
+                    for online_sub_info_data_item in online_sub_info_data:
+                        online_sub_info_data_item['parent_title'] = online_info_data_item_instance
+
+                        quez_questions_data = online_sub_info_data_item.pop('quezQuestions')
+                        self.queryset = OnlineSubInfo.objects
+                        self.serializer_class = online_sub_info_serializer
+                        online_sub_info_data_item_instance = self.create(request, online_sub_info_data_item)
+                        online_sub_info_data_item_instances.append(online_sub_info_data_item_instance)
+
+                        if online_sub_info_data_item['file_type'] == OnlineSubInfo.QUIZ:
+                            quez_questions_data_item_instances = []
+
+                            for quez_questions_data_item in quez_questions_data:
+                                quez_questions_data_item['created_by'] = teacher_instance
+
+                                quez_choices_data = quez_questions_data_item.pop('quezChoices')
+                                self.queryset = QuezQuestions.objects
+                                self.serializer_class = quez_questions_serializer
+                                quez_questions_data_item_instance = self.create(request, quez_questions_data_item)
+                                quez_questions_data_item_instances.append(quez_questions_data_item_instance)
+                                quez_choices_data_item_instances = []
+
+                                for quez_choices_data_item in quez_choices_data:
+                                    quez_choices_data_item['created_by'] = teacher_instance
+
+                                    self.queryset = QuezChoices.objects
+                                    self.serializer_class = quez_questions_serializer
+                                    quez_choices_data_item_instance = self.create(request, quez_choices_data_item)
+                                    quez_choices_data_item_instances.append(quez_choices_data_item_instance)
+
+                                quez_choices_data_item_instances_ids = [item.id for item in quez_choices_data_item_instances]
+                                quez_questions_data_item_instance.choices.set(quez_choices_data_item_instances_ids)
+                            quez_questions_data_item_instances_ids = [item.id for item in quez_questions_data_item_instances]
+                            online_sub_info_data_item_instance.quiz.set(quez_questions_data_item_instances_ids)
+        except ValidationError as serializer_errors:
+            traceback.print_exc()
+            return request.send_error_valid(serializer_errors.detail)
+        except Exception:
+            traceback.print_exc()
+            return request.send_error("ERR_002")
         return request.send_info("INF_001")
