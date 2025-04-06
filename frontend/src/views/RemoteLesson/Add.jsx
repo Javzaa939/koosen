@@ -18,6 +18,8 @@ import { convertDefaultValue, validate, ReactSelectStyles, get_day } from '@util
 
 import { validateSchema } from './validateSchema';
 import empty from "@src/assets/images/empty-image.jpg"
+import ModalPages from './components/ModalPages';
+import { getPagination } from '@src/utility/Utils';
 
 const Add = ({ isOpen, handleModal, refreshDatas }) => {
 
@@ -122,6 +124,15 @@ const Add = ({ isOpen, handleModal, refreshDatas }) => {
         }
     }
 
+    // #region modal page
+    const [modalPage, setModalPage] = useState(1)
+
+    function handleNextModalPage(page) {
+		const newPage = page.selected + 1
+		setModalPage(newPage)
+    }
+    // #endregion
+
     return (
         <Fragment>
             {
@@ -149,7 +160,25 @@ const Add = ({ isOpen, handleModal, refreshDatas }) => {
                 <ModalBody className='flex-grow-1'>
                     <Row tag={Form} className='gy-1' onSubmit={handleSubmit(onSubmit)}>
                         <Col md={12}>
-                            <ModalPages />
+                            <div className='modal-pages-pagination'>
+                                {getPagination(handleNextModalPage, modalPage, 1, 3)()}
+                            </div>
+                            <ModalPages
+                                t={t}
+                                control={control}
+                                errors={errors}
+                                isLoading={isLoading}
+                                lesson_option={lesson_option}
+                                setSelectValue={setSelectValue}
+                                teacher_option={teacher_option}
+                                selectedTeachers={selectedTeachers}
+                                handleDeleteImage={handleDeleteImage}
+                                image_old={image_old}
+                                clickLogoImage={clickLogoImage}
+                                onChange={onChange}
+                                handleNextModalPage={handleNextModalPage}
+                                modalPage={modalPage}
+                            />
                         </Col>
                         <Col md={12} className="mt-2">
                             <Button className='me-2' color="primary" type="submit">
