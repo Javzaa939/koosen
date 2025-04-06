@@ -80,7 +80,7 @@ const Add = ({ isOpen, handleModal, refreshDatas }) => {
     useEffect(() => {
         getLessonOption();
         getTeachers()
-    },[])
+    }, [])
 
     async function onSubmit(cdata) {
         cdata = convertDefaultValue(cdata)
@@ -95,7 +95,7 @@ const Add = ({ isOpen, handleModal, refreshDatas }) => {
 
         setIsLoading(true)
         const { success, errors } = await fetchData(remoteApi.post(formData))
-        if(success) {
+        if (success) {
             // reset()
             refreshDatas()
             // handleModal()
@@ -105,13 +105,13 @@ const Add = ({ isOpen, handleModal, refreshDatas }) => {
             setIsLoading(false)
             /** Алдааны мессеж */
             for (let key in errors) {
-                setError(key, { type: 'custom', message: errors[key][0]});
+                setError(key, { type: 'custom', message: errors[key][0] });
             }
         }
     }
 
     const onChange = (e) => {
-		const reader = new FileReader()
+        const reader = new FileReader()
         const files = e.target.files
         if (files.length > 0) {
             setFeaturedImg(files[0])
@@ -120,14 +120,14 @@ const Add = ({ isOpen, handleModal, refreshDatas }) => {
             }
             reader.readAsDataURL(files[0])
         }
-	}
+    }
 
     return (
         <Fragment>
             {
                 isLoading && is_loading &&
                 <div className='suspense-loader'>
-                    <Spinner size='bg'/>
+                    <Spinner size='bg' />
                     <span className='ms-50'>{t('Түр хүлээнэ үү...')}</span>
                 </div>
             }
