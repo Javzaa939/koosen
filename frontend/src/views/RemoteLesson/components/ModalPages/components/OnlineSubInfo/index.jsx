@@ -146,7 +146,7 @@ export default function OnlineSubInfo({
 				</Accordion>
 			</Col>
 			<Col md={12}>
-				<Button color="primary" size='sm' onClick={addOnlineInfos}>
+				<Button color="primary" size='sm' className="mt-2" onClick={addOnlineInfos}>
 					{t('Хэсэг нэмэх')}
 				</Button>
 			</Col>
