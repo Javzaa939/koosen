@@ -78,14 +78,18 @@ const Add = ({ isOpen, handleModal, refreshDatas }) => {
         getTeachers()
     }, [])
 
-    async function onSubmit(cdata) {//console.log(cdata,'submit')
+    async function onSubmit(cdata) {
+        // console.log(cdata, 'submit')
         cdata = convertDefaultValue(cdata)
 
         const formData = new FormData()
 
         for (let key in cdata) {
             if (key === 'onlineInfo') formData.append(key, JSON.stringify(cdata[key]))
-            else formData.append(key, cdata[key])
+            else if (key === 'students') {
+                const cdataNew = cdata[key].map(item => item.id)
+                formData.append(key, JSON.stringify(cdataNew))
+            } else formData.append(key, cdata[key])
         }
         formData.append('image', featurefile)
 
@@ -123,7 +127,7 @@ const Add = ({ isOpen, handleModal, refreshDatas }) => {
 
     function handleModalPage(pageFromReactPagination, simplePage) {
         let newPage = simplePage ? simplePage : pageFromReactPagination.selected + 1
-		setModalPage(newPage)
+        setModalPage(newPage)
     }
     // #endregion
 

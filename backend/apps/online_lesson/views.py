@@ -853,12 +853,19 @@ class RemoteLessonAPIView(
 
             with transaction.atomic():
                 # to keep "querydict-formdata" type to save files correctly ".dict()" not used and ".copy()" used instead
-                elearn_data = request.data.copy()
-                del elearn_data['onlineInfo']
-                elearn_instance = self.create(request, elearn_data)
+                request_querydict = request.data.copy()
+                del request_querydict['onlineInfo']
+                del request_querydict['students']
+                elearn_instance = self.create(request, request_querydict)
 
-                online_info_data = json.loads(request.data.dict().pop('onlineInfo'))
+                request_dict = request.data.dict()
+                students = request_dict.pop('students', [])
 
+                if students:
+                    students = json.loads(students)
+                    elearn_instance.students.set(students)
+
+                online_info_data = json.loads(request_dict.pop('onlineInfo'))
                 online_info_data_item_instances = []
 
                 for online_info_data_item_ind, online_info_data_item in enumerate(online_info_data):

@@ -18,6 +18,7 @@ import { convertDefaultValue, validate, ReactSelectStyles, get_day } from '@util
 
 import { validateSchema } from '../../../../validateSchema';
 import empty from "@src/assets/images/empty-image.jpg"
+import ScrollSelectFilter from '../../../ScrollSelectFilter';
 
 
 export default function Elearn({
@@ -33,6 +34,8 @@ export default function Elearn({
 	onChange,
 	handleModalPage
 }) {
+    const studentApi = useApi().student
+
 	return (
 		<Row>
 			<Col md={6}>
@@ -263,6 +266,31 @@ export default function Elearn({
 				/>
 				{errors.description && <FormFeedback className='d-block'>{t(errors.description.message)}</FormFeedback>}
 			</Col> */}
+			<Col md={6}>
+				<Label className="form-label" for="students">
+					{t('Хичээл үзэх оюутнууд')}
+				</Label>
+				<Controller
+					control={control}
+					defaultValue=''
+					name="students"
+					render={({ field: { ref, ...rest } }) => {
+						return (
+							<ScrollSelectFilter
+								{...rest}
+								fieldName={rest.name}
+								getApi={(pageLocal, searchTextLocal, recordsLimitPerPageLocal) => studentApi.get(recordsLimitPerPageLocal, pageLocal, '', searchTextLocal = '', '', '', '', '', '', '', '')}
+								getOptionLabel={(option) => `${option.code} ${option.last_name?.charAt(0)}. ${option.first_name}`}
+								getOptionValue={(option) => option.id}
+								isMulti={true}
+								optionValueFieldName={'id'}
+								className={classnames('react-select', { 'is-invalid': errors[rest.name] })}
+							/>
+						)
+					}}
+				></Controller>
+				{errors.students && <FormFeedback className='d-block'>{t(errors.students.message)}</FormFeedback>}
+			</Col>
 			<Col md={12} className="mt-50">
 				<Button color="primary" size='sm' className="mt-2" onClick={() => handleModalPage(null, 2)}>
 					{t('Бүлэг нэмэх')}
