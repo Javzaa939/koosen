@@ -33,10 +33,10 @@ class OnlineLessonSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def get_lesson_name(self, obj):
-        return obj.lesson.name
+        return obj.lesson.name if obj.lesson else ''
 
     def get_lesson_code(self, obj):
-        return obj.lesson.code
+        return obj.lesson.code  if obj.lesson else ''
 
     def get_student_count(self, obj):
         return obj.students.count()
