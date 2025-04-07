@@ -1,4 +1,5 @@
 import os
+import math
 import json
 import traceback
 
@@ -130,10 +131,15 @@ class LessonStandartListSerializer(serializers.ModelSerializer):
     category = LessonCategorySerializer(many=False)
     department = DepartmentRegisterSerailizer(many=False)
     teachers = serializers.SerializerMethodField()
+    ckredit = serializers.SerializerMethodField()
 
     class Meta:
         model = LessonStandart
-        fields = "code", 'name', 'department', 'category', 'teachers', 'id'
+        fields = "code", 'name', 'department', 'category', 'teachers', 'id', 'ckredit'
+
+    def get_ckredit(self, obj):
+        kredit = 0.0 if math.isnan(obj.kredit) else obj.kredit
+        return kredit
 
     def get_teachers(self, obj):
 
@@ -179,6 +185,7 @@ class LessonStandartSerializer(serializers.ModelSerializer):
 
     def get_full_name(self, obj):
         return obj.code_name
+
 
 class LessonStandartCreateSerializer(serializers.ModelSerializer):
 
