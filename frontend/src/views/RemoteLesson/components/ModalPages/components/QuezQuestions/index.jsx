@@ -87,7 +87,7 @@ export default function QuezQuestions({
 												type='text'
 												id={field.name}
 												bsSize='sm'
-												placeholder={t('Хичээлийн нэр гарчиг')}
+												placeholder={t('Асуулт')}
 												invalid={errors[field.name] && true}
 											/>
 										)}

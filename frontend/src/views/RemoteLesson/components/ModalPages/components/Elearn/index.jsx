@@ -285,7 +285,7 @@ export default function Elearn({
 				/>
 				{errors.description && <FormFeedback className='d-block'>{t(errors.description.message)}</FormFeedback>}
 			</Col> */}
-			<Col md={6}>
+			<Col md={6} className="mt-50">
 				<Label className="form-label" for="students">
 					{t('Хичээл үзэх оюутнууд')}
 				</Label>

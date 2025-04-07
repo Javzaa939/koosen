@@ -70,7 +70,7 @@ export default function QuezChoices({
 											type='text'
 											id={field.name}
 											bsSize='sm'
-											placeholder={t('Хичээлийн нэр гарчиг')}
+											placeholder={t('Сонголт')}
 											invalid={errors[field.name] && true}
 										/>
 									)}
