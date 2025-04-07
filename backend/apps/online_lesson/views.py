@@ -833,6 +833,18 @@ class RemoteLessonAPIView(
         self.perform_create(serializer)
         return serializer.instance
 
+    # to save file in django server if CDN does not work
+    def save_file_to_cdn_and_remove_from_dict(self, file, dict_where_remove, field_names_to_remove, dir_name):
+        if file:
+            relative_path, _, error = create_file_in_cdn_silently(dir_name, file)
+
+            if error:
+                return None, error
+            else:
+                for field_name in field_names_to_remove:
+                    del dict_where_remove[field_name]
+                return relative_path, None
+
     def get(self,request,pk=None):
         if pk:
             datas = self.retrieve(request, pk).data
@@ -842,6 +854,7 @@ class RemoteLessonAPIView(
 
     def post(self, request):
         # print(request.data)
+        # print(request.FILES)
 
         try:
             online_info_serializer = dynamic_serializer(OnlineInfo, "__all__", 0)
@@ -850,44 +863,46 @@ class RemoteLessonAPIView(
             quez_choices_serializer = dynamic_serializer(QuezChoices, "__all__", 0)
 
             teacher_instance = Teachers.objects.filter(user_id=request.user.id).first()
+            upload_to = self.queryset.model._meta.get_field('image').upload_to
 
             with transaction.atomic():
                 # region to save to Elearn
-                # to keep "querydict-formdata" type to save files correctly ".dict()" not used and ".copy()" used instead
-                request_querydict = request.data.copy()
+                # to keep "querydict-formdata" type to save files correctly ".dict()" not used and ".copy()" used instead. but i am not sure yet
+                # request_querydict = request.data.copy()
 
-                del request_querydict['onlineInfo']
-                del request_querydict['students']
+                request_dict = request.data.dict()
+                students = request_dict.pop('students', [])
+                online_info_data = json.loads(request_dict.pop('onlineInfo'))
+
+                # to get error no check if key exists because onlineInfo is required i guess
+                # del request_dict['onlineInfo']
+
+                # if 'students' in request_dict:
+                    # del request_dict['students']
+
+                # region to save file
                 elearn_data_image = request.FILES.getlist('image')
                 file_path_in_cdn = None
 
                 if elearn_data_image:
-                    elearn_data_image = elearn_data_image[0]
-                    upload_to = self.queryset.model._meta.get_field('image').upload_to
-                    relative_path, _, error = create_file_in_cdn_silently(upload_to, elearn_data_image)
+                    file_path_in_cdn, _ = self.save_file_to_cdn_and_remove_from_dict(elearn_data_image,request_dict,['image'],upload_to)
+                else:
+                    del request_dict['image']
+                # endregion
 
-                    # to save file in django server if CDN does not work
-                    if error:
-                        print(error)
-                    else:
-                        file_path_in_cdn = relative_path
-                        del request_querydict['image']
+                elearn_instance = self.create(request, request_dict)
 
-                elearn_instance = self.create(request, request_querydict)
-
+                # region to save file
                 if file_path_in_cdn:
                     elearn_instance.image = file_path_in_cdn
                     elearn_instance.save()
-                # #endregion
-
-                request_dict = request.data.dict()
-                students = request_dict.pop('students', [])
+                # endregion
+                # #endregion to save to Elearn
 
                 if students:
                     students = json.loads(students)
                     elearn_instance.students.set(students)
 
-                online_info_data = json.loads(request_dict.pop('onlineInfo'))
                 online_info_data_item_instances = []
 
                 for online_info_data_item_ind, online_info_data_item in enumerate(online_info_data):
@@ -925,12 +940,41 @@ class RemoteLessonAPIView(
                                 quez_questions_data_item_instances.append(quez_questions_data_item_instance)
                                 quez_choices_data_item_instances = []
 
-                                for quez_choices_data_item in quez_choices_data:
+                                for quez_choices_data_index, quez_choices_data_item in enumerate(quez_choices_data):
                                     quez_choices_data_item['created_by'] = teacher_instance.id
 
                                     self.queryset = QuezChoices.objects
                                     self.serializer_class = quez_choices_serializer
+
+                                    # region to save file
+                                    quez_choices_data_image = request.FILES.getlist('quez_choices_image')[quez_choices_data_index]
+                                    file_path_in_cdn = None
+                                    quez_choices_image_keys = ['image', 'quez_choices_image']
+
+                                    if quez_choices_data_image:
+                                        file_path_in_cdn, error = self.save_file_to_cdn_and_remove_from_dict(quez_choices_data_image,quez_choices_data_item,quez_choices_image_keys,upload_to)
+
+                                        if error:
+                                            quez_choices_data_item[quez_choices_image_keys[0]] = quez_choices_data_image
+                                            print(type(quez_choices_data_item[quez_choices_image_keys[0]]))
+                                    else:
+                                        for item in quez_choices_image_keys:
+                                            del quez_choices_data_item[item]
+                                    # endregion
+                                    # print(quez_choices_data_item,'vfvfvf')
+                                    # {'choices': 'a', 'image': <InMemoryUploadedFile: Screenshot.png (image/png)>, 'created_by': 1} vfvfvf
+                                    """
+                                    TODO:
+                                        solve: rest_framework.exceptions.ValidationError: {'image': [ErrorDetail(string='Зөв зураг оруулна уу. Таны оруулсан файл нэг бол зургийн файл биш эсвэл гэмтсэн зураг байна.', code='invalid_image')]}
+                                    """
                                     quez_choices_data_item_instance = self.create(request, quez_choices_data_item)
+
+                                    # region to save file
+                                    if file_path_in_cdn:
+                                        quez_choices_data_item_instance.image = file_path_in_cdn
+                                        quez_choices_data_item_instance.save()
+                                    # endregion
+
                                     quez_choices_data_item_instances.append(quez_choices_data_item_instance)
 
                                 quez_choices_data_item_instances_ids = [item.id for item in quez_choices_data_item_instances]

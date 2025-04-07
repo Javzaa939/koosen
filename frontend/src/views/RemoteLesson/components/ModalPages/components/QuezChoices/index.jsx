@@ -34,15 +34,15 @@ export default function QuezChoices({
 	parentName,
 	getValues,
 }) {
-	const inputNameElementPrefix = `${parentName}.quezChoices
-`
+	const inputNameElementPrefix = `${parentName}.quezChoices`
+
 	// #region accordion
 	const [open, setOpen] = useState('1');
 	const toggle = (id) => open === id ? setOpen() : setOpen(id)
 	// #endregion
 
 	// #region items
-	const [onlineInfos, setOnlineInfos] = useState(getValues(`${parentName}.quezChoices`)?.length || 0);
+	const [onlineInfos, setOnlineInfos] = useState(getValues(inputNameElementPrefix)?.length || 0);
 
 	function addOnlineInfos() {
 		setOnlineInfos((current) => current + 1)
