@@ -62,7 +62,8 @@ function RemoteLesson() {
     // Хуудас солих үед ажиллах хэсэг
 	function handlePagination(page) {
 		setCurrentPage(page.selected + 1);
-	};
+	}
+
     const Pagination = getPagination(
         handlePagination,
         currentPage,

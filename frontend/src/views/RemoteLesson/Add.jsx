@@ -37,18 +37,6 @@ const Add = ({ isOpen, handleModal, refreshDatas }) => {
     const [is_loading, setIsLoading] = useState(false)
     const [lesson_option, setLessonOption] = useState([])
     const [teacher_option, setTeacherOption] = useState([])
-    const [featurefile, setFeaturedImg] = useState('')
-    const [image_old, setImageOld] = useState('')
-
-    const handleDeleteImage = () => {
-        setFeaturedImg('')
-        setImageOld('')
-    }
-
-    const clickLogoImage = () => {
-        var logoInput = document.getElementById(`image`)
-        logoInput.click()
-    }
 
     // Api
     const gymPaymentApi = useApi().order.gym
@@ -87,11 +75,13 @@ const Add = ({ isOpen, handleModal, refreshDatas }) => {
         for (let key in cdata) {
             if (key === 'onlineInfo') formData.append(key, JSON.stringify(cdata[key]))
             else if (key === 'students') {
-                const cdataNew = cdata[key].map(item => item.id)
-                formData.append(key, JSON.stringify(cdataNew))
-            } else formData.append(key, cdata[key])
+                if (cdata[key]) {
+                    const cdataNew = cdata[key].map(item => item.id)
+                    formData.append(key, JSON.stringify(cdataNew))
+                }
+            } else if (key === 'image') formData.append(key, cdata[key][0])
+            else formData.append(key, cdata[key])
         }
-        formData.append('image', featurefile)
 
         setIsLoading(true)
         const { success, errors } = await fetchData(remoteApi.post(formData))
@@ -110,11 +100,10 @@ const Add = ({ isOpen, handleModal, refreshDatas }) => {
         }
     }
 
-    const onChange = (e) => {
+    const onChangeFile = (e, setImageOld) => {
         const reader = new FileReader()
         const files = e.target.files
         if (files.length > 0) {
-            setFeaturedImg(files[0])
             reader.onload = function () {
                 setImageOld(reader.result)
             }
@@ -168,10 +157,7 @@ const Add = ({ isOpen, handleModal, refreshDatas }) => {
                                 isLoading={isLoading}
                                 lesson_option={lesson_option}
                                 teacher_option={teacher_option}
-                                handleDeleteImage={handleDeleteImage}
-                                image_old={image_old}
-                                clickLogoImage={clickLogoImage}
-                                onChange={onChange}
+                                onChangeFile={onChangeFile}
                                 handleModalPage={handleModalPage}
                                 modalPage={modalPage}
                                 getValues={getValues}

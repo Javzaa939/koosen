@@ -36,7 +36,8 @@ export default function QuezQuestions({
 	onChange,
 	handleModalPage,
 	parentName,
-	getValues
+	getValues,
+	onChangeFile
 }) {
 	// #region accordion
 	const [open, setOpen] = useState('1');
@@ -145,6 +146,7 @@ export default function QuezQuestions({
 										handleModalPage={handleModalPage}
 										parentName={inputNameElement}
 										getValues={getValues}
+										onChangeFile={onChangeFile}
 									/>
 								</AccordionBody>
 							</AccordionItem>

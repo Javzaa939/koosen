@@ -28,13 +28,10 @@ export default function ModalPages({
 	isLoading,
 	lesson_option,
 	teacher_option,
-	handleDeleteImage,
-	image_old,
-	clickLogoImage,
-	onChange,
+	onChangeFile,
 	handleModalPage,
 	modalPage,
-	getValues
+	getValues,
 }) {
 	return (
 		modalPage === 1
@@ -46,10 +43,7 @@ export default function ModalPages({
 				isLoading={isLoading}
 				lesson_option={lesson_option}
 				teacher_option={teacher_option}
-				handleDeleteImage={handleDeleteImage}
-				image_old={image_old}
-				clickLogoImage={clickLogoImage}
-				onChange={onChange}
+				onChangeFile={onChangeFile}
 				handleModalPage={handleModalPage}
 			/>
 			:
@@ -62,10 +56,7 @@ export default function ModalPages({
 					isLoading={isLoading}
 					lesson_option={lesson_option}
 					teacher_option={teacher_option}
-					handleDeleteImage={handleDeleteImage}
-					image_old={image_old}
-					clickLogoImage={clickLogoImage}
-					onChange={onChange}
+					onChangeFile={onChangeFile}
 					handleModalPage={handleModalPage}
 					getValues={getValues}
 				/>

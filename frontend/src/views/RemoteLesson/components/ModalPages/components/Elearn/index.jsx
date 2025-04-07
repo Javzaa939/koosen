@@ -28,13 +28,23 @@ export default function Elearn({
 	isLoading,
 	lesson_option,
 	teacher_option,
-	handleDeleteImage,
-	image_old,
-	clickLogoImage,
-	onChange,
+	onChangeFile,
 	handleModalPage
 }) {
     const studentApi = useApi().student
+
+	// #region to save file
+    const [image_old, setImageOld] = useState('')
+
+    const handleDeleteImage = () => {
+        setImageOld('')
+    }
+
+    const clickLogoImage = () => {
+        var logoInput = document.getElementById(`image`)
+        logoInput.click()
+    }
+	// #endregion
 
 	return (
 		<Row>
@@ -228,14 +238,23 @@ export default function Elearn({
 							</div>
 							<div className="orgLogoDiv image-responsive">
 								<img id={`logoImg${image_old}`} className="image-responsive w-100" src={image_old ? image_old : empty} onClick={() => { clickLogoImage() }} />
-								<input
-									accept="image/*"
-									type="file"
-									// disabled={is_valid}
-									id={`image`}
-									name="image"
-									className="form-control d-none image-responsive"
-									onChange={(e) => onChange(e)}
+								<Controller
+									defaultValue=''
+									control={control}
+									name={`image`}
+									render={({ field }) => (
+										<input
+											accept="image/*"
+											type="file"
+											id={field.name}
+											name={field.name}
+											className="form-control d-none image-responsive"
+											onChange={(e) => {
+												field.onChange(e.target.files)
+												onChangeFile(e, setImageOld)}
+											}
+										/>
+									)}
 								/>
 							</div>
 						</div>

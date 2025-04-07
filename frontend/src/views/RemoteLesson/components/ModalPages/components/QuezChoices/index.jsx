@@ -35,7 +35,8 @@ export default function QuezChoices({
 	onChange,
 	handleModalPage,
 	parentName,
-	getValues
+	getValues,
+	onChangeFile
 }) {
 	// #region accordion
 	const [open, setOpen] = useState('1');
@@ -77,7 +78,28 @@ export default function QuezChoices({
 								{errors[inputName] && <FormFeedback className='d-block'>{t(errors[inputName].message)}</FormFeedback>}
 							</AccordionHeader>
 							<AccordionBody accordionId={`accordionId_${onlineInfos_ind}`}>
-								choices
+								{/* <div className='row mt-1'>
+									<Label for='image'>{t('Зураг')}</Label>
+									<div className="d-flex custom-flex">
+										<div className="me-2">
+											<div className='d-flex justify-content-end'>
+												<X size={15} color='red' onClick={() => { handleDeleteImage(image_old) }}></X>
+											</div>
+											<div className="orgLogoDiv image-responsive">
+												<img id={`logoImg${image_old}`} className="image-responsive w-100" src={image_old ? image_old : empty} onClick={() => { clickLogoImage() }} />
+												<input
+													accept="image/*"
+													type="file"
+													// disabled={is_valid}
+													id={`image`}
+													name="image"
+													className="form-control d-none image-responsive"
+													onChange={(e) => onChangeFile(e)}
+												/>
+											</div>
+										</div>
+									</div>
+								</div> */}
 							</AccordionBody>
 						</AccordionItem>
 					})}

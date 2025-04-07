@@ -35,7 +35,8 @@ export default function OnlineInfo({
 	clickLogoImage,
 	onChange,
 	handleModalPage,
-	getValues = () => null
+	getValues,
+	onChangeFile
 }) {
 	// #region accordion
 	const [open, setOpen] = useState('1');
@@ -93,6 +94,7 @@ export default function OnlineInfo({
 									handleModalPage={handleModalPage}
 									parentName={inputNameElement}
 									getValues={getValues}
+									onChangeFile={onChangeFile}
 								/>
 							</AccordionBody>
 						</AccordionItem>

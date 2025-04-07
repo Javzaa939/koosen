@@ -36,7 +36,8 @@ export default function OnlineSubInfo({
 	onChange,
 	handleModalPage,
 	parentName,
-	getValues
+	getValues,
+	onChangeFile
 }) {
 	// #region accordion
 	const [open, setOpen] = useState('1');
@@ -139,6 +140,7 @@ export default function OnlineSubInfo({
 										handleModalPage={handleModalPage}
 										parentName={inputNameElement}
 										getValues={getValues}
+										onChangeFile={onChangeFile}
 									/>
 								</AccordionBody>
 							</AccordionItem>
