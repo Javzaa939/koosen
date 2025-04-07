@@ -30,14 +30,10 @@ export default function OnlineSubInfo({
 	setSelectValue,
 	teacher_option,
 	selectedTeachers,
-	handleDeleteImage,
-	image_old,
-	clickLogoImage,
-	onChange,
+	onChangeFile,
 	handleModalPage,
 	parentName,
 	getValues,
-	onChangeFile
 }) {
 	// #region accordion
 	const [open, setOpen] = useState('1');
@@ -133,14 +129,10 @@ export default function OnlineSubInfo({
 										setSelectValue={setSelectValue}
 										teacher_option={teacher_option}
 										selectedTeachers={selectedTeachers}
-										handleDeleteImage={handleDeleteImage}
-										image_old={image_old}
-										clickLogoImage={clickLogoImage}
-										onChange={onChange}
+										onChangeFile={onChangeFile}
 										handleModalPage={handleModalPage}
 										parentName={inputNameElement}
 										getValues={getValues}
-										onChangeFile={onChangeFile}
 									/>
 								</AccordionBody>
 							</AccordionItem>

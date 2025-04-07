@@ -237,7 +237,7 @@ export default function Elearn({
 								<X size={15} color='red' onClick={() => { handleDeleteImage(image_old) }}></X>
 							</div>
 							<div className="orgLogoDiv image-responsive">
-								<img id={`logoImg${image_old}`} className="image-responsive w-100" src={image_old ? image_old : empty} onClick={() => { clickLogoImage() }} />
+								<img className="image-responsive w-100" src={image_old ? image_old : empty} onClick={() => { clickLogoImage() }} />
 								<Controller
 									defaultValue=''
 									control={control}
