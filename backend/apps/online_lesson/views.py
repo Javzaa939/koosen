@@ -40,7 +40,7 @@ from core.models import (
 )
 
 from main.utils.file import split_root_path
-from main.utils.function.utils import create_file_to_cdn, remove_file_from_cdn, get_file_from_cdn, str2bool
+from main.utils.function.utils import create_file_in_cdn_silently, create_file_to_cdn, remove_file_from_cdn, get_file_from_cdn, str2bool
 
 @permission_classes([IsAuthenticated])
 class OnlineLessonListAPIView(
@@ -852,11 +852,33 @@ class RemoteLessonAPIView(
             teacher_instance = Teachers.objects.filter(user_id=request.user.id).first()
 
             with transaction.atomic():
+                # region to save to Elearn
                 # to keep "querydict-formdata" type to save files correctly ".dict()" not used and ".copy()" used instead
                 request_querydict = request.data.copy()
+
                 del request_querydict['onlineInfo']
                 del request_querydict['students']
+                elearn_data_image = request.FILES.getlist('image')
+                file_path_in_cdn = None
+
+                if elearn_data_image:
+                    elearn_data_image = elearn_data_image[0]
+                    upload_to = self.queryset.model._meta.get_field('image').upload_to
+                    relative_path, _, error = create_file_in_cdn_silently(upload_to, elearn_data_image)
+
+                    # to save file in django server if CDN does not work
+                    if error:
+                        print(error)
+                    else:
+                        file_path_in_cdn = relative_path
+                        del request_querydict['image']
+
                 elearn_instance = self.create(request, request_querydict)
+
+                if file_path_in_cdn:
+                    elearn_instance.image = file_path_in_cdn
+                    elearn_instance.save()
+                # #endregion
 
                 request_dict = request.data.dict()
                 students = request_dict.pop('students', [])
