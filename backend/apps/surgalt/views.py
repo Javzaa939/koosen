@@ -206,6 +206,7 @@ class LessonStandartAPIView(
 
         request_data = request.data
         teachers_data = request.data.get("teachers")
+        self.serializer_class = LessonStandartCreateSerializer
 
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request_data, partial=True)
