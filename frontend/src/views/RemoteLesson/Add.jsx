@@ -123,7 +123,7 @@ const Add = ({ isOpen, handleModal, refreshDatas }) => {
                     formData.append(key, JSON.stringify(cdataNew))
                 }
             } else if (key === 'image' && cdata[key]) formData.append(key, cdata[key][0])
-            else formData.append(key, cdata[key])
+            else formData.append(key, JSON.stringify(cdata[key]))
         }
 
         setIsLoading(true)

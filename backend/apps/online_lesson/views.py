@@ -831,30 +831,93 @@ class RemoteLessonAPIView(
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
+
         return serializer.instance
 
     # to save file in django server if CDN does not work
-    def save_file_to_cdn_and_remove_from_dict(self, file, dict_where_remove, field_names_to_remove, dir_name):
+    def save_file_to_cdn_and_remove_from_dict(self, dict_where_to_remove, field_names_to_remove, dir_name, request_file_field_name, request_file_index, field_name_to_add):
+        file = self.request.FILES.getlist(request_file_field_name)
+        file_path_in_cdn = None
+
         if file:
+            file = file[request_file_index]
             relative_path, _, error = create_file_in_cdn_silently(dir_name, file)
 
             if error:
+                dict_where_to_remove[field_name_to_add] = file
                 return None, error
             else:
-                for field_name in field_names_to_remove:
-                    del dict_where_remove[field_name]
-                return relative_path, None
+                for field_name_to_remove in field_names_to_remove:
+                    del dict_where_to_remove[field_name_to_remove]
+                file_path_in_cdn = relative_path
+
+        return file_path_in_cdn, None
+
+    # to override upload_to because current upload to is wrong, that causes error: "TypeError: get_choice_image_path() takes 1 positional argument but 2 were given"
+    def override_upload_to(self, new_upload_to, model, field_name_with_upload_to):
+        field = model._meta.get_field(field_name_with_upload_to)
+        original_upload_to = field.upload_to
+        field.upload_to = new_upload_to
+
+        return original_upload_to
+
+    """
+        to get "POST" data in "json-parsed" types and keep all list items of QueryDict/formData for their specified keys in 2nd argument (keep_list)
+        Required to use JSON.stringify() first for all "not file fields" on frontend to pass formData
+    """
+    def convert_stringified_querydict_to_dict(self,post_data,keep_list=[],is_keep_only_not_singles=True):
+        if keep_list:
+            post_data_dict = post_data.dict()
+
+            for keep_item in keep_list:
+                post_data_list = post_data.getlist(keep_item)
+
+                if is_keep_only_not_singles and len(post_data_list) == 1:
+                    post_data_dict[keep_item] = post_data_list[0]
+                else:
+                    post_data_dict[keep_item] = post_data_list
+
+            post_data = post_data_dict
+        result = {}
+
+        for key in post_data.keys():
+            if isinstance(post_data[key], list):
+                if not isinstance(result.get(key), list):
+                    result[key]= []
+
+                values = []
+
+                if keep_list:
+                    values = post_data[key]
+                else:
+                    values = post_data.getlist(key)
+
+                for value in values:
+                    if key in keep_list:
+                        result[key].append(value)
+                    else:
+                        result[key].append(json.loads(value))
+            else:
+                if key in keep_list:
+                    result[key] = post_data[key]
+                else:
+                    if post_data[key] == 'undefined':
+                        post_data[key] = 'null'
+
+                    result[key] = json.loads(post_data[key])
+
+        return result
 
     def get(self,request,pk=None):
         if pk:
             datas = self.retrieve(request, pk).data
             return request.send_data(datas)
         serializer = self.list(request).data
+
         return request.send_data(serializer)
 
     def post(self, request):
-        # print(request.data)
-        # print(request.FILES)
+        result = request.send_info("INF_001")
 
         try:
             online_info_serializer = dynamic_serializer(OnlineInfo, "__all__", 0)
@@ -864,40 +927,27 @@ class RemoteLessonAPIView(
 
             teacher_instance = Teachers.objects.filter(user_id=request.user.id).first()
             upload_to = self.queryset.model._meta.get_field('image').upload_to
+            quez_choices_image_keys = ['image', 'quez_choices_image']
+            file_keys = request.FILES.keys()
+            original_quez_choices_upload_to = self.override_upload_to(upload_to, QuezChoices, quez_choices_image_keys[0])
 
             with transaction.atomic():
+                data = self.convert_stringified_querydict_to_dict(request.data,file_keys)
+                students = data.pop('students', [])
+                online_info_data = data.pop('onlineInfo', [])
+
                 # region to save to Elearn
-                # to keep "querydict-formdata" type to save files correctly ".dict()" not used and ".copy()" used instead. but i am not sure yet
-                # request_querydict = request.data.copy()
+                if quez_choices_image_keys[1] in data:
+                    del data[quez_choices_image_keys[1]]
 
-                request_dict = request.data.dict()
-                students = request_dict.pop('students', [])
-                online_info_data = json.loads(request_dict.pop('onlineInfo'))
+                file_path_in_cdn, _ = self.save_file_to_cdn_and_remove_from_dict(data,['image'],upload_to,'image',0,'image')
+                elearn_instance = self.create(request, data)
 
-                # to get error no check if key exists because onlineInfo is required i guess
-                # del request_dict['onlineInfo']
-
-                # if 'students' in request_dict:
-                    # del request_dict['students']
-
-                # region to save file
-                elearn_data_image = request.FILES.getlist('image')
-                file_path_in_cdn = None
-
-                if elearn_data_image:
-                    file_path_in_cdn, _ = self.save_file_to_cdn_and_remove_from_dict(elearn_data_image,request_dict,['image'],upload_to)
-                else:
-                    del request_dict['image']
-                # endregion
-
-                elearn_instance = self.create(request, request_dict)
-
-                # region to save file
+                # to save file if CDN is alive
                 if file_path_in_cdn:
                     elearn_instance.image = file_path_in_cdn
                     elearn_instance.save()
                 # endregion
-                # #endregion to save to Elearn
 
                 if students:
                     students = json.loads(students)
@@ -945,35 +995,26 @@ class RemoteLessonAPIView(
 
                                     self.queryset = QuezChoices.objects
                                     self.serializer_class = quez_choices_serializer
+                                    file_path_in_cdn, _ = self.save_file_to_cdn_and_remove_from_dict(quez_choices_data_item,quez_choices_image_keys,upload_to,quez_choices_image_keys[1],quez_choices_data_index,quez_choices_image_keys[0])
 
-                                    # region to save file
-                                    quez_choices_data_image = request.FILES.getlist('quez_choices_image')[quez_choices_data_index]
-                                    file_path_in_cdn = None
-                                    quez_choices_image_keys = ['image', 'quez_choices_image']
-
-                                    if quez_choices_data_image:
-                                        file_path_in_cdn, error = self.save_file_to_cdn_and_remove_from_dict(quez_choices_data_image,quez_choices_data_item,quez_choices_image_keys,upload_to)
-
-                                        if error:
-                                            quez_choices_data_item[quez_choices_image_keys[0]] = quez_choices_data_image
-                                            print(type(quez_choices_data_item[quez_choices_image_keys[0]]))
-                                    else:
-                                        for item in quez_choices_image_keys:
-                                            del quez_choices_data_item[item]
-                                    # endregion
-                                    # print(quez_choices_data_item,'vfvfvf')
-                                    # {'choices': 'a', 'image': <InMemoryUploadedFile: Screenshot.png (image/png)>, 'created_by': 1} vfvfvf
                                     """
-                                    TODO:
-                                        solve: rest_framework.exceptions.ValidationError: {'image': [ErrorDetail(string='Зөв зураг оруулна уу. Таны оруулсан файл нэг бол зургийн файл биш эсвэл гэмтсэн зураг байна.', code='invalid_image')]}
+                                        I could not find solution for this error:
+                                         "rest_framework.exceptions.ValidationError: {'image': [ErrorDetail(string='Зөв зураг оруулна уу. Таны оруулсан файл нэг бол зургийн файл биш эсвэл гэмтсэн зураг байна.', code='invalid_image')]}"
+                                        to save file using serializer.save(), so I used direct saving using object_instance.save()
+                                        To get this error try to save 2 files with formData using serializer.save() then error will occur for second file of serializer.is_valid() call
                                     """
+                                    if quez_choices_image_keys[0] in quez_choices_data_item:
+                                        del quez_choices_data_item[quez_choices_image_keys[0]]
+
                                     quez_choices_data_item_instance = self.create(request, quez_choices_data_item)
 
-                                    # region to save file
+                                    # to save file if CDN is alive and not alive
                                     if file_path_in_cdn:
                                         quez_choices_data_item_instance.image = file_path_in_cdn
                                         quez_choices_data_item_instance.save()
-                                    # endregion
+                                    else:
+                                        quez_choices_data_item_instance.image = request.FILES.getlist(quez_choices_image_keys[1])[0]
+                                        quez_choices_data_item_instance.save()
 
                                     quez_choices_data_item_instances.append(quez_choices_data_item_instance)
 
@@ -983,8 +1024,10 @@ class RemoteLessonAPIView(
                             online_sub_info_data_item_instance.quiz.set(quez_questions_data_item_instances_ids)
         except ValidationError as serializer_errors:
             traceback.print_exc()
-            return request.send_error_valid(serializer_errors.detail)
+            result = request.send_error_valid(serializer_errors.detail)
         except Exception:
             traceback.print_exc()
-            return request.send_error("ERR_002")
-        return request.send_info("INF_001")
+            result = request.send_error("ERR_002")
+        self.override_upload_to(original_quez_choices_upload_to, QuezChoices, quez_choices_image_keys[0])
+
+        return result
