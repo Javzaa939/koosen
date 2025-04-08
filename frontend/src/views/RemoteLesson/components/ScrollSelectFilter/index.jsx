@@ -9,14 +9,13 @@ import useLoader from '@src/utility/hooks/useLoader';
  * @param optionValueFieldName example value: 'id'
  * @param getOptionValue required structure: "(option) => ...". Example value: (option) => option.id
  * @param getOptionLabel required structure: "(option) => ...". Example value: (option) => `${option.code} ${option.last_name?.charAt(0)}. ${option.first_name}`
- * if not work then e.g.:
- * - check default '' values of getApi args
- * if Controller used then e.g.:
- * - exclude ref field from controller 'field/rest' object. E.g.: render={({ field: { ref, ...rest } }) => {
+ * * if not work then e.g.:
+ * * - check default '' values of getApi args. e.g.: "(pageLocal, searchTextLocal='', recordsLimitPerPageLocal) => ..."
+ * * if Controller used then e.g.:
+ * * - exclude ref field from controller 'field/rest' object. E.g.: render={({ field: { ref, ...rest } }) => {
  */
 export default function ScrollSelectFilter({
 	fieldName,
-	setParentSelectedOptions,
 	getApi,
 	optionValueFieldName,
 	getOptionValue,
@@ -24,6 +23,7 @@ export default function ScrollSelectFilter({
 	isMulti,
 	className='react-select',
 	recordsLimitPerPage=50,
+	onChange,
 	...rest
 }) {
 	const { t } = useTranslation()
@@ -75,6 +75,10 @@ export default function ScrollSelectFilter({
 	}, [searchText])
 	// #endregion
 
+	useEffect(() => {
+		getOptions(1)
+	}, [getApi])
+
 	return (
 		<Select
 			{...rest}
@@ -86,18 +90,11 @@ export default function ScrollSelectFilter({
 			placeholder={t(`-- Сонгоно уу --`)}
 			options={options || []}
 			noOptionsMessage={() => t('Хоосон байна')}
-			onChange={(val) => {
-				if (rest?.onChange) {
-					// to support Controller from react-hook-form
-					rest.onChange(val)
-				}
-
-				if (setParentSelectedOptions) setParentSelectedOptions(val)
-			}}
+			onChange={onChange}
 			styles={ReactSelectStyles}
 			isLoading={isLoading}
-			getOptionValue={(option) => getOptionValue(option)}
-			getOptionLabel={(option) => getOptionLabel(option)}
+			getOptionValue={getOptionValue}
+			getOptionLabel={getOptionLabel}
 			isMulti={isMulti}
 
 			// scrolling

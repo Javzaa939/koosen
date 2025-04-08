@@ -811,6 +811,8 @@ class SummarizeLessonMaterialAPIView(
 
         return request.send_info("INF_002")
 
+
+@permission_classes([IsAuthenticated])
 class RemoteLessonAPIView(
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
@@ -827,12 +829,12 @@ class RemoteLessonAPIView(
     filter_backends = [SearchFilter]
     search_fields = ['lesson__name', 'lesson__code', 'teacher__first_name', 'title']
 
-    def create(self, request, data):
+    def create(self, data):
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
 
-        return serializer.instance
+        return serializer
 
     # to save file in django server if CDN does not work
     def save_file_to_cdn_and_remove_from_dict(self, dict_where_to_remove, field_names_to_remove, dir_name, request_file_field_name, request_file_index, field_name_to_add):
@@ -927,13 +929,41 @@ class RemoteLessonAPIView(
             with transaction.atomic():
                 # region to save to Elearn
                 file_path_in_cdn, _ = self.save_file_to_cdn_and_remove_from_dict(data,['image'],upload_to,'image',0,'image')
-                elearn_instance = self.create(request, data)
+                elearn_instance = self.create(data).instance
 
                 # to save file if CDN is alive
                 if file_path_in_cdn:
                     elearn_instance.image = file_path_in_cdn
                     elearn_instance.save()
                 # endregion
+        except ValidationError as serializer_errors:
+            traceback.print_exc()
+            result = request.send_error_valid(serializer_errors.detail)
+        except Exception:
+            traceback.print_exc()
+            result = request.send_error("ERR_002")
+
+        return result
+
+    def put(self, request, pk):
+        result = request.send_info("INF_001")
+
+        try:
+            with transaction.atomic():
+                data = request.data
+                request_type = data.get('requestType')
+                group_ids = data.get('groups')
+                student_ids = data.get('students')
+
+                if not group_ids and not student_ids:
+                    return request.send_error("ERR_002")
+
+                if request_type == 'groups':
+                    student_ids = list(Student.objects.filter(group__in=group_ids).values_list('id',flat=True))
+
+                if isinstance(student_ids, list) and len(student_ids):
+                    instance = self.get_object()
+                    instance.students.add(*student_ids)
         except ValidationError as serializer_errors:
             traceback.print_exc()
             result = request.send_error_valid(serializer_errors.detail)

@@ -6,14 +6,15 @@ import { Badge, Card, CardBody, Col, Row } from 'reactstrap'
 import { ChevronsLeft } from 'react-feather'
 import { CiUser } from 'react-icons/ci'
 import { PiCertificate, PiExam } from 'react-icons/pi'
+import GroupStudentBlock from '../components/GroupStudentBlock'
+import { useTranslation } from 'react-i18next'
 
 function Lesson() {
 
     const { id } = useParams()
+	const { t } = useTranslation();
 
     const [datas, setDatas] = useState()
-
-    console.log(datas,'datas')
 
     const { isLoading, fetchData, Loader } = useLoader({isSmall: true});
     const remoteApi = useApi().remote
@@ -30,8 +31,8 @@ function Lesson() {
 
     return (
         <div>
-            <a href='/remote_lesson' className='d-flex align-items-center mb-1 fw-bold text-decoration-underline'><ChevronsLeft size={18} strokeWidth={2.5}/> Буцах</a>
-            <Row className=''>
+            <a href='/remote_lesson' className='mb-1 fw-bold text-decoration-underline'><ChevronsLeft size={18} strokeWidth={2.5}/> Буцах</a>
+            <Row className='mt-2'>
                 <Col>
                     <Card className='bg-white w-100'>
                         <CardBody>
@@ -72,13 +73,12 @@ function Lesson() {
                     </Card>
                 </Col>
                 <Col>
-                    <Card className='bg-white w-100'>
-                        <CardBody>
-                            <div>
-                                <h5 className='fw-bold'>Багшийн мэдээлэл</h5>
-                            </div>
-                        </CardBody>
-                    </Card>
+                    <GroupStudentBlock
+                        elearnId={id}
+                        remoteApi={remoteApi}
+                        t={t}
+                        refreshData={getDatas}
+                    />
                 </Col>
             </Row>
             <div>

@@ -2068,6 +2068,7 @@ function useApi(isDisplay=false) {
 			get: (limit, page, search) => instance.get(`online_lesson/remote/?limit=${limit}&page=${page}&search=${search}`),
 			getOne: (id) => instance.get(`online_lesson/remote/${id}/`),
 			post : (data) => instance.post(`online_lesson/remote/`,data),
+			put : (id, data) => instance.put(`online_lesson/remote/${id}/`,data),
 		},
 
 		// суралцагчийн хөтөч
