@@ -165,6 +165,7 @@ class LessonStandartAPIView(
             self.queryset = self.queryset.filter(category=category)
 
         if pk:
+            self.serializer_class = LessonStandartCreateSerializer
             standart = self.retrieve(request, pk).data
             return request.send_data(standart)
 
@@ -205,18 +206,16 @@ class LessonStandartAPIView(
 
         request_data = request.data
         teachers_data = request.data.get("teachers")
+
         instance = self.get_object()
-        self.serializer_class = LessonStandartCreateSerializer
+        serializer = self.get_serializer(instance, data=request_data, partial=True)
 
+        if not serializer.is_valid(raise_exception=False):
+            return request.send_error_valid(serializer.errors)
+
+        self.perform_update(serializer)
         try:
-            instance = self.get_object()
-            serializer = self.get_serializer(instance, data=request_data, partial=True)
-
-            if not serializer.is_valid(raise_exception=False):
-                return request.send_error_valid(serializer.errors)
-
-            serializer.save()
-            try:
+            if teachers_data:
                 teacher_ids = [teacher.get('id') for teacher in teachers_data]
                 old_teacher_ids = Lesson_to_teacher.objects.filter(lesson=pk).values_list('teacher', flat=True)
 
@@ -237,16 +236,11 @@ class LessonStandartAPIView(
                             lesson_id=pk,
                             teacher_id=teacher_id
                         )
-
-            except Exception as e:
-                print(e)
-                return request.send_info("INF_002", 'Багшийн системд дүн оруулсан учраас устгах боломжгүй')
-
-            return request.send_info("INF_002")
-
         except Exception as e:
             print(e)
-            return request.send_error("ERR_002")
+            return request.send_info("INF_002", 'Багшийн системд дүн оруулсан учраас устгах боломжгүй')
+
+        return request.send_info("INF_002")
 
     @has_permission(must_permissions=['lms-study-lessonstandart-delete'])
     def delete(self, request, pk=None):

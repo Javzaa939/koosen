@@ -52,7 +52,7 @@ export function getColumns (currentPage, rowsPerPage, total_count, editModal, ha
 		{
 			header: 'kredit',
 			name: `${t('Багц цаг')}`,
-			selector: (row) => row?.kredit,
+			selector: (row) => row?.ckredit,
             sortable: true,
 			minWidth: "250px",
 			maxWidth: "50px",
