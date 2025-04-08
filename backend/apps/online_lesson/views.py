@@ -920,22 +920,30 @@ class RemoteLessonAPIView(
         result = request.send_info("INF_001")
 
         try:
+            # to override upload_to because current upload to is wrong, that causes error: "TypeError: get_choice_image_path() takes 1 positional argument but 2 were given"
+            quez_choices_image_keys = ['image', 'quez_choices_image']
+            upload_to = self.queryset.model._meta.get_field('image').upload_to
+            original_quez_choices_upload_to = self.override_upload_to(upload_to, QuezChoices, quez_choices_image_keys[0])
+
+            # to get "POST" data in "json-parsed" types and keep all list items of QueryDict/formData for their specified keys in 2nd argument (keep_list)
+            data = self.convert_stringified_querydict_to_dict(request.data,request.FILES.keys())
+
+            # to require fields
+            if not data.get('title'):
+                raise ValidationError({ 'title': ['Хоосон байна'] })
+
+            # to get simple serializers
             online_info_serializer = dynamic_serializer(OnlineInfo, "__all__", 0)
             online_sub_info_serializer = dynamic_serializer(OnlineSubInfo, "__all__", 0)
             quez_questions_serializer = dynamic_serializer(QuezQuestions, "__all__", 0)
             quez_choices_serializer = dynamic_serializer(QuezChoices, "__all__", 0)
 
             teacher_instance = Teachers.objects.filter(user_id=request.user.id).first()
-            upload_to = self.queryset.model._meta.get_field('image').upload_to
-            quez_choices_image_keys = ['image', 'quez_choices_image']
-            file_keys = request.FILES.keys()
-            original_quez_choices_upload_to = self.override_upload_to(upload_to, QuezChoices, quez_choices_image_keys[0])
+
+            students = data.pop('students', [])
+            online_info_data = data.pop('onlineInfo', [])
 
             with transaction.atomic():
-                data = self.convert_stringified_querydict_to_dict(request.data,file_keys)
-                students = data.pop('students', [])
-                online_info_data = data.pop('onlineInfo', [])
-
                 # region to save to Elearn
                 if quez_choices_image_keys[1] in data:
                     del data[quez_choices_image_keys[1]]

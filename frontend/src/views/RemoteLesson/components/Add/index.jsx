@@ -1,70 +1,61 @@
-import React, { Fragment, useState, useEffect } from 'react'
+import { useState, Fragment, useEffect } from 'react';
+import { useForm, Controller } from "react-hook-form";
+import { convertDefaultValue, ReactSelectStyles } from "@utils";
+import { t } from 'i18next';
 
-import { X } from 'react-feather'
+import {
+	Modal,
+	ModalHeader,
+	ModalBody,
+    Row,
+    Form,
+    Col,
+    Label,
+    Input,
+    Button,
+    FormFeedback,
+} from "reactstrap";
 
-import { Controller, useForm } from 'react-hook-form'
-
-import { Modal, Row, Col, Label, ModalHeader, ModalBody, Form, Input, Button, FormFeedback, Spinner } from 'reactstrap'
-
+import Select from 'react-select';
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
+import Flatpickr from 'react-flatpickr';
+import '@styles/react/libs/flatpickr/flatpickr.scss';
+import useApiCustom from '../../hooks/useApiCustom';
+import Elearn from '../Elearn';
 
-import Select from 'react-select'
+const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
+	// #region API usage
+	// const remoteLessonApi = useApi().remote
 
-import { useTranslation } from 'react-i18next'
-import classnames from 'classnames'
+	// const { data: lesson_option, isLoading: isLoadingLesson, Loader: LoaderLesson } = useApiCustom({
+	// 	apiFunction: () => remoteLessonApi.onlineInfo.get({}),
+	// 	loaderArgs: { isFullScreen: true }
+	// })
+	// #endregion
 
-import { convertDefaultValue, validate, ReactSelectStyles, get_day } from '@utils'
+    const { control, handleSubmit, setError, setValue, formState: { errors, title, lesson, duration, description,question_count} } = useForm()
+	const { fetchData, isLoading, Loader } = useLoader({ isFullScreen: true });
 
-import { validateSchema } from './validateSchema';
-import empty from "@src/assets/images/empty-image.jpg"
-import ModalPages from './components/ModalPages';
-import { getPagination } from '@src/utility/Utils';
+    const [endPicker, setEndPicker] = useState(new Date(editData?.end_date))
+	const [startPicker, setStartPicker] = useState(new Date(editData?.start_date))
 
-const Add = ({ isOpen, handleModal, refreshDatas }) => {
-
-    const { t } = useTranslation()
-
-    const closeBtn = (
-        <X className='cursor-pointer' size={15} onClick={handleModal} />
-    )
-
-    // ** Hook
-    const { control, handleSubmit, formState: { errors }, reset, setError, watch, getValues } = useForm(validate(validateSchema));
-
-    const { isLoading, fetchData } = useLoader({})
-
-    const [is_loading, setIsLoading] = useState(false)
-    const [lesson_option, setLessonOption] = useState([])
-    const [teacher_option, setTeacherOption] = useState([])
-
-    // Api
-    const gymPaymentApi = useApi().order.gym
-
-    const teacherApi = useApi().hrms.teacher
-    const lessonApi = useApi().study.lessonStandart
     const remoteApi = useApi().remote
 
-    // Хичээлийн жагсаалт
-    async function getLessonOption() {
-        const { success, data } = await fetchData(lessonApi.getExam())
-        if (success) {
-            setLessonOption(data)
-        }
-    }
-
-    // Багшийн жагсаалт
-    async function getTeachers() {
-        const { success, data } = await fetchData(teacherApi.getTeacher(''))
-        if (success) {
-            setTeacherOption(data)
-        }
-    }
-
     useEffect(() => {
-        getLessonOption();
-        getTeachers()
-    }, [])
+        if(editData && Object.keys(editData).length > 0) {
+            for(let key in editData) {
+                if (editData[key] !== null && editData[key] !== undefined) {
+                    setValue(key, editData[key])
+                } else {
+                    setValue(key, '')
+                }
+                if (key === 'lesson') {
+                    setValue(key, editData[key]?.id || '');
+                }
+            }
+        }
+	}, [editData]);
 
     async function onSubmit(cdata) {
         // console.log(cdata, 'submit')
@@ -126,16 +117,14 @@ const Add = ({ isOpen, handleModal, refreshDatas }) => {
             else formData.append(key, JSON.stringify(cdata[key]))
         }
 
-        setIsLoading(true)
         const { success, errors } = await fetchData(remoteApi.post(formData))
+
         if (success) {
             // reset()
             refreshDatas()
             // handleModal()
-            setIsLoading(false)
         }
         else {
-            setIsLoading(false)
             /** Алдааны мессеж */
             for (let key in errors) {
                 setError(key, { type: 'custom', message: errors[key][0] });
@@ -143,70 +132,39 @@ const Add = ({ isOpen, handleModal, refreshDatas }) => {
         }
     }
 
-    const onChangeFile = (e, setImageOld) => {
-        const reader = new FileReader()
-        const files = e.target.files
-        if (files.length > 0) {
-            reader.onload = function () {
-                setImageOld(reader.result)
-            }
-            reader.readAsDataURL(files[0])
-        }
-    }
-
-    // #region modal page
-    const [modalPage, setModalPage] = useState(1)
-
-    function handleModalPage(pageFromReactPagination, simplePage) {
-        let newPage = simplePage ? simplePage : pageFromReactPagination.selected + 1
-        setModalPage(newPage)
-    }
-    // #endregion
-
     return (
         <Fragment>
-            {
-                isLoading && is_loading &&
-                <div className='suspense-loader'>
-                    <Spinner size='bg' />
-                    <span className='ms-50'>{t('Түр хүлээнэ үү...')}</span>
-                </div>
-            }
             <Modal
-                isOpen={isOpen}
+                isOpen={open}
                 toggle={handleModal}
-                className="sidebar-xl hr-register"
-                modalClassName="modal-slide-in "
+                className="modal-dialog-centered modal-lg"
                 contentClassName="pt-0"
+                fade={true}
+                backdrop='static'
             >
-                <ModalHeader
-                    className="mb-1"
-                    toggle={handleModal}
-                    close={closeBtn}
-                    tag="div"
-                >
-                    <h5 className="modal-title">{t('Зайн сургалт үүсгэх')}</h5>
-                </ModalHeader>
-                <ModalBody className='flex-grow-1'>
-                    <Row tag={Form} className='gy-1' onSubmit={handleSubmit(onSubmit)}>
+                <ModalHeader toggle={handleModal}></ModalHeader>
+                {
+                    editData !== undefined
+                    ?
+                        <ModalHeader className='bg-transparent pb-0' cssModule={{'modal-title': 'w-100 text-center'}}>
+                            <h4>{t('Зайн сургалт засах')}</h4>
+                        </ModalHeader>
+                    :
+                        <ModalHeader className='bg-transparent pb-0' cssModule={{'modal-title': 'w-100 text-center'}}>
+                            <h4>{t('Зайн сургалт нэмэх')}</h4>
+                        </ModalHeader>
+                }
+                <ModalBody className="flex-grow-50 mb-3 t-0">
+                    {isLoading && Loader}
+                    <Row tag={Form} onSubmit={handleSubmit(onSubmit)}>
                         <Col md={12}>
-                            <div className='modal-pages-pagination'>
-                                {getPagination(handleModalPage, modalPage, 1, 2)()}
-                            </div>
-                            <ModalPages
+                            <Elearn
                                 t={t}
                                 control={control}
                                 errors={errors}
-                                isLoading={isLoading}
-                                lesson_option={lesson_option}
-                                teacher_option={teacher_option}
-                                onChangeFile={onChangeFile}
-                                handleModalPage={handleModalPage}
-                                modalPage={modalPage}
-                                getValues={getValues}
                             />
                         </Col>
-                        <Col md={12} className="mt-2">
+                        <Col md={12} className="text-center mt-2">
                             <Button className='me-2' color="primary" type="submit">
                                 {t('Хадгалах')}
                             </Button>
@@ -220,6 +178,4 @@ const Add = ({ isOpen, handleModal, refreshDatas }) => {
         </Fragment>
     )
 }
-
-export default Add
-
+export default Addmodal

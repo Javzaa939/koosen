@@ -8,10 +8,11 @@ import './style.scss'
 // import { sample } from './asd'
 import { CiUser } from "react-icons/ci";
 import { FaAngleDoubleRight } from "react-icons/fa";
-import Add from './Add'
+
 import { getPagination } from '@utils'
 import { PiExam } from "react-icons/pi";
 import { PiCertificate } from "react-icons/pi";
+import Addmodal from './components/Add';
 
 function RemoteLesson() {
     // const datas = sample
@@ -81,7 +82,15 @@ function RemoteLesson() {
 
     return (
         <div>
-            <Add isOpen={addModal} handleModal={toggleAddModal} refreshDatas={getDatas}/>
+            {
+                addModal && (
+                    <Addmodal
+                        open={addModal}
+                        handleModal={toggleAddModal}
+                        refreshDatas={getDatas}
+                    />
+                )
+            }
             <Card className='p-1 mb-1'>
                 <CardTitle>Зайн сургалт</CardTitle>
                 <CardBody className='d-flex justify-content-between align-items-center'>
@@ -121,7 +130,7 @@ function RemoteLesson() {
                         {Loader}
                     </div>
                 :
-                    <div className='d-flex flex-wrap gap-1 justify-content-center'>
+                    <div className='d-flex flex-wrap gap-1'>
                         {datas.map((data, idx) => (
                             <div className='lesson_card d-flex flex-wrap align-items-between align-content-between p-2 shadow-sm' key={idx} style={{ overflow:'hidden' }}>
                                 <div className='w-100'>
