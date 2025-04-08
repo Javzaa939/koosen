@@ -54,7 +54,7 @@ export default function GroupStudentBlock({
 	return (
 		<Card xs={4} className="bg-white">
 			<CardHeader className="rounded border pb-0" style={{ paddingTop: '1.5rem', paddingLeft: '1.5rem', paddingRight: '1.5rem' }}>
-				<h5 className='fw-bold'>{t('Суралцагчийг нэмэх')}</h5>
+				<h5 className='fw-bold'>{t('Суралцагч нэмэх')}</h5>
 			</CardHeader>
 			{isLoading && Loader}
 			<Row className="m-0">
