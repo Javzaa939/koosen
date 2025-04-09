@@ -1,17 +1,17 @@
 import useLoader from "@src/utility/hooks/useLoader";
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 
 export default function useApiCustom({ apiFunction, deps = [], loaderArgs = {} }) {
 	const { isLoading, fetchData, Loader } = useLoader(loaderArgs)
 	const [data, setData] = useState()
 
-	const getDataRef = useRef(async () => {
+	const getDataRef = useCallback(async () => {
 		const { success, data } = await fetchData(apiFunction())
 		if (success) setData(data)
-	})
+	}, deps)
 
 	useEffect(() => {
-		getDataRef.current()
+		getDataRef()
 	}, deps)
 
 	return { data, isLoading, Loader }

@@ -1,5 +1,5 @@
 import DataTable from "react-data-table-component";
-import { Search } from "react-feather";
+import { Plus, Search } from "react-feather";
 
 import {
 	Button,
@@ -8,7 +8,8 @@ import {
 	CardHeader,
 	CardTitle,
 	Col,
-	Input
+	Input,
+	Row
 } from "reactstrap";
 
 import { getPagination } from "@utils";
@@ -24,6 +25,7 @@ export default function OnlineInfoBlock({
 	remoteApi,
 	elearnId
 }) {
+	// console.log(datas, 'eeeeeeeeeeeeeee')
 
 	async function handleDelete(id) {
 		// const { success } = await fetchData(remoteApi.students.delete(elearnId, id));
@@ -33,10 +35,30 @@ export default function OnlineInfoBlock({
 		// }
 	}
 
+	async function handleModal(id) {
+		// const { success } = await fetchData(remoteApi.students.delete(elearnId, id));
+
+		// if (success) {
+		// 	getDatas();
+		// }
+	}
+
 	return (
 		<Card md={12} className='bg-white'>
-			<CardHeader className="flex-md-row flex-column align-md-items-center align-items-start border-bottom">
-				<CardTitle tag="h4">{t("Тухайн цахим хичээлд хамаарах бүлгүүд")}</CardTitle>
+			<CardHeader className="border-bottom">
+				<Row className="">
+					<Col>
+						<CardTitle tag="h4">{t("Тухайн цахим хичээлд хамаарах бүлгүүд")}</CardTitle>
+					</Col>
+					<Col className="d-flex flex-column align-items-end">
+						<Button color='primary' onClick={handleModal}
+							className="rounded-circle d-flex align-items-center justify-content-center p-0"
+							style={{ width: '30px', height: '30px' }}
+						>
+							<Plus size={15} />
+						</Button>
+					</Col>
+				</Row>
 			</CardHeader>
 			<CardBody>
 				<div className="accordion stick-top accordion-custom-button course-content-fixed" id="courseContent">

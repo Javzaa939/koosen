@@ -2073,6 +2073,10 @@ function useApi(isDisplay=false) {
 				get: ({ limit = 'Бүгд', page = 1, search = '', elearnId = '' }) => instance.get(`online_lesson/remote/students/?limit=${limit}&page=${page}&search=${search}&elearnId=${elearnId}`),
 				put : (data) => instance.put(`online_lesson/remote/students/`,data),
 				delete: (elearnId, id) => instance.delete(`/online_lesson/remote/students/${id}/?elearnId=${elearnId}`),
+			},
+
+			onlineInfo: {
+				get: ({ limit = 'Бүгд', page = 1, search = '', elearnId = '' }) => instance.get(`online_lesson/remote/online-info/?limit=${limit}&page=${page}&search=${search}&elearnId=${elearnId}`),
 			}
 		},
 

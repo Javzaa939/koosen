@@ -11,37 +11,9 @@ import GroupStudentBlock from '../components/GroupStudentBlock'
 import StudentListBlock from '../components/StudentListBlock'
 import OnlineInfoBlock from '../components/OnlineInfoBlock'
 import OnlineSubInfoBlock from '../components/OnlineSubInfoBlock'
+import useApiCustom from '../hooks/useApiCustom'
 
 function Lesson() {
-    const { id } = useParams()
-    const { t } = useTranslation();
-    const { isLoading, fetchData, Loader } = useLoader({ isFullScreen: true });
-    const remoteApi = useApi().remote
-
-    // #region API usage
-    // const remoteLessonApi = useApi().remote
-
-    // const { data: lesson_option, isLoading: isLoadingLesson, Loader: LoaderLesson } = useApiCustom({
-    // 	apiFunction: () => remoteLessonApi.onlineInfo.get({}),
-    // 	loaderArgs: { isFullScreen: true }
-    // })
-    // #endregion
-
-    // #region to get Elearn basic data
-    const [datas, setDatas] = useState()
-
-    async function getDatas() {
-        const { success, data } = await fetchData(remoteApi.getOne(id));
-        if (success) {
-            setDatas(data)
-        }
-    }
-
-    useEffect(() => {
-        getDatas();
-    }, []);
-    // #endregion
-
     // #region to paginate students in datatable
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(20);
@@ -50,10 +22,6 @@ function Lesson() {
     const handlePagination = (page) => {
         setCurrentPage(page.selected + 1);
     }
-
-    useEffect(() => {
-        getStudentsDatas();
-    }, [currentPage, rowsPerPage]);
     // #endregion
 
     // #region to search students using text input in datatable
@@ -62,30 +30,64 @@ function Lesson() {
     useEffect(
         () => {
             if (searchValue.length === 0) {
-                getStudentsDatas()
+                setRefreshStudents((current) => !current)
             }
         },
         [searchValue]
     )
     // #endregion
 
-    // #region to get Elearn.students data
-    const [studentsDatas, setStudentsDatas] = useState()
+    const { id } = useParams()
+    const remoteApi = useApi().remote
 
-    const getStudentsDatas = async () => {
-        const { success, data } = await fetchData(remoteApi.students.get({
-            limit: rowsPerPage,
-            page: currentPage,
-            search: searchValue,
-            elearnId: id,
-        }));
+    // #region API usage
+    // to get Elearn basic data
+    const { data: datas, isLoading: isLoadingElearn } = useApiCustom({
+        apiFunction: () => remoteApi.getOne(id),
+    })
 
-        if (success) {
-            setStudentsDatas(data?.results)
-            setTotalCount(data?.count)
-        }
-    }
+    // #region to get Elearn's students data
+    const [refreshStudents, setRefreshStudents] = useState(false)
+
+    const getStudents = () => remoteApi.students.get({
+        limit: rowsPerPage,
+        page: currentPage,
+        search: searchValue,
+        elearnId: id,
+    })
+
+    const { data: studentsDatasOriginal, isLoading: isLoadingStudents } = useApiCustom({
+        apiFunction: getStudents,
+        deps: [refreshStudents, currentPage, rowsPerPage]
+    })
+
+    const studentsDatas = studentsDatasOriginal?.results
+
+    useEffect(() => {
+        setTotalCount(studentsDatasOriginal?.count)
+    }, [studentsDatasOriginal])
     // #endregion
+
+    // to get OnlineInfo data
+    const [refreshOnlineInfo, setRefreshOnlineInfo] = useState(false)
+
+    const getOnlineInfo = () => remoteApi.onlineInfo.get({
+        limit: rowsPerPage,
+        page: currentPage,
+        search: searchValue,
+        elearnId: id,
+    })
+
+    const { data: onlineInfoDatas, isLoading: isLoadingOnlineInfo } = useApiCustom({
+        apiFunction: getOnlineInfo,
+        deps: [refreshOnlineInfo, currentPage, rowsPerPage]
+    })
+    // #endregion API usage
+
+    const { isLoading: isLoadingGeneral, Loader, fetchData } = useLoader({});
+    const isLoading = isLoadingGeneral || isLoadingStudents || isLoadingElearn || isLoadingOnlineInfo
+
+    const { t } = useTranslation();
 
     return (
         <>
@@ -136,14 +138,14 @@ function Lesson() {
                         elearnId={id}
                         remoteApi={remoteApi}
                         t={t}
-                        refreshData={getStudentsDatas}
+                        refreshData={() => setRefreshStudents((current) => !current)}
                     />
                 </Col>
             </Row>
             <StudentListBlock
                 t={t}
                 datas={studentsDatas}
-                getDatas={getStudentsDatas}
+                getDatas={() => setRefreshStudents((current) => !current)}
                 setSearchValue={setSearchValue}
                 currentPage={currentPage}
                 rowsPerPage={rowsPerPage}
@@ -157,8 +159,9 @@ function Lesson() {
                 <Col md={4}>
                     <OnlineInfoBlock
                         t={t}
-                        datas={studentsDatas}
-                        getDatas={getStudentsDatas}
+                        datas={onlineInfoDatas}
+                        getDatas={() => setRefreshOnlineInfo((current) => !current)}
+                        isLoading={isLoadingOnlineInfo}
                         fetchData={fetchData}
                         remoteApi={remoteApi}
                         elearnId={id}
@@ -167,8 +170,9 @@ function Lesson() {
                 <Col md={8}>
                     <OnlineSubInfoBlock
                         t={t}
-                        datas={studentsDatas}
-                        getDatas={getStudentsDatas}
+                        datas={null}
+                        getDatas={null}
+                        isLoading={null}
                         fetchData={fetchData}
                         remoteApi={remoteApi}
                         elearnId={id}

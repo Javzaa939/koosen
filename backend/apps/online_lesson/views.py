@@ -1008,3 +1008,31 @@ class RemoteLessonStudentsAPIView(
             result = request.send_error("ERR_002")
 
         return result
+
+
+@permission_classes([IsAuthenticated])
+class RemoteLessonOnlineInfoAPIView(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    generics.GenericAPIView
+):
+    '''Зайн сургалтын api/OnlineInfo'''
+
+    queryset = OnlineInfo.objects
+    serializer_class = dynamic_serializer(OnlineInfo, "__all__", 0)
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['title']
+
+    def get(self,request,pk=None):
+        elearn_id = request.query_params.get('elearnId')
+        self.queryset = self.queryset.filter(elearn__id=elearn_id)
+
+        if pk:
+            datas = self.retrieve(request, pk).data
+            return request.send_data(datas)
+        serializer = self.list(request).data
+
+        return request.send_data(serializer)

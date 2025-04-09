@@ -52,4 +52,7 @@ urlpatterns = [
     path('remote/students/',RemoteLessonStudentsAPIView.as_view()),
     path('remote/students/<int:pk>/',RemoteLessonStudentsAPIView.as_view()),
 
+    path('remote/online-info/',RemoteLessonOnlineInfoAPIView.as_view()),
+    path('remote/online-info/<int:pk>/',RemoteLessonOnlineInfoAPIView.as_view()),
+
 ]
