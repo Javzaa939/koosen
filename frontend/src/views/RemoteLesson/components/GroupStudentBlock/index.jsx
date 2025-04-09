@@ -1,13 +1,11 @@
 import { convertDefaultValue } from "@utils";
-import { useState } from "react";
+import { useCallback } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
 
 import {
 	Button,
 	Card,
 	CardHeader,
-	CardTitle,
 	Col,
 	Form,
 	FormFeedback,
@@ -19,7 +17,6 @@ import useLoader from "@hooks/useLoader";
 import classnames from "classnames";
 import ScrollSelectFilter from "../ScrollSelectFilter";
 
-
 export default function GroupStudentBlock({
 	t,
 	remoteApi,
@@ -27,18 +24,27 @@ export default function GroupStudentBlock({
 	refreshData
 }) {
 	const { isLoading, Loader, fetchData } = useLoader({});
-	const { control, handleSubmit, setError, formState: { errors }, } = useForm({});
-	const [studentFilterRefresh, setStudentFilterRefresh] = useState(() => (pageLocal, searchTextLocal = '', recordsLimitPerPageLocal) => studentApi.get(recordsLimitPerPageLocal, pageLocal, '', searchTextLocal, '', '', '', '', '', '', '', ''))
+	const { control, handleSubmit, setError, formState: { errors }, watch } = useForm({})
+	const formValuesOriginal = watch()
+
+	// to get id from objects on form inputs
+	const formValues = {
+		groups: formValuesOriginal?.groups?.map(item => item.id) || '',
+		students: formValuesOriginal?.students?.map(item => item.id) || '',
+	}
 
 	const studentApi = useApi().student
 
-	async function onSubmit(cdata, requestType) {
-		cdata.requestType = requestType
-		cdata.students = cdata?.students ? cdata.students.map(item => item.id) : null
-		cdata.groups = cdata?.groups ? cdata.groups.map(item => item.id) : null
-		cdata = convertDefaultValue(cdata)
+	// to prevent getdatas every render on select inputs
+	const getGroups = useCallback((pageLocal, searchTextLocal = '', recordsLimitPerPageLocal) => studentApi.group.get(recordsLimitPerPageLocal, pageLocal, '', searchTextLocal, '', '', '', '', ''), [])
+	const getStudents = useCallback((pageLocal, searchTextLocal = '', recordsLimitPerPageLocal) => studentApi.get(recordsLimitPerPageLocal, pageLocal, '', searchTextLocal, '', '', '', formValues.groups, '', '', '', ''), [formValuesOriginal?.groups])
 
-		const { success, error } = await fetchData(remoteApi.put(elearnId, cdata))
+	async function onSubmit(formCdata, requestType) {
+		let cdata = {}
+		cdata.elearnId = elearnId
+		cdata[requestType] = formValues[requestType]
+		cdata = convertDefaultValue(cdata)
+		const { success, error } = await fetchData(remoteApi.students.put(cdata))
 
 		if (success) {
 			refreshData()
@@ -65,23 +71,18 @@ export default function GroupStudentBlock({
 								<h4>{t('Анги сонгоно уу')}</h4>
 								<div className="mt-auto">
 									<Controller
-										defaultValue=''
+										defaultValue={[]}
 										control={control}
 										name="groups"
 										render={({ field: { ref, ...rest } }) =>
 											<ScrollSelectFilter
 												{...rest}
 												fieldName={rest.name}
-												getApi={(pageLocal, searchTextLocal = '', recordsLimitPerPageLocal) => studentApi.group.get(recordsLimitPerPageLocal, pageLocal, '', searchTextLocal, '', '', '', '', '')}
+												getApi={getGroups}
 												getOptionLabel={(option) => `${option.name} (${option.degree?.degree_code})`}
 												getOptionValue={(option) => option.id}
 												isMulti={true}
 												optionValueFieldName={'id'}
-												onChange={(val) => {
-													rest.onChange(val)
-													const vals = val.map(item => item.id)
-													setStudentFilterRefresh(() => (pageLocal, searchTextLocal = '', recordsLimitPerPageLocal) => studentApi.get(recordsLimitPerPageLocal, pageLocal, '', searchTextLocal, '', '', '', vals, '', '', '', ''))
-												}}
 											/>
 										}
 									/>
@@ -105,14 +106,14 @@ export default function GroupStudentBlock({
 								<h4>{t('Оюутныг кодоор сонгох')}</h4>
 								<div className="mt-auto">
 									<Controller
-										defaultValue=''
+										defaultValue={[]}
 										control={control}
 										name="students"
 										render={({ field: { ref, ...rest } }) =>
 											<ScrollSelectFilter
 												{...rest}
 												fieldName={rest.name}
-												getApi={studentFilterRefresh}
+												getApi={getStudents}
 												getOptionLabel={(option) => `${option.code} ${option.last_name?.charAt(0)}. ${option.first_name}`}
 												getOptionValue={(option) => option.id}
 												isMulti={true}

@@ -945,28 +945,64 @@ class RemoteLessonAPIView(
 
         return result
 
-    def put(self, request, pk):
+
+@permission_classes([IsAuthenticated])
+class RemoteLessonStudentsAPIView(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    generics.GenericAPIView
+):
+    '''Зайн сургалтын api/students'''
+
+    queryset = Student.objects
+    serializer_class = StudentSerializer
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['code', 'first_name']
+
+    def get(self,request,pk=None):
+        elearn_id = request.query_params.get('elearnId')
+        self.queryset = self.queryset.filter(elearn__id=elearn_id)
+
+        if pk:
+            datas = self.retrieve(request, pk).data
+            return request.send_data(datas)
+        serializer = self.list(request).data
+
+        return request.send_data(serializer)
+
+    def put(self, request):
         result = request.send_info("INF_001")
 
         try:
             with transaction.atomic():
                 data = request.data
-                request_type = data.get('requestType')
-                group_ids = data.get('groups')
+                groups_ids = data.get('groups')
                 student_ids = data.get('students')
 
-                if not group_ids and not student_ids:
-                    return request.send_error("ERR_002")
-
-                if request_type == 'groups':
-                    student_ids = list(Student.objects.filter(group__in=group_ids).values_list('id',flat=True))
+                if groups_ids:
+                    student_ids = list(Student.objects.filter(group__in=groups_ids).values_list('id',flat=True))
 
                 if isinstance(student_ids, list) and len(student_ids):
-                    instance = self.get_object()
+                    elearn_id = data.get('elearnId')
+                    instance = ELearn.objects.get(id=elearn_id)
                     instance.students.add(*student_ids)
-        except ValidationError as serializer_errors:
+        except Exception:
             traceback.print_exc()
-            result = request.send_error_valid(serializer_errors.detail)
+            result = request.send_error("ERR_002")
+
+        return result
+
+    def delete(self, request, pk):
+        result = request.send_info("INF_001")
+
+        try:
+            with transaction.atomic():
+                elearn_id = request.query_params.get('elearnId')
+                instance = ELearn.objects.get(id=elearn_id)
+                instance.students.remove(pk)
         except Exception:
             traceback.print_exc()
             result = request.send_error("ERR_002")
