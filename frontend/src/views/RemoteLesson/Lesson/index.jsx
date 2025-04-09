@@ -18,6 +18,15 @@ function Lesson() {
     const { isLoading, fetchData, Loader } = useLoader({ isFullScreen: true });
     const remoteApi = useApi().remote
 
+    // #region API usage
+    // const remoteLessonApi = useApi().remote
+
+    // const { data: lesson_option, isLoading: isLoadingLesson, Loader: LoaderLesson } = useApiCustom({
+    // 	apiFunction: () => remoteLessonApi.onlineInfo.get({}),
+    // 	loaderArgs: { isFullScreen: true }
+    // })
+    // #endregion
+
     // #region to get Elearn basic data
     const [datas, setDatas] = useState()
 

@@ -1,50 +1,31 @@
-import { useState, Fragment, useEffect } from 'react';
-import { useForm, Controller } from "react-hook-form";
-import { convertDefaultValue, ReactSelectStyles } from "@utils";
+import { convertDefaultValue } from "@utils";
 import { t } from 'i18next';
+import { Fragment, useEffect } from 'react';
+import { useForm } from "react-hook-form";
 
 import {
-	Modal,
-	ModalHeader,
-	ModalBody,
-    Row,
-    Form,
-    Col,
-    Label,
-    Input,
     Button,
-    FormFeedback,
+    Col,
+    Form,
+    Modal,
+    ModalBody,
+    ModalHeader,
+    Row
 } from "reactstrap";
 
-import Select from 'react-select';
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
-import Flatpickr from 'react-flatpickr';
 import '@styles/react/libs/flatpickr/flatpickr.scss';
-import useApiCustom from '../../hooks/useApiCustom';
 import Elearn from '../Elearn';
 
 const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
-	// #region API usage
-	// const remoteLessonApi = useApi().remote
-
-	// const { data: lesson_option, isLoading: isLoadingLesson, Loader: LoaderLesson } = useApiCustom({
-	// 	apiFunction: () => remoteLessonApi.onlineInfo.get({}),
-	// 	loaderArgs: { isFullScreen: true }
-	// })
-	// #endregion
-
-    const { control, handleSubmit, setError, setValue, formState: { errors, title, lesson, duration, description,question_count} } = useForm()
-	const { fetchData, isLoading, Loader } = useLoader({ isFullScreen: true });
-
-    const [endPicker, setEndPicker] = useState(new Date(editData?.end_date))
-	const [startPicker, setStartPicker] = useState(new Date(editData?.start_date))
-
+    const { control, handleSubmit, setError, setValue, reset, formState: { errors } } = useForm()
+    const { fetchData, isLoading, Loader } = useLoader({ isFullScreen: true });
     const remoteApi = useApi().remote
 
     useEffect(() => {
-        if(editData && Object.keys(editData).length > 0) {
-            for(let key in editData) {
+        if (editData && Object.keys(editData).length > 0) {
+            for (let key in editData) {
                 if (editData[key] !== null && editData[key] !== undefined) {
                     setValue(key, editData[key])
                 } else {
@@ -55,12 +36,10 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
                 }
             }
         }
-	}, [editData]);
+    }, [editData]);
 
     async function onSubmit(cdata) {
-        // console.log(cdata, 'submit')
         cdata = convertDefaultValue(cdata)
-
         const formData = new FormData()
 
         for (let key in cdata) {
@@ -120,11 +99,10 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
         const { success, errors } = await fetchData(remoteApi.post(formData))
 
         if (success) {
-            // reset()
+            reset()
             refreshDatas()
-            // handleModal()
-        }
-        else {
+            handleModal()
+        } else {
             /** Алдааны мессеж */
             for (let key in errors) {
                 setError(key, { type: 'custom', message: errors[key][0] });
@@ -145,12 +123,12 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
                 <ModalHeader toggle={handleModal}></ModalHeader>
                 {
                     editData !== undefined
-                    ?
-                        <ModalHeader className='bg-transparent pb-0' cssModule={{'modal-title': 'w-100 text-center'}}>
+                        ?
+                        <ModalHeader className='bg-transparent pb-0' cssModule={{ 'modal-title': 'w-100 text-center' }}>
                             <h4>{t('Зайн сургалт засах')}</h4>
                         </ModalHeader>
-                    :
-                        <ModalHeader className='bg-transparent pb-0' cssModule={{'modal-title': 'w-100 text-center'}}>
+                        :
+                        <ModalHeader className='bg-transparent pb-0' cssModule={{ 'modal-title': 'w-100 text-center' }}>
                             <h4>{t('Зайн сургалт нэмэх')}</h4>
                         </ModalHeader>
                 }
@@ -178,4 +156,5 @@ const Addmodal = ({ open, handleModal, refreshDatas, editData }) => {
         </Fragment>
     )
 }
+
 export default Addmodal
