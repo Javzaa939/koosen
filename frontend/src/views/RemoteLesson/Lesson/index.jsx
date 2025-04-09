@@ -6,9 +6,11 @@ import { useTranslation } from 'react-i18next'
 import { CiUser } from 'react-icons/ci'
 import { PiCertificate, PiExam } from 'react-icons/pi'
 import { useParams } from 'react-router-dom'
-import { Badge, Card, CardBody, Col, Row } from 'reactstrap'
+import { Badge, Card, CardBody, CardTitle, Col, Row } from 'reactstrap'
 import GroupStudentBlock from '../components/GroupStudentBlock'
 import StudentListBlock from '../components/StudentListBlock'
+import OnlineInfoBlock from '../components/OnlineInfoBlock'
+import OnlineSubInfoBlock from '../components/OnlineSubInfoBlock'
 
 function Lesson() {
     const { id } = useParams()
@@ -84,8 +86,8 @@ function Lesson() {
                 <Col>
                     <Card className='bg-white w-100'>
                         <CardBody>
+                            <CardTitle tag="h4">{t("Сургалтын мэдээлэл")}</CardTitle>
                             <div>
-                                <h5 className='fw-bold'>Сургалтын мэдээлэл</h5>
                                 <h2 className=''>{datas?.title}</h2>
                             </div>
                             <div>
@@ -142,6 +144,28 @@ function Lesson() {
                 remoteApi={remoteApi}
                 elearnId={id}
             />
+            <Row>
+                <Col md={4}>
+                    <OnlineInfoBlock
+                        t={t}
+                        datas={studentsDatas}
+                        getDatas={getStudentsDatas}
+                        fetchData={fetchData}
+                        remoteApi={remoteApi}
+                        elearnId={id}
+                    />
+                </Col>
+                <Col md={8}>
+                    <OnlineSubInfoBlock
+                        t={t}
+                        datas={studentsDatas}
+                        getDatas={getStudentsDatas}
+                        fetchData={fetchData}
+                        remoteApi={remoteApi}
+                        elearnId={id}
+                    />
+                </Col>
+            </Row>
         </>
     )
 }
