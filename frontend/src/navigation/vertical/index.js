@@ -26,6 +26,7 @@ import PsychologicalTesting from './PsychologicalTesting'
 
 import OnlineLesson from "./OnlineLesson";
 import StudentBrowsers from "./StudentBrowser";
+import RemoteRoutes from './RemoteLesson'
 
 export default [
   ...Calendar,
@@ -34,6 +35,7 @@ export default [
   ...Reference,
   ...Study,
   ...OnlineLesson,
+  ...RemoteRoutes,
   ...Student,
   ...Credit,
   ...TimeTable,

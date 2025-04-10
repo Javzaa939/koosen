@@ -6,8 +6,8 @@ from rest_framework import serializers
 
 from student.serializers import StudentSimpleListSerializer
 from core.serializers import TeachersSerializer
-from lms.models import OnlineLesson,Challenge, LessonMaterial, OnlineWeek , Announcement, HomeWork,  HomeWorkStudent, OnlineWeekStudent, Student, WeekMaterials
-from core.models import Teachers
+from lms.models import OnlineInfo, OnlineLesson,Challenge, LessonMaterial, OnlineSubInfo, OnlineWeek , Announcement, HomeWork,  HomeWorkStudent, OnlineWeekStudent, QuezQuestions, Student, WeekMaterials, ELearn
+from core.models import Teachers, SubOrgs
 
 from main.utils.file import split_root_path
 from main.utils.function.utils import get_file_from_cdn
@@ -356,3 +356,61 @@ class LectureStudentSerializer(serializers.ModelSerializer):
 
     def get_send_file(self,obj):
         return settings.CDN_FILE_URL + str(obj.lekts_file)
+
+
+class SubOrgSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = SubOrgs
+        fields = ['name']
+
+class TeacherSerializer(serializers.ModelSerializer):
+
+    full_name = serializers.SerializerMethodField()
+    sub_org = SubOrgSerializer(read_only=True)
+
+    class Meta:
+        model = Teachers
+        fields = '__all__'
+
+    def get_full_name(self, obj):
+        return obj.full_name
+
+class ELearnSerializer(serializers.ModelSerializer):
+
+    teacher_info = TeacherSerializer(source='teacher', read_only=True)
+
+    class Meta:
+        model = ELearn
+        fields = "__all__"
+
+
+class OnlineInfoSerializer(serializers.ModelSerializer):
+
+    online_sub_info_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = OnlineInfo
+        fields = "__all__"
+
+    def get_online_sub_info_count(self, obj):
+        result = OnlineSubInfo.objects.filter(parent_title=obj).count()
+        return result
+
+
+class OnlineSubInfoSerializer(serializers.ModelSerializer):
+
+    quezquestions_count = serializers.SerializerMethodField()
+    file_type_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = OnlineSubInfo
+        fields = "__all__"
+
+    def get_quezquestions_count(self, obj):
+        result = obj.quiz.count()
+        return result
+
+    def get_file_type_name(self, obj):
+        file_type_name = obj.get_file_type_display()
+        return file_type_name
