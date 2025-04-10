@@ -10,7 +10,6 @@ import { Badge, Card, CardBody, CardTitle, Col, Row } from 'reactstrap'
 import GroupStudentBlock from '../components/GroupStudentBlock'
 import StudentListBlock from '../components/StudentListBlock'
 import OnlineInfoBlock from '../components/OnlineInfoBlock'
-import OnlineSubInfoBlock from '../components/OnlineSubInfoBlock'
 import useApiCustom from '../hooks/useApiCustom'
 
 function Lesson() {
@@ -72,21 +71,31 @@ function Lesson() {
     const [refreshOnlineInfo, setRefreshOnlineInfo] = useState(false)
 
     const getOnlineInfo = () => remoteApi.onlineInfo.get({
-        limit: rowsPerPage,
-        page: currentPage,
-        search: searchValue,
         elearnId: id,
     })
 
     const { data: onlineInfoDatas, isLoading: isLoadingOnlineInfo } = useApiCustom({
         apiFunction: getOnlineInfo,
-        deps: [refreshOnlineInfo, currentPage, rowsPerPage]
+        deps: [refreshOnlineInfo]
+    })
+    // #endregion
+
+    // #region to get OnlineSubInfo data
+    const [refreshOnlineSubInfo, setRefreshOnlineSubInfo] = useState(false)
+
+    const getOnlineSubInfo = () => remoteApi.onlineSubInfo.get({
+        elearnId: id,
+    })
+
+    const { data: onlineSubInfoDatas, isLoading: isLoadingOnlineSubInfo } = useApiCustom({
+        apiFunction: getOnlineSubInfo,
+        deps: [refreshOnlineSubInfo]
     })
     // #endregion
     // #endregion API usage
 
     const { isLoading: isLoadingGeneral, Loader, fetchData } = useLoader({});
-    const isLoading = isLoadingGeneral || isLoadingStudents || isLoadingElearn || isLoadingOnlineInfo
+    const isLoading = isLoadingGeneral || isLoadingStudents || isLoadingElearn || isLoadingOnlineInfo || isLoadingOnlineSubInfo
 
     const { t } = useTranslation();
 
@@ -162,14 +171,13 @@ function Lesson() {
                         t={t}
                         datas={onlineInfoDatas}
                         getDatas={() => setRefreshOnlineInfo((current) => !current)}
-                        isLoading={isLoadingOnlineInfo}
-                        fetchData={fetchData}
-                        remoteApi={remoteApi}
+                        onlineSubInfoDatas={onlineSubInfoDatas}
+                        getOnlineSubInfoDatas={() => setRefreshOnlineSubInfo((current) => !current)}
                         elearnId={id}
                     />
                 </Col>
                 <Col md={8}>
-                    <OnlineSubInfoBlock
+                    {/* <OnlineSubInfoDetailsBlock
                         t={t}
                         datas={null}
                         getDatas={null}
@@ -177,7 +185,7 @@ function Lesson() {
                         fetchData={fetchData}
                         remoteApi={remoteApi}
                         elearnId={id}
-                    />
+                    /> */}
                 </Col>
             </Row>
         </>

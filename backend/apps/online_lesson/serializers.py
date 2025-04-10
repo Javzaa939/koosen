@@ -6,7 +6,7 @@ from rest_framework import serializers
 
 from student.serializers import StudentSimpleListSerializer
 from core.serializers import TeachersSerializer
-from lms.models import OnlineLesson,Challenge, LessonMaterial, OnlineWeek , Announcement, HomeWork,  HomeWorkStudent, OnlineWeekStudent, Student, WeekMaterials, ELearn
+from lms.models import OnlineInfo, OnlineLesson,Challenge, LessonMaterial, OnlineSubInfo, OnlineWeek , Announcement, HomeWork,  HomeWorkStudent, OnlineWeekStudent, QuezQuestions, Student, WeekMaterials, ELearn
 from core.models import Teachers, SubOrgs
 
 from main.utils.file import split_root_path
@@ -383,3 +383,34 @@ class ELearnSerializer(serializers.ModelSerializer):
     class Meta:
         model = ELearn
         fields = "__all__"
+
+
+class OnlineInfoSerializer(serializers.ModelSerializer):
+
+    online_sub_info_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = OnlineInfo
+        fields = "__all__"
+
+    def get_online_sub_info_count(self, obj):
+        result = OnlineSubInfo.objects.filter(parent_title=obj).count()
+        return result
+
+
+class OnlineSubInfoSerializer(serializers.ModelSerializer):
+
+    quezquestions_count = serializers.SerializerMethodField()
+    file_type_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = OnlineSubInfo
+        fields = "__all__"
+
+    def get_quezquestions_count(self, obj):
+        result = obj.quiz.count()
+        return result
+
+    def get_file_type_name(self, obj):
+        file_type_name = obj.get_file_type_display()
+        return file_type_name

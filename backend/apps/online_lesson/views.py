@@ -23,8 +23,10 @@ from lms.models import (
     Group, LessonStandart, OnlineInfo, OnlineLesson, LessonMaterial, OnlineWeek, Announcement, HomeWork , HomeWorkStudent, Challenge, Student, OnlineWeekStudent, ELearn, OnlineSubInfo, QuezQuestions, QuezChoices
 )
 from .serializers import (
+    OnlineInfoSerializer,
     OnlineLessonSerializer,
     LessonMaterialSerializer,
+    OnlineSubInfoSerializer,
     OnlineWeekSerializer,
     AnnouncementSerializer,
     HomeWorkSerializer,
@@ -1018,7 +1020,7 @@ class RemoteLessonOnlineInfoAPIView(
     '''Зайн сургалтын api/OnlineInfo'''
 
     queryset = OnlineInfo.objects
-    serializer_class = dynamic_serializer(OnlineInfo, "__all__", 0)
+    serializer_class = OnlineInfoSerializer
     pagination_class = CustomPagination
 
     filter_backends = [SearchFilter]
@@ -1053,3 +1055,51 @@ class RemoteLessonOnlineInfoAPIView(
             result = request.send_error("ERR_002")
 
         return result
+
+
+@permission_classes([IsAuthenticated])
+class RemoteLessonOnlineSubInfoAPIView(
+    mixins.ListModelMixin,
+    mixins.CreateModelMixin,
+    mixins.RetrieveModelMixin,
+    generics.GenericAPIView
+):
+    '''Зайн сургалтын api/OnlineInfo'''
+
+    queryset = OnlineSubInfo.objects
+    serializer_class = OnlineSubInfoSerializer
+    pagination_class = CustomPagination
+
+    filter_backends = [SearchFilter]
+    search_fields = ['title']
+
+    def get(self,request,pk=None):
+        elearn_id = request.query_params.get('elearnId')
+        self.queryset = self.queryset.filter(parent_title__elearn__id=elearn_id)
+
+        if pk:
+            datas = self.retrieve(request, pk).data
+            return request.send_data(datas)
+        serializer = self.list(request).data
+
+        return request.send_data(serializer)
+
+    def post(self, request):
+        result = request.send_info("INF_001")
+
+        try:
+            # to require fields
+            if not request.data.get('title'):
+                raise ValidationError({ 'title': ['Хоосон байна'] })
+
+            with transaction.atomic():
+                self.create(request)
+        except ValidationError as serializer_errors:
+            traceback.print_exc()
+            result = request.send_error_valid(serializer_errors.detail)
+        except Exception:
+            traceback.print_exc()
+            result = request.send_error("ERR_002")
+
+        return result
+
