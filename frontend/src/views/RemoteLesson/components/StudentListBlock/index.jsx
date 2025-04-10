@@ -70,7 +70,7 @@ export default function StudentListBlock({
 					<span className='align-middle ms-50'></span>
 				</Button>
 			</Col>
-			<div className="react-dataTable react-dataTable-selectable-rows">
+			<div className="react-dataTable">
 				<DataTable
 					noHeader
 					pagination
@@ -102,7 +102,7 @@ export default function StudentListBlock({
 						total_count,
 					)}
 					fixedHeader
-					fixedHeaderScrollHeight="62vh"
+					fixedHeaderScrollHeight="30vh"
 				/>
 			</div>
 		</Card>

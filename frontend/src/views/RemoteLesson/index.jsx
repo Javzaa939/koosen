@@ -131,14 +131,18 @@ function RemoteLesson() {
                             return (
                                 <Col sm={6} lg={3} key={idx} className='m-0 p-50'>
                                     <Card className="p-50 h-100 shadow-none border bg-white">
-                                        <div className="rounded-2 text-center mb-1">
-                                            <img className="img-fluid" src={image} alt={title}
-                                                onError={({ currentTarget }) => {
-                                                    currentTarget.onerror = null; // prevents looping
-                                                    currentTarget.src = empty
-                                                }}
-                                            />
-                                        </div>
+                                        {
+                                            imageOriginal
+                                            &&
+                                            <div className="rounded-2 text-center mb-1">
+                                                <img className="img-fluid" src={image} alt={title}
+                                                    onError={({ currentTarget }) => {
+                                                        currentTarget.onerror = null; // prevents looping
+                                                        currentTarget.src = empty
+                                                    }}
+                                                />
+                                            </div>
+                                        }
                                         <CardBody className="p-1 pt-50 d-flex flex-column h-100">
                                             <div className="d-flex justify-content-between align-items-center mb-1">
                                                 <div>

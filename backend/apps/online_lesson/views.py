@@ -983,7 +983,8 @@ class RemoteLessonStudentsAPIView(
                 student_ids = data.get('students')
 
                 if groups_ids:
-                    student_ids = list(Student.objects.filter(group__in=groups_ids).values_list('id',flat=True))
+                    # NOTE Student status always stay Суралцаж буй
+                    student_ids = list(Student.objects.filter(group__in=groups_ids).filter(status__code=1).values_list('id',flat=True))
 
                 if isinstance(student_ids, list) and len(student_ids):
                     elearn_id = data.get('elearnId')

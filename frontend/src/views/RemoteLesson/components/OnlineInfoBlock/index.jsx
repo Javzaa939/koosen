@@ -72,7 +72,7 @@ export default function OnlineInfoBlock({
 				<CardHeader className="border-bottom d-block">
 					<Row>
 						<Col>
-							<CardTitle tag="h4">{t("Бүлэг")}</CardTitle>
+							<CardTitle tag="h4">{t("Хичээлийн бүлэг")}</CardTitle>
 						</Col>
 						<Col md={2} className="d-flex justify-content-end">
 							<div>
@@ -98,7 +98,7 @@ export default function OnlineInfoBlock({
 											<Col>
 												<span className="d-flex flex-column">
 													<span className="h5 mb-0">{title}</span>
-													<span className="text-body fw-normal">{0} / {online_sub_info_count} {t('хэсгүүд')}</span>
+													<span className="text-body fw-normal">{0} / {online_sub_info_count} {t('дэд бүлэг')}</span>
 												</span>
 											</Col>
 											<Col md={2} className="d-flex justify-content-end">
