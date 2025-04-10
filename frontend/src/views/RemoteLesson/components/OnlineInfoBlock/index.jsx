@@ -89,11 +89,11 @@ export default function OnlineInfoBlock({
 				<CardBody className="card-body-custom">
 					<Accordion open={open} toggle={toggle} className="accordion-custom">
 						{
-							onlineInfos.map((onlineInfos_item, onlineInfos_ind) => {
-								const { id, title, online_sub_info_count } = onlineInfos_item
+							onlineInfos.map((onlineInfosItem, onlineInfosInd) => {
+								const { id, title, online_sub_info_count } = onlineInfosItem
 
-								return <AccordionItem key={onlineInfos_ind}>
-									<AccordionHeader targetId={`onlineInfos_${onlineInfos_ind}`}>
+								return <AccordionItem key={onlineInfosInd}>
+									<AccordionHeader targetId={`onlineInfos_${onlineInfosInd}`}>
 										<Row className="w-100">
 											<Col>
 												<span className="d-flex flex-column">
@@ -113,7 +113,7 @@ export default function OnlineInfoBlock({
 											</Col>
 										</Row>
 									</AccordionHeader>
-									<AccordionBody accordionId={`onlineInfos_${onlineInfos_ind}`}>
+									<AccordionBody accordionId={`onlineInfos_${onlineInfosInd}`}>
 										<OnlineSubInfoBlock
 											t={t}
 											datas={onlineSubInfos.filter(item => item.parent_title === id)}
