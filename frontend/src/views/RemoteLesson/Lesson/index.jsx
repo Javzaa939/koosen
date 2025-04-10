@@ -68,7 +68,7 @@ function Lesson() {
     }, [studentsDatasOriginal])
     // #endregion
 
-    // to get OnlineInfo data
+    // #region to get OnlineInfo data
     const [refreshOnlineInfo, setRefreshOnlineInfo] = useState(false)
 
     const getOnlineInfo = () => remoteApi.onlineInfo.get({
@@ -82,6 +82,7 @@ function Lesson() {
         apiFunction: getOnlineInfo,
         deps: [refreshOnlineInfo, currentPage, rowsPerPage]
     })
+    // #endregion
     // #endregion API usage
 
     const { isLoading: isLoadingGeneral, Loader, fetchData } = useLoader({});

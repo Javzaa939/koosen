@@ -925,17 +925,15 @@ class RemoteLessonAPIView(
 
             teacher_instance = Teachers.objects.filter(user_id=request.user.id).first()
             data['created_user'] = teacher_instance.id
+            file_path_in_cdn, _ = self.save_file_to_cdn_and_remove_from_dict(data,['image'],upload_to,'image',0,'image')
 
             with transaction.atomic():
-                # region to save to Elearn
-                file_path_in_cdn, _ = self.save_file_to_cdn_and_remove_from_dict(data,['image'],upload_to,'image',0,'image')
                 elearn_instance = self.create(data).instance
 
                 # to save file if CDN is alive
                 if file_path_in_cdn:
                     elearn_instance.image = file_path_in_cdn
                     elearn_instance.save()
-                # endregion
         except ValidationError as serializer_errors:
             traceback.print_exc()
             result = request.send_error_valid(serializer_errors.detail)
@@ -1036,3 +1034,22 @@ class RemoteLessonOnlineInfoAPIView(
         serializer = self.list(request).data
 
         return request.send_data(serializer)
+
+    def post(self, request):
+        result = request.send_info("INF_001")
+
+        try:
+            # to require fields
+            if not request.data.get('title'):
+                raise ValidationError({ 'title': ['Хоосон байна'] })
+
+            with transaction.atomic():
+                self.create(request)
+        except ValidationError as serializer_errors:
+            traceback.print_exc()
+            result = request.send_error_valid(serializer_errors.detail)
+        except Exception:
+            traceback.print_exc()
+            result = request.send_error("ERR_002")
+
+        return result

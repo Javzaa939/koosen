@@ -2077,6 +2077,7 @@ function useApi(isDisplay=false) {
 
 			onlineInfo: {
 				get: ({ limit = 'Бүгд', page = 1, search = '', elearnId = '' }) => instance.get(`online_lesson/remote/online-info/?limit=${limit}&page=${page}&search=${search}&elearnId=${elearnId}`),
+				post : (data) => instance.post(`online_lesson/remote/online-info/`,data),
 			}
 		},
 
