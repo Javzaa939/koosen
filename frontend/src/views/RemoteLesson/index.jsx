@@ -3,7 +3,7 @@ import { Plus, Search } from 'react-feather';
 import { CiUser } from "react-icons/ci";
 import { FaAngleDoubleRight } from "react-icons/fa";
 import { PiCertificate, PiExam } from "react-icons/pi";
-import { Badge, Button, Card, CardBody, CardHeader, CardTitle, Col, Input, PopoverBody, PopoverHeader, Row, UncontrolledPopover } from 'reactstrap';
+import { Badge, Button, Card, CardBody, CardHeader, CardTitle, Col, Input, PopoverBody, PopoverHeader, Progress, Row, UncontrolledPopover } from 'reactstrap';
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
@@ -176,16 +176,16 @@ function RemoteLesson() {
                                                         <CiUser style={{ width: "12px", height: "12px" }} /> {students?.length || 0}
                                                     </Badge>
                                                 </p>
-                                                <div className="progress mb-1" style={{ height: '8px' }}>
-                                                    <div className="progress-bar w-75" role="progressbar" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
-                                                </div>
+                                                <Progress value={75} style={{ height: '8px' }} className="mb-1" />
                                                 <div className='text-end'>
-                                                    <a
-                                                        className="btn btn-label-primary"
-                                                        href={`/remote_lesson/${id}`}
+                                                    <Button
+                                                        to={`/remote_lesson/${id}`}
+                                                        color="primary"
+                                                        outline
+                                                        className="btn-label-primary border"
                                                     >
                                                         <span className="me-50">Дэлгэрэнгүй</span> <FaAngleDoubleRight />
-                                                    </a>
+                                                    </Button>
                                                 </div>
                                             </div>
                                         </CardBody>
