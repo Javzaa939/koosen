@@ -4,6 +4,7 @@ import { CiUser } from "react-icons/ci";
 import { FaAngleDoubleRight } from "react-icons/fa";
 import { PiCertificate, PiExam } from "react-icons/pi";
 import { Badge, Button, Card, CardBody, CardHeader, CardTitle, Col, Input, PopoverBody, PopoverHeader, Progress, Row, UncontrolledPopover } from 'reactstrap';
+import { Link } from 'react-router-dom';
 
 import useApi from '@hooks/useApi';
 import useLoader from '@hooks/useLoader';
@@ -12,6 +13,7 @@ import empty from "@src/assets/images/empty-image.jpg";
 
 import Addmodal from './components/Add';
 import './style.scss';
+import DisplayQuill from './components/DisplayQuill';
 
 function RemoteLesson() {
     // const datas = sample
@@ -124,7 +126,7 @@ function RemoteLesson() {
                     :
                     <Row className='gy-6 mb-6'>
                         {datas.map((data, idx) => {
-                            const { id, title, teacher_info, students, is_end_exam, is_certificate, image: imageOriginal } = data
+                            const { id, title, teacher_info, students, is_end_exam, is_certificate, image: imageOriginal, description } = data
                             const image = imageOriginal || empty
                             return (
                                 <Col sm={6} lg={3} key={idx} className='m-0 p-50'>
@@ -169,7 +171,9 @@ function RemoteLesson() {
                                                 </p>
                                             </div>
                                             <span className="h5">{title}</span>
-                                            <p className="mt-25">Introductory course for Angular and framework basics in web development.</p>
+                                            <p className="mt-25">
+                                                <DisplayQuill content={description} />
+                                            </p>
                                             <div className='mt-auto'>
                                                 <p className="d-flex align-items-center mb-50">
                                                     <Badge color='primary' pill title='Оюутны тоо' className='d-flex align-items-center gap-25'>
@@ -179,6 +183,7 @@ function RemoteLesson() {
                                                 <Progress value={75} style={{ height: '8px' }} className="mb-1" />
                                                 <div className='text-end'>
                                                     <Button
+                                                        tag={Link}
                                                         to={`/remote_lesson/${id}`}
                                                         color="primary"
                                                         outline

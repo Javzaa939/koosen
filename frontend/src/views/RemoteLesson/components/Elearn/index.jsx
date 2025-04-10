@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { X } from 'react-feather';
 import { Controller } from 'react-hook-form';
 import { Col, FormFeedback, Input, Label, Row } from 'reactstrap';
+import ReactQuill from 'react-quill';
+import 'quill/dist/quill.snow.css'
 
 import empty from "@src/assets/images/empty-image.jpg";
 import { onChangeFile } from '@src/views/RemoteLesson/utils';
-
 
 export default function Elearn({
 	t,
@@ -23,6 +24,35 @@ export default function Elearn({
 		var logoInput = document.getElementById(`image`)
 		logoInput.click()
 	}
+	// #endregion
+
+	// #region editor code
+	const quillRef = useRef(null);
+
+	const modules = {
+		toolbar: [
+			[{ 'font': [] }, { 'size': ['small', 'medium', 'large', 'huge'] }],
+			[{ 'header': '1' }, { 'header': '2' }, { 'font': [] }],
+			[{ 'align': [] }],
+			['bold', 'italic', 'underline', 'strike'],
+			[{ 'list': 'ordered' }, { 'list': 'bullet' }],
+			[{ 'indent': '-1' }, { 'indent': '+1' }],
+			['link'],
+			[{ color: [] }, { background: [] }],
+			['blockquote'],
+			//   ['image'],
+			['clean']
+		],
+	};
+
+	const formats = [
+		'header', 'bold', 'italic', 'underline', 'strike',
+		'align', 'list', 'indent',
+		'size', 'link',
+		// 'image',
+		'color', 'background',
+		'clean'
+	];
 	// #endregion
 
 	return (
@@ -49,6 +79,36 @@ export default function Elearn({
 					)}
 				/>
 				{errors.title && <FormFeedback className='d-block'>{t(errors.title.message)}</FormFeedback>}
+			</Col>
+			<Col md={12} className="mt-50">
+				<style>
+				{`
+					.custom-quill .ql-container {
+						min-height: 100px;
+					}
+				`}
+				</style>
+				<Label className="form-label" for="description">
+					{t('Тайлбар')}
+				</Label>
+				<Controller
+					defaultValue={''}
+					control={control}
+					name="description"
+					render={({ field }) => (
+						<ReactQuill
+							{...field}
+							id={field.name}
+							ref={quillRef}
+							placeholder={t('Тайлбар')}
+							modules={modules}
+							formats={formats}
+							theme="snow"
+							className='custom-quill'
+						/>
+					)}
+				/>
+				{errors.description && <FormFeedback className='d-block'>{t(errors.description.message)}</FormFeedback>}
 			</Col>
 			<Col md={6} className="mt-50">
 				<Controller
