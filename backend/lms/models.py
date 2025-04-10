@@ -4639,6 +4639,7 @@ class ELearn(models.Model):
 
     lesson = models.ForeignKey(LessonStandart, on_delete=models.CASCADE, verbose_name='Хичээл', null=True)
     title = models.TextField(null=True, verbose_name='Хичээлийн нэр гарчиг')
+    description = models.CharField(verbose_name='Тайлбар', max_length=1000, null=True)
 
     teacher = models.ForeignKey(Teachers, on_delete=models.CASCADE, verbose_name='Багш', null=True)
     image = models.FileField(upload_to='online', verbose_name='Зураг', null=True)
