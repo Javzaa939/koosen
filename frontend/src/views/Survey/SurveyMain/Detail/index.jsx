@@ -55,7 +55,7 @@ function Detail({ open, openModal, data }){
                 toggle={openModal}
                 className="modal-dialog-centered modal-lg"
             >
-                <ModalHeader close={closeBtn}>Судалгааны мэдээлэл</ModalHeader>
+                <ModalHeader close={closeBtn} style={{ justifyContent: 'space-between' }}>Судалгааны мэдээлэл</ModalHeader>
 
                 <ModalBody>
                     <div className="m-1">
